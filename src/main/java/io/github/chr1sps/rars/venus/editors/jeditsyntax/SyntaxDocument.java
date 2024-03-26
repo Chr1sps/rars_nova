@@ -30,6 +30,8 @@ public class SyntaxDocument extends PlainDocument {
      * Returns the token marker that is to be used to split lines
      * of this document up into tokens. May return null if this
      * document is not to be colorized.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker} object
      */
     public TokenMarker getTokenMarker() {
         return tokenMarker;
@@ -122,6 +124,8 @@ public class SyntaxDocument extends PlainDocument {
     protected TokenMarker tokenMarker;
 
     /**
+     * {@inheritDoc}
+     * <p>
      * We overwrite this method to update the token marker
      * state immediately so that any event listeners get a
      * consistent token marker.
@@ -141,6 +145,8 @@ public class SyntaxDocument extends PlainDocument {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * We overwrite this method to update the token marker
      * state immediately so that any event listeners get a
      * consistent token marker.

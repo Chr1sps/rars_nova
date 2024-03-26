@@ -37,21 +37,21 @@ package io.github.chr1sps.rars.tools;//.bhtsim;
  * The entry will change its prediction, if it mispredicts the branch <i>n</i>
  * times in series.
  * The prediction of the entry can be obtained by the
- * {@link BHTEntry#getPrediction()} method.
+ * {@link io.github.chr1sps.rars.tools.BHTEntry#getPrediction()} method.
  * Feedback of taken or not taken branches is provided to the entry via the
- * {@link BHTEntry#updatePrediction(boolean)} method.
+ * {@link io.github.chr1sps.rars.tools.BHTEntry#updatePrediction(boolean)} method.
  * This causes the history and the prediction to be updated.
  * <p>
  * Additionally the entry keeps track about how many times the prediction was
  * correct or incorrect.
  * The statistics can be obtained by the methods
- * {@link BHTEntry#getStatsPredCorrect()},
- * {@link BHTEntry#getStatsPredIncorrect()} and
- * {@link BHTEntry#getStatsPredPrecision()}.
+ * {@link io.github.chr1sps.rars.tools.BHTEntry#getStatsPredCorrect()},
+ * {@link io.github.chr1sps.rars.tools.BHTEntry#getStatsPredIncorrect()} and
+ * {@link io.github.chr1sps.rars.tools.BHTEntry#getStatsPredPrecision()}.
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
+ * @version $Id: $Id
  */
-
 public class BHTEntry {
 
     /**
@@ -168,7 +168,7 @@ public class BHTEntry {
         return (sum == 0) ? 0 : m_correct * 100.0 / sum;
     }
 
-    /***
+    /**
      * Builds a string representation of the BHT entry's history.
      * The history is a sequence of flags that signal if the branch was taken (T) or
      * not taken (NT).
@@ -186,7 +186,7 @@ public class BHTEntry {
         return result;
     }
 
-    /***
+    /**
      * Returns a string representation of the BHT entry's current prediction.
      * The prediction can be either to TAKE or do NOT TAKE the branch.
      *

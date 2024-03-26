@@ -3,10 +3,9 @@ package io.github.chr1sps.rars.riscv.instructions;
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.types.Float32;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
-import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
@@ -36,12 +35,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FSQRTS class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FSQRTS extends BasicInstruction {
+    /**
+     * <p>Constructor for FSQRTS.</p>
+     */
     public FSQRTS() {
         super("fsqrt.s f1, f2, dyn", "Floating SQuare RooT: Assigns f1 to the square root of f2",
                 BasicInstructionFormat.I_FORMAT, "0101100 00000 sssss ttt fffff 1010011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         Environment e = new Environment();

@@ -53,12 +53,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action for the Help -> Help menu item
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class HelpHelpAction extends GuiAction {
     private VenusUI mainUI;
 
+    /**
+     * <p>Constructor for HelpHelpAction.</p>
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     */
     public HelpHelpAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel, VenusUI gui) {
+                          Integer mnemonic, KeyStroke accel, VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         mainUI = gui;
     }
@@ -78,6 +91,8 @@ public class HelpHelpAction extends GuiAction {
     public static final String descriptionDetailSeparator = ":";
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Displays tabs with categories of information
      */
     public void actionPerformed(ActionEvent e) {
@@ -299,7 +314,7 @@ public class HelpHelpAction extends GuiAction {
      */
     private JScrollPane createSyscallsHelpPane() {
         ArrayList<AbstractSyscall> list = SyscallLoader.getSyscallList();
-        String[] columnNames = { "Name", "Number", "Description", "Inputs", "Ouputs" };
+        String[] columnNames = {"Name", "Number", "Description", "Inputs", "Ouputs"};
         String[][] data = new String[list.size()][5];
         Collections.sort(list);
 

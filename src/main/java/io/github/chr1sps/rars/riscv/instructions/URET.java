@@ -32,12 +32,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
+
+/**
+ * <p>URET class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class URET extends BasicInstruction {
+    /**
+     * <p>Constructor for URET.</p>
+     */
     public URET() {
         super("uret", "Return from handling an interrupt or exception (to uepc)",
                 BasicInstructionFormat.I_FORMAT, "000000000010 00000 000 00000 1110011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         boolean upie = (ControlAndStatusRegisterFile.getValue("ustatus") & 0x10) == 0x10;
         ControlAndStatusRegisterFile.clearRegister("ustatus", 0x10); // Clear UPIE

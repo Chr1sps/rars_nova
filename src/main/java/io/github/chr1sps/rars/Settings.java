@@ -59,8 +59,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * HKEY_CURRENT_USER\Software\JavaSoft\Prefs\rars
  *
  * @author Pete Sanderson
- **/
-
+ * @version $Id: $Id
+ */
 public class Settings extends Observable {
     /* Properties file used to hold default settings. */
     private static String settingsFile = "Settings";
@@ -229,8 +229,8 @@ public class Settings extends Observable {
      */
     public static final int EDITOR_POPUP_PREFIX_LENGTH = 6;
     // Match the above by position.
-    private static final String[] stringSettingsKeys = { "ExceptionHandler", "TextColumnOrder", "LabelSortState",
-            "MemoryConfiguration", "CaretBlinkRate", "EditorTabSize", "EditorPopupPrefixLength" };
+    private static final String[] stringSettingsKeys = {"ExceptionHandler", "TextColumnOrder", "LabelSortState",
+            "MemoryConfiguration", "CaretBlinkRate", "EditorTabSize", "EditorPopupPrefixLength"};
 
     /**
      * Last resort default values for String settings;
@@ -238,7 +238,7 @@ public class Settings extends Observable {
      * If you wish to change, do so before instantiating the Settings object.
      * Must match key by list position.
      */
-    private static String[] defaultStringSettingsValues = { "", "0 1 2 3 4", "0", "", "500", "8", "2" };
+    private static String[] defaultStringSettingsValues = {"", "0 1 2 3 4", "0", "", "500", "8", "2"};
 
     // FONT SETTINGS. Each array position has associated name.
     /**
@@ -270,15 +270,15 @@ public class Settings extends Observable {
      */
     public static final int REGISTER_HIGHLIGHT_FONT = 6;
 
-    private static final String[] fontFamilySettingsKeys = { "EditorFontFamily", "EvenRowFontFamily",
+    private static final String[] fontFamilySettingsKeys = {"EditorFontFamily", "EvenRowFontFamily",
             "OddRowFontFamily", " TextSegmentHighlightFontFamily", "TextSegmentDelayslotHighightFontFamily",
             "DataSegmentHighlightFontFamily", "RegisterHighlightFontFamily"
     };
-    private static final String[] fontStyleSettingsKeys = { "EditorFontStyle", "EvenRowFontStyle",
+    private static final String[] fontStyleSettingsKeys = {"EditorFontStyle", "EvenRowFontStyle",
             "OddRowFontStyle", " TextSegmentHighlightFontStyle", "TextSegmentDelayslotHighightFontStyle",
             "DataSegmentHighlightFontStyle", "RegisterHighlightFontStyle"
     };
-    private static final String[] fontSizeSettingsKeys = { "EditorFontSize", "EvenRowFontSize",
+    private static final String[] fontSizeSettingsKeys = {"EditorFontSize", "EvenRowFontSize",
             "OddRowFontSize", " TextSegmentHighlightFontSize", "TextSegmentDelayslotHighightFontSize",
             "DataSegmentHighlightFontSize", "RegisterHighlightFontSize"
     };
@@ -297,13 +297,13 @@ public class Settings extends Observable {
     // segment display.
     // See
     // http://www.mirthcorp.com/community/issues/browse/MIRTH-1921?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel
-    private static final String[] defaultFontFamilySettingsValues = { "Monospaced", "Monospaced", "Monospaced",
+    private static final String[] defaultFontFamilySettingsValues = {"Monospaced", "Monospaced", "Monospaced",
             "Monospaced", "Monospaced", "Monospaced", "Monospaced"
     };
-    private static final String[] defaultFontStyleSettingsValues = { "Plain", "Plain", "Plain", "Plain",
+    private static final String[] defaultFontStyleSettingsValues = {"Plain", "Plain", "Plain", "Plain",
             "Plain", "Plain", "Plain"
     };
-    private static final String[] defaultFontSizeSettingsValues = { "12", "12", "12", "12", "12", "12", "12",
+    private static final String[] defaultFontSizeSettingsValues = {"12", "12", "12", "12", "12", "12", "12",
     };
 
     // COLOR SETTINGS. Each array position has associated name.
@@ -395,7 +395,7 @@ public class Settings extends Observable {
             "TextSegmentDelaySlotHighlightBackground", "TextSegmentDelaySlotHighlightForeground",
             "DataSegmentHighlightBackground", "DataSegmentHighlightForeground",
             "RegisterHighlightBackground", "RegisterHighlightForeground",
-            "EditorBackground", "EditorForeground", "EditorLineHighlight", "EditorSelection", "EditorCaretColor" };
+            "EditorBackground", "EditorForeground", "EditorLineHighlight", "EditorSelection", "EditorCaretColor"};
     /**
      * Last resort default values for color settings;
      * will use only if neither the Preferences nor the properties file work.
@@ -404,7 +404,7 @@ public class Settings extends Observable {
      */
     private static String[] defaultColorSettingsValues = {
             "0x00e0e0e0", "0", "0x00ffffff", "0", "0x00ffff99", "0", "0x0033ff00", "0", "0x0099ccff", "0", "0x0099cc55",
-            "0", "0x00ffffff", "0x00000000", "0x00eeeeee", "0x00ccccff", "0x00000000" };
+            "0", "0x00ffffff", "0x00000000", "0x00eeeeee", "0x00ccccff", "0x00000000"};
 
     interface SystemColorProvider {
         Color getColor();
@@ -432,7 +432,6 @@ public class Settings extends Observable {
      * set based
      * on defaults stored in this class.
      */
-
     public Settings() {
         booleanSettingsValues = new HashMap<>();
         stringSettingsValues = new String[stringSettingsKeys.length];
@@ -483,12 +482,12 @@ public class Settings extends Observable {
      * This section contains all code related to syntax highlighting styles
      * settings.
      * A style includes 3 components: color, bold (t/f), italic (t/f)
-     * 
+     *
      * The fallback defaults will come not from an array here, but from the
      * existing static method SyntaxUtilities.getDefaultSyntaxStyles()
      * in the rars.venus.editors.jeditsyntax package. It returns an array
      * of SyntaxStyle objects.
-     * 
+     *
      */
     private String[] syntaxStyleColorSettingsValues;
     private boolean[] syntaxStyleBoldSettingsValues;
@@ -503,6 +502,12 @@ public class Settings extends Observable {
     private static boolean[] defaultSyntaxStyleBoldSettingsValues;
     private static boolean[] defaultSyntaxStyleItalicSettingsValues;
 
+    /**
+     * <p>setEditorSyntaxStyleByPosition.</p>
+     *
+     * @param index       a int
+     * @param syntaxStyle a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle} object
+     */
     public void setEditorSyntaxStyleByPosition(int index, SyntaxStyle syntaxStyle) {
         syntaxStyleColorSettingsValues[index] = syntaxStyle.getColorAsHexString();
         syntaxStyleItalicSettingsValues[index] = syntaxStyle.isItalic();
@@ -510,6 +515,12 @@ public class Settings extends Observable {
         saveEditorSyntaxStyle(index);
     }
 
+    /**
+     * <p>getEditorSyntaxStyleByPosition.</p>
+     *
+     * @param index a int
+     * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle} object
+     */
     public SyntaxStyle getEditorSyntaxStyleByPosition(int index) {
         return new SyntaxStyle(
                 getColorValueByPosition(index, syntaxStyleColorSettingsValues, defaultSyntaxStyleColorSettingsValues,
@@ -518,6 +529,12 @@ public class Settings extends Observable {
                 syntaxStyleBoldSettingsValues[index]);
     }
 
+    /**
+     * <p>getDefaultEditorSyntaxStyleByPosition.</p>
+     *
+     * @param index a int
+     * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle} object
+     */
     public SyntaxStyle getDefaultEditorSyntaxStyleByPosition(int index) {
         return new SyntaxStyle(getColorValueByPosition(index, defaultSyntaxStyleColorSettingsValues, null, null),
                 defaultSyntaxStyleItalicSettingsValues[index],
@@ -589,7 +606,7 @@ public class Settings extends Observable {
      *
      * @param setting the setting to fetch the value of
      * @return corresponding boolean setting.
-     * @throws IllegalArgumentException if identifier is invalid.
+     * @throws java.lang.IllegalArgumentException if identifier is invalid.
      */
     public boolean getBooleanSetting(Bool setting) {
         if (booleanSettingsValues.containsKey(setting)) {
@@ -612,7 +629,7 @@ public class Settings extends Observable {
      * Returns identifier of current built-in memory configuration.
      *
      * @return String identifier of current built-in memory configuration, empty if
-     *         none.
+     * none.
      */
     public String getMemoryConfiguration() {
         return stringSettingsValues[MEMORY_CONFIGURATION];
@@ -675,7 +692,6 @@ public class Settings extends Observable {
      *
      * @return int blink rate in milliseconds
      */
-
     public int getCaretBlinkRate() {
         int rate;
         try {
@@ -746,7 +762,7 @@ public class Settings extends Observable {
      *
      * @param key the Setting key
      * @return corresponding Color, or null if key not found or value not valid
-     *         color
+     * color
      */
     public Color getColorSettingByKey(String key) {
         return getColorValueByKey(key, colorSettingsValues, defaultColorSettingsValues, systemColors);
@@ -758,7 +774,7 @@ public class Settings extends Observable {
      *
      * @param key the Setting key
      * @return corresponding default Color, or null if key not found or value not
-     *         valid color
+     * valid color
      */
     public Color getDefaultColorSettingByKey(String key) {
         return getColorValueByKey(key, defaultColorSettingsValues, null, null);
@@ -770,7 +786,7 @@ public class Settings extends Observable {
      *
      * @param position the Setting name (see list of static constants)
      * @return corresponding Color, or null if argument invalid or value not valid
-     *         color
+     * color
      */
     public Color getColorSettingByPosition(int position) {
         return getColorValueByPosition(position, colorSettingsValues, defaultColorSettingsValues, systemColors);
@@ -782,7 +798,7 @@ public class Settings extends Observable {
      *
      * @param position the Setting name (see list of static constants)
      * @return corresponding default Color, or null if argument invalid or value not
-     *         valid color
+     * valid color
      */
     public Color getDefaultColorSettingByPosition(int position) {
         return getColorValueByPosition(position, defaultColorSettingsValues, null, null);
@@ -825,7 +841,7 @@ public class Settings extends Observable {
      *
      * @param setting setting to set the value of
      * @param value   boolean value to store
-     * @throws IllegalArgumentException if identifier is not valid.
+     * @throws java.lang.IllegalArgumentException if identifier is not valid.
      */
     public void setBooleanSetting(Bool setting, boolean value) {
         if (booleanSettingsValues.containsKey(setting)) {
@@ -866,7 +882,6 @@ public class Settings extends Observable {
      * @param config A string that identifies the current built-in memory
      *               configuration
      */
-
     public void setMemoryConfiguration(String config) {
         setStringSetting(MEMORY_CONFIGURATION, config);
     }
@@ -940,7 +955,6 @@ public class Settings extends Observable {
      *
      * @param columnOrder An array of int indicating column order.
      */
-
     public void setTextColumnOrder(int[] columnOrder) {
         String stringifiedOrder = "";
         for (int column : columnOrder) {
@@ -956,7 +970,6 @@ public class Settings extends Observable {
      *
      * @param state The current labels window sorting state, as a String.
      */
-
     public void setLabelSortState(String state) {
         setStringSetting(LABEL_SORT_STATE, state);
     }
@@ -999,6 +1012,8 @@ public class Settings extends Observable {
     }
 
     /**
+     * <p>Getter for the field <code>defaultColorMode</code>.</p>
+     *
      * @return Default color mode
      */
     public ColorMode getDefaultColorMode() {
@@ -1046,7 +1061,9 @@ public class Settings extends Observable {
         initializeEditorSyntaxStyles();
     }
 
-    /** Takes a color from the LookAndFeel */
+    /**
+     * Takes a color from the LookAndFeel
+     */
     static class LookAndFeelColor implements SystemColorProvider {
         private final String key;
 
@@ -1068,7 +1085,9 @@ public class Settings extends Observable {
                 ((float) a.getAlpha()) / 256 * ratio + ((float) b.getAlpha()) / 256 * (1 - ratio));
     }
 
-    /** Mixes two other setting-colors */
+    /**
+     * Mixes two other setting-colors
+     */
     @SuppressWarnings("unused")
     class ColorSettingMix implements SystemColorProvider {
         private final int posA;
@@ -1086,7 +1105,9 @@ public class Settings extends Observable {
         }
     }
 
-    /** Mixes color of two providers */
+    /**
+     * Mixes color of two providers
+     */
     static class ColorProviderMix implements SystemColorProvider {
         private final SystemColorProvider proA;
         private final SystemColorProvider proB;
@@ -1163,12 +1184,12 @@ public class Settings extends Observable {
     // provided as argument (could be either
     // the current or the default settings array).
     private Color getColorValueByPosition(int position, String[] values, String[] defaults,
-            SystemColorProvider[] system) {
+                                          SystemColorProvider[] system) {
         return getColorValueByString(position, getColorStringByPosition(position, values), defaults, systemColors);
     }
 
     private Color getColorValueByString(int position, String colorStr, String[] defaults,
-            SystemColorProvider[] system) {
+                                        SystemColorProvider[] system) {
         Color color = null;
         if (colorStr != null) {
             if (colorStr.equalsIgnoreCase(ColorMode.DEFAULT.modeKey)) {

@@ -33,11 +33,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallClose class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallClose extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallClose.</p>
+     */
     public SyscallClose() {
         super("Close", "Close a file", "a0 = the file descriptor to close", "N/A");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         SystemIO.closeFile(RegisterFile.getValue("a0"));
     }

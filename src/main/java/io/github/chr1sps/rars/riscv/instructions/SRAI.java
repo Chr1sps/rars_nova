@@ -32,13 +32,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SRAI class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SRAI extends BasicInstruction {
+    /**
+     * <p>Constructor for SRAI.</p>
+     */
     public SRAI() {
         super("srai t1,t2,10",
                 "Shift right arithmetic : Set t1 to result of sign-extended shifting t2 right by number of bits specified by immediate",
                 BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0010011", false);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         // Uses >> because sign fill

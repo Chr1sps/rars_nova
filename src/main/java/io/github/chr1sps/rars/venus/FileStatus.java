@@ -38,8 +38,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * is being edited in the program.
  *
  * @author Team JSpim
- **/
-
+ * @version $Id: $Id
+ */
 public class FileStatus {
     /**
      * initial state or after close
@@ -275,7 +275,7 @@ public class FileStatus {
      * If created using Open, it is not new.
      *
      * @return true if file was created using New and has not yet been saved, false
-     *         otherwise.
+     * otherwise.
      */
     public boolean isNew() {
         return status == FileStatus.NEW_NOT_EDITED || status == FileStatus.NEW_EDITED;
@@ -287,7 +287,7 @@ public class FileStatus {
      * being created using New or Open.
      *
      * @return true if file has been modified since save or creation, false
-     *         otherwise.
+     * otherwise.
      */
     public boolean hasUnsavedEdits() {
         return status == FileStatus.NEW_EDITED || status == FileStatus.EDITED;
@@ -347,7 +347,6 @@ public class FileStatus {
      * Update static FileStatus fields with values from this FileStatus object
      * To support legacy code that depends on the static.
      */
-
     public void updateStaticFileStatus() {
         systemStatus = this.status;
         systemName = this.file.getPath();

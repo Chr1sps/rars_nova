@@ -1,37 +1,10 @@
 package io.github.chr1sps.rars.riscv.dump;
 
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.riscv.hardware.Memory;
+
 import java.io.File;
 import java.io.IOException;
-/*
-Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
-import io.github.chr1sps.rars.riscv.hardware.Memory;
 
 /**
  * Abstract class for memory dump file formats. Provides constructors and
@@ -40,7 +13,6 @@ import io.github.chr1sps.rars.riscv.hardware.Memory;
  * @author Pete Sanderson
  * @version December 2007
  */
-
 public abstract class AbstractDumpFormat implements DumpFormat {
 
     private final String name, commandDescriptor, description, extension;
@@ -61,7 +33,7 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      *                          none.
      */
     public AbstractDumpFormat(String name, String commandDescriptor,
-            String description, String extension) {
+                              String description, String extension) {
         this.name = name;
         this.commandDescriptor = (commandDescriptor == null) ? null : commandDescriptor.replaceAll(" ", "");
         this.description = description;
@@ -72,7 +44,7 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      * Get the file extension associated with this format.
      *
      * @return String containing file extension -- without the leading "." -- or
-     *         null if there is no standard extension.
+     * null if there is no standard extension.
      */
     public String getFileExtension() {
         return extension;
@@ -83,7 +55,7 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      * the extension, in the file save dialog, or as a tool tip.
      *
      * @return String containing short description to go with the extension
-     *         or for use as tool tip. Possibly null.
+     * or for use as tool tip. Possibly null.
      */
     public String getDescription() {
         return description;
@@ -109,19 +81,10 @@ public abstract class AbstractDumpFormat implements DumpFormat {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Write memory contents according to the
      * specification for this format.
-     *
-     * @param file         File in which to store memory contents.
-     * @param firstAddress first (lowest) memory address to dump. In bytes but
-     *                     must be on word boundary.
-     * @param lastAddress  last (highest) memory address to dump. In bytes but
-     *                     must be on word boundary. Will dump the word that starts
-     *                     at this address.
-     * @param memory
-     * @throws AddressErrorException if firstAddress is invalid or not on a word
-     *                               boundary.
-     * @throws IOException           if error occurs during file output.
      */
     public abstract void dumpMemoryRange(File file, int firstAddress, int lastAddress, Memory memory)
             throws AddressErrorException, IOException;

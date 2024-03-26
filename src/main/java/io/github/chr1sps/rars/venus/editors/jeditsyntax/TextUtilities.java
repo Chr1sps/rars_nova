@@ -26,8 +26,9 @@ public class TextUtilities {
      *
      * @param doc    The document
      * @param offset The offset
-     * @throws BadLocationException If an out-of-bounds access
-     *                              was attempted on the document text
+     * @return a int
+     * @throws javax.swing.text.BadLocationException If an out-of-bounds access
+     *                                               was attempted on the document text
      */
     public static int findMatchingBracket(Document doc, int offset)
             throws BadLocationException {
@@ -90,9 +91,9 @@ public class TextUtilities {
                 if (x == c)
                     count++;
 
-                // If text[i] == cprime, we have found a
-                // opening bracket, so we return i if
-                // --count == 0
+                    // If text[i] == cprime, we have found a
+                    // opening bracket, so we return i if
+                    // --count == 0
                 else if (x == cprime) {
                     if (--count == 0)
                         return i;
@@ -123,9 +124,9 @@ public class TextUtilities {
                 if (x == c)
                     count++;
 
-                // If text[i] == cprime, we have found an
-                // closing bracket, so we return i if
-                // --count == 0
+                    // If text[i] == cprime, we have found an
+                    // closing bracket, so we return i if
+                    // --count == 0
                 else if (x == cprime) {
                     if (--count == 0)
                         return i + offset;
@@ -140,8 +141,10 @@ public class TextUtilities {
     /**
      * Locates the start of the word at the specified position.
      *
-     * @param line The text
-     * @param pos  The position
+     * @param line      The text
+     * @param pos       The position
+     * @param noWordSep a {@link java.lang.String} object
+     * @return a int
      */
     public static int findWordStart(String line, int pos, String noWordSep) {
         char ch = line.charAt(pos - 1);
@@ -167,8 +170,10 @@ public class TextUtilities {
     /**
      * Locates the end of the word at the specified position.
      *
-     * @param line The text
-     * @param pos  The position
+     * @param line      The text
+     * @param pos       The position
+     * @param noWordSep a {@link java.lang.String} object
+     * @return a int
      */
     public static int findWordEnd(String line, int pos, String noWordSep) {
         char ch = line.charAt(pos);
@@ -192,9 +197,10 @@ public class TextUtilities {
 
     /**
      * Prefix all lines with the specified prefix.
-     * 
+     *
      * @param text   The text
      * @param prefix The prefix
+     * @return a {@link java.lang.String} object
      */
     public static String addLinePrefixes(String text, String prefix) {
         String[] lines = text.split("\n", -1);
@@ -208,9 +214,10 @@ public class TextUtilities {
 
     /**
      * Delete all lines of the specified prefix.
-     * 
+     *
      * @param text   The text
      * @param prefix The prefix
+     * @return a {@link java.lang.String} object
      */
     public static String deleteLinePrefixes(String text, String prefix) {
         String[] lines = text.split("\n", -1);

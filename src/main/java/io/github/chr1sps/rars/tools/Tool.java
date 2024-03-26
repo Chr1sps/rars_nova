@@ -47,12 +47,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * published methods PROVIDED any such communication is
  * wrapped inside a block synchronized on the
  * Globals.memoryAndRegistersLock object.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public interface Tool {
     /**
      * Return a name you have chosen for this tool. It will appear as the
      * menu item.
+     *
+     * @return a {@link java.lang.String} object
      */
     String getName();
 
@@ -60,6 +64,5 @@ public interface Tool {
      * Performs tool functions. It will be invoked when the tool is selected
      * from the Tools menu.
      */
-
     void action();
 }

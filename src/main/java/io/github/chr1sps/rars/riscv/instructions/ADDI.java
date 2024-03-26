@@ -27,11 +27,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>ADDI class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class ADDI extends ImmediateInstruction {
+    /**
+     * <p>Constructor for ADDI.</p>
+     */
     public ADDI() {
         super("addi t1,t2,-100", "Addition immediate: set t1 to (t2 plus signed 12-bit immediate)", "000");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long immediate) {
         return value + immediate;
     }

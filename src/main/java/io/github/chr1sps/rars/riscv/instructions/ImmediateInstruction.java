@@ -40,16 +40,34 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public abstract class ImmediateInstruction extends BasicInstruction {
+    /**
+     * <p>Constructor for ImmediateInstruction.</p>
+     *
+     * @param usage       a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param funct       a {@link java.lang.String} object
+     */
     public ImmediateInstruction(String usage, String description, String funct) {
         super(usage, description, BasicInstructionFormat.I_FORMAT,
                 "tttttttttttt sssss " + funct + " fffff 0010011");
     }
 
+    /**
+     * <p>Constructor for ImmediateInstruction.</p>
+     *
+     * @param usage       a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param funct       a {@link java.lang.String} object
+     * @param rv64        a boolean
+     */
     public ImmediateInstruction(String usage, String description, String funct, boolean rv64) {
         super(usage, description, BasicInstructionFormat.I_FORMAT,
                 "tttttttttttt sssss " + funct + " fffff 0011011", rv64);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         if (InstructionSet.rv64) {
@@ -62,6 +80,8 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     }
 
     /**
+     * <p>compute.</p>
+     *
      * @param value     the value from the register
      * @param immediate the value from the immediate
      * @return the result to be stored from the instruction
@@ -69,6 +89,8 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     protected abstract long compute(long value, long immediate);
 
     /**
+     * <p>computeW.</p>
+     *
      * @param value     the truncated value from the register
      * @param immediate the value from the immediate
      * @return the result to be stored from the instruction

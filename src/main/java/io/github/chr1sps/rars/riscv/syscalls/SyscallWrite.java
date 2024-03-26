@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.util.SystemIO;
 
@@ -39,15 +39,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Service to write to file descriptor given in a0. a1 specifies buffer
  * and a2 specifies length. Number of characters written is returned in a0.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class SyscallWrite extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallWrite.</p>
+     */
     public SyscallWrite() {
         super("Write", "Write to a filedescriptor from a buffer",
                 "a0 = the file descriptor<br>a1 = the buffer address<br>a2 = the length to write",
                 "a0 = the number of charcters written");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         int byteAddress = RegisterFile.getValue("a1"); // source of characters to write to file
         int reqLength = RegisterFile.getValue("a2"); // user-requested length

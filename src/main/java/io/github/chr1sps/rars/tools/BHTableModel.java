@@ -45,13 +45,13 @@ import java.util.Vector;
  * <li>Construction of a BHT with a certain number of entries with a given
  * history size.</li>
  * <li>When encountering a branch instruction the index of the relevant BHT
- * entry is calculated via the {@link BHTableModel#getIdxForAddress(int)}
+ * entry is calculated via the {@link io.github.chr1sps.rars.tools.BHTableModel#getIdxForAddress(int)}
  * method.</li>
  * <li>The current prediction of the BHT entry at the calculated index is
- * obtained via the {@link BHTableModel#getPredictionAtIdx(int)} method.</li>
+ * obtained via the {@link io.github.chr1sps.rars.tools.BHTableModel#getPredictionAtIdx(int)} method.</li>
  * <li>After detecting if the branch was really taken or not, this feedback is
  * provided to the BHT by the
- * {@link BHTableModel#updatePredictionAtIdx(int, boolean)} method.</li>
+ * {@link io.github.chr1sps.rars.tools.BHTableModel#updatePredictionAtIdx(int, boolean)} method.</li>
  * </ul>
  * <p>
  * Additionally it serves as TableModel that can be directly used to render the
@@ -60,8 +60,8 @@ import java.util.Vector;
  * repaint of the table(s) associated to this model.
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
+ * @version $Id: $Id
  */
-
 public class BHTableModel extends AbstractTableModel {
 
     /**
@@ -77,31 +77,31 @@ public class BHTableModel extends AbstractTableModel {
     /**
      * name of the table columns
      */
-    private String m_columnNames[] = { "Index", "History", "Prediction", "Correct", "Incorrect", "Precision" };
+    private String m_columnNames[] = {"Index", "History", "Prediction", "Correct", "Incorrect", "Precision"};
 
     /**
      * type of the table columns
      */
     // @SuppressWarnings("unchecked")
-    private Class m_columnClasses[] = { Integer.class, String.class, String.class, Integer.class, Integer.class,
-            Double.class };
+    private Class m_columnClasses[] = {Integer.class, String.class, String.class, Integer.class, Integer.class,
+            Double.class};
 
     /**
      * Constructs a new BHT with given number of entries and history size.
      *
      * @param numEntries  number of entries in the BHT
      * @param historySize size of the history (in bits/number of past branches)
+     * @param initVal     a boolean
      */
     public BHTableModel(int numEntries, int historySize, boolean initVal) {
         initBHT(numEntries, historySize, initVal);
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Returns the name of the i-th column of the table.
      * Required by the TableModel interface.
-     *
-     * @param i the index of the column
-     * @return name of the i-th column
      */
     public String getColumnName(int i) {
         if (i < 0 || i > m_columnNames.length)
@@ -112,11 +112,10 @@ public class BHTableModel extends AbstractTableModel {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Returns the class/type of the i-th column of the table.
      * Required by the TableModel interface.
-     *
-     * @param i the index of the column
-     * @return class representing the type of the i-th column
      */
     public Class getColumnClass(int i) {
         if (i < 0 || i > m_columnClasses.length)
@@ -147,12 +146,10 @@ public class BHTableModel extends AbstractTableModel {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Returns the value of the cell at the given row and column
      * Required by the TableModel interface.
-     *
-     * @param row the row index
-     * @param col the column index
-     * @return the value of the cell
      */
     public Object getValueAt(int row, int col) {
 
@@ -238,7 +235,7 @@ public class BHTableModel extends AbstractTableModel {
      * table(s).
      *
      * @param index       the index of the entry in the BHT
-     * @param branchTaken
+     * @param branchTaken a boolean
      */
     public void updatePredictionAtIdx(int index, boolean branchTaken) {
         if (index < 0 || index > m_entryCnt)

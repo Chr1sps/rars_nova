@@ -61,8 +61,7 @@ public class ExtendedInstruction extends Instruction {
      *                    sequence
      *                    of one or more MIPS basic instructions.
      * @param description a helpful description to be included on help requests
-     **/
-
+     */
     public ExtendedInstruction(String example, String translation, String description) {
         this.exampleFormat = example;
         this.description = description;
@@ -80,8 +79,7 @@ public class ExtendedInstruction extends Instruction {
      * @param translation Specifications for translating this instruction into a
      *                    sequence
      *                    of one or more MIPS basic instructions.
-     **/
-
+     */
     public ExtendedInstruction(String example, String translation) {
         this(example, translation, "");
     }
@@ -93,7 +91,6 @@ public class ExtendedInstruction extends Instruction {
      *
      * @return int length in bytes of corresponding binary instruction(s).
      */
-
     public int getInstructionLength() {
         return getInstructionLength(translationStrings);
     }
@@ -104,7 +101,6 @@ public class ExtendedInstruction extends Instruction {
      *
      * @return ArrayList of Strings.
      */
-
     public ArrayList<String> getBasicIntructionTemplateList() {
         return translationStrings;
     }
@@ -144,9 +140,10 @@ public class ExtendedInstruction extends Instruction {
      *
      * @param template  a String containing template for basic statement.
      * @param tokenList a TokenList containing tokens from extended instruction.
+     * @param program   a {@link io.github.chr1sps.rars.RISCVprogram} object
+     * @param PC        a int
      * @return String representing basic assembler statement.
      */
-
     public static String makeTemplateSubstitutions(RISCVprogram program, String template, TokenList tokenList, int PC) {
         String instruction = template;
         // substitute first operand token for template's RG1 or OP1, second for RG2 or

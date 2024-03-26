@@ -8,8 +8,20 @@ import io.github.chr1sps.jsoftfloat.types.Floating;
 
 /**
  * Groups any arithmetic operations such as addition, subtraction, etc
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class Arithmetic {
+    /**
+     * <p>add.</p>
+     *
+     * @param a   a T object
+     * @param b   a T object
+     * @param env a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @param <T> a T class
+     * @return a T object
+     */
     public static <T extends Floating<T>> T add(T a, T b, Environment env) {
         // TODO: handle signalling correctly
 
@@ -55,6 +67,15 @@ public class Arithmetic {
         return a.fromExactFloat(out, env);
     }
 
+    /**
+     * <p>subtraction.</p>
+     *
+     * @param a   a T object
+     * @param b   a T object
+     * @param env a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @param <T> a T class
+     * @return a T object
+     */
     public static <T extends Floating<T>> T subtraction(T a, T b, Environment env) {
         // TODO: handle signalling correctly
 
@@ -68,6 +89,15 @@ public class Arithmetic {
         return add(a, b.negate(), env);
     }
 
+    /**
+     * <p>multiplication.</p>
+     *
+     * @param a   a T object
+     * @param b   a T object
+     * @param env a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @param <T> a T class
+     * @return a T object
+     */
     public static <T extends Floating<T>> T multiplication(T a, T b, Environment env) {
         // TODO: handle signalling correctly
 
@@ -95,6 +125,14 @@ public class Arithmetic {
         return a.fromExactFloat(a.toExactFloat().multiply(b.toExactFloat()), env);
     }
 
+    /**
+     * <p>squareRoot.</p>
+     *
+     * @param a   a T object
+     * @param env a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @param <T> a T class
+     * @return a T object
+     */
     public static <T extends Floating<T>> T squareRoot(T a, Environment env) {
         // TODO: handle signalling correctly
 
@@ -121,6 +159,16 @@ public class Arithmetic {
         return a.fromExactFloat(a.toExactFloat().squareRoot(a.maxPrecision()), env);
     }
 
+    /**
+     * <p>fusedMultiplyAdd.</p>
+     *
+     * @param a   a T object
+     * @param b   a T object
+     * @param c   a T object
+     * @param env a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @param <T> a T class
+     * @return a T object
+     */
     public static <T extends Floating<T>> T fusedMultiplyAdd(T a, T b, T c, Environment env) {
         // TODO: handle signalling correctly
 
@@ -153,6 +201,15 @@ public class Arithmetic {
         return a.fromExactFloat(multiplication.add(c.toExactFloat()), env);
     }
 
+    /**
+     * <p>division.</p>
+     *
+     * @param a   a T object
+     * @param b   a T object
+     * @param env a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @param <T> a T class
+     * @return a T object
+     */
     public static <T extends Floating<T>> T division(T a, T b, Environment env) {
         // TODO: handle signalling correctly
 

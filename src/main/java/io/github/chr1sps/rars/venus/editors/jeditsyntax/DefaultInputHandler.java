@@ -85,14 +85,13 @@ public class DefaultInputHandler extends InputHandler {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Adds a key binding to this input handler. The key binding is
      * a list of white space separated key strokes of the form
      * <i>[modifiers+]key</i> where modifier is C for Control, A for Alt,
      * or S for Shift, and key is either a character (a-z) or a field
      * name in the KeyEvent class prefixed with VK_ (e.g., BACK_SPACE)
-     *
-     * @param keyBinding The key binding
-     * @param action     The action
      */
     public void addKeyBinding(String keyBinding, ActionListener action) {
         BindingMap current = bindings;
@@ -118,10 +117,10 @@ public class DefaultInputHandler extends InputHandler {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Removes a key binding from this input handler. This is not yet
      * implemented.
-     *
-     * @param keyBinding The key binding
      */
     public void removeKeyBinding(String keyBinding) {
         throw new InternalError("Not yet implemented");
@@ -138,12 +137,16 @@ public class DefaultInputHandler extends InputHandler {
      * Returns a copy of this input handler that shares the same
      * key bindings. Setting key bindings in the copy will also
      * set them in the original.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.InputHandler} object
      */
     public InputHandler copy() {
         return new DefaultInputHandler(this);
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Handle a key pressed event. This will look up the binding for
      * the key stroke and execute it.
      */
@@ -203,6 +206,8 @@ public class DefaultInputHandler extends InputHandler {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Handle a key typed event. This inserts the key into the text area.
      */
     public void keyTyped(KeyEvent evt) {
@@ -301,6 +306,7 @@ public class DefaultInputHandler extends InputHandler {
      * the <code>VK_</code> prefix.
      *
      * @param keyStroke A string description of the key stroke
+     * @return a {@link javax.swing.KeyStroke} object
      */
     public static KeyStroke parseKeyStroke(String keyStroke) {
         if (keyStroke == null)

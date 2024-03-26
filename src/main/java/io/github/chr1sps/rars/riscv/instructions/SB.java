@@ -1,7 +1,7 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -30,12 +30,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SB class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SB extends Store {
+    /**
+     * <p>Constructor for SB.</p>
+     */
     public SB() {
         super("sb t1, -100(t2)", "Store byte : Store the low-order 8 bits of t1 into the effective memory byte address",
                 "000");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void store(int address, long data) throws AddressErrorException {
         Globals.memory.setByte(address, (int) data & 0x000000FF);
     }

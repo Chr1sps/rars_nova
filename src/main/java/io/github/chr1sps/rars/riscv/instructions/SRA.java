@@ -27,17 +27,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SRA class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SRA extends Arithmetic {
+    /**
+     * <p>Constructor for SRA.</p>
+     */
     public SRA() {
         super("sra t1,t2,t3",
                 "Shift right arithmetic: Set t1 to result of sign-extended shifting t2 right by number of bits specified by value in low-order 5 bits of t3",
                 "0100000", "101");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         return value >> (value2 & 0x0000003F); // Use the bottom 6 bits
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public int computeW(int value, int value2) {
         /// Use >> to sign-fill
         return value >> (value2 & 0x0000001F); // Only use the bottom 5 bits

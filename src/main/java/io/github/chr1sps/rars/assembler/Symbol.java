@@ -33,8 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Jason Bumgarner, Jason Shrewsbury
  * @version June 2003
- **/
-
+ */
 public class Symbol {
     private String name;
     private int address;
@@ -46,8 +45,7 @@ public class Symbol {
      * @param name    The name of the Symbol.
      * @param address The memroy address that the Symbol refers to.
      * @param data    true if it represents data, false if code.
-     **/
-
+     */
     public Symbol(String name, int address, boolean data) {
         this.name = name;
         this.address = address;
@@ -58,8 +56,7 @@ public class Symbol {
      * Returns the address of the the Symbol.
      *
      * @return The address of the Symbol.
-     **/
-
+     */
     public int getAddress() {
         return this.address;
     }
@@ -68,8 +65,7 @@ public class Symbol {
      * Returns the label of the the Symbol.
      *
      * @return The label of the Symbol.
-     **/
-
+     */
     public String getName() {
         return this.name;
     }
@@ -78,8 +74,7 @@ public class Symbol {
      * Finds the type of symbol, text or data.
      *
      * @return The type of the data.
-     **/
-
+     */
     public boolean getType() {
         return this.data;
     }
@@ -88,8 +83,7 @@ public class Symbol {
      * Sets (replaces) the address of the the Symbol.
      *
      * @param newAddress The revised address of the Symbol.
-     **/
-
+     */
     public void setAddress(int newAddress) {
         this.address = newAddress;
     }

@@ -1,8 +1,8 @@
 package io.github.chr1sps.rars.riscv.hardware;
 
-import java.util.Observer;
-
 import io.github.chr1sps.rars.Globals;
+
+import java.util.Observer;
 
 /*
 Copyright (c) 2017-2019,  Benjamin Landers
@@ -38,13 +38,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Benjamin Landers
  * @version August 2017
- **/
-
+ */
 public class ControlAndStatusRegisterFile {
+    /**
+     * Constant <code>EXTERNAL_INTERRUPT=0x100</code>
+     */
     public static final int EXTERNAL_INTERRUPT = 0x100;
+    /**
+     * Constant <code>TIMER_INTERRUPT=0x10</code>
+     */
     public static final int TIMER_INTERRUPT = 0x10;
+    /**
+     * Constant <code>SOFTWARE_INTERRUPT=0x1</code>
+     */
     public static final int SOFTWARE_INTERRUPT = 0x1;
 
+    /**
+     * Constant <code>INTERRUPT_ENABLE=0x1</code>
+     */
     public static final int INTERRUPT_ENABLE = 0x1;
 
     private static final RegisterBlock instance;
@@ -87,7 +98,7 @@ public class ControlAndStatusRegisterFile {
      * @param num Number of register to set the value of.
      * @param val The desired value for the register.
      * @return old value in register prior to update
-     **/
+     */
     public static boolean updateRegister(int num, long val) {
         if (instance.getRegister(num) instanceof ReadOnlyRegister) {
             return true;
@@ -109,8 +120,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param name Name of register to set the value of.
      * @param val  The desired value for the register.
-     * @return old value in register prior to update
-     **/
+     */
     public static void updateRegister(String name, long val) {
         updateRegister(instance.getRegister(name).getNumber(), val);
     }
@@ -120,8 +130,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param num Number of register to set the value of.
      * @param val The desired value for the register.
-     * @return old value in register prior to update
-     **/
+     */
     public static void updateRegisterBackdoor(int num, long val) {
         if ((Globals.getSettings().getBackSteppingEnabled())) {
             Globals.program.getBackStepper().addControlAndStatusBackdoor(num,
@@ -136,8 +145,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param name Name of register to set the value of.
      * @param val  The desired value for the register.
-     * @return old value in register prior to update
-     **/
+     */
     public static void updateRegisterBackdoor(String name, long val) {
         updateRegisterBackdoor(instance.getRegister(name).getNumber(), val);
     }
@@ -147,7 +155,8 @@ public class ControlAndStatusRegisterFile {
      *
      * @param num Number of register to change
      * @param val The value to OR with
-     **/
+     * @return a boolean
+     */
     public static boolean orRegister(int num, long val) {
         return updateRegister(num, instance.getValue(num) | val);
     }
@@ -157,7 +166,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param name Name of register to change
      * @param val  The value to OR with
-     **/
+     */
     public static void orRegister(String name, long val) {
         updateRegister(name, instance.getValue(name) | val);
     }
@@ -167,7 +176,8 @@ public class ControlAndStatusRegisterFile {
      *
      * @param num Number of register to change
      * @param val The value to clear by
-     **/
+     * @return a boolean
+     */
     public static boolean clearRegister(int num, long val) {
         return updateRegister(num, instance.getValue(num) & ~val);
     }
@@ -177,7 +187,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param name Name of register to change
      * @param val  The value to clear by
-     **/
+     */
     public static void clearRegister(String name, long val) {
         updateRegister(name, instance.getValue(name) & ~val);
     }
@@ -187,8 +197,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param num The register number.
      * @return The value of the given register. 0 for non-implemented registers
-     **/
-
+     */
     public static int getValue(int num) {
         return (int) instance.getValue(num);
     }
@@ -198,8 +207,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param num The register number.
      * @return The value of the given register. 0 for non-implemented registers
-     **/
-
+     */
     public static long getValueLong(int num) {
         return instance.getValue(num);
     }
@@ -209,8 +217,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param name The register's name
      * @return The value of the given register. 0 for non-implemented registers
-     **/
-
+     */
     public static int getValue(String name) {
         return (int) instance.getValue(name);
     }
@@ -220,8 +227,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param name The register's name
      * @return The value of the given register. 0 for non-implemented registers
-     **/
-
+     */
     public static long getValueNoNotify(String name) {
         return instance.getRegister(name).getValueNoNotify();
     }
@@ -230,8 +236,7 @@ public class ControlAndStatusRegisterFile {
      * For returning the set of registers.
      *
      * @return The set of registers.
-     **/
-
+     */
     public static Register[] getRegisters() {
         return instance.getRegisters();
     }
@@ -242,8 +247,7 @@ public class ControlAndStatusRegisterFile {
      *
      * @param r the CSR
      * @return the list position of given register, -1 if not found.
-     **/
-
+     */
     public static int getRegisterPosition(Register r) {
         Register[] registers = instance.getRegisters();
         for (int i = 0; i < registers.length; i++) {
@@ -254,14 +258,19 @@ public class ControlAndStatusRegisterFile {
         return -1;
     }
 
+    /**
+     * <p>getRegister.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @return a {@link io.github.chr1sps.rars.riscv.hardware.Register} object
+     */
     public static Register getRegister(String name) {
         return instance.getRegister(name);
     }
 
     /**
      * Method to reinitialize the values of the registers.
-     **/
-
+     */
     public static void resetRegisters() {
         instance.resetRegisters();
     }
@@ -270,6 +279,8 @@ public class ControlAndStatusRegisterFile {
      * Each individual register is a separate object and Observable. This handy
      * method
      * will add the given Observer to each one.
+     *
+     * @param observer a {@link java.util.Observer} object
      */
     public static void addRegistersObserver(Observer observer) {
         instance.addRegistersObserver(observer);
@@ -279,6 +290,8 @@ public class ControlAndStatusRegisterFile {
      * Each individual register is a separate object and Observable. This handy
      * method
      * will delete the given Observer from each one.
+     *
+     * @param observer a {@link java.util.Observer} object
      */
     public static void deleteRegistersObserver(Observer observer) {
         instance.deleteRegistersObserver(observer);

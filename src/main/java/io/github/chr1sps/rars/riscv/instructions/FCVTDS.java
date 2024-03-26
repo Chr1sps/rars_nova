@@ -4,17 +4,29 @@ import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.types.Float32;
 import io.github.chr1sps.jsoftfloat.types.Float64;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 
+/**
+ * <p>FCVTDS class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FCVTDS extends BasicInstruction {
+    /**
+     * <p>Constructor for FCVTDS.</p>
+     */
     public FCVTDS() {
         super("fcvt.d.s f1, f2, dyn", "Convert a float to a double: Assigned the value of f2 to f1",
                 BasicInstructionFormat.R4_FORMAT, "0100001 00000 sssss ttt fffff 1010011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         Environment e = new Environment();

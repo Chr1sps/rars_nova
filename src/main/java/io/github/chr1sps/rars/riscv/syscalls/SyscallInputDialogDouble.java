@@ -1,14 +1,14 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import javax.swing.JOptionPane;
-
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
+import javax.swing.*;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -40,6 +40,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Service to input data.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 // TODO: Fill in desc, in and out for all input dialogs
 public class SyscallInputDialogDouble extends AbstractSyscall {
@@ -51,6 +54,8 @@ public class SyscallInputDialogDouble extends AbstractSyscall {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * System call to input data.
      */
     public void simulate(ProgramStatement statement) throws ExitingException {
@@ -66,7 +71,7 @@ public class SyscallInputDialogDouble extends AbstractSyscall {
 
         String message = new String(); // = "";
         int byteAddress = RegisterFile.getValue(4);
-        char ch[] = { ' ' }; // Need an array to convert to String
+        char ch[] = {' '}; // Need an array to convert to String
         try {
             ch[0] = (char) Globals.memory.getByte(byteAddress);
             while (ch[0] != 0) // only uses single location ch[0]

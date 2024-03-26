@@ -1,6 +1,15 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
+/**
+ * <p>REMUW class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class REMUW extends ArithmeticW {
+    /**
+     * <p>Constructor for REMUW.</p>
+     */
     public REMUW() {
         super("remuw t1,t2,t3",
                 "Remainder: set t1 to the remainder of t2/t3 using unsigned division limited to 32 bits",

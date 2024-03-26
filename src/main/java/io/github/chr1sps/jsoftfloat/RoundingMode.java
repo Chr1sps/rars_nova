@@ -2,6 +2,9 @@ package io.github.chr1sps.jsoftfloat;
 
 /**
  * The different ways that rounding can be performed
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public enum RoundingMode {
     /**

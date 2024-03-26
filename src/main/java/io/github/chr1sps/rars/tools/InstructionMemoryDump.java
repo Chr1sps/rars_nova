@@ -27,9 +27,9 @@
 
 /**
  * Instructions for use
- *
+ * <p>
  * This tool allows you to generate a trace by doing the following:
- *
+ * <p>
  * Open your source file in RARS.
  * Tools menu, Instruction/Memory Dump.
  * Change filename to a filename of your choice.
@@ -37,46 +37,44 @@
  * Run, Assemble.
  * Run, Go.
  * Go back to Instruction/Memory Dump window: click "Dump Log". This
- *   saves the dump to the file you specified in step 3.
- *
+ * saves the dump to the file you specified in step 3.
+ * <p>
  * These steps are pretty brittle (i.e., do them in this exact order)
- *   because the author doesn’t know how to use Swing very well.
- *
+ * because the author doesn’t know how to use Swing very well.
+ * <p>
  * The file you generate has one line per datum. The four kinds of
- *   data you will see in the trace are:
- *
+ * data you will see in the trace are:
+ * <p>
  * ‘I': The address of an access into instruction memory
  * ‘i’: A 32-bit RISC-V instruction (the trace first dumps the address then
- *      the instruction)
+ * the instruction)
  * ‘L’: The address of a memory load into data memory
  * ‘S’: The address of a memory store into data memory (the contents of the
- *      memory load/store aren’t in the trace)
- *
+ * memory load/store aren’t in the trace)
+ * <p>
  * The trace is in "text" mode for readability reasons, but for reducing
- *   trace size, it would be possible to instead store it in a "binary" mode.
+ * trace size, it would be possible to instead store it in a "binary" mode.
  */
 
 package io.github.chr1sps.rars.tools;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.*;
 
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 
+import javax.swing.*;
 import java.awt.*;
-import java.util.Observable;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Observable;
 
 /**
  * Instruction/memory dump tool. Dumps every instruction run and every memory
@@ -85,7 +83,8 @@ import java.io.IOException;
  * <p>
  * Code based on InstructionCounter.
  *
- * @author John Owens <jowens@ece.ucdavis.edu>
+ * @author John Owens &lt;jowens@ece.ucdavis.edu&gt;
+ * @version $Id: $Id
  */
 public class InstructionMemoryDump extends AbstractToolAndApplication {
     private static String name = "Instruction/Memory Dump";
@@ -129,6 +128,9 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
         super(name + ", " + version, heading);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JComponent buildMainDisplayArea() {
         JPanel panel = new JPanel(new FlowLayout());
@@ -157,6 +159,9 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
         return panel;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return name;
@@ -165,6 +170,9 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
     private int lowDataSegmentAddress = Memory.dataSegmentBaseAddress;
     private int highDataSegmentAddress = Memory.stackBaseAddress;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void addAsObserver() {
         // watch the text segment (the program)
@@ -173,6 +181,9 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
         addAsObserver(lowDataSegmentAddress, highDataSegmentAddress);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processRISCVUpdate(Observable resource, AccessNotice notice) {
         if (!notice.accessIsFromRISCV())
@@ -223,10 +234,16 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
         updateDisplay();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void initializePreGUI() {
     }
 
+    /**
+     * <p>dumpLog.</p>
+     */
     public void dumpLog() {
         // TODO: handle ressizing the window if the logSuccess label is not visible
         try {
@@ -248,6 +265,9 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
         theWindow.pack();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void reset() {
         lastAddress = -1;
@@ -255,10 +275,18 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
         updateDisplay();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void updateDisplay() {
     }
 
+    /**
+     * <p>getHelpComponent.</p>
+     *
+     * @return a {@link javax.swing.JComponent} object
+     */
     protected JComponent getHelpComponent() {
         final String helpContent = " Generates a trace, to be stored in a file specified by the user, with one line per datum. The four kinds of data in the trace are: \n"
                 +

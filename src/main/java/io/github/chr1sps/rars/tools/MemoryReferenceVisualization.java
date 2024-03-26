@@ -51,6 +51,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * maximum use of methods inherited from its abstract superclass
  * AbstractToolAndApplication.
  * Pete Sanderson, verison 1.0, 14 November 2006.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class MemoryReferenceVisualization extends AbstractToolAndApplication {
 
@@ -73,16 +76,16 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
 
     // Values for Combo Boxes
 
-    private static final String[] wordsPerUnitChoices = { "1", "2", "4", "8", "16", "32", "64", "128", "256", "512",
-            "1024", "2048" };
+    private static final String[] wordsPerUnitChoices = {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512",
+            "1024", "2048"};
     private static final int defaultWordsPerUnitIndex = 0;
-    private static final String[] visualizationUnitPixelWidthChoices = { "1", "2", "4", "8", "16", "32" };
+    private static final String[] visualizationUnitPixelWidthChoices = {"1", "2", "4", "8", "16", "32"};
     private static final int defaultVisualizationUnitPixelWidthIndex = 4;
-    private static final String[] visualizationUnitPixelHeightChoices = { "1", "2", "4", "8", "16", "32" };
+    private static final String[] visualizationUnitPixelHeightChoices = {"1", "2", "4", "8", "16", "32"};
     private static final int defaultVisualizationUnitPixelHeightIndex = 4;
-    private static final String[] displayAreaPixelWidthChoices = { "64", "128", "256", "512", "1024" };
+    private static final String[] displayAreaPixelWidthChoices = {"64", "128", "256", "512", "1024"};
     private static final int defaultDisplayWidthIndex = 2;
-    private static final String[] displayAreaPixelHeightChoices = { "64", "128", "256", "512", "1024" };
+    private static final String[] displayAreaPixelHeightChoices = {"64", "128", "256", "512", "1024"};
     private static final int defaultDisplayHeightIndex = 2;
     private static final boolean defaultDrawHashMarks = true;
 
@@ -105,7 +108,7 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
     // subrange.
     // This array will grow if user adds colors at additional counter points (see
     // below).
-    private CounterColor[] defaultCounterColors = { new CounterColor(0, Color.black),
+    private CounterColor[] defaultCounterColors = {new CounterColor(0, Color.black),
             new CounterColor(1, Color.blue),
             new CounterColor(2, Color.green),
             new CounterColor(3, Color.yellow),
@@ -162,11 +165,16 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
      * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
      * there
      * is no driver program to invoke the application.
+     *
+     * @param args an array of {@link java.lang.String} objects
      */
     public static void main(String[] args) {
         new MemoryReferenceVisualization("Memory Reference Visualization stand-alone, " + version, heading).go();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return "Memory Reference Visualization";
@@ -223,6 +231,9 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
     // the abstract superclass.
     //////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processRISCVUpdate(Observable memory, AccessNotice accessNotice) {
         incrementReferenceCountForAddress(((MemoryAccessNotice) accessNotice).getAddress());
@@ -248,7 +259,6 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
      * on the default settings
      * of the various combo boxes. Overrides inherited method that does nothing.
      */
-
     protected void initializePostGUI() {
         wordsPerUnit = getIntComboBoxSelection(wordsPerUnitSelector);
         theGrid = createNewGrid();
@@ -264,6 +274,9 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
         updateDisplay();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void updateDisplay() {
         canvas.repaint();
@@ -271,6 +284,8 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
 
     /**
      * Overrides default method, to provide a Help button for this tool/app.
+     *
+     * @return a {@link javax.swing.JComponent} object
      */
     protected JComponent getHelpComponent() {
         final String helpContent = "Use this program to visualize dynamic memory reference\n" +
@@ -485,11 +500,11 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
     // dataBaseAddress=0x10010000, heapBaseAddress=0x10040000,
     // memoryMapBaseAddress=0xffff0000
     private void initializeDisplayBaseChoices() {
-        int[] displayBaseAddressArray = { Memory.textBaseAddress, Memory.dataSegmentBaseAddress, Memory.globalPointer,
+        int[] displayBaseAddressArray = {Memory.textBaseAddress, Memory.dataSegmentBaseAddress, Memory.globalPointer,
                 Memory.dataBaseAddress,
-                Memory.heapBaseAddress, Memory.memoryMapBaseAddress };
+                Memory.heapBaseAddress, Memory.memoryMapBaseAddress};
         // Must agree with above in number and order...
-        String[] descriptions = { " (text)", " (global data)", " (gp)", " (static data)", " (heap)", " (memory map)" };
+        String[] descriptions = {" (text)", " (global data)", " (gp)", " (static data)", " (heap)", " (memory map)"};
         displayBaseAddresses = displayBaseAddressArray;
         displayBaseAddressChoices = new String[displayBaseAddressArray.length];
         for (int i = 0; i < displayBaseAddressChoices.length; i++) {

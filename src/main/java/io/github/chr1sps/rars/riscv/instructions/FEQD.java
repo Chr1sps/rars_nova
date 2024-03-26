@@ -7,12 +7,24 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
+/**
+ * <p>FEQD class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FEQD extends BasicInstruction {
+    /**
+     * <p>Constructor for FEQD.</p>
+     */
     public FEQD() {
         super("feq.d t1, f1, f2", "Floating EQuals (64 bit): if f1 = f2, set t1 to 1, else set t1 to 0",
                 BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 010 fffff 1010011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         Float64 f1 = Double.getDouble(operands[1]), f2 = Double.getDouble(operands[2]);

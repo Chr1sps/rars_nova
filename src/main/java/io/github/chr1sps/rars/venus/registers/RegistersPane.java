@@ -39,8 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson
  * @version August 2005
- **/
-
+ */
 public class RegistersPane extends JTabbedPane {
     private RegistersWindow regsTab;
     private FloatingPointWindow fpTab;
@@ -50,10 +49,14 @@ public class RegistersPane extends JTabbedPane {
 
     /**
      * Constructor for the RegistersPane class.
-     **/
-
+     *
+     * @param appFrame a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     * @param regs     a {@link io.github.chr1sps.rars.venus.registers.RegistersWindow} object
+     * @param cop1     a {@link io.github.chr1sps.rars.venus.registers.FloatingPointWindow} object
+     * @param cop0     a {@link io.github.chr1sps.rars.venus.registers.ControlAndStatusWindow} object
+     */
     public RegistersPane(VenusUI appFrame, RegistersWindow regs, FloatingPointWindow cop1,
-            ControlAndStatusWindow cop0) {
+                         ControlAndStatusWindow cop0) {
         super();
         this.mainUI = appFrame;
 

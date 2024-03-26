@@ -46,6 +46,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action class for the Settings menu item for text editor settings.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class SettingsHighlightingAction extends GuiAction {
 
@@ -101,9 +104,21 @@ public class SettingsHighlightingAction extends GuiAction {
     private static final String FONT_TOOL_TIP_TEXT = "Click, to select text font";
     private static final String DEFAULT_TOOL_TIP_TEXT = "Check, to select default color (disables color select buttons)";
     // Tool tips for the control buttons along the bottom
+    /**
+     * Constant <code>CLOSE_TOOL_TIP_TEXT="Apply current settings and close dialog"</code>
+     */
     public static final String CLOSE_TOOL_TIP_TEXT = "Apply current settings and close dialog";
+    /**
+     * Constant <code>APPLY_TOOL_TIP_TEXT="Apply current settings now and leave di"{trunked}</code>
+     */
     public static final String APPLY_TOOL_TIP_TEXT = "Apply current settings now and leave dialog open";
+    /**
+     * Constant <code>RESET_TOOL_TIP_TEXT="Reset to initial settings without apply"{trunked}</code>
+     */
     public static final String RESET_TOOL_TIP_TEXT = "Reset to initial settings without applying";
+    /**
+     * Constant <code>CANCEL_TOOL_TIP_TEXT="Close dialog without applying current s"{trunked}</code>
+     */
     public static final String CANCEL_TOOL_TIP_TEXT = "Close dialog without applying current settings";
     // Tool tips for the data and register highlighting enable/disable controls
     private static final String DATA_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting in Data Segment window";
@@ -112,13 +127,21 @@ public class SettingsHighlightingAction extends GuiAction {
 
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
      */
     public SettingsHighlightingAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel) {
+                                      Integer mnemonic, KeyStroke accel) {
         super(name, icon, descrip, mnemonic, accel);
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * When this action is triggered, launch a dialog to view and modify
      * editor settings.
      */
@@ -602,6 +625,7 @@ public class SettingsHighlightingAction extends GuiAction {
         protected void apply(Font font) {
 
         }
+/** {@inheritDoc} */
 
     }
 

@@ -30,8 +30,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
 */
 // TODO: refactor this out of existance
+
+/**
+ * <p>MemoryDump class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class MemoryDump {
-    private static final String[] segmentNames = { ".text", ".data" };
+    private static final String[] segmentNames = {".text", ".data"};
     private static int[] baseAddresses = new int[2];
     private static int[] limitAddresses = new int[2];
 
@@ -40,8 +47,8 @@ public class MemoryDump {
      *
      * @param segment String with segment name (initially ".text" and ".data")
      * @return array of two Integer, the base and limit address for that segment.
-     *         Null if parameter
-     *         name does not match a known segment name.
+     * Null if parameter
+     * name does not match a known segment name.
      */
     public static Integer[] getSegmentBounds(String segment) {
         for (int i = 0; i < segmentNames.length; i++) {

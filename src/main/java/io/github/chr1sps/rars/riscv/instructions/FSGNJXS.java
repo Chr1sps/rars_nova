@@ -32,13 +32,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FSGNJXS class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FSGNJXS extends BasicInstruction {
+    /**
+     * <p>Constructor for FSGNJXS.</p>
+     */
     public FSGNJXS() {
         super("fsgnjx.s f1, f2, f3",
                 "Floating point sign injection (xor):  xor the sign bit of f2 with the sign bit of f3 and assign it to f1",
                 BasicInstructionFormat.R_FORMAT, "0010000 ttttt sssss 010 fffff 1010011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         int f2 = FloatingPointRegisterFile.getValue(operands[1]), f3 = FloatingPointRegisterFile.getValue(operands[2]);

@@ -36,12 +36,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FLES class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FLES extends BasicInstruction {
+    /**
+     * <p>Constructor for FLES.</p>
+     */
     public FLES() {
         super("fle.s t1, f1, f2", "Floating Less than or Equals: if f1 <= f2, set t1 to 1, else set t1 to 0",
                 BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 000 fffff 1010011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         Float32 f1 = Floating.getFloat(operands[1]), f2 = Floating.getFloat(operands[2]);

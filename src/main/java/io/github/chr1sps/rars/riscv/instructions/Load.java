@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
 /*
@@ -41,17 +41,35 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public abstract class Load extends BasicInstruction {
+    /**
+     * <p>Constructor for Load.</p>
+     *
+     * @param usage       a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param funct       a {@link java.lang.String} object
+     */
     public Load(String usage, String description, String funct) {
         super(usage, description, BasicInstructionFormat.I_FORMAT,
                 "ssssssssssss ttttt " + funct + " fffff 0000011");
     }
 
+    /**
+     * <p>Constructor for Load.</p>
+     *
+     * @param usage       a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param funct       a {@link java.lang.String} object
+     * @param rv64        a boolean
+     */
     public Load(String usage, String description, String funct, boolean rv64) {
         super(usage, description, BasicInstructionFormat.I_FORMAT,
                 "ssssssssssss ttttt " + funct + " fffff 0000011", rv64);
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         operands[1] = (operands[1] << 20) >> 20;
@@ -63,8 +81,11 @@ public abstract class Load extends BasicInstruction {
     }
 
     /**
+     * <p>load.</p>
+     *
      * @param address the address to load from
      * @return The value to store to the register
+     * @throws AddressErrorException if any.
      */
     protected abstract long load(int address) throws AddressErrorException;
 }

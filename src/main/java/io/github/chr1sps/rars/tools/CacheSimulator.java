@@ -62,6 +62,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * of final access (where address found or stored). Also added log display to
  * GUI (previously System.out).
  * </p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class CacheSimulator extends AbstractToolAndApplication {
     private static boolean debug = false; // controls display of debugging info
@@ -88,14 +91,14 @@ public class CacheSimulator extends AbstractToolAndApplication {
 
     // Values for Combo Boxes
     private int[] cacheBlockSizeChoicesInt, cacheBlockCountChoicesInt;
-    private static final String[] cacheBlockSizeChoices = { "1", "2", "4", "8", "16", "32", "64", "128", "256", "512",
-            "1024", "2048" };
-    private static final String[] cacheBlockCountChoices = { "1", "2", "4", "8", "16", "32", "64", "128", "256", "512",
-            "1024", "2048" };
-    private static final String[] placementPolicyChoices = { "Direct Mapping", "Fully Associative",
-            "N-way Set Associative" };
+    private static final String[] cacheBlockSizeChoices = {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512",
+            "1024", "2048"};
+    private static final String[] cacheBlockCountChoices = {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512",
+            "1024", "2048"};
+    private static final String[] placementPolicyChoices = {"Direct Mapping", "Fully Associative",
+            "N-way Set Associative"};
     private static final int DIRECT = 0, FULL = 1, SET = 2; // NOTE: these have to match placementPolicyChoices order!
-    private static final String[] replacementPolicyChoices = { "LRU", "Random" };
+    private static final String[] replacementPolicyChoices = {"LRU", "Random"};
     private static final int LRU = 0, RANDOM = 1; // NOTE: these have to match replacementPolicyChoices order!
     private String[] cacheSetSizeChoices; // will change dynamically based on the other selections
     private static final int defaultCacheBlockSizeIndex = 2;
@@ -139,11 +142,16 @@ public class CacheSimulator extends AbstractToolAndApplication {
      * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
      * there
      * is no driver program to invoke the Cache Simulator.
+     *
+     * @param args an array of {@link java.lang.String} objects
      */
     public static void main(String[] args) {
         new CacheSimulator("Data Cache Simulator stand-alone, " + version, heading).go();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return "Data Cache Simulator";
@@ -436,12 +444,10 @@ public class CacheSimulator extends AbstractToolAndApplication {
     //////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Apply caching policies and update display when connected program accesses
      * (data) memory.
-     *
-     * @param memory       the attached memory
-     * @param accessNotice information provided by memory in MemoryAccessNotice
-     *                     object
      */
     protected void processRISCVUpdate(Observable memory, AccessNotice accessNotice) {
         MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
@@ -488,7 +494,6 @@ public class CacheSimulator extends AbstractToolAndApplication {
      * on the default settings
      * of the various combo boxes. Overrides inherited method that does nothing.
      */
-
     protected void initializePostGUI() {
         theCache = createNewCache();
     }

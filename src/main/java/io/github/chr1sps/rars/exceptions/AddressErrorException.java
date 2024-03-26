@@ -1,4 +1,4 @@
-package io.github.chr1sps.rars.riscv.hardware;
+package io.github.chr1sps.rars.exceptions;
 
 import io.github.chr1sps.rars.util.Binary;
 
@@ -36,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version August 2003
- **/
+ */
 public class AddressErrorException extends Exception {
     private final int address;
     private final int type; // SimulationException.(STORE|LOAD|INSTRUCTION)_(ADDRESS_MISALIGNED|ACCESS_FAULT)
@@ -44,9 +44,10 @@ public class AddressErrorException extends Exception {
     /**
      * Constructor for the AddressErrorException class
      *
-     * @param addr The erroneous memory address.
-     **/
-
+     * @param addr       The erroneous memory address.
+     * @param message    a {@link java.lang.String} object
+     * @param exceptType a int
+     */
     public AddressErrorException(String message, int exceptType, int addr) {
         super(message + Binary.intToHexString(addr));
         address = addr;
@@ -57,7 +58,7 @@ public class AddressErrorException extends Exception {
      * Get the erroneous memory address.
      *
      * @return The erroneous memory address.
-     **/
+     */
     public int getAddress() {
         return address;
     }
@@ -66,8 +67,8 @@ public class AddressErrorException extends Exception {
      * Get the exception type (load or store).
      *
      * @return Exception type:
-     *         SimulationException.(STORE|LOAD|INSTRUCTION)_(ADDRESS_MISALIGNED|ACCESS_FAULT)
-     **/
+     * SimulationException.(STORE|LOAD|INSTRUCTION)_(ADDRESS_MISALIGNED|ACCESS_FAULT)
+     */
     public int getType() {
         return type;
     }

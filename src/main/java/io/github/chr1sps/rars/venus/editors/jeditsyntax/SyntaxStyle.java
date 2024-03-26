@@ -34,6 +34,8 @@ public class SyntaxStyle {
 
     /**
      * Returns the color specified in this style.
+     *
+     * @return a {@link java.awt.Color} object
      */
     public Color getColor() {
         return color;
@@ -48,7 +50,6 @@ public class SyntaxStyle {
      *
      * @return String containing hex-coded color value.
      */
-
     public String getColorAsHexString() {
         return io.github.chr1sps.rars.util.Binary
                 .intToHexString(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
@@ -56,6 +57,8 @@ public class SyntaxStyle {
 
     /**
      * Returns true if no font styles are enabled.
+     *
+     * @return a boolean
      */
     public boolean isPlain() {
         return !(bold || italic);
@@ -63,6 +66,8 @@ public class SyntaxStyle {
 
     /**
      * Returns true if italics is enabled for this style.
+     *
+     * @return a boolean
      */
     public boolean isItalic() {
         return italic;
@@ -70,6 +75,8 @@ public class SyntaxStyle {
 
     /**
      * Returns true if boldface is enabled for this style.
+     *
+     * @return a boolean
      */
     public boolean isBold() {
         return bold;
@@ -78,6 +85,9 @@ public class SyntaxStyle {
     /**
      * Returns the specified font, but with the style's bold and
      * italic flags applied.
+     *
+     * @param font a {@link java.awt.Font} object
+     * @return a {@link java.awt.Font} object
      */
     public Font getStyledFont(Font font) {
         if (font == null)
@@ -95,6 +105,9 @@ public class SyntaxStyle {
 
     /**
      * Returns the font metrics for the styled font.
+     *
+     * @param font a {@link java.awt.Font} object
+     * @return a {@link java.awt.FontMetrics} object
      */
     public FontMetrics getFontMetrics(Font font) {
         if (font == null)
@@ -127,6 +140,8 @@ public class SyntaxStyle {
 
     /**
      * Returns a string representation of this object.
+     *
+     * @return a {@link java.lang.String} object
      */
     public String toString() {
         return getClass().getName() + "[color=" + color +

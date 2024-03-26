@@ -29,6 +29,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * A register which aliases a subset of another register
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class LinkedRegister extends Register {
     private Register base;
@@ -36,6 +39,8 @@ public class LinkedRegister extends Register {
     private int shift;
 
     /**
+     * <p>Constructor for LinkedRegister.</p>
+     *
      * @param name the name to assign
      * @param num  the number to assign
      * @param base the register to alias
@@ -54,15 +59,28 @@ public class LinkedRegister extends Register {
         }
     }
 
+    /**
+     * <p>getValue.</p>
+     *
+     * @return a long
+     */
     public synchronized long getValue() {
         super.getValue(); // to notify observers
         return getValueNoNotify();
     }
 
+    /**
+     * <p>getValueNoNotify.</p>
+     *
+     * @return a long
+     */
     public synchronized long getValueNoNotify() {
         return (base.getValueNoNotify() & mask) >>> shift;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public synchronized long setValue(long val) {
         long old = base.getValueNoNotify();
         base.setValue(((val << shift) & mask) | (old & ~mask));
@@ -70,8 +88,11 @@ public class LinkedRegister extends Register {
         return (old & mask) >>> shift;
     }
 
+    /**
+     * <p>resetValue.</p>
+     */
     public synchronized void resetValue() {
         base.resetValue(); // not completely correct, but registers are only reset all together, so it
-                           // doesn't matter that the other subsets are reset too
+        // doesn't matter that the other subsets are reset too
     }
 }

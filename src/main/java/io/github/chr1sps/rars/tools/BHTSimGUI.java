@@ -61,6 +61,7 @@ import java.util.Vector;
  * </ul>
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
+ * @version $Id: $Id
  */
 public class BHTSimGUI extends JPanel {
 
@@ -287,7 +288,7 @@ public class BHTSimGUI extends JPanel {
         return panel;
     }
 
-    /***
+    /**
      * Returns the combo box for selecting the number of BHT entries.
      *
      * @return the reference to the combo box
@@ -296,7 +297,7 @@ public class BHTSimGUI extends JPanel {
         return m_cbBHTentries;
     }
 
-    /***
+    /**
      * Returns the combo box for selecting the size of the BHT history.
      *
      * @return the reference to the combo box
@@ -305,7 +306,7 @@ public class BHTSimGUI extends JPanel {
         return m_cbBHThistory;
     }
 
-    /***
+    /**
      * Returns the combo box for selecting the initial value of the BHT
      *
      * @return the reference to the combo box
@@ -314,7 +315,7 @@ public class BHTSimGUI extends JPanel {
         return m_cbBHTinitVal;
     }
 
-    /***
+    /**
      * Returns the table representing the BHT.
      *
      * @return the reference to the table
@@ -323,7 +324,7 @@ public class BHTSimGUI extends JPanel {
         return m_tabBHT;
     }
 
-    /***
+    /**
      * Returns the text area for log purposes.
      *
      * @return the reference to the text area
@@ -332,7 +333,7 @@ public class BHTSimGUI extends JPanel {
         return m_taLog;
     }
 
-    /***
+    /**
      * Returns the text field for displaying the most recent branch instruction
      *
      * @return the reference to the text field
@@ -341,7 +342,7 @@ public class BHTSimGUI extends JPanel {
         return m_tfInstruction;
     }
 
-    /***
+    /**
      * Returns the text field for displaying the address of the most recent branch
      * instruction
      *
@@ -351,7 +352,7 @@ public class BHTSimGUI extends JPanel {
         return m_tfAddress;
     }
 
-    /***
+    /**
      * Returns the text field for displaying the corresponding index into the BHT
      *
      * @return the reference to the text field

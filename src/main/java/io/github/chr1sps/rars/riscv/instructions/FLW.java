@@ -2,10 +2,10 @@ package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
@@ -36,12 +36,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FLW class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FLW extends BasicInstruction {
+    /**
+     * <p>Constructor for FLW.</p>
+     */
     public FLW() {
         super("flw f1, -100(t1)", "Load a float from memory",
                 BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 0000111");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         operands[1] = (operands[1] << 20) >> 20;

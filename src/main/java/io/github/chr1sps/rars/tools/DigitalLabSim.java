@@ -3,6 +3,7 @@ package io.github.chr1sps.rars.tools;
 import javax.swing.*;
 
 import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.*;
 import io.github.chr1sps.rars.util.Binary;
 
@@ -13,6 +14,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Observable;
 
+/**
+ * <p>DigitalLabSim class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 @SuppressWarnings("serial")
 /*
  * Didier Teifreto LIFC Universit� de franche-Comt�
@@ -26,7 +33,13 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     // Used to be static final variables now they are regenerated per instance
     private final int IN_ADRESS_DISPLAY_1, IN_ADRESS_DISPLAY_2, IN_ADRESS_HEXA_KEYBOARD, IN_ADRESS_COUNTER,
             OUT_ADRESS_HEXA_KEYBOARD;
+    /**
+     * Constant <code>EXTERNAL_INTERRUPT_TIMER=0x00000100</code>
+     */
     public static final int EXTERNAL_INTERRUPT_TIMER = 0x00000100;
+    /**
+     * Constant <code>EXTERNAL_INTERRUPT_HEXA_KEYBOARD=0x00000200</code>
+     */
     public static final int EXTERNAL_INTERRUPT_HEXA_KEYBOARD = 0x00000200;
 
     // GUI Interface.
@@ -43,6 +56,12 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     private static boolean CounterInterruptOnOff = false;
     private static OneSecondCounter SecondCounter;
 
+    /**
+     * <p>Constructor for DigitalLabSim.</p>
+     *
+     * @param title   a {@link java.lang.String} object
+     * @param heading a {@link java.lang.String} object
+     */
     public DigitalLabSim(String title, String heading) {
         super(title, heading);
 
@@ -53,24 +72,41 @@ public class DigitalLabSim extends AbstractToolAndApplication {
         OUT_ADRESS_HEXA_KEYBOARD = Memory.memoryMapBaseAddress + 0x14;
     }
 
+    /**
+     * <p>Constructor for DigitalLabSim.</p>
+     */
     public DigitalLabSim() {
         this(heading + ", " + version, heading);
     }
 
+    /**
+     * <p>main.</p>
+     *
+     * @param args an array of {@link java.lang.String} objects
+     */
     public static void main(String[] args) {
         new DigitalLabSim(heading + ", " + version, heading).go();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return "Digital Lab Sim";
     }
 
+    /**
+     * <p>addAsObserver.</p>
+     */
     protected void addAsObserver() {
         addAsObserver(IN_ADRESS_DISPLAY_1, IN_ADRESS_DISPLAY_1);
         addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void update(Observable ressource, Object accessNotice) {
         MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
         int address = notice.getAddress();
@@ -92,12 +128,20 @@ public class DigitalLabSim extends AbstractToolAndApplication {
             }
     }
 
+    /**
+     * <p>reset.</p>
+     */
     protected void reset() {
         sevenSegPanel.resetSevenSegment();
         hexaKeyPanel.resetHexaKeyboard();
         SecondCounter.resetOneSecondCounter();
     }
 
+    /**
+     * <p>buildMainDisplayArea.</p>
+     *
+     * @return a {@link javax.swing.JComponent} object
+     */
     protected JComponent buildMainDisplayArea() {
         panelTools = new JPanel(new GridLayout(1, 2));
         sevenSegPanel = new SevenSegmentPanel();
@@ -128,6 +172,11 @@ public class DigitalLabSim extends AbstractToolAndApplication {
         }
     }
 
+    /**
+     * <p>getHelpComponent.</p>
+     *
+     * @return a {@link javax.swing.JComponent} object
+     */
     protected JComponent getHelpComponent() {
         final String helpContent = " This tool is composed of 3 parts : two seven-segment displays, an hexadecimal keyboard and counter \n"
                 +
@@ -174,13 +223,20 @@ public class DigitalLabSim extends AbstractToolAndApplication {
                 });
         return help;
     }/*
-      * ....................Seven Segment display start
-      * here...................................
-      */
+     * ....................Seven Segment display start
+     * here...................................
+     */
 
     /*
      * ...........................Seven segment display start here
      * ..............................
+     */
+
+    /**
+     * <p>updateSevenSegment.</p>
+     *
+     * @param number a int
+     * @param value  a char
      */
     public void updateSevenSegment(int number, char value) {
         sevenSegPanel.display[number].modifyDisplay(value);
@@ -202,57 +258,57 @@ public class DigitalLabSim extends AbstractToolAndApplication {
         public void SwitchSegment(Graphics g, char segment) {
             switch (segment) {
                 case 'a': // a segment
-                    int[] pxa1 = { 12, 9, 12 };
-                    int[] pxa2 = { 36, 39, 36 };
-                    int[] pya = { 5, 8, 11 };
+                    int[] pxa1 = {12, 9, 12};
+                    int[] pxa2 = {36, 39, 36};
+                    int[] pya = {5, 8, 11};
                     g.fillPolygon(pxa1, pya, 3);
                     g.fillPolygon(pxa2, pya, 3);
                     g.fillRect(12, 5, 24, 6);
                     break;
                 case 'b': // b segment
-                    int[] pxb = { 37, 40, 43 };
-                    int[] pyb1 = { 12, 9, 12 };
-                    int[] pyb2 = { 36, 39, 36 };
+                    int[] pxb = {37, 40, 43};
+                    int[] pyb1 = {12, 9, 12};
+                    int[] pyb2 = {36, 39, 36};
                     g.fillPolygon(pxb, pyb1, 3);
                     g.fillPolygon(pxb, pyb2, 3);
                     g.fillRect(37, 12, 6, 24);
                     break;
                 case 'c': // c segment
-                    int[] pxc = { 37, 40, 43 };
-                    int[] pyc1 = { 44, 41, 44 };
-                    int[] pyc2 = { 68, 71, 68 };
+                    int[] pxc = {37, 40, 43};
+                    int[] pyc1 = {44, 41, 44};
+                    int[] pyc2 = {68, 71, 68};
                     g.fillPolygon(pxc, pyc1, 3);
                     g.fillPolygon(pxc, pyc2, 3);
                     g.fillRect(37, 44, 6, 24);
                     break;
                 case 'd': // d segment
-                    int[] pxd1 = { 12, 9, 12 };
-                    int[] pxd2 = { 36, 39, 36 };
-                    int[] pyd = { 69, 72, 75 };
+                    int[] pxd1 = {12, 9, 12};
+                    int[] pxd2 = {36, 39, 36};
+                    int[] pyd = {69, 72, 75};
                     g.fillPolygon(pxd1, pyd, 3);
                     g.fillPolygon(pxd2, pyd, 3);
                     g.fillRect(12, 69, 24, 6);
                     break;
                 case 'e': // e segment
-                    int[] pxe = { 5, 8, 11 };
-                    int[] pye1 = { 44, 41, 44 };
-                    int[] pye2 = { 68, 71, 68 };
+                    int[] pxe = {5, 8, 11};
+                    int[] pye1 = {44, 41, 44};
+                    int[] pye2 = {68, 71, 68};
                     g.fillPolygon(pxe, pye1, 3);
                     g.fillPolygon(pxe, pye2, 3);
                     g.fillRect(5, 44, 6, 24);
                     break;
                 case 'f': // f segment
-                    int[] pxf = { 5, 8, 11 };
-                    int[] pyf1 = { 12, 9, 12 };
-                    int[] pyf2 = { 36, 39, 36 };
+                    int[] pxf = {5, 8, 11};
+                    int[] pyf1 = {12, 9, 12};
+                    int[] pyf2 = {36, 39, 36};
                     g.fillPolygon(pxf, pyf1, 3);
                     g.fillPolygon(pxf, pyf2, 3);
                     g.fillRect(5, 12, 6, 24);
                     break;
                 case 'g': // g segment
-                    int[] pxg1 = { 12, 9, 12 };
-                    int[] pxg2 = { 36, 39, 36 };
-                    int[] pyg = { 37, 40, 43 };
+                    int[] pxg1 = {12, 9, 12};
+                    int[] pxg2 = {36, 39, 36};
+                    int[] pyg = {37, 40, 43};
                     g.fillPolygon(pxg1, pyg, 3);
                     g.fillPolygon(pxg2, pyg, 3);
                     g.fillRect(12, 37, 24, 6);
@@ -310,6 +366,12 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     /*
      * ....................Hexa Keyboard start
      * here...................................
+     */
+
+    /**
+     * <p>updateHexaKeyboard.</p>
+     *
+     * @param row a char
      */
     public void updateHexaKeyboard(char row) {
         int key = KeyBoardValueButtonClick;
@@ -389,6 +451,12 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      * ....................Hexa Keyboard end here...................................
      */
     /* ....................Timer start here................................... */
+
+    /**
+     * <p>updateOneSecondCounter.</p>
+     *
+     * @param value a char
+     */
     public void updateOneSecondCounter(char value) {
         if (value != 0) {
             CounterInterruptOnOff = true;

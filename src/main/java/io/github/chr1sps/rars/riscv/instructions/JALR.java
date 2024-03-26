@@ -33,13 +33,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>JALR class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class JALR extends BasicInstruction {
+    /**
+     * <p>Constructor for JALR.</p>
+     */
     public JALR() {
         super("jalr t1, t2, -100",
                 "Jump and link register: Set t1 to Program Counter (return address) then jump to statement at t2 + immediate",
                 BasicInstructionFormat.I_FORMAT, "tttttttttttt sssss 000 fffff 1100111");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         int target = RegisterFile.getValue(operands[1]);

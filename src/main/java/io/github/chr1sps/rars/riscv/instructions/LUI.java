@@ -32,12 +32,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>LUI class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class LUI extends BasicInstruction {
+    /**
+     * <p>Constructor for LUI.</p>
+     */
     public LUI() {
         super("lui t1,100000", "Load upper immediate: set t1 to 20-bit followed by 12 0s",
                 BasicInstructionFormat.U_FORMAT, "ssssssssssssssssssss fffff 0110111");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0], operands[1] << 12);

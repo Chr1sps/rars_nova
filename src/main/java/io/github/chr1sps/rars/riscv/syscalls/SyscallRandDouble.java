@@ -1,12 +1,12 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import java.util.Random;
-
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
+import java.util.Random;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -38,8 +38,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Service to return a random floating point value.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class SyscallRandDouble extends AbstractSyscall {
     /**
      * Build an instance of the syscall with its default service number and name.
@@ -49,6 +51,9 @@ public class SyscallRandDouble extends AbstractSyscall {
                 "a0 = index of pseudorandom number generator", "fa0 = the next pseudorandom");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         Integer index = RegisterFile.getValue("a0");
         Random stream = RandomStreams.randomStreams.get(index);

@@ -1,6 +1,6 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
@@ -33,7 +33,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallLSeek class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallLSeek extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallLSeek.</p>
+     */
     public SyscallLSeek() {
         super("LSeek", "Seek to a position in a file",
                 "a0 = the file descriptor <br> a1 = the offset for the base <br>a2 is the begining of the file (0)," +
@@ -41,6 +50,9 @@ public class SyscallLSeek extends AbstractSyscall {
                 "a0 = the selected position from the beginning of the file or -1 is an error occurred");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         int result = SystemIO.seek(RegisterFile.getValue("a0"),
                 RegisterFile.getValue("a1"),

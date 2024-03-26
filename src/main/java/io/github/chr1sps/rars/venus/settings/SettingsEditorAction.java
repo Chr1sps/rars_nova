@@ -50,6 +50,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action class for the Settings menu item for text editor settings.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class SettingsEditorAction extends GuiAction {
 
@@ -57,13 +60,21 @@ public class SettingsEditorAction extends GuiAction {
 
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
      */
     public SettingsEditorAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel) {
+                                Integer mnemonic, KeyStroke accel) {
         super(name, icon, descrip, mnemonic, accel);
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * When this action is triggered, launch a dialog to view and modify
      * editor settings.
      */
@@ -624,7 +635,7 @@ public class SettingsEditorAction extends GuiAction {
 
             /**
              * Creates a {@link ColorChangerPanel}
-             * 
+             *
              * @param label The label to be put next to the changer
              * @param title The title of the dialogue to be opened
              * @param index the index of the color for

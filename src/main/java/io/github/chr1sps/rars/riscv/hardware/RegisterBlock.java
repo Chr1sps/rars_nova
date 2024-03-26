@@ -1,8 +1,8 @@
 package io.github.chr1sps.rars.riscv.hardware;
 
-import java.util.Observer;
-
 import io.github.chr1sps.rars.util.Binary;
+
+import java.util.Observer;
 
 /*
 Copyright (c) 2003-2017,  Pete Sanderson, Benjamin Landers and Kenneth Vollmar
@@ -45,6 +45,12 @@ public class RegisterBlock {
     private final Register[] regFile;
     private final char prefix;
 
+    /**
+     * <p>Constructor for RegisterBlock.</p>
+     *
+     * @param prefix    a char
+     * @param registers an array of {@link io.github.chr1sps.rars.riscv.hardware.Register} objects
+     */
     protected RegisterBlock(char prefix, Register[] registers) {
         this.prefix = prefix;
         this.regFile = registers;
@@ -52,7 +58,7 @@ public class RegisterBlock {
 
     /**
      * Method for displaying the register values for debugging.
-     **/
+     */
     public void showRegisters() {
         for (Register r : regFile) {
             System.out.println("Name: " + r.getName());
@@ -67,17 +73,32 @@ public class RegisterBlock {
      *
      * @param r   Register to set the value of.
      * @param val The desired value for the register.
-     **/
+     * @return a long
+     */
     public long updateRegister(Register r, long val) {
         if (r == null)
             return 0;
         return r.setValue(val);
     }
 
+    /**
+     * <p>updateRegister.</p>
+     *
+     * @param num a int
+     * @param val a long
+     * @return a long
+     */
     public long updateRegister(int num, long val) {
         return updateRegister(getRegister(num), val);
     }
 
+    /**
+     * <p>updateRegister.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @param val  a long
+     * @return a long
+     */
     public long updateRegister(String name, long val) {
         return updateRegister(getRegister(name), val);
     }
@@ -87,7 +108,7 @@ public class RegisterBlock {
      *
      * @param num The register's number.
      * @return The value of the given register.
-     **/
+     */
     public long getValue(int num) {
         return getRegister(num).getValue();
     }
@@ -97,7 +118,7 @@ public class RegisterBlock {
      *
      * @param name The register's name.
      * @return The value of the given register.
-     **/
+     */
     public long getValue(String name) {
         return getRegister(name).getValue();
     }
@@ -123,7 +144,7 @@ public class RegisterBlock {
      * @param name The register name, either in (prefix)(number) format or a direct
      *             name.
      * @return The register object,or null if not found.
-     **/
+     */
     public Register getRegister(String name) {
         if (name.length() < 2)
             return null;
@@ -154,15 +175,14 @@ public class RegisterBlock {
      * For returning the set of registers.
      *
      * @return The set of registers.
-     **/
-
+     */
     public Register[] getRegisters() {
         return regFile;
     }
 
     /**
      * Method to reinitialize the values of the registers.
-     **/
+     */
     public void resetRegisters() {
         for (Register r : regFile) {
             r.resetValue();
@@ -174,6 +194,8 @@ public class RegisterBlock {
      * method
      * will add the given Observer to each one. Currently does not apply to Program
      * Counter.
+     *
+     * @param observer a {@link java.util.Observer} object
      */
     public void addRegistersObserver(Observer observer) {
         for (Register r : regFile) {
@@ -187,6 +209,8 @@ public class RegisterBlock {
      * will delete the given Observer from each one. Currently does not apply to
      * Program
      * Counter.
+     *
+     * @param observer a {@link java.util.Observer} object
      */
     public void deleteRegistersObserver(Observer observer) {
         for (Register r : regFile) {

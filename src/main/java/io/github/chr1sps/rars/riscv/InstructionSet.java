@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintChar;
 import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintDouble;
@@ -65,11 +65,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson and Ken Vollmar
  * @version August 2003-5
  */
-
 public class InstructionSet {
     private static final String CLASS_PREFIX = "io.github.chr1sps.rars.riscv.instructions.";
     private static final String INSTRUCTIONS_DIRECTORY_PATH = "io/github/chr1sps/rars/riscv/instructions";
     private static final String CLASS_EXTENSION = "class";
+    /**
+     * Constant <code>rv64=Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED)</code>
+     */
     public static boolean rv64 = Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED);
 
     private ArrayList<Instruction> instructionList;
@@ -85,6 +87,8 @@ public class InstructionSet {
 
     /**
      * Retrieve the current instruction set.
+     *
+     * @return a {@link java.util.ArrayList} object
      */
     public ArrayList<Instruction> getInstructionList() {
         return instructionList;
@@ -142,6 +146,12 @@ public class InstructionSet {
         this.opcodeMatchMaps = matchMaps;
     }
 
+    /**
+     * <p>findByBinaryCode.</p>
+     *
+     * @param binaryInstr a int
+     * @return a {@link io.github.chr1sps.rars.riscv.BasicInstruction} object
+     */
     public BasicInstruction findByBinaryCode(int binaryInstr) {
         for (MatchMap map : this.opcodeMatchMaps) {
             BasicInstruction ret = map.find(binaryInstr);
@@ -267,6 +277,7 @@ public class InstructionSet {
     }
 
     // TODO: check to see if autocomplete was accidentally removed
+
     /**
      * Given a string, will return the Instruction object(s) from the instruction
      * set whose operator mnemonic prefix matches it. Case-insensitive. For example
@@ -296,6 +307,13 @@ public class InstructionSet {
      * a class that implements Syscall or extends AbstractSyscall.
      */
 
+    /**
+     * <p>findAndSimulateSyscall.</p>
+     *
+     * @param number    a int
+     * @param statement a {@link io.github.chr1sps.rars.ProgramStatement} object
+     * @throws SimulationException if any.
+     */
     public static void findAndSimulateSyscall(int number, ProgramStatement statement)
             throws SimulationException {
         AbstractSyscall service = SyscallLoader.findSyscall(number);
@@ -331,6 +349,11 @@ public class InstructionSet {
      * The parameter is displacement operand from instruction.
      */
 
+    /**
+     * <p>processBranch.</p>
+     *
+     * @param displacement a int
+     */
     public static void processBranch(int displacement) {
         // Decrement needed because PC has already been incremented
         RegisterFile
@@ -345,6 +368,11 @@ public class InstructionSet {
      * The parameter is jump target absolute byte address.
      */
 
+    /**
+     * <p>processJump.</p>
+     *
+     * @param targetAddress a int
+     */
     public static void processJump(int targetAddress) {
         RegisterFile.setProgramCounter(targetAddress);
     }
@@ -356,6 +384,11 @@ public class InstructionSet {
      * The parameter is register number to receive the return address.
      */
 
+    /**
+     * <p>processReturnAddress.</p>
+     *
+     * @param register a int
+     */
     public static void processReturnAddress(int register) {
         RegisterFile.updateRegister(register, RegisterFile.getProgramCounter());
     }

@@ -30,13 +30,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>BLTU class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class BLTU extends Branch {
+    /**
+     * <p>Constructor for BLTU.</p>
+     */
     public BLTU() {
         super("bltu t1,t2,label",
                 "Branch if less than (unsigned): Branch to statement at label's address if t1 is less than t2 (with an unsigned interpretation)",
                 "110");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean willBranch(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         return Long.compareUnsigned(RegisterFile.getValueLong(operands[0]), RegisterFile.getValueLong(operands[1])) < 0;

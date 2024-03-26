@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Stores information of a macro definition.
  *
  * @author M.H.Sekhavat sekhavat17@gmail.com
+ * @version $Id: $Id
  */
 public class Macro {
     private String name;
@@ -55,6 +56,9 @@ public class Macro {
      */
     private ArrayList<String> args;
 
+    /**
+     * <p>Constructor for Macro.</p>
+     */
     public Macro() {
         name = "";
         program = null;
@@ -64,65 +68,134 @@ public class Macro {
         labels = new ArrayList<>();
     }
 
+    /**
+     * <p>Getter for the field <code>name</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * <p>Setter for the field <code>name</code>.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * <p>Getter for the field <code>program</code>.</p>
+     *
+     * @return a {@link io.github.chr1sps.rars.RISCVprogram} object
+     */
     public RISCVprogram getProgram() {
         return program;
     }
 
+    /**
+     * <p>Setter for the field <code>program</code>.</p>
+     *
+     * @param program a {@link io.github.chr1sps.rars.RISCVprogram} object
+     */
     public void setProgram(RISCVprogram program) {
         this.program = program;
     }
 
+    /**
+     * <p>Getter for the field <code>fromLine</code>.</p>
+     *
+     * @return a int
+     */
     public int getFromLine() {
         return fromLine;
     }
 
+    /**
+     * <p>getOriginalFromLine.</p>
+     *
+     * @return a int
+     */
     public int getOriginalFromLine() {
         return this.origFromLine;
     }
 
+    /**
+     * <p>Setter for the field <code>fromLine</code>.</p>
+     *
+     * @param fromLine a int
+     */
     public void setFromLine(int fromLine) {
         this.fromLine = fromLine;
     }
 
+    /**
+     * <p>setOriginalFromLine.</p>
+     *
+     * @param origFromLine a int
+     */
     public void setOriginalFromLine(int origFromLine) {
         this.origFromLine = origFromLine;
     }
 
+    /**
+     * <p>Getter for the field <code>toLine</code>.</p>
+     *
+     * @return a int
+     */
     public int getToLine() {
         return toLine;
     }
 
+    /**
+     * <p>getOriginalToLine.</p>
+     *
+     * @return a int
+     */
     public int getOriginalToLine() {
         return this.origToLine;
     }
 
+    /**
+     * <p>Setter for the field <code>toLine</code>.</p>
+     *
+     * @param toLine a int
+     */
     public void setToLine(int toLine) {
         this.toLine = toLine;
     }
 
+    /**
+     * <p>setOriginalToLine.</p>
+     *
+     * @param origToLine a int
+     */
     public void setOriginalToLine(int origToLine) {
         this.origToLine = origToLine;
     }
 
+    /**
+     * <p>Getter for the field <code>args</code>.</p>
+     *
+     * @return a {@link java.util.ArrayList} object
+     */
     public ArrayList<String> getArgs() {
         return args;
     }
 
+    /**
+     * <p>Setter for the field <code>args</code>.</p>
+     *
+     * @param args a {@link java.util.ArrayList} object
+     */
     public void setArgs(ArrayList<String> args) {
         this.args = args;
     }
 
     /**
-     * @param obj {@link Macro} object to check if their name and count of
-     *            arguments are same
+     * {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {
@@ -133,6 +206,11 @@ public class Macro {
         return super.equals(obj);
     }
 
+    /**
+     * <p>addArg.</p>
+     *
+     * @param value a {@link java.lang.String} object
+     */
     public void addArg(String value) {
         args.add(value);
     }
@@ -144,13 +222,12 @@ public class Macro {
      * of <code>counter</code>
      *
      * @param line    source line number in macro definition to be substituted
-     * @param args
+     * @param args    a {@link io.github.chr1sps.rars.assembler.TokenList} object
      * @param counter unique macro expansion id
-     * @param errors
+     * @param errors  a {@link io.github.chr1sps.rars.ErrorList} object
      * @return <code>line</code>-th line of source code, with substituted
-     *         arguments
+     * arguments
      */
-
     public String getSubstitutedLine(int line, TokenList args, long counter, ErrorList errors) {
         TokenList tokens = program.getTokenList().get(line - 1);
         String s = program.getSourceLine(line);
@@ -220,10 +297,10 @@ public class Macro {
     /**
      * returns whether <code>tokenValue</code> is macro parameter or not
      *
-     * @param tokenValue
+     * @param tokenValue                a {@link java.lang.String} object
      * @param acceptSpimStyleParameters accepts SPIM-style parameters which begin
      *                                  with '$' if true
-     * @return
+     * @return a boolean
      */
     public static boolean tokenIsMacroParameter(String tokenValue, boolean acceptSpimStyleParameters) {
         if (acceptSpimStyleParameters) {
@@ -245,6 +322,11 @@ public class Macro {
         return tokenValue.length() > 1 && tokenValue.charAt(0) == '%';
     }
 
+    /**
+     * <p>addLabel.</p>
+     *
+     * @param value a {@link java.lang.String} object
+     */
     public void addLabel(String value) {
         labels.add(value);
     }

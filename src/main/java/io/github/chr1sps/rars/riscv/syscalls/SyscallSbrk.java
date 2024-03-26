@@ -1,6 +1,6 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
@@ -34,11 +34,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallSbrk class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallSbrk extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallSbrk.</p>
+     */
     public SyscallSbrk() {
         super("Sbrk", "Allocate heap memory", "a0 = amount of memory in bytes", "a0 = address to the allocated block");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         try {
             RegisterFile.updateRegister("a0", Globals.memory.allocateBytesFromHeap(RegisterFile.getValue("a0")));

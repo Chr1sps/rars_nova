@@ -50,7 +50,6 @@ public class PropertiesFile {
      *             it is assumed to be ".properties" and is added here.
      * @return Properties (Hashtable) of key-value pairs read from the file.
      */
-
     public static Properties loadPropertiesFromFile(String file) {
         Properties properties = new Properties();
         try {

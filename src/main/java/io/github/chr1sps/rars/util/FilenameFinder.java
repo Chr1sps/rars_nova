@@ -54,6 +54,9 @@ public class FilenameFinder {
     private static final String FILE_URL = "file:";
     private static final String JAR_URI_PREFIX = "jar:";
     private static final boolean NO_DIRECTORIES = false;
+    /**
+     * Constant <code>MATCH_ALL_EXTENSIONS="*"</code>
+     */
     public static String MATCH_ALL_EXTENSIONS = "*";
 
     /**
@@ -77,8 +80,8 @@ public class FilenameFinder {
      * @return array list of matching file names as Strings. If none, list is empty.
      */
     public static ArrayList<String> getFilenameList(ClassLoader classLoader,
-            String directoryPath,
-            String fileExtension) {
+                                                    String directoryPath,
+                                                    String fileExtension) {
         fileExtension = checkFileExtension(fileExtension);
         ArrayList<String> filenameList = new ArrayList<>();
         // Modified by DPS 10-July-2008 to better handle path containing space
@@ -166,8 +169,8 @@ public class FilenameFinder {
      * @return array list of matching file names as Strings. If none, list is empty.
      */
     public static ArrayList<String> getFilenameList(ClassLoader classLoader,
-            String directoryPath,
-            ArrayList<String> fileExtensions) {
+                                                    String directoryPath,
+                                                    ArrayList<String> fileExtensions) {
         ArrayList<String> filenameList = new ArrayList<>();
         if (fileExtensions == null || fileExtensions.size() == 0) {
             filenameList = getFilenameList(classLoader, directoryPath, "");
@@ -191,7 +194,7 @@ public class FilenameFinder {
      *                      Do NOT include "." in extension.
      *                      If null or empty string, all files are added.
      * @return array list of matching file names (absolute path). If none, list is
-     *         empty.
+     * empty.
      */
     public static ArrayList<String> getFilenameList(String directoryPath, String fileExtension) {
         fileExtension = checkFileExtension(fileExtension);
@@ -222,7 +225,7 @@ public class FilenameFinder {
      *                       Arraylist or
      *                       extension null or empty, all files are added.
      * @return array list of matching file names (absolute path). If none, list is
-     *         empty.
+     * empty.
      */
     public static ArrayList<String> getFilenameList(String directoryPath, ArrayList<String> fileExtensions) {
         ArrayList<String> filenameList = new ArrayList<>();
@@ -249,7 +252,7 @@ public class FilenameFinder {
      *                      If null or empty string, all files are added. Do NOT
      *                      include "." in extension.
      * @return array list of matching file names (absolute path). If none, list is
-     *         empty.
+     * empty.
      */
     public static ArrayList<String> getFilenameList(ArrayList<String> nameList, String fileExtension) {
         fileExtension = checkFileExtension(fileExtension);
@@ -278,7 +281,7 @@ public class FilenameFinder {
      *                       Arraylist or
      *                       extension null or empty, all files are added.
      * @return array list of matching file names (absolute path). If none, list is
-     *         empty.
+     * empty.
      */
     public static ArrayList<String> getFilenameList(ArrayList<String> nameList, ArrayList<String> fileExtensions) {
         ArrayList<String> filenameList = new ArrayList<>();
@@ -299,7 +302,7 @@ public class FilenameFinder {
      *
      * @param file the File object representing the file of interest
      * @return The filename extension (everything that follows
-     *         last '.' in filename) or null if none.
+     * last '.' in filename) or null if none.
      */
     // Source code from Sun Microsystems "The Java Tutorials : How To Use File
     // Choosers"
@@ -324,11 +327,10 @@ public class FilenameFinder {
      * @param acceptDirectories boolean value true if directories are accepted by
      *                          the filter, false otherwise.
      * @return a FileFilter object that accepts files with given extensions, and
-     *         directories if so indicated.
+     * directories if so indicated.
      */
-
     public static FileFilter getFileFilter(ArrayList<String> extensions, String description,
-            boolean acceptDirectories) {
+                                           boolean acceptDirectories) {
         return new RarsFileFilter(extensions, description, acceptDirectories);
     }
 
@@ -342,9 +344,8 @@ public class FilenameFinder {
      * @param acceptDirectories boolean value true if directories are accepted by
      *                          the filter, false otherwise.
      * @return a FileFilter object that accepts files with given extensions, and
-     *         directories if so indicated.
+     * directories if so indicated.
      */
-
     public static FileFilter getFileFilter(String extension, String description, boolean acceptDirectories) {
         ArrayList<String> extensions = new ArrayList<>();
         extensions.add(extension);

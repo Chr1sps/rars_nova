@@ -1,31 +1,28 @@
 package io.github.chr1sps.rars;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import io.github.chr1sps.rars.api.Options;
+import io.github.chr1sps.rars.api.Program;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AssemblyException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
+import io.github.chr1sps.rars.riscv.InstructionSet;
+import io.github.chr1sps.rars.riscv.dump.DumpFormat;
+import io.github.chr1sps.rars.riscv.dump.DumpFormatLoader;
+import io.github.chr1sps.rars.riscv.hardware.*;
+import io.github.chr1sps.rars.simulator.Simulator;
+import io.github.chr1sps.rars.util.Binary;
+import io.github.chr1sps.rars.util.FilenameFinder;
+import io.github.chr1sps.rars.util.MemoryDump;
+import io.github.chr1sps.rars.venus.VenusUI;
+
+import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import javax.swing.SwingUtilities;
-
-import io.github.chr1sps.rars.api.Options;
-import io.github.chr1sps.rars.api.Program;
-import io.github.chr1sps.rars.riscv.InstructionSet;
-import io.github.chr1sps.rars.riscv.dump.DumpFormat;
-import io.github.chr1sps.rars.riscv.dump.DumpFormatLoader;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
-import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
-import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
-import io.github.chr1sps.rars.riscv.hardware.Memory;
-import io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration;
-import io.github.chr1sps.rars.riscv.hardware.MemoryConfigurations;
-import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
-import io.github.chr1sps.rars.simulator.Simulator;
-import io.github.chr1sps.rars.util.Binary;
-import io.github.chr1sps.rars.util.FilenameFinder;
-import io.github.chr1sps.rars.util.MemoryDump;
-import io.github.chr1sps.rars.venus.VenusUI;
 
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
@@ -60,8 +57,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version December 2009
- **/
-
+ */
 public class Launch {
 
     /**
@@ -146,6 +142,11 @@ public class Launch {
     private int assembleErrorExitCode; // RARS command exit code to return if assemble error occurs
     private int simulateErrorExitCode;// RARS command exit code to return if simulation error occurs
 
+    /**
+     * <p>main.</p>
+     *
+     * @param args an array of {@link java.lang.String} objects
+     */
     public static void main(String[] args) {
         new Launch(args);
     }
@@ -249,7 +250,7 @@ public class Launch {
     private void launchIDE() {
         // System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts RARS menu
         // on Mac OS menu bar
-        // FlatDarkLaf.setup();
+        FlatDarkLaf.setup();
         SwingUtilities.invokeLater(
                 new Runnable() {
                     public void run() {
@@ -315,7 +316,7 @@ public class Launch {
                 } else {
                     if (dumpTriples == null)
                         dumpTriples = new ArrayList<>();
-                    dumpTriples.add(new String[] { args[++i], args[++i], args[++i] });
+                    dumpTriples.add(new String[]{args[++i], args[++i], args[++i]});
                     // simulate = false;
                 }
                 continue;

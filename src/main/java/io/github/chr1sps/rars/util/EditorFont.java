@@ -1,9 +1,9 @@
 package io.github.chr1sps.rars.util;
 
+import io.github.chr1sps.rars.Globals;
+
 import java.awt.*;
 import java.util.Arrays;
-
-import io.github.chr1sps.rars.Globals;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -43,12 +43,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public class EditorFont {
 
     // Note: These are parallel arrays so corresponding elements must match up.
-    private static final String[] styleStrings = { "Plain", "Bold", "Italic", "Bold + Italic" };
-    private static final int[] styleInts = { Font.PLAIN, Font.BOLD, Font.ITALIC, Font.BOLD | Font.ITALIC };
+    private static final String[] styleStrings = {"Plain", "Bold", "Italic", "Bold + Italic"};
+    private static final int[] styleInts = {Font.PLAIN, Font.BOLD, Font.ITALIC, Font.BOLD | Font.ITALIC};
+    /**
+     * Constant <code>DEFAULT_STYLE_STRING="styleStrings[0]"</code>
+     */
     public static final String DEFAULT_STYLE_STRING = styleStrings[0];
+    /**
+     * Constant <code>DEFAULT_STYLE_INT=styleInts[0]</code>
+     */
     public static final int DEFAULT_STYLE_INT = styleInts[0];
+    /**
+     * Constant <code>MIN_SIZE=6</code>
+     */
     public static final int MIN_SIZE = 6;
+    /**
+     * Constant <code>MAX_SIZE=72</code>
+     */
     public static final int MAX_SIZE = 72;
+    /**
+     * Constant <code>DEFAULT_SIZE=12</code>
+     */
     public static final int DEFAULT_SIZE = 12;
     /*
      * Fonts in 3 categories that are common to major Java platforms: Win, Mac,
@@ -58,8 +73,8 @@ public class EditorFont {
      * Sans Serif: Ariel, Verdana
      * This is according to lists published by www.codestyle.org.
      */
-    private static final String[] allCommonFamilies = { "Arial", "Courier New", "Georgia",
-            "Lucida Sans Typewriter", "Times New Roman", "Verdana" };
+    private static final String[] allCommonFamilies = {"Arial", "Courier New", "Georgia",
+            "Lucida Sans Typewriter", "Times New Roman", "Verdana"};
 
     /**
      * Obtain an array of common font family names. These are guaranteed to
@@ -68,7 +83,6 @@ public class EditorFont {
      *
      * @return Array of strings, each is a common and available font family name.
      */
-
     public static String[] getCommonFamilies() {
         return commonFamilies;
     }
@@ -79,13 +93,14 @@ public class EditorFont {
      *
      * @return Array of strings, each is an available font family name.
      */
-
     public static String[] getAllFamilies() {
         return GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
     }
 
     /**
      * Get array containing String values for font style names.
+     *
+     * @return an array of {@link java.lang.String} objects
      */
     public static String[] getFontStyleStrings() {
         return styleStrings;
@@ -98,7 +113,7 @@ public class EditorFont {
      *
      * @param style String representing the font style name
      * @return The int value of the corresponding Font style constant. If the
-     *         string does not match any style name, returns Font.PLAIN.
+     * string does not match any style name, returns Font.PLAIN.
      */
     public static int styleStringToStyleInt(String style) {
         String styleLower = style.toLowerCase();
@@ -116,7 +131,7 @@ public class EditorFont {
      *
      * @param style Must be one of Font.PLAIN, Font.BOLD, Font.ITALIC.
      * @return The String representation of that style. If the parameter
-     *         is not one of the above, returns "Plain".
+     * is not one of the above, returns "Plain".
      */
     public static String styleIntToStyleString(int style) {
         for (int i = 0; i < styleInts.length; i++) {
@@ -132,8 +147,8 @@ public class EditorFont {
      *
      * @param size Int representing size.
      * @return String value of parameter, unless it is less than MIN_SIZE (returns
-     *         MIN_SIZE
-     *         as String) or greater than MAX_SIZE (returns MAX_SIZE as String).
+     * MIN_SIZE
+     * as String) or greater than MAX_SIZE (returns MAX_SIZE as String).
      */
     public static String sizeIntToSizeString(int size) {
         int result = (size < MIN_SIZE) ? MIN_SIZE : ((size > MAX_SIZE) ? MAX_SIZE : size);
@@ -145,8 +160,8 @@ public class EditorFont {
      *
      * @param size String representing size.
      * @return int value of parameter, unless it is less than MIN_SIZE (returns
-     *         MIN_SIZE) or greater than MAX_SIZE (returns MAX_SIZE). If the string
-     *         cannot be parsed as a decimal integer, it returns DEFAULT_SIZE.
+     * MIN_SIZE) or greater than MAX_SIZE (returns MAX_SIZE). If the string
+     * cannot be parsed as a decimal integer, it returns DEFAULT_SIZE.
      */
     public static int sizeStringToSizeInt(String size) {
         int result = DEFAULT_SIZE;
@@ -169,6 +184,7 @@ public class EditorFont {
      *               is substituted if necessary.
      * @param size   String containing font size. The defaults and limits of
      *               sizeStringToSizeInt() are substituted if necessary.
+     * @return a {@link java.awt.Font} object
      */
     public static Font createFontFromStringValues(String family, String style, String size) {
         return new Font(family, styleStringToStyleInt(style), sizeStringToSizeInt(size));
@@ -187,7 +203,7 @@ public class EditorFont {
      *
      * @param string The original string
      * @return New string in which spaces are substituted for tabs
-     * @throws NullPointerException if string is null
+     * @throws java.lang.NullPointerException if string is null
      */
     public static String substituteSpacesForTabs(String string) {
         return substituteSpacesForTabs(string, Globals.getSettings().getEditorTabSize());
@@ -203,7 +219,7 @@ public class EditorFont {
      * @param string  The original string
      * @param tabSize The number of spaces each tab character represents
      * @return New string in which spaces are substituted for tabs
-     * @throws NullPointerException if string is null
+     * @throws java.lang.NullPointerException if string is null
      */
     public static String substituteSpacesForTabs(String string, int tabSize) {
         if (!string.contains(TAB_STRING))

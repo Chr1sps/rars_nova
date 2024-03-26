@@ -45,8 +45,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * exist in them.
  *
  * @author Sanderson and Bumgarner
- **/
-
+ * @version $Id: $Id
+ */
 public class MainPane extends JTabbedPane {
     EditPane editTab;
     ExecutePane executeTab;
@@ -56,10 +56,15 @@ public class MainPane extends JTabbedPane {
 
     /**
      * Constructor for the MainPane class.
-     **/
-
+     *
+     * @param appFrame a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     * @param editor   a {@link io.github.chr1sps.rars.venus.Editor} object
+     * @param regs     a {@link io.github.chr1sps.rars.venus.registers.RegistersWindow} object
+     * @param cop1Regs a {@link io.github.chr1sps.rars.venus.registers.FloatingPointWindow} object
+     * @param cop0Regs a {@link io.github.chr1sps.rars.venus.registers.ControlAndStatusWindow} object
+     */
     public MainPane(VenusUI appFrame, Editor editor, RegistersWindow regs,
-            FloatingPointWindow cop1Regs, ControlAndStatusWindow cop0Regs) {
+                    FloatingPointWindow cop1Regs, ControlAndStatusWindow cop0Regs) {
         super();
         this.mainUI = appFrame;
 
@@ -72,9 +77,9 @@ public class MainPane extends JTabbedPane {
         String editTabTitle = "Edit";
         String executeTabTitle = "Execute"; // "<html><center>&nbsp;<br>E<br>x<br>e<br>c<br>u<br>t<br>e<br>&nbsp;</center></html>";
         Icon editTabIcon = null;// new
-                                // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Edit_tab.jpg")));
+        // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Edit_tab.jpg")));
         Icon executeTabIcon = null;// new
-                                   // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Execute_tab.jpg")));
+        // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Execute_tab.jpg")));
 
         this.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         this.addTab(editTabTitle, editTabIcon, editTabbedPane);

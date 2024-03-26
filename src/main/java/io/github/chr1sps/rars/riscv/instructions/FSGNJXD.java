@@ -5,13 +5,25 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 
+/**
+ * <p>FSGNJXD class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FSGNJXD extends BasicInstruction {
+    /**
+     * <p>Constructor for FSGNJXD.</p>
+     */
     public FSGNJXD() {
         super("fsgnjx.d f1, f2, f3",
                 "Floating point sign injection (xor 64 bit):  xor the sign bit of f2 with the sign bit of f3 and assign it to f1",
                 BasicInstructionFormat.R_FORMAT, "0010001 ttttt sssss 010 fffff 1010011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         long f2 = FloatingPointRegisterFile.getValueLong(operands[1]),

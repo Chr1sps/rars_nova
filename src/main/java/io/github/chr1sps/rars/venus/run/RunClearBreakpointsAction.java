@@ -44,6 +44,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * thus will
  * set its enabled status true or false depending on whether breakpoints remain
  * after that action.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class RunClearBreakpointsAction extends GuiAction implements TableModelListener {
 
@@ -55,14 +58,22 @@ public class RunClearBreakpointsAction extends GuiAction implements TableModelLi
      * registration info and transfer it to the table model upon creation (which
      * happens with
      * each successful assembly).
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
      */
     public RunClearBreakpointsAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel) {
+                                     Integer mnemonic, KeyStroke accel) {
         super(name, icon, descrip, mnemonic, accel);
         Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow().registerTableModelListener(this);
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * When this option is selected, tell text segment window to clear breakpoints
      * in its table model.
      */
@@ -71,6 +82,8 @@ public class RunClearBreakpointsAction extends GuiAction implements TableModelLi
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Required TableModelListener method. This is response upon editing of text
      * segment table
      * model. The only editable column is breakpoints so this method is called only

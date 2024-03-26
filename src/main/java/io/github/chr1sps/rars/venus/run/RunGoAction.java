@@ -4,7 +4,7 @@ import javax.swing.*;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.simulator.ProgramArgumentList;
 import io.github.chr1sps.rars.simulator.Simulator;
@@ -50,22 +50,43 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action class for the Run -> Go menu item (and toolbar icon)
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class RunGoAction extends GuiAction {
 
+    /**
+     * Constant <code>defaultMaxSteps=-1</code>
+     */
     public static int defaultMaxSteps = -1; // "forever", formerly 10000000; // 10 million
+    /**
+     * Constant <code>maxSteps=defaultMaxSteps</code>
+     */
     public static int maxSteps = defaultMaxSteps;
     private String name;
     private ExecutePane executePane;
     private VenusUI mainUI;
 
+    /**
+     * <p>Constructor for RunGoAction.</p>
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     */
     public RunGoAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel, VenusUI gui) {
+                       Integer mnemonic, KeyStroke accel, VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         mainUI = gui;
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Action to take when GO is selected -- run the MIPS program!
      */
     public void actionPerformed(ActionEvent e) {
@@ -110,15 +131,15 @@ public class RunGoAction extends GuiAction {
                 // This should never occur because at termination the Go and Step buttons are
                 // disabled.
                 JOptionPane.showMessageDialog(mainUI, "reset " + mainUI.getReset() + " started " + mainUI.getStarted());// "You
-                                                                                                                        // must
-                                                                                                                        // reset
-                                                                                                                        // before
-                                                                                                                        // you
-                                                                                                                        // can
-                                                                                                                        // execute
-                                                                                                                        // the
-                                                                                                                        // program
-                                                                                                                        // again.");
+                // must
+                // reset
+                // before
+                // you
+                // can
+                // execute
+                // the
+                // program
+                // again.");
             }
         } else {
             // note: this should never occur since "Go" is only enabled after successful
@@ -135,8 +156,11 @@ public class RunGoAction extends GuiAction {
      * status of menu items based on FileStatus. Set GUI as if at breakpoint or
      * executing
      * step by step.
+     *
+     * @param done        a boolean
+     * @param pauseReason a {@link io.github.chr1sps.rars.simulator.Simulator.Reason} object
+     * @param pe          a {@link SimulationException} object
      */
-
     public void paused(boolean done, Simulator.Reason pauseReason, SimulationException pe) {
         // I doubt this can happen (pause when execution finished), but if so treat it
         // as stopped.
@@ -170,8 +194,10 @@ public class RunGoAction extends GuiAction {
      * status of menu items based on FileStatus. Display finalized values as if
      * execution
      * terminated due to completion or exception.
+     *
+     * @param pe     a {@link SimulationException} object
+     * @param reason a {@link io.github.chr1sps.rars.simulator.Simulator.Reason} object
      */
-
     public void stopped(SimulationException pe, Simulator.Reason reason) {
         // show final register and data segment values.
         executePane.getRegistersWindow().updateRegisters();
@@ -229,7 +255,6 @@ public class RunGoAction extends GuiAction {
      * Reset max steps limit to default value at termination of a simulated
      * execution.
      */
-
     public static void resetMaxSteps() {
         maxSteps = defaultMaxSteps;
     }

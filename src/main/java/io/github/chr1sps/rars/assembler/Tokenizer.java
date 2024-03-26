@@ -1,15 +1,15 @@
 package io.github.chr1sps.rars.assembler;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import io.github.chr1sps.rars.AssemblyException;
 import io.github.chr1sps.rars.ErrorList;
 import io.github.chr1sps.rars.ErrorMessage;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.RISCVprogram;
+import io.github.chr1sps.rars.exceptions.AssemblyException;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -51,15 +51,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * <br>
  * Example: <br>
  * The RISCV statement
- * <tt>here:  lw  t3, 8(t4)   #load third member of array</tt><br>
+ * <code>here:  lw  t3, 8(t4)   #load third member of array</code><br>
  * generates the following token list<br>
  * IDENTIFIER, COLON, OPERATOR, REGISTER_NAME, COMMA, INTEGER_5, LEFT_PAREN,
  * REGISTER_NAME, RIGHT_PAREN, COMMENT<br>
  *
  * @author Pete Sanderson
  * @version August 2003
- **/
-
+ */
 public class Tokenizer {
 
     private ErrorList errors;
@@ -71,12 +70,11 @@ public class Tokenizer {
     // decimal codes:
     // TODO: potentially make this automatic
     private static final String escapedCharacters = "'\"\\ntbrf0";
-    private static final String[] escapedCharactersValues = { "39", "34", "92", "10", "9", "8", "13", "12", "0" };
+    private static final String[] escapedCharactersValues = {"39", "34", "92", "10", "9", "8", "13", "12", "0"};
 
     /**
      * Simple constructor. Initializes empty error list.
      */
-
     public Tokenizer() {
         this(null);
     }
@@ -97,10 +95,10 @@ public class Tokenizer {
      *
      * @param p The RISCVprogram to be tokenized.
      * @return An ArrayList representing the tokenized program. Each list member is
-     *         a TokenList
-     *         that represents a tokenized source statement from the program.
-     **/
-
+     * a TokenList
+     * that represents a tokenized source statement from the program.
+     * @throws AssemblyException if any.
+     */
     public ArrayList<TokenList> tokenize(RISCVprogram p) throws AssemblyException {
         sourceRISCVprogram = p;
         equivalents = new HashMap<>(); // DPS 11-July-2012
@@ -198,13 +196,12 @@ public class Tokenizer {
      *
      * @param example The example RISCV instruction to be tokenized.
      * @return An TokenList representing the tokenized instruction. Each list member
-     *         is a Token
-     *         that represents one language element.
+     * is a Token
+     * that represents one language element.
      * @throws AssemblyException This occurs only if the instruction specification
      *                           itself
      *                           contains one or more lexical (i.e. token) errors.
-     **/
-
+     */
     public TokenList tokenizeExampleInstruction(String example) throws AssemblyException {
         TokenList result = tokenizeLine(sourceRISCVprogram, 0, example, false);
         if (errors.errorsOccurred()) {
@@ -222,22 +219,22 @@ public class Tokenizer {
      * @param lineNum line number from source code (used in error message)
      * @param theLine String containing source code
      * @return the generated token list for that line
-     **/
+     */
     /*
-     * 
+     *
      * Tokenizing is not as easy as it appears at first blush, because the typical
      * delimiters: space, tab, comma, can all appear inside quoted ASCII strings!
      * Also, spaces are not as necessary as they seem, the following line is
      * accepted
      * and parsed correctly by SPIM: label:lw,$t4,simple#comment
      * as is this weird variation: label :lw $t4 ,simple , , , # comment
-     * 
+     *
      * as is this line: stuff:.asciiz"# ,\n\"","aaaaa" (interestingly, if you put
      * additional characters after the \", they are ignored!!)
-     * 
+     *
      * I also would like to know the starting character position in the line of each
      * token, for error reporting purposes. StringTokenizer cannot give you this.
-     * 
+     *
      * Given all the above, it is just as easy to "roll my own" as to use
      * StringTokenizer
      */
@@ -258,7 +255,7 @@ public class Tokenizer {
      * @param callerErrorList errors will go into this list instead of tokenizer's
      *                        list.
      * @return the generated token list for that line
-     **/
+     */
     public TokenList tokenizeLine(int lineNum, String theLine, ErrorList callerErrorList) {
         ErrorList saveList = this.errors;
         this.errors = callerErrorList;
@@ -280,7 +277,7 @@ public class Tokenizer {
      * @param doEqvSubstitutes boolean param set true to perform .eqv substitutions,
      *                         else false
      * @return the generated token list for that line
-     **/
+     */
     public TokenList tokenizeLine(int lineNum, String theLine, ErrorList callerErrorList, boolean doEqvSubstitutes) {
         ErrorList saveList = this.errors;
         this.errors = callerErrorList;
@@ -301,7 +298,7 @@ public class Tokenizer {
      * @param doEqvSubstitutes boolean param set true to perform .eqv substitutions,
      *                         else false
      * @return the generated token list for that line
-     **/
+     */
     public TokenList tokenizeLine(RISCVprogram program, int lineNum, String theLine, boolean doEqvSubstitutes) {
         TokenTypes tokenType;
         TokenList result = new TokenList();
@@ -574,7 +571,7 @@ public class Tokenizer {
                 theLine = theLine.substring(0, startPos - 1) + sub
                         + theLine.substring(startPos + token.getValue().length() - 1);
                 substitutionMade = true; // one substitution per call. If there are multiple, will catch next one on the
-                                         // recursion
+                // recursion
                 break;
             }
         }
@@ -594,7 +591,7 @@ public class Tokenizer {
 
     // Given candidate token and its position, will classify and record it.
     private void processCandidateToken(char[] token, RISCVprogram program, int line, String theLine,
-            int tokenPos, int tokenStartPos, TokenList tokenList) {
+                                       int tokenPos, int tokenStartPos, TokenList tokenList) {
         String value = new String(token, 0, tokenPos);
         if (value.length() > 0 && value.charAt(0) == '\'')
             value = preprocessCharacterLiteral(value);

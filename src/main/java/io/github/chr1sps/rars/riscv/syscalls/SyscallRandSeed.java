@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import java.util.Random;
-
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
+import java.util.Random;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -34,12 +34,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallRandSeed class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallRandSeed extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallRandSeed.</p>
+     */
     public SyscallRandSeed() {
         super("RandSeed", "Set seed for the underlying Java pseudorandom number generator",
                 "a0 = index of pseudorandom number generator<br>a1 = the seed", "N/A");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         Integer index = RegisterFile.getValue("a0");
         Random stream = RandomStreams.randomStreams.get(index);

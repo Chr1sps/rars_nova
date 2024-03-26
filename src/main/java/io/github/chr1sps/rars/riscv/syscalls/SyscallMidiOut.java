@@ -32,18 +32,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallMidiOut class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallMidiOut extends AbstractSyscall {
     // Endpoints of ranges for the three "byte" parameters. The duration
     // parameter is limited at the high end only by the int range.
     private static final int rangeLowEnd = 0;
     private static final int rangeHighEnd = 127;
 
+    /**
+     * <p>Constructor for SyscallMidiOut.</p>
+     */
     public SyscallMidiOut() {
         super("MidiOut", "Outputs simulated MIDI tone to sound card (does not wait for sound to end).",
                 "See MIDI note below", "N/A");
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Arguments:
      * a0 - pitch (note). Integer value from 0 to 127, with 60 being middle-C on a
      * piano.<br>

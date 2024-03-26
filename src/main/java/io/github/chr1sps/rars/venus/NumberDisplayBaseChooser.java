@@ -43,11 +43,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * choices are only 10 (decimal) and 16 (hex), so I'm using
  * a check box where checked means hex. If base 8 (octal)
  * is added later, the Component will need to change.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class NumberDisplayBaseChooser extends JCheckBox {
+    /**
+     * Constant <code>DECIMAL=10</code>
+     */
     public static final int DECIMAL = 10;
+    /**
+     * Constant <code>HEXADECIMAL=16</code>
+     */
     public static final int HEXADECIMAL = 16;
+    /**
+     * Constant <code>ASCII=0</code>
+     */
     public static final int ASCII = 0;
     private int base;
     private JCheckBoxMenuItem settingMenuItem;
@@ -161,6 +172,13 @@ public class NumberDisplayBaseChooser extends JCheckBox {
         // }
     }
 
+    /**
+     * <p>formatNumber.</p>
+     *
+     * @param value a long
+     * @param base  a int
+     * @return a {@link java.lang.String} object
+     */
     public static String formatNumber(long value, int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
             return Binary.longToHexString(value);
@@ -295,6 +313,8 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * one is created first (before the menu item). They need to communicate
      * with each other so that whenever one changes, so does the other. They
      * cannot be the same object (one is JCheckBox, the other is JCheckBoxMenuItem).
+     *
+     * @param setter a {@link javax.swing.JCheckBoxMenuItem} object
      */
     public void setSettingsMenuItem(JCheckBoxMenuItem setter) {
         settingMenuItem = setter;
@@ -303,6 +323,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     /**
      * Return the number base corresponding to the specified setting.
      *
+     * @param setting a boolean
      * @return HEXADECIMAL if setting is true, DECIMAL otherwise.
      */
     public static int getBase(boolean setting) {

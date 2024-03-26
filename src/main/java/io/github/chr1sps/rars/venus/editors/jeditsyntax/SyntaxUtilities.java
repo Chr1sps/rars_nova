@@ -36,9 +36,10 @@ public class SyntaxUtilities {
      * @param text       The segment
      * @param offset     The offset into the segment
      * @param match      The string to match
+     * @return a boolean
      */
     public static boolean regionMatches(boolean ignoreCase, Segment text,
-            int offset, String match) {
+                                        int offset, String match) {
         int length = offset + match.length();
         char[] textArray = text.array;
         if (length > text.offset + text.count)
@@ -64,9 +65,10 @@ public class SyntaxUtilities {
      * @param text       The segment
      * @param offset     The offset into the segment
      * @param match      The character array to match
+     * @return a boolean
      */
     public static boolean regionMatches(boolean ignoreCase, Segment text,
-            int offset, char[] match) {
+                                        int offset, char[] match) {
         int length = offset + match.length;
         char[] textArray = text.array;
         if (length > text.offset + text.count)
@@ -88,6 +90,8 @@ public class SyntaxUtilities {
      * Returns the default style table. This can be passed to the
      * <code>setStyles()</code> method of <code>SyntaxDocument</code>
      * to use the default syntax styles.
+     *
+     * @return an array of {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle} objects
      */
     public static SyntaxStyle[] getDefaultSyntaxStyles() {
         SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
@@ -101,7 +105,7 @@ public class SyntaxUtilities {
         styles[Token.KEYWORD2] = new SyntaxStyle(Color.magenta, false, false);
         styles[Token.KEYWORD3] = new SyntaxStyle(Color.red, false, false);// (new Color(0x009600),false,false);
         styles[Token.LITERAL1] = new SyntaxStyle(new Color(0x00CC33), false, false);// (new
-                                                                                    // Color(0x650099),false,false);
+        // Color(0x650099),false,false);
         styles[Token.LITERAL2] = new SyntaxStyle(new Color(0x00CC33), false, false);// (new Color(0x650099),false,true);
         styles[Token.LABEL] = new SyntaxStyle(Color.black, true, false);// (new Color(0x990033),false,true);
         styles[Token.OPERATOR] = new SyntaxStyle(Color.black, false, true);
@@ -116,6 +120,8 @@ public class SyntaxUtilities {
      * to use the current syntax styles. If changes have been made
      * via MARS Settings menu, the current settings will not be the
      * same as the default settings.
+     *
+     * @return an array of {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle} objects
      */
     public static SyntaxStyle[] getCurrentSyntaxStyles() {
         SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
@@ -135,7 +141,13 @@ public class SyntaxUtilities {
         return styles;
     }
 
+    /**
+     * Constant <code>popupShowing=false</code>
+     */
     public static boolean popupShowing = false;
+    /**
+     * Constant <code>popup</code>
+     */
     public static Popup popup;
 
     /**
@@ -153,13 +165,13 @@ public class SyntaxUtilities {
      * @return The x co-ordinate, plus the width of the painted string
      */
     public static int paintSyntaxLine(Segment line, Token tokens,
-            SyntaxStyle[] styles, TabExpander expander, Graphics gfx,
-            int x, int y) {
+                                      SyntaxStyle[] styles, TabExpander expander, Graphics gfx,
+                                      int x, int y) {
         Font defaultFont = gfx.getFont();
         Color defaultColor = gfx.getColor();
 
         int offset = 0;
-        for (;;) {
+        for (; ; ) {
             byte id = tokens.id;
             if (id == Token.END)
                 break;
@@ -218,12 +230,25 @@ public class SyntaxUtilities {
         return x;
     }
 
+    /**
+     * <p>Constructor for InstructionMouseEvent.</p>
+     *
+     * @param component a {@link java.awt.Component} object
+     * @param x         a int
+     * @param y         a int
+     * @param line      a {@link javax.swing.text.Segment} object
+     */
     // private members
     private SyntaxUtilities() {
     }
 }
 
 class InstructionMouseEvent extends MouseEvent {
+    /**
+     * <p>Getter for the field <code>line</code>.</p>
+     *
+     * @return a {@link javax.swing.text.Segment} object
+     */
     private Segment line;
 
     public InstructionMouseEvent(Component component, int x, int y, Segment line) {

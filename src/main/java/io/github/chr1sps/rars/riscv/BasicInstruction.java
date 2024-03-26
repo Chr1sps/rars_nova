@@ -1,7 +1,7 @@
 package io.github.chr1sps.rars.riscv;
 
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 
 /**
  * Class to represent a basic instruction in the MIPS instruction set.
@@ -29,7 +29,8 @@ public abstract class BasicInstruction extends Instruction {
      *                    opcode in binary in the appropriate bit positions and
      *                    codes for operand positions ('f', 's', 't') in the
      *                    remainding positions.
-     **/
+     * @param description a {@link java.lang.String} object
+     */
     /*
      * codes for operand positions are:
      * f == First operand
@@ -50,7 +51,7 @@ public abstract class BasicInstruction extends Instruction {
      * instruction simulator -- it needs to match all and only the 0's and 1's.
      */
     public BasicInstruction(String example, String description, BasicInstructionFormat instrFormat,
-            String operMask) {
+                            String operMask) {
         this.exampleFormat = example;
         this.mnemonic = this.extractOperator(example);
         this.description = description;
@@ -64,8 +65,17 @@ public abstract class BasicInstruction extends Instruction {
         this.opcodeMatch = (int) Long.parseLong(this.operationMask.replaceAll("[^1]", "0"), 2);
     }
 
+    /**
+     * <p>Constructor for BasicInstruction.</p>
+     *
+     * @param example     a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param instrFormat a {@link io.github.chr1sps.rars.riscv.BasicInstructionFormat} object
+     * @param operMask    a {@link java.lang.String} object
+     * @param onlyinrv64  a boolean
+     */
     public BasicInstruction(String example, String description, BasicInstructionFormat instrFormat,
-            String operMask, boolean onlyinrv64) {
+                            String operMask, boolean onlyinrv64) {
         this(example, description, instrFormat, operMask);
         if (InstructionSet.rv64 != onlyinrv64) {
             throw new NullPointerException("rv64");
@@ -75,8 +85,15 @@ public abstract class BasicInstruction extends Instruction {
     // Temporary constructor so that instructions without description yet will
     // compile.
 
+    /**
+     * <p>Constructor for BasicInstruction.</p>
+     *
+     * @param example     a {@link java.lang.String} object
+     * @param instrFormat a {@link io.github.chr1sps.rars.riscv.BasicInstructionFormat} object
+     * @param operMask    a {@link java.lang.String} object
+     */
     public BasicInstruction(String example, BasicInstructionFormat instrFormat,
-            String operMask) {
+                            String operMask) {
         this(example, "", instrFormat, operMask);
     }
 
@@ -108,10 +125,20 @@ public abstract class BasicInstruction extends Instruction {
         return instructionFormat;
     }
 
+    /**
+     * <p>Getter for the field <code>opcodeMask</code>.</p>
+     *
+     * @return a int
+     */
     public int getOpcodeMask() {
         return this.opcodeMask;
     }
 
+    /**
+     * <p>Getter for the field <code>opcodeMatch</code>.</p>
+     *
+     * @return a int
+     */
     public int getOpcodeMatch() {
         return this.opcodeMatch;
     }
@@ -123,7 +150,6 @@ public abstract class BasicInstruction extends Instruction {
      *                  simulate.
      * @throws SimulationException This is a run-time exception generated during
      *                             simulation.
-     **/
-
+     */
     public abstract void simulate(ProgramStatement statement) throws SimulationException;
 }

@@ -1,14 +1,14 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import java.nio.charset.StandardCharsets;
-
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.util.SystemIO;
+
+import java.nio.charset.StandardCharsets;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -47,13 +47,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Follows semantics of UNIX 'fgets'. For specified length n,
  * string can be no longer than n-1. If less than that, add
  * newline to end. In either case, then pad with null byte.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class SyscallReadString extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallReadString.</p>
+     */
     public SyscallReadString() {
         super("ReadString", "Reads a string from the console",
                 "a0 = address of input buffer<br>a1 = maximum number of characters to read", "N/A");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         String inputString = "";
         int buf = RegisterFile.getValue("a0"); // buf addr

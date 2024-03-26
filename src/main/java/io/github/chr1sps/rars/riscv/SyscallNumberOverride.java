@@ -32,8 +32,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Represents User override of default syscall number assignment.
  * Such overrides are specified in the Syscall.properties file read when
  * RARS starts up.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class SyscallNumberOverride {
     private String serviceName;
     private int newServiceNumber;
@@ -51,7 +53,6 @@ public class SyscallNumberOverride {
      *                    numbers will
      *                    be issued at RARS launch.
      */
-
     public SyscallNumberOverride(String serviceName, String value) {
         this.serviceName = serviceName;
         try {

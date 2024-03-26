@@ -16,6 +16,9 @@ import io.github.chr1sps.jsoftfloat.RoundingMode;
  * Square Root and Division cannot really use this because they cannot avoid the
  * precision issue. They have to stop
  * computing digits once they get past the maximum length of the significand.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class ExactFloat implements Comparable<ExactFloat> {
     // Value = (-1)^sign * significand * 2^exponent
@@ -23,12 +26,24 @@ public class ExactFloat implements Comparable<ExactFloat> {
     public final int exponent;
     public final BigInteger significand;
 
+    /**
+     * <p>Constructor for ExactFloat.</p>
+     *
+     * @param sign a boolean
+     * @param exp  a int
+     * @param sig  a {@link java.math.BigInteger} object
+     */
     public ExactFloat(boolean sign, int exp, BigInteger sig) {
         this.sign = sign;
         exponent = exp;
         significand = sig;
     }
 
+    /**
+     * <p>Constructor for ExactFloat.</p>
+     *
+     * @param i a {@link java.math.BigInteger} object
+     */
     public ExactFloat(BigInteger i) {
         if (i.compareTo(BigInteger.ZERO) < 0) {
             sign = true;
@@ -40,6 +55,12 @@ public class ExactFloat implements Comparable<ExactFloat> {
         significand = i;
     }
 
+    /**
+     * <p>add.</p>
+     *
+     * @param other a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     * @return a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     */
     public ExactFloat add(ExactFloat other) {
         int expoDiff = exponent - other.exponent;
         int finalExpo = Math.min(exponent, other.exponent);
@@ -69,6 +90,12 @@ public class ExactFloat implements Comparable<ExactFloat> {
         }
     }
 
+    /**
+     * <p>multiply.</p>
+     *
+     * @param other a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     * @return a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     */
     public ExactFloat multiply(ExactFloat other) {
         // 0 * x = 0
         // Sign is the xor of the input signs - Section 6.3
@@ -95,7 +122,7 @@ public class ExactFloat implements Comparable<ExactFloat> {
      * @param other    the dividend
      * @param accuracy the number of bits to compute
      * @return An exact float that equals this/other with the first accuracy bits
-     *         correct
+     * correct
      * @author Benjamin Landers
      */
     public ExactFloat divide(ExactFloat other, int accuracy) {
@@ -137,6 +164,12 @@ public class ExactFloat implements Comparable<ExactFloat> {
         return new ExactFloat(a.sign != b.sign, a.exponent - b.exponent - count - expChange + 1, outbits);
     }
 
+    /**
+     * <p>squareRoot.</p>
+     *
+     * @param accuracy a int
+     * @return a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     */
     public ExactFloat squareRoot(int accuracy) {
         assert !sign : "Square root of a negative number is not real";
         ExactFloat normed = normalize();
@@ -184,10 +217,21 @@ public class ExactFloat implements Comparable<ExactFloat> {
         }
     }
 
+    /**
+     * <p>shiftRight.</p>
+     *
+     * @param i a int
+     * @return a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     */
     public ExactFloat shiftRight(int i) {
         return new ExactFloat(sign, exponent - i, significand);
     }
 
+    /**
+     * <p>normalize.</p>
+     *
+     * @return a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     */
     public ExactFloat normalize() {
         if (isZero())
             return new ExactFloat(sign, 0, BigInteger.ZERO);
@@ -195,6 +239,12 @@ public class ExactFloat implements Comparable<ExactFloat> {
                 significand.shiftRight(significand.getLowestSetBit()));
     }
 
+    /**
+     * <p>roundToIntegral.</p>
+     *
+     * @param env a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @return a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     */
     public ExactFloat roundToIntegral(Environment env) {
         if (isZero())
             return this;
@@ -236,6 +286,12 @@ public class ExactFloat implements Comparable<ExactFloat> {
         }
     }
 
+    /**
+     * <p>toIntegral.</p>
+     *
+     * @param env a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @return a {@link java.math.BigInteger} object
+     */
     public BigInteger toIntegral(Environment env) {
         if (isZero())
             return BigInteger.ZERO;
@@ -248,6 +304,9 @@ public class ExactFloat implements Comparable<ExactFloat> {
         return f.significand.shiftLeft(f.exponent).multiply(BigInteger.valueOf(sign ? -1 : 1));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int compareTo(ExactFloat other) {
         if (isZero()) {
@@ -272,14 +331,29 @@ public class ExactFloat implements Comparable<ExactFloat> {
         }
     }
 
+    /**
+     * <p>abs.</p>
+     *
+     * @return a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     */
     public ExactFloat abs() {
         return new ExactFloat(false, exponent, significand);
     }
 
+    /**
+     * <p>negate.</p>
+     *
+     * @return a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     */
     public ExactFloat negate() {
         return new ExactFloat(!sign, exponent, significand);
     }
 
+    /**
+     * <p>isZero.</p>
+     *
+     * @return a boolean
+     */
     public boolean isZero() {
         return significand.equals(BigInteger.ZERO);
     }

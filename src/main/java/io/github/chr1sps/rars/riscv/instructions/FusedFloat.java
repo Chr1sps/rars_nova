@@ -4,7 +4,7 @@ import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.RoundingMode;
 import io.github.chr1sps.jsoftfloat.types.Float32;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
@@ -38,13 +38,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Helper class for 4 argument floating point instructions
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public abstract class FusedFloat extends BasicInstruction {
+    /**
+     * <p>Constructor for FusedFloat.</p>
+     *
+     * @param usage       a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param op          a {@link java.lang.String} object
+     */
     public FusedFloat(String usage, String description, String op) {
         super(usage + ", dyn", description, BasicInstructionFormat.R4_FORMAT,
                 "qqqqq 00 ttttt sssss " + "ppp" + " fffff 100" + op + "11");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         Environment e = new Environment();
@@ -56,6 +69,11 @@ public abstract class FusedFloat extends BasicInstruction {
         FloatingPointRegisterFile.updateRegister(operands[0], result.bits);
     }
 
+    /**
+     * <p>flipRounding.</p>
+     *
+     * @param e a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     */
     public static void flipRounding(Environment e) {
         if (e.mode == RoundingMode.max) {
             e.mode = RoundingMode.min;
@@ -65,9 +83,12 @@ public abstract class FusedFloat extends BasicInstruction {
     }
 
     /**
+     * <p>compute.</p>
+     *
      * @param r1 The first register
      * @param r2 The second register
      * @param r3 The third register
+     * @param e  a {@link io.github.chr1sps.jsoftfloat.Environment} object
      * @return The value to store to the destination
      */
     protected abstract Float32 compute(Float32 r1, Float32 r2, Float32 r3, Environment e);

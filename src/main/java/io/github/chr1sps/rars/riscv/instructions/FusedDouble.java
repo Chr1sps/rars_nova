@@ -3,20 +3,33 @@ package io.github.chr1sps.rars.riscv.instructions;
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.types.Float64;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 
 /**
  * Helper class for 4 argument floating point instructions
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public abstract class FusedDouble extends BasicInstruction {
+    /**
+     * <p>Constructor for FusedDouble.</p>
+     *
+     * @param usage       a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param op          a {@link java.lang.String} object
+     */
     public FusedDouble(String usage, String description, String op) {
         super(usage + ", dyn", description, BasicInstructionFormat.R4_FORMAT,
                 "qqqqq 01 ttttt sssss " + "ppp" + " fffff 100" + op + "11");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         Environment e = new Environment();
@@ -29,9 +42,12 @@ public abstract class FusedDouble extends BasicInstruction {
     }
 
     /**
+     * <p>compute.</p>
+     *
      * @param r1 The first register
      * @param r2 The second register
      * @param r3 The third register
+     * @param e  a {@link io.github.chr1sps.jsoftfloat.Environment} object
      * @return The value to store to the destination
      */
     protected abstract Float64 compute(Float64 r1, Float64 r2, Float64 r3, Environment e);

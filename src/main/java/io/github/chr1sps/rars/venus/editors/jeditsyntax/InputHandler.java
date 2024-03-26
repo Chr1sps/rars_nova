@@ -31,8 +31,8 @@ import java.util.Hashtable;
  *
  * @author Slava Pestov
  * @version $Id: InputHandler.java,v 1.14 1999/12/13 03:40:30 sp Exp $
- *          <p>
- *          08/12/2002 Clipboard actions (Oliver Henning)
+ * <p>
+ * 08/12/2002 Clipboard actions (Oliver Henning)
  */
 public abstract class InputHandler extends KeyAdapter {
     /**
@@ -44,47 +44,164 @@ public abstract class InputHandler extends KeyAdapter {
      */
     public static final String SMART_HOME_END_PROPERTY = "InputHandler.homeEnd";
 
+    /**
+     * Constant <code>BACKSPACE</code>
+     */
     public static final ActionListener BACKSPACE = new backspace();
+    /**
+     * Constant <code>BACKSPACE_WORD</code>
+     */
     public static final ActionListener BACKSPACE_WORD = new backspace_word();
+    /**
+     * Constant <code>DELETE</code>
+     */
     public static final ActionListener DELETE = new delete();
+    /**
+     * Constant <code>DELETE_WORD</code>
+     */
     public static final ActionListener DELETE_WORD = new delete_word();
+    /**
+     * Constant <code>END</code>
+     */
     public static final ActionListener END = new end(false);
+    /**
+     * Constant <code>DOCUMENT_END</code>
+     */
     public static final ActionListener DOCUMENT_END = new document_end(false);
+    /**
+     * Constant <code>SELECT_ALL</code>
+     */
     public static final ActionListener SELECT_ALL = new select_all();
+    /**
+     * Constant <code>SELECT_END</code>
+     */
     public static final ActionListener SELECT_END = new end(true);
+    /**
+     * Constant <code>SELECT_DOC_END</code>
+     */
     public static final ActionListener SELECT_DOC_END = new document_end(true);
+    /**
+     * Constant <code>INSERT_BREAK</code>
+     */
     public static final ActionListener INSERT_BREAK = new insert_break();
+    /**
+     * Constant <code>INSERT_TAB</code>
+     */
     public static final ActionListener INSERT_TAB = new insert_tab();
+    /**
+     * Constant <code>DELETE_TAB</code>
+     */
     public static final ActionListener DELETE_TAB = new delete_tab();
+    /**
+     * Constant <code>HOME</code>
+     */
     public static final ActionListener HOME = new home(false);
+    /**
+     * Constant <code>DOCUMENT_HOME</code>
+     */
     public static final ActionListener DOCUMENT_HOME = new document_home(false);
+    /**
+     * Constant <code>SELECT_HOME</code>
+     */
     public static final ActionListener SELECT_HOME = new home(true);
+    /**
+     * Constant <code>SELECT_DOC_HOME</code>
+     */
     public static final ActionListener SELECT_DOC_HOME = new document_home(true);
+    /**
+     * Constant <code>NEXT_CHAR</code>
+     */
     public static final ActionListener NEXT_CHAR = new next_char(false);
+    /**
+     * Constant <code>NEXT_LINE</code>
+     */
     public static final ActionListener NEXT_LINE = new next_line(false);
+    /**
+     * Constant <code>NEXT_PAGE</code>
+     */
     public static final ActionListener NEXT_PAGE = new next_page(false);
+    /**
+     * Constant <code>NEXT_WORD</code>
+     */
     public static final ActionListener NEXT_WORD = new next_word(false);
+    /**
+     * Constant <code>SELECT_NEXT_CHAR</code>
+     */
     public static final ActionListener SELECT_NEXT_CHAR = new next_char(true);
+    /**
+     * Constant <code>SELECT_NEXT_LINE</code>
+     */
     public static final ActionListener SELECT_NEXT_LINE = new next_line(true);
+    /**
+     * Constant <code>SELECT_NEXT_PAGE</code>
+     */
     public static final ActionListener SELECT_NEXT_PAGE = new next_page(true);
+    /**
+     * Constant <code>SELECT_NEXT_WORD</code>
+     */
     public static final ActionListener SELECT_NEXT_WORD = new next_word(true);
+    /**
+     * Constant <code>OVERWRITE</code>
+     */
     public static final ActionListener OVERWRITE = new overwrite();
+    /**
+     * Constant <code>PREV_CHAR</code>
+     */
     public static final ActionListener PREV_CHAR = new prev_char(false);
+    /**
+     * Constant <code>PREV_LINE</code>
+     */
     public static final ActionListener PREV_LINE = new prev_line(false);
+    /**
+     * Constant <code>PREV_PAGE</code>
+     */
     public static final ActionListener PREV_PAGE = new prev_page(false);
+    /**
+     * Constant <code>PREV_WORD</code>
+     */
     public static final ActionListener PREV_WORD = new prev_word(false);
+    /**
+     * Constant <code>SELECT_PREV_CHAR</code>
+     */
     public static final ActionListener SELECT_PREV_CHAR = new prev_char(true);
+    /**
+     * Constant <code>SELECT_PREV_LINE</code>
+     */
     public static final ActionListener SELECT_PREV_LINE = new prev_line(true);
+    /**
+     * Constant <code>SELECT_PREV_PAGE</code>
+     */
     public static final ActionListener SELECT_PREV_PAGE = new prev_page(true);
+    /**
+     * Constant <code>SELECT_PREV_WORD</code>
+     */
     public static final ActionListener SELECT_PREV_WORD = new prev_word(true);
+    /**
+     * Constant <code>REPEAT</code>
+     */
     public static final ActionListener REPEAT = new repeat();
+    /**
+     * Constant <code>TOGGLE_RECT</code>
+     */
     public static final ActionListener TOGGLE_RECT = new toggle_rect();
     // Clipboard
+    /**
+     * Constant <code>CLIP_COPY</code>
+     */
     public static final ActionListener CLIP_COPY = new clip_copy();
+    /**
+     * Constant <code>CLIP_PASTE</code>
+     */
     public static final ActionListener CLIP_PASTE = new clip_paste();
+    /**
+     * Constant <code>CLIP_CUT</code>
+     */
     public static final ActionListener CLIP_CUT = new clip_cut();
 
     // Default action
+    /**
+     * Constant <code>INSERT_CHAR</code>
+     */
     public static final ActionListener INSERT_CHAR = new insert_char();
 
     private static Hashtable<String, ActionListener> actions;
@@ -136,6 +253,7 @@ public abstract class InputHandler extends KeyAdapter {
      * Returns a named text area action.
      *
      * @param name The action name
+     * @return a {@link java.awt.event.ActionListener} object
      */
     public static ActionListener getAction(String name) {
         return actions.get(name);
@@ -145,6 +263,7 @@ public abstract class InputHandler extends KeyAdapter {
      * Returns the name of the specified text area action.
      *
      * @param listener The action
+     * @return a {@link java.lang.String} object
      */
     public static String getActionName(ActionListener listener) {
         Enumeration<String> enumeration = getActions();
@@ -159,6 +278,8 @@ public abstract class InputHandler extends KeyAdapter {
 
     /**
      * Returns an enumeration of all available actions.
+     *
+     * @return a {@link java.util.Enumeration} object
      */
     public static Enumeration<String> getActions() {
         return actions.keys();
@@ -207,6 +328,8 @@ public abstract class InputHandler extends KeyAdapter {
      * Returns if repeating is enabled. When repeating is enabled,
      * actions will be executed multiple times. This is usually
      * invoked with a special key stroke in the input handler.
+     *
+     * @return a boolean
      */
     public boolean isRepeatEnabled() {
         return repeat;
@@ -216,6 +339,8 @@ public abstract class InputHandler extends KeyAdapter {
      * Enables repeating. When repeating is enabled, actions will be
      * executed multiple times. Once repeating is enabled, the input
      * handler should read a number from the keyboard.
+     *
+     * @param repeat a boolean
      */
     public void setRepeatEnabled(boolean repeat) {
         this.repeat = repeat;
@@ -223,6 +348,8 @@ public abstract class InputHandler extends KeyAdapter {
 
     /**
      * Returns the number of times the next action will be repeated.
+     *
+     * @return a int
      */
     public int getRepeatCount() {
         return (repeat ? Math.max(1, repeatCount) : 1);
@@ -240,6 +367,8 @@ public abstract class InputHandler extends KeyAdapter {
     /**
      * Returns the macro recorder. If this is non-null, all executed
      * actions should be forwarded to the recorder.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.InputHandler.MacroRecorder} object
      */
     public InputHandler.MacroRecorder getMacroRecorder() {
         return recorder;
@@ -259,6 +388,8 @@ public abstract class InputHandler extends KeyAdapter {
      * Returns a copy of this input handler that shares the same
      * key bindings. Setting key bindings in the copy will also
      * set them in the original.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.InputHandler} object
      */
     public abstract InputHandler copy();
 
@@ -271,7 +402,7 @@ public abstract class InputHandler extends KeyAdapter {
      * @param actionCommand The action command
      */
     public void executeAction(ActionListener listener, Object source,
-            String actionCommand) {
+                              String actionCommand) {
         // create event
         ActionEvent evt = new ActionEvent(source,
                 ActionEvent.ACTION_PERFORMED,
@@ -321,6 +452,7 @@ public abstract class InputHandler extends KeyAdapter {
      * Returns the text area that fired the specified event.
      *
      * @param evt The event
+     * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.JEditTextArea} object
      */
     public static JEditTextArea getTextArea(EventObject evt) {
         if (evt != null) {
@@ -328,7 +460,7 @@ public abstract class InputHandler extends KeyAdapter {
             if (o instanceof Component) {
                 // find the parent text area
                 Component c = (Component) o;
-                for (;;) {
+                for (; ; ) {
                     if (c instanceof JEditTextArea)
                         return (JEditTextArea) c;
                     else if (c == null)
@@ -354,6 +486,8 @@ public abstract class InputHandler extends KeyAdapter {
      * If a key is being grabbed, this method should be called with
      * the appropriate key event. It executes the grab action with
      * the typed character as the parameter.
+     *
+     * @param evt a {@link java.awt.event.KeyEvent} object
      */
     protected void handleGrabAction(KeyEvent evt) {
         // Clear it *before* it is executed so that executeAction()
@@ -397,7 +531,7 @@ public abstract class InputHandler extends KeyAdapter {
      */
     public interface MacroRecorder {
         void actionPerformed(ActionListener listener,
-                String actionCommand);
+                             String actionCommand);
     }
 
     public static class backspace implements ActionListener {

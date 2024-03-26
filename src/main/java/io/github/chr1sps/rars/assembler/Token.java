@@ -37,8 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version August 2003
- **/
-
+ */
 public class Token {
 
     private TokenTypes type;
@@ -61,8 +60,7 @@ public class Token {
      * @param start         The starting position in that line number of this
      *                      token's source value.
      * @see TokenTypes
-     **/
-
+     */
     public Token(TokenTypes type, String value, RISCVprogram sourceProgram, int line, int start) {
         this.type = type;
         this.value = value;
@@ -81,7 +79,7 @@ public class Token {
      *
      * @param origProgram    source program containing this token.
      * @param origSourceLine Line within that program of this token.
-     **/
+     */
     public void setOriginal(RISCVprogram origProgram, int origSourceLine) {
         this.originalProgram = origProgram;
         this.originalSourceLine = origSourceLine;
@@ -91,7 +89,7 @@ public class Token {
      * Produces original program containing this token.
      *
      * @return RISCVprogram of origin for this token.
-     **/
+     */
     public RISCVprogram getOriginalProgram() {
         return this.originalProgram;
     }
@@ -101,7 +99,7 @@ public class Token {
      * of ".include"
      *
      * @return original line number of this token.
-     **/
+     */
     public int getOriginalSourceLine() {
         return this.originalSourceLine;
     }
@@ -110,7 +108,7 @@ public class Token {
      * Produces token type of this token.
      *
      * @return TokenType of this token.
-     **/
+     */
     public TokenTypes getType() {
         return type;
     }
@@ -121,7 +119,7 @@ public class Token {
      * actually being used as a label.
      *
      * @param type new TokenTypes for this token.
-     **/
+     */
     public void setType(TokenTypes type) {
         this.type = type;
     }
@@ -130,8 +128,7 @@ public class Token {
      * Produces source code of this token.
      *
      * @return String containing source code of this token.
-     **/
-
+     */
     public String getValue() {
         return value;
     }
@@ -142,7 +139,6 @@ public class Token {
      *
      * @return String version of the token.
      */
-
     public String toString() {
         return value;
     }
@@ -151,8 +147,7 @@ public class Token {
      * Produces RISCVprogram object associated with this token.
      *
      * @return RISCVprogram object associated with this token.
-     **/
-
+     */
     public RISCVprogram getSourceProgram() {
         return sourceProgram;
     }
@@ -161,8 +156,7 @@ public class Token {
      * Produces line number of source program of this token.
      *
      * @return line number in source program of this token.
-     **/
-
+     */
     public int getSourceLine() {
         return sourceLine;
     }
@@ -171,8 +165,7 @@ public class Token {
      * Produces position within source line of this token.
      *
      * @return first character position within source program line of this token.
-     **/
-
+     */
     public int getStartPos() {
         return sourcePos;
     }

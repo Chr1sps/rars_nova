@@ -1,9 +1,9 @@
 package io.github.chr1sps.rars.riscv.dump;
 
+import io.github.chr1sps.rars.util.FilenameFinder;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-
-import io.github.chr1sps.rars.util.FilenameFinder;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -38,6 +38,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * from Bret Barker's GameServer class from the book "Developing Games In Java".
  */
 
+/**
+ * <p>DumpFormatLoader class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class DumpFormatLoader {
 
     private static final String CLASS_PREFIX = "com.chrisps.rars.riscv.dump.";
@@ -73,15 +79,21 @@ public class DumpFormatLoader {
      * Barker (bret@hypefiend.com) is co-author of the book "Developing Games
      * in Java".
      *
-     * @see rars.riscv.SyscallLoader
-     * @see rars.venus.ToolLoader
-     * @see rars.riscv.InstructionSet
+     * @return a {@link java.util.ArrayList} object
+     * @see io.github.chr1sps.rars.riscv.SyscallLoader
+     * @see io.github.chr1sps.rars.venus.ToolLoader
+     * @see io.github.chr1sps.rars.riscv.InstructionSet
      */
-
     public static ArrayList<DumpFormat> getDumpFormats() {
         return formatList;
     }
 
+    /**
+     * <p>findDumpFormatGivenCommandDescriptor.</p>
+     *
+     * @param formatCommandDescriptor a {@link java.lang.String} object
+     * @return a {@link io.github.chr1sps.rars.riscv.dump.DumpFormat} object
+     */
     public static DumpFormat findDumpFormatGivenCommandDescriptor(String formatCommandDescriptor) {
         for (DumpFormat f : formatList) {
             if (f.getCommandDescriptor().equals(formatCommandDescriptor)) {

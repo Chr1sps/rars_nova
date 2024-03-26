@@ -1,6 +1,6 @@
 package io.github.chr1sps.rars.riscv;
 
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 
 /**
@@ -13,8 +13,10 @@ import io.github.chr1sps.rars.ProgramStatement;
  * When its service is invoked at runtime ("ecall" instruction
  * with its service number stored in register a7), its simulate()
  * method will be invoked.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     private int serviceNumber;
     private String serviceName;
@@ -31,6 +33,8 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     }
 
     /**
+     * <p>Constructor for AbstractSyscall.</p>
+     *
      * @param name  service name which may be used for reference independent of
      *              number
      * @param descr a hort description of what the system calll does
@@ -40,6 +44,8 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     }
 
     /**
+     * <p>Constructor for AbstractSyscall.</p>
+     *
      * @param name  service name which may be used for reference independent of
      *              number
      * @param descr a short description of what the system call does
@@ -67,6 +73,8 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     }
 
     /**
+     * <p>Getter for the field <code>description</code>.</p>
+     *
      * @return a string describing what the system call does
      */
     public String getDescription() {
@@ -74,16 +82,20 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     }
 
     /**
+     * <p>Getter for the field <code>inputs</code>.</p>
+     *
      * @return a string documenting what registers should be set to before the
-     *         system call runs
+     * system call runs
      */
     public String getInputs() {
         return inputs;
     }
 
     /**
+     * <p>Getter for the field <code>outputs</code>.</p>
+     *
      * @return a string documenting what registers are set to after the system call
-     *         runs
+     * runs
      */
     public String getOutputs() {
         return outputs;
@@ -114,10 +126,17 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      * at simulation time. Service is identified by value stored in a7.
      *
      * @param statement ProgramStatement object for this syscall instruction.
+     * @throws ExitingException if any.
      */
     public abstract void simulate(ProgramStatement statement)
             throws ExitingException;
 
+    /**
+     * <p>compareTo.</p>
+     *
+     * @param other a {@link io.github.chr1sps.rars.riscv.AbstractSyscall} object
+     * @return a int
+     */
     public int compareTo(AbstractSyscall other) {
         if (this == other)
             return 0;

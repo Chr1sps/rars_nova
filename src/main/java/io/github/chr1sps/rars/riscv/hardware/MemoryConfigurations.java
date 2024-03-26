@@ -1,9 +1,9 @@
 package io.github.chr1sps.rars.riscv.hardware;
 
+import io.github.chr1sps.rars.Globals;
+
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import io.github.chr1sps.rars.Globals;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -41,7 +41,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2009
  */
-
 public class MemoryConfigurations {
 
     private static ArrayList<MemoryConfiguration> configurations = null;
@@ -132,10 +131,16 @@ public class MemoryConfigurations {
             0x00007fff // memory map limit address
     };
 
+    /**
+     * <p>Constructor for MemoryConfigurations.</p>
+     */
     public MemoryConfigurations() {
 
     }
 
+    /**
+     * <p>buildConfigurationCollection.</p>
+     */
     public static void buildConfigurationCollection() {
         if (configurations == null) {
             configurations = new ArrayList<>();
@@ -164,6 +169,11 @@ public class MemoryConfigurations {
         }
     }
 
+    /**
+     * <p>getConfigurationsIterator.</p>
+     *
+     * @return a {@link java.util.Iterator} object
+     */
     public static Iterator<MemoryConfiguration> getConfigurationsIterator() {
         if (configurations == null) {
             buildConfigurationCollection();
@@ -172,6 +182,12 @@ public class MemoryConfigurations {
 
     }
 
+    /**
+     * <p>getConfigurationByName.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @return a {@link io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration} object
+     */
     public static MemoryConfiguration getConfigurationByName(String name) {
         Iterator<MemoryConfiguration> configurationsIterator = getConfigurationsIterator();
         while (configurationsIterator.hasNext()) {
@@ -183,6 +199,11 @@ public class MemoryConfigurations {
         return null;
     }
 
+    /**
+     * <p>Getter for the field <code>defaultConfiguration</code>.</p>
+     *
+     * @return a {@link io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration} object
+     */
     public static MemoryConfiguration getDefaultConfiguration() {
         if (defaultConfiguration == null) {
             buildConfigurationCollection();
@@ -190,6 +211,11 @@ public class MemoryConfigurations {
         return defaultConfiguration;
     }
 
+    /**
+     * <p>Getter for the field <code>currentConfiguration</code>.</p>
+     *
+     * @return a {@link io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration} object
+     */
     public static MemoryConfiguration getCurrentConfiguration() {
         if (currentConfiguration == null) {
             buildConfigurationCollection();
@@ -197,6 +223,12 @@ public class MemoryConfigurations {
         return currentConfiguration;
     }
 
+    /**
+     * <p>Setter for the field <code>currentConfiguration</code>.</p>
+     *
+     * @param config a {@link io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration} object
+     * @return a boolean
+     */
     public static boolean setCurrentConfiguration(MemoryConfiguration config) {
         if (config == null)
             return false;
@@ -216,66 +248,146 @@ public class MemoryConfigurations {
 
     //// Use these to intialize Memory static variables at launch
 
+    /**
+     * <p>getDefaultTextBaseAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultTextBaseAddress() {
         return defaultConfigurationItemValues[0];
     }
 
+    /**
+     * <p>getDefaultDataSegmentBaseAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultDataSegmentBaseAddress() {
         return defaultConfigurationItemValues[1];
     }
 
+    /**
+     * <p>getDefaultExternBaseAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultExternBaseAddress() {
         return defaultConfigurationItemValues[2];
     }
 
+    /**
+     * <p>getDefaultGlobalPointer.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultGlobalPointer() {
         return defaultConfigurationItemValues[3];
     }
 
+    /**
+     * <p>getDefaultDataBaseAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultDataBaseAddress() {
         return defaultConfigurationItemValues[4];
     }
 
+    /**
+     * <p>getDefaultHeapBaseAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultHeapBaseAddress() {
         return defaultConfigurationItemValues[5];
     }
 
+    /**
+     * <p>getDefaultStackPointer.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultStackPointer() {
         return defaultConfigurationItemValues[6];
     }
 
+    /**
+     * <p>getDefaultStackBaseAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultStackBaseAddress() {
         return defaultConfigurationItemValues[7];
     }
 
+    /**
+     * <p>getDefaultUserHighAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultUserHighAddress() {
         return defaultConfigurationItemValues[8];
     }
 
+    /**
+     * <p>getDefaultKernelBaseAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultKernelBaseAddress() {
         return defaultConfigurationItemValues[9];
     }
 
+    /**
+     * <p>getDefaultMemoryMapBaseAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultMemoryMapBaseAddress() {
         return defaultConfigurationItemValues[10];
     }
 
+    /**
+     * <p>getDefaultKernelHighAddress.</p>
+     *
+     * @return a int
+     */
     public static int getDefaultKernelHighAddress() {
         return defaultConfigurationItemValues[11];
     }
 
+    /**
+     * <p>getDefaultDataSegmentLimitAddress.</p>
+     *
+     * @return a int
+     */
     public int getDefaultDataSegmentLimitAddress() {
         return defaultConfigurationItemValues[12];
     }
 
+    /**
+     * <p>getDefaultTextLimitAddress.</p>
+     *
+     * @return a int
+     */
     public int getDefaultTextLimitAddress() {
         return defaultConfigurationItemValues[13];
     }
 
+    /**
+     * <p>getDefaultStackLimitAddress.</p>
+     *
+     * @return a int
+     */
     public int getDefaultStackLimitAddress() {
         return defaultConfigurationItemValues[14];
     }
 
+    /**
+     * <p>getMemoryMapLimitAddress.</p>
+     *
+     * @return a int
+     */
     public int getMemoryMapLimitAddress() {
         return defaultConfigurationItemValues[15];
     }

@@ -1,6 +1,6 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
@@ -34,11 +34,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallExit2 class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallExit2 extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallExit2.</p>
+     */
     public SyscallExit2() {
         super("Exit2", "Exits the program with a code", "a0 = the number to exit with", "N/A");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         Globals.exitCode = RegisterFile.getValue("a0");
         throw new ExitingException(); // empty error list

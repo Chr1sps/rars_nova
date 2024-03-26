@@ -1,13 +1,13 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 /*
 Copyright (c) 2003-2017,  Pete Sanderson,Benjamin Landers and Kenneth Vollmar
@@ -40,11 +40,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Small helper class to wrap getting null terminated strings from memory
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class NullString {
     /**
      * Just a wrapper around #String get(ProgramStatement, String) which passes in
      * the default "a0"
+     *
+     * @param statement a {@link io.github.chr1sps.rars.ProgramStatement} object
+     * @return a {@link java.lang.String} object
+     * @throws ExitingException if any.
      */
     public static String get(ProgramStatement statement) throws ExitingException {
         return get(statement, "a0");

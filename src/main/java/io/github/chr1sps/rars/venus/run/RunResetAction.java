@@ -1,9 +1,7 @@
 package io.github.chr1sps.rars.venus.run;
 
-import javax.swing.*;
-
-import io.github.chr1sps.rars.AssemblyException;
 import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.exceptions.AssemblyException;
 import io.github.chr1sps.rars.riscv.hardware.*;
 import io.github.chr1sps.rars.util.SystemIO;
 import io.github.chr1sps.rars.venus.ExecutePane;
@@ -11,6 +9,7 @@ import io.github.chr1sps.rars.venus.FileStatus;
 import io.github.chr1sps.rars.venus.GuiAction;
 import io.github.chr1sps.rars.venus.VenusUI;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /*
@@ -43,17 +42,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action for the Run -> Reset menu item
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class RunResetAction extends GuiAction {
     private VenusUI mainUI;
 
+    /**
+     * <p>Constructor for RunResetAction.</p>
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     */
     public RunResetAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel, VenusUI gui) {
+                          Integer mnemonic, KeyStroke accel, VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         mainUI = gui;
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * reset GUI components and MIPS resources
      */
     public void actionPerformed(ActionEvent e) {

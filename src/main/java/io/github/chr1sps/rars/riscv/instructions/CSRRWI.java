@@ -1,7 +1,7 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
@@ -33,13 +33,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
+
+/**
+ * <p>CSRRWI class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class CSRRWI extends BasicInstruction {
+    /**
+     * <p>Constructor for CSRRWI.</p>
+     */
     public CSRRWI() {
         super("csrrwi t0, fcsr, 10",
                 "Atomic Read/Write CSR Immediate: read from the CSR into t0 and write a constant into the CSR",
                 BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 101 fffff 1110011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         try {

@@ -1,23 +1,18 @@
 package io.github.chr1sps.rars.assembler;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-
-import io.github.chr1sps.rars.AssemblyException;
-import io.github.chr1sps.rars.ErrorList;
-import io.github.chr1sps.rars.ErrorMessage;
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.RISCVprogram;
-import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.*;
+import io.github.chr1sps.rars.exceptions.AssemblyException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.ExtendedInstruction;
 import io.github.chr1sps.rars.riscv.Instruction;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.SystemIO;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /*
  Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
@@ -49,13 +44,12 @@ import io.github.chr1sps.rars.util.SystemIO;
 
 /**
  * An Assembler is capable of assembling a RISCV program. It has only one public
- * method, <tt>assemble()</tt>, which implements a two-pass assembler. It
+ * method, <code>assemble()</code>, which implements a two-pass assembler. It
  * translates RISCV source code into binary machine code.
  *
  * @author Pete Sanderson
  * @version August 2003
- **/
-
+ */
 public class Assembler {
     private ErrorList errors;
     private boolean inDataSegment; // status maintained by parser
@@ -101,14 +95,15 @@ public class Assembler {
      *                                 otherwise ignore
      *                                 warnings.
      * @return An ArrayList representing the assembled program. Each member of
-     *         the list is a ProgramStatement object containing the source,
-     *         intermediate, and machine binary representations of a program
-     *         statement. Returns null if incoming array list is null or empty.
+     * the list is a ProgramStatement object containing the source,
+     * intermediate, and machine binary representations of a program
+     * statement. Returns null if incoming array list is null or empty.
+     * @throws AssemblyException if any.
      * @see ProgramStatement
-     **/
+     */
     public ArrayList<ProgramStatement> assemble(ArrayList<RISCVprogram> tokenizedProgramFiles,
-            boolean extendedAssemblerEnabled,
-            boolean warningsAreErrors) throws AssemblyException {
+                                                boolean extendedAssemblerEnabled,
+                                                boolean warningsAreErrors) throws AssemblyException {
 
         if (tokenizedProgramFiles == null || tokenizedProgramFiles.size() == 0)
             return null;
@@ -347,8 +342,8 @@ public class Assembler {
                         "Duplicate text segment address: "
                                 + io.github.chr1sps.rars.venus.NumberDisplayBaseChooser.formatUnsignedInteger(ps2
                                         .getAddress(),
-                                        (Globals.getSettings()
-                                                .getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX)) ? 16 : 10)
+                                (Globals.getSettings()
+                                        .getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX)) ? 16 : 10)
                                 + " already occupied by " + ps1.getSourceFile() + " line "
                                 + ps1.getSourceLine() + " (caused by use of "
                                 + ((Memory.inTextSegment(ps2.getAddress())) ? ".text" : ".ktext")
@@ -368,10 +363,10 @@ public class Assembler {
      * @param sourceLineNumber
      * @param extendedAssemblerEnabled
      * @return ArrayList of ProgramStatements because parsing a macro expansion
-     *         request will return a list of ProgramStatements expanded
+     * request will return a list of ProgramStatements expanded
      */
     private ArrayList<ProgramStatement> parseLine(TokenList tokenList, String source,
-            int sourceLineNumber, boolean extendedAssemblerEnabled) {
+                                                  int sourceLineNumber, boolean extendedAssemblerEnabled) {
 
         ArrayList<ProgramStatement> ret = new ArrayList<>();
 
@@ -509,7 +504,7 @@ public class Assembler {
                         || // here and reported as a directive in text segment!
                         tokenType == TokenTypes.QUOTED_STRING || tokenType == TokenTypes.IDENTIFIER
                         || TokenTypes.isIntegerTokenType(tokenType) || TokenTypes
-                                .isFloatingTokenType(tokenType))) {
+                        .isFloatingTokenType(tokenType))) {
             this.executeDirectiveContinuation(tokens);
             return null;
         }
@@ -634,13 +629,13 @@ public class Assembler {
             if (tokens.size() < 2) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
-                                + "\" directive requires at least one argument."));
+                        + "\" directive requires at least one argument."));
                 return;
             }
             if (tokens.get(1).getType() != TokenTypes.IDENTIFIER) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         tokens.get(1).getStartPos(), "Invalid Macro name \""
-                                + tokens.get(1).getValue() + "\""));
+                        + tokens.get(1).getValue() + "\""));
                 return;
             }
             if (inMacroSegment) {
@@ -729,14 +724,14 @@ public class Assembler {
             if (tokens.size() != 2) {
                 errors.add(new ErrorMessage(token.getSourceProgram(),
                         token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                                + "\" requires one operand"));
+                        + "\" requires one operand"));
                 return;
             }
             if (!TokenTypes.isIntegerTokenType(tokens.get(1).getType())
                     || Binary.stringToInt(tokens.get(1).getValue()) < 0) {
                 errors.add(new ErrorMessage(token.getSourceProgram(),
                         token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                                + "\" requires a non-negative integer"));
+                        + "\" requires a non-negative integer"));
                 return;
             }
             int value = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
@@ -756,14 +751,14 @@ public class Assembler {
                 if (tokens.size() != 2) {
                     errors.add(new ErrorMessage(token.getSourceProgram(),
                             token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                                    + "\" requires one operand"));
+                            + "\" requires one operand"));
                     return;
                 }
                 if (!TokenTypes.isIntegerTokenType(tokens.get(1).getType())
                         || Binary.stringToInt(tokens.get(1).getValue()) < 0) {
                     errors.add(new ErrorMessage(token.getSourceProgram(),
                             token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                                    + "\" requires a non-negative integer"));
+                            + "\" requires a non-negative integer"));
                     return;
                 }
                 int value = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
@@ -773,14 +768,14 @@ public class Assembler {
             if (tokens.size() != 3) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
-                                + "\" directive requires two operands (label and size)."));
+                        + "\" directive requires two operands (label and size)."));
                 return;
             }
             if (!TokenTypes.isIntegerTokenType(tokens.get(2).getType())
                     || Binary.stringToInt(tokens.get(2).getValue()) < 0) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
-                                + "\" requires a non-negative integer size"));
+                        + "\" requires a non-negative integer size"));
                 return;
             }
             int size = Binary.stringToInt(tokens.get(2).getValue());
@@ -794,7 +789,7 @@ public class Assembler {
             if (tokens.size() < 2) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
-                                + "\" directive requires at least one argument."));
+                        + "\" directive requires at least one argument."));
                 return;
             }
             // SPIM limits .globl list to one label, why not extend it to a list?
@@ -806,7 +801,7 @@ public class Assembler {
                 if (label.getType() != TokenTypes.IDENTIFIER) {
                     errors.add(new ErrorMessage(token.getSourceProgram(),
                             token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                                    + "\" directive argument must be label."));
+                            + "\" directive argument must be label."));
                     return;
                 }
                 globalDeclarationList.add(label);
@@ -831,7 +826,7 @@ public class Assembler {
             if (symtabEntry == null) {
                 errors.add(new ErrorMessage(fileCurrentlyBeingAssembled, label.getSourceLine(),
                         label.getStartPos(), "\"" + label.getValue()
-                                + "\" declared global label but not defined."));
+                        + "\" declared global label but not defined."));
                 // TODO: allow this case, but check later to see if all requested globals are
                 // actually implemented in other files
                 // GCC outputs assembly that uses this
@@ -839,7 +834,7 @@ public class Assembler {
                 if (Globals.symbolTable.getAddress(label.getValue()) != SymbolTable.NOT_FOUND) {
                     errors.add(new ErrorMessage(fileCurrentlyBeingAssembled, label.getSourceLine(),
                             label.getStartPos(), "\"" + label.getValue()
-                                    + "\" already defined as global in a different file."));
+                            + "\" already defined as global in a different file."));
                 } else {
                     fileCurrentlyBeingAssembled.getLocalSymbolTable().removeSymbol(label);
                     Globals.symbolTable.addSymbol(label, symtabEntry.getAddress(),
@@ -888,7 +883,7 @@ public class Assembler {
         if (inst == null) { // This should NEVER happen...
             this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                     token.getStartPos(), "Internal Assembler error: \"" + token.getValue()
-                            + "\" tokenized OPERATOR then not recognized"));
+                    + "\" tokenized OPERATOR then not recognized"));
         }
         return inst;
     } // matchInstruction()
@@ -925,9 +920,9 @@ public class Assembler {
             if (!(Directives.isIntegerDirective(directive)
                     && TokenTypes.isIntegerTokenType(valueToken.getType())
                     || Directives
-                            .isFloatingDirective(directive)
-                            && (TokenTypes.isIntegerTokenType(valueToken.getType()) || TokenTypes
-                                    .isFloatingTokenType(valueToken.getType())))
+                    .isFloatingDirective(directive)
+                    && (TokenTypes.isIntegerTokenType(valueToken.getType()) || TokenTypes
+                    .isFloatingTokenType(valueToken.getType())))
                     || !TokenTypes.isIntegerTokenType(repetitionsToken.getType())) {
                 errors.add(new ErrorMessage(fileCurrentlyBeingAssembled,
                         valueToken.getSourceLine(), valueToken.getStartPos(),
@@ -985,7 +980,7 @@ public class Assembler {
                 if (directive != Directives.DWORD) {
                     errors.add(new ErrorMessage(ErrorMessage.WARNING, token.getSourceProgram(), token.getSourceLine(),
                             token.getStartPos(), "value " + Binary.longToHexString(longvalue)
-                                    + " is out-of-range and truncated to " + Binary.intToHexString(value)));
+                            + " is out-of-range and truncated to " + Binary.intToHexString(value)));
                 }
             } else {
                 value = Binary.stringToInt(token.getValue());
@@ -1012,7 +1007,7 @@ public class Assembler {
             if (DataTypes.outOfRange(directive, fullvalue)) {
                 errors.add(new ErrorMessage(ErrorMessage.WARNING, token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "value " + Binary.intToHexString(fullvalue)
-                                + " is out-of-range and truncated to " + Binary.intToHexString(value)));
+                        + " is out-of-range and truncated to " + Binary.intToHexString(value)));
             }
             if (this.inDataSegment) {
                 writeToDataSegment(value, lengthInBytes, token, errors);
@@ -1033,8 +1028,8 @@ public class Assembler {
                 } catch (AddressErrorException e) {
                     errors.add(new ErrorMessage(token.getSourceProgram(),
                             token.getSourceLine(), token.getStartPos(), "\""
-                                    + this.textAddress.get()
-                                    + "\" is not a valid text segment address"));
+                            + this.textAddress.get()
+                            + "\" is not a valid text segment address"));
                     return;
                 }
                 this.textAddress.increment(lengthInBytes);
@@ -1052,11 +1047,11 @@ public class Assembler {
                     writeToDataSegment(value, lengthInBytes, token, errors);
                 }
             } // Data segment check done previously, so this "else" will not be.
-              // See 11/20/06 note above.
+            // See 11/20/06 note above.
             else {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
-                                + "\" label as directive operand not permitted in text segment"));
+                        + "\" label as directive operand not permitted in text segment"));
             }
         } // end of "if label"
         else {
@@ -1087,13 +1082,13 @@ public class Assembler {
             } catch (NumberFormatException nfe) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
-                                + "\" is not a valid floating point constant"));
+                        + "\" is not a valid floating point constant"));
                 return;
             }
             if (DataTypes.outOfRange(directive, value)) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
-                                + "\" is an out-of-range value"));
+                        + "\" is an out-of-range value"));
                 return;
             }
         } else {
@@ -1131,7 +1126,7 @@ public class Assembler {
             if (token.getType() != TokenTypes.QUOTED_STRING) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
-                                + "\" is not a valid character string"));
+                        + "\" is not a valid character string"));
             } else {
                 String quote = token.getValue();
                 char theChar;
@@ -1171,10 +1166,10 @@ public class Assembler {
                                 String codePoint = "";
                                 try {
                                     codePoint = quote.substring(j + 1, j + 5); // get the UTF-8 codepoint following the
-                                                                               // unicode escape sequence
+                                    // unicode escape sequence
                                     theChar = Character.toChars(Integer.parseInt(codePoint, 16))[0]; // converts the
-                                                                                                     // codepoint to
-                                                                                                     // single character
+                                    // codepoint to
+                                    // single character
                                 } catch (StringIndexOutOfBoundsException e) {
                                     String invalidCodePoint = quote.substring(j + 1);
                                     errors.add(new ErrorMessage(token.getSourceProgram(), token

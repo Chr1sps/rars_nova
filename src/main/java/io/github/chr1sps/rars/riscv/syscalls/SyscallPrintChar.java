@@ -33,12 +33,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallPrintChar class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallPrintChar extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallPrintChar.</p>
+     */
     public SyscallPrintChar() {
         super("PrintChar", "Prints an ascii character",
                 "a0 = character to print (only lowest byte is considered)", "N/A");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         char t = (char) (RegisterFile.getValue("a0") & 0x000000ff);
         SystemIO.printString(Character.toString(t));

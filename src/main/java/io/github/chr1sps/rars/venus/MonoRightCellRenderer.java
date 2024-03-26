@@ -38,11 +38,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Strings containing either the decimal or hexidecimal version
  * of the integer value.
  */
+
+/**
+ * <p>MonoRightCellRenderer class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class MonoRightCellRenderer extends DefaultTableCellRenderer {
+    /**
+     * Constant <code>MONOSPACED_PLAIN_12POINT</code>
+     */
     public static final Font MONOSPACED_PLAIN_12POINT = new Font("Monospaced", Font.PLAIN, 12);
 
+    /**
+     * {@inheritDoc}
+     */
     public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
+                                                   boolean isSelected, boolean hasFocus, int row, int column) {
         JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                 isSelected, hasFocus, row, column);
         cell.setFont(MONOSPACED_PLAIN_12POINT);

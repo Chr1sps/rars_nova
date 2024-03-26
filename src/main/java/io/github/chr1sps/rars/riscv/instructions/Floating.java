@@ -5,7 +5,7 @@ import io.github.chr1sps.jsoftfloat.Flags;
 import io.github.chr1sps.jsoftfloat.RoundingMode;
 import io.github.chr1sps.jsoftfloat.types.Float32;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
@@ -45,16 +45,34 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public abstract class Floating extends BasicInstruction {
+    /**
+     * <p>Constructor for Floating.</p>
+     *
+     * @param name        a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param funct       a {@link java.lang.String} object
+     */
     protected Floating(String name, String description, String funct) {
         super(name + " f1, f2, f3, dyn", description, BasicInstructionFormat.R_FORMAT,
                 funct + "ttttt sssss qqq fffff 1010011");
     }
 
+    /**
+     * <p>Constructor for Floating.</p>
+     *
+     * @param name        a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param funct       a {@link java.lang.String} object
+     * @param rm          a {@link java.lang.String} object
+     */
     protected Floating(String name, String description, String funct, String rm) {
         super(name + " f1, f2, f3", description, BasicInstructionFormat.R_FORMAT,
                 funct + "ttttt sssss " + rm + " fffff 1010011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         Environment e = new Environment();
@@ -65,6 +83,11 @@ public abstract class Floating extends BasicInstruction {
         FloatingPointRegisterFile.updateRegister(operands[0], result.bits);
     }
 
+    /**
+     * <p>setfflags.</p>
+     *
+     * @param e a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     */
     public static void setfflags(Environment e) {
         int fflags = (e.flags.contains(Flags.inexact) ? 1 : 0) +
                 (e.flags.contains(Flags.underflow) ? 2 : 0) +
@@ -75,6 +98,14 @@ public abstract class Floating extends BasicInstruction {
             ControlAndStatusRegisterFile.orRegister("fflags", fflags);
     }
 
+    /**
+     * <p>getRoundingMode.</p>
+     *
+     * @param RM        a int
+     * @param statement a {@link io.github.chr1sps.rars.ProgramStatement} object
+     * @return a {@link io.github.chr1sps.jsoftfloat.RoundingMode} object
+     * @throws SimulationException if any.
+     */
     public static RoundingMode getRoundingMode(int RM, ProgramStatement statement) throws SimulationException {
         int rm = RM;
         int frm = ControlAndStatusRegisterFile.getValue("frm");
@@ -96,8 +127,22 @@ public abstract class Floating extends BasicInstruction {
         }
     }
 
+    /**
+     * <p>compute.</p>
+     *
+     * @param f1 a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     * @param f2 a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     * @param e  a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     */
     public abstract Float32 compute(Float32 f1, Float32 f2, Environment e);
 
+    /**
+     * <p>getFloat.</p>
+     *
+     * @param num a int
+     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     */
     public static Float32 getFloat(int num) {
         return new Float32(FloatingPointRegisterFile.getValue(num));
     }

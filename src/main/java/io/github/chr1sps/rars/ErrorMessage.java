@@ -38,8 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version August 2003
- **/
-
+ */
 public class ErrorMessage {
     private boolean isWarning; // allow for warnings too (added Nov 2006)
     private String filename; // name of source file (added Oct 2006)
@@ -72,8 +71,7 @@ public class ErrorMessage {
      *                      occurred. Normally is starting
      *                      position of source token.
      * @param message       String containing appropriate error message.
-     **/
-
+     */
     public ErrorMessage(RISCVprogram sourceProgram, int line, int position, String message) {
         this(ERROR, sourceProgram, line, position, message);
     }
@@ -94,8 +92,7 @@ public class ErrorMessage {
      *                      occurred. Normally is starting
      *                      position of source token.
      * @param message       String containing appropriate error message.
-     **/
-
+     */
     public ErrorMessage(boolean isWarning, RISCVprogram sourceProgram, int line, int position, String message) {
         this.isWarning = isWarning;
         if (sourceProgram == null) {
@@ -123,7 +120,7 @@ public class ErrorMessage {
      * @param statement The ProgramStatement object for the instruction causing the
      *                  runtime error
      * @param message   String containing appropriate error message.
-     **/
+     */
     // Added January 2013
     public ErrorMessage(ProgramStatement statement, String message) {
         this.isWarning = ERROR;
@@ -191,7 +188,6 @@ public class ErrorMessage {
      *
      * @return Returns line number in source program where error occurred.
      */
-
     public int getLine() {
         return line;
     }
@@ -201,7 +197,6 @@ public class ErrorMessage {
      *
      * @return Returns position within line of source program where error occurred.
      */
-
     public int getPosition() {
         return position;
     }
@@ -211,7 +206,6 @@ public class ErrorMessage {
      *
      * @return Returns String containing textual error message.
      */
-
     public String getMessage() {
         return message;
     }
@@ -226,6 +220,11 @@ public class ErrorMessage {
         return this.isWarning;
     }
 
+    /**
+     * <p>generateReport.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String generateReport() {
         String out = ((isWarning) ? ErrorList.WARNING_MESSAGE_PREFIX : ErrorList.ERROR_MESSAGE_PREFIX)
                 + ErrorList.FILENAME_PREFIX;

@@ -29,12 +29,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>REM class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class REM extends Arithmetic {
+    /**
+     * <p>Constructor for REM.</p>
+     */
     public REM() {
         super("rem t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3",
                 "0000001", "110");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         // Division by 0
         if (value2 == 0) {

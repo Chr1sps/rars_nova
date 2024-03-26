@@ -1,14 +1,13 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import javax.swing.JOptionPane;
-
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
+import javax.swing.*;
 import java.nio.charset.StandardCharsets;
 
 /*
@@ -52,9 +51,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * -1: input data cannot be correctly parsed <br>
  * -2: Cancel was chosen <br>
  * -3: OK was chosen but no data had been input into field <br>
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class SyscallInputDialogString extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallInputDialogString.</p>
+     */
     public SyscallInputDialogString() {
         super("InputDialogString", "Service to display a message to a user and request a string input",
                 "a0 = address of null-terminated string that is the message to user<br>a1 = address of input buffer<br>"
@@ -65,6 +69,9 @@ public class SyscallInputDialogString extends AbstractSyscall {
                         "-3: OK was chosen but no data had been input into field. No change to buffer.<br>-4: length of the input string exceeded the specified maximum. Buffer contains the maximum allowable input string terminated with null.");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         String message = NullString.get(statement);
 

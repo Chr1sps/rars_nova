@@ -32,12 +32,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>AUIPC class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class AUIPC extends BasicInstruction {
+    /**
+     * <p>Constructor for AUIPC.</p>
+     */
     public AUIPC() {
         super("auipc t1,100000", "Add upper immediate to pc: set t1 to (pc plus an upper 20-bit immediate)",
                 BasicInstructionFormat.U_FORMAT, "ssssssssssssssssssss fffff 0010111");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0],

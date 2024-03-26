@@ -27,12 +27,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>XOR class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class XOR extends Arithmetic {
+    /**
+     * <p>Constructor for XOR.</p>
+     */
     public XOR() {
         super("xor t1,t2,t3", "Bitwise XOR : Set t1 to bitwise XOR of t2 and t3",
                 "0000000", "100");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         return value ^ value2;
     }

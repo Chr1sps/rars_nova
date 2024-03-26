@@ -33,6 +33,9 @@ import java.awt.event.MouseListener;
  * aware of. There seems to be no way to suppress the final event from
  * firing anyway, except to process all ActionListeners internally. But
  * realistically, it probably doesn't matter.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class RepeatButton extends JButton
         implements ActionListener, MouseListener {
@@ -198,10 +201,10 @@ public class RepeatButton extends JButton
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Sets the enabled state of this button. Overridden to stop the timer
      * if it's running.
-     *
-     * @param en if true, enables the button
      */
     public void setEnabled(boolean en) {
         if (en != super.isEnabled()) {
@@ -214,9 +217,9 @@ public class RepeatButton extends JButton
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Handle action events. OVERRIDE THIS IN SUBCLASS!
-     *
-     * @param ae the action event
      */
     public void actionPerformed(ActionEvent ae) {
         // process events only from this components
@@ -233,9 +236,9 @@ public class RepeatButton extends JButton
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Handle mouse clicked events.
-     *
-     * @param me the mouse event
      */
     public void mouseClicked(MouseEvent me) {
         // process events only from this components
@@ -248,9 +251,9 @@ public class RepeatButton extends JButton
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Handle mouse pressed events.
-     *
-     * @param me the mouse event
      */
     public void mousePressed(MouseEvent me) {
         // process events only from this components
@@ -265,9 +268,9 @@ public class RepeatButton extends JButton
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Handle mouse released events.
-     *
-     * @param me the mouse event
      */
     public void mouseReleased(MouseEvent me) {
         // process events only from this components
@@ -280,9 +283,9 @@ public class RepeatButton extends JButton
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Handle mouse entered events.
-     *
-     * @param me the mouse event
      */
     public void mouseEntered(MouseEvent me) {
         // process events only from this components
@@ -296,9 +299,9 @@ public class RepeatButton extends JButton
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Handle mouse exited events.
-     *
-     * @param me the mouse event
      */
     public void mouseExited(MouseEvent me) {
         // process events only from this components

@@ -30,16 +30,30 @@ import java.util.TreeSet;
  * RISCV token marker.
  *
  * @author Pete Sanderson (2010) and Slava Pestov (1999)
+ * @version $Id: $Id
  */
 public class RISCVTokenMarker extends TokenMarker {
+    /**
+     * <p>Constructor for RISCVTokenMarker.</p>
+     */
     public RISCVTokenMarker() {
         this(getKeywords());
     }
 
+    /**
+     * <p>Constructor for RISCVTokenMarker.</p>
+     *
+     * @param keywords a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.KeywordMap} object
+     */
     public RISCVTokenMarker(KeywordMap keywords) {
         this.keywords = keywords;
     }
 
+    /**
+     * <p>getRISCVTokenLabels.</p>
+     *
+     * @return an array of {@link java.lang.String} objects
+     */
     public static String[] getRISCVTokenLabels() {
         if (tokenLabels == null) {
             tokenLabels = new String[Token.ID_COUNT];
@@ -56,6 +70,11 @@ public class RISCVTokenMarker extends TokenMarker {
         return tokenLabels;
     }
 
+    /**
+     * <p>getRISCVTokenExamples.</p>
+     *
+     * @return an array of {@link java.lang.String} objects
+     */
     public static String[] getRISCVTokenExamples() {
         if (tokenExamples == null) {
             tokenExamples = new String[Token.ID_COUNT];
@@ -72,6 +91,9 @@ public class RISCVTokenMarker extends TokenMarker {
         return tokenExamples;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public byte markTokensImpl(byte token, Segment line, int lineIndex) {
         char[] array = line.array;
         int offset = line.offset;
@@ -80,7 +102,8 @@ public class RISCVTokenMarker extends TokenMarker {
         int length = line.count + offset;
         boolean backslash = false;
 
-        loop: for (int i = offset; i < length; i++) {
+        loop:
+        for (int i = offset; i < length; i++) {
             int i1 = (i + 1);
 
             char c = array[i];
@@ -196,12 +219,10 @@ public class RISCVTokenMarker extends TokenMarker {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Construct and return any appropriate help information for
      * the given token.
-     *
-     * @param token     the pertinent Token object
-     * @param tokenText the source String that matched to the token
-     * @return ArrayList of PopupHelpItem objects, one per match.
      */
     public ArrayList<PopupHelpItem> getTokenExactMatchHelp(Token token, String tokenText) {
         ArrayList<PopupHelpItem> matches = null;
@@ -233,19 +254,13 @@ public class RISCVTokenMarker extends TokenMarker {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Construct and return any appropriate help information for
      * prefix match based on current line's token list.
-     *
-     * @param line      String containing current line
-     * @param tokenList first Token on current line (head of linked list)
-     * @param token     the pertinent Token object
-     * @param tokenText the source String that matched to the token in previous
-     *                  parameter
-     * @return ArrayList of PopupHelpItem objects, one per match.
      */
-
     public ArrayList<PopupHelpItem> getTokenPrefixMatchHelp(String line, Token tokenList, Token token,
-            String tokenText) {
+                                                            String tokenText) {
         // CASE: Unlikely boundary case...
         if (tokenList == null || tokenList.id == Token.END) {
             return null;
@@ -441,7 +456,7 @@ public class RISCVTokenMarker extends TokenMarker {
      * assembler directives, and register names.
      *
      * @return KeywordMap where key is the keyword and associated value is the token
-     *         type (e.g. Token.KEYWORD1).
+     * type (e.g. Token.KEYWORD1).
      */
     private static KeywordMap getKeywords() {
         if (cKeywords == null) {

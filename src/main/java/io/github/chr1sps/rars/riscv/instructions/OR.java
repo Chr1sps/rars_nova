@@ -27,12 +27,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>OR class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class OR extends Arithmetic {
+    /**
+     * <p>Constructor for OR.</p>
+     */
     public OR() {
         super("or t1,t2,t3", "Bitwise OR : Set t1 to bitwise OR of t2 and t3",
                 "0000000", "110");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         return value | value2;
     }

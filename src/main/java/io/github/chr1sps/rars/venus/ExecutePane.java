@@ -43,8 +43,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * pane.
  *
  * @author Sanderson and Team JSpim
- **/
-
+ * @version $Id: $Id
+ */
 public class ExecutePane extends JDesktopPane {
     private RegistersWindow registerValues;
     private FloatingPointWindow fpRegValues;
@@ -65,9 +65,8 @@ public class ExecutePane extends JDesktopPane {
      * @param fpRegs  window containing floating point register set
      * @param csrRegs window containing the CSR set
      */
-
     public ExecutePane(VenusUI mainUI, RegistersWindow regs, FloatingPointWindow fpRegs,
-            ControlAndStatusWindow csrRegs) {
+                       ControlAndStatusWindow csrRegs) {
         this.mainUI = mainUI;
         // Although these are displayed in Data Segment, they apply to all three
         // internal
@@ -80,7 +79,7 @@ public class ExecutePane extends JDesktopPane {
                 .setToolTipText("If checked, displays all memory addresses in hexadecimal.  Otherwise, decimal.");
         valueDisplayBase.setToolTipText(
                 "If checked, displays all memory and register contents in hexadecimal.  Otherwise, decimal.");
-        NumberDisplayBaseChooser[] choosers = { addressDisplayBase, valueDisplayBase };
+        NumberDisplayBaseChooser[] choosers = {addressDisplayBase, valueDisplayBase};
         registerValues = regs;
         fpRegValues = fpRegs;
         csrValues = csrRegs;
@@ -139,7 +138,6 @@ public class ExecutePane extends JDesktopPane {
      *
      * @param visibility set to true or false
      */
-
     public void setLabelWindowVisibility(boolean visibility) {
         if (!visibility && labelWindowVisible) {
             labelWindowVisible = false;
@@ -161,7 +159,6 @@ public class ExecutePane extends JDesktopPane {
      * display, data segment display, label display and register display.
      * This will typically be done upon File->Close, Open, New.
      */
-
     public void clearPane() {
         this.getTextSegmentWindow().clearWindow();
         this.getDataSegmentWindow().clearWindow();
@@ -178,6 +175,8 @@ public class ExecutePane extends JDesktopPane {
 
     /**
      * Access the text segment window.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.TextSegmentWindow} object
      */
     public TextSegmentWindow getTextSegmentWindow() {
         return textSegment;
@@ -185,6 +184,8 @@ public class ExecutePane extends JDesktopPane {
 
     /**
      * Access the data segment window.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.DataSegmentWindow} object
      */
     public DataSegmentWindow getDataSegmentWindow() {
         return dataSegment;
@@ -192,6 +193,8 @@ public class ExecutePane extends JDesktopPane {
 
     /**
      * Access the register values window.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.registers.RegistersWindow} object
      */
     public RegistersWindow getRegistersWindow() {
         return registerValues;
@@ -199,6 +202,8 @@ public class ExecutePane extends JDesktopPane {
 
     /**
      * Access the floating point values window.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.registers.FloatingPointWindow} object
      */
     public FloatingPointWindow getFloatingPointWindow() {
         return fpRegValues;
@@ -206,6 +211,8 @@ public class ExecutePane extends JDesktopPane {
 
     /**
      * Access the Control and Status values window.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.registers.ControlAndStatusWindow} object
      */
     public ControlAndStatusWindow getControlAndStatusWindow() {
         return csrValues;
@@ -213,6 +220,8 @@ public class ExecutePane extends JDesktopPane {
 
     /**
      * Access the label values window.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.LabelsWindow} object
      */
     public LabelsWindow getLabelsWindow() {
         return labelValues;
@@ -220,6 +229,8 @@ public class ExecutePane extends JDesktopPane {
 
     /**
      * Retrieve the number system base for displaying values (mem/register contents)
+     *
+     * @return a int
      */
     public int getValueDisplayBase() {
         return valueDisplayBase.getBase();
@@ -227,6 +238,8 @@ public class ExecutePane extends JDesktopPane {
 
     /**
      * Retrieve the number system base for displaying memory addresses
+     *
+     * @return a int
      */
     public int getAddressDisplayBase() {
         return addressDisplayBase.getBase();

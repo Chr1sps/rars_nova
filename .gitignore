@@ -18,3 +18,5 @@ examples/riscv
 target/
 .vscode/
 .iml
+
+dependency-reduced-pom.xml

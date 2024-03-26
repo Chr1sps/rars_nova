@@ -4,6 +4,12 @@ import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.Register;
 import io.github.chr1sps.rars.venus.NumberDisplayBaseChooser;
 
+/**
+ * <p>FloatingPointWindow class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FloatingPointWindow extends RegisterBlockWindow {
     /*
      * The tips to show when hovering over the names of the registers
@@ -43,10 +49,16 @@ public class FloatingPointWindow extends RegisterBlockWindow {
             /* ft11 */ "floating point temporary"
     };
 
+    /**
+     * <p>Constructor for FloatingPointWindow.</p>
+     */
     public FloatingPointWindow() {
         super(FloatingPointRegisterFile.getRegisters(), regToolTips, "32-bit single precision IEEE 754 floating point");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected String formatRegister(Register value, int base) {
         long val = value.getValue();
         if ((val & 0xFFFFFFFF_00000000L) == 0xFFFFFFFF_00000000L) {
@@ -56,14 +68,23 @@ public class FloatingPointWindow extends RegisterBlockWindow {
         }
     }
 
+    /**
+     * <p>beginObserving.</p>
+     */
     protected void beginObserving() {
         FloatingPointRegisterFile.addRegistersObserver(this);
     }
 
+    /**
+     * <p>endObserving.</p>
+     */
     protected void endObserving() {
         FloatingPointRegisterFile.deleteRegistersObserver(this);
     }
 
+    /**
+     * <p>resetRegisters.</p>
+     */
     protected void resetRegisters() {
         FloatingPointRegisterFile.resetRegisters();
     }

@@ -1,12 +1,12 @@
 package io.github.chr1sps.rars.riscv.dump;
 
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.riscv.hardware.Memory;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
-import io.github.chr1sps.rars.riscv.hardware.Memory;
 
 /**
  * Intel's Hex memory initialization format
@@ -14,7 +14,6 @@ import io.github.chr1sps.rars.riscv.hardware.Memory;
  * @author Leo Alterman
  * @version July 2011
  */
-
 public class IntelHexDumpFormat extends AbstractDumpFormat {
 
     /**
@@ -25,6 +24,8 @@ public class IntelHexDumpFormat extends AbstractDumpFormat {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Write memory contents according to the Memory Initialization File
      * (MIF) specification.
      *

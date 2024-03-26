@@ -1,7 +1,7 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -30,11 +30,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>LB class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class LB extends Load {
+    /**
+     * <p>Constructor for LB.</p>
+     */
     public LB() {
         super("lb t1, -100(t2)", "Set t1 to sign-extended 8-bit value from effective memory byte address", "000");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long load(int address) throws AddressErrorException {
         return (Globals.memory.getByte(address) << 24) >> 24; // Shifting sign extends
     }

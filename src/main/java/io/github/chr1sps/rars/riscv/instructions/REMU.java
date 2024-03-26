@@ -29,12 +29,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>REMU class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class REMU extends Arithmetic {
+    /**
+     * <p>Constructor for REMU.</p>
+     */
     public REMU() {
         super("remu t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3 using unsigned division",
                 "0000001", "111");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         if (value2 == 0) {
             return value;
@@ -42,6 +54,9 @@ public class REMU extends Arithmetic {
         return Long.remainderUnsigned(value, value2);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public int computeW(int value, int value2) {
         if (value2 == 0) {
             return value;

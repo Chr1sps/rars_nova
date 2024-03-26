@@ -42,8 +42,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * functions. This is adapted from the ToolLoader class, which is in turn
  * adapted
  * from Bret Barker's GameServer class from the book "Developing Games In Java".
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class SyscallLoader {
 
     private static final String CLASS_PREFIX = "io.github.chr1sps.rars.riscv.syscalls.";
@@ -140,6 +142,13 @@ public class SyscallLoader {
      * Method to find Syscall object associated with given service number.
      * Returns null if no associated object found.
      */
+
+    /**
+     * <p>findSyscall.</p>
+     *
+     * @param number a int
+     * @return a {@link io.github.chr1sps.rars.riscv.AbstractSyscall} object
+     */
     public static AbstractSyscall findSyscall(int number) {
         // linear search is OK since number of syscalls is small.
         for (AbstractSyscall service : syscallList) {
@@ -150,6 +159,11 @@ public class SyscallLoader {
         return null;
     }
 
+    /**
+     * <p>Getter for the field <code>syscallList</code>.</p>
+     *
+     * @return a {@link java.util.ArrayList} object
+     */
     public static ArrayList<AbstractSyscall> getSyscallList() {
         return syscallList;
     }

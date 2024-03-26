@@ -33,6 +33,9 @@ import java.util.ArrayList;
 /**
  * Handly little class to contain help information for a popupMenu or
  * tool tip item.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class PopupHelpItem {
     private String tokenText;
@@ -81,15 +84,27 @@ public class PopupHelpItem {
 
     /**
      * The document text that mached this item
+     *
+     * @return a {@link java.lang.String} object
      */
     public String getTokenText() {
         return this.tokenText;
     }
 
+    /**
+     * <p>Getter for the field <code>example</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getExample() {
         return this.example;
     }
 
+    /**
+     * <p>Getter for the field <code>description</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getDescription() {
         return this.description;
     }
@@ -107,11 +122,23 @@ public class PopupHelpItem {
         return this.exact;
     }
 
+    /**
+     * <p>Getter for the field <code>exampleLength</code>.</p>
+     *
+     * @return a int
+     */
     public int getExampleLength() {
         return this.exampleLength;
     }
 
     // for performance purposes, length limited to example length + 40
+
+    /**
+     * <p>getExamplePaddedToLength.</p>
+     *
+     * @param length a int
+     * @return a {@link java.lang.String} object
+     */
     public String getExamplePaddedToLength(int length) {
         String result = null;
         if (length > this.exampleLength) {
@@ -128,17 +155,34 @@ public class PopupHelpItem {
         return result;
     }
 
+    /**
+     * <p>Setter for the field <code>example</code>.</p>
+     *
+     * @param example a {@link java.lang.String} object
+     */
     public void setExample(String example) {
         this.example = example;
         this.exampleLength = example.length();
     }
 
+    /**
+     * <p>Setter for the field <code>description</code>.</p>
+     *
+     * @param description a {@link java.lang.String} object
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
     // Utility method. Traverse ArrayList of PopupHelpItem objects
     // and return String length of longest example.
+
+    /**
+     * <p>maxExampleLength.</p>
+     *
+     * @param matches a {@link java.util.ArrayList} object
+     * @return a int
+     */
     public static int maxExampleLength(ArrayList<PopupHelpItem> matches) {
         int length = 0;
         if (matches != null) {

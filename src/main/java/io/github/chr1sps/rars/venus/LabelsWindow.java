@@ -55,8 +55,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * can view MIPS program labels.
  *
  * @author Sanderson and Team JSpim
- **/
-
+ * @version $Id: $Id
+ */
 public class LabelsWindow extends JInternalFrame {
     private Container contentPane;
     private JPanel labelPanel; // holds J
@@ -103,29 +103,29 @@ public class LabelsWindow extends JInternalFrame {
     // above,
     // secondary index corresponds to table columns (0==label name, 1==address).
     private static final int[][] sortStateTransitions = {
-            /* 0 */ { 4, 1 },
-            /* 1 */ { 5, 0 },
-            /* 2 */ { 6, 3 },
-            /* 3 */ { 7, 2 },
-            /* 4 */ { 6, 0 },
-            /* 5 */ { 7, 1 },
-            /* 6 */ { 4, 2 },
-            /* 7 */ { 5, 3 }
+            /* 0 */ {4, 1},
+            /* 1 */ {5, 0},
+            /* 2 */ {6, 3},
+            /* 3 */ {7, 2},
+            /* 4 */ {6, 0},
+            /* 5 */ {7, 1},
+            /* 6 */ {4, 2},
+            /* 7 */ {5, 3}
     };
     // The array of column headings; index corresponds to state in table above.
     private static final char ASCENDING_SYMBOL = '\u25b2'; // triangle with base at bottom ("points" up, to indicate
-                                                           // ascending sort)
+    // ascending sort)
     private static final char DESCENDING_SYMBOL = '\u25bc';// triangle with base at top ("points" down, to indicate
-                                                           // descending sort)
+    // descending sort)
     private static final String[][] sortColumnHeadings = {
-            /* 0 */ { "Label", "Address  " + ASCENDING_SYMBOL },
-            /* 1 */ { "Label", "Address  " + DESCENDING_SYMBOL },
-            /* 2 */ { "Label", "Address  " + ASCENDING_SYMBOL },
-            /* 3 */ { "Label", "Address  " + DESCENDING_SYMBOL },
-            /* 4 */ { "Label  " + ASCENDING_SYMBOL, "Address" },
-            /* 5 */ { "Label  " + ASCENDING_SYMBOL, "Address" },
-            /* 6 */ { "Label  " + DESCENDING_SYMBOL, "Address" },
-            /* 7 */ { "Label  " + DESCENDING_SYMBOL, "Address" }
+            /* 0 */ {"Label", "Address  " + ASCENDING_SYMBOL},
+            /* 1 */ {"Label", "Address  " + DESCENDING_SYMBOL},
+            /* 2 */ {"Label", "Address  " + ASCENDING_SYMBOL},
+            /* 3 */ {"Label", "Address  " + DESCENDING_SYMBOL},
+            /* 4 */ {"Label  " + ASCENDING_SYMBOL, "Address"},
+            /* 5 */ {"Label  " + ASCENDING_SYMBOL, "Address"},
+            /* 6 */ {"Label  " + DESCENDING_SYMBOL, "Address"},
+            /* 7 */ {"Label  " + DESCENDING_SYMBOL, "Address"}
     };
 
     // Current sort state (0-7, see table above). Will be set from saved Settings in
@@ -134,8 +134,7 @@ public class LabelsWindow extends JInternalFrame {
 
     /**
      * Constructor for the Labels (symbol table) window.
-     **/
-
+     */
     public LabelsWindow() {
         super("Labels", true, false, true, true);
         try {

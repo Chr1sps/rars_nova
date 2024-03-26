@@ -27,12 +27,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>XORI class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class XORI extends ImmediateInstruction {
+    /**
+     * <p>Constructor for XORI.</p>
+     */
     public XORI() {
         super("xori t1,t2,-100",
                 "Bitwise XOR immediate : Set t1 to bitwise XOR of t2 and sign-extended 12-bit immediate", "100");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long immediate) {
         return value ^ immediate;
     }

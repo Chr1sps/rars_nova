@@ -37,21 +37,39 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Simple wrapper for boolean settings actions
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class SettingsAction extends GuiAction {
     private Settings.Bool setting;
 
+    /**
+     * <p>Constructor for SettingsAction.</p>
+     *
+     * @param name    a {@link java.lang.String} object
+     * @param descrip a {@link java.lang.String} object
+     * @param setting a {@link io.github.chr1sps.rars.Settings.Bool} object
+     */
     public SettingsAction(String name, String descrip, Settings.Bool setting) {
         super(name, null, descrip, null, null);
         this.setting = setting;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void actionPerformed(ActionEvent e) {
         boolean value = ((JCheckBoxMenuItem) e.getSource()).isSelected();
         Globals.getSettings().setBooleanSetting(setting, value);
         handler(value);
     }
 
+    /**
+     * <p>handler.</p>
+     *
+     * @param value a boolean
+     */
     public void handler(boolean value) {
     }
 

@@ -35,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version July 2005
  */
-
 public class RegisterAccessNotice extends AccessNotice {
     private String registerName;
 
@@ -50,6 +49,8 @@ public class RegisterAccessNotice extends AccessNotice {
 
     /**
      * Fetch the register number of register accessed.
+     *
+     * @return a {@link java.lang.String} object
      */
     public String getRegisterName() {
         return registerName;
@@ -57,6 +58,8 @@ public class RegisterAccessNotice extends AccessNotice {
 
     /**
      * String representation indicates access type and which register
+     *
+     * @return a {@link java.lang.String} object
      */
     public String toString() {
         return ((this.getAccessType() == AccessNotice.READ) ? "R " : "W ") +

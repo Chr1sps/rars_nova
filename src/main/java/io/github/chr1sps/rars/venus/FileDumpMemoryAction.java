@@ -7,7 +7,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.riscv.dump.DumpFormat;
 import io.github.chr1sps.rars.riscv.dump.DumpFormatLoader;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.MemoryDump;
@@ -51,6 +51,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action for the File -> Save For Dump Memory menu item
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class FileDumpMemoryAction extends GuiAction {
 
@@ -74,12 +77,25 @@ public class FileDumpMemoryAction extends GuiAction {
 
     private VenusUI mainUI;
 
+    /**
+     * <p>Constructor for FileDumpMemoryAction.</p>
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     */
     public FileDumpMemoryAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel, VenusUI gui) {
+                                Integer mnemonic, KeyStroke accel, VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         mainUI = gui;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void actionPerformed(ActionEvent e) {
         dumpMemory();
     }
@@ -145,7 +161,7 @@ public class FileDumpMemoryAction extends GuiAction {
                         - Memory.WORD_LENGTH_BYTES;
 
             } // Exception will not happen since the Memory base and limit addresses are on
-              // word boundaries!
+            // word boundaries!
             catch (AddressErrorException aee) {
                 highAddressArray[i] = baseAddressArray[i] - Memory.WORD_LENGTH_BYTES;
             }
@@ -293,7 +309,7 @@ public class FileDumpMemoryAction extends GuiAction {
         }
 
         public Component getListCellRendererComponent(JList list, Object value, int index,
-                boolean isSelected, boolean cellHasFocus) {
+                                                      boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             setToolTipText(value.toString());
             if (index >= 0 && ((DumpFormat) (myMaster.getItemAt(index))).getDescription() != null) {

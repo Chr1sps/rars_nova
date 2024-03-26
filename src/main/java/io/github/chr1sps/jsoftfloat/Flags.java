@@ -2,6 +2,9 @@ package io.github.chr1sps.jsoftfloat;
 
 /**
  * Exception flags which can be set in certain conditions
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public enum Flags {
     /**
@@ -12,7 +15,7 @@ public enum Flags {
      */
     inexact,
     /**
-     * Triggered when a result is tiny (|result| < b^emin; smaller than the smallest
+     * Triggered when a result is tiny (|result| &lt; b^emin; smaller than the smallest
      * normal number)
      */
     // TODO: handling of underflow was incorrect up till this point subnormal

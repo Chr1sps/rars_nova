@@ -80,7 +80,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Top level container for Venus GUI.
  *
  * @author Sanderson and Team JSpim
- **/
+ * @version $Id: $Id
+ */
 
 /*
  * Heavily modified by Pete Sanderson, July 2004, to incorporate JSPIMMenu and
@@ -89,7 +90,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * are both
  * here primarily so both can share the Action objects.
  */
-
 public class VenusUI extends JFrame {
     VenusUI mainUI;
     public JMenuBar menu;
@@ -158,8 +158,7 @@ public class VenusUI extends JFrame {
      *
      * @param name  Name of the window to be created.
      * @param paths File paths to open width
-     **/
-
+     */
     public VenusUI(String name, ArrayList<String> paths) {
         super(name);
         mainUI = this;
@@ -833,6 +832,12 @@ public class VenusUI extends JFrame {
      * setMenuStateRunning: set upon Run->Go
      * setMenuStateTerminated: set upon completion of simulated execution
      */
+
+    /**
+     * <p>Setter for the field <code>menuState</code>.</p>
+     *
+     * @param status a int
+     */
     public void setMenuState(int status) {
         menuState = status;
         switch (status) {
@@ -1112,8 +1117,7 @@ public class VenusUI extends JFrame {
      * 23 July 2008
      *
      * @return current menu state.
-     **/
-
+     */
     public static int getMenuState() {
         return menuState;
     }
@@ -1122,8 +1126,7 @@ public class VenusUI extends JFrame {
      * To set whether the register values are reset.
      *
      * @param b Boolean true if the register values have been reset.
-     **/
-
+     */
     public void setReset(boolean b) {
         reset = b;
     }
@@ -1132,8 +1135,7 @@ public class VenusUI extends JFrame {
      * To set whether MIPS program execution has started.
      *
      * @param b true if the MIPS program execution has started.
-     **/
-
+     */
     public void setStarted(boolean b) {
         started = b;
     }
@@ -1142,8 +1144,7 @@ public class VenusUI extends JFrame {
      * To find out whether the register values are reset.
      *
      * @return Boolean true if the register values have been reset.
-     **/
-
+     */
     public boolean getReset() {
         return reset;
     }
@@ -1152,7 +1153,7 @@ public class VenusUI extends JFrame {
      * To find out whether MIPS program is currently executing.
      *
      * @return true if MIPS program is currently executing.
-     **/
+     */
     public boolean getStarted() {
         return started;
     }
@@ -1161,8 +1162,7 @@ public class VenusUI extends JFrame {
      * Get reference to Editor object associated with this GUI.
      *
      * @return Editor for the GUI.
-     **/
-
+     */
     public Editor getEditor() {
         return editor;
     }
@@ -1171,8 +1171,7 @@ public class VenusUI extends JFrame {
      * Get reference to messages pane associated with this GUI.
      *
      * @return MessagesPane object associated with the GUI.
-     **/
-
+     */
     public MainPane getMainPane() {
         return mainPane;
     }
@@ -1181,8 +1180,7 @@ public class VenusUI extends JFrame {
      * Get reference to messages pane associated with this GUI.
      *
      * @return MessagesPane object associated with the GUI.
-     **/
-
+     */
     public MessagesPane getMessagesPane() {
         return messagesPane;
     }
@@ -1191,8 +1189,7 @@ public class VenusUI extends JFrame {
      * Get reference to registers pane associated with this GUI.
      *
      * @return RegistersPane object associated with the GUI.
-     **/
-
+     */
     public RegistersPane getRegistersPane() {
         return registersPane;
     }
@@ -1202,8 +1199,7 @@ public class VenusUI extends JFrame {
      * values.
      *
      * @return the menu item
-     **/
-
+     */
     public JCheckBoxMenuItem getValueDisplayBaseMenuItem() {
         return settingsValueDisplayBase;
     }
@@ -1213,8 +1209,7 @@ public class VenusUI extends JFrame {
      * values.
      *
      * @return the menu item
-     **/
-
+     */
     public JCheckBoxMenuItem getAddressDisplayBaseMenuItem() {
         return settingsAddressDisplayBase;
     }
@@ -1246,6 +1241,9 @@ public class VenusUI extends JFrame {
         this.menu.dispatchEvent(evt);
     }
 
+    /**
+     * <p>updateUndoAndRedoState.</p>
+     */
     public void updateUndoAndRedoState() {
         EditPane editPane = getMainPane().getEditPane();
         editUndoAction.setEnabled(editPane != null && editPane.getUndoManager().canUndo());

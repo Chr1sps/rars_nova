@@ -32,13 +32,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SRLI class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SRLI extends BasicInstruction {
+    /**
+     * <p>Constructor for SRLI.</p>
+     */
     public SRLI() {
         super("srli t1,t2,10",
                 "Shift right logical : Set t1 to result of shifting t2 right by number of bits specified by immediate",
                 BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 101 fffff 0010011", false);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         // Uses >>> because 0 fill

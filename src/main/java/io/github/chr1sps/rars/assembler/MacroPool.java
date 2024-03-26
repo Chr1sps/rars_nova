@@ -33,16 +33,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Stores information of macros defined by now. <br>
  * Will be used in first pass of assembling RISCV source code. When reached
  * <code>.macro</code> directive, parser calls
- * {@link MacroPool#beginMacro(Token)} and skips source code lines until
+ * {@link io.github.chr1sps.rars.assembler.MacroPool#beginMacro(Token)} and skips source code lines until
  * reaches <code>.end_macro</code> directive. then calls
- * {@link MacroPool#commitMacro(Token)} and the macro information stored in a
- * {@link Macro} instance will be added to {@link #macroList}. <br>
- * Each {@link RISCVprogram} will have one {@link MacroPool}<br>
+ * {@link io.github.chr1sps.rars.assembler.MacroPool#commitMacro(Token)} and the macro information stored in a
+ * {@link io.github.chr1sps.rars.assembler.Macro} instance will be added to {@link #macroList}. <br>
+ * Each {@link io.github.chr1sps.rars.RISCVprogram} will have one {@link io.github.chr1sps.rars.assembler.MacroPool}<br>
  * NOTE: Forward referencing macros (macro expansion before its definition in
  * source code) and Nested macro definition (defining a macro inside other macro
  * definition) are not supported.
  *
  * @author M.H.Sekhavat sekhavat17@gmail.com
+ * @version $Id: $Id
  */
 public class MacroPool {
     private RISCVprogram program;
@@ -78,14 +79,13 @@ public class MacroPool {
     /**
      * This method will be called by parser when reached <code>.macro</code>
      * directive.<br>
-     * Instantiates a new {@link Macro} object and stores it in {@link #current}
+     * Instantiates a new {@link io.github.chr1sps.rars.assembler.Macro} object and stores it in {@link #current}
      * . {@link #current} will be added to {@link #macroList} by
      * {@link #commitMacro(Token)}
      *
      * @param nameToken Token containing name of macro after <code>.macro</code>
      *                  directive
      */
-
     public void beginMacro(Token nameToken) {
         current = new Macro();
         current.setName(nameToken.getValue());
@@ -102,7 +102,6 @@ public class MacroPool {
      * @param endToken Token containing <code>.end_macro</code> directive in source
      *                 code
      */
-
     public void commitMacro(Token endToken) {
         current.setToLine(endToken.getSourceLine());
         current.setOriginalToLine(endToken.getOriginalSourceLine());
@@ -114,9 +113,10 @@ public class MacroPool {
     /**
      * Will be called by parser when reaches a macro expansion call
      *
-     * @param tokens tokens passed to macro expansion call
-     * @return {@link Macro} object matching the name and argument count of
-     *         tokens passed
+     * @param tokens     tokens passed to macro expansion call
+     * @param callerLine a int
+     * @return {@link io.github.chr1sps.rars.assembler.Macro} object matching the name and argument count of
+     * tokens passed
      */
     public Macro getMatchingMacro(TokenList tokens, int callerLine) {
         if (tokens.size() < 1)
@@ -135,9 +135,11 @@ public class MacroPool {
     }
 
     /**
-     * @param value
+     * <p>matchesAnyMacroName.</p>
+     *
+     * @param value a {@link java.lang.String} object
      * @return true if any macros have been defined with name <code>value</code>
-     *         by now, not concerning arguments count.
+     * by now, not concerning arguments count.
      */
     public boolean matchesAnyMacroName(String value) {
         for (Macro macro : macroList)
@@ -146,10 +148,20 @@ public class MacroPool {
         return false;
     }
 
+    /**
+     * <p>Getter for the field <code>current</code>.</p>
+     *
+     * @return a {@link io.github.chr1sps.rars.assembler.Macro} object
+     */
     public Macro getCurrent() {
         return current;
     }
 
+    /**
+     * <p>Setter for the field <code>current</code>.</p>
+     *
+     * @param current a {@link io.github.chr1sps.rars.assembler.Macro} object
+     */
     public void setCurrent(Macro current) {
         this.current = current;
     }
@@ -165,10 +177,21 @@ public class MacroPool {
         return counter++;
     }
 
+    /**
+     * <p>Getter for the field <code>callStack</code>.</p>
+     *
+     * @return a {@link java.util.ArrayList} object
+     */
     public ArrayList<Integer> getCallStack() {
         return callStack;
     }
 
+    /**
+     * <p>pushOnCallStack.</p>
+     *
+     * @param token a {@link io.github.chr1sps.rars.assembler.Token} object
+     * @return a boolean
+     */
     public boolean pushOnCallStack(Token token) { // returns true if detected expansion loop
         int sourceLine = token.getSourceLine();
         int origSourceLine = token.getOriginalSourceLine();
@@ -179,11 +202,19 @@ public class MacroPool {
         return false;
     }
 
+    /**
+     * <p>popFromCallStack.</p>
+     */
     public void popFromCallStack() {
         callStack.remove(callStack.size() - 1);
         callStackOrigLines.remove(callStackOrigLines.size() - 1);
     }
 
+    /**
+     * <p>getExpansionHistory.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getExpansionHistory() {
         String ret = "";
         for (int i = 0; i < callStackOrigLines.size(); i++) {

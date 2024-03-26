@@ -2,11 +2,16 @@ package io.github.chr1sps.rars.riscv.hardware;
 
 /**
  * A register which aliases a subset of another register
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class MaskedRegister extends Register {
     private long mask;
 
     /**
+     * <p>Constructor for MaskedRegister.</p>
+     *
      * @param name the name to assign
      * @param num  the number to assign
      * @param val  the reset value
@@ -17,6 +22,9 @@ public class MaskedRegister extends Register {
         this.mask = mask;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public synchronized long setValue(long val) {
         long current = getValue();
         super.setValue((current & mask) | (val & ~mask));

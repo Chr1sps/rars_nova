@@ -1,26 +1,25 @@
 package io.github.chr1sps.rars.simulator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Observable;
-
-import javax.swing.SwingUtilities;
-
-import io.github.chr1sps.rars.BreakpointException;
-import io.github.chr1sps.rars.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
-import io.github.chr1sps.rars.WaitException;
+import io.github.chr1sps.rars.exceptions.BreakpointException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
+import io.github.chr1sps.rars.exceptions.WaitException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.Instruction;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.InterruptController;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.SystemIO;
 import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
+
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Observable;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -55,8 +54,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version August 2005
- **/
-
+ */
 public class Simulator extends Observable {
     private SimThread simulatorThread;
     private static Simulator simulator = null; // Singleton object
@@ -111,8 +109,7 @@ public class Simulator extends Observable {
      *                    none
      * @return true if execution completed, false otherwise
      * @throws SimulationException Throws exception if run-time exception occurs.
-     **/
-
+     */
     public Reason simulate(int pc, int maxSteps, int[] breakPoints) throws SimulationException {
         simulatorThread = new SimThread(pc, maxSteps, breakPoints);
         simulatorThread.run(); // Just call run, this is a blocking method
@@ -138,8 +135,7 @@ public class Simulator extends Observable {
      *                    (0 or less means no max)
      * @param breakPoints array of breakpoint program counter values, use null if
      *                    none
-     **/
-
+     */
     public void startSimulation(int pc, int maxSteps, int[] breakPoints) {
         simulatorThread = new SimThread(pc, maxSteps, breakPoints);
         new Thread(simulatorThread, "RISCV").start();
@@ -162,10 +158,16 @@ public class Simulator extends Observable {
         }
     }
 
+    /**
+     * <p>stopExecution.</p>
+     */
     public void stopExecution() {
         interruptExecution(Reason.STOP);
     }
 
+    /**
+     * <p>pauseExecution.</p>
+     */
     public void pauseExecution() {
         interruptExecution(Reason.PAUSE);
     }
@@ -182,10 +184,20 @@ public class Simulator extends Observable {
 
     private ArrayList<StopListener> stopListeners = new ArrayList<>(1);
 
+    /**
+     * <p>addStopListener.</p>
+     *
+     * @param l a {@link io.github.chr1sps.rars.simulator.Simulator.StopListener} object
+     */
     public void addStopListener(StopListener l) {
         stopListeners.add(l);
     }
 
+    /**
+     * <p>removeStopListener.</p>
+     *
+     * @param l a {@link io.github.chr1sps.rars.simulator.Simulator.StopListener} object
+     */
     public void removeStopListener(StopListener l) {
         stopListeners.remove(l);
     }
@@ -204,6 +216,9 @@ public class Simulator extends Observable {
         this.notifyObservers(notice);
     }
 
+    /**
+     * <p>interrupt.</p>
+     */
     public void interrupt() {
         if (simulatorThread == null)
             return;
@@ -456,7 +471,7 @@ public class Simulator extends Observable {
                                 uip &= ~0x100;
                             } else {
                                 return; // if the interrupt can't be handled, but the interrupt enable bit is high,
-                                        // thats an error
+                                // thats an error
                             }
                         } else if (IE && (uip & 0x1) != 0
                                 && (uie & ControlAndStatusRegisterFile.SOFTWARE_INTERRUPT) != 0) {
@@ -464,7 +479,7 @@ public class Simulator extends Observable {
                                 uip &= ~0x1;
                             } else {
                                 return; // if the interrupt can't be handled, but the interrupt enable bit is high,
-                                        // thats an error
+                                // thats an error
                             }
                         } else if (IE && pendingTimer && (uie & ControlAndStatusRegisterFile.TIMER_INTERRUPT) != 0) {
                             if (handleInterrupt(InterruptController.claimTimer(), SimulationException.TIMER_INTERRUPT,
@@ -473,19 +488,19 @@ public class Simulator extends Observable {
                                 uip &= ~0x10;
                             } else {
                                 return; // if the interrupt can't be handled, but the interrupt enable bit is high,
-                                        // thats an error
+                                // thats an error
                             }
                         } else if (pendingTrap) { // if we have a pending trap and aren't handling an interrupt it must
-                                                  // be handled
+                            // be handled
                             if (handleTrap(InterruptController.claimTrap(), pc - Instruction.INSTRUCTION_LENGTH)) { // account
-                                                                                                                    // for
-                                                                                                                    // that
-                                                                                                                    // the
-                                                                                                                    // PC
-                                                                                                                    // has
-                                                                                                                    // already
-                                                                                                                    // been
-                                                                                                                    // incremented
+                                // for
+                                // that
+                                // the
+                                // PC
+                                // has
+                                // already
+                                // been
+                                // incremented
                             } else {
                                 return;
                             }
@@ -623,13 +638,13 @@ public class Simulator extends Observable {
                     SwingUtilities.invokeLater(interactiveGUIUpdater);
                 }
                 if (Globals.getGui() != null || Globals.runSpeedPanelExists) { // OR added by DPS 24 July 2008 to enable
-                                                                               // speed control by stand-alone tool
+                    // speed control by stand-alone tool
                     if (maxSteps != 1 &&
                             RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                         try {
                             // TODO: potentially use this.wait so it can be interrupted
                             Thread.sleep((int) (1000 / RunSpeedPanel.getInstance().getRunSpeed())); // make sure it's
-                                                                                                    // never zero!
+                            // never zero!
                         } catch (InterruptedException e) {
                         }
                     }

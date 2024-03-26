@@ -1,7 +1,5 @@
 package io.github.chr1sps.rars;
 
-import java.util.ArrayList;
-
 import io.github.chr1sps.rars.assembler.SymbolTable;
 import io.github.chr1sps.rars.assembler.Token;
 import io.github.chr1sps.rars.assembler.TokenList;
@@ -15,6 +13,8 @@ import io.github.chr1sps.rars.riscv.hardware.Register;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.venus.NumberDisplayBaseChooser;
+
+import java.util.ArrayList;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -54,7 +54,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson and Jason Bumgarner
  * @version August 2003
  */
-
 public class ProgramStatement implements Comparable<ProgramStatement> {
     private RISCVprogram sourceProgram;
     private String source, basicAssemblyStatement, machineStatement;
@@ -87,10 +86,11 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @param textAddress       The Text Segment address in memory where the binary
      *                          machine code for this statement
      *                          is stored.
-     **/
+     * @param sourceLine        a int
+     */
     public ProgramStatement(RISCVprogram sourceProgram, String source, TokenList origTokenList,
-            TokenList strippedTokenList,
-            Instruction inst, int textAddress, int sourceLine) {
+                            TokenList strippedTokenList,
+                            Instruction inst, int textAddress, int sourceLine) {
         this.sourceProgram = sourceProgram;
         this.source = source;
         this.originalTokenList = origTokenList;
@@ -120,7 +120,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @param textAddress     The Text Segment address in memory where the binary
      *                        machine code for this statement
      *                        is stored.
-     **/
+     */
     public ProgramStatement(int binaryStatement, int textAddress) {
         this.sourceProgram = null;
         this.binaryStatement = binaryStatement;
@@ -163,6 +163,12 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
         this.basicStatementList = buildBasicStatementListFromBinaryCode(binaryStatement, instr, operands, numOperands);
     }
 
+    /**
+     * <p>compareTo.</p>
+     *
+     * @param obj1 a {@link io.github.chr1sps.rars.ProgramStatement} object
+     * @return a int
+     */
     public int compareTo(ProgramStatement obj1) {
         int addr1 = getAddress();
         int addr2 = obj1.getAddress();
@@ -178,7 +184,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @param errors The list of assembly errors encountered so far. May add to it
      *               here.
-     **/
+     */
     public void buildBasicStatementFromBasicInstruction(ErrorList errors) {
         Token token = strippedTokenList.get(0);
         String basicStatementElement = token.getValue() + " ";
@@ -405,7 +411,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @param errors The list of assembly errors encountered so far. May add to it
      *               here.
-     **/
+     */
     public void buildMachineStatementFromBasicStatement(ErrorList errors) {
         if (!(instruction instanceof BasicInstruction)) {
             // This means the pseudo-instruction expansion generated another
@@ -472,8 +478,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Crude attempt at building String representation of this complex structure.
      *
      * @return A String representing the ProgramStatement.
-     **/
-
+     */
     public String toString() {
         // a crude attempt at string formatting. Where's C when you need it?
         String blanks = "                               ";
@@ -506,8 +511,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * line.
      *
      * @param statement A String containing equivalent Basic Assembly statement.
-     **/
-
+     */
     public void setBasicAssemblyStatement(String statement) {
         basicAssemblyStatement = statement;
     }
@@ -518,8 +522,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * equivalent to this source line.
      *
      * @param statement A String containing equivalent machine code.
-     **/
-
+     */
     public void setMachineStatement(String statement) {
         machineStatement = statement;
     }
@@ -528,8 +531,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Assigns given int to be binary machine code equivalent to this source line.
      *
      * @param binaryCode An int containing equivalent binary machine code.
-     **/
-
+     */
     public void setBinaryStatement(int binaryCode) {
         binaryStatement = binaryCode;
     }
@@ -539,8 +541,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * statements during macro expansion of extended statement.
      *
      * @param src a RISCV source statement.
-     **/
-
+     */
     public void setSource(String src) {
         source = src;
     }
@@ -550,7 +551,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * statement.
      *
      * @return The RISCVprogram object. May be null...
-     **/
+     */
     public RISCVprogram getSourceProgram() {
         return sourceProgram;
     }
@@ -559,7 +560,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Produces String name of the source file containing this statement.
      *
      * @return The file name.
-     **/
+     */
     public String getSourceFile() {
         return (sourceProgram == null) ? "" : sourceProgram.getFilename();
     }
@@ -568,8 +569,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Produces RISCV source statement.
      *
      * @return The RISCV source statement.
-     **/
-
+     */
     public String getSource() {
         return source;
     }
@@ -578,8 +578,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Produces line number of RISCV source statement.
      *
      * @return The RISCV source statement line number.
-     **/
-
+     */
     public int getSourceLine() {
         return sourceLine;
     }
@@ -589,8 +588,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * All numeric values are in decimal.
      *
      * @return The Basic Assembly statement.
-     **/
-
+     */
     public String getBasicAssemblyStatement() {
         return basicAssemblyStatement;
     }
@@ -602,7 +600,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * setting.
      *
      * @return The Basic Assembly statement.
-     **/
+     */
     public String getPrintableBasicAssemblyStatement() {
         return basicStatementList.toString();
     }
@@ -612,8 +610,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * chars.
      *
      * @return The String version of 32-bit binary machine code.
-     **/
-
+     */
     public String getMachineStatement() {
         return machineStatement;
     }
@@ -622,7 +619,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Produces 32-bit binary machine statement as int.
      *
      * @return The int version of 32-bit binary machine code.
-     **/
+     */
     public int getBinaryStatement() {
         return binaryStatement;
     }
@@ -631,7 +628,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Produces token list generated from original source statement.
      *
      * @return The TokenList of Token objects generated from original source.
-     **/
+     */
     public TokenList getOriginalTokenList() {
         return originalTokenList;
     }
@@ -640,9 +637,9 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Produces token list stripped of all but operator and operand tokens.
      *
      * @return The TokenList of Token objects generated by stripping original list
-     *         of all
-     *         except operator and operand tokens.
-     **/
+     * of all
+     * except operator and operand tokens.
+     */
     public TokenList getStrippedTokenList() {
         return strippedTokenList;
     }
@@ -651,7 +648,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Produces Instruction object corresponding to this statement's operator.
      *
      * @return The Instruction that matches the operator used in this statement.
-     **/
+     */
     public Instruction getInstruction() {
         return instruction;
     }
@@ -660,7 +657,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Produces Text Segment address where the binary machine statement is stored.
      *
      * @return address in Text Segment of this binary machine statement.
-     **/
+     */
     public int getAddress() {
         return textAddress;
     }
@@ -669,8 +666,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Produces int array of operand values for this statement.
      *
      * @return int array of operand values (if any) required by this statement's
-     *         operator.
-     **/
+     * operator.
+     */
     public int[] getOperands() {
         return operands;
     }
@@ -680,9 +677,9 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * 0).
      *
      * @param i Operand position in array (first operand is position 0).
-     * @return Operand value at given operand array position. If < 0 or >=
-     *         numOperands, it returns -1.
-     **/
+     * @return Operand value at given operand array position. If &lt; 0 or &ge;
+     * numOperands, it returns -1.
+     */
     public int getOperand(int i) {
         if (i >= 0 && i < this.numOperands) {
             return operands[i];
@@ -695,7 +692,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Reads an operand from a binary statement according to a mask and format
      * <p>
      * i.e.
-     * 
+     *
      * <pre>
      * 0b01001 == readBinaryCode("ttttttttttttttsssss010fffff1101001", 'f',
      *         0b0101000001000001000010010011101001)
@@ -772,7 +769,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * intended to be used when source code is available. DPS 11-July-2013
      */
     private BasicStatementList buildBasicStatementListFromBinaryCode(int binary, BasicInstruction instr, int[] operands,
-            int numOperands) {
+                                                                     int numOperands) {
         BasicStatementList statementList = new BasicStatementList();
         int tokenListCounter = 1; // index 0 is operator; operands start at index 1
         if (instr == null) {
@@ -805,7 +802,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                     statementList.addValue((operands[i] << 20) >> 20);
                     notOperand = false;
                 } else if (tokenType.equals(TokenTypes.ROUNDING_MODE)) {
-                    String[] modes = new String[] { "rne", "rtz", "rdn", "rup", "rmm", "invalid", "invalid", "dyn" };
+                    String[] modes = new String[]{"rne", "rtz", "rdn", "rup", "rmm", "invalid", "invalid", "dyn"};
                     String value = "invalid";
                     if (operands[i] >= 0 && operands[i] < 8) {
                         value = modes[operands[i]];
@@ -890,7 +887,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                     case 2:
                         if (valueBase == NumberDisplayBaseChooser.HEXADECIMAL) {
                             result.append(io.github.chr1sps.rars.util.Binary.intToHexString(e.iValue)); // 13-July-2011,
-                                                                                                        // was:
+                            // was:
                             // intToHalfHexString()
                         } else {
                             result.append(NumberDisplayBaseChooser.formatNumber(e.iValue, valueBase));

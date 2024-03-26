@@ -1,31 +1,23 @@
 package io.github.chr1sps.rars.api;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-
-import io.github.chr1sps.rars.AssemblyException;
-import io.github.chr1sps.rars.ErrorList;
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.RISCVprogram;
-import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.SimulationException;
-import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
-import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
-import io.github.chr1sps.rars.riscv.hardware.InterruptController;
-import io.github.chr1sps.rars.riscv.hardware.Memory;
-import io.github.chr1sps.rars.riscv.hardware.Register;
-import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import io.github.chr1sps.rars.*;
+import io.github.chr1sps.rars.exceptions.AssemblyException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
+import io.github.chr1sps.rars.riscv.hardware.*;
 import io.github.chr1sps.rars.simulator.ProgramArgumentList;
 import io.github.chr1sps.rars.simulator.Simulator;
 import io.github.chr1sps.rars.util.SystemIO;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 
 /**
  * <p>
  * This is most of the public API for running RARS programs. It wraps internal
  * APIs to provide a base for making applications to simulate many programs.
  * </p>
- *
+ * <p>
  * The order you are expected to run the methods is:
  * <ol>
  * <li>assemble(...)
@@ -50,6 +42,9 @@ import io.github.chr1sps.rars.util.SystemIO;
  * invalidate
  * a concurrent simulation.
  * </p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class Program {
 
@@ -60,10 +55,18 @@ public class Program {
     private Memory assembled, simulation;
     private int startPC, exitCode;
 
+    /**
+     * <p>Constructor for Program.</p>
+     */
     public Program() {
         this(new Options());
     }
 
+    /**
+     * <p>Constructor for Program.</p>
+     *
+     * @param set a {@link io.github.chr1sps.rars.api.Options} object
+     */
     public Program(Options set) {
         Globals.initialize();
         this.set = set;
@@ -79,7 +82,7 @@ public class Program {
      * @param main  Which file should be considered the main file; it should be in
      *              files
      * @return A list of warnings generated if Options.warningsAreErrors is true,
-     *         this will be empty
+     * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
     public ErrorList assemble(ArrayList<String> files, String main) throws AssemblyException {
@@ -92,7 +95,7 @@ public class Program {
      *
      * @param file path to the file to assemble
      * @return A list of warnings generated if Options.warningsAreErrors is true,
-     *         this will be empty
+     * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
     public ErrorList assemble(String file) throws AssemblyException {
@@ -108,7 +111,7 @@ public class Program {
      *
      * @param source the code to assemble
      * @return A list of warnings generated if Options.warningsAreErrors is true,
-     *         this will be empty
+     * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
     public ErrorList assembleString(String source) throws AssemblyException {
@@ -175,15 +178,15 @@ public class Program {
      * Simulates a processor executing the machine code.
      *
      * @return the reason why simulation was paused or terminated.
-     *         Possible values are:
-     *         <ul>
-     *         <li>BREAKPOINT (caused by ebreak instruction),
-     *         <li>MAX_STEPS (caused by simulating Options.maxSteps instructions),
-     *         <li>NORMAL_TERMINATION (caused by executing the exit system call)
-     *         <li>CLIFF_TERMINATION (caused by the program overflowing the written
-     *         code).
-     *         </ul>
-     *         Only BREAKPOINT and MAX_STEPS can be simulated further.
+     * Possible values are:
+     * <ul>
+     * <li>BREAKPOINT (caused by ebreak instruction),
+     * <li>MAX_STEPS (caused by simulating Options.maxSteps instructions),
+     * <li>NORMAL_TERMINATION (caused by executing the exit system call)
+     * <li>CLIFF_TERMINATION (caused by the program overflowing the written
+     * code).
+     * </ul>
+     * Only BREAKPOINT and MAX_STEPS can be simulated further.
      * @throws SimulationException thrown if there is an uncaught interrupt. The
      *                             program cannot be simulated further.
      */
@@ -215,16 +218,20 @@ public class Program {
     }
 
     /**
+     * <p>getSTDOUT.</p>
+     *
      * @return converts the bytes sent to stdout into a string (resets to "" when
-     *         setup is called)
+     * setup is called)
      */
     public String getSTDOUT() {
         return stdout.toString();
     }
 
     /**
+     * <p>getSTDERR.</p>
+     *
      * @return converts the bytes sent to stderr into a string (resets to "" when
-     *         setup is called)
+     * setup is called)
      */
     public String getSTDERR() {
         return stderr.toString();
@@ -236,8 +243,8 @@ public class Program {
      * @param name Either the common usage (t0, a0, ft0), explicit numbering (x2,
      *             x3, f0), or CSR name (ustatus)
      * @return The value of the register as an int (floats are encoded as IEEE-754)
-     * @throws NullPointerException if name is invalid; only needs to be checked if
-     *                              code accesses arbitrary names
+     * @throws java.lang.NullPointerException if name is invalid; only needs to be checked if
+     *                                        code accesses arbitrary names
      */
     public int getRegisterValue(String name) {
         Register r = RegisterFile.getRegister(name);
@@ -258,8 +265,8 @@ public class Program {
      *              x3, f0), or CSR name (ustatus)
      * @param value The value of the register as an int (floats are encoded as
      *              IEEE-754)
-     * @throws NullPointerException if name is invalid; only needs to be checked if
-     *                              code accesses arbitrary names
+     * @throws java.lang.NullPointerException if name is invalid; only needs to be checked if
+     *                                        code accesses arbitrary names
      */
     public void setRegisterValue(String name, int value) {
         Register r = RegisterFile.getRegister(name);
@@ -276,6 +283,8 @@ public class Program {
     /**
      * Returns the exit code passed to the exit syscall if it was called, otherwise
      * returns 0
+     *
+     * @return a int
      */
     public int getExitCode() {
         return exitCode;
@@ -283,8 +292,10 @@ public class Program {
 
     /**
      * Gets the instance of memory the program is using.
-     *
+     * <p>
      * This is only valid when setup has been called.
+     *
+     * @return a {@link io.github.chr1sps.rars.riscv.hardware.Memory} object
      */
     public Memory getMemory() {
         return simulation;

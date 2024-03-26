@@ -44,6 +44,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>GenericTextArea class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class GenericTextArea extends JTextArea implements TextEditingArea {
 
     private EditPane editPane;
@@ -55,6 +61,12 @@ public class GenericTextArea extends JTextArea implements TextEditingArea {
     private boolean isCompoundEdit = false;
     private CompoundEdit compoundEdit;
 
+    /**
+     * <p>Constructor for GenericTextArea.</p>
+     *
+     * @param editPain    a {@link io.github.chr1sps.rars.venus.EditPane} object
+     * @param lineNumbers a {@link javax.swing.JComponent} object
+     */
     public GenericTextArea(EditPane editPain, JComponent lineNumbers) {
         this.editPane = editPain;
         this.sourceCode = this;
@@ -97,6 +109,8 @@ public class GenericTextArea extends JTextArea implements TextEditingArea {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Does nothing, but required by the interface. This editor does not support
      * highlighting of the line currently being edited.
      */
@@ -111,10 +125,10 @@ public class GenericTextArea extends JTextArea implements TextEditingArea {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Set the caret blinking rate in milliseconds. If rate is 0
      * it will not blink. If negative, do nothing.
-     *
-     * @param rate blinking rate in milliseconds
      */
     public void setCaretBlinkRate(int rate) {
         if (rate >= 0) {
@@ -122,17 +136,20 @@ public class GenericTextArea extends JTextArea implements TextEditingArea {
         }
     }
 
+    /**
+     * <p>getOuterComponent.</p>
+     *
+     * @return a {@link java.awt.Component} object
+     */
     public Component getOuterComponent() {
         return editAreaScrollPane;
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * For initalizing the source code when opening an ASM file
-     *
-     * @param s        String containing text
-     * @param editable set true if code is editable else false
-     **/
-
+     */
     public void setSourceCode(String s, boolean editable) {
         this.setText(s);
         this.setBackground((editable) ? Color.WHITE : Color.GRAY);
@@ -152,12 +169,11 @@ public class GenericTextArea extends JTextArea implements TextEditingArea {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Override inherited setText to temporarily remove UndoableEditListener because
      * this
      * operation is not undoable.
-     *
-     * @param s String with new contents for the editing area. Replaces current
-     *          content.
      */
     public void setText(String s) {
         this.getDocument().removeUndoableEditListener(undoableEditListener);
@@ -166,18 +182,18 @@ public class GenericTextArea extends JTextArea implements TextEditingArea {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Control caret visibility
-     *
-     * @param vis true to display caret, false to hide it
      */
     public void setCaretVisible(boolean vis) {
         this.getCaret().setVisible(vis);
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Control selection visibility
-     *
-     * @param vis true to display selection, false to hide it
      */
     public void setSelectionVisible(boolean vis) {
         this.getCaret().setSelectionVisible(vis);
@@ -233,13 +249,11 @@ public class GenericTextArea extends JTextArea implements TextEditingArea {
     // by both from JTextComponent.
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Finds next occurrence of text in a forward search of a string. Search begins
      * at the current cursor location, and wraps around when the end of the string
      * is reached.
-     *
-     * @param find          the text to locate in the string
-     * @param caseSensitive true if search is to be case-sensitive, false otherwise
-     * @return TEXT_FOUND or TEXT_NOT_FOUND, depending on the result.
      */
     public int doFindText(String find, boolean caseSensitive) {
         int findPosn = sourceCode.getCaretPosition();
@@ -288,25 +302,13 @@ public class GenericTextArea extends JTextArea implements TextEditingArea {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Finds and replaces next occurrence of text in a string in a forward search.
      * If cursor is initially at end
      * of matching selection, will immediately replace then find and select the
      * next occurrence if any. Otherwise it performs a find operation. The replace
      * can be undone with one undo operation.
-     *
-     * @param find          the text to locate in the string
-     * @param replace       the text to replace the find text with - if the find
-     *                      text exists
-     * @param caseSensitive true for case sensitive. false to ignore case
-     * @return Returns TEXT_FOUND if not initially at end of selected match and
-     *         matching
-     *         occurrence is found. Returns TEXT_NOT_FOUND if the text is not
-     *         matched.
-     *         Returns TEXT_REPLACED_NOT_FOUND_NEXT if replacement is successful but
-     *         there are
-     *         no additional matches. Returns TEXT_REPLACED_FOUND_NEXT if
-     *         reaplacement is
-     *         successful and there is at least one additional match.
      */
     public int doReplace(String find, String replace, boolean caseSensitive) {
         int nextPosn = 0;
@@ -338,17 +340,13 @@ public class GenericTextArea extends JTextArea implements TextEditingArea {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Finds and replaces <B>ALL</B> occurrences of text in a string in a forward
      * search.
      * All replacements are bundled into one CompoundEdit, so one Undo operation
      * will
      * undo all of them.
-     *
-     * @param find          the text to locate in the string
-     * @param replace       the text to replace the find text with - if the find
-     *                      text exists
-     * @param caseSensitive true for case sensitive. false to ignore case
-     * @return the number of occurrences that were matched and replaced.
      */
     public int doReplaceAll(String find, String replace, boolean caseSensitive) {
         int nextPosn = 0;

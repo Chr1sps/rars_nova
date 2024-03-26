@@ -20,6 +20,9 @@ import io.github.chr1sps.rars.Settings;
  * to the constructor once the necessary fields have been filled out.
  * The advantage of doing this over calling lots of set() methods after
  * creating the text area is that this method is faster.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class TextAreaDefaults {
     private static TextAreaDefaults DEFAULTS;
@@ -53,6 +56,8 @@ public class TextAreaDefaults {
     /**
      * Returns a new TextAreaDefaults object with the default values filled
      * in.
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.TextAreaDefaults} object
      */
     public static TextAreaDefaults getDefaults() {
         DEFAULTS = new TextAreaDefaults();

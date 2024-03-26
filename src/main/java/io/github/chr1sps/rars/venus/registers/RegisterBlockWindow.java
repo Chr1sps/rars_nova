@@ -55,8 +55,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Sets up a window to display registers in the UI.
  *
  * @author Sanderson, Bumgarner
- **/
-
+ * @version $Id: $Id
+ */
 public abstract class RegisterBlockWindow extends JPanel implements Observer {
     private JTable table;
     private boolean highlighting;
@@ -72,7 +72,11 @@ public abstract class RegisterBlockWindow extends JPanel implements Observer {
     /**
      * Constructor which sets up a fresh window with a table that contains the
      * register values.
-     **/
+     *
+     * @param registers            an array of {@link io.github.chr1sps.rars.riscv.hardware.Register} objects
+     * @param registerDescriptions an array of {@link java.lang.String} objects
+     * @param valueTip             a {@link java.lang.String} object
+     */
     public RegisterBlockWindow(Register[] registers, String[] registerDescriptions, String valueTip) {
         Simulator.getInstance().addObserver(this);
         settings = Globals.getSettings();
@@ -80,8 +84,8 @@ public abstract class RegisterBlockWindow extends JPanel implements Observer {
         this.registers = registers;
         clearHighlighting();
         table = new MyTippedJTable(new RegTableModel(setupWindow()), registerDescriptions,
-                new String[] { "Each register has a tool tip describing its usage convention",
-                        "Corresponding register number", valueTip }) {
+                new String[]{"Each register has a tool tip describing its usage convention",
+                        "Corresponding register number", valueTip}) {
         };
         updateRowHeight();
         table.getColumnModel().getColumn(NAME_COLUMN).setPreferredWidth(50);
@@ -101,12 +105,28 @@ public abstract class RegisterBlockWindow extends JPanel implements Observer {
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
     }
 
+    /**
+     * <p>formatRegister.</p>
+     *
+     * @param value a {@link io.github.chr1sps.rars.riscv.hardware.Register} object
+     * @param base  a int
+     * @return a {@link java.lang.String} object
+     */
     protected abstract String formatRegister(Register value, int base);
 
+    /**
+     * <p>beginObserving.</p>
+     */
     protected abstract void beginObserving();
 
+    /**
+     * <p>endObserving.</p>
+     */
     protected abstract void endObserving();
 
+    /**
+     * <p>resetRegisters.</p>
+     */
     protected abstract void resetRegisters();
 
     /**
@@ -183,6 +203,8 @@ public abstract class RegisterBlockWindow extends JPanel implements Observer {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Required by Observer interface. Called when notified by an Observable that we
      * are registered with.
      * Observables include:
@@ -190,9 +212,6 @@ public abstract class RegisterBlockWindow extends JPanel implements Observer {
      * A register object, which lets us know of register operations
      * The Simulator keeps us informed of when simulated MIPS execution is active.
      * This is the only time we care about register operations.
-     *
-     * @param observable The Observable object who is notifying us
-     * @param obj        Auxiliary object with additional information.
      */
     public void update(Observable observable, Object obj) {
         if (observable == io.github.chr1sps.rars.simulator.Simulator.getInstance()) {
@@ -258,7 +277,7 @@ public abstract class RegisterBlockWindow extends JPanel implements Observer {
         }
 
         public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
             JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
             cell.setFont(font);
@@ -282,7 +301,7 @@ public abstract class RegisterBlockWindow extends JPanel implements Observer {
     }
 
     private class RegTableModel extends AbstractTableModel {
-        final String[] columnNames = { "Name", "Number", "Value" };
+        final String[] columnNames = {"Name", "Number", "Value"};
         private Object[][] data;
 
         private RegTableModel(Object[][] d) {

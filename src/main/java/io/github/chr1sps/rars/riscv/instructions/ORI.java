@@ -27,12 +27,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>ORI class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class ORI extends ImmediateInstruction {
+    /**
+     * <p>Constructor for ORI.</p>
+     */
     public ORI() {
         super("ori t1,t2,-100", "Bitwise OR immediate : Set t1 to bitwise OR of t2 and sign-extended 12-bit immediate",
                 "110");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long immediate) {
         return value | immediate;
     }

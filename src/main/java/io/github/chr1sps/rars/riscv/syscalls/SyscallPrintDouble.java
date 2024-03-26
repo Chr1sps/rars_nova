@@ -1,10 +1,9 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
-import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.SystemIO;
 
 /*
@@ -35,6 +34,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallPrintDouble class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallPrintDouble extends AbstractSyscall {
     /**
      * Build an instance of the Print Double syscall. Default service number
@@ -45,6 +50,8 @@ public class SyscallPrintDouble extends AbstractSyscall {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Performs syscall function to print double whose bits are stored in fa0
      */
     public void simulate(ProgramStatement statement) throws ExitingException {

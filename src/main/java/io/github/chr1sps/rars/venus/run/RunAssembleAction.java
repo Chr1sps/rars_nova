@@ -1,14 +1,14 @@
 package io.github.chr1sps.rars.venus.run;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.*;
+import io.github.chr1sps.rars.exceptions.AssemblyException;
 import io.github.chr1sps.rars.riscv.hardware.*;
 import io.github.chr1sps.rars.util.FilenameFinder;
 import io.github.chr1sps.rars.util.SystemIO;
 import io.github.chr1sps.rars.venus.*;
 import io.github.chr1sps.rars.venus.registers.RegistersPane;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -43,6 +43,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action class for the Run -> Assemble menu item (and toolbar icon)
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class RunAssembleAction extends GuiAction {
 
@@ -53,14 +56,30 @@ public class RunAssembleAction extends GuiAction {
     private static final int LINE_LENGTH_LIMIT = 60;
     private VenusUI mainUI;
 
+    /**
+     * <p>Constructor for RunAssembleAction.</p>
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     */
     public RunAssembleAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel, VenusUI gui) {
+                             Integer mnemonic, KeyStroke accel, VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         mainUI = gui;
     }
 
     // These are both used by RunResetAction to re-assemble under identical
     // conditions.
+
+    /**
+     * <p>Getter for the field <code>programsToAssemble</code>.</p>
+     *
+     * @return a {@link java.util.ArrayList} object
+     */
     public static ArrayList<RISCVprogram> getProgramsToAssemble() {
         return programsToAssemble;
     }
@@ -73,6 +92,9 @@ public class RunAssembleAction extends GuiAction {
         return warningsAreErrors;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void actionPerformed(ActionEvent e) {
         String name = this.getValue(Action.NAME).toString();
         MessagesPane messagesPane = mainUI.getMessagesPane();
@@ -88,7 +110,7 @@ public class RunAssembleAction extends GuiAction {
                 Globals.program = new RISCVprogram();
                 ArrayList<String> filesToAssemble;
                 if (Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ALL)) {// setting calls for multiple
-                                                                                          // file assembly
+                    // file assembly
                     filesToAssemble = FilenameFinder.getFilenameList(
                             new File(FileStatus.getName()).getParent(), Globals.fileExtensions);
                 } else {

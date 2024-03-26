@@ -34,13 +34,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>JAL class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class JAL extends BasicInstruction {
+    /**
+     * <p>Constructor for JAL.</p>
+     */
     public JAL() {
         super("jal t1, target",
                 "Jump and link : Set t1 to Program Counter (return address) then jump to statement at target address",
                 BasicInstructionFormat.J_FORMAT, "s ssssssssss s ssssssss fffff 1101111 ");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         InstructionSet.processReturnAddress(operands[0]);

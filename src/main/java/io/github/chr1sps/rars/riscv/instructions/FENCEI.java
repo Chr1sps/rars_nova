@@ -31,12 +31,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FENCEI class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FENCEI extends BasicInstruction {
+    /**
+     * <p>Constructor for FENCEI.</p>
+     */
     public FENCEI() {
         super("fence.i", "Ensure that stores to instruction memory are visible to instruction fetches",
                 BasicInstructionFormat.I_FORMAT, "0000 0000 0000 00000 001 00000 0001111");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         // Do nothing, currently all stores are immediately available to instruction
         // fetches

@@ -9,6 +9,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultCaret;
 
 import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.*;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.venus.util.AbstractFontSettingDialog;
@@ -86,8 +87,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * the specified
  * position of a virtual text-based terminal. X represents column, Y represents
  * row.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
 
     private static String version = "Version 1.4";
@@ -95,6 +98,9 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     private static String displayPanelTitle, keyboardPanelTitle;
     private static char VT_FILL = ' '; // fill character for virtual terminal (random access mode)
 
+    /**
+     * Constant <code>preferredTextAreaDimension</code>
+     */
     public static Dimension preferredTextAreaDimension = new Dimension(400, 200);
     private static Insets textAreaInsets = new Insets(4, 4, 4, 4);
 
@@ -106,9 +112,21 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
             new UniformlyDistributedDelay(),
             new NormallyDistributedDelay()
     };
+    /**
+     * Constant <code>RECEIVER_CONTROL=</code>
+     */
     public static int RECEIVER_CONTROL; // keyboard Ready in low-order bit
+    /**
+     * Constant <code>RECEIVER_DATA=// keyboard Ready in low-order bit</code>
+     */
     public static int RECEIVER_DATA; // keyboard character in low-order byte
+    /**
+     * Constant <code>TRANSMITTER_CONTROL=// keyboard character in low-order byte</code>
+     */
     public static int TRANSMITTER_CONTROL; // display Ready in low-order bit
+    /**
+     * Constant <code>TRANSMITTER_DATA=// display Ready in low-order bit</code>
+     */
     public static int TRANSMITTER_DATA; // display character in low-order byte
     // These are used to track instruction counts to simulate driver delay of
     // Transmitter Data
@@ -146,7 +164,13 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     private JButton fontButton;
     private Font defaultFont = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
+    /**
+     * Constant <code>EXTERNAL_INTERRUPT_KEYBOARD=0x00000040</code>
+     */
     public static final int EXTERNAL_INTERRUPT_KEYBOARD = 0x00000040;
+    /**
+     * Constant <code>EXTERNAL_INTERRUPT_DISPLAY=0x00000080</code>
+     */
     public static final int EXTERNAL_INTERRUPT_DISPLAY = 0x00000080;
 
     /**
@@ -177,11 +201,16 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
      * there
      * is no driver program to invoke the application.
+     *
+     * @param args an array of {@link java.lang.String} objects
      */
     public static void main(String[] args) {
         new KeyboardAndDisplaySimulator(heading + " stand-alone, " + version, heading).go();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return heading;
@@ -190,6 +219,10 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // Set the MMIO addresses. Prior to MARS 3.7 these were final because
     // address space was final as well. Now we will get MMIO base address
     // each time to reflect possible change in memory configuration. DPS 6-Aug-09
+
+    /**
+     * <p>initializePreGUI.</p>
+     */
     protected void initializePreGUI() {
         RECEIVER_CONTROL = Memory.memoryMapBaseAddress; // 0xffff0000; // keyboard Ready in low-order bit
         RECEIVER_DATA = Memory.memoryMapBaseAddress + 4; // 0xffff0004; // keyboard character in low-order byte
@@ -271,6 +304,9 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // the abstract superclass.
     //////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processRISCVUpdate(Observable memory, AccessNotice accessNotice) {
         MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
@@ -392,6 +428,9 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void initializePostGUI() {
         initializeTransmitDelaySimulator();
@@ -501,6 +540,9 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JComponent getHelpComponent() {
         final String helpContent = "Keyboard And Display MMIO Simulator\n\n" +
@@ -785,7 +827,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     ///////////////////////////////////////////////////////////////////////////////////////////////////// and
     ///////////////////////////////////////////////////////////////////////////////////////////////////// Data.
     private void updateMMIOControlAndData(int controlAddr, int controlValue, int dataAddr, int dataValue,
-            boolean controlOnly) {
+                                          boolean controlOnly) {
         if (!this.isBeingUsedAsATool || (this.isBeingUsedAsATool && connectButton.isConnected())) {
             Globals.memoryAndRegistersLock.lock();
             try {

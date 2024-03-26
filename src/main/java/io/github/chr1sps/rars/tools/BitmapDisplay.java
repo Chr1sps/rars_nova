@@ -58,6 +58,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * maximum use of methods inherited from its abstract superclass
  * AbstractToolAndApplication.
  * Pete Sanderson, verison 1.0, 23 December 2010.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class BitmapDisplay extends AbstractToolAndApplication {
 
@@ -78,13 +81,13 @@ public class BitmapDisplay extends AbstractToolAndApplication {
 
     // Values for Combo Boxes
 
-    private static final String[] visualizationUnitPixelWidthChoices = { "1", "2", "4", "8", "16", "32" };
+    private static final String[] visualizationUnitPixelWidthChoices = {"1", "2", "4", "8", "16", "32"};
     private static final int defaultVisualizationUnitPixelWidthIndex = 0;
-    private static final String[] visualizationUnitPixelHeightChoices = { "1", "2", "4", "8", "16", "32" };
+    private static final String[] visualizationUnitPixelHeightChoices = {"1", "2", "4", "8", "16", "32"};
     private static final int defaultVisualizationUnitPixelHeightIndex = 0;
-    private static final String[] displayAreaPixelWidthChoices = { "64", "128", "256", "512", "1024" };
+    private static final String[] displayAreaPixelWidthChoices = {"64", "128", "256", "512", "1024"};
     private static final int defaultDisplayWidthIndex = 3;
-    private static final String[] displayAreaPixelHeightChoices = { "64", "128", "256", "512", "1024" };
+    private static final String[] displayAreaPixelHeightChoices = {"64", "128", "256", "512", "1024"};
     private static final int defaultDisplayHeightIndex = 2;
 
     // Values for display canvas. Note their initialization uses the identifiers
@@ -131,11 +134,16 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
      * there
      * is no driver program to invoke the application.
+     *
+     * @param args an array of {@link java.lang.String} objects
      */
     public static void main(String[] args) {
         new BitmapDisplay("Bitmap Display stand-alone, " + version, heading).go();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return "Bitmap Display";
@@ -192,11 +200,9 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     //////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Update display when the connected program accesses (data) memory.
-     *
-     * @param memory       the attached memory
-     * @param accessNotice information provided by memory in MemoryAccessNotice
-     *                     object
      */
     protected void processRISCVUpdate(Observable memory, AccessNotice accessNotice) {
         if (accessNotice.getAccessType() == AccessNotice.WRITE) {
@@ -223,7 +229,6 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * on the default settings
      * of the various combo boxes. Overrides inherited method that does nothing.
      */
-
     protected void initializePostGUI() {
         theGrid = createNewGrid();
         updateBaseAddress();
@@ -251,6 +256,8 @@ public class BitmapDisplay extends AbstractToolAndApplication {
 
     /**
      * Overrides default method, to provide a Help button for this tool/app.
+     *
+     * @return a {@link javax.swing.JComponent} object
      */
     protected JComponent getHelpComponent() {
         final String helpContent = "Use this program to simulate a basic bitmap display where\n" +
@@ -428,10 +435,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     // dataBaseAddress=0x10010000, heapBaseAddress=0x10040000,
     // memoryMapBaseAddress=0xffff0000
     private void initializeDisplayBaseChoices() {
-        int[] displayBaseAddressArray = { Memory.dataSegmentBaseAddress, Memory.globalPointer, Memory.dataBaseAddress,
-                Memory.heapBaseAddress, Memory.memoryMapBaseAddress };
+        int[] displayBaseAddressArray = {Memory.dataSegmentBaseAddress, Memory.globalPointer, Memory.dataBaseAddress,
+                Memory.heapBaseAddress, Memory.memoryMapBaseAddress};
         // Must agree with above in number and order...
-        String[] descriptions = { " (global data)", " (gp)", " (static data)", " (heap)", " (memory map)" };
+        String[] descriptions = {" (global data)", " (gp)", " (static data)", " (heap)", " (memory map)"};
         displayBaseAddresses = displayBaseAddressArray;
         displayBaseAddressChoices = new String[displayBaseAddressArray.length];
         for (int i = 0; i < displayBaseAddressChoices.length; i++) {

@@ -27,12 +27,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SLT class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SLT extends Arithmetic {
+    /**
+     * <p>Constructor for SLT.</p>
+     */
     public SLT() {
         super("slt t1,t2,t3", "Set less than : If t2 is less than t3, then set t1 to 1 else set t1 to 0",
                 "0000000", "010");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         return (value < value2) ? 1 : 0;
     }

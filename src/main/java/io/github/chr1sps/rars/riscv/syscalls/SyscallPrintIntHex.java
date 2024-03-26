@@ -34,12 +34,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallPrintIntHex class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallPrintIntHex extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallPrintIntHex.</p>
+     */
     public SyscallPrintIntHex() {
         super("PrintIntHex", "Prints an integer (in hexdecimal format left-padded with zeroes)",
                 "a0 = integer to print", "N/A");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         SystemIO.printString(Binary.intToHexString(RegisterFile.getValue("a0")));
     }

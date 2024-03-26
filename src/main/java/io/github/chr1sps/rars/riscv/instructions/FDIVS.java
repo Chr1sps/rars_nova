@@ -31,11 +31,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FDIVS class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FDIVS extends Floating {
+    /**
+     * <p>Constructor for FDIVS.</p>
+     */
     public FDIVS() {
         super("fdiv.s", "Floating DIVide: assigns f1 to f2 / f3", "0001100");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Float32 compute(Float32 f1, Float32 f2, Environment e) {
         return io.github.chr1sps.jsoftfloat.operations.Arithmetic.division(f1, f2, e);

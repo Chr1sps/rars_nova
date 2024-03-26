@@ -51,8 +51,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Creates the message window at the bottom of the UI.
  *
  * @author Team JSpim
- **/
-
+ * @version $Id: $Id
+ */
 public class MessagesPane extends JTabbedPane {
     JTextArea assemble, run;
     private JPanel assembleTab, runTab;
@@ -62,14 +62,19 @@ public class MessagesPane extends JTabbedPane {
     // reaches MAXIMUM_SCROLLED_CHARACTERS in length then cut off
     // the first NUMBER_OF_CHARACTERS_TO_CUT characters. The latter
     // must obviously be smaller than the former.
+    /**
+     * Constant <code>MAXIMUM_SCROLLED_CHARACTERS=Globals.maximumMessageCharacters</code>
+     */
     public static final int MAXIMUM_SCROLLED_CHARACTERS = Globals.maximumMessageCharacters;
+    /**
+     * Constant <code>NUMBER_OF_CHARACTERS_TO_CUT=Globals.maximumMessageCharacters / 10</code>
+     */
     public static final int NUMBER_OF_CHARACTERS_TO_CUT = Globals.maximumMessageCharacters / 10; // 10%
 
     /**
      * Constructor for the class, sets up two fresh tabbed text areas for program
      * feedback.
-     **/
-
+     */
     public MessagesPane() {
         super();
         this.setMinimumSize(new Dimension(0, 0));
@@ -533,5 +538,5 @@ public class MessagesPane extends JTabbedPane {
             }
         }
     } // Asker class
-      ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
 }

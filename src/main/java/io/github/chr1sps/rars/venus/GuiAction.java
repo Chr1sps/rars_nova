@@ -34,11 +34,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * parent class for Action subclasses to be defined for every menu/toolbar
  * option.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class GuiAction extends AbstractAction {
+    /**
+     * <p>Constructor for GuiAction.</p>
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
+     */
     protected GuiAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel) {
+                        Integer mnemonic, KeyStroke accel) {
         super(name, icon);
         putValue(SHORT_DESCRIPTION, descrip);
         putValue(MNEMONIC_KEY, mnemonic);
@@ -46,6 +57,8 @@ public class GuiAction extends AbstractAction {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * does nothing by default. Should be over-ridden by subclass
      */
     public void actionPerformed(ActionEvent e) {

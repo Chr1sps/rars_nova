@@ -1,9 +1,9 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
+import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
 import java.util.HashMap;
 import java.util.Random;
-
-import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -37,8 +37,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * This small class serves only to hold a static HashMap for storing
  * random number generators for use by all the random number generator
  * syscalls.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class RandomStreams {
     /**
      * Collection of pseudorandom number streams available for use in Rand-type

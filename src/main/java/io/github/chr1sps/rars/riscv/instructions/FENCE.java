@@ -31,13 +31,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FENCE class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FENCE extends BasicInstruction {
+    /**
+     * <p>Constructor for FENCE.</p>
+     */
     public FENCE() {
         super("fence 1, 1",
                 "Ensure that IO and memory accesses before the fence happen before the following IO and memory accesses as viewed by a different thread",
                 BasicInstructionFormat.I_FORMAT, "0000 ffff ssss 00000 000 00000 0001111");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         // Do nothing, currently there are no other threads so local consitency is
         // enough

@@ -19,7 +19,6 @@ package io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker;
  * @author Slava Pestov
  * @version $Id: Token.java,v 1.12 1999/12/13 03:40:30 sp Exp $
  */
-
 public class Token {
     // NOTE from DPS 13-May-2010.
     // Please do not modify any of these constants! It's not fatal or
@@ -153,6 +152,8 @@ public class Token {
 
     /**
      * Returns a string representation of this token.
+     *
+     * @return a {@link java.lang.String} object
      */
     public String toString() {
         return "[id=" + id + ",length=" + length + "]";

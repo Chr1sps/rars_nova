@@ -5,13 +5,25 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
+/**
+ * <p>SLLIW class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SLLIW extends BasicInstruction {
+    /**
+     * <p>Constructor for SLLIW.</p>
+     */
     public SLLIW() {
         super("slliw t1,t2,10",
                 "Shift left logical (32 bit): Set t1 to result of shifting t2 left by number of bits specified by immediate",
                 BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 001 fffff 0011011", true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         // Copy from SLLI
         int[] operands = statement.getOperands();

@@ -42,14 +42,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  */
-
 public class ToolAction extends AbstractAction {
     private Tool tool; // Tool tool;
 
     /**
      * Simple constructor.
      *
-     * @param tool
+     * @param tool a {@link io.github.chr1sps.rars.tools.Tool} object
      */
     public ToolAction(Tool tool) {
         super(tool.getName(), null);
@@ -57,9 +56,9 @@ public class ToolAction extends AbstractAction {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Response when tool's item selected from menu. Invokes tool's action() method.
-     *
-     * @param e the ActionEvent that triggered this call
      */
     public void actionPerformed(ActionEvent e) {
         try {

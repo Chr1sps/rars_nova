@@ -1,8 +1,8 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
-import io.github.chr1sps.rars.BreakpointException;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
+import io.github.chr1sps.rars.exceptions.BreakpointException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 
@@ -33,12 +33,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>EBREAK class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class EBREAK extends BasicInstruction {
+    /**
+     * <p>Constructor for EBREAK.</p>
+     */
     public EBREAK() {
         super("ebreak", "Pause execution",
                 BasicInstructionFormat.I_FORMAT, "000000000001 00000 000 00000 1110011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws SimulationException {
         throw new BreakpointException();
     }

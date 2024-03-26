@@ -42,11 +42,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public abstract class Branch extends BasicInstruction {
+    /**
+     * <p>Constructor for Branch.</p>
+     *
+     * @param usage       a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     * @param funct       a {@link java.lang.String} object
+     */
     public Branch(String usage, String description, String funct) {
         super(usage, description, BasicInstructionFormat.B_FORMAT,
                 "ttttttt sssss fffff " + funct + " ttttt 1100011 ");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         if (willBranch(statement)) {
             InstructionSet.processBranch(statement.getOperands()[2]);
@@ -54,6 +64,8 @@ public abstract class Branch extends BasicInstruction {
     }
 
     /**
+     * <p>willBranch.</p>
+     *
      * @param statement the program statement that carries the operands for this
      *                  instruction
      * @return true if the Branch instruction will branch

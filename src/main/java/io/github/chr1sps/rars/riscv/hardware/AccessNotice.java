@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version July 2005
  */
-
 public abstract class AccessNotice {
     /**
      * Indicates the purpose of access was to read.
@@ -50,6 +49,11 @@ public abstract class AccessNotice {
     private int accessType;
     private Thread thread;
 
+    /**
+     * <p>Constructor for AccessNotice.</p>
+     *
+     * @param type a int
+     */
     protected AccessNotice(int type) {
         if (type != READ && type != WRITE) {
             throw new IllegalArgumentException();
@@ -92,7 +96,7 @@ public abstract class AccessNotice {
      * Query whether the access originated from executing program
      *
      * @return true if this access originated from executing program, false
-     *         otherwise
+     * otherwise
      */
     // Thread to execute the MIPS program is instantiated in SwingWorker.java.
     // There it is given the name "RISCV" to replace the default "Thread-x".

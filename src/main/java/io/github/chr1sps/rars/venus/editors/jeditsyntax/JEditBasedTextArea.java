@@ -26,9 +26,9 @@ import java.awt.*;
  * to be used within MARS largely without modification. DPS 4-20-2010
  *
  * @author Pete Sanderson
+ * @version $Id: $Id
  * @since 4.0
  */
-
 public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea, CaretListener {
 
     private final JComponent lineNumbers;
@@ -39,6 +39,12 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     private CompoundEdit compoundEdit;
     private JEditBasedTextArea sourceCode;
 
+    /**
+     * <p>Constructor for JEditBasedTextArea.</p>
+     *
+     * @param editPain    a {@link io.github.chr1sps.rars.venus.EditPane} object
+     * @param lineNumbers a {@link javax.swing.JComponent} object
+     */
     public JEditBasedTextArea(EditPane editPain, JComponent lineNumbers) {
         super(lineNumbers);
         this.lineNumbers = lineNumbers;
@@ -66,10 +72,18 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         addCaretListener(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void setFont(Font f) {
         getPainter().setFont(f);
     }
 
+    /**
+     * <p>getFont.</p>
+     *
+     * @return a {@link java.awt.Font} object
+     */
     public Font getFont() {
         return getPainter().getFont();
     }
@@ -79,19 +93,19 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     // public void setSize(Dimension d) { painter.setSize(d);}
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Use for highlighting the line currently being edited.
-     *
-     * @param highlight true to enable line highlighting, false to disable.
      */
     public void setLineHighlightEnabled(boolean highlight) {
         getPainter().setLineHighlightEnabled(highlight);
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Set the caret blinking rate in milliseconds. If rate is 0
      * will disable blinking. If negative, do nothing.
-     *
-     * @param rate blinking rate in milliseconds
      */
     public void setCaretBlinkRate(int rate) {
         if (rate == 0) {
@@ -107,14 +121,17 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Set the number of characters a tab will expand to.
-     *
-     * @param chars number of characters
      */
     public void setTabSize(int chars) {
         painter.setTabSize(chars);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setBackground(Color bg) {
         super.setBackground(bg);
@@ -123,6 +140,9 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         lineNumbers.setBackground(bg);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setForeground(Color fg) {
         super.setForeground(fg);
@@ -132,7 +152,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
 
     /**
      * Update editor-colors based on the information
-     * from {@link Globals#getSettings()}
+     * from {@link io.github.chr1sps.rars.Globals#getSettings()}
      */
     public void updateEditorColors() {
         boolean editable = this.isEditable();
@@ -148,13 +168,18 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
 
     /**
      * Update editor colors and update the syntax style table,
-     * which is obtained from {@link SyntaxUtilities}.
+     * which is obtained from {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxUtilities}.
      */
     public void updateSyntaxStyles() {
         updateEditorColors();
         painter.setStyles(SyntaxUtilities.getCurrentSyntaxStyles());
     }
 
+    /**
+     * <p>getOuterComponent.</p>
+     *
+     * @return a {@link java.awt.Component} object
+     */
     public Component getOuterComponent() {
         return this;
     }
@@ -172,21 +197,20 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Display caret position on the edit pane.
-     *
-     * @param e A CaretEvent
      */
-
     public void caretUpdate(CaretEvent e) {
         editPane.displayCaretPosition(((MutableCaretEvent) e).getDot());
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Same as setSelectedText but named for compatibility with
      * JTextComponent method replaceSelection.
      * DPS, 14 Apr 2010
-     *
-     * @param replacementText The replacement text for the selection
      */
     public void replaceSelection(String replacementText) {
         setSelectedText(replacementText);
@@ -194,12 +218,20 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
 
     //
     //
+
+    /**
+     * {@inheritDoc}
+     */
     public void setSelectionVisible(boolean vis) {
 
     }
 
     //
     //
+
+    /**
+     * {@inheritDoc}
+     */
     public void setSourceCode(String s, boolean editable) {
         this.setText(s);
         this.setEditable(editable);
@@ -265,13 +297,11 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     //
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Finds next occurrence of text in a forward search of a string. Search begins
      * at the current cursor location, and wraps around when the end of the string
      * is reached.
-     *
-     * @param find          the text to locate in the string
-     * @param caseSensitive true if search is to be case-sensitive, false otherwise
-     * @return TEXT_FOUND or TEXT_NOT_FOUND, depending on the result.
      */
     public int doFindText(String find, boolean caseSensitive) {
         int findPosn = sourceCode.getCaretPosition();
@@ -322,25 +352,13 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Finds and replaces next occurrence of text in a string in a forward search.
      * If cursor is initially at end
      * of matching selection, will immediately replace then find and select the
      * next occurrence if any. Otherwise it performs a find operation. The replace
      * can be undone with one undo operation.
-     *
-     * @param find          the text to locate in the string
-     * @param replace       the text to replace the find text with - if the find
-     *                      text exists
-     * @param caseSensitive true for case sensitive. false to ignore case
-     * @return Returns TEXT_FOUND if not initially at end of selected match and
-     *         matching
-     *         occurrence is found. Returns TEXT_NOT_FOUND if the text is not
-     *         matched.
-     *         Returns TEXT_REPLACED_NOT_FOUND_NEXT if replacement is successful but
-     *         there are
-     *         no additional matches. Returns TEXT_REPLACED_FOUND_NEXT if
-     *         reaplacement is
-     *         successful and there is at least one additional match.
      */
     public int doReplace(String find, String replace, boolean caseSensitive) {
         int nextPosn = 0;
@@ -375,17 +393,13 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Finds and replaces <B>ALL</B> occurrences of text in a string in a forward
      * search.
      * All replacements are bundled into one CompoundEdit, so one Undo operation
      * will
      * undo all of them.
-     *
-     * @param find          the text to locate in the string
-     * @param replace       the text to replace the find text with - if the find
-     *                      text exists
-     * @param caseSensitive true for case sensitive. false to ignore case
-     * @return the number of occurrences that were matched and replaced.
      */
     public int doReplaceAll(String find, String replace, boolean caseSensitive) {
         int nextPosn = 0;

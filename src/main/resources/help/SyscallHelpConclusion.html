@@ -47,13 +47,17 @@ package.
         <td><h3>pitch (a0)</h3>
 
             <li>Accepts a positive byte value (0-127) that denotes a pitch as it would
-                be represented in MIDI </li>
+                be represented in MIDI
+            </li>
 
             <li>Each number is one semitone / half-step in the chromatic scale.</li>
 
             <li>0 represents a very low C and 127 represents a very high G (a standard
-                88 key piano begins at 9-A and ends at 108-C).</li>
-            <li>If the parameter value is outside this range, it applies a default value 60 which is the same as middle C on a piano.</li>
+                88 key piano begins at 9-A and ends at 108-C).
+            </li>
+            <li>If the parameter value is outside this range, it applies a default value 60 which is the same as middle
+                C on a piano.
+            </li>
 
             <li>From middle C, all other pitches in the octave are as follows:</li>
 
@@ -83,7 +87,8 @@ package.
 
 
             <li>To produce these pitches in other octaves, add or subtract multiples
-                of 12.</li>
+                of 12.
+            </li>
             <br>
         </td>
     </tr>
@@ -97,13 +102,17 @@ package.
     <tr>
         <td><h3>instrument (a2)</h3>
             <li>Accepts a positive byte value (0-127) that denotes the General MIDI
-                &quot;patch&quot; used to play the tone.</li>
-            <li>If the parameter is outside this range, it applies a default value 0 which is an <em>Acoustic Grand Piano</em>.</li>
+                &quot;patch&quot; used to play the tone.
+            </li>
+            <li>If the parameter is outside this range, it applies a default value 0 which is an <em>Acoustic Grand
+                Piano</em>.
+            </li>
             <li>General MIDI standardizes the number associated with each possible instrument
                 (often referred to as <em>program change</em> numbers), however it does
                 not determine how the tone will sound. This is determined by the synthesizer
                 that is producing the sound. Thus a<em> Tuba</em> (patch 58) on one computer
-                may sound different than that same patch on another computer.</li>
+                may sound different than that same patch on another computer.
+            </li>
             <li>The 128 available patches are divided into instrument families of 8:</li>
             <table width="450" border="0" align="center" cellpadding="2">
                 <tr>
@@ -161,7 +170,8 @@ package.
                 see <a href="http://www.midi.org/">
                     www.midi.org/about-midi/gm/gm1sound.shtml</a>.
                 The General MIDI channel 10 percussion key map is not relevant to the
-                toneGenerator method because it always defaults to MIDI channel 1.</li>
+                toneGenerator method because it always defaults to MIDI channel 1.
+            </li>
             <br>
         </td>
     </tr>
@@ -169,15 +179,18 @@ package.
         <td><h3>volume (a3)</h3>
             <li>Accepts a positive byte value (0-127) where 127 is the loudest and 0
                 is silent. This value denotes MIDI velocity which refers to the initial
-                attack of the tone.</li>
+                attack of the tone.
+            </li>
             <li>If the parameter value is outside this range, it applies a default value 100.</li>
             <li>MIDI velocity measures how hard a <em>note on</em> (or <em>note off</em>)
                 message is played, perhaps on a MIDI controller like a keyboard. Most
                 MIDI synthesizers will translate this into volume on a logarithmic scale
-                in which the difference in amplitude decreases as the velocity value increases.</li>
+                in which the difference in amplitude decreases as the velocity value increases.
+            </li>
             <li>Note that velocity value on more sophisticated synthesizers can also
                 affect the timbre of the tone (as most instruments sound different when
-                they are played louder or softer).</li>
+                they are played louder or softer).
+            </li>
         </td>
     </tr>
 </table>

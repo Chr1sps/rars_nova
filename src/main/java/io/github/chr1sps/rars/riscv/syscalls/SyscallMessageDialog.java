@@ -1,11 +1,11 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import javax.swing.JOptionPane;
-
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
+import javax.swing.*;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -35,7 +35,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallMessageDialog class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallMessageDialog extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallMessageDialog.</p>
+     */
     public SyscallMessageDialog() {
         super("MessageDialog", "Service to display a message to user",
                 "a0 = address of null-terminated string that is the message to user <br>" +
@@ -44,6 +53,9 @@ public class SyscallMessageDialog extends AbstractSyscall {
                 "N/A");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         // Display the dialog.
         int msgType = RegisterFile.getValue("a1");

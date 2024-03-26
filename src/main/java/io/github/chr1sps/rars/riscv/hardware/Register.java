@@ -35,8 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Jason Bumgarner, Jason Shrewsbury, Ben Sherman
  * @version June 2003
- **/
-
+ */
 public class Register extends Observable {
     private String name;
     private int number;
@@ -55,7 +54,6 @@ public class Register extends Observable {
      * @param num The number of the register.
      * @param val The inital (and reset) value of the register.
      */
-
     public Register(String n, int num, long val) {
         name = n;
         number = num;
@@ -68,7 +66,6 @@ public class Register extends Observable {
      *
      * @return name The name of the Register.
      */
-
     public String getName() {
         return name;
     }
@@ -79,7 +76,6 @@ public class Register extends Observable {
      *
      * @return value The value of the Register.
      */
-
     public synchronized long getValue() {
         notifyAnyObservers(AccessNotice.READ);
         return value;
@@ -91,7 +87,6 @@ public class Register extends Observable {
      *
      * @return value The value of the Register.
      */
-
     public synchronized long getValueNoNotify() {
         return value;
     }
@@ -101,7 +96,6 @@ public class Register extends Observable {
      *
      * @return The reset (initial) value of the Register.
      */
-
     public long getResetValue() {
         return resetValue;
     }
@@ -111,7 +105,6 @@ public class Register extends Observable {
      *
      * @return number The number of the Register.
      */
-
     public int getNumber() {
         return number;
     }
@@ -123,7 +116,6 @@ public class Register extends Observable {
      * @param val Value to set the Register to.
      * @return previous value of register
      */
-
     public synchronized long setValue(long val) {
         long old = value;
         value = val;
@@ -138,7 +130,6 @@ public class Register extends Observable {
      * @param val Value to set the Register to.
      * @return previous value of register
      */
-
     public synchronized long setValueBackdoor(long val) {
         long old = value;
         value = val;
@@ -149,16 +140,16 @@ public class Register extends Observable {
      * Resets the value of the register to the value it was constructed with.
      * Observers are not notified.
      */
-
     public synchronized void resetValue() {
         value = resetValue;
     }
 
     /**
      * Change the register's reset value; the value to which it will be
-     * set when <tt>resetValue()</tt> is called.
+     * set when <code>resetValue()</code> is called.
+     *
+     * @param reset a long
      */
-
     public synchronized void changeResetValue(long reset) {
         resetValue = reset;
     }

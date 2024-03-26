@@ -35,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version July 2005
  */
-
 public class MemoryAccessNotice extends AccessNotice {
     private int address;
     private int length;
@@ -55,6 +54,10 @@ public class MemoryAccessNotice extends AccessNotice {
     /**
      * Constructor will be called only within this package, so assume
      * address is in valid range.
+     *
+     * @param type    a int
+     * @param address a int
+     * @param value   a int
      */
     public MemoryAccessNotice(int type, int address, int value) {
         super(type);
@@ -65,6 +68,8 @@ public class MemoryAccessNotice extends AccessNotice {
 
     /**
      * Fetch the memory address that was accessed.
+     *
+     * @return a int
      */
     public int getAddress() {
         return address;
@@ -72,6 +77,8 @@ public class MemoryAccessNotice extends AccessNotice {
 
     /**
      * Fetch the length in bytes of the access operation (4,2,1).
+     *
+     * @return a int
      */
     public int getLength() {
         return length;
@@ -79,6 +86,8 @@ public class MemoryAccessNotice extends AccessNotice {
 
     /**
      * Fetch the value of the access operation (the value read or written).
+     *
+     * @return a int
      */
     public int getValue() {
         return value;
@@ -86,6 +95,8 @@ public class MemoryAccessNotice extends AccessNotice {
 
     /**
      * String representation indicates access type, address and length in bytes
+     *
+     * @return a {@link java.lang.String} object
      */
     public String toString() {
         return ((this.getAccessType() == AccessNotice.READ) ? "R " : "W ") +

@@ -8,6 +8,12 @@ import io.github.chr1sps.rars.riscv.hardware.Register;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.venus.NumberDisplayBaseChooser;
 
+/**
+ * <p>RegistersWindow class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class RegistersWindow extends RegisterBlockWindow {
     /*
      * The tips to show when hovering over the names of the registers
@@ -48,6 +54,9 @@ public class RegistersWindow extends RegisterBlockWindow {
             /* pc */ "program counter",
     };
 
+    /**
+     * <p>Constructor for RegistersWindow.</p>
+     */
     public RegistersWindow() {
         super(getRegisters(), regToolTips, "Current 32 bit value");
     }
@@ -62,6 +71,9 @@ public class RegistersWindow extends RegisterBlockWindow {
         return out;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected String formatRegister(Register value, int base) {
         if (Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED)) {
             return NumberDisplayBaseChooser.formatNumber(value.getValue(), base);
@@ -70,14 +82,23 @@ public class RegistersWindow extends RegisterBlockWindow {
         }
     }
 
+    /**
+     * <p>beginObserving.</p>
+     */
     protected void beginObserving() {
         RegisterFile.addRegistersObserver(this);
     }
 
+    /**
+     * <p>endObserving.</p>
+     */
     protected void endObserving() {
         RegisterFile.deleteRegistersObserver(this);
     }
 
+    /**
+     * <p>resetRegisters.</p>
+     */
     protected void resetRegisters() {
         RegisterFile.resetRegisters();
     }

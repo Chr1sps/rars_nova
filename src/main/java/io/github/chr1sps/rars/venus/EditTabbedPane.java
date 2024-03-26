@@ -1,17 +1,16 @@
 package io.github.chr1sps.rars.venus;
 
+import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.RISCVprogram;
+import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.exceptions.AssemblyException;
+import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import io.github.chr1sps.rars.util.FilenameFinder;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
-
-import io.github.chr1sps.rars.AssemblyException;
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.RISCVprogram;
-import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
-import io.github.chr1sps.rars.util.FilenameFinder;
-
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
@@ -52,8 +51,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Tabbed pane for the editor. Each of its tabs represents an open file.
  *
  * @author Sanderson
- **/
-
+ * @version $Id: $Id
+ */
 public class EditTabbedPane extends JTabbedPane {
     EditPane editTab;
     MainPane mainPane;
@@ -64,8 +63,11 @@ public class EditTabbedPane extends JTabbedPane {
 
     /**
      * Constructor for the EditTabbedPane class.
-     **/
-
+     *
+     * @param appFrame a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     * @param editor   a {@link io.github.chr1sps.rars.venus.Editor} object
+     * @param mainPane a {@link io.github.chr1sps.rars.venus.MainPane} object
+     */
     public EditTabbedPane(VenusUI appFrame, Editor editor, MainPane mainPane) {
         super();
         this.mainUI = appFrame;
@@ -119,7 +121,7 @@ public class EditTabbedPane extends JTabbedPane {
      *
      * @param file File object for the desired file.
      * @return EditPane for the specified file, or null if file is unable to be
-     *         opened in an EditPane
+     * opened in an EditPane
      */
     public EditPane getCurrentEditTabForFile(File file) {
         EditPane result = null;
@@ -179,6 +181,7 @@ public class EditTabbedPane extends JTabbedPane {
      * Carries out all necessary operations to open the
      * specified file in the editor.
      *
+     * @param file a {@link java.io.File} object
      * @return true if file was opened, false otherwise.
      */
     public boolean openFile(File file) {
@@ -439,6 +442,12 @@ public class EditTabbedPane extends JTabbedPane {
     }
 
     // TODO: this is too much of a hack, there needs to be a better way
+
+    /**
+     * <p>getOpenFilePaths.</p>
+     *
+     * @return an array of {@link java.lang.String} objects
+     */
     public String[] getOpenFilePaths() {
         int tabCount = getTabCount();
         String[] tabs = new String[tabCount];
@@ -450,6 +459,8 @@ public class EditTabbedPane extends JTabbedPane {
 
     /**
      * Remove the pane and update menu status
+     *
+     * @param editPane a {@link io.github.chr1sps.rars.venus.EditPane} object
      */
     public void remove(EditPane editPane) {
         super.remove(editPane);
@@ -494,7 +505,7 @@ public class EditTabbedPane extends JTabbedPane {
      *
      * @param pathname Pathname for desired file
      * @return the EditPane for this file if it is open in the editor, or null if
-     *         not.
+     * not.
      */
     public EditPane getEditPaneForFile(String pathname) {
         EditPane openPane = null;
@@ -513,8 +524,8 @@ public class EditTabbedPane extends JTabbedPane {
      * them.
      *
      * @return true if no unsaved edits or if user chooses to save them or not;
-     *         false
-     *         if there are unsaved edits and user cancels the operation.
+     * false
+     * if there are unsaved edits and user cancels the operation.
      */
     public boolean editsSavedOrAbandoned() {
         EditPane currentPane = getCurrentEditTab();
@@ -725,20 +736,20 @@ public class EditTabbedPane extends JTabbedPane {
                 }
             }
         }//////////////////////////////////////////////////////////////////////////////////
-         // Private inner class for special property change listener. DPS 9 July 2008.
-         // If user adds a file filter, e.g. by typing *.txt into the file text field
-         ////////////////////////////////////////////////////////////////////////////////// then
-         ////////////////////////////////////////////////////////////////////////////////// pressing
-         // Enter, then it is automatically added to the array of choosable file filters.
-         ////////////////////////////////////////////////////////////////////////////////// BUT,
-         ////////////////////////////////////////////////////////////////////////////////// unless
-         ////////////////////////////////////////////////////////////////////////////////// you
-         // Cancel out of the Open dialog, it is then REMOVED from the list automatically
-         ////////////////////////////////////////////////////////////////////////////////// also.
-         ////////////////////////////////////////////////////////////////////////////////// Here
-         // we will achieve a sort of persistence at least through the current activation
-         ////////////////////////////////////////////////////////////////////////////////// of
-         ////////////////////////////////////////////////////////////////////////////////// MARS.
+        // Private inner class for special property change listener. DPS 9 July 2008.
+        // If user adds a file filter, e.g. by typing *.txt into the file text field
+        ////////////////////////////////////////////////////////////////////////////////// then
+        ////////////////////////////////////////////////////////////////////////////////// pressing
+        // Enter, then it is automatically added to the array of choosable file filters.
+        ////////////////////////////////////////////////////////////////////////////////// BUT,
+        ////////////////////////////////////////////////////////////////////////////////// unless
+        ////////////////////////////////////////////////////////////////////////////////// you
+        // Cancel out of the Open dialog, it is then REMOVED from the list automatically
+        ////////////////////////////////////////////////////////////////////////////////// also.
+        ////////////////////////////////////////////////////////////////////////////////// Here
+        // we will achieve a sort of persistence at least through the current activation
+        ////////////////////////////////////////////////////////////////////////////////// of
+        ////////////////////////////////////////////////////////////////////////////////// MARS.
 
         private class ChoosableFileFilterChangeListener implements PropertyChangeListener {
             public void propertyChange(java.beans.PropertyChangeEvent e) {

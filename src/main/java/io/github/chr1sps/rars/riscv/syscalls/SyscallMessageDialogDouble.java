@@ -1,14 +1,14 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import javax.swing.JOptionPane;
-
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
+import javax.swing.*;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -40,8 +40,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Service to display a message to user.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class SyscallMessageDialogDouble extends AbstractSyscall {
     /**
      * Build an instance of the syscall with its default service number and name.
@@ -52,6 +54,8 @@ public class SyscallMessageDialogDouble extends AbstractSyscall {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * System call to display a message to user.
      */
     public void simulate(ProgramStatement statement) throws ExitingException {
@@ -59,7 +63,7 @@ public class SyscallMessageDialogDouble extends AbstractSyscall {
         // now
         String message = new String(); // = "";
         int byteAddress = RegisterFile.getValue("a0");
-        char ch[] = { ' ' }; // Need an array to convert to String
+        char ch[] = {' '}; // Need an array to convert to String
         try {
             ch[0] = (char) Globals.memory.getByte(byteAddress);
             while (ch[0] != 0) // only uses single location ch[0]

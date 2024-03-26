@@ -54,6 +54,7 @@ public class KeywordMap {
      * @param text   The text segment
      * @param offset The offset of the substring within the text segment
      * @param length The length of the substring
+     * @return a byte
      */
     public byte lookup(Segment text, int offset, int length) {
         if (length == 0)
@@ -88,6 +89,8 @@ public class KeywordMap {
     /**
      * Returns true if the keyword map is set to be case insensitive,
      * false otherwise.
+     *
+     * @return a boolean
      */
     public boolean getIgnoreCase() {
         return ignoreCase;
@@ -106,12 +109,26 @@ public class KeywordMap {
     // protected members
     protected int mapLength;
 
+    /**
+     * <p>getStringMapKey.</p>
+     *
+     * @param s a {@link java.lang.String} object
+     * @return a int
+     */
     protected int getStringMapKey(String s) {
         return (Character.toUpperCase(s.charAt(0)) +
                 Character.toUpperCase(s.charAt(s.length() - 1)))
                 % mapLength;
     }
 
+    /**
+     * <p>getSegmentMapKey.</p>
+     *
+     * @param s   a {@link javax.swing.text.Segment} object
+     * @param off a int
+     * @param len a int
+     * @return a int
+     */
     protected int getSegmentMapKey(Segment s, int off, int len) {
         return (Character.toUpperCase(s.array[off]) +
                 Character.toUpperCase(s.array[off + len - 1]))

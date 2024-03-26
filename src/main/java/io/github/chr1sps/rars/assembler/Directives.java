@@ -41,161 +41,218 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version August 2003
- **/
-
+ */
 public final class Directives {
 
-        private static ArrayList<Directives> directiveList = new ArrayList<>();
-        public static final Directives DATA = new Directives(".data",
-                        "Subsequent items stored in Data segment at next available address");
-        public static final Directives TEXT = new Directives(".text",
-                        "Subsequent items (instructions) stored in Text segment at next available address");
-        public static final Directives WORD = new Directives(".word",
-                        "Store the listed value(s) as 32 bit words on word boundary");
-        public static final Directives DWORD = new Directives(".dword",
-                        "Store the listed value(s) as 64 bit double-word on word boundary");
-        public static final Directives ASCII = new Directives(".ascii",
-                        "Store the string in the Data segment but do not add null terminator");
-        public static final Directives ASCIZ = new Directives(".asciz",
-                        "Store the string in the Data segment and add null terminator");
-        public static final Directives STRING = new Directives(".string", "Alias for .asciz");
-        public static final Directives BYTE = new Directives(".byte", "Store the listed value(s) as 8 bit bytes");
-        public static final Directives ALIGN = new Directives(".align",
-                        "Align next data item on specified byte boundary (0=byte, 1=half, 2=word, 3=double)");
-        public static final Directives HALF = new Directives(".half",
-                        "Store the listed value(s) as 16 bit halfwords on halfword boundary");
-        public static final Directives SPACE = new Directives(".space",
-                        "Reserve the next specified number of bytes in Data segment");
-        public static final Directives DOUBLE = new Directives(".double",
-                        "Store the listed value(s) as double precision floating point");
-        public static final Directives FLOAT = new Directives(".float",
-                        "Store the listed value(s) as single precision floating point");
-        public static final Directives EXTERN = new Directives(".extern",
-                        "Declare the listed label and byte length to be a global data field");
-        public static final Directives GLOBL = new Directives(".globl",
-                        "Declare the listed label(s) as global to enable referencing from other files");
-        public static final Directives GLOBAL = new Directives(".global",
-                        "Declare the listed label(s) as global to enable referencing from other files");
-        /* EQV added by DPS 11 July 2012 */
-        public static final Directives EQV = new Directives(".eqv",
-                        "Substitute second operand for first. First operand is symbol, second operand is expression (like #define)");
-        /* MACRO and END_MACRO added by Mohammad Sekhavat Oct 2012 */
-        public static final Directives MACRO = new Directives(".macro", "Begin macro definition.  See .end_macro");
-        public static final Directives END_MACRO = new Directives(".end_macro", "End macro definition.  See .macro");
-        /* INCLUDE added by DPS 11 Jan 2013 */
-        public static final Directives INCLUDE = new Directives(".include",
-                        "Insert the contents of the specified file.  Put filename in quotes.");
-        public static final Directives SECTION = new Directives(".section",
-                        "Allows specifying sections without .text or .data directives. Included for gcc comparability");
+    private static ArrayList<Directives> directiveList = new ArrayList<>();
+    /**
+     * Constant <code>DATA</code>
+     */
+    public static final Directives DATA = new Directives(".data",
+            "Subsequent items stored in Data segment at next available address");
+    /**
+     * Constant <code>TEXT</code>
+     */
+    public static final Directives TEXT = new Directives(".text",
+            "Subsequent items (instructions) stored in Text segment at next available address");
+    /**
+     * Constant <code>WORD</code>
+     */
+    public static final Directives WORD = new Directives(".word",
+            "Store the listed value(s) as 32 bit words on word boundary");
+    /**
+     * Constant <code>DWORD</code>
+     */
+    public static final Directives DWORD = new Directives(".dword",
+            "Store the listed value(s) as 64 bit double-word on word boundary");
+    /**
+     * Constant <code>ASCII</code>
+     */
+    public static final Directives ASCII = new Directives(".ascii",
+            "Store the string in the Data segment but do not add null terminator");
+    /**
+     * Constant <code>ASCIZ</code>
+     */
+    public static final Directives ASCIZ = new Directives(".asciz",
+            "Store the string in the Data segment and add null terminator");
+    /**
+     * Constant <code>STRING</code>
+     */
+    public static final Directives STRING = new Directives(".string", "Alias for .asciz");
+    /**
+     * Constant <code>BYTE</code>
+     */
+    public static final Directives BYTE = new Directives(".byte", "Store the listed value(s) as 8 bit bytes");
+    /**
+     * Constant <code>ALIGN</code>
+     */
+    public static final Directives ALIGN = new Directives(".align",
+            "Align next data item on specified byte boundary (0=byte, 1=half, 2=word, 3=double)");
+    /**
+     * Constant <code>HALF</code>
+     */
+    public static final Directives HALF = new Directives(".half",
+            "Store the listed value(s) as 16 bit halfwords on halfword boundary");
+    /**
+     * Constant <code>SPACE</code>
+     */
+    public static final Directives SPACE = new Directives(".space",
+            "Reserve the next specified number of bytes in Data segment");
+    /**
+     * Constant <code>DOUBLE</code>
+     */
+    public static final Directives DOUBLE = new Directives(".double",
+            "Store the listed value(s) as double precision floating point");
+    /**
+     * Constant <code>FLOAT</code>
+     */
+    public static final Directives FLOAT = new Directives(".float",
+            "Store the listed value(s) as single precision floating point");
+    /**
+     * Constant <code>EXTERN</code>
+     */
+    public static final Directives EXTERN = new Directives(".extern",
+            "Declare the listed label and byte length to be a global data field");
+    /**
+     * Constant <code>GLOBL</code>
+     */
+    public static final Directives GLOBL = new Directives(".globl",
+            "Declare the listed label(s) as global to enable referencing from other files");
+    /**
+     * Constant <code>GLOBAL</code>
+     */
+    public static final Directives GLOBAL = new Directives(".global",
+            "Declare the listed label(s) as global to enable referencing from other files");
+    /* EQV added by DPS 11 July 2012 */
+    /**
+     * Constant <code>EQV</code>
+     */
+    public static final Directives EQV = new Directives(".eqv",
+            "Substitute second operand for first. First operand is symbol, second operand is expression (like #define)");
+    /* MACRO and END_MACRO added by Mohammad Sekhavat Oct 2012 */
+    /**
+     * Constant <code>MACRO</code>
+     */
+    public static final Directives MACRO = new Directives(".macro", "Begin macro definition.  See .end_macro");
+    /**
+     * Constant <code>END_MACRO</code>
+     */
+    public static final Directives END_MACRO = new Directives(".end_macro", "End macro definition.  See .macro");
+    /* INCLUDE added by DPS 11 Jan 2013 */
+    /**
+     * Constant <code>INCLUDE</code>
+     */
+    public static final Directives INCLUDE = new Directives(".include",
+            "Insert the contents of the specified file.  Put filename in quotes.");
+    /**
+     * Constant <code>SECTION</code>
+     */
+    public static final Directives SECTION = new Directives(".section",
+            "Allows specifying sections without .text or .data directives. Included for gcc comparability");
 
-        private String descriptor;
-        private String description; // help text
+    private String descriptor;
+    private String description; // help text
 
-        private Directives(String name, String description) {
-                this.descriptor = name;
-                this.description = description;
-                directiveList.add(this);
+    private Directives(String name, String description) {
+        this.descriptor = name;
+        this.description = description;
+        directiveList.add(this);
+    }
+
+    /**
+     * Find Directive object, if any, which matches the given String.
+     *
+     * @param str A String containing candidate directive name (e.g. ".ascii")
+     * @return If match is found, returns matching Directives object, else returns
+     * <code>null</code>.
+     */
+    public static Directives matchDirective(String str) {
+        for (Directives match : directiveList) {
+            if (str.equalsIgnoreCase(match.descriptor)) {
+                return match;
+            }
         }
+        return null;
+    }
 
-        /**
-         * Find Directive object, if any, which matches the given String.
-         *
-         * @param str A String containing candidate directive name (e.g. ".ascii")
-         * @return If match is found, returns matching Directives object, else returns
-         *         <tt>null</tt>.
-         **/
-
-        public static Directives matchDirective(String str) {
-                for (Directives match : directiveList) {
-                        if (str.equalsIgnoreCase(match.descriptor)) {
-                                return match;
-                        }
+    /**
+     * Find Directive object, if any, which contains the given string as a prefix.
+     * For example,
+     * ".a" will match ".ascii", ".asciiz" and ".align"
+     *
+     * @param str A String
+     * @return If match is found, returns ArrayList of matching Directives objects,
+     * else returns <code>null</code>.
+     */
+    public static ArrayList<Directives> prefixMatchDirectives(String str) {
+        ArrayList<Directives> matches = null;
+        for (Directives direct : directiveList) {
+            if (direct.descriptor.toLowerCase().startsWith(str.toLowerCase())) {
+                if (matches == null) {
+                    matches = new ArrayList<>();
                 }
-                return null;
+                matches.add(direct);
+            }
         }
+        return matches;
+    }
 
-        /**
-         * Find Directive object, if any, which contains the given string as a prefix.
-         * For example,
-         * ".a" will match ".ascii", ".asciiz" and ".align"
-         *
-         * @param str A String
-         * @return If match is found, returns ArrayList of matching Directives objects,
-         *         else returns <tt>null</tt>.
-         **/
+    /**
+     * Produces String-ified version of Directive object
+     *
+     * @return String representing Directive: its MIPS name
+     */
+    public String toString() {
+        return this.descriptor;
+    }
 
-        public static ArrayList<Directives> prefixMatchDirectives(String str) {
-                ArrayList<Directives> matches = null;
-                for (Directives direct : directiveList) {
-                        if (direct.descriptor.toLowerCase().startsWith(str.toLowerCase())) {
-                                if (matches == null) {
-                                        matches = new ArrayList<>();
-                                }
-                                matches.add(direct);
-                        }
-                }
-                return matches;
-        }
+    /**
+     * Get name of this Directives object
+     *
+     * @return name of this directive as a String
+     */
+    public String getName() {
+        return this.descriptor;
+    }
 
-        /**
-         * Produces String-ified version of Directive object
-         *
-         * @return String representing Directive: its MIPS name
-         **/
+    /**
+     * Get description of this Directives object
+     *
+     * @return description of this directive (for help purposes)
+     */
+    public String getDescription() {
+        return this.description;
+    }
 
-        public String toString() {
-                return this.descriptor;
-        }
+    /**
+     * Produces List of Directive objects
+     *
+     * @return All directives defined
+     */
+    public static ArrayList<Directives> getDirectiveList() {
+        return directiveList;
+    }
 
-        /**
-         * Get name of this Directives object
-         *
-         * @return name of this directive as a String
-         **/
+    /**
+     * Lets you know whether given directive is for integer (WORD,HALF,BYTE).
+     *
+     * @param direct a directive
+     * @return true if given directive is WORD, HALF, or BYTE, false otherwise
+     */
+    public static boolean isIntegerDirective(Directives direct) {
+        return direct == Directives.DWORD || direct == Directives.WORD || direct == Directives.HALF
+                || direct == Directives.BYTE;
 
-        public String getName() {
-                return this.descriptor;
-        }
+    }
 
-        /**
-         * Get description of this Directives object
-         *
-         * @return description of this directive (for help purposes)
-         **/
-
-        public String getDescription() {
-                return this.description;
-        }
-
-        /**
-         * Produces List of Directive objects
-         *
-         * @return All directives defined
-         **/
-        public static ArrayList<Directives> getDirectiveList() {
-                return directiveList;
-        }
-
-        /**
-         * Lets you know whether given directive is for integer (WORD,HALF,BYTE).
-         *
-         * @param direct a directive
-         * @return true if given directive is WORD, HALF, or BYTE, false otherwise
-         **/
-        public static boolean isIntegerDirective(Directives direct) {
-                return direct == Directives.DWORD || direct == Directives.WORD || direct == Directives.HALF
-                                || direct == Directives.BYTE;
-
-        }
-
-        /**
-         * Lets you know whether given directive is for floating number (FLOAT,DOUBLE).
-         *
-         * @param direct a directive
-         * @return true if given directive is FLOAT or DOUBLE, false otherwise.
-         **/
-        public static boolean isFloatingDirective(Directives direct) {
-                return direct == Directives.FLOAT || direct == Directives.DOUBLE;
-        }
+    /**
+     * Lets you know whether given directive is for floating number (FLOAT,DOUBLE).
+     *
+     * @param direct a directive
+     * @return true if given directive is FLOAT or DOUBLE, false otherwise.
+     */
+    public static boolean isFloatingDirective(Directives direct) {
+        return direct == Directives.FLOAT || direct == Directives.DOUBLE;
+    }
 
 }

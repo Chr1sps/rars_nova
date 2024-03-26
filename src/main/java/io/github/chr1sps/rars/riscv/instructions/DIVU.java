@@ -29,12 +29,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>DIVU class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class DIVU extends Arithmetic {
+    /**
+     * <p>Constructor for DIVU.</p>
+     */
     public DIVU() {
         super("divu t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division",
                 "0000001", "101");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         // Signal illegal division with -1
         if (value2 == 0) {
@@ -43,6 +55,9 @@ public class DIVU extends Arithmetic {
         return Long.divideUnsigned(value, value2);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public int computeW(int value, int value2) {
         return (int) compute(value & 0xFFFFFFFFL, value2 & 0xFFFFFFFFL);
     }

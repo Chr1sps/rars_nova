@@ -50,7 +50,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson with help from Bret Barker
  * @version August 2005
  */
-
 public class ToolLoader {
 
     private static final String CLASS_PREFIX = "rars.tools.";

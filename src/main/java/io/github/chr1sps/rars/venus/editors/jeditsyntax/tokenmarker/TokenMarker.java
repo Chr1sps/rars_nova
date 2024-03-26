@@ -1,11 +1,11 @@
 /*
-* TokenMarker.java - Generic token marker
-* Copyright (C) 1998, 1999 Slava Pestov
-*
-* You may use and modify this package for any purpose. Redistribution is
-* permitted, in both source and binary form, provided that this notice
-* remains intact in all source distributions of this package.
-*/
+ * TokenMarker.java - Generic token marker
+ * Copyright (C) 1998, 1999 Slava Pestov
+ *
+ * You may use and modify this package for any purpose. Redistribution is
+ * permitted, in both source and binary form, provided that this notice
+ * remains intact in all source distributions of this package.
+ */
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker;
 
@@ -36,6 +36,7 @@ public abstract class TokenMarker {
      *
      * @param line      The line
      * @param lineIndex The line number
+     * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.Token} object
      */
     public Token markTokens(Segment line, int lineIndex) {
         if (lineIndex >= length) {
@@ -60,34 +61,34 @@ public abstract class TokenMarker {
         /*
          * This is a foul hack. It stops nextLineRequested from being cleared if
          * the same line is marked twice.
-         * 
+         *
          * Why is this necessary? It's all JEditTextArea's fault. When something
          * is inserted into the text, firing a document event, the
          * insertUpdate() method shifts the caret (if necessary) by the amount
          * inserted.
-         * 
+         *
          * All caret movement is handled by the select() method, which
          * eventually pipes the new position to scrollTo() and calls repaint().
-         * 
+         *
          * Note that at this point in time, the new line hasn't yet been
          * painted; the caret is moved first.
-         * 
+         *
          * scrollTo() calls offsetToX(), which tokenizes the line unless it is
          * being called on the last line painted (in which case it uses the text
          * area's painter cached token list). What scrollTo() does next is
          * irrelevant.
-         * 
+         *
          * After scrollTo() has done it's job, repaint() is called, and
          * eventually we end up in paintLine(), whose job is to paint the
          * changed line. It, too, calls markTokens().
-         * 
+         *
          * The problem was that if the line started a multiline token, the first
          * markTokens() (done in offsetToX()) would set nextLineRequested
          * (because the line end token had changed) but the second would clear
          * it (because the line was the same that time) and therefore
          * paintLine() would never know that it needed to repaint subsequent
          * lines.
-         * 
+         *
          * This bug took me ages to track down, that's why I wrote all the
          * relevant info down so that others wouldn't duplicate it.
          */
@@ -119,7 +120,7 @@ public abstract class TokenMarker {
      * @return The initial token type for the next line
      */
     protected abstract byte markTokensImpl(byte token, Segment line,
-            int lineIndex);
+                                           int lineIndex);
 
     /**
      * Returns if the token marker supports tokens that span multiple
@@ -130,6 +131,8 @@ public abstract class TokenMarker {
      * <p>
      * The default implementation returns true; it should be overridden
      * to return false on simpler token markers for increased speed.
+     *
+     * @return a boolean
      */
     public boolean supportsMultilineTokens() {
         return true;
@@ -175,6 +178,8 @@ public abstract class TokenMarker {
 
     /**
      * Returns the number of lines in this token marker.
+     *
+     * @return a int
      */
     public int getLineCount() {
         return length;
@@ -184,6 +189,8 @@ public abstract class TokenMarker {
      * Returns true if the next line should be repainted. This
      * will return true after a line has been tokenized that starts
      * a multiline token that continues onto the next line.
+     *
+     * @return a boolean
      */
     public boolean isNextLineRequested() {
         return nextLineRequested;
@@ -216,7 +223,7 @@ public abstract class TokenMarker {
      * @return ArrayList containing PopupHelpItem objects, one per match.
      */
     public ArrayList<PopupHelpItem> getTokenPrefixMatchHelp(String line, Token tokenList, Token tokenAtOffset,
-            String tokenText) {
+                                                            String tokenText) {
         return null;
     }
 

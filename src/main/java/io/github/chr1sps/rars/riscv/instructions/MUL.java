@@ -27,12 +27,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>MUL class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class MUL extends Arithmetic {
+    /**
+     * <p>Constructor for MUL.</p>
+     */
     public MUL() {
         super("mul t1,t2,t3", "Multiplication: set t1 to the lower 32 bits of t2*t3",
                 "0000001", "000");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         // int*int is correct here
         // the upper 64 bits are just ignored and the result is is just the lower 32

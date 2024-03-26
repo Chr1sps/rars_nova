@@ -1,7 +1,5 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
-import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
-
 /*
 Copyright (c) 2017,  Benjamin Landers
 
@@ -29,12 +27,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>DIV class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class DIV extends Arithmetic {
+    /**
+     * <p>Constructor for DIV.</p>
+     */
     public DIV() {
         super("div t1,t2,t3", "Division: set t1 to the result of t2/t3",
                 "0000001", "100");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         // Signal illegal division with -1
         if (value2 == 0) {

@@ -44,7 +44,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  */
-
 public class RunSpeedPanel extends JPanel {
     /**
      * Constant that represents unlimited run speed. Compare with return value of
@@ -76,7 +75,6 @@ public class RunSpeedPanel extends JPanel {
      *
      * @return the run speed panel
      */
-
     public static RunSpeedPanel getInstance() {
         if (runSpeedPanel == null) {
             runSpeedPanel = new RunSpeedPanel();
@@ -112,7 +110,6 @@ public class RunSpeedPanel extends JPanel {
      *
      * @return run speed setting in instructions/second.
      */
-
     public double getRunSpeed() {
         return speedTable[runSpeedIndex];
     }

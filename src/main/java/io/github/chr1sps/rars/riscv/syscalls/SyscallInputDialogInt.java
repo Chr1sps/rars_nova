@@ -1,11 +1,11 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import javax.swing.JOptionPane;
-
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
+import javax.swing.*;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -47,13 +47,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * -1: input data cannot be correctly parsed <br>
  * -2: Cancel was chosen <br>
  * -3: OK was chosen but no data had been input into field <br>
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class SyscallInputDialogInt extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallInputDialogInt.</p>
+     */
     public SyscallInputDialogInt() {
         super("InputDialogInt");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         String message = NullString.get(statement);
 

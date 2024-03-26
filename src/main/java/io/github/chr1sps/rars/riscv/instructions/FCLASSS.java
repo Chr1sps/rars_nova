@@ -34,7 +34,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FCLASSS class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FCLASSS extends BasicInstruction {
+    /**
+     * <p>Constructor for FCLASSS.</p>
+     */
     public FCLASSS() {
         super("fclass.s t1, f1", "Classify a floating point number",
                 BasicInstructionFormat.I_FORMAT, "1110000 00000 sssss 001 fffff 1010011");
@@ -53,12 +62,23 @@ public class FCLASSS extends BasicInstruction {
      * 8 t1 is a signaling NaN (Not implemented due to Java).
      * 9 t1 is a quiet NaN.
      */
+
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         Float32 in = new Float32(FloatingPointRegisterFile.getValue(operands[1]));
         fclass(in, operands[0]);
     }
 
+    /**
+     * <p>fclass.</p>
+     *
+     * @param in  a T object
+     * @param out a int
+     * @param <T> a T class
+     */
     public static <T extends io.github.chr1sps.jsoftfloat.types.Floating<T>> void fclass(T in, int out) {
         if (in.isNaN()) {
             RegisterFile.updateRegister(out, in.isSignalling() ? 0x100 : 0x200);

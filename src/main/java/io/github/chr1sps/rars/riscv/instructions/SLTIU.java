@@ -27,13 +27,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SLTIU class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SLTIU extends ImmediateInstruction {
+    /**
+     * <p>Constructor for SLTIU.</p>
+     */
     public SLTIU() {
         super("sltiu t1,t2,-100",
                 "Set less than immediate unsigned : If t2 is less than  sign-extended 16-bit immediate using unsigned comparison, then set t1 to 1 else set t1 to 0",
                 "011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long immediate) {
         return (Long.compareUnsigned(value, immediate) < 0) ? 1 : 0;
     }

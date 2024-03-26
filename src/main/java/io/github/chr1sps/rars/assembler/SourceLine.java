@@ -37,6 +37,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * a given line of code. When .include is used, it will migrate to a different
  * line and possibly different program but the migration should not be visible
  * to the user.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class SourceLine {
     private String source;
@@ -74,7 +77,6 @@ public class SourceLine {
      *
      * @return File name as String
      */
-
     public String getFilename() {
         return filename;
     }
@@ -84,7 +86,6 @@ public class SourceLine {
      *
      * @return Line number of source statement
      */
-
     public int getLineNumber() {
         return lineNumber;
     }
@@ -94,7 +95,6 @@ public class SourceLine {
      *
      * @return program as RISCVprogram object
      */
-
     public RISCVprogram getRISCVprogram() {
         return program;
     }

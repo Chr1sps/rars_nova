@@ -1,6 +1,6 @@
 package io.github.chr1sps.rars.riscv.hardware;
 
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.simulator.Simulator;
 
@@ -8,10 +8,16 @@ import io.github.chr1sps.rars.simulator.Simulator;
  * Manages the flow of interrupts to the processor
  * <p>
  * Roughly corresponds to PLIC in the spec, but it additionally (kindof) handles
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 // TODO: add backstepper support
 public class InterruptController {
     // Lock for synchronizing as this is a static class
+    /**
+     * Constant <code>lock</code>
+     */
     public static final Object lock = new Object();
 
     // Status for the interrupt state
@@ -25,6 +31,9 @@ public class InterruptController {
     private static SimulationException trapSE;
     private static int trapPC;
 
+    /**
+     * <p>reset.</p>
+     */
     public static void reset() {
         synchronized (lock) {
             externalPending = false;
@@ -33,6 +42,12 @@ public class InterruptController {
         }
     }
 
+    /**
+     * <p>registerExternalInterrupt.</p>
+     *
+     * @param value a int
+     * @return a boolean
+     */
     public static boolean registerExternalInterrupt(int value) {
         synchronized (lock) {
             if (externalPending)
@@ -44,6 +59,12 @@ public class InterruptController {
         }
     }
 
+    /**
+     * <p>registerTimerInterrupt.</p>
+     *
+     * @param value a int
+     * @return a boolean
+     */
     public static boolean registerTimerInterrupt(int value) {
         synchronized (lock) {
             if (timerPending)
@@ -55,6 +76,13 @@ public class InterruptController {
         }
     }
 
+    /**
+     * <p>registerSynchronousTrap.</p>
+     *
+     * @param se a {@link SimulationException} object
+     * @param pc a int
+     * @return a boolean
+     */
     public static boolean registerSynchronousTrap(SimulationException se, int pc) {
         synchronized (lock) {
             if (trapPending)
@@ -66,24 +94,44 @@ public class InterruptController {
         }
     }
 
+    /**
+     * <p>externalPending.</p>
+     *
+     * @return a boolean
+     */
     public static boolean externalPending() {
         synchronized (lock) {
             return externalPending;
         }
     }
 
+    /**
+     * <p>timerPending.</p>
+     *
+     * @return a boolean
+     */
     public static boolean timerPending() {
         synchronized (lock) {
             return timerPending;
         }
     }
 
+    /**
+     * <p>trapPending.</p>
+     *
+     * @return a boolean
+     */
     public static boolean trapPending() {
         synchronized (lock) {
             return trapPending;
         }
     }
 
+    /**
+     * <p>claimExternal.</p>
+     *
+     * @return a int
+     */
     public static int claimExternal() {
         synchronized (lock) {
             assert externalPending : "Cannot claim, no external interrupt pending";
@@ -92,6 +140,11 @@ public class InterruptController {
         }
     }
 
+    /**
+     * <p>claimTimer.</p>
+     *
+     * @return a int
+     */
     public static int claimTimer() {
         synchronized (lock) {
             assert timerPending : "Cannot claim, no timer interrupt pending";
@@ -100,6 +153,11 @@ public class InterruptController {
         }
     }
 
+    /**
+     * <p>claimTrap.</p>
+     *
+     * @return a {@link SimulationException} object
+     */
     public static SimulationException claimTrap() {
         synchronized (lock) {
             assert trapPending : "Cannot claim, no trap pending";

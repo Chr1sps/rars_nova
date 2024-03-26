@@ -36,12 +36,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FEQS class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FEQS extends BasicInstruction {
+    /**
+     * <p>Constructor for FEQS.</p>
+     */
     public FEQS() {
         super("feq.s t1, f1, f2", "Floating EQuals: if f1 = f2, set t1 to 1, else set t1 to 0",
                 BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 010 fffff 1010011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         Float32 f1 = Floating.getFloat(operands[1]), f2 = Floating.getFloat(operands[2]);

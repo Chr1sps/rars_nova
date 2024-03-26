@@ -59,8 +59,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * duties were split between EditPane and the new EditTabbedPane class.
  *
  * @author Sanderson and Bumgarner
+ * @version $Id: $Id
  */
-
 public class EditPane extends JPanel implements Observer {
 
     private TextEditingArea sourceCode;
@@ -76,8 +76,9 @@ public class EditPane extends JPanel implements Observer {
 
     /**
      * Constructor for the EditPane class.
+     *
+     * @param appFrame a {@link io.github.chr1sps.rars.venus.VenusUI} object
      */
-
     public EditPane(VenusUI appFrame) {
         super(new BorderLayout());
         this.mainUI = appFrame;
@@ -202,7 +203,6 @@ public class EditPane extends JPanel implements Observer {
      * @param s        String containing text
      * @param editable set true if code is editable else false
      */
-
     public void setSourceCode(String s, boolean editable) {
         sourceCode.setSourceCode(s, editable);
     }
@@ -228,6 +228,12 @@ public class EditPane extends JPanel implements Observer {
      */
     private static final String spaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
+    /**
+     * <p>getLineNumbersList.</p>
+     *
+     * @param doc a {@link javax.swing.text.Document} object
+     * @return a {@link java.lang.String} object
+     */
     public String getLineNumbersList(javax.swing.text.Document doc) {
         StringBuffer lineNumberList = new StringBuffer("<html>");
         int lineCount = doc.getDefaultRootElement().getElementCount(); // this.getSourceLineCount();
@@ -249,6 +255,8 @@ public class EditPane extends JPanel implements Observer {
      * Calculate and return number of lines in source code text.
      * Do this by counting newline characters then adding one if last line does
      * not end with newline character.
+     *
+     * @return a int
      */
 
     /*
@@ -292,14 +300,17 @@ public class EditPane extends JPanel implements Observer {
     /**
      * Get the editing status for this EditPane's associated document.
      * This will be one of the constants from class FileStatus.
+     *
+     * @return a int
      */
-
     public int getFileStatus() {
         return this.fileStatus.getFileStatus();
     }
 
     /**
      * Delegates to corresponding FileStatus method
+     *
+     * @return a {@link java.lang.String} object
      */
     public String getFilename() {
         return this.fileStatus.getFilename();
@@ -307,6 +318,8 @@ public class EditPane extends JPanel implements Observer {
 
     /**
      * Delegates to corresponding FileStatus method
+     *
+     * @return a {@link java.lang.String} object
      */
     public String getPathname() {
         return this.fileStatus.getPathname();
@@ -314,6 +327,8 @@ public class EditPane extends JPanel implements Observer {
 
     /**
      * Delegates to corresponding FileStatus method
+     *
+     * @param pathname a {@link java.lang.String} object
      */
     public void setPathname(String pathname) {
         this.fileStatus.setPathname(pathname);
@@ -321,6 +336,8 @@ public class EditPane extends JPanel implements Observer {
 
     /**
      * Delegates to corresponding FileStatus method
+     *
+     * @return a boolean
      */
     public boolean hasUnsavedEdits() {
         return this.fileStatus.hasUnsavedEdits();
@@ -328,6 +345,8 @@ public class EditPane extends JPanel implements Observer {
 
     /**
      * Delegates to corresponding FileStatus method
+     *
+     * @return a boolean
      */
     public boolean isNew() {
         return this.fileStatus.isNew();
@@ -336,7 +355,6 @@ public class EditPane extends JPanel implements Observer {
     /**
      * Delegates to text area's requestFocusInWindow method.
      */
-
     public void tellEditingComponentToRequestFocusInWindow() {
         this.sourceCode.requestFocusInWindow();
     }
@@ -494,7 +512,7 @@ public class EditPane extends JPanel implements Observer {
      * @param line   Line number in file (starts with 1)
      * @param column Position within that line (starts with 1)
      * @return corresponding stream position. Returns -1 if there is no
-     *         corresponding position.
+     * corresponding position.
      */
     public int convertLineColumnToStreamPosition(int line, int column) {
         String textStream = sourceCode.getText();
@@ -581,14 +599,14 @@ public class EditPane extends JPanel implements Observer {
      *                      text exists
      * @param caseSensitive true for case sensitive. false to ignore case
      * @return Returns TEXT_FOUND if not initially at end of selected match and
-     *         matching
-     *         occurrence is found. Returns TEXT_NOT_FOUND if the text is not
-     *         matched.
-     *         Returns TEXT_REPLACED_NOT_FOUND_NEXT if replacement is successful but
-     *         there are
-     *         no additional matches. Returns TEXT_REPLACED_FOUND_NEXT if
-     *         reaplacement is
-     *         successful and there is at least one additional match.
+     * matching
+     * occurrence is found. Returns TEXT_NOT_FOUND if the text is not
+     * matched.
+     * Returns TEXT_REPLACED_NOT_FOUND_NEXT if replacement is successful but
+     * there are
+     * no additional matches. Returns TEXT_REPLACED_FOUND_NEXT if
+     * reaplacement is
+     * successful and there is at least one additional match.
      */
     public int doReplace(String find, String replace, boolean caseSensitive) {
         return sourceCode.doReplace(find, replace, caseSensitive);
@@ -612,6 +630,8 @@ public class EditPane extends JPanel implements Observer {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Update, if source code is visible, when Font setting changes.
      * This method is specified by the Observer interface.
      */

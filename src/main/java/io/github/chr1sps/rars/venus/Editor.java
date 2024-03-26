@@ -34,13 +34,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Manage the file being edited.
  * Currently only manages one file at a time, but can be expanded.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
-
 public class Editor {
 
+    /**
+     * Constant <code>MIN_TAB_SIZE=1</code>
+     */
     public static final int MIN_TAB_SIZE = 1;
+    /**
+     * Constant <code>MAX_TAB_SIZE=32</code>
+     */
     public static final int MAX_TAB_SIZE = 32;
+    /**
+     * Constant <code>MIN_BLINK_RATE=0</code>
+     */
     public static final int MIN_BLINK_RATE = 0; // no flashing
+    /**
+     * Constant <code>MAX_BLINK_RATE=1000</code>
+     */
     public static final int MAX_BLINK_RATE = 1000; // once per second
 
     private VenusUI mainUI;
@@ -75,6 +89,12 @@ public class Editor {
     }
 
     // TODO: this doesn't really fit here, it doesn't interact with the GUI
+
+    /**
+     * <p>getOpenFilePaths.</p>
+     *
+     * @return an array of {@link java.lang.String} objects
+     */
     public String[] getOpenFilePaths() {
         return editTabbedPane.getOpenFilePaths();
     }
@@ -92,11 +112,10 @@ public class Editor {
      * Get name of current directory for Open operation.
      *
      * @return String containing directory pathname. Returns null if there is
-     *         no EditTabbedPane. Returns default, directory MARS is launched from,
-     *         if
-     *         no Opens have been performed.
+     * no EditTabbedPane. Returns default, directory MARS is launched from,
+     * if
+     * no Opens have been performed.
      */
-
     public String getCurrentOpenDirectory() {
         return currentOpenDirectory;
     }
@@ -125,11 +144,10 @@ public class Editor {
      * Get name of current directory for Save or Save As operation.
      *
      * @return String containing directory pathname. Returns null if there is
-     *         no EditTabbedPane. Returns default, directory MARS is launched from,
-     *         if
-     *         no Save or Save As operations have been performed.
+     * no EditTabbedPane. Returns default, directory MARS is launched from,
+     * if
+     * no Save or Save As operations have been performed.
      */
-
     public String getCurrentSaveDirectory() {
         return currentSaveDirectory;
     }
@@ -252,7 +270,7 @@ public class Editor {
 
     /**
      * Open files in new tabs.
-     * 
+     *
      * @param paths File paths to open
      * @return true if succeeded, else false.
      */
@@ -276,8 +294,8 @@ public class Editor {
      * File->Close, and File->Exit.
      *
      * @return false means user selected Cancel so caller should do that.
-     *         Return of true means caller can proceed (edits were saved or
-     *         discarded).
+     * Return of true means caller can proceed (edits were saved or
+     * discarded).
      */
     public boolean editsSavedOrAbandoned() {
         return editTabbedPane.editsSavedOrAbandoned();

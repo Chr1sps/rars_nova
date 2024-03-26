@@ -38,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-
 public class TokenList implements Cloneable, Iterable<Token> {
 
     private ArrayList<Token> tokenList;
@@ -52,6 +51,11 @@ public class TokenList implements Cloneable, Iterable<Token> {
         processedLine = ""; // DPS 03-Jan-2013
     }
 
+    /**
+     * <p>iterator.</p>
+     *
+     * @return a {@link java.util.Iterator} object
+     */
     public Iterator<Token> iterator() {
         return tokenList.iterator();
     }
@@ -75,7 +79,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * assembly preprocessing.
      *
      * @return The source line for this token list.
-     */ // DPS 03-Jan-2013/
+     */
+    // DPS 03-Jan-2013/
     public String getProcessedLine() {
         return processedLine;
     }
@@ -125,8 +130,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      *
      * @param pos Position in token list. Subsequent Tokens are shifted one position
      *            left.
-     * @throws IndexOutOfBoundsException if <tt>pos</tt> is < 0 or >=
-     *                                   <tt>size()</tt>
+     * @throws java.lang.IndexOutOfBoundsException if <code>pos</code> is &lt; 0 or &ge;
+     *                                             <code>size()</code>
      */
     public void remove(int pos) {
         tokenList.remove(pos);
@@ -135,7 +140,7 @@ public class TokenList implements Cloneable, Iterable<Token> {
     /**
      * Returns empty/non-empty status of list.
      *
-     * @return <tt>true</tt> if list has no tokens, else <tt>false</tt>.
+     * @return <code>true</code> if list has no tokens, else <code>false</code>.
      */
     public boolean isEmpty() {
         return tokenList.isEmpty();
@@ -145,9 +150,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * Get a String representing the token list.
      *
      * @return String version of the token list
-     *         (a blank is inserted after each token).
+     * (a blank is inserted after each token).
      */
-
     public String toString() {
         String stringified = "";
         for (Token token : tokenList) {
@@ -160,9 +164,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * Get a String representing the sequence of token types for this list.
      *
      * @return String version of the token types for this list
-     *         (a blank is inserted after each token type).
+     * (a blank is inserted after each token type).
      */
-
     public String toTypeString() {
         String stringified = "";
         for (Token t : tokenList) {

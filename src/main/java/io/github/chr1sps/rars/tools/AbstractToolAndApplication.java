@@ -1,42 +1,22 @@
 package io.github.chr1sps.rars.tools;
 
-import javax.swing.AbstractButton;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileFilter;
-
-import io.github.chr1sps.rars.AssemblyException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.RISCVprogram;
 import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AssemblyException;
 import io.github.chr1sps.rars.riscv.hardware.*;
 import io.github.chr1sps.rars.simulator.Simulator;
 import io.github.chr1sps.rars.simulator.SimulatorNotice;
 import io.github.chr1sps.rars.util.FilenameFinder;
 import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Insets;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,11 +71,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * a button that assembles and runs the current program, a button to interrupt
  * the running program, a reset button, and an exit button.
  * Pete Sanderson, 14 November 2006.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public abstract class AbstractToolAndApplication extends JFrame implements Tool, Observer {
     protected boolean isBeingUsedAsATool = false; // can use to determine whether invoked as Tool or stand-alone.
     private JDialog dialog; // used only for Tool use. This is the pop-up dialog that appears when menu item
-                            // selected.
+    // selected.
     protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
 
     // Major GUI components
@@ -129,7 +112,8 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
     /**
      * Simple constructor
      *
-     * @param title String containing title bar text
+     * @param title   String containing title bar text
+     * @param heading a {@link java.lang.String} object
      */
     protected AbstractToolAndApplication(String title, String heading) {
         this.title = title;
@@ -152,6 +136,8 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * display area
      * of the GUI. It will be placed in the CENTER area of a BorderLayout. The title
      * is in the NORTH area, and the controls are in the SOUTH area.
+     *
+     * @return a {@link javax.swing.JComponent} object
      */
     protected abstract JComponent buildMainDisplayArea();
 
@@ -237,7 +223,6 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * buildMainDisplayArea()
      * to contain application-specific displays of parameters and results.
      */
-
     public void action() {
         this.isBeingUsedAsATool = true;
         dialog = new JDialog(Globals.getGui(), this.title);
@@ -296,6 +281,8 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
     /**
      * Constructs GUI header as label with default positioning and font. May be
      * overridden.
+     *
+     * @return a {@link javax.swing.JComponent} object
      */
     protected JComponent buildHeadingArea() {
         // OVERALL STRUCTURE OF MESSAGE (TOP)
@@ -316,6 +303,8 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * dual-purpose button to
      * attach or detach simulator to memory, a button to reset the cache, and one to
      * close the tool.
+     *
+     * @return a {@link javax.swing.JComponent} object
      */
     protected JComponent buildButtonAreaForTool() {
         Box buttonArea = Box.createHorizontalBox();
@@ -379,8 +368,9 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * button
      * whose action is determined by the subclass reset() method, and an exit
      * button.
+     *
+     * @return a {@link javax.swing.JComponent} object
      */
-
     protected JComponent buildButtonAreaStandAlone() {
         // Overall structure of control area (two rows).
         Box operationArea = Box.createVerticalBox();
@@ -528,6 +518,8 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
     //////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Called when receiving notice of access to memory or registers. Default
      * implementation of method required by Observer interface. This method will
      * filter out
@@ -536,9 +528,6 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * displays. Only notices arising from program access are allowed in.
      * It then calls two methods to be overridden by the subclass (since they do
      * nothing by default): processRISCVUpdate() then updateDisplay().
-     *
-     * @param resource     the attached resource
-     * @param accessNotice AccessNotice information provided by the resource
      */
     public void update(Observable resource, Object accessNotice) {
         if (((AccessNotice) accessNotice).accessIsFromRISCV()) {
@@ -555,6 +544,9 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * By default it does nothing. After this method is complete, the
      * updateDisplay() method will be
      * invoked automatically.
+     *
+     * @param resource a {@link java.util.Observable} object
+     * @param notice   a {@link io.github.chr1sps.rars.riscv.hardware.AccessNotice} object
      */
     protected void processRISCVUpdate(Observable resource, AccessNotice notice) {
     }
@@ -587,7 +579,6 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * or nothing at all. This method is also overloaded to allow arbitrary memory
      * subrange.
      */
-
     protected void addAsObserver() {
         addAsObserver(lowMemoryAddress, highMemoryAddress);
     }
@@ -604,7 +595,6 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * @param lowEnd  low end of memory address range.
      * @param highEnd high end of memory address range; must be >= lowEnd
      */
-
     protected void addAsObserver(int lowEnd, int highEnd) {
         String errorMessage = "Error connecting to memory";
         try {
@@ -620,6 +610,8 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
 
     /**
      * Add this app/tool as an Observer of the specified register.
+     *
+     * @param reg a {@link io.github.chr1sps.rars.riscv.hardware.Register} object
      */
     protected void addAsObserver(Register reg) {
         if (reg != null) {
@@ -637,15 +629,15 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * on a stand-alone
      * app terminates (e.g. when the button is re-enabled).
      */
-
     protected void deleteAsObserver() {
         Globals.memory.deleteObserver(this);
     }
 
     /**
      * Delete this app/tool as an Observer of the specified register
+     *
+     * @param reg a {@link io.github.chr1sps.rars.riscv.hardware.Register} object
      */
-
     protected void deleteAsObserver(Register reg) {
         if (reg != null) {
             reg.deleteObserver(this);
@@ -667,7 +659,6 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      *
      * @return true if tool/app is (or could be) currently active as an Observer.
      */
-
     protected boolean isObserving() {
         return observing;
     }
@@ -688,6 +679,8 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * to be placed just left of the Close/Exit button. Its anticipated use is for a
      * "help" button that launches a help message or dialog. But it can be any valid
      * JComponent that doesn't mind co-existing among a bunch of JButtons.
+     *
+     * @return a {@link javax.swing.JComponent} object
      */
     protected JComponent getHelpComponent() {
         return null;

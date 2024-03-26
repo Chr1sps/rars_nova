@@ -142,6 +142,9 @@ public class Globals {
      */
     public static int exitCode = 0;
 
+    /**
+     * Constant <code>runSpeedPanelExists=false</code>
+     */
     public static boolean runSpeedPanelExists = false;
 
     private static String getCopyrightYears() {
@@ -152,14 +155,29 @@ public class Globals {
         return "Pete Sanderson and Kenneth Vollmar";
     }
 
+    /**
+     * <p>Setter for the field <code>gui</code>.</p>
+     *
+     * @param g a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     */
     public static void setGui(VenusUI g) {
         gui = g;
     }
 
+    /**
+     * <p>Getter for the field <code>gui</code>.</p>
+     *
+     * @return a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     */
     public static VenusUI getGui() {
         return gui;
     }
 
+    /**
+     * <p>Getter for the field <code>settings</code>.</p>
+     *
+     * @return a {@link io.github.chr1sps.rars.Settings} object
+     */
     public static Settings getSettings() {
         return settings;
     }
@@ -167,8 +185,7 @@ public class Globals {
     /**
      * Method called once upon system initialization to create the global data
      * structures.
-     **/
-
+     */
     public static void initialize() {
         if (!initialized) {
             memory = Memory.getInstance(); // clients can use Memory.getInstance instead of Globals.memory
@@ -199,6 +216,12 @@ public class Globals {
 
     // Read ASCII default display character for non-printing characters, from
     // properties file.
+
+    /**
+     * <p>getAsciiNonPrint.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public static String getAsciiNonPrint() {
         String anp = getPropertyEntry(configPropertiesFile, "AsciiNonPrint");
         return (anp == null) ? "." : ((anp.equals("space")) ? " " : anp);
@@ -207,6 +230,12 @@ public class Globals {
     // Read ASCII strings for codes 0-255, from properties file. If string
     // value is "null", substitute value of ASCII_NON_PRINT. If string is
     // "space", substitute string containing one space character.
+
+    /**
+     * <p>getAsciiStrings.</p>
+     *
+     * @return an array of {@link java.lang.String} objects
+     */
     public static String[] getAsciiStrings() {
         String let = getPropertyEntry(configPropertiesFile, "AsciiTable");
         String placeHolder = getAsciiNonPrint();

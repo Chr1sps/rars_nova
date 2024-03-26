@@ -1,4 +1,4 @@
-package io.github.chr1sps.rars;
+package io.github.chr1sps.rars.exceptions;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -27,6 +27,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import io.github.chr1sps.rars.ErrorList;
+import io.github.chr1sps.rars.ErrorMessage;
+
 /**
  * Exception wrapping ErrorList, used mainly in Tokenizer and Assembler;
  * Represents errors that occurs while assembling a RISCV program.
@@ -37,6 +40,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public class AssemblyException extends Exception {
     private ErrorList errs;
 
+    /**
+     * <p>Constructor for AssemblyException.</p>
+     *
+     * @param errs a {@link io.github.chr1sps.rars.ErrorList} object
+     */
     public AssemblyException(ErrorList errs) {
         this.errs = errs;
     }
@@ -47,7 +55,7 @@ public class AssemblyException extends Exception {
      * @return Returns ErrorList of error messages.
      * @see ErrorList
      * @see ErrorMessage
-     **/
+     */
     public ErrorList errors() {
         return errs;
     }

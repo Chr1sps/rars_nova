@@ -7,6 +7,7 @@ import javax.swing.table.*;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.*;
 import io.github.chr1sps.rars.simulator.Simulator;
 import io.github.chr1sps.rars.simulator.SimulatorNotice;
@@ -48,8 +49,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Creates the Text Segment window in the Execute tab of the UI
  *
  * @author Team JSpim
- **/
-
+ * @version $Id: $Id
+ */
 public class TextSegmentWindow extends JInternalFrame implements Observer {
     private JPanel programArgumentsPanel; // DPS 17-July-2008
     private JTextField programArgumentsTextField; // DPS 17-July-2008
@@ -68,7 +69,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
     private int[] intAddresses; // index is table model row, value is text address
     private Hashtable<Integer, Integer> addressRows; // key is text address, value is table model row
     private Hashtable<Integer, ModifiedCode> executeMods; // key is table model row, value is original code, basic,
-                                                          // source.
+    // source.
     private Container contentPane;
     private TextTableModel tableModel;
     private Font tableCellFont = new Font("Monospaced", Font.PLAIN, 12);
@@ -77,7 +78,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
     private int highlightAddress;
     private TableModelListener tableModelListener;
 
-    private static String[] columnNames = { "Bkpt", "Address", "Code", "Basic", "Source" };
+    private static String[] columnNames = {"Bkpt", "Address", "Code", "Basic", "Source"};
     private static final int BREAK_COLUMN = 0;
     private static final int ADDRESS_COLUMN = 1;
     private static final int CODE_COLUMN = 2;
@@ -91,8 +92,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
 
     /**
      * Constructor, sets up a new JInternalFrame.
-     **/
-
+     */
     public TextSegmentWindow() {
         super("Text Segment", true, false, true, true);
         Simulator.getInstance().addObserver(this);
@@ -111,7 +111,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
     /**
      * Method to be called once the user compiles the program.
      * Should convert the lines of code over to the table rows and columns.
-     **/
+     */
     public void setupTable() {
         int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
         codeHighlighting = true;
@@ -212,6 +212,9 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
         return programArgumentsTextField.getText();
     }
 
+    /**
+     * <p>addProgramArgumentsPanel.</p>
+     */
     public void addProgramArgumentsPanel() {
         // Don't add it if text segment window blank (file closed or no assemble yet)
         if (contentPane != null && contentPane.getComponentCount() > 0) {
@@ -220,6 +223,9 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
         }
     }
 
+    /**
+     * <p>removeProgramArgumentsPanel.</p>
+     */
     public void removeProgramArgumentsPanel() {
         if (contentPane != null) {
             contentPane.remove(programArgumentsPanel);
@@ -245,6 +251,8 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
      * listener then
      * add it as a listener each time a new table model object is created. Limit 1
      * listener.
+     *
+     * @param tml a {@link javax.swing.event.TableModelListener} object
      */
     public void registerTableModelListener(TableModelListener tml) {
         tableModelListener = tml;
@@ -301,6 +309,8 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Required by Observer interface. Called when notified by an Observable that we
      * are registered with.
      * The Observable here is a delegate of the Memory object, which lets us know of
@@ -309,11 +319,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
      * only range of
      * addresses we're registered for. And we're only interested in write
      * operations.
-     *
-     * @param observable The Observable object who is notifying us
-     * @param obj        Auxiliary object with additional information.
      */
-
     public void update(Observable observable, Object obj) {
         if (observable == io.github.chr1sps.rars.simulator.Simulator.getInstance()) {
 
@@ -328,12 +334,12 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
                 // even when running at unlimited speed. DPS 10-July-2013
                 deleteAsTextSegmentObserver();
                 if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) { // &&
-                                                                                                          // (notice.getRunSpeed()
-                                                                                                          // !=
-                                                                                                          // RunSpeedPanel.UNLIMITED_SPEED
-                                                                                                          // ||
-                                                                                                          // notice.getMaxSteps()==1))
-                                                                                                          // {
+                    // (notice.getRunSpeed()
+                    // !=
+                    // RunSpeedPanel.UNLIMITED_SPEED
+                    // ||
+                    // notice.getMaxSteps()==1))
+                    // {
                     addAsTextSegmentObserver();
                 }
             }
@@ -430,7 +436,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
      */
     public void resetModifiedSourceCode() {
         if (executeMods != null && !executeMods.isEmpty()) {
-            for (Enumeration<ModifiedCode> elements = executeMods.elements(); elements.hasMoreElements();) {
+            for (Enumeration<ModifiedCode> elements = executeMods.elements(); elements.hasMoreElements(); ) {
                 ModifiedCode mc = elements.nextElement();
                 tableModel.setValueAt(mc.getCode(), mc.getRow(), CODE_COLUMN);
                 tableModel.setValueAt(mc.getBasic(), mc.getRow(), BASIC_COLUMN);
@@ -454,7 +460,6 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
      *
      * @return number of current breakpoints
      */
-
     public int getBreakpointCount() {
         int breakpointCount = 0;
         for (Object[] data : data) {
@@ -471,7 +476,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
      * These are stored in the BREAK_COLUMN of the table model.
      *
      * @return int array of breakpoints, sorted by PC address, or null if there are
-     *         none.
+     * none.
      */
     public int[] getSortedBreakPointsArray() {
         int breakpointCount = getBreakpointCount();
@@ -533,7 +538,6 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
      *
      * @param address Text segment address of instruction to be highlighted.
      */
-
     public void highlightStepAtAddress(int address) {
         highlightAddress = address;
         // Scroll if necessary to assure highlighted row is visible.
@@ -853,7 +857,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
     class CodeCellRenderer extends DefaultTableCellRenderer {
 
         public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
             Component cell = super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
             // cell.setFont(tableCellFont);
@@ -886,7 +890,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
      */
     class MachineCodeCellRenderer extends DefaultTableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
             JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
             cell.setFont(MonoRightCellRenderer.MONOSPACED_PLAIN_12POINT);
@@ -935,7 +939,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
              * Synchronization
              * will come into play in the SimThread class? It could get complicated, which
              * is why I'm dropping it for release 3.8. DPS 31-dec-2009
-             * 
+             *
              * addItemListener(
              * new ItemListener(){
              * public void itemStateChanged(ItemEvent e) {
@@ -944,7 +948,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
              * if (e.getStateChange()==ItemEvent.DESELECTED) what = "deselected";
              * System.out.println("Item "+what);
              * }});
-             * 
+             *
              * For a different approach, see RunClearBreakpointsAction.java. This menu item
              * registers
              * as a TableModelListener by calling the TextSegmentWindow's
@@ -957,14 +961,14 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
              * SwingWorker and
              * thus is only invoked when the IDE is present (never when running MARS in
              * command mode).
-             * 
+             *
              *****************************************************/
         }
 
         public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected,
-                boolean hasFocus,
-                int row, int column) {
+                                                       boolean isSelected,
+                                                       boolean hasFocus,
+                                                       int row, int column) {
 
             if (table == null) {
                 // ???

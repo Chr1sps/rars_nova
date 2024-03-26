@@ -33,8 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version August 2003
- **/
-
+ */
 public final class DataTypes {
     /**
      * Number of bytes occupied by double is 8.
@@ -116,10 +115,9 @@ public final class DataTypes {
      *
      * @param direct Directive to be measured.
      * @return Returns length in bytes for values of that type. If type is not
-     *         numeric
-     *         (or not implemented yet), returns 0.
-     **/
-
+     * numeric
+     * (or not implemented yet), returns 0.
+     */
     public static int getLengthInBytes(Directives direct) {
         if (direct == Directives.FLOAT)
             return FLOAT_SIZE;
@@ -143,11 +141,11 @@ public final class DataTypes {
      *
      * @param direct Directive that controls storage allocation for value.
      * @param value  The value to be stored.
-     * @return Returns <tt>true</tt> if value can be stored in the number of bytes
-     *         allowed
-     *         by the given directive (.word, .half, .byte), <tt>false</tt>
-     *         otherwise.
-     **/
+     * @return Returns <code>true</code> if value can be stored in the number of bytes
+     * allowed
+     * by the given directive (.word, .half, .byte), <code>false</code>
+     * otherwise.
+     */
     public static boolean outOfRange(Directives direct, int value) {
         // Hex values used here rather than constants because there aren't constants for
         // unsigned max
@@ -167,9 +165,9 @@ public final class DataTypes {
      *
      * @param direct Directive that controls storage allocation for value.
      * @param value  The value to be stored.
-     * @return Returns <tt>true</tt> if value is within range of
-     *         the given directive (.float, .double), <tt>false</tt> otherwise.
-     **/
+     * @return Returns <code>true</code> if value is within range of
+     * the given directive (.float, .double), <code>false</code> otherwise.
+     */
     public static boolean outOfRange(Directives direct, double value) {
         return direct == Directives.FLOAT && (value < LOW_FLOAT_VALUE || value > MAX_FLOAT_VALUE);
     }

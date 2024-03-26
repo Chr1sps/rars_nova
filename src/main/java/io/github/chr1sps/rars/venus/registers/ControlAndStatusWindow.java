@@ -6,6 +6,12 @@ import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.Register;
 import io.github.chr1sps.rars.venus.NumberDisplayBaseChooser;
 
+/**
+ * <p>ControlAndStatusWindow class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class ControlAndStatusWindow extends RegisterBlockWindow {
     /*
      * The tips to show when hovering over the names of the registers
@@ -31,10 +37,16 @@ public class ControlAndStatusWindow extends RegisterBlockWindow {
             /* instreth */ "High 32 bits of instret"
     };
 
+    /**
+     * <p>Constructor for ControlAndStatusWindow.</p>
+     */
     public ControlAndStatusWindow() {
         super(ControlAndStatusRegisterFile.getRegisters(), regToolTips, "Current 32 bit value");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected String formatRegister(Register value, int base) {
         if (Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED)) {
             return NumberDisplayBaseChooser.formatNumber(value.getValue(), base);
@@ -43,14 +55,23 @@ public class ControlAndStatusWindow extends RegisterBlockWindow {
         }
     }
 
+    /**
+     * <p>beginObserving.</p>
+     */
     protected void beginObserving() {
         ControlAndStatusRegisterFile.addRegistersObserver(this);
     }
 
+    /**
+     * <p>endObserving.</p>
+     */
     protected void endObserving() {
         ControlAndStatusRegisterFile.deleteRegistersObserver(this);
     }
 
+    /**
+     * <p>resetRegisters.</p>
+     */
     public void resetRegisters() {
         ControlAndStatusRegisterFile.resetRegisters();
     }

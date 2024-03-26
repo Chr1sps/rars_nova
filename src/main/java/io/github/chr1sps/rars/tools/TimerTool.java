@@ -37,7 +37,7 @@ import javax.swing.*;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.InterruptController;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
@@ -45,7 +45,10 @@ import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 
 /**
  * A RARS tool used to implement a timing module and timer inturrpts.
- **/
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class TimerTool extends AbstractToolAndApplication {
     private static String heading = "Timer Tool";
     private static String version = "Version 1.0 (Zachary Selk)";
@@ -70,26 +73,49 @@ public class TimerTool extends AbstractToolAndApplication {
     private static boolean updateTime = false; // Controls when time progresses (for pausing)
     private static boolean running = false; // true while tick thread is running
 
+    /**
+     * <p>Constructor for TimerTool.</p>
+     */
     public TimerTool() {
         super(heading + ", " + version, heading);
         startTimeCmpDaemon();
     }
 
+    /**
+     * <p>Constructor for TimerTool.</p>
+     *
+     * @param title   a {@link java.lang.String} object
+     * @param heading a {@link java.lang.String} object
+     */
     public TimerTool(String title, String heading) {
         super(title, heading);
         startTimeCmpDaemon();
     }
 
+    /**
+     * <p>main.</p>
+     *
+     * @param args an array of {@link java.lang.String} objects
+     */
     public static void main(String[] args) {
         new TimerTool(heading + ", " + version, heading);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return "Timer Tool";
     }
 
     // Set up the tools interface
+
+    /**
+     * <p>buildMainDisplayArea.</p>
+     *
+     * @return a {@link javax.swing.JComponent} object
+     */
     protected JComponent buildMainDisplayArea() {
         JPanel panelTools = new JPanel(new GridLayout(1, 2));
         timePanel = new TimePanel();
@@ -130,12 +156,17 @@ public class TimerTool extends AbstractToolAndApplication {
     }
 
     // Overwrites the empty parent method, called when the tool is closed
+
+    /**
+     * <p>performSpecialClosingDuties.</p>
+     */
     protected void performSpecialClosingDuties() {
         stop();
     }
 
-    /*************************** Timer controls *****************************/
-
+    /**
+     * ************************ Timer controls ****************************
+     */
     public void start() {
         if (!running) {
             // Start a timer that checks to see if a timer interupt needs to be raised
@@ -145,6 +176,9 @@ public class TimerTool extends AbstractToolAndApplication {
         }
     }
 
+    /**
+     * <p>play.</p>
+     */
     public void play() {
         // Gaurd against multiple plays
         if (!updateTime) {
@@ -154,6 +188,9 @@ public class TimerTool extends AbstractToolAndApplication {
 
     }
 
+    /**
+     * <p>pause.</p>
+     */
     public void pause() {
         // Gaurd against multiple pauses
         if (updateTime) {
@@ -164,6 +201,10 @@ public class TimerTool extends AbstractToolAndApplication {
     }
 
     // Reset all of our counters to their default values
+
+    /**
+     * <p>reset.</p>
+     */
     protected void reset() {
         time = 0L;
         savedTime = 0L;
@@ -174,6 +215,10 @@ public class TimerTool extends AbstractToolAndApplication {
     }
 
     // Shutdown the timer (note that we keep the TimeCmpDaemon running)
+
+    /**
+     * <p>stop.</p>
+     */
     public void stop() {
         updateTime = false;
         timer.cancel();
@@ -307,6 +352,12 @@ public class TimerTool extends AbstractToolAndApplication {
     }
 
     // A help popup window on how to use this tool
+
+    /**
+     * <p>getHelpComponent.</p>
+     *
+     * @return a {@link javax.swing.JComponent} object
+     */
     protected JComponent getHelpComponent() {
         final String helpContent = "Use this tool to simulate the Memory Mapped IO (MMIO) for a timing device allowing the program to utalize timer interupts. "
                 +

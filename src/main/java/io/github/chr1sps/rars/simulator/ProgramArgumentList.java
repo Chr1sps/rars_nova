@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
@@ -43,8 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version July 2008
- **/
-
+ */
 public class ProgramArgumentList {
 
     private ArrayList<String> programArgumentList;
@@ -129,6 +128,10 @@ public class ProgramArgumentList {
     // pointer register $sp is adjusted accordingly and $a0 is set
     // to the argument count (argc), and $a1 is set to the stack
     // address holding the first argument pointer (argv).
+
+    /**
+     * <p>storeProgramArguments.</p>
+     */
     public void storeProgramArguments() {
         if (programArgumentList == null || programArgumentList.size() == 0) {
             return;

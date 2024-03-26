@@ -9,6 +9,7 @@ import javax.swing.table.TableModel;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.*;
 import io.github.chr1sps.rars.simulator.Simulator;
 import io.github.chr1sps.rars.simulator.SimulatorNotice;
@@ -54,11 +55,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Represents the Data Segment window, which is a type of JInternalFrame.
  *
  * @author Sanderson and Bumgarner
- **/
-
+ * @version $Id: $Id
+ */
 public class DataSegmentWindow extends JInternalFrame implements Observer {
 
-    private static final String[] dataSegmentNames = { "Data", "Stack", "Kernel" };
+    private static final String[] dataSegmentNames = {"Data", "Stack", "Kernel"};
     private static Object[][] dataData;
 
     private static JTable dataTable;
@@ -114,7 +115,6 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
      * @param choosers an array of objects used by user to select number display
      *                 base (10 or 16)
      */
-
     public DataSegmentWindow(NumberDisplayBaseChooser[] choosers) {
         super("Data Segment", true, false, true, true);
 
@@ -135,7 +135,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
             prevButton = new PrevButton(
                     new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Previous22.png"))));// "Back16.gif"))));//"Down16.gif"))));
             nextButton = new NextButton(new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Next22.png"))));// "Forward16.gif"))));
-                                                                                                                       // //"Up16.gif"))));
+            // //"Up16.gif"))));
             // This group of buttons was replaced by a combo box. Keep the JButton objects
             // for their action listeners.
             dataButton = new JButton();// ".data");
@@ -189,6 +189,9 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
         contentPane.add(features, BorderLayout.SOUTH);
     }
 
+    /**
+     * <p>updateBaseAddressComboBox.</p>
+     */
     public void updateBaseAddressComboBox() {
         displayBaseAddressArray[EXTERN_BASE_ADDRESS_INDEX] = Memory.externBaseAddress;
         displayBaseAddressArray[GLOBAL_POINTER_ADDRESS_INDEX] = -1; /* Memory.globalPointer */
@@ -349,13 +352,13 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     private static final int STACK_POINTER_BASE_ADDRESS_INDEX = 4; // 5;
     private static final int MMIO_BASE_ADDRESS_INDEX = 6;
     // Must agree with above in number and order...
-    private int[] displayBaseAddressArray = { Memory.externBaseAddress,
+    private int[] displayBaseAddressArray = {Memory.externBaseAddress,
             Memory.dataBaseAddress, Memory.heapBaseAddress, -1 /* Memory.globalPointer */,
             -1 /* Memory.stackPointer */, Memory.textBaseAddress,
-            Memory.memoryMapBaseAddress, };
+            Memory.memoryMapBaseAddress,};
     // Must agree with above in number and order...
-    String[] descriptions = { " (.extern)", " (.data)", " (heap)", "current gp",
-            "current sp", " (.text)", " (MMIO)" };
+    String[] descriptions = {" (.extern)", " (.data)", " (heap)", "current gp",
+            "current sp", " (.text)", " (MMIO)"};
 
     private void initializeBaseAddressChoices() {
         // Also must agree in number and order. Upon combo box item selection, will
@@ -410,8 +413,8 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
         }
         // Check distance from global pointer; can be either side of it...
         thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER)); // distance from
-                                                                                                        // global
-                                                                                                        // pointer
+        // global
+        // pointer
         if (thisDistance < shortDistance) {
             shortDistance = thisDistance;
             desiredComboBoxIndex = GLOBAL_POINTER_ADDRESS_INDEX;
@@ -537,7 +540,6 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
      * @param firstAddr the first address in the memory range to be placed in the
      *                  model.
      */
-
     public void updateModelForMemoryRange(int firstAddr) {
         if (tablePanel.getComponentCount() == 0)
             return; // ignore if no content to change
@@ -601,8 +603,10 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
 
     /**
      * Update data display to show this value (I'm not sure it is being called).
+     *
+     * @param address a int
+     * @param value   a int
      */
-
     public void updateCell(int address, int value) {
         int offset = address - this.firstAddress;
         if (offset < 0 || offset >= MEMORY_CHUNK_SIZE) { // out of range
@@ -642,7 +646,6 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     /**
      * Update data display to show all values
      */
-
     public void updateValues() {
         updateModelForMemoryRange(this.firstAddress);
     }
@@ -651,7 +654,6 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
      * Reset range of memory addresses to base address of currently selected segment
      * and update display.
      */
-
     public void resetMemoryRange() {
         baseAddressSelector.getActionListeners()[0].actionPerformed(null); // previously dataButton
     }
@@ -659,7 +661,6 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     /**
      * Reset all data display values to 0
      */
-
     public void resetValues() {
         int valueBase = Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase();
         TableModel dataModel = dataTable.getModel();
@@ -839,7 +840,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     //
     private int setFirstAddressAndPrevNextButtonEnableStatus(int lowAddress) {
         int lowLimit = (userOrKernelMode == USER_MODE) ? Math.min(Math.min(Memory.textBaseAddress,
-                Memory.dataSegmentBaseAddress),
+                        Memory.dataSegmentBaseAddress),
                 Memory.dataBaseAddress)
                 : Memory.memoryMapBaseAddress;
         int highLimit = (userOrKernelMode == USER_MODE) ? Memory.userHighAddress
@@ -860,6 +861,8 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Required by Observer interface. Called when notified by an Observable that we
      * are registered with.
      * Observables include:
@@ -867,11 +870,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
      * A delegate of the Memory object, which lets us know of memory operations
      * The Simulator keeps us informed of when simulated MIPS execution is active.
      * This is the only time we care about memory operations.
-     *
-     * @param observable The Observable object who is notifying us
-     * @param obj        Auxiliary object with additional information.
      */
-
     public void update(Observable observable, Object obj) {
         if (observable == io.github.chr1sps.rars.simulator.Simulator.getInstance()) {
             SimulatorNotice notice = (SimulatorNotice) obj;
@@ -896,7 +895,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
 
             updateRowHeight();
         } else if (obj instanceof MemoryAccessNotice) { // NOTE: observable != Memory.getInstance() because Memory class
-                                                        // delegates notification duty.
+            // delegates notification duty.
             MemoryAccessNotice access = (MemoryAccessNotice) obj;
             if (access.getAccessType() == AccessNotice.WRITE) {
                 int address = access.getAddress();
@@ -1018,7 +1017,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
             // calculate address from row and column
             try {
                 address = Binary.stringToInt((String) data[row][ADDRESS_COLUMN]) + (col - 1) * BYTES_PER_VALUE; // KENV
-                                                                                                                // 1/6/05
+                // 1/6/05
             } catch (NumberFormatException nfe) {
                 // can't really happen since memory addresses are completely under
                 // the control of my software.
@@ -1074,7 +1073,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     class AddressCellRenderer extends DefaultTableCellRenderer {
 
         public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
             JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
 

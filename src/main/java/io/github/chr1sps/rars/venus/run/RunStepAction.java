@@ -12,7 +12,7 @@ import javax.swing.KeyStroke;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.SimulationException;
+import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.simulator.ProgramArgumentList;
 import io.github.chr1sps.rars.simulator.Simulator;
@@ -52,6 +52,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action for the Run -> Step menu item
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class RunStepAction extends GuiAction {
 
@@ -59,13 +62,25 @@ public class RunStepAction extends GuiAction {
     private ExecutePane executePane;
     private VenusUI mainUI;
 
+    /**
+     * <p>Constructor for RunStepAction.</p>
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
+     */
     public RunStepAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel, VenusUI gui) {
+                         Integer mnemonic, KeyStroke accel, VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         mainUI = gui;
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * perform next simulated instruction step.
      */
     public void actionPerformed(ActionEvent e) {
@@ -102,6 +117,14 @@ public class RunStepAction extends GuiAction {
     // When step is completed, control returns here (from execution thread,
     // indirectly)
     // to update the GUI.
+
+    /**
+     * <p>stepped.</p>
+     *
+     * @param done   a boolean
+     * @param reason a {@link io.github.chr1sps.rars.simulator.Simulator.Reason} object
+     * @param pe     a {@link SimulationException} object
+     */
     public void stepped(boolean done, Simulator.Reason reason, SimulationException pe) {
         executePane.getRegistersWindow().updateRegisters();
         executePane.getFloatingPointWindow().updateRegisters();

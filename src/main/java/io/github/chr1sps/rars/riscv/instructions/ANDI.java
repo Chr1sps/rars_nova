@@ -27,12 +27,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>ANDI class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class ANDI extends ImmediateInstruction {
+    /**
+     * <p>Constructor for ANDI.</p>
+     */
     public ANDI() {
         super("andi t1,t2,-100",
                 "Bitwise AND immediate : Set t1 to bitwise AND of t2 and sign-extended 12-bit immediate", "111");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long immediate) {
         return value & immediate;
     }

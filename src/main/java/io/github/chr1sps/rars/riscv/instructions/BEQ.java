@@ -30,12 +30,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>BEQ class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class BEQ extends Branch {
+    /**
+     * <p>Constructor for BEQ.</p>
+     */
     public BEQ() {
         super("beq t1,t2,label", "Branch if equal : Branch to statement at label's address if t1 and t2 are equal",
                 "000");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean willBranch(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         return RegisterFile.getValueLong(operands[0]) == RegisterFile.getValueLong(operands[1]);

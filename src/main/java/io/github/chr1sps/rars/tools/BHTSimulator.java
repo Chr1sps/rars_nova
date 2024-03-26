@@ -31,7 +31,7 @@ import javax.swing.JComponent;
 
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
@@ -63,6 +63,7 @@ import java.util.Observable;
  * explored and visualized.
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
+ * @version $Id: $Id
  */
 public class BHTSimulator extends AbstractToolAndApplication implements ActionListener {
     /**
@@ -133,6 +134,8 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
 
     /**
      * Creates a GUI and initialize the GUI with the default values.
+     *
+     * @return a {@link javax.swing.JComponent} object
      */
     protected JComponent buildMainDisplayArea() {
 
@@ -151,6 +154,9 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
         return m_gui;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return BHTSimulator.BHT_NAME;
@@ -165,6 +171,8 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Handles the actions when selecting another value in one of the two combo
      * boxes.
      * Selecting a different BHT size or history causes a reset of the simulator.
@@ -265,7 +273,7 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      *
      * @param stmt the branch instruction
      * @return the address of the instruction that is executed if the branch is
-     *         taken
+     * taken
      */
     protected static int extractBranchAddress(ProgramStatement stmt) {
         assert stmt.getInstruction() instanceof Branch : "Should only be called on branch instructions";
@@ -275,6 +283,8 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Callback for text segment access by the RISCV simulator.
      * <p>
      * The method is called each time the text segment is accessed to fetch the next
@@ -283,9 +293,6 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      * prediction is performed and visualized.
      * In case the last instruction was a branch instruction, the outcome of the
      * branch prediction is analyzed and visualized.
-     *
-     * @param resource the observed resource
-     * @param notice   signals the type of access (memory, register etc.)
      */
     protected void processRISCVUpdate(Observable resource, AccessNotice notice) {
 

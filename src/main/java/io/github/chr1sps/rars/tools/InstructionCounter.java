@@ -26,16 +26,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package io.github.chr1sps.rars.tools;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.Observable;
 
@@ -45,7 +44,8 @@ import java.util.Observable;
  * <p>
  * Code slightly based on MemoryReferenceVisualization.
  *
- * @author Felipe Lessa <felipe.lessa@gmail.com>
+ * @author Felipe Lessa &lt;felipe.lessa@gmail.com&gt;
+ * @version $Id: $Id
  */
 public class InstructionCounter extends AbstractToolAndApplication {
     private static String name = "Instruction Counter";
@@ -133,11 +133,17 @@ public class InstructionCounter extends AbstractToolAndApplication {
         super(name + ", " + version, heading);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return name;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JComponent buildMainDisplayArea() {
         // Create everything
@@ -273,11 +279,17 @@ public class InstructionCounter extends AbstractToolAndApplication {
         return panel;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void addAsObserver() {
         addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processRISCVUpdate(Observable resource, AccessNotice notice) {
         if (!notice.accessIsFromRISCV())
@@ -320,12 +332,18 @@ public class InstructionCounter extends AbstractToolAndApplication {
         updateDisplay();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void initializePreGUI() {
         counter = counterR = counterR4 = counterI = counterS = counterB = counterU = counterJ = 0;
         lastAddress = -1;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void reset() {
         counter = counterR = counterR4 = counterI = counterS = counterB = counterU = counterJ = 0;
@@ -333,6 +351,9 @@ public class InstructionCounter extends AbstractToolAndApplication {
         updateDisplay();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void updateDisplay() {
         counterField.setText(String.valueOf(counter));

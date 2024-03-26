@@ -30,12 +30,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>BLT class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class BLT extends Branch {
+    /**
+     * <p>Constructor for BLT.</p>
+     */
     public BLT() {
         super("blt t1,t2,label", "Branch if less than: Branch to statement at label's address if t1 is less than t2",
                 "100");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean willBranch(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         return RegisterFile.getValueLong(operands[0]) < RegisterFile.getValueLong(operands[1]);

@@ -45,6 +45,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action class for the Settings menu item for optionally loading a MIPS
  * exception handler.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class SettingsExceptionHandlerAction extends GuiAction {
 
@@ -56,12 +59,25 @@ public class SettingsExceptionHandlerAction extends GuiAction {
     private boolean initialSelected; // state of check box when dialog initiated.
     private String initialPathname; // selected exception handler when dialog initiated.
 
+    /**
+     * <p>Constructor for SettingsExceptionHandlerAction.</p>
+     *
+     * @param name     a {@link java.lang.String} object
+     * @param icon     a {@link javax.swing.Icon} object
+     * @param descrip  a {@link java.lang.String} object
+     * @param mnemonic a {@link java.lang.Integer} object
+     * @param accel    a {@link javax.swing.KeyStroke} object
+     */
     public SettingsExceptionHandlerAction(String name, Icon icon, String descrip,
-            Integer mnemonic, KeyStroke accel) {
+                                          Integer mnemonic, KeyStroke accel) {
         super(name, icon, descrip, mnemonic, accel);
     }
 
     // launch dialog for setting and filename specification
+
+    /**
+     * {@inheritDoc}
+     */
     public void actionPerformed(ActionEvent e) {
         initialSelected = Globals.getSettings().getBooleanSetting(Settings.Bool.EXCEPTION_HANDLER_ENABLED);
         initialPathname = Globals.getSettings().getExceptionHandler();

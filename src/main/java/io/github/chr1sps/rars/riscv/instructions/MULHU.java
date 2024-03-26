@@ -29,12 +29,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import java.math.BigInteger;
 
+/**
+ * <p>MULHU class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class MULHU extends Arithmetic {
+    /**
+     * <p>Constructor for MULHU.</p>
+     */
     public MULHU() {
         super("mulhu t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using unsigned multiplication",
                 "0000001", "011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         BigInteger unsigned = BigInteger.valueOf(value);
         if (value < 0) {
@@ -47,6 +59,9 @@ public class MULHU extends Arithmetic {
         return unsigned.multiply(unsigned2).shiftRight(64).longValue();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public int computeW(int value, int value2) {
         // Don't sign extend both arguments
         long ext = ((long) value) & 0xFFFFFFFFL, ext2 = ((long) value2) & 0xFFFFFFFFL;

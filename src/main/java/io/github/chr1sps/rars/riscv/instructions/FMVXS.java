@@ -33,12 +33,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>FMVXS class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class FMVXS extends BasicInstruction {
+    /**
+     * <p>Constructor for FMVXS.</p>
+     */
     public FMVXS() {
         super("fmv.x.s t1, f1", "Move float: move bits representing a float to an integer register",
                 BasicInstructionFormat.I_FORMAT, "1110000 00000 sssss 000 fffff 1010011");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0], (int) FloatingPointRegisterFile.getValueLong(operands[1]));

@@ -40,8 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version August 2003
- **/
-
+ */
 public enum TokenTypes {
     COMMENT, DIRECTIVE, OPERATOR, DELIMITER,
     /**
@@ -59,13 +58,16 @@ public enum TokenTypes {
     HI, LO,
     TAG;
 
+    /**
+     * Constant <code>TOKEN_DELIMITERS="\t ,()"</code>
+     */
     public static final String TOKEN_DELIMITERS = "\t ,()";
 
     /**
      * Produces String equivalent of this token type, which is its name.
      *
      * @return String containing descriptive name for token type.
-     **/
+     */
     public String toString() {
         return name(); // Get the literal string from enum
     }
@@ -76,9 +78,9 @@ public enum TokenTypes {
      * @param value String containing candidate language element, extracted from
      *              MIPS program.
      * @return Returns the corresponding TokenTypes object if the parameter matches
-     *         a
-     *         defined MIPS token type, else returns <tt>null</tt>.
-     **/
+     * a
+     * defined MIPS token type, else returns <code>null</code>.
+     */
     public static TokenTypes matchTokenType(String value) {
         // If it starts with single quote ('), it is a mal-formed character literal
         // because a well-formed character literal was converted to string-ified
@@ -226,7 +228,7 @@ public enum TokenTypes {
      *
      * @param type the TokenType of interest
      * @return true if type is an integer type, false otherwise.
-     **/
+     */
     public static boolean isIntegerTokenType(TokenTypes type) {
         return type == TokenTypes.INTEGER_5 || type == TokenTypes.INTEGER_6 || type == TokenTypes.INTEGER_12 ||
                 type == TokenTypes.INTEGER_12U || type == TokenTypes.INTEGER_20 || type == TokenTypes.INTEGER_32 ||
@@ -238,7 +240,7 @@ public enum TokenTypes {
      *
      * @param type the TokenType of interest
      * @return true if type is an floating point type, false otherwise.
-     **/
+     */
     public static boolean isFloatingTokenType(TokenTypes type) {
         return type == TokenTypes.REAL_NUMBER;
     }
@@ -254,6 +256,13 @@ public enum TokenTypes {
     //
     // DPS 14-Jul-2008: added '$' as valid symbol. Permits labels to include $.
     // MIPS-target GCC will produce labels that start with $.
+
+    /**
+     * <p>isValidIdentifier.</p>
+     *
+     * @param value a {@link java.lang.String} object
+     * @return a boolean
+     */
     public static boolean isValidIdentifier(String value) {
         boolean result = (Character.isLetter(value.charAt(0)) || value.charAt(0) == '_' || value.charAt(0) == '.'
                 || value.charAt(0) == '$');

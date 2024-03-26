@@ -41,7 +41,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version February 2006
  */
-
 public class BackStepper {
     private enum Action {
         MEMORY_RESTORE_RAW_WORD,
@@ -127,7 +126,7 @@ public class BackStepper {
         if (engaged && !backSteps.empty()) {
             ProgramStatement statement = backSteps.peek().ps;
             engaged = false; // GOTTA DO THIS SO METHOD CALL IN SWITCH WILL NOT RESULT IN NEW ACTION ON
-                             // STACK!
+            // STACK!
             do {
                 BackStep step = backSteps.pop();
                 /*
@@ -221,6 +220,13 @@ public class BackStepper {
         return value;
     }
 
+    /**
+     * <p>addMemoryRestoreDoubleWord.</p>
+     *
+     * @param address a int
+     * @param value   a long
+     * @return a long
+     */
     public long addMemoryRestoreDoubleWord(int address, long value) {
         backSteps.push(Action.MEMORY_RESTORE_DOUBLE_WORD, pc(), address, value);
         return value;
@@ -328,6 +334,8 @@ public class BackStepper {
      * through the program no instructions will be skipped. Cosmetic. If the top of
      * the
      * stack has the same PC counter, the do-nothing action will not be added.
+     *
+     * @param pc a int
      */
     public void addDoNothing(int pc) {
         if (backSteps.empty() || backSteps.peek().pc != pc) {

@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.util.SystemIO;
 
@@ -36,13 +36,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallRead class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallRead extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallRead.</p>
+     */
     public SyscallRead() {
         super("Read", "Read from a file descriptor into a buffer",
                 "a0 = the file descriptor <br>a1 = address of the buffer <br>a2 = maximum length to read",
                 "a0 = the length read or -1 if error");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         int byteAddress = RegisterFile.getValue("a1"); // destination of characters read from file
         int index = 0;

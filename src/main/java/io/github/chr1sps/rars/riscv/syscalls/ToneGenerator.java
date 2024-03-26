@@ -1,18 +1,10 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
+import javax.sound.midi.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiEvent;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
-import javax.sound.midi.ShortMessage;
-import javax.sound.midi.Track;
 
 /*
 Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
@@ -107,7 +99,7 @@ class ToneGenerator {
      *                   (0-127).
      */
     public void generateTone(byte pitch, int duration,
-            byte instrument, byte volume) {
+                             byte instrument, byte volume) {
         Runnable tone = new Tone(pitch, duration, instrument, volume);
         threadPool.execute(tone);
     }
@@ -130,7 +122,7 @@ class ToneGenerator {
      *                   (0-127).
      */
     public void generateToneSynchronously(byte pitch, int duration,
-            byte instrument, byte volume) {
+                                          byte instrument, byte volume) {
         Runnable tone = new Tone(pitch, duration, instrument, volume);
         tone.run();
     }
@@ -277,6 +269,9 @@ class EndOfTrackListener implements javax.sound.midi.MetaEventListener {
 
     private boolean endedYet = false;
 
+    /**
+     * {@inheritDoc}
+     */
     public synchronized void meta(javax.sound.midi.MetaMessage m) {
         if (m.getType() == 47) {
             endedYet = true;
@@ -284,6 +279,11 @@ class EndOfTrackListener implements javax.sound.midi.MetaEventListener {
         }
     }
 
+    /**
+     * <p>awaitEndOfTrack.</p>
+     *
+     * @throws java.lang.InterruptedException if any.
+     */
     public synchronized void awaitEndOfTrack() throws InterruptedException {
         while (!endedYet) {
             wait();

@@ -40,19 +40,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-
 public class OperandFormat {
     /**
      * Syntax test for correct match in both numbers and types of operands.
-     * 
+     *
      * @param candidateList List of tokens generated from programmer's MIPS
      *                      statement.
      * @param inst          The (presumably best matched) RISCV instruction.
      * @param errors        ErrorList into which any error messages generated here
      *                      will be added.
-     * 
      * @return Returns <tt>true</tt> if the programmer's statement matches the MIPS
-     *         specification, else returns <tt>false</tt>.
+     * specification, else returns <tt>false</tt>.
      */
 
     static boolean tokenOperandMatch(TokenList candidateList, Instruction inst, ErrorList errors) {

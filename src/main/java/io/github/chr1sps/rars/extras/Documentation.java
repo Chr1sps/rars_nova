@@ -17,13 +17,21 @@ import io.github.chr1sps.rars.riscv.SyscallLoader;
 
 /**
  * Small class for automatically generating documentation.
- *
+ * <p>
  * Currently it makes some Markdown tables, but in the future it could do
  * something
  * with javadocs or generate a website with all of the help information
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class Documentation {
 
+    /**
+     * <p>main.</p>
+     *
+     * @param args an array of {@link java.lang.String} objects
+     */
     public static void main(String[] args) {
         Globals.initialize();
         System.out.println(createDirectiveMarkdown());
@@ -34,6 +42,11 @@ public class Documentation {
         System.out.println(createInstructionMarkdown64Only(ExtendedInstruction.class));
     }
 
+    /**
+     * <p>createDirectiveMarkdown.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public static String createDirectiveMarkdown() {
         ArrayList<Directives> directives = Directives.getDirectiveList();
         directives.sort(Comparator.comparing(Directives::getName));
@@ -48,6 +61,11 @@ public class Documentation {
         return output.toString();
     }
 
+    /**
+     * <p>createSyscallMarkdown.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public static String createSyscallMarkdown() {
         ArrayList<AbstractSyscall> list = SyscallLoader.getSyscallList();
         Collections.sort(list);
@@ -70,6 +88,12 @@ public class Documentation {
         return output.toString();
     }
 
+    /**
+     * <p>createInstructionMarkdown.</p>
+     *
+     * @param instructionClass a {@link java.lang.Class} object
+     * @return a {@link java.lang.String} object
+     */
     public static String createInstructionMarkdown(Class<? extends Instruction> instructionClass) {
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, false);
         InstructionSet.rv64 = false;
@@ -91,6 +115,12 @@ public class Documentation {
         return output.toString();
     }
 
+    /**
+     * <p>createInstructionMarkdown64Only.</p>
+     *
+     * @param instructionClass a {@link java.lang.Class} object
+     * @return a {@link java.lang.String} object
+     */
     public static String createInstructionMarkdown64Only(Class<? extends Instruction> instructionClass) {
 
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, false);

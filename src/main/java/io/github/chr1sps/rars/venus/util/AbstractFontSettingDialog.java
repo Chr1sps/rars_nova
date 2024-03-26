@@ -60,6 +60,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Abstract class for a font selection dialog.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public abstract class AbstractFontSettingDialog extends JDialog {
 
@@ -76,6 +79,11 @@ public abstract class AbstractFontSettingDialog extends JDialog {
     /**
      * Create a new font chooser. Has pertinent JDialog parameters.
      * Will do everything except make it visible.
+     *
+     * @param owner       a {@link java.awt.Frame} object
+     * @param title       a {@link java.lang.String} object
+     * @param modality    a boolean
+     * @param currentFont a {@link java.awt.Font} object
      */
     public AbstractFontSettingDialog(Frame owner, String title, boolean modality, Font currentFont) {
         super(owner, title, modality);
@@ -98,6 +106,12 @@ public abstract class AbstractFontSettingDialog extends JDialog {
     }
 
     // The dialog area, not including control buttons at bottom
+
+    /**
+     * <p>buildDialogPanel.</p>
+     *
+     * @return a {@link javax.swing.JPanel} object
+     */
     protected JPanel buildDialogPanel() {
         JPanel contents = new JPanel(new BorderLayout(20, 20));
         contents.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -110,7 +124,7 @@ public abstract class AbstractFontSettingDialog extends JDialog {
         String[] allFontFamilies = EditorFont.getAllFamilies();
         // The makeVectorData() method will combine these two into one Vector
         // with a horizontal line separating the two groups.
-        String[][] fullList = { commonFontFamilies, allFontFamilies };
+        String[][] fullList = {commonFontFamilies, allFontFamilies};
 
         fontFamilySelector = new JComboBox<>(makeVectorData(fullList));
         fontFamilySelector.setRenderer(new ComboBoxRenderer());
@@ -183,8 +197,19 @@ public abstract class AbstractFontSettingDialog extends JDialog {
     // Build component containing the buttons for dialog control
     // Such as OK, Cancel, Reset, Apply, etc. These may vary
     // by application
+
+    /**
+     * <p>buildControlPanel.</p>
+     *
+     * @return a {@link java.awt.Component} object
+     */
     protected abstract Component buildControlPanel();
 
+    /**
+     * <p>getFont.</p>
+     *
+     * @return a {@link java.awt.Font} object
+     */
     public Font getFont() {
         return EditorFont.createFontFromStringValues(
                 (String) fontFamilySelector.getSelectedItem(),
@@ -193,17 +218,29 @@ public abstract class AbstractFontSettingDialog extends JDialog {
     }
 
     // User has clicked "Apply" or "Apply and Close" button.
+
+    /**
+     * <p>performApply.</p>
+     */
     protected void performApply() {
         apply(this.getFont());
     }
 
     // We're finished with this modal dialog.
+
+    /**
+     * <p>closeDialog.</p>
+     */
     protected void closeDialog() {
         this.setVisible(false);
         this.dispose();
     }
 
     // Reset font to its initial setting
+
+    /**
+     * <p>reset.</p>
+     */
     protected void reset() {
         fontFamilySelector.setSelectedItem(initialFontFamily);
         fontStyleSelector.setSelectedItem(initialFontStyle);
@@ -261,7 +298,7 @@ public abstract class AbstractFontSettingDialog extends JDialog {
         }
 
         public Component getListCellRendererComponent(JList<? extends String> list,
-                String value, int index, boolean isSelected, boolean cellHasFocus) {
+                                                      String value, int index, boolean isSelected, boolean cellHasFocus) {
             String str = (value == null) ? "" : value;
             if (SEPARATOR.equals(str)) {
                 return separator;

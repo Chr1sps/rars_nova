@@ -1,7 +1,7 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -30,11 +30,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>LHU class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class LHU extends Load {
+    /**
+     * <p>Constructor for LHU.</p>
+     */
     public LHU() {
         super("lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit value from effective memory halfword address", "101");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long load(int address) throws AddressErrorException {
         return Globals.memory.getHalf(address) & 0x0000FFFF;
     }

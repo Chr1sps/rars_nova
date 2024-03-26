@@ -27,16 +27,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package io.github.chr1sps.rars.tools;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
-import io.github.chr1sps.rars.riscv.hardware.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.instructions.*;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.Observable;
 
@@ -46,7 +45,8 @@ import java.util.Observable;
  * The code of this tools is initially based on the Instruction counter tool by
  * Felipe Lassa.
  *
- * @author Ingo Kofler <ingo.kofler@itec.uni-klu.ac.at>
+ * @author Ingo Kofler &lt;ingo.kofler@itec.uni-klu.ac.at&gt;
+ * @version $Id: $Id
  */
 public class InstructionStatistics extends AbstractToolAndApplication {
 
@@ -123,7 +123,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     /**
      * names of the instruction categories as array
      */
-    private String[] m_categoryLabels = { "ALU", "Jump", "Branch", "Memory", "Other" };
+    private String[] m_categoryLabels = {"ALU", "Jump", "Branch", "Memory", "Other"};
 
     // From Felipe Lessa's instruction counter. Prevent double-counting of
     // instructions
@@ -154,6 +154,9 @@ public class InstructionStatistics extends AbstractToolAndApplication {
         super(InstructionStatistics.NAME + ", " + InstructionStatistics.VERSION, InstructionStatistics.HEADING);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return NAME;
@@ -226,12 +229,12 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      *
      * @param instruction the instruction to decode
      * @return the category of the instruction
+     * @author Giancarlo Pernudi Segura
      * @see InstructionStatistics#CATEGORY_ALU
      * @see InstructionStatistics#CATEGORY_JUMP
      * @see InstructionStatistics#CATEGORY_BRANCH
      * @see InstructionStatistics#CATEGORY_MEM
      * @see InstructionStatistics#CATEGORY_OTHER
-     * @author Giancarlo Pernudi Segura
      */
     protected int getInstructionCategory(Instruction instruction) {
         if (instruction instanceof Arithmetic)
@@ -260,6 +263,8 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * method that is called each time the simulator accesses the text segment.
      * Before an instruction is executed by the simulator, the instruction is
      * fetched from the program memory.
@@ -267,9 +272,6 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      * and categorized by the tool.
      * According to the category the counter values are increased and the display
      * gets updated.
-     *
-     * @param resource the observed resource
-     * @param notice   signals the type of access (memory, register etc.)
      */
     protected void processRISCVUpdate(Observable resource, AccessNotice notice) {
 

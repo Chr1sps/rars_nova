@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import java.util.Random;
-
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
+
+import java.util.Random;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -34,12 +34,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallRandFloat class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallRandFloat extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallRandFloat.</p>
+     */
     public SyscallRandFloat() {
         super("RandFloat", "Get a random float", "a0 = index of pseudorandom number generator",
                 "fa0 = uniformly randomly selected from from [0,1]");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) {
         Random stream = RandomStreams.get("a0");
         FloatingPointRegisterFile.setRegisterToFloat(10, stream.nextFloat());// TODO: make this a string method fa0

@@ -1,11 +1,11 @@
 package io.github.chr1sps.rars.util;
 
+import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.Settings;
+
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.Settings;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -83,7 +83,6 @@ public class SystemIO {
      * @param serviceNumber the number assigned to Read Int syscall (default 5)
      * @return int value corresponding to user input
      */
-
     public static int readInteger(int serviceNumber) {
         String input = readStringInternal("0", "Enter an integer value (syscall " + serviceNumber + ")", -1);
         // Client is responsible for catching NumberFormatException
@@ -115,7 +114,7 @@ public class SystemIO {
      *
      * @param serviceNumber the number assigned to Read Float syscall (default 6)
      * @return float value corresponding to user input
-     *         Feb 14 2005 Ken Vollmar
+     * Feb 14 2005 Ken Vollmar
      */
     public static float readFloat(int serviceNumber) {
         String input = readStringInternal("0", "Enter a float value (syscall " + serviceNumber + ")", -1);
@@ -128,7 +127,7 @@ public class SystemIO {
      *
      * @param serviceNumber the number assigned to Read Duoble syscall (default 7)
      * @return double value corresponding to user input
-     *         Feb 14 2005 Ken Vollmar
+     * Feb 14 2005 Ken Vollmar
      */
     public static double readDouble(int serviceNumber) {
         String input = readStringInternal("0", "Enter a Double value (syscall " + serviceNumber + ")", -1);
@@ -137,6 +136,8 @@ public class SystemIO {
 
     /**
      * Implements syscall having 4 in $v0, to print a string.
+     *
+     * @param string a {@link java.lang.String} object
      */
     public static void printString(String string) {
         if (Globals.getGui() == null) {
@@ -203,7 +204,6 @@ public class SystemIO {
      * @param lengthRequested number of bytes to write
      * @return number of bytes written, or -1 on error
      */
-
     public static int writeToFile(int fd, byte[] myBuffer, int lengthRequested) {
         /////////////// DPS 8-Jan-2013
         /////////////// ////////////////////////////////////////////////////
@@ -484,6 +484,8 @@ public class SystemIO {
      * Flush stdout cache
      * Makes sure that messages don't get stuck in the print2Gui buffer for too
      * long.
+     *
+     * @param force a boolean
      */
     public static void flush(boolean force) {
         long time = System.currentTimeMillis();
@@ -494,6 +496,12 @@ public class SystemIO {
         }
     }
 
+    /**
+     * <p>swapData.</p>
+     *
+     * @param in a {@link io.github.chr1sps.rars.util.SystemIO.Data} object
+     * @return a {@link io.github.chr1sps.rars.util.SystemIO.Data} object
+     */
     public static Data swapData(Data in) {
         Data temp = new Data(false);
         temp.fileNames = FileIOData.fileNames;
@@ -514,7 +522,7 @@ public class SystemIO {
     public static class Data {
         private String[] fileNames; // The filenames in use. Null if file descriptor i is not in use.
         private int[] fileFlags; // The flags of this file, 0=READ, 1=WRITE. Invalid if this file descriptor is
-                                 // not in use.
+        // not in use.
         public Closeable[] streams;
         public BufferedReader inputReader;
         public BufferedWriter outputWriter;
@@ -555,11 +563,11 @@ public class SystemIO {
 
     private static class FileIOData {
         private static String[] fileNames = new String[SYSCALL_MAXFILES]; // The filenames in use. Null if file
-                                                                          // descriptor i is not in use.
+        // descriptor i is not in use.
         private static int[] fileFlags = new int[SYSCALL_MAXFILES]; // The flags of this file, 0=READ, 1=WRITE. Invalid
-                                                                    // if this file descriptor is not in use.
+        // if this file descriptor is not in use.
         private static Closeable[] streams = new Closeable[SYSCALL_MAXFILES]; // The streams in use, associated with the
-                                                                              // filenames
+        // filenames
         public static BufferedReader inputReader;
         public static BufferedWriter outputWriter;
         public static BufferedWriter errorWriter;
@@ -633,7 +641,7 @@ public class SystemIO {
             } else if (fileNames[fd] != null && fileFlags[fd] == 0 && flag == 0) { // O_RDONLY read-only
                 return true;
             } else if (fileNames[fd] != null && ((fileFlags[fd] & flag & O_WRONLY) == O_WRONLY)) { // O_WRONLY
-                                                                                                   // write-only
+                // write-only
                 return true;
             }
             return false;
@@ -681,7 +689,7 @@ public class SystemIO {
             }
 
             if (flag != O_RDONLY && flag != O_WRONLY && flag != (O_WRONLY | O_APPEND)) // Only read and write are
-                                                                                       // implemented
+            // implemented
             {
                 fileErrorString = "File name " + filename + " has unknown requested opening flag";
                 return -1;

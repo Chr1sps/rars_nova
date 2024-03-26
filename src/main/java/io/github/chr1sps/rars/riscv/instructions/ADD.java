@@ -27,12 +27,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>ADD class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class ADD extends Arithmetic {
+    /**
+     * <p>Constructor for ADD.</p>
+     */
     public ADD() {
         super("add t1,t2,t3", "Addition: set t1 to (t2 plus t3)",
                 "0000000", "000");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public long compute(long value, long value2) {
         return value + value2;
     }

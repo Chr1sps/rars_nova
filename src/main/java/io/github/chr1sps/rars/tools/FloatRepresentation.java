@@ -50,6 +50,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * directive and instructions and also the Java (and most other languages)
  * "float" data type. As written, it can ALMOST be adapted to 64 bit by
  * changing a few constants.
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class FloatRepresentation extends AbstractToolAndApplication {
     private static String version = "Version 1.1";
@@ -124,11 +127,16 @@ public class FloatRepresentation extends AbstractToolAndApplication {
      * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
      * there
      * is no driver program to invoke the application.
+     *
+     * @param args an array of {@link java.lang.String} objects
      */
     public static void main(String[] args) {
         new FloatRepresentation(title + version, heading).go();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return "Floating Point Representation";
@@ -168,23 +176,21 @@ public class FloatRepresentation extends AbstractToolAndApplication {
      * the standard heading area at the top and the control area at the bottom.
      *
      * @return the GUI component containing the application/tool-specific part of
-     *         the user interface
+     * the user interface
      */
     protected JComponent buildMainDisplayArea() {
         return buildDisplayArea();
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Override inherited update() to update display when "attached" register is
      * modified
      * either by the program or by user editing it on the RARS user interface.
      * The latter is the reason for overriding the inherited update() method.
      * The inherited method will filter out notices triggered by the RARS GUI or the
      * user.
-     *
-     * @param register     the attached register
-     * @param accessNotice information provided by register in RegisterAccessNotice
-     *                     object
      */
     public void update(Observable register, Object accessNotice) {
         if (((AccessNotice) accessNotice).getAccessType() == AccessNotice.WRITE) {
@@ -205,6 +211,11 @@ public class FloatRepresentation extends AbstractToolAndApplication {
     //////////////////////////////////////////////////////////////////////////////////////
     // Private methods defined to support the above.
 
+    /**
+     * <p>buildDisplayArea.</p>
+     *
+     * @return a {@link javax.swing.JComponent} object
+     */
     protected JComponent buildDisplayArea() {
         // Panel to hold all floating point dislay and editing components
         Box mainPanel = Box.createVerticalBox();
@@ -924,11 +935,11 @@ public class FloatRepresentation extends AbstractToolAndApplication {
             g.setColor(saved);
             subtractLabelWidth = g.getFontMetrics().stringWidth(label);
             g.drawString(label, exponentCenterX - subtractLabelWidth / 2, centerY + subtractLabelHeight / 2 - 3); // -3
-                                                                                                                  // makes
-                                                                                                                  // it
-                                                                                                                  // more
-                                                                                                                  // visually
-                                                                                                                  // appealing
+            // makes
+            // it
+            // more
+            // visually
+            // appealing
         }
 
         // format the label for a given integer exponent value...

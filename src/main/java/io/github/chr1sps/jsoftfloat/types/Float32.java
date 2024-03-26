@@ -9,9 +9,19 @@ import io.github.chr1sps.jsoftfloat.internal.ExactFloat;
 
 /**
  * Represents the Binary32 format
+ *
+ * @author chrisps
+ * @version $Id: $Id
  */
 public class Float32 extends Floating<Float32> {
     // TODO: make a more abstract binary float class
+    /** Constant <code>Zero</code> */
+    /** Constant <code>NegativeZero</code> */
+    /** Constant <code>NaN</code> */
+    /** Constant <code>Infinity</code> */
+    /**
+     * Constant <code>NegativeInfinity</code>
+     */
     public static final Float32 Zero = new Float32(0),
             NegativeZero = new Float32(0x80000000),
             NaN = new Float32(0x7FC00000),
@@ -20,21 +30,40 @@ public class Float32 extends Floating<Float32> {
 
     public final int bits;
 
+    /**
+     * <p>Constructor for Float32.</p>
+     *
+     * @param bits a int
+     */
     public Float32(int bits) {
         this.bits = bits;
     }
 
+    /**
+     * <p>Constructor for Float32.</p>
+     *
+     * @param sign        a boolean
+     * @param exponent    a int
+     * @param significand a int
+     */
     public Float32(boolean sign, int exponent, int significand) {
         this(((sign) ? 0x80000000 : 0) | (((exponent + 127) & 0xFF) << 23) | (significand & 0x007FFFFF));
     }
 
+    /**
+     * <p>exponent.</p>
+     *
+     * @return a int
+     */
     public int exponent() {
         return ((bits >>> 23) & 0xFF) - 127;
     }
 
     /**
+     * <p>fromInteger.</p>
+     *
      * @param num An integer to be converted to
-     * @return
+     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
      */
     public static Float32 fromInteger(int num) {
         if (num == 0)
@@ -53,74 +82,146 @@ public class Float32 extends Floating<Float32> {
         return new Float32(bits);
     }
 
+    /**
+     * <p>negate.</p>
+     *
+     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     */
     public Float32 negate() {
         return new Float32(bits ^ 0x80000000); // Flip the sign bit
     }
 
+    /**
+     * <p>abs.</p>
+     *
+     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     */
     public Float32 abs() {
         return new Float32(bits & 0x7FFFFFFF);
     }
 
+    /**
+     * <p>copySign.</p>
+     *
+     * @param signToTake a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     */
     public Float32 copySign(Float32 signToTake) {
         return new Float32((bits & 0x7FFFFFFF) | (signToTake.bits & 0x80000000));
     }
 
+    /**
+     * <p>isSignMinus.</p>
+     *
+     * @return a boolean
+     */
     public boolean isSignMinus() {
         return (bits >>> 31) == 1;
     }
 
+    /**
+     * <p>isInfinite.</p>
+     *
+     * @return a boolean
+     */
     public boolean isInfinite() {
         return exponent() == 128 && (bits & 0x007FFFFF) == 0;
     }
 
+    /**
+     * <p>isNormal.</p>
+     *
+     * @return a boolean
+     */
     public boolean isNormal() {
         return exponent() != -127 && exponent() != 128;
     }
 
+    /**
+     * <p>isSubnormal.</p>
+     *
+     * @return a boolean
+     */
     public boolean isSubnormal() {
         return exponent() == -127 && !isZero();
     }
 
+    /**
+     * <p>isNaN.</p>
+     *
+     * @return a boolean
+     */
     public boolean isNaN() {
         return exponent() == 128 && !isInfinite();
     }
 
     // Section 6.2.1
+
+    /**
+     * <p>isSignalling.</p>
+     *
+     * @return a boolean
+     */
     public boolean isSignalling() {
         if (!isNaN())
             return false;
         return (bits & 0x400000) == 0;
     }
 
+    /**
+     * <p>isCanonical.</p>
+     *
+     * @return a boolean
+     */
     public boolean isCanonical() {
         // TODO: implement
         return true;
     }
 
+    /**
+     * <p>isZero.</p>
+     *
+     * @return a boolean
+     */
     public boolean isZero() {
         return bits == 0 || bits == 0x80000000;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Float32 NaN() {
         return NaN;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Float32 Zero() {
         return Zero;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Float32 NegativeZero() {
         return NegativeZero;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Float32 Infinity() {
         return Infinity;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Float32 NegativeInfinity() {
         return NegativeInfinity;
@@ -132,6 +233,9 @@ public class Float32 extends Floating<Float32> {
             minexp = -(1 << (expbits - 1)) + 1,
             sigmask = (1 << sigbits) - 1;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Float32 fromExactFloat(ExactFloat ef, Environment env) {
         if (ef.isZero()) {
@@ -244,10 +348,20 @@ public class Float32 extends Floating<Float32> {
         }
     }
 
+    /**
+     * <p>fromExact.</p>
+     *
+     * @param ef a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+     * @param e  a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     */
     public static Float32 fromExact(ExactFloat ef, Environment e) {
         return Zero.fromExactFloat(ef, e);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ExactFloat toExactFloat() {
         assert !isInfinite() : "Infinity is not exact";
@@ -273,6 +387,9 @@ public class Float32 extends Floating<Float32> {
         return new ExactFloat(sign, exponent, significand);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int maxPrecision() {
         // TODO: make a tight bound around actual required precision

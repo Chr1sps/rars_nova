@@ -1,6 +1,6 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.ExitingException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
@@ -34,15 +34,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+/**
+ * <p>SyscallOpen class.</p>
+ *
+ * @author chrisps
+ * @version $Id: $Id
+ */
 public class SyscallOpen extends AbstractSyscall {
+    /**
+     * <p>Constructor for SyscallOpen.</p>
+     */
     public SyscallOpen() {
         super("Open", "Opens a file from a path <br>Only supported flags (a1) are read-only (0), write-only (1) and" +
-                " write-append (9). write-only flag creates file if it does not exist, so it is technically" +
-                " write-create.  write-append will start writing at end of existing file.",
+                        " write-append (9). write-only flag creates file if it does not exist, so it is technically" +
+                        " write-create.  write-append will start writing at end of existing file.",
                 "a0 = Null terminated string for the path <br>a1 = flags",
                 "a0 = the file decriptor or -1 if an error occurred");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void simulate(ProgramStatement statement) throws ExitingException {
         int retValue = SystemIO.openFile(NullString.get(statement),
                 RegisterFile.getValue("a1"));
