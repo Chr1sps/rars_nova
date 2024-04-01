@@ -199,7 +199,7 @@ public enum TokenTypes {
         }
 
         // See if it is a directive
-        if (value.charAt(0) == '.' && Directives.matchDirective(value) != null) {
+        if (value.charAt(0) == '.' && Directive.matchDirective(value) != null) {
             return TokenTypes.DIRECTIVE;
         }
 

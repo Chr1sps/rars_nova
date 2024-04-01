@@ -52,7 +52,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public class RISCVprogram {
 
     // See explanation of method inSteppedExecution() below.
-    private boolean steppedExecution = false;
+    private final boolean steppedExecution = false;
 
     private String filename;
     private ArrayList<String> sourceList;
@@ -241,7 +241,7 @@ public class RISCVprogram {
             }
         } catch (Exception e) {
             errors = new ErrorList();
-            errors.add(new ErrorMessage((RISCVprogram) null, 0, 0, e.toString()));
+            errors.add(new ErrorMessage(null, 0, 0, e.toString()));
             throw new AssemblyException(errors);
         }
     }
@@ -286,7 +286,7 @@ public class RISCVprogram {
                                                            String exceptionHandler) throws AssemblyException {
         ArrayList<RISCVprogram> programsToAssemble = new ArrayList<>();
         int leadFilePosition = 0;
-        if (exceptionHandler != null && exceptionHandler.length() > 0) {
+        if (exceptionHandler != null && !exceptionHandler.isEmpty()) {
             filenames.add(0, exceptionHandler);
             leadFilePosition = 1;
         }
@@ -296,7 +296,7 @@ public class RISCVprogram {
             preparee.tokenize();
             // I want "this" RISCVprogram to be the first in the list...except for exception
             // handler
-            if (preparee == this && programsToAssemble.size() > 0) {
+            if (preparee == this && !programsToAssemble.isEmpty()) {
                 programsToAssemble.add(leadFilePosition, preparee);
             } else {
                 programsToAssemble.add(preparee);

@@ -1,13 +1,5 @@
 package io.github.chr1sps.rars.venus.settings;
 
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.text.Caret;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.venus.Editor;
@@ -17,6 +9,13 @@ import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxUtilities;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.RISCVTokenMarker;
 import io.github.chr1sps.rars.venus.util.AbstractFontSettingDialog;
 
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.Caret;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -128,7 +127,7 @@ public class SettingsEditorAction extends GuiAction {
 
         private JSlider tabSizeSelector;
         private JSpinner tabSizeSpinSelector, blinkRateSpinSelector, popupPrefixLengthSpinSelector;
-        private JCheckBox lineHighlightCheck, genericEditorCheck, autoIndentCheck;
+        private JCheckBox lineHighlightCheck, autoIndentCheck;
         private ColorChangerPanel bgChanger, fgChanger, lhChanger, textSelChanger, caretChanger;
         private Caret blinkCaret;
         private JTextField blinkSample;
@@ -143,10 +142,10 @@ public class SettingsEditorAction extends GuiAction {
 
         public EditorFontDialog(Frame owner, String title, boolean modality, Font font) {
             super(owner, title, modality, font);
-            if (Globals.getSettings().getBooleanSetting(Settings.Bool.GENERIC_TEXT_EDITOR)) {
-                syntaxStylePanel.setVisible(false);
-                otherSettingsPanel.setVisible(false);
-            }
+//            if (Globals.getSettings().getBooleanSetting(Settings.Bool.GENERIC_TEXT_EDITOR)) {
+//                syntaxStylePanel.setVisible(false);
+//                otherSettingsPanel.setVisible(false);
+//            }
         }
 
         // build the dialog here
@@ -206,21 +205,21 @@ public class SettingsEditorAction extends GuiAction {
                             reset();
                         }
                     });
-            initialGenericTextEditor = Globals.getSettings().getBooleanSetting(Settings.Bool.GENERIC_TEXT_EDITOR);
-            genericEditorCheck = new JCheckBox("Use Generic Editor", initialGenericTextEditor);
-            genericEditorCheck.setToolTipText(GENERIC_TOOL_TIP_TEXT);
-            genericEditorCheck.addItemListener(
-                    new ItemListener() {
-                        public void itemStateChanged(ItemEvent e) {
-                            if (e.getStateChange() == ItemEvent.SELECTED) {
-                                syntaxStylePanel.setVisible(false);
-                                otherSettingsPanel.setVisible(false);
-                            } else {
-                                syntaxStylePanel.setVisible(true);
-                                otherSettingsPanel.setVisible(true);
-                            }
-                        }
-                    });
+//            initialGenericTextEditor = Globals.getSettings().getBooleanSetting(Settings.Bool.GENERIC_TEXT_EDITOR);
+//            genericEditorCheck = new JCheckBox("Use Generic Editor", initialGenericTextEditor);
+//            genericEditorCheck.setToolTipText(GENERIC_TOOL_TIP_TEXT);
+//            genericEditorCheck.addItemListener(
+//                    new ItemListener() {
+//                        public void itemStateChanged(ItemEvent e) {
+//                            if (e.getStateChange() == ItemEvent.SELECTED) {
+//                                syntaxStylePanel.setVisible(false);
+//                                otherSettingsPanel.setVisible(false);
+//                            } else {
+//                                syntaxStylePanel.setVisible(true);
+//                                otherSettingsPanel.setVisible(true);
+//                            }
+//                        }
+//                    });
 
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(okButton);
@@ -231,15 +230,15 @@ public class SettingsEditorAction extends GuiAction {
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(resetButton);
             controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(genericEditorCheck);
-            controlPanel.add(Box.createHorizontalGlue());
+//            controlPanel.add(genericEditorCheck);
+//            controlPanel.add(Box.createHorizontalGlue());
             return controlPanel;
         }
 
         // User has clicked "Apply" or "Apply and Close" button. Required method, is
         // abstract in superclass.
         protected void apply(Font font) {
-            Globals.getSettings().setBooleanSetting(Settings.Bool.GENERIC_TEXT_EDITOR, genericEditorCheck.isSelected());
+//            Globals.getSettings().setBooleanSetting(Settings.Bool.GENERIC_TEXT_EDITOR, genericEditorCheck.isSelected());
             Globals.getSettings().setBooleanSetting(Settings.Bool.EDITOR_CURRENT_LINE_HIGHLIGHTING,
                     lineHighlightCheck.isSelected());
             Globals.getSettings().setBooleanSetting(Settings.Bool.AUTO_INDENT, autoIndentCheck.isSelected());
@@ -279,7 +278,7 @@ public class SettingsEditorAction extends GuiAction {
             initializeSyntaxStyleChangeables();
             resetOtherSettings();
             syntaxStylesAction = true;
-            genericEditorCheck.setSelected(initialGenericTextEditor);
+//            genericEditorCheck.setSelected(initialGenericTextEditor);
         }
 
         // Perform reset on miscellaneous editor settings

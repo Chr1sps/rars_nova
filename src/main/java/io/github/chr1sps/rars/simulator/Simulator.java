@@ -2,13 +2,9 @@ package io.github.chr1sps.rars.simulator;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.exceptions.BreakpointException;
-import io.github.chr1sps.rars.exceptions.ExitingException;
-import io.github.chr1sps.rars.exceptions.SimulationException;
-import io.github.chr1sps.rars.exceptions.WaitException;
+import io.github.chr1sps.rars.exceptions.*;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.Instruction;
-import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.InterruptController;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
@@ -299,13 +295,13 @@ public class Simulator extends Observable {
         }
 
         private boolean handleTrap(SimulationException se, int pc) {
-            assert se.cause() != -1 : "Unhandlable exception not thrown through ExitingEception";
-            assert se.cause() >= 0 : "Interrupts cannot be handled by the trap handler";
+            assert se.reason != ExceptionReason.OTHER : "Unhandlable exception not thrown through ExitingEception";
+            assert !se.reason.isInterrupt() : "Interrupts cannot be handled by the trap handler";
 
             // set the relevant CSRs
-            ControlAndStatusRegisterFile.updateRegister("ucause", se.cause());
+            ControlAndStatusRegisterFile.updateRegister("ucause", se.reason.value);
             ControlAndStatusRegisterFile.updateRegister("uepc", pc);
-            ControlAndStatusRegisterFile.updateRegister("utval", se.value());
+            ControlAndStatusRegisterFile.updateRegister("utval", se.value);
 
             // Get the interrupt handler if it exists
             int utvec = ControlAndStatusRegisterFile.getValue("utvec");
@@ -466,7 +462,7 @@ public class Simulator extends Observable {
                         // This is the explicit (in the spec) order that interrupts should be serviced
                         if (IE && pendingExternal && (uie & ControlAndStatusRegisterFile.EXTERNAL_INTERRUPT) != 0) {
                             if (handleInterrupt(InterruptController.claimExternal(),
-                                    SimulationException.EXTERNAL_INTERRUPT, pc)) {
+                                    ExceptionReason.EXTERNAL_INTERRUPT.value, pc)) {
                                 pendingExternal = false;
                                 uip &= ~0x100;
                             } else {
@@ -475,14 +471,14 @@ public class Simulator extends Observable {
                             }
                         } else if (IE && (uip & 0x1) != 0
                                 && (uie & ControlAndStatusRegisterFile.SOFTWARE_INTERRUPT) != 0) {
-                            if (handleInterrupt(0, SimulationException.SOFTWARE_INTERRUPT, pc)) {
+                            if (handleInterrupt(0, ExceptionReason.SOFTWARE_INTERRUPT.value, pc)) {
                                 uip &= ~0x1;
                             } else {
                                 return; // if the interrupt can't be handled, but the interrupt enable bit is high,
                                 // thats an error
                             }
                         } else if (IE && pendingTimer && (uie & ControlAndStatusRegisterFile.TIMER_INTERRUPT) != 0) {
-                            if (handleInterrupt(InterruptController.claimTimer(), SimulationException.TIMER_INTERRUPT,
+                            if (handleInterrupt(InterruptController.claimTimer(), ExceptionReason.TIMER_INTERRUPT.value,
                                     pc)) {
                                 pendingTimer = false;
                                 uip &= ~0x10;
@@ -529,12 +525,12 @@ public class Simulator extends Observable {
                         statement = Globals.memory.getStatement(pc);
                     } catch (AddressErrorException e) {
                         SimulationException tmp;
-                        if (e.getType() == SimulationException.LOAD_ACCESS_FAULT) {
+                        if (e.reason == ExceptionReason.LOAD_ACCESS_FAULT) {
                             tmp = new SimulationException("Instruction load access error",
-                                    SimulationException.INSTRUCTION_ACCESS_FAULT);
+                                    ExceptionReason.INSTRUCTION_ACCESS_FAULT);
                         } else {
                             tmp = new SimulationException("Instruction load alignment error",
-                                    SimulationException.INSTRUCTION_ADDR_MISALIGNED);
+                                    ExceptionReason.INSTRUCTION_ADDR_MISALIGNED);
                         }
                         if (!InterruptController.registerSynchronousTrap(tmp, pc)) {
                             this.pe = tmp;
@@ -557,7 +553,7 @@ public class Simulator extends Observable {
                             throw new SimulationException(statement,
                                     "undefined instruction (" + Binary.intToHexString(statement.getBinaryStatement())
                                             + ")",
-                                    SimulationException.ILLEGAL_INSTRUCTION);
+                                    ExceptionReason.ILLEGAL_INSTRUCTION);
                         }
                         // THIS IS WHERE THE INSTRUCTION EXECUTION IS ACTUALLY SIMULATED!
                         instruction.simulate(statement);
@@ -578,7 +574,7 @@ public class Simulator extends Observable {
                         }
                         waiting = true;
                     } catch (ExitingException e) {
-                        if (e.error() == null) {
+                        if (e.reason == ExceptionReason.OTHER) {
                             this.constructReturnReason = Reason.NORMAL_TERMINATION;
                         } else {
                             this.constructReturnReason = Reason.EXCEPTION;

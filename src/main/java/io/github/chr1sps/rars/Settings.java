@@ -1,19 +1,17 @@
 package io.github.chr1sps.rars;
 
-import java.awt.Color;
-import java.awt.Font;
+import io.github.chr1sps.rars.util.Binary;
+import io.github.chr1sps.rars.util.EditorFont;
+import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle;
+import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxUtilities;
+
+import javax.swing.*;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.StringTokenizer;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-
-import javax.swing.UIManager;
-
-import io.github.chr1sps.rars.util.Binary;
-import io.github.chr1sps.rars.util.EditorFont;
-import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle;
-import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxUtilities;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -149,11 +147,6 @@ public class Settings extends Observable {
          * syscalls
          */
         POPUP_SYSCALL_INPUT("PopupSyscallInput", false),
-        /**
-         * Flag to control whether or not to use generic text editor instead of
-         * language-aware styled editor
-         */
-        GENERIC_TEXT_EDITOR("GenericTextEditor", false),
         /**
          * Flag to control whether or not language-aware editor will use auto-indent
          * feature
@@ -563,7 +556,7 @@ public class Settings extends Observable {
     // to be created! It is possible but a real pain in the rear to avoid using
     // Color objects totally. Requires new methods for the SyntaxUtilities class.
     private void initializeEditorSyntaxStyles() {
-        SyntaxStyle syntaxStyle[] = SyntaxUtilities.getDefaultSyntaxStyles();
+        SyntaxStyle[] syntaxStyle = SyntaxUtilities.getDefaultSyntaxStyles();
         int tokens = syntaxStyle.length;
         syntaxStyleColorSettingsKeys = new String[tokens];
         syntaxStyleBoldSettingsKeys = new String[tokens];
@@ -708,7 +701,7 @@ public class Settings extends Observable {
      * @return tab size in characters.
      */
     public int getEditorTabSize() {
-        int size = 8;
+        int size;
         try {
             size = Integer.parseInt(stringSettingsValues[EDITOR_TAB_SIZE]);
         } catch (NumberFormatException nfe) {
@@ -958,7 +951,7 @@ public class Settings extends Observable {
     public void setTextColumnOrder(int[] columnOrder) {
         String stringifiedOrder = "";
         for (int column : columnOrder) {
-            stringifiedOrder += Integer.toString(column) + " ";
+            stringifiedOrder += column + " ";
         }
         setStringSetting(TEXT_COLUMN_ORDER, stringifiedOrder);
     }
@@ -1047,9 +1040,7 @@ public class Settings extends Observable {
         for (Bool setting : Bool.values()) {
             booleanSettingsValues.put(setting, setting.getDefault());
         }
-        for (int i = 0; i < stringSettingsValues.length; i++) {
-            stringSettingsValues[i] = defaultStringSettingsValues[i];
-        }
+        System.arraycopy(defaultStringSettingsValues, 0, stringSettingsValues, 0, stringSettingsValues.length);
         for (int i = 0; i < fontFamilySettingsValues.length; i++) {
             fontFamilySettingsValues[i] = defaultFontFamilySettingsValues[i];
             fontStyleSettingsValues[i] = defaultFontStyleSettingsValues[i];
@@ -1266,7 +1257,7 @@ public class Settings extends Observable {
             for (Bool setting : Bool.values()) {
                 settingValue = Globals.getPropertyEntry(filename, setting.getName());
                 if (settingValue != null) {
-                    boolean value = Boolean.valueOf(settingValue);
+                    boolean value = Boolean.parseBoolean(settingValue);
                     setting.setDefault(value);
                     booleanSettingsValues.put(setting, value);
                 }
@@ -1308,10 +1299,8 @@ public class Settings extends Observable {
     // from
     // Settings.properties file or default value arrays above!
     private void getSettingsFromPreferences() {
-        for (Bool setting : booleanSettingsValues.keySet()) {
-            booleanSettingsValues.put(setting,
-                    preferences.getBoolean(setting.getName(), booleanSettingsValues.get(setting)));
-        }
+        booleanSettingsValues.replaceAll(
+                (s, v) -> preferences.getBoolean(s.getName(), booleanSettingsValues.get(s)));
         for (int i = 0; i < stringSettingsKeys.length; i++) {
             stringSettingsValues[i] = preferences.get(stringSettingsKeys[i], stringSettingsValues[i]);
         }

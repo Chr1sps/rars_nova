@@ -9,11 +9,9 @@
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker;
 
-import javax.swing.text.Segment;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.assembler.Directives;
+import io.github.chr1sps.rars.assembler.Directive;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
@@ -22,6 +20,7 @@ import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.KeywordMap;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.PopupHelpItem;
 
+import javax.swing.text.Segment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
@@ -244,7 +243,7 @@ public class RISCVTokenMarker extends TokenMarker {
             }
         }
         if (token != null && token.id == Token.KEYWORD2) {
-            Directives dir = Directives.matchDirective(tokenText);
+            Directive dir = Directive.matchDirective(tokenText);
             if (dir != null) {
                 matches = new ArrayList<>();
                 matches.add(new PopupHelpItem(tokenText, dir.getName(), dir.getDescription()));
@@ -382,19 +381,19 @@ public class RISCVTokenMarker extends TokenMarker {
     // if no matches.
     private ArrayList<PopupHelpItem> getTextFromDirectiveMatch(String tokenText, boolean exact) {
         ArrayList<PopupHelpItem> matches = null;
-        ArrayList<Directives> directiveMatches = null;
+        ArrayList<Directive> directiveMatches = null;
         if (exact) {
-            Directives dir = Directives.matchDirective(tokenText);
+            Directive dir = Directive.matchDirective(tokenText);
             if (dir != null) {
                 directiveMatches = new ArrayList<>();
                 directiveMatches.add(dir);
             }
         } else {
-            directiveMatches = Directives.prefixMatchDirectives(tokenText);
+            directiveMatches = Directive.prefixMatchDirectives(tokenText);
         }
         if (directiveMatches != null) {
             matches = new ArrayList<>();
-            for (Directives direct : directiveMatches) {
+            for (Directive direct : directiveMatches) {
                 matches.add(new PopupHelpItem(tokenText, direct.getName(), direct.getDescription(), exact));
             }
         }
@@ -466,7 +465,7 @@ public class RISCVTokenMarker extends TokenMarker {
                 cKeywords.add(inst.getName(), Token.KEYWORD1);
             }
             // add assembler directives
-            for (Directives direct : Directives.getDirectiveList()) {
+            for (Directive direct : Directive.getDirectiveList()) {
                 cKeywords.add(direct.getName(), Token.KEYWORD2);
             }
             // add integer register file

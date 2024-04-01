@@ -38,8 +38,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public class AddressErrorException extends Exception {
-    private final int address;
-    private final int type; // SimulationException.(STORE|LOAD|INSTRUCTION)_(ADDRESS_MISALIGNED|ACCESS_FAULT)
+    public final int address;
+    public final ExceptionReason reason; // SimulationException.(STORE|LOAD|INSTRUCTION)_(ADDRESS_MISALIGNED|ACCESS_FAULT)
 
     /**
      * Constructor for the AddressErrorException class
@@ -48,28 +48,15 @@ public class AddressErrorException extends Exception {
      * @param message    a {@link java.lang.String} object
      * @param exceptType a int
      */
-    public AddressErrorException(String message, int exceptType, int addr) {
+    public AddressErrorException(String message, ExceptionReason exceptType, int addr) {
         super(message + Binary.intToHexString(addr));
         address = addr;
-        type = exceptType;
-    }
-
-    /**
-     * Get the erroneous memory address.
-     *
-     * @return The erroneous memory address.
-     */
-    public int getAddress() {
-        return address;
-    }
-
-    /**
-     * Get the exception type (load or store).
-     *
-     * @return Exception type:
-     * SimulationException.(STORE|LOAD|INSTRUCTION)_(ADDRESS_MISALIGNED|ACCESS_FAULT)
-     */
-    public int getType() {
-        return type;
+        switch (exceptType) {
+            case INSTRUCTION_ACCESS_FAULT, INSTRUCTION_ADDR_MISALIGNED, LOAD_ACCESS_FAULT, LOAD_ADDRESS_MISALIGNED, STORE_ACCESS_FAULT, STORE_ADDRESS_MISALIGNED:
+                reason = exceptType;
+                break;
+            default:
+                throw new IllegalArgumentException("This exception reason is not allowed.");
+        }
     }
 }

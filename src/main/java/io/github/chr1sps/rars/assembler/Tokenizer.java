@@ -150,7 +150,7 @@ public class Tokenizer {
             TokenList tl = tokenizeLine(program, i + 1, line, false);
             boolean hasInclude = false;
             for (int ii = 0; ii < tl.size(); ii++) {
-                if (tl.get(ii).getValue().equalsIgnoreCase(Directives.INCLUDE.getName())
+                if (tl.get(ii).getValue().equalsIgnoreCase(Directive.INCLUDE.getName())
                         && (tl.size() > ii + 1)
                         && tl.get(ii + 1).getType() == TokenTypes.QUOTED_STRING) {
                     String filename = tl.get(ii + 1).getValue();
@@ -511,20 +511,20 @@ public class Tokenizer {
             // There should not be a label but if there is, the directive is in token
             // position 2 (ident, colon, directive).
             int dirPos = (tokens.get(0).getType() == TokenTypes.DIRECTIVE) ? 0 : 2;
-            if (Directives.matchDirective(tokens.get(dirPos).getValue()) == Directives.EQV) {
+            if (Directive.matchDirective(tokens.get(dirPos).getValue()) == Directive.EQV) {
                 // Get position in token list of last non-comment token
                 int tokenPosLastOperand = tokens.size()
                         - ((tokens.get(tokens.size() - 1).getType() == TokenTypes.COMMENT) ? 2 : 1);
                 // There have to be at least two non-comment tokens beyond the directive
                 if (tokenPosLastOperand < dirPos + 2) {
                     errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
-                            "Too few operands for " + Directives.EQV.getName() + " directive"));
+                            "Too few operands for " + Directive.EQV.getName() + " directive"));
                     return tokens;
                 }
                 // Token following the directive has to be IDENTIFIER
                 if (tokens.get(dirPos + 1).getType() != TokenTypes.IDENTIFIER) {
                     errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
-                            "Malformed " + Directives.EQV.getName() + " directive"));
+                            "Malformed " + Directive.EQV.getName() + " directive"));
                     return tokens;
                 }
                 String symbol = tokens.get(dirPos + 1).getValue();
@@ -534,7 +534,7 @@ public class Tokenizer {
                 for (int i = dirPos + 2; i < tokens.size(); i++) {
                     if (tokens.get(i).getValue().equals(symbol)) {
                         errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
-                                "Cannot substitute " + symbol + " for itself in " + Directives.EQV.getName()
+                                "Cannot substitute " + symbol + " for itself in " + Directive.EQV.getName()
                                         + " directive"));
                         return tokens;
                     }

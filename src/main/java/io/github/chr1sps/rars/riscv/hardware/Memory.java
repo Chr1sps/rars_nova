@@ -4,7 +4,7 @@ import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
-import io.github.chr1sps.rars.exceptions.SimulationException;
+import io.github.chr1sps.rars.exceptions.ExceptionReason;
 import io.github.chr1sps.rars.riscv.Instruction;
 
 import java.util.Collection;
@@ -486,7 +486,7 @@ public class Memory extends Observable {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
                             "Load address crosses word boundary",
-                            SimulationException.LOAD_ADDRESS_MISALIGNED, address);
+                            ExceptionReason.LOAD_ADDRESS_MISALIGNED, address);
                 }
                 ProgramStatement oldStatement = getStatementNoNotify((address / 4) * 4);
                 if (oldStatement != null) {
@@ -505,7 +505,7 @@ public class Memory extends Observable {
             } else {
                 throw new AddressErrorException(
                         "Cannot write directly to text segment!",
-                        SimulationException.STORE_ACCESS_FAULT, address);
+                        ExceptionReason.STORE_ACCESS_FAULT, address);
             }
         } else if (address >= memoryMapBaseAddress && address < memoryMapLimitAddress) {
             // memory mapped I/O.
@@ -514,7 +514,7 @@ public class Memory extends Observable {
         } else {
             // falls outside addressing range
             throw new AddressErrorException("address out of range ",
-                    SimulationException.STORE_ACCESS_FAULT, address);
+                    ExceptionReason.STORE_ACCESS_FAULT, address);
         }
         notifyAnyObservers(AccessNotice.WRITE, address, length, value);
         return oldValue;
@@ -558,7 +558,7 @@ public class Memory extends Observable {
             } else {
                 throw new AddressErrorException(
                         "Cannot write directly to text segment!",
-                        SimulationException.STORE_ACCESS_FAULT, address);
+                        ExceptionReason.STORE_ACCESS_FAULT, address);
             }
         } else if (address >= memoryMapBaseAddress && address < memoryMapLimitAddress) {
             // memory mapped I/O.
@@ -567,7 +567,7 @@ public class Memory extends Observable {
         } else {
             // falls outside addressing range
             throw new AddressErrorException("store address out of range ",
-                    SimulationException.STORE_ACCESS_FAULT, address);
+                    ExceptionReason.STORE_ACCESS_FAULT, address);
         }
         notifyAnyObservers(AccessNotice.WRITE, address, WORD_LENGTH_BYTES, value);
         if (Globals.getSettings().getBackSteppingEnabled()) {
@@ -611,7 +611,7 @@ public class Memory extends Observable {
     public int setHalf(int address, int value) throws AddressErrorException {
         if (address % 2 != 0) {
             throw new AddressErrorException("store address not aligned on halfword boundary ",
-                    SimulationException.STORE_ADDRESS_MISALIGNED, address);
+                    ExceptionReason.STORE_ADDRESS_MISALIGNED, address);
         }
         return (Globals.getSettings().getBackSteppingEnabled())
                 ? Globals.program.getBackStepper().addMemoryRestoreHalf(address, set(address, value, 2))
@@ -694,7 +694,7 @@ public class Memory extends Observable {
         if (!inTextSegment(address)) {
             throw new AddressErrorException(
                     "Store address to text segment out of range",
-                    SimulationException.STORE_ACCESS_FAULT, address);
+                    ExceptionReason.STORE_ACCESS_FAULT, address);
         }
         if (Globals.debug)
             System.out.println("memory[" + address + "] set to " + statement.getBinaryStatement());
@@ -747,7 +747,7 @@ public class Memory extends Observable {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
                             "Load address not aligned to word boundary ",
-                            SimulationException.LOAD_ADDRESS_MISALIGNED, address);
+                            ExceptionReason.LOAD_ADDRESS_MISALIGNED, address);
                 }
                 ProgramStatement stmt = getStatementNoNotify((address / 4) * 4);
                 // TODO: maybe find a way to make the bit manipulation more clear
@@ -758,12 +758,12 @@ public class Memory extends Observable {
             } else {
                 throw new AddressErrorException(
                         "Cannot read directly from text segment!",
-                        SimulationException.LOAD_ACCESS_FAULT, address);
+                        ExceptionReason.LOAD_ACCESS_FAULT, address);
             }
         } else {
             // falls outside addressing range
             throw new AddressErrorException("address out of range ",
-                    SimulationException.LOAD_ACCESS_FAULT, address);
+                    ExceptionReason.LOAD_ACCESS_FAULT, address);
         }
         if (notify)
             notifyAnyObservers(AccessNotice.READ, address, length, value);
@@ -813,12 +813,12 @@ public class Memory extends Observable {
             } else {
                 throw new AddressErrorException(
                         "Cannot read directly from text segment!",
-                        SimulationException.LOAD_ACCESS_FAULT, address);
+                        ExceptionReason.LOAD_ACCESS_FAULT, address);
             }
         } else {
             // falls outside addressing range
             throw new AddressErrorException("address out of range ",
-                    SimulationException.LOAD_ACCESS_FAULT, address);
+                    ExceptionReason.LOAD_ACCESS_FAULT, address);
         }
         notifyAnyObservers(AccessNotice.READ, address, Memory.WORD_LENGTH_BYTES, value);
         return value;
@@ -870,7 +870,7 @@ public class Memory extends Observable {
             }
         } else {
             // falls outside addressing range
-            throw new AddressErrorException("address out of range ", SimulationException.LOAD_ACCESS_FAULT, address);
+            throw new AddressErrorException("address out of range ", ExceptionReason.LOAD_ACCESS_FAULT, address);
         }
         // Do not notify observers. This read operation is initiated by the
         // dump feature, not the executing program.
@@ -963,7 +963,7 @@ public class Memory extends Observable {
     public int getHalf(int address) throws AddressErrorException {
         if (address % 2 != 0) {
             throw new AddressErrorException("Load address not aligned on halfword boundary ",
-                    SimulationException.LOAD_ADDRESS_MISALIGNED, address);
+                    ExceptionReason.LOAD_ADDRESS_MISALIGNED, address);
         }
         return get(address, 2);
     }
@@ -1023,7 +1023,7 @@ public class Memory extends Observable {
                 && !inTextSegment(address)) {
             throw new AddressErrorException(
                     "fetch address for text segment out of range ",
-                    SimulationException.LOAD_ACCESS_FAULT, address);
+                    ExceptionReason.LOAD_ACCESS_FAULT, address);
         }
         if (inTextSegment(address))
             return readProgramStatement(address, textBaseAddress, textBlockTable, notify);
@@ -1049,7 +1049,7 @@ public class Memory extends Observable {
         if (!wordAligned(address)) {
             throw new AddressErrorException(
                     "Load address not aligned to word boundary ",
-                    SimulationException.LOAD_ADDRESS_MISALIGNED, address);
+                    ExceptionReason.LOAD_ADDRESS_MISALIGNED, address);
         }
     }
 
@@ -1057,7 +1057,7 @@ public class Memory extends Observable {
         if (!wordAligned(address)) {
             throw new AddressErrorException(
                     "Store address not aligned to word boundary ",
-                    SimulationException.STORE_ADDRESS_MISALIGNED, address);
+                    ExceptionReason.STORE_ADDRESS_MISALIGNED, address);
         }
     }
 
@@ -1170,11 +1170,11 @@ public class Memory extends Observable {
         // negative.
         if (startAddr >= 0 && endAddr < 0) {
             throw new AddressErrorException("range cannot cross 0x8000000; please split it up",
-                    SimulationException.LOAD_ACCESS_FAULT, startAddr);
+                    ExceptionReason.LOAD_ACCESS_FAULT, startAddr);
         }
         if (endAddr < startAddr) {
             throw new AddressErrorException("end address of range < start address of range ",
-                    SimulationException.LOAD_ACCESS_FAULT, startAddr);
+                    ExceptionReason.LOAD_ACCESS_FAULT, startAddr);
         }
         observables.add(new MemoryObservable(obs, startAddr, endAddr));
     }

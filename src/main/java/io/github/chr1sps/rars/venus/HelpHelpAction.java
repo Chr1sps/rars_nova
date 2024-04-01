@@ -1,15 +1,14 @@
 package io.github.chr1sps.rars.venus;
 
+import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.assembler.Directive;
+import io.github.chr1sps.rars.riscv.*;
+
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLFrameHyperlinkEvent;
-
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.assembler.Directives;
-import io.github.chr1sps.rars.riscv.*;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -295,7 +294,7 @@ public class HelpHelpAction extends GuiAction {
     private JScrollPane createDirectivesHelpPane() {
         Vector<String> exampleList = new Vector<>();
         String blanks = "            "; // 12 blanks
-        for (Directives direct : Directives.getDirectiveList()) {
+        for (Directive direct : Directive.getDirectiveList()) {
             exampleList.add(direct.toString()
                     + blanks.substring(0, Math.max(0, blanks.length() - direct.toString().length()))
                     + direct.getDescription());

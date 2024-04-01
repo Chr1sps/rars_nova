@@ -1,11 +1,11 @@
 package io.github.chr1sps.rars.assembler;
 
 import io.github.chr1sps.rars.*;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.exceptions.AssemblyException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.ExtendedInstruction;
 import io.github.chr1sps.rars.riscv.Instruction;
-import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.SystemIO;
@@ -57,7 +57,7 @@ public class Assembler {
     // macro definition segment
     private int externAddress;
     private boolean autoAlign;
-    private Directives dataDirective;
+    private Directive dataDirective;
     private RISCVprogram fileCurrentlyBeingAssembled;
     private TokenList globalDeclarationList;
     private AddressSpace textAddress;
@@ -105,7 +105,7 @@ public class Assembler {
                                                 boolean extendedAssemblerEnabled,
                                                 boolean warningsAreErrors) throws AssemblyException {
 
-        if (tokenizedProgramFiles == null || tokenizedProgramFiles.size() == 0)
+        if (tokenizedProgramFiles == null || tokenizedProgramFiles.isEmpty())
             return null;
         textAddress = new AddressSpace(Memory.textBaseAddress);
         dataAddress = new AddressSpace(Memory.dataBaseAddress);
@@ -137,7 +137,7 @@ public class Assembler {
             // This can be turned off for remainder of current data segment with ".align 0"
             this.autoAlign = true;
             // Default data directive is .word for 4 byte data items
-            this.dataDirective = Directives.WORD;
+            this.dataDirective = Directive.WORD;
             // Clear out (initialize) symbol table related structures.
             fileCurrentlyBeingAssembled.getLocalSymbolTable().clear();
             currentFileDataSegmentForwardReferences.clear();
@@ -303,7 +303,7 @@ public class Assembler {
             } catch (AddressErrorException e) {
                 Token t = statement.getOriginalTokenList().get(0);
                 errors.add(new ErrorMessage(t.getSourceProgram(), t.getSourceLine(), t
-                        .getStartPos(), "Invalid address for text segment: " + e.getAddress()));
+                        .getStartPos(), "Invalid address for text segment: " + e.address));
             }
         }
         // Aug. 24, 2005 Ken Vollmar
@@ -443,7 +443,7 @@ public class Assembler {
                     // contains the modified source.
                     // Put it into the line to be parsed, so it will be displayed properly in text
                     // segment display. DPS 23 Jan 2013
-                    if (tokenList2.getProcessedLine().length() > 0)
+                    if (!tokenList2.getProcessedLine().isEmpty())
                         substituted = tokenList2.getProcessedLine();
 
                     // recursively parse lines of expanded macro
@@ -614,7 +614,7 @@ public class Assembler {
     // This source code line is a directive, not a instruction. Let's carry it out.
     private void executeDirective(TokenList tokens) {
         Token token = tokens.get(0);
-        Directives direct = Directives.matchDirective(token.getValue());
+        Directive direct = Directive.matchDirective(token.getValue());
         if (Globals.debug)
             System.out.println("line " + token.getSourceLine() + " is directive " + direct);
         if (direct == null) {
@@ -622,10 +622,9 @@ public class Assembler {
                     .getStartPos(),
                     "\"" + token.getValue()
                             + "\" directive is invalid or not implemented in RARS"));
-            return;
-        } else if (direct == Directives.EQV) { /* EQV added by DPS 11 July 2012 */
+        } else if (direct == Directive.EQV) { /* EQV added by DPS 11 July 2012 */
             // Do nothing. This was vetted and processed during tokenizing.
-        } else if (direct == Directives.MACRO) {
+        } else if (direct == Directive.MACRO) {
             if (tokens.size() < 2) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
@@ -658,7 +657,7 @@ public class Assembler {
                 }
                 pool.getCurrent().addArg(arg.getValue());
             }
-        } else if (direct == Directives.END_MACRO) {
+        } else if (direct == Directive.END_MACRO) {
             if (tokens.size() > 1) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "invalid text after .END_MACRO"));
@@ -673,19 +672,18 @@ public class Assembler {
             fileCurrentlyBeingAssembled.getLocalMacroPool().commitMacro(token);
         } else if (inMacroSegment) {
             // should not parse lines even directives in macro segment
-            return;
-        } else if (direct == Directives.DATA) {
+        } else if (direct == Directive.DATA) {
             this.inDataSegment = true;
             this.autoAlign = true;
             if (tokens.size() > 1 && TokenTypes.isIntegerTokenType(tokens.get(1).getType())) {
                 this.dataAddress.set(Binary.stringToInt(tokens.get(1).getValue())); // KENV 1/6/05
             }
-        } else if (direct == Directives.TEXT) {
+        } else if (direct == Directive.TEXT) {
             this.inDataSegment = false;
             if (tokens.size() > 1 && TokenTypes.isIntegerTokenType(tokens.get(1).getType())) {
                 this.textAddress.set(Binary.stringToInt(tokens.get(1).getValue())); // KENV 1/6/05
             }
-        } else if (direct == Directives.SECTION) {
+        } else if (direct == Directive.SECTION) {
             if (tokens.size() >= 2) {
                 Token section = tokens.get(1);
                 if (section.getType() == TokenTypes.QUOTED_STRING || section.getType() == TokenTypes.IDENTIFIER) {
@@ -707,20 +705,20 @@ public class Assembler {
                 errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(), token.getStartPos(),
                         ".section without arguments is ignored"));
             }
-        } else if (direct == Directives.WORD || direct == Directives.HALF
-                || direct == Directives.BYTE || direct == Directives.FLOAT
-                || direct == Directives.DOUBLE || direct == Directives.DWORD) {
+        } else if (direct == Directive.WORD || direct == Directive.HALF
+                || direct == Directive.BYTE || direct == Directive.FLOAT
+                || direct == Directive.DOUBLE || direct == Directive.DWORD) {
             this.dataDirective = direct;
             if (passesDataSegmentCheck(token) && tokens.size() > 1) { // DPS
                 // 11/20/06, added text segment prohibition
                 storeNumeric(tokens, direct, errors);
             }
-        } else if (direct == Directives.ASCII || direct == Directives.ASCIZ || direct == Directives.STRING) {
+        } else if (direct == Directive.ASCII || direct == Directive.ASCIZ || direct == Directive.STRING) {
             this.dataDirective = direct;
             if (passesDataSegmentCheck(token)) {
                 storeStrings(tokens, direct, errors);
             }
-        } else if (direct == Directives.ALIGN) {
+        } else if (direct == Directive.ALIGN) {
             if (tokens.size() != 2) {
                 errors.add(new ErrorMessage(token.getSourceProgram(),
                         token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
@@ -744,7 +742,7 @@ public class Assembler {
             } else {
                 this.dataAddress.set(this.alignToBoundary(this.dataAddress.get(), (int) Math.pow(2, value)));
             }
-        } else if (direct == Directives.SPACE) {
+        } else if (direct == Directive.SPACE) {
             // TODO: add a fill type option
             // .space 90, 1 should fill memory with 90 bytes with the values 1
             if (passesDataSegmentCheck(token)) {
@@ -764,7 +762,7 @@ public class Assembler {
                 int value = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
                 this.dataAddress.increment(value);
             }
-        } else if (direct == Directives.EXTERN) {
+        } else if (direct == Directive.EXTERN) {
             if (tokens.size() != 3) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
@@ -785,7 +783,7 @@ public class Assembler {
                         true, errors);
                 this.externAddress += size;
             }
-        } else if (direct == Directives.GLOBL || direct == Directives.GLOBAL) {
+        } else if (direct == Directive.GLOBL || direct == Directive.GLOBAL) {
             if (tokens.size() < 2) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
@@ -848,13 +846,13 @@ public class Assembler {
     // This source code line, if syntactically correct, is a continuation of a
     // directive list begun on on previous line.
     private void executeDirectiveContinuation(TokenList tokens) {
-        Directives direct = this.dataDirective;
-        if (direct == Directives.WORD || direct == Directives.HALF || direct == Directives.BYTE
-                || direct == Directives.FLOAT || direct == Directives.DOUBLE || direct == Directives.DWORD) {
+        Directive direct = this.dataDirective;
+        if (direct == Directive.WORD || direct == Directive.HALF || direct == Directive.BYTE
+                || direct == Directive.FLOAT || direct == Directive.DOUBLE || direct == Directive.DWORD) {
             if (tokens.size() > 0) {
                 storeNumeric(tokens, direct, errors);
             }
-        } else if (direct == Directives.ASCII || direct == Directives.ASCIZ || direct == Directives.STRING) {
+        } else if (direct == Directive.ASCII || direct == Directive.ASCIZ || direct == Directive.STRING) {
             if (passesDataSegmentCheck(tokens.get(0))) {
                 storeStrings(tokens, direct, errors);
             }
@@ -894,7 +892,7 @@ public class Assembler {
     // of a multiline list, which does not contain the directive token. Just pass
     // the
     // current directive as argument.
-    private void storeNumeric(TokenList tokens, Directives directive, ErrorList errors) {
+    private void storeNumeric(TokenList tokens, Directive directive, ErrorList errors) {
         Token token = tokens.get(0);
         // A double-check; should have already been caught...removed ".word" exemption
         // 11/20/06
@@ -917,12 +915,7 @@ public class Assembler {
             // (integer directive AND integer value OR floating directive AND
             // (integer value OR floating value))
             // AND integer repetition value
-            if (!(Directives.isIntegerDirective(directive)
-                    && TokenTypes.isIntegerTokenType(valueToken.getType())
-                    || Directives
-                    .isFloatingDirective(directive)
-                    && (TokenTypes.isIntegerTokenType(valueToken.getType()) || TokenTypes
-                    .isFloatingTokenType(valueToken.getType())))
+            if (!(directive.isIntegerDirective())
                     || !TokenTypes.isIntegerTokenType(repetitionsToken.getType())) {
                 errors.add(new ErrorMessage(fileCurrentlyBeingAssembled,
                         valueToken.getSourceLine(), valueToken.getStartPos(),
@@ -942,7 +935,7 @@ public class Assembler {
                             .set(this.alignToBoundary(this.dataAddress.get(), lengthInBytes));
                 }
                 for (int i = 0; i < repetitions; i++) {
-                    if (Directives.isIntegerDirective(directive)) {
+                    if (directive.isIntegerDirective()) {
                         storeInteger(valueToken, directive, errors);
                     } else {
                         storeRealNumber(valueToken, directive, errors);
@@ -955,10 +948,10 @@ public class Assembler {
         // if not in ".word w : n" format, must just be list of one or more values.
         for (int i = tokenStart; i < tokens.size(); i++) {
             token = tokens.get(i);
-            if (Directives.isIntegerDirective(directive)) {
+            if (directive.isIntegerDirective()) {
                 storeInteger(token, directive, errors);
             }
-            if (Directives.isFloatingDirective(directive)) {
+            if (directive.isFloatingDirective()) {
                 storeRealNumber(token, directive, errors);
             }
         }
@@ -969,7 +962,7 @@ public class Assembler {
     // Called by storeNumeric()
     // NOTE: The token itself may be a label, in which case the correct action is
     // to store the address of that label (into however many bytes specified).
-    private void storeInteger(Token token, Directives directive, ErrorList errors) {
+    private void storeInteger(Token token, Directive directive, ErrorList errors) {
         int lengthInBytes = DataTypes.getLengthInBytes(directive);
         if (TokenTypes.isIntegerTokenType(token.getType())) {
             int value;
@@ -977,7 +970,7 @@ public class Assembler {
             if (TokenTypes.INTEGER_64 == token.getType()) {
                 longvalue = Binary.stringToLong(token.getValue());
                 value = (int) longvalue;
-                if (directive != Directives.DWORD) {
+                if (directive != Directive.DWORD) {
                     errors.add(new ErrorMessage(ErrorMessage.WARNING, token.getSourceProgram(), token.getSourceLine(),
                             token.getStartPos(), "value " + Binary.longToHexString(longvalue)
                             + " is out-of-range and truncated to " + Binary.intToHexString(value)));
@@ -987,7 +980,7 @@ public class Assembler {
                 longvalue = value;
             }
 
-            if (directive == Directives.DWORD) {
+            if (directive == Directive.DWORD) {
                 writeToDataSegment((int) longvalue, 4, token, errors);
                 writeToDataSegment((int) (longvalue >> 32), 4, token, errors);
                 return;
@@ -998,9 +991,9 @@ public class Assembler {
             // If value is out of range for the directive, will simply truncate
             // the leading bits (includes sign bits). This is what SPIM does.
             // But will issue a warning (not error) which SPIM does not do.
-            if (directive == Directives.BYTE) {
+            if (directive == Directive.BYTE) {
                 value = value & 0x000000FF;
-            } else if (directive == Directives.HALF) {
+            } else if (directive == Directive.HALF) {
                 value = value & 0x0000FFFF;
             }
 
@@ -1066,7 +1059,7 @@ public class Assembler {
     // Store real (fixed or floating point) value given floating (float, double)
     // directive.
     // Called by storeNumeric()
-    private void storeRealNumber(Token token, Directives directive, ErrorList errors) {
+    private void storeRealNumber(Token token, Directive directive, ErrorList errors) {
         int lengthInBytes = DataTypes.getLengthInBytes(directive);
         double value;
 
@@ -1101,10 +1094,10 @@ public class Assembler {
 
         // Value has been validated; let's store it.
 
-        if (directive == Directives.FLOAT) {
+        if (directive == Directive.FLOAT) {
             writeToDataSegment(Float.floatToIntBits((float) value), lengthInBytes, token, errors);
         }
-        if (directive == Directives.DOUBLE) {
+        if (directive == Directive.DOUBLE) {
             writeDoubleToDataSegment(value, token, errors);
         }
 
@@ -1114,7 +1107,7 @@ public class Assembler {
     // Use directive argument to distinguish between ASCII and ASCIZ. The
     // latter stores a terminating null byte. Can handle a list of one or more
     // strings on a single line.
-    private void storeStrings(TokenList tokens, Directives direct, ErrorList errors) {
+    private void storeStrings(TokenList tokens, Directive direct, ErrorList errors) {
         Token token;
         // Correctly handles case where this is a "directive continuation" line.
         int tokenStart = 0;
@@ -1206,7 +1199,7 @@ public class Assembler {
                     }
 
                 }
-                if (direct == Directives.ASCIZ || direct == Directives.STRING) {
+                if (direct == Directive.ASCIZ || direct == Directive.STRING) {
                     try {
                         Globals.memory.set(this.dataAddress.get(), 0, DataTypes.CHAR_SIZE);
                     } catch (AddressErrorException e) {
@@ -1389,7 +1382,7 @@ public class Assembler {
                     // patch address has to be valid b/c we already stored there...
                     try {
                         Globals.memory.set(entry.patchAddress, labelAddress, entry.length);
-                    } catch (AddressErrorException aee) {
+                    } catch (AddressErrorException ignored) {
                     }
                     forwardReferenceList.remove(i);
                     i--; // needed because removal shifted the remaining list indices down
@@ -1409,7 +1402,7 @@ public class Assembler {
         }
 
         // inner-inner class to hold each entry of the forward reference list.
-        private class DataSegmentForwardReference {
+        private static class DataSegmentForwardReference {
             int patchAddress;
             int length;
             Token token;

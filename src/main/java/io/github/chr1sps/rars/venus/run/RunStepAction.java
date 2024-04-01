@@ -1,15 +1,5 @@
 package io.github.chr1sps.rars.venus.run;
 
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.util.Observable;
-import java.util.Observer;
-
-import javax.swing.Action;
-import javax.swing.Icon;
-import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.SimulationException;
@@ -21,6 +11,12 @@ import io.github.chr1sps.rars.venus.ExecutePane;
 import io.github.chr1sps.rars.venus.FileStatus;
 import io.github.chr1sps.rars.venus.GuiAction;
 import io.github.chr1sps.rars.venus.VenusUI;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.Observable;
+import java.util.Observer;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -155,7 +151,7 @@ public class RunStepAction extends GuiAction {
         if (pe != null) {
             RunGoAction.resetMaxSteps();
             mainUI.getMessagesPane().postMessage(
-                    pe.error().generateReport());
+                    pe.errorMessage.generateReport());
             mainUI.getMessagesPane().postMessage(
                     "\n" + name + ": execution terminated with errors.\n\n");
             mainUI.getRegistersPane().setSelectedComponent(executePane.getControlAndStatusWindow());
@@ -176,7 +172,7 @@ public class RunStepAction extends GuiAction {
     //////////////////////////////////////////////////////////////////////////////////// (argv).
     private void processProgramArgumentsIfAny() {
         String programArguments = executePane.getTextSegmentWindow().getProgramArguments();
-        if (programArguments == null || programArguments.length() == 0 ||
+        if (programArguments == null || programArguments.isEmpty() ||
                 !Globals.getSettings().getBooleanSetting(Settings.Bool.PROGRAM_ARGUMENTS)) {
             return;
         }

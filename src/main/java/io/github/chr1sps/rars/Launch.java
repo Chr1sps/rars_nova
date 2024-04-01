@@ -119,7 +119,7 @@ public class Launch {
      * made available to the program at runtime.<br>
      **/
 
-    private Options options;
+    private final Options options;
     private boolean gui;
     private boolean simulate;
     private boolean rv64;
@@ -132,10 +132,10 @@ public class Launch {
     private static final int DECIMAL = 0; // memory and register display format
     private static final int HEXADECIMAL = 1;// memory and register display format
     private static final int ASCII = 2;// memory and register display format
-    private ArrayList<String> registerDisplayList;
-    private ArrayList<String> memoryDisplayList;
-    private ArrayList<String> filenameList;
-    private int instructionCount;
+    private final ArrayList<String> registerDisplayList;
+    private final ArrayList<String> memoryDisplayList;
+    private final ArrayList<String> filenameList;
+    private final int instructionCount;
     private PrintStream out; // stream for display of command line output
     private ArrayList<String[]> dumpTriples = null; // each element holds 3 arguments for dump option
     private ArrayList<String> programArgumentList; // optional program args for program (becomes argc, argv)
@@ -209,9 +209,7 @@ public class Launch {
                     segInfo = new Integer[2];
                     segInfo[0] = Binary.stringToInt(memoryRange[0]); // low end of range
                     segInfo[1] = Binary.stringToInt(memoryRange[1]); // high end of range
-                } catch (NumberFormatException nfe) {
-                    segInfo = null;
-                } catch (NullPointerException npe) {
+                } catch (NumberFormatException | NullPointerException nfe) {
                     segInfo = null;
                 }
             }
@@ -236,7 +234,7 @@ public class Launch {
                 out.println("Error while attempting to save dump, file " + file + " was not found!");
             } catch (AddressErrorException e) {
                 out.println("Error while attempting to save dump, file " + file + "!  Could not access address: "
-                        + e.getAddress() + "!");
+                        + e.address + "!");
             } catch (IOException e) {
                 out.println("Error while attempting to save dump, file " + file + "!  Disk IO failed!");
             }
@@ -251,13 +249,13 @@ public class Launch {
         // System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts RARS menu
         // on Mac OS menu bar
         FlatDarkLaf.setup();
+//        FlatIntelliJLaf.setup();
+//        FlatMacDarkLaf.setup();
         SwingUtilities.invokeLater(
-                new Runnable() {
-                    public void run() {
-                        // Turn off metal's use of bold fonts
-                        // UIManager.put("swing.boldMetal", Boolean.FALSE);
-                        new VenusUI("RARS " + Globals.version, filenameList);
-                    }
+                () -> {
+                    // Turn off metal's use of bold fonts
+                    // UIManager.put("swing.boldMetal", Boolean.FALSE);
+                    new VenusUI("RARS " + Globals.version, filenameList);
                 });
     }
 
@@ -297,19 +295,19 @@ public class Launch {
             }
             // Once we hit "pa", all remaining command args are assumed
             // to be program arguments.
-            if (args[i].toLowerCase().equals("pa")) {
+            if (args[i].equalsIgnoreCase("pa")) {
                 inProgramArgumentList = true;
                 continue;
             }
             // messages-to-standard-error switch already processed, so ignore.
-            if (args[i].toLowerCase().equals(displayMessagesToErrSwitch)) {
+            if (args[i].equalsIgnoreCase(displayMessagesToErrSwitch)) {
                 continue;
             }
             // no-copyright switch already processed, so ignore.
-            if (args[i].toLowerCase().equals(noCopyrightSwitch)) {
+            if (args[i].equalsIgnoreCase(noCopyrightSwitch)) {
                 continue;
             }
-            if (args[i].toLowerCase().equals("dump")) {
+            if (args[i].equalsIgnoreCase("dump")) {
                 if (args.length <= (i + 3)) {
                     out.println("Dump command line argument requires a segment, format and file name.");
                     argsOK = false;
@@ -321,7 +319,7 @@ public class Launch {
                 }
                 continue;
             }
-            if (args[i].toLowerCase().equals("mc")) {
+            if (args[i].equalsIgnoreCase("mc")) {
                 String configName = args[++i];
                 MemoryConfiguration config = MemoryConfigurations.getConfigurationByName(configName);
                 if (config == null) {
@@ -352,65 +350,65 @@ public class Launch {
                     // Let it fall thru and get handled by catch-all
                 }
             }
-            if (args[i].toLowerCase().equals("d")) {
+            if (args[i].equalsIgnoreCase("d")) {
                 Globals.debug = true;
                 continue;
             }
-            if (args[i].toLowerCase().equals("a")) {
+            if (args[i].equalsIgnoreCase("a")) {
                 simulate = false;
                 continue;
             }
-            if (args[i].toLowerCase().equals("ad") ||
-                    args[i].toLowerCase().equals("da")) {
+            if (args[i].equalsIgnoreCase("ad") ||
+                    args[i].equalsIgnoreCase("da")) {
                 Globals.debug = true;
                 simulate = false;
                 continue;
             }
-            if (args[i].toLowerCase().equals("p")) {
+            if (args[i].equalsIgnoreCase("p")) {
                 assembleProject = true;
                 continue;
             }
-            if (args[i].toLowerCase().equals("dec")) {
+            if (args[i].equalsIgnoreCase("dec")) {
                 displayFormat = DECIMAL;
                 continue;
             }
-            if (args[i].toLowerCase().equals("g")) {
+            if (args[i].equalsIgnoreCase("g")) {
                 gui = true;
                 continue;
             }
-            if (args[i].toLowerCase().equals("hex")) {
+            if (args[i].equalsIgnoreCase("hex")) {
                 displayFormat = HEXADECIMAL;
                 continue;
             }
-            if (args[i].toLowerCase().equals("ascii")) {
+            if (args[i].equalsIgnoreCase("ascii")) {
                 displayFormat = ASCII;
                 continue;
             }
-            if (args[i].toLowerCase().equals("b")) {
+            if (args[i].equalsIgnoreCase("b")) {
                 verbose = false;
                 continue;
             }
-            if (args[i].toLowerCase().equals("np") || args[i].toLowerCase().equals("ne")) {
+            if (args[i].equalsIgnoreCase("np") || args[i].equalsIgnoreCase("ne")) {
                 options.pseudo = false;
                 continue;
             }
-            if (args[i].toLowerCase().equals("we")) { // added 14-July-2008 DPS
+            if (args[i].equalsIgnoreCase("we")) { // added 14-July-2008 DPS
                 options.warningsAreErrors = true;
                 continue;
             }
-            if (args[i].toLowerCase().equals("sm")) { // added 17-Dec-2009 DPS
+            if (args[i].equalsIgnoreCase("sm")) { // added 17-Dec-2009 DPS
                 options.startAtMain = true;
                 continue;
             }
-            if (args[i].toLowerCase().equals("smc")) { // added 5-Jul-2013 DPS
+            if (args[i].equalsIgnoreCase("smc")) { // added 5-Jul-2013 DPS
                 options.selfModifyingCode = true;
                 continue;
             }
-            if (args[i].toLowerCase().equals("rv64")) {
+            if (args[i].equalsIgnoreCase("rv64")) {
                 rv64 = true;
                 continue;
             }
-            if (args[i].toLowerCase().equals("ic")) { // added 19-Jul-2012 DPS
+            if (args[i].equalsIgnoreCase("ic")) { // added 19-Jul-2012 DPS
                 countInstructions = true;
                 continue;
             }
@@ -438,7 +436,6 @@ public class Launch {
             }
             // Check for stand-alone integer, which is the max execution steps option
             try {
-                Integer.decode(args[i]);
                 options.maxSteps = Integer.decode(args[i]); // if we got here, it has to be OK
                 continue;
             } catch (NumberFormatException nfe) {
@@ -467,7 +464,7 @@ public class Launch {
     // Returns false if no simulation (run) occurs, true otherwise.
 
     private Program runCommand() {
-        if (filenameList.size() == 0) {
+        if (filenameList.isEmpty()) {
             return null;
         }
 
@@ -487,8 +484,8 @@ public class Launch {
                         FilenameFinder.MATCH_ALL_EXTENSIONS);
                 // Remove any duplicates then merge the two lists.
                 for (int index2 = 0; index2 < moreFilesToAssemble.size(); index2++) {
-                    for (int index1 = 0; index1 < filesToAssemble.size(); index1++) {
-                        if (filesToAssemble.get(index1).equals(moreFilesToAssemble.get(index2))) {
+                    for (String s : filesToAssemble) {
+                        if (s.equals(moreFilesToAssemble.get(index2))) {
                             moreFilesToAssemble.remove(index2);
                             index2--; // adjust for left shift in moreFilesToAssemble...
                             break; // break out of inner loop...
@@ -541,7 +538,7 @@ public class Launch {
 
             } catch (SimulationException e) {
                 Globals.exitCode = simulateErrorExitCode;
-                out.println(e.error().generateReport());
+                out.println(e.errorMessage.generateReport());
                 out.println("Simulation terminated due to errors.");
             }
             displayAllPostMortem(program);
@@ -625,21 +622,11 @@ public class Launch {
     //////////////////////////////////////////////////////////////////////
     // Formats int value for display: decimal, hex, ascii
     private String formatIntForDisplay(int value) {
-        String strValue;
-        switch (displayFormat) {
-            case DECIMAL:
-                strValue = "" + value;
-                break;
-            case HEXADECIMAL:
-                strValue = Binary.intToHexString(value);
-                break;
-            case ASCII:
-                strValue = Binary.intToAscii(value);
-                break;
-            default:
-                strValue = Binary.intToHexString(value);
-        }
-        return strValue;
+        return switch (displayFormat) {
+            case DECIMAL -> "" + value;
+            case ASCII -> Binary.intToAscii(value);
+            default -> Binary.intToHexString(value); // hex case
+        };
     }
 
     //////////////////////////////////////////////////////////////////////

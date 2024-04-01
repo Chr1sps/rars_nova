@@ -1,17 +1,15 @@
 package io.github.chr1sps.rars.venus;
 
+import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.venus.editors.TextEditingArea;
+import io.github.chr1sps.rars.venus.editors.jeditsyntax.JEditBasedTextArea;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
-
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.venus.editors.TextEditingArea;
-import io.github.chr1sps.rars.venus.editors.generic.GenericTextArea;
-import io.github.chr1sps.rars.venus.editors.jeditsyntax.JEditBasedTextArea;
-
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -90,11 +88,7 @@ public class EditPane extends JPanel implements Observer {
         this.fileStatus = new FileStatus();
         lineNumbers = new JLabel();
 
-        if (Globals.getSettings().getBooleanSetting(Settings.Bool.GENERIC_TEXT_EDITOR)) {
-            this.sourceCode = new GenericTextArea(this, lineNumbers);
-        } else {
-            this.sourceCode = new JEditBasedTextArea(this, lineNumbers);
-        }
+        this.sourceCode = new JEditBasedTextArea(this, lineNumbers);
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);
 

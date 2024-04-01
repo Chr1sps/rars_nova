@@ -1,22 +1,24 @@
 package io.github.chr1sps.rars.venus;
 
-import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableModel;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
-import io.github.chr1sps.rars.riscv.hardware.*;
+import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
+import io.github.chr1sps.rars.riscv.hardware.Memory;
+import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
+import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.simulator.Simulator;
 import io.github.chr1sps.rars.simulator.SimulatorNotice;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
 import io.github.chr1sps.rars.venus.util.RepeatButton;
 
+import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Date;

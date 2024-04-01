@@ -1,19 +1,14 @@
 package io.github.chr1sps.rars.extras;
 
+import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.assembler.Directive;
+import io.github.chr1sps.rars.riscv.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.assembler.Directives;
-import io.github.chr1sps.rars.riscv.AbstractSyscall;
-import io.github.chr1sps.rars.riscv.BasicInstruction;
-import io.github.chr1sps.rars.riscv.ExtendedInstruction;
-import io.github.chr1sps.rars.riscv.Instruction;
-import io.github.chr1sps.rars.riscv.InstructionSet;
-import io.github.chr1sps.rars.riscv.SyscallLoader;
 
 /**
  * Small class for automatically generating documentation.
@@ -48,10 +43,10 @@ public class Documentation {
      * @return a {@link java.lang.String} object
      */
     public static String createDirectiveMarkdown() {
-        ArrayList<Directives> directives = Directives.getDirectiveList();
-        directives.sort(Comparator.comparing(Directives::getName));
+        ArrayList<Directive> directives = Directive.getDirectiveList();
+        directives.sort(Comparator.comparing(Directive::getName));
         StringBuilder output = new StringBuilder("| Name | Description|\n|------|------------|");
-        for (Directives direct : directives) {
+        for (var direct : directives) {
             output.append("\n|");
             output.append(direct.getName());
             output.append('|');

@@ -1,6 +1,7 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.rars.ProgramStatement;
+import io.github.chr1sps.rars.exceptions.ExceptionReason;
 import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
@@ -59,13 +60,13 @@ public class CSRRS extends BasicInstruction {
             if (operands[2] != 0) {
                 if (ControlAndStatusRegisterFile.orRegister(operands[1], RegisterFile.getValueLong(operands[2]))) {
                     throw new SimulationException(statement, "Attempt to write to read-only CSR",
-                            SimulationException.ILLEGAL_INSTRUCTION);
+                            ExceptionReason.ILLEGAL_INSTRUCTION);
                 }
             }
             RegisterFile.updateRegister(operands[0], csr);
         } catch (NullPointerException e) {
             throw new SimulationException(statement, "Attempt to access unavailable CSR",
-                    SimulationException.ILLEGAL_INSTRUCTION);
+                    ExceptionReason.ILLEGAL_INSTRUCTION);
         }
     }
 }

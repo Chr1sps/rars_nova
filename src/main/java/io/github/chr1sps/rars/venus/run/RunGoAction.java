@@ -1,7 +1,5 @@
 package io.github.chr1sps.rars.venus.run;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.SimulationException;
@@ -15,6 +13,7 @@ import io.github.chr1sps.rars.venus.FileStatus;
 import io.github.chr1sps.rars.venus.GuiAction;
 import io.github.chr1sps.rars.venus.VenusUI;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Observable;
@@ -230,7 +229,7 @@ public class RunGoAction extends GuiAction {
                 break;
             case EXCEPTION:
                 mainUI.getMessagesPane().postMessage(
-                        pe.error().generateReport());
+                        pe.errorMessage.generateReport());
                 mainUI.getMessagesPane().postMessage(
                         "\n" + name + ": execution terminated with errors.\n\n");
                 break;

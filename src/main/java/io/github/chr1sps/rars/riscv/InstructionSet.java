@@ -1,32 +1,21 @@
 package io.github.chr1sps.rars.riscv;
 
+import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.ProgramStatement;
+import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.exceptions.ExceptionReason;
+import io.github.chr1sps.rars.exceptions.SimulationException;
+import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import io.github.chr1sps.rars.riscv.syscalls.*;
+import io.github.chr1sps.rars.util.FilenameFinder;
+import io.github.chr1sps.rars.util.SystemIO;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.StringTokenizer;
-
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.exceptions.SimulationException;
-import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
-import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintChar;
-import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintDouble;
-import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintFloat;
-import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintInt;
-import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintIntBinary;
-import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintIntHex;
-import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintIntUnsigned;
-import io.github.chr1sps.rars.riscv.syscalls.SyscallPrintString;
-import io.github.chr1sps.rars.riscv.syscalls.SyscallWrite;
-import io.github.chr1sps.rars.util.FilenameFinder;
-import io.github.chr1sps.rars.util.SystemIO;
+import java.util.*;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -338,7 +327,7 @@ public class InstructionSet {
         throw new SimulationException(statement,
                 "invalid or unimplemented syscall service: " +
                         number + " ",
-                SimulationException.ENVIRONMENT_CALL);
+                ExceptionReason.ENVIRONMENT_CALL);
     }
 
     /*

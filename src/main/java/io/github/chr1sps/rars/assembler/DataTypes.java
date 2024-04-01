@@ -118,21 +118,16 @@ public final class DataTypes {
      * numeric
      * (or not implemented yet), returns 0.
      */
-    public static int getLengthInBytes(Directives direct) {
-        if (direct == Directives.FLOAT)
-            return FLOAT_SIZE;
-        else if (direct == Directives.DOUBLE)
-            return DOUBLE_SIZE;
-        else if (direct == Directives.DWORD)
-            return 2 * WORD_SIZE;
-        else if (direct == Directives.WORD)
-            return WORD_SIZE;
-        else if (direct == Directives.HALF)
-            return HALF_SIZE;
-        else if (direct == Directives.BYTE)
-            return BYTE_SIZE;
-        else
-            return 0;
+    public static int getLengthInBytes(Directive direct) {
+        return switch (direct) {
+            case FLOAT -> FLOAT_SIZE;
+            case DOUBLE -> DOUBLE_SIZE;
+            case DWORD -> 2 * WORD_SIZE;
+            case WORD -> WORD_SIZE;
+            case HALF -> HALF_SIZE;
+            case BYTE -> BYTE_SIZE;
+            default -> 0;
+        };
     }
 
     /**
@@ -146,11 +141,11 @@ public final class DataTypes {
      * by the given directive (.word, .half, .byte), <code>false</code>
      * otherwise.
      */
-    public static boolean outOfRange(Directives direct, int value) {
+    public static boolean outOfRange(Directive direct, int value) {
         // Hex values used here rather than constants because there aren't constants for
         // unsigned max
-        return (direct == Directives.HALF && (value < MIN_HALF_VALUE || value > 0xFFFF)) ||
-                (direct == Directives.BYTE && (value < MIN_BYTE_VALUE || value > 0xFF));
+        return (direct == Directive.HALF && (value < MIN_HALF_VALUE || value > 0xFFFF)) ||
+                (direct == Directive.BYTE && (value < MIN_BYTE_VALUE || value > 0xFF));
     }
 
     /**
@@ -168,7 +163,7 @@ public final class DataTypes {
      * @return Returns <code>true</code> if value is within range of
      * the given directive (.float, .double), <code>false</code> otherwise.
      */
-    public static boolean outOfRange(Directives direct, double value) {
-        return direct == Directives.FLOAT && (value < LOW_FLOAT_VALUE || value > MAX_FLOAT_VALUE);
+    public static boolean outOfRange(Directive direct, double value) {
+        return direct == Directive.FLOAT && (value < LOW_FLOAT_VALUE || value > MAX_FLOAT_VALUE);
     }
 }

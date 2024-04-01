@@ -16,72 +16,35 @@ import io.github.chr1sps.rars.util.Binary;
  */
 public class SimulationException extends Exception {
 
-    // Interrupts
-    /**
-     * Constant <code>SOFTWARE_INTERRUPT=0x80000000</code>
-     */
-    public static final int SOFTWARE_INTERRUPT = 0x80000000;
-    /**
-     * Constant <code>TIMER_INTERRUPT=0x80000004</code>
-     */
-    public static final int TIMER_INTERRUPT = 0x80000004;
-    /**
-     * Constant <code>EXTERNAL_INTERRUPT=0x80000008</code>
-     */
-    public static final int EXTERNAL_INTERRUPT = 0x80000008;
-    // Traps
-    /**
-     * Constant <code>INSTRUCTION_ADDR_MISALIGNED=0</code>
-     */
-    public static final int INSTRUCTION_ADDR_MISALIGNED = 0;
-    /**
-     * Constant <code>INSTRUCTION_ACCESS_FAULT=1</code>
-     */
-    public static final int INSTRUCTION_ACCESS_FAULT = 1;
-    /**
-     * Constant <code>ILLEGAL_INSTRUCTION=2</code>
-     */
-    public static final int ILLEGAL_INSTRUCTION = 2;
-    /**
-     * Constant <code>LOAD_ADDRESS_MISALIGNED=4</code>
-     */
-    public static final int LOAD_ADDRESS_MISALIGNED = 4;
-    /**
-     * Constant <code>LOAD_ACCESS_FAULT=5</code>
-     */
-    public static final int LOAD_ACCESS_FAULT = 5;
-    /**
-     * Constant <code>STORE_ADDRESS_MISALIGNED=6</code>
-     */
-    public static final int STORE_ADDRESS_MISALIGNED = 6;
-    /**
-     * Constant <code>STORE_ACCESS_FAULT=7</code>
-     */
-    public static final int STORE_ACCESS_FAULT = 7;
-    /**
-     * Constant <code>ENVIRONMENT_CALL=8</code>
-     */
-    public static final int ENVIRONMENT_CALL = 8;
+    public final ExceptionReason reason;
+    public final int value;
+    public final ErrorMessage errorMessage;
 
-    private int cause = -1, value = 0;
-    private ErrorMessage message = null;
+
+    private SimulationException(ExceptionReason reason, ErrorMessage msg, int value) {
+        this.reason = reason;
+        this.value = value;
+        this.errorMessage = msg;
+    }
 
     /**
      * <p>Constructor for SimulationException.</p>
      */
     public SimulationException() {
+        this(ExceptionReason.OTHER, null, 0);
     }
 
     /**
      * <p>Constructor for SimulationException.</p>
      *
-     * @param ps    a {@link io.github.chr1sps.rars.ProgramStatement} object
-     * @param m     a {@link java.lang.String} object
-     * @param cause a int
+     * @param ps     a {@link io.github.chr1sps.rars.ProgramStatement} object
+     * @param m      a {@link java.lang.String} object
+     * @param reason a int
      */
-    public SimulationException(ProgramStatement ps, String m, int cause) {
-        this(ps, m);
-        this.cause = cause;
+    public SimulationException(ProgramStatement ps, String m, ExceptionReason reason) {
+        this(reason, new ErrorMessage(ps, "Runtime exception at " +
+                Binary.intToHexString(RegisterFile.getProgramCounter() - Instruction.INSTRUCTION_LENGTH) +
+                ": " + m), 0);
     }
 
     /**
@@ -91,9 +54,7 @@ public class SimulationException extends Exception {
      * @param m  a String containing specialized error message
      */
     public SimulationException(ProgramStatement ps, String m) {
-        message = new ErrorMessage(ps, "Runtime exception at " +
-                Binary.intToHexString(RegisterFile.getProgramCounter() - Instruction.INSTRUCTION_LENGTH) +
-                ": " + m);
+        this(ps, m, ExceptionReason.OTHER);
         // Stopped using ps.getAddress() because of pseudo-instructions. All
         // instructions in
         // the macro expansion point to the same ProgramStatement, and thus all will
@@ -112,9 +73,9 @@ public class SimulationException extends Exception {
      * @param aee a {@link AddressErrorException} object
      */
     public SimulationException(ProgramStatement ps, AddressErrorException aee) {
-        this(ps, aee.getMessage());
-        cause = aee.getType();
-        value = aee.getAddress();
+        this(aee.reason, new ErrorMessage(ps, "Runtime exception at " +
+                Binary.intToHexString(RegisterFile.getProgramCounter() - Instruction.INSTRUCTION_LENGTH) +
+                ": " + aee.getMessage()), aee.address);
     }
 
     /**
@@ -123,45 +84,18 @@ public class SimulationException extends Exception {
      * @param m a {@link java.lang.String} object
      */
     public SimulationException(String m) {
-        message = new ErrorMessage(null, 0, 0, m);
+        this(m, ExceptionReason.OTHER);
     }
 
     /**
      * <p>Constructor for SimulationException.</p>
      *
-     * @param m     a {@link java.lang.String} object
-     * @param cause a int
+     * @param m      a {@link java.lang.String} object
+     * @param reason a int
      */
-    public SimulationException(String m, int cause) {
-        message = new ErrorMessage(null, 0, 0, m);
-        this.cause = cause;
-    }
-
-    /**
-     * Produce the list of error messages.
-     *
-     * @return Returns the Message associated with the exception
-     * @see ErrorMessage
-     */
-    public ErrorMessage error() {
-        return message;
-    }
-
-    /**
-     * <p>cause.</p>
-     *
-     * @return a int
-     */
-    public int cause() {
-        return cause;
-    }
-
-    /**
-     * <p>value.</p>
-     *
-     * @return a int
-     */
-    public int value() {
-        return value;
+    public SimulationException(String m, ExceptionReason reason) {
+        this.errorMessage = new ErrorMessage(null, 0, 0, m);
+        this.reason = reason;
+        this.value = 0;
     }
 }
