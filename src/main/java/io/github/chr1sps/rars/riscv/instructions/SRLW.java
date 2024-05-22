@@ -3,8 +3,6 @@ package io.github.chr1sps.rars.riscv.instructions;
 /**
  * <p>SRLW class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SRLW extends ArithmeticW {
     /**

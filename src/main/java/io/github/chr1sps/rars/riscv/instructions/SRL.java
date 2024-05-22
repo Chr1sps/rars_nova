@@ -30,8 +30,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SRL class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SRL extends Arithmetic {
     /**

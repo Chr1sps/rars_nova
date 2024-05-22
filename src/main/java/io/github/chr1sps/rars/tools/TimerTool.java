@@ -46,8 +46,6 @@ import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 /**
  * A RARS tool used to implement a timing module and timer inturrpts.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class TimerTool extends AbstractToolAndApplication {
     private static String heading = "Timer Tool";

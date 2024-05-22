@@ -41,8 +41,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Service to input data.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 // TODO: Fill in desc, in and out for all input dialogs
 public class SyscallInputDialogDouble extends AbstractSyscall {

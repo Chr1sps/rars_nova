@@ -11,8 +11,6 @@ import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 /**
  * <p>Abstract Double class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public abstract class Double extends BasicInstruction {
     /**

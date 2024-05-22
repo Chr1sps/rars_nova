@@ -44,8 +44,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action class for the Run -> Assemble menu item (and toolbar icon)
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class RunAssembleAction extends GuiAction {
 

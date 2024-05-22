@@ -39,8 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FSW class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FSW extends BasicInstruction {
     /**

@@ -51,7 +51,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Creates the message window at the bottom of the UI.
  *
  * @author Team JSpim
- * @version $Id: $Id
  */
 public class MessagesPane extends JTabbedPane {
     JTextArea assemble, run;

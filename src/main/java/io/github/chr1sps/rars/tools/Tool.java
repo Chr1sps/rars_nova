@@ -48,8 +48,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * wrapped inside a block synchronized on the
  * Globals.memoryAndRegistersLock object.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public interface Tool {
     /**

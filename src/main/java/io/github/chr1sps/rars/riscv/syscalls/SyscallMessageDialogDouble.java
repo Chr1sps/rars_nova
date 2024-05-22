@@ -41,8 +41,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Service to display a message to user.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallMessageDialogDouble extends AbstractSyscall {
     /**

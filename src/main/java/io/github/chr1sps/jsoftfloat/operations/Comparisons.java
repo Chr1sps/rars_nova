@@ -7,8 +7,6 @@ import io.github.chr1sps.jsoftfloat.types.Floating;
 /**
  * <p>Comparisons class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class Comparisons {
 

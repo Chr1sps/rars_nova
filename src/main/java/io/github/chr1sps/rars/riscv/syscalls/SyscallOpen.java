@@ -37,8 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallOpen class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallOpen extends AbstractSyscall {
     /**

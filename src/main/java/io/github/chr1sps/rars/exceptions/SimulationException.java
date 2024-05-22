@@ -11,8 +11,6 @@ import io.github.chr1sps.rars.util.Binary;
  * <p>
  * if cause is -1, the exception is not-handlable is user code.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SimulationException extends Exception {
 

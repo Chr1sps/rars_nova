@@ -57,7 +57,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * duties were split between EditPane and the new EditTabbedPane class.
  *
  * @author Sanderson and Bumgarner
- * @version $Id: $Id
  */
 public class EditPane extends JPanel implements Observer {
 

@@ -39,8 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Helper class for 4 argument floating point instructions
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public abstract class FusedFloat extends BasicInstruction {
     /**

@@ -38,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * is being edited in the program.
  *
  * @author Team JSpim
- * @version $Id: $Id
  */
 public class FileStatus {
     /**

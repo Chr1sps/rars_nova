@@ -17,8 +17,6 @@ import java.util.Observable;
 /**
  * <p>DigitalLabSim class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 @SuppressWarnings("serial")
 /*

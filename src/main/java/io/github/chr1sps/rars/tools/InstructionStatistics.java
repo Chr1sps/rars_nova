@@ -46,7 +46,6 @@ import java.util.Observable;
  * Felipe Lassa.
  *
  * @author Ingo Kofler &lt;ingo.kofler@itec.uni-klu.ac.at&gt;
- * @version $Id: $Id
  */
 public class InstructionStatistics extends AbstractToolAndApplication {
 

@@ -51,7 +51,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Tabbed pane for the editor. Each of its tabs represents an open file.
  *
  * @author Sanderson
- * @version $Id: $Id
  */
 public class EditTabbedPane extends JTabbedPane {
     EditPane editTab;

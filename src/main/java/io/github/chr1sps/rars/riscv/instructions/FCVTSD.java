@@ -12,8 +12,6 @@ import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 /**
  * <p>FCVTSD class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FCVTSD extends BasicInstruction {
     /**

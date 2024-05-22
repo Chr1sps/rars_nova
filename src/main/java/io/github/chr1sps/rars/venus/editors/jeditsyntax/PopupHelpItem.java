@@ -34,8 +34,6 @@ import java.util.ArrayList;
  * Handly little class to contain help information for a popupMenu or
  * tool tip item.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class PopupHelpItem {
     private String tokenText;

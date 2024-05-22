@@ -45,8 +45,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action for the Run -> Backstep menu item
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class RunBackstepAction extends GuiAction {
 

@@ -53,8 +53,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action for the Help -> Help menu item
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class HelpHelpAction extends GuiAction {
     private VenusUI mainUI;

@@ -72,8 +72,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * the running program, a reset button, and an exit button.
  * Pete Sanderson, 14 November 2006.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public abstract class AbstractToolAndApplication extends JFrame implements Tool, Observer {
     protected boolean isBeingUsedAsATool = false; // can use to determine whether invoked as Tool or stand-alone.

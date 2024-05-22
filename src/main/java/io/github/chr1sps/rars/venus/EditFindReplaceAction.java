@@ -42,8 +42,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action for the Edit -> Find/Replace menu item
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class EditFindReplaceAction extends GuiAction {
     private static String searchString = "";

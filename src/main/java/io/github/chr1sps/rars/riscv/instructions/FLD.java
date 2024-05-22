@@ -12,8 +12,6 @@ import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 /**
  * <p>FLD class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FLD extends BasicInstruction {
     /**

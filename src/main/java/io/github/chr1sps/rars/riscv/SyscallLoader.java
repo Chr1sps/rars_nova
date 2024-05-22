@@ -43,8 +43,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * adapted
  * from Bret Barker's GameServer class from the book "Developing Games In Java".
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallLoader {
 

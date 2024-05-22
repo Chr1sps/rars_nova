@@ -43,7 +43,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * definition) are not supported.
  *
  * @author M.H.Sekhavat sekhavat17@gmail.com
- * @version $Id: $Id
  */
 public class MacroPool {
     private RISCVprogram program;

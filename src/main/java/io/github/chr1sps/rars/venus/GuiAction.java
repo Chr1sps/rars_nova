@@ -35,8 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * parent class for Action subclasses to be defined for every menu/toolbar
  * option.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class GuiAction extends AbstractAction {
     /**

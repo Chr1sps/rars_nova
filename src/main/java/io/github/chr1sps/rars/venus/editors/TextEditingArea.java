@@ -35,8 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Specifies capabilities that any test editor used in MARS must have.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public interface TextEditingArea {
 

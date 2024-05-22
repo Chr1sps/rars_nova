@@ -8,8 +8,6 @@ import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 /**
  * <p>SRAI64 class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SRAI64 extends BasicInstruction {
     /**

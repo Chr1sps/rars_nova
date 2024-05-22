@@ -48,8 +48,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * AbstractToolAndApplication.
  * Pete Sanderson, verison 1.0, 23 December 2010.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class BitmapDisplay extends AbstractToolAndApplication {
 

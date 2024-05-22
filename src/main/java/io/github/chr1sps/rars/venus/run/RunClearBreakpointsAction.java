@@ -45,8 +45,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * set its enabled status true or false depending on whether breakpoints remain
  * after that action.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class RunClearBreakpointsAction extends GuiAction implements TableModelListener {
 

@@ -40,8 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>PopupListener class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class PopupListener extends MouseAdapter {
     private JPopupMenu popup;

@@ -38,8 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Simple wrapper for boolean settings actions
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SettingsAction extends GuiAction {
     private Settings.Bool setting;

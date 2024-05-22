@@ -14,8 +14,6 @@ import java.math.BigInteger;
 /**
  * <p>FCVTDW class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FCVTDW extends BasicInstruction {
     /**

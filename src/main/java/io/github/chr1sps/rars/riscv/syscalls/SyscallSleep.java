@@ -35,8 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallSleep class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallSleep extends AbstractSyscall {
     /**

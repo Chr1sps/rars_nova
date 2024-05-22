@@ -30,8 +30,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * A register which aliases a subset of another register
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class LinkedRegister extends Register {
     private Register base;

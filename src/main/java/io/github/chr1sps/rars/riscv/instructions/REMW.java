@@ -3,8 +3,6 @@ package io.github.chr1sps.rars.riscv.instructions;
 /**
  * <p>REMW class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class REMW extends ArithmeticW {
     /**

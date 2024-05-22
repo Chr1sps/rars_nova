@@ -38,8 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallMessageDialogFloat class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallMessageDialogFloat extends AbstractSyscall {
     /**

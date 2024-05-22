@@ -9,8 +9,6 @@ import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 /**
  * <p>FCLASSD class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FCLASSD extends BasicInstruction {
     /**

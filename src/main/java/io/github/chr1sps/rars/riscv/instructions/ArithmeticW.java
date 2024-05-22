@@ -3,8 +3,6 @@ package io.github.chr1sps.rars.riscv.instructions;
 /**
  * <p>Abstract ArithmeticW class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public abstract class ArithmeticW extends Arithmetic {
     private final Arithmetic base;

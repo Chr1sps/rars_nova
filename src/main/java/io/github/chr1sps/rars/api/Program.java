@@ -43,8 +43,6 @@ import java.util.ArrayList;
  * a concurrent simulation.
  * </p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class Program {
 

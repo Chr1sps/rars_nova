@@ -17,8 +17,6 @@ import io.github.chr1sps.jsoftfloat.RoundingMode;
  * precision issue. They have to stop
  * computing digits once they get past the maximum length of the significand.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class ExactFloat implements Comparable<ExactFloat> {
     // Value = (-1)^sign * significand * 2^exponent

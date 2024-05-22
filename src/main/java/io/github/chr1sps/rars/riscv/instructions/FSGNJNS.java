@@ -35,8 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FSGNJNS class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FSGNJNS extends BasicInstruction {
     /**

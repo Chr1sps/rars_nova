@@ -57,7 +57,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Represents the Data Segment window, which is a type of JInternalFrame.
  *
  * @author Sanderson and Bumgarner
- * @version $Id: $Id
  */
 public class DataSegmentWindow extends JInternalFrame implements Observer {
 

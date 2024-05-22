@@ -46,8 +46,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Action class for the Settings menu item for optionally loading a MIPS
  * exception handler.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SettingsExceptionHandlerAction extends GuiAction {
 

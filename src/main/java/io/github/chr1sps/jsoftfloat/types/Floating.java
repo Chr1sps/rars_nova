@@ -7,8 +7,6 @@ import io.github.chr1sps.jsoftfloat.internal.ExactFloat;
  * General classifications that any floating point class needs to provide.
  *
  * @param <T>
- * @author chrisps
- * @version $Id: $Id
  */
 public abstract class Floating<T extends Floating<T>> {
     // TODO: order/group these

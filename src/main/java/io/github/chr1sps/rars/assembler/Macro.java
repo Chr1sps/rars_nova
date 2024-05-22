@@ -38,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Stores information of a macro definition.
  *
  * @author M.H.Sekhavat sekhavat17@gmail.com
- * @version $Id: $Id
  */
 public class Macro {
     private String name;

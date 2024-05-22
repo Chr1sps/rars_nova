@@ -14,8 +14,6 @@ import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 /**
  * <p>FCVTDWU class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FCVTDWU extends BasicInstruction {
     /**

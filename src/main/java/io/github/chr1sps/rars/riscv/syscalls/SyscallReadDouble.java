@@ -38,8 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Service to read the bits of console input double into $f0 and $f1.
  * $f1 contains high order word of the double.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallReadDouble extends AbstractSyscall {
     /**

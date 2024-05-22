@@ -49,7 +49,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Creates the Text Segment window in the Execute tab of the UI
  *
  * @author Team JSpim
- * @version $Id: $Id
  */
 public class TextSegmentWindow extends JInternalFrame implements Observer {
     private JPanel programArgumentsPanel; // DPS 17-July-2008

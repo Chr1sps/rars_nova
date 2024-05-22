@@ -61,7 +61,6 @@ import java.util.Vector;
  * </ul>
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
- * @version $Id: $Id
  */
 public class BHTSimGUI extends JPanel {
 

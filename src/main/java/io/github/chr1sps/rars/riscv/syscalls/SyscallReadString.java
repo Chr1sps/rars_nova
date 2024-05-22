@@ -48,8 +48,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * string can be no longer than n-1. If less than that, add
  * newline to end. In either case, then pad with null byte.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallReadString extends AbstractSyscall {
     /**

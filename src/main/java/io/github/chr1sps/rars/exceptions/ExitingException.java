@@ -8,8 +8,6 @@ import io.github.chr1sps.rars.ProgramStatement;
  * <p>
  * Used for exit syscalls and errors in syscalls
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class ExitingException extends SimulationException {
     /**

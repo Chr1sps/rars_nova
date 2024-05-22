@@ -38,8 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * random number generators for use by all the random number generator
  * syscalls.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class RandomStreams {
     /**

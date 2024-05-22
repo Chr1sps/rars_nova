@@ -45,7 +45,6 @@ import java.util.Observable;
  * Code slightly based on MemoryReferenceVisualization.
  *
  * @author Felipe Lessa &lt;felipe.lessa@gmail.com&gt;
- * @version $Id: $Id
  */
 public class InstructionCounter extends AbstractToolAndApplication {
     private static String name = "Instruction Counter";

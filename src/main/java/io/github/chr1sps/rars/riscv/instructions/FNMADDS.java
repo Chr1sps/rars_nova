@@ -6,8 +6,6 @@ import io.github.chr1sps.jsoftfloat.types.Float32;
 /**
  * <p>FNMADDS class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FNMADDS extends FusedFloat {
     /**

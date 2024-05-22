@@ -52,8 +52,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action for the File -> Save For Dump Memory menu item
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FileDumpMemoryAction extends GuiAction {
 

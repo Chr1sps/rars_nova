@@ -52,8 +52,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * -2: Cancel was chosen <br>
  * -3: OK was chosen but no data had been input into field <br>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallInputDialogString extends AbstractSyscall {
     /**

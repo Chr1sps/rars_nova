@@ -3,8 +3,6 @@ package io.github.chr1sps.rars.riscv.hardware;
 /**
  * <p>ReadOnlyRegister class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class ReadOnlyRegister extends Register {
     /**

@@ -6,8 +6,6 @@ import io.github.chr1sps.rars.exceptions.AddressErrorException;
 /**
  * <p>SD class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SD extends Store {
     /**

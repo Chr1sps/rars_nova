@@ -38,8 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>CSRRS class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class CSRRS extends BasicInstruction {
     /**

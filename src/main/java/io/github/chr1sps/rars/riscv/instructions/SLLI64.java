@@ -8,8 +8,6 @@ import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 /**
  * <p>SLLI64 class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SLLI64 extends BasicInstruction {
     /**

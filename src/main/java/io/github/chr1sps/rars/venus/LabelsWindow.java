@@ -55,7 +55,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * can view MIPS program labels.
  *
  * @author Sanderson and Team JSpim
- * @version $Id: $Id
  */
 public class LabelsWindow extends JInternalFrame {
     private Container contentPane;

@@ -63,7 +63,6 @@ import java.util.Observable;
  * explored and visualized.
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
- * @version $Id: $Id
  */
 public class BHTSimulator extends AbstractToolAndApplication implements ActionListener {
     /**

@@ -17,8 +17,6 @@ import java.util.HashSet;
  * something
  * with javadocs or generate a website with all of the help information
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class Documentation {
 

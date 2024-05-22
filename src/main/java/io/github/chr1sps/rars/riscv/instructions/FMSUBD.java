@@ -6,8 +6,6 @@ import io.github.chr1sps.jsoftfloat.types.Float64;
 /**
  * <p>FMSUBD class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FMSUBD extends FusedDouble {
     /**

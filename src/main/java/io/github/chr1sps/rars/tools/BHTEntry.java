@@ -50,7 +50,6 @@ package io.github.chr1sps.rars.tools;//.bhtsim;
  * {@link io.github.chr1sps.rars.tools.BHTEntry#getStatsPredPrecision()}.
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
- * @version $Id: $Id
  */
 public class BHTEntry {
 

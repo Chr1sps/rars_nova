@@ -9,8 +9,6 @@ import io.github.chr1sps.rars.venus.NumberDisplayBaseChooser;
 /**
  * <p>ControlAndStatusWindow class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class ControlAndStatusWindow extends RegisterBlockWindow {
     /*

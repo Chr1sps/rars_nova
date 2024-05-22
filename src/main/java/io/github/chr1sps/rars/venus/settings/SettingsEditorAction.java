@@ -50,8 +50,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action class for the Settings menu item for text editor settings.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SettingsEditorAction extends GuiAction {
 

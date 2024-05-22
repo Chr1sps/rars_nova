@@ -55,7 +55,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Top level container for Venus GUI.
  *
  * @author Sanderson and Team JSpim
- * @version $Id: $Id
  */
 
 /*

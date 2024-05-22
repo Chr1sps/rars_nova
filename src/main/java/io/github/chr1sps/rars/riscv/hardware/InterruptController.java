@@ -9,8 +9,6 @@ import io.github.chr1sps.rars.simulator.Simulator;
  * <p>
  * Roughly corresponds to PLIC in the spec, but it additionally (kindof) handles
  *
- * @author chrisps
- * @version $Id: $Id
  */
 // TODO: add backstepper support
 public class InterruptController {

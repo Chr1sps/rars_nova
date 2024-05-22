@@ -8,8 +8,6 @@ import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 /**
  * <p>FSGNJND class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FSGNJND extends BasicInstruction {
     /**

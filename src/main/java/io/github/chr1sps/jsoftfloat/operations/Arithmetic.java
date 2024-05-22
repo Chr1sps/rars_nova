@@ -9,8 +9,6 @@ import io.github.chr1sps.jsoftfloat.types.Floating;
 /**
  * Groups any arithmetic operations such as addition, subtraction, etc
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class Arithmetic {
     /**

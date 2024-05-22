@@ -3,8 +3,6 @@ package io.github.chr1sps.rars.api;
 /**
  * <p>Options class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class Options {
     public boolean pseudo; // pseudo instructions allowed in source code or not.

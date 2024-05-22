@@ -11,8 +11,6 @@ import io.github.chr1sps.jsoftfloat.types.Floating;
  * Groups conversion operations such as integer to float32, float32 to integer,
  * etc
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class Conversions {
     /**

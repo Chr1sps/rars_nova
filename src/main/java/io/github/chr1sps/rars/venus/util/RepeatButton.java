@@ -34,8 +34,6 @@ import java.awt.event.MouseListener;
  * firing anyway, except to process all ActionListeners internally. But
  * realistically, it probably doesn't matter.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class RepeatButton extends JButton
         implements ActionListener, MouseListener {

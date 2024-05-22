@@ -34,8 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FENCE class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FENCE extends BasicInstruction {
     /**

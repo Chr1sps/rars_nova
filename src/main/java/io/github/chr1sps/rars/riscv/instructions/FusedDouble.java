@@ -11,8 +11,6 @@ import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 /**
  * Helper class for 4 argument floating point instructions
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public abstract class FusedDouble extends BasicInstruction {
     /**

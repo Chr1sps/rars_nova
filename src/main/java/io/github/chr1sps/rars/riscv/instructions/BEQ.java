@@ -33,8 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>BEQ class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class BEQ extends Branch {
     /**

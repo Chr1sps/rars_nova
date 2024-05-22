@@ -52,8 +52,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * AbstractToolAndApplication.
  * Pete Sanderson, verison 1.0, 14 November 2006.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class MemoryReferenceVisualization extends AbstractToolAndApplication {
 

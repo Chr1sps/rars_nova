@@ -5,8 +5,6 @@ import java.util.EnumSet;
 /**
  * <p>Environment class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class Environment {
     public EnumSet<Flags> flags = EnumSet.noneOf(Flags.class);

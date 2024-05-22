@@ -42,8 +42,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>MonoRightCellRenderer class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class MonoRightCellRenderer extends DefaultTableCellRenderer {
     /**

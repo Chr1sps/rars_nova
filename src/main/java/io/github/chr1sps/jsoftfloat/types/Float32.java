@@ -10,8 +10,6 @@ import io.github.chr1sps.jsoftfloat.internal.ExactFloat;
 /**
  * Represents the Binary32 format
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class Float32 extends Floating<Float32> {
     // TODO: make a more abstract binary float class

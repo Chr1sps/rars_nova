@@ -40,8 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Service to write to file descriptor given in a0. a1 specifies buffer
  * and a2 specifies length. Number of characters written is returned in a0.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallWrite extends AbstractSyscall {
     /**

@@ -44,8 +44,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallMidiOutSync class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallMidiOutSync extends AbstractSyscall {
 

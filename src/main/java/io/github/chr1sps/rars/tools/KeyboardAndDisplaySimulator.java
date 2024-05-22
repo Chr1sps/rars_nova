@@ -88,8 +88,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * position of a virtual text-based terminal. X represents column, Y represents
  * row.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
 

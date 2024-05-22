@@ -33,8 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SH class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SH extends Store {
     /**

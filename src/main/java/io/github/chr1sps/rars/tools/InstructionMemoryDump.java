@@ -84,7 +84,6 @@ import java.util.Observable;
  * Code based on InstructionCounter.
  *
  * @author John Owens &lt;jowens@ece.ucdavis.edu&gt;
- * @version $Id: $Id
  */
 public class InstructionMemoryDump extends AbstractToolAndApplication {
     private static String name = "Instruction/Memory Dump";

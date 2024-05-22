@@ -41,8 +41,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Small helper class to wrap getting null terminated strings from memory
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class NullString {
     /**

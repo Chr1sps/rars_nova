@@ -36,8 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallPrintFloat class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallPrintFloat extends AbstractSyscall {
     /**

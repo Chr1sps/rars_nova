@@ -11,8 +11,6 @@ import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 /**
  * <p>FSQRTD class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FSQRTD extends BasicInstruction {
     /**

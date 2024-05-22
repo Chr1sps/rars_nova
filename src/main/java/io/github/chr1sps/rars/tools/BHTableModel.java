@@ -60,7 +60,6 @@ import java.util.Vector;
  * repaint of the table(s) associated to this model.
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
- * @version $Id: $Id
  */
 public class BHTableModel extends AbstractTableModel {
 

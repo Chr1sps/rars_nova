@@ -35,8 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Manage the file being edited.
  * Currently only manages one file at a time, but can be expanded.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class Editor {
 

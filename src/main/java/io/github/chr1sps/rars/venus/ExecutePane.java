@@ -43,7 +43,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * pane.
  *
  * @author Sanderson and Team JSpim
- * @version $Id: $Id
  */
 public class ExecutePane extends JDesktopPane {
     private RegistersWindow registerValues;

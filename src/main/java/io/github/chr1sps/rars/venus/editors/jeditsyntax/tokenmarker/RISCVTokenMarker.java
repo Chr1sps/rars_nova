@@ -29,7 +29,6 @@ import java.util.TreeSet;
  * RISCV token marker.
  *
  * @author Pete Sanderson (2010) and Slava Pestov (1999)
- * @version $Id: $Id
  */
 public class RISCVTokenMarker extends TokenMarker {
     /**

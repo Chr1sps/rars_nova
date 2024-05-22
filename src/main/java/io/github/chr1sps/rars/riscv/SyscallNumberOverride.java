@@ -33,8 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Such overrides are specified in the Syscall.properties file read when
  * RARS starts up.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SyscallNumberOverride {
     private String serviceName;

@@ -50,8 +50,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action class for the Run -> Go menu item (and toolbar icon)
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class RunGoAction extends GuiAction {
 

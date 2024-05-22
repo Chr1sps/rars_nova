@@ -32,8 +32,6 @@ import java.math.BigInteger;
 /**
  * <p>MULHU class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class MULHU extends Arithmetic {
     /**

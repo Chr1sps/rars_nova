@@ -57,7 +57,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * HKEY_CURRENT_USER\Software\JavaSoft\Prefs\rars
  *
  * @author Pete Sanderson
- * @version $Id: $Id
  */
 public class Settings extends Observable {
     /* Properties file used to hold default settings. */

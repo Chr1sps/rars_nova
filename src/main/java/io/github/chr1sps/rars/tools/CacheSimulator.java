@@ -63,8 +63,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * GUI (previously System.out).
  * </p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class CacheSimulator extends AbstractToolAndApplication {
     private static boolean debug = false; // controls display of debugging info

@@ -44,8 +44,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * a check box where checked means hex. If base 8 (octal)
  * is added later, the Component will need to change.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class NumberDisplayBaseChooser extends JCheckBox {
     /**

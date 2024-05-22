@@ -45,7 +45,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * exist in them.
  *
  * @author Sanderson and Bumgarner
- * @version $Id: $Id
  */
 public class MainPane extends JTabbedPane {
     EditPane editTab;

@@ -5,8 +5,6 @@ package io.github.chr1sps.rars.exceptions;
  * <p>
  * Its a bit of a hack, but it works and somewhat makes logical sense.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class BreakpointException extends SimulationException {
 }

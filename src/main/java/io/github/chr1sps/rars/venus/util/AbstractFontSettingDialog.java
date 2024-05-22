@@ -61,8 +61,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Abstract class for a font selection dialog.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public abstract class AbstractFontSettingDialog extends JDialog {
 

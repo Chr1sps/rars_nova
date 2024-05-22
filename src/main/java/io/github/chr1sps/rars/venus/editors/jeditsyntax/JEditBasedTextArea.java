@@ -26,7 +26,6 @@ import java.awt.*;
  * to be used within MARS largely without modification. DPS 4-20-2010
  *
  * @author Pete Sanderson
- * @version $Id: $Id
  * @since 4.0
  */
 public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea, CaretListener {

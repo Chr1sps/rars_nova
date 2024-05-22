@@ -54,7 +54,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Sets up a window to display registers in the UI.
  *
  * @author Sanderson, Bumgarner
- * @version $Id: $Id
  */
 public abstract class RegisterBlockWindow extends JPanel implements Observer {
     private final JTable table;

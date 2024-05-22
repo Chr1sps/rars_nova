@@ -49,8 +49,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action for the Run -> Step menu item
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class RunStepAction extends GuiAction {
 

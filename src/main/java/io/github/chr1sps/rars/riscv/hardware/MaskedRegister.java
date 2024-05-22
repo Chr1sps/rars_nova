@@ -3,8 +3,6 @@ package io.github.chr1sps.rars.riscv.hardware;
 /**
  * A register which aliases a subset of another register
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class MaskedRegister extends Register {
     private long mask;

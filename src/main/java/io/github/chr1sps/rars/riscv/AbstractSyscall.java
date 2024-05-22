@@ -14,8 +14,6 @@ import io.github.chr1sps.rars.ProgramStatement;
  * with its service number stored in register a7), its simulate()
  * method will be invoked.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     private int serviceNumber;

@@ -38,8 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * line and possibly different program but the migration should not be visible
  * to the user.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SourceLine {
     private String source;

@@ -51,8 +51,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * "float" data type. As written, it can ALMOST be adapted to 64 bit by
  * changing a few constants.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FloatRepresentation extends AbstractToolAndApplication {
     private static String version = "Version 1.1";

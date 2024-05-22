@@ -10,8 +10,6 @@ import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 /**
  * <p>FLED class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class FLED extends BasicInstruction {
     /**

@@ -21,8 +21,6 @@ import io.github.chr1sps.rars.Settings;
  * The advantage of doing this over calling lots of set() methods after
  * creating the text area is that this method is faster.
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class TextAreaDefaults {
     private static TextAreaDefaults DEFAULTS;

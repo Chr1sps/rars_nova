@@ -8,8 +8,6 @@ import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 /**
  * <p>SRLIW class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SRLIW extends BasicInstruction {
     /**

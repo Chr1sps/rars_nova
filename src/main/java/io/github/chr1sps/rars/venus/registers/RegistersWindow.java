@@ -11,8 +11,6 @@ import io.github.chr1sps.rars.venus.NumberDisplayBaseChooser;
 /**
  * <p>RegistersWindow class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class RegistersWindow extends RegisterBlockWindow {
     /*

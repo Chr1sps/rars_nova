@@ -3,8 +3,6 @@ package io.github.chr1sps.jsoftfloat;
 /**
  * Exception flags which can be set in certain conditions
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public enum Flags {
     /**

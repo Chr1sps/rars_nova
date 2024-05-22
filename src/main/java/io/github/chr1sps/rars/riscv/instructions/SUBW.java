@@ -3,8 +3,6 @@ package io.github.chr1sps.rars.riscv.instructions;
 /**
  * <p>SUBW class.</p>
  *
- * @author chrisps
- * @version $Id: $Id
  */
 public class SUBW extends ArithmeticW {
     /**
