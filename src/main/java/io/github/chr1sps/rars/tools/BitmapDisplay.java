@@ -1,23 +1,12 @@
 package io.github.chr1sps.rars.tools;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
 import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.GridLayout;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Observable;
@@ -64,8 +53,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class BitmapDisplay extends AbstractToolAndApplication {
 
-    private static String version = "Version 1.0";
-    private static String heading = "Bitmap Display";
+    private static final String version = "Version 1.0";
+    private static final String heading = "Bitmap Display";
 
     // Major GUI components
     private JComboBox<String> visualizationUnitPixelWidthSelector, visualizationUnitPixelHeightSelector,
@@ -75,9 +64,9 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     private JPanel results;
 
     // Some GUI settings
-    private EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
-    private Font countFonts = new Font("Times", Font.BOLD, 12);
-    private Color backgroundColor = Color.WHITE;
+    private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
+    private final Font countFonts = new Font("Times", Font.BOLD, 12);
+    private final Color backgroundColor = Color.WHITE;
 
     // Values for Combo Boxes
 
@@ -115,7 +104,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * @param heading String containing text for heading shown in upper part of
      *                window.
      */
-    public BitmapDisplay(String title, String heading) {
+    private BitmapDisplay(final String title, final String heading) {
         super(title, heading);
     }
 
@@ -137,7 +126,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      *
      * @param args an array of {@link java.lang.String} objects
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         new BitmapDisplay("Bitmap Display stand-alone, " + version, heading).go();
     }
 
@@ -163,8 +152,9 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * method is invoked when you click "Connect" button on Tool or the
      * "Assemble and Run" button on a Rars-based app.
      */
+    @Override
     protected void addAsObserver() {
-        int highAddress = baseAddress + theGrid.getRows() * theGrid.getColumns() * Memory.WORD_LENGTH_BYTES;
+        int highAddress = this.baseAddress + this.theGrid.getRows() * this.theGrid.getColumns() * Memory.WORD_LENGTH_BYTES;
         // Special case: baseAddress<0 means we're in kernel memory (0x80000000 and up)
         // and most likely
         // in memory map address space (0xffff0000 and up). In this case, we need to
@@ -172,10 +162,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         // does not drop off the high end of 32 bit address space. Highest allowable
         // word address is 0xfffffffc,
         // which is interpreted in Java int as -4.
-        if (baseAddress < 0 && highAddress > -4) {
+        if (this.baseAddress < 0 && highAddress > -4) {
             highAddress = -4;
         }
-        addAsObserver(baseAddress, highAddress);
+        this.addAsObserver(this.baseAddress, highAddress);
     }
 
     /**
@@ -186,11 +176,12 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      *
      * @return the GUI component containing these two areas
      */
+    @Override
     protected JComponent buildMainDisplayArea() {
-        results = new JPanel();
-        results.add(buildOrganizationArea());
-        results.add(buildVisualizationArea());
-        return results;
+        this.results = new JPanel();
+        this.results.add(this.buildOrganizationArea());
+        this.results.add(this.buildVisualizationArea());
+        return this.results;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -204,9 +195,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * <p>
      * Update display when the connected program accesses (data) memory.
      */
-    protected void processRISCVUpdate(Observable memory, AccessNotice accessNotice) {
+    @Override
+    protected void processRISCVUpdate(final Observable memory, final AccessNotice accessNotice) {
         if (accessNotice.getAccessType() == AccessNotice.WRITE) {
-            updateColorForAddress((MemoryAccessNotice) accessNotice);
+            this.updateColorForAddress((MemoryAccessNotice) accessNotice);
         }
     }
 
@@ -215,13 +207,14 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * declaration.
      * Overrides inherited method that does nothing.
      */
+    @Override
     protected void initializePreGUI() {
-        initializeDisplayBaseChoices();
+        this.initializeDisplayBaseChoices();
         // NOTE: Can't call "createNewGrid()" here because it uses settings from
         // several combo boxes that have not been created yet. But a default grid
         // needs to be allocated for initial canvas display.
-        theGrid = new Grid(displayAreaHeightInPixels / unitPixelHeight,
-                displayAreaWidthInPixels / unitPixelWidth);
+        this.theGrid = new Grid(this.displayAreaHeightInPixels / this.unitPixelHeight,
+                this.displayAreaWidthInPixels / this.unitPixelWidth);
     }
 
     /**
@@ -229,18 +222,20 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * on the default settings
      * of the various combo boxes. Overrides inherited method that does nothing.
      */
+    @Override
     protected void initializePostGUI() {
-        theGrid = createNewGrid();
-        updateBaseAddress();
+        this.theGrid = this.createNewGrid();
+        this.updateBaseAddress();
     }
 
     /**
      * Method to reset counters and display when the Reset button selected.
      * Overrides inherited method that does nothing.
      */
+    @Override
     protected void reset() {
-        resetCounts();
-        updateDisplay();
+        this.resetCounts();
+        this.updateDisplay();
     }
 
     /**
@@ -250,8 +245,9 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * Rars
      * is running in timed mode. Overrides inherited method that does nothing.
      */
+    @Override
     protected void updateDisplay() {
-        canvas.repaint();
+        this.canvas.repaint();
     }
 
     /**
@@ -259,6 +255,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      *
      * @return a {@link javax.swing.JComponent} object
      */
+    @Override
     protected JComponent getHelpComponent() {
         final String helpContent = "Use this program to simulate a basic bitmap display where\n" +
                 "each memory word in a specified address space corresponds to\n" +
@@ -280,11 +277,12 @@ public class BitmapDisplay extends AbstractToolAndApplication {
                 "Reference Visualization tool's code.  Feel free to improve it and\n" +
                 "send your code for consideration in the next release.\n" +
                 "\n";
-        JButton help = new JButton("Help");
+        final JButton help = new JButton("Help");
         help.addActionListener(
                 new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(theWindow, helpContent);
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        JOptionPane.showMessageDialog(BitmapDisplay.this.theWindow, helpContent);
                     }
                 });
         return help;
@@ -296,72 +294,77 @@ public class BitmapDisplay extends AbstractToolAndApplication {
 
     // UI components and layout for left half of GUI, where settings are specified.
     private JComponent buildOrganizationArea() {
-        JPanel organization = new JPanel(new GridLayout(8, 1));
+        final JPanel organization = new JPanel(new GridLayout(8, 1));
 
-        visualizationUnitPixelWidthSelector = new JComboBox<>(visualizationUnitPixelWidthChoices);
-        visualizationUnitPixelWidthSelector.setEditable(false);
-        visualizationUnitPixelWidthSelector.setBackground(backgroundColor);
-        visualizationUnitPixelWidthSelector.setSelectedIndex(defaultVisualizationUnitPixelWidthIndex);
-        visualizationUnitPixelWidthSelector.setToolTipText("Width in pixels of rectangle representing memory word");
-        visualizationUnitPixelWidthSelector.addActionListener(
+        this.visualizationUnitPixelWidthSelector = new JComboBox<>(visualizationUnitPixelWidthChoices);
+        this.visualizationUnitPixelWidthSelector.setEditable(false);
+        this.visualizationUnitPixelWidthSelector.setBackground(this.backgroundColor);
+        this.visualizationUnitPixelWidthSelector.setSelectedIndex(defaultVisualizationUnitPixelWidthIndex);
+        this.visualizationUnitPixelWidthSelector.setToolTipText("Width in pixels of rectangle representing memory word");
+        this.visualizationUnitPixelWidthSelector.addActionListener(
                 new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        unitPixelWidth = getIntComboBoxSelection(visualizationUnitPixelWidthSelector);
-                        theGrid = createNewGrid();
-                        updateDisplay();
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        BitmapDisplay.this.unitPixelWidth = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationUnitPixelWidthSelector);
+                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                        BitmapDisplay.this.updateDisplay();
                     }
                 });
-        visualizationUnitPixelHeightSelector = new JComboBox<>(visualizationUnitPixelHeightChoices);
-        visualizationUnitPixelHeightSelector.setEditable(false);
-        visualizationUnitPixelHeightSelector.setBackground(backgroundColor);
-        visualizationUnitPixelHeightSelector.setSelectedIndex(defaultVisualizationUnitPixelHeightIndex);
-        visualizationUnitPixelHeightSelector.setToolTipText("Height in pixels of rectangle representing memory word");
-        visualizationUnitPixelHeightSelector.addActionListener(
+        this.visualizationUnitPixelHeightSelector = new JComboBox<>(visualizationUnitPixelHeightChoices);
+        this.visualizationUnitPixelHeightSelector.setEditable(false);
+        this.visualizationUnitPixelHeightSelector.setBackground(this.backgroundColor);
+        this.visualizationUnitPixelHeightSelector.setSelectedIndex(defaultVisualizationUnitPixelHeightIndex);
+        this.visualizationUnitPixelHeightSelector.setToolTipText("Height in pixels of rectangle representing memory word");
+        this.visualizationUnitPixelHeightSelector.addActionListener(
                 new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        unitPixelHeight = getIntComboBoxSelection(visualizationUnitPixelHeightSelector);
-                        theGrid = createNewGrid();
-                        updateDisplay();
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        BitmapDisplay.this.unitPixelHeight = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationUnitPixelHeightSelector);
+                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                        BitmapDisplay.this.updateDisplay();
                     }
                 });
-        visualizationPixelWidthSelector = new JComboBox<>(displayAreaPixelWidthChoices);
-        visualizationPixelWidthSelector.setEditable(false);
-        visualizationPixelWidthSelector.setBackground(backgroundColor);
-        visualizationPixelWidthSelector.setSelectedIndex(defaultDisplayWidthIndex);
-        visualizationPixelWidthSelector.setToolTipText("Total width in pixels of display area");
-        visualizationPixelWidthSelector.addActionListener(
+        this.visualizationPixelWidthSelector = new JComboBox<>(displayAreaPixelWidthChoices);
+        this.visualizationPixelWidthSelector.setEditable(false);
+        this.visualizationPixelWidthSelector.setBackground(this.backgroundColor);
+        this.visualizationPixelWidthSelector.setSelectedIndex(defaultDisplayWidthIndex);
+        this.visualizationPixelWidthSelector.setToolTipText("Total width in pixels of display area");
+        this.visualizationPixelWidthSelector.addActionListener(
                 new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        displayAreaWidthInPixels = getIntComboBoxSelection(visualizationPixelWidthSelector);
-                        canvas.setPreferredSize(getDisplayAreaDimension());
-                        canvas.setSize(getDisplayAreaDimension());
-                        theGrid = createNewGrid();
-                        updateDisplay();
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        BitmapDisplay.this.displayAreaWidthInPixels = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationPixelWidthSelector);
+                        BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
+                        BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
+                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                        BitmapDisplay.this.updateDisplay();
                     }
                 });
-        visualizationPixelHeightSelector = new JComboBox<>(displayAreaPixelHeightChoices);
-        visualizationPixelHeightSelector.setEditable(false);
-        visualizationPixelHeightSelector.setBackground(backgroundColor);
-        visualizationPixelHeightSelector.setSelectedIndex(defaultDisplayHeightIndex);
-        visualizationPixelHeightSelector.setToolTipText("Total height in pixels of display area");
-        visualizationPixelHeightSelector.addActionListener(
+        this.visualizationPixelHeightSelector = new JComboBox<>(displayAreaPixelHeightChoices);
+        this.visualizationPixelHeightSelector.setEditable(false);
+        this.visualizationPixelHeightSelector.setBackground(this.backgroundColor);
+        this.visualizationPixelHeightSelector.setSelectedIndex(defaultDisplayHeightIndex);
+        this.visualizationPixelHeightSelector.setToolTipText("Total height in pixels of display area");
+        this.visualizationPixelHeightSelector.addActionListener(
                 new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        displayAreaHeightInPixels = getIntComboBoxSelection(visualizationPixelHeightSelector);
-                        canvas.setPreferredSize(getDisplayAreaDimension());
-                        canvas.setSize(getDisplayAreaDimension());
-                        theGrid = createNewGrid();
-                        updateDisplay();
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        BitmapDisplay.this.displayAreaHeightInPixels = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationPixelHeightSelector);
+                        BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
+                        BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
+                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                        BitmapDisplay.this.updateDisplay();
                     }
                 });
-        displayBaseAddressSelector = new JComboBox<>(displayBaseAddressChoices);
-        displayBaseAddressSelector.setEditable(false);
-        displayBaseAddressSelector.setBackground(backgroundColor);
-        displayBaseAddressSelector.setSelectedIndex(defaultBaseAddressIndex);
-        displayBaseAddressSelector.setToolTipText("Base address for display area (upper left corner)");
-        displayBaseAddressSelector.addActionListener(
+        this.displayBaseAddressSelector = new JComboBox<>(this.displayBaseAddressChoices);
+        this.displayBaseAddressSelector.setEditable(false);
+        this.displayBaseAddressSelector.setBackground(this.backgroundColor);
+        this.displayBaseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
+        this.displayBaseAddressSelector.setToolTipText("Base address for display area (upper left corner)");
+        this.displayBaseAddressSelector.addActionListener(
                 new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
                         // This may also affect what address range we should be registered as an
                         // Observer
                         // for. The default (inherited) address range is the static data segment
@@ -369,46 +372,46 @@ public class BitmapDisplay extends AbstractToolAndApplication {
                         // AbstractToolAndApplication.addAsObserver(). The no-argument version of
                         // that method is called automatically when "Connect" button is clicked for Tool
                         // and when "Assemble and Run" button is clicked for Rars application.
-                        updateBaseAddress();
+                        BitmapDisplay.this.updateBaseAddress();
                         // If display base address is changed while connected to the program (this can
                         // only occur
                         // when being used as a Tool), we have to delete ourselves as an observer and
                         // re-register.
-                        if (connectButton != null && connectButton.isConnected()) {
-                            deleteAsObserver();
-                            addAsObserver();
+                        if (BitmapDisplay.this.connectButton != null && BitmapDisplay.this.connectButton.isConnected()) {
+                            BitmapDisplay.this.deleteAsObserver();
+                            BitmapDisplay.this.addAsObserver();
                         }
-                        theGrid = createNewGrid();
-                        updateDisplay();
+                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                        BitmapDisplay.this.updateDisplay();
                     }
                 });
 
         // ALL COMPONENTS FOR "ORGANIZATION" SECTION
 
-        JPanel unitWidthInPixelsRow = getPanelWithBorderLayout();
-        unitWidthInPixelsRow.setBorder(emptyBorder);
+        final JPanel unitWidthInPixelsRow = this.getPanelWithBorderLayout();
+        unitWidthInPixelsRow.setBorder(this.emptyBorder);
         unitWidthInPixelsRow.add(new JLabel("Unit Width in Pixels "), BorderLayout.WEST);
-        unitWidthInPixelsRow.add(visualizationUnitPixelWidthSelector, BorderLayout.EAST);
+        unitWidthInPixelsRow.add(this.visualizationUnitPixelWidthSelector, BorderLayout.EAST);
 
-        JPanel unitHeightInPixelsRow = getPanelWithBorderLayout();
-        unitHeightInPixelsRow.setBorder(emptyBorder);
+        final JPanel unitHeightInPixelsRow = this.getPanelWithBorderLayout();
+        unitHeightInPixelsRow.setBorder(this.emptyBorder);
         unitHeightInPixelsRow.add(new JLabel("Unit Height in Pixels "), BorderLayout.WEST);
-        unitHeightInPixelsRow.add(visualizationUnitPixelHeightSelector, BorderLayout.EAST);
+        unitHeightInPixelsRow.add(this.visualizationUnitPixelHeightSelector, BorderLayout.EAST);
 
-        JPanel widthInPixelsRow = getPanelWithBorderLayout();
-        widthInPixelsRow.setBorder(emptyBorder);
+        final JPanel widthInPixelsRow = this.getPanelWithBorderLayout();
+        widthInPixelsRow.setBorder(this.emptyBorder);
         widthInPixelsRow.add(new JLabel("Display Width in Pixels "), BorderLayout.WEST);
-        widthInPixelsRow.add(visualizationPixelWidthSelector, BorderLayout.EAST);
+        widthInPixelsRow.add(this.visualizationPixelWidthSelector, BorderLayout.EAST);
 
-        JPanel heightInPixelsRow = getPanelWithBorderLayout();
-        heightInPixelsRow.setBorder(emptyBorder);
+        final JPanel heightInPixelsRow = this.getPanelWithBorderLayout();
+        heightInPixelsRow.setBorder(this.emptyBorder);
         heightInPixelsRow.add(new JLabel("Display Height in Pixels "), BorderLayout.WEST);
-        heightInPixelsRow.add(visualizationPixelHeightSelector, BorderLayout.EAST);
+        heightInPixelsRow.add(this.visualizationPixelHeightSelector, BorderLayout.EAST);
 
-        JPanel baseAddressRow = getPanelWithBorderLayout();
-        baseAddressRow.setBorder(emptyBorder);
+        final JPanel baseAddressRow = this.getPanelWithBorderLayout();
+        baseAddressRow.setBorder(this.emptyBorder);
         baseAddressRow.add(new JLabel("Base address for display "), BorderLayout.WEST);
-        baseAddressRow.add(displayBaseAddressSelector, BorderLayout.EAST);
+        baseAddressRow.add(this.displayBaseAddressSelector, BorderLayout.EAST);
 
         // Lay 'em out in the grid...
         organization.add(unitWidthInPixelsRow);
@@ -422,10 +425,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     // UI components and layout for right half of GUI, the visualization display
     // area.
     private JComponent buildVisualizationArea() {
-        canvas = new GraphicsPanel();
-        canvas.setPreferredSize(getDisplayAreaDimension());
-        canvas.setToolTipText("Bitmap display area");
-        return canvas;
+        this.canvas = new GraphicsPanel();
+        this.canvas.setPreferredSize(this.getDisplayAreaDimension());
+        this.canvas.setToolTipText("Bitmap display area");
+        return this.canvas;
     }
 
     // For greatest flexibility, initialize the display base choices directly from
@@ -435,24 +438,24 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     // dataBaseAddress=0x10010000, heapBaseAddress=0x10040000,
     // memoryMapBaseAddress=0xffff0000
     private void initializeDisplayBaseChoices() {
-        int[] displayBaseAddressArray = {Memory.dataSegmentBaseAddress, Memory.globalPointer, Memory.dataBaseAddress,
+        final int[] displayBaseAddressArray = {Memory.dataSegmentBaseAddress, Memory.globalPointer, Memory.dataBaseAddress,
                 Memory.heapBaseAddress, Memory.memoryMapBaseAddress};
         // Must agree with above in number and order...
-        String[] descriptions = {" (global data)", " (gp)", " (static data)", " (heap)", " (memory map)"};
-        displayBaseAddresses = displayBaseAddressArray;
-        displayBaseAddressChoices = new String[displayBaseAddressArray.length];
-        for (int i = 0; i < displayBaseAddressChoices.length; i++) {
-            displayBaseAddressChoices[i] = io.github.chr1sps.rars.util.Binary.intToHexString(displayBaseAddressArray[i])
+        final String[] descriptions = {" (global data)", " (gp)", " (static data)", " (heap)", " (memory map)"};
+        this.displayBaseAddresses = displayBaseAddressArray;
+        this.displayBaseAddressChoices = new String[displayBaseAddressArray.length];
+        for (int i = 0; i < this.displayBaseAddressChoices.length; i++) {
+            this.displayBaseAddressChoices[i] = io.github.chr1sps.rars.util.Binary.intToHexString(displayBaseAddressArray[i])
                     + descriptions[i];
         }
-        defaultBaseAddressIndex = 2; // default to 0x10010000 (static data)
-        baseAddress = displayBaseAddressArray[defaultBaseAddressIndex];
+        this.defaultBaseAddressIndex = 2; // default to 0x10010000 (static data)
+        this.baseAddress = displayBaseAddressArray[this.defaultBaseAddressIndex];
     }
 
     // update based on combo box selection (currently not editable but that may
     // change).
     private void updateBaseAddress() {
-        baseAddress = displayBaseAddresses[displayBaseAddressSelector.getSelectedIndex()];
+        this.baseAddress = this.displayBaseAddresses[this.displayBaseAddressSelector.getSelectedIndex()];
         /*
          * If you want to extend this app to allow user to edit combo box, you can
          * always
@@ -470,20 +473,20 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     // determined
     // by current settings of respective combo boxes.
     private Dimension getDisplayAreaDimension() {
-        return new Dimension(displayAreaWidthInPixels, displayAreaHeightInPixels);
+        return new Dimension(this.displayAreaWidthInPixels, this.displayAreaHeightInPixels);
     }
 
     // reset all counters in the Grid.
     private void resetCounts() {
-        theGrid.reset();
+        this.theGrid.reset();
     }
 
     // Will return int equivalent of specified combo box's current selection.
     // The selection must be a String that parses to an int.
-    private int getIntComboBoxSelection(JComboBox<String> comboBox) {
+    private int getIntComboBoxSelection(final JComboBox<String> comboBox) {
         try {
             return Integer.parseInt((String) comboBox.getSelectedItem());
-        } catch (NumberFormatException nfe) {
+        } catch (final NumberFormatException nfe) {
             // Can occur only if initialization list contains badly formatted numbers. This
             // is a developer's error, not a user error, and better be caught before
             // release.
@@ -499,20 +502,20 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     // Method to determine grid dimensions based on current control settings.
     // Each grid element corresponds to one visualization unit.
     private Grid createNewGrid() {
-        int rows = displayAreaHeightInPixels / unitPixelHeight;
-        int columns = displayAreaWidthInPixels / unitPixelWidth;
+        final int rows = this.displayAreaHeightInPixels / this.unitPixelHeight;
+        final int columns = this.displayAreaWidthInPixels / this.unitPixelWidth;
         return new Grid(rows, columns);
     }
 
     // Given memory address, update color for the corresponding grid element.
-    private void updateColorForAddress(MemoryAccessNotice notice) {
-        int address = notice.getAddress();
-        int offset = (address - baseAddress) / Memory.WORD_LENGTH_BYTES;
+    private void updateColorForAddress(final MemoryAccessNotice notice) {
+        final int address = notice.getAddress();
+        final int offset = (address - this.baseAddress) / Memory.WORD_LENGTH_BYTES;
 
         try {
-            theGrid.setElement(offset / theGrid.getColumns(), offset % theGrid.getColumns(),
+            this.theGrid.setElement(offset / this.theGrid.getColumns(), offset % this.theGrid.getColumns(),
                     Memory.getInstance().getWord(address / Memory.WORD_LENGTH_BYTES * Memory.WORD_LENGTH_BYTES));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // If address is out of range for display, do nothing.
         }
     }
@@ -529,22 +532,23 @@ public class BitmapDisplay extends AbstractToolAndApplication {
 
         // override default paint method to assure display updated correctly every time
         // the panel is repainted.
-        public void paint(Graphics g) {
-            paintGrid(g, theGrid);
+        @Override
+        public void paint(final Graphics g) {
+            this.paintGrid(g, BitmapDisplay.this.theGrid);
         }
 
         // Paint the color codes.
-        private void paintGrid(Graphics g, Grid grid) {
+        private void paintGrid(final Graphics g, final Grid grid) {
             int upperLeftX = 0, upperLeftY = 0;
             for (int i = 0; i < grid.getRows(); i++) {
                 for (int j = 0; j < grid.getColumns(); j++) {
                     g.setColor(grid.getElementFast(i, j));
-                    g.fillRect(upperLeftX, upperLeftY, unitPixelWidth, unitPixelHeight);
-                    upperLeftX += unitPixelWidth; // faster than multiplying
+                    g.fillRect(upperLeftX, upperLeftY, BitmapDisplay.this.unitPixelWidth, BitmapDisplay.this.unitPixelHeight);
+                    upperLeftX += BitmapDisplay.this.unitPixelWidth; // faster than multiplying
                 }
                 // get ready for next row...
                 upperLeftX = 0;
-                upperLeftY += unitPixelHeight; // faster than multiplying
+                upperLeftY += BitmapDisplay.this.unitPixelHeight; // faster than multiplying
             }
         }
     }
@@ -556,24 +560,24 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         Color[][] grid;
         int rows, columns;
 
-        private Grid(int rows, int columns) {
-            grid = new Color[rows][columns];
+        private Grid(final int rows, final int columns) {
+            this.grid = new Color[rows][columns];
             this.rows = rows;
             this.columns = columns;
-            reset();
+            this.reset();
         }
 
         private int getRows() {
-            return rows;
+            return this.rows;
         }
 
         private int getColumns() {
-            return columns;
+            return this.columns;
         }
 
         // Returns value in given grid element; null if row or column is out of range.
-        private Color getElement(int row, int column) {
-            return (row >= 0 && row <= rows && column >= 0 && column <= columns) ? grid[row][column] : null;
+        private Color getElement(final int row, final int column) {
+            return (row >= 0 && row <= this.rows && column >= 0 && column <= this.columns) ? this.grid[row][column] : null;
         }
 
         // Returns value in given grid element without doing any row/column index
@@ -581,25 +585,25 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         // Is faster than getElement but will throw array index out of bounds exception
         // if
         // parameter values are outside the bounds of the grid.
-        private Color getElementFast(int row, int column) {
-            return grid[row][column];
+        private Color getElementFast(final int row, final int column) {
+            return this.grid[row][column];
         }
 
         // Set the grid element.
-        private void setElement(int row, int column, int color) {
-            grid[row][column] = new Color(color);
+        private void setElement(final int row, final int column, final int color) {
+            this.grid[row][column] = new Color(color);
         }
 
         // Set the grid element.
-        private void setElement(int row, int column, Color color) {
-            grid[row][column] = color;
+        private void setElement(final int row, final int column, final Color color) {
+            this.grid[row][column] = color;
         }
 
         // Just set all grid elements to black.
         private void reset() {
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < columns; j++) {
-                    grid[i][j] = Color.BLACK;
+            for (int i = 0; i < this.rows; i++) {
+                for (int j = 0; j < this.columns; j++) {
+                    this.grid[i][j] = Color.BLACK;
                 }
             }
         }

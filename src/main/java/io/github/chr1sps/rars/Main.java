@@ -1,6 +1,7 @@
 package io.github.chr1sps.rars;
 
-import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.util.SystemInfo;
 import io.github.chr1sps.rars.api.Options;
 import io.github.chr1sps.rars.api.Program;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
@@ -58,7 +59,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version December 2009
  */
-public class Launch {
+public class Main {
 
     /**
      * Main takes a number of command line arguments.<br>
@@ -147,96 +148,98 @@ public class Launch {
      *
      * @param args an array of {@link java.lang.String} objects
      */
-    public static void main(String[] args) {
-        new Launch(args);
+    public static void main(final String[] args) {
+        new Main(args);
     }
 
-    private Launch(String[] args) {
+    private Main(final String[] args) {
         Globals.initialize();
 
-        options = new Options();
-        gui = args.length == 0;
-        simulate = true;
-        displayFormat = HEXADECIMAL;
-        verbose = true;
-        assembleProject = false;
-        countInstructions = false;
-        instructionCount = 0;
-        assembleErrorExitCode = 0;
-        simulateErrorExitCode = 0;
-        registerDisplayList = new ArrayList<>();
-        memoryDisplayList = new ArrayList<>();
-        filenameList = new ArrayList<>();
+        this.options = new Options();
+        this.gui = args.length == 0;
+        this.simulate = true;
+        this.displayFormat = HEXADECIMAL;
+        this.verbose = true;
+        this.assembleProject = false;
+        this.countInstructions = false;
+        this.instructionCount = 0;
+        this.assembleErrorExitCode = 0;
+        this.simulateErrorExitCode = 0;
+        this.registerDisplayList = new ArrayList<>();
+        this.memoryDisplayList = new ArrayList<>();
+        this.filenameList = new ArrayList<>();
         MemoryConfigurations.setCurrentConfiguration(MemoryConfigurations.getDefaultConfiguration());
-        out = System.out;
+        this.out = System.out;
 
-        if (!parseCommandArgs(args)) {
+        if (!this.parseCommandArgs(args)) {
             System.exit(Globals.exitCode);
         }
 
-        if (gui) {
-            launchIDE();
+        if (this.gui) {
+            this.launchIDE();
         } else { // running from command line.
             // assure command mode works in headless environment (generates exception if
             // not)
             System.setProperty("java.awt.headless", "true");
 
-            dumpSegments(runCommand());
+            this.dumpSegments(this.runCommand());
             System.exit(Globals.exitCode);
         }
     }
 
-    private void displayAllPostMortem(Program program) {
-        displayMiscellaneousPostMortem(program);
-        displayRegistersPostMortem(program);
-        displayMemoryPostMortem(program.getMemory());
+    private void displayAllPostMortem(final Program program) {
+        this.displayMiscellaneousPostMortem(program);
+        this.displayRegistersPostMortem(program);
+        this.displayMemoryPostMortem(program.getMemory());
     }
     /////////////////////////////////////////////////////////////
     // Perform any specified dump operations. See "dump" option.
     //
 
-    private void dumpSegments(Program program) {
-        if (dumpTriples == null || program == null)
+    private void dumpSegments(final Program program) {
+        if (this.dumpTriples == null || program == null) {
             return;
+        }
 
-        for (String[] triple : dumpTriples) {
-            File file = new File(triple[2]);
+        for (final String[] triple : this.dumpTriples) {
+            final File file = new File(triple[2]);
             Integer[] segInfo = MemoryDump.getSegmentBounds(triple[0]);
             // If not segment name, see if it is address range instead. DPS 14-July-2008
             if (segInfo == null) {
                 try {
-                    String[] memoryRange = checkMemoryAddressRange(triple[0]);
+                    final String[] memoryRange = this.checkMemoryAddressRange(triple[0]);
                     segInfo = new Integer[2];
                     segInfo[0] = Binary.stringToInt(memoryRange[0]); // low end of range
                     segInfo[1] = Binary.stringToInt(memoryRange[1]); // high end of range
-                } catch (NumberFormatException | NullPointerException nfe) {
+                } catch (final NumberFormatException |
+                               NullPointerException nfe) {
                     segInfo = null;
                 }
             }
             if (segInfo == null) {
-                out.println("Error while attempting to save dump, segment/address-range " + triple[0] + " is invalid!");
+                this.out.println("Error while attempting to save dump, segment/address-range " + triple[0] + " is invalid!");
                 continue;
             }
-            DumpFormat format = DumpFormatLoader.findDumpFormatGivenCommandDescriptor(triple[1]);
+            final DumpFormat format = DumpFormatLoader.findDumpFormatGivenCommandDescriptor(triple[1]);
             if (format == null) {
-                out.println("Error while attempting to save dump, format " + triple[1] + " was not found!");
+                this.out.println("Error while attempting to save dump, format " + triple[1] + " was not found!");
                 continue;
             }
             try {
-                int highAddress = program.getMemory().getAddressOfFirstNull(segInfo[0], segInfo[1])
+                final int highAddress = program.getMemory().getAddressOfFirstNull(segInfo[0], segInfo[1])
                         - Memory.WORD_LENGTH_BYTES;
                 if (highAddress < segInfo[0]) {
-                    out.println("This segment has not been written to, there is nothing to dump.");
+                    this.out.println("This segment has not been written to, there is nothing to dump.");
                     continue;
                 }
                 format.dumpMemoryRange(file, segInfo[0], highAddress, program.getMemory());
-            } catch (FileNotFoundException e) {
-                out.println("Error while attempting to save dump, file " + file + " was not found!");
-            } catch (AddressErrorException e) {
-                out.println("Error while attempting to save dump, file " + file + "!  Could not access address: "
+            } catch (final FileNotFoundException e) {
+                this.out.println("Error while attempting to save dump, file " + file + " was not found!");
+            } catch (final AddressErrorException e) {
+                this.out.println("Error while attempting to save dump, file " + file + "!  Could not access address: "
                         + e.address + "!");
-            } catch (IOException e) {
-                out.println("Error while attempting to save dump, file " + file + "!  Disk IO failed!");
+            } catch (final IOException e) {
+                this.out.println("Error while attempting to save dump, file " + file + "!  Disk IO failed!");
             }
         }
     }
@@ -248,14 +251,21 @@ public class Launch {
     private void launchIDE() {
         // System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts RARS menu
         // on Mac OS menu bar
-        FlatDarkLaf.setup();
-//        FlatIntelliJLaf.setup();
-//        FlatMacDarkLaf.setup();
+        FlatMacDarkLaf.setup();
+        if (SystemInfo.isLinux) {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
+        }
+        if (SystemInfo.isMacOS) {
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            System.setProperty("apple.awt.application.name", "RARS Nova");
+            System.setProperty("apple.awt.application.appearance", "system");
+        }
         SwingUtilities.invokeLater(
                 () -> {
                     // Turn off metal's use of bold fonts
                     // UIManager.put("swing.boldMetal", Boolean.FALSE);
-                    new VenusUI("RARS " + Globals.version, filenameList);
+                    new VenusUI("RARS " + Globals.version, this.filenameList);
                 });
     }
 
@@ -266,31 +276,32 @@ public class Launch {
     // and build data structures. For help option (h), display the help.
     // Returns true if command args parse OK, false otherwise.
 
-    private boolean parseCommandArgs(String[] args) {
-        String noCopyrightSwitch = "nc";
-        String displayMessagesToErrSwitch = "me";
+    private boolean parseCommandArgs(final String[] args) {
+        final String noCopyrightSwitch = "nc";
+        final String displayMessagesToErrSwitch = "me";
         boolean argsOK = true;
         boolean inProgramArgumentList = false;
-        programArgumentList = null;
-        if (args.length == 0)
+        this.programArgumentList = null;
+        if (args.length == 0) {
             return true; // should not get here...
+        }
         // If the option to display RARS messages to standard erro is used,
         // it must be processed before any others (since messages may be
         // generated during option parsing).
-        processDisplayMessagesToErrSwitch(args, displayMessagesToErrSwitch);
-        displayCopyright(args, noCopyrightSwitch); // ..or not..
+        this.processDisplayMessagesToErrSwitch(args, displayMessagesToErrSwitch);
+        this.displayCopyright(args, noCopyrightSwitch); // ..or not..
         if (args.length == 1 && args[0].equals("h")) {
-            displayHelp();
+            this.displayHelp();
             return false;
         }
         for (int i = 0; i < args.length; i++) {
             // We have seen "pa" switch, so all remaining args are program args
             // that will become "argc" and "argv" for the program.
             if (inProgramArgumentList) {
-                if (programArgumentList == null) {
-                    programArgumentList = new ArrayList<>();
+                if (this.programArgumentList == null) {
+                    this.programArgumentList = new ArrayList<>();
                 }
-                programArgumentList.add(args[i]);
+                this.programArgumentList.add(args[i]);
                 continue;
             }
             // Once we hit "pa", all remaining command args are assumed
@@ -309,21 +320,22 @@ public class Launch {
             }
             if (args[i].equalsIgnoreCase("dump")) {
                 if (args.length <= (i + 3)) {
-                    out.println("Dump command line argument requires a segment, format and file name.");
+                    this.out.println("Dump command line argument requires a segment, format and file name.");
                     argsOK = false;
                 } else {
-                    if (dumpTriples == null)
-                        dumpTriples = new ArrayList<>();
-                    dumpTriples.add(new String[]{args[++i], args[++i], args[++i]});
+                    if (this.dumpTriples == null) {
+                        this.dumpTriples = new ArrayList<>();
+                    }
+                    this.dumpTriples.add(new String[]{args[++i], args[++i], args[++i]});
                     // simulate = false;
                 }
                 continue;
             }
             if (args[i].equalsIgnoreCase("mc")) {
-                String configName = args[++i];
-                MemoryConfiguration config = MemoryConfigurations.getConfigurationByName(configName);
+                final String configName = args[++i];
+                final MemoryConfiguration config = MemoryConfigurations.getConfigurationByName(configName);
                 if (config == null) {
-                    out.println("Invalid memory configuration: " + configName);
+                    this.out.println("Invalid memory configuration: " + configName);
                     argsOK = false;
                 } else {
                     MemoryConfigurations.setCurrentConfiguration(config);
@@ -332,21 +344,21 @@ public class Launch {
             }
             // Set RARS exit code for assemble error
             if (args[i].toLowerCase().indexOf("ae") == 0) {
-                String s = args[i].substring(2);
+                final String s = args[i].substring(2);
                 try {
-                    assembleErrorExitCode = Integer.decode(s);
+                    this.assembleErrorExitCode = Integer.decode(s);
                     continue;
-                } catch (NumberFormatException nfe) {
+                } catch (final NumberFormatException nfe) {
                     // Let it fall thru and get handled by catch-all
                 }
             }
             // Set RARS exit code for simulate error
             if (args[i].toLowerCase().indexOf("se") == 0) {
-                String s = args[i].substring(2);
+                final String s = args[i].substring(2);
                 try {
-                    simulateErrorExitCode = Integer.decode(s);
+                    this.simulateErrorExitCode = Integer.decode(s);
                     continue;
-                } catch (NumberFormatException nfe) {
+                } catch (final NumberFormatException nfe) {
                     // Let it fall thru and get handled by catch-all
                 }
             }
@@ -355,75 +367,75 @@ public class Launch {
                 continue;
             }
             if (args[i].equalsIgnoreCase("a")) {
-                simulate = false;
+                this.simulate = false;
                 continue;
             }
             if (args[i].equalsIgnoreCase("ad") ||
                     args[i].equalsIgnoreCase("da")) {
                 Globals.debug = true;
-                simulate = false;
+                this.simulate = false;
                 continue;
             }
             if (args[i].equalsIgnoreCase("p")) {
-                assembleProject = true;
+                this.assembleProject = true;
                 continue;
             }
             if (args[i].equalsIgnoreCase("dec")) {
-                displayFormat = DECIMAL;
+                this.displayFormat = DECIMAL;
                 continue;
             }
             if (args[i].equalsIgnoreCase("g")) {
-                gui = true;
+                this.gui = true;
                 continue;
             }
             if (args[i].equalsIgnoreCase("hex")) {
-                displayFormat = HEXADECIMAL;
+                this.displayFormat = HEXADECIMAL;
                 continue;
             }
             if (args[i].equalsIgnoreCase("ascii")) {
-                displayFormat = ASCII;
+                this.displayFormat = ASCII;
                 continue;
             }
             if (args[i].equalsIgnoreCase("b")) {
-                verbose = false;
+                this.verbose = false;
                 continue;
             }
             if (args[i].equalsIgnoreCase("np") || args[i].equalsIgnoreCase("ne")) {
-                options.pseudo = false;
+                this.options.pseudo = false;
                 continue;
             }
             if (args[i].equalsIgnoreCase("we")) { // added 14-July-2008 DPS
-                options.warningsAreErrors = true;
+                this.options.warningsAreErrors = true;
                 continue;
             }
             if (args[i].equalsIgnoreCase("sm")) { // added 17-Dec-2009 DPS
-                options.startAtMain = true;
+                this.options.startAtMain = true;
                 continue;
             }
             if (args[i].equalsIgnoreCase("smc")) { // added 5-Jul-2013 DPS
-                options.selfModifyingCode = true;
+                this.options.selfModifyingCode = true;
                 continue;
             }
             if (args[i].equalsIgnoreCase("rv64")) {
-                rv64 = true;
+                this.rv64 = true;
                 continue;
             }
             if (args[i].equalsIgnoreCase("ic")) { // added 19-Jul-2012 DPS
-                countInstructions = true;
+                this.countInstructions = true;
                 continue;
             }
 
             if (new File(args[i]).exists()) { // is it a file name?
-                filenameList.add(args[i]);
+                this.filenameList.add(args[i]);
                 continue;
             }
 
             if (args[i].indexOf("x") == 0) {
                 if (RegisterFile.getRegister(args[i]) == null &&
                         FloatingPointRegisterFile.getRegister(args[i]) == null) {
-                    out.println("Invalid Register Name: " + args[i]);
+                    this.out.println("Invalid Register Name: " + args[i]);
                 } else {
-                    registerDisplayList.add(args[i]);
+                    this.registerDisplayList.add(args[i]);
                 }
                 continue;
             }
@@ -431,29 +443,29 @@ public class Launch {
             if (RegisterFile.getRegister(args[i]) != null ||
                     FloatingPointRegisterFile.getRegister(args[i]) != null ||
                     ControlAndStatusRegisterFile.getRegister(args[i]) != null) {
-                registerDisplayList.add(args[i]);
+                this.registerDisplayList.add(args[i]);
                 continue;
             }
             // Check for stand-alone integer, which is the max execution steps option
             try {
-                options.maxSteps = Integer.decode(args[i]); // if we got here, it has to be OK
+                this.options.maxSteps = Integer.decode(args[i]); // if we got here, it has to be OK
                 continue;
-            } catch (NumberFormatException nfe) {
+            } catch (final NumberFormatException nfe) {
             }
             // Check for integer address range (m-n)
             try {
-                String[] memoryRange = checkMemoryAddressRange(args[i]);
-                memoryDisplayList.add(memoryRange[0]); // low end of range
-                memoryDisplayList.add(memoryRange[1]); // high end of range
+                final String[] memoryRange = this.checkMemoryAddressRange(args[i]);
+                this.memoryDisplayList.add(memoryRange[0]); // low end of range
+                this.memoryDisplayList.add(memoryRange[1]); // high end of range
                 continue;
-            } catch (NumberFormatException nfe) {
-                out.println("Invalid/unaligned address or invalid range: " + args[i]);
+            } catch (final NumberFormatException nfe) {
+                this.out.println("Invalid/unaligned address or invalid range: " + args[i]);
                 argsOK = false;
                 continue;
-            } catch (NullPointerException npe) {
+            } catch (final NullPointerException npe) {
                 // Do nothing. next statement will handle it
             }
-            out.println("Invalid Command Argument: " + args[i]);
+            this.out.println("Invalid Command Argument: " + args[i]);
             argsOK = false;
         }
         return argsOK;
@@ -464,27 +476,27 @@ public class Launch {
     // Returns false if no simulation (run) occurs, true otherwise.
 
     private Program runCommand() {
-        if (filenameList.isEmpty()) {
+        if (this.filenameList.isEmpty()) {
             return null;
         }
 
-        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, rv64);
-        InstructionSet.rv64 = rv64;
+        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, this.rv64);
+        InstructionSet.rv64 = this.rv64;
         Globals.instructionSet.populate();
 
-        File mainFile = new File(filenameList.get(0)).getAbsoluteFile();// First file is "main" file
-        ArrayList<String> filesToAssemble;
-        if (assembleProject) {
+        final File mainFile = new File(this.filenameList.get(0)).getAbsoluteFile();// First file is "main" file
+        final ArrayList<String> filesToAssemble;
+        if (this.assembleProject) {
             filesToAssemble = FilenameFinder.getFilenameList(mainFile.getParent(), Globals.fileExtensions);
-            if (filenameList.size() > 1) {
+            if (this.filenameList.size() > 1) {
                 // Using "p" project option PLUS listing more than one filename on command line.
                 // Add the additional files, avoiding duplicates.
-                filenameList.remove(0); // first one has already been processed
-                ArrayList<String> moreFilesToAssemble = FilenameFinder.getFilenameList(filenameList,
+                this.filenameList.remove(0); // first one has already been processed
+                final ArrayList<String> moreFilesToAssemble = FilenameFinder.getFilenameList(this.filenameList,
                         FilenameFinder.MATCH_ALL_EXTENSIONS);
                 // Remove any duplicates then merge the two lists.
                 for (int index2 = 0; index2 < moreFilesToAssemble.size(); index2++) {
-                    for (String s : filesToAssemble) {
+                    for (final String s : filesToAssemble) {
                         if (s.equals(moreFilesToAssemble.get(index2))) {
                             moreFilesToAssemble.remove(index2);
                             index2--; // adjust for left shift in moreFilesToAssemble...
@@ -495,56 +507,56 @@ public class Launch {
                 filesToAssemble.addAll(moreFilesToAssemble);
             }
         } else {
-            filesToAssemble = FilenameFinder.getFilenameList(filenameList, FilenameFinder.MATCH_ALL_EXTENSIONS);
+            filesToAssemble = FilenameFinder.getFilenameList(this.filenameList, FilenameFinder.MATCH_ALL_EXTENSIONS);
         }
-        Program program = new Program(options);
+        final Program program = new Program(this.options);
         try {
             if (Globals.debug) {
-                out.println("---  TOKENIZING & ASSEMBLY BEGINS  ---");
+                this.out.println("---  TOKENIZING & ASSEMBLY BEGINS  ---");
             }
-            ErrorList warnings = program.assemble(filesToAssemble, mainFile.getAbsolutePath());
+            final ErrorList warnings = program.assemble(filesToAssemble, mainFile.getAbsolutePath());
             if (warnings != null && warnings.warningsOccurred()) {
-                out.println(warnings.generateWarningReport());
+                this.out.println(warnings.generateWarningReport());
             }
-        } catch (AssemblyException e) {
-            Globals.exitCode = assembleErrorExitCode;
-            out.println(e.errors().generateErrorAndWarningReport());
-            out.println("Processing terminated due to errors.");
+        } catch (final AssemblyException e) {
+            Globals.exitCode = this.assembleErrorExitCode;
+            this.out.println(e.errors().generateErrorAndWarningReport());
+            this.out.println("Processing terminated due to errors.");
             return null;
         }
         // Setup for program simulation even if just assembling to prepare memory dumps
-        program.setup(programArgumentList, null);
-        if (simulate) {
+        program.setup(this.programArgumentList, null);
+        if (this.simulate) {
             if (Globals.debug) {
-                out.println("--------  SIMULATION BEGINS  -----------");
+                this.out.println("--------  SIMULATION BEGINS  -----------");
             }
             try {
                 while (true) {
-                    Simulator.Reason done = program.simulate();
+                    final Simulator.Reason done = program.simulate();
                     if (done == Simulator.Reason.MAX_STEPS) {
-                        out.println("\nProgram terminated when maximum step limit " + options.maxSteps + " reached.");
+                        this.out.println("\nProgram terminated when maximum step limit " + this.options.maxSteps + " reached.");
                         break;
                     } else if (done == Simulator.Reason.CLIFF_TERMINATION) {
-                        out.println("\nProgram terminated by dropping off the bottom.");
+                        this.out.println("\nProgram terminated by dropping off the bottom.");
                         break;
                     } else if (done == Simulator.Reason.NORMAL_TERMINATION) {
-                        out.println("\nProgram terminated by calling exit");
+                        this.out.println("\nProgram terminated by calling exit");
                         break;
                     }
                     assert done == Simulator.Reason.BREAKPOINT
                             : "Internal error: All cases other than breakpoints should be handled already";
-                    displayAllPostMortem(program); // print registers if we hit a breakpoint, then continue
+                    this.displayAllPostMortem(program); // print registers if we hit a breakpoint, then continue
                 }
 
-            } catch (SimulationException e) {
-                Globals.exitCode = simulateErrorExitCode;
-                out.println(e.errorMessage.generateReport());
-                out.println("Simulation terminated due to errors.");
+            } catch (final SimulationException e) {
+                Globals.exitCode = this.simulateErrorExitCode;
+                this.out.println(e.errorMessage.generateReport());
+                this.out.println("Simulation terminated due to errors.");
             }
-            displayAllPostMortem(program);
+            this.displayAllPostMortem(program);
         }
         if (Globals.debug) {
-            out.println("\n--------  ALL PROCESSING COMPLETE  -----------");
+            this.out.println("\n--------  ALL PROCESSING COMPLETE  -----------");
         }
         return program;
     }
@@ -554,7 +566,7 @@ public class Launch {
     // by "-"; no embedded spaces. e.g. 0x00400000-0x00400010
     // If number is not multiple of 4, will be rounded up to next higher.
 
-    private String[] checkMemoryAddressRange(String arg) throws NumberFormatException {
+    private String[] checkMemoryAddressRange(final String arg) throws NumberFormatException {
         String[] memoryRange = null;
         if (arg.indexOf(rangeSeparator) > 0 &&
                 arg.indexOf(rangeSeparator) < arg.length() - 1) {
@@ -577,52 +589,52 @@ public class Launch {
     //////////////////////////////////////////////////////////////////////
     // Displays any specified runtime properties. Initially just instruction count
     // DPS 19 July 2012
-    private void displayMiscellaneousPostMortem(Program program) {
-        if (countInstructions) {
-            out.println("\n" + program.getRegisterValue("cycle"));
+    private void displayMiscellaneousPostMortem(final Program program) {
+        if (this.countInstructions) {
+            this.out.println("\n" + program.getRegisterValue("cycle"));
         }
     }
 
     //////////////////////////////////////////////////////////////////////
     // Displays requested register or registers
 
-    private void displayRegistersPostMortem(Program program) {
+    private void displayRegistersPostMortem(final Program program) {
         // Display requested register contents
-        for (String reg : registerDisplayList) {
+        for (final String reg : this.registerDisplayList) {
             if (FloatingPointRegisterFile.getRegister(reg) != null) {
                 // TODO: do something for double vs float
                 // It isn't clear to me what the best behaviour is
                 // floating point register
-                int ivalue = program.getRegisterValue(reg);
-                float fvalue = Float.intBitsToFloat(ivalue);
-                if (verbose) {
-                    out.print(reg + "\t");
+                final int ivalue = program.getRegisterValue(reg);
+                final float fvalue = Float.intBitsToFloat(ivalue);
+                if (this.verbose) {
+                    this.out.print(reg + "\t");
                 }
-                if (displayFormat == HEXADECIMAL) {
+                if (this.displayFormat == HEXADECIMAL) {
                     // display float (and double, if applicable) in hex
-                    out.println(Binary.intToHexString(ivalue));
+                    this.out.println(Binary.intToHexString(ivalue));
 
-                } else if (displayFormat == DECIMAL) {
+                } else if (this.displayFormat == DECIMAL) {
                     // display float (and double, if applicable) in decimal
-                    out.println(fvalue);
+                    this.out.println(fvalue);
 
                 } else { // displayFormat == ASCII
-                    out.println(Binary.intToAscii(ivalue));
+                    this.out.println(Binary.intToAscii(ivalue));
                 }
             } else if (ControlAndStatusRegisterFile.getRegister(reg) != null) {
-                out.print(reg + "\t");
-                out.println(formatIntForDisplay((int) ControlAndStatusRegisterFile.getRegister(reg).getValue()));
-            } else if (verbose) {
-                out.print(reg + "\t");
-                out.println(formatIntForDisplay((int) RegisterFile.getRegister(reg).getValue()));
+                this.out.print(reg + "\t");
+                this.out.println(this.formatIntForDisplay((int) ControlAndStatusRegisterFile.getRegister(reg).getValue()));
+            } else if (this.verbose) {
+                this.out.print(reg + "\t");
+                this.out.println(this.formatIntForDisplay((int) RegisterFile.getRegister(reg).getValue()));
             }
         }
     }
 
     //////////////////////////////////////////////////////////////////////
     // Formats int value for display: decimal, hex, ascii
-    private String formatIntForDisplay(int value) {
-        return switch (displayFormat) {
+    private String formatIntForDisplay(final int value) {
+        return switch (this.displayFormat) {
             case DECIMAL -> "" + value;
             case ASCII -> Binary.intToAscii(value);
             default -> Binary.intToHexString(value); // hex case
@@ -632,42 +644,43 @@ public class Launch {
     //////////////////////////////////////////////////////////////////////
     // Displays requested memory range or ranges
 
-    private void displayMemoryPostMortem(Memory memory) {
+    private void displayMemoryPostMortem(final Memory memory) {
         int value;
         // Display requested memory range contents
-        Iterator<String> memIter = memoryDisplayList.iterator();
+        final Iterator<String> memIter = this.memoryDisplayList.iterator();
         int addressStart = 0, addressEnd = 0;
         while (memIter.hasNext()) {
             try { // This will succeed; error would have been caught during command arg parse
                 addressStart = Binary.stringToInt(memIter.next());
                 addressEnd = Binary.stringToInt(memIter.next());
-            } catch (NumberFormatException nfe) {
+            } catch (final NumberFormatException nfe) {
             }
             int valuesDisplayed = 0;
             for (int addr = addressStart; addr <= addressEnd; addr += Memory.WORD_LENGTH_BYTES) {
-                if (addr < 0 && addressEnd > 0)
+                if (addr < 0 && addressEnd > 0) {
                     break; // happens only if addressEnd is 0x7ffffffc
+                }
                 if (valuesDisplayed % memoryWordsPerLine == 0) {
-                    out.print((valuesDisplayed > 0) ? "\n" : "");
-                    if (verbose) {
-                        out.print("Mem[" + Binary.intToHexString(addr) + "]\t");
+                    this.out.print((valuesDisplayed > 0) ? "\n" : "");
+                    if (this.verbose) {
+                        this.out.print("Mem[" + Binary.intToHexString(addr) + "]\t");
                     }
                 }
                 try {
                     // Allow display of binary text segment (machine code) DPS 14-July-2008
                     if (Memory.inTextSegment(addr)) {
-                        Integer iValue = memory.getRawWordOrNull(addr);
+                        final Integer iValue = memory.getRawWordOrNull(addr);
                         value = (iValue == null) ? 0 : iValue;
                     } else {
                         value = memory.getWord(addr);
                     }
-                    out.print(formatIntForDisplay(value) + "\t");
-                } catch (AddressErrorException aee) {
-                    out.print("Invalid address: " + addr + "\t");
+                    this.out.print(this.formatIntForDisplay(value) + "\t");
+                } catch (final AddressErrorException aee) {
+                    this.out.print("Invalid address: " + addr + "\t");
                 }
                 valuesDisplayed++;
             }
-            out.println();
+            this.out.println();
         }
     }
 
@@ -675,10 +688,10 @@ public class Launch {
     // If option to display RARS messages to standard err (System.err) is
     // present, it must be processed before all others. Since messages may
     // be output as early as during the command parse.
-    private void processDisplayMessagesToErrSwitch(String[] args, String displayMessagesToErrSwitch) {
-        for (String arg : args) {
+    private void processDisplayMessagesToErrSwitch(final String[] args, final String displayMessagesToErrSwitch) {
+        for (final String arg : args) {
             if (arg.toLowerCase().equals(displayMessagesToErrSwitch)) {
-                out = System.err;
+                this.out = System.err;
                 return;
             }
         }
@@ -687,13 +700,13 @@ public class Launch {
     // Decide whether copyright should be displayed, and display
     // if so.
 
-    private void displayCopyright(String[] args, String noCopyrightSwitch) {
-        for (String arg : args) {
+    private void displayCopyright(final String[] args, final String noCopyrightSwitch) {
+        for (final String arg : args) {
             if (arg.toLowerCase().equals(noCopyrightSwitch)) {
                 return;
             }
         }
-        out.println("RARS " + Globals.version + "  Copyright " + Globals.copyrightYears + " " + Globals.copyrightHolders
+        this.out.println("RARS " + Globals.version + "  Copyright " + Globals.copyrightYears + " " + Globals.copyrightHolders
                 + "\n");
     }
 
@@ -701,7 +714,7 @@ public class Launch {
     // Display command line help text
 
     private void displayHelp() {
-        String[] segmentNames = MemoryDump.getSegmentNames();
+        final String[] segmentNames = MemoryDump.getSegmentNames();
         String segments = "";
         for (int i = 0; i < segmentNames.length; i++) {
             segments += segmentNames[i];
@@ -709,7 +722,7 @@ public class Launch {
                 segments += ", ";
             }
         }
-        ArrayList<DumpFormat> dumpFormats = DumpFormatLoader.getDumpFormats();
+        final ArrayList<DumpFormat> dumpFormats = DumpFormatLoader.getDumpFormats();
         String formats = "";
         for (int i = 0; i < dumpFormats.size(); i++) {
             formats += dumpFormats.get(i).getCommandDescriptor();
@@ -717,55 +730,55 @@ public class Launch {
                 formats += ", ";
             }
         }
-        out.println("Usage:  Rars  [options] filename [additional filenames]");
-        out.println("  Valid options (not case sensitive, separate by spaces) are:");
-        out.println("      a  -- assemble only, do not simulate");
-        out.println("  ae<n>  -- terminate RARS with integer exit code <n> if an assemble error occurs.");
-        out.println("  ascii  -- display memory or register contents interpreted as ASCII codes.");
-        out.println("      b  -- brief - do not display register/memory address along with contents");
-        out.println("      d  -- display RARS debugging statements");
-        out.println("    dec  -- display memory or register contents in decimal.");
-        out.println("   dump <segment> <format> <file> -- memory dump of specified memory segment");
-        out.println("            in specified format to specified file.  Option may be repeated.");
-        out.println("            Dump occurs at the end of simulation unless 'a' option is used.");
-        out.println("            Segment and format are case-sensitive and possible values are:");
-        out.println("            <segment> = " + segments + ", or a range like 0x400000-0x10000000");
-        out.println("            <format> = " + formats);
-        out.println("      g  -- force GUI mode");
-        out.println("      h  -- display this help.  Use by itself with no filename.");
-        out.println("    hex  -- display memory or register contents in hexadecimal (default)");
-        out.println("     ic  -- display count of basic instructions 'executed'");
-        out.println("     mc <config>  -- set memory configuration.  Argument <config> is");
-        out.println("            case-sensitive and possible values are: Default for the default");
-        out.println("            32-bit address space, CompactDataAtZero for a 32KB memory with");
-        out.println("            data segment at address 0, or CompactTextAtZero for a 32KB");
-        out.println("            memory with text segment at address 0.");
-        out.println("     me  -- display RARS messages to standard err instead of standard out. ");
-        out.println("            Can separate messages from program output using redirection");
-        out.println("     nc  -- do not display copyright notice (for cleaner redirected/piped output).");
-        out.println("     np  -- use of pseudo instructions and formats not permitted");
-        out.println("      p  -- Project mode - assemble all files in the same directory as given file.");
-        out.println("  se<n>  -- terminate RARS with integer exit code <n> if a simulation (run) error occurs.");
-        out.println("     sm  -- start execution at statement with global label main, if defined");
-        out.println("    smc  -- Self Modifying Code - Program can write and branch to either text or data segment");
-        out.println("    rv64 -- Enables 64 bit assembly and executables (Not fully compatible with rv32)");
-        out.println("    <n>  -- where <n> is an integer maximum count of steps to simulate.");
-        out.println("            If 0, negative or not specified, there is no maximum.");
-        out.println(" x<reg>  -- where <reg> is number or name (e.g. 5, t3, f10) of register whose ");
-        out.println("            content to display at end of run.  Option may be repeated.");
-        out.println("<reg_name>  -- where <reg_name> is name (e.g. t3, f10) of register whose");
-        out.println("            content to display at end of run.  Option may be repeated. ");
-        out.println("<m>-<n>  -- memory address range from <m> to <n> whose contents to");
-        out.println("            display at end of run. <m> and <n> may be hex or decimal,");
-        out.println("            must be on word boundary, <m> <= <n>.  Option may be repeated.");
-        out.println("     pa  -- Program Arguments follow in a space-separated list.  This");
-        out.println("            option must be placed AFTER ALL FILE NAMES, because everything");
-        out.println("            that follows it is interpreted as a program argument to be");
-        out.println("            made available to the program at runtime.");
-        out.println("If more than one filename is listed, the first is assumed to be the main");
-        out.println("unless the global statement label 'main' is defined in one of the files.");
-        out.println("Exception handler not automatically assembled.  Add it to the file list.");
-        out.println("Options used here do not affect RARS Settings menu values and vice versa.");
+        this.out.println("Usage:  Rars  [options] filename [additional filenames]");
+        this.out.println("  Valid options (not case sensitive, separate by spaces) are:");
+        this.out.println("      a  -- assemble only, do not simulate");
+        this.out.println("  ae<n>  -- terminate RARS with integer exit code <n> if an assemble error occurs.");
+        this.out.println("  ascii  -- display memory or register contents interpreted as ASCII codes.");
+        this.out.println("      b  -- brief - do not display register/memory address along with contents");
+        this.out.println("      d  -- display RARS debugging statements");
+        this.out.println("    dec  -- display memory or register contents in decimal.");
+        this.out.println("   dump <segment> <format> <file> -- memory dump of specified memory segment");
+        this.out.println("            in specified format to specified file.  Option may be repeated.");
+        this.out.println("            Dump occurs at the end of simulation unless 'a' option is used.");
+        this.out.println("            Segment and format are case-sensitive and possible values are:");
+        this.out.println("            <segment> = " + segments + ", or a range like 0x400000-0x10000000");
+        this.out.println("            <format> = " + formats);
+        this.out.println("      g  -- force GUI mode");
+        this.out.println("      h  -- display this help.  Use by itself with no filename.");
+        this.out.println("    hex  -- display memory or register contents in hexadecimal (default)");
+        this.out.println("     ic  -- display count of basic instructions 'executed'");
+        this.out.println("     mc <config>  -- set memory configuration.  Argument <config> is");
+        this.out.println("            case-sensitive and possible values are: Default for the default");
+        this.out.println("            32-bit address space, CompactDataAtZero for a 32KB memory with");
+        this.out.println("            data segment at address 0, or CompactTextAtZero for a 32KB");
+        this.out.println("            memory with text segment at address 0.");
+        this.out.println("     me  -- display RARS messages to standard err instead of standard out. ");
+        this.out.println("            Can separate messages from program output using redirection");
+        this.out.println("     nc  -- do not display copyright notice (for cleaner redirected/piped output).");
+        this.out.println("     np  -- use of pseudo instructions and formats not permitted");
+        this.out.println("      p  -- Project mode - assemble all files in the same directory as given file.");
+        this.out.println("  se<n>  -- terminate RARS with integer exit code <n> if a simulation (run) error occurs.");
+        this.out.println("     sm  -- start execution at statement with global label main, if defined");
+        this.out.println("    smc  -- Self Modifying Code - Program can write and branch to either text or data segment");
+        this.out.println("    rv64 -- Enables 64 bit assembly and executables (Not fully compatible with rv32)");
+        this.out.println("    <n>  -- where <n> is an integer maximum count of steps to simulate.");
+        this.out.println("            If 0, negative or not specified, there is no maximum.");
+        this.out.println(" x<reg>  -- where <reg> is number or name (e.g. 5, t3, f10) of register whose ");
+        this.out.println("            content to display at end of run.  Option may be repeated.");
+        this.out.println("<reg_name>  -- where <reg_name> is name (e.g. t3, f10) of register whose");
+        this.out.println("            content to display at end of run.  Option may be repeated. ");
+        this.out.println("<m>-<n>  -- memory address range from <m> to <n> whose contents to");
+        this.out.println("            display at end of run. <m> and <n> may be hex or decimal,");
+        this.out.println("            must be on word boundary, <m> <= <n>.  Option may be repeated.");
+        this.out.println("     pa  -- Program Arguments follow in a space-separated list.  This");
+        this.out.println("            option must be placed AFTER ALL FILE NAMES, because everything");
+        this.out.println("            that follows it is interpreted as a program argument to be");
+        this.out.println("            made available to the program at runtime.");
+        this.out.println("If more than one filename is listed, the first is assumed to be the main");
+        this.out.println("unless the global statement label 'main' is defined in one of the files.");
+        this.out.println("Exception handler not automatically assembled.  Add it to the file list.");
+        this.out.println("Options used here do not affect RARS Settings menu values and vice versa.");
     }
 
 }

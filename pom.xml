@@ -17,10 +17,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--        <maven.compiler.source>21</maven.compiler.source>-->
-        <!--        <maven.compiler.target>21</maven.compiler.target>-->
         <maven.compiler.release>21</maven.compiler.release>
-        <project.mainClass>io.github.chr1sps.rars.Launch</project.mainClass>
+        <project.mainClass>io.github.chr1sps.rars.Main</project.mainClass>
         <yDoc.path>${project.basedir}/ydoc</yDoc.path>
     </properties>
 
@@ -36,6 +34,17 @@
             <artifactId>flatlaf</artifactId>
             <version>3.4</version>
         </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.formdev</groupId>-->
+        <!--            <artifactId>flatlaf-extras</artifactId>-->
+        <!--            <version>3.4</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.weisj</groupId>-->
+        <!--            <artifactId>jsvg</artifactId>-->
+        <!--            <version>1.2.0</version>-->
+        <!--            <scope>runtime</scope>-->
+        <!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -61,13 +70,6 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.22.1</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.ow2.asm</groupId>
-                            <artifactId>asm</artifactId>
-                            <version>9.4</version>
-                        </dependency>
-                    </dependencies>
                     <configuration>
                         <skipTests>true</skipTests>
                     </configuration>
@@ -123,6 +125,27 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <mainClass>io.github.chr1sps.rars.Main</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.8</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <groupId>org.apache.maven.plugins</groupId>
                 <version>3.5.2</version>
@@ -143,6 +166,61 @@
                     </transformers>
                 </configuration>
             </plugin>
+            <!--<plugin>
+                <artifactId>maven-jlink-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>3.2.0</version>
+                <configuration>
+                    <stripDebug>false</stripDebug>
+                    <noHeaderFiles>true</noHeaderFiles>
+                    <noManPages>true</noManPages>
+                    <launcher>runtime=RARSNova/io.github.chr1sps.rars.Main
+                    </launcher>
+                    <compress>zip-9</compress>
+                    <verbose>true</verbose>
+                </configuration>
+            </plugin>-->
+            <!--<plugin>
+                <groupId>org.panteleyev</groupId>
+                <artifactId>jpackage-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <configuration>
+                    <name>rars-nova</name>
+                    <appVersion>${project.version}</appVersion>
+                    <vendor>${project.groupId}</vendor>
+                    <modulePaths>
+                        <modulePath>${java.home}/jmods</modulePath>
+                        <modulePath>${project.build.directory}/classes
+                        </modulePath>
+                    </modulePaths>
+                    <module>RARSNova/io.github.chr1sps.rars.Main</module>
+                    <destination>target/dist</destination>
+                    <runtimeImage>
+                        ${project.build.directory}/maven-jlink/default
+                    </runtimeImage>
+                    <winMenu>true</winMenu>
+                    <winShortcut>true</winShortcut>
+                    <winDirChooser>true</winDirChooser>
+                    <winMenuGroup>Utilities</winMenuGroup>
+                    <linuxShortcut>true</linuxShortcut>
+                    <linuxPackageName>rars-nova</linuxPackageName>
+                    <linuxAppCategory>Utilities</linuxAppCategory>
+                    <linuxMenuGroup>Utilities</linuxMenuGroup>
+                    <javaOptions>
+                        <option>-Dfile.encoding=UTF-8</option>
+                    </javaOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <tasks>
+                                <echo>${maven}</echo>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->
         </plugins>
     </build>
 </project>

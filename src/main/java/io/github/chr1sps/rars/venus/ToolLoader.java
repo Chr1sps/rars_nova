@@ -1,10 +1,9 @@
 package io.github.chr1sps.rars.venus;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.tools.Tool;
 import io.github.chr1sps.rars.util.FilenameFinder;
 
+import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -52,8 +51,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class ToolLoader {
 
-    private static final String CLASS_PREFIX = "rars.tools.";
-    private static final String TOOLS_DIRECTORY_PATH = "rars/tools";
+    private static final String CLASS_PREFIX = "io.github.chr1sps.rars.tools.";
+    private static final String TOOLS_DIRECTORY_PATH = "io/github/chr1sps/rars/tools";
     private static final String TOOLS_MENU_NAME = "Tools";
     private static final String TOOL_INTERFACE = "Tool.class";
     private static final String CLASS_EXTENSION = "class";
