@@ -42,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 public class PopupListener extends MouseAdapter {
-    private JPopupMenu popup;
+    private final JPopupMenu popup;
 
     /**
      * <p>Constructor for PopupListener.</p>

@@ -33,20 +33,19 @@ public class IntelHexDumpFormat extends AbstractDumpFormat {
      */
     public void dumpMemoryRange(File file, int firstAddress, int lastAddress, Memory memory)
             throws AddressErrorException, IOException {
-        PrintStream out = new PrintStream(new FileOutputStream(file));
-        String string = null;
-        try {
+        try (PrintStream out = new PrintStream(new FileOutputStream(file))) {
+            StringBuilder string;
             for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
                 Integer temp = memory.getRawWordOrNull(address);
                 if (temp == null)
                     break;
-                string = Integer.toHexString(temp);
+                string = new StringBuilder(Integer.toHexString(temp));
                 while (string.length() < 8) {
-                    string = '0' + string;
+                    string.insert(0, '0');
                 }
-                String addr = Integer.toHexString(address - firstAddress);
+                StringBuilder addr = new StringBuilder(Integer.toHexString(address - firstAddress));
                 while (addr.length() < 4) {
-                    addr = '0' + addr;
+                    addr.insert(0, '0');
                 }
                 String chksum;
                 int tmp_chksum = 0;
@@ -66,8 +65,6 @@ public class IntelHexDumpFormat extends AbstractDumpFormat {
                 out.println(finalstr.toUpperCase());
             }
             out.println(":00000001FF");
-        } finally {
-            out.close();
         }
 
     }

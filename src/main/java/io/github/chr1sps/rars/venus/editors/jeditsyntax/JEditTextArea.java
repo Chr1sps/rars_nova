@@ -90,7 +90,7 @@ public class JEditTextArea extends JComponent {
         this(TextAreaDefaults.getDefaults(), lineNumbers);
     }
 
-    private JScrollBar lineNumbersVertical;
+    private final JScrollBar lineNumbersVertical;
 
     /**
      * Creates a new JEditTextArea with the specified settings.
@@ -1802,7 +1802,7 @@ public class JEditTextArea extends JComponent {
         private Component center;
         private Component right;
         private Component bottom;
-        private Vector<Component> leftOfScrollBar = new Vector<>();
+        private final Vector<Component> leftOfScrollBar = new Vector<>();
     }
 
     static class CaretBlinker implements ActionListener {
@@ -2110,8 +2110,7 @@ public class JEditTextArea extends JComponent {
         }
 
         public boolean addEdit(UndoableEdit edit) {
-            if (edit instanceof CaretUndo) {
-                CaretUndo cedit = (CaretUndo) edit;
+            if (edit instanceof CaretUndo cedit) {
                 start = cedit.start;
                 end = cedit.end;
                 cedit.die();
@@ -2307,7 +2306,8 @@ public class JEditTextArea extends JComponent {
     // Carries out the instruction/directive completion when popup menu
     // item is selected.
     private class PopupHelpActionListener implements ActionListener {
-        private String tokenText, text;
+        private final String tokenText;
+        private final String text;
 
         public PopupHelpActionListener(String tokenText, String text) {
             this.tokenText = tokenText;

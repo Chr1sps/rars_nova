@@ -5,4 +5,5 @@ module RARSNova {
     requires java.datatransfer;
     requires java.desktop;
     requires java.prefs;
+    requires org.jetbrains.annotations;
 }

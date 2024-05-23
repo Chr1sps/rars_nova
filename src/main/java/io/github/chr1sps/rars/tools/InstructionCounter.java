@@ -27,12 +27,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package io.github.chr1sps.rars.tools;
 
 import io.github.chr1sps.rars.ProgramStatement;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
-import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
-import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
-import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,9 +47,9 @@ import java.util.Observable;
  * @author Felipe Lessa &lt;felipe.lessa@gmail.com&gt;
  */
 public class InstructionCounter extends AbstractToolAndApplication {
-    private static String name = "Instruction Counter";
-    private static String version = "Version 1.0 (Felipe Lessa)";
-    private static String heading = "Counting the number of instructions executed";
+    private static final String name = "Instruction Counter";
+    private static final String version = "Version 1.0 (Felipe Lessa)";
+    private static final String heading = "Counting the number of instructions executed";
 
     /**
      * Number of instructions executed until now.

@@ -40,7 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 public class SettingsAction extends GuiAction {
-    private Settings.Bool setting;
+    private final Settings.Bool setting;
 
     /**
      * <p>Constructor for SettingsAction.</p>

@@ -43,7 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2005
  */
 public class ToolAction extends AbstractAction {
-    private Tool tool; // Tool tool;
+    private final Tool tool; // Tool tool;
 
     /**
      * Simple constructor.

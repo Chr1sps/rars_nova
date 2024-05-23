@@ -73,7 +73,7 @@ public class FileDumpMemoryAction extends GuiAction {
     private JComboBox<String> segmentListSelector;
     private JComboBox formatListSelector;
 
-    private VenusUI mainUI;
+    private final VenusUI mainUI;
 
     /**
      * <p>Constructor for FileDumpMemoryAction.</p>
@@ -299,7 +299,7 @@ public class FileDumpMemoryAction extends GuiAction {
     // http://forum.java.sun.com/thread.jspa?threadID=488762&messageID=2292482
 
     private class DumpFormatComboBoxRenderer extends BasicComboBoxRenderer {
-        private JComboBox myMaster;
+        private final JComboBox myMaster;
 
         public DumpFormatComboBoxRenderer(JComboBox myMaster) {
             super();

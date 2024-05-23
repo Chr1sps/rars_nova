@@ -2,11 +2,10 @@ package io.github.chr1sps.rars.venus.registers;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.RegisterAccessNotice;
+import io.github.chr1sps.rars.notices.SimulatorNotice;
 import io.github.chr1sps.rars.riscv.hardware.Register;
-import io.github.chr1sps.rars.riscv.hardware.RegisterAccessNotice;
-import io.github.chr1sps.rars.simulator.Simulator;
-import io.github.chr1sps.rars.simulator.SimulatorNotice;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.venus.MonoRightCellRenderer;
 import io.github.chr1sps.rars.venus.NumberDisplayBaseChooser;
@@ -20,7 +19,7 @@ import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Observable;
-import java.util.Observer;
+import java.util.concurrent.Flow;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -55,7 +54,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson, Bumgarner
  */
-public abstract class RegisterBlockWindow extends JPanel implements Observer {
+public abstract class RegisterBlockWindow extends JPanel implements Flow.Subscriber<RegisterAccessNotice> {
     private final JTable table;
     private boolean highlighting;
     private int highlightRow;
@@ -79,9 +78,9 @@ public abstract class RegisterBlockWindow extends JPanel implements Observer {
      * @param valueTip             a {@link java.lang.String} object
      */
     RegisterBlockWindow(final Register[] registers, final String[] registerDescriptions, final String valueTip) {
-        Simulator.getInstance().addObserver(this);
+//        Simulator.getInstance().addObserver(this);
         this.settings = Globals.getSettings();
-        this.settings.addObserver(this);
+//        this.settings.addObserver(this);
         this.registers = registers;
         this.clearHighlighting();
         this.table = new MyTippedJTable(new RegTableModel(this.setupWindow()), registerDescriptions,

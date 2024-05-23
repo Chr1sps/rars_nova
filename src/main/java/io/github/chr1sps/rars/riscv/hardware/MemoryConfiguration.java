@@ -42,9 +42,10 @@ public class MemoryConfiguration {
     // TODO: remove kernel mode maybe?
     // TODO: move away from a multi-array approach to array of ranges approach
     // Identifier is used for saving setting; name is used for display
-    private String configurationIdentifier, configurationName;
-    private String[] configurationItemNames;
-    private int[] configurationItemValues;
+    private final String configurationIdentifier;
+    private final String configurationName;
+    private final String[] configurationItemNames;
+    private final int[] configurationItemValues;
 
     /**
      * <p>Constructor for MemoryConfiguration.</p>

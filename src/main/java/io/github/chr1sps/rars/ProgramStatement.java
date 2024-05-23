@@ -55,17 +55,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public class ProgramStatement implements Comparable<ProgramStatement> {
-    private RISCVprogram sourceProgram;
+    private final RISCVprogram sourceProgram;
     private String source, basicAssemblyStatement, machineStatement;
-    private TokenList originalTokenList, strippedTokenList;
-    private BasicStatementList basicStatementList;
-    private int[] operands;
+    private final TokenList originalTokenList;
+    private final TokenList strippedTokenList;
+    private final BasicStatementList basicStatementList;
+    private final int[] operands;
     private int numOperands;
-    private Instruction instruction;
-    private int textAddress;
+    private final Instruction instruction;
+    private final int textAddress;
     private int sourceLine;
     private int binaryStatement;
-    private boolean altered;
+    private final boolean altered;
     private static final String invalidOperator = "<INVALID>";
 
     //////////////////////////////////////////////////////////////////////////////////
@@ -845,7 +846,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
 
     private class BasicStatementList {
 
-        private ArrayList<ListElement> list;
+        private final ArrayList<ListElement> list;
 
         BasicStatementList() {
             list = new ArrayList<>();

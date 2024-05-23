@@ -444,7 +444,7 @@ public class SettingsHighlightingAction extends GuiAction {
     // Class that handles click on the background selection button
     //
     private class BackgroundChanger implements ActionListener {
-        private int position;
+        private final int position;
 
         public BackgroundChanger(int pos) {
             position = pos;
@@ -466,7 +466,7 @@ public class SettingsHighlightingAction extends GuiAction {
     // Class that handles click on the foreground selection button
     //
     private class ForegroundChanger implements ActionListener {
-        private int position;
+        private final int position;
 
         public ForegroundChanger(int pos) {
             position = pos;
@@ -488,7 +488,7 @@ public class SettingsHighlightingAction extends GuiAction {
     // Class that handles click on the font select button
     //
     private class FontChanger implements ActionListener {
-        private int position;
+        private final int position;
 
         public FontChanger(int pos) {
             position = pos;
@@ -510,7 +510,7 @@ public class SettingsHighlightingAction extends GuiAction {
     // Class that handles action (check, uncheck) on the Default checkbox.
     //
     private class DefaultChanger implements ItemListener {
-        private int position;
+        private final int position;
 
         public DefaultChanger(int pos) {
             position = pos;

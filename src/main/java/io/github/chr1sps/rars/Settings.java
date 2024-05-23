@@ -1,5 +1,6 @@
 package io.github.chr1sps.rars;
 
+import io.github.chr1sps.rars.notices.SettingsNotice;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.EditorFont;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle;
@@ -7,9 +8,10 @@ import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxUtilities;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Observable;
 import java.util.StringTokenizer;
+import java.util.concurrent.SubmissionPublisher;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -58,10 +60,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  */
-public class Settings extends Observable {
+public class Settings extends SubmissionPublisher<SettingsNotice> {
     /* Properties file used to hold default settings. */
-    private static String settingsFile = "Settings";
-    private ColorMode defaultColorMode = ColorMode.SYSTEM;
+    private static final String settingsFile = "Settings";
+    private final ColorMode defaultColorMode = ColorMode.SYSTEM;
 
     // BOOLEAN SETTINGS...
     public enum Bool {
@@ -169,7 +171,7 @@ public class Settings extends Observable {
         DERIVE_CURRENT_WORKING_DIRECTORY("DeriveCurrentWorkingDirectory", false);
 
         // TODO: add option for turning off user trap handling and interrupts
-        private String name;
+        private final String name;
         private boolean value;
 
         Bool(String n, boolean v) {
@@ -230,7 +232,7 @@ public class Settings extends Observable {
      * If you wish to change, do so before instantiating the Settings object.
      * Must match key by list position.
      */
-    private static String[] defaultStringSettingsValues = {"", "0 1 2 3 4", "0", "", "500", "8", "2"};
+    private static final String[] defaultStringSettingsValues = {"", "0 1 2 3 4", "0", "", "500", "8", "2"};
 
     // FONT SETTINGS. Each array position has associated name.
     /**
@@ -394,7 +396,7 @@ public class Settings extends Observable {
      * If you wish to change, do so before instantiating the Settings object.
      * Must match key by list position.
      */
-    private static String[] defaultColorSettingsValues = {
+    private static final String[] defaultColorSettingsValues = {
             "0x00e0e0e0", "0", "0x00ffffff", "0", "0x00ffff99", "0", "0x0033ff00", "0", "0x0099ccff", "0", "0x0099cc55",
             "0", "0x00ffffff", "0x00000000", "0x00eeeeee", "0x00ccccff", "0x00000000"};
 
@@ -404,18 +406,18 @@ public class Settings extends Observable {
 
     private SystemColorProvider[] systemColors;
 
-    private HashMap<Bool, Boolean> booleanSettingsValues;
-    private String[] stringSettingsValues;
-    private String[] fontFamilySettingsValues;
-    private String[] fontStyleSettingsValues;
-    private String[] fontSizeSettingsValues;
+    private final HashMap<Bool, Boolean> booleanSettingsValues;
+    private final String[] stringSettingsValues;
+    private final String[] fontFamilySettingsValues;
+    private final String[] fontStyleSettingsValues;
+    private final String[] fontSizeSettingsValues;
     /**
      * Color settings, either a hex-encoded value or a value of
      * {@link ColorMode#modeKey}
      */
-    private String[] colorSettingsValues;
+    private final String[] colorSettingsValues;
 
-    private Preferences preferences;
+    private final Preferences preferences;
 
     /**
      * Create Settings object and set to saved values. If saved values not found,
@@ -722,7 +724,7 @@ public class Settings extends Observable {
         int length = 2;
         try {
             length = Integer.parseInt(stringSettingsValues[EDITOR_POPUP_PREFIX_LENGTH]);
-        } catch (NumberFormatException nfe) {
+        } catch (NumberFormatException ignored) {
 
         }
         return length;
@@ -937,8 +939,7 @@ public class Settings extends Observable {
             saveFontSetting(fontSettingPosition, fontStyleSettingsKeys, fontStyleSettingsValues);
             saveFontSetting(fontSettingPosition, fontSizeSettingsKeys, fontSizeSettingsValues);
         }
-        setChanged();
-        notifyObservers();
+        submit(SettingsNotice.get());
     }
 
     /**
@@ -948,11 +949,11 @@ public class Settings extends Observable {
      * @param columnOrder An array of int indicating column order.
      */
     public void setTextColumnOrder(int[] columnOrder) {
-        String stringifiedOrder = "";
+        StringBuilder stringifiedOrder = new StringBuilder();
         for (int column : columnOrder) {
-            stringifiedOrder += column + " ";
+            stringifiedOrder.append(column).append(" ");
         }
-        setStringSetting(TEXT_COLUMN_ORDER, stringifiedOrder);
+        setStringSetting(TEXT_COLUMN_ORDER, stringifiedOrder.toString());
     }
 
     /**
@@ -1045,9 +1046,7 @@ public class Settings extends Observable {
             fontStyleSettingsValues[i] = defaultFontStyleSettingsValues[i];
             fontSizeSettingsValues[i] = defaultFontSizeSettingsValues[i];
         }
-        for (int i = 0; i < colorSettingsValues.length; i++) {
-            colorSettingsValues[i] = getDefaultColorMode().modeKey;
-        }
+        Arrays.fill(colorSettingsValues, getDefaultColorMode().modeKey);
         initializeEditorSyntaxStyles();
     }
 
@@ -1133,8 +1132,7 @@ public class Settings extends Observable {
         if (value != booleanSettingsValues.get(setting)) {
             booleanSettingsValues.put(setting, value);
             saveBooleanSetting(setting.getName(), value);
-            setChanged();
-            notifyObservers();
+            submit(SettingsNotice.get());
         }
     }
 
@@ -1194,8 +1192,7 @@ public class Settings extends Observable {
         if (color == null && colorStr != null) {
             try {
                 color = Color.decode(colorStr);
-            } catch (NumberFormatException nfe) {
-                color = null;
+            } catch (NumberFormatException ignored) {
             }
         }
         return color;

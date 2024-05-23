@@ -45,15 +45,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson and Team JSpim
  */
 public class ExecutePane extends JDesktopPane {
-    private RegistersWindow registerValues;
-    private FloatingPointWindow fpRegValues;
-    private ControlAndStatusWindow csrValues;
-    private DataSegmentWindow dataSegment;
-    private TextSegmentWindow textSegment;
-    private LabelsWindow labelValues;
-    private VenusUI mainUI;
-    private NumberDisplayBaseChooser valueDisplayBase;
-    private NumberDisplayBaseChooser addressDisplayBase;
+    private final RegistersWindow registerValues;
+    private final FloatingPointWindow fpRegValues;
+    private final ControlAndStatusWindow csrValues;
+    private final DataSegmentWindow dataSegment;
+    private final TextSegmentWindow textSegment;
+    private final LabelsWindow labelValues;
+    private final VenusUI mainUI;
+    private final NumberDisplayBaseChooser valueDisplayBase;
+    private final NumberDisplayBaseChooser addressDisplayBase;
     private boolean labelWindowVisible;
 
     /**
@@ -117,9 +117,9 @@ public class ExecutePane extends JDesktopPane {
         int fullHeight = this.getSize().height - this.getInsets().top - this.getInsets().bottom;
         int halfHeight = fullHeight / 2;
         Dimension textDim = new Dimension((int) (fullWidth * .75), halfHeight);
-        Dimension dataDim = new Dimension((int) (fullWidth), halfHeight);
+        Dimension dataDim = new Dimension(fullWidth, halfHeight);
         Dimension lablDim = new Dimension((int) (fullWidth * .25), halfHeight);
-        Dimension textFullDim = new Dimension((int) (fullWidth), halfHeight);
+        Dimension textFullDim = new Dimension(fullWidth, halfHeight);
         dataSegment.setBounds(0, textDim.height + 1, dataDim.width, dataDim.height);
         if (labelWindowVisible) {
             System.out.println("YEA");

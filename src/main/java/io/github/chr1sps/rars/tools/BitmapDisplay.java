@@ -1,8 +1,8 @@
 package io.github.chr1sps.rars.tools;
 
-import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
-import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -47,7 +47,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * maximum use of methods inherited from its abstract superclass
  * AbstractToolAndApplication.
  * Pete Sanderson, verison 1.0, 23 December 2010.
- *
  */
 public class BitmapDisplay extends AbstractToolAndApplication {
 

@@ -148,6 +148,6 @@ public class KeywordMap {
         public Keyword next;
     }
 
-    private Keyword[] map;
+    private final Keyword[] map;
     private boolean ignoreCase;
 }

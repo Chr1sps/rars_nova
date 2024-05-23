@@ -45,7 +45,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 public class RunResetAction extends GuiAction {
-    private VenusUI mainUI;
+    private final VenusUI mainUI;
 
     /**
      * <p>Constructor for RunResetAction.</p>

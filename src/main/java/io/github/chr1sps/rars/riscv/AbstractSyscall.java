@@ -1,7 +1,8 @@
 package io.github.chr1sps.rars.riscv;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
+import io.github.chr1sps.rars.exceptions.ExitingException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Abstract class that a syscall system service must extend. A qualifying
@@ -13,12 +14,13 @@ import io.github.chr1sps.rars.ProgramStatement;
  * When its service is invoked at runtime ("ecall" instruction
  * with its service number stored in register a7), its simulate()
  * method will be invoked.
- *
  */
 public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     private int serviceNumber;
-    private String serviceName;
-    private String description, inputs, outputs;
+    private final String serviceName;
+    private final String description;
+    private final String inputs;
+    private final String outputs;
 
     /**
      * Constructor is provided so subclass may initialize instance variables.
@@ -135,7 +137,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      * @param other a {@link io.github.chr1sps.rars.riscv.AbstractSyscall} object
      * @return a int
      */
-    public int compareTo(AbstractSyscall other) {
+    public int compareTo(@NotNull AbstractSyscall other) {
         if (this == other)
             return 0;
         assert getNumber() != other.getNumber() : "Different syscalls have to have different numbers";

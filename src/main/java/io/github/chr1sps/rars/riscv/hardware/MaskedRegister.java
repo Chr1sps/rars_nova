@@ -5,7 +5,7 @@ package io.github.chr1sps.rars.riscv.hardware;
  *
  */
 public class MaskedRegister extends Register {
-    private long mask;
+    private final long mask;
 
     /**
      * <p>Constructor for MaskedRegister.</p>

@@ -1,10 +1,9 @@
 package io.github.chr1sps.rars.venus;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.util.Binary;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -43,7 +42,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * choices are only 10 (decimal) and 16 (hex), so I'm using
  * a check box where checked means hex. If base 8 (octal)
  * is added later, the Component will need to change.
- *
  */
 public class NumberDisplayBaseChooser extends JCheckBox {
     /**
@@ -235,7 +233,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
             return Binary.intToHexString(value);
         } else {
-            return new Integer(value).toString();
+            return Integer.valueOf(value).toString();
         }
     }
 

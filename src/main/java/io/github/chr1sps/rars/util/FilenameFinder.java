@@ -422,9 +422,9 @@ public class FilenameFinder {
 
     private static class RarsFileFilter extends FileFilter {
 
-        private ArrayList<String> extensions;
-        private String fullDescription;
-        private boolean acceptDirectories;
+        private final ArrayList<String> extensions;
+        private final String fullDescription;
+        private final boolean acceptDirectories;
 
         private RarsFileFilter(ArrayList<String> extensions, String description, boolean acceptDirectories) {
             this.extensions = extensions;

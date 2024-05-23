@@ -1,8 +1,9 @@
 package io.github.chr1sps.rars.riscv.hardware;
 
+import io.github.chr1sps.rars.notices.RegisterAccessNotice;
 import io.github.chr1sps.rars.util.Binary;
 
-import java.util.Observer;
+import java.util.concurrent.Flow;
 
 /*
 Copyright (c) 2003-2017,  Pete Sanderson, Benjamin Landers and Kenneth Vollmar
@@ -64,7 +65,7 @@ public class RegisterBlock {
             System.out.println("Name: " + r.getName());
             System.out.println("Number: " + r.getNumber());
             System.out.println("Value: " + r.getValue());
-            System.out.println("");
+            System.out.println();
         }
     }
 
@@ -195,11 +196,11 @@ public class RegisterBlock {
      * will add the given Observer to each one. Currently does not apply to Program
      * Counter.
      *
-     * @param observer a {@link java.util.Observer} object
+     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public void addRegistersObserver(Observer observer) {
+    public void addRegistersObserver(Flow.Subscriber<? super RegisterAccessNotice> observer) {
         for (Register r : regFile) {
-            r.addObserver(observer);
+            r.subscribe(observer);
         }
     }
 
@@ -210,9 +211,9 @@ public class RegisterBlock {
      * Program
      * Counter.
      *
-     * @param observer a {@link java.util.Observer} object
+     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public void deleteRegistersObserver(Observer observer) {
+    public void deleteRegistersObserver(Flow.Subscriber<? super RegisterAccessNotice> observer) {
         for (Register r : regFile) {
             r.deleteObserver(observer);
         }

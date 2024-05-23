@@ -146,10 +146,10 @@ public enum Directive {
     SECTION(".section",
             "Allows specifying sections without .text or .data directives. Included for gcc comparability");
 
-    private String name;
-    private String description; // help text
+    private final String name;
+    private final String description; // help text
 
-    private static ArrayList<Directive> directiveList = new ArrayList<>();
+    private static final ArrayList<Directive> directiveList = new ArrayList<>();
 
     Directive(String name, String description) {
         this.name = name;

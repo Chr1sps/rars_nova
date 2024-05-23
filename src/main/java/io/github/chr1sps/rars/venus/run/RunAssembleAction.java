@@ -52,7 +52,7 @@ public class RunAssembleAction extends GuiAction {
     private static boolean warningsAreErrors;
     // Threshold for adding filename to printed message of files being assembled.
     private static final int LINE_LENGTH_LIMIT = 60;
-    private VenusUI mainUI;
+    private final VenusUI mainUI;
 
     /**
      * <p>Constructor for RunAssembleAction.</p>

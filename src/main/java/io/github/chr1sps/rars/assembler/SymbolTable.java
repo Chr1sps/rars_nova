@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.assembler;
 
-import java.util.ArrayList;
-
 import io.github.chr1sps.rars.ErrorList;
 import io.github.chr1sps.rars.ErrorMessage;
 import io.github.chr1sps.rars.Globals;
+
+import java.util.ArrayList;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -41,8 +41,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2003
  */
 public class SymbolTable {
-    private static String startLabel = "main";
-    private String filename;
+    private static final String startLabel = "main";
+    private final String filename;
     private ArrayList<Symbol> table;
     // Note -1 is legal 32 bit address (0xFFFFFFFF) but it is the high address in
     // kernel address space so highly unlikely that any symbol will have this as
@@ -225,9 +225,7 @@ public class SymbolTable {
      * @return An ArrayList of Symbol objects.
      */
     public ArrayList<Symbol> getAllSymbols() {
-        ArrayList<Symbol> list = new ArrayList<>();
-        list.addAll(table);
-        return list;
+        return new ArrayList<>(table);
     }
 
     /**

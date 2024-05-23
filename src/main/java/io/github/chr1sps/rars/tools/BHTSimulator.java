@@ -27,16 +27,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package io.github.chr1sps.rars.tools;
 
-import javax.swing.JComponent;
-
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
-import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.riscv.instructions.Branch;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Observable;
@@ -195,7 +194,7 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
         m_gui.getTaLog().setText("");
         m_bhtModel.initBHT((Integer) m_gui.getCbBHTentries().getSelectedItem(),
                 (Integer) m_gui.getCbBHThistory().getSelectedItem(),
-                ((String) m_gui.getCbBHTinitVal().getSelectedItem()).equals(BHTSimGUI.BHT_TAKE_BRANCH));
+                m_gui.getCbBHTinitVal().getSelectedItem().equals(BHTSimGUI.BHT_TAKE_BRANCH));
 
         m_pendingBranchInstAddress = 0;
         m_lastBranchTaken = false;
@@ -298,10 +297,9 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
         if (!notice.accessIsFromRISCV())
             return;
 
-        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice) {
+        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice memAccNotice) {
 
             // now it is safe to make a cast of the notice
-            MemoryAccessNotice memAccNotice = (MemoryAccessNotice) notice;
 
             try {
                 // access the statement in the text segment without notifying other tools etc.

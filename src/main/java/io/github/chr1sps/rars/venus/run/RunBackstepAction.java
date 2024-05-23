@@ -1,7 +1,5 @@
 package io.github.chr1sps.rars.venus.run;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
@@ -12,6 +10,7 @@ import io.github.chr1sps.rars.venus.FileStatus;
 import io.github.chr1sps.rars.venus.GuiAction;
 import io.github.chr1sps.rars.venus.VenusUI;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /*
@@ -44,13 +43,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action for the Run -> Backstep menu item
- *
  */
 public class RunBackstepAction extends GuiAction {
 
     private String name;
     private ExecutePane executePane;
-    private VenusUI mainUI;
+    private final VenusUI mainUI;
 
     /**
      * <p>Constructor for RunBackstepAction.</p>
@@ -88,7 +86,7 @@ public class RunBackstepAction extends GuiAction {
         executePane.getTextSegmentWindow().setCodeHighlighting(true);
 
         if (Globals.getSettings().getBackSteppingEnabled()) {
-            Memory.getInstance().addObserver(executePane.getDataSegmentWindow());
+            Memory.getInstance().subscribe(executePane.getDataSegmentWindow());
             RegisterFile.addRegistersObserver(executePane.getRegistersWindow());
             ControlAndStatusRegisterFile.addRegistersObserver(executePane.getControlAndStatusWindow());
             FloatingPointRegisterFile.addRegistersObserver(executePane.getFloatingPointWindow());

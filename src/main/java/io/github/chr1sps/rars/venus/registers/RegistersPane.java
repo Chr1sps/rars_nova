@@ -41,11 +41,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2005
  */
 public class RegistersPane extends JTabbedPane {
-    private RegistersWindow regsTab;
-    private FloatingPointWindow fpTab;
-    private ControlAndStatusWindow csrTab;
+    private final RegistersWindow regsTab;
+    private final FloatingPointWindow fpTab;
+    private final ControlAndStatusWindow csrTab;
 
-    private VenusUI mainUI;
+    private final VenusUI mainUI;
 
     /**
      * Constructor for the RegistersPane class.

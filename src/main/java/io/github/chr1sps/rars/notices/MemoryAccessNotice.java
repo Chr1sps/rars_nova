@@ -1,4 +1,4 @@
-package io.github.chr1sps.rars.riscv.hardware;
+package io.github.chr1sps.rars.notices;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -28,42 +28,80 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import io.github.chr1sps.rars.riscv.hardware.Memory;
+
 /**
- * Object provided to Observers of runtime access to register.
- * Observer can get the access type (R/W) and register number.
+ * Object provided to Observers of runtime access to memory.
+ * Observer can get the access type (R/W), address and length in bytes (4,2,1).
  *
  * @author Pete Sanderson
  * @version July 2005
  */
-public class RegisterAccessNotice extends AccessNotice {
-    private String registerName;
+public final class MemoryAccessNotice extends AccessNotice {
+    private final int address;
+    private final int length;
+    private final int value;
 
     /**
      * Constructor will be called only within this package, so assume
-     * register number is in valid range.
+     * address and length are in valid ranges.
      */
-    RegisterAccessNotice(int type, String registerName) {
+    public MemoryAccessNotice(int type, int address, int length, int value) {
         super(type);
-        this.registerName = registerName;
+        this.address = address;
+        this.length = length;
+        this.value = value;
     }
 
     /**
-     * Fetch the register number of register accessed.
+     * Constructor will be called only within this package, so assume
+     * address is in valid range.
      *
-     * @return a {@link java.lang.String} object
+     * @param type    a int
+     * @param address a int
+     * @param value   a int
      */
-    public String getRegisterName() {
-        return registerName;
+    public MemoryAccessNotice(int type, int address, int value) {
+        super(type);
+        this.address = address;
+        this.length = Memory.WORD_LENGTH_BYTES;
+        this.value = value;
     }
 
     /**
-     * String representation indicates access type and which register
+     * Fetch the memory address that was accessed.
+     *
+     * @return a int
+     */
+    public int getAddress() {
+        return address;
+    }
+
+    /**
+     * Fetch the length in bytes of the access operation (4,2,1).
+     *
+     * @return a int
+     */
+    public int getLength() {
+        return length;
+    }
+
+    /**
+     * Fetch the value of the access operation (the value read or written).
+     *
+     * @return a int
+     */
+    public int getValue() {
+        return value;
+    }
+
+    /**
+     * String representation indicates access type, address and length in bytes
      *
      * @return a {@link java.lang.String} object
      */
     public String toString() {
         return ((this.getAccessType() == AccessNotice.READ) ? "R " : "W ") +
-                "Reg " + registerName;
+                "Mem " + address + " " + length + "B = " + value;
     }
-
 }

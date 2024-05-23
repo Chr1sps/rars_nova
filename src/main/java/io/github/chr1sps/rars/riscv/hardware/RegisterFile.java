@@ -71,7 +71,7 @@ public class RegisterFile {
             new Register("t5", 30, 0), new Register("t6", 31, 0)
     });
 
-    private static Register programCounter = new Register("pc", -1, Memory.textBaseAddress);
+    private static final Register programCounter = new Register("pc", -1, Memory.textBaseAddress);
 
     /**
      * This method updates the register value who's number is num. Also handles the
@@ -82,7 +82,6 @@ public class RegisterFile {
      */
     public static void updateRegister(int num, long val) {
         if (num == 0) {
-            ;
         } else {
             if ((Globals.getSettings().getBackSteppingEnabled())) {
                 Globals.program.getBackStepper().addRegisterFileRestore(num, instance.updateRegister(num, val));
@@ -164,7 +163,7 @@ public class RegisterFile {
      * @param value The value to set the Program Counter to.
      */
     public static void initializeProgramCounter(int value) {
-        programCounter.setValue((long) value);
+        programCounter.setValue(value);
     }
 
     /**

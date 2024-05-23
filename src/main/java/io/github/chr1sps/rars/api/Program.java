@@ -46,11 +46,12 @@ import java.util.ArrayList;
  */
 public class Program {
 
-    private Options set;
-    private RISCVprogram code;
+    private final Options set;
+    private final RISCVprogram code;
     private SystemIO.Data fds;
     private ByteArrayOutputStream stdout, stderr;
-    private Memory assembled, simulation;
+    private final Memory assembled;
+    private final Memory simulation;
     private int startPC, exitCode;
 
     /**

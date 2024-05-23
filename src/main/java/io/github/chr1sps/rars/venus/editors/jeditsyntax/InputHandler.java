@@ -204,7 +204,7 @@ public abstract class InputHandler extends KeyAdapter {
      */
     public static final ActionListener INSERT_CHAR = new insert_char();
 
-    private static Hashtable<String, ActionListener> actions;
+    private static final Hashtable<String, ActionListener> actions;
 
     static {
         actions = new Hashtable<>();
@@ -457,9 +457,8 @@ public abstract class InputHandler extends KeyAdapter {
     public static JEditTextArea getTextArea(EventObject evt) {
         if (evt != null) {
             Object o = evt.getSource();
-            if (o instanceof Component) {
+            if (o instanceof Component c) {
                 // find the parent text area
-                Component c = (Component) o;
                 for (; ; ) {
                     if (c instanceof JEditTextArea)
                         return (JEditTextArea) c;
@@ -658,7 +657,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class end implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public end(boolean select) {
             this.select = select;
@@ -710,7 +709,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class document_end implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public document_end(boolean select) {
             this.select = select;
@@ -728,7 +727,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class home implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public home(boolean select) {
             this.select = select;
@@ -768,7 +767,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class document_home implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public document_home(boolean select) {
             this.select = select;
@@ -897,7 +896,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class next_char implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public next_char(boolean select) {
             this.select = select;
@@ -920,7 +919,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class next_line implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public next_line(boolean select) {
             this.select = select;
@@ -953,7 +952,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class next_page implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public next_page(boolean select) {
             this.select = select;
@@ -984,7 +983,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class next_word implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public next_word(boolean select) {
             this.select = select;
@@ -1028,7 +1027,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class prev_char implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public prev_char(boolean select) {
             this.select = select;
@@ -1051,7 +1050,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class prev_line implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public prev_line(boolean select) {
             this.select = select;
@@ -1084,7 +1083,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class prev_page implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public prev_page(boolean select) {
             this.select = select;
@@ -1111,7 +1110,7 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     public static class prev_word implements ActionListener {
-        private boolean select;
+        private final boolean select;
 
         public prev_word(boolean select) {
             this.select = select;

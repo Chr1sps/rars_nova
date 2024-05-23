@@ -58,7 +58,7 @@ public class SyscallMessageDialogInt extends AbstractSyscall {
 
         // Display the dialog.
         JOptionPane.showMessageDialog(null,
-                message + Integer.toString(RegisterFile.getValue("a1")),
+                message + RegisterFile.getValue("a1"),
                 null,
                 JOptionPane.INFORMATION_MESSAGE);
     }

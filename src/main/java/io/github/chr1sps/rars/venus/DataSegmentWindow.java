@@ -3,12 +3,12 @@ package io.github.chr1sps.rars.venus;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
-import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
+import io.github.chr1sps.rars.notices.SimulatorNotice;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
-import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.simulator.Simulator;
-import io.github.chr1sps.rars.simulator.SimulatorNotice;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
 import io.github.chr1sps.rars.venus.util.RepeatButton;
@@ -65,11 +65,11 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
 
     private static JTable dataTable;
     private JScrollPane dataTableScroller;
-    private Container contentPane;
-    private JPanel tablePanel;
+    private final Container contentPane;
+    private final JPanel tablePanel;
     private JButton dataButton, nextButton, prevButton, stakButton, globButton, heapButton, extnButton, mmioButton,
             textButton;
-    private JCheckBox asciiDisplayCheckBox;
+    private final JCheckBox asciiDisplayCheckBox;
 
     private static final int VALUES_PER_ROW = 8;
     private static final int NUMBER_OF_ROWS = 16; // with 8 value columns, this shows 512 bytes;
@@ -91,7 +91,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     private boolean addressHighlighting = false;
     private boolean asciiDisplay = false;
     private int addressRow, addressColumn, addressRowFirstAddress;
-    private Settings settings;
+    private final Settings settings;
 
     private int firstAddress;
     private int homeAddress;
@@ -102,7 +102,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     // We'll keep the button objects however and manually invoke their action
     // listeners
     // when the corresponding combo box item is selected. DPS 22-Nov-2006
-    private JComboBox<String> baseAddressSelector;
+    private final JComboBox<String> baseAddressSelector;
 
     // The next bunch are initialized dynamically in initializeBaseAddressChoices()
     private String[] displayBaseAddressChoices;
@@ -119,9 +119,9 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     public DataSegmentWindow(NumberDisplayBaseChooser[] choosers) {
         super("Data Segment", true, false, true, true);
 
-        Simulator.getInstance().addObserver(this);
+        Simulator.getInstance().subscribe(this);
         settings = Globals.getSettings();
-        settings.addObserver(this);
+        settings.subscribe(this);
 
         homeAddress = Memory.dataBaseAddress; // address for Home button
         firstAddress = homeAddress; // first address to display at any given time
@@ -353,7 +353,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     private static final int STACK_POINTER_BASE_ADDRESS_INDEX = 4; // 5;
     private static final int MMIO_BASE_ADDRESS_INDEX = 6;
     // Must agree with above in number and order...
-    private int[] displayBaseAddressArray = {Memory.externBaseAddress,
+    private final int[] displayBaseAddressArray = {Memory.externBaseAddress,
             Memory.dataBaseAddress, Memory.heapBaseAddress, -1 /* Memory.globalPointer */,
             -1 /* Memory.stackPointer */, Memory.textBaseAddress,
             Memory.memoryMapBaseAddress,};
@@ -872,6 +872,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
      * The Simulator keeps us informed of when simulated MIPS execution is active.
      * This is the only time we care about memory operations.
      */
+    @Override
     public void update(Observable observable, Object obj) {
         if (observable == io.github.chr1sps.rars.simulator.Simulator.getInstance()) {
             SimulatorNotice notice = (SimulatorNotice) obj;
@@ -881,7 +882,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
                 // timed
                 // or stepped mode.
                 if (notice.getRunSpeed() != RunSpeedPanel.UNLIMITED_SPEED || notice.getMaxSteps() == 1) {
-                    Memory.getInstance().addObserver(this);
+                    Memory.getInstance().subscribe(this);
                     addressHighlighting = true;
                 }
             } else {
@@ -895,9 +896,8 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
             // *.setEnabled(settings.getBooleanSetting(Settings.SELF_MODIFYING_CODE_ENABLED));
 
             updateRowHeight();
-        } else if (obj instanceof MemoryAccessNotice) { // NOTE: observable != Memory.getInstance() because Memory class
+        } else if (obj instanceof MemoryAccessNotice access) { // NOTE: observable != Memory.getInstance() because Memory class
             // delegates notification duty.
-            MemoryAccessNotice access = (MemoryAccessNotice) obj;
             if (access.getAccessType() == AccessNotice.WRITE) {
                 int address = access.getAddress();
                 // Use the same highlighting technique as for Text Segment -- see
@@ -911,7 +911,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
         if (dataTable == null) {
             return;
         }
-        Font possibleFonts[] = {
+        Font[] possibleFonts = {
                 settings.getFontByPosition(Settings.DATASEGMENT_HIGHLIGHT_FONT),
                 settings.getFontByPosition(Settings.EVEN_ROW_FONT),
                 settings.getFontByPosition(Settings.ODD_ROW_FONT),
@@ -1110,7 +1110,7 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
             super(m);
         }
 
-        private String[] columnToolTips = {
+        private final String[] columnToolTips = {
                 /* address */ "Base memory address for this row of the table.",
                 /* value +0 */ "32-bit value stored at base address for its row.",
                 /* value +n */ "32-bit value stored ",

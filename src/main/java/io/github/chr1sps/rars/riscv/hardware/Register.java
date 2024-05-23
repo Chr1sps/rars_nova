@@ -1,6 +1,9 @@
 package io.github.chr1sps.rars.riscv.hardware;
 
-import java.util.Observable;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.RegisterAccessNotice;
+
+import java.util.concurrent.SubmissionPublisher;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -36,9 +39,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Jason Bumgarner, Jason Shrewsbury, Ben Sherman
  * @version June 2003
  */
-public class Register extends Observable {
-    private String name;
-    private int number;
+public class Register extends SubmissionPublisher<RegisterAccessNotice> {
+    private final String name;
+    private final int number;
     private long resetValue;
     // volatile should be enough to allow safe multi-threaded access
     // w/o the use of synchronized methods. getValue and setValue
@@ -77,7 +80,7 @@ public class Register extends Observable {
      * @return value The value of the Register.
      */
     public synchronized long getValue() {
-        notifyAnyObservers(AccessNotice.READ);
+        this.submit(new RegisterAccessNotice(AccessNotice.READ, this.name));
         return value;
     }
 
@@ -119,7 +122,7 @@ public class Register extends Observable {
     public synchronized long setValue(long val) {
         long old = value;
         value = val;
-        notifyAnyObservers(AccessNotice.WRITE);
+        this.submit(new RegisterAccessNotice(AccessNotice.WRITE, this.name));
         return old;
     }
 
@@ -153,15 +156,4 @@ public class Register extends Observable {
     public synchronized void changeResetValue(long reset) {
         resetValue = reset;
     }
-
-    //
-    // Method to notify any observers of register operation that has just occurred.
-    //
-    private void notifyAnyObservers(int type) {
-        if (this.countObservers() > 0) {// && Globals.program != null) && Globals.program.inSteppedExecution()) {
-            this.setChanged();
-            this.notifyObservers(new RegisterAccessNotice(type, this.name));
-        }
-    }
-
 }

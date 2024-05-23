@@ -58,7 +58,7 @@ public class RunSpeedPanel extends JPanel {
     private final static int SPEED_INDEX_MAX = 40;
     private final static int SPEED_INDEX_INIT = 40;
     private static final int SPEED_INDEX_INTERACTION_LIMIT = 35;
-    private double[] speedTable = {
+    private final double[] speedTable = {
             .05, .1, .2, .3, .4, .5, 1, 2, 3, 4, 5, // 0-10
             6, 7, 8, 9, 10, 11, 12, 13, 14, 15, // 11-20
             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, // 21-30
@@ -141,7 +141,7 @@ public class RunSpeedPanel extends JPanel {
         public void stateChanged(ChangeEvent e) {
             JSlider source = (JSlider) e.getSource();
             if (!source.getValueIsAdjusting()) {
-                runSpeedIndex = (int) source.getValue();
+                runSpeedIndex = source.getValue();
             } else {
                 sliderLabel.setText(setLabel(source.getValue()));
             }

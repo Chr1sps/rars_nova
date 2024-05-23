@@ -55,7 +55,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 public class HelpHelpAction extends GuiAction {
-    private VenusUI mainUI;
+    private final VenusUI mainUI;
 
     /**
      * <p>Constructor for HelpHelpAction.</p>
@@ -168,7 +168,7 @@ public class HelpHelpAction extends GuiAction {
         JEditorPane copyrightDisplay;
         try {
             StringBuilder text = loadFiletoStringBuilder("/License.txt").append("</pre>");
-            copyrightDisplay = new JEditorPane("text/html", "<pre>" + text.toString());
+            copyrightDisplay = new JEditorPane("text/html", "<pre>" + text);
             copyrightDisplay.setEditable(false);
             copyrightDisplay.setCaretPosition(0); // assure top of document displayed
             copyrightScrollPane = new JScrollPane(copyrightDisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -431,8 +431,7 @@ public class HelpHelpAction extends GuiAction {
         public void hyperlinkUpdate(HyperlinkEvent e) {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                 JEditorPane pane = (JEditorPane) e.getSource();
-                if (e instanceof HTMLFrameHyperlinkEvent) {
-                    HTMLFrameHyperlinkEvent evt = (HTMLFrameHyperlinkEvent) e;
+                if (e instanceof HTMLFrameHyperlinkEvent evt) {
                     HTMLDocument doc = (HTMLDocument) pane.getDocument();
                     doc.processHTMLFrameHyperlinkEvent(evt);
                 } else {
@@ -450,8 +449,7 @@ public class HelpHelpAction extends GuiAction {
                                 public void hyperlinkUpdate(HyperlinkEvent e) {
                                     if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                                         JEditorPane pane = (JEditorPane) e.getSource();
-                                        if (e instanceof HTMLFrameHyperlinkEvent) {
-                                            HTMLFrameHyperlinkEvent evt = (HTMLFrameHyperlinkEvent) e;
+                                        if (e instanceof HTMLFrameHyperlinkEvent evt) {
                                             HTMLDocument doc = (HTMLDocument) pane.getDocument();
                                             doc.processHTMLFrameHyperlinkEvent(evt);
                                         } else {

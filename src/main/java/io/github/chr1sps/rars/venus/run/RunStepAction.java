@@ -3,10 +3,11 @@ package io.github.chr1sps.rars.venus.run;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.SimulationException;
+import io.github.chr1sps.rars.notices.SimulatorNotice;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.simulator.ProgramArgumentList;
 import io.github.chr1sps.rars.simulator.Simulator;
-import io.github.chr1sps.rars.simulator.SimulatorNotice;
+import io.github.chr1sps.rars.util.SimpleSubscriber;
 import io.github.chr1sps.rars.venus.ExecutePane;
 import io.github.chr1sps.rars.venus.FileStatus;
 import io.github.chr1sps.rars.venus.GuiAction;
@@ -15,8 +16,7 @@ import io.github.chr1sps.rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.concurrent.Flow;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -48,13 +48,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action for the Run -> Step menu item
- *
  */
 public class RunStepAction extends GuiAction {
 
     private String name;
     private ExecutePane executePane;
-    private VenusUI mainUI;
+    private final VenusUI mainUI;
 
     /**
      * <p>Constructor for RunStepAction.</p>
@@ -88,17 +87,34 @@ public class RunStepAction extends GuiAction {
             mainUI.getMessagesPane().selectRunMessageTab();
             executePane.getTextSegmentWindow().setCodeHighlighting(true);
 
-            // Setup callback for after step finishes
-            final Observer stopListener = new Observer() {
-                public void update(Observable o, Object simulator) {
-                    SimulatorNotice notice = ((SimulatorNotice) simulator);
-                    if (notice.getAction() != SimulatorNotice.SIMULATOR_STOP)
+            final var stopListener = new SimpleSubscriber<SimulatorNotice>() {
+                private Flow.Subscription subscription;
+
+                @Override
+                public void onSubscribe(Flow.Subscription subscription) {
+                    this.subscription = subscription;
+                    this.subscription.request(1);
+                }
+
+                @Override
+                public void onNext(SimulatorNotice item) {
+                    if (item.getAction() != SimulatorNotice.SIMULATOR_STOP) {
+                        this.subscription.request(1);
                         return;
-                    EventQueue.invokeLater(() -> stepped(notice.getDone(), notice.getReason(), notice.getException()));
-                    o.deleteObserver(this);
+                    }
+                    EventQueue.invokeLater(() -> stepped(item.getDone(), item.getReason(), item.getException()));
+                    this.subscription.cancel();
                 }
             };
-            Simulator.getInstance().addObserver(stopListener);
+            // Setup callback for after step finishes
+//                public void update(Observable o, Object simulator) {
+//                    SimulatorNotice notice = ((SimulatorNotice) simulator);
+//                    if (notice.getAction() != SimulatorNotice.SIMULATOR_STOP)
+//                        return;
+//                    EventQueue.invokeLater(() -> stepped(notice.getDone(), notice.getReason(), notice.getException()));
+//                    o.deleteObserver(this);
+//                }
+            Simulator.getInstance().subscribe(stopListener);
 
             Globals.program.startSimulation(1, null);
         } else {

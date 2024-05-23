@@ -287,7 +287,7 @@ public class RISCVprogram {
         ArrayList<RISCVprogram> programsToAssemble = new ArrayList<>();
         int leadFilePosition = 0;
         if (exceptionHandler != null && !exceptionHandler.isEmpty()) {
-            filenames.add(0, exceptionHandler);
+            filenames.addFirst(exceptionHandler);
             leadFilePosition = 1;
         }
         for (String filename : filenames) {
@@ -365,7 +365,7 @@ public class RISCVprogram {
      * paused, maximum steps exceeded, or exception occurs.
      *
      * @param maxSteps the maximum maximum number of steps to simulate.
-     * @return true if execution completed and false otherwise
+     * @return reason for the interruption of the program
      * @throws SimulationException Will throw exception if errors occurred while
      *                             simulating.
      */

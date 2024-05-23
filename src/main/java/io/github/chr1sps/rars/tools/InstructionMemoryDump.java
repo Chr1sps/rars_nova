@@ -59,12 +59,12 @@
 package io.github.chr1sps.rars.tools;
 
 import io.github.chr1sps.rars.ProgramStatement;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
-import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
-import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
-import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 
 import javax.swing.*;
 import java.awt.*;
@@ -86,9 +86,9 @@ import java.util.Observable;
  * @author John Owens &lt;jowens@ece.ucdavis.edu&gt;
  */
 public class InstructionMemoryDump extends AbstractToolAndApplication {
-    private static String name = "Instruction/Memory Dump";
-    private static String version = "Version 1.0 (John Owens)";
-    private static String heading = "Dumps every executed instruction and data memory access to a file";
+    private static final String name = "Instruction/Memory Dump";
+    private static final String version = "Version 1.0 (John Owens)";
+    private static final String heading = "Dumps every executed instruction and data memory access to a file";
 
     /**
      * The last address we saw. We ignore it because the only way for a
@@ -100,7 +100,7 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
     /**
      * Instructions and memory accesses get logged here
      */
-    private StringBuffer log = new StringBuffer("");
+    private final StringBuffer log = new StringBuffer();
 
     /**
      * Filename when we dump the log
@@ -166,8 +166,8 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
         return name;
     }
 
-    private int lowDataSegmentAddress = Memory.dataSegmentBaseAddress;
-    private int highDataSegmentAddress = Memory.stackBaseAddress;
+    private final int lowDataSegmentAddress = Memory.dataSegmentBaseAddress;
+    private final int highDataSegmentAddress = Memory.stackBaseAddress;
 
     /**
      * {@inheritDoc}

@@ -47,7 +47,7 @@ public class EditFindReplaceAction extends GuiAction {
     private static String searchString = "";
     private static boolean caseSensitivity = true;
     private static final String DIALOG_TITLE = "Find and Replace";
-    private MainPane mainPane;
+    private final MainPane mainPane;
 
     private JDialog findReplaceDialog;
 

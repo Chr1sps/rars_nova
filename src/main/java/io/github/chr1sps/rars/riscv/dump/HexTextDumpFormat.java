@@ -37,21 +37,18 @@ public class HexTextDumpFormat extends AbstractDumpFormat {
      */
     public void dumpMemoryRange(File file, int firstAddress, int lastAddress, Memory memory)
             throws AddressErrorException, IOException {
-        PrintStream out = new PrintStream(new FileOutputStream(file));
-        String string = null;
-        try {
+        try (PrintStream out = new PrintStream(new FileOutputStream(file))) {
+            StringBuilder string;
             for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
                 Integer temp = memory.getRawWordOrNull(address);
                 if (temp == null)
                     break;
-                string = Integer.toHexString(temp);
+                string = new StringBuilder(Integer.toHexString(temp));
                 while (string.length() < 8) {
-                    string = '0' + string;
+                    string.insert(0, '0');
                 }
                 out.println(string);
             }
-        } finally {
-            out.close();
         }
     }
 

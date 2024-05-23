@@ -55,9 +55,9 @@ public class Editor {
      */
     public static final int MAX_BLINK_RATE = 1000; // once per second
 
-    private VenusUI mainUI;
+    private final VenusUI mainUI;
     private EditTabbedPane editTabbedPane;
-    private String mainUIbaseTitle;
+    private final String mainUIbaseTitle;
     /*
      * number of times File->New has been selected. Used to generate
      * default filename until first Save or Save As.
@@ -66,8 +66,10 @@ public class Editor {
     // Current Directory for Open operation, same for Save operation
     // Values will mainly be set by the EditTabbedPane as Open/Save operations
     // occur.
-    private String defaultOpenDirectory, currentOpenDirectory;
-    private String defaultSaveDirectory, currentSaveDirectory;
+    private final String defaultOpenDirectory;
+    private String currentOpenDirectory;
+    private final String defaultSaveDirectory;
+    private String currentSaveDirectory;
 
     /**
      * Create editor.

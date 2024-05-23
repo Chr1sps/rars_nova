@@ -57,7 +57,7 @@ public class SystemIO {
     /**
      * String used for description of file error
      */
-    public static String fileErrorString = new String("File operation OK");
+    public static String fileErrorString = "File operation OK";
 
     private static final int O_RDONLY = 0x00000000;
     private static final int O_WRONLY = 0x00000001;
@@ -186,7 +186,7 @@ public class SystemIO {
         // just propagating the runtime exception (the default behavior), but
         // I want to make it explicit. The client needs to catch it.
         try {
-            returnValue = (int) (input.charAt(0)); // first character input
+            returnValue = input.charAt(0); // first character input
         } catch (IndexOutOfBoundsException e) // no chars present
         {
             throw e; // was: returnValue = 0;
@@ -638,13 +638,11 @@ public class SystemIO {
         private static boolean fdInUse(int fd, int flag) {
             if (fd < 0 || fd >= SYSCALL_MAXFILES) {
                 return false;
-            } else if (fileNames[fd] != null && fileFlags[fd] == 0 && flag == 0) { // O_RDONLY read-only
-                return true;
-            } else if (fileNames[fd] != null && ((fileFlags[fd] & flag & O_WRONLY) == O_WRONLY)) { // O_WRONLY
+            } else // O_WRONLY
                 // write-only
+                if (fileNames[fd] != null && fileFlags[fd] == 0 && flag == 0) { // O_RDONLY read-only
                 return true;
-            }
-            return false;
+            } else return fileNames[fd] != null && ((fileFlags[fd] & flag & O_WRONLY) == O_WRONLY);
 
         }
 
@@ -706,9 +704,9 @@ public class SystemIO {
             }
 
             // Must be OK -- put filename in table
-            fileNames[i] = new String(filename); // our table has its own copy of filename
+            fileNames[i] = filename; // our table has its own copy of filename
             fileFlags[i] = flag;
-            fileErrorString = new String("File operation OK");
+            fileErrorString = "File operation OK";
             return i;
         }
 

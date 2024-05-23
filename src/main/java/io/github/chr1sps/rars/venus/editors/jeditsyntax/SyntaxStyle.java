@@ -150,9 +150,9 @@ public class SyntaxStyle {
     }
 
     // private members
-    private Color color;
-    private boolean italic;
-    private boolean bold;
+    private final Color color;
+    private final boolean italic;
+    private final boolean bold;
     private Font lastFont;
     private Font lastStyledFont;
     private FontMetrics fontMetrics;

@@ -849,7 +849,7 @@ public class Assembler {
         Directive direct = this.dataDirective;
         if (direct == Directive.WORD || direct == Directive.HALF || direct == Directive.BYTE
                 || direct == Directive.FLOAT || direct == Directive.DOUBLE || direct == Directive.DWORD) {
-            if (tokens.size() > 0) {
+            if (!tokens.isEmpty()) {
                 storeNumeric(tokens, direct, errors);
             }
         } else if (direct == Directive.ASCII || direct == Directive.ASCIZ || direct == Directive.STRING) {
@@ -1138,13 +1138,10 @@ public class Assembler {
                                 theChar = '\r';
                                 break;
                             case '\\':
-                                theChar = '\\';
                                 break;
                             case '\'':
-                                theChar = '\'';
                                 break;
                             case '"':
-                                theChar = '"';
                                 break;
                             case 'b':
                                 theChar = '\b';
@@ -1296,7 +1293,7 @@ public class Assembler {
 
     // Private wrapper around an int; used to be more complicated
     // TODO: evaluate if it makes sense to keep this
-    private class AddressSpace {
+    private static class AddressSpace {
         int address;
 
         private AddressSpace(int userBase) {
@@ -1333,8 +1330,8 @@ public class Assembler {
     // the integer directives: .word, .half, .byte)
     // - the label's token. Normally need only the name but error message needs
     // more.
-    private class DataSegmentForwardReferences {
-        private ArrayList<DataSegmentForwardReference> forwardReferenceList;
+    private static class DataSegmentForwardReferences {
+        private final ArrayList<DataSegmentForwardReference> forwardReferenceList;
 
         private DataSegmentForwardReferences() {
             forwardReferenceList = new ArrayList<>();

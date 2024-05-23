@@ -120,7 +120,7 @@ public class Tokenizer {
             // This IF statement will replace original source with source modified by .eqv
             // substitution.
             // Not needed by assembler, but looks better in the Text Segment Display.
-            if (sourceLine.length() > 0 && sourceLine != currentLineTokens.getProcessedLine()) {
+            if (!sourceLine.isEmpty() && !sourceLine.equals(currentLineTokens.getProcessedLine())) {
                 source.set(i, new SourceLine(currentLineTokens.getProcessedLine(), source.get(i).getRISCVprogram(),
                         source.get(i).getLineNumber()));
             }
@@ -300,9 +300,8 @@ public class Tokenizer {
      * @return the generated token list for that line
      */
     public TokenList tokenizeLine(RISCVprogram program, int lineNum, String theLine, boolean doEqvSubstitutes) {
-        TokenTypes tokenType;
         TokenList result = new TokenList();
-        if (theLine.length() == 0)
+        if (theLine.isEmpty())
             return result;
         // will be faster to work with char arrays instead of strings
         char c;
@@ -483,7 +482,6 @@ public class Tokenizer {
                         "String is not terminated."));
             }
             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result);
-            tokenPos = 0;
         }
         if (doEqvSubstitutes) {
             result = processEqv(program, lineNum, theLine, result); // DPS 11-July-2012
@@ -593,7 +591,7 @@ public class Tokenizer {
     private void processCandidateToken(char[] token, RISCVprogram program, int line, String theLine,
                                        int tokenPos, int tokenStartPos, TokenList tokenList) {
         String value = new String(token, 0, tokenPos);
-        if (value.length() > 0 && value.charAt(0) == '\'')
+        if (!value.isEmpty() && value.charAt(0) == '\'')
             value = preprocessCharacterLiteral(value);
         TokenTypes type = TokenTypes.matchTokenType(value);
         if (type == TokenTypes.ERROR) {
@@ -616,7 +614,7 @@ public class Tokenizer {
         // if not escaped, then if one character left return its value else return
         // original.
         if (quotesRemoved.charAt(0) != '\\') {
-            return (quotesRemoved.length() == 1) ? Integer.toString((int) quotesRemoved.charAt(0)) : value;
+            return (quotesRemoved.length() == 1) ? Integer.toString(quotesRemoved.charAt(0)) : value;
         }
         // now we know it is escape sequence and have to decode which of the 8:
         // ',",\,n,t,b,r,f
@@ -631,7 +629,7 @@ public class Tokenizer {
                 if (intValue >= 0 && intValue <= 255) {
                     return Integer.toString(intValue);
                 }
-            } catch (NumberFormatException nfe) {
+            } catch (NumberFormatException ignored) {
             } // if not valid octal, will fall through and reject
         }
         return value;

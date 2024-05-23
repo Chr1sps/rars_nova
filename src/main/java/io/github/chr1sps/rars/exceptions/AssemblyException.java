@@ -38,7 +38,7 @@ import io.github.chr1sps.rars.ErrorMessage;
  * @version July 2017
  */
 public class AssemblyException extends Exception {
-    private ErrorList errs;
+    private final ErrorList errs;
 
     /**
      * <p>Constructor for AssemblyException.</p>

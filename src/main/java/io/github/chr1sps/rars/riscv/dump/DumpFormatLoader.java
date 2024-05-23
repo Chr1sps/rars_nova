@@ -40,7 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>DumpFormatLoader class.</p>
- *
  */
 public class DumpFormatLoader {
 
@@ -59,11 +58,11 @@ public class DumpFormatLoader {
             try {
                 // grab the class, make sure it implements DumpFormat, instantiate, add to list
                 String formatClassName = CLASS_PREFIX + file.substring(0, file.indexOf(CLASS_EXTENSION) - 1);
-                Class clas = Class.forName(formatClassName);
+                Class<?> clas = Class.forName(formatClassName);
                 if (DumpFormat.class.isAssignableFrom(clas) &&
                         !Modifier.isAbstract(clas.getModifiers()) &&
                         !Modifier.isInterface(clas.getModifiers())) {
-                    formatList.add((DumpFormat) clas.newInstance());
+                    formatList.add((DumpFormat) clas.getDeclaredConstructor().newInstance());
                 }
             } catch (Exception e) {
                 System.out.println("Error instantiating DumpFormat from file " + file + ": " + e);

@@ -1,12 +1,13 @@
 package io.github.chr1sps.rars.tools;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
-import io.github.chr1sps.rars.riscv.hardware.*;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
+import io.github.chr1sps.rars.riscv.hardware.InterruptController;
+import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.Binary;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +17,6 @@ import java.util.Observable;
 
 /**
  * <p>DigitalLabSim class.</p>
- *
  */
 @SuppressWarnings("serial")
 /*
@@ -25,8 +25,8 @@ import java.util.Observable;
  * didier.teifreto@univ-fcomte.fr
  */
 public class DigitalLabSim extends AbstractToolAndApplication {
-    private static String heading = "Digital Lab Sim";
-    private static String version = " Version 1.0 (Didier Teifreto)";
+    private static final String heading = "Digital Lab Sim";
+    private static final String version = " Version 1.0 (Didier Teifreto)";
 
     // Used to be static final variables now they are regenerated per instance
     private final int IN_ADRESS_DISPLAY_1, IN_ADRESS_DISPLAY_2, IN_ADRESS_HEXA_KEYBOARD, IN_ADRESS_COUNTER,
@@ -49,7 +49,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     private HexaKeyboard hexaKeyPanel;
     private static boolean KeyboardInterruptOnOff = false;
     // Counter
-    private static int CounterValueMax = 30;
+    private static final int CounterValueMax = 30;
     private static int CounterValue = CounterValueMax;
     private static boolean CounterInterruptOnOff = false;
     private static OneSecondCounter SecondCounter;
@@ -408,7 +408,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
         }
 
         public class EcouteurClick implements MouseListener {
-            private int buttonValue;
+            private final int buttonValue;
 
             public EcouteurClick(int val) {
                 buttonValue = val;

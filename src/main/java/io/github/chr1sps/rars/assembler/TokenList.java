@@ -1,5 +1,7 @@
 package io.github.chr1sps.rars.assembler;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -56,7 +58,7 @@ public class TokenList implements Cloneable, Iterable<Token> {
      *
      * @return a {@link java.util.Iterator} object
      */
-    public Iterator<Token> iterator() {
+    public @NotNull Iterator<Token> iterator() {
         return tokenList.iterator();
     }
 
@@ -153,11 +155,11 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * (a blank is inserted after each token).
      */
     public String toString() {
-        String stringified = "";
+        StringBuilder stringified = new StringBuilder();
         for (Token token : tokenList) {
-            stringified += token.toString() + " ";
+            stringified.append(token.toString()).append(" ");
         }
-        return stringified;
+        return stringified.toString();
     }
 
     /**
@@ -167,11 +169,11 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * (a blank is inserted after each token type).
      */
     public String toTypeString() {
-        String stringified = "";
+        StringBuilder stringified = new StringBuilder();
         for (Token t : tokenList) {
-            stringified += t.getType().toString() + " ";
+            stringified.append(t.getType().toString()).append(" ");
         }
-        return stringified;
+        return stringified.toString();
     }
 
     /**

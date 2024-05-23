@@ -63,7 +63,7 @@ public class InstructionSet {
      */
     public static boolean rv64 = Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED);
 
-    private ArrayList<Instruction> instructionList;
+    private final ArrayList<Instruction> instructionList;
     private ArrayList<MatchMap> opcodeMatchMaps;
 
     /**
@@ -118,8 +118,7 @@ public class InstructionSet {
         HashMap<Integer, HashMap<Integer, BasicInstruction>> maskMap = new HashMap<>();
         ArrayList<MatchMap> matchMaps = new ArrayList<>();
         for (Instruction inst : instructionList) {
-            if (inst instanceof BasicInstruction) {
-                BasicInstruction basic = (BasicInstruction) inst;
+            if (inst instanceof BasicInstruction basic) {
                 Integer mask = basic.getOpcodeMask();
                 Integer match = basic.getOpcodeMatch();
                 HashMap<Integer, BasicInstruction> matchMap = maskMap.get(mask);
@@ -383,9 +382,9 @@ public class InstructionSet {
     }
 
     private static class MatchMap implements Comparable<MatchMap> {
-        private int mask;
-        private int maskLength; // number of 1 bits in mask
-        private HashMap<Integer, BasicInstruction> matchMap;
+        private final int mask;
+        private final int maskLength; // number of 1 bits in mask
+        private final HashMap<Integer, BasicInstruction> matchMap;
 
         public MatchMap(int mask, HashMap<Integer, BasicInstruction> matchMap) {
             this.mask = mask;

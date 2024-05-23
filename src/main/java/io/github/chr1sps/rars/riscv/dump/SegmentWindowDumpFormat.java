@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Objects;
 
 /**
  * Dump memory contents in Segment Window format. Each line of
@@ -61,23 +62,23 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
         if (Memory.inDataSegment(firstAddress)) {
             boolean hexValues = Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX);
             int offset = 0;
-            String string = "";
+            StringBuilder string = new StringBuilder();
             try {
                 for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
                     if (offset % 8 == 0) {
-                        string = ((hexAddresses) ? Binary.intToHexString(address)
-                                : Binary.unsignedIntToIntString(address)) + "    ";
+                        string = new StringBuilder(((hexAddresses) ? Binary.intToHexString(address)
+                                : Binary.unsignedIntToIntString(address)) + "    ");
                     }
                     offset++;
                     Integer temp = memory.getRawWordOrNull(address);
                     if (temp == null)
                         break;
-                    string += ((hexValues)
+                    string.append((hexValues)
                             ? Binary.intToHexString(temp)
-                            : ("           " + temp).substring(temp.toString().length())) + " ";
+                            : ("           " + temp).substring(temp.toString().length())).append(" ");
                     if (offset % 8 == 0) {
                         out.println(string);
-                        string = "";
+                        string = new StringBuilder();
                     }
                 }
             } finally {
@@ -93,7 +94,7 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
         // If address in text segment, print in same format as Text Segment Window
         out.println("Address     Code        Basic                        Line Source");
         out.println();
-        String string = null;
+        String string;
         try {
             for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
                 string = ((hexAddresses) ? Binary.intToHexString(address) : Binary.unsignedIntToIntString(address))
@@ -106,10 +107,10 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
                     ProgramStatement ps = memory.getStatement(address);
                     string += (ps.getPrintableBasicAssemblyStatement() + "                             ").substring(0,
                             29);
-                    string += (((ps.getSource() == "") ? "" : Integer.toString(ps.getSourceLine())) + "     ")
+                    string += (((Objects.equals(ps.getSource(), "")) ? "" : Integer.toString(ps.getSourceLine())) + "     ")
                             .substring(0, 5);
                     string += ps.getSource();
-                } catch (AddressErrorException aee) {
+                } catch (AddressErrorException ignored) {
                 }
                 out.println(string);
             }

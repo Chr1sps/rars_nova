@@ -37,8 +37,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class MemoryDump {
     private static final String[] segmentNames = {".text", ".data"};
-    private static int[] baseAddresses = new int[2];
-    private static int[] limitAddresses = new int[2];
+    private static final int[] baseAddresses = new int[2];
+    private static final int[] limitAddresses = new int[2];
 
     /**
      * Return array with segment address bounds for specified segment.

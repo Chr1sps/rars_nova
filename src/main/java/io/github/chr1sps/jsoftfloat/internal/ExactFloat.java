@@ -1,10 +1,11 @@
 package io.github.chr1sps.jsoftfloat.internal;
 
-import java.math.BigInteger;
-
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.Flags;
 import io.github.chr1sps.jsoftfloat.RoundingMode;
+import org.jetbrains.annotations.NotNull;
+
+import java.math.BigInteger;
 
 /**
  * A helper type to generalize floating point exact operations. This helps to
@@ -16,7 +17,6 @@ import io.github.chr1sps.jsoftfloat.RoundingMode;
  * Square Root and Division cannot really use this because they cannot avoid the
  * precision issue. They have to stop
  * computing digits once they get past the maximum length of the significand.
- *
  */
 public class ExactFloat implements Comparable<ExactFloat> {
     // Value = (-1)^sign * significand * 2^exponent
@@ -195,10 +195,8 @@ public class ExactFloat implements Comparable<ExactFloat> {
                 return tmp;
             } else if (cmp > 0) {
                 a = tmp;
-            } else if (cmp < 0) {
-                b = tmp;
             } else {
-                assert false : "Cannot get here";
+                b = tmp;
             }
         }
         ExactFloat tmp = a.add(b).shiftRight(1);
@@ -207,11 +205,8 @@ public class ExactFloat implements Comparable<ExactFloat> {
             return tmp;
         } else if (cmp > 0) {
             return tmp.add(b).shiftRight(1); // ensure it doesn't round incorrectly
-        } else if (cmp < 0) {
-            return tmp.add(a).shiftRight(1); // ensure it doesn't round incorrectly
         } else {
-            assert false : "Cannot get here";
-            return null;
+            return tmp.add(a).shiftRight(1); // ensure it doesn't round incorrectly
         }
     }
 
@@ -306,7 +301,7 @@ public class ExactFloat implements Comparable<ExactFloat> {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(ExactFloat other) {
+    public int compareTo(@NotNull ExactFloat other) {
         if (isZero()) {
             if (other.isZero()) {
                 return 0;
@@ -316,9 +311,10 @@ public class ExactFloat implements Comparable<ExactFloat> {
         if (sign != other.sign) {
             return sign ? -1 : 1;
         }
-        if (exponent - other.exponent + significand.bitLength() - other.significand.bitLength() > 0) {
+        var tmp = exponent - other.exponent + significand.bitLength() - other.significand.bitLength();
+        if (tmp > 0) {
             return sign ? -1 : 1;
-        } else if (exponent - other.exponent + significand.bitLength() - other.significand.bitLength() < 0) {
+        } else if (tmp < 0) {
             return sign ? 1 : -1;
         } else {
             if (exponent < other.exponent) {

@@ -25,6 +25,6 @@ public class SLLIW extends BasicInstruction {
     public void simulate(ProgramStatement statement) {
         // Copy from SLLI
         int[] operands = statement.getOperands();
-        RegisterFile.updateRegister(operands[0], RegisterFile.getValue(operands[1]) << operands[2]);
+        RegisterFile.updateRegister(operands[0], (long) RegisterFile.getValue(operands[1]) << operands[2]);
     }
 }

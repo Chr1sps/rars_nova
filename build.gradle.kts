@@ -18,6 +18,7 @@ dependencies {
     implementation("com.formdev:flatlaf:3.4")
     testImplementation("junit:junit:4.13.2")
     graphDoclet("nl.talsmasoftware:umldoclet:2.1.2")
+    implementation("org.jetbrains:annotations:24.0.0")
 }
 
 tasks.test {

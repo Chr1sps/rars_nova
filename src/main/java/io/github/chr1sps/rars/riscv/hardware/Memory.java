@@ -5,12 +5,16 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.exceptions.ExceptionReason;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.Instruction;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.Flow;
+import java.util.concurrent.SubmissionPublisher;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -47,7 +51,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class Memory extends Observable {
+public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     /**
      * base address for (user) text segment: 0x00400000
@@ -120,7 +124,7 @@ public class Memory extends Observable {
     /**
      * Current setting for endian (default LITTLE_ENDIAN)
      **/
-    private static boolean byteOrder = LITTLE_ENDIAN;
+    private static final boolean byteOrder = LITTLE_ENDIAN;
 
     /**
      * Constant <code>heapAddress=</code>
@@ -280,6 +284,8 @@ public class Memory extends Observable {
     // always returns this instance.
 
     private static Memory uniqueMemoryInstance = new Memory();
+
+    private final List<Flow.Subscription> subscriptions = new ArrayList<>();
 
     /*
      * Private constructor for Memory. Separate data structures for text and data
@@ -1124,10 +1130,10 @@ public class Memory extends Observable {
      * operations
      * so notices will come from the delegate, not the memory object.
      */
-    public void addObserver(Observer obs) {
+    public void subscribe(Flow.Subscriber<? super MemoryAccessNotice> obs) {
         try { // split so start address always >= end address
-            this.addObserver(obs, 0, 0x7ffffffc);
-            this.addObserver(obs, 0x80000000, 0xfffffffc);
+            this.subscribe(obs, 0, 0x7ffffffc);
+            this.subscribe(obs, 0x80000000, 0xfffffffc);
         } catch (AddressErrorException aee) {
             System.out.println("Internal Error in Memory.addObserver: " + aee);
         }
@@ -1144,8 +1150,8 @@ public class Memory extends Observable {
      * @param addr the memory address which must be on word boundary
      * @throws AddressErrorException if any.
      */
-    public void addObserver(Observer obs, int addr) throws AddressErrorException {
-        this.addObserver(obs, addr, addr);
+    public void subscribe(Flow.Subscriber<? super MemoryAccessNotice> obs, int addr) throws AddressErrorException {
+        this.subscribe(obs, addr, addr);
     }
 
     /**
@@ -1163,7 +1169,7 @@ public class Memory extends Observable {
      *                  boundary
      * @throws AddressErrorException if any.
      */
-    public void addObserver(Observer obs, int startAddr, int endAddr) throws AddressErrorException {
+    public void subscribe(Flow.Subscriber<? super MemoryAccessNotice> obs, int startAddr, int endAddr) throws AddressErrorException {
         checkLoadWordAligned(startAddr);
         checkLoadWordAligned(endAddr);
         // upper half of address space (above 0x7fffffff) has sign bit 1 thus is seen as
@@ -1193,7 +1199,7 @@ public class Memory extends Observable {
      * <p>
      * Remove specified memory observers
      */
-    public void deleteObserver(Observer obs) {
+    public void deleteObserver(Flow.Subscriber<? super MemoryAccessNotice> obs) {
         for (MemoryObservable o : observables) {
             o.deleteObserver(obs);
         }
@@ -1236,22 +1242,18 @@ public class Memory extends Observable {
     /////////////////////////////////////////////////////////////////////////
     // Private class whose objects will represent an observable-observer pair
     // for a given memory address or range.
-    private class MemoryObservable extends Observable implements Comparable<MemoryObservable> {
-        private int lowAddress, highAddress;
+    private static class MemoryObservable extends SubmissionPublisher<MemoryAccessNotice> implements Comparable<MemoryObservable> {
+        private final int lowAddress;
+        private final int highAddress;
 
-        public MemoryObservable(Observer obs, int startAddr, int endAddr) {
+        public MemoryObservable(Flow.Subscriber<? super MemoryAccessNotice> subscriber, int startAddr, int endAddr) {
             lowAddress = startAddr;
             highAddress = endAddr;
-            this.addObserver(obs);
+            this.subscribe(subscriber);
         }
 
         public boolean match(int address) {
             return (address >= lowAddress && address <= highAddress - 1 + WORD_LENGTH_BYTES);
-        }
-
-        public void notifyObserver(MemoryAccessNotice notice) {
-            this.setChanged();
-            this.notifyObservers(notice);
         }
 
         // Useful to have for future refactoring, if it actually becomes worthwhile to
@@ -1283,12 +1285,10 @@ public class Memory extends Observable {
     // is from command mode, Globals.program is null but still want ability to
     //////////////////////////////////////////////////////////////////////////////// observe.
     private void notifyAnyObservers(int type, int address, int length, int value) {
-        if ((Globals.program != null || Globals.getGui() == null) && this.observables.size() > 0) {
-            for (MemoryObservable mo : observables) {
-                if (mo.match(address)) {
-                    mo.notifyObserver(new MemoryAccessNotice(type, address, length, value));
-                }
-            }
+        if ((Globals.program != null || Globals.getGui() == null)) {
+            observables.stream()
+                    .filter((mo) -> mo.match(address))
+                    .forEach((mo) -> mo.submit(new MemoryAccessNotice(type, address, length, value)));
         }
     }
 

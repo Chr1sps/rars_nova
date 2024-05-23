@@ -111,15 +111,16 @@ public enum TokenTypes {
             }
         }
 
-        if (value.equals("%hi")) {
-            return TokenTypes.HI;
-        }
-        if (value.equals("%lo")) {
-            return TokenTypes.LO;
-        }
-        if (value.equals("rne") || value.equals("rtz") || value.equals("rdn") || value.equals("rup")
-                || value.equals("rmm") || value.equals("dyn")) {
-            return TokenTypes.ROUNDING_MODE;
+        switch (value) {
+            case "%hi" -> {
+                return TokenTypes.HI;
+            }
+            case "%lo" -> {
+                return TokenTypes.LO;
+            }
+            case "rne", "rtz", "rdn", "rup", "rmm", "dyn" -> {
+                return TokenTypes.ROUNDING_MODE;
+            }
         }
 
         // See if it is a macro parameter

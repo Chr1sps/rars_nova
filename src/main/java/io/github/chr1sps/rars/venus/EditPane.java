@@ -2,6 +2,7 @@ package io.github.chr1sps.rars.venus;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.notices.SettingsNotice;
 import io.github.chr1sps.rars.venus.editors.TextEditingArea;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.JEditBasedTextArea;
 
@@ -17,7 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Observable;
-import java.util.Observer;
+import java.util.concurrent.Flow;
 
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
@@ -58,18 +59,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Bumgarner
  */
-public class EditPane extends JPanel implements Observer {
+public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> {
 
-    private TextEditingArea sourceCode;
-    private VenusUI mainUI;
-    private String currentDirectoryPath;
-    private JLabel caretPositionLabel;
-    private JCheckBox showLineNumbers;
-    private JLabel lineNumbers;
-    private static int count = 0;
-    private boolean isCompoundEdit = false;
+    private final TextEditingArea sourceCode;
+    private final VenusUI mainUI;
+    private final String currentDirectoryPath;
+    private final JLabel caretPositionLabel;
+    private final JCheckBox showLineNumbers;
+    private final JLabel lineNumbers;
+    private static final int count = 0;
+    private final boolean isCompoundEdit = false;
     private CompoundEdit compoundEdit;
-    private FileStatus fileStatus;
+    private final FileStatus fileStatus;
 
     /**
      * Constructor for the EditPane class.
@@ -83,7 +84,7 @@ public class EditPane extends JPanel implements Observer {
         currentDirectoryPath = System.getProperty("user.dir");
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
-        Globals.getSettings().addObserver(this);
+        Globals.getSettings().subscribe(this);
         this.fileStatus = new FileStatus();
         lineNumbers = new JLabel();
 

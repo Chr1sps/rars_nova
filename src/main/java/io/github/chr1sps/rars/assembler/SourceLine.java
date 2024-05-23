@@ -40,10 +40,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 public class SourceLine {
-    private String source;
+    private final String source;
     private String filename;
-    private RISCVprogram program;
-    private int lineNumber;
+    private final RISCVprogram program;
+    private final int lineNumber;
 
     /**
      * SourceLine constructor

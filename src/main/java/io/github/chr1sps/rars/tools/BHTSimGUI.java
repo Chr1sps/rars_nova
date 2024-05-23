@@ -97,7 +97,7 @@ public class BHTSimGUI extends JPanel {
     /**
      * the table representing the BHT
      */
-    private JTable m_tabBHT;
+    private final JTable m_tabBHT;
 
     /**
      * text field for log output
@@ -159,7 +159,7 @@ public class BHTSimGUI extends JPanel {
 
         // create a default renderer for double values (percentage)
         DefaultTableCellRenderer doubleRenderer = new DefaultTableCellRenderer() {
-            private DecimalFormat formatter = new DecimalFormat("##0.00");
+            private final DecimalFormat formatter = new DecimalFormat("##0.00");
 
             public void setValue(Object value) {
                 setText((value == null) ? "" : formatter.format(value));

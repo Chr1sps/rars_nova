@@ -1,17 +1,19 @@
 package io.github.chr1sps.rars.venus;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
-import io.github.chr1sps.rars.riscv.hardware.*;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
+import io.github.chr1sps.rars.notices.SimulatorNotice;
+import io.github.chr1sps.rars.riscv.hardware.Memory;
+import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.simulator.Simulator;
-import io.github.chr1sps.rars.simulator.SimulatorNotice;
 
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -51,8 +53,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Team JSpim
  */
 public class TextSegmentWindow extends JInternalFrame implements Observer {
-    private JPanel programArgumentsPanel; // DPS 17-July-2008
-    private JTextField programArgumentsTextField; // DPS 17-July-2008
+    private final JPanel programArgumentsPanel; // DPS 17-July-2008
+    private final JTextField programArgumentsTextField; // DPS 17-July-2008
     private static final int PROGRAM_ARGUMENT_TEXTFIELD_COLUMNS = 40;
     private JTable table;
     private JScrollPane tableScroller;
@@ -69,15 +71,15 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
     private Hashtable<Integer, Integer> addressRows; // key is text address, value is table model row
     private Hashtable<Integer, ModifiedCode> executeMods; // key is table model row, value is original code, basic,
     // source.
-    private Container contentPane;
+    private final Container contentPane;
     private TextTableModel tableModel;
-    private Font tableCellFont = new Font("Monospaced", Font.PLAIN, 12);
+    private final Font tableCellFont = new Font("Monospaced", Font.PLAIN, 12);
     private boolean codeHighlighting;
     private boolean breakpointsEnabled; // Added 31 Dec 2009
     private int highlightAddress;
     private TableModelListener tableModelListener;
 
-    private static String[] columnNames = {"Bkpt", "Address", "Code", "Basic", "Source"};
+    private static final String[] columnNames = {"Bkpt", "Address", "Code", "Basic", "Source"};
     private static final int BREAK_COLUMN = 0;
     private static final int ADDRESS_COLUMN = 1;
     private static final int CODE_COLUMN = 2;
@@ -94,8 +96,8 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
      */
     public TextSegmentWindow() {
         super("Text Segment", true, false, true, true);
-        Simulator.getInstance().addObserver(this);
-        Globals.getSettings().addObserver(this);
+        Simulator.getInstance().subscribe(this);
+        Globals.getSettings().subscribe(this);
         contentPane = this.getContentPane();
         codeHighlighting = true;
         breakpointsEnabled = true;
@@ -300,7 +302,8 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
                             io.github.chr1sps.rars.util.Binary
                                     .stringToInt((String) table.getModel().getValueAt(i, ADDRESS_COLUMN)));
                     table.getModel().setValueAt(statement.getPrintableBasicAssemblyStatement(), i, BASIC_COLUMN);
-                } catch (NumberFormatException e) { // should never happen but just in case...
+                } catch (
+                        NumberFormatException e) { // should never happen but just in case...
                     table.getModel().setValueAt("", i, BASIC_COLUMN);
                 }
             }
@@ -348,12 +351,11 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
                 addAsTextSegmentObserver();
             }
             updateRowHeight();
-        } else if (obj instanceof MemoryAccessNotice) {
+        } else if (obj instanceof MemoryAccessNotice access) {
             // NOTE: observable != Memory.getInstance() because Memory class delegates
             // notification duty.
             // This will occur only if running program has written to text segment
             // (self-modifying code)
-            MemoryAccessNotice access = (MemoryAccessNotice) obj;
             if (access.getAccessType() == AccessNotice.WRITE) {
                 int address = access.getAddress();
                 int value = access.getValue();
@@ -647,7 +649,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
      */
     private void addAsTextSegmentObserver() {
         try {
-            Memory.getInstance().addObserver(this, Memory.textBaseAddress, Memory.dataSegmentBaseAddress);
+            Memory.getInstance().subscribe(this, Memory.textBaseAddress, Memory.dataSegmentBaseAddress);
         } catch (AddressErrorException aee) {
         }
     }
@@ -696,7 +698,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
         if (table == null) {
             return;
         }
-        Font possibleFonts[] = {
+        Font[] possibleFonts = {
                 Globals.getSettings().getFontByPosition(Settings.TEXTSEGMENT_HIGHLIGHT_FONT),
                 Globals.getSettings().getFontByPosition(Settings.EVEN_ROW_FONT),
                 Globals.getSettings().getFontByPosition(Settings.ODD_ROW_FONT),
@@ -799,7 +801,6 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
                 // between
                 // stack base and Kernel.
                 catch (AddressErrorException aee) {
-                    return;
                 }
             } finally {
                 Globals.memoryAndRegistersLock.unlock();
@@ -822,8 +823,10 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
     }
 
     private class ModifiedCode {
-        private Integer row;
-        private Object code, basic, source;
+        private final Integer row;
+        private final Object code;
+        private final Object basic;
+        private final Object source;
 
         private ModifiedCode(Integer row, Object code, Object basic, Object source) {
             this.row = row;
@@ -1019,7 +1022,7 @@ public class TextSegmentWindow extends JInternalFrame implements Observer {
             super(m);
         }
 
-        private String[] columnToolTips = {
+        private final String[] columnToolTips = {
                 /* break */ "If checked, will set an execution breakpoint. Click header to disable/enable breakpoints",
                 /* address */ "Text segment address of binary instruction code",
                 /* code */ "32-bit binary RISCV instruction",

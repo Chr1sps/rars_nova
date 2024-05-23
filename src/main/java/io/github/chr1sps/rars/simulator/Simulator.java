@@ -3,6 +3,7 @@ package io.github.chr1sps.rars.simulator;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.exceptions.*;
+import io.github.chr1sps.rars.notices.SimulatorNotice;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
@@ -15,7 +16,7 @@ import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Observable;
+import java.util.concurrent.SubmissionPublisher;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -51,7 +52,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  */
-public class Simulator extends Observable {
+public class Simulator extends SubmissionPublisher<SimulatorNotice> {
     private SimThread simulatorThread;
     private static Simulator simulator = null; // Singleton object
     private static Runnable interactiveGUIUpdater = null;
@@ -178,7 +179,7 @@ public class Simulator extends Observable {
         void stopped(Simulator s);
     }
 
-    private ArrayList<StopListener> stopListeners = new ArrayList<>(1);
+    private final ArrayList<StopListener> stopListeners = new ArrayList<>(1);
 
     /**
      * <p>addStopListener.</p>
@@ -206,10 +207,9 @@ public class Simulator extends Observable {
     // by Stop button, by Pause button, by Step button, by runtime exception, by
     // instruction count limit, by breakpoint, or by end of simulation (truly done).
     private void notifyObserversOfExecution(SimulatorNotice notice) {
-        this.setChanged();
         // TODO: this is not completely threadsafe, if anything using Swing is observing
         // This can be fixed by making a SwingObserver class that is thread-safe
-        this.notifyObservers(notice);
+        this.submit(notice);
     }
 
     /**
@@ -229,7 +229,8 @@ public class Simulator extends Observable {
      */
 
     class SimThread implements Runnable {
-        private int pc, maxSteps;
+        private int pc;
+        private final int maxSteps;
         private int[] breakPoints;
         private boolean done;
         private SimulationException pe;
@@ -600,7 +601,6 @@ public class Simulator extends Observable {
                 long cycle = ControlAndStatusRegisterFile.getValueNoNotify("cycle"),
                         instret = ControlAndStatusRegisterFile.getValueNoNotify("instret"),
                         time = System.currentTimeMillis();
-                ;
                 ControlAndStatusRegisterFile.updateRegisterBackdoor("cycle", cycle + 1);
                 ControlAndStatusRegisterFile.updateRegisterBackdoor("instret", instret + 1);
                 ControlAndStatusRegisterFile.updateRegisterBackdoor("time", time);

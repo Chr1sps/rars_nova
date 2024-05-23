@@ -359,7 +359,7 @@ public class DefaultInputHandler extends InputHandler {
     }
 
     // private members
-    private BindingMap bindings;
+    private final BindingMap bindings;
     private BindingMap currentBindings;
 
     private class Binding {

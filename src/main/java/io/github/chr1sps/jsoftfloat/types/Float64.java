@@ -1,30 +1,37 @@
 package io.github.chr1sps.jsoftfloat.types;
 
-import java.math.BigInteger;
-
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.Flags;
 import io.github.chr1sps.jsoftfloat.RoundingMode;
 import io.github.chr1sps.jsoftfloat.internal.ExactFloat;
 
+import java.math.BigInteger;
+
 /**
  * Represents the Binary32 format
- *
  */
 public class Float64 extends Floating<Float64> {
     // TODO: make a more abstract binary float class
-    /** Constant <code>Zero</code> */
-    /** Constant <code>NegativeZero</code> */
-    /** Constant <code>NaN</code> */
-    /** Constant <code>Infinity</code> */
+    /**
+     * Constant <code>Zero</code>
+     */
+    public static final Float64 Zero = new Float64(0);
+    /**
+     * Constant <code>NegativeZero</code>
+     */
+    public static final Float64 NegativeZero = new Float64(0x80000000_00000000L);
+    /**
+     * Constant <code>NaN</code>
+     */
+    public static final Float64 NaN = new Float64(0x7FF80000_00000000L);
+    /**
+     * Constant <code>Infinity</code>
+     */
+    public static final Float64 Infinity = new Float64(0x7FF00000_00000000L);
     /**
      * Constant <code>NegativeInfinity</code>
      */
-    public static final Float64 Zero = new Float64(0),
-            NegativeZero = new Float64(0x80000000_00000000L),
-            NaN = new Float64(0x7FF80000_00000000L),
-            Infinity = new Float64(0x7FF00000_00000000L),
-            NegativeInfinity = new Float64(0xFFF00000_00000000L);
+    public static final Float64 NegativeInfinity = new Float64(0xFFF00000_00000000L);
 
     public final long bits;
 
@@ -291,12 +298,12 @@ public class Float64 extends Floating<Float64> {
         } else {
             if (ef.significand.bitLength() <= (sigbits + 1)) {
                 // No rounding needed
-                assert ef.exponent + ef.significand.bitLength() - 1 > minexp : "Its actually subnormal";
-                Float64 a = new Float64(ef.sign, ef.exponent + ef.significand.bitLength() - 1,
+                int tmp = ef.exponent + ef.significand.bitLength() - 1;
+                assert tmp > minexp : "Its actually subnormal";
+
+                return new Float64(ef.sign, tmp,
                         ef.significand.shiftLeft((sigbits + 1) - ef.significand.bitLength()).longValueExact()
                                 & sigmask);
-
-                return a;
             }
             env.flags.add(Flags.inexact);
             bitsToRound = ef.significand.bitLength() - (sigbits + 1);

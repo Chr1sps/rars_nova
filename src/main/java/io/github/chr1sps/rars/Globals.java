@@ -1,17 +1,17 @@
 package io.github.chr1sps.rars;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.concurrent.locks.ReentrantLock;
-
 import io.github.chr1sps.rars.assembler.SymbolTable;
 import io.github.chr1sps.rars.riscv.InstructionSet;
 import io.github.chr1sps.rars.riscv.SyscallNumberOverride;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.PropertiesFile;
 import io.github.chr1sps.rars.venus.VenusUI;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.concurrent.locks.ReentrantLock;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -50,8 +50,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public class Globals {
     // List these first because they are referenced by methods called at
     // initialization.
-    private static String configPropertiesFile = "Config";
-    private static String syscallPropertiesFile = "Syscall";
+    private static final String configPropertiesFile = "Config";
+    private static final String syscallPropertiesFile = "Syscall";
 
     /**
      * The set of implemented instructions.
@@ -280,7 +280,7 @@ public class Globals {
         Properties properties = PropertiesFile.loadPropertiesFromFile(propertiesFile);
         try {
             limit = Integer.parseInt(properties.getProperty(propertyName, Integer.toString(defaultValue)));
-        } catch (NumberFormatException nfe) {
+        } catch (NumberFormatException ignored) {
         } // do nothing, I already have a default
         return limit;
     }
@@ -321,7 +321,7 @@ public class Globals {
     public ArrayList<SyscallNumberOverride> getSyscallOverrides() {
         ArrayList<SyscallNumberOverride> overrides = new ArrayList<>();
         Properties properties = PropertiesFile.loadPropertiesFromFile(syscallPropertiesFile);
-        Enumeration keys = properties.keys();
+        Enumeration<Object> keys = properties.keys();
         while (keys.hasMoreElements()) {
             String key = (String) keys.nextElement();
             overrides.add(new SyscallNumberOverride(key, properties.getProperty(key)));

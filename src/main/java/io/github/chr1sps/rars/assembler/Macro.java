@@ -42,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public class Macro {
     private String name;
     private RISCVprogram program;
-    private ArrayList<String> labels;
+    private final ArrayList<String> labels;
 
     /**
      * first and last line number of macro definition. first line starts with
@@ -198,8 +198,7 @@ public class Macro {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Macro) {
-            Macro macro = (Macro) obj;
+        if (obj instanceof Macro macro) {
             return macro.getName().equals(name) && (macro.args.size() == args.size());
         }
         return super.equals(obj);

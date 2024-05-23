@@ -57,11 +57,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson and Team JSpim
  */
 public class LabelsWindow extends JInternalFrame {
-    private Container contentPane;
-    private JPanel labelPanel; // holds J
-    private JCheckBox dataLabels, textLabels;
+    private final Container contentPane;
+    private final JPanel labelPanel; // holds J
+    private final JCheckBox dataLabels;
+    private final JCheckBox textLabels;
     private ArrayList<LabelsForSymbolTable> listOfLabelsForSymbolTable;
-    private LabelsWindow labelsWindow;
+    private final LabelsWindow labelsWindow;
     private static final int MAX_DISPLAYED_CHARS = 24;
     private static final int PREFERRED_NAME_COLUMN_WIDTH = 60;
     private static final int PREFERRED_ADDRESS_COLUMN_WIDTH = 60;
@@ -299,12 +300,12 @@ public class LabelsWindow extends JInternalFrame {
     ///////////////////////////////////////////////////////////////////
     // Represents one symbol table for the display.
     private class LabelsForSymbolTable {
-        private RISCVprogram program;
+        private final RISCVprogram program;
         private Object[][] labelData;
         private JTable labelTable;
         private ArrayList<Symbol> symbols;
-        private SymbolTable symbolTable;
-        private String tableName;
+        private final SymbolTable symbolTable;
+        private final String tableName;
 
         // Associated RISCVprogram object. If null, this represents global symbol table.
         public LabelsForSymbolTable(RISCVprogram program) {
@@ -454,8 +455,7 @@ public class LabelsWindow extends JInternalFrame {
         // customized).
         public Component prepareRenderer(TableCellRenderer renderer, int rowIndex, int vColIndex) {
             Component c = super.prepareRenderer(renderer, rowIndex, vColIndex);
-            if (c instanceof JComponent) {
-                JComponent jc = (JComponent) c;
+            if (c instanceof JComponent jc) {
                 jc.setToolTipText("Click on label or address to view it in Text/Data Segment");
             }
             return c;
@@ -554,7 +554,7 @@ public class LabelsWindow extends JInternalFrame {
     // is implemented by returning the result of the Ascending comparator when
     // arguments are reversed.
     private class DescendingComparator implements Comparator<Symbol> {
-        private Comparator<Symbol> opposite;
+        private final Comparator<Symbol> opposite;
 
         private DescendingComparator(Comparator<Symbol> opposite) {
             this.opposite = opposite;

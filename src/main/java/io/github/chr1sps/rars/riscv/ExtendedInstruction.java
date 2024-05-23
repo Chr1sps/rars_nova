@@ -50,7 +50,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class ExtendedInstruction extends Instruction {
 
-    private ArrayList<String> translationStrings;
+    private final ArrayList<String> translationStrings;
 
     /**
      * Constructor for ExtendedInstruction. No compact translation is provided.

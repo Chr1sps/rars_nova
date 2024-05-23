@@ -1,4 +1,4 @@
-package io.github.chr1sps.rars.riscv.hardware;
+package io.github.chr1sps.rars.notices;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -36,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version July 2005
  */
-public abstract class AccessNotice {
+public abstract sealed class AccessNotice implements Notice permits MemoryAccessNotice, RegisterAccessNotice {
     /**
      * Indicates the purpose of access was to read.
      */
@@ -46,8 +46,8 @@ public abstract class AccessNotice {
      */
     public static final int WRITE = 1;
 
-    private int accessType;
-    private Thread thread;
+    private final int accessType;
+    private final Thread thread;
 
     /**
      * <p>Constructor for AccessNotice.</p>

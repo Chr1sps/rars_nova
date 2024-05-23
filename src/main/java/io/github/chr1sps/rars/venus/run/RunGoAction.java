@@ -3,10 +3,11 @@ package io.github.chr1sps.rars.venus.run;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.SimulationException;
+import io.github.chr1sps.rars.notices.SimulatorNotice;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.simulator.ProgramArgumentList;
 import io.github.chr1sps.rars.simulator.Simulator;
-import io.github.chr1sps.rars.simulator.SimulatorNotice;
+import io.github.chr1sps.rars.util.SimpleSubscriber;
 import io.github.chr1sps.rars.util.SystemIO;
 import io.github.chr1sps.rars.venus.ExecutePane;
 import io.github.chr1sps.rars.venus.FileStatus;
@@ -16,8 +17,7 @@ import io.github.chr1sps.rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.concurrent.Flow;
 
 /*
 Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
@@ -49,7 +49,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action class for the Run -> Go menu item (and toolbar icon)
- *
  */
 public class RunGoAction extends GuiAction {
 
@@ -63,7 +62,7 @@ public class RunGoAction extends GuiAction {
     public static int maxSteps = defaultMaxSteps;
     private String name;
     private ExecutePane executePane;
-    private VenusUI mainUI;
+    private final VenusUI mainUI;
 
     /**
      * <p>Constructor for RunGoAction.</p>
@@ -106,21 +105,31 @@ public class RunGoAction extends GuiAction {
                 mainUI.setMenuState(FileStatus.RUNNING);
 
                 // Setup cleanup procedures for the simulation
-                final Observer stopListener = new Observer() {
-                    public void update(Observable o, Object simulator) {
-                        SimulatorNotice notice = ((SimulatorNotice) simulator);
-                        if (notice.getAction() != SimulatorNotice.SIMULATOR_STOP)
+                final var stopListener = new SimpleSubscriber<SimulatorNotice>() {
+                    private Flow.Subscription subscription;
+
+                    @Override
+                    public void onSubscribe(Flow.Subscription subscription) {
+                        this.subscription = subscription;
+                        this.subscription.request(1);
+                    }
+
+                    @Override
+                    public void onNext(SimulatorNotice notice) {
+                        if (notice.getAction() != SimulatorNotice.SIMULATOR_STOP) {
+                            this.subscription.request(1);
                             return;
+                        }
                         Simulator.Reason reason = notice.getReason();
                         if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
                             EventQueue.invokeLater(() -> paused(notice.getDone(), reason, notice.getException()));
                         } else {
                             EventQueue.invokeLater(() -> stopped(notice.getException(), reason));
                         }
-                        o.deleteObserver(this);
+                        this.subscription.cancel();
                     }
                 };
-                Simulator.getInstance().addObserver(stopListener);
+                Simulator.getInstance().subscribe(stopListener);
 
                 int[] breakPoints = executePane.getTextSegmentWindow().getSortedBreakPointsArray();
                 Globals.program.startSimulation(maxSteps, breakPoints);

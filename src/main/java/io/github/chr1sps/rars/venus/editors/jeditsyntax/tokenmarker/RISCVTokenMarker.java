@@ -487,7 +487,7 @@ public class RISCVTokenMarker extends TokenMarker {
     // private members
     private static KeywordMap cKeywords;
     private static String[] tokenLabels, tokenExamples;
-    private KeywordMap keywords;
+    private final KeywordMap keywords;
     private int lastOffset;
     private int lastKeyword;
 

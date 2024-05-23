@@ -25,31 +25,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package io.github.chr1sps.rars.tools;
 
+import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
+import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
+import io.github.chr1sps.rars.riscv.hardware.InterruptController;
+import io.github.chr1sps.rars.riscv.hardware.Memory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.awt.GridLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.*;
-
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
-import io.github.chr1sps.rars.exceptions.AddressErrorException;
-import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
-import io.github.chr1sps.rars.riscv.hardware.InterruptController;
-import io.github.chr1sps.rars.riscv.hardware.Memory;
-import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 
 /**
  * A RARS tool used to implement a timing module and timer inturrpts.
- *
  */
 public class TimerTool extends AbstractToolAndApplication {
-    private static String heading = "Timer Tool";
-    private static String version = "Version 1.0 (Zachary Selk)";
+    private static final String heading = "Timer Tool";
+    private static final String version = "Version 1.0 (Zachary Selk)";
     private static final int TIME_ADDRESS = Memory.memoryMapBaseAddress + 0x18;
     private static final int TIME_CMP_ADDRESS = Memory.memoryMapBaseAddress + 0x20;
 
@@ -64,8 +62,8 @@ public class TimerTool extends AbstractToolAndApplication {
 
     // Timing threads
     private static TimeCmpDaemon timeCmp = null; // Watches for changes made to timecmp
-    private Timer timer = new Timer();
-    private Tick tick = new Tick(); // Runs every millisecond to decide if a timer inturrupt should be raised
+    private final Timer timer = new Timer();
+    private final Tick tick = new Tick(); // Runs every millisecond to decide if a timer inturrupt should be raised
 
     // Internal timing flags
     private static boolean updateTime = false; // Controls when time progresses (for pausing)
@@ -237,7 +235,7 @@ public class TimerTool extends AbstractToolAndApplication {
 
         public void addAsObserver() {
             try {
-                Globals.memory.addObserver(this, TIME_CMP_ADDRESS, TIME_CMP_ADDRESS + 8);
+                Globals.memory.subscribe(this, TIME_CMP_ADDRESS, TIME_CMP_ADDRESS + 8);
             } catch (AddressErrorException aee) {
                 System.out.println("Error while adding observer in Timer Tool");
                 System.exit(0);

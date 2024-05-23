@@ -1,6 +1,7 @@
-package io.github.chr1sps.rars.simulator;
+package io.github.chr1sps.rars.notices;
 
 import io.github.chr1sps.rars.exceptions.SimulationException;
+import io.github.chr1sps.rars.simulator.Simulator;
 import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
 
 /**
@@ -11,14 +12,14 @@ import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
  * @author Pete Sanderson
  * @version January 2009
  */
-public class SimulatorNotice {
-    private int action;
-    private int maxSteps;
-    private Simulator.Reason reason;
-    private boolean done;
-    private SimulationException exception;
-    private double runSpeed;
-    private int programCounter;
+public final class SimulatorNotice implements Notice {
+    private final int action;
+    private final int maxSteps;
+    private final Simulator.Reason reason;
+    private final boolean done;
+    private final SimulationException exception;
+    private final double runSpeed;
+    private final int programCounter;
     /**
      * Constant <code>SIMULATOR_START=0</code>
      */
@@ -123,7 +124,7 @@ public class SimulatorNotice {
         return ((this.getAction() == SIMULATOR_START) ? "START " : "STOP  ") +
                 "Max Steps " + this.maxSteps + " " +
                 "Speed "
-                + ((this.runSpeed == RunSpeedPanel.UNLIMITED_SPEED) ? "unlimited " : "" + this.runSpeed + " inst/sec") +
+                + ((this.runSpeed == RunSpeedPanel.UNLIMITED_SPEED) ? "unlimited " : this.runSpeed + " inst/sec") +
                 "Prog Ctr " + this.programCounter;
     }
 }

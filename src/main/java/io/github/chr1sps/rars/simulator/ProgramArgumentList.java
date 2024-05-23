@@ -1,6 +1,7 @@
 package io.github.chr1sps.rars.simulator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import io.github.chr1sps.rars.Globals;
@@ -46,7 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class ProgramArgumentList {
 
-    private ArrayList<String> programArgumentList;
+    private final ArrayList<String> programArgumentList;
 
     /**
      * Constructor that parses string to produce list. Delimiters
@@ -83,9 +84,7 @@ public class ProgramArgumentList {
      */
     public ProgramArgumentList(String[] list, int startPosition) {
         programArgumentList = new ArrayList<>(list.length - startPosition);
-        for (int i = startPosition; i < list.length; i++) {
-            programArgumentList.add(list[i]);
-        }
+        programArgumentList.addAll(Arrays.asList(list).subList(startPosition, list.length));
     }
 
     /**

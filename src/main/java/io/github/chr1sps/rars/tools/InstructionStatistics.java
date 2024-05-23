@@ -28,15 +28,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package io.github.chr1sps.rars.tools;
 
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.riscv.Instruction;
-import io.github.chr1sps.rars.riscv.hardware.AccessNotice;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.notices.AccessNotice;
+import io.github.chr1sps.rars.notices.MemoryAccessNotice;
+import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
-import io.github.chr1sps.rars.riscv.hardware.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.instructions.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Observable;
 
 /**
@@ -52,17 +53,17 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     /**
      * name of the tool
      */
-    private static String NAME = "Instruction Statistics";
+    private static final String NAME = "Instruction Statistics";
 
     /**
      * version and author information of the tool
      */
-    private static String VERSION = "Version 1.0 (Ingo Kofler)";
+    private static final String VERSION = "Version 1.0 (Ingo Kofler)";
 
     /**
      * heading of the tool
      */
-    private static String HEADING = "";
+    private static final String HEADING = "";
 
     /**
      * number of instruction categories used by this tool
@@ -117,12 +118,12 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     /**
      * array of counter variables - one for each instruction category
      */
-    private int[] m_counters = new int[MAX_CATEGORY];
+    private final int[] m_counters = new int[MAX_CATEGORY];
 
     /**
      * names of the instruction categories as array
      */
-    private String[] m_categoryLabels = {"ALU", "Jump", "Branch", "Memory", "Other"};
+    private final String[] m_categoryLabels = {"ALU", "Jump", "Branch", "Memory", "Other"};
 
     // From Felipe Lessa's instruction counter. Prevent double-counting of
     // instructions
@@ -278,10 +279,9 @@ public class InstructionStatistics extends AbstractToolAndApplication {
             return;
 
         // check for a read access in the text segment
-        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice) {
+        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice memAccNotice) {
 
             // now it is safe to make a cast of the notice
-            MemoryAccessNotice memAccNotice = (MemoryAccessNotice) notice;
 
             // The next three statments are from Felipe Lessa's instruction counter.
             // Prevents double-counting.
@@ -317,8 +317,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     protected void initializePreGUI() {
         m_totalCounter = 0;
         lastAddress = -1; // from Felipe Lessa's instruction counter tool
-        for (int i = 0; i < InstructionStatistics.MAX_CATEGORY; i++)
-            m_counters[i] = 0;
+        Arrays.fill(m_counters, 0);
     }
 
     /**
@@ -327,8 +326,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     protected void reset() {
         m_totalCounter = 0;
         lastAddress = -1; // from Felipe Lessa's instruction counter tool
-        for (int i = 0; i < InstructionStatistics.MAX_CATEGORY; i++)
-            m_counters[i] = 0;
+        Arrays.fill(m_counters, 0);
         updateDisplay();
     }
 

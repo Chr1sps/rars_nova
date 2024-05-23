@@ -72,7 +72,7 @@ public abstract class ImmediateInstruction extends BasicInstruction {
         int[] operands = statement.getOperands();
         if (InstructionSet.rv64) {
             RegisterFile.updateRegister(operands[0], compute(RegisterFile.getValueLong(operands[1]),
-                    (operands[2] << 20) >> 20)); // make sure the immediate is sign-extended
+                    ((long) operands[2] << 20) >> 20)); // make sure the immediate is sign-extended
         } else {
             RegisterFile.updateRegister(operands[0], computeW(RegisterFile.getValue(operands[1]),
                     (operands[2] << 20) >> 20)); // make sure the immediate is sign-extended

@@ -54,7 +54,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class MessagesPane extends JTabbedPane {
     JTextArea assemble, run;
-    private JPanel assembleTab, runTab;
+    private final JPanel assembleTab;
+    private final JPanel runTab;
     // These constants are designed to keep scrolled contents of the
     // two message areas from becoming overwhelmingly large (which
     // seems to slow things down as new text is appended). Once it
