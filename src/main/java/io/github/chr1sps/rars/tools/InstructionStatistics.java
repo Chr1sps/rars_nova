@@ -167,6 +167,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      *
      * @return a panel that holds the GUI of the tool
      */
+    @Override
     protected JComponent buildMainDisplayArea() {
 
         // Create GUI elements for the tool
@@ -217,6 +218,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     /**
      * registers the tool as observer for the text segment of the program
      */
+    @Override
     protected void addAsObserver() {
         addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
@@ -314,6 +316,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     /**
      * performs initialization tasks of the counters before the GUI is created.
      */
+    @Override
     protected void initializePreGUI() {
         m_totalCounter = 0;
         lastAddress = -1; // from Felipe Lessa's instruction counter tool
@@ -323,6 +326,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     /**
      * resets the counter values of the tool and updates the display.
      */
+    @Override
     protected void reset() {
         m_totalCounter = 0;
         lastAddress = -1; // from Felipe Lessa's instruction counter tool
@@ -334,6 +338,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      * updates the text fields and progress bars according to the current counter
      * values.
      */
+    @Override
     protected void updateDisplay() {
         m_tfTotalCounter.setText(String.valueOf(m_totalCounter));
 

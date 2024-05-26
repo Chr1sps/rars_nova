@@ -1,8 +1,10 @@
 package io.github.chr1sps.rars.riscv.hardware;
 
 import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.notices.RegisterAccessNotice;
 
-import java.util.Observer;
+import java.util.concurrent.Flow;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -45,6 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // a 32 bit float value into its equivalent 32-bit int representation, and
 // Float.intBitsToFloat() to bring it back.
 public class FloatingPointRegisterFile {
+    @SuppressWarnings("resource")
     private static final RegisterBlock instance = new RegisterBlock('f', new Register[]{
             new Register("ft0", 0, 0), new Register("ft1", 1, 0),
             new Register("ft2", 2, 0), new Register("ft3", 3, 0),
@@ -64,14 +67,18 @@ public class FloatingPointRegisterFile {
             new Register("ft10", 30, 0), new Register("ft11", 31, 0)
     });
 
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(FloatingPointRegisterFile.instance::close));
+    }
+
     /**
      * Sets the value of the FPU register given to the value given.
      *
      * @param reg Register to set the value of.
      * @param val The desired float value for the register.
      */
-    public static void setRegisterToFloat(int reg, float val) {
-        updateRegister(reg, Float.floatToRawIntBits(val));
+    public static void setRegisterToFloat(final int reg, final float val) {
+        FloatingPointRegisterFile.updateRegister(reg, Float.floatToRawIntBits(val));
     }
 
     /**
@@ -80,8 +87,8 @@ public class FloatingPointRegisterFile {
      * @param name Register to get the value of.
      * @return The float value stored by that register.
      */
-    public static float getFloatFromRegister(String name) {
-        return Float.intBitsToFloat(getValue(name));
+    public static float getFloatFromRegister(final String name) {
+        return Float.intBitsToFloat(FloatingPointRegisterFile.getValue(name));
     }
 
     /**
@@ -92,12 +99,12 @@ public class FloatingPointRegisterFile {
      * @param num FPU register to set the value of.
      * @param val The desired int value for the register.
      */
-    public static void updateRegister(int num, int val) {
-        long lval = val | 0xFFFFFFFF_00000000L; // NAN box if used as float
-        if ((Globals.getSettings().getBackSteppingEnabled())) {
-            Globals.program.getBackStepper().addFloatingPointRestore(num, instance.updateRegister(num, lval));
+    public static void updateRegister(final int num, final int val) {
+        final long lval = val | 0xFFFFFFFF_00000000L; // NAN box if used as float
+        if ((Settings.getBackSteppingEnabled())) {
+            Globals.program.getBackStepper().addFloatingPointRestore(num, FloatingPointRegisterFile.instance.updateRegister(num, lval));
         } else {
-            instance.updateRegister(num, lval);
+            FloatingPointRegisterFile.instance.updateRegister(num, lval);
         }
     }
 
@@ -107,11 +114,11 @@ public class FloatingPointRegisterFile {
      * @param num a int
      * @param val a long
      */
-    public static void updateRegisterLong(int num, long val) {
-        if ((Globals.getSettings().getBackSteppingEnabled())) {
-            Globals.program.getBackStepper().addFloatingPointRestore(num, instance.updateRegister(num, val));
+    public static void updateRegisterLong(final int num, final long val) {
+        if ((Settings.getBackSteppingEnabled())) {
+            Globals.program.getBackStepper().addFloatingPointRestore(num, FloatingPointRegisterFile.instance.updateRegister(num, val));
         } else {
-            instance.updateRegister(num, val);
+            FloatingPointRegisterFile.instance.updateRegister(num, val);
         }
     }
 
@@ -122,8 +129,8 @@ public class FloatingPointRegisterFile {
      * @param num The FPU register number.
      * @return The int value of the given register.
      */
-    public static int getValue(int num) {
-        long lval = instance.getValue(num);
+    public static int getValue(final int num) {
+        final long lval = FloatingPointRegisterFile.instance.getValue(num);
         if ((lval & 0xFFFFFFFF_00000000L) == 0xFFFFFFFF_00000000L) {
             return (int) lval; // If NaN-Boxed return value
         } else {
@@ -137,8 +144,8 @@ public class FloatingPointRegisterFile {
      * @param num a int
      * @return a long
      */
-    public static long getValueLong(int num) {
-        return instance.getValue(num);
+    public static long getValueLong(final int num) {
+        return FloatingPointRegisterFile.instance.getValue(num);
     }
 
     /**
@@ -148,8 +155,8 @@ public class FloatingPointRegisterFile {
      * @param name The FPU register name.
      * @return The int value of the given register.
      */
-    public static int getValue(String name) {
-        long lval = instance.getValue(name);
+    public static int getValue(final String name) {
+        final long lval = FloatingPointRegisterFile.instance.getValue(name);
         if ((lval & 0xFFFFFFFF_00000000L) == 0xFFFFFFFF_00000000L) {
             return (int) lval;
         } else {
@@ -163,7 +170,7 @@ public class FloatingPointRegisterFile {
      * @return The set of registers.
      */
     public static Register[] getRegisters() {
-        return instance.getRegisters();
+        return FloatingPointRegisterFile.instance.getRegisters();
     }
 
     /**
@@ -172,15 +179,15 @@ public class FloatingPointRegisterFile {
      * @param name The FPU register name, must be "f0" through "f31".
      * @return The register object,or null if not found.
      */
-    public static Register getRegister(String name) {
-        return instance.getRegister(name);
+    public static Register getRegister(final String name) {
+        return FloatingPointRegisterFile.instance.getRegister(name);
     }
 
     /**
      * Method to reinitialize the values of the registers.
      */
     public static void resetRegisters() {
-        instance.resetRegisters();
+        FloatingPointRegisterFile.instance.resetRegisters();
     }
 
     /**
@@ -188,10 +195,10 @@ public class FloatingPointRegisterFile {
      * method
      * will add the given Observer to each one.
      *
-     * @param observer a {@link java.util.Observer} object
+     * @param subscriber a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void addRegistersObserver(Observer observer) {
-        instance.addRegistersObserver(observer);
+    public static void addRegistersSubscriber(final Flow.Subscriber<? super RegisterAccessNotice> subscriber) {
+        FloatingPointRegisterFile.instance.addRegistersObserver(subscriber);
     }
 
     /**
@@ -199,9 +206,9 @@ public class FloatingPointRegisterFile {
      * method
      * will delete the given Observer from each one.
      *
-     * @param observer a {@link java.util.Observer} object
+     * @param subscriber a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void deleteRegistersObserver(Observer observer) {
-        instance.deleteRegistersObserver(observer);
+    public static void deleteRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> subscriber) {
+        FloatingPointRegisterFile.instance.deleteRegistersSubscriber(subscriber);
     }
 }

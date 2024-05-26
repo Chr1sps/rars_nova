@@ -3,6 +3,7 @@ package io.github.chr1sps.rars.venus;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.notices.SettingsNotice;
+import io.github.chr1sps.rars.util.SimpleSubscriber;
 import io.github.chr1sps.rars.venus.editors.TextEditingArea;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.JEditBasedTextArea;
 
@@ -17,7 +18,6 @@ import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Observable;
 import java.util.concurrent.Flow;
 
 /*
@@ -26,23 +26,23 @@ Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
 Developed by Pete Sanderson (psanderson@otterbein.edu)
 and Kenneth Vollmar (kenvollmar@missouristate.edu)
 
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
 to the following conditions:
 
-The above copyright notice and this permission notice shall be 
+The above copyright notice and this permission notice shall be
 included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
@@ -59,7 +59,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Bumgarner
  */
-public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> {
+public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice> {
 
     private final TextEditingArea sourceCode;
     private final VenusUI mainUI;
@@ -77,48 +77,49 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      *
      * @param appFrame a {@link io.github.chr1sps.rars.venus.VenusUI} object
      */
-    public EditPane(VenusUI appFrame) {
+    public EditPane(final VenusUI appFrame) {
         super(new BorderLayout());
         this.mainUI = appFrame;
         // user.dir, user's current working directory, is guaranteed to have a value
-        currentDirectoryPath = System.getProperty("user.dir");
+        this.currentDirectoryPath = System.getProperty("user.dir");
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
         Globals.getSettings().subscribe(this);
         this.fileStatus = new FileStatus();
-        lineNumbers = new JLabel();
+        this.lineNumbers = new JLabel();
 
-        this.sourceCode = new JEditBasedTextArea(this, lineNumbers);
+        this.sourceCode = new JEditBasedTextArea(this, this.lineNumbers);
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);
 
         // If source code is modified, will set flag to trigger/request file save.
-        sourceCode.getDocument().addDocumentListener(
+        this.sourceCode.getDocument().addDocumentListener(
                 new DocumentListener() {
-                    public void insertUpdate(DocumentEvent evt) {
+                    @Override
+                    public void insertUpdate(final DocumentEvent evt) {
                         // IF statement added DPS 9-Aug-2011
                         // This method is triggered when file contents added to document
                         // upon opening, even though not edited by user. The IF
                         // statement will sense this situation and immediately return.
                         if (FileStatus.get() == FileStatus.OPENING) {
-                            setFileStatus(FileStatus.NOT_EDITED);
+                            EditPane.this.setFileStatus(FileStatus.NOT_EDITED);
                             FileStatus.set(FileStatus.NOT_EDITED);
-                            if (showingLineNumbers()) {
-                                lineNumbers.setText(getLineNumbersList(sourceCode.getDocument()));
+                            if (EditPane.this.showingLineNumbers()) {
+                                EditPane.this.lineNumbers.setText(EditPane.this.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
                             }
                             return;
                         }
                         // End of 9-Aug-2011 modification.
-                        if (getFileStatus() == FileStatus.NEW_NOT_EDITED) {
-                            setFileStatus(FileStatus.NEW_EDITED);
+                        if (EditPane.this.getFileStatus() == FileStatus.NEW_NOT_EDITED) {
+                            EditPane.this.setFileStatus(FileStatus.NEW_EDITED);
                         }
-                        if (getFileStatus() == FileStatus.NOT_EDITED) {
-                            setFileStatus(FileStatus.EDITED);
+                        if (EditPane.this.getFileStatus() == FileStatus.NOT_EDITED) {
+                            EditPane.this.setFileStatus(FileStatus.EDITED);
                         }
-                        if (getFileStatus() == FileStatus.NEW_EDITED) {
-                            mainUI.getEditor().setTitle("", getFilename(), getFileStatus());
+                        if (EditPane.this.getFileStatus() == FileStatus.NEW_EDITED) {
+                            EditPane.this.mainUI.getEditor().setTitle("", EditPane.this.getFilename(), EditPane.this.getFileStatus());
                         } else {
-                            mainUI.getEditor().setTitle(getPathname(), getFilename(), getFileStatus());
+                            EditPane.this.mainUI.getEditor().setTitle(EditPane.this.getPathname(), EditPane.this.getFilename(), EditPane.this.getFileStatus());
                         }
 
                         FileStatus.setEdited(true);
@@ -134,60 +135,63 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
 
                         Globals.getGui().getMainPane().getExecutePane().clearPane(); // DPS 9-Aug-2011
 
-                        if (showingLineNumbers()) {
-                            lineNumbers.setText(getLineNumbersList(sourceCode.getDocument()));
+                        if (EditPane.this.showingLineNumbers()) {
+                            EditPane.this.lineNumbers.setText(EditPane.this.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
                         }
                     }
 
-                    public void removeUpdate(DocumentEvent evt) {
+                    @Override
+                    public void removeUpdate(final DocumentEvent evt) {
                         this.insertUpdate(evt);
                     }
 
-                    public void changedUpdate(DocumentEvent evt) {
+                    @Override
+                    public void changedUpdate(final DocumentEvent evt) {
                         this.insertUpdate(evt);
                     }
                 });
 
-        showLineNumbers = new JCheckBox("Show Line Numbers");
-        showLineNumbers.setToolTipText("If checked, will display line number for each line of text.");
-        showLineNumbers.setEnabled(false);
+        this.showLineNumbers = new JCheckBox("Show Line Numbers");
+        this.showLineNumbers.setToolTipText("If checked, will display line number for each line of text.");
+        this.showLineNumbers.setEnabled(false);
         // Show line numbers by default.
-        showLineNumbers
+        this.showLineNumbers
                 .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.EDITOR_LINE_NUMBERS_DISPLAYED));
 
         this.setSourceCode("", false);
 
-        lineNumbers.setFont(getLineNumberFont(sourceCode.getFont()));
-        lineNumbers.setVerticalAlignment(JLabel.TOP);
-        lineNumbers.setText("");
-        lineNumbers.setVisible(true);
+        this.lineNumbers.setFont(this.getLineNumberFont(this.sourceCode.getFont()));
+        this.lineNumbers.setVerticalAlignment(JLabel.TOP);
+        this.lineNumbers.setText("");
+        this.lineNumbers.setVisible(true);
 
         // Listener fires when "Show Line Numbers" check box is clicked.
-        showLineNumbers.addItemListener(
+        this.showLineNumbers.addItemListener(
                 new ItemListener() {
-                    public void itemStateChanged(ItemEvent e) {
-                        if (showLineNumbers.isSelected()) {
-                            lineNumbers.setText(getLineNumbersList(sourceCode.getDocument()));
-                            lineNumbers.setVisible(true);
+                    @Override
+                    public void itemStateChanged(final ItemEvent e) {
+                        if (EditPane.this.showLineNumbers.isSelected()) {
+                            EditPane.this.lineNumbers.setText(EditPane.this.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
+                            EditPane.this.lineNumbers.setVisible(true);
                         } else {
-                            lineNumbers.setText("");
-                            lineNumbers.setVisible(false);
+                            EditPane.this.lineNumbers.setText("");
+                            EditPane.this.lineNumbers.setVisible(false);
                         }
-                        sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
+                        EditPane.this.sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
                         Globals.getSettings().setBooleanSetting(Settings.Bool.EDITOR_LINE_NUMBERS_DISPLAYED,
-                                showLineNumbers.isSelected());
+                                EditPane.this.showLineNumbers.isSelected());
                         // needed because caret disappears when checkbox clicked
-                        sourceCode.setCaretVisible(true);
-                        sourceCode.requestFocusInWindow();
+                        EditPane.this.sourceCode.setCaretVisible(true);
+                        EditPane.this.sourceCode.requestFocusInWindow();
                     }
                 });
 
-        JPanel editInfo = new JPanel(new BorderLayout());
-        caretPositionLabel = new JLabel();
-        caretPositionLabel.setToolTipText("Tracks the current position of the text editing cursor.");
-        displayCaretPosition(new Point());
-        editInfo.add(caretPositionLabel, BorderLayout.WEST);
-        editInfo.add(showLineNumbers, BorderLayout.CENTER);
+        final JPanel editInfo = new JPanel(new BorderLayout());
+        this.caretPositionLabel = new JLabel();
+        this.caretPositionLabel.setToolTipText("Tracks the current position of the text editing cursor.");
+        this.displayCaretPosition(new Point());
+        editInfo.add(this.caretPositionLabel, BorderLayout.WEST);
+        editInfo.add(this.showLineNumbers, BorderLayout.CENTER);
         this.add(editInfo, BorderLayout.SOUTH);
     }
 
@@ -197,8 +201,8 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * @param s        String containing text
      * @param editable set true if code is editable else false
      */
-    public void setSourceCode(String s, boolean editable) {
-        sourceCode.setSourceCode(s, editable);
+    public void setSourceCode(final String s, final boolean editable) {
+        this.sourceCode.setSourceCode(s, editable);
     }
 
     /**
@@ -210,7 +214,7 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * call this after setting the text.
      */
     public void discardAllUndoableEdits() {
-        sourceCode.discardAllUndoableEdits();
+        this.sourceCode.discardAllUndoableEdits();
     }
 
     /**
@@ -228,17 +232,17 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * @param doc a {@link javax.swing.text.Document} object
      * @return a {@link java.lang.String} object
      */
-    public String getLineNumbersList(javax.swing.text.Document doc) {
-        StringBuffer lineNumberList = new StringBuffer("<html>");
-        int lineCount = doc.getDefaultRootElement().getElementCount(); // this.getSourceLineCount();
-        int digits = Integer.toString(lineCount).length();
+    public String getLineNumbersList(final javax.swing.text.Document doc) {
+        final StringBuffer lineNumberList = new StringBuffer("<html>");
+        final int lineCount = doc.getDefaultRootElement().getElementCount(); // this.getSourceLineCount();
+        final int digits = Integer.toString(lineCount).length();
         for (int i = 1; i <= lineCount; i++) {
-            String lineStr = Integer.toString(i);
-            int leadingSpaces = digits - lineStr.length();
+            final String lineStr = Integer.toString(i);
+            final int leadingSpaces = digits - lineStr.length();
             if (leadingSpaces == 0) {
                 lineNumberList.append(lineStr + "&nbsp;<br>");
             } else {
-                lineNumberList.append(spaces.substring(0, leadingSpaces * 6) + lineStr + "&nbsp;<br>");
+                lineNumberList.append(EditPane.spaces.substring(0, leadingSpaces * 6) + lineStr + "&nbsp;<br>");
             }
         }
         lineNumberList.append("<br></html>");
@@ -261,13 +265,13 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * BufferedReader on StringReader seems to work better.
      */
     public int getSourceLineCount() {
-        BufferedReader bufStringReader = new BufferedReader(new StringReader(sourceCode.getText()));
+        final BufferedReader bufStringReader = new BufferedReader(new StringReader(this.sourceCode.getText()));
         int lineNums = 0;
         try {
             while (bufStringReader.readLine() != null) {
                 lineNums++;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
         return lineNums;
     }
@@ -278,7 +282,7 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * @return Sting containing source code
      */
     public String getSource() {
-        return sourceCode.getText();
+        return this.sourceCode.getText();
     }
 
     /**
@@ -287,7 +291,7 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      *
      * @param fileStatus the status constant from class FileStatus
      */
-    public void setFileStatus(int fileStatus) {
+    public void setFileStatus(final int fileStatus) {
         this.fileStatus.setFileStatus(fileStatus);
     }
 
@@ -324,7 +328,7 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      *
      * @param pathname a {@link java.lang.String} object
      */
-    public void setPathname(String pathname) {
+    public void setPathname(final String pathname) {
         this.fileStatus.setPathname(pathname);
     }
 
@@ -357,7 +361,7 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * Delegates to corresponding FileStatus method
      */
     public void updateStaticFileStatus() {
-        fileStatus.updateStaticFileStatus();
+        this.fileStatus.updateStaticFileStatus();
     }
 
     /**
@@ -366,7 +370,7 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * @return the UnDo manager
      */
     public UndoManager getUndoManager() {
-        return sourceCode.getUndoManager();
+        return this.sourceCode.getUndoManager();
     }
 
     /*
@@ -384,55 +388,55 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * copy currently-selected text into clipboard
      */
     public void copyText() {
-        sourceCode.copy();
-        sourceCode.setCaretVisible(true);
-        sourceCode.setSelectionVisible(true);
+        this.sourceCode.copy();
+        this.sourceCode.setCaretVisible(true);
+        this.sourceCode.setSelectionVisible(true);
     }
 
     /**
      * cut currently-selected text into clipboard
      */
     public void cutText() {
-        sourceCode.cut();
-        sourceCode.setCaretVisible(true);
+        this.sourceCode.cut();
+        this.sourceCode.setCaretVisible(true);
     }
 
     /**
      * paste clipboard contents at cursor position
      */
     public void pasteText() {
-        sourceCode.paste();
-        sourceCode.setCaretVisible(true);
+        this.sourceCode.paste();
+        this.sourceCode.setCaretVisible(true);
     }
 
     /**
      * select all text
      */
     public void selectAllText() {
-        sourceCode.selectAll();
-        sourceCode.setCaretVisible(true);
-        sourceCode.setSelectionVisible(true);
+        this.sourceCode.selectAll();
+        this.sourceCode.setCaretVisible(true);
+        this.sourceCode.setSelectionVisible(true);
     }
 
     /**
      * Undo previous edit
      */
     public void undo() {
-        sourceCode.undo();
+        this.sourceCode.undo();
     }
 
     /**
      * Redo previous edit
      */
     public void redo() {
-        sourceCode.redo();
+        this.sourceCode.redo();
     }
 
     /**
      * Update state of Edit menu's Undo and Redo menu items.
      */
     public void updateUndoAndRedoState() {
-        mainUI.updateUndoAndRedoState();
+        this.mainUI.updateUndoAndRedoState();
     }
 
     /**
@@ -441,7 +445,7 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * @return true if editor is current displaying line numbers, false otherwise.
      */
     public boolean showingLineNumbers() {
-        return showLineNumbers.isSelected();
+        return this.showLineNumbers.isSelected();
     }
 
     /**
@@ -449,8 +453,8 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      *
      * @param enabled True to enable box, false to disable.
      */
-    public void setShowLineNumbersEnabled(boolean enabled) {
-        showLineNumbers.setEnabled(enabled);
+    public void setShowLineNumbersEnabled(final boolean enabled) {
+        this.showLineNumbers.setEnabled(enabled);
         // showLineNumbers.setSelected(false); // set off, whether closing or opening
     }
 
@@ -461,8 +465,8 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      *
      * @param pos Offset into the text stream of caret.
      */
-    public void displayCaretPosition(int pos) {
-        displayCaretPosition(convertStreamPositionToLineColumn(pos));
+    public void displayCaretPosition(final int pos) {
+        this.displayCaretPosition(this.convertStreamPositionToLineColumn(pos));
     }
 
     /**
@@ -470,8 +474,8 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      *
      * @param p Point object with x-y (column, line number) coordinates of cursor
      */
-    public void displayCaretPosition(Point p) {
-        caretPositionLabel.setText("Line: " + p.y + " Column: " + p.x);
+    public void displayCaretPosition(final Point p) {
+        this.caretPositionLabel.setText("Line: " + p.y + " Column: " + p.x);
     }
 
     private static final char newline = '\n';
@@ -484,12 +488,12 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * @param position position of character
      * @return position Its column and line number coordinate as a Point.
      */
-    public Point convertStreamPositionToLineColumn(int position) {
-        String textStream = sourceCode.getText();
+    public Point convertStreamPositionToLineColumn(final int position) {
+        final String textStream = this.sourceCode.getText();
         int line = 1;
         int column = 1;
         for (int i = 0; i < position; i++) {
-            if (textStream.charAt(i) == newline) {
+            if (textStream.charAt(i) == EditPane.newline) {
                 line++;
                 column = 1;
             } else {
@@ -508,16 +512,16 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * @return corresponding stream position. Returns -1 if there is no
      * corresponding position.
      */
-    public int convertLineColumnToStreamPosition(int line, int column) {
-        String textStream = sourceCode.getText();
-        int textLength = textStream.length();
+    public int convertLineColumnToStreamPosition(final int line, final int column) {
+        final String textStream = this.sourceCode.getText();
+        final int textLength = textStream.length();
         int textLine = 1;
         int textColumn = 1;
         for (int i = 0; i < textLength; i++) {
             if (textLine == line && textColumn == column) {
                 return i;
             }
-            if (textStream.charAt(i) == newline) {
+            if (textStream.charAt(i) == EditPane.newline) {
                 textLine++;
                 textColumn = 1;
             } else {
@@ -536,17 +540,17 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      *             at 1, and
      *             nothing will happen if the parameter value is less than 1
      */
-    public void selectLine(int line) {
+    public void selectLine(final int line) {
         if (line > 0) {
-            int lineStartPosition = convertLineColumnToStreamPosition(line, 1);
-            int lineEndPosition = convertLineColumnToStreamPosition(line + 1, 1) - 1;
+            final int lineStartPosition = this.convertLineColumnToStreamPosition(line, 1);
+            int lineEndPosition = this.convertLineColumnToStreamPosition(line + 1, 1) - 1;
             if (lineEndPosition < 0) { // DPS 19 Sept 2012. Happens if "line" is last line of file.
 
-                lineEndPosition = sourceCode.getText().length() - 1;
+                lineEndPosition = this.sourceCode.getText().length() - 1;
             }
             if (lineStartPosition >= 0) {
-                sourceCode.select(lineStartPosition, lineEndPosition);
-                sourceCode.setSelectionVisible(true);
+                this.sourceCode.select(lineStartPosition, lineEndPosition);
+                this.sourceCode.setSelectionVisible(true);
             }
         }
     }
@@ -561,8 +565,8 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      *               nothing will happen if the parameter value is less than 1
      * @param column Desired column at which to place the cursor.
      */
-    public void selectLine(int line, int column) {
-        selectLine(line);
+    public void selectLine(final int line, final int column) {
+        this.selectLine(line);
         // Made one attempt at setting cursor; didn't work but here's the attempt
         // (imagine using it in the one-parameter overloaded method above)
         // sourceCode.setCaretPosition(lineStartPosition+column-1);
@@ -577,8 +581,8 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * @param caseSensitive true if search is to be case-sensitive, false otherwise
      * @return TEXT_FOUND or TEXT_NOT_FOUND, depending on the result.
      */
-    public int doFindText(String find, boolean caseSensitive) {
-        return sourceCode.doFindText(find, caseSensitive);
+    public int doFindText(final String find, final boolean caseSensitive) {
+        return this.sourceCode.doFindText(find, caseSensitive);
     }
 
     /**
@@ -602,8 +606,8 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * reaplacement is
      * successful and there is at least one additional match.
      */
-    public int doReplace(String find, String replace, boolean caseSensitive) {
-        return sourceCode.doReplace(find, replace, caseSensitive);
+    public int doReplace(final String find, final String replace, final boolean caseSensitive) {
+        return this.sourceCode.doReplace(find, replace, caseSensitive);
     }
 
     /**
@@ -619,8 +623,8 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * @param caseSensitive true for case sensitive. false to ignore case
      * @return the number of occurrences that were matched and replaced.
      */
-    public int doReplaceAll(String find, String replace, boolean caseSensitive) {
-        return sourceCode.doReplaceAll(find, replace, caseSensitive);
+    public int doReplaceAll(final String find, final String replace, final boolean caseSensitive) {
+        return this.sourceCode.doReplaceAll(find, replace, caseSensitive);
     }
 
     /**
@@ -629,14 +633,24 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * Update, if source code is visible, when Font setting changes.
      * This method is specified by the Observer interface.
      */
-    public void update(Observable fontChanger, Object arg) {
-        sourceCode.setFont(Globals.getSettings().getEditorFont());
-        sourceCode.setLineHighlightEnabled(
+    private Flow.Subscription subscription;
+
+    @Override
+    public void onSubscribe(final Flow.Subscription subscription) {
+        this.subscription = subscription;
+        this.subscription.request(1);
+    }
+
+    @Override
+    public void onNext(final SettingsNotice ignored) {
+        System.out.println("onNext called in:" + this);
+        this.sourceCode.setFont(Globals.getSettings().getEditorFont());
+        this.sourceCode.setLineHighlightEnabled(
                 Globals.getSettings().getBooleanSetting(Settings.Bool.EDITOR_CURRENT_LINE_HIGHLIGHTING));
-        sourceCode.setCaretBlinkRate(Globals.getSettings().getCaretBlinkRate());
-        sourceCode.setTabSize(Globals.getSettings().getEditorTabSize());
-        sourceCode.updateSyntaxStyles();
-        sourceCode.revalidate();
+        this.sourceCode.setCaretBlinkRate(Globals.getSettings().getCaretBlinkRate());
+        this.sourceCode.setTabSize(Globals.getSettings().getEditorTabSize());
+        this.sourceCode.updateSyntaxStyles();
+        this.sourceCode.revalidate();
         // We want line numbers to be displayed same size but always PLAIN style.
         // Easiest way to get same pixel height as source code is to set to same
         // font family as the source code! It can get a bit complicated otherwise
@@ -645,8 +659,9 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
         // in the editor form a separate column from the source code and if the
         // pixel height is not the same then the numbers will not line up with
         // the source lines.
-        lineNumbers.setFont(getLineNumberFont(sourceCode.getFont()));
-        lineNumbers.revalidate();
+        this.lineNumbers.setFont(this.getLineNumberFont(this.sourceCode.getFont()));
+        this.lineNumbers.revalidate();
+        this.subscription.request(1);
     }
 
     /*
@@ -654,8 +669,8 @@ public class EditPane extends JPanel implements Flow.Subscriber<SettingsNotice> 
      * Determine font to use for editor line number display, given current
      * font for source code.
      */
-    private Font getLineNumberFont(Font sourceFont) {
-        return (sourceCode.getFont().getStyle() == Font.PLAIN)
+    private Font getLineNumberFont(final Font sourceFont) {
+        return (this.sourceCode.getFont().getStyle() == Font.PLAIN)
                 ? sourceFont
                 : new Font(sourceFont.getFamily(), Font.PLAIN, sourceFont.getSize());
     }

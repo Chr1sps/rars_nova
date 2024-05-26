@@ -27,20 +27,17 @@ package io.github.chr1sps.rars.tools;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
-import io.github.chr1sps.rars.notices.AccessNotice;
 import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.InterruptController;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
+import io.github.chr1sps.rars.util.SimpleSubscriber;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Flow;
 
 /**
  * A RARS tool used to implement a timing module and timer inturrpts.
@@ -112,6 +109,7 @@ public class TimerTool extends AbstractToolAndApplication {
      *
      * @return a {@link javax.swing.JComponent} object
      */
+    @Override
     protected JComponent buildMainDisplayArea() {
         JPanel panelTools = new JPanel(new GridLayout(1, 2));
         timePanel = new TimePanel();
@@ -120,22 +118,14 @@ public class TimerTool extends AbstractToolAndApplication {
         JButton playButton = new JButton("Play");
         playButton.setToolTipText("Starts the counter");
         playButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        play();
-                    }
-                });
+                e -> play());
         playButton.addKeyListener(new EnterKeyListener(playButton));
 
         // Adds a pause button to pause time
         JButton pauseButton = new JButton("Pause");
         pauseButton.setToolTipText("Pauses the counter");
         pauseButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        pause();
-                    }
-                });
+                e -> pause());
         pauseButton.addKeyListener(new EnterKeyListener(pauseButton));
 
         timePanel.add(playButton);
@@ -156,6 +146,7 @@ public class TimerTool extends AbstractToolAndApplication {
     /**
      * <p>performSpecialClosingDuties.</p>
      */
+    @Override
     protected void performSpecialClosingDuties() {
         stop();
     }
@@ -201,6 +192,7 @@ public class TimerTool extends AbstractToolAndApplication {
     /**
      * <p>reset.</p>
      */
+    @Override
     protected void reset() {
         time = 0L;
         savedTime = 0L;
@@ -225,7 +217,7 @@ public class TimerTool extends AbstractToolAndApplication {
     /***************************** Timer Classes *****************************/
 
     // Watches for changes made to the timecmp MMIO
-    public class TimeCmpDaemon implements Observer {
+    public class TimeCmpDaemon implements SimpleSubscriber<MemoryAccessNotice> {
         public boolean postInterrupt = false;
         public long value = 0L; // Holds the most recent value of timecmp writen to the MMIO
 
@@ -242,9 +234,17 @@ public class TimerTool extends AbstractToolAndApplication {
             }
         }
 
-        public void update(Observable ressource, Object accessNotice) {
-            MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
-            int accessType = ((AccessNotice) accessNotice).getAccessType();
+        private Flow.Subscription subscription;
+
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            this.subscription = subscription;
+            this.subscription.request(1);
+        }
+
+        @Override
+        public void onNext(MemoryAccessNotice notice) {
+            int accessType = notice.getAccessType();
             // If is was a WRITE operation
             if (accessType == 1) {
                 int address = notice.getAddress();
@@ -259,6 +259,7 @@ public class TimerTool extends AbstractToolAndApplication {
                     postInterrupt = true; // timecmp was writen to
                 }
             }
+            this.subscription.request(1);
         }
     }
 
@@ -354,6 +355,7 @@ public class TimerTool extends AbstractToolAndApplication {
      *
      * @return a {@link javax.swing.JComponent} object
      */
+    @Override
     protected JComponent getHelpComponent() {
         final String helpContent = "Use this tool to simulate the Memory Mapped IO (MMIO) for a timing device allowing the program to utalize timer interupts. "
                 +
@@ -385,16 +387,14 @@ public class TimerTool extends AbstractToolAndApplication {
                 "(contributed by Zachary Selk, zrselk@gmail.com)";
         JButton help = new JButton("Help");
         help.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        JTextArea ja = new JTextArea(helpContent);
-                        ja.setRows(20);
-                        ja.setColumns(60);
-                        ja.setLineWrap(true);
-                        ja.setWrapStyleWord(true);
-                        JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
-                                "Simulating a timing device", JOptionPane.INFORMATION_MESSAGE);
-                    }
+                e -> {
+                    JTextArea ja = new JTextArea(helpContent);
+                    ja.setRows(20);
+                    ja.setColumns(60);
+                    ja.setLineWrap(true);
+                    ja.setWrapStyleWord(true);
+                    JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
+                            "Simulating a timing device", JOptionPane.INFORMATION_MESSAGE);
                 });
         return help;
     }

@@ -6,7 +6,6 @@ import io.github.chr1sps.rars.venus.NumberDisplayBaseChooser;
 
 /**
  * <p>FloatingPointWindow class.</p>
- *
  */
 public class FloatingPointWindow extends RegisterBlockWindow {
     /*
@@ -70,7 +69,7 @@ public class FloatingPointWindow extends RegisterBlockWindow {
      * <p>beginObserving.</p>
      */
     protected void beginObserving() {
-        FloatingPointRegisterFile.addRegistersObserver(this);
+        FloatingPointRegisterFile.addRegistersSubscriber(this);
     }
 
     /**

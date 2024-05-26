@@ -9,7 +9,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Observable;
 
 /*
 Copyright (c) 2010-2011,  Pete Sanderson and Kenneth Vollmar
@@ -80,11 +79,11 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     // just above.
 
     private int unitPixelWidth = Integer
-            .parseInt(visualizationUnitPixelWidthChoices[defaultVisualizationUnitPixelWidthIndex]);
+            .parseInt(BitmapDisplay.visualizationUnitPixelWidthChoices[BitmapDisplay.defaultVisualizationUnitPixelWidthIndex]);
     private int unitPixelHeight = Integer
-            .parseInt(visualizationUnitPixelHeightChoices[defaultVisualizationUnitPixelHeightIndex]);
-    private int displayAreaWidthInPixels = Integer.parseInt(displayAreaPixelWidthChoices[defaultDisplayWidthIndex]);
-    private int displayAreaHeightInPixels = Integer.parseInt(displayAreaPixelHeightChoices[defaultDisplayHeightIndex]);
+            .parseInt(BitmapDisplay.visualizationUnitPixelHeightChoices[BitmapDisplay.defaultVisualizationUnitPixelHeightIndex]);
+    private int displayAreaWidthInPixels = Integer.parseInt(BitmapDisplay.displayAreaPixelWidthChoices[BitmapDisplay.defaultDisplayWidthIndex]);
+    private int displayAreaHeightInPixels = Integer.parseInt(BitmapDisplay.displayAreaPixelHeightChoices[BitmapDisplay.defaultDisplayHeightIndex]);
 
     // The next four are initialized dynamically in initializeDisplayBaseChoices()
     private String[] displayBaseAddressChoices;
@@ -109,7 +108,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * Simple constructor, likely used by the RARS Tools menu mechanism
      */
     public BitmapDisplay() {
-        super("Bitmap Display, " + version, heading);
+        super("Bitmap Display, " + BitmapDisplay.version, BitmapDisplay.heading);
     }
 
     /**
@@ -124,7 +123,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * @param args an array of {@link java.lang.String} objects
      */
     public static void main(final String[] args) {
-        new BitmapDisplay("Bitmap Display stand-alone, " + version, heading).go();
+        new BitmapDisplay("Bitmap Display stand-alone, " + BitmapDisplay.version, BitmapDisplay.heading).go();
     }
 
     /**
@@ -193,7 +192,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      * Update display when the connected program accesses (data) memory.
      */
     @Override
-    protected void processRISCVUpdate(final Observable memory, final AccessNotice accessNotice) {
+    protected void processRISCVUpdate(final AccessNotice accessNotice) {
         if (accessNotice.getAccessType() == AccessNotice.WRITE) {
             this.updateColorForAddress((MemoryAccessNotice) accessNotice);
         }
@@ -293,10 +292,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     private JComponent buildOrganizationArea() {
         final JPanel organization = new JPanel(new GridLayout(8, 1));
 
-        this.visualizationUnitPixelWidthSelector = new JComboBox<>(visualizationUnitPixelWidthChoices);
+        this.visualizationUnitPixelWidthSelector = new JComboBox<>(BitmapDisplay.visualizationUnitPixelWidthChoices);
         this.visualizationUnitPixelWidthSelector.setEditable(false);
         this.visualizationUnitPixelWidthSelector.setBackground(this.backgroundColor);
-        this.visualizationUnitPixelWidthSelector.setSelectedIndex(defaultVisualizationUnitPixelWidthIndex);
+        this.visualizationUnitPixelWidthSelector.setSelectedIndex(BitmapDisplay.defaultVisualizationUnitPixelWidthIndex);
         this.visualizationUnitPixelWidthSelector.setToolTipText("Width in pixels of rectangle representing memory word");
         this.visualizationUnitPixelWidthSelector.addActionListener(
                 new ActionListener() {
@@ -307,10 +306,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
                         BitmapDisplay.this.updateDisplay();
                     }
                 });
-        this.visualizationUnitPixelHeightSelector = new JComboBox<>(visualizationUnitPixelHeightChoices);
+        this.visualizationUnitPixelHeightSelector = new JComboBox<>(BitmapDisplay.visualizationUnitPixelHeightChoices);
         this.visualizationUnitPixelHeightSelector.setEditable(false);
         this.visualizationUnitPixelHeightSelector.setBackground(this.backgroundColor);
-        this.visualizationUnitPixelHeightSelector.setSelectedIndex(defaultVisualizationUnitPixelHeightIndex);
+        this.visualizationUnitPixelHeightSelector.setSelectedIndex(BitmapDisplay.defaultVisualizationUnitPixelHeightIndex);
         this.visualizationUnitPixelHeightSelector.setToolTipText("Height in pixels of rectangle representing memory word");
         this.visualizationUnitPixelHeightSelector.addActionListener(
                 new ActionListener() {
@@ -321,10 +320,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
                         BitmapDisplay.this.updateDisplay();
                     }
                 });
-        this.visualizationPixelWidthSelector = new JComboBox<>(displayAreaPixelWidthChoices);
+        this.visualizationPixelWidthSelector = new JComboBox<>(BitmapDisplay.displayAreaPixelWidthChoices);
         this.visualizationPixelWidthSelector.setEditable(false);
         this.visualizationPixelWidthSelector.setBackground(this.backgroundColor);
-        this.visualizationPixelWidthSelector.setSelectedIndex(defaultDisplayWidthIndex);
+        this.visualizationPixelWidthSelector.setSelectedIndex(BitmapDisplay.defaultDisplayWidthIndex);
         this.visualizationPixelWidthSelector.setToolTipText("Total width in pixels of display area");
         this.visualizationPixelWidthSelector.addActionListener(
                 new ActionListener() {
@@ -337,10 +336,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
                         BitmapDisplay.this.updateDisplay();
                     }
                 });
-        this.visualizationPixelHeightSelector = new JComboBox<>(displayAreaPixelHeightChoices);
+        this.visualizationPixelHeightSelector = new JComboBox<>(BitmapDisplay.displayAreaPixelHeightChoices);
         this.visualizationPixelHeightSelector.setEditable(false);
         this.visualizationPixelHeightSelector.setBackground(this.backgroundColor);
-        this.visualizationPixelHeightSelector.setSelectedIndex(defaultDisplayHeightIndex);
+        this.visualizationPixelHeightSelector.setSelectedIndex(BitmapDisplay.defaultDisplayHeightIndex);
         this.visualizationPixelHeightSelector.setToolTipText("Total height in pixels of display area");
         this.visualizationPixelHeightSelector.addActionListener(
                 new ActionListener() {
@@ -375,7 +374,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
                         // when being used as a Tool), we have to delete ourselves as an observer and
                         // re-register.
                         if (BitmapDisplay.this.connectButton != null && BitmapDisplay.this.connectButton.isConnected()) {
-                            BitmapDisplay.this.deleteAsObserver();
+                            BitmapDisplay.this.deleteAsSubscriber();
                             BitmapDisplay.this.addAsObserver();
                         }
                         BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
@@ -605,5 +604,4 @@ public class BitmapDisplay extends AbstractToolAndApplication {
             }
         }
     }
-
 }

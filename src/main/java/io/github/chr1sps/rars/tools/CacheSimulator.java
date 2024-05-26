@@ -9,10 +9,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.Observable;
 import java.util.Random;
 
@@ -163,6 +160,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
      *
      * @return the GUI component containing these three areas
      */
+    @Override
     protected JComponent buildMainDisplayArea() {
         // OVERALL STRUCTURE OF MAIN UI (CENTER)
         Box results = Box.createVerticalBox();
@@ -180,13 +178,11 @@ public class CacheSimulator extends AbstractToolAndApplication {
         logPanel.setBorder(ltb);
         logShow = new JCheckBox("Enabled", debug);
         logShow.addItemListener(
-                new ItemListener() {
-                    public void itemStateChanged(ItemEvent e) {
-                        debug = e.getStateChange() == ItemEvent.SELECTED;
-                        resetLogDisplay();
-                        logText.setEnabled(debug);
-                        logText.setBackground(debug ? Color.WHITE : logPanel.getBackground());
-                    }
+                e -> {
+                    debug = e.getStateChange() == ItemEvent.SELECTED;
+                    resetLogDisplay();
+                    logText.setEnabled(debug);
+                    logText.setBackground(debug ? Color.WHITE : logPanel.getBackground());
                 });
         logPanel.add(logShow);
         logText = new JTextArea(5, 70);
@@ -211,11 +207,9 @@ public class CacheSimulator extends AbstractToolAndApplication {
         cachePlacementSelector.setBackground(backgroundColor);
         cachePlacementSelector.setSelectedIndex(defaultPlacementPolicyIndex);
         cachePlacementSelector.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        updateCacheSetSizeSelector();
-                        reset();
-                    }
+                e -> {
+                    updateCacheSetSizeSelector();
+                    reset();
                 });
 
         cacheReplacementSelector = new JComboBox<>(replacementPolicyChoices);
@@ -228,26 +222,22 @@ public class CacheSimulator extends AbstractToolAndApplication {
         cacheBlockSizeSelector.setBackground(backgroundColor);
         cacheBlockSizeSelector.setSelectedIndex(defaultCacheBlockSizeIndex);
         cacheBlockSizeSelector.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        updateCacheSizeDisplay();
-                        reset();
-                    }
+                e -> {
+                    updateCacheSizeDisplay();
+                    reset();
                 });
         cacheBlockCountSelector = new JComboBox<>(cacheBlockCountChoices);
         cacheBlockCountSelector.setEditable(false);
         cacheBlockCountSelector.setBackground(backgroundColor);
         cacheBlockCountSelector.setSelectedIndex(defaultCacheBlockCountIndex);
         cacheBlockCountSelector.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        updateCacheSetSizeSelector();
-                        theCache = createNewCache();
-                        resetCounts();
-                        updateDisplay();
-                        updateCacheSizeDisplay();
-                        animations.fillAnimationBoxWithCacheBlocks();
-                    }
+                e -> {
+                    updateCacheSetSizeSelector();
+                    theCache = createNewCache();
+                    resetCounts();
+                    updateDisplay();
+                    updateCacheSizeDisplay();
+                    animations.fillAnimationBoxWithCacheBlocks();
                 });
 
         cacheSetSizeSelector = new JComboBox<>(cacheSetSizeChoices);
@@ -255,11 +245,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
         cacheSetSizeSelector.setBackground(backgroundColor);
         cacheSetSizeSelector.setSelectedIndex(defaultCacheSetSizeIndex);
         cacheSetSizeSelector.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        reset();
-                    }
-                });
+                e -> reset());
 
         // ALL COMPONENTS FOR "CACHE ORGANIZATION" SECTION
         JPanel placementPolicyRow = getPanelWithBorderLayout();
@@ -465,6 +451,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
      * Also creates initial default cache object. Overrides inherited method that
      * does nothing.
      */
+    @Override
     protected void initializePreGUI() {
         cacheBlockSizeChoicesInt = new int[cacheBlockSizeChoices.length];
         for (int i = 0; i < cacheBlockSizeChoices.length; i++) {
@@ -490,6 +477,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
      * on the default settings
      * of the various combo boxes. Overrides inherited method that does nothing.
      */
+    @Override
     protected void initializePostGUI() {
         theCache = createNewCache();
     }
@@ -498,6 +486,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
      * Method to reset cache, counters and display when the Reset button selected.
      * Overrides inherited method that does nothing.
      */
+    @Override
     protected void reset() {
         theCache = createNewCache();
         resetCounts();
@@ -513,6 +502,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
      * Rars
      * is running in timed mode. Overrides inherited method that does nothing.
      */
+    @Override
     protected void updateDisplay() {
         updateMemoryAccessCountDisplay();
         updateCacheHitCountDisplay();
@@ -537,7 +527,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
                 break;
             case SET:
                 choices = new String[cacheBlockCountIndex - firstBlockCountIndex + 1];
-                System.arraycopy(cacheBlockCountChoices, firstBlockCountIndex + 0, choices, 0, choices.length);
+                System.arraycopy(cacheBlockCountChoices, firstBlockCountIndex, choices, 0, choices.length);
                 break;
             case FULL: // 1 set total, so set size fixed at current number of blocks
             default:
@@ -550,7 +540,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
     // Update the Set Size combo box selection in response to other selections..
     private void updateCacheSetSizeSelector() {
         cacheSetSizeSelector.setModel(
-                new DefaultComboBoxModel(determineSetSizeChoices(
+                new DefaultComboBoxModel<>(determineSetSizeChoices(
                         cacheBlockCountSelector.getSelectedIndex(),
                         cachePlacementSelector.getSelectedIndex())));
     }
@@ -639,7 +629,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
     // whether it was a hit or not, and in which block is the value stored.
     // In the case of a hit, the block associated with address. In the case of
     // a miss, the block where new association is made. DPS 23-Dec-2010
-    private class CacheAccessResult {
+    private static class CacheAccessResult {
         private final boolean hitOrMiss;
         private final int blockNumber;
 
@@ -946,5 +936,4 @@ public class CacheSimulator extends AbstractToolAndApplication {
         }
 
     }
-
 }

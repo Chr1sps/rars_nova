@@ -19,7 +19,6 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Arrays;
-import java.util.Observable;
 import java.util.Random;
 
 /*
@@ -222,6 +221,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     /**
      * <p>initializePreGUI.</p>
      */
+    @Override
     protected void initializePreGUI() {
         RECEIVER_CONTROL = Memory.memoryMapBaseAddress; // 0xffff0000; // keyboard Ready in low-order bit
         RECEIVER_DATA = Memory.memoryMapBaseAddress + 4; // 0xffff0004; // keyboard character in low-order byte
@@ -250,6 +250,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      * "Connect" button on Tool or the
      * "Assemble and Run" button on a Rars-based app.
      */
+    @Override
     protected void addAsObserver() {
         // Set transmitter Control ready bit to 1, means we're ready to accept display
         // character.
@@ -279,6 +280,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      *
      * @return the GUI component containing these two areas
      */
+    @Override
     protected JComponent buildMainDisplayArea() {
         // Changed arrangement of the display and keyboard panels from GridLayout(2,1)
         // to BorderLayout to hold a JSplitPane containing both panels. This permits
@@ -307,7 +309,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      * {@inheritDoc}
      */
     @Override
-    protected void processRISCVUpdate(Observable memory, AccessNotice accessNotice) {
+    protected void processRISCVUpdate(AccessNotice accessNotice) {
         MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
         // If the program has just read (loaded) the receiver (keyboard) data register,
         // then clear the Ready bit to indicate there is no longer a keystroke
@@ -440,6 +442,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      * Method to reset counters and display when the Reset button selected.
      * Overrides inherited method that does nothing.
      */
+    @Override
     protected void reset() {
         displayRandomAccessMode = false;
         initializeTransmitDelaySimulator();
@@ -1141,5 +1144,4 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
             Font newFont = fontDialog.showDialog();
         }
     }
-
 }

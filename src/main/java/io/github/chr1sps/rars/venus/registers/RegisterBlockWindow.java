@@ -2,11 +2,10 @@ package io.github.chr1sps.rars.venus.registers;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
-import io.github.chr1sps.rars.notices.AccessNotice;
-import io.github.chr1sps.rars.notices.RegisterAccessNotice;
-import io.github.chr1sps.rars.notices.SimulatorNotice;
+import io.github.chr1sps.rars.notices.*;
 import io.github.chr1sps.rars.riscv.hardware.Register;
 import io.github.chr1sps.rars.util.Binary;
+import io.github.chr1sps.rars.util.SimpleSubscriber;
 import io.github.chr1sps.rars.venus.MonoRightCellRenderer;
 import io.github.chr1sps.rars.venus.NumberDisplayBaseChooser;
 import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
@@ -18,7 +17,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.Observable;
 import java.util.concurrent.Flow;
 
 /*
@@ -54,7 +52,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson, Bumgarner
  */
-public abstract class RegisterBlockWindow extends JPanel implements Flow.Subscriber<RegisterAccessNotice> {
+public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscriber<Notice> {
     private final JTable table;
     private boolean highlighting;
     private int highlightRow;
@@ -215,34 +213,75 @@ public abstract class RegisterBlockWindow extends JPanel implements Flow.Subscri
      * The Simulator keeps us informed of when simulated MIPS execution is active.
      * This is the only time we care about register operations.
      */
+//    @Override
+//    public void update(final Observable observable, final Object obj) {
+//        if (observable == io.github.chr1sps.rars.simulator.Simulator.getInstance()) {
+//            final SimulatorNotice notice = (SimulatorNotice) obj;
+//            if (notice.getAction() == SimulatorNotice.SIMULATOR_START) {
+//                // Simulated MIPS execution starts. Respond to memory changes if running in
+//                // timed
+//                // or stepped mode.
+//                if (notice.getRunSpeed() != RunSpeedPanel.UNLIMITED_SPEED || notice.getMaxSteps() == 1) {
+//                    this.beginObserving();
+//                    this.highlighting = true;
+//                }
+//            } else {
+//                // Simulated MIPS execution stops. Stop responding.
+//                this.endObserving();
+//            }
+//        } else if (observable == this.settings) {
+//            this.updateRowHeight();
+//        } else if (obj instanceof final RegisterAccessNotice access) {
+//            // NOTE: each register is a separate Observable
+//            if (access.getAccessType() == AccessNotice.WRITE) {
+//                // Uses the same highlighting technique as for Text Segment -- see
+//                // AddressCellRenderer class in DataSegmentWindow.java.
+//                this.highlighting = true;
+//                this.highlightCellForRegister((Register) observable);
+//                Globals.getGui().getRegistersPane().setSelectedComponent(this);
+//            }
+//        }
+//    }
+    private Flow.Subscription subscription;
+
     @Override
-    public void update(final Observable observable, final Object obj) {
-        if (observable == io.github.chr1sps.rars.simulator.Simulator.getInstance()) {
-            final SimulatorNotice notice = (SimulatorNotice) obj;
-            if (notice.getAction() == SimulatorNotice.SIMULATOR_START) {
-                // Simulated MIPS execution starts. Respond to memory changes if running in
-                // timed
-                // or stepped mode.
-                if (notice.getRunSpeed() != RunSpeedPanel.UNLIMITED_SPEED || notice.getMaxSteps() == 1) {
-                    this.beginObserving();
-                    this.highlighting = true;
+    public void onSubscribe(Flow.Subscription subscription) {
+        this.subscription = subscription;
+        this.subscription.request(1);
+    }
+
+    @Override
+    public void onNext(final Notice notice) {
+        switch (notice) {
+            case SimulatorNotice s -> {
+                if (s.getAction() == SimulatorNotice.SIMULATOR_START) {
+                    // Simulated MIPS execution starts. Respond to memory changes if running in
+                    // timed
+                    // or stepped mode.
+                    if (s.getRunSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.getMaxSteps() == 1) {
+                        this.beginObserving();
+                        this.highlighting = true;
+                    }
+                } else {
+                    // Simulated MIPS execution stops. Stop responding.
+                    this.endObserving();
                 }
-            } else {
-                // Simulated MIPS execution stops. Stop responding.
-                this.endObserving();
             }
-        } else if (observable == this.settings) {
-            this.updateRowHeight();
-        } else if (obj instanceof final RegisterAccessNotice access) {
-            // NOTE: each register is a separate Observable
-            if (access.getAccessType() == AccessNotice.WRITE) {
-                // Uses the same highlighting technique as for Text Segment -- see
-                // AddressCellRenderer class in DataSegmentWindow.java.
-                this.highlighting = true;
-                this.highlightCellForRegister((Register) observable);
-                Globals.getGui().getRegistersPane().setSelectedComponent(this);
+            case SettingsNotice ignored -> this.updateRowHeight();
+            case RegisterAccessNotice a -> {
+                // NOTE: each register is a separate Observable
+                if (a.getAccessType() == AccessNotice.WRITE) {
+                    // Uses the same highlighting technique as for Text Segment -- see
+                    // AddressCellRenderer class in DataSegmentWindow.java.
+                    this.highlighting = true;
+//                  TODO:  this.highlightCellForRegister((Register) observable);
+                    Globals.getGui().getRegistersPane().setSelectedComponent(this);
+                }
+            }
+            default -> {
             }
         }
+        this.subscription.request(1);
     }
 
     private void updateRowHeight() {

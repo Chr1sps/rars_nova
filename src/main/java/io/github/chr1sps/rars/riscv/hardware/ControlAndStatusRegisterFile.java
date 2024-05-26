@@ -1,8 +1,10 @@
 package io.github.chr1sps.rars.riscv.hardware;
 
 import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.Settings;
+import io.github.chr1sps.rars.notices.RegisterAccessNotice;
 
-import java.util.Observer;
+import java.util.concurrent.Flow;
 
 /*
 Copyright (c) 2017-2019,  Benjamin Landers
@@ -64,7 +66,7 @@ public class ControlAndStatusRegisterFile {
         // TODO: consider making time, cycle and instret 64 bit registers which then are
         // linked to by *h
         // Remember to update the window tooltips when adding a CSR
-        Register[] tmp = {
+        final Register[] tmp = {
                 new MaskedRegister("ustatus", 0x000, 0, ~0x11),
                 null, // fflags
                 null, // frm
@@ -99,18 +101,18 @@ public class ControlAndStatusRegisterFile {
      * @param val The desired value for the register.
      * @return old value in register prior to update
      */
-    public static boolean updateRegister(int num, long val) {
-        if (instance.getRegister(num) instanceof ReadOnlyRegister) {
+    public static boolean updateRegister(final int num, final long val) {
+        if (ControlAndStatusRegisterFile.instance.getRegister(num) instanceof ReadOnlyRegister) {
             return true;
         }
         // TODO: do something to better handle the h csrs
         if (num >= 0xC80 && num <= 0xC82) {
             return true;
         }
-        if ((Globals.getSettings().getBackSteppingEnabled())) {
-            Globals.program.getBackStepper().addControlAndStatusRestore(num, instance.updateRegister(num, val));
+        if ((Settings.getBackSteppingEnabled())) {
+            Globals.program.getBackStepper().addControlAndStatusRestore(num, ControlAndStatusRegisterFile.instance.updateRegister(num, val));
         } else {
-            instance.updateRegister(num, val);
+            ControlAndStatusRegisterFile.instance.updateRegister(num, val);
         }
         return false;
     }
@@ -121,8 +123,8 @@ public class ControlAndStatusRegisterFile {
      * @param name Name of register to set the value of.
      * @param val  The desired value for the register.
      */
-    public static void updateRegister(String name, long val) {
-        updateRegister(instance.getRegister(name).getNumber(), val);
+    public static void updateRegister(final String name, final long val) {
+        ControlAndStatusRegisterFile.updateRegister(ControlAndStatusRegisterFile.instance.getRegister(name).getNumber(), val);
     }
 
     /**
@@ -131,12 +133,12 @@ public class ControlAndStatusRegisterFile {
      * @param num Number of register to set the value of.
      * @param val The desired value for the register.
      */
-    public static void updateRegisterBackdoor(int num, long val) {
-        if ((Globals.getSettings().getBackSteppingEnabled())) {
+    public static void updateRegisterBackdoor(final int num, final long val) {
+        if ((Settings.getBackSteppingEnabled())) {
             Globals.program.getBackStepper().addControlAndStatusBackdoor(num,
-                    instance.getRegister(num).setValueBackdoor(val));
+                    ControlAndStatusRegisterFile.instance.getRegister(num).setValueBackdoor(val));
         } else {
-            instance.getRegister(num).setValueBackdoor(val);
+            ControlAndStatusRegisterFile.instance.getRegister(num).setValueBackdoor(val);
         }
     }
 
@@ -146,8 +148,8 @@ public class ControlAndStatusRegisterFile {
      * @param name Name of register to set the value of.
      * @param val  The desired value for the register.
      */
-    public static void updateRegisterBackdoor(String name, long val) {
-        updateRegisterBackdoor(instance.getRegister(name).getNumber(), val);
+    public static void updateRegisterBackdoor(final String name, final long val) {
+        ControlAndStatusRegisterFile.updateRegisterBackdoor(ControlAndStatusRegisterFile.instance.getRegister(name).getNumber(), val);
     }
 
     /**
@@ -157,8 +159,8 @@ public class ControlAndStatusRegisterFile {
      * @param val The value to OR with
      * @return a boolean
      */
-    public static boolean orRegister(int num, long val) {
-        return updateRegister(num, instance.getValue(num) | val);
+    public static boolean orRegister(final int num, final long val) {
+        return ControlAndStatusRegisterFile.updateRegister(num, ControlAndStatusRegisterFile.instance.getValue(num) | val);
     }
 
     /**
@@ -167,8 +169,8 @@ public class ControlAndStatusRegisterFile {
      * @param name Name of register to change
      * @param val  The value to OR with
      */
-    public static void orRegister(String name, long val) {
-        updateRegister(name, instance.getValue(name) | val);
+    public static void orRegister(final String name, final long val) {
+        ControlAndStatusRegisterFile.updateRegister(name, ControlAndStatusRegisterFile.instance.getValue(name) | val);
     }
 
     /**
@@ -178,8 +180,8 @@ public class ControlAndStatusRegisterFile {
      * @param val The value to clear by
      * @return a boolean
      */
-    public static boolean clearRegister(int num, long val) {
-        return updateRegister(num, instance.getValue(num) & ~val);
+    public static boolean clearRegister(final int num, final long val) {
+        return ControlAndStatusRegisterFile.updateRegister(num, ControlAndStatusRegisterFile.instance.getValue(num) & ~val);
     }
 
     /**
@@ -188,8 +190,8 @@ public class ControlAndStatusRegisterFile {
      * @param name Name of register to change
      * @param val  The value to clear by
      */
-    public static void clearRegister(String name, long val) {
-        updateRegister(name, instance.getValue(name) & ~val);
+    public static void clearRegister(final String name, final long val) {
+        ControlAndStatusRegisterFile.updateRegister(name, ControlAndStatusRegisterFile.instance.getValue(name) & ~val);
     }
 
     /**
@@ -198,8 +200,8 @@ public class ControlAndStatusRegisterFile {
      * @param num The register number.
      * @return The value of the given register. 0 for non-implemented registers
      */
-    public static int getValue(int num) {
-        return (int) instance.getValue(num);
+    public static int getValue(final int num) {
+        return (int) ControlAndStatusRegisterFile.instance.getValue(num);
     }
 
     /**
@@ -208,8 +210,8 @@ public class ControlAndStatusRegisterFile {
      * @param num The register number.
      * @return The value of the given register. 0 for non-implemented registers
      */
-    public static long getValueLong(int num) {
-        return instance.getValue(num);
+    public static long getValueLong(final int num) {
+        return ControlAndStatusRegisterFile.instance.getValue(num);
     }
 
     /**
@@ -218,8 +220,8 @@ public class ControlAndStatusRegisterFile {
      * @param name The register's name
      * @return The value of the given register. 0 for non-implemented registers
      */
-    public static int getValue(String name) {
-        return (int) instance.getValue(name);
+    public static int getValue(final String name) {
+        return (int) ControlAndStatusRegisterFile.instance.getValue(name);
     }
 
     /**
@@ -228,8 +230,8 @@ public class ControlAndStatusRegisterFile {
      * @param name The register's name
      * @return The value of the given register. 0 for non-implemented registers
      */
-    public static long getValueNoNotify(String name) {
-        return instance.getRegister(name).getValueNoNotify();
+    public static long getValueNoNotify(final String name) {
+        return ControlAndStatusRegisterFile.instance.getRegister(name).getValueNoNotify();
     }
 
     /**
@@ -238,7 +240,7 @@ public class ControlAndStatusRegisterFile {
      * @return The set of registers.
      */
     public static Register[] getRegisters() {
-        return instance.getRegisters();
+        return ControlAndStatusRegisterFile.instance.getRegisters();
     }
 
     /**
@@ -248,8 +250,8 @@ public class ControlAndStatusRegisterFile {
      * @param r the CSR
      * @return the list position of given register, -1 if not found.
      */
-    public static int getRegisterPosition(Register r) {
-        Register[] registers = instance.getRegisters();
+    public static int getRegisterPosition(final Register r) {
+        final Register[] registers = ControlAndStatusRegisterFile.instance.getRegisters();
         for (int i = 0; i < registers.length; i++) {
             if (registers[i] == r) {
                 return i;
@@ -264,15 +266,15 @@ public class ControlAndStatusRegisterFile {
      * @param name a {@link java.lang.String} object
      * @return a {@link io.github.chr1sps.rars.riscv.hardware.Register} object
      */
-    public static Register getRegister(String name) {
-        return instance.getRegister(name);
+    public static Register getRegister(final String name) {
+        return ControlAndStatusRegisterFile.instance.getRegister(name);
     }
 
     /**
      * Method to reinitialize the values of the registers.
      */
     public static void resetRegisters() {
-        instance.resetRegisters();
+        ControlAndStatusRegisterFile.instance.resetRegisters();
     }
 
     /**
@@ -282,8 +284,8 @@ public class ControlAndStatusRegisterFile {
      *
      * @param observer a {@link java.util.Observer} object
      */
-    public static void addRegistersObserver(Observer observer) {
-        instance.addRegistersObserver(observer);
+    public static void addRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+        ControlAndStatusRegisterFile.instance.addRegistersObserver(observer);
     }
 
     /**
@@ -293,8 +295,8 @@ public class ControlAndStatusRegisterFile {
      *
      * @param observer a {@link java.util.Observer} object
      */
-    public static void deleteRegistersObserver(Observer observer) {
-        instance.deleteRegistersObserver(observer);
+    public static void deleteRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+        ControlAndStatusRegisterFile.instance.deleteRegistersSubscriber(observer);
     }
 
 }

@@ -277,21 +277,21 @@ public class VenusUI extends JFrame {
         try {
             this.fileNewAction = new GuiAction("New",
                     this.loadIcon("New22.png"),
-                    "Create a new file for editing", KeyEvent.VK_N, this.makeShortcut(KeyEvent.VK_N)) {
+                    "Create a new file for editing", KeyEvent.VK_N, VenusUI.makeShortcut(KeyEvent.VK_N)) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     VenusUI.this.editor.newFile();
                 }
             };
             this.fileOpenAction = new GuiAction("Open ...", this.loadIcon("Open22.png"),
-                    "Open a file for editing", KeyEvent.VK_O, this.makeShortcut(KeyEvent.VK_O)) {
+                    "Open a file for editing", KeyEvent.VK_O, VenusUI.makeShortcut(KeyEvent.VK_O)) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     VenusUI.this.editor.open();
                 }
             };
             this.fileCloseAction = new GuiAction("Close", null, "Close the current file", KeyEvent.VK_C,
-                    this.makeShortcut(KeyEvent.VK_W)) {
+                    VenusUI.makeShortcut(KeyEvent.VK_W)) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     VenusUI.this.editor.close();
@@ -305,7 +305,7 @@ public class VenusUI extends JFrame {
                 }
             };
             this.fileSaveAction = new GuiAction("Save", this.loadIcon("Save22.png"), "Save the current file",
-                    KeyEvent.VK_S, this.makeShortcut(KeyEvent.VK_S)) {
+                    KeyEvent.VK_S, VenusUI.makeShortcut(KeyEvent.VK_S)) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     VenusUI.this.editor.save();
@@ -326,7 +326,7 @@ public class VenusUI extends JFrame {
                 }
             };
             this.fileDumpMemoryAction = new FileDumpMemoryAction("Dump Memory ...", this.loadIcon("Dump22.png"),
-                    "Dump machine code or data in an available format", KeyEvent.VK_D, this.makeShortcut(KeyEvent.VK_D),
+                    "Dump machine code or data in an available format", KeyEvent.VK_D, VenusUI.makeShortcut(KeyEvent.VK_D),
                     this.mainUI);
             this.fileExitAction = new GuiAction("Exit", null, "Exit Rars", KeyEvent.VK_X, null) {
                 @Override
@@ -338,7 +338,7 @@ public class VenusUI extends JFrame {
             };
 
             this.editUndoAction = new GuiAction("Undo", this.loadIcon("Undo22.png"), "Undo last edit",
-                    KeyEvent.VK_U, this.makeShortcut(KeyEvent.VK_Z)) {
+                    KeyEvent.VK_U, VenusUI.makeShortcut(KeyEvent.VK_Z)) {
                 {
                     this.setEnabled(false);
                 }
@@ -353,7 +353,7 @@ public class VenusUI extends JFrame {
                 }
             };
             this.editRedoAction = new GuiAction("Redo", this.loadIcon("Redo22.png"), "Redo last edit",
-                    KeyEvent.VK_R, this.makeShortcut(KeyEvent.VK_Y)) {
+                    KeyEvent.VK_R, VenusUI.makeShortcut(KeyEvent.VK_Y)) {
                 {
                     this.setEnabled(false);
                 }
@@ -368,32 +368,32 @@ public class VenusUI extends JFrame {
                 }
             };
             this.editCutAction = new GuiAction("Cut", this.loadIcon("Cut22.gif"), "Cut", KeyEvent.VK_C,
-                    this.makeShortcut(KeyEvent.VK_X)) {
+                    VenusUI.makeShortcut(KeyEvent.VK_X)) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     VenusUI.this.mainPane.getEditPane().cutText();
                 }
             };
             this.editCopyAction = new GuiAction("Copy", this.loadIcon("Copy22.png"), "Copy", KeyEvent.VK_O,
-                    this.makeShortcut(KeyEvent.VK_C)) {
+                    VenusUI.makeShortcut(KeyEvent.VK_C)) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     VenusUI.this.mainPane.getEditPane().copyText();
                 }
             };
             this.editPasteAction = new GuiAction("Paste", this.loadIcon("Paste22.png"), "Paste", KeyEvent.VK_P,
-                    this.makeShortcut(KeyEvent.VK_V)) {
+                    VenusUI.makeShortcut(KeyEvent.VK_V)) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     VenusUI.this.mainPane.getEditPane().pasteText();
                 }
             };
             this.editFindReplaceAction = new EditFindReplaceAction("Find/Replace", this.loadIcon("Find22.png"),
-                    "Find/Replace", KeyEvent.VK_F, this.makeShortcut(KeyEvent.VK_F), this.mainUI);
+                    "Find/Replace", KeyEvent.VK_F, VenusUI.makeShortcut(KeyEvent.VK_F), this.mainUI);
             this.editSelectAllAction = new GuiAction("Select All",
                     null, // new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath+"Find22.png"),
                     "Select All", KeyEvent.VK_A,
-                    this.makeShortcut(KeyEvent.VK_A)) {
+                    VenusUI.makeShortcut(KeyEvent.VK_A)) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     VenusUI.this.mainPane.getEditPane().selectAllText();
@@ -429,10 +429,10 @@ public class VenusUI extends JFrame {
                     KeyEvent.VK_R, KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0), this.mainUI);
             this.runClearBreakpointsAction = new RunClearBreakpointsAction("Clear all breakpoints", null,
                     "Clears all execution breakpoints set since the last assemble.", KeyEvent.VK_K,
-                    this.makeShortcut(KeyEvent.VK_K));
+                    VenusUI.makeShortcut(KeyEvent.VK_K));
             this.runToggleBreakpointsAction = new GuiAction("Toggle all breakpoints", null,
                     "Disable/enable all breakpoints without clearing (can also click Bkpt column header)",
-                    KeyEvent.VK_T, this.makeShortcut(KeyEvent.VK_T)) {
+                    KeyEvent.VK_T, VenusUI.makeShortcut(KeyEvent.VK_T)) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     // settingsLabelAction.actionPerformed(e);
@@ -842,7 +842,7 @@ public class VenusUI extends JFrame {
      * @param status a int
      */
     public void setMenuState(final int status) {
-        menuState = status;
+        VenusUI.menuState = status;
         switch (status) {
             case FileStatus.NO_FILE:
                 this.setMenuStateInitial();
@@ -1037,7 +1037,7 @@ public class VenusUI extends JFrame {
         this.runGoAction.setEnabled(true);
         this.runStepAction.setEnabled(true);
         this.runBackstepAction.setEnabled(
-                Globals.getSettings().getBackSteppingEnabled() && !Globals.program.getBackStepper().empty());
+                Settings.getBackSteppingEnabled() && !Globals.program.getBackStepper().empty());
         this.runResetAction.setEnabled(true);
         this.runStopAction.setEnabled(false);
         this.runPauseAction.setEnabled(false);
@@ -1105,7 +1105,7 @@ public class VenusUI extends JFrame {
         this.runGoAction.setEnabled(false);
         this.runStepAction.setEnabled(false);
         this.runBackstepAction.setEnabled(
-                Globals.getSettings().getBackSteppingEnabled() && !Globals.program.getBackStepper().empty());
+                Settings.getBackSteppingEnabled() && !Globals.program.getBackStepper().empty());
         this.runResetAction.setEnabled(true);
         this.runStopAction.setEnabled(false);
         this.runPauseAction.setEnabled(false);
@@ -1122,7 +1122,7 @@ public class VenusUI extends JFrame {
      * @return current menu state.
      */
     public static int getMenuState() {
-        return menuState;
+        return VenusUI.menuState;
     }
 
     /**
@@ -1263,7 +1263,7 @@ public class VenusUI extends JFrame {
 //        return new FlatSVGIcon(this.getClass().getResource(Globals.imagesPath + name));
 //    }
 
-    private KeyStroke makeShortcut(final int key) {
-        return KeyStroke.getKeyStroke(key, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static KeyStroke makeShortcut(final int key) {
+        return KeyStroke.getKeyStroke(key, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
     }
 }

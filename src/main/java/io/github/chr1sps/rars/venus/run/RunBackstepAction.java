@@ -1,6 +1,7 @@
 package io.github.chr1sps.rars.venus.run;
 
 import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
@@ -60,10 +61,10 @@ public class RunBackstepAction extends GuiAction {
      * @param accel    a {@link javax.swing.KeyStroke} object
      * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
      */
-    public RunBackstepAction(String name, Icon icon, String descrip,
-                             Integer mnemonic, KeyStroke accel, VenusUI gui) {
+    public RunBackstepAction(final String name, final Icon icon, final String descrip,
+                             final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
-        mainUI = gui;
+        this.mainUI = gui;
     }
 
     /**
@@ -71,33 +72,33 @@ public class RunBackstepAction extends GuiAction {
      * <p>
      * perform next simulated instruction step.
      */
-    public void actionPerformed(ActionEvent e) {
-        name = this.getValue(Action.NAME).toString();
-        executePane = mainUI.getMainPane().getExecutePane();
-        boolean done = false;
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        this.name = this.getValue(Action.NAME).toString();
+        this.executePane = this.mainUI.getMainPane().getExecutePane();
         if (!FileStatus.isAssembled()) {
             // note: this should never occur since backstepping is only enabled after
             // successful assembly.
-            JOptionPane.showMessageDialog(mainUI, "The program must be assembled before it can be run.");
+            JOptionPane.showMessageDialog(this.mainUI, "The program must be assembled before it can be run.");
             return;
         }
-        mainUI.setStarted(true);
-        mainUI.getMessagesPane().selectRunMessageTab();
-        executePane.getTextSegmentWindow().setCodeHighlighting(true);
+        this.mainUI.setStarted(true);
+        this.mainUI.getMessagesPane().selectRunMessageTab();
+        this.executePane.getTextSegmentWindow().setCodeHighlighting(true);
 
-        if (Globals.getSettings().getBackSteppingEnabled()) {
-            Memory.getInstance().subscribe(executePane.getDataSegmentWindow());
-            RegisterFile.addRegistersObserver(executePane.getRegistersWindow());
-            ControlAndStatusRegisterFile.addRegistersObserver(executePane.getControlAndStatusWindow());
-            FloatingPointRegisterFile.addRegistersObserver(executePane.getFloatingPointWindow());
+        if (Settings.getBackSteppingEnabled()) {
+            Memory.getInstance().subscribe(this.executePane.getDataSegmentWindow());
+            RegisterFile.addRegistersObserver(this.executePane.getRegistersWindow());
+            ControlAndStatusRegisterFile.addRegistersObserver(this.executePane.getControlAndStatusWindow());
+            FloatingPointRegisterFile.addRegistersSubscriber(this.executePane.getFloatingPointWindow());
             Globals.program.getBackStepper().backStep();
-            Memory.getInstance().deleteObserver(executePane.getDataSegmentWindow());
-            RegisterFile.deleteRegistersObserver(executePane.getRegistersWindow());
-            executePane.getRegistersWindow().updateRegisters();
-            executePane.getFloatingPointWindow().updateRegisters();
-            executePane.getControlAndStatusWindow().updateRegisters();
-            executePane.getDataSegmentWindow().updateValues();
-            executePane.getTextSegmentWindow().highlightStepAtPC(); // Argument aded 25 June 2007
+            Memory.getInstance().deleteSubscriber(this.executePane.getDataSegmentWindow());
+            RegisterFile.deleteRegistersObserver(this.executePane.getRegistersWindow());
+            this.executePane.getRegistersWindow().updateRegisters();
+            this.executePane.getFloatingPointWindow().updateRegisters();
+            this.executePane.getControlAndStatusWindow().updateRegisters();
+            this.executePane.getDataSegmentWindow().updateValues();
+            this.executePane.getTextSegmentWindow().highlightStepAtPC(); // Argument aded 25 June 2007
             FileStatus.set(FileStatus.RUNNABLE);
             // if we've backed all the way, disable the button
             // if (Globals.program.getBackStepper().empty()) {
@@ -119,7 +120,7 @@ public class RunBackstepAction extends GuiAction {
              * getProgramCounter()-4);
              * }
              */
-            mainUI.setReset(false);
+            this.mainUI.setReset(false);
         }
     }
 }

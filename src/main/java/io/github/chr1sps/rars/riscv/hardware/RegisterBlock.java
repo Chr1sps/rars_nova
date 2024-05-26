@@ -42,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Benjamin Landers
  * @version June 2017
  */
-public class RegisterBlock {
+public class RegisterBlock implements AutoCloseable {
     private final Register[] regFile;
     private final char prefix;
 
@@ -211,11 +211,18 @@ public class RegisterBlock {
      * Program
      * Counter.
      *
-     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
+     * @param subscriber a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public void deleteRegistersObserver(Flow.Subscriber<? super RegisterAccessNotice> observer) {
+    public void deleteRegistersSubscriber(Flow.Subscriber<? super RegisterAccessNotice> subscriber) {
         for (Register r : regFile) {
-            r.deleteObserver(observer);
+            r.deleteSubscriber(subscriber);
+        }
+    }
+
+    @Override
+    public void close() {
+        for (var register : regFile) {
+            register.close();
         }
     }
 }

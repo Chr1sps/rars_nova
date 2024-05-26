@@ -127,14 +127,14 @@ public class ToolLoader {
                 try {
                     // grab the class, make sure it implements Tool, instantiate, add to menu
                     String toolClassName = CLASS_PREFIX + file.substring(0, file.indexOf(CLASS_EXTENSION) - 1);
-                    Class clas = Class.forName(toolClassName);
+                    Class<?> clas = Class.forName(toolClassName);
                     if (!Tool.class.isAssignableFrom(clas) ||
                             Modifier.isAbstract(clas.getModifiers()) ||
                             Modifier.isInterface(clas.getModifiers())) {
                         continue;
                     }
 
-                    toolList.add((Tool) clas.newInstance());
+                    toolList.add((Tool) clas.getDeclaredConstructor().newInstance());
                 } catch (Exception e) {
                     System.out.println("Error instantiating Tool from file " + file + ": " + e);
                 }

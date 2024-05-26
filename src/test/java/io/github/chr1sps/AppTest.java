@@ -10,6 +10,7 @@ import io.github.chr1sps.rars.exceptions.AssemblyException;
 import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.*;
 import io.github.chr1sps.rars.simulator.Simulator;
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -156,7 +157,7 @@ public class AppTest {
 //                    ProgramStatement assembled = p.getMemory().getStatement(0x400000);
                     ProgramStatement ps = new ProgramStatement(word, 0x400000);
                     Assert.assertNotNull("Error 1 on: " + program, ps.getInstruction());
-                    Assert.assertThat("Error 2 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
+                    MatcherAssert.assertThat("Error 2 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
 //                    String decompiled = ps.getPrintableBasicAssemblyStatement();
 
                     p.assembleString(program);
@@ -231,7 +232,7 @@ public class AppTest {
                     int second = p.getMemory().getWord(0x400004);
                     ProgramStatement ps = new ProgramStatement(first, 0x400000);
                     Assert.assertNotNull("Error 11 on: " + program, ps.getInstruction());
-                    Assert.assertThat("Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
+                    MatcherAssert.assertThat("Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
                     if (program.contains("t0") || program.contains("t1") || program.contains("t2") || program.contains("f1")) {
                         // TODO: test that each register individually is meaningful and test every
                         // register.

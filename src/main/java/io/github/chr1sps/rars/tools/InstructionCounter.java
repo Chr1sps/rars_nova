@@ -36,7 +36,6 @@ import io.github.chr1sps.rars.riscv.hardware.Memory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Observable;
 
 /**
  * Instruction counter tool. Can be used to know how many instructions
@@ -290,7 +289,7 @@ public class InstructionCounter extends AbstractToolAndApplication {
      * {@inheritDoc}
      */
     @Override
-    protected void processRISCVUpdate(Observable resource, AccessNotice notice) {
+    protected void processRISCVUpdate(AccessNotice notice) {
         if (!notice.accessIsFromRISCV())
             return;
         if (notice.getAccessType() != AccessNotice.READ)

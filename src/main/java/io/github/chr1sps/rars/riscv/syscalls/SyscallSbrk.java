@@ -1,9 +1,9 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
-import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
+import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
 /*
@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallSbrk class.</p>
- *
  */
 public class SyscallSbrk extends AbstractSyscall {
     /**
@@ -49,10 +48,11 @@ public class SyscallSbrk extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws ExitingException {
+    @Override
+    public void simulate(final ProgramStatement statement) throws ExitingException {
         try {
-            RegisterFile.updateRegister("a0", Globals.memory.allocateBytesFromHeap(RegisterFile.getValue("a0")));
-        } catch (IllegalArgumentException iae) {
+            RegisterFile.updateRegister("a0", Memory.allocateBytesFromHeap(RegisterFile.getValue("a0")));
+        } catch (final IllegalArgumentException iae) {
             throw new ExitingException(statement,
                     iae.getMessage() + " (syscall " + this.getNumber() + ")");
         }

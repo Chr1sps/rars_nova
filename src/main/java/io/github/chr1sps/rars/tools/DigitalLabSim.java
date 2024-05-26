@@ -2,6 +2,7 @@ package io.github.chr1sps.rars.tools;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.notices.AccessNotice;
 import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.InterruptController;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
@@ -13,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Observable;
 
 /**
  * <p>DigitalLabSim class.</p>
@@ -97,18 +97,17 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     /**
      * <p>addAsObserver.</p>
      */
+    @Override
     protected void addAsObserver() {
         addAsObserver(IN_ADRESS_DISPLAY_1, IN_ADRESS_DISPLAY_1);
         addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void update(Observable ressource, Object accessNotice) {
-        MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
-        int address = notice.getAddress();
-        char value = (char) notice.getValue();
+    @Override
+    public void onNext(AccessNotice notice) {
+        var memNotice = (MemoryAccessNotice) notice;
+        int address = memNotice.getAddress();
+        char value = (char) memNotice.getValue();
         if (address == IN_ADRESS_DISPLAY_1)
             updateSevenSegment(1, value);
         else if (address == IN_ADRESS_DISPLAY_2)
@@ -124,11 +123,13 @@ public class DigitalLabSim extends AbstractToolAndApplication {
                 CounterValue = CounterValueMax;
                 InterruptController.registerTimerInterrupt(EXTERNAL_INTERRUPT_TIMER);
             }
+        this.subscription.request(1);
     }
 
     /**
      * <p>reset.</p>
      */
+    @Override
     protected void reset() {
         sevenSegPanel.resetSevenSegment();
         hexaKeyPanel.resetHexaKeyboard();
@@ -140,6 +141,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      *
      * @return a {@link javax.swing.JComponent} object
      */
+    @Override
     protected JComponent buildMainDisplayArea() {
         panelTools = new JPanel(new GridLayout(1, 2));
         sevenSegPanel = new SevenSegmentPanel();
@@ -175,6 +177,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      *
      * @return a {@link javax.swing.JComponent} object
      */
+    @Override
     protected JComponent getHelpComponent() {
         final String helpContent = " This tool is composed of 3 parts : two seven-segment displays, an hexadecimal keyboard and counter \n"
                 +

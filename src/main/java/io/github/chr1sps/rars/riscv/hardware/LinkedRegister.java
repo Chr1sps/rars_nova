@@ -62,6 +62,7 @@ public class LinkedRegister extends Register {
      *
      * @return a long
      */
+    @Override
     public synchronized long getValue() {
         super.getValue(); // to notify observers
         return getValueNoNotify();
@@ -72,6 +73,7 @@ public class LinkedRegister extends Register {
      *
      * @return a long
      */
+    @Override
     public synchronized long getValueNoNotify() {
         return (base.getValueNoNotify() & mask) >>> shift;
     }
@@ -79,6 +81,7 @@ public class LinkedRegister extends Register {
     /**
      * {@inheritDoc}
      */
+    @Override
     public synchronized long setValue(long val) {
         long old = base.getValueNoNotify();
         base.setValue(((val << shift) & mask) | (old & ~mask));
@@ -89,6 +92,7 @@ public class LinkedRegister extends Register {
     /**
      * <p>resetValue.</p>
      */
+    @Override
     public synchronized void resetValue() {
         base.resetValue(); // not completely correct, but registers are only reset all together, so it
         // doesn't matter that the other subsets are reset too

@@ -12,6 +12,7 @@ import io.github.chr1sps.rars.simulator.Simulator;
 import io.github.chr1sps.rars.util.FilenameFinder;
 import io.github.chr1sps.rars.util.SimpleSubscriber;
 import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -73,7 +74,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * the running program, a reset button, and an exit button.
  * Pete Sanderson, 14 November 2006.
  */
-public abstract class AbstractToolAndApplication extends JFrame implements Tool, Flow.Subscriber<AccessNotice> {
+
+public abstract class AbstractToolAndApplication extends JFrame implements Tool, SimpleSubscriber<AccessNotice> {
     protected boolean isBeingUsedAsATool = false; // can use to determine whether invoked as Tool or stand-alone.
     private JDialog dialog; // used only for Tool use. This is the pop-up dialog that appears when menu item
     // selected.
@@ -113,7 +115,7 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * @param title   String containing title bar text
      * @param heading a {@link java.lang.String} object
      */
-    protected AbstractToolAndApplication(String title, String heading) {
+    protected AbstractToolAndApplication(final String title, final String heading) {
         this.title = title;
         this.heading = heading;
     }
@@ -127,6 +129,7 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      *
      * @return Tool name. RARS will display this in menu item.
      */
+    @Override
     public abstract String getName();
 
     /**
@@ -173,31 +176,32 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * to contain application-specific displays of parameters and results.
      */
     public void go() {
-        theWindow = this;
+        this.theWindow = this;
         this.isBeingUsedAsATool = false;
         this.setTitle(this.title);
         io.github.chr1sps.rars.Globals.initialize();
         // assure the dialog goes away if user clicks the X
         this.addWindowListener(
                 new WindowAdapter() {
-                    public void windowClosing(WindowEvent e) {
-                        performAppClosingDuties();
+                    @Override
+                    public void windowClosing(final WindowEvent e) {
+                        AbstractToolAndApplication.this.performAppClosingDuties();
                     }
                 });
-        initializePreGUI();
+        this.initializePreGUI();
 
-        JPanel contentPane = new JPanel(new BorderLayout(5, 5));
-        contentPane.setBorder(emptyBorder);
+        final JPanel contentPane = new JPanel(new BorderLayout(5, 5));
+        contentPane.setBorder(this.emptyBorder);
         contentPane.setOpaque(true);
-        contentPane.add(buildHeadingArea(), BorderLayout.NORTH);
-        contentPane.add(buildMainDisplayArea(), BorderLayout.CENTER);
-        contentPane.add(buildButtonAreaStandAlone(), BorderLayout.SOUTH);
+        contentPane.add(this.buildHeadingArea(), BorderLayout.NORTH);
+        contentPane.add(this.buildMainDisplayArea(), BorderLayout.CENTER);
+        contentPane.add(this.buildButtonAreaStandAlone(), BorderLayout.SOUTH);
 
         this.setContentPane(contentPane);
         this.pack();
         this.setLocationRelativeTo(null); // center on screen
         this.setVisible(true);
-        initializePostGUI();
+        this.initializePostGUI();
     }
 
     /**
@@ -221,29 +225,31 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * buildMainDisplayArea()
      * to contain application-specific displays of parameters and results.
      */
+    @Override
     public void action() {
         this.isBeingUsedAsATool = true;
-        dialog = new JDialog(Globals.getGui(), this.title);
+        this.dialog = new JDialog(Globals.getGui(), this.title);
         // assure the dialog goes away if user clicks the X
-        dialog.addWindowListener(
+        this.dialog.addWindowListener(
                 new WindowAdapter() {
-                    public void windowClosing(WindowEvent e) {
-                        performToolClosingDuties();
+                    @Override
+                    public void windowClosing(final WindowEvent e) {
+                        AbstractToolAndApplication.this.performToolClosingDuties();
                     }
                 });
-        theWindow = dialog;
-        initializePreGUI();
-        JPanel contentPane = new JPanel(new BorderLayout(5, 5));
-        contentPane.setBorder(emptyBorder);
+        this.theWindow = this.dialog;
+        this.initializePreGUI();
+        final JPanel contentPane = new JPanel(new BorderLayout(5, 5));
+        contentPane.setBorder(this.emptyBorder);
         contentPane.setOpaque(true);
-        contentPane.add(buildHeadingArea(), BorderLayout.NORTH);
-        contentPane.add(buildMainDisplayArea(), BorderLayout.CENTER);
-        contentPane.add(buildButtonAreaForTool(), BorderLayout.SOUTH);
-        initializePostGUI();
-        dialog.setContentPane(contentPane);
-        dialog.pack();
-        dialog.setLocationRelativeTo(Globals.getGui());
-        dialog.setVisible(true);
+        contentPane.add(this.buildHeadingArea(), BorderLayout.NORTH);
+        contentPane.add(this.buildMainDisplayArea(), BorderLayout.CENTER);
+        contentPane.add(this.buildButtonAreaForTool(), BorderLayout.SOUTH);
+        this.initializePostGUI();
+        this.dialog.setContentPane(contentPane);
+        this.dialog.pack();
+        this.dialog.setLocationRelativeTo(Globals.getGui());
+        this.dialog.setVisible(true);
     }
 
     /**
@@ -284,15 +290,15 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      */
     protected JComponent buildHeadingArea() {
         // OVERALL STRUCTURE OF MESSAGE (TOP)
-        headingLabel = new JLabel();
-        Box headingPanel = Box.createHorizontalBox();// new JPanel(new BorderLayout());
+        this.headingLabel = new JLabel();
+        final Box headingPanel = Box.createHorizontalBox();// new JPanel(new BorderLayout());
         headingPanel.add(Box.createHorizontalGlue());
-        headingPanel.add(headingLabel);
+        headingPanel.add(this.headingLabel);
         headingPanel.add(Box.createHorizontalGlue());
         // Details for heading area (top)
-        headingLabel.setText(heading);
-        headingLabel.setHorizontalTextPosition(JLabel.CENTER);
-        headingLabel.setFont(new Font(headingLabel.getFont().getFontName(), Font.PLAIN, 18));
+        this.headingLabel.setText(this.heading);
+        this.headingLabel.setHorizontalTextPosition(JLabel.CENTER);
+        this.headingLabel.setFont(new Font(this.headingLabel.getFont().getFontName(), Font.PLAIN, 18));
         return headingPanel;
     }
 
@@ -305,40 +311,40 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * @return a {@link javax.swing.JComponent} object
      */
     protected JComponent buildButtonAreaForTool() {
-        Box buttonArea = Box.createHorizontalBox();
-        TitledBorder tc = new TitledBorder("Tool Control");
+        final Box buttonArea = Box.createHorizontalBox();
+        final TitledBorder tc = new TitledBorder("Tool Control");
         tc.setTitleJustification(TitledBorder.CENTER);
         buttonArea.setBorder(tc);
-        connectButton = new ConnectButton();
-        connectButton.setToolTipText("Control whether tool will respond to running program");
-        connectButton.addActionListener(
+        this.connectButton = new ConnectButton();
+        this.connectButton.setToolTipText("Control whether tool will respond to running program");
+        this.connectButton.addActionListener(
                 e -> {
-                    if (connectButton.isConnected()) {
-                        connectButton.disconnect();
+                    if (this.connectButton.isConnected()) {
+                        this.connectButton.disconnect();
                     } else {
-                        connectButton.connect();
+                        this.connectButton.connect();
                     }
                 });
-        connectButton.addKeyListener(new EnterKeyListener(connectButton));
+        this.connectButton.addKeyListener(new EnterKeyListener(this.connectButton));
 
-        JButton resetButton = new JButton("Reset");
+        final JButton resetButton = new JButton("Reset");
         resetButton.setToolTipText("Reset all counters and other structures");
         resetButton.addActionListener(
-                e -> reset());
+                e -> this.reset());
         resetButton.addKeyListener(new EnterKeyListener(resetButton));
 
-        JButton closeButton = new JButton("Close");
+        final JButton closeButton = new JButton("Close");
         closeButton.setToolTipText("Close (exit) this tool");
         closeButton.addActionListener(
-                e -> performToolClosingDuties());
+                e -> this.performToolClosingDuties());
         closeButton.addKeyListener(new EnterKeyListener(closeButton));
 
         // Add all the buttons...
-        buttonArea.add(connectButton);
+        buttonArea.add(this.connectButton);
         buttonArea.add(Box.createHorizontalGlue());
         buttonArea.add(resetButton);
         buttonArea.add(Box.createHorizontalGlue());
-        JComponent helpComponent = getHelpComponent();
+        final JComponent helpComponent = this.getHelpComponent();
         if (helpComponent != null) {
             buttonArea.add(helpComponent);
             buttonArea.add(Box.createHorizontalGlue());
@@ -361,103 +367,103 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      */
     protected JComponent buildButtonAreaStandAlone() {
         // Overall structure of control area (two rows).
-        Box operationArea = Box.createVerticalBox();
-        Box fileControlArea = Box.createHorizontalBox();
-        Box buttonArea = Box.createHorizontalBox();
+        final Box operationArea = Box.createVerticalBox();
+        final Box fileControlArea = Box.createHorizontalBox();
+        final Box buttonArea = Box.createHorizontalBox();
         operationArea.add(fileControlArea);
         operationArea.add(Box.createVerticalStrut(5));
         operationArea.add(buttonArea);
-        TitledBorder ac = new TitledBorder("Application Control");
+        final TitledBorder ac = new TitledBorder("Application Control");
         ac.setTitleJustification(TitledBorder.CENTER);
         operationArea.setBorder(ac);
 
-        AbstractToolAndApplication that = this;
+        final AbstractToolAndApplication that = this;
         // Top row of controls consists of button to launch file open operation,
         // text field to show filename, and run speed slider.
-        openFileButton = new JButton("Open program...");
-        openFileButton.setToolTipText("Select program file to assemble and run");
-        openFileButton.addActionListener(
+        this.openFileButton = new JButton("Open program...");
+        this.openFileButton.setToolTipText("Select program file to assemble and run");
+        this.openFileButton.addActionListener(
                 e -> {
-                    JFileChooser fileChooser = new JFileChooser();
-                    JCheckBox multiFileAssembleChoose = new JCheckBox("Assemble all in selected file's directory",
-                            multiFileAssemble);
+                    final JFileChooser fileChooser = new JFileChooser();
+                    final JCheckBox multiFileAssembleChoose = new JCheckBox("Assemble all in selected file's directory",
+                            this.multiFileAssemble);
                     multiFileAssembleChoose.setToolTipText(
                             "If checked, selected file will be assembled first and all other assembly files in directory will be assembled also.");
                     fileChooser.setAccessory(multiFileAssembleChoose);
-                    if (mostRecentlyOpenedFile != null) {
-                        fileChooser.setSelectedFile(mostRecentlyOpenedFile);
+                    if (this.mostRecentlyOpenedFile != null) {
+                        fileChooser.setSelectedFile(this.mostRecentlyOpenedFile);
                     }
                     // DPS 13 June 2007. The next 4 lines add file filter to file chooser.
-                    FileFilter defaultFileFilter = FilenameFinder.getFileFilter(Globals.fileExtensions,
+                    final FileFilter defaultFileFilter = FilenameFinder.getFileFilter(Globals.fileExtensions,
                             "Assembler Files", true);
                     fileChooser.addChoosableFileFilter(defaultFileFilter);
                     fileChooser.addChoosableFileFilter(fileChooser.getAcceptAllFileFilter());
                     fileChooser.setFileFilter(defaultFileFilter);
 
                     if (fileChooser.showOpenDialog(that) == JFileChooser.APPROVE_OPTION) {
-                        multiFileAssemble = multiFileAssembleChoose.isSelected();
+                        this.multiFileAssemble = multiFileAssembleChoose.isSelected();
                         File theFile = fileChooser.getSelectedFile();
                         try {
                             theFile = theFile.getCanonicalFile();
-                        } catch (IOException ioe) {
+                        } catch (final IOException ioe) {
                             // nothing to do, theFile will keep current value
                         }
-                        String currentFilePath = theFile.getPath();
-                        mostRecentlyOpenedFile = theFile;
-                        operationStatusMessages.setText("File: " + currentFilePath);
-                        operationStatusMessages.setCaretPosition(0);
-                        assembleRunButton.setEnabled(true);
+                        final String currentFilePath = theFile.getPath();
+                        this.mostRecentlyOpenedFile = theFile;
+                        this.operationStatusMessages.setText("File: " + currentFilePath);
+                        this.operationStatusMessages.setCaretPosition(0);
+                        this.assembleRunButton.setEnabled(true);
                     }
                 });
-        openFileButton.addKeyListener(new EnterKeyListener(openFileButton));
+        this.openFileButton.addKeyListener(new EnterKeyListener(this.openFileButton));
 
-        operationStatusMessages = new MessageField("No file open.");
-        operationStatusMessages.setColumns(40);
-        operationStatusMessages.setMargin(new Insets(0, 3, 0, 3)); // (top, left, bottom, right)
-        operationStatusMessages.setBackground(backgroundColor);
-        operationStatusMessages.setFocusable(false);
-        operationStatusMessages.setToolTipText("Display operation status messages");
+        this.operationStatusMessages = new MessageField("No file open.");
+        this.operationStatusMessages.setColumns(40);
+        this.operationStatusMessages.setMargin(new Insets(0, 3, 0, 3)); // (top, left, bottom, right)
+        this.operationStatusMessages.setBackground(this.backgroundColor);
+        this.operationStatusMessages.setFocusable(false);
+        this.operationStatusMessages.setToolTipText("Display operation status messages");
 
-        RunSpeedPanel speed = RunSpeedPanel.getInstance();
+        final RunSpeedPanel speed = RunSpeedPanel.getInstance();
 
         // Bottom row of controls consists of the three buttons defined here.
-        assembleRunButton = new JButton("Assemble and Run");
-        assembleRunButton.setToolTipText("Assemble and run the currently selected program");
-        assembleRunButton.setEnabled(false);
-        assembleRunButton.addActionListener(
+        this.assembleRunButton = new JButton("Assemble and Run");
+        this.assembleRunButton.setToolTipText("Assemble and run the currently selected program");
+        this.assembleRunButton.setEnabled(false);
+        this.assembleRunButton.addActionListener(
                 e -> {
-                    assembleRunButton.setEnabled(false);
-                    openFileButton.setEnabled(false);
-                    stopButton.setEnabled(true);
+                    this.assembleRunButton.setEnabled(false);
+                    this.openFileButton.setEnabled(false);
+                    this.stopButton.setEnabled(true);
                     new Thread(new CreateAssembleRunProgram()).start();
                 });
-        assembleRunButton.addKeyListener(new EnterKeyListener(assembleRunButton));
+        this.assembleRunButton.addKeyListener(new EnterKeyListener(this.assembleRunButton));
 
-        stopButton = new JButton("Stop");
-        stopButton.setToolTipText("Terminate program execution");
-        stopButton.setEnabled(false);
-        stopButton.addActionListener(
+        this.stopButton = new JButton("Stop");
+        this.stopButton.setToolTipText("Terminate program execution");
+        this.stopButton.setEnabled(false);
+        this.stopButton.addActionListener(
                 e -> Simulator.getInstance().stopExecution());
-        stopButton.addKeyListener(new EnterKeyListener(stopButton));
+        this.stopButton.addKeyListener(new EnterKeyListener(this.stopButton));
 
-        JButton resetButton = new JButton("Reset");
+        final JButton resetButton = new JButton("Reset");
         resetButton.setToolTipText("Reset all counters and other structures");
         resetButton.addActionListener(
-                e -> reset());
+                e -> this.reset());
         resetButton.addKeyListener(new EnterKeyListener(resetButton));
 
-        JButton closeButton = new JButton("Exit");
+        final JButton closeButton = new JButton("Exit");
         closeButton.setToolTipText("Exit this application");
         closeButton.addActionListener(
-                e -> performAppClosingDuties());
+                e -> this.performAppClosingDuties());
         closeButton.addKeyListener(new EnterKeyListener(closeButton));
 
         // Add top row of controls...
         // fileControlArea.add(Box.createHorizontalStrut(5));
 
-        Box fileDisplayBox = Box.createVerticalBox();
+        final Box fileDisplayBox = Box.createVerticalBox();
         fileDisplayBox.add(Box.createVerticalStrut(8));
-        fileDisplayBox.add(operationStatusMessages);
+        fileDisplayBox.add(this.operationStatusMessages);
         fileDisplayBox.add(Box.createVerticalStrut(8));
         fileControlArea.add(fileDisplayBox);
 
@@ -466,15 +472,15 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
 
         // Add bottom row of buttons...
 
-        buttonArea.add(openFileButton);
+        buttonArea.add(this.openFileButton);
         buttonArea.add(Box.createHorizontalGlue());
-        buttonArea.add(assembleRunButton);
+        buttonArea.add(this.assembleRunButton);
         buttonArea.add(Box.createHorizontalGlue());
-        buttonArea.add(stopButton);
+        buttonArea.add(this.stopButton);
         buttonArea.add(Box.createHorizontalGlue());
         buttonArea.add(resetButton);
         buttonArea.add(Box.createHorizontalGlue());
-        JComponent helpComponent = getHelpComponent();
+        final JComponent helpComponent = this.getHelpComponent();
         if (helpComponent != null) {
             buttonArea.add(helpComponent);
             buttonArea.add(Box.createHorizontalGlue());
@@ -518,7 +524,7 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * subrange.
      */
     protected void addAsObserver() {
-        addAsObserver(lowMemoryAddress, highMemoryAddress);
+        this.addAsObserver(this.lowMemoryAddress, this.highMemoryAddress);
     }
 
     /**
@@ -533,15 +539,15 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * @param lowEnd  low end of memory address range.
      * @param highEnd high end of memory address range; must be >= lowEnd
      */
-    protected void addAsObserver(int lowEnd, int highEnd) {
-        String errorMessage = "Error connecting to memory";
+    protected void addAsObserver(final int lowEnd, final int highEnd) {
+        final String errorMessage = "Error connecting to memory";
         try {
             Globals.memory.subscribe(this, lowEnd, highEnd);
-        } catch (AddressErrorException aee) {
+        } catch (final AddressErrorException aee) {
             if (this.isBeingUsedAsATool) {
-                headingLabel.setText(errorMessage);
+                this.headingLabel.setText(errorMessage);
             } else {
-                operationStatusMessages.displayTerminatingMessage(errorMessage);
+                this.operationStatusMessages.displayTerminatingMessage(errorMessage);
             }
         }
     }
@@ -551,7 +557,7 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      *
      * @param reg a {@link io.github.chr1sps.rars.riscv.hardware.Register} object
      */
-    protected void addAsObserver(Register reg) {
+    protected void addAsObserver(final Register reg) {
         if (reg != null) {
             reg.subscribe(this);
         }
@@ -567,8 +573,8 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * on a stand-alone
      * app terminates (e.g. when the button is re-enabled).
      */
-    protected void deleteAsObserver() {
-        Globals.memory.deleteObserver(this);
+    protected void deleteAsSubscriber() {
+        Globals.memory.deleteSubscriber(this);
     }
 
     /**
@@ -576,9 +582,9 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      *
      * @param reg a {@link io.github.chr1sps.rars.riscv.hardware.Register} object
      */
-    protected void deleteAsObserver(Register reg) {
+    protected void deleteAsSubscriber(final Register reg) {
         if (reg != null) {
-            reg.deleteObserver(this);
+            reg.deleteSubscriber(this);
         }
     }
 
@@ -598,7 +604,7 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * @return true if tool/app is (or could be) currently active as an Observer.
      */
     protected boolean isObserving() {
-        return observing;
+        return this.observing;
     }
 
     /**
@@ -609,6 +615,20 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
      * Does nothing by default.
      */
     protected void updateDisplay() {
+    }
+
+    /**
+     * Override this method to process a received notice from an Observable (memory
+     * or register)
+     * It will only be called if the notice was generated as the result of RISCV
+     * instruction execution.
+     * By default it does nothing. After this method is complete, the
+     * updateDisplay() method will be
+     * invoked automatically.
+     *
+     * @param notice a {@link io.github.chr1sps.rars.notices.AccessNotice} object
+     */
+    protected void processRISCVUpdate(final AccessNotice notice) {
     }
 
     /**
@@ -630,17 +650,17 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
 
     // Closing duties for Tool only.
     private void performToolClosingDuties() {
-        performSpecialClosingDuties();
-        if (connectButton.isConnected()) {
-            connectButton.disconnect();
+        this.performSpecialClosingDuties();
+        if (this.connectButton.isConnected()) {
+            this.connectButton.disconnect();
         }
-        dialog.setVisible(false);
-        dialog.dispose();
+        this.dialog.setVisible(false);
+        this.dialog.dispose();
     }
 
     // Closing duties for stand-alone application only.
     private void performAppClosingDuties() {
-        performSpecialClosingDuties();
+        this.performSpecialClosingDuties();
         this.setVisible(false);
         System.exit(0);
     }
@@ -660,33 +680,33 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
 
         public ConnectButton() {
             super();
-            disconnect();
+            this.disconnect();
         }
 
         public void connect() {
-            observing = true;
+            AbstractToolAndApplication.this.observing = true;
             Globals.memoryAndRegistersLock.lock();
             try {
-                addAsObserver();
+                AbstractToolAndApplication.this.addAsObserver();
             } finally {
                 Globals.memoryAndRegistersLock.unlock();
             }
-            setText(disconnectText);
+            this.setText(ConnectButton.disconnectText);
         }
 
         public void disconnect() {
             Globals.memoryAndRegistersLock.lock();
             try {
-                deleteAsObserver();
+                AbstractToolAndApplication.this.deleteAsSubscriber();
             } finally {
                 Globals.memoryAndRegistersLock.unlock();
             }
-            observing = false;
-            setText(connectText);
+            AbstractToolAndApplication.this.observing = false;
+            this.setText(ConnectButton.connectText);
         }
 
         public boolean isConnected() {
-            return observing;
+            return AbstractToolAndApplication.this.observing;
         }
     }
 
@@ -700,16 +720,17 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
     protected static class EnterKeyListener extends KeyAdapter {
         AbstractButton myButton;
 
-        public EnterKeyListener(AbstractButton who) {
-            myButton = who;
+        public EnterKeyListener(final AbstractButton who) {
+            this.myButton = who;
         }
 
-        public void keyPressed(KeyEvent e) {
+        @Override
+        public void keyPressed(@NotNull final KeyEvent e) {
             if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                 e.consume();
                 try {
-                    myButton.getActionListeners()[0].actionPerformed(new ActionEvent(myButton, 0, myButton.getText()));
-                } catch (ArrayIndexOutOfBoundsException oob) {
+                    this.myButton.getActionListeners()[0].actionPerformed(new ActionEvent(this.myButton, 0, this.myButton.getText()));
+                } catch (final ArrayIndexOutOfBoundsException oob) {
                     // do nothing, since there is no action listener.
                 }
             }
@@ -720,6 +741,7 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
     // called when the Assemble and Run button is pressed. Used only by stand-alone
     ///////////////////////////////////////////////////////////////////////////////// app.
     private class CreateAssembleRunProgram implements Runnable {
+        @Override
         public void run() {
             // String noSupportForExceptionHandler = null; // no auto-loaded exception
             // handlers.
@@ -736,23 +758,23 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
 
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
             Thread.yield();
-            RISCVprogram program = new RISCVprogram();
+            final RISCVprogram program = new RISCVprogram();
             io.github.chr1sps.rars.Globals.program = program; // Shouldn't have to do this...
-            String fileToAssemble = mostRecentlyOpenedFile.getPath();
-            ArrayList<String> filesToAssemble;
-            if (multiFileAssemble) {// setting (check box in file open dialog) calls for multiple file assembly
+            final String fileToAssemble = AbstractToolAndApplication.this.mostRecentlyOpenedFile.getPath();
+            final ArrayList<String> filesToAssemble;
+            if (AbstractToolAndApplication.this.multiFileAssemble) {// setting (check box in file open dialog) calls for multiple file assembly
                 filesToAssemble = FilenameFinder.getFilenameList(
                         new File(fileToAssemble).getParent(), Globals.fileExtensions);
             } else {
                 filesToAssemble = new ArrayList<>();
                 filesToAssemble.add(fileToAssemble);
             }
-            ArrayList<RISCVprogram> programsToAssemble;
+            final ArrayList<RISCVprogram> programsToAssemble;
             try {
-                operationStatusMessages.displayNonTerminatingMessage("Assembling " + fileToAssemble);
+                AbstractToolAndApplication.this.operationStatusMessages.displayNonTerminatingMessage("Assembling " + fileToAssemble);
                 programsToAssemble = program.prepareFilesForAssembly(filesToAssemble, fileToAssemble, exceptionHandler);
-            } catch (AssemblyException pe) {
-                operationStatusMessages.displayTerminatingMessage("Error reading file(s): " + fileToAssemble);
+            } catch (final AssemblyException pe) {
+                AbstractToolAndApplication.this.operationStatusMessages.displayTerminatingMessage("Error reading file(s): " + fileToAssemble);
                 return;
             }
 
@@ -760,8 +782,8 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
                 program.assemble(programsToAssemble,
                         Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED),
                         Globals.getSettings().getBooleanSetting(Settings.Bool.WARNINGS_ARE_ERRORS));
-            } catch (AssemblyException pe) {
-                operationStatusMessages.displayTerminatingMessage("Assembly Error: " + fileToAssemble);
+            } catch (final AssemblyException pe) {
+                AbstractToolAndApplication.this.operationStatusMessages.displayTerminatingMessage("Assembly Error: " + fileToAssemble);
                 return;
             }
             // Moved these three register resets from before the try block to after it.
@@ -771,33 +793,33 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
             ControlAndStatusRegisterFile.resetRegisters();
             InterruptController.reset();
 
-            addAsObserver();
-            observing = true;
-            operationStatusMessages.displayNonTerminatingMessage("Running " + fileToAssemble);
+            AbstractToolAndApplication.this.addAsObserver();
+            AbstractToolAndApplication.this.observing = true;
+            AbstractToolAndApplication.this.operationStatusMessages.displayNonTerminatingMessage("Running " + fileToAssemble);
             final var stopListener = new SimpleSubscriber<SimulatorNotice>() {
                 private Flow.Subscription subscription;
 
                 @Override
-                public void onSubscribe(Flow.Subscription subscription) {
+                public void onSubscribe(final Flow.Subscription subscription) {
                     this.subscription = subscription;
                     this.subscription.request(1);
                 }
 
                 @Override
-                public void onNext(SimulatorNotice notice) {
+                public void onNext(@NotNull final SimulatorNotice notice) {
                     if (notice.getAction() != SimulatorNotice.SIMULATOR_STOP) {
                         this.subscription.request(1);
                         return;
                     }
-                    deleteAsObserver();
-                    observing = false;
+                    AbstractToolAndApplication.this.deleteAsSubscriber();
+                    AbstractToolAndApplication.this.observing = false;
                     String terminatingMessage = "Normal termination: ";
                     if (notice.getReason() == Simulator.Reason.EXCEPTION)
                         terminatingMessage = "Runtime error: ";
                     if (notice.getReason() == Simulator.Reason.STOP || notice.getReason() == Simulator.Reason.PAUSE) {
                         terminatingMessage = "User interrupt: ";
                     }
-                    operationStatusMessages.displayTerminatingMessage(terminatingMessage + fileToAssemble);
+                    AbstractToolAndApplication.this.operationStatusMessages.displayTerminatingMessage(terminatingMessage + fileToAssemble);
                     this.subscription.cancel();
                 }
             };
@@ -811,19 +833,19 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
     // assembling and running programs.
     private class MessageField extends JTextField {
 
-        public MessageField(String text) {
+        public MessageField(final String text) {
             super(text);
         }
 
-        private void displayTerminatingMessage(String text) {
-            displayMessage(text, true);
+        private void displayTerminatingMessage(final String text) {
+            this.displayMessage(text, true);
         }
 
-        private void displayNonTerminatingMessage(String text) {
-            displayMessage(text, false);
+        private void displayNonTerminatingMessage(final String text) {
+            this.displayMessage(text, false);
         }
 
-        private void displayMessage(String text, boolean terminating) {
+        private void displayMessage(final String text, final boolean terminating) {
             SwingUtilities.invokeLater(new MessageWriter(text, terminating));
         }
 
@@ -834,20 +856,21 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
             private final String text;
             private final boolean terminatingMessage;
 
-            public MessageWriter(String text, boolean terminating) {
+            public MessageWriter(final String text, final boolean terminating) {
                 this.text = text;
                 this.terminatingMessage = terminating;
             }
 
+            @Override
             public void run() {
-                if (text != null) {
-                    operationStatusMessages.setText(text);
-                    operationStatusMessages.setCaretPosition(0);
+                if (this.text != null) {
+                    AbstractToolAndApplication.this.operationStatusMessages.setText(this.text);
+                    AbstractToolAndApplication.this.operationStatusMessages.setCaretPosition(0);
                 }
-                if (terminatingMessage) {
-                    assembleRunButton.setEnabled(true);
-                    openFileButton.setEnabled(true);
-                    stopButton.setEnabled(false);
+                if (this.terminatingMessage) {
+                    AbstractToolAndApplication.this.assembleRunButton.setEnabled(true);
+                    AbstractToolAndApplication.this.openFileButton.setEnabled(true);
+                    AbstractToolAndApplication.this.stopButton.setEnabled(false);
                 }
             }
         }
@@ -856,9 +879,28 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
     //////////////////////////////////////////////////////////////////////
     // For scheduling GUI update on timed runs...used only by stand-alone app.
     private class GUIUpdater implements Runnable {
+        @Override
         public void run() {
-            updateDisplay();
+            AbstractToolAndApplication.this.updateDisplay();
         }
     }
 
+    protected Flow.Subscription subscription;
+
+    @Override
+    public void onSubscribe(@NotNull final Flow.Subscription subscription) {
+        System.out.println("onSubscribe called for: " + this);
+        this.subscription = subscription;
+        this.subscription.request(1);
+    }
+
+    @Override
+    public void onNext(final AccessNotice notice) {
+        System.out.println("onNext called for: " + this);
+        if (notice.accessIsFromRISCV()) {
+            this.processRISCVUpdate(notice);
+            this.updateDisplay();
+        }
+        this.subscription.request(1);
+    }
 }

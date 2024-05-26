@@ -38,7 +38,6 @@ import io.github.chr1sps.rars.riscv.instructions.Branch;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Observable;
 
 /**
  * A RARS tool for simulating branch prediction with a Branch History Table
@@ -125,6 +124,7 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
     /**
      * Adds BHTSimulator as observer of the text segment.
      */
+    @Override
     protected void addAsObserver() {
         addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
         addAsObserver(RegisterFile.getProgramCounterRegister());
@@ -135,6 +135,7 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      *
      * @return a {@link javax.swing.JComponent} object
      */
+    @Override
     protected JComponent buildMainDisplayArea() {
 
         m_gui = new BHTSimGUI();
@@ -164,6 +165,7 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      * Performs a reset of the simulator.
      * This causes the BHT to be reseted and the log messages to be cleared.
      */
+    @Override
     protected void reset() {
         resetSimulator();
     }
@@ -292,7 +294,8 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      * In case the last instruction was a branch instruction, the outcome of the
      * branch prediction is analyzed and visualized.
      */
-    protected void processRISCVUpdate(Observable resource, AccessNotice notice) {
+    @Override
+    protected void processRISCVUpdate(AccessNotice notice) {
 
         if (!notice.accessIsFromRISCV())
             return;

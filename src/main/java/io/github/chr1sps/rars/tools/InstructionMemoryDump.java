@@ -74,7 +74,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Observable;
 
 /**
  * Instruction/memory dump tool. Dumps every instruction run and every memory
@@ -184,7 +183,7 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
      * {@inheritDoc}
      */
     @Override
-    protected void processRISCVUpdate(Observable resource, AccessNotice notice) {
+    protected void processRISCVUpdate(AccessNotice notice) {
         if (!notice.accessIsFromRISCV())
             return;
         // we've got two kinds of access here: instructions and data
@@ -286,6 +285,7 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
      *
      * @return a {@link javax.swing.JComponent} object
      */
+    @Override
     protected JComponent getHelpComponent() {
         final String helpContent = " Generates a trace, to be stored in a file specified by the user, with one line per datum. The four kinds of data in the trace are: \n"
                 +

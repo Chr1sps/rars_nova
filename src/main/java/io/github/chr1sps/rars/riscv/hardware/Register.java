@@ -2,8 +2,7 @@ package io.github.chr1sps.rars.riscv.hardware;
 
 import io.github.chr1sps.rars.notices.AccessNotice;
 import io.github.chr1sps.rars.notices.RegisterAccessNotice;
-
-import java.util.concurrent.SubmissionPublisher;
+import io.github.chr1sps.rars.util.CustomPublisher;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -39,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Jason Bumgarner, Jason Shrewsbury, Ben Sherman
  * @version June 2003
  */
-public class Register extends SubmissionPublisher<RegisterAccessNotice> {
+public class Register extends CustomPublisher<RegisterAccessNotice> {
     private final String name;
     private final int number;
     private long resetValue;
@@ -57,11 +56,11 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      * @param num The number of the register.
      * @param val The inital (and reset) value of the register.
      */
-    public Register(String n, int num, long val) {
-        name = n;
-        number = num;
-        value = val;
-        resetValue = val;
+    public Register(final String n, final int num, final long val) {
+        this.name = n;
+        this.number = num;
+        this.value = val;
+        this.resetValue = val;
     }
 
     /**
@@ -70,7 +69,7 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      * @return name The name of the Register.
      */
     public String getName() {
-        return name;
+        return this.name;
     }
 
     /**
@@ -81,7 +80,7 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      */
     public synchronized long getValue() {
         this.submit(new RegisterAccessNotice(AccessNotice.READ, this.name));
-        return value;
+        return this.value;
     }
 
     /**
@@ -91,7 +90,7 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      * @return value The value of the Register.
      */
     public synchronized long getValueNoNotify() {
-        return value;
+        return this.value;
     }
 
     /**
@@ -100,7 +99,7 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      * @return The reset (initial) value of the Register.
      */
     public long getResetValue() {
-        return resetValue;
+        return this.resetValue;
     }
 
     /**
@@ -109,7 +108,7 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      * @return number The number of the Register.
      */
     public int getNumber() {
-        return number;
+        return this.number;
     }
 
     /**
@@ -119,9 +118,9 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      * @param val Value to set the Register to.
      * @return previous value of register
      */
-    public synchronized long setValue(long val) {
-        long old = value;
-        value = val;
+    public synchronized long setValue(final long val) {
+        final long old = this.value;
+        this.value = val;
         this.submit(new RegisterAccessNotice(AccessNotice.WRITE, this.name));
         return old;
     }
@@ -133,9 +132,9 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      * @param val Value to set the Register to.
      * @return previous value of register
      */
-    public synchronized long setValueBackdoor(long val) {
-        long old = value;
-        value = val;
+    public synchronized long setValueBackdoor(final long val) {
+        final long old = this.value;
+        this.value = val;
         return old;
     }
 
@@ -144,7 +143,7 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      * Observers are not notified.
      */
     public synchronized void resetValue() {
-        value = resetValue;
+        this.value = this.resetValue;
     }
 
     /**
@@ -153,7 +152,7 @@ public class Register extends SubmissionPublisher<RegisterAccessNotice> {
      *
      * @param reset a long
      */
-    public synchronized void changeResetValue(long reset) {
-        resetValue = reset;
+    public synchronized void changeResetValue(final long reset) {
+        this.resetValue = reset;
     }
 }

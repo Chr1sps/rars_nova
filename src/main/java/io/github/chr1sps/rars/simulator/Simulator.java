@@ -2,6 +2,7 @@ package io.github.chr1sps.rars.simulator;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
+import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.*;
 import io.github.chr1sps.rars.notices.SimulatorNotice;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
@@ -81,16 +82,16 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
         // Its constructor looks for the GUI, which at load time is not created yet,
         // and incorrectly leaves interactiveGUIUpdater null! This causes runtime
         // exceptions while running in timed mode.
-        if (simulator == null) {
-            simulator = new Simulator();
+        if (Simulator.simulator == null) {
+            Simulator.simulator = new Simulator();
         }
-        return simulator;
+        return Simulator.simulator;
     }
 
     private Simulator() {
-        simulatorThread = null;
+        this.simulatorThread = null;
         if (Globals.getGui() != null) {
-            interactiveGUIUpdater = new UpdateGUI();
+            Simulator.interactiveGUIUpdater = new UpdateGUI();
         }
     }
 
@@ -107,12 +108,12 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
      * @return true if execution completed, false otherwise
      * @throws SimulationException Throws exception if run-time exception occurs.
      */
-    public Reason simulate(int pc, int maxSteps, int[] breakPoints) throws SimulationException {
-        simulatorThread = new SimThread(pc, maxSteps, breakPoints);
-        simulatorThread.run(); // Just call run, this is a blocking method
-        SimulationException pe = simulatorThread.pe;
-        boolean done = simulatorThread.done;
-        Reason out = simulatorThread.constructReturnReason;
+    public Reason simulate(final int pc, final int maxSteps, final int[] breakPoints) throws SimulationException {
+        this.simulatorThread = new SimThread(pc, maxSteps, breakPoints);
+        this.simulatorThread.run(); // Just call run, this is a blocking method
+        final SimulationException pe = this.simulatorThread.pe;
+        final boolean done = this.simulatorThread.done;
+        final Reason out = this.simulatorThread.constructReturnReason;
         if (done)
             SystemIO.resetFiles(); // close any files opened in the process of simulating
         this.simulatorThread = null;
@@ -133,9 +134,9 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
      * @param breakPoints array of breakpoint program counter values, use null if
      *                    none
      */
-    public void startSimulation(int pc, int maxSteps, int[] breakPoints) {
-        simulatorThread = new SimThread(pc, maxSteps, breakPoints);
-        new Thread(simulatorThread, "RISCV").start();
+    public void startSimulation(final int pc, final int maxSteps, final int[] breakPoints) {
+        this.simulatorThread = new SimThread(pc, maxSteps, breakPoints);
+        new Thread(this.simulatorThread, "RISCV").start();
     }
 
     /**
@@ -145,13 +146,13 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
      * gracefully so the main thread handling the GUI can take over.
      * This is used by both STOP and PAUSE features.
      */
-    private void interruptExecution(Reason reason) {
-        if (simulatorThread != null) {
-            simulatorThread.setStop(reason);
-            for (StopListener l : stopListeners) {
+    private void interruptExecution(final Reason reason) {
+        if (this.simulatorThread != null) {
+            this.simulatorThread.setStop(reason);
+            for (final StopListener l : this.stopListeners) {
                 l.stopped(this);
             }
-            simulatorThread = null;
+            this.simulatorThread = null;
         }
     }
 
@@ -159,14 +160,14 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
      * <p>stopExecution.</p>
      */
     public void stopExecution() {
-        interruptExecution(Reason.STOP);
+        this.interruptExecution(Reason.STOP);
     }
 
     /**
      * <p>pauseExecution.</p>
      */
     public void pauseExecution() {
-        interruptExecution(Reason.PAUSE);
+        this.interruptExecution(Reason.PAUSE);
     }
 
     /*
@@ -186,8 +187,8 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
      *
      * @param l a {@link io.github.chr1sps.rars.simulator.Simulator.StopListener} object
      */
-    public void addStopListener(StopListener l) {
-        stopListeners.add(l);
+    public void addStopListener(final StopListener l) {
+        this.stopListeners.add(l);
     }
 
     /**
@@ -195,8 +196,8 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
      *
      * @param l a {@link io.github.chr1sps.rars.simulator.Simulator.StopListener} object
      */
-    public void removeStopListener(StopListener l) {
-        stopListeners.remove(l);
+    public void removeStopListener(final StopListener l) {
+        this.stopListeners.remove(l);
     }
 
     // The Simthread object will call this method when it enters and returns from
@@ -206,7 +207,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
     // "stop" just means it is leaving execution state; this could be triggered
     // by Stop button, by Pause button, by Step button, by runtime exception, by
     // instruction count limit, by breakpoint, or by end of simulation (truly done).
-    private void notifyObserversOfExecution(SimulatorNotice notice) {
+    private void notifyObserversOfExecution(final SimulatorNotice notice) {
         // TODO: this is not completely threadsafe, if anything using Swing is observing
         // This can be fixed by making a SwingObserver class that is thread-safe
         this.submit(notice);
@@ -216,9 +217,9 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
      * <p>interrupt.</p>
      */
     public void interrupt() {
-        if (simulatorThread == null)
+        if (this.simulatorThread == null)
             return;
-        simulatorThread.interrupt();
+        this.simulatorThread.interrupt();
     }
 
     /**
@@ -228,7 +229,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
      * is simulated. Thus interruption occurs in a tightly controlled fashion.
      */
 
-    class SimThread implements Runnable {
+    static class SimThread implements Runnable {
         private int pc;
         private final int maxSteps;
         private int[] breakPoints;
@@ -247,7 +248,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
          * @param breakPoints array of breakpoints (instruction addresses) specified by
          *                    user
          */
-        SimThread(int pc, int maxSteps, int[] breakPoints) {
+        SimThread(final int pc, final int maxSteps, final int[] breakPoints) {
             this.pc = pc;
             this.maxSteps = maxSteps;
             this.breakPoints = breakPoints;
@@ -262,40 +263,40 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
          *
          * @param reason the Reason for stopping (PAUSE or STOP)
          */
-        public synchronized void setStop(Reason reason) {
-            stop = true;
-            constructReturnReason = reason;
-            notify();
+        public synchronized void setStop(final Reason reason) {
+            this.stop = true;
+            this.constructReturnReason = reason;
+            this.notify();
         }
 
         private void startExecution() {
             Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.SIMULATOR_START,
-                    maxSteps,
+                    this.maxSteps,
                     (Globals.getGui() != null || Globals.runSpeedPanelExists)
                             ? RunSpeedPanel.getInstance().getRunSpeed()
                             : RunSpeedPanel.UNLIMITED_SPEED,
-                    pc, null, pe, done));
+                    this.pc, null, this.pe, this.done));
         }
 
-        private void stopExecution(boolean done, Reason reason) {
+        private void stopExecution(final boolean done, final Reason reason) {
             this.done = done;
             this.constructReturnReason = reason;
             SystemIO.flush(true);
             if (done)
                 SystemIO.resetFiles(); // close any files opened in the process of simulating
             Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.SIMULATOR_STOP,
-                    maxSteps,
+                    this.maxSteps,
                     (Globals.getGui() != null || Globals.runSpeedPanelExists)
                             ? RunSpeedPanel.getInstance().getRunSpeed()
                             : RunSpeedPanel.UNLIMITED_SPEED,
-                    pc, reason, pe, done));
+                    this.pc, reason, this.pe, done));
         }
 
         private synchronized void interrupt() {
-            notify();
+            this.notify();
         }
 
-        private boolean handleTrap(SimulationException se, int pc) {
+        private boolean handleTrap(final SimulationException se, final int pc) {
             assert se.reason != ExceptionReason.OTHER : "Unhandlable exception not thrown through ExitingEception";
             assert !se.reason.isInterrupt() : "Interrupts cannot be handled by the trap handler";
 
@@ -305,16 +306,16 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
             ControlAndStatusRegisterFile.updateRegister("utval", se.value);
 
             // Get the interrupt handler if it exists
-            int utvec = ControlAndStatusRegisterFile.getValue("utvec");
+            final int utvec = ControlAndStatusRegisterFile.getValue("utvec");
 
             // Mode can be ignored because we are only handling traps
-            int base = utvec & 0xFFFFFFFC;
+            final int base = utvec & 0xFFFFFFFC;
 
             ProgramStatement exceptionHandler = null;
             if ((ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) != 0) { // test user-interrupt enable (UIE)
                 try {
                     exceptionHandler = Globals.memory.getStatement(base);
-                } catch (AddressErrorException aee) {
+                } catch (final AddressErrorException aee) {
                     // Handled below
                 }
             }
@@ -328,14 +329,14 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                 // If we don't have an error handler or exceptions are disabled terminate the
                 // process
                 this.pe = se;
-                stopExecution(true, Reason.EXCEPTION);
+                this.stopExecution(true, Reason.EXCEPTION);
                 return false;
             }
         }
 
-        private boolean handleInterrupt(int value, int cause, int pc) {
+        private boolean handleInterrupt(final int value, final int cause, final int pc) {
             assert (cause & 0x80000000) != 0 : "Traps cannot be handled by the interupt handler";
-            int code = cause & 0x7FFFFFFF;
+            final int code = cause & 0x7FFFFFFF;
 
             // Don't handle cases where that interrupt isn't enabled
             assert ((ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) != 0
@@ -348,10 +349,11 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
             ControlAndStatusRegisterFile.updateRegister("utval", value);
 
             // Get the interrupt handler if it exists
-            int utvec = ControlAndStatusRegisterFile.getValue("utvec");
+            final int utvec = ControlAndStatusRegisterFile.getValue("utvec");
 
             // Handle vectored mode
-            int base = utvec & 0xFFFFFFFC, mode = utvec & 0x3;
+            int base = utvec & 0xFFFFFFFC;
+            final int mode = utvec & 0x3;
             if (mode == 2) {
                 base += 4 * code;
             }
@@ -359,7 +361,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
             ProgramStatement exceptionHandler = null;
             try {
                 exceptionHandler = Globals.memory.getStatement(base);
-            } catch (AddressErrorException aee) {
+            } catch (final AddressErrorException aee) {
                 // handled below
             }
             if (exceptionHandler != null) {
@@ -371,7 +373,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                 // If we don't have an error handler or exceptions are disabled terminate the
                 // process
                 this.pe = new SimulationException("Interrupt handler was not supplied, but interrupt enable was high");
-                stopExecution(true, Reason.EXCEPTION);
+                this.stopExecution(true, Reason.EXCEPTION);
                 return false;
             }
         }
@@ -380,6 +382,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
          * Implements Runnable
          */
 
+        @Override
         public void run() {
             // The next two statements are necessary for GUI to be consistently updated
             // before the simulation gets underway. Without them, this happens only
@@ -390,13 +393,13 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
             Thread.yield(); // let the main thread run a bit to finish updating the GUI
 
-            if (breakPoints == null || breakPoints.length == 0) {
-                breakPoints = null;
+            if (this.breakPoints == null || this.breakPoints.length == 0) {
+                this.breakPoints = null;
             } else {
-                Arrays.sort(breakPoints); // must be pre-sorted for binary search
+                Arrays.sort(this.breakPoints); // must be pre-sorted for binary search
             }
 
-            startExecution();
+            this.startExecution();
 
             // ******************* PS addition 26 July 2006 **********************
             // A couple statements below were added for the purpose of assuring that when
@@ -433,14 +436,14 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
             // This is noticeable in stepped mode.
             // *********************************************************************
 
-            RegisterFile.initializeProgramCounter(pc);
-            ProgramStatement statement = null;
+            RegisterFile.initializeProgramCounter(this.pc);
+            ProgramStatement statement;
             int steps = 0;
             boolean ebreak = false, waiting = false;
 
             // Volatile variable initialized false but can be set true by the main thread.
             // Used to stop or pause a running program. See stopSimulation() above.
-            while (!stop) {
+            while (!this.stop) {
                 SystemIO.flush(false);
                 // Perform the RISCV instruction in synchronized block. If external threads
                 // agree
@@ -450,20 +453,20 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                 Globals.memoryAndRegistersLock.lock();
                 try {
                     // Handle pending interupts and traps first
-                    long uip = ControlAndStatusRegisterFile.getValueNoNotify("uip"),
-                            uie = ControlAndStatusRegisterFile.getValueNoNotify("uie");
-                    boolean IE = (ControlAndStatusRegisterFile.getValueNoNotify("ustatus")
+                    long uip = ControlAndStatusRegisterFile.getValueNoNotify("uip");
+                    final long uie = ControlAndStatusRegisterFile.getValueNoNotify("uie");
+                    final boolean IE = (ControlAndStatusRegisterFile.getValueNoNotify("ustatus")
                             & ControlAndStatusRegisterFile.INTERRUPT_ENABLE) != 0;
                     // make sure no interrupts sneak in while we are processing them
-                    pc = RegisterFile.getProgramCounter();
+                    this.pc = RegisterFile.getProgramCounter();
                     synchronized (InterruptController.lock) {
-                        boolean pendingExternal = InterruptController.externalPending(),
-                                pendingTimer = InterruptController.timerPending(),
-                                pendingTrap = InterruptController.trapPending();
+                        boolean pendingExternal = InterruptController.externalPending();
+                        boolean pendingTimer = InterruptController.timerPending();
+                        final boolean pendingTrap = InterruptController.trapPending();
                         // This is the explicit (in the spec) order that interrupts should be serviced
                         if (IE && pendingExternal && (uie & ControlAndStatusRegisterFile.EXTERNAL_INTERRUPT) != 0) {
-                            if (handleInterrupt(InterruptController.claimExternal(),
-                                    ExceptionReason.EXTERNAL_INTERRUPT.value, pc)) {
+                            if (this.handleInterrupt(InterruptController.claimExternal(),
+                                    ExceptionReason.EXTERNAL_INTERRUPT.value, this.pc)) {
                                 pendingExternal = false;
                                 uip &= ~0x100;
                             } else {
@@ -472,15 +475,15 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                             }
                         } else if (IE && (uip & 0x1) != 0
                                 && (uie & ControlAndStatusRegisterFile.SOFTWARE_INTERRUPT) != 0) {
-                            if (handleInterrupt(0, ExceptionReason.SOFTWARE_INTERRUPT.value, pc)) {
+                            if (this.handleInterrupt(0, ExceptionReason.SOFTWARE_INTERRUPT.value, this.pc)) {
                                 uip &= ~0x1;
                             } else {
                                 return; // if the interrupt can't be handled, but the interrupt enable bit is high,
                                 // thats an error
                             }
                         } else if (IE && pendingTimer && (uie & ControlAndStatusRegisterFile.TIMER_INTERRUPT) != 0) {
-                            if (handleInterrupt(InterruptController.claimTimer(), ExceptionReason.TIMER_INTERRUPT.value,
-                                    pc)) {
+                            if (this.handleInterrupt(InterruptController.claimTimer(), ExceptionReason.TIMER_INTERRUPT.value,
+                                    this.pc)) {
                                 pendingTimer = false;
                                 uip &= ~0x10;
                             } else {
@@ -489,16 +492,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                             }
                         } else if (pendingTrap) { // if we have a pending trap and aren't handling an interrupt it must
                             // be handled
-                            if (handleTrap(InterruptController.claimTrap(), pc - Instruction.INSTRUCTION_LENGTH)) { // account
-                                // for
-                                // that
-                                // the
-                                // PC
-                                // has
-                                // already
-                                // been
-                                // incremented
-                            } else {
+                            if (!this.handleTrap(InterruptController.claimTrap(), this.pc - Instruction.INSTRUCTION_LENGTH)) {
                                 return;
                             }
                         }
@@ -511,21 +505,21 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
 
                     // always handle interrupts and traps before quiting
                     // Check number of instructions executed. Return if at limit (-1 is no limit).
-                    if (maxSteps > 0) {
+                    if (this.maxSteps > 0) {
                         steps++;
-                        if (steps > maxSteps) {
-                            stopExecution(false, Reason.MAX_STEPS);
+                        if (steps > this.maxSteps) {
+                            this.stopExecution(false, Reason.MAX_STEPS);
                             return;
                         }
                     }
 
-                    pc = RegisterFile.getProgramCounter();
+                    this.pc = RegisterFile.getProgramCounter();
                     RegisterFile.incrementPC();
                     // Get instuction
                     try {
-                        statement = Globals.memory.getStatement(pc);
-                    } catch (AddressErrorException e) {
-                        SimulationException tmp;
+                        statement = Globals.memory.getStatement(this.pc);
+                    } catch (final AddressErrorException e) {
+                        final SimulationException tmp;
                         if (e.reason == ExceptionReason.LOAD_ACCESS_FAULT) {
                             tmp = new SimulationException("Instruction load access error",
                                     ExceptionReason.INSTRUCTION_ACCESS_FAULT);
@@ -533,22 +527,22 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                             tmp = new SimulationException("Instruction load alignment error",
                                     ExceptionReason.INSTRUCTION_ADDR_MISALIGNED);
                         }
-                        if (!InterruptController.registerSynchronousTrap(tmp, pc)) {
+                        if (!InterruptController.registerSynchronousTrap(tmp, this.pc)) {
                             this.pe = tmp;
-                            ControlAndStatusRegisterFile.updateRegister("uepc", pc);
-                            stopExecution(true, Reason.EXCEPTION);
+                            ControlAndStatusRegisterFile.updateRegister("uepc", this.pc);
+                            this.stopExecution(true, Reason.EXCEPTION);
                             return;
                         } else {
                             continue;
                         }
                     }
                     if (statement == null) {
-                        stopExecution(true, Reason.CLIFF_TERMINATION);
+                        this.stopExecution(true, Reason.CLIFF_TERMINATION);
                         return;
                     }
 
                     try {
-                        BasicInstruction instruction = (BasicInstruction) statement.getInstruction();
+                        final BasicInstruction instruction = (BasicInstruction) statement.getInstruction();
                         if (instruction == null) {
                             // TODO: Proper error handling here
                             throw new SimulationException(statement,
@@ -560,21 +554,21 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                         instruction.simulate(statement);
 
                         // IF statement added 7/26/06 (explanation above)
-                        if (Globals.getSettings().getBackSteppingEnabled()) {
-                            Globals.program.getBackStepper().addDoNothing(pc);
+                        if (Settings.getBackSteppingEnabled()) {
+                            Globals.program.getBackStepper().addDoNothing(this.pc);
                         }
-                    } catch (BreakpointException b) {
+                    } catch (final BreakpointException b) {
                         // EBREAK needs backstepping support too.
-                        if (Globals.getSettings().getBackSteppingEnabled()) {
-                            Globals.program.getBackStepper().addDoNothing(pc);
+                        if (Settings.getBackSteppingEnabled()) {
+                            Globals.program.getBackStepper().addDoNothing(this.pc);
                         }
                         ebreak = true;
-                    } catch (WaitException w) {
-                        if (Globals.getSettings().getBackSteppingEnabled()) {
-                            Globals.program.getBackStepper().addDoNothing(pc);
+                    } catch (final WaitException w) {
+                        if (Settings.getBackSteppingEnabled()) {
+                            Globals.program.getBackStepper().addDoNothing(this.pc);
                         }
                         waiting = true;
-                    } catch (ExitingException e) {
+                    } catch (final ExitingException e) {
                         if (e.reason == ExceptionReason.OTHER) {
                             this.constructReturnReason = Reason.NORMAL_TERMINATION;
                         } else {
@@ -582,14 +576,14 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                             this.pe = e;
                         }
                         // TODO: remove access to constructReturnReason
-                        stopExecution(true, constructReturnReason);
+                        this.stopExecution(true, this.constructReturnReason);
                         return;
-                    } catch (SimulationException se) {
-                        if (InterruptController.registerSynchronousTrap(se, pc)) {
+                    } catch (final SimulationException se) {
+                        if (InterruptController.registerSynchronousTrap(se, this.pc)) {
                             continue;
                         } else {
                             this.pe = se;
-                            stopExecution(true, Reason.EXCEPTION);
+                            this.stopExecution(true, Reason.EXCEPTION);
                             return;
                         }
                     }
@@ -598,17 +592,17 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                 }
 
                 // Update cycle(h) and instret(h)
-                long cycle = ControlAndStatusRegisterFile.getValueNoNotify("cycle"),
-                        instret = ControlAndStatusRegisterFile.getValueNoNotify("instret"),
-                        time = System.currentTimeMillis();
+                final long cycle = ControlAndStatusRegisterFile.getValueNoNotify("cycle");
+                final long instret = ControlAndStatusRegisterFile.getValueNoNotify("instret");
+                final long time = System.currentTimeMillis();
                 ControlAndStatusRegisterFile.updateRegisterBackdoor("cycle", cycle + 1);
                 ControlAndStatusRegisterFile.updateRegisterBackdoor("instret", instret + 1);
                 ControlAndStatusRegisterFile.updateRegisterBackdoor("time", time);
 
                 // Return if we've reached a breakpoint.
-                if (ebreak || (breakPoints != null) &&
-                        (Arrays.binarySearch(breakPoints, RegisterFile.getProgramCounter()) >= 0)) {
-                    stopExecution(false, Reason.BREAKPOINT);
+                if (ebreak || (this.breakPoints != null) &&
+                        (Arrays.binarySearch(this.breakPoints, RegisterFile.getProgramCounter()) >= 0)) {
+                    this.stopExecution(false, Reason.BREAKPOINT);
                     return;
                 }
 
@@ -617,8 +611,8 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                     if (!(InterruptController.externalPending() || InterruptController.timerPending())) {
                         synchronized (this) {
                             try {
-                                wait();
-                            } catch (InterruptedException ie) {
+                                this.wait();
+                            } catch (final InterruptedException ie) {
                                 // Don't bother catching an interruption
                             }
                         }
@@ -629,28 +623,29 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                 // schedule GUI update only if: there is in fact a GUI! AND
                 // using Run, not Step (maxSteps != 1) AND
                 // running slowly enough for GUI to keep up
-                if (interactiveGUIUpdater != null && maxSteps != 1 &&
+                if (Simulator.interactiveGUIUpdater != null && this.maxSteps != 1 &&
                         RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
-                    SwingUtilities.invokeLater(interactiveGUIUpdater);
+                    SwingUtilities.invokeLater(Simulator.interactiveGUIUpdater);
                 }
                 if (Globals.getGui() != null || Globals.runSpeedPanelExists) { // OR added by DPS 24 July 2008 to enable
                     // speed control by stand-alone tool
-                    if (maxSteps != 1 &&
+                    if (this.maxSteps != 1 &&
                             RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                         try {
                             // TODO: potentially use this.wait so it can be interrupted
                             Thread.sleep((int) (1000 / RunSpeedPanel.getInstance().getRunSpeed())); // make sure it's
                             // never zero!
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException ignored) {
                         }
                     }
                 }
             }
-            stopExecution(false, constructReturnReason);
+            this.stopExecution(false, this.constructReturnReason);
         }
     }
 
-    private class UpdateGUI implements Runnable {
+    private static class UpdateGUI implements Runnable {
+        @Override
         public void run() {
             if (Globals.getGui().getRegistersPane().getSelectedComponent() == Globals.getGui().getMainPane()
                     .getExecutePane().getRegistersWindow()) {

@@ -23,6 +23,7 @@ public class MaskedRegister extends Register {
     /**
      * {@inheritDoc}
      */
+    @Override
     public synchronized long setValue(long val) {
         long current = getValue();
         super.setValue((current & mask) | (val & ~mask));

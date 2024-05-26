@@ -3,9 +3,10 @@ package io.github.chr1sps.rars.riscv.hardware;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.assembler.SymbolTable;
+import io.github.chr1sps.rars.notices.RegisterAccessNotice;
 import io.github.chr1sps.rars.riscv.Instruction;
 
-import java.util.Observer;
+import java.util.concurrent.Flow;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -53,8 +54,8 @@ public class RegisterFile {
     public static final int STACK_POINTER_REGISTER = 2;
     private static final RegisterBlock instance = new RegisterBlock('x', new Register[]{
             new Register("zero", 0, 0), new Register("ra", 1, 0),
-            new Register("sp", STACK_POINTER_REGISTER, Memory.stackPointer),
-            new Register("gp", GLOBAL_POINTER_REGISTER, Memory.globalPointer),
+            new Register("sp", RegisterFile.STACK_POINTER_REGISTER, Memory.stackPointer),
+            new Register("gp", RegisterFile.GLOBAL_POINTER_REGISTER, Memory.globalPointer),
             new Register("tp", 4, 0), new Register("t0", 5, 0),
             new Register("t1", 6, 0), new Register("t2", 7, 0),
             new Register("s0", 8, 0), new Register("s1", 9, 0),
@@ -80,13 +81,12 @@ public class RegisterFile {
      * @param num Register to set the value of.
      * @param val The desired value for the register.
      */
-    public static void updateRegister(int num, long val) {
-        if (num == 0) {
-        } else {
-            if ((Globals.getSettings().getBackSteppingEnabled())) {
-                Globals.program.getBackStepper().addRegisterFileRestore(num, instance.updateRegister(num, val));
+    public static void updateRegister(final int num, final long val) {
+        if (num != 0) {
+            if ((Settings.getBackSteppingEnabled())) {
+                Globals.program.getBackStepper().addRegisterFileRestore(num, RegisterFile.instance.updateRegister(num, val));
             } else {
-                instance.updateRegister(num, val);
+                RegisterFile.instance.updateRegister(num, val);
             }
         }
     }
@@ -97,8 +97,8 @@ public class RegisterFile {
      * @param name Name of register to set the value of.
      * @param val  The desired value for the register.
      */
-    public static void updateRegister(String name, long val) {
-        updateRegister(instance.getRegister(name).getNumber(), val);
+    public static void updateRegister(final String name, final long val) {
+        RegisterFile.updateRegister(RegisterFile.instance.getRegister(name).getNumber(), val);
     }
 
     /**
@@ -107,8 +107,8 @@ public class RegisterFile {
      * @param num The register number.
      * @return The value of the given register.
      */
-    public static int getValue(int num) {
-        return (int) instance.getValue(num);
+    public static int getValue(final int num) {
+        return (int) RegisterFile.instance.getValue(num);
 
     }
 
@@ -118,8 +118,8 @@ public class RegisterFile {
      * @param num The register number.
      * @return The value of the given register.
      */
-    public static long getValueLong(int num) {
-        return instance.getValue(num);
+    public static long getValueLong(final int num) {
+        return RegisterFile.instance.getValue(num);
 
     }
 
@@ -129,8 +129,8 @@ public class RegisterFile {
      * @param name The register's name.
      * @return The value of the given register.
      */
-    public static int getValue(String name) {
-        return (int) instance.getValue(name);
+    public static int getValue(final String name) {
+        return (int) RegisterFile.instance.getValue(name);
     }
 
     /**
@@ -139,7 +139,7 @@ public class RegisterFile {
      * @return The set of registers.
      */
     public static Register[] getRegisters() {
-        return instance.getRegisters();
+        return RegisterFile.instance.getRegisters();
     }
 
     /**
@@ -148,11 +148,11 @@ public class RegisterFile {
      * @param name The register name, either in $0 or $zero format.
      * @return The register object,or null if not found.
      */
-    public static Register getRegister(String name) {
+    public static Register getRegister(final String name) {
         if (name.equals("fp")) {
-            return instance.getRegister("s0");
+            return RegisterFile.instance.getRegister("s0");
         }
-        return instance.getRegister(name);
+        return RegisterFile.instance.getRegister(name);
     }
 
     /**
@@ -162,8 +162,8 @@ public class RegisterFile {
      *
      * @param value The value to set the Program Counter to.
      */
-    public static void initializeProgramCounter(int value) {
-        programCounter.setValue(value);
+    public static void initializeProgramCounter(final int value) {
+        RegisterFile.programCounter.setValue(value);
     }
 
     /**
@@ -179,12 +179,12 @@ public class RegisterFile {
      *                    defined, or if parameter false,
      *                    will set program counter to default reset value.
      */
-    public static void initializeProgramCounter(boolean startAtMain) {
-        int mainAddr = Globals.symbolTable.getAddress(SymbolTable.getStartLabel());
+    public static void initializeProgramCounter(final boolean startAtMain) {
+        final int mainAddr = Globals.symbolTable.getAddress(SymbolTable.getStartLabel());
         if (startAtMain && mainAddr != SymbolTable.NOT_FOUND && Memory.inTextSegment(mainAddr)) {
-            initializeProgramCounter(mainAddr);
+            RegisterFile.initializeProgramCounter(mainAddr);
         } else {
-            initializeProgramCounter((int) programCounter.getResetValue());
+            RegisterFile.initializeProgramCounter((int) RegisterFile.programCounter.getResetValue());
         }
     }
 
@@ -196,10 +196,10 @@ public class RegisterFile {
      * @param value The value to set the Program Counter to.
      * @return previous PC value
      */
-    public static int setProgramCounter(int value) {
-        int old = (int) programCounter.getValue();
-        programCounter.setValue(value);
-        if (Globals.getSettings().getBackSteppingEnabled()) {
+    public static int setProgramCounter(final int value) {
+        final int old = (int) RegisterFile.programCounter.getValue();
+        RegisterFile.programCounter.setValue(value);
+        if (Settings.getBackSteppingEnabled()) {
             Globals.program.getBackStepper().addPCRestore(old);
         }
         return old;
@@ -211,7 +211,7 @@ public class RegisterFile {
      * @return The program counters value as an int.
      */
     public static int getProgramCounter() {
-        return (int) programCounter.getValue();
+        return (int) RegisterFile.programCounter.getValue();
     }
 
     /**
@@ -220,7 +220,7 @@ public class RegisterFile {
      * @return program counter's Register object.
      */
     public static Register getProgramCounterRegister() {
-        return programCounter;
+        return RegisterFile.programCounter;
     }
 
     /**
@@ -229,7 +229,7 @@ public class RegisterFile {
      * @return The program counter's initial value
      */
     public static int getInitialProgramCounter() {
-        return (int) programCounter.getResetValue();
+        return (int) RegisterFile.programCounter.getResetValue();
     }
 
     /**
@@ -241,8 +241,8 @@ public class RegisterFile {
      * <code>AbstractToolAndApplication</code>.
      */
     public static void resetRegisters() {
-        instance.resetRegisters();
-        initializeProgramCounter(Globals.getSettings().getBooleanSetting(Settings.Bool.START_AT_MAIN));// replaces
+        RegisterFile.instance.resetRegisters();
+        RegisterFile.initializeProgramCounter(Globals.getSettings().getBooleanSetting(Settings.Bool.START_AT_MAIN));// replaces
         // "programCounter.resetValue()",
         // DPS 3/3/09
     }
@@ -252,7 +252,7 @@ public class RegisterFile {
      * branch).
      */
     public static void incrementPC() {
-        programCounter.setValue(programCounter.getValue() + Instruction.INSTRUCTION_LENGTH);
+        RegisterFile.programCounter.setValue(RegisterFile.programCounter.getValue() + Instruction.INSTRUCTION_LENGTH);
     }
 
     /**
@@ -261,10 +261,10 @@ public class RegisterFile {
      * will add the given Observer to each one. Currently does not apply to Program
      * Counter.
      *
-     * @param observer a {@link java.util.Observer} object
+     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void addRegistersObserver(Observer observer) {
-        instance.addRegistersObserver(observer);
+    public static void addRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+        RegisterFile.instance.addRegistersObserver(observer);
     }
 
     /**
@@ -274,9 +274,9 @@ public class RegisterFile {
      * Program
      * Counter.
      *
-     * @param observer a {@link java.util.Observer} object
+     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void deleteRegistersObserver(Observer observer) {
-        instance.deleteRegistersObserver(observer);
+    public static void deleteRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+        RegisterFile.instance.deleteRegistersSubscriber(observer);
     }
 }

@@ -1,9 +1,8 @@
 package io.github.chr1sps.rars.venus;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.tools.Tool;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /*
@@ -50,7 +49,7 @@ public class ToolAction extends AbstractAction {
      *
      * @param tool a {@link io.github.chr1sps.rars.tools.Tool} object
      */
-    public ToolAction(Tool tool) {
+    public ToolAction(final Tool tool) {
         super(tool.getName(), null);
         this.tool = tool;
     }
@@ -60,12 +59,13 @@ public class ToolAction extends AbstractAction {
      * <p>
      * Response when tool's item selected from menu. Invokes tool's action() method.
      */
-    public void actionPerformed(ActionEvent e) {
+    @Override
+    public void actionPerformed(final ActionEvent e) {
         try {
             // I am not sure if a new instance needs to be made each time
             // It may be possible to reduce this to tool.action()
-            tool.getClass().newInstance().action();
-        } catch (Exception ex) {
+            this.tool.getClass().getDeclaredConstructor().newInstance().action();
+        } catch (final Exception ignored) {
         }
     }
 }

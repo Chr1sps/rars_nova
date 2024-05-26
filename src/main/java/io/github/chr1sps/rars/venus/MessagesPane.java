@@ -487,6 +487,7 @@ public class MessagesPane extends JTabbedPane {
             }
         };
         final Simulator.StopListener stopListener = new Simulator.StopListener() {
+            @Override
             public void stopped(Simulator s) {
                 returnResponse();
             }
