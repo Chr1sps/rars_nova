@@ -47,7 +47,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // a 32 bit float value into its equivalent 32-bit int representation, and
 // Float.intBitsToFloat() to bring it back.
 public class FloatingPointRegisterFile {
-    @SuppressWarnings("resource")
     private static final RegisterBlock instance = new RegisterBlock('f', new Register[]{
             new Register("ft0", 0, 0), new Register("ft1", 1, 0),
             new Register("ft2", 2, 0), new Register("ft3", 3, 0),
@@ -66,10 +65,6 @@ public class FloatingPointRegisterFile {
             new Register("ft8", 28, 0), new Register("ft9", 29, 0),
             new Register("ft10", 30, 0), new Register("ft11", 31, 0)
     });
-
-    static {
-        Runtime.getRuntime().addShutdownHook(new Thread(FloatingPointRegisterFile.instance::close));
-    }
 
     /**
      * Sets the value of the FPU register given to the value given.

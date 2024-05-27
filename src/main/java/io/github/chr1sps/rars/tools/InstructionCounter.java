@@ -120,7 +120,7 @@ public class InstructionCounter extends AbstractToolAndApplication {
      * @param heading String containing text for heading shown in upper part of
      *                window.
      */
-    public InstructionCounter(String title, String heading) {
+    public InstructionCounter(final String title, final String heading) {
         super(title, heading);
     }
 
@@ -128,7 +128,7 @@ public class InstructionCounter extends AbstractToolAndApplication {
      * Simple construction, likely used by the RARS Tools menu mechanism.
      */
     public InstructionCounter() {
-        super(name + ", " + version, heading);
+        super(InstructionCounter.name + ", " + InstructionCounter.version, InstructionCounter.heading);
     }
 
     /**
@@ -136,87 +136,84 @@ public class InstructionCounter extends AbstractToolAndApplication {
      */
     @Override
     public String getName() {
-        return name;
+        return InstructionCounter.name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected JComponent buildMainDisplayArea() {
         // Create everything
-        JPanel panel = new JPanel(new GridBagLayout());
+        final JPanel panel = new JPanel(new GridBagLayout());
 
-        counterField = new JTextField("0", 10);
-        counterField.setEditable(false);
+        this.counterField = new JTextField("0", 10);
+        this.counterField.setEditable(false);
 
-        counterRField = new JTextField("0", 10);
-        counterRField.setEditable(false);
-        progressbarR = new JProgressBar(JProgressBar.HORIZONTAL);
-        progressbarR.setStringPainted(true);
+        this.counterRField = new JTextField("0", 10);
+        this.counterRField.setEditable(false);
+        this.progressbarR = new JProgressBar(JProgressBar.HORIZONTAL);
+        this.progressbarR.setStringPainted(true);
 
-        counterR4Field = new JTextField("0", 10);
-        counterR4Field.setEditable(false);
-        progressbarR4 = new JProgressBar(JProgressBar.HORIZONTAL);
-        progressbarR4.setStringPainted(true);
+        this.counterR4Field = new JTextField("0", 10);
+        this.counterR4Field.setEditable(false);
+        this.progressbarR4 = new JProgressBar(JProgressBar.HORIZONTAL);
+        this.progressbarR4.setStringPainted(true);
 
-        counterIField = new JTextField("0", 10);
-        counterIField.setEditable(false);
-        progressbarI = new JProgressBar(JProgressBar.HORIZONTAL);
-        progressbarI.setStringPainted(true);
+        this.counterIField = new JTextField("0", 10);
+        this.counterIField.setEditable(false);
+        this.progressbarI = new JProgressBar(JProgressBar.HORIZONTAL);
+        this.progressbarI.setStringPainted(true);
 
-        counterSField = new JTextField("0", 10);
-        counterSField.setEditable(false);
-        progressbarS = new JProgressBar(JProgressBar.HORIZONTAL);
-        progressbarS.setStringPainted(true);
+        this.counterSField = new JTextField("0", 10);
+        this.counterSField.setEditable(false);
+        this.progressbarS = new JProgressBar(JProgressBar.HORIZONTAL);
+        this.progressbarS.setStringPainted(true);
 
-        counterBField = new JTextField("0", 10);
-        counterBField.setEditable(false);
-        progressbarB = new JProgressBar(JProgressBar.HORIZONTAL);
-        progressbarB.setStringPainted(true);
+        this.counterBField = new JTextField("0", 10);
+        this.counterBField.setEditable(false);
+        this.progressbarB = new JProgressBar(JProgressBar.HORIZONTAL);
+        this.progressbarB.setStringPainted(true);
 
-        counterUField = new JTextField("0", 10);
-        counterUField.setEditable(false);
-        progressbarU = new JProgressBar(JProgressBar.HORIZONTAL);
-        progressbarU.setStringPainted(true);
+        this.counterUField = new JTextField("0", 10);
+        this.counterUField.setEditable(false);
+        this.progressbarU = new JProgressBar(JProgressBar.HORIZONTAL);
+        this.progressbarU.setStringPainted(true);
 
-        counterJField = new JTextField("0", 10);
-        counterJField.setEditable(false);
-        progressbarJ = new JProgressBar(JProgressBar.HORIZONTAL);
-        progressbarJ.setStringPainted(true);
+        this.counterJField = new JTextField("0", 10);
+        this.counterJField.setEditable(false);
+        this.progressbarJ = new JProgressBar(JProgressBar.HORIZONTAL);
+        this.progressbarJ.setStringPainted(true);
 
         // Add them to the panel
 
         // Fields
-        GridBagConstraints c = new GridBagConstraints();
+        final GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.LINE_START;
         c.gridheight = c.gridwidth = 1;
         c.gridx = 3;
         c.gridy = 1;
         c.insets = new Insets(0, 0, 17, 0);
-        panel.add(counterField, c);
+        panel.add(this.counterField, c);
 
         c.insets = new Insets(0, 0, 0, 0);
         c.gridy++;
-        panel.add(counterRField, c);
+        panel.add(this.counterRField, c);
 
         c.gridy++;
-        panel.add(counterR4Field, c);
+        panel.add(this.counterR4Field, c);
 
         c.gridy++;
-        panel.add(counterIField, c);
+        panel.add(this.counterIField, c);
 
         c.gridy++;
-        panel.add(counterSField, c);
+        panel.add(this.counterSField, c);
 
         c.gridy++;
-        panel.add(counterBField, c);
+        panel.add(this.counterBField, c);
 
         c.gridy++;
-        panel.add(counterUField, c);
+        panel.add(this.counterUField, c);
 
         c.gridy++;
-        panel.add(counterJField, c);
+        panel.add(this.counterJField, c);
 
         // Labels
         c.anchor = GridBagConstraints.LINE_END;
@@ -254,25 +251,25 @@ public class InstructionCounter extends AbstractToolAndApplication {
         c.insets = new Insets(3, 3, 3, 3);
         c.gridx = 4;
         c.gridy = 2;
-        panel.add(progressbarR, c);
+        panel.add(this.progressbarR, c);
 
         c.gridy++;
-        panel.add(progressbarR4, c);
+        panel.add(this.progressbarR4, c);
 
         c.gridy++;
-        panel.add(progressbarI, c);
+        panel.add(this.progressbarI, c);
 
         c.gridy++;
-        panel.add(progressbarS, c);
+        panel.add(this.progressbarS, c);
 
         c.gridy++;
-        panel.add(progressbarB, c);
+        panel.add(this.progressbarB, c);
 
         c.gridy++;
-        panel.add(progressbarU, c);
+        panel.add(this.progressbarU, c);
 
         c.gridy++;
-        panel.add(progressbarJ, c);
+        panel.add(this.progressbarJ, c);
 
         return panel;
     }
@@ -282,52 +279,52 @@ public class InstructionCounter extends AbstractToolAndApplication {
      */
     @Override
     protected void addAsObserver() {
-        addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
+        this.addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void processRISCVUpdate(AccessNotice notice) {
+    protected void processRISCVUpdate(final AccessNotice notice) {
         if (!notice.accessIsFromRISCV())
             return;
         if (notice.getAccessType() != AccessNotice.READ)
             return;
-        MemoryAccessNotice m = (MemoryAccessNotice) notice;
-        int a = m.getAddress();
-        if (a == lastAddress)
+        final MemoryAccessNotice m = (MemoryAccessNotice) notice;
+        final int a = m.getAddress();
+        if (a == this.lastAddress)
             return;
-        lastAddress = a;
-        counter++;
+        this.lastAddress = a;
+        this.counter++;
         try {
-            ProgramStatement stmt = Memory.getInstance().getStatement(a);
+            final ProgramStatement stmt = Memory.getInstance().getStatement(a);
 
             // If the program is finished, getStatement() will return null,
             // a null statement will cause the simulator to stall.
             if (stmt != null) {
-                BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
-                BasicInstructionFormat format = instr.getInstructionFormat();
+                final BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
+                final BasicInstructionFormat format = instr.getInstructionFormat();
                 if (format == BasicInstructionFormat.R_FORMAT)
-                    counterR++;
+                    this.counterR++;
                 else if (format == BasicInstructionFormat.R4_FORMAT)
-                    counterR4++;
+                    this.counterR4++;
                 else if (format == BasicInstructionFormat.I_FORMAT)
-                    counterI++;
+                    this.counterI++;
                 else if (format == BasicInstructionFormat.S_FORMAT)
-                    counterS++;
+                    this.counterS++;
                 else if (format == BasicInstructionFormat.B_FORMAT)
-                    counterB++;
+                    this.counterB++;
                 else if (format == BasicInstructionFormat.U_FORMAT)
-                    counterU++;
+                    this.counterU++;
                 else if (format == BasicInstructionFormat.J_FORMAT)
-                    counterJ++;
+                    this.counterJ++;
             }
-        } catch (AddressErrorException e) {
+        } catch (final AddressErrorException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        updateDisplay();
+        this.updateDisplay();
     }
 
     /**
@@ -335,8 +332,8 @@ public class InstructionCounter extends AbstractToolAndApplication {
      */
     @Override
     protected void initializePreGUI() {
-        counter = counterR = counterR4 = counterI = counterS = counterB = counterU = counterJ = 0;
-        lastAddress = -1;
+        this.counter = this.counterR = this.counterR4 = this.counterI = this.counterS = this.counterB = this.counterU = this.counterJ = 0;
+        this.lastAddress = -1;
     }
 
     /**
@@ -344,9 +341,9 @@ public class InstructionCounter extends AbstractToolAndApplication {
      */
     @Override
     protected void reset() {
-        counter = counterR = counterR4 = counterI = counterS = counterB = counterU = counterJ = 0;
-        lastAddress = -1;
-        updateDisplay();
+        this.counter = this.counterR = this.counterR4 = this.counterI = this.counterS = this.counterB = this.counterU = this.counterJ = 0;
+        this.lastAddress = -1;
+        this.updateDisplay();
     }
 
     /**
@@ -354,52 +351,52 @@ public class InstructionCounter extends AbstractToolAndApplication {
      */
     @Override
     protected void updateDisplay() {
-        counterField.setText(String.valueOf(counter));
+        this.counterField.setText(String.valueOf(this.counter));
 
-        counterRField.setText(String.valueOf(counterR));
-        progressbarR.setMaximum(counter);
-        progressbarR.setValue(counterR);
+        this.counterRField.setText(String.valueOf(this.counterR));
+        this.progressbarR.setMaximum(this.counter);
+        this.progressbarR.setValue(this.counterR);
 
-        counterR4Field.setText(String.valueOf(counterR4));
-        progressbarR4.setMaximum(counter);
-        progressbarR4.setValue(counterR4);
+        this.counterR4Field.setText(String.valueOf(this.counterR4));
+        this.progressbarR4.setMaximum(this.counter);
+        this.progressbarR4.setValue(this.counterR4);
 
-        counterIField.setText(String.valueOf(counterI));
-        progressbarI.setMaximum(counter);
-        progressbarI.setValue(counterI);
+        this.counterIField.setText(String.valueOf(this.counterI));
+        this.progressbarI.setMaximum(this.counter);
+        this.progressbarI.setValue(this.counterI);
 
-        counterSField.setText(String.valueOf(counterS));
-        progressbarS.setMaximum(counter);
-        progressbarS.setValue(counterS);
+        this.counterSField.setText(String.valueOf(this.counterS));
+        this.progressbarS.setMaximum(this.counter);
+        this.progressbarS.setValue(this.counterS);
 
-        counterBField.setText(String.valueOf(counterB));
-        progressbarB.setMaximum(counter);
-        progressbarB.setValue(counterB);
+        this.counterBField.setText(String.valueOf(this.counterB));
+        this.progressbarB.setMaximum(this.counter);
+        this.progressbarB.setValue(this.counterB);
 
-        counterUField.setText(String.valueOf(counterU));
-        progressbarU.setMaximum(counter);
-        progressbarU.setValue(counterU);
+        this.counterUField.setText(String.valueOf(this.counterU));
+        this.progressbarU.setMaximum(this.counter);
+        this.progressbarU.setValue(this.counterU);
 
-        counterJField.setText(String.valueOf(counterJ));
-        progressbarJ.setMaximum(counter);
-        progressbarJ.setValue(counterJ);
+        this.counterJField.setText(String.valueOf(this.counterJ));
+        this.progressbarJ.setMaximum(this.counter);
+        this.progressbarJ.setValue(this.counterJ);
 
-        if (counter == 0) {
-            progressbarR.setString("0%");
-            progressbarR4.setString("0%");
-            progressbarI.setString("0%");
-            progressbarS.setString("0%");
-            progressbarB.setString("0%");
-            progressbarU.setString("0%");
-            progressbarJ.setString("0%");
+        if (this.counter == 0) {
+            this.progressbarR.setString("0%");
+            this.progressbarR4.setString("0%");
+            this.progressbarI.setString("0%");
+            this.progressbarS.setString("0%");
+            this.progressbarB.setString("0%");
+            this.progressbarU.setString("0%");
+            this.progressbarJ.setString("0%");
         } else {
-            progressbarR.setString((counterR * 100) / counter + "%");
-            progressbarR4.setString((counterR4 * 100) / counter + "%");
-            progressbarI.setString((counterI * 100) / counter + "%");
-            progressbarS.setString((counterS * 100) / counter + "%");
-            progressbarB.setString((counterB * 100) / counter + "%");
-            progressbarU.setString((counterU * 100) / counter + "%");
-            progressbarJ.setString((counterJ * 100) / counter + "%");
+            this.progressbarR.setString((this.counterR * 100) / this.counter + "%");
+            this.progressbarR4.setString((this.counterR4 * 100) / this.counter + "%");
+            this.progressbarI.setString((this.counterI * 100) / this.counter + "%");
+            this.progressbarS.setString((this.counterS * 100) / this.counter + "%");
+            this.progressbarB.setString((this.counterB * 100) / this.counter + "%");
+            this.progressbarU.setString((this.counterU * 100) / this.counter + "%");
+            this.progressbarJ.setString((this.counterJ * 100) / this.counter + "%");
         }
     }
 }

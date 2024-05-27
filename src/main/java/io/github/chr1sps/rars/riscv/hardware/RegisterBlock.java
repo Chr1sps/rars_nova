@@ -42,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Benjamin Landers
  * @version June 2017
  */
-public class RegisterBlock implements AutoCloseable {
+public class RegisterBlock {
     private final Register[] regFile;
     private final char prefix;
 
@@ -52,7 +52,7 @@ public class RegisterBlock implements AutoCloseable {
      * @param prefix    a char
      * @param registers an array of {@link io.github.chr1sps.rars.riscv.hardware.Register} objects
      */
-    protected RegisterBlock(char prefix, Register[] registers) {
+    protected RegisterBlock(final char prefix, final Register[] registers) {
         this.prefix = prefix;
         this.regFile = registers;
     }
@@ -61,7 +61,7 @@ public class RegisterBlock implements AutoCloseable {
      * Method for displaying the register values for debugging.
      */
     public void showRegisters() {
-        for (Register r : regFile) {
+        for (final Register r : this.regFile) {
             System.out.println("Name: " + r.getName());
             System.out.println("Number: " + r.getNumber());
             System.out.println("Value: " + r.getValue());
@@ -76,7 +76,7 @@ public class RegisterBlock implements AutoCloseable {
      * @param val The desired value for the register.
      * @return a long
      */
-    public long updateRegister(Register r, long val) {
+    public long updateRegister(final Register r, final long val) {
         if (r == null)
             return 0;
         return r.setValue(val);
@@ -89,8 +89,8 @@ public class RegisterBlock implements AutoCloseable {
      * @param val a long
      * @return a long
      */
-    public long updateRegister(int num, long val) {
-        return updateRegister(getRegister(num), val);
+    public long updateRegister(final int num, final long val) {
+        return this.updateRegister(this.getRegister(num), val);
     }
 
     /**
@@ -100,8 +100,8 @@ public class RegisterBlock implements AutoCloseable {
      * @param val  a long
      * @return a long
      */
-    public long updateRegister(String name, long val) {
-        return updateRegister(getRegister(name), val);
+    public long updateRegister(final String name, final long val) {
+        return this.updateRegister(this.getRegister(name), val);
     }
 
     /**
@@ -110,8 +110,8 @@ public class RegisterBlock implements AutoCloseable {
      * @param num The register's number.
      * @return The value of the given register.
      */
-    public long getValue(int num) {
-        return getRegister(num).getValue();
+    public long getValue(final int num) {
+        return this.getRegister(num).getValue();
     }
 
     /**
@@ -120,8 +120,8 @@ public class RegisterBlock implements AutoCloseable {
      * @param name The register's name.
      * @return The value of the given register.
      */
-    public long getValue(String name) {
-        return getRegister(name).getValue();
+    public long getValue(final String name) {
+        return this.getRegister(name).getValue();
     }
 
     /**
@@ -130,8 +130,8 @@ public class RegisterBlock implements AutoCloseable {
      * @param num the number to search for
      * @return the register for num or null if none exists
      */
-    public Register getRegister(int num) {
-        for (Register r : regFile) {
+    public Register getRegister(final int num) {
+        for (final Register r : this.regFile) {
             if (r.getNumber() == num) {
                 return r;
             }
@@ -146,28 +146,28 @@ public class RegisterBlock implements AutoCloseable {
      *             name.
      * @return The register object,or null if not found.
      */
-    public Register getRegister(String name) {
+    public Register getRegister(final String name) {
         if (name.length() < 2)
             return null;
 
         // Handle a direct name
-        for (Register r : regFile) {
+        for (final Register r : this.regFile) {
             if (r.getName().equals(name)) {
                 return r;
             }
         }
         // Handle prefix case
-        if (name.charAt(0) == prefix) {
+        if (name.charAt(0) == this.prefix) {
             if (name.charAt(1) == 0) { // Ensure that it is a normal decimal number
                 if (name.length() > 2)
                     return null;
-                return getRegister(0);
+                return this.getRegister(0);
             }
 
-            Integer num = Binary.stringToIntFast(name.substring(1));
+            final Integer num = Binary.stringToIntFast(name.substring(1));
             if (num == null)
                 return null;
-            return getRegister(num);
+            return this.getRegister(num);
         }
         return null;
     }
@@ -178,14 +178,14 @@ public class RegisterBlock implements AutoCloseable {
      * @return The set of registers.
      */
     public Register[] getRegisters() {
-        return regFile;
+        return this.regFile;
     }
 
     /**
      * Method to reinitialize the values of the registers.
      */
     public void resetRegisters() {
-        for (Register r : regFile) {
+        for (final Register r : this.regFile) {
             r.resetValue();
         }
     }
@@ -198,8 +198,8 @@ public class RegisterBlock implements AutoCloseable {
      *
      * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public void addRegistersObserver(Flow.Subscriber<? super RegisterAccessNotice> observer) {
-        for (Register r : regFile) {
+    public void addRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+        for (final Register r : this.regFile) {
             r.subscribe(observer);
         }
     }
@@ -213,16 +213,10 @@ public class RegisterBlock implements AutoCloseable {
      *
      * @param subscriber a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public void deleteRegistersSubscriber(Flow.Subscriber<? super RegisterAccessNotice> subscriber) {
-        for (Register r : regFile) {
+    public void deleteRegistersSubscriber(final Flow.Subscriber<? super RegisterAccessNotice> subscriber) {
+        for (final Register r : this.regFile) {
             r.deleteSubscriber(subscriber);
         }
     }
 
-    @Override
-    public void close() {
-        for (var register : regFile) {
-            register.close();
-        }
-    }
 }

@@ -3,68 +3,67 @@ package io.github.chr1sps.rars.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
-import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class CustomPublisher<T> extends SubmissionPublisher<T> {
+public class CustomPublisher<T> implements Flow.Publisher<T> {
     private final List<CustomSubscription> subscriptions = new ArrayList<>();
     private final ReentrantLock lock = new ReentrantLock();
 
     @Override
-    public void subscribe(Flow.Subscriber<? super T> subscriber) {
-        lock.lock();
+    public void subscribe(final Flow.Subscriber<? super T> subscriber) {
+        this.lock.lock();
         try {
-            CustomSubscription subscription = new CustomSubscription(subscriber);
-            subscriptions.add(subscription);
+            final CustomSubscription subscription = new CustomSubscription(subscriber);
+            this.subscriptions.add(subscription);
             subscriber.onSubscribe(subscription);
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
-    public void deleteSubscriber(Flow.Subscriber<? super T> subscriber) {
-        lock.lock();
+    public void deleteSubscriber(final Flow.Subscriber<? super T> subscriber) {
+        this.lock.lock();
         try {
-            subscriptions.removeIf(subscription -> subscription.getSubscriber().equals(subscriber));
+            this.subscriptions.removeIf(subscription -> subscription.getSubscriber().equals(subscriber));
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
-    public void publish(T item) {
-        lock.lock();
+    public void submit(final T item) {
+        this.lock.lock();
         try {
-            for (CustomSubscription subscription : subscriptions) {
+            for (final CustomSubscription subscription : this.subscriptions) {
                 subscription.sendNext(item);
             }
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
     public void complete() {
-        lock.lock();
+        this.lock.lock();
         try {
-            for (CustomSubscription subscription : subscriptions) {
+            for (final CustomSubscription subscription : this.subscriptions) {
                 subscription.complete();
             }
-            subscriptions.clear();
+            this.subscriptions.clear();
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
-    public void error(Throwable throwable) {
-        lock.lock();
+    public void error(final Throwable throwable) {
+        this.lock.lock();
         try {
-            for (CustomSubscription subscription : subscriptions) {
+            for (final CustomSubscription subscription : this.subscriptions) {
                 subscription.error(throwable);
             }
-            subscriptions.clear();
+            this.subscriptions.clear();
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
@@ -74,71 +73,71 @@ public class CustomPublisher<T> extends SubmissionPublisher<T> {
         private final AtomicBoolean completed = new AtomicBoolean(false);
         private final ReentrantLock subscriptionLock = new ReentrantLock();
 
-        public CustomSubscription(Flow.Subscriber<? super T> subscriber) {
+        public CustomSubscription(final Flow.Subscriber<? super T> subscriber) {
             this.subscriber = subscriber;
         }
 
         public Flow.Subscriber<? super T> getSubscriber() {
-            return subscriber;
+            return this.subscriber;
         }
 
         @Override
-        public void request(long n) {
+        public void request(final long n) {
             if (n <= 0) {
-                error(new IllegalArgumentException("Non-positive subscription request"));
+                this.error(new IllegalArgumentException("Non-positive subscription request"));
                 return;
             }
-            subscriptionLock.lock();
+            this.subscriptionLock.lock();
             try {
-                requested.addAndGet(n);
+                this.requested.addAndGet(n);
             } finally {
-                subscriptionLock.unlock();
+                this.subscriptionLock.unlock();
             }
         }
 
         @Override
         public void cancel() {
-            subscriptionLock.lock();
+            this.subscriptionLock.lock();
             try {
-                completed.set(true);
-                subscriptions.remove(this);
+                this.completed.set(true);
+                CustomPublisher.this.subscriptions.remove(this);
             } finally {
-                subscriptionLock.unlock();
+                this.subscriptionLock.unlock();
             }
         }
 
-        public void sendNext(T item) {
-            subscriptionLock.lock();
+        public void sendNext(final T item) {
+            this.subscriptionLock.lock();
             try {
-                if (requested.get() > 0 && !completed.get()) {
-                    subscriber.onNext(item);
+                if (this.requested.get() > 0 && !this.completed.get()) {
+                    this.subscriber.onNext(item);
                     System.out.println("value sent");
-                    requested.decrementAndGet();
+                    this.requested.decrementAndGet();
                 }
             } finally {
-                subscriptionLock.unlock();
+                this.subscriptionLock.unlock();
             }
         }
 
         public void complete() {
-            subscriptionLock.lock();
+            this.subscriptionLock.lock();
             try {
-                if (!completed.getAndSet(true)) {
-                    subscriber.onComplete();
+                if (!this.completed.getAndSet(true)) {
+                    this.subscriber.onComplete();
                 }
             } finally {
-                subscriptionLock.unlock();
+                this.subscriptionLock.unlock();
             }
         }
 
-        public void error(Throwable throwable) {
-            subscriptionLock.lock();
+        public void error(final Throwable throwable) {
+            this.subscriptionLock.lock();
             try {
-                if (!completed.getAndSet(true)) {
-                    subscriber.onError(throwable);
+                if (!this.completed.getAndSet(true)) {
+                    this.subscriber.onError(throwable);
                 }
             } finally {
-                subscriptionLock.unlock();
+                this.subscriptionLock.unlock();
             }
         }
     }
