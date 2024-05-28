@@ -1,7 +1,7 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.util.SystemIO;
@@ -37,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Service to read the bits of console input double into $f0 and $f1.
  * $f1 contains high order word of the double.
- *
  */
 public class SyscallReadDouble extends AbstractSyscall {
     /**
@@ -53,11 +52,12 @@ public class SyscallReadDouble extends AbstractSyscall {
      * <p>
      * Performs syscall function to read the bits of input double into $f0 and $f1.
      */
-    public void simulate(ProgramStatement statement) throws ExitingException {
-        double doubleValue = 0;
+    @Override
+    public void simulate(final ProgramStatement statement) throws ExitingException {
+        final double doubleValue;
         try {
             doubleValue = SystemIO.readDouble(this.getNumber());
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new ExitingException(statement,
                     "invalid double input (syscall " + this.getNumber() + ")");
         }

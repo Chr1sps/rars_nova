@@ -1,7 +1,5 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
-import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
-
 /*
 Copyright (c) 2017,  Benjamin Landers
 
@@ -31,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>DIVU class.</p>
- *
  */
 public class DIVU extends Arithmetic {
     /**
@@ -45,7 +42,8 @@ public class DIVU extends Arithmetic {
     /**
      * {@inheritDoc}
      */
-    public long compute(long value, long value2) {
+    @Override
+    public long compute(final long value, final long value2) {
         // Signal illegal division with -1
         if (value2 == 0) {
             return -1;
@@ -56,7 +54,8 @@ public class DIVU extends Arithmetic {
     /**
      * {@inheritDoc}
      */
-    public int computeW(int value, int value2) {
-        return (int) compute(value & 0xFFFFFFFFL, value2 & 0xFFFFFFFFL);
+    @Override
+    public int computeW(final int value, final int value2) {
+        return (int) this.compute(value & 0xFFFFFFFFL, value2 & 0xFFFFFFFFL);
     }
 }

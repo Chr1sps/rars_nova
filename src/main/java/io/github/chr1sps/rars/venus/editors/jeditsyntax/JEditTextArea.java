@@ -156,9 +156,9 @@ public class JEditTextArea extends JComponent {
         // DPS 12May2010
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(
                 e -> {
-                    final int modifiers = e.getModifiers();
+                    final int modifiers = e.getModifiersEx();
                     if (JEditTextArea.this.isFocusOwner() && e.getKeyCode() == KeyEvent.VK_TAB
-                            && (modifiers == 0 || (modifiers & InputEvent.SHIFT_MASK) != 0)) {
+                            && (modifiers == 0 || (modifiers & InputEvent.SHIFT_DOWN_MASK) != 0)) {
                         JEditTextArea.this.processKeyEvent(e);
                         return true;
                     } else {
@@ -170,7 +170,7 @@ public class JEditTextArea extends JComponent {
         JEditTextArea.focusedComponent = this;
     }
 
-    /**
+    /*
      * Returns if this component can be traversed by pressing
      * the Tab key. This returns false.
      */
@@ -539,8 +539,8 @@ public class JEditTextArea extends JComponent {
         /* If syntax coloring is disabled, do simple translation */
         if (tokenMarker == null) {
             this.lineSegment.count = offset;
-            return x + Utilities.getTabbedTextWidth(this.lineSegment,
-                    fm, x, this.painter, 0);
+            return x + (int) Utilities.getTabbedTextWidth(this.lineSegment,
+                    fm, (float) x, this.painter, 0);
         }
         /*
          * If syntax coloring is enabled, we have to do this because
@@ -569,18 +569,18 @@ public class JEditTextArea extends JComponent {
                 if (id == Token.NULL)
                     fm = this.painter.getFontMetrics();
                 else
-                    fm = styles[id].getFontMetrics(defaultFont);
+                    fm = styles[id].getFontMetrics(defaultFont, this.getGraphics());
 
                 final int length = tokens.length;
 
                 if (offset + segmentOffset < this.lineSegment.offset + length) {
                     this.lineSegment.count = offset - (this.lineSegment.offset - segmentOffset);
-                    return x + Utilities.getTabbedTextWidth(
-                            this.lineSegment, fm, x, this.painter, 0);
+                    return x + (int) Utilities.getTabbedTextWidth(
+                            this.lineSegment, fm, (float) x, this.painter, 0);
                 } else {
                     this.lineSegment.count = length;
-                    x += Utilities.getTabbedTextWidth(
-                            this.lineSegment, fm, x, this.painter, 0);
+                    x += (int) Utilities.getTabbedTextWidth(
+                            this.lineSegment, fm, (float) x, this.painter, 0);
                     this.lineSegment.offset += length;
                 }
                 tokens = tokens.next;
@@ -653,7 +653,7 @@ public class JEditTextArea extends JComponent {
                 if (id == Token.NULL)
                     fm = this.painter.getFontMetrics();
                 else
-                    fm = styles[id].getFontMetrics(defaultFont);
+                    fm = styles[id].getFontMetrics(defaultFont, this.getGraphics());
 
                 final int length = tokens.length;
 
@@ -1184,7 +1184,7 @@ public class JEditTextArea extends JComponent {
                 final Element lineElement = map.getElement(i);
                 int lineStart = lineElement.getStartOffset();
                 final int lineEnd = lineElement.getEndOffset() - 1;
-                int lineLen = lineEnd - lineStart;
+                final int lineLen;
 
                 lineStart = Math.min(lineStart + start, lineEnd);
                 lineLen = Math.min(end - start, lineEnd - lineStart);
@@ -1622,7 +1622,7 @@ public class JEditTextArea extends JComponent {
     // "unredoing" is mode used by DocumentHandler's insertUpdate() and
     // removeUpdate()
     // to pleasingly select the text and location of the undo. DPS 3-May-2010
-    protected boolean unredoing = false;
+    protected boolean unredoing;
 
     /**
      * <p>fireCaretEvent.</p>
@@ -1812,7 +1812,7 @@ public class JEditTextArea extends JComponent {
         }
     }
 
-    class MutableCaretEvent extends CaretEvent {
+    protected class MutableCaretEvent extends CaretEvent {
         MutableCaretEvent() {
             super(JEditTextArea.this);
         }
@@ -1855,7 +1855,7 @@ public class JEditTextArea extends JComponent {
         }
     }
 
-    class DocumentHandler implements DocumentListener {
+    protected class DocumentHandler implements DocumentListener {
         @Override
         public void insertUpdate(final DocumentEvent evt) {
             JEditTextArea.this.documentChanged(evt);
@@ -1931,8 +1931,8 @@ public class JEditTextArea extends JComponent {
             if (JEditTextArea.this.popup != null && JEditTextArea.this.popup.isVisible())
                 return;
 
-            JEditTextArea.this.setSelectionRectangular((evt.getModifiers()
-                    & InputEvent.CTRL_MASK) != 0);
+            JEditTextArea.this.setSelectionRectangular((evt.getModifiersEx()
+                    & InputEvent.CTRL_DOWN_MASK) != 0);
             JEditTextArea.this.select(JEditTextArea.this.getMarkPosition(), JEditTextArea.this.xyToOffset(evt.getX(), evt.getY()));
         }
 
@@ -1982,7 +1982,7 @@ public class JEditTextArea extends JComponent {
             JEditTextArea.this.setCaretVisible(true);
             JEditTextArea.focusedComponent = JEditTextArea.this;
 
-            if ((evt.getModifiers() & InputEvent.BUTTON3_MASK) != 0
+            if ((evt.getModifiersEx() & InputEvent.BUTTON3_DOWN_MASK) != 0
                     && JEditTextArea.this.popup != null) {
                 JEditTextArea.this.popup.show(JEditTextArea.this.painter, evt.getX(), evt.getY());
                 return;
@@ -2009,8 +2009,8 @@ public class JEditTextArea extends JComponent {
 
         private void doSingleClick(final MouseEvent evt, final int line,
                                    final int offset, final int dot) {
-            if ((evt.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
-                JEditTextArea.this.rectSelect = (evt.getModifiers() & InputEvent.CTRL_MASK) != 0;
+            if ((evt.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) != 0) {
+                JEditTextArea.this.rectSelect = (evt.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0;
                 JEditTextArea.this.select(JEditTextArea.this.getMarkPosition(), dot);
             } else
                 JEditTextArea.this.setCaretPosition(dot);
@@ -2143,19 +2143,17 @@ public class JEditTextArea extends JComponent {
      */
     // Is used for tool tip only (not popup menu)
     public String getSyntaxSensitiveToolTipText(final int x, final int y) {
-        String result = null;
+        final StringBuilder result;
         final int line = this.yToLine(y);
         final ArrayList<PopupHelpItem> matches = this.getSyntaxSensitiveHelpAtLineOffset(line, this.xToOffset(line, x), true);
         if (matches == null) {
             return null;
         }
         final int length = PopupHelpItem.maxExampleLength(matches) + 2;
-        result = "<html>";
+        result = new StringBuilder("<html>");
         for (int i = 0; i < matches.size(); i++) {
             final PopupHelpItem match = matches.get(i);
-            result += ((i == 0) ? "" : "<br>") + "<tt>"
-                    + match.getExamplePaddedToLength(length).replaceAll(" ", "&nbsp;") + "</tt>"
-                    + match.getDescription();
+            result.append((i == 0) ? "" : "<br>").append("<tt>").append(match.getExamplePaddedToLength(length).replaceAll(" ", "&nbsp;")).append("</tt>").append(match.getDescription());
         }
         return result + "</html>";
     }
@@ -2402,7 +2400,7 @@ public class JEditTextArea extends JComponent {
                 // The solution, as shown here, is to use invokeLater.
                 final MenuElement[] newPath = new MenuElement[2];
                 newPath[0] = path[0];
-                newPath[1] = (MenuElement) this.popupMenu.getComponentAtIndex(index);
+                newPath[1] = (MenuElement) this.popupMenu.getComponent(index);
                 SwingUtilities.invokeLater(
                         () -> MenuSelectionManager.defaultManager().setSelectedPath(newPath));
                 return true;

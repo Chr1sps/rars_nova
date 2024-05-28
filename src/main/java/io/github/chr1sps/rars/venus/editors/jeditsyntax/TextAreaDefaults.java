@@ -9,21 +9,18 @@
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax;
 
-import java.awt.Color;
-
-import javax.swing.JPopupMenu;
-
 import io.github.chr1sps.rars.Settings;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Encapsulates default settings for a text area. This can be passed
  * to the constructor once the necessary fields have been filled out.
  * The advantage of doing this over calling lots of set() methods after
  * creating the text area is that this method is faster.
- *
  */
 public class TextAreaDefaults {
-    private static TextAreaDefaults DEFAULTS;
 
     public InputHandler inputHandler;
     public SyntaxDocument document;
@@ -58,7 +55,7 @@ public class TextAreaDefaults {
      * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.TextAreaDefaults} object
      */
     public static TextAreaDefaults getDefaults() {
-        DEFAULTS = new TextAreaDefaults();
+        final TextAreaDefaults DEFAULTS = new TextAreaDefaults();
 
         DEFAULTS.inputHandler = new DefaultInputHandler();
         DEFAULTS.inputHandler.addDefaultKeyBindings();

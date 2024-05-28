@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
+import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.util.SystemIO;
 
@@ -47,7 +47,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Follows semantics of UNIX 'fgets'. For specified length n,
  * string can be no longer than n-1. If less than that, add
  * newline to end. In either case, then pad with null byte.
- *
  */
 public class SyscallReadString extends AbstractSyscall {
     /**
@@ -61,9 +60,10 @@ public class SyscallReadString extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws ExitingException {
-        String inputString = "";
-        int buf = RegisterFile.getValue("a0"); // buf addr
+    @Override
+    public void simulate(final ProgramStatement statement) throws ExitingException {
+        final String inputString;
+        final int buf = RegisterFile.getValue("a0"); // buf addr
         int maxLength = RegisterFile.getValue("a1") - 1;
         boolean addNullByte = true;
         // Guard against negative maxLength. DPS 13-July-2011
@@ -73,7 +73,7 @@ public class SyscallReadString extends AbstractSyscall {
         }
         inputString = SystemIO.readString(this.getNumber(), maxLength);
 
-        byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
+        final byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
         // TODO: allow for utf-8 encoded strings
         int stringLength = Math.min(maxLength, utf8BytesList.length);
         try {
@@ -87,7 +87,7 @@ public class SyscallReadString extends AbstractSyscall {
             }
             if (addNullByte)
                 Globals.memory.setByte(buf + stringLength, 0);
-        } catch (AddressErrorException e) {
+        } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }
     }

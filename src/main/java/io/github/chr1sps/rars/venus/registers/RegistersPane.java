@@ -1,10 +1,9 @@
 package io.github.chr1sps.rars.venus.registers;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.venus.VenusUI;
 
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -45,8 +44,6 @@ public class RegistersPane extends JTabbedPane {
     private final FloatingPointWindow fpTab;
     private final ControlAndStatusWindow csrTab;
 
-    private final VenusUI mainUI;
-
     /**
      * Constructor for the RegistersPane class.
      *
@@ -55,21 +52,20 @@ public class RegistersPane extends JTabbedPane {
      * @param cop1     a {@link io.github.chr1sps.rars.venus.registers.FloatingPointWindow} object
      * @param cop0     a {@link io.github.chr1sps.rars.venus.registers.ControlAndStatusWindow} object
      */
-    public RegistersPane(VenusUI appFrame, RegistersWindow regs, FloatingPointWindow cop1,
-                         ControlAndStatusWindow cop0) {
+    public RegistersPane(final VenusUI appFrame, final RegistersWindow regs, final FloatingPointWindow cop1,
+                         final ControlAndStatusWindow cop0) {
         super();
-        this.mainUI = appFrame;
 
-        regsTab = regs;
-        fpTab = cop1;
-        csrTab = cop0;
-        regsTab.setVisible(true);
-        fpTab.setVisible(true);
-        csrTab.setVisible(true);
+        this.regsTab = regs;
+        this.fpTab = cop1;
+        this.csrTab = cop0;
+        this.regsTab.setVisible(true);
+        this.fpTab.setVisible(true);
+        this.csrTab.setVisible(true);
 
-        this.addTab("Registers", regsTab);
-        this.addTab("Floating Point", fpTab);
-        this.addTab("Control and Status", csrTab);
+        this.addTab("Registers", this.regsTab);
+        this.addTab("Floating Point", this.fpTab);
+        this.addTab("Control and Status", this.csrTab);
         this.setForeground(Color.black);
 
         this.setToolTipTextAt(0, "CPU registers");
@@ -83,7 +79,7 @@ public class RegistersPane extends JTabbedPane {
      * @return integer register window
      */
     public RegistersWindow getRegistersWindow() {
-        return regsTab;
+        return this.regsTab;
     }
 
     /**
@@ -92,7 +88,7 @@ public class RegistersPane extends JTabbedPane {
      * @return floating point register window
      */
     public FloatingPointWindow getFloatingPointWindow() {
-        return fpTab;
+        return this.fpTab;
     }
 
     /**
@@ -101,6 +97,6 @@ public class RegistersPane extends JTabbedPane {
      * @return exceptions register window
      */
     public ControlAndStatusWindow getControlAndStatusWindow() {
-        return csrTab;
+        return this.csrTab;
     }
 }

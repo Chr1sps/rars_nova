@@ -436,20 +436,20 @@ public class FilenameFinder {
         // description
         // generated here will be "Assembler Programs (*.s; *.asm)"
         private String buildFullDescription(final String description, final ArrayList<String> extensions) {
-            String result = (description == null) ? "" : description;
+            final StringBuilder result = new StringBuilder((description == null) ? "" : description);
             if (!extensions.isEmpty()) {
-                result += "  (";
+                result.append("  (");
             }
             for (int i = 0; i < extensions.size(); i++) {
                 final String extension = extensions.get(i);
                 if (extension != null && !extension.isEmpty()) {
-                    result += ((i == 0) ? "" : "; ") + "*" + ((extension.charAt(0) == '.') ? "" : ".") + extension;
+                    result.append((i == 0) ? "" : "; ").append("*").append((extension.charAt(0) == '.') ? "" : ".").append(extension);
                 }
             }
             if (!extensions.isEmpty()) {
-                result += ")";
+                result.append(")");
             }
-            return result;
+            return result.toString();
         }
 
         // required by the abstract superclass

@@ -60,7 +60,6 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
     private JCheckBox drawHashMarksSelector;
     private Graphics drawingArea;
     private JPanel canvas;
-    private JPanel results;
 
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
@@ -214,10 +213,10 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
      */
     @Override
     protected JComponent buildMainDisplayArea() {
-        this.results = new JPanel();
-        this.results.add(this.buildOrganizationArea());
-        this.results.add(this.buildVisualizationArea());
-        return this.results;
+        final JPanel results = new JPanel();
+        results.add(this.buildOrganizationArea());
+        results.add(this.buildVisualizationArea());
+        return results;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -641,17 +640,16 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
 
     private class ColorChooserControls {
         private JLabel sliderLabel = null;
-        private JSlider colorRangeSlider = null;
         private final JButton currentColorButton;
         private final JPanel colorChooserRow;
         private final JPanel countDisplayRow;
         private volatile int counterIndex;
 
         private ColorChooserControls() {
-            this.colorRangeSlider = new JSlider(JSlider.HORIZONTAL, 0, MemoryReferenceVisualization.this.countTable.length - 1, MemoryReferenceVisualization.COUNT_INDEX_INIT);
-            this.colorRangeSlider.setToolTipText("View or change color associated with each reference count value");
-            this.colorRangeSlider.setPaintTicks(false);
-            this.colorRangeSlider.addChangeListener(new ColorChooserListener());
+            final JSlider colorRangeSlider = new JSlider(JSlider.HORIZONTAL, 0, MemoryReferenceVisualization.this.countTable.length - 1, MemoryReferenceVisualization.COUNT_INDEX_INIT);
+            colorRangeSlider.setToolTipText("View or change color associated with each reference count value");
+            colorRangeSlider.setPaintTicks(false);
+            colorRangeSlider.addChangeListener(new ColorChooserListener());
             this.counterIndex = MemoryReferenceVisualization.COUNT_INDEX_INIT;
             this.sliderLabel = new JLabel(this.setLabel(MemoryReferenceVisualization.this.countTable[this.counterIndex]));
             this.sliderLabel.setToolTipText("Reference count values listed on non-linear scale of " +
@@ -680,7 +678,7 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
                     });
             this.colorChooserRow = new JPanel();
             this.countDisplayRow = new JPanel();
-            this.colorChooserRow.add(this.colorRangeSlider);
+            this.colorChooserRow.add(colorRangeSlider);
             this.colorChooserRow.add(this.currentColorButton);
             this.countDisplayRow.add(this.sliderLabel);
         }
@@ -717,7 +715,7 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
     // Object that represents mapping from counter value to color it is displayed
     //////////////////////////////////////////////////////////////////////////////// as.
     //
-    private class CounterColorScale {
+    private static class CounterColorScale {
         CounterColor[] counterColors;
 
         CounterColorScale(final CounterColor[] colors) {
@@ -778,7 +776,7 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
     // color for rendering the range. High end of the range is defined as low end of
     /////////////////////////////////////////////////////////////////////////////////////// the
     // next range minus 1. For last range, high end is Integer.MAX_VALUE.
-    private class CounterColor implements Comparable<CounterColor> {
+    private static class CounterColor implements Comparable<CounterColor> {
         private final int colorRangeStart;
         private final Color associatedColor;
 
@@ -796,7 +794,7 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
 
     ////////////////////////////////////////////////////////////////////////
     // Represents grid of memory access counts
-    private class Grid {
+    private static class Grid {
 
         final int[][] grid;
         final int rows;

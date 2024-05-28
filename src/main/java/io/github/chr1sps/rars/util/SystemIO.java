@@ -179,7 +179,7 @@ public class SystemIO {
      * @return int value with lowest byte corresponding to user input
      */
     public static int readChar(final int serviceNumber) {
-        int returnValue = 0;
+        final int returnValue;
 
         final String input = SystemIO.readStringInternal("0", "Enter a character value (syscall " + serviceNumber + ")", 1);
         // The whole try-catch is not really necessary in this case since I'm

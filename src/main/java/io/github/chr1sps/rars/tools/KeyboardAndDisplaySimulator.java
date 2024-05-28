@@ -145,19 +145,13 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     private DisplayResizeAdapter updateDisplayBorder;
     private final KeyboardAndDisplaySimulator simulator;
 
-    // Major GUI components
-    private JPanel keyboardAndDisplay;
-    private JScrollPane displayScrollPane;
     private JTextArea display;
-    private JPanel displayPanel, displayOptions;
+    private JPanel displayPanel;
     private JComboBox<TransmitterDelayTechnique> delayTechniqueChooser;
     private DelayLengthPanel delayLengthPanel;
     private JSlider delayLengthSlider;
     private JCheckBox displayAfterDelayCheckBox;
-    private JPanel keyboardPanel;
-    private JScrollPane keyAccepterScrollPane;
     private JTextArea keyEventAccepter;
-    private JButton fontButton;
     private final Font defaultFont = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
     /**
@@ -289,11 +283,12 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         // text areas were equal in size and there was no way for the user to change
         // that.
         // DPS 17-July-2014
-        this.keyboardAndDisplay = new JPanel(new BorderLayout());
+        // Major GUI components
+        final JPanel keyboardAndDisplay = new JPanel(new BorderLayout());
         final JSplitPane both = new JSplitPane(JSplitPane.VERTICAL_SPLIT, this.buildDisplay(), this.buildKeyboard());
         both.setResizeWeight(0.5);
-        this.keyboardAndDisplay.add(both);
-        return this.keyboardAndDisplay;
+        keyboardAndDisplay.add(both);
+        return keyboardAndDisplay;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -735,11 +730,11 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         // end added autoscrolling
 
-        this.displayScrollPane = new JScrollPane(this.display);
-        this.displayScrollPane.setPreferredSize(KeyboardAndDisplaySimulator.preferredTextAreaDimension);
+        final JScrollPane displayScrollPane = new JScrollPane(this.display);
+        displayScrollPane.setPreferredSize(KeyboardAndDisplaySimulator.preferredTextAreaDimension);
 
-        this.displayPanel.add(this.displayScrollPane);
-        this.displayOptions = new JPanel();
+        this.displayPanel.add(displayScrollPane);
+        final JPanel displayOptions = new JPanel();
         this.delayTechniqueChooser = new JComboBox<>(this.delayTechniques);
         this.delayTechniqueChooser.setToolTipText("Technique for determining simulated transmitter device processing delay");
         this.delayTechniqueChooser.addActionListener(
@@ -752,14 +747,14 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
                 e -> KeyboardAndDisplaySimulator.this.displayAfterDelay = KeyboardAndDisplaySimulator.this.displayAfterDelayCheckBox.isSelected());
 
         // font button to display font
-        this.fontButton = new JButton("Font");
-        this.fontButton.setToolTipText("Select the font for the display panel");
-        this.fontButton.addActionListener(new FontChanger());
-        this.displayOptions.add(this.fontButton);
-        this.displayOptions.add(this.displayAfterDelayCheckBox);
-        this.displayOptions.add(this.delayTechniqueChooser);
-        this.displayOptions.add(this.delayLengthPanel);
-        this.displayPanel.add(this.displayOptions, BorderLayout.SOUTH);
+        final JButton fontButton = new JButton("Font");
+        fontButton.setToolTipText("Select the font for the display panel");
+        fontButton.addActionListener(new FontChanger());
+        displayOptions.add(fontButton);
+        displayOptions.add(this.displayAfterDelayCheckBox);
+        displayOptions.add(this.delayTechniqueChooser);
+        displayOptions.add(this.delayLengthPanel);
+        this.displayPanel.add(displayOptions, BorderLayout.SOUTH);
         return this.displayPanel;
     }
 
@@ -767,19 +762,19 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // UI components and layout for lower part of GUI, where simulated keyboard is
     ////////////////////////////////////////////////////////////////////////////////////// located.
     private JComponent buildKeyboard() {
-        this.keyboardPanel = new JPanel(new BorderLayout());
+        final JPanel keyboardPanel = new JPanel(new BorderLayout());
         this.keyEventAccepter = new JTextArea();
         this.keyEventAccepter.setEditable(true);
         this.keyEventAccepter.setFont(this.defaultFont);
         this.keyEventAccepter.setMargin(KeyboardAndDisplaySimulator.textAreaInsets);
-        this.keyAccepterScrollPane = new JScrollPane(this.keyEventAccepter);
-        this.keyAccepterScrollPane.setPreferredSize(KeyboardAndDisplaySimulator.preferredTextAreaDimension);
+        final JScrollPane keyAccepterScrollPane = new JScrollPane(this.keyEventAccepter);
+        keyAccepterScrollPane.setPreferredSize(KeyboardAndDisplaySimulator.preferredTextAreaDimension);
         this.keyEventAccepter.addKeyListener(new KeyboardKeyListener());
-        this.keyboardPanel.add(this.keyAccepterScrollPane);
+        keyboardPanel.add(keyAccepterScrollPane);
         final TitledBorder tb = new TitledBorder(KeyboardAndDisplaySimulator.keyboardPanelTitle);
         tb.setTitleJustification(TitledBorder.CENTER);
-        this.keyboardPanel.setBorder(tb);
-        return this.keyboardPanel;
+        keyboardPanel.setBorder(tb);
+        return keyboardPanel;
     }
 
     ////////////////////////////////////////////////////////////////////
@@ -997,7 +992,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     }
 
     // Delay value is fixed, and equal to slider value.
-    private class FixedLengthDelay implements TransmitterDelayTechnique {
+    private static class FixedLengthDelay implements TransmitterDelayTechnique {
         @Override
         public String toString() {
             return "Fixed transmitter delay, select using slider";
@@ -1011,7 +1006,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
 
     // Randomly pick value from range 1 to slider setting, uniform distribution
     // (each value has equal probability of being chosen).
-    private class UniformlyDistributedDelay implements TransmitterDelayTechnique {
+    private static class UniformlyDistributedDelay implements TransmitterDelayTechnique {
         final Random randu;
 
         public UniformlyDistributedDelay() {
@@ -1033,7 +1028,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // Get sample from Normal(0,1) -- mean=0, s.d.=1 -- multiply it by slider
     // value, take absolute value to make sure we don't get negative,
     // add 1 to make sure we don't get 0.
-    private class NormallyDistributedDelay implements TransmitterDelayTechnique {
+    private static class NormallyDistributedDelay implements TransmitterDelayTechnique {
         final Random randn;
 
         public NormallyDistributedDelay() {

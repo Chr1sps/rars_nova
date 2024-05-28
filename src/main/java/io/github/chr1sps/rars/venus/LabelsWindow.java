@@ -55,12 +55,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson and Team JSpim
  */
 public class LabelsWindow extends JInternalFrame {
-    private final Container contentPane;
     private final JPanel labelPanel; // holds J
     private final JCheckBox dataLabels;
     private final JCheckBox textLabels;
     private ArrayList<LabelsForSymbolTable> listOfLabelsForSymbolTable;
-    private final LabelsWindow labelsWindow;
     private static final int MAX_DISPLAYED_CHARS = 24;
     private static final int PREFERRED_NAME_COLUMN_WIDTH = 60;
     private static final int PREFERRED_ADDRESS_COLUMN_WIDTH = 60;
@@ -128,7 +126,7 @@ public class LabelsWindow extends JInternalFrame {
 
     // Current sort state (0-7, see table above). Will be set from saved Settings in
     // construtor.
-    private int sortState = 0;
+    private int sortState;
 
     /**
      * Constructor for the Labels (symbol table) window.
@@ -142,8 +140,8 @@ public class LabelsWindow extends JInternalFrame {
         }
         LabelsWindow.columnNames = LabelsWindow.sortColumnHeadings[this.sortState];
         this.tableSortComparator = this.tableSortingComparators.get(this.sortState);
-        this.labelsWindow = this;
-        this.contentPane = this.getContentPane();
+        final LabelsWindow labelsWindow = this;
+        final Container contentPane = this.getContentPane();
         this.labelPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         final JPanel features = new JPanel();
         this.dataLabels = new JCheckBox("Data", true);
@@ -154,8 +152,8 @@ public class LabelsWindow extends JInternalFrame {
         this.textLabels.setToolTipText("If checked, will display labels defined in text segment");
         features.add(this.dataLabels);
         features.add(this.textLabels);
-        this.contentPane.add(features, BorderLayout.SOUTH);
-        this.contentPane.add(this.labelPanel);
+        contentPane.add(features, BorderLayout.SOUTH);
+        contentPane.add(this.labelPanel);
     }
 
     /**
@@ -268,7 +266,7 @@ public class LabelsWindow extends JInternalFrame {
     // Suggested by Ken Vollmar, implemented by Pete Sanderson
     // July 2007.
 
-    private class LabelDisplayMouseListener extends MouseAdapter {
+    private static class LabelDisplayMouseListener extends MouseAdapter {
         @Override
         public void mouseClicked(final MouseEvent e) {
             final JTable table = (JTable) e.getSource();
@@ -378,7 +376,7 @@ public class LabelsWindow extends JInternalFrame {
 
     ///////////////////////////////////////////////////////////////
     // Class representing label table data
-    class LabelTableModel extends AbstractTableModel {
+    static class LabelTableModel extends AbstractTableModel {
         final String[] columns;
         final Object[][] data;
 
@@ -534,7 +532,7 @@ public class LabelsWindow extends JInternalFrame {
     //////////////////////////////////////////////////////////////////////////// alphabetically
     //////////////////////////////////////////////////////////////////////////// by
     //////////////////////////////////////////////////////////////////////////// name
-    private class LabelNameAscendingComparator implements Comparator<Symbol> {
+    private static class LabelNameAscendingComparator implements Comparator<Symbol> {
         @Override
         public int compare(final Symbol a, final Symbol b) {
             return a.getName().toLowerCase().compareTo(b.getName().toLowerCase());
@@ -552,7 +550,7 @@ public class LabelsWindow extends JInternalFrame {
     // Remember, if not equal then any value with correct sign will work.
     // If both have same sign, a-b will yield correct result.
     // If signs differ, b will yield correct result (think about it).
-    private class LabelAddressAscendingComparator implements Comparator<Symbol> {
+    private static class LabelAddressAscendingComparator implements Comparator<Symbol> {
         @Override
         public int compare(final Symbol a, final Symbol b) {
             final int addrA = a.getAddress();
@@ -569,12 +567,8 @@ public class LabelsWindow extends JInternalFrame {
     // Comparator object provided as the argument constructor. This works because it
     // is implemented by returning the result of the Ascending comparator when
     // arguments are reversed.
-    private class DescendingComparator implements Comparator<Symbol> {
-        private final Comparator<Symbol> opposite;
-
-        private DescendingComparator(final Comparator<Symbol> opposite) {
-            this.opposite = opposite;
-        }
+    private record DescendingComparator(
+            Comparator<Symbol> opposite) implements Comparator<Symbol> {
 
         @Override
         public int compare(final Symbol a, final Symbol b) {

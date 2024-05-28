@@ -509,9 +509,9 @@ public class SettingsHighlightingAction extends GuiAction {
             // sample bg & fg
             // If deselected: enable buttons, set their bg values from current setting, set
             // sample bg & bg
-            Color newBackground = null;
-            Color newForeground = null;
-            Font newFont = null;
+            final Color newBackground;
+            final Color newForeground;
+            final Font newFont;
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 SettingsHighlightingAction.this.backgroundButtons[this.position].setEnabled(false);
                 SettingsHighlightingAction.this.foregroundButtons[this.position].setEnabled(false);
@@ -545,7 +545,7 @@ public class SettingsHighlightingAction extends GuiAction {
     //
     // Modal dialog to set a font.
     //
-    private class FontSettingDialog extends AbstractFontSettingDialog {
+    private static class FontSettingDialog extends AbstractFontSettingDialog {
         private boolean resultOK;
 
         public FontSettingDialog(final Frame owner, final String title, final Font currentFont) {
@@ -602,11 +602,14 @@ public class SettingsHighlightingAction extends GuiAction {
         }
 
         // required by Abstract super class but not used here.
+
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected void apply(final Font font) {
 
         }
-/** {@inheritDoc} */
 
     }
 

@@ -141,7 +141,7 @@ public class RISCVTokenMarker extends TokenMarker {
                             // MIPS identifier (otherwise would catch, say, 0 (zero) in .word 0:10)
                             backslash = false;
                             // String lab = new String(array, lastOffset, i1-lastOffset-1).trim();
-                            boolean validIdentifier = false;
+                            boolean validIdentifier;
                             try {
                                 validIdentifier = io.github.chr1sps.rars.assembler.TokenTypes
                                         .isValidIdentifier(new String(array, this.lastOffset, i1 - this.lastOffset - 1).trim());

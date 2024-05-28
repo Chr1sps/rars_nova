@@ -55,7 +55,6 @@ public class BitmapDisplay extends AbstractToolAndApplication {
             visualizationPixelWidthSelector, visualizationPixelHeightSelector, displayBaseAddressSelector;
     private Graphics drawingArea;
     private JPanel canvas;
-    private JPanel results;
 
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
@@ -172,10 +171,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      */
     @Override
     protected JComponent buildMainDisplayArea() {
-        this.results = new JPanel();
-        this.results.add(this.buildOrganizationArea());
-        this.results.add(this.buildVisualizationArea());
-        return this.results;
+        final JPanel results = new JPanel();
+        results.add(this.buildOrganizationArea());
+        results.add(this.buildVisualizationArea());
+        return results;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -531,7 +530,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
 
     ////////////////////////////////////////////////////////////////////////
     // Represents grid of colors
-    private class Grid {
+    private static class Grid {
 
         final Color[][] grid;
         final int rows;

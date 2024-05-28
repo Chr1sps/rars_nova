@@ -10,9 +10,7 @@ import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.util.CustomPublisher;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
@@ -144,7 +142,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     // and high end of address range, but retrieval from the tree has to be based
     // on target address being ANYWHERE IN THE RANGE (not an exact key match).
 
-    private Collection<MemoryObservable> observables = Memory.getNewMemoryObserversCollection();
+    private final Collection<MemoryObservable> observables = Memory.getNewMemoryObserversCollection();
 
     // The data segment is allocated in blocks of 1024 ints (4096 bytes). Each block
     // is
@@ -285,8 +283,6 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     // always returns this instance.
 
     private static Memory uniqueMemoryInstance = new Memory();
-
-    private final List<Flow.Subscription> subscriptions = new ArrayList<>();
 
     /*
      * Private constructor for Memory. Separate data structures for text and data
@@ -678,7 +674,6 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
      * @throws AddressErrorException if any.
      */
     public double setDouble(final int address, final double value) throws AddressErrorException {
-        int oldHighOrder, oldLowOrder;
         final long longValue = Double.doubleToLongBits(value);
         return Double.longBitsToDouble(this.setDoubleWord(address, longValue));
     }
@@ -710,9 +705,9 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
         Memory.storeProgramStatement(address, statement, Memory.textBaseAddress, this.textBlockTable);
     }
 
-    /********************************
+    /* *******************************
      * THE GETTER METHODS
-     ******************************/
+     * *****************************/
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -733,7 +728,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     // Does the real work, but includes option to NOT notify observers.
     private int get(final int address, final int length, final boolean notify) throws AddressErrorException {
-        int value = 0;
+        final int value;
         final int relativeByteAddress;
         if (Memory.inDataSegment(address)) {
             // in data segment. Will read one byte at a time, w/o regard to boundaries.
@@ -797,7 +792,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     // Doing so would be detrimental to simulation runtime performance, so
     // I decided to keep the duplicate logic.
     public int getRawWord(final int address) throws AddressErrorException {
-        int value = 0;
+        final int value;
         final int relative;
         Memory.checkLoadWordAligned(address);
         if (Memory.inDataSegment(address)) {
@@ -859,7 +854,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     // See note above, with getRawWord(), concerning duplicated logic.
     public Integer getRawWordOrNull(final int address) throws AddressErrorException {
-        Integer value = null;
+        Integer value;
         final int relative;
         Memory.checkLoadWordAligned(address);
         if (Memory.inDataSegment(address)) {
@@ -1193,15 +1188,6 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     }
 
     /**
-     * Return number of observers
-     *
-     * @return a int
-     */
-    public int countObservers() {
-        return this.observables.size();
-    }
-
-    /**
      * {@inheritDoc}
      * <p>
      * Remove specified memory observers
@@ -1210,36 +1196,6 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
         for (final MemoryObservable o : this.observables) {
             o.deleteSubscriber(obs);
         }
-    }
-
-    /**
-     * Remove all memory observers
-     */
-    public void deleteObservers() {
-        // just drop the collection
-        this.observables = Memory.getNewMemoryObserversCollection();
-    }
-
-    /**
-     * Overridden to be unavailable. The notice that an Observer
-     * receives does not come from the memory object itself, but
-     * instead from a delegate.
-     *
-     * @throws java.lang.UnsupportedOperationException
-     */
-    public static void notifyObservers() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Overridden to be unavailable. The notice that an Observer
-     * receives does not come from the memory object itself, but
-     * instead from a delegate.
-     */
-    public static void notifyObservers(final Object obj) {
-        throw new UnsupportedOperationException();
     }
 
     private static Collection<MemoryObservable> getNewMemoryObserversCollection() {
@@ -1272,9 +1228,8 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
                     || this.lowAddress == mo.lowAddress && this.highAddress < mo.highAddress) {
                 return -1;
             }
-            if (this.lowAddress > mo.lowAddress
-                    || this.lowAddress == mo.lowAddress && this.highAddress > mo.highAddress) {
-                return -1;
+            if (this.lowAddress > mo.lowAddress || this.highAddress > mo.highAddress) {
+                return 1;
             }
             return 0; // they have to be equal at this point.
         }
@@ -1412,7 +1367,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     // Same as above, but doesn't set, just gets
     private synchronized int fetchWordFromTable(final int[][] blockTable, final int relative) {
-        int value = 0;
+        final int value;
         final int block;
         final int offset;
         block = relative / Memory.BLOCK_LENGTH_WORDS;
@@ -1429,7 +1384,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     // Same as above, but if it hasn't been allocated returns null.
     // Developed by Greg Gibeling of UC Berkeley, fall 2007.
     private synchronized Integer fetchWordOrNullFromTable(final int[][] blockTable, final int relative) {
-        int value = 0;
+        final int value;
         final int block;
         final int offset;
         block = relative / Memory.BLOCK_LENGTH_WORDS;

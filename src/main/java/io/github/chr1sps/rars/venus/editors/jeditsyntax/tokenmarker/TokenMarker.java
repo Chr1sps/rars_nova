@@ -9,10 +9,9 @@
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker;
 
-import javax.swing.text.Segment;
-
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.PopupHelpItem;
 
+import javax.swing.text.Segment;
 import java.util.ArrayList;
 
 /**
@@ -38,23 +37,23 @@ public abstract class TokenMarker {
      * @param lineIndex The line number
      * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.Token} object
      */
-    public Token markTokens(Segment line, int lineIndex) {
-        if (lineIndex >= length) {
+    public Token markTokens(final Segment line, final int lineIndex) {
+        if (lineIndex >= this.length) {
             throw new IllegalArgumentException("Tokenizing invalid line: "
                     + lineIndex);
         }
 
-        lastToken = null;
+        this.lastToken = null;
 
-        LineInfo info = lineInfo[lineIndex];
-        LineInfo prev;
+        final LineInfo info = this.lineInfo[lineIndex];
+        final LineInfo prev;
         if (lineIndex == 0)
             prev = null;
         else
-            prev = lineInfo[lineIndex - 1];
+            prev = this.lineInfo[lineIndex - 1];
 
-        byte oldToken = info.token;
-        byte token = markTokensImpl(prev == null ? Token.NULL : prev.token, line, lineIndex);
+        final byte oldToken = info.token;
+        final byte token = this.markTokensImpl(prev == null ? Token.NULL : prev.token, line, lineIndex);
 
         info.token = token;
 
@@ -92,14 +91,14 @@ public abstract class TokenMarker {
          * This bug took me ages to track down, that's why I wrote all the
          * relevant info down so that others wouldn't duplicate it.
          */
-        if (!(lastLine == lineIndex && nextLineRequested))
-            nextLineRequested = (oldToken != token);
+        if (!(this.lastLine == lineIndex && this.nextLineRequested))
+            this.nextLineRequested = (oldToken != token);
 
-        lastLine = lineIndex;
+        this.lastLine = lineIndex;
 
-        addToken(0, Token.END);
+        this.addToken(0, Token.END);
 
-        return firstToken;
+        return this.firstToken;
     }
 
     /**
@@ -146,16 +145,16 @@ public abstract class TokenMarker {
      * @param index The first line number
      * @param lines The number of lines
      */
-    public void insertLines(int index, int lines) {
+    public void insertLines(final int index, final int lines) {
         if (lines <= 0)
             return;
-        length += lines;
-        ensureCapacity(length);
-        int len = index + lines;
-        System.arraycopy(lineInfo, index, lineInfo, len, lineInfo.length - len);
+        this.length += lines;
+        this.ensureCapacity(this.length);
+        final int len = index + lines;
+        System.arraycopy(this.lineInfo, index, this.lineInfo, len, this.lineInfo.length - len);
 
         for (int i = index + lines - 1; i >= index; i--) {
-            lineInfo[i] = new LineInfo();
+            this.lineInfo[i] = new LineInfo();
         }
     }
 
@@ -167,13 +166,13 @@ public abstract class TokenMarker {
      * @param index The first line number
      * @param lines The number of lines
      */
-    public void deleteLines(int index, int lines) {
+    public void deleteLines(final int index, final int lines) {
         if (lines <= 0)
             return;
-        int len = index + lines;
-        length -= lines;
-        System.arraycopy(lineInfo, len, lineInfo,
-                index, lineInfo.length - len);
+        final int len = index + lines;
+        this.length -= lines;
+        System.arraycopy(this.lineInfo, len, this.lineInfo,
+                index, this.lineInfo.length - len);
     }
 
     /**
@@ -182,7 +181,7 @@ public abstract class TokenMarker {
      * @return a int
      */
     public int getLineCount() {
-        return length;
+        return this.length;
     }
 
     /**
@@ -193,7 +192,7 @@ public abstract class TokenMarker {
      * @return a boolean
      */
     public boolean isNextLineRequested() {
-        return nextLineRequested;
+        return this.nextLineRequested;
     }
 
     /**
@@ -205,7 +204,7 @@ public abstract class TokenMarker {
      * @param tokenText the source String that matched to the token
      * @return ArrayList containing PopupHelpItem objects, one per match.
      */
-    public ArrayList<PopupHelpItem> getTokenExactMatchHelp(Token token, String tokenText) {
+    public ArrayList<PopupHelpItem> getTokenExactMatchHelp(final Token token, final String tokenText) {
         return null;
     }
 
@@ -222,8 +221,8 @@ public abstract class TokenMarker {
      * @param tokenText     the source String that matched to the token
      * @return ArrayList containing PopupHelpItem objects, one per match.
      */
-    public ArrayList<PopupHelpItem> getTokenPrefixMatchHelp(String line, Token tokenList, Token tokenAtOffset,
-                                                            String tokenText) {
+    public ArrayList<PopupHelpItem> getTokenPrefixMatchHelp(final String line, final Token tokenList, final Token tokenAtOffset,
+                                                            final String tokenText) {
         return null;
     }
 
@@ -270,7 +269,7 @@ public abstract class TokenMarker {
      * does that.
      */
     protected TokenMarker() {
-        lastLine = -1;
+        this.lastLine = -1;
     }
 
     /**
@@ -285,14 +284,14 @@ public abstract class TokenMarker {
      *
      * @param index The array index
      */
-    protected void ensureCapacity(int index) {
-        if (lineInfo == null)
-            lineInfo = new LineInfo[index + 1];
-        else if (lineInfo.length <= index) {
-            LineInfo[] lineInfoN = new LineInfo[(index + 1) * 2];
-            System.arraycopy(lineInfo, 0, lineInfoN, 0,
-                    lineInfo.length);
-            lineInfo = lineInfoN;
+    protected void ensureCapacity(final int index) {
+        if (this.lineInfo == null)
+            this.lineInfo = new LineInfo[index + 1];
+        else if (this.lineInfo.length <= index) {
+            final LineInfo[] lineInfoN = new LineInfo[(index + 1) * 2];
+            System.arraycopy(this.lineInfo, 0, lineInfoN, 0,
+                    this.lineInfo.length);
+            this.lineInfo = lineInfoN;
         }
     }
 
@@ -302,34 +301,34 @@ public abstract class TokenMarker {
      * @param length The length of the token
      * @param id     The id of the token
      */
-    protected void addToken(int length, byte id) {
+    protected void addToken(final int length, final byte id) {
         if (id >= Token.INTERNAL_FIRST && id <= Token.INTERNAL_LAST)
             throw new InternalError("Invalid id: " + id);
 
         if (length == 0 && id != Token.END)
             return;
 
-        if (firstToken == null) {
-            firstToken = new Token(length, id);
-            lastToken = firstToken;
-        } else if (lastToken == null) {
-            lastToken = firstToken;
-            firstToken.length = length;
-            firstToken.id = id;
-        } else if (lastToken.next == null) {
-            lastToken.next = new Token(length, id);
-            lastToken = lastToken.next;
+        if (this.firstToken == null) {
+            this.firstToken = new Token(length, id);
+            this.lastToken = this.firstToken;
+        } else if (this.lastToken == null) {
+            this.lastToken = this.firstToken;
+            this.firstToken.length = length;
+            this.firstToken.id = id;
+        } else if (this.lastToken.next == null) {
+            this.lastToken.next = new Token(length, id);
+            this.lastToken = this.lastToken.next;
         } else {
-            lastToken = lastToken.next;
-            lastToken.length = length;
-            lastToken.id = id;
+            this.lastToken = this.lastToken.next;
+            this.lastToken.length = length;
+            this.lastToken.id = id;
         }
     }
 
     /**
      * Inner class for storing information about tokenized lines.
      */
-    public class LineInfo {
+    public static class LineInfo {
         /**
          * Creates a new LineInfo object with token = Token.NULL
          * and obj = null.
@@ -341,7 +340,7 @@ public abstract class TokenMarker {
          * Creates a new LineInfo object with the specified
          * parameters.
          */
-        public LineInfo(byte token, Object obj) {
+        public LineInfo(final byte token, final Object obj) {
             this.token = token;
             this.obj = obj;
         }

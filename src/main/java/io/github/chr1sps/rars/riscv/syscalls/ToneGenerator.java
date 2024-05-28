@@ -207,7 +207,7 @@ class Tone implements Runnable {
     private void playTone() {
 
         try {
-            Sequencer player = null;
+            Sequencer player;
             Tone.openLock.lock();
             try {
                 player = MidiSystem.getSequencer();

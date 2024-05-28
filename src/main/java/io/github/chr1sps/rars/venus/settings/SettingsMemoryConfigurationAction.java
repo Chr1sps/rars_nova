@@ -81,7 +81,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
     //
     // Private class to do all the work!
     //
-    private class MemoryConfigurationDialog extends JDialog implements ActionListener {
+    private static class MemoryConfigurationDialog extends JDialog implements ActionListener {
         JTextField[] addressDisplay;
         JLabel[] nameDisplay;
         ConfigurationButton selectedConfigurationButton, initialConfigurationButton;
@@ -271,7 +271,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
     }
 
     // Handy class to connect button to its configuration...
-    private class ConfigurationButton extends JRadioButton {
+    private static class ConfigurationButton extends JRadioButton {
         private final MemoryConfiguration configuration;
 
         public ConfigurationButton(final MemoryConfiguration config) {

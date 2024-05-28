@@ -84,14 +84,14 @@ public class BHTEntry {
      * @param historySize number of past branch outcomes to remember
      * @param initVal     the initial value of the entry (take or do not take)
      */
-    public BHTEntry(int historySize, boolean initVal) {
-        m_prediction = initVal;
-        m_history = new boolean[historySize];
+    public BHTEntry(final int historySize, final boolean initVal) {
+        this.m_prediction = initVal;
+        this.m_history = new boolean[historySize];
 
         for (int i = 0; i < historySize; i++) {
-            m_history[i] = initVal;
+            this.m_history[i] = initVal;
         }
-        m_correct = m_incorrect = 0;
+        this.m_correct = this.m_incorrect = 0;
     }
 
     /**
@@ -100,7 +100,7 @@ public class BHTEntry {
      * @return true if prediction is to take the branch, false otherwise
      */
     public boolean getPrediction() {
-        return m_prediction;
+        return this.m_prediction;
     }
 
     /**
@@ -111,24 +111,24 @@ public class BHTEntry {
      *
      * @param branchTaken signals if the branch was taken (true) or not (false)
      */
-    public void updatePrediction(boolean branchTaken) {
+    public void updatePrediction(final boolean branchTaken) {
 
         // update history
-        for (int i = 0; i < m_history.length - 1; i++) {
-            m_history[i] = m_history[i + 1];
+        for (int i = 0; i < this.m_history.length - 1; i++) {
+            this.m_history[i] = this.m_history[i + 1];
         }
-        m_history[m_history.length - 1] = branchTaken;
+        this.m_history[this.m_history.length - 1] = branchTaken;
 
         // if the prediction was correct, update stats and keep prediction
-        if (branchTaken == m_prediction) {
-            m_correct++;
+        if (branchTaken == this.m_prediction) {
+            this.m_correct++;
         } else {
-            m_incorrect++;
+            this.m_incorrect++;
 
             // check if the prediction should change
             boolean changePrediction = true;
 
-            for (boolean taken : m_history) {
+            for (final boolean taken : this.m_history) {
                 if (taken != branchTaken) {
                     changePrediction = false;
                     break;
@@ -136,7 +136,7 @@ public class BHTEntry {
             }
 
             if (changePrediction)
-                m_prediction = !m_prediction;
+                this.m_prediction = !this.m_prediction;
 
         }
     }
@@ -147,7 +147,7 @@ public class BHTEntry {
      * @return number of incorrect predictions (mispredictions)
      */
     public int getStatsPredIncorrect() {
-        return m_incorrect;
+        return this.m_incorrect;
     }
 
     /**
@@ -156,7 +156,7 @@ public class BHTEntry {
      * @return number of correct predictions
      */
     public int getStatsPredCorrect() {
-        return m_correct;
+        return this.m_correct;
     }
 
     /**
@@ -165,8 +165,8 @@ public class BHTEntry {
      * @return the percentage of correct predictions
      */
     public double getStatsPredPrecision() {
-        int sum = m_incorrect + m_correct;
-        return (sum == 0) ? 0 : m_correct * 100.0 / sum;
+        final int sum = this.m_incorrect + this.m_correct;
+        return (sum == 0) ? 0 : this.m_correct * 100.0 / sum;
     }
 
     /**
@@ -177,14 +177,14 @@ public class BHTEntry {
      * @return a string representation of the BHT entry's history
      */
     public String getHistoryAsStr() {
-        String result = "";
+        final StringBuilder result = new StringBuilder();
 
-        for (int i = 0; i < m_history.length; i++) {
+        for (int i = 0; i < this.m_history.length; i++) {
             if (i > 0)
-                result = result + ", ";
-            result += m_history[i] ? "T" : "NT";
+                result.append(", ");
+            result.append(this.m_history[i] ? "T" : "NT");
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -194,6 +194,6 @@ public class BHTEntry {
      * @return a string representation of the BHT entry's current prediction
      */
     public String getPredictionAsStr() {
-        return m_prediction ? "TAKE" : "NOT TAKE";
+        return this.m_prediction ? "TAKE" : "NOT TAKE";
     }
 }

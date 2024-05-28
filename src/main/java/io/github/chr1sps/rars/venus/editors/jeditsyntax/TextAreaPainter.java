@@ -20,6 +20,7 @@ import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 /**
  * The text area repaint manager. It performs double buffering and paints
@@ -70,21 +71,6 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         this.eolMarkers = defaults.eolMarkers;
     }
 
-    /**
-     * Returns if this component can be traversed by pressing the
-     * Tab key. This returns false.
-     * <p>
-     * NOTE: as of Java 1.4 this method is deprecated and no longer
-     * has the desired effect because the focus subsystem does not
-     * call it. I've implemented a KeyEventDispatcher in JEditTextArea
-     * to handle Tabs. DPS 12-May-2010
-     *
-     * @return a boolean
-     */
-    @Override
-    public final boolean isManagingFocus() {
-        return false;
-    }
 
     /**
      * Fetch the tab size in characters. DPS 12-May-2010.
@@ -416,7 +402,10 @@ public class TextAreaPainter extends JComponent implements TabExpander {
     @Override
     public void setFont(final Font font) {
         super.setFont(font);
-        this.fm = Toolkit.getDefaultToolkit().getFontMetrics(font);
+        final var img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        final var graphics = img.getGraphics();
+        this.fm = graphics.getFontMetrics(font);
+        graphics.dispose();
         this.textArea.recalculateVisibleLines();
     }
 
@@ -615,7 +604,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         gfx.setColor(defaultColor);
 
         y += this.fm.getHeight();
-        x = Utilities.drawTabbedText(this.currentLine, x, y, gfx, this, 0);
+        x = (int) Utilities.drawTabbedText(this.currentLine, (float) x, (float) y, (Graphics2D) gfx, this, 0);
 
         if (this.eolMarkers) {
             gfx.setColor(this.eolMarkerColor);

@@ -1,7 +1,5 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
-import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
-
 /*
 Copyright (c) 2017,  Benjamin Landers
 
@@ -31,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>REM class.</p>
- *
  */
 public class REM extends Arithmetic {
     /**
@@ -45,7 +42,8 @@ public class REM extends Arithmetic {
     /**
      * {@inheritDoc}
      */
-    public long compute(long value, long value2) {
+    @Override
+    public long compute(final long value, final long value2) {
         // Division by 0
         if (value2 == 0) {
             return value;

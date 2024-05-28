@@ -219,7 +219,7 @@ public class SyntaxUtilities {
                 // new InstructionMouseEvent((Component)expander, x, y, line));
             }
 
-            x = Utilities.drawTabbedText(line, x, y, gfx, expander, 0);
+            x = (int) Utilities.drawTabbedText(line, (float) x, (float) y, (Graphics2D) gfx, expander, 0);
             line.offset += length;
             offset += length;
 
@@ -229,6 +229,14 @@ public class SyntaxUtilities {
         return x;
     }
 
+    private SyntaxUtilities() {
+    }
+}
+
+class InstructionMouseEvent extends MouseEvent {
+    // private members
+    private final Segment line;
+
     /**
      * <p>Constructor for InstructionMouseEvent.</p>
      *
@@ -237,25 +245,17 @@ public class SyntaxUtilities {
      * @param y         a int
      * @param line      a {@link javax.swing.text.Segment} object
      */
-    // private members
-    private SyntaxUtilities() {
-    }
-}
-
-class InstructionMouseEvent extends MouseEvent {
-    /**
-     * <p>Getter for the field <code>line</code>.</p>
-     *
-     * @return a {@link javax.swing.text.Segment} object
-     */
-    private final Segment line;
-
     public InstructionMouseEvent(final Component component, final int x, final int y, final Segment line) {
         super(component, MouseEvent.MOUSE_MOVED, new java.util.Date().getTime(), 0, x, y, 0, false);
         System.out.println("Create InstructionMouseEvent " + x + " " + y + " " + line);
         this.line = line;
     }
 
+    /**
+     * <p>Getter for the field <code>line</code>.</p>
+     *
+     * @return a {@link javax.swing.text.Segment} object
+     */
     public Segment getLine() {
         return this.line;
     }

@@ -136,7 +136,6 @@ public class Main {
     private final ArrayList<String> registerDisplayList;
     private final ArrayList<String> memoryDisplayList;
     private final ArrayList<String> filenameList;
-    private final int instructionCount;
     private PrintStream out; // stream for display of command line output
     private ArrayList<String[]> dumpTriples = null; // each element holds 3 arguments for dump option
     private ArrayList<String> programArgumentList; // optional program args for program (becomes argc, argv)
@@ -162,7 +161,7 @@ public class Main {
         this.verbose = true;
         this.assembleProject = false;
         this.countInstructions = false;
-        this.instructionCount = 0;
+        final int instructionCount = 0;
         this.assembleErrorExitCode = 0;
         this.simulateErrorExitCode = 0;
         this.registerDisplayList = new ArrayList<>();

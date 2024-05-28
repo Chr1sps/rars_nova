@@ -26,7 +26,7 @@ public class SyntaxStyle {
      * @param italic True if the text should be italics
      * @param bold   True if the text should be bold
      */
-    public SyntaxStyle(Color color, boolean italic, boolean bold) {
+    public SyntaxStyle(final Color color, final boolean italic, final boolean bold) {
         this.color = color;
         this.italic = italic;
         this.bold = bold;
@@ -38,7 +38,7 @@ public class SyntaxStyle {
      * @return a {@link java.awt.Color} object
      */
     public Color getColor() {
-        return color;
+        return this.color;
     }
 
     /**
@@ -52,7 +52,7 @@ public class SyntaxStyle {
      */
     public String getColorAsHexString() {
         return io.github.chr1sps.rars.util.Binary
-                .intToHexString(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
+                .intToHexString(this.color.getRed() << 16 | this.color.getGreen() << 8 | this.color.getBlue());
     }
 
     /**
@@ -61,7 +61,7 @@ public class SyntaxStyle {
      * @return a boolean
      */
     public boolean isPlain() {
-        return !(bold || italic);
+        return !(this.bold || this.italic);
     }
 
     /**
@@ -70,7 +70,7 @@ public class SyntaxStyle {
      * @return a boolean
      */
     public boolean isItalic() {
-        return italic;
+        return this.italic;
     }
 
     /**
@@ -79,7 +79,7 @@ public class SyntaxStyle {
      * @return a boolean
      */
     public boolean isBold() {
-        return bold;
+        return this.bold;
     }
 
     /**
@@ -89,18 +89,18 @@ public class SyntaxStyle {
      * @param font a {@link java.awt.Font} object
      * @return a {@link java.awt.Font} object
      */
-    public Font getStyledFont(Font font) {
+    public Font getStyledFont(final Font font) {
         if (font == null)
             throw new NullPointerException("font param must not"
                     + " be null");
-        if (font.equals(lastFont))
-            return lastStyledFont;
-        lastFont = font;
-        lastStyledFont = new Font(font.getFamily(),
-                (bold ? Font.BOLD : 0)
-                        | (italic ? Font.ITALIC : 0),
+        if (font.equals(this.lastFont))
+            return this.lastStyledFont;
+        this.lastFont = font;
+        this.lastStyledFont = new Font(font.getFamily(),
+                (this.bold ? Font.BOLD : Font.PLAIN)
+                        | (this.italic ? Font.ITALIC : Font.PLAIN),
                 font.getSize());
-        return lastStyledFont;
+        return this.lastStyledFont;
     }
 
     /**
@@ -109,20 +109,19 @@ public class SyntaxStyle {
      * @param font a {@link java.awt.Font} object
      * @return a {@link java.awt.FontMetrics} object
      */
-    public FontMetrics getFontMetrics(Font font) {
+    public FontMetrics getFontMetrics(final Font font, final Graphics graphics) {
         if (font == null)
             throw new NullPointerException("font param must not"
                     + " be null");
-        if (font.equals(lastFont) && fontMetrics != null)
-            return fontMetrics;
-        lastFont = font;
-        lastStyledFont = new Font(font.getFamily(),
-                (bold ? Font.BOLD : 0)
-                        | (italic ? Font.ITALIC : 0),
+        if (font.equals(this.lastFont) && this.fontMetrics != null)
+            return this.fontMetrics;
+        this.lastFont = font;
+        this.lastStyledFont = new Font(font.getFamily(),
+                (this.bold ? Font.BOLD : Font.PLAIN)
+                        | (this.italic ? Font.ITALIC : Font.PLAIN),
                 font.getSize());
-        fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(
-                lastStyledFont);
-        return fontMetrics;
+        this.fontMetrics = graphics.getFontMetrics(this.lastStyledFont);
+        return this.fontMetrics;
     }
 
     /**
@@ -132,10 +131,10 @@ public class SyntaxStyle {
      * @param gfx  The graphics context
      * @param font The font to add the styles to
      */
-    public void setGraphicsFlags(Graphics gfx, Font font) {
-        Font _font = getStyledFont(font);
+    public void setGraphicsFlags(final Graphics gfx, final Font font) {
+        final Font _font = this.getStyledFont(font);
         gfx.setFont(_font);
-        gfx.setColor(color);
+        gfx.setColor(this.color);
     }
 
     /**
@@ -143,10 +142,11 @@ public class SyntaxStyle {
      *
      * @return a {@link java.lang.String} object
      */
+    @Override
     public String toString() {
-        return getClass().getName() + "[color=" + color +
-                (italic ? ",italic" : "") +
-                (bold ? ",bold" : "") + "]";
+        return this.getClass().getName() + "[color=" + this.color +
+                (this.italic ? ",italic" : "") +
+                (this.bold ? ",bold" : "") + "]";
     }
 
     // private members

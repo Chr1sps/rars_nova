@@ -77,7 +77,7 @@ public class SyscallInputDialogString extends AbstractSyscall {
         // A null return value means that "Cancel" was chosen rather than OK.
         // An empty string returned (that is, inputString.length() of zero)
         // means that OK was chosen but no string was input.
-        String inputString = null;
+        final String inputString;
         inputString = JOptionPane.showInputDialog(message);
         final int byteAddress = RegisterFile.getValue("a1"); // byteAddress of string is in a1
         final int maxLength = RegisterFile.getValue("a2"); // input buffer size for input string is in a2

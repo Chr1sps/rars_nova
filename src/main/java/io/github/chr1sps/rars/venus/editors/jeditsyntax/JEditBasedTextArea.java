@@ -31,7 +31,6 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     private final JComponent lineNumbers;
     private final EditPane editPane;
     private final UndoManager undoManager;
-    private final UndoableEditListener undoableEditListener;
     private boolean isCompoundEdit = false;
     private CompoundEdit compoundEdit;
     private final JEditBasedTextArea sourceCode;
@@ -51,7 +50,8 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         this.sourceCode = this;
 
         // Needed to support unlimited undo/redo capability
-        this.undoableEditListener = e -> {
+        // Remember the edit and update the menus.
+        final UndoableEditListener undoableEditListener = e -> {
             // Remember the edit and update the menus.
             if (this.isCompoundEdit) {
                 this.compoundEdit.addEdit(e.getEdit());
@@ -60,7 +60,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
                 this.editPane.updateUndoAndRedoState();
             }
         };
-        this.getDocument().addUndoableEditListener(this.undoableEditListener);
+        this.getDocument().addUndoableEditListener(undoableEditListener);
         this.setFont(Globals.getSettings().getEditorFont());
         this.setTokenMarker(new RISCVTokenMarker());
 
@@ -316,7 +316,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     @Override
     public int doFindText(final String find, final boolean caseSensitive) {
         final int findPosn = this.sourceCode.getCaretPosition();
-        int nextPosn = 0;
+        final int nextPosn;
         nextPosn = this.nextIndex(this.sourceCode.getText(), find, findPosn, caseSensitive);
         if (nextPosn >= 0) {
             this.sourceCode.requestFocus(); // guarantees visibility of the blue highlight
@@ -373,7 +373,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      */
     @Override
     public int doReplace(final String find, final String replace, final boolean caseSensitive) {
-        int nextPosn = 0;
+        final int nextPosn;
         int posn;
         // Will perform a "find" and return, unless positioned at the end of
         // a selected "find" result.

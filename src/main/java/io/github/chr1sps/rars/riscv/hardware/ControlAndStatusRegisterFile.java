@@ -282,7 +282,7 @@ public class ControlAndStatusRegisterFile {
      * method
      * will add the given Observer to each one.
      *
-     * @param observer a {@link java.util.Observer} object
+     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public static void addRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
         ControlAndStatusRegisterFile.instance.addRegistersObserver(observer);
@@ -293,7 +293,7 @@ public class ControlAndStatusRegisterFile {
      * method
      * will delete the given Observer from each one.
      *
-     * @param observer a {@link java.util.Observer} object
+     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public static void deleteRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
         ControlAndStatusRegisterFile.instance.deleteRegistersSubscriber(observer);

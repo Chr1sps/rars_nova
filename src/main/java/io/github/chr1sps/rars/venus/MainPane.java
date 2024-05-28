@@ -8,7 +8,6 @@ import io.github.chr1sps.rars.venus.registers.RegistersWindow;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import java.awt.*;
 
 /*
@@ -50,8 +49,6 @@ public class MainPane extends JTabbedPane {
     final ExecutePane executeTab;
     final EditTabbedPane editTabbedPane;
 
-    private final VenusUI mainUI;
-
     /**
      * Constructor for the MainPane class.
      *
@@ -64,11 +61,8 @@ public class MainPane extends JTabbedPane {
     public MainPane(final VenusUI appFrame, final Editor editor, final RegistersWindow regs,
                     final FloatingPointWindow cop1Regs, final ControlAndStatusWindow cop0Regs) {
         super();
-        this.mainUI = appFrame;
 
         this.setTabPlacement(JTabbedPane.TOP); // LEFT);
-        if (this.getUI() instanceof final BasicTabbedPaneUI ui) {
-        }
         this.editTabbedPane = new EditTabbedPane(appFrame, editor, this);
         this.executeTab = new ExecutePane(appFrame, regs, cop1Regs, cop0Regs);
         final String editTabTitle = "Edit";

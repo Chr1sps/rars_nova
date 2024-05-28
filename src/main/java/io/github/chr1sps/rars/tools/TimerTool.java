@@ -217,7 +217,7 @@ public class TimerTool extends AbstractToolAndApplication {
     /***************************** Timer Classes *****************************/
 
     // Watches for changes made to the timecmp MMIO
-    public class TimeCmpDaemon implements SimpleSubscriber<MemoryAccessNotice> {
+    public static class TimeCmpDaemon implements SimpleSubscriber<MemoryAccessNotice> {
         public boolean postInterrupt = false;
         public long value = 0L; // Holds the most recent value of timecmp writen to the MMIO
 

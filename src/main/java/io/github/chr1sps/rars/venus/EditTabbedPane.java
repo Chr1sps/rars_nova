@@ -335,7 +335,7 @@ public class EditTabbedPane extends JTabbedPane {
     private File saveAsFile(final EditPane editPane) {
         File theFile = null;
         if (editPane != null) {
-            JFileChooser saveDialog = null;
+            JFileChooser saveDialog;
             boolean operationOK = false;
             while (!operationOK) {
                 // Set Save As dialog directory in a logical way. If file in
@@ -645,7 +645,7 @@ public class EditTabbedPane extends JTabbedPane {
                 int lineNumber = 1;
                 String line = Globals.program.getSourceLine(lineNumber++);
                 while (line != null) {
-                    fileContents.append(line + "\n");
+                    fileContents.append(line).append("\n");
                     line = Globals.program.getSourceLine(lineNumber++);
                 }
                 editPane.setSourceCode(fileContents.toString(), true);
@@ -746,7 +746,7 @@ public class EditTabbedPane extends JTabbedPane {
         private class ChoosableFileFilterChangeListener implements PropertyChangeListener {
             @Override
             public void propertyChange(final java.beans.PropertyChangeEvent e) {
-                if (e.getPropertyName() == JFileChooser.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY) {
+                if (e.getPropertyName().equals(JFileChooser.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY)) {
                     final FileFilter[] newFilters = (FileFilter[]) e.getNewValue();
                     final FileFilter[] oldFilters = (FileFilter[]) e.getOldValue();
                     if (newFilters.length > FileOpener.this.fileFilterList.size()) {

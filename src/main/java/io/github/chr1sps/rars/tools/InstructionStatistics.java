@@ -38,7 +38,6 @@ import io.github.chr1sps.rars.riscv.instructions.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Observable;
 
 /**
  * A RARS tool for obtaining instruction statistics by instruction category.
@@ -118,7 +117,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     /**
      * array of counter variables - one for each instruction category
      */
-    private final int[] m_counters = new int[MAX_CATEGORY];
+    private final int[] m_counters = new int[InstructionStatistics.MAX_CATEGORY];
 
     /**
      * names of the instruction categories as array
@@ -143,7 +142,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      * @param heading String containing text for heading shown in upper part of
      *                window.
      */
-    public InstructionStatistics(String title, String heading) {
+    public InstructionStatistics(final String title, final String heading) {
         super(title, heading);
     }
 
@@ -159,7 +158,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      */
     @Override
     public String getName() {
-        return NAME;
+        return InstructionStatistics.NAME;
     }
 
     /**
@@ -171,23 +170,23 @@ public class InstructionStatistics extends AbstractToolAndApplication {
     protected JComponent buildMainDisplayArea() {
 
         // Create GUI elements for the tool
-        JPanel panel = new JPanel(new GridBagLayout());
+        final JPanel panel = new JPanel(new GridBagLayout());
 
-        m_tfTotalCounter = new JTextField("0", 10);
-        m_tfTotalCounter.setEditable(false);
+        this.m_tfTotalCounter = new JTextField("0", 10);
+        this.m_tfTotalCounter.setEditable(false);
 
-        m_tfCounters = new JTextField[MAX_CATEGORY];
-        m_pbCounters = new JProgressBar[MAX_CATEGORY];
+        this.m_tfCounters = new JTextField[InstructionStatistics.MAX_CATEGORY];
+        this.m_pbCounters = new JProgressBar[InstructionStatistics.MAX_CATEGORY];
 
         // for each category a text field and a progress bar is created
         for (int i = 0; i < InstructionStatistics.MAX_CATEGORY; i++) {
-            m_tfCounters[i] = new JTextField("0", 10);
-            m_tfCounters[i].setEditable(false);
-            m_pbCounters[i] = new JProgressBar(JProgressBar.HORIZONTAL);
-            m_pbCounters[i].setStringPainted(true);
+            this.m_tfCounters[i] = new JTextField("0", 10);
+            this.m_tfCounters[i].setEditable(false);
+            this.m_pbCounters[i] = new JProgressBar(JProgressBar.HORIZONTAL);
+            this.m_pbCounters[i].setStringPainted(true);
         }
 
-        GridBagConstraints c = new GridBagConstraints();
+        final GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.LINE_START;
         c.gridheight = c.gridwidth = 1;
 
@@ -197,7 +196,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
         c.insets = new Insets(0, 0, 17, 0);
         panel.add(new JLabel("Total: "), c);
         c.gridx = 3;
-        panel.add(m_tfTotalCounter, c);
+        panel.add(this.m_tfTotalCounter, c);
 
         c.insets = new Insets(3, 3, 3, 3);
 
@@ -205,11 +204,11 @@ public class InstructionStatistics extends AbstractToolAndApplication {
         for (int i = 0; i < InstructionStatistics.MAX_CATEGORY; i++) {
             c.gridy++;
             c.gridx = 2;
-            panel.add(new JLabel(m_categoryLabels[i] + ":   "), c);
+            panel.add(new JLabel(this.m_categoryLabels[i] + ":   "), c);
             c.gridx = 3;
-            panel.add(m_tfCounters[i], c);
+            panel.add(this.m_tfCounters[i], c);
             c.gridx = 4;
-            panel.add(m_pbCounters[i], c);
+            panel.add(this.m_pbCounters[i], c);
         }
 
         return panel;
@@ -220,7 +219,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      */
     @Override
     protected void addAsObserver() {
-        addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
+        this.addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
 
     /**
@@ -238,7 +237,7 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      * @see InstructionStatistics#CATEGORY_MEM
      * @see InstructionStatistics#CATEGORY_OTHER
      */
-    protected int getInstructionCategory(Instruction instruction) {
+    protected int getInstructionCategory(final Instruction instruction) {
         if (instruction instanceof Arithmetic)
             return InstructionStatistics.CATEGORY_ALU; // add, addw, sub, subw, and, or, xor, slt, sltu, m extension
         if (instruction instanceof ADDI || instruction instanceof ADDIW || instruction instanceof ANDI
@@ -275,39 +274,40 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      * According to the category the counter values are increased and the display
      * gets updated.
      */
-    protected void processRISCVUpdate(Observable resource, AccessNotice notice) {
+    @Override
+    protected void processRISCVUpdate(final AccessNotice notice) {
 
         if (!notice.accessIsFromRISCV())
             return;
 
         // check for a read access in the text segment
-        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice memAccNotice) {
+        if (notice.getAccessType() == AccessNotice.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
 
             // now it is safe to make a cast of the notice
 
             // The next three statments are from Felipe Lessa's instruction counter.
             // Prevents double-counting.
-            int a = memAccNotice.getAddress();
-            if (a == lastAddress)
+            final int a = memAccNotice.getAddress();
+            if (a == this.lastAddress)
                 return;
-            lastAddress = a;
+            this.lastAddress = a;
 
             try {
 
                 // access the statement in the text segment without notifying other tools etc.
-                ProgramStatement stmt = Memory.getInstance().getStatementNoNotify(memAccNotice.getAddress());
+                final ProgramStatement stmt = Memory.getInstance().getStatementNoNotify(memAccNotice.getAddress());
 
                 // necessary to handle possible null pointers at the end of the program
                 // (e.g., if the simulator tries to execute the next instruction after the last
                 // instruction in the text segment)
                 if (stmt != null) {
-                    int category = getInstructionCategory(stmt.getInstruction());
+                    final int category = this.getInstructionCategory(stmt.getInstruction());
 
-                    m_totalCounter++;
-                    m_counters[category]++;
-                    updateDisplay();
+                    this.m_totalCounter++;
+                    this.m_counters[category]++;
+                    this.updateDisplay();
                 }
-            } catch (AddressErrorException e) {
+            } catch (final AddressErrorException e) {
                 // silently ignore these exceptions
             }
         }
@@ -318,9 +318,9 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      */
     @Override
     protected void initializePreGUI() {
-        m_totalCounter = 0;
-        lastAddress = -1; // from Felipe Lessa's instruction counter tool
-        Arrays.fill(m_counters, 0);
+        this.m_totalCounter = 0;
+        this.lastAddress = -1; // from Felipe Lessa's instruction counter tool
+        Arrays.fill(this.m_counters, 0);
     }
 
     /**
@@ -328,10 +328,10 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      */
     @Override
     protected void reset() {
-        m_totalCounter = 0;
-        lastAddress = -1; // from Felipe Lessa's instruction counter tool
-        Arrays.fill(m_counters, 0);
-        updateDisplay();
+        this.m_totalCounter = 0;
+        this.lastAddress = -1; // from Felipe Lessa's instruction counter tool
+        Arrays.fill(this.m_counters, 0);
+        this.updateDisplay();
     }
 
     /**
@@ -340,12 +340,12 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      */
     @Override
     protected void updateDisplay() {
-        m_tfTotalCounter.setText(String.valueOf(m_totalCounter));
+        this.m_tfTotalCounter.setText(String.valueOf(this.m_totalCounter));
 
         for (int i = 0; i < InstructionStatistics.MAX_CATEGORY; i++) {
-            m_tfCounters[i].setText(String.valueOf(m_counters[i]));
-            m_pbCounters[i].setMaximum(m_totalCounter);
-            m_pbCounters[i].setValue(m_counters[i]);
+            this.m_tfCounters[i].setText(String.valueOf(this.m_counters[i]));
+            this.m_pbCounters[i].setMaximum(this.m_totalCounter);
+            this.m_pbCounters[i].setValue(this.m_counters[i]);
         }
     }
 }

@@ -139,7 +139,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             }
         }
         final int sourceLineDigits = ("" + maxSourceLineNumber).length();
-        int leadingSpaces = 0;
+        int leadingSpaces;
         int lastLine = -1;
         for (int i = 0; i < sourceStatementList.size(); i++) {
             final ProgramStatement statement = sourceStatementList.get(i);
@@ -151,7 +151,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             this.data[i][TextSegmentWindow.CODE_COLUMN] = NumberDisplayBaseChooser.formatNumber(statement.getBinaryStatement(), 16);
             this.data[i][TextSegmentWindow.BASIC_COLUMN] = statement.getPrintableBasicAssemblyStatement();
             String sourceString = "";
-            if (!statement.getSource().equals("")) {
+            if (!statement.getSource().isEmpty()) {
                 leadingSpaces = sourceLineDigits - ("" + statement.getSourceLine()).length();
                 String lineNumber = "          ".substring(0, leadingSpaces)
                         + statement.getSourceLine() + ": ";
@@ -362,11 +362,11 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     final int address = m.getAddress();
                     final int value = m.getValue();
                     final String strValue = Binary.intToHexString(m.getValue());
-                    String strBasic = TextSegmentWindow.modifiedCodeMarker;
+                    final String strBasic;
                     String strSource = TextSegmentWindow.modifiedCodeMarker;
                     // Translate the address into table model row and modify the values in that row
                     // accordingly.
-                    int row = 0;
+                    final int row;
                     try {
                         row = this.findRowForAddress(address);
                     } catch (final IllegalArgumentException e) {
@@ -389,9 +389,9 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     } else {
                         // If restored to original value, restore the basic and source
                         // This will be the case upon backstepping.
-                        if (mc.getCode().equals(strValue)) {
-                            strBasic = (String) mc.getBasic();
-                            strSource = (String) mc.getSource();
+                        if (mc.code().equals(strValue)) {
+                            strBasic = (String) mc.basic();
+                            strSource = (String) mc.source();
                             // remove from executeMods since we are back to original
                             this.executeMods.remove(row);
                         } else {
@@ -434,128 +434,9 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             default -> {
             }
         }
+        this.subscription.request(1);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Required by Observer interface. Called when notified by an Observable that we
-     * are registered with.
-     * The Observable here is a delegate of the Memory object, which lets us know of
-     * memory operations.
-     * More precisely, memory operations only in the text segment, since that is the
-     * only range of
-     * addresses we're registered for. And we're only interested in write
-     * operations.
-     */
-//    public void update(Observable observable, Object obj) {
-//        if (observable == io.github.chr1sps.rars.simulator.Simulator.getInstance()) {
-//
-//            SimulatorNotice notice = (SimulatorNotice) obj;
-//            if (notice.getAction() == SimulatorNotice.SIMULATOR_START) {
-//                // Simulated MIPS execution starts. Respond to text segment changes only if
-//                // self-modifying code
-//                // enabled. I commented out conditions that would further limit it to running in
-//                // timed or stepped mode.
-//                // Seems reasonable for text segment display to be accurate in cases where
-//                // existing code is overwritten
-//                // even when running at unlimited speed. DPS 10-July-2013
-//                deleteAsTextSegmentObserver();
-//                if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) { // &&
-//                    // (notice.getRunSpeed()
-//                    // !=
-//                    // RunSpeedPanel.UNLIMITED_SPEED
-//                    // ||
-//                    // notice.getMaxSteps()==1))
-//                    // {
-//                    addAsTextSegmentObserver();
-//                }
-//            }
-//        } else if (observable == Globals.getSettings()) {
-//            deleteAsTextSegmentObserver();
-//            if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) {
-//                addAsTextSegmentObserver();
-//            }
-//            updateRowHeight();
-//        } else if (obj instanceof MemoryAccessNotice access) {
-//            // NOTE: observable != Memory.getInstance() because Memory class delegates
-//            // notification duty.
-//            // This will occur only if running program has written to text segment
-//            // (self-modifying code)
-//            if (access.getAccessType() == AccessNotice.WRITE) {
-//                int address = access.getAddress();
-//                int value = access.getValue();
-//                String strValue = io.github.chr1sps.rars.util.Binary.intToHexString(access.getValue());
-//                String strBasic = modifiedCodeMarker;
-//                String strSource = modifiedCodeMarker;
-//                // Translate the address into table model row and modify the values in that row
-//                // accordingly.
-//                int row = 0;
-//                try {
-//                    row = findRowForAddress(address);
-//                } catch (IllegalArgumentException e) {
-//                    return; // do nothing if address modified is outside the range of original program.
-//                }
-//                ModifiedCode mc = executeMods.get(row);
-//                if (mc == null) { // if not already modified
-//                    // Not already modified and new code is same as original --> do nothing.
-//                    if (tableModel.getValueAt(row, CODE_COLUMN).equals(strValue)) {
-//                        return;
-//                    }
-//                    mc = new ModifiedCode(
-//                            row,
-//                            tableModel.getValueAt(row, CODE_COLUMN),
-//                            tableModel.getValueAt(row, BASIC_COLUMN),
-//                            tableModel.getValueAt(row, SOURCE_COLUMN));
-//                    executeMods.put(row, mc);
-//                    // make a ProgramStatement and get basic code to display in BASIC_COLUMN
-//                    strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
-//                } else {
-//                    // If restored to original value, restore the basic and source
-//                    // This will be the case upon backstepping.
-//                    if (mc.getCode().equals(strValue)) {
-//                        strBasic = (String) mc.getBasic();
-//                        strSource = (String) mc.getSource();
-//                        // remove from executeMods since we are back to original
-//                        executeMods.remove(row);
-//                    } else {
-//                        // make a ProgramStatement and get basic code to display in BASIC_COLUMN
-//                        strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
-//                    }
-//                }
-//                // For the code column, we don't want to do the following:
-//                // tableModel.setValueAt(strValue, row, CODE_COLUMN)
-//                // because that method will write to memory using Memory.setRawWord() which will
-//                // trigger notification to observers, which brings us back to here!!! Infinite
-//                // indirect recursion results. Neither fun nor productive. So what happens is
-//                // this: (1) change to memory cell causes setValueAt() to be automatically be
-//                // called. (2) it updates the memory cell which in turn notifies us which
-//                // invokes
-//                // the update() method - the method we're in right now. All we need to do here
-//                // is
-//                // update the table model then notify the controller/view to update its display.
-//                data[row][CODE_COLUMN] = strValue;
-//                tableModel.fireTableCellUpdated(row, CODE_COLUMN);
-//                // The other columns do not present a problem since they are not editable by
-//                // user.
-//                tableModel.setValueAt(strBasic, row, BASIC_COLUMN);
-//                tableModel.setValueAt(strSource, row, SOURCE_COLUMN);
-//                // Let's update the value displayed in the DataSegmentWindow too. But it only
-//                // observes memory while
-//                // the MIPS program is running, and even then only in timed or step mode. There
-//                // are good reasons
-//                // for that. So we'll pretend to be Memory observable and send it a fake memory
-//                // write update.
-//                try {
-//                    Globals.getGui().getMainPane().getExecutePane().getDataSegmentWindow()
-//                            .update(Memory.getInstance(), new MemoryAccessNotice(AccessNotice.WRITE, address, value));
-//                } catch (Exception e) {
-//                    // Not sure if anything bad can happen in this sequence, but if anything does we
-//                    // can let it go.
-//                }
-//            }
-//        }
-//    }
 
     /**
      * Called by RunResetAction to restore display of any table rows that were
@@ -565,9 +446,9 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         if (this.executeMods != null && !this.executeMods.isEmpty()) {
             for (final Enumeration<ModifiedCode> elements = this.executeMods.elements(); elements.hasMoreElements(); ) {
                 final ModifiedCode mc = elements.nextElement();
-                this.tableModel.setValueAt(mc.getCode(), mc.getRow(), TextSegmentWindow.CODE_COLUMN);
-                this.tableModel.setValueAt(mc.getBasic(), mc.getRow(), TextSegmentWindow.BASIC_COLUMN);
-                this.tableModel.setValueAt(mc.getSource(), mc.getRow(), TextSegmentWindow.SOURCE_COLUMN);
+                this.tableModel.setValueAt(mc.code(), mc.row(), TextSegmentWindow.CODE_COLUMN);
+                this.tableModel.setValueAt(mc.basic(), mc.row(), TextSegmentWindow.BASIC_COLUMN);
+                this.tableModel.setValueAt(mc.source(), mc.row(), TextSegmentWindow.SOURCE_COLUMN);
             }
             this.executeMods.clear();
         }
@@ -668,7 +549,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public void highlightStepAtAddress(final int address) {
         this.highlightAddress = address;
         // Scroll if necessary to assure highlighted row is visible.
-        int row = 0;
+        final int row;
         try {
             row = this.findRowForAddress(address);
         } catch (final IllegalArgumentException e) {
@@ -725,7 +606,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      */
 
     void selectStepAtAddress(final int address) {
-        int addressRow = 0;
+        final int addressRow;
         try {
             addressRow = this.findRowForAddress(address);
         } catch (final IllegalArgumentException e) {
@@ -737,13 +618,13 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final double cellHeight = sourceCell.getHeight();
         final double viewHeight = this.tableScroller.getViewport().getExtentSize().getHeight();
         final int numberOfVisibleRows = (int) (viewHeight / cellHeight);
-        final int newViewPositionY = Math.max((int) ((addressRow - (numberOfVisibleRows / 2)) * cellHeight), 0);
+        final int newViewPositionY = Math.max((int) ((addressRow - ((double) numberOfVisibleRows / 2)) * cellHeight), 0);
         this.tableScroller.getViewport().setViewPosition(new Point(0, newViewPositionY));
         // Select the source code cell for this row by generating a fake Mouse Pressed
         // event
         // and explicitly invoking the table's mouse listener.
         final MouseEvent fakeMouseEvent = new MouseEvent(this.table, MouseEvent.MOUSE_PRESSED,
-                new Date().getTime(), MouseEvent.BUTTON1_MASK,
+                new Date().getTime(), MouseEvent.BUTTON1_DOWN_MASK,
                 (int) sourceCell.getX() + 1,
                 (int) sourceCell.getY() + 1, 1, false);
         final MouseListener[] mouseListeners = this.table.getMouseListeners();
@@ -761,7 +642,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // event on its mouse listener.
         final Rectangle rect = ((MyTippedJTable) this.table).getRectForColumnIndex(TextSegmentWindow.BREAK_COLUMN);
         final MouseEvent fakeMouseEvent = new MouseEvent(this.table, MouseEvent.MOUSE_CLICKED,
-                new Date().getTime(), MouseEvent.BUTTON1_MASK,
+                new Date().getTime(), MouseEvent.BUTTON1_DOWN_MASK,
                 (int) rect.getX(), (int) rect.getY(), 1, false);
         final MouseListener[] mouseListeners = ((MyTippedJTable) this.table).tableHeader.getMouseListeners();
         for (final MouseListener mouseListener : mouseListeners) {
@@ -810,7 +691,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * corresponding to this address.
      */
     private int findRowForAddress(final int address) throws IllegalArgumentException {
-        int addressRow = 0;
+        final int addressRow;
         try {
             addressRow = this.addressRows.get(address);
         } catch (final NullPointerException e) {
@@ -842,7 +723,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     /**
      * Inner class to implement the Table model for this JTable.
      */
-    class TextTableModel extends AbstractTableModel {
+    static class TextTableModel extends AbstractTableModel {
         final Object[][] data;
 
         public TextTableModel(final Object[][] d) {
@@ -904,7 +785,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 return;
             }
             // Handle changes in the Code column.
-            int val = 0;
+            final int val;
             int address = 0;
             if (value.equals(this.data[row][col]))
                 return;
@@ -954,34 +835,8 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
     }
 
-    private class ModifiedCode {
-        private final Integer row;
-        private final Object code;
-        private final Object basic;
-        private final Object source;
-
-        private ModifiedCode(final Integer row, final Object code, final Object basic, final Object source) {
-            this.row = row;
-            this.code = code;
-            this.basic = basic;
-            this.source = source;
-        }
-
-        private Integer getRow() {
-            return this.row;
-        }
-
-        private Object getCode() {
-            return this.code;
-        }
-
-        private Object getBasic() {
-            return this.basic;
-        }
-
-        private Object getSource() {
-            return this.source;
-        }
+    private record ModifiedCode(Integer row, Object code, Object basic,
+                                Object source) {
     }
 
     /*
@@ -1023,7 +878,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * otherwise is
      * same as MonoRightCellRenderer.
      */
-    class MachineCodeCellRenderer extends DefaultTableCellRenderer {
+    static class MachineCodeCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(final JTable table, final Object value,
                                                        final boolean isSelected, final boolean hasFocus, final int row, final int column) {
@@ -1063,7 +918,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             this.setHorizontalAlignment(SwingConstants.CENTER);
             this.setVerticalAlignment(SwingConstants.CENTER);
 
-            /**********************************************
+            /* *********************************************
              * Use this if you want to add "instant" recognition of breakpoint changes
              * during simulation run. Currently, the simulator gets array of breakpoints
              * only when "Go" is selected. Thus the system does not respond to breakpoints

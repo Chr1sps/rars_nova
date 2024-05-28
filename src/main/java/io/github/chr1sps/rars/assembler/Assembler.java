@@ -62,8 +62,7 @@ public class Assembler {
     private TokenList globalDeclarationList;
     private AddressSpace textAddress;
     private AddressSpace dataAddress;
-    private DataSegmentForwardReferences currentFileDataSegmentForwardReferences,
-            accumulatedDataSegmentForwardReferences;
+    private DataSegmentForwardReferences currentFileDataSegmentForwardReferences;
 
     /**
      * Get list of assembler errors and warnings
@@ -111,7 +110,7 @@ public class Assembler {
         this.dataAddress = new AddressSpace(Memory.dataBaseAddress);
         this.externAddress = Memory.externBaseAddress;
         this.currentFileDataSegmentForwardReferences = new DataSegmentForwardReferences();
-        this.accumulatedDataSegmentForwardReferences = new DataSegmentForwardReferences();
+        final DataSegmentForwardReferences accumulatedDataSegmentForwardReferences = new DataSegmentForwardReferences();
         Globals.symbolTable.clear();
         Globals.memory.clear();
         final ArrayList<ProgramStatement> machineList = new ArrayList<>();
@@ -148,7 +147,7 @@ public class Assembler {
             final ArrayList<TokenList> tokenList = this.fileCurrentlyBeingAssembled.getTokenList();
             final ArrayList<ProgramStatement> parsedList = this.fileCurrentlyBeingAssembled.createParsedList();
             // each file keeps its own macro definitions
-            final MacroPool macroPool = this.fileCurrentlyBeingAssembled.createMacroPool();
+            this.fileCurrentlyBeingAssembled.createMacroPool();
             // FIRST PASS OF ASSEMBLER VERIFIES SYNTAX, GENERATES SYMBOL TABLE,
             // INITIALIZES DATA SEGMENT
             ArrayList<ProgramStatement> statements;
@@ -185,7 +184,7 @@ public class Assembler {
             // file.
             this.currentFileDataSegmentForwardReferences.resolve(this.fileCurrentlyBeingAssembled
                     .getLocalSymbolTable());
-            this.accumulatedDataSegmentForwardReferences.add(this.currentFileDataSegmentForwardReferences);
+            accumulatedDataSegmentForwardReferences.add(this.currentFileDataSegmentForwardReferences);
             this.currentFileDataSegmentForwardReferences.clear();
         } // end of first-pass loop for each RISCVprogram
 
@@ -194,8 +193,8 @@ public class Assembler {
         // references from global symbol table. Those that remain unresolved are
         // undefined
         // and require error message.
-        this.accumulatedDataSegmentForwardReferences.resolve(Globals.symbolTable);
-        this.accumulatedDataSegmentForwardReferences.generateErrorMessages(this.errors);
+        accumulatedDataSegmentForwardReferences.resolve(Globals.symbolTable);
+        accumulatedDataSegmentForwardReferences.generateErrorMessages(this.errors);
 
         // Throw collection of errors accumulated through the first pass.
         if (this.errors.errorsOccurred()) {

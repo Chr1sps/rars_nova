@@ -3,12 +3,10 @@ package io.github.chr1sps.rars.riscv.instructions;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
-import io.github.chr1sps.rars.riscv.InstructionSet;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
 /**
  * <p>SRAIW class.</p>
- *
  */
 public class SRAIW extends BasicInstruction {
     /**
@@ -23,9 +21,10 @@ public class SRAIW extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    @Override
+    public void simulate(final ProgramStatement statement) {
         // Use the code directly from SRAI
-        int[] operands = statement.getOperands();
+        final int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0], RegisterFile.getValue(operands[1]) >> operands[2]);
     }
 }

@@ -78,7 +78,7 @@ public class SyscallLoader {
                 if (!AbstractSyscall.class.isAssignableFrom(clas)) {
                     continue;
                 }
-                final AbstractSyscall syscall = (AbstractSyscall) clas.newInstance();
+                final AbstractSyscall syscall = (AbstractSyscall) clas.getDeclaredConstructor().newInstance();
                 if (syscall.getNumber() == -1) {
                     SyscallLoader.syscallList.add(syscall);
                 } else {

@@ -46,8 +46,6 @@ public class EditFindReplaceAction extends GuiAction {
     private static final String DIALOG_TITLE = "Find and Replace";
     private final MainPane mainPane;
 
-    private JDialog findReplaceDialog;
-
     /**
      * <p>Constructor for EditFindReplaceAction.</p>
      *
@@ -69,8 +67,8 @@ public class EditFindReplaceAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        this.findReplaceDialog = new FindReplaceDialog(Globals.getGui(), EditFindReplaceAction.DIALOG_TITLE, false);
-        this.findReplaceDialog.setVisible(true);
+        final JDialog findReplaceDialog = new FindReplaceDialog(Globals.getGui(), EditFindReplaceAction.DIALOG_TITLE, false);
+        findReplaceDialog.setVisible(true);
     }
 
     //////////////////////////////////////////////////////////////////////////////

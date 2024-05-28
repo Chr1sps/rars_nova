@@ -68,7 +68,7 @@ public class SyscallInputDialogFloat extends AbstractSyscall {
         // A null return value means that "Cancel" was chosen rather than OK.
         // An empty string returned (that is, inputValue.length() of zero)
         // means that OK was chosen but no string was input.
-        String inputValue = null;
+        final String inputValue;
         inputValue = JOptionPane.showInputDialog(message);
 
         try {

@@ -33,7 +33,6 @@ import java.util.ArrayList;
 /**
  * Handly little class to contain help information for a popupMenu or
  * tool tip item.
- *
  */
 public class PopupHelpItem {
     private final String tokenText;
@@ -54,13 +53,13 @@ public class PopupHelpItem {
      * @param exact       True if match occurred as result of exact-match search,
      *                    false otherwise.
      */
-    public PopupHelpItem(String tokenText, String example, String description, boolean exact) {
+    public PopupHelpItem(final String tokenText, final String example, final String description, final boolean exact) {
         this.tokenText = tokenText;
         this.example = example;
         if (exact) {
             this.description = description;
         } else {
-            int detailPosition = description
+            final int detailPosition = description
                     .indexOf(io.github.chr1sps.rars.venus.HelpHelpAction.descriptionDetailSeparator);
             this.description = (detailPosition == -1) ? description : description.substring(0, detailPosition);
         }
@@ -75,7 +74,7 @@ public class PopupHelpItem {
      * @param example     An example instruction
      * @param description A textual description of the instruction
      */
-    public PopupHelpItem(String tokenText, String example, String description) {
+    public PopupHelpItem(final String tokenText, final String example, final String description) {
         this(tokenText, example, description, true);
 
     }
@@ -137,14 +136,14 @@ public class PopupHelpItem {
      * @param length a int
      * @return a {@link java.lang.String} object
      */
-    public String getExamplePaddedToLength(int length) {
-        String result = null;
+    public String getExamplePaddedToLength(final int length) {
+        final String result;
         if (length > this.exampleLength) {
             int numSpaces = length - this.exampleLength;
-            if (numSpaces > spaces.length()) {
-                numSpaces = spaces.length();
+            if (numSpaces > PopupHelpItem.spaces.length()) {
+                numSpaces = PopupHelpItem.spaces.length();
             }
-            result = this.example + spaces.substring(0, numSpaces);
+            result = this.example + PopupHelpItem.spaces.substring(0, numSpaces);
         } else if (length == this.exampleLength) {
             result = this.example;
         } else {
@@ -158,7 +157,7 @@ public class PopupHelpItem {
      *
      * @param example a {@link java.lang.String} object
      */
-    public void setExample(String example) {
+    public void setExample(final String example) {
         this.example = example;
         this.exampleLength = example.length();
     }
@@ -168,7 +167,7 @@ public class PopupHelpItem {
      *
      * @param description a {@link java.lang.String} object
      */
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -181,10 +180,10 @@ public class PopupHelpItem {
      * @param matches a {@link java.util.ArrayList} object
      * @return a int
      */
-    public static int maxExampleLength(ArrayList<PopupHelpItem> matches) {
+    public static int maxExampleLength(final ArrayList<PopupHelpItem> matches) {
         int length = 0;
         if (matches != null) {
-            for (PopupHelpItem match : matches) {
+            for (final PopupHelpItem match : matches) {
                 length = Math.max(length, match.getExampleLength());
             }
         }

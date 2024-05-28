@@ -61,7 +61,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
 
     private final TextEditingArea sourceCode;
     private final VenusUI mainUI;
-    private final String currentDirectoryPath;
     private final JLabel caretPositionLabel;
     private final JCheckBox showLineNumbers;
     private final JLabel lineNumbers;
@@ -79,7 +78,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         super(new BorderLayout());
         this.mainUI = appFrame;
         // user.dir, user's current working directory, is guaranteed to have a value
-        this.currentDirectoryPath = System.getProperty("user.dir");
+        final String currentDirectoryPath = System.getProperty("user.dir");
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
         Globals.getSettings().subscribe(this);
@@ -235,9 +234,9 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
             final String lineStr = Integer.toString(i);
             final int leadingSpaces = digits - lineStr.length();
             if (leadingSpaces == 0) {
-                lineNumberList.append(lineStr + "&nbsp;<br>");
+                lineNumberList.append(lineStr).append("&nbsp;<br>");
             } else {
-                lineNumberList.append(EditPane.spaces.substring(0, leadingSpaces * 6) + lineStr + "&nbsp;<br>");
+                lineNumberList.append(EditPane.spaces, 0, leadingSpaces * 6).append(lineStr).append("&nbsp;<br>");
             }
         }
         lineNumberList.append("<br></html>");

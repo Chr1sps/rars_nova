@@ -50,8 +50,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class SettingsEditorAction extends GuiAction {
 
-    private JDialog editorDialog;
-
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.
      *
@@ -74,9 +72,9 @@ public class SettingsEditorAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        this.editorDialog = new EditorFontDialog(Globals.getGui(), "Text Editor Settings", true,
+        final JDialog editorDialog = new EditorFontDialog(Globals.getGui(), "Text Editor Settings", true,
                 Globals.getSettings().getEditorFont());
-        this.editorDialog.setVisible(true);
+        editorDialog.setVisible(true);
 
     }
 
@@ -108,7 +106,7 @@ public class SettingsEditorAction extends GuiAction {
     };
 
     // Concrete font chooser class.
-    private class EditorFontDialog extends AbstractFontSettingDialog {
+    private static class EditorFontDialog extends AbstractFontSettingDialog {
 
         private JButton[] foregroundButtons;
         private JLabel[] samples;
@@ -119,15 +117,12 @@ public class SettingsEditorAction extends GuiAction {
         private SyntaxStyle[] defaultStyles, initialStyles, currentStyles;
         private Font previewFont;
 
-        private JPanel dialogPanel, syntaxStylePanel, otherSettingsPanel; ///// 4 Aug 2010
-
         private JSlider tabSizeSelector;
         private JSpinner tabSizeSpinSelector, blinkRateSpinSelector, popupPrefixLengthSpinSelector;
         private JCheckBox lineHighlightCheck, autoIndentCheck;
         private ColorChangerPanel bgChanger, fgChanger, lhChanger, textSelChanger, caretChanger;
         private Caret blinkCaret;
         private JTextField blinkSample;
-        private ButtonGroup popupGuidanceButtons;
         private JRadioButton[] popupGuidanceOptions;
         // Flag to indicate whether any syntax style buttons have been clicked
         // since dialog created or most recent "apply".
@@ -160,9 +155,7 @@ public class SettingsEditorAction extends GuiAction {
             dialog.add(editorStylePanel, BorderLayout.CENTER);
             dialog.add(syntaxStylePanel, BorderLayout.EAST);
             dialog.add(otherSettingsPanel, BorderLayout.SOUTH);
-            this.dialogPanel = dialog; ///// 4 Aug 2010
-            this.syntaxStylePanel = syntaxStylePanel; ///// 4 Aug 2010
-            this.otherSettingsPanel = otherSettingsPanel; ///// 4 Aug 2010
+            ///// 4 Aug 2010
             return dialog;
         }
 
@@ -362,7 +355,7 @@ public class SettingsEditorAction extends GuiAction {
             // Combine instruction guide off/on and instruction prefix length into radio
             // buttons
             final JPanel rightColumnSettingsPanel = new JPanel(new GridLayout(4, 1));
-            this.popupGuidanceButtons = new ButtonGroup();
+            final ButtonGroup popupGuidanceButtons = new ButtonGroup();
             this.popupGuidanceOptions = new JRadioButton[3];
             this.popupGuidanceOptions[0] = new JRadioButton("No popup instruction or directive guide");
             this.popupGuidanceOptions[1] = new JRadioButton("Display instruction guide after 1 letter typed");
@@ -370,7 +363,7 @@ public class SettingsEditorAction extends GuiAction {
             for (int i = 0; i < this.popupGuidanceOptions.length; i++) {
                 this.popupGuidanceOptions[i].setSelected(false);
                 this.popupGuidanceOptions[i].setToolTipText(SettingsEditorAction.POPUP_GUIDANCE_TOOL_TIP_TEXT[i]);
-                this.popupGuidanceButtons.add(this.popupGuidanceOptions[i]);
+                popupGuidanceButtons.add(this.popupGuidanceOptions[i]);
             }
             this.initialPopupGuidance = Globals.getSettings().getBooleanSetting(Settings.Bool.POPUP_INSTRUCTION_GUIDANCE)
                     ? Globals.getSettings().getEditorPopupPrefixLength()
@@ -560,7 +553,7 @@ public class SettingsEditorAction extends GuiAction {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 final Font f = EditorFontDialog.this.samples[this.row].getFont();
-                if (e.getActionCommand() == SettingsEditorAction.BOLD_BUTTON_TOOL_TIP_TEXT) {
+                if (e.getActionCommand().equals(SettingsEditorAction.BOLD_BUTTON_TOOL_TIP_TEXT)) {
                     if (EditorFontDialog.this.bold[this.row].isSelected()) {
                         EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() | Font.BOLD));
                     } else {
@@ -608,7 +601,7 @@ public class SettingsEditorAction extends GuiAction {
         /**
          * Panel to change colors via {@link Settings}
          */
-        class ColorChangerPanel extends JPanel {
+        static class ColorChangerPanel extends JPanel {
             private final int index;
             private final ColorSelectButton colorSelect;
             private final JButton modeButton;

@@ -495,7 +495,7 @@ public class Binary {
      */
     public static long stringToLong(final String s) throws NumberFormatException {
         String work = s;
-        long result = 0;
+        long result;
         // First, use Long.decode(). This will validate most, but it flags
         // valid hex two's complement values as exceptions. We'll catch those and
         // do our own validation.
@@ -636,7 +636,7 @@ public class Binary {
     /**
      * Parsing method to see if a string represents a hex number.
      * As per
-     * http://java.sun.com/j2se/1.4.2/docs/api/java/lang/Integer.html#decode(java.lang.String),
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/Integer.html#decode(java.lang.String)">...</a>,
      * a string represents a hex number if the string is in the forms:
      * Signopt 0x HexDigits
      * Signopt 0X HexDigits
@@ -680,7 +680,7 @@ public class Binary {
     /**
      * Parsing method to see if a string represents an octal number.
      * As per
-     * http://java.sun.com/j2se/1.4.2/docs/api/java/lang/Integer.html#decode(java.lang.String),
+     * <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/Integer.html#decode(java.lang.String)">...</a>,
      * a string represents an octal number if the string is in the forms:
      * Signopt 0 OctalDigits
      *

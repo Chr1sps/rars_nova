@@ -25,7 +25,7 @@
   (MIT license, http://www.opensource.org/licenses/mit-license.html)
 */
 
-/**
+/*
  * Instructions for use
  * <p>
  * This tool allows you to generate a trace by doing the following:
@@ -200,13 +200,9 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
                     final BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
                     final BasicInstructionFormat format = instr.getInstructionFormat();
                     // First dump the instruction address, prefixed by "I:"
-                    this.log.append("I: 0x"
-                            + Integer.toUnsignedString(a, 16)
-                            + "\n");
+                    this.log.append("I: 0x").append(Integer.toUnsignedString(a, 16)).append("\n");
                     // Then dump the instruction, prefixed by "i:"
-                    this.log.append("i: 0x"
-                            + Integer.toUnsignedString(stmt.getBinaryStatement(), 16)
-                            + "\n");
+                    this.log.append("i: 0x").append(Integer.toUnsignedString(stmt.getBinaryStatement(), 16)).append("\n");
                 }
             } catch (final AddressErrorException e) {
                 // TODO Auto-generated catch block
@@ -220,7 +216,7 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
                 this.log.append("L: 0x");
             if (notice.getAccessType() == AccessNotice.WRITE)
                 this.log.append("S: 0x");
-            this.log.append(Integer.toUnsignedString(a, 16) + "\n");
+            this.log.append(Integer.toUnsignedString(a, 16)).append("\n");
         }
 
         this.updateDisplay();
@@ -240,7 +236,7 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
         // TODO: handle ressizing the window if the logSuccess label is not visible
         try {
             final String filename = this.dumpLogFilename.getText();
-            if (filename.equals("")) {
+            if (filename.isEmpty()) {
                 this.logSuccess.setText("Enter a filename before trying to dump log");
                 return;
             }

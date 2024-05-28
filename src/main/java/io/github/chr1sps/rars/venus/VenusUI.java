@@ -67,15 +67,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public class VenusUI extends JFrame {
     private final VenusUI mainUI;
     public final JMenuBar menu;
-    private final JToolBar toolbar;
     private final MainPane mainPane;
     private final RegistersPane registersPane;
     private final RegistersWindow registersTab;
-    private final FloatingPointWindow fpTab;
     private final ControlAndStatusWindow csrTab;
     private final MessagesPane messagesPane;
-    private final JSplitPane splitter;
-    private final JSplitPane horizonSplitter;
 
     private int frameState; // see windowActivated() and windowDeactivated()
     private static int menuState = FileStatus.NO_FILE;
@@ -85,26 +81,11 @@ public class VenusUI extends JFrame {
     private boolean started = false; // started execution
     private final Editor editor;
 
-    // components of the menubar
-    private JMenu file, run, window, help, edit, settings;
-    private JMenuItem fileNew, fileOpen, fileClose, fileCloseAll, fileSave, fileSaveAs, fileSaveAll, fileDumpMemory,
-            fileExit;
-    private JMenuItem editUndo, editRedo, editCut, editCopy, editPaste, editFindReplace, editSelectAll;
-    private JMenuItem runGo, runStep, runBackstep, runReset, runAssemble, runStop, runPause, runClearBreakpoints,
-            runToggleBreakpoints;
-    private JCheckBoxMenuItem settingsLabel, settingsPopupInput, settingsValueDisplayBase, settingsAddressDisplayBase,
-            settingsExtended, settingsAssembleOnOpen, settingsAssembleAll, settingsAssembleOpen,
-            settingsWarningsAreErrors,
-            settingsStartAtMain, settingsProgramArguments, settingsSelfModifyingCode, settingsRV64,
-            settingsDeriveCurrentWorkingDirectory;
-    private JMenuItem settingsExceptionHandler, settingsEditor, settingsHighlighting, settingsMemoryConfiguration;
-    private JMenuItem helpHelp, helpAbout;
+    private JMenu window;
+    private JCheckBoxMenuItem settingsValueDisplayBase;
+    private JCheckBoxMenuItem settingsAddressDisplayBase;
 
-    // components of the toolbar
-    private JButton Undo, Redo, Cut, Copy, Paste, FindReplace, SelectAll;
-    private JButton New, Open, Save, SaveAs, SaveAll, DumpMemory;
-    private JButton Run, Assemble, Reset, Step, Backstep, Stop, Pause;
-    private JButton Help;
+    private JButton SaveAll;
 
     // The "action" objects, which include action listeners. One of each will be
     // created then
@@ -189,39 +170,39 @@ public class VenusUI extends JFrame {
         // not visible here.
 
         this.registersTab = new RegistersWindow();
-        this.fpTab = new FloatingPointWindow();
+        final FloatingPointWindow fpTab = new FloatingPointWindow();
         this.csrTab = new ControlAndStatusWindow();
-        this.registersPane = new RegistersPane(this.mainUI, this.registersTab, this.fpTab, this.csrTab);
+        this.registersPane = new RegistersPane(this.mainUI, this.registersTab, fpTab, this.csrTab);
         this.registersPane.setPreferredSize(registersPanePreferredSize);
 
         // Insets defaultTabInsets = (Insets)UIManager.get("TabbedPane.tabInsets");
         // UIManager.put("TabbedPane.tabInsets", new Insets(1, 1, 1, 1));
-        this.mainPane = new MainPane(this.mainUI, this.editor, this.registersTab, this.fpTab, this.csrTab);
+        this.mainPane = new MainPane(this.mainUI, this.editor, this.registersTab, fpTab, this.csrTab);
         // UIManager.put("TabbedPane.tabInsets", defaultTabInsets);
 
         this.mainPane.setPreferredSize(mainPanePreferredSize);
         this.messagesPane = new MessagesPane();
         this.messagesPane.setPreferredSize(messagesPanePreferredSize);
-        this.splitter = new JSplitPane(JSplitPane.VERTICAL_SPLIT, this.mainPane, this.messagesPane);
-        this.splitter.setOneTouchExpandable(true);
-        this.splitter.resetToPreferredSizes();
-        this.horizonSplitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.splitter, this.registersPane);
-        this.horizonSplitter.setOneTouchExpandable(true);
-        this.horizonSplitter.resetToPreferredSizes();
+        final JSplitPane splitter = new JSplitPane(JSplitPane.VERTICAL_SPLIT, this.mainPane, this.messagesPane);
+        splitter.setOneTouchExpandable(true);
+        splitter.resetToPreferredSizes();
+        final JSplitPane horizonSplitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, splitter, this.registersPane);
+        horizonSplitter.setOneTouchExpandable(true);
+        horizonSplitter.resetToPreferredSizes();
 
         // due to dependencies, do not set up menu/toolbar until now.
         this.createActionObjects();
         this.menu = this.setUpMenuBar();
         this.setJMenuBar(this.menu);
 
-        this.toolbar = this.setUpToolBar();
+        final JToolBar toolbar = this.setUpToolBar();
 
         final JPanel jp = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        jp.add(this.toolbar);
+        jp.add(toolbar);
         jp.add(RunSpeedPanel.getInstance());
         final JPanel center = new JPanel(new BorderLayout());
         center.add(jp, BorderLayout.NORTH);
-        center.add(this.horizonSplitter);
+        center.add(horizonSplitter);
 
         this.getContentPane().add(center);
 
@@ -551,111 +532,112 @@ public class VenusUI extends JFrame {
         UIManager.put("TitlePane.menuBarEmbedded", true);
         final JMenuBar menuBar = new JMenuBar();
 //        FlatLaf.revalidateAndRepaintAllFramesAndDialogs();
-        this.file = new JMenu("File");
-        this.file.setMnemonic(KeyEvent.VK_F);
-        this.edit = new JMenu("Edit");
-        this.edit.setMnemonic(KeyEvent.VK_E);
-        this.run = new JMenu("Run");
-        this.run.setMnemonic(KeyEvent.VK_R);
+        // components of the menubar
+        final JMenu file = new JMenu("File");
+        file.setMnemonic(KeyEvent.VK_F);
+        final JMenu edit = new JMenu("Edit");
+        edit.setMnemonic(KeyEvent.VK_E);
+        final JMenu run = new JMenu("Run");
+        run.setMnemonic(KeyEvent.VK_R);
         // window = new JMenu("Window");
         // window.setMnemonic(KeyEvent.VK_W);
-        this.settings = new JMenu("Settings");
-        this.settings.setMnemonic(KeyEvent.VK_S);
-        this.help = new JMenu("Help");
-        this.help.setMnemonic(KeyEvent.VK_H);
+        final JMenu settings = new JMenu("Settings");
+        settings.setMnemonic(KeyEvent.VK_S);
+        final JMenu help = new JMenu("Help");
+        help.setMnemonic(KeyEvent.VK_H);
         // slight bug: user typing alt-H activates help menu item directly, not help
         // menu
 
-        this.fileNew = new JMenuItem(this.fileNewAction);
-        this.fileNew.setIcon(this.loadIcon("New16.png"));
-        this.fileOpen = new JMenuItem(this.fileOpenAction);
-        this.fileOpen.setIcon(this.loadIcon("Open16.png"));
-        this.fileClose = new JMenuItem(this.fileCloseAction);
-        this.fileClose.setIcon(this.loadIcon("MyBlank16.gif"));
-        this.fileCloseAll = new JMenuItem(this.fileCloseAllAction);
-        this.fileCloseAll.setIcon(this.loadIcon("MyBlank16.gif"));
-        this.fileSave = new JMenuItem(this.fileSaveAction);
-        this.fileSave.setIcon(this.loadIcon("Save16.png"));
-        this.fileSaveAs = new JMenuItem(this.fileSaveAsAction);
-        this.fileSaveAs.setIcon(this.loadIcon("SaveAs16.png"));
-        this.fileSaveAll = new JMenuItem(this.fileSaveAllAction);
-        this.fileSaveAll.setIcon(this.loadIcon("MyBlank16.gif"));
-        this.fileDumpMemory = new JMenuItem(this.fileDumpMemoryAction);
-        this.fileDumpMemory.setIcon(this.loadIcon("Dump16.png"));
-        this.fileExit = new JMenuItem(this.fileExitAction);
-        this.fileExit.setIcon(this.loadIcon("MyBlank16.gif"));
-        this.file.add(this.fileNew);
-        this.file.add(this.fileOpen);
-        this.file.add(this.fileClose);
-        this.file.add(this.fileCloseAll);
-        this.file.addSeparator();
-        this.file.add(this.fileSave);
-        this.file.add(this.fileSaveAs);
-        this.file.add(this.fileSaveAll);
+        final JMenuItem fileNew = new JMenuItem(this.fileNewAction);
+        fileNew.setIcon(this.loadIcon("New16.png"));
+        final JMenuItem fileOpen = new JMenuItem(this.fileOpenAction);
+        fileOpen.setIcon(this.loadIcon("Open16.png"));
+        final JMenuItem fileClose = new JMenuItem(this.fileCloseAction);
+        fileClose.setIcon(this.loadIcon("MyBlank16.gif"));
+        final JMenuItem fileCloseAll = new JMenuItem(this.fileCloseAllAction);
+        fileCloseAll.setIcon(this.loadIcon("MyBlank16.gif"));
+        final JMenuItem fileSave = new JMenuItem(this.fileSaveAction);
+        fileSave.setIcon(this.loadIcon("Save16.png"));
+        final JMenuItem fileSaveAs = new JMenuItem(this.fileSaveAsAction);
+        fileSaveAs.setIcon(this.loadIcon("SaveAs16.png"));
+        final JMenuItem fileSaveAll = new JMenuItem(this.fileSaveAllAction);
+        fileSaveAll.setIcon(this.loadIcon("MyBlank16.gif"));
+        final JMenuItem fileDumpMemory = new JMenuItem(this.fileDumpMemoryAction);
+        fileDumpMemory.setIcon(this.loadIcon("Dump16.png"));
+        final JMenuItem fileExit = new JMenuItem(this.fileExitAction);
+        fileExit.setIcon(this.loadIcon("MyBlank16.gif"));
+        file.add(fileNew);
+        file.add(fileOpen);
+        file.add(fileClose);
+        file.add(fileCloseAll);
+        file.addSeparator();
+        file.add(fileSave);
+        file.add(fileSaveAs);
+        file.add(fileSaveAll);
         if (!DumpFormatLoader.getDumpFormats().isEmpty()) {
-            this.file.add(this.fileDumpMemory);
+            file.add(fileDumpMemory);
         }
-        this.file.addSeparator();
-        this.file.add(this.fileExit);
+        file.addSeparator();
+        file.add(fileExit);
 
-        this.editUndo = new JMenuItem(this.editUndoAction);
-        this.editUndo.setIcon(this.loadIcon("Undo16.png"));// "Undo16.gif"));
-        this.editRedo = new JMenuItem(this.editRedoAction);
-        this.editRedo.setIcon(this.loadIcon("Redo16.png"));// "Redo16.gif"));
-        this.editCut = new JMenuItem(this.editCutAction);
-        this.editCut.setIcon(this.loadIcon("Cut16.gif"));
-        this.editCopy = new JMenuItem(this.editCopyAction);
-        this.editCopy.setIcon(this.loadIcon("Copy16.png"));// "Copy16.gif"));
-        this.editPaste = new JMenuItem(this.editPasteAction);
-        this.editPaste.setIcon(this.loadIcon("Paste16.png"));// "Paste16.gif"));
-        this.editFindReplace = new JMenuItem(this.editFindReplaceAction);
-        this.editFindReplace.setIcon(this.loadIcon("Find16.png"));// "Paste16.gif"));
-        this.editSelectAll = new JMenuItem(this.editSelectAllAction);
-        this.editSelectAll.setIcon(this.loadIcon("MyBlank16.gif"));
-        this.edit.add(this.editUndo);
-        this.edit.add(this.editRedo);
-        this.edit.addSeparator();
-        this.edit.add(this.editCut);
-        this.edit.add(this.editCopy);
-        this.edit.add(this.editPaste);
-        this.edit.addSeparator();
-        this.edit.add(this.editFindReplace);
-        this.edit.add(this.editSelectAll);
+        final JMenuItem editUndo = new JMenuItem(this.editUndoAction);
+        editUndo.setIcon(this.loadIcon("Undo16.png"));// "Undo16.gif"));
+        final JMenuItem editRedo = new JMenuItem(this.editRedoAction);
+        editRedo.setIcon(this.loadIcon("Redo16.png"));// "Redo16.gif"));
+        final JMenuItem editCut = new JMenuItem(this.editCutAction);
+        editCut.setIcon(this.loadIcon("Cut16.gif"));
+        final JMenuItem editCopy = new JMenuItem(this.editCopyAction);
+        editCopy.setIcon(this.loadIcon("Copy16.png"));// "Copy16.gif"));
+        final JMenuItem editPaste = new JMenuItem(this.editPasteAction);
+        editPaste.setIcon(this.loadIcon("Paste16.png"));// "Paste16.gif"));
+        final JMenuItem editFindReplace = new JMenuItem(this.editFindReplaceAction);
+        editFindReplace.setIcon(this.loadIcon("Find16.png"));// "Paste16.gif"));
+        final JMenuItem editSelectAll = new JMenuItem(this.editSelectAllAction);
+        editSelectAll.setIcon(this.loadIcon("MyBlank16.gif"));
+        edit.add(editUndo);
+        edit.add(editRedo);
+        edit.addSeparator();
+        edit.add(editCut);
+        edit.add(editCopy);
+        edit.add(editPaste);
+        edit.addSeparator();
+        edit.add(editFindReplace);
+        edit.add(editSelectAll);
 
-        this.runAssemble = new JMenuItem(this.runAssembleAction);
-        this.runAssemble.setIcon(this.loadIcon("Assemble16.png"));// "MyAssemble16.gif"));
-        this.runGo = new JMenuItem(this.runGoAction);
-        this.runGo.setIcon(this.loadIcon("Play16.png"));// "Play16.gif"));
-        this.runStep = new JMenuItem(this.runStepAction);
-        this.runStep.setIcon(this.loadIcon("StepForward16.png"));// "MyStepForward16.gif"));
-        this.runBackstep = new JMenuItem(this.runBackstepAction);
-        this.runBackstep.setIcon(this.loadIcon("StepBack16.png"));// "MyStepBack16.gif"));
-        this.runReset = new JMenuItem(this.runResetAction);
-        this.runReset.setIcon(this.loadIcon("Reset16.png"));// "MyReset16.gif"));
-        this.runStop = new JMenuItem(this.runStopAction);
-        this.runStop.setIcon(this.loadIcon("Stop16.png"));// "Stop16.gif"));
-        this.runPause = new JMenuItem(this.runPauseAction);
-        this.runPause.setIcon(this.loadIcon("Pause16.png"));// "Pause16.gif"));
-        this.runClearBreakpoints = new JMenuItem(this.runClearBreakpointsAction);
-        this.runClearBreakpoints.setIcon(this.loadIcon("MyBlank16.gif"));
-        this.runToggleBreakpoints = new JMenuItem(this.runToggleBreakpointsAction);
-        this.runToggleBreakpoints.setIcon(this.loadIcon("MyBlank16.gif"));
+        final JMenuItem runAssemble = new JMenuItem(this.runAssembleAction);
+        runAssemble.setIcon(this.loadIcon("Assemble16.png"));// "MyAssemble16.gif"));
+        final JMenuItem runGo = new JMenuItem(this.runGoAction);
+        runGo.setIcon(this.loadIcon("Play16.png"));// "Play16.gif"));
+        final JMenuItem runStep = new JMenuItem(this.runStepAction);
+        runStep.setIcon(this.loadIcon("StepForward16.png"));// "MyStepForward16.gif"));
+        final JMenuItem runBackstep = new JMenuItem(this.runBackstepAction);
+        runBackstep.setIcon(this.loadIcon("StepBack16.png"));// "MyStepBack16.gif"));
+        final JMenuItem runReset = new JMenuItem(this.runResetAction);
+        runReset.setIcon(this.loadIcon("Reset16.png"));// "MyReset16.gif"));
+        final JMenuItem runStop = new JMenuItem(this.runStopAction);
+        runStop.setIcon(this.loadIcon("Stop16.png"));// "Stop16.gif"));
+        final JMenuItem runPause = new JMenuItem(this.runPauseAction);
+        runPause.setIcon(this.loadIcon("Pause16.png"));// "Pause16.gif"));
+        final JMenuItem runClearBreakpoints = new JMenuItem(this.runClearBreakpointsAction);
+        runClearBreakpoints.setIcon(this.loadIcon("MyBlank16.gif"));
+        final JMenuItem runToggleBreakpoints = new JMenuItem(this.runToggleBreakpointsAction);
+        runToggleBreakpoints.setIcon(this.loadIcon("MyBlank16.gif"));
 
-        this.run.add(this.runAssemble);
-        this.run.add(this.runGo);
-        this.run.add(this.runStep);
-        this.run.add(this.runBackstep);
-        this.run.add(this.runPause);
-        this.run.add(this.runStop);
-        this.run.add(this.runReset);
-        this.run.addSeparator();
-        this.run.add(this.runClearBreakpoints);
-        this.run.add(this.runToggleBreakpoints);
+        run.add(runAssemble);
+        run.add(runGo);
+        run.add(runStep);
+        run.add(runBackstep);
+        run.add(runPause);
+        run.add(runStop);
+        run.add(runReset);
+        run.addSeparator();
+        run.add(runClearBreakpoints);
+        run.add(runToggleBreakpoints);
 
-        this.settingsLabel = new JCheckBoxMenuItem(this.settingsLabelAction);
-        this.settingsLabel.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.LABEL_WINDOW_VISIBILITY));
-        this.settingsPopupInput = new JCheckBoxMenuItem(this.settingsPopupInputAction);
-        this.settingsPopupInput.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.POPUP_SYSCALL_INPUT));
+        final JCheckBoxMenuItem settingsLabel = new JCheckBoxMenuItem(this.settingsLabelAction);
+        settingsLabel.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.LABEL_WINDOW_VISIBILITY));
+        final JCheckBoxMenuItem settingsPopupInput = new JCheckBoxMenuItem(this.settingsPopupInputAction);
+        settingsPopupInput.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.POPUP_SYSCALL_INPUT));
         this.settingsValueDisplayBase = new JCheckBoxMenuItem(this.settingsValueDisplayBaseAction);
         this.settingsValueDisplayBase
                 .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX));// mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
@@ -668,73 +650,73 @@ public class VenusUI extends JFrame {
         // Tell the corresponding JCheckBox in the Execute Pane about me -- it has
         // already been created.
         this.mainPane.getExecutePane().getAddressDisplayBaseChooser().setSettingsMenuItem(this.settingsAddressDisplayBase);
-        this.settingsExtended = new JCheckBoxMenuItem(this.settingsExtendedAction);
-        this.settingsExtended.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED));
-        this.settingsSelfModifyingCode = new JCheckBoxMenuItem(this.settingsSelfModifyingCodeAction);
-        this.settingsSelfModifyingCode
+        final JCheckBoxMenuItem settingsExtended = new JCheckBoxMenuItem(this.settingsExtendedAction);
+        settingsExtended.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED));
+        final JCheckBoxMenuItem settingsSelfModifyingCode = new JCheckBoxMenuItem(this.settingsSelfModifyingCodeAction);
+        settingsSelfModifyingCode
                 .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED));
-        this.settingsRV64 = new JCheckBoxMenuItem(this.settingsRV64Action);
-        this.settingsRV64.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED));
-        this.settingsDeriveCurrentWorkingDirectory = new JCheckBoxMenuItem(this.settingsDeriveCurrentWorkingDirectoryAction);
-        this.settingsDeriveCurrentWorkingDirectory
+        final JCheckBoxMenuItem settingsRV64 = new JCheckBoxMenuItem(this.settingsRV64Action);
+        settingsRV64.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED));
+        final JCheckBoxMenuItem settingsDeriveCurrentWorkingDirectory = new JCheckBoxMenuItem(this.settingsDeriveCurrentWorkingDirectoryAction);
+        settingsDeriveCurrentWorkingDirectory
                 .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.DERIVE_CURRENT_WORKING_DIRECTORY));
-        this.settingsAssembleOnOpen = new JCheckBoxMenuItem(this.settingsAssembleOnOpenAction);
-        this.settingsAssembleOnOpen.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ON_OPEN));
-        this.settingsAssembleAll = new JCheckBoxMenuItem(this.settingsAssembleAllAction);
-        this.settingsAssembleAll.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ALL));
-        this.settingsAssembleOpen = new JCheckBoxMenuItem(this.settingsAssembleOpenAction);
-        this.settingsAssembleOpen.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_OPEN));
-        this.settingsWarningsAreErrors = new JCheckBoxMenuItem(this.settingsWarningsAreErrorsAction);
-        this.settingsWarningsAreErrors
+        final JCheckBoxMenuItem settingsAssembleOnOpen = new JCheckBoxMenuItem(this.settingsAssembleOnOpenAction);
+        settingsAssembleOnOpen.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ON_OPEN));
+        final JCheckBoxMenuItem settingsAssembleAll = new JCheckBoxMenuItem(this.settingsAssembleAllAction);
+        settingsAssembleAll.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ALL));
+        final JCheckBoxMenuItem settingsAssembleOpen = new JCheckBoxMenuItem(this.settingsAssembleOpenAction);
+        settingsAssembleOpen.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_OPEN));
+        final JCheckBoxMenuItem settingsWarningsAreErrors = new JCheckBoxMenuItem(this.settingsWarningsAreErrorsAction);
+        settingsWarningsAreErrors
                 .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.WARNINGS_ARE_ERRORS));
-        this.settingsStartAtMain = new JCheckBoxMenuItem(this.settingsStartAtMainAction);
-        this.settingsStartAtMain.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.START_AT_MAIN));
-        this.settingsProgramArguments = new JCheckBoxMenuItem(this.settingsProgramArgumentsAction);
-        this.settingsProgramArguments.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.PROGRAM_ARGUMENTS));
-        this.settingsEditor = new JMenuItem(this.settingsEditorAction);
-        this.settingsHighlighting = new JMenuItem(this.settingsHighlightingAction);
-        this.settingsExceptionHandler = new JMenuItem(this.settingsExceptionHandlerAction);
-        this.settingsMemoryConfiguration = new JMenuItem(this.settingsMemoryConfigurationAction);
+        final JCheckBoxMenuItem settingsStartAtMain = new JCheckBoxMenuItem(this.settingsStartAtMainAction);
+        settingsStartAtMain.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.START_AT_MAIN));
+        final JCheckBoxMenuItem settingsProgramArguments = new JCheckBoxMenuItem(this.settingsProgramArgumentsAction);
+        settingsProgramArguments.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.PROGRAM_ARGUMENTS));
+        final JMenuItem settingsEditor = new JMenuItem(this.settingsEditorAction);
+        final JMenuItem settingsHighlighting = new JMenuItem(this.settingsHighlightingAction);
+        final JMenuItem settingsExceptionHandler = new JMenuItem(this.settingsExceptionHandlerAction);
+        final JMenuItem settingsMemoryConfiguration = new JMenuItem(this.settingsMemoryConfigurationAction);
 
-        this.settings.add(this.settingsLabel);
-        this.settings.add(this.settingsProgramArguments);
-        this.settings.add(this.settingsPopupInput);
-        this.settings.add(this.settingsAddressDisplayBase);
-        this.settings.add(this.settingsValueDisplayBase);
-        this.settings.addSeparator();
-        this.settings.add(this.settingsAssembleOnOpen);
-        this.settings.add(this.settingsAssembleAll);
-        this.settings.add(this.settingsAssembleOpen);
-        this.settings.add(this.settingsWarningsAreErrors);
-        this.settings.add(this.settingsStartAtMain);
-        this.settings.add(this.settingsDeriveCurrentWorkingDirectory);
-        this.settings.addSeparator();
-        this.settings.add(this.settingsExtended);
-        this.settings.add(this.settingsSelfModifyingCode);
-        this.settings.add(this.settingsRV64);
-        this.settings.addSeparator();
-        this.settings.add(this.settingsEditor);
-        this.settings.add(this.settingsHighlighting);
-        this.settings.add(this.settingsExceptionHandler);
-        this.settings.add(this.settingsMemoryConfiguration);
+        settings.add(settingsLabel);
+        settings.add(settingsProgramArguments);
+        settings.add(settingsPopupInput);
+        settings.add(this.settingsAddressDisplayBase);
+        settings.add(this.settingsValueDisplayBase);
+        settings.addSeparator();
+        settings.add(settingsAssembleOnOpen);
+        settings.add(settingsAssembleAll);
+        settings.add(settingsAssembleOpen);
+        settings.add(settingsWarningsAreErrors);
+        settings.add(settingsStartAtMain);
+        settings.add(settingsDeriveCurrentWorkingDirectory);
+        settings.addSeparator();
+        settings.add(settingsExtended);
+        settings.add(settingsSelfModifyingCode);
+        settings.add(settingsRV64);
+        settings.addSeparator();
+        settings.add(settingsEditor);
+        settings.add(settingsHighlighting);
+        settings.add(settingsExceptionHandler);
+        settings.add(settingsMemoryConfiguration);
 
-        this.helpHelp = new JMenuItem(this.helpHelpAction);
-        this.helpHelp.setIcon(this.loadIcon("Help16.png"));// "Help16.gif"));
-        this.helpAbout = new JMenuItem(this.helpAboutAction);
-        this.helpAbout.setIcon(this.loadIcon("MyBlank16.gif"));
-        this.help.add(this.helpHelp);
-        this.help.addSeparator();
-        this.help.add(this.helpAbout);
+        final JMenuItem helpHelp = new JMenuItem(this.helpHelpAction);
+        helpHelp.setIcon(this.loadIcon("Help16.png"));// "Help16.gif"));
+        final JMenuItem helpAbout = new JMenuItem(this.helpAboutAction);
+        helpAbout.setIcon(this.loadIcon("MyBlank16.gif"));
+        help.add(helpHelp);
+        help.addSeparator();
+        help.add(helpAbout);
 
-        menuBar.add(this.file);
-        menuBar.add(this.edit);
-        menuBar.add(this.run);
-        menuBar.add(this.settings);
+        menuBar.add(file);
+        menuBar.add(edit);
+        menuBar.add(run);
+        menuBar.add(settings);
         final JMenu toolMenu = ToolLoader.buildToolsMenu();
         if (toolMenu != null) {
             menuBar.add(toolMenu);
         }
-        menuBar.add(this.help);
+        menuBar.add(help);
 
         // experiment with popup menu for settings. 3 Aug 2006 PS
         // setupPopupMenu();
@@ -751,73 +733,74 @@ public class VenusUI extends JFrame {
     private JToolBar setUpToolBar() {
         final JToolBar toolBar = new JToolBar();
 
-        this.New = new JButton(this.fileNewAction);
-        this.New.setText("");
-        this.Open = new JButton(this.fileOpenAction);
-        this.Open.setText("");
-        this.Save = new JButton(this.fileSaveAction);
-        this.Save.setText("");
-        this.SaveAs = new JButton(this.fileSaveAsAction);
-        this.SaveAs.setText("");
-        this.DumpMemory = new JButton(this.fileDumpMemoryAction);
-        this.DumpMemory.setText("");
+        final JButton aNew = new JButton(this.fileNewAction);
+        aNew.setText("");
+        final JButton open = new JButton(this.fileOpenAction);
+        open.setText("");
+        final JButton save = new JButton(this.fileSaveAction);
+        save.setText("");
+        final JButton saveAs = new JButton(this.fileSaveAsAction);
+        saveAs.setText("");
+        final JButton dumpMemory = new JButton(this.fileDumpMemoryAction);
+        dumpMemory.setText("");
 
-        this.Undo = new JButton(this.editUndoAction);
-        this.Undo.setText("");
-        this.Redo = new JButton(this.editRedoAction);
-        this.Redo.setText("");
-        this.Cut = new JButton(this.editCutAction);
-        this.Cut.setText("");
-        this.Copy = new JButton(this.editCopyAction);
-        this.Copy.setText("");
-        this.Paste = new JButton(this.editPasteAction);
-        this.Paste.setText("");
-        this.FindReplace = new JButton(this.editFindReplaceAction);
-        this.FindReplace.setText("");
-        this.SelectAll = new JButton(this.editSelectAllAction);
-        this.SelectAll.setText("");
+        // components of the toolbar
+        final JButton undo = new JButton(this.editUndoAction);
+        undo.setText("");
+        final JButton redo = new JButton(this.editRedoAction);
+        redo.setText("");
+        final JButton cut = new JButton(this.editCutAction);
+        cut.setText("");
+        final JButton copy = new JButton(this.editCopyAction);
+        copy.setText("");
+        final JButton paste = new JButton(this.editPasteAction);
+        paste.setText("");
+        final JButton findReplace = new JButton(this.editFindReplaceAction);
+        findReplace.setText("");
+        final JButton selectAll = new JButton(this.editSelectAllAction);
+        selectAll.setText("");
 
-        this.Run = new JButton(this.runGoAction);
-        this.Run.setText("");
-        this.Assemble = new JButton(this.runAssembleAction);
-        this.Assemble.setText("");
-        this.Step = new JButton(this.runStepAction);
-        this.Step.setText("");
-        this.Backstep = new JButton(this.runBackstepAction);
-        this.Backstep.setText("");
-        this.Reset = new JButton(this.runResetAction);
-        this.Reset.setText("");
-        this.Stop = new JButton(this.runStopAction);
-        this.Stop.setText("");
-        this.Pause = new JButton(this.runPauseAction);
-        this.Pause.setText("");
-        this.Help = new JButton(this.helpHelpAction);
-        this.Help.setText("");
+        final JButton run1 = new JButton(this.runGoAction);
+        run1.setText("");
+        final JButton assemble = new JButton(this.runAssembleAction);
+        assemble.setText("");
+        final JButton step = new JButton(this.runStepAction);
+        step.setText("");
+        final JButton backstep = new JButton(this.runBackstepAction);
+        backstep.setText("");
+        final JButton reset1 = new JButton(this.runResetAction);
+        reset1.setText("");
+        final JButton stop = new JButton(this.runStopAction);
+        stop.setText("");
+        final JButton pause = new JButton(this.runPauseAction);
+        pause.setText("");
+        final JButton help1 = new JButton(this.helpHelpAction);
+        help1.setText("");
 
-        toolBar.add(this.New);
-        toolBar.add(this.Open);
-        toolBar.add(this.Save);
-        toolBar.add(this.SaveAs);
+        toolBar.add(aNew);
+        toolBar.add(open);
+        toolBar.add(save);
+        toolBar.add(saveAs);
         if (!DumpFormatLoader.getDumpFormats().isEmpty()) {
-            toolBar.add(this.DumpMemory);
+            toolBar.add(dumpMemory);
         }
         toolBar.add(new JToolBar.Separator());
-        toolBar.add(this.Undo);
-        toolBar.add(this.Redo);
-        toolBar.add(this.Cut);
-        toolBar.add(this.Copy);
-        toolBar.add(this.Paste);
-        toolBar.add(this.FindReplace);
+        toolBar.add(undo);
+        toolBar.add(redo);
+        toolBar.add(cut);
+        toolBar.add(copy);
+        toolBar.add(paste);
+        toolBar.add(findReplace);
         toolBar.add(new JToolBar.Separator());
-        toolBar.add(this.Assemble);
-        toolBar.add(this.Run);
-        toolBar.add(this.Step);
-        toolBar.add(this.Backstep);
-        toolBar.add(this.Pause);
-        toolBar.add(this.Stop);
-        toolBar.add(this.Reset);
+        toolBar.add(assemble);
+        toolBar.add(run1);
+        toolBar.add(step);
+        toolBar.add(backstep);
+        toolBar.add(pause);
+        toolBar.add(stop);
+        toolBar.add(reset1);
         toolBar.add(new JToolBar.Separator());
-        toolBar.add(this.Help);
+        toolBar.add(help1);
         toolBar.add(new JToolBar.Separator());
 
         return toolBar;

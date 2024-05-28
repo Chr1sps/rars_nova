@@ -209,9 +209,9 @@ public class MessagesPane extends JTabbedPane {
                 + ErrorList.POSITION_PREFIX + column;
         final int textPosition = this.assemble.getText().lastIndexOf(errorReportSubstring);
         if (textPosition >= 0) {
-            int textLine = 0;
-            int lineStart = 0;
-            int lineEnd = 0;
+            final int textLine;
+            final int lineStart;
+            final int lineEnd;
             try {
                 textLine = this.assemble.getLineOfOffset(textPosition);
                 lineStart = this.assemble.getLineStartOffset(textLine);
@@ -311,11 +311,10 @@ public class MessagesPane extends JTabbedPane {
     // run under the event-processing thread no matter what.
     // DPS, 23 Aug 2005.
     public void postRunMessage(final String message) {
-        final String mess = message;
         SwingUtilities.invokeLater(
                 () -> {
                     this.setSelectedComponent(this.runTab);
-                    this.run.append(mess);
+                    this.run.append(message);
                     // can do some crude cutting here. If the document gets "very large",
                     // let's cut off the oldest text. This will limit scrolling but the limit
                     // can be set reasonably high.

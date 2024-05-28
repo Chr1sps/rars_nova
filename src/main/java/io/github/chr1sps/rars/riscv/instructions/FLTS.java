@@ -5,8 +5,6 @@ import io.github.chr1sps.jsoftfloat.types.Float32;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
-import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
-import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
 /*
@@ -38,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>FLTS class.</p>
- *
  */
 public class FLTS extends BasicInstruction {
     /**
@@ -52,11 +49,13 @@ public class FLTS extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
-        int[] operands = statement.getOperands();
-        Float32 f1 = Floating.getFloat(operands[1]), f2 = Floating.getFloat(operands[2]);
-        Environment e = new Environment();
-        boolean result = io.github.chr1sps.jsoftfloat.operations.Comparisons.compareSignalingLessThan(f1, f2, e);
+    @Override
+    public void simulate(final ProgramStatement statement) {
+        final int[] operands = statement.getOperands();
+        final Float32 f1 = Floating.getFloat(operands[1]);
+        final Float32 f2 = Floating.getFloat(operands[2]);
+        final Environment e = new Environment();
+        final boolean result = io.github.chr1sps.jsoftfloat.operations.Comparisons.compareSignalingLessThan(f1, f2, e);
         Floating.setfflags(e);
         RegisterFile.updateRegister(operands[0], result ? 1 : 0);
     }

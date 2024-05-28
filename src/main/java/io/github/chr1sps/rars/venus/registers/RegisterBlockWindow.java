@@ -307,7 +307,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * highlight
      * all columns.
      */
-    private class RegisterCellRenderer extends DefaultTableCellRenderer {
+    private static class RegisterCellRenderer extends DefaultTableCellRenderer {
         private final Font font;
         private final int alignment;
 

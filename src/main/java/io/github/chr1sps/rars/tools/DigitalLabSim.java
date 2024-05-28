@@ -238,7 +238,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
         this.sevenSegPanel.display[number].modifyDisplay(value);
     }
 
-    public class SevenSegmentDisplay extends JComponent {
+    public static class SevenSegmentDisplay extends JComponent {
         public char aff;
 
         public SevenSegmentDisplay(final char aff) {
@@ -330,7 +330,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
         }
     }
 
-    public class SevenSegmentPanel extends JPanel {
+    public static class SevenSegmentPanel extends JPanel {
         public final SevenSegmentDisplay[] display;
 
         public SevenSegmentPanel() {
@@ -468,7 +468,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
         }
     }
 
-    public class OneSecondCounter {
+    public static class OneSecondCounter {
         public OneSecondCounter() {
             DigitalLabSim.CounterInterruptOnOff = false;
         }

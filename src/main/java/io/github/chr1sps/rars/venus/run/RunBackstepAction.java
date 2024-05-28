@@ -47,8 +47,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class RunBackstepAction extends GuiAction {
 
-    private String name;
-    private ExecutePane executePane;
     private final VenusUI mainUI;
 
     /**
@@ -74,8 +72,8 @@ public class RunBackstepAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        this.name = this.getValue(Action.NAME).toString();
-        this.executePane = this.mainUI.getMainPane().getExecutePane();
+        final String name = this.getValue(Action.NAME).toString();
+        final ExecutePane executePane = this.mainUI.getMainPane().getExecutePane();
         if (!FileStatus.isAssembled()) {
             // note: this should never occur since backstepping is only enabled after
             // successful assembly.
@@ -84,21 +82,21 @@ public class RunBackstepAction extends GuiAction {
         }
         this.mainUI.setStarted(true);
         this.mainUI.getMessagesPane().selectRunMessageTab();
-        this.executePane.getTextSegmentWindow().setCodeHighlighting(true);
+        executePane.getTextSegmentWindow().setCodeHighlighting(true);
 
         if (Settings.getBackSteppingEnabled()) {
-            Memory.getInstance().subscribe(this.executePane.getDataSegmentWindow());
-            RegisterFile.addRegistersObserver(this.executePane.getRegistersWindow());
-            ControlAndStatusRegisterFile.addRegistersObserver(this.executePane.getControlAndStatusWindow());
-            FloatingPointRegisterFile.addRegistersSubscriber(this.executePane.getFloatingPointWindow());
+            Memory.getInstance().subscribe(executePane.getDataSegmentWindow());
+            RegisterFile.addRegistersObserver(executePane.getRegistersWindow());
+            ControlAndStatusRegisterFile.addRegistersObserver(executePane.getControlAndStatusWindow());
+            FloatingPointRegisterFile.addRegistersSubscriber(executePane.getFloatingPointWindow());
             Globals.program.getBackStepper().backStep();
-            Memory.getInstance().deleteSubscriber(this.executePane.getDataSegmentWindow());
-            RegisterFile.deleteRegistersObserver(this.executePane.getRegistersWindow());
-            this.executePane.getRegistersWindow().updateRegisters();
-            this.executePane.getFloatingPointWindow().updateRegisters();
-            this.executePane.getControlAndStatusWindow().updateRegisters();
-            this.executePane.getDataSegmentWindow().updateValues();
-            this.executePane.getTextSegmentWindow().highlightStepAtPC(); // Argument aded 25 June 2007
+            Memory.getInstance().deleteSubscriber(executePane.getDataSegmentWindow());
+            RegisterFile.deleteRegistersObserver(executePane.getRegistersWindow());
+            executePane.getRegistersWindow().updateRegisters();
+            executePane.getFloatingPointWindow().updateRegisters();
+            executePane.getControlAndStatusWindow().updateRegisters();
+            executePane.getDataSegmentWindow().updateValues();
+            executePane.getTextSegmentWindow().highlightStepAtPC(); // Argument aded 25 June 2007
             FileStatus.set(FileStatus.RUNNABLE);
             // if we've backed all the way, disable the button
             // if (Globals.program.getBackStepper().empty()) {

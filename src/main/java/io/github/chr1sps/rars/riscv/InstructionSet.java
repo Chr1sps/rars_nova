@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
@@ -172,14 +173,18 @@ public class InstructionSet {
                     continue;
                 }
                 try {
-                    this.instructionList.add((BasicInstruction) clas.newInstance());
-                } catch (final NullPointerException ne) {
-                    if (ne.toString().contains("rv"))
-                        continue;
-                    throw ne;
+                    this.instructionList.add((BasicInstruction) clas.getDeclaredConstructor().newInstance());
+                } catch (final InvocationTargetException e) {
+                    final var target = e.getTargetException();
+                    if (target instanceof final NullPointerException ne) {
+                        if (ne.toString().contains("rv"))
+                            continue;
+                    }
+                    throw target;
                 }
-            } catch (final Exception e) {
-                System.out.println("Error instantiating Instruction from file " + file + ": " + e);
+            } catch (final Throwable e) {
+                System.out.println("Error instantiating Instruction from file " + file + ":");
+                e.printStackTrace();
                 System.exit(0);
             }
         }
@@ -189,7 +194,7 @@ public class InstructionSet {
      * METHOD TO ADD PSEUDO-INSTRUCTIONS
      */
     private void addPseudoInstructions(final String file) {
-        InputStream is = null;
+        final InputStream is;
         BufferedReader in = null;
         try {
             // leading "/" prevents package name being prepended to filepath.
@@ -201,7 +206,10 @@ public class InstructionSet {
             System.exit(0);
         }
         try {
-            String line, pseudoOp, template, token;
+            String line;
+            String pseudoOp;
+            StringBuilder template;
+            String token;
             String description;
             StringTokenizer tokenizer;
             while ((line = in.readLine()) != null) {
@@ -211,7 +219,7 @@ public class InstructionSet {
                     description = "";
                     tokenizer = new StringTokenizer(line, ";");
                     pseudoOp = tokenizer.nextToken();
-                    template = "";
+                    template = new StringBuilder();
                     while (tokenizer.hasMoreTokens()) {
                         token = tokenizer.nextToken();
                         if (token.startsWith("#")) {
@@ -219,12 +227,12 @@ public class InstructionSet {
                             description = token.substring(1);
                             break;
                         }
-                        template = template + token;
+                        template.append(token);
                         if (tokenizer.hasMoreTokens()) {
-                            template = template + "\n";
+                            template.append("\n");
                         }
                     }
-                    this.instructionList.add(new ExtendedInstruction(pseudoOp, template, description));
+                    this.instructionList.add(new ExtendedInstruction(pseudoOp, template.toString(), description));
                     // if (firstTemplate != null) System.out.println("\npseudoOp:
                     // "+pseudoOp+"\ndefault template:\n"+firstTemplate+"\ncompact
                     // template:\n"+template);

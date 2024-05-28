@@ -105,7 +105,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
      *                    (0 or less means no max)
      * @param breakPoints array of breakpoint program counter values, use null if
      *                    none
-     * @return true if execution completed, false otherwise
+     * @return a {@link Reason} object that indicates how the simulation ended/was stopped
      * @throws SimulationException Throws exception if run-time exception occurs.
      */
     public Reason simulate(final int pc, final int maxSteps, final int[] breakPoints) throws SimulationException {

@@ -136,16 +136,8 @@ public class KeywordMap {
     }
 
     // private members
-    class Keyword {
-        public Keyword(final char[] keyword, final byte id, final Keyword next) {
-            this.keyword = keyword;
-            this.id = id;
-            this.next = next;
-        }
+    record Keyword(char[] keyword, byte id, KeywordMap.Keyword next) {
 
-        public final char[] keyword;
-        public final byte id;
-        public final Keyword next;
     }
 
     private final Keyword[] map;

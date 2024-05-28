@@ -1,11 +1,10 @@
 package io.github.chr1sps.rars.venus.run;
 
+import io.github.chr1sps.rars.Globals;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import io.github.chr1sps.rars.Globals;
-
 import java.awt.*;
 
 /*
@@ -62,13 +61,12 @@ public class RunSpeedPanel extends JPanel {
             .05, .1, .2, .3, .4, .5, 1, 2, 3, 4, 5, // 0-10
             6, 7, 8, 9, 10, 11, 12, 13, 14, 15, // 11-20
             16, 17, 18, 19, 20, 21, 22, 23, 24, 25, // 21-30
-            26, 27, 28, 29, 30, UNLIMITED_SPEED, UNLIMITED_SPEED, // 31-37
-            UNLIMITED_SPEED, UNLIMITED_SPEED, UNLIMITED_SPEED // 38-40
+            26, 27, 28, 29, 30, RunSpeedPanel.UNLIMITED_SPEED, RunSpeedPanel.UNLIMITED_SPEED, // 31-37
+            RunSpeedPanel.UNLIMITED_SPEED, RunSpeedPanel.UNLIMITED_SPEED, RunSpeedPanel.UNLIMITED_SPEED // 38-40
     };
     private JLabel sliderLabel = null;
-    private JSlider runSpeedSlider = null;
     private static RunSpeedPanel runSpeedPanel = null;
-    private volatile int runSpeedIndex = SPEED_INDEX_MAX;
+    private volatile int runSpeedIndex = RunSpeedPanel.SPEED_INDEX_MAX;
 
     /**
      * Retrieve the run speed panel object
@@ -76,11 +74,11 @@ public class RunSpeedPanel extends JPanel {
      * @return the run speed panel
      */
     public static RunSpeedPanel getInstance() {
-        if (runSpeedPanel == null) {
-            runSpeedPanel = new RunSpeedPanel();
+        if (RunSpeedPanel.runSpeedPanel == null) {
+            RunSpeedPanel.runSpeedPanel = new RunSpeedPanel();
             Globals.runSpeedPanelExists = true; // DPS 24 July 2008 (needed for standalone tools)
         }
-        return runSpeedPanel;
+        return RunSpeedPanel.runSpeedPanel;
     }
 
     /*
@@ -88,19 +86,19 @@ public class RunSpeedPanel extends JPanel {
      */
     private RunSpeedPanel() {
         super(new BorderLayout());
-        runSpeedSlider = new JSlider(JSlider.HORIZONTAL, SPEED_INDEX_MIN, SPEED_INDEX_MAX, SPEED_INDEX_INIT);
+        final JSlider runSpeedSlider = new JSlider(JSlider.HORIZONTAL, RunSpeedPanel.SPEED_INDEX_MIN, RunSpeedPanel.SPEED_INDEX_MAX, RunSpeedPanel.SPEED_INDEX_INIT);
         runSpeedSlider.setSize(new Dimension(100, (int) runSpeedSlider.getSize().getHeight()));
         runSpeedSlider.setMaximumSize(runSpeedSlider.getSize());
         runSpeedSlider.setMajorTickSpacing(5);
         runSpeedSlider.setPaintTicks(true); // Create the label table
         runSpeedSlider.addChangeListener(new RunSpeedListener());
-        sliderLabel = new JLabel(setLabel(runSpeedIndex));
-        sliderLabel.setHorizontalAlignment(JLabel.CENTER);
-        sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        this.add(sliderLabel, BorderLayout.NORTH);
+        this.sliderLabel = new JLabel(this.setLabel(this.runSpeedIndex));
+        this.sliderLabel.setHorizontalAlignment(JLabel.CENTER);
+        this.sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        this.add(this.sliderLabel, BorderLayout.NORTH);
         this.add(runSpeedSlider, BorderLayout.CENTER);
         this.setToolTipText("Simulation speed for \"Go\".  At " +
-                ((int) speedTable[SPEED_INDEX_INTERACTION_LIMIT]) + " inst/sec or less, tables updated " +
+                ((int) this.speedTable[RunSpeedPanel.SPEED_INDEX_INTERACTION_LIMIT]) + " inst/sec or less, tables updated " +
                 "after each instruction.");
     }
 
@@ -111,19 +109,19 @@ public class RunSpeedPanel extends JPanel {
      * @return run speed setting in instructions/second.
      */
     public double getRunSpeed() {
-        return speedTable[runSpeedIndex];
+        return this.speedTable[this.runSpeedIndex];
     }
 
     /*
      * set label wording depending on current speed setting
      */
-    private String setLabel(int index) {
+    private String setLabel(final int index) {
         String result = "Run speed ";
-        if (index <= SPEED_INDEX_INTERACTION_LIMIT) {
-            if (speedTable[index] < 1) {
-                result += speedTable[index];
+        if (index <= RunSpeedPanel.SPEED_INDEX_INTERACTION_LIMIT) {
+            if (this.speedTable[index] < 1) {
+                result += this.speedTable[index];
             } else {
-                result += ((int) speedTable[index]);
+                result += ((int) this.speedTable[index]);
             }
             result += " inst/sec";
         } else {
@@ -138,12 +136,13 @@ public class RunSpeedPanel extends JPanel {
      */
 
     private class RunSpeedListener implements ChangeListener {
-        public void stateChanged(ChangeEvent e) {
-            JSlider source = (JSlider) e.getSource();
+        @Override
+        public void stateChanged(final ChangeEvent e) {
+            final JSlider source = (JSlider) e.getSource();
             if (!source.getValueIsAdjusting()) {
-                runSpeedIndex = source.getValue();
+                RunSpeedPanel.this.runSpeedIndex = source.getValue();
             } else {
-                sliderLabel.setText(setLabel(source.getValue()));
+                RunSpeedPanel.this.sliderLabel.setText(RunSpeedPanel.this.setLabel(source.getValue()));
             }
         }
     }

@@ -54,12 +54,12 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
      *
      * @param type a int
      */
-    protected AccessNotice(int type) {
-        if (type != READ && type != WRITE) {
+    protected AccessNotice(final int type) {
+        if (type != AccessNotice.READ && type != AccessNotice.WRITE) {
             throw new IllegalArgumentException();
         }
-        accessType = type;
-        thread = Thread.currentThread();
+        this.accessType = type;
+        this.thread = Thread.currentThread();
     }
 
     /**
@@ -68,7 +68,7 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
      * @return Access type, either AccessNotice.READ or AccessNotice.WRITE
      */
     public int getAccessType() {
-        return accessType;
+        return this.accessType;
     }
 
     /**
@@ -77,19 +77,7 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
      * @return Return reference to the thread that created this notice.
      */
     public Thread getThread() {
-        return thread;
-    }
-
-    /**
-     * Query whether the access originated from GUI (AWT event queue)
-     *
-     * @return true if this access originated from GUI, false otherwise
-     */
-    // 'A' is the first character of the main AWT event queue thread name.
-    // "AWT-EventQueue-0"
-    // TODO: delete this as its unused, find out when it was last used
-    public boolean accessIsFromGUI() {
-        return thread.getName().startsWith("AWT");
+        return this.thread;
     }
 
     /**
@@ -103,7 +91,7 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
     // TODO: there should be a better way than this; I think that this is always
     // true or should be for all usages
     public boolean accessIsFromRISCV() {
-        return thread.getName().startsWith("RISCV");
+        return this.thread.getName().startsWith("RISCV");
     }
 
 }

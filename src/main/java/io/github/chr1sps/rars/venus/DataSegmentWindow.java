@@ -70,7 +70,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private final JPanel tablePanel;
     private JButton dataButton, nextButton, prevButton, stakButton, globButton, heapButton, extnButton, mmioButton,
             textButton;
-    private final JCheckBox asciiDisplayCheckBox;
 
     private static final int VALUES_PER_ROW = 8;
     private static final int NUMBER_OF_ROWS = 16; // with 8 value columns, this shows 512 bytes;
@@ -91,7 +90,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
     private boolean addressHighlighting = false;
     private boolean asciiDisplay = false;
-    private int addressRow, addressColumn, addressRowFirstAddress;
+    private int addressColumn;
+    private int addressRowFirstAddress;
     private final Settings settings;
 
     private int firstAddress;
@@ -174,15 +174,15 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         for (final NumberDisplayBaseChooser chooser : choosers) {
             features.add(chooser);
         }
-        this.asciiDisplayCheckBox = new JCheckBox("ASCII", this.asciiDisplay);
-        this.asciiDisplayCheckBox
+        final JCheckBox asciiDisplayCheckBox = new JCheckBox("ASCII", this.asciiDisplay);
+        asciiDisplayCheckBox
                 .setToolTipText("Display data segment values in ASCII (overrides Hexadecimal Values setting)");
-        this.asciiDisplayCheckBox.addItemListener(
+        asciiDisplayCheckBox.addItemListener(
                 e -> {
                     DataSegmentWindow.this.asciiDisplay = (e.getStateChange() == ItemEvent.SELECTED);
                     DataSegmentWindow.this.updateValues();
                 });
-        features.add(this.asciiDisplayCheckBox);
+        features.add(asciiDisplayCheckBox);
 
         this.contentPane.add(features, BorderLayout.SOUTH);
     }
@@ -246,10 +246,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         if (rowColumn == null || rowColumn.x < 0 || rowColumn.y < 0) {
             return;
         }
-        this.addressRow = rowColumn.x;
+        final int addressRow = rowColumn.x;
         this.addressColumn = rowColumn.y;
         this.addressRowFirstAddress = Binary
-                .stringToInt(DataSegmentWindow.dataTable.getValueAt(this.addressRow, DataSegmentWindow.ADDRESS_COLUMN).toString());
+                .stringToInt(DataSegmentWindow.dataTable.getValueAt(addressRow, DataSegmentWindow.ADDRESS_COLUMN).toString());
         // System.out.println("Address "+Binary.intToHexString(address)+" becomes row "+
         // addressRow + " column "+addressColumn+
         // " starting addr "+dataTable.getValueAt(this.addressRow,ADDRESS_COLUMN));
@@ -333,7 +333,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final double cellHeight = addressCell.getHeight();
         final double viewHeight = this.dataTableScroller.getViewport().getExtentSize().getHeight();
         final int numberOfVisibleRows = (int) (viewHeight / cellHeight);
-        final int newViewPositionY = Math.max((int) ((addrRow - (numberOfVisibleRows / 2)) * cellHeight), 0);
+        final int newViewPositionY = Math.max((int) ((addrRow - ((double) numberOfVisibleRows / 2)) * cellHeight), 0);
         this.dataTableScroller.getViewport().setViewPosition(new Point(0, newViewPositionY));
         return new Point(addrRow, addrColumn);
     }
@@ -432,7 +432,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // Check distance from stack pointer. Can be on either side of it...
         thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER));
         if (thisDistance < shortDistance) {
-            shortDistance = thisDistance;
             desiredComboBoxIndex = DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX;
         }
         return desiredComboBoxIndex;
@@ -1002,7 +1001,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
          */
         @Override
         public void setValueAt(final Object value, final int row, final int col) {
-            int val = 0;
+            final int val;
             int address = 0;
             try {
                 val = Binary.stringToInt((String) value);
