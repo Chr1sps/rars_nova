@@ -19,7 +19,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Date;
 import java.util.concurrent.Flow;
 
@@ -129,7 +132,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.tablePanel = new JPanel(new GridLayout(1, 2, 10, 0));
         final JPanel features = new JPanel();
         final Toolkit tk = Toolkit.getDefaultToolkit();
-        final Class cs = this.getClass();
+        final Class<? extends DataSegmentWindow> cs = this.getClass();
         try {
             this.prevButton = new PrevButton(
                     new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Previous22.png"))));// "Back16.gif"))));//"Down16.gif"))));
@@ -156,13 +159,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.baseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
         this.baseAddressSelector.setToolTipText("Base address for data segment display");
         this.baseAddressSelector.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        // trigger action listener for associated invisible button.
-                        DataSegmentWindow.this.baseAddressButtons[DataSegmentWindow.this.baseAddressSelector.getSelectedIndex()].getActionListeners()[0]
-                                .actionPerformed(null);
-                    }
+                e -> {
+                    // trigger action listener for associated invisible button.
+                    DataSegmentWindow.this.baseAddressButtons[DataSegmentWindow.this.baseAddressSelector.getSelectedIndex()].getActionListeners()[0]
+                            .actionPerformed(null);
                 });
 
         this.addButtonActionListenersAndInitialize();
@@ -178,12 +178,9 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.asciiDisplayCheckBox
                 .setToolTipText("Display data segment values in ASCII (overrides Hexadecimal Values setting)");
         this.asciiDisplayCheckBox.addItemListener(
-                new ItemListener() {
-                    @Override
-                    public void itemStateChanged(final ItemEvent e) {
-                        DataSegmentWindow.this.asciiDisplay = (e.getStateChange() == ItemEvent.SELECTED);
-                        DataSegmentWindow.this.updateValues();
-                    }
+                e -> {
+                    DataSegmentWindow.this.asciiDisplay = (e.getStateChange() == ItemEvent.SELECTED);
+                    DataSegmentWindow.this.updateValues();
                 });
         features.add(this.asciiDisplayCheckBox);
 
@@ -228,7 +225,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // within its
         // extent and explicitly invoking the table's mouse listener.
         final MouseEvent fakeMouseEvent = new MouseEvent(DataSegmentWindow.dataTable, MouseEvent.MOUSE_PRESSED,
-                new Date().getTime(), MouseEvent.BUTTON1_MASK,
+                new Date().getTime(), MouseEvent.BUTTON1_DOWN_MASK,
                 (int) addressCell.getX() + 1,
                 (int) addressCell.getY() + 1, 1, false);
         final MouseListener[] mouseListeners = DataSegmentWindow.dataTable.getMouseListeners();
@@ -358,7 +355,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             -1 /* Memory.stackPointer */, Memory.textBaseAddress,
             Memory.memoryMapBaseAddress,};
     // Must agree with above in number and order...
-    String[] descriptions = {" (.extern)", " (.data)", " (heap)", "current gp",
+    final String[] descriptions = {" (.extern)", " (.data)", " (heap)", "current gp",
             "current sp", " (.text)", " (MMIO)"};
 
     private void initializeBaseAddressChoices() {
@@ -735,96 +732,75 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // Currently there is no memory upper bound so next button always enabled.
 
         this.globButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent ae) {
-                        DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                        // get $gp global pointer, but guard against it having value below data segment
-                        DataSegmentWindow.this.firstAddress = Math.max(Memory.dataSegmentBaseAddress,
-                                RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER));
-                        // updateModelForMemoryRange requires argument to be multiple of 4
-                        // but for cleaner display we'll make it multiple of 32 (last nibble is 0).
-                        // This makes it easier to mentally calculate address from row address + column
-                        // offset.
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
-                        DataSegmentWindow.this.homeAddress = DataSegmentWindow.this.firstAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                        DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
-                    }
+                ae -> {
+                    DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
+                    // get $gp global pointer, but guard against it having value below data segment
+                    DataSegmentWindow.this.firstAddress = Math.max(Memory.dataSegmentBaseAddress,
+                            RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER));
+                    // updateModelForMemoryRange requires argument to be multiple of 4
+                    // but for cleaner display we'll make it multiple of 32 (last nibble is 0).
+                    // This makes it easier to mentally calculate address from row address + column
+                    // offset.
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
+                    DataSegmentWindow.this.homeAddress = DataSegmentWindow.this.firstAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
         this.stakButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent ae) {
-                        DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                        // get $sp stack pointer, but guard against it having value below data segment
-                        DataSegmentWindow.this.firstAddress = Math.max(Memory.dataSegmentBaseAddress,
-                                RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER));
-                        // See comment above for gloButton...
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
-                        DataSegmentWindow.this.homeAddress = Memory.stackBaseAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                        DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
-                    }
+                ae -> {
+                    DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
+                    // get $sp stack pointer, but guard against it having value below data segment
+                    DataSegmentWindow.this.firstAddress = Math.max(Memory.dataSegmentBaseAddress,
+                            RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER));
+                    // See comment above for gloButton...
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
+                    DataSegmentWindow.this.homeAddress = Memory.stackBaseAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
         this.heapButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent ae) {
-                        DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                        DataSegmentWindow.this.homeAddress = Memory.heapBaseAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
-                        DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
-                    }
+                ae -> {
+                    DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
+                    DataSegmentWindow.this.homeAddress = Memory.heapBaseAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
+                    DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
         this.extnButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent ae) {
-                        DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                        DataSegmentWindow.this.homeAddress = Memory.externBaseAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
-                        DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
-                    }
+                ae -> {
+                    DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
+                    DataSegmentWindow.this.homeAddress = Memory.externBaseAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
+                    DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
         this.mmioButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent ae) {
-                        DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.KERNEL_MODE;
-                        DataSegmentWindow.this.homeAddress = Memory.memoryMapBaseAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                        DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
-                    }
+                ae -> {
+                    DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.KERNEL_MODE;
+                    DataSegmentWindow.this.homeAddress = Memory.memoryMapBaseAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
         this.textButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent ae) {
-                        DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                        DataSegmentWindow.this.homeAddress = Memory.textBaseAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                        DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
-                    }
+                ae -> {
+                    DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
+                    DataSegmentWindow.this.homeAddress = Memory.textBaseAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
         this.dataButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent ae) {
-                        DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                        DataSegmentWindow.this.homeAddress = Memory.dataBaseAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
-                        DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                        DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
-                    }
+                ae -> {
+                    DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
+                    DataSegmentWindow.this.homeAddress = Memory.dataBaseAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
+                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
         // NOTE: action listeners for prevButton and nextButton are now in their
@@ -931,8 +907,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 this.settings.getFontByPosition(Settings.ODD_ROW_FONT),
         };
         int maxHeight = 0;
-        for (int i = 0; i < possibleFonts.length; i++) {
-            final int height = this.getFontMetrics(possibleFonts[i]).getHeight();
+        for (final Font possibleFont : possibleFonts) {
+            final int height = this.getFontMetrics(possibleFont).getHeight();
             if (height > maxHeight) {
                 maxHeight = height;
             }
@@ -953,7 +929,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // setSelectedIndex to also call selectedItemChanged() did not help. Only this
     // solution to extend the model class to call the protected
     // "fireContentsChanged()" method worked. DPS 25-Jan-2009
-    private class CustomComboBoxModel extends DefaultComboBoxModel<String> {
+    private static class CustomComboBoxModel extends DefaultComboBoxModel<String> {
         public CustomComboBoxModel(final String[] list) {
             super(list);
         }
@@ -967,8 +943,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // Class representing memory data table data
 
     class DataTableModel extends AbstractTableModel {
-        String[] columnNames;
-        Object[][] data;
+        final String[] columnNames;
+        final Object[][] data;
 
         public DataTableModel(final Object[][] d, final String[] n) {
             this.data = d;
@@ -1015,7 +991,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
          * editor for each cell.
          */
         @Override
-        public Class getColumnClass(final int c) {
+        public Class<?> getColumnClass(final int c) {
             return this.getValueAt(0, c).getClass();
         }
 

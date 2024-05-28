@@ -1,13 +1,13 @@
 package io.github.chr1sps.rars.assembler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import io.github.chr1sps.rars.ErrorList;
 import io.github.chr1sps.rars.ErrorMessage;
 import io.github.chr1sps.rars.RISCVprogram;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 /*
 Copyright (c) 2013-2014.
@@ -59,12 +59,12 @@ public class Macro {
      * <p>Constructor for Macro.</p>
      */
     public Macro() {
-        name = "";
-        program = null;
-        fromLine = toLine = 0;
-        origFromLine = origToLine = 0;
-        args = new ArrayList<>();
-        labels = new ArrayList<>();
+        this.name = "";
+        this.program = null;
+        this.fromLine = this.toLine = 0;
+        this.origFromLine = this.origToLine = 0;
+        this.args = new ArrayList<>();
+        this.labels = new ArrayList<>();
     }
 
     /**
@@ -73,7 +73,7 @@ public class Macro {
      * @return a {@link java.lang.String} object
      */
     public String getName() {
-        return name;
+        return this.name;
     }
 
     /**
@@ -81,7 +81,7 @@ public class Macro {
      *
      * @param name a {@link java.lang.String} object
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -91,7 +91,7 @@ public class Macro {
      * @return a {@link io.github.chr1sps.rars.RISCVprogram} object
      */
     public RISCVprogram getProgram() {
-        return program;
+        return this.program;
     }
 
     /**
@@ -99,7 +99,7 @@ public class Macro {
      *
      * @param program a {@link io.github.chr1sps.rars.RISCVprogram} object
      */
-    public void setProgram(RISCVprogram program) {
+    public void setProgram(final RISCVprogram program) {
         this.program = program;
     }
 
@@ -109,7 +109,7 @@ public class Macro {
      * @return a int
      */
     public int getFromLine() {
-        return fromLine;
+        return this.fromLine;
     }
 
     /**
@@ -126,7 +126,7 @@ public class Macro {
      *
      * @param fromLine a int
      */
-    public void setFromLine(int fromLine) {
+    public void setFromLine(final int fromLine) {
         this.fromLine = fromLine;
     }
 
@@ -135,7 +135,7 @@ public class Macro {
      *
      * @param origFromLine a int
      */
-    public void setOriginalFromLine(int origFromLine) {
+    public void setOriginalFromLine(final int origFromLine) {
         this.origFromLine = origFromLine;
     }
 
@@ -145,7 +145,7 @@ public class Macro {
      * @return a int
      */
     public int getToLine() {
-        return toLine;
+        return this.toLine;
     }
 
     /**
@@ -162,7 +162,7 @@ public class Macro {
      *
      * @param toLine a int
      */
-    public void setToLine(int toLine) {
+    public void setToLine(final int toLine) {
         this.toLine = toLine;
     }
 
@@ -171,7 +171,7 @@ public class Macro {
      *
      * @param origToLine a int
      */
-    public void setOriginalToLine(int origToLine) {
+    public void setOriginalToLine(final int origToLine) {
         this.origToLine = origToLine;
     }
 
@@ -181,7 +181,7 @@ public class Macro {
      * @return a {@link java.util.ArrayList} object
      */
     public ArrayList<String> getArgs() {
-        return args;
+        return this.args;
     }
 
     /**
@@ -189,7 +189,7 @@ public class Macro {
      *
      * @param args a {@link java.util.ArrayList} object
      */
-    public void setArgs(ArrayList<String> args) {
+    public void setArgs(final ArrayList<String> args) {
         this.args = args;
     }
 
@@ -197,9 +197,9 @@ public class Macro {
      * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Macro macro) {
-            return macro.getName().equals(name) && (macro.args.size() == args.size());
+    public boolean equals(final Object obj) {
+        if (obj instanceof final Macro macro) {
+            return macro.getName().equals(this.name) && (macro.args.size() == this.args.size());
         }
         return super.equals(obj);
     }
@@ -209,8 +209,8 @@ public class Macro {
      *
      * @param value a {@link java.lang.String} object
      */
-    public void addArg(String value) {
-        args.add(value);
+    public void addArg(final String value) {
+        this.args.add(value);
     }
 
     /**
@@ -226,13 +226,13 @@ public class Macro {
      * @return <code>line</code>-th line of source code, with substituted
      * arguments
      */
-    public String getSubstitutedLine(int line, TokenList args, long counter, ErrorList errors) {
-        TokenList tokens = program.getTokenList().get(line - 1);
-        String s = program.getSourceLine(line);
+    public String getSubstitutedLine(final int line, final TokenList args, final long counter, final ErrorList errors) {
+        final TokenList tokens = this.program.getTokenList().get(line - 1);
+        String s = this.program.getSourceLine(line);
 
         for (int i = tokens.size() - 1; i >= 0; i--) {
-            Token token = tokens.get(i);
-            if (tokenIsMacroParameter(token.getValue(), true)) {
+            final Token token = tokens.get(i);
+            if (Macro.tokenIsMacroParameter(token.getValue(), true)) {
                 int repl = -1;
                 for (int j = 0; j < this.args.size(); j++) {
                     if (this.args.get(j).equals(token.getValue())) {
@@ -244,13 +244,13 @@ public class Macro {
                 if (repl != -1)
                     substitute = args.get(repl + 1).toString();
                 else {
-                    errors.add(new ErrorMessage(program, token.getSourceLine(),
+                    errors.add(new ErrorMessage(this.program, token.getSourceLine(),
                             token.getStartPos(), "Unknown macro parameter"));
                 }
-                s = replaceToken(s, token, substitute);
-            } else if (tokenIsMacroLabel(token.getValue())) {
-                String substitute = token.getValue() + "_M" + counter;
-                s = replaceToken(s, token, substitute);
+                s = this.replaceToken(s, token, substitute);
+            } else if (this.tokenIsMacroLabel(token.getValue())) {
+                final String substitute = token.getValue() + "_M" + counter;
+                s = this.replaceToken(s, token, substitute);
             }
         }
         return s;
@@ -263,8 +263,8 @@ public class Macro {
      * @param value
      * @return
      */
-    private boolean tokenIsMacroLabel(String value) {
-        return (Collections.binarySearch(labels, value) >= 0);
+    private boolean tokenIsMacroLabel(final String value) {
+        return (Collections.binarySearch(this.labels, value) >= 0);
     }
 
     /**
@@ -285,9 +285,9 @@ public class Macro {
     // the source comes from a macro definition? That has proven to be a tough
     // question to answer.
     // DPS 12-feb-2013
-    private String replaceToken(String source, Token tokenToBeReplaced, String substitute) {
-        String stringToBeReplaced = tokenToBeReplaced.getValue();
-        int pos = source.indexOf(stringToBeReplaced);
+    private String replaceToken(final String source, final Token tokenToBeReplaced, final String substitute) {
+        final String stringToBeReplaced = tokenToBeReplaced.getValue();
+        final int pos = source.indexOf(stringToBeReplaced);
         return (pos < 0) ? source
                 : source.substring(0, pos) + substitute + source.substring(pos + stringToBeReplaced.length());
     }
@@ -300,7 +300,7 @@ public class Macro {
      *                                  with '$' if true
      * @return a boolean
      */
-    public static boolean tokenIsMacroParameter(String tokenValue, boolean acceptSpimStyleParameters) {
+    public static boolean tokenIsMacroParameter(final String tokenValue, final boolean acceptSpimStyleParameters) {
         if (acceptSpimStyleParameters) {
             // Bug fix: SPIM accepts parameter names that start with $ instead of %. This
             // can
@@ -310,7 +310,7 @@ public class Macro {
             // from ControlAndStatusRegisterFile or FloatingPointRegisterFile register sets.
             // Expanded the condition.
             // DPS 7-July-2014.
-            if (tokenValue.length() > 0 && tokenValue.charAt(0) == '$' &&
+            if (!tokenValue.isEmpty() && tokenValue.charAt(0) == '$' &&
                     RegisterFile.getRegister(tokenValue) == null &&
                     FloatingPointRegisterFile.getRegister(tokenValue) == null) // added 7-July-2014
             {
@@ -325,14 +325,14 @@ public class Macro {
      *
      * @param value a {@link java.lang.String} object
      */
-    public void addLabel(String value) {
-        labels.add(value);
+    public void addLabel(final String value) {
+        this.labels.add(value);
     }
 
     /**
      * Operations to be done on this macro before it is committed in macro pool.
      */
     public void readyForCommit() {
-        Collections.sort(labels);
+        Collections.sort(this.labels);
     }
 }

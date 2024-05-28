@@ -1,8 +1,8 @@
 package io.github.chr1sps.rars.assembler;
 
-import java.util.ArrayList;
-
 import io.github.chr1sps.rars.RISCVprogram;
+
+import java.util.ArrayList;
 
 /*
 Copyright (c) 2013.
@@ -66,13 +66,13 @@ public class MacroPool {
      *
      * @param program associated program
      */
-    public MacroPool(RISCVprogram program) {
+    public MacroPool(final RISCVprogram program) {
         this.program = program;
-        macroList = new ArrayList<>();
-        callStack = new ArrayList<>();
-        callStackOrigLines = new ArrayList<>();
-        current = null;
-        counter = 0;
+        this.macroList = new ArrayList<>();
+        this.callStack = new ArrayList<>();
+        this.callStackOrigLines = new ArrayList<>();
+        this.current = null;
+        this.counter = 0;
     }
 
     /**
@@ -85,12 +85,12 @@ public class MacroPool {
      * @param nameToken Token containing name of macro after <code>.macro</code>
      *                  directive
      */
-    public void beginMacro(Token nameToken) {
-        current = new Macro();
-        current.setName(nameToken.getValue());
-        current.setFromLine(nameToken.getSourceLine());
-        current.setOriginalFromLine(nameToken.getOriginalSourceLine());
-        current.setProgram(program);
+    public void beginMacro(final Token nameToken) {
+        this.current = new Macro();
+        this.current.setName(nameToken.getValue());
+        this.current.setFromLine(nameToken.getSourceLine());
+        this.current.setOriginalFromLine(nameToken.getOriginalSourceLine());
+        this.current.setProgram(this.program);
     }
 
     /**
@@ -101,12 +101,12 @@ public class MacroPool {
      * @param endToken Token containing <code>.end_macro</code> directive in source
      *                 code
      */
-    public void commitMacro(Token endToken) {
-        current.setToLine(endToken.getSourceLine());
-        current.setOriginalToLine(endToken.getOriginalSourceLine());
-        current.readyForCommit();
-        macroList.add(current);
-        current = null;
+    public void commitMacro(final Token endToken) {
+        this.current.setToLine(endToken.getSourceLine());
+        this.current.setOriginalToLine(endToken.getOriginalSourceLine());
+        this.current.readyForCommit();
+        this.macroList.add(this.current);
+        this.current = null;
     }
 
     /**
@@ -117,12 +117,12 @@ public class MacroPool {
      * @return {@link io.github.chr1sps.rars.assembler.Macro} object matching the name and argument count of
      * tokens passed
      */
-    public Macro getMatchingMacro(TokenList tokens, int callerLine) {
-        if (tokens.size() < 1)
+    public Macro getMatchingMacro(final TokenList tokens, final int callerLine) {
+        if (tokens.isEmpty())
             return null;
         Macro ret = null;
-        Token firstToken = tokens.get(0);
-        for (Macro macro : macroList) {
+        final Token firstToken = tokens.get(0);
+        for (final Macro macro : this.macroList) {
             if (macro.getName().equals(firstToken.getValue())
                     && macro.getArgs().size() + 1 == tokens.size()
                     // && macro.getToLine() < callerLine // condition removed; doesn't work nicely
@@ -140,8 +140,8 @@ public class MacroPool {
      * @return true if any macros have been defined with name <code>value</code>
      * by now, not concerning arguments count.
      */
-    public boolean matchesAnyMacroName(String value) {
-        for (Macro macro : macroList)
+    public boolean matchesAnyMacroName(final String value) {
+        for (final Macro macro : this.macroList)
             if (macro.getName().equals(value))
                 return true;
         return false;
@@ -153,7 +153,7 @@ public class MacroPool {
      * @return a {@link io.github.chr1sps.rars.assembler.Macro} object
      */
     public Macro getCurrent() {
-        return current;
+        return this.current;
     }
 
     /**
@@ -161,7 +161,7 @@ public class MacroPool {
      *
      * @param current a {@link io.github.chr1sps.rars.assembler.Macro} object
      */
-    public void setCurrent(Macro current) {
+    public void setCurrent(final Macro current) {
         this.current = current;
     }
 
@@ -173,7 +173,7 @@ public class MacroPool {
      * @return counter value
      */
     public int getNextCounter() {
-        return counter++;
+        return this.counter++;
     }
 
     /**
@@ -182,7 +182,7 @@ public class MacroPool {
      * @return a {@link java.util.ArrayList} object
      */
     public ArrayList<Integer> getCallStack() {
-        return callStack;
+        return this.callStack;
     }
 
     /**
@@ -191,13 +191,13 @@ public class MacroPool {
      * @param token a {@link io.github.chr1sps.rars.assembler.Token} object
      * @return a boolean
      */
-    public boolean pushOnCallStack(Token token) { // returns true if detected expansion loop
-        int sourceLine = token.getSourceLine();
-        int origSourceLine = token.getOriginalSourceLine();
-        if (callStack.contains(sourceLine))
+    public boolean pushOnCallStack(final Token token) { // returns true if detected expansion loop
+        final int sourceLine = token.getSourceLine();
+        final int origSourceLine = token.getOriginalSourceLine();
+        if (this.callStack.contains(sourceLine))
             return true;
-        callStack.add(sourceLine);
-        callStackOrigLines.add(origSourceLine);
+        this.callStack.add(sourceLine);
+        this.callStackOrigLines.add(origSourceLine);
         return false;
     }
 
@@ -205,8 +205,8 @@ public class MacroPool {
      * <p>popFromCallStack.</p>
      */
     public void popFromCallStack() {
-        callStack.remove(callStack.size() - 1);
-        callStackOrigLines.remove(callStackOrigLines.size() - 1);
+        this.callStack.removeLast();
+        this.callStackOrigLines.removeLast();
     }
 
     /**
@@ -216,10 +216,10 @@ public class MacroPool {
      */
     public String getExpansionHistory() {
         String ret = "";
-        for (int i = 0; i < callStackOrigLines.size(); i++) {
+        for (int i = 0; i < this.callStackOrigLines.size(); i++) {
             if (i > 0)
                 ret += "->";
-            ret += callStackOrigLines.get(i).toString();
+            ret += this.callStackOrigLines.get(i).toString();
         }
         return ret;
     }

@@ -70,8 +70,8 @@ public class TimerTool extends AbstractToolAndApplication {
      * <p>Constructor for TimerTool.</p>
      */
     public TimerTool() {
-        super(heading + ", " + version, heading);
-        startTimeCmpDaemon();
+        super(TimerTool.heading + ", " + TimerTool.version, TimerTool.heading);
+        this.startTimeCmpDaemon();
     }
 
     /**
@@ -80,9 +80,9 @@ public class TimerTool extends AbstractToolAndApplication {
      * @param title   a {@link java.lang.String} object
      * @param heading a {@link java.lang.String} object
      */
-    public TimerTool(String title, String heading) {
+    public TimerTool(final String title, final String heading) {
         super(title, heading);
-        startTimeCmpDaemon();
+        this.startTimeCmpDaemon();
     }
 
     /**
@@ -90,8 +90,8 @@ public class TimerTool extends AbstractToolAndApplication {
      *
      * @param args an array of {@link java.lang.String} objects
      */
-    public static void main(String[] args) {
-        new TimerTool(heading + ", " + version, heading);
+    public static void main(final String[] args) {
+        new TimerTool(TimerTool.heading + ", " + TimerTool.version, TimerTool.heading);
     }
 
     /**
@@ -111,33 +111,33 @@ public class TimerTool extends AbstractToolAndApplication {
      */
     @Override
     protected JComponent buildMainDisplayArea() {
-        JPanel panelTools = new JPanel(new GridLayout(1, 2));
-        timePanel = new TimePanel();
+        final JPanel panelTools = new JPanel(new GridLayout(1, 2));
+        this.timePanel = new TimePanel();
 
         // Adds a play button to start/resume time
-        JButton playButton = new JButton("Play");
+        final JButton playButton = new JButton("Play");
         playButton.setToolTipText("Starts the counter");
         playButton.addActionListener(
-                e -> play());
+                e -> this.play());
         playButton.addKeyListener(new EnterKeyListener(playButton));
 
         // Adds a pause button to pause time
-        JButton pauseButton = new JButton("Pause");
+        final JButton pauseButton = new JButton("Pause");
         pauseButton.setToolTipText("Pauses the counter");
         pauseButton.addActionListener(
-                e -> pause());
+                e -> this.pause());
         pauseButton.addKeyListener(new EnterKeyListener(pauseButton));
 
-        timePanel.add(playButton);
-        timePanel.add(pauseButton);
-        panelTools.add(timePanel);
+        this.timePanel.add(playButton);
+        this.timePanel.add(pauseButton);
+        panelTools.add(this.timePanel);
         return panelTools;
     }
 
     // A daemon that watches the timecmp MMIO for any changes
     private void startTimeCmpDaemon() {
-        if (timeCmp == null) {
-            timeCmp = new TimeCmpDaemon();
+        if (TimerTool.timeCmp == null) {
+            TimerTool.timeCmp = new TimeCmpDaemon();
         }
     }
 
@@ -148,18 +148,18 @@ public class TimerTool extends AbstractToolAndApplication {
      */
     @Override
     protected void performSpecialClosingDuties() {
-        stop();
+        this.stop();
     }
 
     /**
      * ************************ Timer controls ****************************
      */
     public void start() {
-        if (!running) {
+        if (!TimerTool.running) {
             // Start a timer that checks to see if a timer interupt needs to be raised
             // every millisecond
-            timer.schedule(tick, 0, 1);
-            running = true;
+            this.timer.schedule(this.tick, 0, 1);
+            TimerTool.running = true;
         }
     }
 
@@ -168,9 +168,9 @@ public class TimerTool extends AbstractToolAndApplication {
      */
     public void play() {
         // Gaurd against multiple plays
-        if (!updateTime) {
-            updateTime = true;
-            startTime = System.currentTimeMillis();
+        if (!TimerTool.updateTime) {
+            TimerTool.updateTime = true;
+            TimerTool.startTime = System.currentTimeMillis();
         }
 
     }
@@ -180,10 +180,10 @@ public class TimerTool extends AbstractToolAndApplication {
      */
     public void pause() {
         // Gaurd against multiple pauses
-        if (updateTime) {
-            updateTime = false;
-            time = savedTime + System.currentTimeMillis() - startTime;
-            savedTime = time;
+        if (TimerTool.updateTime) {
+            TimerTool.updateTime = false;
+            TimerTool.time = TimerTool.savedTime + System.currentTimeMillis() - TimerTool.startTime;
+            TimerTool.savedTime = TimerTool.time;
         }
     }
 
@@ -194,12 +194,12 @@ public class TimerTool extends AbstractToolAndApplication {
      */
     @Override
     protected void reset() {
-        time = 0L;
-        savedTime = 0L;
-        startTime = System.currentTimeMillis();
-        tick.updateTimecmp = true;
-        timePanel.updateTime();
-        tick.reset();
+        TimerTool.time = 0L;
+        TimerTool.savedTime = 0L;
+        TimerTool.startTime = System.currentTimeMillis();
+        this.tick.updateTimecmp = true;
+        this.timePanel.updateTime();
+        this.tick.reset();
     }
 
     // Shutdown the timer (note that we keep the TimeCmpDaemon running)
@@ -208,10 +208,10 @@ public class TimerTool extends AbstractToolAndApplication {
      * <p>stop.</p>
      */
     public void stop() {
-        updateTime = false;
-        timer.cancel();
-        running = false;
-        reset();
+        TimerTool.updateTime = false;
+        this.timer.cancel();
+        TimerTool.running = false;
+        this.reset();
     }
 
     /***************************** Timer Classes *****************************/
@@ -222,13 +222,13 @@ public class TimerTool extends AbstractToolAndApplication {
         public long value = 0L; // Holds the most recent value of timecmp writen to the MMIO
 
         public TimeCmpDaemon() {
-            addAsObserver();
+            this.addAsObserver();
         }
 
         public void addAsObserver() {
             try {
-                Globals.memory.subscribe(this, TIME_CMP_ADDRESS, TIME_CMP_ADDRESS + 8);
-            } catch (AddressErrorException aee) {
+                Globals.memory.subscribe(this, TimerTool.TIME_CMP_ADDRESS, TimerTool.TIME_CMP_ADDRESS + 8);
+            } catch (final AddressErrorException aee) {
                 System.out.println("Error while adding observer in Timer Tool");
                 System.exit(0);
             }
@@ -237,26 +237,26 @@ public class TimerTool extends AbstractToolAndApplication {
         private Flow.Subscription subscription;
 
         @Override
-        public void onSubscribe(Flow.Subscription subscription) {
+        public void onSubscribe(final Flow.Subscription subscription) {
             this.subscription = subscription;
             this.subscription.request(1);
         }
 
         @Override
-        public void onNext(MemoryAccessNotice notice) {
-            int accessType = notice.getAccessType();
+        public void onNext(final MemoryAccessNotice notice) {
+            final int accessType = notice.getAccessType();
             // If is was a WRITE operation
             if (accessType == 1) {
-                int address = notice.getAddress();
-                int value = notice.getValue();
+                final int address = notice.getAddress();
+                final int value = notice.getValue();
 
                 // Check what word was changed, then update the corrisponding information
-                if (address == TIME_CMP_ADDRESS) {
+                if (address == TimerTool.TIME_CMP_ADDRESS) {
                     this.value = ((this.value >> 32) << 32) + value;
-                    postInterrupt = true; // timecmp was writen to
-                } else if (address == TIME_CMP_ADDRESS + 4) {
-                    this.value = (this.value & 0xFFFFFFFF) + (((long) value) << 32);
-                    postInterrupt = true; // timecmp was writen to
+                    this.postInterrupt = true; // timecmp was writen to
+                } else if (address == TimerTool.TIME_CMP_ADDRESS + 4) {
+                    this.value = (this.value) + (((long) value) << 32);
+                    this.postInterrupt = true; // timecmp was writen to
                 }
             }
             this.subscription.request(1);
@@ -267,60 +267,61 @@ public class TimerTool extends AbstractToolAndApplication {
     private class Tick extends TimerTask {
         public volatile boolean updateTimecmp = true;
 
+        @Override
         public void run() {
             // Check to see if the tool is connected
             // Note: "connectButton != null" short circuits the expression when null
-            if (connectButton != null && connectButton.isConnected()) {
+            if (TimerTool.this.connectButton != null && TimerTool.this.connectButton.isConnected()) {
                 // If the tool is not paused
-                if (updateTime) {
+                if (TimerTool.updateTime) {
                     // time is the difference between the last time we started the time and now,
                     // plus
                     // our time accumulator
-                    time = savedTime + System.currentTimeMillis() - startTime;
+                    TimerTool.time = TimerTool.savedTime + System.currentTimeMillis() - TimerTool.startTime;
 
                     // Write the lower and upper words of the time MMIO respectivly
-                    updateMMIOControlAndData(TIME_ADDRESS, (int) (time & 0xFFFFFFFF));
-                    updateMMIOControlAndData(TIME_ADDRESS + 4, (int) (time >> 32));
+                    TimerTool.this.updateMMIOControlAndData(TimerTool.TIME_ADDRESS, (int) (TimerTool.time));
+                    TimerTool.this.updateMMIOControlAndData(TimerTool.TIME_ADDRESS + 4, (int) (TimerTool.time >> 32));
 
                     // The logic for if a timer interrupt should be raised
                     // Note: if either the UTIP bit in the uie CSR or the UIE bit in the ustatus CSR
                     // are zero then this interrupt will be stopped further on in the pipeline
-                    if (time >= timeCmp.value && timeCmp.postInterrupt && bitsEnabled()) {
+                    if (TimerTool.time >= TimerTool.timeCmp.value && TimerTool.timeCmp.postInterrupt && this.bitsEnabled()) {
                         InterruptController.registerTimerInterrupt(ControlAndStatusRegisterFile.TIMER_INTERRUPT);
-                        timeCmp.postInterrupt = false; // Wait for timecmp to be writen to again
+                        TimerTool.timeCmp.postInterrupt = false; // Wait for timecmp to be writen to again
                     }
-                    timePanel.updateTime();
+                    TimerTool.this.timePanel.updateTime();
                 }
             }
             // Otherwise we keep track of the last time the tool was not connected
             else {
-                time = savedTime + System.currentTimeMillis() - startTime;
-                startTime = System.currentTimeMillis();
+                TimerTool.time = TimerTool.savedTime + System.currentTimeMillis() - TimerTool.startTime;
+                TimerTool.startTime = System.currentTimeMillis();
             }
         }
 
         // Checks the control bits to see if user-level timer inturrupts are enabled
         private boolean bitsEnabled() {
-            boolean utip = (ControlAndStatusRegisterFile.getValue("uie") & 0x10) == 0x10;
-            boolean uie = (ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) == 0x1;
+            final boolean utip = (ControlAndStatusRegisterFile.getValue("uie") & 0x10) == 0x10;
+            final boolean uie = (ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) == 0x1;
 
             return (utip && uie);
         }
 
         // Set time MMIO to zero
         public void reset() {
-            updateMMIOControlAndData(TIME_ADDRESS, 0);
-            updateMMIOControlAndData(TIME_ADDRESS + 4, 0);
+            TimerTool.this.updateMMIOControlAndData(TimerTool.TIME_ADDRESS, 0);
+            TimerTool.this.updateMMIOControlAndData(TimerTool.TIME_ADDRESS + 4, 0);
         }
     }
 
     // Writes a word to a virtual memory address
-    private synchronized void updateMMIOControlAndData(int dataAddr, int dataValue) {
+    private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
         Globals.memoryAndRegistersLock.lock();
         try {
             try {
                 Globals.memory.setRawWord(dataAddr, dataValue);
-            } catch (AddressErrorException aee) {
+            } catch (final AddressErrorException aee) {
                 System.out.println("Tool author specified incorrect MMIO address!" + aee);
                 System.exit(0);
             }
@@ -333,18 +334,18 @@ public class TimerTool extends AbstractToolAndApplication {
 
     // A panel that displays time
     public class TimePanel extends JPanel {
-        JLabel currentTime = new JLabel("Hello world");
+        final JLabel currentTime = new JLabel("Hello world");
 
         public TimePanel() {
-            FlowLayout fl = new FlowLayout();
+            final FlowLayout fl = new FlowLayout();
             this.setLayout(fl);
-            this.add(currentTime);
-            updateTime();
-            start();
+            this.add(this.currentTime);
+            this.updateTime();
+            TimerTool.this.start();
         }
 
         public void updateTime() {
-            currentTime.setText(String.format("%02d:%02d.%02d", time / 60000, (time / 1000) % 60, time % 100));
+            this.currentTime.setText(String.format("%02d:%02d.%02d", TimerTool.time / 60000, (TimerTool.time / 1000) % 60, TimerTool.time % 100));
         }
     }
 
@@ -357,43 +358,40 @@ public class TimerTool extends AbstractToolAndApplication {
      */
     @Override
     protected JComponent getHelpComponent() {
-        final String helpContent = "Use this tool to simulate the Memory Mapped IO (MMIO) for a timing device allowing the program to utalize timer interupts. "
-                +
-                "While this tool is connected to the program it runs a clock (starting from time 0), storing the time in milliseconds. "
-                +
-                "The time is stored as a 64 bit integer and can be accessed (using a lw instruction) at 0xFFFF0018 for the lower 32 bits and 0xFFFF001B for the upper 32 bits.\n\n"
-                +
-                "Three things must be done before an interrupt can be set:\n" +
-                " The address of your interrupt handler must be stored in the utvec CSR\n" +
-                " The fourth bit of the uie CSR must be set to 1 (ie. ori uie, uie, 0x10)\n" +
-                " The zeroth bit of the ustatus CSR must be set to 1 (ie. ori ustatus, ustatus, 0x1)\n" +
-                "To set the timer you must write the time that you want the timer to go off (called timecmp) as a 64 bit integer at the address of 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. "
-                +
-                "An interrupt will occur when the time is greater than or equal to timecmp which is a 64 bit integer (interpreted as milliseconds) stored at 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. "
-                +
-                "To set the timer you must set timecmp (using a sw instruction) to be the time that you want the timer to go off at.\n\n"
-                +
-                "Note: the timer will only go off once after the time is reached and is not rearmed until timecmp is writen to again. "
-                +
-                "So if you are writing 64 bit values (opposed to on 32) then to avoid spuriously triggering a timer interrupt timecmp should be written to as such\n"
-                +
-                "    # a0: lower 32 bits of time\n" +
-                "    # a1: upper 32 bits of time\n" +
-                "    li  t0, -1\n" +
-                "    la t1, timecmp\n" +
-                "    sw t0, 0(t1)\n" +
-                "    sw a1, 4(t1)\n" +
-                "    sw a0, 0(t0)\n\n\n" +
-                "(contributed by Zachary Selk, zrselk@gmail.com)";
-        JButton help = new JButton("Help");
+        final String helpContent = """
+                Use this tool to simulate the Memory Mapped IO (MMIO) for a timing device allowing the program to utalize timer interupts. \
+                While this tool is connected to the program it runs a clock (starting from time 0), storing the time in milliseconds. \
+                The time is stored as a 64 bit integer and can be accessed (using a lw instruction) at 0xFFFF0018 for the lower 32 bits and 0xFFFF001B for the upper 32 bits.
+
+                Three things must be done before an interrupt can be set:
+                 The address of your interrupt handler must be stored in the utvec CSR
+                 The fourth bit of the uie CSR must be set to 1 (ie. ori uie, uie, 0x10)
+                 The zeroth bit of the ustatus CSR must be set to 1 (ie. ori ustatus, ustatus, 0x1)
+                To set the timer you must write the time that you want the timer to go off (called timecmp) as a 64 bit integer at the address of 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. \
+                An interrupt will occur when the time is greater than or equal to timecmp which is a 64 bit integer (interpreted as milliseconds) stored at 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. \
+                To set the timer you must set timecmp (using a sw instruction) to be the time that you want the timer to go off at.
+
+                Note: the timer will only go off once after the time is reached and is not rearmed until timecmp is writen to again. \
+                So if you are writing 64 bit values (opposed to on 32) then to avoid spuriously triggering a timer interrupt timecmp should be written to as such
+                    # a0: lower 32 bits of time
+                    # a1: upper 32 bits of time
+                    li  t0, -1
+                    la t1, timecmp
+                    sw t0, 0(t1)
+                    sw a1, 4(t1)
+                    sw a0, 0(t0)
+
+
+                (contributed by Zachary Selk, zrselk@gmail.com)""";
+        final JButton help = new JButton("Help");
         help.addActionListener(
                 e -> {
-                    JTextArea ja = new JTextArea(helpContent);
+                    final JTextArea ja = new JTextArea(helpContent);
                     ja.setRows(20);
                     ja.setColumns(60);
                     ja.setLineWrap(true);
                     ja.setWrapStyleWord(true);
-                    JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
+                    JOptionPane.showMessageDialog(this.theWindow, new JScrollPane(ja),
                             "Simulating a timing device", JOptionPane.INFORMATION_MESSAGE);
                 });
         return help;

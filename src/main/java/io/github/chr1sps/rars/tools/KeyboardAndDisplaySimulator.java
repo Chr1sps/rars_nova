@@ -11,8 +11,6 @@ import io.github.chr1sps.rars.venus.util.AbstractFontSettingDialog;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultCaret;
@@ -99,7 +97,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     /**
      * Constant <code>preferredTextAreaDimension</code>
      */
-    public static Dimension preferredTextAreaDimension = new Dimension(400, 200);
+    public static final Dimension preferredTextAreaDimension = new Dimension(400, 200);
     private static final Insets textAreaInsets = new Insets(4, 4, 4, 4);
 
     // Time delay to process Transmitter Data is simulated by counting instruction
@@ -179,16 +177,16 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      * @param heading String containing text for heading shown in upper part of
      *                window.
      */
-    public KeyboardAndDisplaySimulator(String title, String heading) {
+    public KeyboardAndDisplaySimulator(final String title, final String heading) {
         super(title, heading);
-        simulator = this;
+        this.simulator = this;
     }
 
     /**
      * Simple constructor, likely used by the RARS Tools menu mechanism
      */
     public KeyboardAndDisplaySimulator() {
-        this(heading + ", " + version, heading);
+        this(KeyboardAndDisplaySimulator.heading + ", " + KeyboardAndDisplaySimulator.version, KeyboardAndDisplaySimulator.heading);
     }
 
     /**
@@ -202,8 +200,8 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      *
      * @param args an array of {@link java.lang.String} objects
      */
-    public static void main(String[] args) {
-        new KeyboardAndDisplaySimulator(heading + " stand-alone, " + version, heading).go();
+    public static void main(final String[] args) {
+        new KeyboardAndDisplaySimulator(KeyboardAndDisplaySimulator.heading + " stand-alone, " + KeyboardAndDisplaySimulator.version, KeyboardAndDisplaySimulator.heading).go();
     }
 
     /**
@@ -211,7 +209,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      */
     @Override
     public String getName() {
-        return heading;
+        return KeyboardAndDisplaySimulator.heading;
     }
 
     // Set the MMIO addresses. Prior to MARS 3.7 these were final because
@@ -223,13 +221,13 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      */
     @Override
     protected void initializePreGUI() {
-        RECEIVER_CONTROL = Memory.memoryMapBaseAddress; // 0xffff0000; // keyboard Ready in low-order bit
-        RECEIVER_DATA = Memory.memoryMapBaseAddress + 4; // 0xffff0004; // keyboard character in low-order byte
-        TRANSMITTER_CONTROL = Memory.memoryMapBaseAddress + 8; // 0xffff0008; // display Ready in low-order bit
-        TRANSMITTER_DATA = Memory.memoryMapBaseAddress + 12; // 0xffff000c; // display character in low-order byte
-        displayPanelTitle = "DISPLAY: Store to Transmitter Data " + Binary.intToHexString(TRANSMITTER_DATA);
-        keyboardPanelTitle = "KEYBOARD: Characters typed here are stored to Receiver Data "
-                + Binary.intToHexString(RECEIVER_DATA);
+        KeyboardAndDisplaySimulator.RECEIVER_CONTROL = Memory.memoryMapBaseAddress; // 0xffff0000; // keyboard Ready in low-order bit
+        KeyboardAndDisplaySimulator.RECEIVER_DATA = Memory.memoryMapBaseAddress + 4; // 0xffff0004; // keyboard character in low-order byte
+        KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL = Memory.memoryMapBaseAddress + 8; // 0xffff0008; // display Ready in low-order bit
+        KeyboardAndDisplaySimulator.TRANSMITTER_DATA = Memory.memoryMapBaseAddress + 12; // 0xffff000c; // display character in low-order byte
+        KeyboardAndDisplaySimulator.displayPanelTitle = "DISPLAY: Store to Transmitter Data " + Binary.intToHexString(KeyboardAndDisplaySimulator.TRANSMITTER_DATA);
+        KeyboardAndDisplaySimulator.keyboardPanelTitle = "KEYBOARD: Characters typed here are stored to Receiver Data "
+                + Binary.intToHexString(KeyboardAndDisplaySimulator.RECEIVER_DATA);
     }
 
     /**
@@ -254,13 +252,13 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     protected void addAsObserver() {
         // Set transmitter Control ready bit to 1, means we're ready to accept display
         // character.
-        updateMMIOControl(TRANSMITTER_CONTROL, readyBitSet(TRANSMITTER_CONTROL));
+        this.updateMMIOControl(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL, KeyboardAndDisplaySimulator.readyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL));
         // We want to be an observer only of reads from RECEIVER_DATA and writes to
         // TRANSMITTER_DATA.
         // Use the Globals.memory.addObserver() methods instead of inherited method to
         // achieve this.
-        addAsObserver(RECEIVER_DATA, RECEIVER_DATA);
-        addAsObserver(TRANSMITTER_DATA, TRANSMITTER_DATA);
+        this.addAsObserver(KeyboardAndDisplaySimulator.RECEIVER_DATA, KeyboardAndDisplaySimulator.RECEIVER_DATA);
+        this.addAsObserver(KeyboardAndDisplaySimulator.TRANSMITTER_DATA, KeyboardAndDisplaySimulator.TRANSMITTER_DATA);
         // We want to be notified of each instruction execution, because instruction
         // count is the
         // basis for delay in re-setting (literally) the TRANSMITTER_CONTROL register.
@@ -268,7 +266,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         // this too. This simulates the time required for the display unit to process
         // the
         // TRANSMITTER_DATA.
-        addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
+        this.addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
 
     /**
@@ -291,11 +289,11 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         // text areas were equal in size and there was no way for the user to change
         // that.
         // DPS 17-July-2014
-        keyboardAndDisplay = new JPanel(new BorderLayout());
-        JSplitPane both = new JSplitPane(JSplitPane.VERTICAL_SPLIT, buildDisplay(), buildKeyboard());
+        this.keyboardAndDisplay = new JPanel(new BorderLayout());
+        final JSplitPane both = new JSplitPane(JSplitPane.VERTICAL_SPLIT, this.buildDisplay(), this.buildKeyboard());
         both.setResizeWeight(0.5);
-        keyboardAndDisplay.add(both);
-        return keyboardAndDisplay;
+        this.keyboardAndDisplay.add(both);
+        return this.keyboardAndDisplay;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -309,16 +307,16 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      * {@inheritDoc}
      */
     @Override
-    protected void processRISCVUpdate(AccessNotice accessNotice) {
-        MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
+    protected void processRISCVUpdate(final AccessNotice accessNotice) {
+        final MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
         // If the program has just read (loaded) the receiver (keyboard) data register,
         // then clear the Ready bit to indicate there is no longer a keystroke
         // available.
         // If Ready bit was initially clear, they'll get the old keystroke -- serves 'em
         // right
         // for not checking!
-        if (notice.getAddress() == RECEIVER_DATA && notice.getAccessType() == AccessNotice.READ) {
-            updateMMIOControl(RECEIVER_CONTROL, readyBitCleared(RECEIVER_CONTROL));
+        if (notice.getAddress() == KeyboardAndDisplaySimulator.RECEIVER_DATA && notice.getAccessType() == AccessNotice.READ) {
+            this.updateMMIOControl(KeyboardAndDisplaySimulator.RECEIVER_CONTROL, KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.RECEIVER_CONTROL));
         }
         // The program has just written (stored) the transmitter (display) data
         // register. If transmitter
@@ -328,15 +326,15 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         // is processing the character.
         // Also start an intruction counter that will simulate the delay of the slower
         // display device processing the character.
-        if (isReadyBitSet(TRANSMITTER_CONTROL) && notice.getAddress() == TRANSMITTER_DATA
+        if (KeyboardAndDisplaySimulator.isReadyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL) && notice.getAddress() == KeyboardAndDisplaySimulator.TRANSMITTER_DATA
                 && notice.getAccessType() == AccessNotice.WRITE) {
-            updateMMIOControl(TRANSMITTER_CONTROL, readyBitCleared(TRANSMITTER_CONTROL));
-            intWithCharacterToDisplay = notice.getValue();
-            if (!displayAfterDelay)
-                displayCharacter(intWithCharacterToDisplay);
+            this.updateMMIOControl(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL, KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL));
+            this.intWithCharacterToDisplay = notice.getValue();
+            if (!this.displayAfterDelay)
+                this.displayCharacter(this.intWithCharacterToDisplay);
             this.countingInstructions = true;
             this.instructionCount = 0;
-            this.transmitDelayInstructionCountLimit = generateDelay();
+            this.transmitDelayInstructionCountLimit = this.generateDelay();
         }
         // We have been notified of an instruction execution.
         // If we are in transmit delay period, increment instruction count and if limit
@@ -348,13 +346,13 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
                 notice.getAccessType() == AccessNotice.READ && Memory.inTextSegment(notice.getAddress())) {
             this.instructionCount++;
             if (this.instructionCount >= this.transmitDelayInstructionCountLimit) {
-                if (displayAfterDelay)
-                    displayCharacter(intWithCharacterToDisplay);
+                if (this.displayAfterDelay)
+                    this.displayCharacter(this.intWithCharacterToDisplay);
                 this.countingInstructions = false;
-                int updatedTransmitterControl = readyBitSet(TRANSMITTER_CONTROL);
-                updateMMIOControl(TRANSMITTER_CONTROL, updatedTransmitterControl);
+                final int updatedTransmitterControl = KeyboardAndDisplaySimulator.readyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL);
+                this.updateMMIOControl(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL, updatedTransmitterControl);
                 if (updatedTransmitterControl != 1) {
-                    InterruptController.registerExternalInterrupt(EXTERNAL_INTERRUPT_DISPLAY);
+                    InterruptController.registerExternalInterrupt(KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_DISPLAY);
                 }
             }
         }
@@ -372,19 +370,19 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // Thus the parameter is the entire word, not just the low-order byte.
     // Once the latter is performed, the display mode changes to random
     // access, which has repercussions for the implementation of character display.
-    private void displayCharacter(int intWithCharacterToDisplay) {
-        char characterToDisplay = (char) (intWithCharacterToDisplay & 0x000000FF);
-        if (characterToDisplay == CLEAR_SCREEN) {
-            initializeDisplay(displayRandomAccessMode);
-        } else if (characterToDisplay == SET_CURSOR_X_Y) {
+    private void displayCharacter(final int intWithCharacterToDisplay) {
+        final char characterToDisplay = (char) (intWithCharacterToDisplay & 0x000000FF);
+        if (characterToDisplay == KeyboardAndDisplaySimulator.CLEAR_SCREEN) {
+            this.initializeDisplay(this.displayRandomAccessMode);
+        } else if (characterToDisplay == KeyboardAndDisplaySimulator.SET_CURSOR_X_Y) {
             // First call will activate random access mode.
             // We're using JTextArea, where caret has to be within text.
             // So initialize text to all spaces to fill the JTextArea to its
             // current capacity. Then set caret. Subsequent character
             // displays will replace, not append, in the text.
-            if (!displayRandomAccessMode) {
-                displayRandomAccessMode = true;
-                initializeDisplay(displayRandomAccessMode);
+            if (!this.displayRandomAccessMode) {
+                this.displayRandomAccessMode = true;
+                this.initializeDisplay(this.displayRandomAccessMode);
             }
             // For SET_CURSOR_X_Y, we need data from the rest of the word.
             // High order 3 bytes are split in half to store (X,Y) value.
@@ -394,37 +392,37 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
             // If X or Y values are outside current range, set to range limit.
             if (x < 0)
                 x = 0;
-            if (x >= columns)
-                x = columns - 1;
+            if (x >= this.columns)
+                x = this.columns - 1;
             if (y < 0)
                 y = 0;
-            if (y >= rows)
-                y = rows - 1;
+            if (y >= this.rows)
+                y = this.rows - 1;
             // display is a JTextArea whose character positioning in the text is linear.
             // Converting (row,column) to linear position requires knowing how many columns
             // are in each row. I add one because each row except the last ends with '\n'
             // that
             // does not count as a column but occupies a position in the text string.
             // The values of rows and columns is set in initializeDisplay().
-            display.setCaretPosition(y * (columns + 1) + x);
+            this.display.setCaretPosition(y * (this.columns + 1) + x);
         } else {
-            if (displayRandomAccessMode) {
+            if (this.displayRandomAccessMode) {
                 try {
-                    int caretPosition = display.getCaretPosition();
+                    int caretPosition = this.display.getCaretPosition();
                     // if caret is positioned at the end of a line (at the '\n'), skip over the '\n'
-                    if ((caretPosition + 1) % (columns + 1) == 0) {
+                    if ((caretPosition + 1) % (this.columns + 1) == 0) {
                         caretPosition++;
-                        display.setCaretPosition(caretPosition);
+                        this.display.setCaretPosition(caretPosition);
                     }
-                    display.replaceRange("" + characterToDisplay, caretPosition, caretPosition + 1);
-                } catch (IllegalArgumentException e) {
+                    this.display.replaceRange("" + characterToDisplay, caretPosition, caretPosition + 1);
+                } catch (final IllegalArgumentException e) {
                     // tried to write off the end of the defined grid.
-                    display.setCaretPosition(display.getCaretPosition() - 1);
-                    display.replaceRange("" + characterToDisplay, display.getCaretPosition(),
-                            display.getCaretPosition() + 1);
+                    this.display.setCaretPosition(this.display.getCaretPosition() - 1);
+                    this.display.replaceRange("" + characterToDisplay, this.display.getCaretPosition(),
+                            this.display.getCaretPosition() + 1);
                 }
             } else {
-                display.append("" + characterToDisplay);
+                this.display.append("" + characterToDisplay);
             }
         }
     }
@@ -434,8 +432,8 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      */
     @Override
     protected void initializePostGUI() {
-        initializeTransmitDelaySimulator();
-        keyEventAccepter.requestFocusInWindow();
+        this.initializeTransmitDelaySimulator();
+        this.keyEventAccepter.requestFocusInWindow();
     }
 
     /**
@@ -444,14 +442,14 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      */
     @Override
     protected void reset() {
-        displayRandomAccessMode = false;
-        initializeTransmitDelaySimulator();
-        initializeDisplay(displayRandomAccessMode);
-        keyEventAccepter.setText("");
-        ((TitledBorder) displayPanel.getBorder()).setTitle(displayPanelTitle);
-        displayPanel.repaint();
-        keyEventAccepter.requestFocusInWindow();
-        updateMMIOControl(TRANSMITTER_CONTROL, readyBitSet(TRANSMITTER_CONTROL));
+        this.displayRandomAccessMode = false;
+        this.initializeTransmitDelaySimulator();
+        this.initializeDisplay(this.displayRandomAccessMode);
+        this.keyEventAccepter.setText("");
+        ((TitledBorder) this.displayPanel.getBorder()).setTitle(KeyboardAndDisplaySimulator.displayPanelTitle);
+        this.displayPanel.repaint();
+        this.keyEventAccepter.requestFocusInWindow();
+        this.updateMMIOControl(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL, KeyboardAndDisplaySimulator.readyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL));
     }
 
     // The display JTextArea (top half) is initialized either to the empty
@@ -460,37 +458,33 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // the transmitter. This sets the caret (cursor) to a specific (x,y) position
     // on a text-based virtual display. The lines of spaces is necessary because
     // the caret can only be placed at a position within the current text string.
-    private void initializeDisplay(boolean randomAccess) {
+    private void initializeDisplay(final boolean randomAccess) {
         String initialText = "";
         if (randomAccess) {
-            Dimension textDimensions = getDisplayPanelTextDimensions();
-            columns = (int) textDimensions.getWidth();
-            rows = (int) textDimensions.getHeight();
-            repaintDisplayPanelBorder();
-            char[] charArray = new char[columns];
-            Arrays.fill(charArray, VT_FILL);
-            String row = new String(charArray);
-            StringBuffer str = new StringBuffer(row);
-            for (int i = 1; i < rows; i++) {
-                str.append("\n" + row);
-            }
-            initialText = str.toString();
+            final Dimension textDimensions = this.getDisplayPanelTextDimensions();
+            this.columns = (int) textDimensions.getWidth();
+            this.rows = (int) textDimensions.getHeight();
+            this.repaintDisplayPanelBorder();
+            final char[] charArray = new char[this.columns];
+            Arrays.fill(charArray, KeyboardAndDisplaySimulator.VT_FILL);
+            final String row = new String(charArray);
+            initialText = row + ("\n" + row).repeat(Math.max(0, this.rows - 1));
         }
-        display.setText(initialText);
-        display.setCaretPosition(0);
+        this.display.setText(initialText);
+        this.display.setCaretPosition(0);
     }
 
     // Update display window title with current text display capacity (columns and
     // rows)
     // This will be called when window resized or font changed.
     private void repaintDisplayPanelBorder() {
-        Dimension size = this.getDisplayPanelTextDimensions();
-        int cols = (int) size.getWidth();
-        int rows = (int) size.getHeight();
-        int caretPosition = display.getCaretPosition();
-        String stringCaretPosition;
+        final Dimension size = this.getDisplayPanelTextDimensions();
+        final int cols = (int) size.getWidth();
+        final int rows = (int) size.getHeight();
+        final int caretPosition = this.display.getCaretPosition();
+        final String stringCaretPosition;
         // display position as stream or 2D depending on random access
-        if (displayRandomAccessMode) {
+        if (this.displayRandomAccessMode) {
             // if ( caretPosition == rows*(columns+1)+1) {
             // stringCaretPosition = "(0,0)";
             // }
@@ -501,32 +495,32 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
             // stringCaretPosition =
             // "("+(caretPosition%(columns+1))+","+(caretPosition/(columns+1))+")";
             // }
-            if (((caretPosition + 1) % (columns + 1) != 0)) {
-                stringCaretPosition = "(" + (caretPosition % (columns + 1)) + "," + (caretPosition / (columns + 1))
+            if (((caretPosition + 1) % (this.columns + 1) != 0)) {
+                stringCaretPosition = "(" + (caretPosition % (this.columns + 1)) + "," + (caretPosition / (this.columns + 1))
                         + ")";
-            } else if (((caretPosition + 1) % (columns + 1) == 0) && ((caretPosition / (columns + 1)) + 1 == rows)) {
-                stringCaretPosition = "(" + (caretPosition % (columns + 1) - 1) + "," + (caretPosition / (columns + 1))
+            } else if (((caretPosition + 1) % (this.columns + 1) == 0) && ((caretPosition / (this.columns + 1)) + 1 == rows)) {
+                stringCaretPosition = "(" + (caretPosition % (this.columns + 1) - 1) + "," + (caretPosition / (this.columns + 1))
                         + ")";
             } else {
-                stringCaretPosition = "(0," + ((caretPosition / (columns + 1)) + 1) + ")";
+                stringCaretPosition = "(0," + ((caretPosition / (this.columns + 1)) + 1) + ")";
             }
         } else {
             stringCaretPosition = "" + caretPosition;
         }
-        String title = displayPanelTitle + ", cursor " + stringCaretPosition + ", area " + cols + " x " + rows;
-        ((TitledBorder) displayPanel.getBorder()).setTitle(title);
-        displayPanel.repaint();
+        final String title = KeyboardAndDisplaySimulator.displayPanelTitle + ", cursor " + stringCaretPosition + ", area " + cols + " x " + rows;
+        ((TitledBorder) this.displayPanel.getBorder()).setTitle(title);
+        this.displayPanel.repaint();
     }
 
     // Calculate text display capacity of display window. Text dimensions are based
     // on pixel dimensions of window divided by font size properties.
     private Dimension getDisplayPanelTextDimensions() {
-        Dimension areaSize = display.getSize();
-        int widthInPixels = (int) areaSize.getWidth();
-        int heightInPixels = (int) areaSize.getHeight();
-        FontMetrics metrics = getFontMetrics(display.getFont());
-        int rowHeight = metrics.getHeight();
-        int charWidth = metrics.charWidth('m');
+        final Dimension areaSize = this.display.getSize();
+        final int widthInPixels = (int) areaSize.getWidth();
+        final int heightInPixels = (int) areaSize.getHeight();
+        final FontMetrics metrics = this.getFontMetrics(this.display.getFont());
+        final int rowHeight = metrics.getHeight();
+        final int charWidth = metrics.charWidth('m');
         // Estimate number of columns/rows of text that will fit in current window with
         // current font.
         // I subtract 1 because initial tests showed slight scroll otherwise.
@@ -536,9 +530,10 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // Trigger recalculation and update of display text dimensions when window
     // resized.
     private class DisplayResizeAdapter extends ComponentAdapter {
-        public void componentResized(ComponentEvent e) {
-            getDisplayPanelTextDimensions();
-            repaintDisplayPanelBorder();
+        @Override
+        public void componentResized(final ComponentEvent e) {
+            KeyboardAndDisplaySimulator.this.getDisplayPanelTextDimensions();
+            KeyboardAndDisplaySimulator.this.repaintDisplayPanelBorder();
         }
     }
 
@@ -557,18 +552,18 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
                 "While the tool is connected to the program, each keystroke in the text area causes the corresponding ASCII "
                 +
                 "code to be placed in the Receiver Data register (low-order byte of memory word "
-                + Binary.intToHexString(RECEIVER_DATA) + "), and the " +
+                + Binary.intToHexString(KeyboardAndDisplaySimulator.RECEIVER_DATA) + "), and the " +
                 "Ready bit to be set to 1 in the Receiver Control register (low-order bit of "
-                + Binary.intToHexString(RECEIVER_CONTROL) + ").  The Ready " +
+                + Binary.intToHexString(KeyboardAndDisplaySimulator.RECEIVER_CONTROL) + ").  The Ready " +
                 "bit is automatically reset to 0 when the program reads the Receiver Data using an 'lw' instruction.\n"
                 +
                 "\n" +
                 "A program may write to the display area by detecting the Ready bit set (1) in the Transmitter Control "
                 +
-                "register (low-order bit of memory word " + Binary.intToHexString(TRANSMITTER_CONTROL)
+                "register (low-order bit of memory word " + Binary.intToHexString(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL)
                 + "), then storing the ASCII code of the character to be " +
                 "displayed in the Transmitter Data register (low-order byte of "
-                + Binary.intToHexString(TRANSMITTER_DATA) + ") using a 'sw' instruction.  This " +
+                + Binary.intToHexString(KeyboardAndDisplaySimulator.TRANSMITTER_DATA) + ") using a 'sw' instruction.  This " +
                 "triggers the simulated display to clear the Ready bit to 0, delay awhile to simulate processing the data, "
                 +
                 "then set the Ready bit back to 1.  The delay is based on a count of executed instructions.\n" +
@@ -653,62 +648,58 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
                 "Thanks to Eric Wang at Washington State University, who requested these features to enable use of this display as the target "
                 +
                 "for programming MMIO text-based games.";
-        JButton help = new JButton("Help");
+        final JButton help = new JButton("Help");
         help.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        JTextArea ja = new JTextArea(helpContent);
-                        ja.setRows(30);
-                        ja.setColumns(60);
-                        ja.setLineWrap(true);
-                        ja.setWrapStyleWord(true);
-                        // TODO: potentially implement method 2
-                        // Make the Help dialog modeless (can remain visible while working with other
-                        // components).
-                        // Unfortunately, JOptionPane.showMessageDialog() cannot be made modeless. I
-                        // found two
-                        // workarounds:
-                        // (1) Use JDialog and the additional work that requires
-                        // (2) create JOptionPane object, get JDialog from it, make the JDialog modeless
-                        // Solution 2 is shorter but requires Java 1.6. Trying to keep MARS at 1.5. So
-                        // we
-                        // do it the hard way. DPS 16-July-2014
-                        final JDialog d;
-                        final String title = "Simulating the Keyboard and Display";
-                        // The following is necessary because there are different JDialog constructors
-                        // for Dialog and
-                        // Frame and theWindow is declared a Window, superclass for both.
-                        d = (theWindow instanceof Dialog) ? new JDialog((Dialog) theWindow, title, false)
-                                : new JDialog((Frame) theWindow, title, false);
-                        d.setSize(ja.getPreferredSize());
-                        d.getContentPane().setLayout(new BorderLayout());
-                        d.getContentPane().add(new JScrollPane(ja), BorderLayout.CENTER);
-                        JButton b = new JButton("Close");
-                        b.addActionListener(
-                                new ActionListener() {
-                                    public void actionPerformed(ActionEvent ev) {
-                                        d.setVisible(false);
-                                        d.dispose();
-                                    }
-                                });
-                        JPanel p = new JPanel(); // Flow layout will center button.
-                        p.add(b);
-                        d.getContentPane().add(p, BorderLayout.SOUTH);
-                        d.setLocationRelativeTo(theWindow);
-                        d.setVisible(true);
-                        // This alternative technique is simpler than the above but requires java 1.6!
-                        // DPS 16-July-2014
-                        // JOptionPane theStuff = new JOptionPane(new
-                        // JScrollPane(ja),JOptionPane.INFORMATION_MESSAGE,
-                        // JOptionPane.DEFAULT_OPTION, null, new String[]{"Close"} );
-                        // JDialog theDialog = theStuff.createDialog(theWindow, "Simulating the Keyboard
-                        // and Display");
-                        // theDialog.setModal(false);
-                        // theDialog.setVisible(true);
-                        // The original code. Cannot be made modeless.
-                        // JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
-                        // "Simulating the Keyboard and Display", JOptionPane.INFORMATION_MESSAGE);
-                    }
+                e -> {
+                    final JTextArea ja = new JTextArea(helpContent);
+                    ja.setRows(30);
+                    ja.setColumns(60);
+                    ja.setLineWrap(true);
+                    ja.setWrapStyleWord(true);
+                    // TODO: potentially implement method 2
+                    // Make the Help dialog modeless (can remain visible while working with other
+                    // components).
+                    // Unfortunately, JOptionPane.showMessageDialog() cannot be made modeless. I
+                    // found two
+                    // workarounds:
+                    // (1) Use JDialog and the additional work that requires
+                    // (2) create JOptionPane object, get JDialog from it, make the JDialog modeless
+                    // Solution 2 is shorter but requires Java 1.6. Trying to keep MARS at 1.5. So
+                    // we
+                    // do it the hard way. DPS 16-July-2014
+                    final JDialog d;
+                    final String title = "Simulating the Keyboard and Display";
+                    // The following is necessary because there are different JDialog constructors
+                    // for Dialog and
+                    // Frame and theWindow is declared a Window, superclass for both.
+                    d = (KeyboardAndDisplaySimulator.this.theWindow instanceof Dialog) ? new JDialog((Dialog) KeyboardAndDisplaySimulator.this.theWindow, title, false)
+                            : new JDialog((Frame) KeyboardAndDisplaySimulator.this.theWindow, title, false);
+                    d.setSize(ja.getPreferredSize());
+                    d.getContentPane().setLayout(new BorderLayout());
+                    d.getContentPane().add(new JScrollPane(ja), BorderLayout.CENTER);
+                    final JButton b = new JButton("Close");
+                    b.addActionListener(
+                            ev -> {
+                                d.setVisible(false);
+                                d.dispose();
+                            });
+                    final JPanel p = new JPanel(); // Flow layout will center button.
+                    p.add(b);
+                    d.getContentPane().add(p, BorderLayout.SOUTH);
+                    d.setLocationRelativeTo(KeyboardAndDisplaySimulator.this.theWindow);
+                    d.setVisible(true);
+                    // This alternative technique is simpler than the above but requires java 1.6!
+                    // DPS 16-July-2014
+                    // JOptionPane theStuff = new JOptionPane(new
+                    // JScrollPane(ja),JOptionPane.INFORMATION_MESSAGE,
+                    // JOptionPane.DEFAULT_OPTION, null, new String[]{"Close"} );
+                    // JDialog theDialog = theStuff.createDialog(theWindow, "Simulating the Keyboard
+                    // and Display");
+                    // theDialog.setModal(false);
+                    // theDialog.setVisible(true);
+                    // The original code. Cannot be made modeless.
+                    // JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
+                    // "Simulating the Keyboard and Display", JOptionPane.INFORMATION_MESSAGE);
                 });
         return help;
     }
@@ -721,99 +712,87 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // UI components and layout for upper part of GUI, where simulated display is
     //////////////////////////////////////////////////////////////////////////////////////// located.
     private JComponent buildDisplay() {
-        displayPanel = new JPanel(new BorderLayout());
-        TitledBorder tb = new TitledBorder(displayPanelTitle);
+        this.displayPanel = new JPanel(new BorderLayout());
+        final TitledBorder tb = new TitledBorder(KeyboardAndDisplaySimulator.displayPanelTitle);
         tb.setTitleJustification(TitledBorder.CENTER);
-        displayPanel.setBorder(tb);
-        display = new JTextArea();
-        display.setFont(defaultFont);
-        display.setEditable(false);
-        display.setMargin(textAreaInsets);
-        updateDisplayBorder = new DisplayResizeAdapter();
+        this.displayPanel.setBorder(tb);
+        this.display = new JTextArea();
+        this.display.setFont(this.defaultFont);
+        this.display.setEditable(false);
+        this.display.setMargin(KeyboardAndDisplaySimulator.textAreaInsets);
+        this.updateDisplayBorder = new DisplayResizeAdapter();
         // To update display of size in the Display text area when window or font size
         // changes.
-        display.addComponentListener(updateDisplayBorder);
+        this.display.addComponentListener(this.updateDisplayBorder);
         // To update display of caret position in the Display text area when caret
         // position changes.
-        display.addCaretListener(
-                new CaretListener() {
-                    public void caretUpdate(CaretEvent e) {
-                        simulator.repaintDisplayPanelBorder();
-                    }
-                });
+        this.display.addCaretListener(
+                e -> KeyboardAndDisplaySimulator.this.simulator.repaintDisplayPanelBorder());
 
         // 2011-07-29: Patrik Lundin, patrik@lundin.info
         // Added code so display autoscrolls.
-        DefaultCaret caret = (DefaultCaret) display.getCaret();
+        final DefaultCaret caret = (DefaultCaret) this.display.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         // end added autoscrolling
 
-        displayScrollPane = new JScrollPane(display);
-        displayScrollPane.setPreferredSize(preferredTextAreaDimension);
+        this.displayScrollPane = new JScrollPane(this.display);
+        this.displayScrollPane.setPreferredSize(KeyboardAndDisplaySimulator.preferredTextAreaDimension);
 
-        displayPanel.add(displayScrollPane);
-        displayOptions = new JPanel();
-        delayTechniqueChooser = new JComboBox<>(delayTechniques);
-        delayTechniqueChooser.setToolTipText("Technique for determining simulated transmitter device processing delay");
-        delayTechniqueChooser.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        transmitDelayInstructionCountLimit = generateDelay();
-                    }
-                });
-        delayLengthPanel = new DelayLengthPanel();
-        displayAfterDelayCheckBox = new JCheckBox("DAD", true);
-        displayAfterDelayCheckBox
+        this.displayPanel.add(this.displayScrollPane);
+        this.displayOptions = new JPanel();
+        this.delayTechniqueChooser = new JComboBox<>(this.delayTechniques);
+        this.delayTechniqueChooser.setToolTipText("Technique for determining simulated transmitter device processing delay");
+        this.delayTechniqueChooser.addActionListener(
+                e -> KeyboardAndDisplaySimulator.this.transmitDelayInstructionCountLimit = KeyboardAndDisplaySimulator.this.generateDelay());
+        this.delayLengthPanel = new DelayLengthPanel();
+        this.displayAfterDelayCheckBox = new JCheckBox("DAD", true);
+        this.displayAfterDelayCheckBox
                 .setToolTipText("Display After Delay: if checked, transmitter data not displayed until after delay");
-        displayAfterDelayCheckBox.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        displayAfterDelay = displayAfterDelayCheckBox.isSelected();
-                    }
-                });
+        this.displayAfterDelayCheckBox.addActionListener(
+                e -> KeyboardAndDisplaySimulator.this.displayAfterDelay = KeyboardAndDisplaySimulator.this.displayAfterDelayCheckBox.isSelected());
 
         // font button to display font
-        fontButton = new JButton("Font");
-        fontButton.setToolTipText("Select the font for the display panel");
-        fontButton.addActionListener(new FontChanger());
-        displayOptions.add(fontButton);
-        displayOptions.add(displayAfterDelayCheckBox);
-        displayOptions.add(delayTechniqueChooser);
-        displayOptions.add(delayLengthPanel);
-        displayPanel.add(displayOptions, BorderLayout.SOUTH);
-        return displayPanel;
+        this.fontButton = new JButton("Font");
+        this.fontButton.setToolTipText("Select the font for the display panel");
+        this.fontButton.addActionListener(new FontChanger());
+        this.displayOptions.add(this.fontButton);
+        this.displayOptions.add(this.displayAfterDelayCheckBox);
+        this.displayOptions.add(this.delayTechniqueChooser);
+        this.displayOptions.add(this.delayLengthPanel);
+        this.displayPanel.add(this.displayOptions, BorderLayout.SOUTH);
+        return this.displayPanel;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
     // UI components and layout for lower part of GUI, where simulated keyboard is
     ////////////////////////////////////////////////////////////////////////////////////// located.
     private JComponent buildKeyboard() {
-        keyboardPanel = new JPanel(new BorderLayout());
-        keyEventAccepter = new JTextArea();
-        keyEventAccepter.setEditable(true);
-        keyEventAccepter.setFont(defaultFont);
-        keyEventAccepter.setMargin(textAreaInsets);
-        keyAccepterScrollPane = new JScrollPane(keyEventAccepter);
-        keyAccepterScrollPane.setPreferredSize(preferredTextAreaDimension);
-        keyEventAccepter.addKeyListener(new KeyboardKeyListener());
-        keyboardPanel.add(keyAccepterScrollPane);
-        TitledBorder tb = new TitledBorder(keyboardPanelTitle);
+        this.keyboardPanel = new JPanel(new BorderLayout());
+        this.keyEventAccepter = new JTextArea();
+        this.keyEventAccepter.setEditable(true);
+        this.keyEventAccepter.setFont(this.defaultFont);
+        this.keyEventAccepter.setMargin(KeyboardAndDisplaySimulator.textAreaInsets);
+        this.keyAccepterScrollPane = new JScrollPane(this.keyEventAccepter);
+        this.keyAccepterScrollPane.setPreferredSize(KeyboardAndDisplaySimulator.preferredTextAreaDimension);
+        this.keyEventAccepter.addKeyListener(new KeyboardKeyListener());
+        this.keyboardPanel.add(this.keyAccepterScrollPane);
+        final TitledBorder tb = new TitledBorder(KeyboardAndDisplaySimulator.keyboardPanelTitle);
         tb.setTitleJustification(TitledBorder.CENTER);
-        keyboardPanel.setBorder(tb);
-        return keyboardPanel;
+        this.keyboardPanel.setBorder(tb);
+        return this.keyboardPanel;
     }
 
     ////////////////////////////////////////////////////////////////////
     // update the MMIO Control register memory cell. We will delegate.
-    private void updateMMIOControl(int addr, int intValue) {
-        updateMMIOControlAndData(addr, intValue, 0, 0, true);
+    private void updateMMIOControl(final int addr, final int intValue) {
+        this.updateMMIOControlAndData(addr, intValue, 0, 0, true);
     }
 
     /////////////////////////////////////////////////////////////////////
     // update the MMIO Control and Data register pair -- 2 memory cells. We will
     ///////////////////////////////////////////////////////////////////// delegate.
-    private void updateMMIOControlAndData(int controlAddr, int controlValue, int dataAddr, int dataValue) {
-        updateMMIOControlAndData(controlAddr, controlValue, dataAddr, dataValue, false);
+    private void updateMMIOControlAndData(final int controlAddr, final int controlValue, final int dataAddr, final int dataValue) {
+        this.updateMMIOControlAndData(controlAddr, controlValue, dataAddr, dataValue, false);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -828,16 +807,16 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     ///////////////////////////////////////////////////////////////////////////////////////////////////// Control
     ///////////////////////////////////////////////////////////////////////////////////////////////////// and
     ///////////////////////////////////////////////////////////////////////////////////////////////////// Data.
-    private void updateMMIOControlAndData(int controlAddr, int controlValue, int dataAddr, int dataValue,
-                                          boolean controlOnly) {
-        if (!this.isBeingUsedAsATool || (this.isBeingUsedAsATool && connectButton.isConnected())) {
+    private void updateMMIOControlAndData(final int controlAddr, final int controlValue, final int dataAddr, final int dataValue,
+                                          final boolean controlOnly) {
+        if (!this.isBeingUsedAsATool || (this.isBeingUsedAsATool && this.connectButton.isConnected())) {
             Globals.memoryAndRegistersLock.lock();
             try {
                 try {
                     Globals.memory.setRawWord(controlAddr, controlValue);
                     if (!controlOnly)
                         Globals.memory.setRawWord(dataAddr, dataValue);
-                } catch (AddressErrorException aee) {
+                } catch (final AddressErrorException aee) {
                     System.out.println("Tool author specified incorrect MMIO address!" + aee);
                     System.exit(0);
                 }
@@ -861,10 +840,10 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     ///////////////////////////////////////////////////////////////////// set (to
     ///////////////////////////////////////////////////////////////////// 1).
     // Have to preserve the value of Interrupt Enable bit (bit 1)
-    private static boolean isReadyBitSet(int mmioControlRegister) {
+    private static boolean isReadyBitSet(final int mmioControlRegister) {
         try {
             return (Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) & 1) == 1;
-        } catch (AddressErrorException aee) {
+        } catch (final AddressErrorException aee) {
             System.out.println("Tool author specified incorrect MMIO address!" + aee);
             System.exit(0);
         }
@@ -876,10 +855,10 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     ///////////////////////////////////////////////////////////////////// set (to
     ///////////////////////////////////////////////////////////////////// 1).
     // Have to preserve the value of Interrupt Enable bit (bit 1)
-    private static int readyBitSet(int mmioControlRegister) {
+    private static int readyBitSet(final int mmioControlRegister) {
         try {
             return Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) | 1;
-        } catch (AddressErrorException aee) {
+        } catch (final AddressErrorException aee) {
             System.out.println("Tool author specified incorrect MMIO address!" + aee);
             System.exit(0);
         }
@@ -893,10 +872,10 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // Have to preserve the value of Interrupt Enable bit (bit 1). Bits 2 and higher
     ///////////////////////////////////////////////////////////////////// don't
     ///////////////////////////////////////////////////////////////////// matter.
-    private static int readyBitCleared(int mmioControlRegister) {
+    private static int readyBitCleared(final int mmioControlRegister) {
         try {
             return Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) & 2;
-        } catch (AddressErrorException aee) {
+        } catch (final AddressErrorException aee) {
             System.out.println("Tool author specified incorrect MMIO address!" + aee);
             System.exit(0);
         }
@@ -917,8 +896,8 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // current combo box and slider settings.
 
     private int generateDelay() {
-        double sliderValue = delayLengthPanel.getDelayLength();
-        TransmitterDelayTechnique technique = (TransmitterDelayTechnique) delayTechniqueChooser.getSelectedItem();
+        final double sliderValue = this.delayLengthPanel.getDelayLength();
+        final TransmitterDelayTechnique technique = (TransmitterDelayTechnique) this.delayTechniqueChooser.getSelectedItem();
         return technique.generateDelay(sliderValue);
     }
 
@@ -929,21 +908,24 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     //
 
     private class KeyboardKeyListener implements KeyListener {
-        public void keyTyped(KeyEvent e) {
-            int updatedReceiverControl = readyBitSet(RECEIVER_CONTROL);
-            updateMMIOControlAndData(RECEIVER_CONTROL, updatedReceiverControl, RECEIVER_DATA,
+        @Override
+        public void keyTyped(final KeyEvent e) {
+            final int updatedReceiverControl = KeyboardAndDisplaySimulator.readyBitSet(KeyboardAndDisplaySimulator.RECEIVER_CONTROL);
+            KeyboardAndDisplaySimulator.this.updateMMIOControlAndData(KeyboardAndDisplaySimulator.RECEIVER_CONTROL, updatedReceiverControl, KeyboardAndDisplaySimulator.RECEIVER_DATA,
                     e.getKeyChar() & 0x00000ff);
             if (updatedReceiverControl != 1) {
-                InterruptController.registerExternalInterrupt(EXTERNAL_INTERRUPT_KEYBOARD);
+                InterruptController.registerExternalInterrupt(KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_KEYBOARD);
             }
         }
 
         /* Ignore key pressed event from the text field. */
-        public void keyPressed(KeyEvent e) {
+        @Override
+        public void keyPressed(final KeyEvent e) {
         }
 
         /* Ignore key released event from the text field. */
-        public void keyReleased(KeyEvent e) {
+        @Override
+        public void keyReleased(final KeyEvent e) {
         }
     }
 
@@ -963,42 +945,43 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
                 20000, 40000, 60000, 80000, 100000, 200000, 400000, 600000, 800000, 1000000// 31-40
         };
         private JLabel sliderLabel = null;
-        private volatile int delayLengthIndex = DELAY_INDEX_INIT;
+        private volatile int delayLengthIndex = DelayLengthPanel.DELAY_INDEX_INIT;
 
         public DelayLengthPanel() {
             super(new BorderLayout());
-            delayLengthSlider = new JSlider(JSlider.HORIZONTAL, DELAY_INDEX_MIN, DELAY_INDEX_MAX, DELAY_INDEX_INIT);
-            delayLengthSlider.setSize(new Dimension(100, (int) delayLengthSlider.getSize().getHeight()));
-            delayLengthSlider.setMaximumSize(delayLengthSlider.getSize());
-            delayLengthSlider.addChangeListener(new DelayLengthListener());
-            sliderLabel = new JLabel(setLabel(delayLengthIndex));
-            sliderLabel.setHorizontalAlignment(JLabel.CENTER);
-            sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            this.add(sliderLabel, BorderLayout.NORTH);
-            this.add(delayLengthSlider, BorderLayout.CENTER);
+            KeyboardAndDisplaySimulator.this.delayLengthSlider = new JSlider(JSlider.HORIZONTAL, DelayLengthPanel.DELAY_INDEX_MIN, DelayLengthPanel.DELAY_INDEX_MAX, DelayLengthPanel.DELAY_INDEX_INIT);
+            KeyboardAndDisplaySimulator.this.delayLengthSlider.setSize(new Dimension(100, (int) KeyboardAndDisplaySimulator.this.delayLengthSlider.getSize().getHeight()));
+            KeyboardAndDisplaySimulator.this.delayLengthSlider.setMaximumSize(KeyboardAndDisplaySimulator.this.delayLengthSlider.getSize());
+            KeyboardAndDisplaySimulator.this.delayLengthSlider.addChangeListener(new DelayLengthListener());
+            this.sliderLabel = new JLabel(this.setLabel(this.delayLengthIndex));
+            this.sliderLabel.setHorizontalAlignment(JLabel.CENTER);
+            this.sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            this.add(this.sliderLabel, BorderLayout.NORTH);
+            this.add(KeyboardAndDisplaySimulator.this.delayLengthSlider, BorderLayout.CENTER);
             this.setToolTipText("Parameter for simulated delay length (instruction execution count)");
         }
 
         // returns current delay length setting, in instructions.
         public double getDelayLength() {
-            return delayTable[delayLengthIndex];
+            return this.delayTable[this.delayLengthIndex];
         }
 
         // set label wording depending on current speed setting
-        private String setLabel(int index) {
-            return "Delay length: " + ((int) delayTable[index]) + " instruction executions";
+        private String setLabel(final int index) {
+            return "Delay length: " + ((int) this.delayTable[index]) + " instruction executions";
         }
 
         // Both revises label as user slides and updates current index when sliding
         // stops.
         private class DelayLengthListener implements ChangeListener {
-            public void stateChanged(ChangeEvent e) {
-                JSlider source = (JSlider) e.getSource();
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
                 if (!source.getValueIsAdjusting()) {
-                    delayLengthIndex = source.getValue();
-                    transmitDelayInstructionCountLimit = generateDelay();
+                    DelayLengthPanel.this.delayLengthIndex = source.getValue();
+                    KeyboardAndDisplaySimulator.this.transmitDelayInstructionCountLimit = KeyboardAndDisplaySimulator.this.generateDelay();
                 } else {
-                    sliderLabel.setText(setLabel(source.getValue()));
+                    DelayLengthPanel.this.sliderLabel.setText(DelayLengthPanel.this.setLabel(source.getValue()));
                 }
             }
         }
@@ -1015,11 +998,13 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
 
     // Delay value is fixed, and equal to slider value.
     private class FixedLengthDelay implements TransmitterDelayTechnique {
+        @Override
         public String toString() {
             return "Fixed transmitter delay, select using slider";
         }
 
-        public int generateDelay(double fixedDelay) {
+        @Override
+        public int generateDelay(final double fixedDelay) {
             return (int) fixedDelay;
         }
     }
@@ -1027,18 +1012,20 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // Randomly pick value from range 1 to slider setting, uniform distribution
     // (each value has equal probability of being chosen).
     private class UniformlyDistributedDelay implements TransmitterDelayTechnique {
-        Random randu;
+        final Random randu;
 
         public UniformlyDistributedDelay() {
-            randu = new Random();
+            this.randu = new Random();
         }
 
+        @Override
         public String toString() {
             return "Uniformly distributed delay, min=1, max=slider";
         }
 
-        public int generateDelay(double max) {
-            return randu.nextInt((int) max) + 1;
+        @Override
+        public int generateDelay(final double max) {
+            return this.randu.nextInt((int) max) + 1;
         }
     }
 
@@ -1047,18 +1034,20 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     // value, take absolute value to make sure we don't get negative,
     // add 1 to make sure we don't get 0.
     private class NormallyDistributedDelay implements TransmitterDelayTechnique {
-        Random randn;
+        final Random randn;
 
         public NormallyDistributedDelay() {
-            randn = new Random();
+            this.randn = new Random();
         }
 
+        @Override
         public String toString() {
             return "'Normally' distributed delay: floor(abs(N(0,1)*slider)+1)";
         }
 
-        public int generateDelay(double mult) {
-            return (int) (Math.abs(randn.nextGaussian() * mult) + 1);
+        @Override
+        public int generateDelay(final double mult) {
+            return (int) (Math.abs(this.randn.nextGaussian() * mult) + 1);
         }
     }
 
@@ -1071,54 +1060,48 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     private class FontSettingDialog extends AbstractFontSettingDialog {
         private boolean resultOK;
 
-        public FontSettingDialog(Frame owner, String title, Font currentFont) {
+        public FontSettingDialog(final Frame owner, final String title, final Font currentFont) {
             super(owner, title, true, currentFont);
         }
 
         private Font showDialog() {
-            resultOK = true;
+            this.resultOK = true;
             // Because dialog is modal, this blocks until user terminates the dialog.
             this.setVisible(true);
-            return resultOK ? getFont() : null;
+            return this.resultOK ? this.getFont() : null;
         }
 
+        @Override
         protected void closeDialog() {
             this.setVisible(false);
             // Update display text dimensions based on current font and size. DPS
             // 22-July-2014
-            updateDisplayBorder.componentResized(null);
+            KeyboardAndDisplaySimulator.this.updateDisplayBorder.componentResized(null);
         }
 
         private void performCancel() {
-            resultOK = false;
+            this.resultOK = false;
         }
 
         // Control buttons for the dialog.
+        @Override
         protected Component buildControlPanel() {
-            Box controlPanel = Box.createHorizontalBox();
-            JButton okButton = new JButton("OK");
+            final Box controlPanel = Box.createHorizontalBox();
+            final JButton okButton = new JButton("OK");
             okButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            apply(getFont());
-                            closeDialog();
-                        }
+                    e -> {
+                        FontSettingDialog.this.apply(FontSettingDialog.this.getFont());
+                        FontSettingDialog.this.closeDialog();
                     });
-            JButton cancelButton = new JButton("Cancel");
+            final JButton cancelButton = new JButton("Cancel");
             cancelButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performCancel();
-                            closeDialog();
-                        }
+                    e -> {
+                        FontSettingDialog.this.performCancel();
+                        FontSettingDialog.this.closeDialog();
                     });
-            JButton resetButton = new JButton("Reset");
+            final JButton resetButton = new JButton("Reset");
             resetButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            reset();
-                        }
-                    });
+                    e -> FontSettingDialog.this.reset());
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(okButton);
             controlPanel.add(Box.createHorizontalGlue());
@@ -1130,18 +1113,20 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         }
 
         // Change the font for the keyboard and display
-        protected void apply(Font font) {
-            display.setFont(font);
-            keyEventAccepter.setFont(font);
+        @Override
+        protected void apply(final Font font) {
+            KeyboardAndDisplaySimulator.this.display.setFont(font);
+            KeyboardAndDisplaySimulator.this.keyEventAccepter.setFont(font);
         }
 
     }
 
     private class FontChanger implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            JButton button = (JButton) e.getSource();
-            FontSettingDialog fontDialog = new FontSettingDialog(null, "Select Text Font", display.getFont());
-            Font newFont = fontDialog.showDialog();
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final JButton button = (JButton) e.getSource();
+            final FontSettingDialog fontDialog = new FontSettingDialog(null, "Select Text Font", KeyboardAndDisplaySimulator.this.display.getFont());
+            final Font newFont = fontDialog.showDialog();
         }
     }
 }

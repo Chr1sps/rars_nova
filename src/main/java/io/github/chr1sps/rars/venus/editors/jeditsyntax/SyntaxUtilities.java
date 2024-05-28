@@ -9,14 +9,13 @@
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax;
 
+import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.Token;
+
 import javax.swing.*;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
-
-import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.Token;
-
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
@@ -38,10 +37,10 @@ public class SyntaxUtilities {
      * @param match      The string to match
      * @return a boolean
      */
-    public static boolean regionMatches(boolean ignoreCase, Segment text,
-                                        int offset, String match) {
-        int length = offset + match.length();
-        char[] textArray = text.array;
+    public static boolean regionMatches(final boolean ignoreCase, final Segment text,
+                                        final int offset, final String match) {
+        final int length = offset + match.length();
+        final char[] textArray = text.array;
         if (length > text.offset + text.count)
             return false;
         for (int i = offset, j = 0; i < length; i++, j++) {
@@ -67,10 +66,10 @@ public class SyntaxUtilities {
      * @param match      The character array to match
      * @return a boolean
      */
-    public static boolean regionMatches(boolean ignoreCase, Segment text,
-                                        int offset, char[] match) {
-        int length = offset + match.length;
-        char[] textArray = text.array;
+    public static boolean regionMatches(final boolean ignoreCase, final Segment text,
+                                        final int offset, final char[] match) {
+        final int length = offset + match.length;
+        final char[] textArray = text.array;
         if (length > text.offset + text.count)
             return false;
         for (int i = offset, j = 0; i < length; i++, j++) {
@@ -94,7 +93,7 @@ public class SyntaxUtilities {
      * @return an array of {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle} objects
      */
     public static SyntaxStyle[] getDefaultSyntaxStyles() {
-        SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
+        final SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
 
         // SyntaxStyle constructor params: color, italic?, bold?
         // All need to be assigned even if not used by language (no gaps in array)
@@ -124,7 +123,7 @@ public class SyntaxUtilities {
      * @return an array of {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle} objects
      */
     public static SyntaxStyle[] getCurrentSyntaxStyles() {
-        SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
+        final SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
 
         styles[Token.NULL] = Globals.getSettings().getEditorSyntaxStyleByPosition(Token.NULL);
         styles[Token.COMMENT1] = Globals.getSettings().getEditorSyntaxStyleByPosition(Token.COMMENT1);
@@ -144,7 +143,7 @@ public class SyntaxUtilities {
     /**
      * Constant <code>popupShowing=false</code>
      */
-    public static boolean popupShowing = false;
+    public static final boolean popupShowing = false;
     /**
      * Constant <code>popup</code>
      */
@@ -164,19 +163,19 @@ public class SyntaxUtilities {
      * @param y        The y co-ordinate
      * @return The x co-ordinate, plus the width of the painted string
      */
-    public static int paintSyntaxLine(Segment line, Token tokens,
-                                      SyntaxStyle[] styles, TabExpander expander, Graphics gfx,
-                                      int x, int y) {
-        Font defaultFont = gfx.getFont();
-        Color defaultColor = gfx.getColor();
+    public static int paintSyntaxLine(final Segment line, Token tokens,
+                                      final SyntaxStyle[] styles, final TabExpander expander, final Graphics gfx,
+                                      int x, final int y) {
+        final Font defaultFont = gfx.getFont();
+        final Color defaultColor = gfx.getColor();
 
         int offset = 0;
         for (; ; ) {
-            byte id = tokens.id;
+            final byte id = tokens.id;
             if (id == Token.END)
                 break;
 
-            int length = tokens.length;
+            final int length = tokens.length;
             if (id == Token.NULL) {
                 if (!defaultColor.equals(gfx.getColor()))
                     gfx.setColor(defaultColor);
@@ -188,7 +187,7 @@ public class SyntaxUtilities {
 
             if (id == Token.KEYWORD1) {
                 // System.out.println("Instruction: "+line);
-                if (!popupShowing) {// System.out.println("creating popup");
+                if (!SyntaxUtilities.popupShowing) {// System.out.println("creating popup");
                     // JComponent paintArea = (JComponent) expander;
                     // JToolTip tip = paintArea.createToolTip();
                     // tip.setTipText("Instruction: "+line);
@@ -251,7 +250,7 @@ class InstructionMouseEvent extends MouseEvent {
      */
     private final Segment line;
 
-    public InstructionMouseEvent(Component component, int x, int y, Segment line) {
+    public InstructionMouseEvent(final Component component, final int x, final int y, final Segment line) {
         super(component, MouseEvent.MOUSE_MOVED, new java.util.Date().getTime(), 0, x, y, 0, false);
         System.out.println("Create InstructionMouseEvent " + x + " " + y + " " + line);
         this.line = line;

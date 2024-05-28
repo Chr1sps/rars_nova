@@ -54,7 +54,7 @@ public abstract class Instruction {
      * Characters used in instruction mask to indicate bit positions
      * for 'f'irst, 's'econd, 't'hird, 'q'uad, and 'p'enta operands .
      **/
-    public static char[] operandMask = {'f', 's', 't', 'q', 'p'};
+    public static final char[] operandMask = {'f', 's', 't', 'q', 'p'};
     /**
      * The instruction name.
      **/
@@ -80,7 +80,7 @@ public abstract class Instruction {
      * @return operation mnemonic (e.g. addi, sw)
      */
     public String getName() {
-        return mnemonic;
+        return this.mnemonic;
     }
 
     /**
@@ -94,7 +94,7 @@ public abstract class Instruction {
      * @return String representing example instruction format.
      */
     public String getExampleFormat() {
-        return exampleFormat;
+        return this.exampleFormat;
     }
 
     /**
@@ -104,7 +104,7 @@ public abstract class Instruction {
      * @return String describing the instruction.
      */
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     /**
@@ -115,7 +115,7 @@ public abstract class Instruction {
      * @return TokenList object representing correct instruction usage.
      */
     public TokenList getTokenList() {
-        return tokenList;
+        return this.tokenList;
     }
 
     /**
@@ -126,7 +126,7 @@ public abstract class Instruction {
      * @return int length in bytes of corresponding binary instruction(s).
      */
     public int getInstructionLength() {
-        return INSTRUCTION_LENGTH;
+        return Instruction.INSTRUCTION_LENGTH;
     }
 
     /**
@@ -136,8 +136,8 @@ public abstract class Instruction {
      * @param example a {@link java.lang.String} object
      * @return a {@link java.lang.String} object
      */
-    protected String extractOperator(String example) {
-        StringTokenizer st = new StringTokenizer(example, " ,\t");
+    protected String extractOperator(final String example) {
+        final StringTokenizer st = new StringTokenizer(example, " ,\t");
         return st.nextToken();
     }
 
@@ -147,10 +147,10 @@ public abstract class Instruction {
      */
     protected void createExampleTokenList() {
         try {
-            tokenList = ((new Tokenizer()).tokenizeExampleInstruction(exampleFormat));
-        } catch (AssemblyException pe) {
+            this.tokenList = ((new Tokenizer()).tokenizeExampleInstruction(this.exampleFormat));
+        } catch (final AssemblyException pe) {
             System.out.println(
-                    "CONFIGURATION ERROR: Instruction example \"" + exampleFormat + "\" contains invalid token(s).");
+                    "CONFIGURATION ERROR: Instruction example \"" + this.exampleFormat + "\" contains invalid token(s).");
         }
     }
 }

@@ -158,7 +158,7 @@ public class Main {
         this.options = new Options();
         this.gui = args.length == 0;
         this.simulate = true;
-        this.displayFormat = HEXADECIMAL;
+        this.displayFormat = Main.HEXADECIMAL;
         this.verbose = true;
         this.assembleProject = false;
         this.countInstructions = false;
@@ -381,7 +381,7 @@ public class Main {
                 continue;
             }
             if (args[i].equalsIgnoreCase("dec")) {
-                this.displayFormat = DECIMAL;
+                this.displayFormat = Main.DECIMAL;
                 continue;
             }
             if (args[i].equalsIgnoreCase("g")) {
@@ -389,11 +389,11 @@ public class Main {
                 continue;
             }
             if (args[i].equalsIgnoreCase("hex")) {
-                this.displayFormat = HEXADECIMAL;
+                this.displayFormat = Main.HEXADECIMAL;
                 continue;
             }
             if (args[i].equalsIgnoreCase("ascii")) {
-                this.displayFormat = ASCII;
+                this.displayFormat = Main.ASCII;
                 continue;
             }
             if (args[i].equalsIgnoreCase("b")) {
@@ -450,7 +450,7 @@ public class Main {
             try {
                 this.options.maxSteps = Integer.decode(args[i]); // if we got here, it has to be OK
                 continue;
-            } catch (final NumberFormatException nfe) {
+            } catch (final NumberFormatException ignored) {
             }
             // Check for integer address range (m-n)
             try {
@@ -484,14 +484,14 @@ public class Main {
         InstructionSet.rv64 = this.rv64;
         Globals.instructionSet.populate();
 
-        final File mainFile = new File(this.filenameList.get(0)).getAbsoluteFile();// First file is "main" file
+        final File mainFile = new File(this.filenameList.getFirst()).getAbsoluteFile();// First file is "main" file
         final ArrayList<String> filesToAssemble;
         if (this.assembleProject) {
             filesToAssemble = FilenameFinder.getFilenameList(mainFile.getParent(), Globals.fileExtensions);
             if (this.filenameList.size() > 1) {
                 // Using "p" project option PLUS listing more than one filename on command line.
                 // Add the additional files, avoiding duplicates.
-                this.filenameList.remove(0); // first one has already been processed
+                this.filenameList.removeFirst(); // first one has already been processed
                 final ArrayList<String> moreFilesToAssemble = FilenameFinder.getFilenameList(this.filenameList,
                         FilenameFinder.MATCH_ALL_EXTENSIONS);
                 // Remove any duplicates then merge the two lists.
@@ -568,13 +568,13 @@ public class Main {
 
     private String[] checkMemoryAddressRange(final String arg) throws NumberFormatException {
         String[] memoryRange = null;
-        if (arg.indexOf(rangeSeparator) > 0 &&
-                arg.indexOf(rangeSeparator) < arg.length() - 1) {
+        if (arg.indexOf(Main.rangeSeparator) > 0 &&
+                arg.indexOf(Main.rangeSeparator) < arg.length() - 1) {
             // assume correct format, two numbers separated by -, no embedded spaces.
             // If that doesn't work it is invalid.
             memoryRange = new String[2];
-            memoryRange[0] = arg.substring(0, arg.indexOf(rangeSeparator));
-            memoryRange[1] = arg.substring(arg.indexOf(rangeSeparator) + 1);
+            memoryRange[0] = arg.substring(0, arg.indexOf(Main.rangeSeparator));
+            memoryRange[1] = arg.substring(arg.indexOf(Main.rangeSeparator) + 1);
             // NOTE: I will use homegrown decoder, because Integer.decode will throw
             // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
             if (Binary.stringToInt(memoryRange[0]) > Binary.stringToInt(memoryRange[1]) ||
@@ -610,11 +610,11 @@ public class Main {
                 if (this.verbose) {
                     this.out.print(reg + "\t");
                 }
-                if (this.displayFormat == HEXADECIMAL) {
+                if (this.displayFormat == Main.HEXADECIMAL) {
                     // display float (and double, if applicable) in hex
                     this.out.println(Binary.intToHexString(ivalue));
 
-                } else if (this.displayFormat == DECIMAL) {
+                } else if (this.displayFormat == Main.DECIMAL) {
                     // display float (and double, if applicable) in decimal
                     this.out.println(fvalue);
 
@@ -635,8 +635,8 @@ public class Main {
     // Formats int value for display: decimal, hex, ascii
     private String formatIntForDisplay(final int value) {
         return switch (this.displayFormat) {
-            case DECIMAL -> "" + value;
-            case ASCII -> Binary.intToAscii(value);
+            case Main.DECIMAL -> "" + value;
+            case Main.ASCII -> Binary.intToAscii(value);
             default -> Binary.intToHexString(value); // hex case
         };
     }
@@ -653,14 +653,14 @@ public class Main {
             try { // This will succeed; error would have been caught during command arg parse
                 addressStart = Binary.stringToInt(memIter.next());
                 addressEnd = Binary.stringToInt(memIter.next());
-            } catch (final NumberFormatException nfe) {
+            } catch (final NumberFormatException ignored) {
             }
             int valuesDisplayed = 0;
             for (int addr = addressStart; addr <= addressEnd; addr += Memory.WORD_LENGTH_BYTES) {
                 if (addr < 0 && addressEnd > 0) {
                     break; // happens only if addressEnd is 0x7ffffffc
                 }
-                if (valuesDisplayed % memoryWordsPerLine == 0) {
+                if (valuesDisplayed % Main.memoryWordsPerLine == 0) {
                     this.out.print((valuesDisplayed > 0) ? "\n" : "");
                     if (this.verbose) {
                         this.out.print("Mem[" + Binary.intToHexString(addr) + "]\t");
@@ -715,19 +715,19 @@ public class Main {
 
     private void displayHelp() {
         final String[] segmentNames = MemoryDump.getSegmentNames();
-        String segments = "";
+        final StringBuilder segments = new StringBuilder();
         for (int i = 0; i < segmentNames.length; i++) {
-            segments += segmentNames[i];
+            segments.append(segmentNames[i]);
             if (i < segmentNames.length - 1) {
-                segments += ", ";
+                segments.append(", ");
             }
         }
         final ArrayList<DumpFormat> dumpFormats = DumpFormatLoader.getDumpFormats();
-        String formats = "";
+        final StringBuilder formats = new StringBuilder();
         for (int i = 0; i < dumpFormats.size(); i++) {
-            formats += dumpFormats.get(i).getCommandDescriptor();
+            formats.append(dumpFormats.get(i).getCommandDescriptor());
             if (i < dumpFormats.size() - 1) {
-                formats += ", ";
+                formats.append(", ");
             }
         }
         this.out.println("Usage:  Rars  [options] filename [additional filenames]");

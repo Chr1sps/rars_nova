@@ -776,7 +776,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private void addAsTextSegmentObserver() {
         try {
             Memory.getInstance().subscribe(this, Memory.textBaseAddress, Memory.dataSegmentBaseAddress);
-        } catch (final AddressErrorException aee) {
+        } catch (final AddressErrorException ignored) {
         }
     }
 
@@ -830,8 +830,8 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 Globals.getSettings().getFontByPosition(Settings.ODD_ROW_FONT),
         };
         int maxHeight = 0;
-        for (int i = 0; i < possibleFonts.length; i++) {
-            final int height = this.getFontMetrics(possibleFonts[i]).getHeight();
+        for (final Font possibleFont : possibleFonts) {
+            final int height = this.getFontMetrics(possibleFont).getHeight();
             if (height > maxHeight) {
                 maxHeight = height;
             }
@@ -843,7 +843,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * Inner class to implement the Table model for this JTable.
      */
     class TextTableModel extends AbstractTableModel {
-        Object[][] data;
+        final Object[][] data;
 
         public TextTableModel(final Object[][] d) {
             this.data = d;
@@ -876,7 +876,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
          * rather than a check box.
          */
         @Override
-        public Class getColumnClass(final int c) {
+        public Class<?> getColumnClass(final int c) {
             return this.getValueAt(0, c).getClass();
         }
 
@@ -932,7 +932,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 // somehow, user was able to display out-of-range address. Most likely to occur
                 // between
                 // stack base and Kernel.
-                catch (final AddressErrorException aee) {
+                catch (final AddressErrorException ignored) {
                 }
             } finally {
                 Globals.memoryAndRegistersLock.unlock();

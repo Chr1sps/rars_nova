@@ -45,6 +45,7 @@ public class ControlAndStatusWindow extends RegisterBlockWindow {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected String formatRegister(Register value, int base) {
         if (Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED)) {
             return NumberDisplayBaseChooser.formatNumber(value.getValue(), base);
@@ -56,6 +57,7 @@ public class ControlAndStatusWindow extends RegisterBlockWindow {
     /**
      * <p>beginObserving.</p>
      */
+    @Override
     protected void beginObserving() {
         ControlAndStatusRegisterFile.addRegistersObserver(this);
     }
@@ -63,6 +65,7 @@ public class ControlAndStatusWindow extends RegisterBlockWindow {
     /**
      * <p>endObserving.</p>
      */
+    @Override
     protected void endObserving() {
         ControlAndStatusRegisterFile.deleteRegistersObserver(this);
     }
@@ -70,6 +73,7 @@ public class ControlAndStatusWindow extends RegisterBlockWindow {
     /**
      * <p>resetRegisters.</p>
      */
+    @Override
     public void resetRegisters() {
         ControlAndStatusRegisterFile.resetRegisters();
     }

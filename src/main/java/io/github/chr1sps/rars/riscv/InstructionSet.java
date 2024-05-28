@@ -70,7 +70,7 @@ public class InstructionSet {
      * Creates a new InstructionSet object.
      */
     public InstructionSet() {
-        instructionList = new ArrayList<>();
+        this.instructionList = new ArrayList<>();
 
     }
 
@@ -80,7 +80,7 @@ public class InstructionSet {
      * @return a {@link java.util.ArrayList} object
      */
     public ArrayList<Instruction> getInstructionList() {
-        return instructionList;
+        return this.instructionList;
 
     }
 
@@ -96,31 +96,31 @@ public class InstructionSet {
         /*
          * Here is where the parade begins. Every instruction is added to the set here.
          */
-        instructionList.clear();
+        this.instructionList.clear();
         // //////////////////////////////////// BASIC INSTRUCTIONS START HERE
         // ////////////////////////////////
 
-        addBasicInstructions();
+        this.addBasicInstructions();
 
         ////////////// READ PSEUDO-INSTRUCTION SPECS FROM DATA FILE AND ADD
         ////////////// //////////////////////
-        if (rv64) {
-            addPseudoInstructions("/PseudoOps-64.txt");
+        if (InstructionSet.rv64) {
+            this.addPseudoInstructions("/PseudoOps-64.txt");
         }
 
-        addPseudoInstructions("/PseudoOps.txt");
+        this.addPseudoInstructions("/PseudoOps.txt");
         // Initialization step. Create token list for each instruction example. This is
         // used by parser to determine user program correct syntax.
-        for (Instruction inst : instructionList) {
+        for (final Instruction inst : this.instructionList) {
             inst.createExampleTokenList();
         }
 
-        HashMap<Integer, HashMap<Integer, BasicInstruction>> maskMap = new HashMap<>();
-        ArrayList<MatchMap> matchMaps = new ArrayList<>();
-        for (Instruction inst : instructionList) {
-            if (inst instanceof BasicInstruction basic) {
-                Integer mask = basic.getOpcodeMask();
-                Integer match = basic.getOpcodeMatch();
+        final HashMap<Integer, HashMap<Integer, BasicInstruction>> maskMap = new HashMap<>();
+        final ArrayList<MatchMap> matchMaps = new ArrayList<>();
+        for (final Instruction inst : this.instructionList) {
+            if (inst instanceof final BasicInstruction basic) {
+                final Integer mask = basic.getOpcodeMask();
+                final Integer match = basic.getOpcodeMatch();
                 HashMap<Integer, BasicInstruction> matchMap = maskMap.get(mask);
                 if (matchMap == null) {
                     matchMap = new HashMap<>();
@@ -140,9 +140,9 @@ public class InstructionSet {
      * @param binaryInstr a int
      * @return a {@link io.github.chr1sps.rars.riscv.BasicInstruction} object
      */
-    public BasicInstruction findByBinaryCode(int binaryInstr) {
-        for (MatchMap map : this.opcodeMatchMaps) {
-            BasicInstruction ret = map.find(binaryInstr);
+    public BasicInstruction findByBinaryCode(final int binaryInstr) {
+        for (final MatchMap map : this.opcodeMatchMaps) {
+            final BasicInstruction ret = map.find(binaryInstr);
             if (ret != null)
                 return ret;
         }
@@ -151,10 +151,10 @@ public class InstructionSet {
 
     private void addBasicInstructions() {
         // grab all class files in the same directory as Syscall
-        ArrayList<String> candidates = FilenameFinder.getFilenameList(this.getClass().getClassLoader(),
-                INSTRUCTIONS_DIRECTORY_PATH, CLASS_EXTENSION);
-        HashSet<String> insts = new HashSet<>();
-        for (String file : candidates) {
+        final ArrayList<String> candidates = FilenameFinder.getFilenameList(this.getClass().getClassLoader(),
+                InstructionSet.INSTRUCTIONS_DIRECTORY_PATH, InstructionSet.CLASS_EXTENSION);
+        final HashSet<String> insts = new HashSet<>();
+        for (final String file : candidates) {
             // Do not add class if already encountered (happens if run in MARS development
             // directory)
             if (insts.contains(file)) {
@@ -164,21 +164,21 @@ public class InstructionSet {
             }
             try {
                 // grab the class, make sure it implements Syscall, instantiate, add to list
-                String syscallClassName = CLASS_PREFIX + file.substring(0, file.indexOf(CLASS_EXTENSION) - 1);
-                Class clas = Class.forName(syscallClassName);
+                final String syscallClassName = InstructionSet.CLASS_PREFIX + file.substring(0, file.indexOf(InstructionSet.CLASS_EXTENSION) - 1);
+                final Class<?> clas = Class.forName(syscallClassName);
                 if (!BasicInstruction.class.isAssignableFrom(clas) ||
                         Modifier.isAbstract(clas.getModifiers()) ||
                         Modifier.isInterface(clas.getModifiers())) {
                     continue;
                 }
                 try {
-                    instructionList.add((BasicInstruction) clas.newInstance());
-                } catch (NullPointerException ne) {
+                    this.instructionList.add((BasicInstruction) clas.newInstance());
+                } catch (final NullPointerException ne) {
                     if (ne.toString().contains("rv"))
                         continue;
                     throw ne;
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.out.println("Error instantiating Instruction from file " + file + ": " + e);
                 System.exit(0);
             }
@@ -188,14 +188,14 @@ public class InstructionSet {
     /*
      * METHOD TO ADD PSEUDO-INSTRUCTIONS
      */
-    private void addPseudoInstructions(String file) {
+    private void addPseudoInstructions(final String file) {
         InputStream is = null;
         BufferedReader in = null;
         try {
             // leading "/" prevents package name being prepended to filepath.
             is = this.getClass().getResourceAsStream(file);
             in = new BufferedReader(new InputStreamReader(is));
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             System.out.println(
                     "Error: Pseudo-instruction file PseudoOps.txt not found.");
             System.exit(0);
@@ -207,7 +207,7 @@ public class InstructionSet {
             while ((line = in.readLine()) != null) {
                 // skip over: comment lines, empty lines, lines starting with blank.
                 if (!line.startsWith("#") && !line.startsWith(" ")
-                        && line.length() > 0) {
+                        && !line.isEmpty()) {
                     description = "";
                     tokenizer = new StringTokenizer(line, ";");
                     pseudoOp = tokenizer.nextToken();
@@ -224,18 +224,18 @@ public class InstructionSet {
                             template = template + "\n";
                         }
                     }
-                    instructionList.add(new ExtendedInstruction(pseudoOp, template, description));
+                    this.instructionList.add(new ExtendedInstruction(pseudoOp, template, description));
                     // if (firstTemplate != null) System.out.println("\npseudoOp:
                     // "+pseudoOp+"\ndefault template:\n"+firstTemplate+"\ncompact
                     // template:\n"+template);
                 }
             }
             in.close();
-        } catch (IOException ioe) {
+        } catch (final IOException ioe) {
             System.out.println(
                     "Internal Error: Pseudo-instructions could not be loaded.");
             System.exit(0);
-        } catch (Exception ioe) {
+        } catch (final Exception ioe) {
             System.out.println(
                     "Internal Error: Invalid pseudo-instruction specification.");
             System.exit(0);
@@ -251,10 +251,10 @@ public class InstructionSet {
      * @param name operator mnemonic (e.g. addi, sw,...)
      * @return list of corresponding Instruction object(s), or null if not found.
      */
-    public ArrayList<Instruction> matchOperator(String name) {
+    public ArrayList<Instruction> matchOperator(final String name) {
         ArrayList<Instruction> matchingInstructions = null;
         // Linear search for now....
-        for (Instruction inst : instructionList) {
+        for (final Instruction inst : this.instructionList) {
             if (inst.getName().equalsIgnoreCase(name)) {
                 if (matchingInstructions == null)
                     matchingInstructions = new ArrayList<>();
@@ -274,11 +274,11 @@ public class InstructionSet {
      * @param name a string
      * @return list of matching Instruction object(s), or null if none match.
      */
-    public ArrayList<Instruction> prefixMatchOperator(String name) {
+    public ArrayList<Instruction> prefixMatchOperator(final String name) {
         ArrayList<Instruction> matchingInstructions = null;
         // Linear search for now....
         if (name != null) {
-            for (Instruction inst : instructionList) {
+            for (final Instruction inst : this.instructionList) {
                 if (inst.getName().toLowerCase().startsWith(name.toLowerCase())) {
                     if (matchingInstructions == null)
                         matchingInstructions = new ArrayList<>();
@@ -302,13 +302,13 @@ public class InstructionSet {
      * @param statement a {@link io.github.chr1sps.rars.ProgramStatement} object
      * @throws SimulationException if any.
      */
-    public static void findAndSimulateSyscall(int number, ProgramStatement statement)
+    public static void findAndSimulateSyscall(final int number, final ProgramStatement statement)
             throws SimulationException {
-        AbstractSyscall service = SyscallLoader.findSyscall(number);
+        final AbstractSyscall service = SyscallLoader.findSyscall(number);
         if (service != null) {
             // TODO: find a cleaner way of doing this
             // This was introduced to solve issue #108
-            boolean is_writing = service instanceof SyscallPrintChar ||
+            final boolean is_writing = service instanceof SyscallPrintChar ||
                     service instanceof SyscallPrintDouble ||
                     service instanceof SyscallPrintFloat ||
                     service instanceof SyscallPrintInt ||
@@ -342,7 +342,7 @@ public class InstructionSet {
      *
      * @param displacement a int
      */
-    public static void processBranch(int displacement) {
+    public static void processBranch(final int displacement) {
         // Decrement needed because PC has already been incremented
         RegisterFile
                 .setProgramCounter(RegisterFile.getProgramCounter() + displacement - Instruction.INSTRUCTION_LENGTH);
@@ -361,7 +361,7 @@ public class InstructionSet {
      *
      * @param targetAddress a int
      */
-    public static void processJump(int targetAddress) {
+    public static void processJump(final int targetAddress) {
         RegisterFile.setProgramCounter(targetAddress);
     }
 
@@ -377,7 +377,7 @@ public class InstructionSet {
      *
      * @param register a int
      */
-    public static void processReturnAddress(int register) {
+    public static void processReturnAddress(final int register) {
         RegisterFile.updateRegister(register, RegisterFile.getProgramCounter());
     }
 
@@ -386,7 +386,7 @@ public class InstructionSet {
         private final int maskLength; // number of 1 bits in mask
         private final HashMap<Integer, BasicInstruction> matchMap;
 
-        public MatchMap(int mask, HashMap<Integer, BasicInstruction> matchMap) {
+        public MatchMap(final int mask, final HashMap<Integer, BasicInstruction> matchMap) {
             this.mask = mask;
             this.matchMap = matchMap;
 
@@ -399,20 +399,22 @@ public class InstructionSet {
             this.maskLength = k;
         }
 
-        public boolean equals(Object o) {
-            return o instanceof MatchMap && mask == ((MatchMap) o).mask;
+        @Override
+        public boolean equals(final Object o) {
+            return o instanceof MatchMap && this.mask == ((MatchMap) o).mask;
         }
 
-        public int compareTo(MatchMap other) {
+        @Override
+        public int compareTo(final MatchMap other) {
             int d = other.maskLength - this.maskLength;
             if (d == 0)
                 d = this.mask - other.mask;
             return d;
         }
 
-        public BasicInstruction find(int instr) {
-            int match = instr & mask;
-            return matchMap.get(match);
+        public BasicInstruction find(final int instr) {
+            final int match = instr & this.mask;
+            return this.matchMap.get(match);
         }
     }
 }

@@ -1,21 +1,19 @@
 package io.github.chr1sps.rars.venus.editors.jeditsyntax;
 
-import javax.swing.*;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.CompoundEdit;
-import javax.swing.undo.UndoManager;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.venus.EditPane;
 import io.github.chr1sps.rars.venus.editors.TextEditingArea;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.RISCVTokenMarker;
 
+import javax.swing.*;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.CompoundEdit;
+import javax.swing.undo.UndoManager;
 import java.awt.*;
 
 /**
@@ -44,7 +42,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * @param editPain    a {@link io.github.chr1sps.rars.venus.EditPane} object
      * @param lineNumbers a {@link javax.swing.JComponent} object
      */
-    public JEditBasedTextArea(EditPane editPain, JComponent lineNumbers) {
+    public JEditBasedTextArea(final EditPane editPain, final JComponent lineNumbers) {
         super(lineNumbers);
         this.lineNumbers = lineNumbers;
         this.editPane = editPain;
@@ -53,29 +51,28 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         this.sourceCode = this;
 
         // Needed to support unlimited undo/redo capability
-        undoableEditListener = new UndoableEditListener() {
-            public void undoableEditHappened(UndoableEditEvent e) {
-                // Remember the edit and update the menus.
-                if (isCompoundEdit) {
-                    compoundEdit.addEdit(e.getEdit());
-                } else {
-                    undoManager.addEdit(e.getEdit());
-                    editPane.updateUndoAndRedoState();
-                }
+        this.undoableEditListener = e -> {
+            // Remember the edit and update the menus.
+            if (this.isCompoundEdit) {
+                this.compoundEdit.addEdit(e.getEdit());
+            } else {
+                this.undoManager.addEdit(e.getEdit());
+                this.editPane.updateUndoAndRedoState();
             }
         };
-        this.getDocument().addUndoableEditListener(undoableEditListener);
+        this.getDocument().addUndoableEditListener(this.undoableEditListener);
         this.setFont(Globals.getSettings().getEditorFont());
         this.setTokenMarker(new RISCVTokenMarker());
 
-        addCaretListener(this);
+        this.addCaretListener(this);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void setFont(Font f) {
-        getPainter().setFont(f);
+    @Override
+    public void setFont(final Font f) {
+        this.getPainter().setFont(f);
     }
 
     /**
@@ -83,8 +80,9 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      *
      * @return a {@link java.awt.Font} object
      */
+    @Override
     public Font getFont() {
-        return getPainter().getFont();
+        return this.getPainter().getFont();
     }
 
     // public void repaint() { getPainter().repaint(); }
@@ -96,8 +94,9 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * <p>
      * Use for highlighting the line currently being edited.
      */
-    public void setLineHighlightEnabled(boolean highlight) {
-        getPainter().setLineHighlightEnabled(highlight);
+    @Override
+    public void setLineHighlightEnabled(final boolean highlight) {
+        this.getPainter().setLineHighlightEnabled(highlight);
     }
 
     /**
@@ -106,16 +105,17 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * Set the caret blinking rate in milliseconds. If rate is 0
      * will disable blinking. If negative, do nothing.
      */
-    public void setCaretBlinkRate(int rate) {
+    @Override
+    public void setCaretBlinkRate(final int rate) {
         if (rate == 0) {
-            caretBlinks = false;
+            this.caretBlinks = false;
         }
         if (rate > 0) {
-            caretBlinks = true;
-            caretBlinkRate = rate;
-            caretTimer.setDelay(rate);
-            caretTimer.setInitialDelay(rate);
-            caretTimer.restart();
+            this.caretBlinks = true;
+            this.caretBlinkRate = rate;
+            JEditTextArea.caretTimer.setDelay(rate);
+            JEditTextArea.caretTimer.setInitialDelay(rate);
+            JEditTextArea.caretTimer.restart();
         }
     }
 
@@ -124,29 +124,30 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * <p>
      * Set the number of characters a tab will expand to.
      */
-    public void setTabSize(int chars) {
-        painter.setTabSize(chars);
+    @Override
+    public void setTabSize(final int chars) {
+        this.painter.setTabSize(chars);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setBackground(Color bg) {
+    public void setBackground(final Color bg) {
         super.setBackground(bg);
-        getPainter().setBackground(bg);
-        lineNumbers.setOpaque(true);
-        lineNumbers.setBackground(bg);
+        this.getPainter().setBackground(bg);
+        this.lineNumbers.setOpaque(true);
+        this.lineNumbers.setBackground(bg);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setForeground(Color fg) {
+    public void setForeground(final Color fg) {
         super.setForeground(fg);
-        getPainter().setForeground(fg);
-        lineNumbers.setForeground(fg);
+        this.getPainter().setForeground(fg);
+        this.lineNumbers.setForeground(fg);
     }
 
     /**
@@ -154,10 +155,10 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * from {@link io.github.chr1sps.rars.Globals#getSettings()}
      */
     public void updateEditorColors() {
-        boolean editable = this.isEditable();
-        Settings settings = Globals.getSettings();
-        Color background = settings.getColorSettingByPosition(Settings.EDITOR_BACKGROUND);
-        Color foreground = settings.getColorSettingByPosition(Settings.EDITOR_FOREGROUND);
+        final boolean editable = this.isEditable();
+        final Settings settings = Globals.getSettings();
+        final Color background = settings.getColorSettingByPosition(Settings.EDITOR_BACKGROUND);
+        final Color foreground = settings.getColorSettingByPosition(Settings.EDITOR_FOREGROUND);
         this.setBackground((editable) ? background : background.darker());
         this.getPainter().setLineHighlightColor(settings.getColorSettingByPosition(Settings.EDITOR_LINE_HIGHLIGHT));
         this.getPainter().setSelectionColor(settings.getColorSettingByPosition(Settings.EDITOR_SELECTION_COLOR));
@@ -169,9 +170,10 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * Update editor colors and update the syntax style table,
      * which is obtained from {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxUtilities}.
      */
+    @Override
     public void updateSyntaxStyles() {
-        updateEditorColors();
-        painter.setStyles(SyntaxUtilities.getCurrentSyntaxStyles());
+        this.updateEditorColors();
+        this.painter.setStyles(SyntaxUtilities.getCurrentSyntaxStyles());
     }
 
     /**
@@ -179,6 +181,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      *
      * @return a {@link java.awt.Component} object
      */
+    @Override
     public Component getOuterComponent() {
         return this;
     }
@@ -191,6 +194,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * to appear with its Undo action enabled. But it will unless you
      * call this after setting the text.
      */
+    @Override
     public void discardAllUndoableEdits() {
         this.undoManager.discardAllEdits();
     }
@@ -200,8 +204,9 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * <p>
      * Display caret position on the edit pane.
      */
-    public void caretUpdate(CaretEvent e) {
-        editPane.displayCaretPosition(e.getDot());
+    @Override
+    public void caretUpdate(final CaretEvent e) {
+        this.editPane.displayCaretPosition(e.getDot());
     }
 
     /**
@@ -211,8 +216,9 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * JTextComponent method replaceSelection.
      * DPS, 14 Apr 2010
      */
-    public void replaceSelection(String replacementText) {
-        setSelectedText(replacementText);
+    @Override
+    public void replaceSelection(final String replacementText) {
+        this.setSelectedText(replacementText);
     }
 
     //
@@ -221,7 +227,8 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     /**
      * {@inheritDoc}
      */
-    public void setSelectionVisible(boolean vis) {
+    @Override
+    public void setSelectionVisible(final boolean vis) {
 
     }
 
@@ -231,13 +238,14 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     /**
      * {@inheritDoc}
      */
-    public void setSourceCode(String s, boolean editable) {
+    @Override
+    public void setSourceCode(final String s, final boolean editable) {
         this.setText(s);
         this.setEditable(editable);
         this.setEnabled(editable);
         // this.getCaret().setVisible(editable);
         this.setCaretPosition(0);
-        updateEditorColors();
+        this.updateEditorColors();
         if (editable)
             this.requestFocusInWindow();
     }
@@ -247,43 +255,46 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      *
      * @return the undo manager
      */
+    @Override
     public UndoManager getUndoManager() {
-        return undoManager;
+        return this.undoManager;
     }
 
     /**
      * Undo previous edit
      */
+    @Override
     public void undo() {
         // "unredoing" is mode used by DocumentHandler's insertUpdate() and
         // removeUpdate()
         // to pleasingly mark the text and location of the undo.
-        unredoing = true;
+        this.unredoing = true;
         try {
             this.undoManager.undo();
-        } catch (CannotUndoException ex) {
+        } catch (final CannotUndoException ex) {
             System.out.println("Unable to undo: " + ex);
             ex.printStackTrace();
         }
-        unredoing = false;
+        this.unredoing = false;
         this.setCaretVisible(true);
     }
 
     /**
      * Redo previous edit
      */
+    @Override
     public void redo() {
         // "unredoing" is mode used by DocumentHandler's insertUpdate() and
         // removeUpdate()
         // to pleasingly mark the text and location of the redo.
-        unredoing = true;
+        this.unredoing = true;
         try {
             this.undoManager.redo();
-        } catch (CannotRedoException ex) {
+        } catch (final CannotRedoException ex) {
             System.out.println("Unable to redo: " + ex);
             ex.printStackTrace();
         }
-        unredoing = false;
+        this.unredoing = false;
         this.setCaretVisible(true);
     }
 
@@ -302,20 +313,21 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * at the current cursor location, and wraps around when the end of the string
      * is reached.
      */
-    public int doFindText(String find, boolean caseSensitive) {
-        int findPosn = sourceCode.getCaretPosition();
+    @Override
+    public int doFindText(final String find, final boolean caseSensitive) {
+        final int findPosn = this.sourceCode.getCaretPosition();
         int nextPosn = 0;
-        nextPosn = nextIndex(sourceCode.getText(), find, findPosn, caseSensitive);
+        nextPosn = this.nextIndex(this.sourceCode.getText(), find, findPosn, caseSensitive);
         if (nextPosn >= 0) {
-            sourceCode.requestFocus(); // guarantees visibility of the blue highlight
-            sourceCode.setSelectionStart(nextPosn); // position cursor at word start
-            sourceCode.setSelectionEnd(nextPosn + find.length());
+            this.sourceCode.requestFocus(); // guarantees visibility of the blue highlight
+            this.sourceCode.setSelectionStart(nextPosn); // position cursor at word start
+            this.sourceCode.setSelectionEnd(nextPosn + find.length());
             // Need to repeat start due to quirk in JEditTextArea implementation of
             // setSelectionStart.
-            sourceCode.setSelectionStart(nextPosn);
-            return TEXT_FOUND;
+            this.sourceCode.setSelectionStart(nextPosn);
+            return TextEditingArea.TEXT_FOUND;
         } else {
-            return TEXT_NOT_FOUND;
+            return TextEditingArea.TEXT_NOT_FOUND;
         }
     }
 
@@ -329,7 +341,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * @param caseSensitive true for case sensitive. false to ignore case
      * @return next indexed position of found text or -1 if not found
      */
-    public int nextIndex(String input, String find, int start, boolean caseSensitive) {
+    public int nextIndex(final String input, final String find, final int start, final boolean caseSensitive) {
         int textPosn = -1;
         if (input != null && find != null && start < input.length()) {
             if (caseSensitive) { // indexOf() returns -1 if not found
@@ -339,7 +351,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
                     textPosn = input.indexOf(find);
                 }
             } else {
-                String lowerCaseText = input.toLowerCase();
+                final String lowerCaseText = input.toLowerCase();
                 textPosn = lowerCaseText.indexOf(find.toLowerCase(), start);
                 // If not found from non-starting cursor position, wrap around
                 if (start > 0 && textPosn < 0) {
@@ -359,35 +371,36 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * next occurrence if any. Otherwise it performs a find operation. The replace
      * can be undone with one undo operation.
      */
-    public int doReplace(String find, String replace, boolean caseSensitive) {
+    @Override
+    public int doReplace(final String find, final String replace, final boolean caseSensitive) {
         int nextPosn = 0;
         int posn;
         // Will perform a "find" and return, unless positioned at the end of
         // a selected "find" result.
-        if (find == null || !find.equals(sourceCode.getSelectedText()) ||
-                sourceCode.getSelectionEnd() != sourceCode.getCaretPosition()) {
-            return doFindText(find, caseSensitive);
+        if (find == null || !find.equals(this.sourceCode.getSelectedText()) ||
+                this.sourceCode.getSelectionEnd() != this.sourceCode.getCaretPosition()) {
+            return this.doFindText(find, caseSensitive);
         }
         // We are positioned at end of selected "find". Rreplace and find next.
-        nextPosn = sourceCode.getSelectionStart();
-        sourceCode.grabFocus();
-        sourceCode.setSelectionStart(nextPosn); // posn cursor at word start
-        sourceCode.setSelectionEnd(nextPosn + find.length()); // select found text
+        nextPosn = this.sourceCode.getSelectionStart();
+        this.sourceCode.grabFocus();
+        this.sourceCode.setSelectionStart(nextPosn); // posn cursor at word start
+        this.sourceCode.setSelectionEnd(nextPosn + find.length()); // select found text
         // Need to repeat start due to quirk in JEditTextArea implementation of
         // setSelectionStart.
-        sourceCode.setSelectionStart(nextPosn);
-        isCompoundEdit = true;
-        compoundEdit = new CompoundEdit();
-        sourceCode.replaceSelection(replace);
-        compoundEdit.end();
-        undoManager.addEdit(compoundEdit);
-        editPane.updateUndoAndRedoState();
-        isCompoundEdit = false;
-        sourceCode.setCaretPosition(nextPosn + replace.length());
-        if (doFindText(find, caseSensitive) == TEXT_NOT_FOUND) {
-            return TEXT_REPLACED_NOT_FOUND_NEXT;
+        this.sourceCode.setSelectionStart(nextPosn);
+        this.isCompoundEdit = true;
+        this.compoundEdit = new CompoundEdit();
+        this.sourceCode.replaceSelection(replace);
+        this.compoundEdit.end();
+        this.undoManager.addEdit(this.compoundEdit);
+        this.editPane.updateUndoAndRedoState();
+        this.isCompoundEdit = false;
+        this.sourceCode.setCaretPosition(nextPosn + replace.length());
+        if (this.doFindText(find, caseSensitive) == TextEditingArea.TEXT_NOT_FOUND) {
+            return TextEditingArea.TEXT_REPLACED_NOT_FOUND_NEXT;
         } else {
-            return TEXT_REPLACED_FOUND_NEXT;
+            return TextEditingArea.TEXT_REPLACED_FOUND_NEXT;
         }
     }
 
@@ -400,14 +413,15 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * will
      * undo all of them.
      */
-    public int doReplaceAll(String find, String replace, boolean caseSensitive) {
+    @Override
+    public int doReplaceAll(final String find, final String replace, final boolean caseSensitive) {
         int nextPosn = 0;
         int findPosn = 0; // *** begin at start of text
         int replaceCount = 0;
-        compoundEdit = null; // new one will be created upon first replacement
-        isCompoundEdit = true; // undo manager's action listener needs this
+        this.compoundEdit = null; // new one will be created upon first replacement
+        this.isCompoundEdit = true; // undo manager's action listener needs this
         while (nextPosn >= 0) {
-            nextPosn = nextIndex(sourceCode.getText(), find, findPosn, caseSensitive);
+            nextPosn = this.nextIndex(this.sourceCode.getText(), find, findPosn, caseSensitive);
             if (nextPosn >= 0) {
                 // nextIndex() will wrap around, which causes infinite loop if
                 // find string is a substring of replacement string. This
@@ -415,26 +429,26 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
                 if (nextPosn < findPosn) {
                     break;
                 }
-                sourceCode.grabFocus();
-                sourceCode.setSelectionStart(nextPosn); // posn cursor at word start
-                sourceCode.setSelectionEnd(nextPosn + find.length()); // select found text
+                this.sourceCode.grabFocus();
+                this.sourceCode.setSelectionStart(nextPosn); // posn cursor at word start
+                this.sourceCode.setSelectionEnd(nextPosn + find.length()); // select found text
                 // Need to repeat start due to quirk in JEditTextArea implementation of
                 // setSelectionStart.
-                sourceCode.setSelectionStart(nextPosn);
-                if (compoundEdit == null) {
-                    compoundEdit = new CompoundEdit();
+                this.sourceCode.setSelectionStart(nextPosn);
+                if (this.compoundEdit == null) {
+                    this.compoundEdit = new CompoundEdit();
                 }
-                sourceCode.replaceSelection(replace);
+                this.sourceCode.replaceSelection(replace);
                 findPosn = nextPosn + replace.length(); // set for next search
                 replaceCount++;
             }
         }
-        isCompoundEdit = false;
+        this.isCompoundEdit = false;
         // Will be true if any replacements were performed
-        if (compoundEdit != null) {
-            compoundEdit.end();
-            undoManager.addEdit(compoundEdit);
-            editPane.updateUndoAndRedoState();
+        if (this.compoundEdit != null) {
+            this.compoundEdit.end();
+            this.undoManager.addEdit(this.compoundEdit);
+            this.editPane.updateUndoAndRedoState();
         }
         return replaceCount;
     }

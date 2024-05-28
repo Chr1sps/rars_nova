@@ -1,6 +1,5 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
@@ -35,7 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallLSeek class.</p>
- *
  */
 public class SyscallLSeek extends AbstractSyscall {
     /**
@@ -51,8 +49,9 @@ public class SyscallLSeek extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws ExitingException {
-        int result = SystemIO.seek(RegisterFile.getValue("a0"),
+    @Override
+    public void simulate(final ProgramStatement statement) {
+        final int result = SystemIO.seek(RegisterFile.getValue("a0"),
                 RegisterFile.getValue("a1"),
                 RegisterFile.getValue("a2"));
         RegisterFile.updateRegister("a0", result);

@@ -10,9 +10,9 @@
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax;
 
-import javax.swing.text.Segment;
-
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.Token;
+
+import javax.swing.text.Segment;
 
 /**
  * A <code>KeywordMap</code> is similar to a hashtable in that it maps keys
@@ -30,7 +30,7 @@ public class KeywordMap {
      *
      * @param ignoreCase True if keys are case insensitive
      */
-    public KeywordMap(boolean ignoreCase) {
+    public KeywordMap(final boolean ignoreCase) {
         this(ignoreCase, 52);
         this.ignoreCase = ignoreCase;
     }
@@ -42,10 +42,10 @@ public class KeywordMap {
      * @param mapLength  The number of `buckets' to create.
      *                   A value of 52 will give good performance for most maps.
      */
-    public KeywordMap(boolean ignoreCase, int mapLength) {
+    public KeywordMap(final boolean ignoreCase, final int mapLength) {
         this.mapLength = mapLength;
         this.ignoreCase = ignoreCase;
-        map = new Keyword[mapLength];
+        this.map = new Keyword[mapLength];
     }
 
     /**
@@ -56,18 +56,18 @@ public class KeywordMap {
      * @param length The length of the substring
      * @return a byte
      */
-    public byte lookup(Segment text, int offset, int length) {
+    public byte lookup(final Segment text, final int offset, final int length) {
         if (length == 0)
             return Token.NULL;
         if (text.array[offset] == '%')
             return Token.MACRO_ARG; // added 12/12 M. Sekhavat
-        Keyword k = map[getSegmentMapKey(text, offset, length)];
+        Keyword k = this.map[this.getSegmentMapKey(text, offset, length)];
         while (k != null) {
             if (length != k.keyword.length) {
                 k = k.next;
                 continue;
             }
-            if (SyntaxUtilities.regionMatches(ignoreCase, text, offset,
+            if (SyntaxUtilities.regionMatches(this.ignoreCase, text, offset,
                     k.keyword))
                 return k.id;
             k = k.next;
@@ -81,9 +81,9 @@ public class KeywordMap {
      * @param keyword The key
      * @param id      The value
      */
-    public void add(String keyword, byte id) {
-        int key = getStringMapKey(keyword);
-        map[key] = new Keyword(keyword.toCharArray(), id, map[key]);
+    public void add(final String keyword, final byte id) {
+        final int key = this.getStringMapKey(keyword);
+        this.map[key] = new Keyword(keyword.toCharArray(), id, this.map[key]);
     }
 
     /**
@@ -93,7 +93,7 @@ public class KeywordMap {
      * @return a boolean
      */
     public boolean getIgnoreCase() {
-        return ignoreCase;
+        return this.ignoreCase;
     }
 
     /**
@@ -102,12 +102,12 @@ public class KeywordMap {
      * @param ignoreCase True if the keyword map should be case
      *                   insensitive, false otherwise
      */
-    public void setIgnoreCase(boolean ignoreCase) {
+    public void setIgnoreCase(final boolean ignoreCase) {
         this.ignoreCase = ignoreCase;
     }
 
     // protected members
-    protected int mapLength;
+    protected final int mapLength;
 
     /**
      * <p>getStringMapKey.</p>
@@ -115,10 +115,10 @@ public class KeywordMap {
      * @param s a {@link java.lang.String} object
      * @return a int
      */
-    protected int getStringMapKey(String s) {
+    protected int getStringMapKey(final String s) {
         return (Character.toUpperCase(s.charAt(0)) +
                 Character.toUpperCase(s.charAt(s.length() - 1)))
-                % mapLength;
+                % this.mapLength;
     }
 
     /**
@@ -129,23 +129,23 @@ public class KeywordMap {
      * @param len a int
      * @return a int
      */
-    protected int getSegmentMapKey(Segment s, int off, int len) {
+    protected int getSegmentMapKey(final Segment s, final int off, final int len) {
         return (Character.toUpperCase(s.array[off]) +
                 Character.toUpperCase(s.array[off + len - 1]))
-                % mapLength;
+                % this.mapLength;
     }
 
     // private members
     class Keyword {
-        public Keyword(char[] keyword, byte id, Keyword next) {
+        public Keyword(final char[] keyword, final byte id, final Keyword next) {
             this.keyword = keyword;
             this.id = id;
             this.next = next;
         }
 
-        public char[] keyword;
-        public byte id;
-        public Keyword next;
+        public final char[] keyword;
+        public final byte id;
+        public final Keyword next;
     }
 
     private final Keyword[] map;

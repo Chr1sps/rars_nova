@@ -66,7 +66,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class VenusUI extends JFrame {
     private final VenusUI mainUI;
-    public JMenuBar menu;
+    public final JMenuBar menu;
     private final JToolBar toolbar;
     private final MainPane mainPane;
     private final RegistersPane registersPane;
@@ -592,7 +592,7 @@ public class VenusUI extends JFrame {
         this.file.add(this.fileSave);
         this.file.add(this.fileSaveAs);
         this.file.add(this.fileSaveAll);
-        if (DumpFormatLoader.getDumpFormats().size() > 0) {
+        if (!DumpFormatLoader.getDumpFormats().isEmpty()) {
             this.file.add(this.fileDumpMemory);
         }
         this.file.addSeparator();
@@ -798,7 +798,7 @@ public class VenusUI extends JFrame {
         toolBar.add(this.Open);
         toolBar.add(this.Save);
         toolBar.add(this.SaveAs);
-        if (DumpFormatLoader.getDumpFormats().size() > 0) {
+        if (!DumpFormatLoader.getDumpFormats().isEmpty()) {
             toolBar.add(this.DumpMemory);
         }
         toolBar.add(new JToolBar.Separator());
@@ -847,10 +847,7 @@ public class VenusUI extends JFrame {
             case FileStatus.NO_FILE:
                 this.setMenuStateInitial();
                 break;
-            case FileStatus.NEW_NOT_EDITED:
-                this.setMenuStateEditingNew();
-                break;
-            case FileStatus.NEW_EDITED:
+            case FileStatus.NEW_NOT_EDITED, FileStatus.NEW_EDITED:
                 this.setMenuStateEditingNew();
                 break;
             case FileStatus.NOT_EDITED:

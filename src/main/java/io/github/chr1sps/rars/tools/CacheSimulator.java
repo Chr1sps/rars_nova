@@ -629,14 +629,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
     // whether it was a hit or not, and in which block is the value stored.
     // In the case of a hit, the block associated with address. In the case of
     // a miss, the block where new association is made. DPS 23-Dec-2010
-    private static class CacheAccessResult {
-        private final boolean hitOrMiss;
-        private final int blockNumber;
-
-        public CacheAccessResult(boolean hitOrMiss, int blockNumber) {
-            this.hitOrMiss = hitOrMiss;
-            this.blockNumber = blockNumber;
-        }
+    private record CacheAccessResult(boolean hitOrMiss, int blockNumber) {
 
         public boolean isHit() {
             return hitOrMiss;
@@ -651,7 +644,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
     // Abstract Cache class. Subclasses will implement specific policies.
     private abstract class AbstractCache {
         private final int numberOfBlocks, blockSizeInWords, setSizeInBlocks, numberOfSets;
-        protected CacheBlock[] blocks;
+        protected final CacheBlock[] blocks;
 
         protected AbstractCache(int numberOfBlocks, int blockSizeInWords, int setSizeInBlocks) {
             this.numberOfBlocks = numberOfBlocks;

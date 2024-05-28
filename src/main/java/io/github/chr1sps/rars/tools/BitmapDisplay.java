@@ -7,8 +7,6 @@ import io.github.chr1sps.rars.riscv.hardware.Memory;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /*
 Copyright (c) 2010-2011,  Pete Sanderson and Kenneth Vollmar
@@ -253,34 +251,31 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      */
     @Override
     protected JComponent getHelpComponent() {
-        final String helpContent = "Use this program to simulate a basic bitmap display where\n" +
-                "each memory word in a specified address space corresponds to\n" +
-                "one display pixel in row-major order starting at the upper left\n" +
-                "corner of the display.  This tool may be run either from the\n" +
-                "Tools menu or as a stand-alone application.\n" +
-                "\n" +
-                "You can easily learn to use this small program by playing with\n" +
-                "it!   Each rectangular unit on the display represents one memory\n" +
-                "word in a contiguous address space starting with the specified\n" +
-                "base address.  The value stored in that word will be interpreted\n" +
-                "as a 24-bit RGB color value with the red component in bits 16-23,\n" +
-                "the green component in bits 8-15, and the blue component in bits 0-7.\n" +
-                "Each time a memory word within the display address space is written\n" +
-                "by the program, its position in the display will be rendered in the\n" +
-                "color that its value represents.\n" +
-                "\n" +
-                "Version 1.0 is very basic and was constructed from the Memory\n" +
-                "Reference Visualization tool's code.  Feel free to improve it and\n" +
-                "send your code for consideration in the next release.\n" +
-                "\n";
+        final String helpContent = """
+                Use this program to simulate a basic bitmap display where
+                each memory word in a specified address space corresponds to
+                one display pixel in row-major order starting at the upper left
+                corner of the display.  This tool may be run either from the
+                Tools menu or as a stand-alone application.
+
+                You can easily learn to use this small program by playing with
+                it!   Each rectangular unit on the display represents one memory
+                word in a contiguous address space starting with the specified
+                base address.  The value stored in that word will be interpreted
+                as a 24-bit RGB color value with the red component in bits 16-23,
+                the green component in bits 8-15, and the blue component in bits 0-7.
+                Each time a memory word within the display address space is written
+                by the program, its position in the display will be rendered in the
+                color that its value represents.
+
+                Version 1.0 is very basic and was constructed from the Memory
+                Reference Visualization tool's code.  Feel free to improve it and
+                send your code for consideration in the next release.
+
+                """;
         final JButton help = new JButton("Help");
         help.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        JOptionPane.showMessageDialog(BitmapDisplay.this.theWindow, helpContent);
-                    }
-                });
+                e -> JOptionPane.showMessageDialog(BitmapDisplay.this.theWindow, helpContent));
         return help;
     }
 
@@ -298,13 +293,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         this.visualizationUnitPixelWidthSelector.setSelectedIndex(BitmapDisplay.defaultVisualizationUnitPixelWidthIndex);
         this.visualizationUnitPixelWidthSelector.setToolTipText("Width in pixels of rectangle representing memory word");
         this.visualizationUnitPixelWidthSelector.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        BitmapDisplay.this.unitPixelWidth = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationUnitPixelWidthSelector);
-                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
-                        BitmapDisplay.this.updateDisplay();
-                    }
+                e -> {
+                    BitmapDisplay.this.unitPixelWidth = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationUnitPixelWidthSelector);
+                    BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                    BitmapDisplay.this.updateDisplay();
                 });
         this.visualizationUnitPixelHeightSelector = new JComboBox<>(BitmapDisplay.visualizationUnitPixelHeightChoices);
         this.visualizationUnitPixelHeightSelector.setEditable(false);
@@ -312,13 +304,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         this.visualizationUnitPixelHeightSelector.setSelectedIndex(BitmapDisplay.defaultVisualizationUnitPixelHeightIndex);
         this.visualizationUnitPixelHeightSelector.setToolTipText("Height in pixels of rectangle representing memory word");
         this.visualizationUnitPixelHeightSelector.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        BitmapDisplay.this.unitPixelHeight = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationUnitPixelHeightSelector);
-                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
-                        BitmapDisplay.this.updateDisplay();
-                    }
+                e -> {
+                    BitmapDisplay.this.unitPixelHeight = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationUnitPixelHeightSelector);
+                    BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                    BitmapDisplay.this.updateDisplay();
                 });
         this.visualizationPixelWidthSelector = new JComboBox<>(BitmapDisplay.displayAreaPixelWidthChoices);
         this.visualizationPixelWidthSelector.setEditable(false);
@@ -326,15 +315,12 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         this.visualizationPixelWidthSelector.setSelectedIndex(BitmapDisplay.defaultDisplayWidthIndex);
         this.visualizationPixelWidthSelector.setToolTipText("Total width in pixels of display area");
         this.visualizationPixelWidthSelector.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        BitmapDisplay.this.displayAreaWidthInPixels = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationPixelWidthSelector);
-                        BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
-                        BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
-                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
-                        BitmapDisplay.this.updateDisplay();
-                    }
+                e -> {
+                    BitmapDisplay.this.displayAreaWidthInPixels = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationPixelWidthSelector);
+                    BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
+                    BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
+                    BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                    BitmapDisplay.this.updateDisplay();
                 });
         this.visualizationPixelHeightSelector = new JComboBox<>(BitmapDisplay.displayAreaPixelHeightChoices);
         this.visualizationPixelHeightSelector.setEditable(false);
@@ -342,15 +328,12 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         this.visualizationPixelHeightSelector.setSelectedIndex(BitmapDisplay.defaultDisplayHeightIndex);
         this.visualizationPixelHeightSelector.setToolTipText("Total height in pixels of display area");
         this.visualizationPixelHeightSelector.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        BitmapDisplay.this.displayAreaHeightInPixels = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationPixelHeightSelector);
-                        BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
-                        BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
-                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
-                        BitmapDisplay.this.updateDisplay();
-                    }
+                e -> {
+                    BitmapDisplay.this.displayAreaHeightInPixels = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationPixelHeightSelector);
+                    BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
+                    BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
+                    BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                    BitmapDisplay.this.updateDisplay();
                 });
         this.displayBaseAddressSelector = new JComboBox<>(this.displayBaseAddressChoices);
         this.displayBaseAddressSelector.setEditable(false);
@@ -358,28 +341,25 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         this.displayBaseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
         this.displayBaseAddressSelector.setToolTipText("Base address for display area (upper left corner)");
         this.displayBaseAddressSelector.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        // This may also affect what address range we should be registered as an
-                        // Observer
-                        // for. The default (inherited) address range is the static data segment
-                        // starting at 0x10010000. To change this requires override of
-                        // AbstractToolAndApplication.addAsObserver(). The no-argument version of
-                        // that method is called automatically when "Connect" button is clicked for Tool
-                        // and when "Assemble and Run" button is clicked for Rars application.
-                        BitmapDisplay.this.updateBaseAddress();
-                        // If display base address is changed while connected to the program (this can
-                        // only occur
-                        // when being used as a Tool), we have to delete ourselves as an observer and
-                        // re-register.
-                        if (BitmapDisplay.this.connectButton != null && BitmapDisplay.this.connectButton.isConnected()) {
-                            BitmapDisplay.this.deleteAsSubscriber();
-                            BitmapDisplay.this.addAsObserver();
-                        }
-                        BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
-                        BitmapDisplay.this.updateDisplay();
+                e -> {
+                    // This may also affect what address range we should be registered as an
+                    // Observer
+                    // for. The default (inherited) address range is the static data segment
+                    // starting at 0x10010000. To change this requires override of
+                    // AbstractToolAndApplication.addAsObserver(). The no-argument version of
+                    // that method is called automatically when "Connect" button is clicked for Tool
+                    // and when "Assemble and Run" button is clicked for Rars application.
+                    BitmapDisplay.this.updateBaseAddress();
+                    // If display base address is changed while connected to the program (this can
+                    // only occur
+                    // when being used as a Tool), we have to delete ourselves as an observer and
+                    // re-register.
+                    if (BitmapDisplay.this.connectButton != null && BitmapDisplay.this.connectButton.isConnected()) {
+                        BitmapDisplay.this.deleteAsSubscriber();
+                        BitmapDisplay.this.addAsObserver();
                     }
+                    BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
+                    BitmapDisplay.this.updateDisplay();
                 });
 
         // ALL COMPONENTS FOR "ORGANIZATION" SECTION
@@ -553,8 +533,9 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     // Represents grid of colors
     private class Grid {
 
-        Color[][] grid;
-        int rows, columns;
+        final Color[][] grid;
+        final int rows;
+        final int columns;
 
         private Grid(final int rows, final int columns) {
             this.grid = new Color[rows][columns];

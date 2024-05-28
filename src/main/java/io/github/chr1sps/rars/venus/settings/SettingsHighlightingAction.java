@@ -254,23 +254,17 @@ public class SettingsHighlightingAction extends GuiAction {
         this.dataHighlightButton.setText(SettingsHighlightingAction.getHighlightControlText(this.currentDataHighlightSetting));
         this.dataHighlightButton.setToolTipText(SettingsHighlightingAction.DATA_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT);
         this.dataHighlightButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        SettingsHighlightingAction.this.currentDataHighlightSetting = !SettingsHighlightingAction.this.currentDataHighlightSetting;
-                        SettingsHighlightingAction.this.dataHighlightButton.setText(SettingsHighlightingAction.getHighlightControlText(SettingsHighlightingAction.this.currentDataHighlightSetting));
-                    }
+                e -> {
+                    SettingsHighlightingAction.this.currentDataHighlightSetting = !SettingsHighlightingAction.this.currentDataHighlightSetting;
+                    SettingsHighlightingAction.this.dataHighlightButton.setText(SettingsHighlightingAction.getHighlightControlText(SettingsHighlightingAction.this.currentDataHighlightSetting));
                 });
         this.registerHighlightButton = new JButton();
         this.registerHighlightButton.setText(SettingsHighlightingAction.getHighlightControlText(this.currentRegisterHighlightSetting));
         this.registerHighlightButton.setToolTipText(SettingsHighlightingAction.REGISTER_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT);
         this.registerHighlightButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        SettingsHighlightingAction.this.currentRegisterHighlightSetting = !SettingsHighlightingAction.this.currentRegisterHighlightSetting;
-                        SettingsHighlightingAction.this.registerHighlightButton.setText(SettingsHighlightingAction.getHighlightControlText(SettingsHighlightingAction.this.currentRegisterHighlightSetting));
-                    }
+                e -> {
+                    SettingsHighlightingAction.this.currentRegisterHighlightSetting = !SettingsHighlightingAction.this.currentRegisterHighlightSetting;
+                    SettingsHighlightingAction.this.registerHighlightButton.setText(SettingsHighlightingAction.getHighlightControlText(SettingsHighlightingAction.this.currentRegisterHighlightSetting));
                 });
         final JPanel dataHighlightPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         final JPanel registerHighlightPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -287,40 +281,22 @@ public class SettingsHighlightingAction extends GuiAction {
         final JButton okButton = new JButton("Apply and Close");
         okButton.setToolTipText(SettingsHighlightingAction.CLOSE_TOOL_TIP_TEXT);
         okButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        SettingsHighlightingAction.this.setHighlightingSettings();
-                        SettingsHighlightingAction.this.closeDialog();
-                    }
+                e -> {
+                    SettingsHighlightingAction.this.setHighlightingSettings();
+                    SettingsHighlightingAction.this.closeDialog();
                 });
         final JButton applyButton = new JButton("Apply");
         applyButton.setToolTipText(SettingsHighlightingAction.APPLY_TOOL_TIP_TEXT);
         applyButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        SettingsHighlightingAction.this.setHighlightingSettings();
-                    }
-                });
+                e -> SettingsHighlightingAction.this.setHighlightingSettings());
         final JButton resetButton = new JButton("Reset");
         resetButton.setToolTipText(SettingsHighlightingAction.RESET_TOOL_TIP_TEXT);
         resetButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        SettingsHighlightingAction.this.resetButtonColors();
-                    }
-                });
+                e -> SettingsHighlightingAction.this.resetButtonColors());
         final JButton cancelButton = new JButton("Cancel");
         cancelButton.setToolTipText(SettingsHighlightingAction.CANCEL_TOOL_TIP_TEXT);
         cancelButton.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        SettingsHighlightingAction.this.closeDialog();
-                    }
-                });
+                e -> SettingsHighlightingAction.this.closeDialog());
         controlPanel.add(Box.createHorizontalGlue());
         controlPanel.add(okButton);
         controlPanel.add(Box.createHorizontalGlue());
@@ -602,30 +578,19 @@ public class SettingsHighlightingAction extends GuiAction {
             final Box controlPanel = Box.createHorizontalBox();
             final JButton okButton = new JButton("OK");
             okButton.addActionListener(
-                    new ActionListener() {
-                        @Override
-                        public void actionPerformed(final ActionEvent e) {
-                            FontSettingDialog.this.performOK();
-                            FontSettingDialog.this.closeDialog();
-                        }
+                    e -> {
+                        FontSettingDialog.this.performOK();
+                        FontSettingDialog.this.closeDialog();
                     });
             final JButton cancelButton = new JButton("Cancel");
             cancelButton.addActionListener(
-                    new ActionListener() {
-                        @Override
-                        public void actionPerformed(final ActionEvent e) {
-                            FontSettingDialog.this.performCancel();
-                            FontSettingDialog.this.closeDialog();
-                        }
+                    e -> {
+                        FontSettingDialog.this.performCancel();
+                        FontSettingDialog.this.closeDialog();
                     });
             final JButton resetButton = new JButton("Reset");
             resetButton.addActionListener(
-                    new ActionListener() {
-                        @Override
-                        public void actionPerformed(final ActionEvent e) {
-                            FontSettingDialog.this.reset();
-                        }
-                    });
+                    e -> FontSettingDialog.this.reset());
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(okButton);
             controlPanel.add(Box.createHorizontalGlue());

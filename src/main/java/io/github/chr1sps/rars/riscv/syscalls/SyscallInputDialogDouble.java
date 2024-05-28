@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
+import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
@@ -40,7 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Service to input data.
- *
  */
 // TODO: Fill in desc, in and out for all input dialogs
 public class SyscallInputDialogDouble extends AbstractSyscall {
@@ -56,7 +55,8 @@ public class SyscallInputDialogDouble extends AbstractSyscall {
      * <p>
      * System call to input data.
      */
-    public void simulate(ProgramStatement statement) throws ExitingException {
+    @Override
+    public void simulate(final ProgramStatement statement) throws ExitingException {
         // Input arguments: $a0 = address of null-terminated string that is the message
         // to user
         // Outputs:
@@ -69,7 +69,7 @@ public class SyscallInputDialogDouble extends AbstractSyscall {
 
         String message = ""; // = "";
         int byteAddress = RegisterFile.getValue(4);
-        char[] ch = {' '}; // Need an array to convert to String
+        final char[] ch = {' '}; // Need an array to convert to String
         try {
             ch[0] = (char) Globals.memory.getByte(byteAddress);
             while (ch[0] != 0) // only uses single location ch[0]
@@ -78,7 +78,7 @@ public class SyscallInputDialogDouble extends AbstractSyscall {
                 byteAddress++;
                 ch[0] = (char) Globals.memory.getByte(byteAddress);
             }
-        } catch (AddressErrorException e) {
+        } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }
 
@@ -94,18 +94,19 @@ public class SyscallInputDialogDouble extends AbstractSyscall {
             if (inputValue == null) // Cancel was chosen
             {
                 RegisterFile.updateRegister("a1", -2); // set $a1 to -2 flag
-            } else if (inputValue.length() == 0) // OK was chosen but there was no input
+            } else if (inputValue.isEmpty()) // OK was chosen but there was no input
             {
                 RegisterFile.updateRegister("a1", -3); // set $a1 to -3 flag
             } else {
-                double doubleValue = Double.parseDouble(inputValue);
+                final double doubleValue = Double.parseDouble(inputValue);
 
                 // Successful parse of valid input data
                 FloatingPointRegisterFile.updateRegisterLong(10, Double.doubleToRawLongBits(doubleValue));
                 RegisterFile.updateRegister("a1", 0); // set $a1 to valid flag
 
             }
-        } catch (NumberFormatException e) // Unsuccessful parse of input data
+        } catch (final
+        NumberFormatException e) // Unsuccessful parse of input data
         {
             RegisterFile.updateRegister("a1", -1); // set $a1 to -1 flag
         }

@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.riscv;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.util.FilenameFinder;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -42,7 +42,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * functions. This is adapted from the ToolLoader class, which is in turn
  * adapted
  * from Bret Barker's GameServer class from the book "Developing Games In Java".
- *
  */
 public class SyscallLoader {
 
@@ -59,12 +58,12 @@ public class SyscallLoader {
      * in Java".  Also see the "loadMarsTools()" method from ToolLoader class.
      */
     static {
-        syscallList = new ArrayList<>();
+        SyscallLoader.syscallList = new ArrayList<>();
         // grab all class files in the same directory as Syscall
-        ArrayList<String> candidates = FilenameFinder.getFilenameList(SyscallLoader.class.getClassLoader(),
-                SYSCALLS_DIRECTORY_PATH, CLASS_EXTENSION);
-        HashSet<String> syscalls = new HashSet<>();
-        for (String file : candidates) {
+        final ArrayList<String> candidates = FilenameFinder.getFilenameList(SyscallLoader.class.getClassLoader(),
+                SyscallLoader.SYSCALLS_DIRECTORY_PATH, SyscallLoader.CLASS_EXTENSION);
+        final HashSet<String> syscalls = new HashSet<>();
+        for (final String file : candidates) {
             // Do not add class if already encountered (happens if run in MARS development
             // directory)
             if (syscalls.contains(file)) {
@@ -74,28 +73,28 @@ public class SyscallLoader {
             }
             try {
                 // grab the class, make sure it implements Syscall, instantiate, add to list
-                String syscallClassName = CLASS_PREFIX + file.substring(0, file.indexOf(CLASS_EXTENSION) - 1);
-                Class clas = Class.forName(syscallClassName);
+                final String syscallClassName = SyscallLoader.CLASS_PREFIX + file.substring(0, file.indexOf(SyscallLoader.CLASS_EXTENSION) - 1);
+                final Class<?> clas = Class.forName(syscallClassName);
                 if (!AbstractSyscall.class.isAssignableFrom(clas)) {
                     continue;
                 }
-                AbstractSyscall syscall = (AbstractSyscall) clas.newInstance();
+                final AbstractSyscall syscall = (AbstractSyscall) clas.newInstance();
                 if (syscall.getNumber() == -1) {
-                    syscallList.add(syscall);
+                    SyscallLoader.syscallList.add(syscall);
                 } else {
                     throw new Exception("Syscalls must assign -1 for number");
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.out.println("Error instantiating Syscall from file " + file + ": " + e);
                 System.exit(0);
             }
         }
-        syscallList = processSyscallNumberOverrides(syscallList);
+        SyscallLoader.syscallList = SyscallLoader.processSyscallNumberOverrides(SyscallLoader.syscallList);
     }
 
     // Loads system call numbers from Syscall.properties
-    private static ArrayList<AbstractSyscall> processSyscallNumberOverrides(ArrayList<AbstractSyscall> syscallList) {
-        ArrayList<SyscallNumberOverride> overrides = new Globals().getSyscallOverrides();
+    private static ArrayList<AbstractSyscall> processSyscallNumberOverrides(final ArrayList<AbstractSyscall> syscallList) {
+        final ArrayList<SyscallNumberOverride> overrides = new Globals().getSyscallOverrides();
         if (syscallList.size() != overrides.size()) {
             System.out.println(
                     "Error: the number of entries in the config file does not match the number of syscalls loaded");
@@ -104,12 +103,12 @@ public class SyscallLoader {
             System.out.printf("syscall list: %d, overrides: %d", syscallList.size(), overrides.size());
             System.exit(0);
         }
-        for (SyscallNumberOverride override : overrides) {
+        for (final SyscallNumberOverride override : overrides) {
             boolean match = false;
-            for (AbstractSyscall syscall : syscallList) {
+            for (final AbstractSyscall syscall : syscallList) {
                 if (syscall.getNumber() == override.getNumber()) {
                     System.out.println("Duplicate service number: " + syscall.getNumber() + " already registered to " +
-                            findSyscall(syscall.getNumber()).getName());
+                            SyscallLoader.findSyscall(syscall.getNumber()).getName());
                     System.exit(0);
                 }
                 if (override.getName().equals(syscall.getName())) {
@@ -147,9 +146,9 @@ public class SyscallLoader {
      * @param number a int
      * @return a {@link io.github.chr1sps.rars.riscv.AbstractSyscall} object
      */
-    public static AbstractSyscall findSyscall(int number) {
+    public static AbstractSyscall findSyscall(final int number) {
         // linear search is OK since number of syscalls is small.
-        for (AbstractSyscall service : syscallList) {
+        for (final AbstractSyscall service : SyscallLoader.syscallList) {
             if (service.getNumber() == number) {
                 return service;
             }
@@ -163,6 +162,6 @@ public class SyscallLoader {
      * @return a {@link java.util.ArrayList} object
      */
     public static ArrayList<AbstractSyscall> getSyscallList() {
-        return syscallList;
+        return SyscallLoader.syscallList;
     }
 }

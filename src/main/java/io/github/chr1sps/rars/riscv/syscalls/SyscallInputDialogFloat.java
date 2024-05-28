@@ -1,7 +1,7 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
@@ -48,7 +48,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * -1: input data cannot be correctly parsed <br>
  * -2: Cancel was chosen <br>
  * -3: OK was chosen but no data had been input into field <br>
- *
  */
 public class SyscallInputDialogFloat extends AbstractSyscall {
     /**
@@ -61,8 +60,9 @@ public class SyscallInputDialogFloat extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws ExitingException {
-        String message = NullString.get(statement);
+    @Override
+    public void simulate(final ProgramStatement statement) throws ExitingException {
+        final String message = NullString.get(statement);
 
         // Values returned by Java's InputDialog:
         // A null return value means that "Cancel" was chosen rather than OK.
@@ -76,12 +76,12 @@ public class SyscallInputDialogFloat extends AbstractSyscall {
             if (inputValue == null) // Cancel was chosen
             {
                 RegisterFile.updateRegister("a1", -2);
-            } else if (inputValue.length() == 0) // OK was chosen but there was no input
+            } else if (inputValue.isEmpty()) // OK was chosen but there was no input
             {
                 RegisterFile.updateRegister("a1", -3);
             } else {
 
-                float floatValue = Float.parseFloat(inputValue);
+                final float floatValue = Float.parseFloat(inputValue);
 
                 // System.out.println("SyscallInputDialogFloat: floatValue is " + floatValue);
 
@@ -91,7 +91,8 @@ public class SyscallInputDialogFloat extends AbstractSyscall {
 
             }
 
-        } catch (NumberFormatException e) // Unsuccessful parse of input data
+        } catch (final
+        NumberFormatException e) // Unsuccessful parse of input data
         {
             RegisterFile.updateRegister("a1", -1);
         }

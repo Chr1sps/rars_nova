@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.assembler;
 
-import java.util.ArrayList;
-
 import io.github.chr1sps.rars.ErrorList;
 import io.github.chr1sps.rars.ErrorMessage;
 import io.github.chr1sps.rars.riscv.Instruction;
+
+import java.util.ArrayList;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -53,8 +53,8 @@ public class OperandFormat {
      * specification, else returns <tt>false</tt>.
      */
 
-    static boolean tokenOperandMatch(TokenList candidateList, Instruction inst, ErrorList errors) {
-        return numOperandsCheck(candidateList, inst, errors) && operandTypeCheck(candidateList, inst, errors);
+    static boolean tokenOperandMatch(final TokenList candidateList, final Instruction inst, final ErrorList errors) {
+        return OperandFormat.numOperandsCheck(candidateList, inst, errors) && OperandFormat.operandTypeCheck(candidateList, inst, errors);
     }
 
     /**
@@ -63,40 +63,40 @@ public class OperandFormat {
      * first such Instruction that has an exact operand match. If none match,
      * return the first Instruction and let client deal with operand mismatches.
      */
-    static Instruction bestOperandMatch(TokenList tokenList, ArrayList<Instruction> instrMatches) {
+    static Instruction bestOperandMatch(final TokenList tokenList, final ArrayList<Instruction> instrMatches) {
         if (instrMatches == null)
             return null;
         if (instrMatches.size() == 1)
-            return instrMatches.get(0);
-        for (Instruction potentialMatch : instrMatches) {
-            if (tokenOperandMatch(tokenList, potentialMatch, new ErrorList()))
+            return instrMatches.getFirst();
+        for (final Instruction potentialMatch : instrMatches) {
+            if (OperandFormat.tokenOperandMatch(tokenList, potentialMatch, new ErrorList()))
                 return potentialMatch;
         }
-        return instrMatches.get(0);
+        return instrMatches.getFirst();
     }
 
     // Simply check to see if numbers of operands are correct and generate error
     // message if not.
-    private static boolean numOperandsCheck(TokenList cand, Instruction spec, ErrorList errors) {
-        int numOperands = cand.size() - 1;
-        int reqNumOperands = spec.getTokenList().size() - 1;
-        Token operator = cand.get(0);
+    private static boolean numOperandsCheck(final TokenList cand, final Instruction spec, final ErrorList errors) {
+        final int numOperands = cand.size() - 1;
+        final int reqNumOperands = spec.getTokenList().size() - 1;
+        final Token operator = cand.get(0);
         if (numOperands == reqNumOperands) {
             return true;
         } else if (numOperands < reqNumOperands) {
 
-            String mess = "Too few or incorrectly formatted operands. Expected: " + spec.getExampleFormat();
-            generateMessage(operator, mess, errors);
+            final String mess = "Too few or incorrectly formatted operands. Expected: " + spec.getExampleFormat();
+            OperandFormat.generateMessage(operator, mess, errors);
         } else {
-            String mess = "Too many or incorrectly formatted operands. Expected: " + spec.getExampleFormat();
-            generateMessage(operator, mess, errors);
+            final String mess = "Too many or incorrectly formatted operands. Expected: " + spec.getExampleFormat();
+            OperandFormat.generateMessage(operator, mess, errors);
         }
         return false;
     }
 
     // Generate error message if operand is not of correct type for this operation &
     // operand position
-    private static boolean operandTypeCheck(TokenList cand, Instruction spec, ErrorList errors) {
+    private static boolean operandTypeCheck(final TokenList cand, final Instruction spec, final ErrorList errors) {
         Token candToken, specToken;
         TokenTypes candType, specType;
         for (int i = 1; i < spec.getTokenList().size(); i++) {
@@ -120,7 +120,7 @@ public class OperandFormat {
             // operator names can be used as labels.
             // TODO: maybe add more cases in here
             if (specType == TokenTypes.IDENTIFIER && candType == TokenTypes.OPERATOR) {
-                Token replacement = new Token(TokenTypes.IDENTIFIER, candToken.getValue(), candToken.getSourceProgram(),
+                final Token replacement = new Token(TokenTypes.IDENTIFIER, candToken.getValue(), candToken.getSourceProgram(),
                         candToken.getSourceLine(), candToken.getStartPos());
                 cand.set(i, replacement);
                 continue;
@@ -153,7 +153,7 @@ public class OperandFormat {
                     (specType == TokenTypes.INTEGER_32 && candType == TokenTypes.INTEGER_20))
                 continue;
             if (specType == TokenTypes.INTEGER_12 && candType == TokenTypes.INTEGER_12U) {
-                generateMessage(candToken, "Unsigned value is too large to fit into a sign-extended immediate", errors);
+                OperandFormat.generateMessage(candToken, "Unsigned value is too large to fit into a sign-extended immediate", errors);
                 return false;
             }
             if ((specType == TokenTypes.INTEGER_5 && candType == TokenTypes.INTEGER_6) ||
@@ -168,11 +168,11 @@ public class OperandFormat {
                     (specType == TokenTypes.INTEGER_12 && candType == TokenTypes.INTEGER_20) ||
                     (specType == TokenTypes.INTEGER_12 && candType == TokenTypes.INTEGER_32) ||
                     (specType == TokenTypes.INTEGER_20 && candType == TokenTypes.INTEGER_32)) {
-                generateMessage(candToken, "operand is out of range", errors);
+                OperandFormat.generateMessage(candToken, "operand is out of range", errors);
                 return false;
             }
             if (candType != specType) {
-                generateMessage(candToken, "operand is of incorrect type", errors);
+                OperandFormat.generateMessage(candToken, "operand is of incorrect type", errors);
                 return false;
             }
         }
@@ -181,7 +181,7 @@ public class OperandFormat {
     }
 
     // Handy utility for all parse errors...
-    private static void generateMessage(Token token, String mess, ErrorList errors) {
+    private static void generateMessage(final Token token, final String mess, final ErrorList errors) {
         errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token.getStartPos(),
                 "\"" + token.getValue() + "\": " + mess));
     }

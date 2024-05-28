@@ -1,13 +1,11 @@
 package io.github.chr1sps.rars.venus;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.venus.editors.TextEditingArea;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -41,7 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action for the Edit -> Find/Replace menu item
- *
  */
 public class EditFindReplaceAction extends GuiAction {
     private static String searchString = "";
@@ -61,18 +58,19 @@ public class EditFindReplaceAction extends GuiAction {
      * @param accel    a {@link javax.swing.KeyStroke} object
      * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
      */
-    public EditFindReplaceAction(String name, Icon icon, String descrip,
-                                 Integer mnemonic, KeyStroke accel, VenusUI gui) {
+    public EditFindReplaceAction(final String name, final Icon icon, final String descrip,
+                                 final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
-        mainPane = gui.getMainPane();
+        this.mainPane = gui.getMainPane();
     }
 
     /**
      * {@inheritDoc}
      */
-    public void actionPerformed(ActionEvent e) {
-        findReplaceDialog = new FindReplaceDialog(Globals.getGui(), DIALOG_TITLE, false);
-        findReplaceDialog.setVisible(true);
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        this.findReplaceDialog = new FindReplaceDialog(Globals.getGui(), EditFindReplaceAction.DIALOG_TITLE, false);
+        this.findReplaceDialog.setVisible(true);
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -99,15 +97,16 @@ public class EditFindReplaceAction extends GuiAction {
         public static final String RESULTS_TEXT_REPLACED_ALL = "Replaced";
         public static final String RESULTS_NO_TEXT_TO_FIND = "No text to find";
 
-        public FindReplaceDialog(Frame owner, String title, boolean modality) {
+        public FindReplaceDialog(final Frame owner, final String title, final boolean modality) {
             super(owner, title, modality);
-            this.setContentPane(buildDialogPanel());
+            this.setContentPane(this.buildDialogPanel());
             this.setDefaultCloseOperation(
                     JDialog.DO_NOTHING_ON_CLOSE);
             this.addWindowListener(
                     new WindowAdapter() {
-                        public void windowClosing(WindowEvent we) {
-                            performClose();
+                        @Override
+                        public void windowClosing(final WindowEvent we) {
+                            FindReplaceDialog.this.performClose();
                         }
                     });
             this.pack();
@@ -116,31 +115,31 @@ public class EditFindReplaceAction extends GuiAction {
 
         // Constructs the dialog's main panel.
         private JPanel buildDialogPanel() {
-            JPanel dialogPanel = new JPanel(new BorderLayout());
+            final JPanel dialogPanel = new JPanel(new BorderLayout());
             dialogPanel.setBorder(new javax.swing.border.EmptyBorder(10, 10, 10, 10));
-            dialogPanel.add(buildInputPanel(), BorderLayout.NORTH);
-            dialogPanel.add(buildOptionsPanel());
-            dialogPanel.add(buildControlPanel(), BorderLayout.SOUTH);
+            dialogPanel.add(this.buildInputPanel(), BorderLayout.NORTH);
+            dialogPanel.add(this.buildOptionsPanel());
+            dialogPanel.add(this.buildControlPanel(), BorderLayout.SOUTH);
             return dialogPanel;
         }
 
         // Top part of the dialog, to contain the two input text fields.
         private Component buildInputPanel() {
-            findInputField = new JTextField(30);
-            if (searchString.length() > 0) {
-                findInputField.setText(searchString);
-                findInputField.selectAll();
+            this.findInputField = new JTextField(30);
+            if (!EditFindReplaceAction.searchString.isEmpty()) {
+                this.findInputField.setText(EditFindReplaceAction.searchString);
+                this.findInputField.selectAll();
             }
-            replaceInputField = new JTextField(30);
-            JPanel inputPanel = new JPanel();
-            JPanel labelsPanel = new JPanel(new GridLayout(2, 1, 5, 5));
-            JPanel fieldsPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+            this.replaceInputField = new JTextField(30);
+            final JPanel inputPanel = new JPanel();
+            final JPanel labelsPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+            final JPanel fieldsPanel = new JPanel(new GridLayout(2, 1, 5, 5));
             labelsPanel.add(new JLabel("Find what:"));
             labelsPanel.add(new JLabel("Replace with:"));
-            fieldsPanel.add(findInputField);
-            fieldsPanel.add(replaceInputField);
+            fieldsPanel.add(this.findInputField);
+            fieldsPanel.add(this.replaceInputField);
 
-            Box columns = Box.createHorizontalBox();
+            final Box columns = Box.createHorizontalBox();
             columns.add(labelsPanel);
             columns.add(Box.createHorizontalStrut(6));
             columns.add(fieldsPanel);
@@ -152,67 +151,51 @@ public class EditFindReplaceAction extends GuiAction {
         // for case sensitivity along with a label to display the
         // outcome of each operation.
         private Component buildOptionsPanel() {
-            Box optionsPanel = Box.createHorizontalBox();
-            caseSensitiveCheckBox = new JCheckBox("Case Sensitive", caseSensitivity);
-            JPanel casePanel = new JPanel(new GridLayout(2, 1));
-            casePanel.add(caseSensitiveCheckBox);
+            final Box optionsPanel = Box.createHorizontalBox();
+            this.caseSensitiveCheckBox = new JCheckBox("Case Sensitive", EditFindReplaceAction.caseSensitivity);
+            final JPanel casePanel = new JPanel(new GridLayout(2, 1));
+            casePanel.add(this.caseSensitiveCheckBox);
             casePanel.setMaximumSize(casePanel.getPreferredSize());
             optionsPanel.add(casePanel);
             optionsPanel.add(Box.createHorizontalStrut(5));
-            JPanel resultsPanel = new JPanel(new GridLayout(1, 1));
+            final JPanel resultsPanel = new JPanel(new GridLayout(1, 1));
             resultsPanel.setBorder(BorderFactory.createTitledBorder("Outcome"));
-            resultsLabel = new JLabel("");
-            resultsLabel.setForeground(Color.RED);
-            resultsLabel.setToolTipText(RESULTS_TOOL_TIP_TEXT);
-            resultsPanel.add(resultsLabel);
+            this.resultsLabel = new JLabel("");
+            this.resultsLabel.setForeground(Color.RED);
+            this.resultsLabel.setToolTipText(FindReplaceDialog.RESULTS_TOOL_TIP_TEXT);
+            resultsPanel.add(this.resultsLabel);
             optionsPanel.add(resultsPanel);
             return optionsPanel;
         }
 
         // Row of control buttons to be placed along the button of the dialog
         private Component buildControlPanel() {
-            Box controlPanel = Box.createHorizontalBox();
+            final Box controlPanel = Box.createHorizontalBox();
             controlPanel.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
-            findButton = new JButton("Find");
-            findButton.setToolTipText(FIND_TOOL_TIP_TEXT);
-            findButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performFind();
-                        }
-                    });
-            replaceButton = new JButton("Replace then Find");
-            replaceButton.setToolTipText(REPLACE_TOOL_TIP_TEXT);
-            replaceButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performReplace();
-                        }
-                    });
-            replaceAllButton = new JButton("Replace all");
-            replaceAllButton.setToolTipText(REPLACE_ALL_TOOL_TIP_TEXT);
-            replaceAllButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performReplaceAll();
-                        }
-                    });
-            closeButton = new JButton("Close");
-            closeButton.setToolTipText(CLOSE_TOOL_TIP_TEXT);
-            closeButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performClose();
-                        }
-                    });
+            this.findButton = new JButton("Find");
+            this.findButton.setToolTipText(FindReplaceDialog.FIND_TOOL_TIP_TEXT);
+            this.findButton.addActionListener(
+                    e -> this.performFind());
+            this.replaceButton = new JButton("Replace then Find");
+            this.replaceButton.setToolTipText(FindReplaceDialog.REPLACE_TOOL_TIP_TEXT);
+            this.replaceButton.addActionListener(
+                    e -> this.performReplace());
+            this.replaceAllButton = new JButton("Replace all");
+            this.replaceAllButton.setToolTipText(FindReplaceDialog.REPLACE_ALL_TOOL_TIP_TEXT);
+            this.replaceAllButton.addActionListener(
+                    e -> this.performReplaceAll());
+            this.closeButton = new JButton("Close");
+            this.closeButton.setToolTipText(FindReplaceDialog.CLOSE_TOOL_TIP_TEXT);
+            this.closeButton.addActionListener(
+                    e -> this.performClose());
             controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(findButton);
+            controlPanel.add(this.findButton);
             controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(replaceButton);
+            controlPanel.add(this.replaceButton);
             controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(replaceAllButton);
+            controlPanel.add(this.replaceAllButton);
             controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(closeButton);
+            controlPanel.add(this.closeButton);
             controlPanel.add(Box.createHorizontalGlue());
             return controlPanel;
         }
@@ -226,22 +209,22 @@ public class EditFindReplaceAction extends GuiAction {
         // object. The operation will wrap around when it reaches the end of the
         // document. If found, the matching text is selected.
         private void performFind() {
-            resultsLabel.setText("");
-            if (findInputField.getText().length() > 0) {
+            this.resultsLabel.setText("");
+            if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null because find/replace tool button disabled
                 // if no file open
-                EditPane editPane = mainPane.getEditPane();
+                final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
-                    searchString = findInputField.getText();
-                    int posn = editPane.doFindText(searchString, caseSensitiveCheckBox.isSelected());
+                    EditFindReplaceAction.searchString = this.findInputField.getText();
+                    final int posn = editPane.doFindText(EditFindReplaceAction.searchString, this.caseSensitiveCheckBox.isSelected());
                     if (posn == TextEditingArea.TEXT_NOT_FOUND) {
-                        resultsLabel.setText(findButton.getText() + ": " + RESULTS_TEXT_NOT_FOUND);
+                        this.resultsLabel.setText(this.findButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {
-                        resultsLabel.setText(findButton.getText() + ": " + RESULTS_TEXT_FOUND);
+                        this.resultsLabel.setText(this.findButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_FOUND);
                     }
                 }
             } else {
-                resultsLabel.setText(findButton.getText() + ": " + RESULTS_NO_TEXT_TO_FIND);
+                this.resultsLabel.setText(this.findButton.getText() + ": " + FindReplaceDialog.RESULTS_NO_TEXT_TO_FIND);
             }
         }
 
@@ -255,35 +238,35 @@ public class EditFindReplaceAction extends GuiAction {
         // replace
         // buttons of different apps I've checked.
         private void performReplace() {
-            resultsLabel.setText("");
-            if (findInputField.getText().length() > 0) {
+            this.resultsLabel.setText("");
+            if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null b/c find/replace tool button disabled if
                 // no file open
-                EditPane editPane = mainPane.getEditPane();
+                final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
-                    searchString = findInputField.getText();
-                    int posn = editPane.doReplace(searchString, replaceInputField.getText(),
-                            caseSensitiveCheckBox.isSelected());
-                    String result = replaceButton.getText() + ": ";
+                    EditFindReplaceAction.searchString = this.findInputField.getText();
+                    final int posn = editPane.doReplace(EditFindReplaceAction.searchString, this.replaceInputField.getText(),
+                            this.caseSensitiveCheckBox.isSelected());
+                    String result = this.replaceButton.getText() + ": ";
                     switch (posn) {
 
                         case TextEditingArea.TEXT_NOT_FOUND:
-                            result += RESULTS_TEXT_NOT_FOUND;
+                            result += FindReplaceDialog.RESULTS_TEXT_NOT_FOUND;
                             break;
                         case TextEditingArea.TEXT_FOUND:
-                            result += RESULTS_TEXT_FOUND;
+                            result += FindReplaceDialog.RESULTS_TEXT_FOUND;
                             break;
                         case TextEditingArea.TEXT_REPLACED_NOT_FOUND_NEXT:
-                            result += RESULTS_TEXT_REPLACED_LAST;
+                            result += FindReplaceDialog.RESULTS_TEXT_REPLACED_LAST;
                             break;
                         case TextEditingArea.TEXT_REPLACED_FOUND_NEXT:
-                            result += RESULTS_TEXT_REPLACED;
+                            result += FindReplaceDialog.RESULTS_TEXT_REPLACED;
                             break;
                     }
-                    resultsLabel.setText(result);
+                    this.resultsLabel.setText(result);
                 }
             } else {
-                resultsLabel.setText(replaceButton.getText() + ": " + RESULTS_NO_TEXT_TO_FIND);
+                this.resultsLabel.setText(this.replaceButton.getText() + ": " + FindReplaceDialog.RESULTS_NO_TEXT_TO_FIND);
             }
 
         }
@@ -291,24 +274,24 @@ public class EditFindReplaceAction extends GuiAction {
         // Performs a replace-all. Makes one pass through the document starting at
         // position 0.
         private void performReplaceAll() {
-            resultsLabel.setText("");
-            if (findInputField.getText().length() > 0) {
+            this.resultsLabel.setText("");
+            if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null b/c find/replace tool button disabled if
                 // no file open
-                EditPane editPane = mainPane.getEditPane();
+                final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
-                    searchString = findInputField.getText();
-                    int replaceCount = editPane.doReplaceAll(searchString, replaceInputField.getText(),
-                            caseSensitiveCheckBox.isSelected());
+                    EditFindReplaceAction.searchString = this.findInputField.getText();
+                    final int replaceCount = editPane.doReplaceAll(EditFindReplaceAction.searchString, this.replaceInputField.getText(),
+                            this.caseSensitiveCheckBox.isSelected());
                     if (replaceCount == 0) {
-                        resultsLabel.setText(replaceAllButton.getText() + ": " + RESULTS_TEXT_NOT_FOUND);
+                        this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {
-                        resultsLabel.setText(replaceAllButton.getText() + ": " + RESULTS_TEXT_REPLACED_ALL + " "
+                        this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_REPLACED_ALL + " "
                                 + replaceCount + " occurrence" + (replaceCount == 1 ? "" : "s"));
                     }
                 }
             } else {
-                resultsLabel.setText(replaceAllButton.getText() + ": " + RESULTS_NO_TEXT_TO_FIND);
+                this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_NO_TEXT_TO_FIND);
             }
         }
 
@@ -318,7 +301,7 @@ public class EditFindReplaceAction extends GuiAction {
         // within
         // the session. This also happens with the contents of the "find" text field.
         private void performClose() {
-            caseSensitivity = caseSensitiveCheckBox.isSelected();
+            EditFindReplaceAction.caseSensitivity = this.caseSensitiveCheckBox.isSelected();
             this.setVisible(false);
             this.dispose();
         }

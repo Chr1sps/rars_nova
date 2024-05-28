@@ -1,10 +1,10 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
-import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
+import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
@@ -51,7 +51,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * -1: input data cannot be correctly parsed <br>
  * -2: Cancel was chosen <br>
  * -3: OK was chosen but no data had been input into field <br>
- *
  */
 public class SyscallInputDialogString extends AbstractSyscall {
     /**
@@ -70,8 +69,9 @@ public class SyscallInputDialogString extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws ExitingException {
-        String message = NullString.get(statement);
+    @Override
+    public void simulate(final ProgramStatement statement) throws ExitingException {
+        final String message = NullString.get(statement);
 
         // Values returned by Java's InputDialog:
         // A null return value means that "Cancel" was chosen rather than OK.
@@ -79,18 +79,18 @@ public class SyscallInputDialogString extends AbstractSyscall {
         // means that OK was chosen but no string was input.
         String inputString = null;
         inputString = JOptionPane.showInputDialog(message);
-        int byteAddress = RegisterFile.getValue("a1"); // byteAddress of string is in a1
-        int maxLength = RegisterFile.getValue("a2"); // input buffer size for input string is in a2
+        final int byteAddress = RegisterFile.getValue("a1"); // byteAddress of string is in a1
+        final int maxLength = RegisterFile.getValue("a2"); // input buffer size for input string is in a2
 
         try {
             if (inputString == null) // Cancel was chosen
             {
                 RegisterFile.updateRegister("a1", -2);
-            } else if (inputString.length() == 0) // OK was chosen but there was no input
+            } else if (inputString.isEmpty()) // OK was chosen but there was no input
             {
                 RegisterFile.updateRegister("a1", -3);
             } else {
-                byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
+                final byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
                 // The buffer will contain characters, a '\n' character, and the null character
                 // Copy the input data to buffer as space permits
                 int stringLength = Math.min(maxLength - 1, utf8BytesList.length);
@@ -113,7 +113,7 @@ public class SyscallInputDialogString extends AbstractSyscall {
             } // end else
 
         } // end try
-        catch (AddressErrorException e) {
+        catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }
 

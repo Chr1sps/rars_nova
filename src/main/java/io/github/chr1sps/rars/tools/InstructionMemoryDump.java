@@ -68,8 +68,6 @@ import io.github.chr1sps.rars.riscv.hardware.Memory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -115,7 +113,7 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
      * @param heading String containing text for heading shown in
      *                upper part of window.
      */
-    public InstructionMemoryDump(String title, String heading) {
+    public InstructionMemoryDump(final String title, final String heading) {
         super(title, heading);
     }
 
@@ -123,7 +121,7 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
      * Simple construction, likely used by the RARS Tools menu mechanism.
      */
     public InstructionMemoryDump() {
-        super(name + ", " + version, heading);
+        super(InstructionMemoryDump.name + ", " + InstructionMemoryDump.version, InstructionMemoryDump.heading);
     }
 
     /**
@@ -131,29 +129,25 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
      */
     @Override
     protected JComponent buildMainDisplayArea() {
-        JPanel panel = new JPanel(new FlowLayout());
+        final JPanel panel = new JPanel(new FlowLayout());
 
         // Adds a "Dump Log" button, which, not surprisingly, dumps the log to a file
-        JButton dumpLogButton = new JButton("Dump Log");
+        final JButton dumpLogButton = new JButton("Dump Log");
         dumpLogButton.setToolTipText("Dumps the log to a file");
         dumpLogButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        dumpLog();
-                    }
-                });
+                e -> InstructionMemoryDump.this.dumpLog());
         dumpLogButton.addKeyListener(new EnterKeyListener(dumpLogButton));
 
-        dumpLogFilename = new JTextField("dumplog.txt", 20);
+        this.dumpLogFilename = new JTextField("dumplog.txt", 20);
 
         panel.add(dumpLogButton);
-        panel.add(dumpLogFilename);
+        panel.add(this.dumpLogFilename);
 
-        logSuccess = new JLabel("");
-        logSuccess.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        logSuccess.setFocusable(false);
-        logSuccess.setBackground(panel.getBackground());
-        panel.add(logSuccess);
+        this.logSuccess = new JLabel("");
+        this.logSuccess.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        this.logSuccess.setFocusable(false);
+        this.logSuccess.setBackground(panel.getBackground());
+        panel.add(this.logSuccess);
         return panel;
     }
 
@@ -162,7 +156,7 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
      */
     @Override
     public String getName() {
-        return name;
+        return InstructionMemoryDump.name;
     }
 
     private final int lowDataSegmentAddress = Memory.dataSegmentBaseAddress;
@@ -174,62 +168,62 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
     @Override
     protected void addAsObserver() {
         // watch the text segment (the program)
-        addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
+        this.addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
         // also watch the data segment
-        addAsObserver(lowDataSegmentAddress, highDataSegmentAddress);
+        this.addAsObserver(this.lowDataSegmentAddress, this.highDataSegmentAddress);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void processRISCVUpdate(AccessNotice notice) {
+    protected void processRISCVUpdate(final AccessNotice notice) {
         if (!notice.accessIsFromRISCV())
             return;
         // we've got two kinds of access here: instructions and data
-        MemoryAccessNotice m = (MemoryAccessNotice) notice;
-        int a = m.getAddress();
+        final MemoryAccessNotice m = (MemoryAccessNotice) notice;
+        final int a = m.getAddress();
 
         // is a in the text segment (program)?
         if ((a >= Memory.textBaseAddress) && (a < Memory.textLimitAddress)) {
             if (notice.getAccessType() != AccessNotice.READ)
                 return;
-            if (a == lastAddress)
+            if (a == this.lastAddress)
                 return;
-            lastAddress = a;
+            this.lastAddress = a;
             try {
-                ProgramStatement stmt = Memory.getInstance().getStatement(a);
+                final ProgramStatement stmt = Memory.getInstance().getStatement(a);
 
                 // If the program is finished, getStatement() will return null,
                 // A null statement will cause the simulator to stall.
                 if (stmt != null) {
-                    BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
-                    BasicInstructionFormat format = instr.getInstructionFormat();
+                    final BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
+                    final BasicInstructionFormat format = instr.getInstructionFormat();
                     // First dump the instruction address, prefixed by "I:"
-                    log.append("I: 0x"
+                    this.log.append("I: 0x"
                             + Integer.toUnsignedString(a, 16)
                             + "\n");
                     // Then dump the instruction, prefixed by "i:"
-                    log.append("i: 0x"
+                    this.log.append("i: 0x"
                             + Integer.toUnsignedString(stmt.getBinaryStatement(), 16)
                             + "\n");
                 }
-            } catch (AddressErrorException e) {
+            } catch (final AddressErrorException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
 
         // is a in the data segment?
-        if ((a >= lowDataSegmentAddress) && (a < highDataSegmentAddress)) {
+        if ((a >= this.lowDataSegmentAddress) && (a < this.highDataSegmentAddress)) {
             if (notice.getAccessType() == AccessNotice.READ)
-                log.append("L: 0x");
+                this.log.append("L: 0x");
             if (notice.getAccessType() == AccessNotice.WRITE)
-                log.append("S: 0x");
-            log.append(Integer.toUnsignedString(a, 16) + "\n");
+                this.log.append("S: 0x");
+            this.log.append(Integer.toUnsignedString(a, 16) + "\n");
         }
 
-        updateDisplay();
+        this.updateDisplay();
     }
 
     /**
@@ -245,22 +239,22 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
     public void dumpLog() {
         // TODO: handle ressizing the window if the logSuccess label is not visible
         try {
-            String filename = dumpLogFilename.getText();
+            final String filename = this.dumpLogFilename.getText();
             if (filename.equals("")) {
-                logSuccess.setText("Enter a filename before trying to dump log");
+                this.logSuccess.setText("Enter a filename before trying to dump log");
                 return;
             }
-            File file = new File(filename);
-            String fullpath = file.getCanonicalPath();
-            BufferedWriter bwr = new BufferedWriter(new FileWriter(file));
-            bwr.write(log.toString());
+            final File file = new File(filename);
+            final String fullpath = file.getCanonicalPath();
+            final BufferedWriter bwr = new BufferedWriter(new FileWriter(file));
+            bwr.write(this.log.toString());
             bwr.flush();
             bwr.close();
-            logSuccess.setText("Successfully dumped to " + fullpath);
-        } catch (IOException e) {
-            logSuccess.setText("Failed to successfully dump. Cause: " + e.getMessage());
+            this.logSuccess.setText("Successfully dumped to " + fullpath);
+        } catch (final IOException e) {
+            this.logSuccess.setText("Failed to successfully dump. Cause: " + e.getMessage());
         }
-        theWindow.pack();
+        this.theWindow.pack();
     }
 
     /**
@@ -268,9 +262,9 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
      */
     @Override
     protected void reset() {
-        lastAddress = -1;
-        logSuccess.setText("");
-        updateDisplay();
+        this.lastAddress = -1;
+        this.logSuccess.setText("");
+        this.updateDisplay();
     }
 
     /**
@@ -287,24 +281,23 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
      */
     @Override
     protected JComponent getHelpComponent() {
-        final String helpContent = " Generates a trace, to be stored in a file specified by the user, with one line per datum. The four kinds of data in the trace are: \n"
-                +
-                "  - I: The address of an access into instruction memory \n" +
-                "  - i: A 32-bit RISC-V instruction (the trace first dumps the address then the instruction)\n" +
-                "  - L: The address of a memory load into data memory\n" +
-                "  - S: The address of a memory store into data memory (the contents of the memory load/store aren’t in the trace)\n";
-        JButton help = new JButton("Help");
+        final String helpContent = """
+                 Generates a trace, to be stored in a file specified by the user, with one line per datum. The four kinds of data in the trace are:\s
+                  - I: The address of an access into instruction memory\s
+                  - i: A 32-bit RISC-V instruction (the trace first dumps the address then the instruction)
+                  - L: The address of a memory load into data memory
+                  - S: The address of a memory store into data memory (the contents of the memory load/store aren’t in the trace)
+                """;
+        final JButton help = new JButton("Help");
         help.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        JTextArea ja = new JTextArea(helpContent);
-                        ja.setRows(20);
-                        ja.setColumns(60);
-                        ja.setLineWrap(true);
-                        ja.setWrapStyleWord(true);
-                        JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
-                                "Log format", JOptionPane.INFORMATION_MESSAGE);
-                    }
+                e -> {
+                    final JTextArea ja = new JTextArea(helpContent);
+                    ja.setRows(20);
+                    ja.setColumns(60);
+                    ja.setLineWrap(true);
+                    ja.setWrapStyleWord(true);
+                    JOptionPane.showMessageDialog(InstructionMemoryDump.this.theWindow, new JScrollPane(ja),
+                            "Log format", JOptionPane.INFORMATION_MESSAGE);
                 });
         return help;
     }

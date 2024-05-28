@@ -1,6 +1,5 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
@@ -38,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Service to return a random floating point value.
- *
  */
 public class SyscallRandDouble extends AbstractSyscall {
     /**
@@ -52,8 +50,9 @@ public class SyscallRandDouble extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws ExitingException {
-        Integer index = RegisterFile.getValue("a0");
+    @Override
+    public void simulate(final ProgramStatement statement) {
+        final Integer index = RegisterFile.getValue("a0");
         Random stream = RandomStreams.randomStreams.get(index);
         if (stream == null) {
             stream = new Random(); // create a non-seeded stream

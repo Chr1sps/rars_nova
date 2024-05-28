@@ -13,8 +13,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -167,23 +165,20 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
 
         // Listener fires when "Show Line Numbers" check box is clicked.
         this.showLineNumbers.addItemListener(
-                new ItemListener() {
-                    @Override
-                    public void itemStateChanged(final ItemEvent e) {
-                        if (EditPane.this.showLineNumbers.isSelected()) {
-                            EditPane.this.lineNumbers.setText(EditPane.this.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
-                            EditPane.this.lineNumbers.setVisible(true);
-                        } else {
-                            EditPane.this.lineNumbers.setText("");
-                            EditPane.this.lineNumbers.setVisible(false);
-                        }
-                        EditPane.this.sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
-                        Globals.getSettings().setBooleanSetting(Settings.Bool.EDITOR_LINE_NUMBERS_DISPLAYED,
-                                EditPane.this.showLineNumbers.isSelected());
-                        // needed because caret disappears when checkbox clicked
-                        EditPane.this.sourceCode.setCaretVisible(true);
-                        EditPane.this.sourceCode.requestFocusInWindow();
+                e -> {
+                    if (EditPane.this.showLineNumbers.isSelected()) {
+                        EditPane.this.lineNumbers.setText(EditPane.this.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
+                        EditPane.this.lineNumbers.setVisible(true);
+                    } else {
+                        EditPane.this.lineNumbers.setText("");
+                        EditPane.this.lineNumbers.setVisible(false);
                     }
+                    EditPane.this.sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
+                    Globals.getSettings().setBooleanSetting(Settings.Bool.EDITOR_LINE_NUMBERS_DISPLAYED,
+                            EditPane.this.showLineNumbers.isSelected());
+                    // needed because caret disappears when checkbox clicked
+                    EditPane.this.sourceCode.setCaretVisible(true);
+                    EditPane.this.sourceCode.requestFocusInWindow();
                 });
 
         final JPanel editInfo = new JPanel(new BorderLayout());
@@ -233,7 +228,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      * @return a {@link java.lang.String} object
      */
     public String getLineNumbersList(final javax.swing.text.Document doc) {
-        final StringBuffer lineNumberList = new StringBuffer("<html>");
+        final StringBuilder lineNumberList = new StringBuilder("<html>");
         final int lineCount = doc.getDefaultRootElement().getElementCount(); // this.getSourceLineCount();
         final int digits = Integer.toString(lineCount).length();
         for (int i = 1; i <= lineCount; i++) {
@@ -271,7 +266,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
             while (bufStringReader.readLine() != null) {
                 lineNums++;
             }
-        } catch (final IOException e) {
+        } catch (final IOException ignored) {
         }
         return lineNums;
     }
@@ -643,7 +638,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
 
     @Override
     public void onNext(final SettingsNotice ignored) {
-        System.out.println("onNext called in:" + this);
         this.sourceCode.setFont(Globals.getSettings().getEditorFont());
         this.sourceCode.setLineHighlightEnabled(
                 Globals.getSettings().getBooleanSetting(Settings.Bool.EDITOR_CURRENT_LINE_HIGHLIGHTING));

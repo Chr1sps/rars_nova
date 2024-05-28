@@ -142,20 +142,20 @@ public class MemoryConfigurations {
      * <p>buildConfigurationCollection.</p>
      */
     public static void buildConfigurationCollection() {
-        if (configurations == null) {
-            configurations = new ArrayList<>();
-            configurations.add(new MemoryConfiguration("Default", "Default", configurationItemNames,
-                    defaultConfigurationItemValues));
-            configurations.add(new MemoryConfiguration("CompactDataAtZero", "Compact, Data at Address 0",
-                    configurationItemNames, dataBasedCompactConfigurationItemValues));
-            configurations.add(new MemoryConfiguration("CompactTextAtZero", "Compact, Text at Address 0",
-                    configurationItemNames, textBasedCompactConfigurationItemValues));
-            defaultConfiguration = configurations.get(0);
-            currentConfiguration = defaultConfiguration;
+        if (MemoryConfigurations.configurations == null) {
+            MemoryConfigurations.configurations = new ArrayList<>();
+            MemoryConfigurations.configurations.add(new MemoryConfiguration("Default", "Default", MemoryConfigurations.configurationItemNames,
+                    MemoryConfigurations.defaultConfigurationItemValues));
+            MemoryConfigurations.configurations.add(new MemoryConfiguration("CompactDataAtZero", "Compact, Data at Address 0",
+                    MemoryConfigurations.configurationItemNames, MemoryConfigurations.dataBasedCompactConfigurationItemValues));
+            MemoryConfigurations.configurations.add(new MemoryConfiguration("CompactTextAtZero", "Compact, Text at Address 0",
+                    MemoryConfigurations.configurationItemNames, MemoryConfigurations.textBasedCompactConfigurationItemValues));
+            MemoryConfigurations.defaultConfiguration = MemoryConfigurations.configurations.getFirst();
+            MemoryConfigurations.currentConfiguration = MemoryConfigurations.defaultConfiguration;
             // Get current config from settings
             // String currentConfigurationIdentifier =
             // Globals.getSettings().getMemoryConfiguration();
-            setCurrentConfiguration(getConfigurationByName(Globals.getSettings().getMemoryConfiguration()));
+            MemoryConfigurations.setCurrentConfiguration(MemoryConfigurations.getConfigurationByName(Globals.getSettings().getMemoryConfiguration()));
             // Iterator configurationsIterator = getConfigurationsIterator();
             // while (configurationsIterator.hasNext()) {
             // MemoryConfiguration config =
@@ -175,10 +175,10 @@ public class MemoryConfigurations {
      * @return a {@link java.util.Iterator} object
      */
     public static Iterator<MemoryConfiguration> getConfigurationsIterator() {
-        if (configurations == null) {
-            buildConfigurationCollection();
+        if (MemoryConfigurations.configurations == null) {
+            MemoryConfigurations.buildConfigurationCollection();
         }
-        return configurations.iterator();
+        return MemoryConfigurations.configurations.iterator();
 
     }
 
@@ -188,10 +188,10 @@ public class MemoryConfigurations {
      * @param name a {@link java.lang.String} object
      * @return a {@link io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration} object
      */
-    public static MemoryConfiguration getConfigurationByName(String name) {
-        Iterator<MemoryConfiguration> configurationsIterator = getConfigurationsIterator();
+    public static MemoryConfiguration getConfigurationByName(final String name) {
+        final Iterator<MemoryConfiguration> configurationsIterator = MemoryConfigurations.getConfigurationsIterator();
         while (configurationsIterator.hasNext()) {
-            MemoryConfiguration config = configurationsIterator.next();
+            final MemoryConfiguration config = configurationsIterator.next();
             if (name.equals(config.getConfigurationIdentifier())) {
                 return config;
             }
@@ -205,10 +205,10 @@ public class MemoryConfigurations {
      * @return a {@link io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration} object
      */
     public static MemoryConfiguration getDefaultConfiguration() {
-        if (defaultConfiguration == null) {
-            buildConfigurationCollection();
+        if (MemoryConfigurations.defaultConfiguration == null) {
+            MemoryConfigurations.buildConfigurationCollection();
         }
-        return defaultConfiguration;
+        return MemoryConfigurations.defaultConfiguration;
     }
 
     /**
@@ -217,10 +217,10 @@ public class MemoryConfigurations {
      * @return a {@link io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration} object
      */
     public static MemoryConfiguration getCurrentConfiguration() {
-        if (currentConfiguration == null) {
-            buildConfigurationCollection();
+        if (MemoryConfigurations.currentConfiguration == null) {
+            MemoryConfigurations.buildConfigurationCollection();
         }
-        return currentConfiguration;
+        return MemoryConfigurations.currentConfiguration;
     }
 
     /**
@@ -229,11 +229,11 @@ public class MemoryConfigurations {
      * @param config a {@link io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration} object
      * @return a boolean
      */
-    public static boolean setCurrentConfiguration(MemoryConfiguration config) {
+    public static boolean setCurrentConfiguration(final MemoryConfiguration config) {
         if (config == null)
             return false;
-        if (config != currentConfiguration) {
-            currentConfiguration = config;
+        if (config != MemoryConfigurations.currentConfiguration) {
+            MemoryConfigurations.currentConfiguration = config;
             Globals.memory.clear();
             RegisterFile.getRegister("gp").changeResetValue(config.getGlobalPointer());
             RegisterFile.getRegister("sp").changeResetValue(config.getStackPointer());
@@ -254,7 +254,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultTextBaseAddress() {
-        return defaultConfigurationItemValues[0];
+        return MemoryConfigurations.defaultConfigurationItemValues[0];
     }
 
     /**
@@ -263,7 +263,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultDataSegmentBaseAddress() {
-        return defaultConfigurationItemValues[1];
+        return MemoryConfigurations.defaultConfigurationItemValues[1];
     }
 
     /**
@@ -272,7 +272,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultExternBaseAddress() {
-        return defaultConfigurationItemValues[2];
+        return MemoryConfigurations.defaultConfigurationItemValues[2];
     }
 
     /**
@@ -281,7 +281,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultGlobalPointer() {
-        return defaultConfigurationItemValues[3];
+        return MemoryConfigurations.defaultConfigurationItemValues[3];
     }
 
     /**
@@ -290,7 +290,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultDataBaseAddress() {
-        return defaultConfigurationItemValues[4];
+        return MemoryConfigurations.defaultConfigurationItemValues[4];
     }
 
     /**
@@ -299,7 +299,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultHeapBaseAddress() {
-        return defaultConfigurationItemValues[5];
+        return MemoryConfigurations.defaultConfigurationItemValues[5];
     }
 
     /**
@@ -308,7 +308,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultStackPointer() {
-        return defaultConfigurationItemValues[6];
+        return MemoryConfigurations.defaultConfigurationItemValues[6];
     }
 
     /**
@@ -317,7 +317,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultStackBaseAddress() {
-        return defaultConfigurationItemValues[7];
+        return MemoryConfigurations.defaultConfigurationItemValues[7];
     }
 
     /**
@@ -326,7 +326,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultUserHighAddress() {
-        return defaultConfigurationItemValues[8];
+        return MemoryConfigurations.defaultConfigurationItemValues[8];
     }
 
     /**
@@ -335,7 +335,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultKernelBaseAddress() {
-        return defaultConfigurationItemValues[9];
+        return MemoryConfigurations.defaultConfigurationItemValues[9];
     }
 
     /**
@@ -344,7 +344,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultMemoryMapBaseAddress() {
-        return defaultConfigurationItemValues[10];
+        return MemoryConfigurations.defaultConfigurationItemValues[10];
     }
 
     /**
@@ -353,7 +353,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public static int getDefaultKernelHighAddress() {
-        return defaultConfigurationItemValues[11];
+        return MemoryConfigurations.defaultConfigurationItemValues[11];
     }
 
     /**
@@ -362,7 +362,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public int getDefaultDataSegmentLimitAddress() {
-        return defaultConfigurationItemValues[12];
+        return MemoryConfigurations.defaultConfigurationItemValues[12];
     }
 
     /**
@@ -371,7 +371,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public int getDefaultTextLimitAddress() {
-        return defaultConfigurationItemValues[13];
+        return MemoryConfigurations.defaultConfigurationItemValues[13];
     }
 
     /**
@@ -380,7 +380,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public int getDefaultStackLimitAddress() {
-        return defaultConfigurationItemValues[14];
+        return MemoryConfigurations.defaultConfigurationItemValues[14];
     }
 
     /**
@@ -389,7 +389,7 @@ public class MemoryConfigurations {
      * @return a int
      */
     public int getMemoryMapLimitAddress() {
-        return defaultConfigurationItemValues[15];
+        return MemoryConfigurations.defaultConfigurationItemValues[15];
     }
 
 }

@@ -4,10 +4,9 @@ import java.util.EnumSet;
 
 /**
  * <p>Environment class.</p>
- *
  */
 public class Environment {
-    public EnumSet<Flags> flags = EnumSet.noneOf(Flags.class);
+    public final EnumSet<Flags> flags = EnumSet.noneOf(Flags.class);
     public RoundingMode mode;
 
     /**
@@ -15,7 +14,7 @@ public class Environment {
      *
      * @param mode a {@link io.github.chr1sps.jsoftfloat.RoundingMode} object
      */
-    public Environment(RoundingMode mode) {
+    public Environment(final RoundingMode mode) {
         this.mode = mode;
     }
 

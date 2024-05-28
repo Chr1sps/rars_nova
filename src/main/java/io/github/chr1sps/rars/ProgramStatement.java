@@ -89,9 +89,9 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *                          is stored.
      * @param sourceLine        a int
      */
-    public ProgramStatement(RISCVprogram sourceProgram, String source, TokenList origTokenList,
-                            TokenList strippedTokenList,
-                            Instruction inst, int textAddress, int sourceLine) {
+    public ProgramStatement(final RISCVprogram sourceProgram, final String source, final TokenList origTokenList,
+                            final TokenList strippedTokenList,
+                            final Instruction inst, final int textAddress, final int sourceLine) {
         this.sourceProgram = sourceProgram;
         this.source = source;
         this.originalTokenList = origTokenList;
@@ -122,14 +122,14 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *                        machine code for this statement
      *                        is stored.
      */
-    public ProgramStatement(int binaryStatement, int textAddress) {
+    public ProgramStatement(final int binaryStatement, final int textAddress) {
         this.sourceProgram = null;
         this.binaryStatement = binaryStatement;
         this.textAddress = textAddress;
         this.originalTokenList = this.strippedTokenList = null;
         this.source = "";
         this.machineStatement = this.basicAssemblyStatement = null;
-        BasicInstruction instr = Globals.instructionSet.findByBinaryCode(binaryStatement);
+        final BasicInstruction instr = Globals.instructionSet.findByBinaryCode(binaryStatement);
         if (instr == null) {
             this.operands = null;
             this.numOperands = 0;
@@ -138,17 +138,17 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
             this.operands = new int[5];
             this.numOperands = 0;
             this.instruction = instr;
-            String mask = instr.getOperationMask();
-            BasicInstructionFormat format = instr.getInstructionFormat();
+            final String mask = instr.getOperationMask();
+            final BasicInstructionFormat format = instr.getInstructionFormat();
             if (format == BasicInstructionFormat.J_FORMAT) {
                 this.operands[0] = this.readBinaryCode(mask, Instruction.operandMask[0], binaryStatement);
-                this.operands[1] = fromJumpImmediate(
+                this.operands[1] = this.fromJumpImmediate(
                         this.readBinaryCode(mask, Instruction.operandMask[1], binaryStatement));
                 this.numOperands = 2;
             } else if (format == BasicInstructionFormat.B_FORMAT) {
                 this.operands[0] = this.readBinaryCode(mask, Instruction.operandMask[0], binaryStatement);
                 this.operands[1] = this.readBinaryCode(mask, Instruction.operandMask[1], binaryStatement);
-                this.operands[2] = fromBranchImmediate(
+                this.operands[2] = this.fromBranchImmediate(
                         this.readBinaryCode(mask, Instruction.operandMask[2], binaryStatement));
                 this.numOperands = 3;
             } else { // Everything else is normal
@@ -161,7 +161,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
             }
         }
         this.altered = false;
-        this.basicStatementList = buildBasicStatementListFromBinaryCode(binaryStatement, instr, operands, numOperands);
+        this.basicStatementList = this.buildBasicStatementListFromBinaryCode(binaryStatement, instr, this.operands, this.numOperands);
     }
 
     /**
@@ -170,9 +170,10 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @param obj1 a {@link io.github.chr1sps.rars.ProgramStatement} object
      * @return a int
      */
-    public int compareTo(ProgramStatement obj1) {
-        int addr1 = getAddress();
-        int addr2 = obj1.getAddress();
+    @Override
+    public int compareTo(final ProgramStatement obj1) {
+        final int addr1 = this.getAddress();
+        final int addr2 = obj1.getAddress();
         return (addr1 < 0 && addr2 >= 0 || addr1 >= 0 && addr2 < 0) ? addr2 : addr1 - addr2;
     }
 
@@ -186,27 +187,27 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @param errors The list of assembly errors encountered so far. May add to it
      *               here.
      */
-    public void buildBasicStatementFromBasicInstruction(ErrorList errors) {
-        Token token = strippedTokenList.get(0);
+    public void buildBasicStatementFromBasicInstruction(final ErrorList errors) {
+        Token token = this.strippedTokenList.get(0);
         String basicStatementElement = token.getValue() + " ";
 
-        String basic = basicStatementElement;
-        basicStatementList.addString(basicStatementElement); // the operator
+        final StringBuilder basic = new StringBuilder(basicStatementElement);
+        this.basicStatementList.addString(basicStatementElement); // the operator
         TokenTypes tokenType, nextTokenType;
         String tokenValue;
         int registerNumber;
         this.numOperands = 0;
-        for (int i = 1; i < strippedTokenList.size(); i++) {
-            token = strippedTokenList.get(i);
+        for (int i = 1; i < this.strippedTokenList.size(); i++) {
+            token = this.strippedTokenList.get(i);
             tokenType = token.getType();
             tokenValue = token.getValue();
             if (tokenType == TokenTypes.REGISTER_NUMBER) {
                 basicStatementElement = tokenValue;
-                basic += basicStatementElement;
-                basicStatementList.addString(basicStatementElement);
+                basic.append(basicStatementElement);
+                this.basicStatementList.addString(basicStatementElement);
                 try {
                     registerNumber = RegisterFile.getRegister(tokenValue).getNumber();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // should never happen; should be caught before now...
                     errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
                             "invalid register name"));
@@ -216,8 +217,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
             } else if (tokenType == TokenTypes.REGISTER_NAME) {
                 registerNumber = RegisterFile.getRegister(tokenValue).getNumber();
                 basicStatementElement = "x" + registerNumber;
-                basic += basicStatementElement;
-                basicStatementList.addString(basicStatementElement);
+                basic.append(basicStatementElement);
+                this.basicStatementList.addString(basicStatementElement);
                 if (registerNumber < 0) {
                     // should never happen; should be caught before now...
                     errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
@@ -227,9 +228,9 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                 this.operands[this.numOperands++] = registerNumber;
             } else if (tokenType == TokenTypes.CSR_NAME) {
                 // Little bit of a hack because CSRFile doesn't supoprt getRegister(strinug)
-                Register[] regs = ControlAndStatusRegisterFile.getRegisters();
+                final Register[] regs = ControlAndStatusRegisterFile.getRegisters();
                 registerNumber = -1;
-                for (Register r : regs) {
+                for (final Register r : regs) {
                     if (r.getName().equals(tokenValue)) {
                         registerNumber = r.getNumber();
                         break;
@@ -241,14 +242,14 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                             "invalid CSR name"));
                     return;
                 }
-                basic += registerNumber;
-                basicStatementList.addString("" + registerNumber);
+                basic.append(registerNumber);
+                this.basicStatementList.addString("" + registerNumber);
                 this.operands[this.numOperands++] = registerNumber;
             } else if (tokenType == TokenTypes.FP_REGISTER_NAME) {
                 registerNumber = FloatingPointRegisterFile.getRegister(tokenValue).getNumber();
                 basicStatementElement = "f" + registerNumber;
-                basic += basicStatementElement;
-                basicStatementList.addString(basicStatementElement);
+                basic.append(basicStatementElement);
+                this.basicStatementList.addString(basicStatementElement);
                 if (registerNumber < 0) {
                     // should never happen; should be caught before now...
                     errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
@@ -257,27 +258,22 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                 }
                 this.operands[this.numOperands++] = registerNumber;
             } else if (tokenType == TokenTypes.ROUNDING_MODE) {
-                int rounding_mode = -1;
-                if (tokenValue.equals("rne")) {
-                    rounding_mode = 0;
-                } else if (tokenValue.equals("rtz")) {
-                    rounding_mode = 1;
-                } else if (tokenValue.equals("rdn")) {
-                    rounding_mode = 2;
-                } else if (tokenValue.equals("rup")) {
-                    rounding_mode = 3;
-                } else if (tokenValue.equals("rmm")) {
-                    rounding_mode = 4;
-                } else if (tokenValue.equals("dyn")) {
-                    rounding_mode = 7;
-                }
+                final int rounding_mode = switch (tokenValue) {
+                    case "rne" -> 0;
+                    case "rtz" -> 1;
+                    case "rdn" -> 2;
+                    case "rup" -> 3;
+                    case "rmm" -> 4;
+                    case "dyn" -> 7;
+                    default -> -1;
+                };
                 if (rounding_mode == -1) {
                     errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
                             "invalid rounding mode"));
                     return;
                 }
-                basic += tokenValue;
-                basicStatementList.addString(tokenValue);
+                basic.append(tokenValue);
+                this.basicStatementList.addString(tokenValue);
                 this.operands[this.numOperands++] = rounding_mode;
             } else if (tokenType == TokenTypes.IDENTIFIER) {
 
@@ -289,8 +285,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                 }
                 boolean absoluteAddress = true; // (used below)
 
-                if (instruction instanceof BasicInstruction) {
-                    BasicInstructionFormat format = ((BasicInstruction) instruction).getInstructionFormat();
+                if (this.instruction instanceof BasicInstruction) {
+                    final BasicInstructionFormat format = ((BasicInstruction) this.instruction).getInstructionFormat();
                     if (format == BasicInstructionFormat.B_FORMAT) {
                         address -= this.textAddress;
                         if (address >= (1 << 12) || address < -(1 << 12)) {
@@ -312,11 +308,11 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                     }
                 }
                 //////////////////////////////////////////////////////////////////////
-                basic += address;
+                basic.append(address);
                 if (absoluteAddress) { // record as address if absolute, value if relative
-                    basicStatementList.addAddress(address);
+                    this.basicStatementList.addAddress(address);
                 } else {
-                    basicStatementList.addValue(address);
+                    this.basicStatementList.addValue(address);
                 }
                 this.operands[this.numOperands++] = address;
             } else if (tokenType == TokenTypes.INTEGER_5 || tokenType == TokenTypes.INTEGER_6
@@ -324,9 +320,9 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                     tokenType == TokenTypes.INTEGER_12U || tokenType == TokenTypes.INTEGER_20
                     || tokenType == TokenTypes.INTEGER_32) {
 
-                int tempNumeric = Binary.stringToInt(tokenValue);
+                final int tempNumeric = Binary.stringToInt(tokenValue);
 
-                /***************************************************************************
+                /* **************************************************************************
                  * MODIFICATION AND COMMENT, DPS 3-July-2008
                  *
                  * The modifications of January 2005 documented below are being rescinded.
@@ -376,32 +372,32 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                  ************************** END DPS 3-July-2008 COMMENTS
                  *******************************/
 
-                basic += tempNumeric;
+                basic.append(tempNumeric);
                 if (tokenType == TokenTypes.INTEGER_5) {
-                    basicStatementList.addShortValue(tempNumeric);
+                    this.basicStatementList.addShortValue(tempNumeric);
                 } else {
-                    basicStatementList.addValue(tempNumeric);
+                    this.basicStatementList.addValue(tempNumeric);
                 }
                 this.operands[this.numOperands++] = tempNumeric;
                 ///// End modification 1/7/05 KENV ///////////////////////////////////////////
             } else {
                 basicStatementElement = tokenValue;
-                basic += basicStatementElement;
-                basicStatementList.addString(basicStatementElement);
+                basic.append(basicStatementElement);
+                this.basicStatementList.addString(basicStatementElement);
             }
             // add separator if not at end of token list AND neither current nor
             // next token is a parenthesis
-            if ((i < strippedTokenList.size() - 1)) {
-                nextTokenType = strippedTokenList.get(i + 1).getType();
+            if ((i < this.strippedTokenList.size() - 1)) {
+                nextTokenType = this.strippedTokenList.get(i + 1).getType();
                 if (tokenType != TokenTypes.LEFT_PAREN && tokenType != TokenTypes.RIGHT_PAREN &&
                         nextTokenType != TokenTypes.LEFT_PAREN && nextTokenType != TokenTypes.RIGHT_PAREN) {
                     basicStatementElement = ",";
-                    basic += basicStatementElement;
-                    basicStatementList.addString(basicStatementElement);
+                    basic.append(basicStatementElement);
+                    this.basicStatementList.addString(basicStatementElement);
                 }
             }
         }
-        this.basicAssemblyStatement = basic;
+        this.basicAssemblyStatement = basic.toString();
     } // buildBasicStatementFromBasicInstruction()
 
     /////////////////////////////////////////////////////////////////////////////
@@ -413,8 +409,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @param errors The list of assembly errors encountered so far. May add to it
      *               here.
      */
-    public void buildMachineStatementFromBasicStatement(ErrorList errors) {
-        if (!(instruction instanceof BasicInstruction)) {
+    public void buildMachineStatementFromBasicStatement(final ErrorList errors) {
+        if (!(this.instruction instanceof BasicInstruction)) {
             // This means the pseudo-instruction expansion generated another
             // pseudo-instruction (expansion must be to all basic instructions).
             // This is an error on the part of the pseudo-instruction author.
@@ -424,16 +420,16 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
         }
 
         // mask indicates bit positions for 'f'irst, 's'econd, 't'hird operand
-        this.machineStatement = ((BasicInstruction) instruction).getOperationMask();
-        BasicInstructionFormat format = ((BasicInstruction) instruction).getInstructionFormat();
+        this.machineStatement = ((BasicInstruction) this.instruction).getOperationMask();
+        final BasicInstructionFormat format = ((BasicInstruction) this.instruction).getInstructionFormat();
 
         if (format == BasicInstructionFormat.J_FORMAT) {
             this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
-            this.insertBinaryCode(toJumpImmediate(this.operands[1]), Instruction.operandMask[1], errors);
+            this.insertBinaryCode(this.toJumpImmediate(this.operands[1]), Instruction.operandMask[1], errors);
         } else if (format == BasicInstructionFormat.B_FORMAT) {
             this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
             this.insertBinaryCode(this.operands[1], Instruction.operandMask[1], errors);
-            this.insertBinaryCode(toBranchImmediate(this.operands[2]), Instruction.operandMask[2], errors);
+            this.insertBinaryCode(this.toBranchImmediate(this.operands[2]), Instruction.operandMask[2], errors);
         } else { // Everything else is normal
             for (int i = 0; i < this.numOperands; i++)
                 this.insertBinaryCode(this.operands[i], Instruction.operandMask[i], errors);
@@ -450,9 +446,9 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                 ((address & 0x7F800) >> 11); // move address[19:12] to the right place
     }
 
-    private int fromJumpImmediate(int immediate) {
+    private int fromJumpImmediate(final int immediate) {
         // trying to produce address[20:0] where immediate = address[20|10:1|11|19:12]
-        int tmp = ((immediate) & (1 << 19)) | // keep the top bit in the same place
+        final int tmp = ((immediate) & (1 << 19)) | // keep the top bit in the same place
                 ((immediate & 0x7FE00) >> 9) | // move address[10:1] to the right place
                 ((immediate & (1 << 8)) << 2) | // move address[11] to the right place
                 ((immediate & 0xFF) << 11); // move address[19:12] to the right place
@@ -467,9 +463,9 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                 ((address & (1 << 10)) >> 10); // move address[11] to the right place
     }
 
-    private int fromBranchImmediate(int immediate) {
+    private int fromBranchImmediate(final int immediate) {
         // trying to produce address[12:0] where immediate = address[12|10:1|11]
-        int tmp = (immediate & (1 << 11)) | // keep the top bit in the same place
+        final int tmp = (immediate & (1 << 11)) | // keep the top bit in the same place
                 ((immediate & 0x7FE) >> 1) | // move address[10:1] to the right place
                 ((immediate & 1) << 10); // move address[11] to the right place
         return (tmp << 20) >> 19; // sign-extend and add extra 0
@@ -480,31 +476,29 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @return A String representing the ProgramStatement.
      */
+    @Override
     public String toString() {
         // a crude attempt at string formatting. Where's C when you need it?
-        String blanks = "                               ";
-        String result = "[" + this.textAddress + "]";
+        final String blanks = "                               ";
+        final StringBuilder result = new StringBuilder("[" + this.textAddress + "]");
         if (this.basicAssemblyStatement != null) {
-            int firstSpace = this.basicAssemblyStatement.indexOf(" ");
-            result += blanks.substring(0, 16 - result.length()) + this.basicAssemblyStatement.substring(0, firstSpace);
-            result += blanks.substring(0, 24 - result.length()) + this.basicAssemblyStatement.substring(firstSpace + 1);
+            final int firstSpace = this.basicAssemblyStatement.indexOf(" ");
+            result.append(blanks, 0, 16 - result.length()).append(this.basicAssemblyStatement, 0, firstSpace);
+            result.append(blanks, 0, 24 - result.length()).append(this.basicAssemblyStatement.substring(firstSpace + 1));
         } else {
-            result += blanks.substring(0, 16 - result.length()) + "0x" + Integer.toString(this.binaryStatement, 16);
+            result.append(blanks, 0, 16 - result.length()).append("0x").append(Integer.toString(this.binaryStatement, 16));
         }
-        result += blanks.substring(0, 40 - result.length()) + ";  "; // this.source;
-        if (operands != null) {
+        result.append(blanks, 0, 40 - result.length()).append(";  "); // this.source;
+        if (this.operands != null) {
             for (int i = 0; i < this.numOperands; i++)
                 // result += operands[i] + " ";
-                result += Integer.toString(operands[i], 16) + " ";
+                result.append(Integer.toString(this.operands[i], 16)).append(" ");
         }
         if (this.machineStatement != null) {
-            result += "[" + Binary.binaryStringToHexString(this.machineStatement) + "]";
-            result += "  " + this.machineStatement.substring(0, 6) + "|" + this.machineStatement.substring(6, 11) + "|"
-                    +
-                    this.machineStatement.substring(11, 16) + "|" + this.machineStatement.substring(16, 21) + "|" +
-                    this.machineStatement.substring(21, 26) + "|" + this.machineStatement.substring(26, 32);
+            result.append("[").append(Binary.binaryStringToHexString(this.machineStatement)).append("]");
+            result.append("  ").append(this.machineStatement, 0, 6).append("|").append(this.machineStatement, 6, 11).append("|").append(this.machineStatement, 11, 16).append("|").append(this.machineStatement, 16, 21).append("|").append(this.machineStatement, 21, 26).append("|").append(this.machineStatement, 26, 32);
         }
-        return result;
+        return result.toString();
     } // toString()
 
     /**
@@ -513,8 +507,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @param statement A String containing equivalent Basic Assembly statement.
      */
-    public void setBasicAssemblyStatement(String statement) {
-        basicAssemblyStatement = statement;
+    public void setBasicAssemblyStatement(final String statement) {
+        this.basicAssemblyStatement = statement;
     }
 
     /**
@@ -524,8 +518,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @param statement A String containing equivalent machine code.
      */
-    public void setMachineStatement(String statement) {
-        machineStatement = statement;
+    public void setMachineStatement(final String statement) {
+        this.machineStatement = statement;
     }
 
     /**
@@ -533,8 +527,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @param binaryCode An int containing equivalent binary machine code.
      */
-    public void setBinaryStatement(int binaryCode) {
-        binaryStatement = binaryCode;
+    public void setBinaryStatement(final int binaryCode) {
+        this.binaryStatement = binaryCode;
     }
 
     /**
@@ -543,8 +537,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @param src a RISCV source statement.
      */
-    public void setSource(String src) {
-        source = src;
+    public void setSource(final String src) {
+        this.source = src;
     }
 
     /**
@@ -554,7 +548,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The RISCVprogram object. May be null...
      */
     public RISCVprogram getSourceProgram() {
-        return sourceProgram;
+        return this.sourceProgram;
     }
 
     /**
@@ -563,7 +557,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The file name.
      */
     public String getSourceFile() {
-        return (sourceProgram == null) ? "" : sourceProgram.getFilename();
+        return (this.sourceProgram == null) ? "" : this.sourceProgram.getFilename();
     }
 
     /**
@@ -572,7 +566,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The RISCV source statement.
      */
     public String getSource() {
-        return source;
+        return this.source;
     }
 
     /**
@@ -581,7 +575,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The RISCV source statement line number.
      */
     public int getSourceLine() {
-        return sourceLine;
+        return this.sourceLine;
     }
 
     /**
@@ -591,7 +585,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The Basic Assembly statement.
      */
     public String getBasicAssemblyStatement() {
-        return basicAssemblyStatement;
+        return this.basicAssemblyStatement;
     }
 
     /**
@@ -603,7 +597,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The Basic Assembly statement.
      */
     public String getPrintableBasicAssemblyStatement() {
-        return basicStatementList.toString();
+        return this.basicStatementList.toString();
     }
 
     /**
@@ -613,7 +607,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The String version of 32-bit binary machine code.
      */
     public String getMachineStatement() {
-        return machineStatement;
+        return this.machineStatement;
     }
 
     /**
@@ -622,7 +616,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The int version of 32-bit binary machine code.
      */
     public int getBinaryStatement() {
-        return binaryStatement;
+        return this.binaryStatement;
     }
 
     /**
@@ -631,7 +625,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The TokenList of Token objects generated from original source.
      */
     public TokenList getOriginalTokenList() {
-        return originalTokenList;
+        return this.originalTokenList;
     }
 
     /**
@@ -642,7 +636,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * except operator and operand tokens.
      */
     public TokenList getStrippedTokenList() {
-        return strippedTokenList;
+        return this.strippedTokenList;
     }
 
     /**
@@ -651,7 +645,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The Instruction that matches the operator used in this statement.
      */
     public Instruction getInstruction() {
-        return instruction;
+        return this.instruction;
     }
 
     /**
@@ -660,7 +654,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return address in Text Segment of this binary machine statement.
      */
     public int getAddress() {
-        return textAddress;
+        return this.textAddress;
     }
 
     /**
@@ -670,7 +664,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * operator.
      */
     public int[] getOperands() {
-        return operands;
+        return this.operands;
     }
 
     /**
@@ -681,9 +675,9 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @return Operand value at given operand array position. If &lt; 0 or &ge;
      * numOperands, it returns -1.
      */
-    public int getOperand(int i) {
+    public int getOperand(final int i) {
         if (i >= 0 && i < this.numOperands) {
-            return operands[i];
+            return this.operands[i];
         } else {
             return -1;
         }
@@ -705,7 +699,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @param binaryStatement the binary statement to read from
      * @return the bits read pushed to the right
      */
-    private int readBinaryCode(String format, char mask, int binaryStatement) {
+    private int readBinaryCode(final String format, final char mask, final int binaryStatement) {
         int out = 0;
         for (int i = 0; i < 32; i++) {
             if (format.charAt(i) == mask) {
@@ -725,8 +719,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * @param errors error list to append errors to in the event of unrecoverable
      *               errors
      */
-    private void insertBinaryCode(int value, char mask, ErrorList errors) {
-        StringBuilder state = new StringBuilder(this.machineStatement);
+    private void insertBinaryCode(final int value, final char mask, final ErrorList errors) {
+        final StringBuilder state = new StringBuilder(this.machineStatement);
 
         // Just counts the number of occurrences of the mask in machineStatement.
         // This could be done with a method from StringUtils, but I didn't think
@@ -747,7 +741,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
 
         // Replace the mask bit for bit with the binary version of the value
         // The old version of this function assumed that the mask was continuous
-        String bitString = Binary.intToBinaryString(value, length);
+        final String bitString = Binary.intToBinaryString(value, length);
         int valueIndex = 0;
         for (int i = 0; i < state.length(); i++) {
             if (state.charAt(i) == mask) {
@@ -769,12 +763,12 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * It is not
      * intended to be used when source code is available. DPS 11-July-2013
      */
-    private BasicStatementList buildBasicStatementListFromBinaryCode(int binary, BasicInstruction instr, int[] operands,
-                                                                     int numOperands) {
-        BasicStatementList statementList = new BasicStatementList();
+    private BasicStatementList buildBasicStatementListFromBinaryCode(final int binary, final BasicInstruction instr, final int[] operands,
+                                                                     final int numOperands) {
+        final BasicStatementList statementList = new BasicStatementList();
         int tokenListCounter = 1; // index 0 is operator; operands start at index 1
         if (instr == null) {
-            statementList.addString(invalidOperator);
+            statementList.addString(ProgramStatement.invalidOperator);
             return statementList;
         } else {
             statementList.addString(instr.getName() + " ");
@@ -783,27 +777,27 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
             // add separator if not at end of token list AND neither current nor
             // next token is a parenthesis
             if (tokenListCounter > 1 && tokenListCounter < instr.getTokenList().size()) {
-                TokenTypes thisTokenType = instr.getTokenList().get(tokenListCounter).getType();
+                final TokenTypes thisTokenType = instr.getTokenList().get(tokenListCounter).getType();
                 if (thisTokenType != TokenTypes.LEFT_PAREN && thisTokenType != TokenTypes.RIGHT_PAREN) {
                     statementList.addString(",");
                 }
             }
             boolean notOperand = true;
             while (notOperand && tokenListCounter < instr.getTokenList().size()) {
-                TokenTypes tokenType = instr.getTokenList().get(tokenListCounter).getType();
+                final TokenTypes tokenType = instr.getTokenList().get(tokenListCounter).getType();
                 if (tokenType.equals(TokenTypes.LEFT_PAREN)) {
                     statementList.addString("(");
                 } else if (tokenType.equals(TokenTypes.RIGHT_PAREN)) {
                     statementList.addString(")");
                 } else if (tokenType.toString().contains("REGISTER")) {
-                    String marker = (tokenType.toString().contains("FP_REGISTER")) ? "f" : "x";
+                    final String marker = (tokenType.toString().contains("FP_REGISTER")) ? "f" : "x";
                     statementList.addString(marker + operands[i]);
                     notOperand = false;
                 } else if (tokenType.equals(TokenTypes.INTEGER_12)) {
                     statementList.addValue((operands[i] << 20) >> 20);
                     notOperand = false;
                 } else if (tokenType.equals(TokenTypes.ROUNDING_MODE)) {
-                    String[] modes = new String[]{"rne", "rtz", "rdn", "rup", "rmm", "invalid", "invalid", "dyn"};
+                    final String[] modes = new String[]{"rne", "rtz", "rdn", "rup", "rmm", "invalid", "invalid", "dyn"};
                     String value = "invalid";
                     if (operands[i] >= 0 && operands[i] < 8) {
                         value = modes[operands[i]];
@@ -818,7 +812,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
             }
         }
         while (tokenListCounter < instr.getTokenList().size()) {
-            TokenTypes tokenType = instr.getTokenList().get(tokenListCounter).getType();
+            final TokenTypes tokenType = instr.getTokenList().get(tokenListCounter).getType();
             if (tokenType.equals(TokenTypes.LEFT_PAREN)) {
                 statementList.addString("(");
             } else if (tokenType.equals(TokenTypes.RIGHT_PAREN)) {
@@ -844,40 +838,41 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
     //
     // DPS 29-July-2010
 
-    private class BasicStatementList {
+    private static class BasicStatementList {
 
         private final ArrayList<ListElement> list;
 
         BasicStatementList() {
-            list = new ArrayList<>();
+            this.list = new ArrayList<>();
         }
 
-        void addString(String string) {
-            list.add(new ListElement(0, string, 0));
+        void addString(final String string) {
+            this.list.add(new ListElement(0, string, 0));
         }
 
-        void addAddress(int address) {
-            list.add(new ListElement(1, null, address));
+        void addAddress(final int address) {
+            this.list.add(new ListElement(1, null, address));
         }
 
-        void addValue(int value) {
-            list.add(new ListElement(2, null, value));
+        void addValue(final int value) {
+            this.list.add(new ListElement(2, null, value));
         }
 
-        void addShortValue(int value) {
-            list.add(new ListElement(3, null, value));
+        void addShortValue(final int value) {
+            this.list.add(new ListElement(3, null, value));
         }
 
+        @Override
         public String toString() {
-            int addressBase = (Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX))
+            final int addressBase = (Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX))
                     ? NumberDisplayBaseChooser.HEXADECIMAL
                     : NumberDisplayBaseChooser.DECIMAL;
-            int valueBase = (Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX))
+            final int valueBase = (Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX))
                     ? NumberDisplayBaseChooser.HEXADECIMAL
                     : NumberDisplayBaseChooser.DECIMAL;
 
-            StringBuffer result = new StringBuffer();
-            for (ListElement e : list) {
+            final StringBuilder result = new StringBuilder();
+            for (final ListElement e : this.list) {
                 switch (e.type) {
                     case 0:
                         result.append(e.sValue);
@@ -904,16 +899,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
             return result.toString();
         }
 
-        private class ListElement {
-            int type;
-            String sValue;
-            int iValue;
-
-            ListElement(int type, String sValue, int iValue) {
-                this.type = type;
-                this.sValue = sValue;
-                this.iValue = iValue;
-            }
+        private record ListElement(int type, String sValue, int iValue) {
         }
     }
 

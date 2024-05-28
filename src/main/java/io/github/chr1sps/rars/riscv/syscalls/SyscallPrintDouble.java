@@ -1,6 +1,5 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.AbstractSyscall;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
@@ -36,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallPrintDouble class.</p>
- *
  */
 public class SyscallPrintDouble extends AbstractSyscall {
     /**
@@ -52,7 +50,8 @@ public class SyscallPrintDouble extends AbstractSyscall {
      * <p>
      * Performs syscall function to print double whose bits are stored in fa0
      */
-    public void simulate(ProgramStatement statement) throws ExitingException {
+    @Override
+    public void simulate(final ProgramStatement statement) {
         // Note: Higher numbered reg contains high order word so concat 13-12.
         SystemIO.printString(Double.toString(Double.longBitsToDouble(FloatingPointRegisterFile.getValueLong(10))));
     }

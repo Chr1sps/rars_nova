@@ -34,7 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallSleep class.</p>
- *
  */
 public class SyscallSleep extends AbstractSyscall {
     /**
@@ -48,10 +47,11 @@ public class SyscallSleep extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    @Override
+    public void simulate(final ProgramStatement statement) {
         try {
             Thread.sleep(RegisterFile.getValue("a0")); // units of milliseconds 1000 millisec = 1 sec.
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException ignored) {
         }
     }
 

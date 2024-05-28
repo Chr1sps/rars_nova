@@ -1,12 +1,11 @@
 package io.github.chr1sps.rars.venus.settings;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.venus.GuiAction;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,7 +44,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action class for the Settings menu item for optionally loading a MIPS
  * exception handler.
- *
  */
 public class SettingsExceptionHandlerAction extends GuiAction {
 
@@ -66,8 +64,8 @@ public class SettingsExceptionHandlerAction extends GuiAction {
      * @param mnemonic a {@link java.lang.Integer} object
      * @param accel    a {@link javax.swing.KeyStroke} object
      */
-    public SettingsExceptionHandlerAction(String name, Icon icon, String descrip,
-                                          Integer mnemonic, KeyStroke accel) {
+    public SettingsExceptionHandlerAction(final String name, final Icon icon, final String descrip,
+                                          final Integer mnemonic, final KeyStroke accel) {
         super(name, icon, descrip, mnemonic, accel);
     }
 
@@ -76,62 +74,58 @@ public class SettingsExceptionHandlerAction extends GuiAction {
     /**
      * {@inheritDoc}
      */
-    public void actionPerformed(ActionEvent e) {
-        initialSelected = Globals.getSettings().getBooleanSetting(Settings.Bool.EXCEPTION_HANDLER_ENABLED);
-        initialPathname = Globals.getSettings().getExceptionHandler();
-        exceptionHandlerDialog = new JDialog(Globals.getGui(), "Exception Handler", true);
-        exceptionHandlerDialog.setContentPane(buildDialogPanel());
-        exceptionHandlerDialog.setDefaultCloseOperation(
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        this.initialSelected = Globals.getSettings().getBooleanSetting(Settings.Bool.EXCEPTION_HANDLER_ENABLED);
+        this.initialPathname = Globals.getSettings().getExceptionHandler();
+        this.exceptionHandlerDialog = new JDialog(Globals.getGui(), "Exception Handler", true);
+        this.exceptionHandlerDialog.setContentPane(this.buildDialogPanel());
+        this.exceptionHandlerDialog.setDefaultCloseOperation(
                 JDialog.DO_NOTHING_ON_CLOSE);
-        exceptionHandlerDialog.addWindowListener(
+        this.exceptionHandlerDialog.addWindowListener(
                 new WindowAdapter() {
-                    public void windowClosing(WindowEvent we) {
-                        closeDialog();
+                    @Override
+                    public void windowClosing(final WindowEvent we) {
+                        SettingsExceptionHandlerAction.this.closeDialog();
                     }
                 });
-        exceptionHandlerDialog.pack();
-        exceptionHandlerDialog.setLocationRelativeTo(Globals.getGui());
-        exceptionHandlerDialog.setVisible(true);
+        this.exceptionHandlerDialog.pack();
+        this.exceptionHandlerDialog.setLocationRelativeTo(Globals.getGui());
+        this.exceptionHandlerDialog.setVisible(true);
     }
 
     // The dialog box that appears when menu item is selected.
     private JPanel buildDialogPanel() {
-        JPanel contents = new JPanel(new BorderLayout(20, 20));
+        final JPanel contents = new JPanel(new BorderLayout(20, 20));
         contents.setBorder(new EmptyBorder(10, 10, 10, 10));
         // Top row - the check box for setting...
-        exceptionHandlerSetting = new JCheckBox("Include this exception handler file in all assemble operations");
-        exceptionHandlerSetting
+        this.exceptionHandlerSetting = new JCheckBox("Include this exception handler file in all assemble operations");
+        this.exceptionHandlerSetting
                 .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.EXCEPTION_HANDLER_ENABLED));
-        exceptionHandlerSetting.addActionListener(new ExceptionHandlerSettingAction());
-        contents.add(exceptionHandlerSetting, BorderLayout.NORTH);
+        this.exceptionHandlerSetting.addActionListener(new ExceptionHandlerSettingAction());
+        contents.add(this.exceptionHandlerSetting, BorderLayout.NORTH);
         // Middle row - the button and text field for exception handler file selection
-        JPanel specifyHandlerFile = new JPanel();
-        exceptionHandlerSelectionButton = new JButton("Browse");
-        exceptionHandlerSelectionButton.setEnabled(exceptionHandlerSetting.isSelected());
-        exceptionHandlerSelectionButton.addActionListener(new ExceptionHandlerSelectionAction());
-        exceptionHandlerDisplay = new JTextField(Globals.getSettings().getExceptionHandler(), 30);
-        exceptionHandlerDisplay.setEditable(false);
-        exceptionHandlerDisplay.setEnabled(exceptionHandlerSetting.isSelected());
-        specifyHandlerFile.add(exceptionHandlerSelectionButton);
-        specifyHandlerFile.add(exceptionHandlerDisplay);
+        final JPanel specifyHandlerFile = new JPanel();
+        this.exceptionHandlerSelectionButton = new JButton("Browse");
+        this.exceptionHandlerSelectionButton.setEnabled(this.exceptionHandlerSetting.isSelected());
+        this.exceptionHandlerSelectionButton.addActionListener(new ExceptionHandlerSelectionAction());
+        this.exceptionHandlerDisplay = new JTextField(Globals.getSettings().getExceptionHandler(), 30);
+        this.exceptionHandlerDisplay.setEditable(false);
+        this.exceptionHandlerDisplay.setEnabled(this.exceptionHandlerSetting.isSelected());
+        specifyHandlerFile.add(this.exceptionHandlerSelectionButton);
+        specifyHandlerFile.add(this.exceptionHandlerDisplay);
         contents.add(specifyHandlerFile, BorderLayout.CENTER);
         // Bottom row - the control buttons for OK and Cancel
-        Box controlPanel = Box.createHorizontalBox();
-        JButton okButton = new JButton("OK");
+        final Box controlPanel = Box.createHorizontalBox();
+        final JButton okButton = new JButton("OK");
         okButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        performOK();
-                        closeDialog();
-                    }
+                e -> {
+                    this.performOK();
+                    this.closeDialog();
                 });
-        JButton cancelButton = new JButton("Cancel");
+        final JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        closeDialog();
-                    }
-                });
+                e -> this.closeDialog());
         controlPanel.add(Box.createHorizontalGlue());
         controlPanel.add(okButton);
         controlPanel.add(Box.createHorizontalGlue());
@@ -144,13 +138,13 @@ public class SettingsExceptionHandlerAction extends GuiAction {
     // User has clicked "OK" button, so record status of the checkbox and text
     // field.
     private void performOK() {
-        boolean finalSelected = exceptionHandlerSetting.isSelected();
-        String finalPathname = exceptionHandlerDisplay.getText();
+        final boolean finalSelected = this.exceptionHandlerSetting.isSelected();
+        final String finalPathname = this.exceptionHandlerDisplay.getText();
         // If nothing has changed then don't modify setting variables or properties
         // file.
-        if (initialSelected != finalSelected
-                || initialPathname == null && finalPathname != null
-                || initialPathname != null && !initialPathname.equals(finalPathname)) {
+        if (this.initialSelected != finalSelected
+                || this.initialPathname == null && finalPathname != null
+                || this.initialPathname != null && !this.initialPathname.equals(finalPathname)) {
             Globals.getSettings().setBooleanSetting(Settings.Bool.EXCEPTION_HANDLER_ENABLED, finalSelected);
             if (finalSelected) {
                 Globals.getSettings().setExceptionHandler(finalPathname);
@@ -160,17 +154,18 @@ public class SettingsExceptionHandlerAction extends GuiAction {
 
     // We're finished with this modal dialog.
     private void closeDialog() {
-        exceptionHandlerDialog.setVisible(false);
-        exceptionHandlerDialog.dispose();
+        this.exceptionHandlerDialog.setVisible(false);
+        this.exceptionHandlerDialog.dispose();
     }
 
     /////////////////////////////////////////////////////////////////////////////////
     // Associated action class: exception handler setting. Attached to check box.
     private class ExceptionHandlerSettingAction implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            boolean selected = ((JCheckBox) e.getSource()).isSelected();
-            exceptionHandlerSelectionButton.setEnabled(selected);
-            exceptionHandlerDisplay.setEnabled(selected);
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final boolean selected = ((JCheckBox) e.getSource()).isSelected();
+            SettingsExceptionHandlerAction.this.exceptionHandlerSelectionButton.setEnabled(selected);
+            SettingsExceptionHandlerAction.this.exceptionHandlerDisplay.setEnabled(selected);
         }
     }
 
@@ -179,18 +174,19 @@ public class SettingsExceptionHandlerAction extends GuiAction {
     ///////////////////////////////////////////////////////////////////////////////// handler
     ///////////////////////////////////////////////////////////////////////////////// selector.
     private class ExceptionHandlerSelectionAction implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            JFileChooser chooser = new JFileChooser();
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final JFileChooser chooser = new JFileChooser();
             String pathname = Globals.getSettings().getExceptionHandler();
             if (pathname != null) {
-                File file = new File(pathname);
+                final File file = new File(pathname);
                 if (file.exists())
                     chooser.setSelectedFile(file);
             }
-            int result = chooser.showOpenDialog(Globals.getGui());
+            final int result = chooser.showOpenDialog(Globals.getGui());
             if (result == JFileChooser.APPROVE_OPTION) {
                 pathname = chooser.getSelectedFile().getPath();// .replaceAll("\\\\","/");
-                exceptionHandlerDisplay.setText(pathname);
+                SettingsExceptionHandlerAction.this.exceptionHandlerDisplay.setText(pathname);
             }
         }
     }

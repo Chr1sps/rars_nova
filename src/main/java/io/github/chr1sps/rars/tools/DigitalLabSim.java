@@ -10,15 +10,12 @@ import io.github.chr1sps.rars.util.Binary;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 /**
  * <p>DigitalLabSim class.</p>
  */
-@SuppressWarnings("serial")
 /*
  * Didier Teifreto LIFC Universit� de franche-Comt�
  * www.lifc.univ-fcomte.fr/~teifreto
@@ -50,7 +47,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     private static boolean KeyboardInterruptOnOff = false;
     // Counter
     private static final int CounterValueMax = 30;
-    private static int CounterValue = CounterValueMax;
+    private static int CounterValue = DigitalLabSim.CounterValueMax;
     private static boolean CounterInterruptOnOff = false;
     private static OneSecondCounter SecondCounter;
 
@@ -60,21 +57,21 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      * @param title   a {@link java.lang.String} object
      * @param heading a {@link java.lang.String} object
      */
-    public DigitalLabSim(String title, String heading) {
+    public DigitalLabSim(final String title, final String heading) {
         super(title, heading);
 
-        IN_ADRESS_DISPLAY_1 = Memory.memoryMapBaseAddress + 0x10;
-        IN_ADRESS_DISPLAY_2 = Memory.memoryMapBaseAddress + 0x11;
-        IN_ADRESS_HEXA_KEYBOARD = Memory.memoryMapBaseAddress + 0x12;
-        IN_ADRESS_COUNTER = Memory.memoryMapBaseAddress + 0x13;
-        OUT_ADRESS_HEXA_KEYBOARD = Memory.memoryMapBaseAddress + 0x14;
+        this.IN_ADRESS_DISPLAY_1 = Memory.memoryMapBaseAddress + 0x10;
+        this.IN_ADRESS_DISPLAY_2 = Memory.memoryMapBaseAddress + 0x11;
+        this.IN_ADRESS_HEXA_KEYBOARD = Memory.memoryMapBaseAddress + 0x12;
+        this.IN_ADRESS_COUNTER = Memory.memoryMapBaseAddress + 0x13;
+        this.OUT_ADRESS_HEXA_KEYBOARD = Memory.memoryMapBaseAddress + 0x14;
     }
 
     /**
      * <p>Constructor for DigitalLabSim.</p>
      */
     public DigitalLabSim() {
-        this(heading + ", " + version, heading);
+        this(DigitalLabSim.heading + ", " + DigitalLabSim.version, DigitalLabSim.heading);
     }
 
     /**
@@ -82,8 +79,8 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      *
      * @param args an array of {@link java.lang.String} objects
      */
-    public static void main(String[] args) {
-        new DigitalLabSim(heading + ", " + version, heading).go();
+    public static void main(final String[] args) {
+        new DigitalLabSim(DigitalLabSim.heading + ", " + DigitalLabSim.version, DigitalLabSim.heading).go();
     }
 
     /**
@@ -99,29 +96,29 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      */
     @Override
     protected void addAsObserver() {
-        addAsObserver(IN_ADRESS_DISPLAY_1, IN_ADRESS_DISPLAY_1);
-        addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
+        this.addAsObserver(this.IN_ADRESS_DISPLAY_1, this.IN_ADRESS_DISPLAY_1);
+        this.addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
     }
 
     @Override
-    public void onNext(AccessNotice notice) {
-        var memNotice = (MemoryAccessNotice) notice;
-        int address = memNotice.getAddress();
-        char value = (char) memNotice.getValue();
-        if (address == IN_ADRESS_DISPLAY_1)
-            updateSevenSegment(1, value);
-        else if (address == IN_ADRESS_DISPLAY_2)
-            updateSevenSegment(0, value);
-        else if (address == IN_ADRESS_HEXA_KEYBOARD)
-            updateHexaKeyboard(value);
-        else if (address == IN_ADRESS_COUNTER)
-            updateOneSecondCounter(value);
-        if (CounterInterruptOnOff)
-            if (CounterValue > 0) {
-                CounterValue--;
+    public void onNext(final AccessNotice notice) {
+        final var memNotice = (MemoryAccessNotice) notice;
+        final int address = memNotice.getAddress();
+        final char value = (char) memNotice.getValue();
+        if (address == this.IN_ADRESS_DISPLAY_1)
+            this.updateSevenSegment(1, value);
+        else if (address == this.IN_ADRESS_DISPLAY_2)
+            this.updateSevenSegment(0, value);
+        else if (address == this.IN_ADRESS_HEXA_KEYBOARD)
+            this.updateHexaKeyboard(value);
+        else if (address == this.IN_ADRESS_COUNTER)
+            this.updateOneSecondCounter(value);
+        if (DigitalLabSim.CounterInterruptOnOff)
+            if (DigitalLabSim.CounterValue > 0) {
+                DigitalLabSim.CounterValue--;
             } else {
-                CounterValue = CounterValueMax;
-                InterruptController.registerTimerInterrupt(EXTERNAL_INTERRUPT_TIMER);
+                DigitalLabSim.CounterValue = DigitalLabSim.CounterValueMax;
+                InterruptController.registerTimerInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_TIMER);
             }
         this.subscription.request(1);
     }
@@ -131,9 +128,9 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      */
     @Override
     protected void reset() {
-        sevenSegPanel.resetSevenSegment();
-        hexaKeyPanel.resetHexaKeyboard();
-        SecondCounter.resetOneSecondCounter();
+        this.sevenSegPanel.resetSevenSegment();
+        this.hexaKeyPanel.resetHexaKeyboard();
+        DigitalLabSim.SecondCounter.resetOneSecondCounter();
     }
 
     /**
@@ -143,22 +140,22 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      */
     @Override
     protected JComponent buildMainDisplayArea() {
-        panelTools = new JPanel(new GridLayout(1, 2));
-        sevenSegPanel = new SevenSegmentPanel();
-        panelTools.add(sevenSegPanel);
-        hexaKeyPanel = new HexaKeyboard();
-        panelTools.add(hexaKeyPanel);
-        SecondCounter = new OneSecondCounter();
-        return panelTools;
+        DigitalLabSim.panelTools = new JPanel(new GridLayout(1, 2));
+        this.sevenSegPanel = new SevenSegmentPanel();
+        DigitalLabSim.panelTools.add(this.sevenSegPanel);
+        this.hexaKeyPanel = new HexaKeyboard();
+        DigitalLabSim.panelTools.add(this.hexaKeyPanel);
+        DigitalLabSim.SecondCounter = new OneSecondCounter();
+        return DigitalLabSim.panelTools;
     }
 
-    private synchronized void updateMMIOControlAndData(int dataAddr, int dataValue) {
-        if (!this.isBeingUsedAsATool || (this.isBeingUsedAsATool && connectButton.isConnected())) {
+    private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
+        if (!this.isBeingUsedAsATool || (this.isBeingUsedAsATool && this.connectButton.isConnected())) {
             Globals.memoryAndRegistersLock.lock();
             try {
                 try {
                     Globals.memory.setByte(dataAddr, dataValue);
-                } catch (AddressErrorException aee) {
+                } catch (final AddressErrorException aee) {
                     System.out.println("Tool author specified incorrect MMIO address!" + aee);
                     System.exit(0);
                 }
@@ -182,17 +179,17 @@ public class DigitalLabSim extends AbstractToolAndApplication {
         final String helpContent = " This tool is composed of 3 parts : two seven-segment displays, an hexadecimal keyboard and counter \n"
                 +
                 "Seven segment display\n" +
-                " Byte value at address " + Binary.intToHexString(IN_ADRESS_DISPLAY_1)
+                " Byte value at address " + Binary.intToHexString(this.IN_ADRESS_DISPLAY_1)
                 + " : command right seven segment display \n " +
-                " Byte value at address " + Binary.intToHexString(IN_ADRESS_DISPLAY_2)
+                " Byte value at address " + Binary.intToHexString(this.IN_ADRESS_DISPLAY_2)
                 + " : command left seven segment display \n " +
                 " Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 for point \n \n"
                 +
                 "Hexadecimal keyboard\n" +
-                " Byte value at address " + Binary.intToHexString(IN_ADRESS_HEXA_KEYBOARD)
+                " Byte value at address " + Binary.intToHexString(this.IN_ADRESS_HEXA_KEYBOARD)
                 + " : command row number of hexadecimal keyboard (bit 0 to 3) and enable keyboard interrupt (bit 7) \n"
                 +
-                " Byte value at address " + Binary.intToHexString(OUT_ADRESS_HEXA_KEYBOARD)
+                " Byte value at address " + Binary.intToHexString(this.OUT_ADRESS_HEXA_KEYBOARD)
                 + " : receive row and column of the key pressed, 0 if not key pressed \n" +
                 " The program has to scan, one by one, each row (send 1,2,4,8...)" +
                 " and then observe if a key is pressed (that mean byte value at adresse 0xFFFF0014 is different from zero). "
@@ -203,24 +200,22 @@ public class DigitalLabSim extends AbstractToolAndApplication {
                 " For exemple key number 2 return 0x41, that mean the key is on column 3 and row 1. \n" +
                 " If keyboard interruption is enable, an external interrupt is started with value 0x00000200\n \n" +
                 "Counter\n" +
-                " Byte value at address " + Binary.intToHexString(IN_ADRESS_COUNTER)
+                " Byte value at address " + Binary.intToHexString(this.IN_ADRESS_COUNTER)
                 + " : If one bit of this byte is set, the counter interruption is enabled.\n" +
                 " If counter interruption is enable, every 30 instructions, a timer interrupt is started with value 0x00000100.\n"
                 +
                 "   (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)";
-        JButton help = new JButton("Help");
+        final JButton help = new JButton("Help");
         help.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        JTextArea ja = new JTextArea(helpContent);
-                        ja.setRows(20);
-                        ja.setColumns(60);
-                        ja.setLineWrap(true);
-                        ja.setWrapStyleWord(true);
-                        JOptionPane.showMessageDialog(theWindow, new JScrollPane(ja),
-                                "Simulating the Hexa Keyboard and Seven segment display",
-                                JOptionPane.INFORMATION_MESSAGE);
-                    }
+                e -> {
+                    final JTextArea ja = new JTextArea(helpContent);
+                    ja.setRows(20);
+                    ja.setColumns(60);
+                    ja.setLineWrap(true);
+                    ja.setWrapStyleWord(true);
+                    JOptionPane.showMessageDialog(DigitalLabSim.this.theWindow, new JScrollPane(ja),
+                            "Simulating the Hexa Keyboard and Seven segment display",
+                            JOptionPane.INFORMATION_MESSAGE);
                 });
         return help;
     }/*
@@ -239,77 +234,77 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      * @param number a int
      * @param value  a char
      */
-    public void updateSevenSegment(int number, char value) {
-        sevenSegPanel.display[number].modifyDisplay(value);
+    public void updateSevenSegment(final int number, final char value) {
+        this.sevenSegPanel.display[number].modifyDisplay(value);
     }
 
     public class SevenSegmentDisplay extends JComponent {
         public char aff;
 
-        public SevenSegmentDisplay(char aff) {
+        public SevenSegmentDisplay(final char aff) {
             this.aff = aff;
             this.setPreferredSize(new Dimension(60, 80));
         }
 
-        public void modifyDisplay(char val) {
-            aff = val;
+        public void modifyDisplay(final char val) {
+            this.aff = val;
             this.repaint();
         }
 
-        public void SwitchSegment(Graphics g, char segment) {
+        public void SwitchSegment(final Graphics g, final char segment) {
             switch (segment) {
                 case 'a': // a segment
-                    int[] pxa1 = {12, 9, 12};
-                    int[] pxa2 = {36, 39, 36};
-                    int[] pya = {5, 8, 11};
+                    final int[] pxa1 = {12, 9, 12};
+                    final int[] pxa2 = {36, 39, 36};
+                    final int[] pya = {5, 8, 11};
                     g.fillPolygon(pxa1, pya, 3);
                     g.fillPolygon(pxa2, pya, 3);
                     g.fillRect(12, 5, 24, 6);
                     break;
                 case 'b': // b segment
-                    int[] pxb = {37, 40, 43};
-                    int[] pyb1 = {12, 9, 12};
-                    int[] pyb2 = {36, 39, 36};
+                    final int[] pxb = {37, 40, 43};
+                    final int[] pyb1 = {12, 9, 12};
+                    final int[] pyb2 = {36, 39, 36};
                     g.fillPolygon(pxb, pyb1, 3);
                     g.fillPolygon(pxb, pyb2, 3);
                     g.fillRect(37, 12, 6, 24);
                     break;
                 case 'c': // c segment
-                    int[] pxc = {37, 40, 43};
-                    int[] pyc1 = {44, 41, 44};
-                    int[] pyc2 = {68, 71, 68};
+                    final int[] pxc = {37, 40, 43};
+                    final int[] pyc1 = {44, 41, 44};
+                    final int[] pyc2 = {68, 71, 68};
                     g.fillPolygon(pxc, pyc1, 3);
                     g.fillPolygon(pxc, pyc2, 3);
                     g.fillRect(37, 44, 6, 24);
                     break;
                 case 'd': // d segment
-                    int[] pxd1 = {12, 9, 12};
-                    int[] pxd2 = {36, 39, 36};
-                    int[] pyd = {69, 72, 75};
+                    final int[] pxd1 = {12, 9, 12};
+                    final int[] pxd2 = {36, 39, 36};
+                    final int[] pyd = {69, 72, 75};
                     g.fillPolygon(pxd1, pyd, 3);
                     g.fillPolygon(pxd2, pyd, 3);
                     g.fillRect(12, 69, 24, 6);
                     break;
                 case 'e': // e segment
-                    int[] pxe = {5, 8, 11};
-                    int[] pye1 = {44, 41, 44};
-                    int[] pye2 = {68, 71, 68};
+                    final int[] pxe = {5, 8, 11};
+                    final int[] pye1 = {44, 41, 44};
+                    final int[] pye2 = {68, 71, 68};
                     g.fillPolygon(pxe, pye1, 3);
                     g.fillPolygon(pxe, pye2, 3);
                     g.fillRect(5, 44, 6, 24);
                     break;
                 case 'f': // f segment
-                    int[] pxf = {5, 8, 11};
-                    int[] pyf1 = {12, 9, 12};
-                    int[] pyf2 = {36, 39, 36};
+                    final int[] pxf = {5, 8, 11};
+                    final int[] pyf1 = {12, 9, 12};
+                    final int[] pyf2 = {36, 39, 36};
                     g.fillPolygon(pxf, pyf1, 3);
                     g.fillPolygon(pxf, pyf2, 3);
                     g.fillRect(5, 12, 6, 24);
                     break;
                 case 'g': // g segment
-                    int[] pxg1 = {12, 9, 12};
-                    int[] pxg2 = {36, 39, 36};
-                    int[] pyg = {37, 40, 43};
+                    final int[] pxg1 = {12, 9, 12};
+                    final int[] pxg2 = {36, 39, 36};
+                    final int[] pyg = {37, 40, 43};
                     g.fillPolygon(pxg1, pyg, 3);
                     g.fillPolygon(pxg2, pyg, 3);
                     g.fillRect(12, 37, 24, 6);
@@ -320,43 +315,44 @@ public class DigitalLabSim extends AbstractToolAndApplication {
             }
         }
 
-        public void paint(Graphics g) {
+        @Override
+        public void paint(final Graphics g) {
             char c = 'a';
             while (c <= 'h') {
-                if ((aff & 0x1) == 1)
+                if ((this.aff & 0x1) == 1)
                     g.setColor(Color.RED);
                 else
                     g.setColor(Color.LIGHT_GRAY);
-                SwitchSegment(g, c);
-                aff = (char) (aff >>> 1);
+                this.SwitchSegment(g, c);
+                this.aff = (char) (this.aff >>> 1);
                 c++;
             }
         }
     }
 
     public class SevenSegmentPanel extends JPanel {
-        public SevenSegmentDisplay[] display;
+        public final SevenSegmentDisplay[] display;
 
         public SevenSegmentPanel() {
             int i;
-            FlowLayout fl = new FlowLayout();
+            final FlowLayout fl = new FlowLayout();
             this.setLayout(fl);
-            display = new SevenSegmentDisplay[2];
+            this.display = new SevenSegmentDisplay[2];
             for (i = 0; i < 2; i++) {
-                display[i] = new SevenSegmentDisplay((char) (0));
-                this.add(display[i]);
+                this.display[i] = new SevenSegmentDisplay((char) (0));
+                this.add(this.display[i]);
             }
         }
 
-        public void modifyDisplay(int num, char val) {
-            display[num].modifyDisplay(val);
-            display[num].repaint();
+        public void modifyDisplay(final int num, final char val) {
+            this.display[num].modifyDisplay(val);
+            this.display[num].repaint();
         }
 
         public void resetSevenSegment() {
             int i;
             for (i = 0; i < 2; i++)
-                modifyDisplay(i, (char) 0);
+                this.modifyDisplay(i, (char) 0);
         }
     }
 
@@ -374,73 +370,78 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      *
      * @param row a char
      */
-    public void updateHexaKeyboard(char row) {
-        int key = KeyBoardValueButtonClick;
+    public void updateHexaKeyboard(final char row) {
+        final int key = DigitalLabSim.KeyBoardValueButtonClick;
         if ((key != -1) && ((1 << (key / 4)) == (row & 0xF))) {
-            updateMMIOControlAndData(OUT_ADRESS_HEXA_KEYBOARD,
+            this.updateMMIOControlAndData(this.OUT_ADRESS_HEXA_KEYBOARD,
                     (char) (1 << (key / 4)) | (1 << (4 + (key % 4))));
         } else {
-            updateMMIOControlAndData(OUT_ADRESS_HEXA_KEYBOARD, 0);
+            this.updateMMIOControlAndData(this.OUT_ADRESS_HEXA_KEYBOARD, 0);
         }
-        KeyboardInterruptOnOff = (row & 0xF0) != 0;
+        DigitalLabSim.KeyboardInterruptOnOff = (row & 0xF0) != 0;
     }
 
     public class HexaKeyboard extends JPanel {
-        public JButton[] button;
+        public final JButton[] button;
 
         public HexaKeyboard() {
             int i;
-            GridLayout layout = new GridLayout(4, 4);
+            final GridLayout layout = new GridLayout(4, 4);
             this.setLayout(layout);
-            button = new JButton[16];
+            this.button = new JButton[16];
             for (i = 0; i < 16; i++) {
-                button[i] = new JButton(Integer.toHexString(i));
-                button[i].setBackground(Color.WHITE);
-                button[i].setMargin(new Insets(10, 10, 10, 10));
-                button[i].addMouseListener(new EcouteurClick(i));
-                this.add(button[i]);
+                this.button[i] = new JButton(Integer.toHexString(i));
+                this.button[i].setBackground(Color.WHITE);
+                this.button[i].setMargin(new Insets(10, 10, 10, 10));
+                this.button[i].addMouseListener(new EcouteurClick(i));
+                this.add(this.button[i]);
             }
         }
 
         public void resetHexaKeyboard() {
             int i;
-            KeyBoardValueButtonClick = -1;
+            DigitalLabSim.KeyBoardValueButtonClick = -1;
             for (i = 0; i < 16; i++) {
-                button[i].setBackground(Color.WHITE);
+                this.button[i].setBackground(Color.WHITE);
             }
         }
 
         public class EcouteurClick implements MouseListener {
             private final int buttonValue;
 
-            public EcouteurClick(int val) {
-                buttonValue = val;
+            public EcouteurClick(final int val) {
+                this.buttonValue = val;
             }
 
-            public void mouseEntered(MouseEvent arg0) {
+            @Override
+            public void mouseEntered(final MouseEvent arg0) {
             }
 
-            public void mouseExited(MouseEvent arg0) {
+            @Override
+            public void mouseExited(final MouseEvent arg0) {
             }
 
-            public void mousePressed(MouseEvent arg0) {
+            @Override
+            public void mousePressed(final MouseEvent arg0) {
             }
 
-            public void mouseReleased(MouseEvent arg0) {
+            @Override
+            public void mouseReleased(final MouseEvent arg0) {
             }
 
-            public void mouseClicked(MouseEvent arg0) {
+            @Override
+            public void mouseClicked(final MouseEvent arg0) {
                 int i;
-                if (KeyBoardValueButtonClick != -1) {// Button already pressed -> now realease
-                    KeyBoardValueButtonClick = -1;
-                    updateMMIOControlAndData(OUT_ADRESS_HEXA_KEYBOARD, 0);
+                if (DigitalLabSim.KeyBoardValueButtonClick != -1) {// Button already pressed -> now realease
+                    DigitalLabSim.KeyBoardValueButtonClick = -1;
+                    DigitalLabSim.this.updateMMIOControlAndData(DigitalLabSim.this.OUT_ADRESS_HEXA_KEYBOARD, 0);
                     for (i = 0; i < 16; i++)
-                        button[i].setBackground(Color.WHITE);
+                        HexaKeyboard.this.button[i].setBackground(Color.WHITE);
                 } else { // new button pressed
-                    KeyBoardValueButtonClick = buttonValue;
-                    button[KeyBoardValueButtonClick].setBackground(Color.GREEN);
-                    if (KeyboardInterruptOnOff) {
-                        InterruptController.registerExternalInterrupt(EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
+                    DigitalLabSim.KeyBoardValueButtonClick = this.buttonValue;
+                    HexaKeyboard.this.button[DigitalLabSim.KeyBoardValueButtonClick].setBackground(Color.GREEN);
+                    if (DigitalLabSim.KeyboardInterruptOnOff) {
+                        InterruptController.registerExternalInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
                     }
 
                 }
@@ -458,23 +459,23 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      *
      * @param value a char
      */
-    public void updateOneSecondCounter(char value) {
+    public void updateOneSecondCounter(final char value) {
         if (value != 0) {
-            CounterInterruptOnOff = true;
-            CounterValue = CounterValueMax;
+            DigitalLabSim.CounterInterruptOnOff = true;
+            DigitalLabSim.CounterValue = DigitalLabSim.CounterValueMax;
         } else {
-            CounterInterruptOnOff = false;
+            DigitalLabSim.CounterInterruptOnOff = false;
         }
     }
 
     public class OneSecondCounter {
         public OneSecondCounter() {
-            CounterInterruptOnOff = false;
+            DigitalLabSim.CounterInterruptOnOff = false;
         }
 
         public void resetOneSecondCounter() {
-            CounterInterruptOnOff = false;
-            CounterValue = CounterValueMax;
+            DigitalLabSim.CounterInterruptOnOff = false;
+            DigitalLabSim.CounterValue = DigitalLabSim.CounterValueMax;
         }
     }
 }

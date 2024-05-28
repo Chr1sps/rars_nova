@@ -842,8 +842,8 @@ public class FloatRepresentation extends AbstractToolAndApplication {
         final int upperY = 50;
         int centerX, exponentCenterX;
         int subtractLabelWidth, subtractLabelHeight;
-        int centerY = (this.upperY - this.lowerY) / 2;
-        int upperYArrowHead = this.upperY - this.arrowHeadOffset;
+        final int centerY = (this.upperY - this.lowerY) / 2;
+        final int upperYArrowHead = this.upperY - this.arrowHeadOffset;
         int currentExponent = Binary.binaryStringToInt(FloatRepresentation.defaultBinaryExponent);
 
         @Override

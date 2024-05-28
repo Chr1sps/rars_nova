@@ -1,8 +1,5 @@
 package io.github.chr1sps.rars.venus.settings;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.riscv.hardware.MemoryConfiguration;
 import io.github.chr1sps.rars.riscv.hardware.MemoryConfigurations;
@@ -11,6 +8,8 @@ import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.venus.FileStatus;
 import io.github.chr1sps.rars.venus.GuiAction;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,7 +49,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action class for the Settings menu item for text editor settings.
- *
  */
 public class SettingsMemoryConfigurationAction extends GuiAction {
     /**
@@ -62,8 +60,8 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
      * @param mnemonic a {@link java.lang.Integer} object
      * @param accel    a {@link javax.swing.KeyStroke} object
      */
-    public SettingsMemoryConfigurationAction(String name, Icon icon, String descrip,
-                                             Integer mnemonic, KeyStroke accel) {
+    public SettingsMemoryConfigurationAction(final String name, final Icon icon, final String descrip,
+                                             final Integer mnemonic, final KeyStroke accel) {
         super(name, icon, descrip, mnemonic, accel);
     }
 
@@ -73,8 +71,9 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
      * When this action is triggered, launch a dialog to view and modify
      * editor settings.
      */
-    public void actionPerformed(ActionEvent e) {
-        JDialog configDialog = new MemoryConfigurationDialog(Globals.getGui(), "Memory Configuration", true);
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        final JDialog configDialog = new MemoryConfigurationDialog(Globals.getGui(), "Memory Configuration", true);
         configDialog.setVisible(true);
     }
 
@@ -87,15 +86,16 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         JLabel[] nameDisplay;
         ConfigurationButton selectedConfigurationButton, initialConfigurationButton;
 
-        private MemoryConfigurationDialog(Frame owner, String title, boolean modality) {
+        private MemoryConfigurationDialog(final Frame owner, final String title, final boolean modality) {
             super(owner, title, modality);
-            this.setContentPane(buildDialogPanel());
+            this.setContentPane(this.buildDialogPanel());
             this.setDefaultCloseOperation(
                     JDialog.DO_NOTHING_ON_CLOSE);
             this.addWindowListener(
                     new WindowAdapter() {
-                        public void windowClosing(WindowEvent we) {
-                            performClose();
+                        @Override
+                        public void windowClosing(final WindowEvent we) {
+                            MemoryConfigurationDialog.this.performClose();
                         }
                     });
             this.pack();
@@ -103,25 +103,25 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         }
 
         private JPanel buildDialogPanel() {
-            JPanel dialogPanel = new JPanel(new BorderLayout());
+            final JPanel dialogPanel = new JPanel(new BorderLayout());
             dialogPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-            JPanel configInfo = new JPanel(new FlowLayout());
+            final JPanel configInfo = new JPanel(new FlowLayout());
             MemoryConfigurations.buildConfigurationCollection();
-            configInfo.add(buildConfigChooser());
-            configInfo.add(buildConfigDisplay());
+            configInfo.add(this.buildConfigChooser());
+            configInfo.add(this.buildConfigDisplay());
             dialogPanel.add(configInfo);
-            dialogPanel.add(buildControlPanel(), BorderLayout.SOUTH);
+            dialogPanel.add(this.buildControlPanel(), BorderLayout.SOUTH);
             return dialogPanel;
         }
 
         private Component buildConfigChooser() {
-            JPanel chooserPanel = new JPanel(new GridLayout(4, 1));
-            ButtonGroup choices = new ButtonGroup();
-            Iterator<MemoryConfiguration> configurationsIterator = MemoryConfigurations.getConfigurationsIterator();
+            final JPanel chooserPanel = new JPanel(new GridLayout(4, 1));
+            final ButtonGroup choices = new ButtonGroup();
+            final Iterator<MemoryConfiguration> configurationsIterator = MemoryConfigurations.getConfigurationsIterator();
             while (configurationsIterator.hasNext()) {
-                MemoryConfiguration config = configurationsIterator.next();
-                ConfigurationButton button = new ConfigurationButton(config);
+                final MemoryConfiguration config = configurationsIterator.next();
+                final ConfigurationButton button = new ConfigurationButton(config);
                 button.addActionListener(this);
                 if (button.isSelected()) {
                     this.selectedConfigurationButton = button;
@@ -136,32 +136,32 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         }
 
         private Component buildConfigDisplay() {
-            JPanel displayPanel = new JPanel();
-            MemoryConfiguration config = MemoryConfigurations.getCurrentConfiguration();
-            String[] configurationItemNames = config.getConfigurationItemNames();
-            int numItems = configurationItemNames.length;
-            JPanel namesPanel = new JPanel(new GridLayout(numItems, 1));
-            JPanel valuesPanel = new JPanel(new GridLayout(numItems, 1));
-            Font monospaced = new Font("Monospaced", Font.PLAIN, 12);
-            nameDisplay = new JLabel[numItems];
+            final JPanel displayPanel = new JPanel();
+            final MemoryConfiguration config = MemoryConfigurations.getCurrentConfiguration();
+            final String[] configurationItemNames = config.getConfigurationItemNames();
+            final int numItems = configurationItemNames.length;
+            final JPanel namesPanel = new JPanel(new GridLayout(numItems, 1));
+            final JPanel valuesPanel = new JPanel(new GridLayout(numItems, 1));
+            final Font monospaced = new Font("Monospaced", Font.PLAIN, 12);
+            this.nameDisplay = new JLabel[numItems];
             // for (int i=numItems-1; i >= 0; i--) {
             // namesPanel.add(new JLabel(configurationItemNames[i]));
             // }
-            addressDisplay = new JTextField[numItems];
+            this.addressDisplay = new JTextField[numItems];
             for (int i = 0; i < numItems; i++) {
-                nameDisplay[i] = new JLabel();
-                addressDisplay[i] = new JTextField();
-                addressDisplay[i].setEditable(false);
-                addressDisplay[i].setFont(monospaced);
+                this.nameDisplay[i] = new JLabel();
+                this.addressDisplay[i] = new JTextField();
+                this.addressDisplay[i].setEditable(false);
+                this.addressDisplay[i].setFont(monospaced);
             }
             // Display vertically from high to low memory addresses so
             // add the components in reverse order.
-            for (int i = addressDisplay.length - 1; i >= 0; i--) {
-                namesPanel.add(nameDisplay[i]);
-                valuesPanel.add(addressDisplay[i]);
+            for (int i = this.addressDisplay.length - 1; i >= 0; i--) {
+                namesPanel.add(this.nameDisplay[i]);
+                valuesPanel.add(this.addressDisplay[i]);
             }
-            setConfigDisplay(config);
-            Box columns = Box.createHorizontalBox();
+            this.setConfigDisplay(config);
+            final Box columns = Box.createHorizontalBox();
             columns.add(valuesPanel);
             columns.add(Box.createHorizontalStrut(6));
             columns.add(namesPanel);
@@ -170,48 +170,35 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         }
 
         // Carry out action for the radio buttons.
-        public void actionPerformed(ActionEvent e) {
-            MemoryConfiguration config = ((ConfigurationButton) e.getSource()).getConfiguration();
-            setConfigDisplay(config);
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final MemoryConfiguration config = ((ConfigurationButton) e.getSource()).getConfiguration();
+            this.setConfigDisplay(config);
             this.selectedConfigurationButton = (ConfigurationButton) e.getSource();
         }
 
         // Row of control buttons to be placed along the button of the dialog
         private Component buildControlPanel() {
-            Box controlPanel = Box.createHorizontalBox();
-            JButton okButton = new JButton("Apply and Close");
+            final Box controlPanel = Box.createHorizontalBox();
+            final JButton okButton = new JButton("Apply and Close");
             okButton.setToolTipText(SettingsHighlightingAction.CLOSE_TOOL_TIP_TEXT);
             okButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performApply();
-                            performClose();
-                        }
+                    e -> {
+                        this.performApply();
+                        this.performClose();
                     });
-            JButton applyButton = new JButton("Apply");
+            final JButton applyButton = new JButton("Apply");
             applyButton.setToolTipText(SettingsHighlightingAction.APPLY_TOOL_TIP_TEXT);
             applyButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performApply();
-                        }
-                    });
-            JButton cancelButton = new JButton("Cancel");
+                    e -> this.performApply());
+            final JButton cancelButton = new JButton("Cancel");
             cancelButton.setToolTipText(SettingsHighlightingAction.CANCEL_TOOL_TIP_TEXT);
             cancelButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performClose();
-                        }
-                    });
-            JButton resetButton = new JButton("Reset");
+                    e -> this.performClose());
+            final JButton resetButton = new JButton("Reset");
             resetButton.setToolTipText(SettingsHighlightingAction.RESET_TOOL_TIP_TEXT);
             resetButton.addActionListener(
-                    new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            performReset();
-                        }
-                    });
+                    e -> this.performReset());
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(okButton);
             controlPanel.add(Box.createHorizontalGlue());
@@ -253,31 +240,31 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         private void performReset() {
             this.selectedConfigurationButton = this.initialConfigurationButton;
             this.selectedConfigurationButton.setSelected(true);
-            setConfigDisplay(this.selectedConfigurationButton.getConfiguration());
+            this.setConfigDisplay(this.selectedConfigurationButton.getConfiguration());
         }
 
         // Set name values in JLabels and address values in the JTextFields
-        private void setConfigDisplay(MemoryConfiguration config) {
-            String[] configurationItemNames = config.getConfigurationItemNames();
-            int[] configurationItemValues = config.getConfigurationItemValues();
+        private void setConfigDisplay(final MemoryConfiguration config) {
+            final String[] configurationItemNames = config.getConfigurationItemNames();
+            final int[] configurationItemValues = config.getConfigurationItemValues();
             // Will use TreeMap to extract list of address-name pairs sorted by
             // hex-stringified address. This will correctly handle kernel addresses,
             // whose int values are negative and thus normal sorting yields incorrect
             // results. There can be duplicate addresses, so I concatenate the name
             // onto the address to make each key unique. Then slice off the name upon
             // extraction.
-            TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
+            final TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
             for (int i = 0; i < configurationItemValues.length; i++) {
                 treeSortedByAddress.put(Binary.intToHexString(configurationItemValues[i]) + configurationItemNames[i],
                         configurationItemNames[i]);
             }
-            Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();
+            final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();
             Map.Entry<String, String> pair;
-            int addressStringLength = Binary.intToHexString(configurationItemValues[0]).length();
+            final int addressStringLength = Binary.intToHexString(configurationItemValues[0]).length();
             for (int i = 0; i < configurationItemValues.length; i++) {
                 pair = setSortedByAddress.next();
-                nameDisplay[i].setText(pair.getValue());
-                addressDisplay[i].setText(pair.getKey().substring(0, addressStringLength));
+                this.nameDisplay[i].setText(pair.getValue());
+                this.addressDisplay[i].setText(pair.getKey().substring(0, addressStringLength));
             }
         }
 
@@ -287,13 +274,13 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
     private class ConfigurationButton extends JRadioButton {
         private final MemoryConfiguration configuration;
 
-        public ConfigurationButton(MemoryConfiguration config) {
+        public ConfigurationButton(final MemoryConfiguration config) {
             super(config.getConfigurationName(), config == MemoryConfigurations.getCurrentConfiguration());
             this.configuration = config;
         }
 
         public MemoryConfiguration getConfiguration() {
-            return configuration;
+            return this.configuration;
         }
 
     }

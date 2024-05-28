@@ -34,7 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Manage the file being edited.
  * Currently only manages one file at a time, but can be expanded.
- *
  */
 public class Editor {
 
@@ -76,16 +75,16 @@ public class Editor {
      *
      * @param ui the GUI that owns this editor
      */
-    public Editor(VenusUI ui) {
-        mainUI = ui;
+    public Editor(final VenusUI ui) {
+        this.mainUI = ui;
         FileStatus.reset();
-        mainUIbaseTitle = mainUI.getTitle();
-        newUsageCount = 0;
+        this.mainUIbaseTitle = this.mainUI.getTitle();
+        this.newUsageCount = 0;
         // Directory from which MARS was launched. Guaranteed to have a value.
-        defaultOpenDirectory = System.getProperty("user.dir");
-        defaultSaveDirectory = System.getProperty("user.dir");
-        currentOpenDirectory = defaultOpenDirectory;
-        currentSaveDirectory = defaultSaveDirectory;
+        this.defaultOpenDirectory = System.getProperty("user.dir");
+        this.defaultSaveDirectory = System.getProperty("user.dir");
+        this.currentOpenDirectory = this.defaultOpenDirectory;
+        this.currentSaveDirectory = this.defaultSaveDirectory;
     }
 
     // TODO: this doesn't really fit here, it doesn't interact with the GUI
@@ -96,7 +95,7 @@ public class Editor {
      * @return an array of {@link java.lang.String} objects
      */
     public String[] getOpenFilePaths() {
-        return editTabbedPane.getOpenFilePaths();
+        return this.editTabbedPane.getOpenFilePaths();
     }
 
     /**
@@ -104,7 +103,7 @@ public class Editor {
      *
      * @param editTabbedPane an existing editTabbedPane object
      */
-    public void setEditTabbedPane(EditTabbedPane editTabbedPane) {
+    public void setEditTabbedPane(final EditTabbedPane editTabbedPane) {
         this.editTabbedPane = editTabbedPane;
     }
 
@@ -117,7 +116,7 @@ public class Editor {
      * no Opens have been performed.
      */
     public String getCurrentOpenDirectory() {
-        return currentOpenDirectory;
+        return this.currentOpenDirectory;
     }
 
     /**
@@ -131,10 +130,10 @@ public class Editor {
      *                             default (MARS launch directory) will be used.
      */
 
-    void setCurrentOpenDirectory(String currentOpenDirectory) {
-        File file = new File(currentOpenDirectory);
+    void setCurrentOpenDirectory(final String currentOpenDirectory) {
+        final File file = new File(currentOpenDirectory);
         if (!file.exists() || !file.isDirectory()) {
-            this.currentOpenDirectory = defaultOpenDirectory;
+            this.currentOpenDirectory = this.defaultOpenDirectory;
         } else {
             this.currentOpenDirectory = currentOpenDirectory;
         }
@@ -149,7 +148,7 @@ public class Editor {
      * no Save or Save As operations have been performed.
      */
     public String getCurrentSaveDirectory() {
-        return currentSaveDirectory;
+        return this.currentSaveDirectory;
     }
 
     /**
@@ -163,10 +162,10 @@ public class Editor {
      *                             default (MARS launch directory) will be used.
      */
 
-    void setCurrentSaveDirectory(String currentSaveDirectory) {
-        File file = new File(currentSaveDirectory);
+    void setCurrentSaveDirectory(final String currentSaveDirectory) {
+        final File file = new File(currentSaveDirectory);
         if (!file.exists() || !file.isDirectory()) {
-            this.currentSaveDirectory = defaultSaveDirectory;
+            this.currentSaveDirectory = this.defaultSaveDirectory;
         } else {
             this.currentSaveDirectory = currentSaveDirectory;
         }
@@ -178,8 +177,8 @@ public class Editor {
      * @return returns string mipsN.asm, where N is 1,2,3,...
      */
     public String getNextDefaultFilename() {
-        newUsageCount++;
-        return "riscv" + newUsageCount + ".asm";
+        this.newUsageCount++;
+        return "riscv" + this.newUsageCount + ".asm";
     }
 
     /**
@@ -196,14 +195,14 @@ public class Editor {
      * @param name   Name of file (last component of path)
      * @param status Edit status of file. See FileStatus static constants.
      */
-    public void setTitle(String path, String name, int status) {
-        if (status == FileStatus.NO_FILE || name == null || name.length() == 0) {
-            mainUI.setTitle(mainUIbaseTitle);
+    public void setTitle(final String path, final String name, final int status) {
+        if (status == FileStatus.NO_FILE || name == null || name.isEmpty()) {
+            this.mainUI.setTitle(this.mainUIbaseTitle);
         } else {
-            String edited = (status == FileStatus.NEW_EDITED || status == FileStatus.EDITED) ? "*" : " ";
-            String titleName = (status == FileStatus.NEW_EDITED || status == FileStatus.NEW_NOT_EDITED) ? name : path;
-            mainUI.setTitle(titleName + edited + " - " + mainUIbaseTitle);
-            editTabbedPane.setTitleAt(editTabbedPane.getSelectedIndex(), name + edited);
+            final String edited = (status == FileStatus.NEW_EDITED || status == FileStatus.EDITED) ? "*" : " ";
+            final String titleName = (status == FileStatus.NEW_EDITED || status == FileStatus.NEW_NOT_EDITED) ? name : path;
+            this.mainUI.setTitle(titleName + edited + " - " + this.mainUIbaseTitle);
+            this.editTabbedPane.setTitleAt(this.editTabbedPane.getSelectedIndex(), name + edited);
         }
     }
 
@@ -211,7 +210,7 @@ public class Editor {
      * Perform "new" operation to create an empty tab.
      */
     public void newFile() {
-        editTabbedPane.newFile();
+        this.editTabbedPane.newFile();
     }
 
     /**
@@ -220,7 +219,7 @@ public class Editor {
      * @return true if succeeded, else false.
      */
     public boolean close() {
-        return editTabbedPane.closeCurrentFile();
+        return this.editTabbedPane.closeCurrentFile();
     }
 
     /**
@@ -229,7 +228,7 @@ public class Editor {
      * @return true if succeeded, else false.
      */
     public boolean closeAll() {
-        return editTabbedPane.closeAllFiles();
+        return this.editTabbedPane.closeAllFiles();
     }
 
     /**
@@ -238,7 +237,7 @@ public class Editor {
      * @return true if succeeded, else false.
      */
     public boolean save() {
-        return editTabbedPane.saveCurrentFile();
+        return this.editTabbedPane.saveCurrentFile();
     }
 
     /**
@@ -247,7 +246,7 @@ public class Editor {
      * @return true if succeeded, else false.
      */
     public boolean saveAs() {
-        return editTabbedPane.saveAsCurrentFile();
+        return this.editTabbedPane.saveAsCurrentFile();
     }
 
     /**
@@ -256,7 +255,7 @@ public class Editor {
      * @return true if succeeded, else false.
      */
     public boolean saveAll() {
-        return editTabbedPane.saveAllFiles();
+        return this.editTabbedPane.saveAllFiles();
     }
 
     /**
@@ -265,7 +264,7 @@ public class Editor {
      * @return true if succeeded, else false.
      */
     public boolean open() {
-        return editTabbedPane.openFile();
+        return this.editTabbedPane.openFile();
     }
 
     /**
@@ -274,10 +273,10 @@ public class Editor {
      * @param paths File paths to open
      * @return true if succeeded, else false.
      */
-    public boolean open(ArrayList<String> paths) {
-        for (String path : paths) {
-            File file = new File(path);
-            if (!editTabbedPane.openFile(file)) {
+    public boolean open(final ArrayList<String> paths) {
+        for (final String path : paths) {
+            final File file = new File(path);
+            if (!this.editTabbedPane.openFile(file)) {
                 return false;
             }
         }
@@ -298,7 +297,7 @@ public class Editor {
      * discarded).
      */
     public boolean editsSavedOrAbandoned() {
-        return editTabbedPane.editsSavedOrAbandoned();
+        return this.editTabbedPane.editsSavedOrAbandoned();
     }
 
 }

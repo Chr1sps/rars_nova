@@ -35,7 +35,7 @@ public class RISCVTokenMarker extends TokenMarker {
      * <p>Constructor for RISCVTokenMarker.</p>
      */
     public RISCVTokenMarker() {
-        this(getKeywords());
+        this(RISCVTokenMarker.getKeywords());
     }
 
     /**
@@ -43,7 +43,7 @@ public class RISCVTokenMarker extends TokenMarker {
      *
      * @param keywords a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.KeywordMap} object
      */
-    public RISCVTokenMarker(KeywordMap keywords) {
+    public RISCVTokenMarker(final KeywordMap keywords) {
         this.keywords = keywords;
     }
 
@@ -53,19 +53,19 @@ public class RISCVTokenMarker extends TokenMarker {
      * @return an array of {@link java.lang.String} objects
      */
     public static String[] getRISCVTokenLabels() {
-        if (tokenLabels == null) {
-            tokenLabels = new String[Token.ID_COUNT];
-            tokenLabels[Token.COMMENT1] = "Comment";
-            tokenLabels[Token.LITERAL1] = "String literal";
-            tokenLabels[Token.LITERAL2] = "Character literal";
-            tokenLabels[Token.LABEL] = "Label";
-            tokenLabels[Token.KEYWORD1] = "Instruction";
-            tokenLabels[Token.KEYWORD2] = "Assembler directive";
-            tokenLabels[Token.KEYWORD3] = "Register";
-            tokenLabels[Token.INVALID] = "In-progress, invalid";
-            tokenLabels[Token.MACRO_ARG] = "Macro parameter";
+        if (RISCVTokenMarker.tokenLabels == null) {
+            RISCVTokenMarker.tokenLabels = new String[Token.ID_COUNT];
+            RISCVTokenMarker.tokenLabels[Token.COMMENT1] = "Comment";
+            RISCVTokenMarker.tokenLabels[Token.LITERAL1] = "String literal";
+            RISCVTokenMarker.tokenLabels[Token.LITERAL2] = "Character literal";
+            RISCVTokenMarker.tokenLabels[Token.LABEL] = "Label";
+            RISCVTokenMarker.tokenLabels[Token.KEYWORD1] = "Instruction";
+            RISCVTokenMarker.tokenLabels[Token.KEYWORD2] = "Assembler directive";
+            RISCVTokenMarker.tokenLabels[Token.KEYWORD3] = "Register";
+            RISCVTokenMarker.tokenLabels[Token.INVALID] = "In-progress, invalid";
+            RISCVTokenMarker.tokenLabels[Token.MACRO_ARG] = "Macro parameter";
         }
-        return tokenLabels;
+        return RISCVTokenMarker.tokenLabels;
     }
 
     /**
@@ -74,37 +74,38 @@ public class RISCVTokenMarker extends TokenMarker {
      * @return an array of {@link java.lang.String} objects
      */
     public static String[] getRISCVTokenExamples() {
-        if (tokenExamples == null) {
-            tokenExamples = new String[Token.ID_COUNT];
-            tokenExamples[Token.COMMENT1] = "# Load";
-            tokenExamples[Token.LITERAL1] = "\"First\"";
-            tokenExamples[Token.LITERAL2] = "'\\n'";
-            tokenExamples[Token.LABEL] = "main:";
-            tokenExamples[Token.KEYWORD1] = "lui";
-            tokenExamples[Token.KEYWORD2] = ".text";
-            tokenExamples[Token.KEYWORD3] = "zero";
-            tokenExamples[Token.INVALID] = "\"Regi";
-            tokenExamples[Token.MACRO_ARG] = "%arg";
+        if (RISCVTokenMarker.tokenExamples == null) {
+            RISCVTokenMarker.tokenExamples = new String[Token.ID_COUNT];
+            RISCVTokenMarker.tokenExamples[Token.COMMENT1] = "# Load";
+            RISCVTokenMarker.tokenExamples[Token.LITERAL1] = "\"First\"";
+            RISCVTokenMarker.tokenExamples[Token.LITERAL2] = "'\\n'";
+            RISCVTokenMarker.tokenExamples[Token.LABEL] = "main:";
+            RISCVTokenMarker.tokenExamples[Token.KEYWORD1] = "lui";
+            RISCVTokenMarker.tokenExamples[Token.KEYWORD2] = ".text";
+            RISCVTokenMarker.tokenExamples[Token.KEYWORD3] = "zero";
+            RISCVTokenMarker.tokenExamples[Token.INVALID] = "\"Regi";
+            RISCVTokenMarker.tokenExamples[Token.MACRO_ARG] = "%arg";
         }
-        return tokenExamples;
+        return RISCVTokenMarker.tokenExamples;
     }
 
     /**
      * {@inheritDoc}
      */
-    public byte markTokensImpl(byte token, Segment line, int lineIndex) {
-        char[] array = line.array;
-        int offset = line.offset;
-        lastOffset = offset;
-        lastKeyword = offset;
-        int length = line.count + offset;
+    @Override
+    public byte markTokensImpl(byte token, final Segment line, final int lineIndex) {
+        final char[] array = line.array;
+        final int offset = line.offset;
+        this.lastOffset = offset;
+        this.lastKeyword = offset;
+        final int length = line.count + offset;
         boolean backslash = false;
 
         loop:
         for (int i = offset; i < length; i++) {
-            int i1 = (i + 1);
+            final int i1 = (i + 1);
 
-            char c = array[i];
+            final char c = array[i];
             if (c == '\\') {
                 backslash = !backslash;
                 continue;
@@ -114,23 +115,23 @@ public class RISCVTokenMarker extends TokenMarker {
                 case Token.NULL:
                     switch (c) {
                         case '"':
-                            doKeyword(line, i, c);
+                            this.doKeyword(line, i, c);
                             if (backslash)
                                 backslash = false;
                             else {
-                                addToken(i - lastOffset, token);
+                                this.addToken(i - this.lastOffset, token);
                                 token = Token.LITERAL1;
-                                lastOffset = lastKeyword = i;
+                                this.lastOffset = this.lastKeyword = i;
                             }
                             break;
                         case '\'':
-                            doKeyword(line, i, c);
+                            this.doKeyword(line, i, c);
                             if (backslash)
                                 backslash = false;
                             else {
-                                addToken(i - lastOffset, token);
+                                this.addToken(i - this.lastOffset, token);
                                 token = Token.LITERAL2;
-                                lastOffset = lastKeyword = i;
+                                this.lastOffset = this.lastKeyword = i;
                             }
                             break;
                         case ':':
@@ -143,22 +144,22 @@ public class RISCVTokenMarker extends TokenMarker {
                             boolean validIdentifier = false;
                             try {
                                 validIdentifier = io.github.chr1sps.rars.assembler.TokenTypes
-                                        .isValidIdentifier(new String(array, lastOffset, i1 - lastOffset - 1).trim());
-                            } catch (StringIndexOutOfBoundsException e) {
+                                        .isValidIdentifier(new String(array, this.lastOffset, i1 - this.lastOffset - 1).trim());
+                            } catch (final StringIndexOutOfBoundsException e) {
                                 validIdentifier = false;
                             }
                             if (validIdentifier) {
-                                addToken(i1 - lastOffset, Token.LABEL);
-                                lastOffset = lastKeyword = i1;
+                                this.addToken(i1 - this.lastOffset, Token.LABEL);
+                                this.lastOffset = this.lastKeyword = i1;
                             }
                             break;
                         case '#':
                             backslash = false;
-                            doKeyword(line, i, c);
+                            this.doKeyword(line, i, c);
                             if (length - i >= 1) {
-                                addToken(i - lastOffset, token);
-                                addToken(length - i, Token.COMMENT1);
-                                lastOffset = lastKeyword = length;
+                                this.addToken(i - this.lastOffset, token);
+                                this.addToken(length - i, Token.COMMENT1);
+                                this.lastOffset = this.lastKeyword = length;
                                 break loop;
                             }
                             break;
@@ -167,7 +168,7 @@ public class RISCVTokenMarker extends TokenMarker {
                             // . and $ added 4/6/10 DPS; % added 12/12 M.Sekhavat
                             if (!Character.isLetterOrDigit(c)
                                     && c != '_' && c != '.' && c != '$' && c != '%')
-                                doKeyword(line, i, c);
+                                this.doKeyword(line, i, c);
                             break;
                     }
                     break;
@@ -175,18 +176,18 @@ public class RISCVTokenMarker extends TokenMarker {
                     if (backslash)
                         backslash = false;
                     else if (c == '"') {
-                        addToken(i1 - lastOffset, token);
+                        this.addToken(i1 - this.lastOffset, token);
                         token = Token.NULL;
-                        lastOffset = lastKeyword = i1;
+                        this.lastOffset = this.lastKeyword = i1;
                     }
                     break;
                 case Token.LITERAL2:
                     if (backslash)
                         backslash = false;
                     else if (c == '\'') {
-                        addToken(i1 - lastOffset, Token.LITERAL1);
+                        this.addToken(i1 - this.lastOffset, Token.LITERAL1);
                         token = Token.NULL;
-                        lastOffset = lastKeyword = i1;
+                        this.lastOffset = this.lastKeyword = i1;
                     }
                     break;
                 default:
@@ -196,20 +197,20 @@ public class RISCVTokenMarker extends TokenMarker {
         }
 
         if (token == Token.NULL)
-            doKeyword(line, length, '\0');
+            this.doKeyword(line, length, '\0');
 
         switch (token) {
             case Token.LITERAL1:
             case Token.LITERAL2:
-                addToken(length - lastOffset, Token.INVALID);
+                this.addToken(length - this.lastOffset, Token.INVALID);
                 token = Token.NULL;
                 break;
             case Token.KEYWORD2:
-                addToken(length - lastOffset, token);
+                this.addToken(length - this.lastOffset, token);
                 if (!backslash)
                     token = Token.NULL;
             default:
-                addToken(length - lastOffset, token);
+                this.addToken(length - this.lastOffset, token);
                 break;
         }
 
@@ -222,14 +223,15 @@ public class RISCVTokenMarker extends TokenMarker {
      * Construct and return any appropriate help information for
      * the given token.
      */
-    public ArrayList<PopupHelpItem> getTokenExactMatchHelp(Token token, String tokenText) {
+    @Override
+    public ArrayList<PopupHelpItem> getTokenExactMatchHelp(final Token token, final String tokenText) {
         ArrayList<PopupHelpItem> matches = null;
         if (token != null && token.id == Token.KEYWORD1) {
-            ArrayList<Instruction> instrMatches = Globals.instructionSet.matchOperator(tokenText);
-            if (instrMatches.size() > 0) {
+            final ArrayList<Instruction> instrMatches = Globals.instructionSet.matchOperator(tokenText);
+            if (!instrMatches.isEmpty()) {
                 int realMatches = 0;
                 matches = new ArrayList<>();
-                for (Instruction inst : instrMatches) {
+                for (final Instruction inst : instrMatches) {
                     if (Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED)
                             || inst instanceof BasicInstruction) {
                         matches.add(new PopupHelpItem(tokenText, inst.getExampleFormat(), inst.getDescription()));
@@ -242,7 +244,7 @@ public class RISCVTokenMarker extends TokenMarker {
             }
         }
         if (token != null && token.id == Token.KEYWORD2) {
-            Directive dir = Directive.matchDirective(tokenText);
+            final Directive dir = Directive.matchDirective(tokenText);
             if (dir != null) {
                 matches = new ArrayList<>();
                 matches.add(new PopupHelpItem(tokenText, dir.getName(), dir.getDescription()));
@@ -257,8 +259,9 @@ public class RISCVTokenMarker extends TokenMarker {
      * Construct and return any appropriate help information for
      * prefix match based on current line's token list.
      */
-    public ArrayList<PopupHelpItem> getTokenPrefixMatchHelp(String line, Token tokenList, Token token,
-                                                            String tokenText) {
+    @Override
+    public ArrayList<PopupHelpItem> getTokenPrefixMatchHelp(final String line, final Token tokenList, final Token token,
+                                                            final String tokenText) {
         // CASE: Unlikely boundary case...
         if (tokenList == null || tokenList.id == Token.END) {
             return null;
@@ -301,10 +304,10 @@ public class RISCVTokenMarker extends TokenMarker {
         // token.
         if (token != null && token.id == Token.KEYWORD1) {
             if (moreThanOneKeyword) {
-                return (keywordType == Token.KEYWORD1) ? getTextFromInstructionMatch(keywordTokenText, true)
-                        : getTextFromDirectiveMatch(keywordTokenText, true);
+                return (keywordType == Token.KEYWORD1) ? this.getTextFromInstructionMatch(keywordTokenText, true)
+                        : this.getTextFromDirectiveMatch(keywordTokenText, true);
             } else {
-                return getTextFromInstructionMatch(tokenText, false);
+                return this.getTextFromInstructionMatch(tokenText, false);
             }
         }
 
@@ -315,10 +318,10 @@ public class RISCVTokenMarker extends TokenMarker {
         // directives for which this is a prefix, so do a prefix match on current token.
         if (token != null && token.id == Token.KEYWORD2) {
             if (moreThanOneKeyword) {
-                return (keywordType == Token.KEYWORD1) ? getTextFromInstructionMatch(keywordTokenText, true)
-                        : getTextFromDirectiveMatch(keywordTokenText, true);
+                return (keywordType == Token.KEYWORD1) ? this.getTextFromInstructionMatch(keywordTokenText, true)
+                        : this.getTextFromDirectiveMatch(keywordTokenText, true);
             } else {
-                return getTextFromDirectiveMatch(tokenText, false);
+                return this.getTextFromDirectiveMatch(tokenText, false);
             }
         }
 
@@ -327,10 +330,10 @@ public class RISCVTokenMarker extends TokenMarker {
         // than KEYWORD1 or KEYWORD2. Generate text based on exact match of that token.
         if (keywordTokenText != null) {
             if (keywordType == Token.KEYWORD1) {
-                return getTextFromInstructionMatch(keywordTokenText, true);
+                return this.getTextFromInstructionMatch(keywordTokenText, true);
             }
             if (keywordType == Token.KEYWORD2) {
-                return getTextFromDirectiveMatch(keywordTokenText, true);
+                return this.getTextFromDirectiveMatch(keywordTokenText, true);
             }
         }
 
@@ -352,21 +355,21 @@ public class RISCVTokenMarker extends TokenMarker {
 
         if (token != null && token.id == Token.NULL) {
 
-            String trimmedTokenText = tokenText.trim();
+            final String trimmedTokenText = tokenText.trim();
 
             // Subcase: no KEYWORD1 or KEYWORD2 but current token contains nothing but white
             // space. We're done.
-            if (keywordTokenText == null && trimmedTokenText.length() == 0) {
+            if (keywordTokenText == null && trimmedTokenText.isEmpty()) {
                 return null;
             }
 
             // Subcase: no KEYWORD1 or KEYWORD2. Generate text based on prefix match of
             // trimmed current token.
-            if (keywordTokenText == null && trimmedTokenText.length() > 0) {
+            if (keywordTokenText == null && !trimmedTokenText.isEmpty()) {
                 if (trimmedTokenText.charAt(0) == '.') {
-                    return getTextFromDirectiveMatch(trimmedTokenText, false);
+                    return this.getTextFromDirectiveMatch(trimmedTokenText, false);
                 } else if (trimmedTokenText.length() >= Globals.getSettings().getEditorPopupPrefixLength()) {
-                    return getTextFromInstructionMatch(trimmedTokenText, false);
+                    return this.getTextFromInstructionMatch(trimmedTokenText, false);
                 }
             }
         }
@@ -378,11 +381,11 @@ public class RISCVTokenMarker extends TokenMarker {
     // Return ArrayList of PopupHelpItem for match of directives. If second argument
     // true, will do exact match. If false, will do prefix match. Returns null
     // if no matches.
-    private ArrayList<PopupHelpItem> getTextFromDirectiveMatch(String tokenText, boolean exact) {
+    private ArrayList<PopupHelpItem> getTextFromDirectiveMatch(final String tokenText, final boolean exact) {
         ArrayList<PopupHelpItem> matches = null;
         ArrayList<Directive> directiveMatches = null;
         if (exact) {
-            Directive dir = Directive.matchDirective(tokenText);
+            final Directive dir = Directive.matchDirective(tokenText);
             if (dir != null) {
                 directiveMatches = new ArrayList<>();
                 directiveMatches.add(dir);
@@ -392,7 +395,7 @@ public class RISCVTokenMarker extends TokenMarker {
         }
         if (directiveMatches != null) {
             matches = new ArrayList<>();
-            for (Directive direct : directiveMatches) {
+            for (final Directive direct : directiveMatches) {
                 matches.add(new PopupHelpItem(tokenText, direct.getName(), direct.getDescription(), exact));
             }
         }
@@ -402,9 +405,9 @@ public class RISCVTokenMarker extends TokenMarker {
     // Return text for match of instruction mnemonic. If second argument true, will
     // do exact match. If false, will do prefix match. Text is returned as ArrayList
     // of PopupHelpItem objects. If no matches, returns null.
-    private ArrayList<PopupHelpItem> getTextFromInstructionMatch(String tokenText, boolean exact) {
-        ArrayList<Instruction> matches;
-        ArrayList<PopupHelpItem> results = new ArrayList<>();
+    private ArrayList<PopupHelpItem> getTextFromInstructionMatch(final String tokenText, final boolean exact) {
+        final ArrayList<Instruction> matches;
+        final ArrayList<PopupHelpItem> results = new ArrayList<>();
         if (exact) {
             matches = Globals.instructionSet.matchOperator(tokenText);
         } else {
@@ -414,15 +417,15 @@ public class RISCVTokenMarker extends TokenMarker {
             return null;
         }
         int realMatches = 0;
-        HashMap<String, String> insts = new HashMap<>();
-        TreeSet<String> mnemonics = new TreeSet<>();
-        for (Instruction inst : matches) {
+        final HashMap<String, String> insts = new HashMap<>();
+        final TreeSet<String> mnemonics = new TreeSet<>();
+        for (final Instruction inst : matches) {
             if (Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED)
                     || inst instanceof BasicInstruction) {
                 if (exact) {
                     results.add(new PopupHelpItem(tokenText, inst.getExampleFormat(), inst.getDescription(), exact));
                 } else {
-                    String mnemonic = inst.getExampleFormat().split(" ")[0];
+                    final String mnemonic = inst.getExampleFormat().split(" ")[0];
                     if (!insts.containsKey(mnemonic)) {
                         mnemonics.add(mnemonic);
                         insts.put(mnemonic, inst.getDescription());
@@ -439,8 +442,8 @@ public class RISCVTokenMarker extends TokenMarker {
             }
         } else {
             if (!exact) {
-                for (String mnemonic : mnemonics) {
-                    String info = insts.get(mnemonic);
+                for (final String mnemonic : mnemonics) {
+                    final String info = insts.get(mnemonic);
                     results.add(new PopupHelpItem(tokenText, mnemonic, info, exact));
                 }
             }
@@ -457,31 +460,31 @@ public class RISCVTokenMarker extends TokenMarker {
      * type (e.g. Token.KEYWORD1).
      */
     private static KeywordMap getKeywords() {
-        if (cKeywords == null) {
-            cKeywords = new KeywordMap(false);
+        if (RISCVTokenMarker.cKeywords == null) {
+            RISCVTokenMarker.cKeywords = new KeywordMap(false);
             // add Instruction mnemonics
-            for (Instruction inst : io.github.chr1sps.rars.Globals.instructionSet.getInstructionList()) {
-                cKeywords.add(inst.getName(), Token.KEYWORD1);
+            for (final Instruction inst : io.github.chr1sps.rars.Globals.instructionSet.getInstructionList()) {
+                RISCVTokenMarker.cKeywords.add(inst.getName(), Token.KEYWORD1);
             }
             // add assembler directives
-            for (Directive direct : Directive.getDirectiveList()) {
-                cKeywords.add(direct.getName(), Token.KEYWORD2);
+            for (final Directive direct : Directive.getDirectiveList()) {
+                RISCVTokenMarker.cKeywords.add(direct.getName(), Token.KEYWORD2);
             }
             // add integer register file
-            for (Register r : RegisterFile.getRegisters()) {
-                cKeywords.add(r.getName(), Token.KEYWORD3);
-                cKeywords.add("x" + r.getNumber(), Token.KEYWORD3); // also recognize x0, x1, x2, etc
+            for (final Register r : RegisterFile.getRegisters()) {
+                RISCVTokenMarker.cKeywords.add(r.getName(), Token.KEYWORD3);
+                RISCVTokenMarker.cKeywords.add("x" + r.getNumber(), Token.KEYWORD3); // also recognize x0, x1, x2, etc
             }
 
-            cKeywords.add("fp", Token.KEYWORD3);
+            RISCVTokenMarker.cKeywords.add("fp", Token.KEYWORD3);
 
             // add floating point register file
-            for (Register r : FloatingPointRegisterFile.getRegisters()) {
-                cKeywords.add(r.getName(), Token.KEYWORD3);
-                cKeywords.add("f" + r.getNumber(), Token.KEYWORD3);
+            for (final Register r : FloatingPointRegisterFile.getRegisters()) {
+                RISCVTokenMarker.cKeywords.add(r.getName(), Token.KEYWORD3);
+                RISCVTokenMarker.cKeywords.add("f" + r.getNumber(), Token.KEYWORD3);
             }
         }
-        return cKeywords;
+        return RISCVTokenMarker.cKeywords;
     }
 
     // private members
@@ -491,23 +494,23 @@ public class RISCVTokenMarker extends TokenMarker {
     private int lastOffset;
     private int lastKeyword;
 
-    private void doKeyword(Segment line, int i, char c) {
-        int i1 = i + 1;
+    private void doKeyword(final Segment line, final int i, final char c) {
+        final int i1 = i + 1;
 
-        int len = i - lastKeyword;
-        byte id = keywords.lookup(line, lastKeyword, len);
+        final int len = i - this.lastKeyword;
+        final byte id = this.keywords.lookup(line, this.lastKeyword, len);
         if (id != Token.NULL) {
             // If this is a Token.KEYWORD1 and line already contains a keyword,
             // then assume this one is a label reference and ignore it.
             // if (id == Token.KEYWORD1 && tokenListContainsKeyword()) {
             // }
             // else {
-            if (lastKeyword != lastOffset)
-                addToken(lastKeyword - lastOffset, Token.NULL);
-            addToken(len, id);
-            lastOffset = i;
+            if (this.lastKeyword != this.lastOffset)
+                this.addToken(this.lastKeyword - this.lastOffset, Token.NULL);
+            this.addToken(len, id);
+            this.lastOffset = i;
             // }
         }
-        lastKeyword = i1;
+        this.lastKeyword = i1;
     }
 }

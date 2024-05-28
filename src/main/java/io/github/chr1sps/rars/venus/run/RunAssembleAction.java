@@ -43,7 +43,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action class for the Run -> Assemble menu item (and toolbar icon)
- *
  */
 public class RunAssembleAction extends GuiAction {
 
@@ -64,10 +63,10 @@ public class RunAssembleAction extends GuiAction {
      * @param accel    a {@link javax.swing.KeyStroke} object
      * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
      */
-    public RunAssembleAction(String name, Icon icon, String descrip,
-                             Integer mnemonic, KeyStroke accel, VenusUI gui) {
+    public RunAssembleAction(final String name, final Icon icon, final String descrip,
+                             final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
-        mainUI = gui;
+        this.mainUI = gui;
     }
 
     // These are both used by RunResetAction to re-assemble under identical
@@ -79,34 +78,35 @@ public class RunAssembleAction extends GuiAction {
      * @return a {@link java.util.ArrayList} object
      */
     public static ArrayList<RISCVprogram> getProgramsToAssemble() {
-        return programsToAssemble;
+        return RunAssembleAction.programsToAssemble;
     }
 
     static boolean getExtendedAssemblerEnabled() {
-        return extendedAssemblerEnabled;
+        return RunAssembleAction.extendedAssemblerEnabled;
     }
 
     static boolean getWarningsAreErrors() {
-        return warningsAreErrors;
+        return RunAssembleAction.warningsAreErrors;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void actionPerformed(ActionEvent e) {
-        String name = this.getValue(Action.NAME).toString();
-        MessagesPane messagesPane = mainUI.getMessagesPane();
-        ExecutePane executePane = mainUI.getMainPane().getExecutePane();
-        RegistersPane registersPane = mainUI.getRegistersPane();
-        extendedAssemblerEnabled = Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED);
-        warningsAreErrors = Globals.getSettings().getBooleanSetting(Settings.Bool.WARNINGS_ARE_ERRORS);
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        final String name = this.getValue(Action.NAME).toString();
+        final MessagesPane messagesPane = this.mainUI.getMessagesPane();
+        final ExecutePane executePane = this.mainUI.getMainPane().getExecutePane();
+        final RegistersPane registersPane = this.mainUI.getRegistersPane();
+        RunAssembleAction.extendedAssemblerEnabled = Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED);
+        RunAssembleAction.warningsAreErrors = Globals.getSettings().getBooleanSetting(Settings.Bool.WARNINGS_ARE_ERRORS);
         if (FileStatus.getFile() != null) {
             if (FileStatus.get() == FileStatus.EDITED) {
-                mainUI.getEditor().save();
+                this.mainUI.getEditor().save();
             }
             try {
                 Globals.program = new RISCVprogram();
-                ArrayList<String> filesToAssemble;
+                final ArrayList<String> filesToAssemble;
                 if (Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ALL)) {// setting calls for multiple
                     // file assembly
                     filesToAssemble = FilenameFinder.getFilenameList(
@@ -116,9 +116,9 @@ public class RunAssembleAction extends GuiAction {
                     filesToAssemble.add(FileStatus.getName());
                 }
                 if (Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_OPEN)) {
-                    mainUI.getEditor().saveAll();
-                    String[] paths = mainUI.getEditor().getOpenFilePaths();
-                    for (String path : paths) {
+                    this.mainUI.getEditor().saveAll();
+                    final String[] paths = this.mainUI.getEditor().getOpenFilePaths();
+                    for (final String path : paths) {
                         if (!filesToAssemble.contains(path)) {
                             filesToAssemble.add(path);
                         }
@@ -127,15 +127,15 @@ public class RunAssembleAction extends GuiAction {
                 String exceptionHandler = null;
                 if (Globals.getSettings().getBooleanSetting(Settings.Bool.EXCEPTION_HANDLER_ENABLED) &&
                         Globals.getSettings().getExceptionHandler() != null &&
-                        Globals.getSettings().getExceptionHandler().length() > 0) {
+                        !Globals.getSettings().getExceptionHandler().isEmpty()) {
                     exceptionHandler = Globals.getSettings().getExceptionHandler();
                 }
-                programsToAssemble = Globals.program.prepareFilesForAssembly(filesToAssemble,
+                RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(filesToAssemble,
                         FileStatus.getFile().getPath(), exceptionHandler);
-                messagesPane.postMessage(buildFileNameList(name + ": assembling ", programsToAssemble));
+                messagesPane.postMessage(this.buildFileNameList(name + ": assembling ", RunAssembleAction.programsToAssemble));
                 // added logic to receive any warnings and output them.... DPS 11/28/06
-                ErrorList warnings = Globals.program.assemble(programsToAssemble, extendedAssemblerEnabled,
-                        warningsAreErrors);
+                final ErrorList warnings = Globals.program.assemble(RunAssembleAction.programsToAssemble, RunAssembleAction.extendedAssemblerEnabled,
+                        RunAssembleAction.warningsAreErrors);
                 if (warnings.warningsOccurred()) {
                     messagesPane.postMessage(warnings.generateWarningReport());
                 }
@@ -159,27 +159,27 @@ public class RunAssembleAction extends GuiAction {
                 registersPane.getRegistersWindow().clearWindow();
                 registersPane.getFloatingPointWindow().clearWindow();
                 registersPane.getControlAndStatusWindow().clearWindow();
-                mainUI.setReset(true);
-                mainUI.setStarted(false);
-                mainUI.getMainPane().setSelectedComponent(executePane);
+                this.mainUI.setReset(true);
+                this.mainUI.setStarted(false);
+                this.mainUI.getMainPane().setSelectedComponent(executePane);
 
                 // Aug. 24, 2005 Ken Vollmar
                 SystemIO.resetFiles(); // Ensure that I/O "file descriptors" are initialized for a new program run
 
-            } catch (AssemblyException pe) {
-                String errorReport = pe.errors().generateErrorAndWarningReport();
+            } catch (final AssemblyException pe) {
+                final String errorReport = pe.errors().generateErrorAndWarningReport();
                 messagesPane.postMessage(errorReport);
                 messagesPane.postMessage(
                         name + ": operation completed with errors.\n\n");
                 // Select editor line containing first error, and corresponding error message.
-                ArrayList<ErrorMessage> errorMessages = pe.errors().getErrorMessages();
-                for (ErrorMessage em : errorMessages) {
+                final ArrayList<ErrorMessage> errorMessages = pe.errors().getErrorMessages();
+                for (final ErrorMessage em : errorMessages) {
                     // No line or position may mean File Not Found (e.g. exception file). Don't try
                     // to open. DPS 3-Oct-2010
                     if (em.getLine() == 0 && em.getPosition() == 0) {
                         continue;
                     }
-                    if (!em.isWarning() || warningsAreErrors) {
+                    if (!em.isWarning() || RunAssembleAction.warningsAreErrors) {
                         Globals.getGui().getMessagesPane().selectErrorMessage(em.getFilename(), em.getLine(),
                                 em.getPosition());
                         // Bug workaround: Line selection does not work correctly for the JEditTextArea
@@ -205,14 +205,14 @@ public class RunAssembleAction extends GuiAction {
 
     // Handy little utility for building comma-separated list of filenames
     // while not letting line length get out of hand.
-    private String buildFileNameList(String preamble, ArrayList<RISCVprogram> programList) {
+    private String buildFileNameList(final String preamble, final ArrayList<RISCVprogram> programList) {
         String result = preamble;
         int lineLength = result.length();
         for (int i = 0; i < programList.size(); i++) {
-            String filename = programList.get(i).getFilename();
+            final String filename = programList.get(i).getFilename();
             result += filename + ((i < programList.size() - 1) ? ", " : "");
             lineLength += filename.length();
-            if (lineLength > LINE_LENGTH_LIMIT) {
+            if (lineLength > RunAssembleAction.LINE_LENGTH_LIMIT) {
                 result += "\n";
                 lineLength = 0;
             }

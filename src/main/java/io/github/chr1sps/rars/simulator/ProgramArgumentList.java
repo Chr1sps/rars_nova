@@ -1,13 +1,13 @@
 package io.github.chr1sps.rars.simulator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.StringTokenizer;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.StringTokenizer;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -56,11 +56,11 @@ public class ProgramArgumentList {
      *
      * @param args String containing delimiter-separated arguments
      */
-    public ProgramArgumentList(String args) {
-        StringTokenizer st = new StringTokenizer(args);
-        programArgumentList = new ArrayList<>(st.countTokens());
+    public ProgramArgumentList(final String args) {
+        final StringTokenizer st = new StringTokenizer(args);
+        this.programArgumentList = new ArrayList<>(st.countTokens());
         while (st.hasMoreTokens()) {
-            programArgumentList.add(st.nextToken());
+            this.programArgumentList.add(st.nextToken());
         }
     }
 
@@ -69,7 +69,7 @@ public class ProgramArgumentList {
      *
      * @param list Array of String, each element containing one argument
      */
-    public ProgramArgumentList(String[] list) {
+    public ProgramArgumentList(final String[] list) {
         this(list, 0);
     }
 
@@ -82,9 +82,9 @@ public class ProgramArgumentList {
      *                      all remaining
      *                      elements are assumed to contain an argument.
      */
-    public ProgramArgumentList(String[] list, int startPosition) {
-        programArgumentList = new ArrayList<>(list.length - startPosition);
-        programArgumentList.addAll(Arrays.asList(list).subList(startPosition, list.length));
+    public ProgramArgumentList(final String[] list, final int startPosition) {
+        this.programArgumentList = new ArrayList<>(list.length - startPosition);
+        this.programArgumentList.addAll(Arrays.asList(list).subList(startPosition, list.length));
     }
 
     /**
@@ -93,7 +93,7 @@ public class ProgramArgumentList {
      *
      * @param list ArrayList of String, each element containing one argument
      */
-    public ProgramArgumentList(ArrayList<String> list) {
+    public ProgramArgumentList(final ArrayList<String> list) {
         this(list, 0);
     }
 
@@ -107,13 +107,13 @@ public class ProgramArgumentList {
      *                      all remaining
      *                      elements are assumed to contain an argument.
      */
-    public ProgramArgumentList(ArrayList<String> list, int startPosition) {
+    public ProgramArgumentList(final ArrayList<String> list, final int startPosition) {
         if (list == null || list.size() < startPosition) {
-            programArgumentList = new ArrayList<>(0);
+            this.programArgumentList = new ArrayList<>(0);
         } else {
-            programArgumentList = new ArrayList<>(list.size() - startPosition);
+            this.programArgumentList = new ArrayList<>(list.size() - startPosition);
             for (int i = startPosition; i < list.size(); i++) {
-                programArgumentList.add(list.get(i));
+                this.programArgumentList.add(list.get(i));
             }
         }
     }
@@ -132,7 +132,7 @@ public class ProgramArgumentList {
      * <p>storeProgramArguments.</p>
      */
     public void storeProgramArguments() {
-        if (programArgumentList == null || programArgumentList.size() == 0) {
+        if (this.programArgumentList == null || this.programArgumentList.isEmpty()) {
             return;
         }
         // Runtime stack initialization from stack top-down (each is 4 bytes) :
@@ -158,10 +158,10 @@ public class ProgramArgumentList {
 
         int highAddress = Memory.stackBaseAddress; // highest non-kernel address, sits "under" stack
         String programArgument;
-        int[] argStartAddress = new int[programArgumentList.size()];
+        final int[] argStartAddress = new int[this.programArgumentList.size()];
         try { // needed for all memory writes
-            for (int i = 0; i < programArgumentList.size(); i++) {
-                programArgument = programArgumentList.get(i);
+            for (int i = 0; i < this.programArgumentList.size(); i++) {
+                programArgument = this.programArgumentList.get(i);
                 Globals.memory.set(highAddress, 0, 1); // trailing null byte for each argument
                 highAddress--;
                 for (int j = programArgument.length() - 1; j >= 0; j--) {
@@ -195,7 +195,7 @@ public class ProgramArgumentList {
             RegisterFile.getRegister("sp").setValue(stackAddress + Memory.WORD_LENGTH_BYTES);
             RegisterFile.getRegister("a0").setValue(argStartAddress.length); // argc
             RegisterFile.getRegister("a1").setValue(stackAddress + Memory.WORD_LENGTH_BYTES + Memory.WORD_LENGTH_BYTES); // argv
-        } catch (AddressErrorException aee) {
+        } catch (final AddressErrorException aee) {
             System.out.println("Internal Error: Memory write error occurred while storing program arguments! " + aee);
             System.exit(0);
         }

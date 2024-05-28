@@ -86,7 +86,7 @@ public class Globals {
     /**
      * String to GUI's RunI/O text area when echoing user input from pop-up dialog.
      */
-    public static String userInputAlert = "**** user input : ";
+    public static final String userInputAlert = "**** user input : ";
     /**
      * Path to folder that contains images
      */
@@ -107,36 +107,36 @@ public class Globals {
     /**
      * List of accepted file extensions for RISCV assembly source files.
      */
-    public static final ArrayList<String> fileExtensions = getFileExtensions();
+    public static final ArrayList<String> fileExtensions = Globals.getFileExtensions();
     /**
      * Maximum length of scrolled message window (RARS Messages and Run I/O)
      */
-    public static final int maximumMessageCharacters = getMessageLimit();
+    public static final int maximumMessageCharacters = Globals.getMessageLimit();
     /**
      * Maximum number of assembler errors produced by one assemble operation
      */
-    public static final int maximumErrorMessages = getErrorLimit();
+    public static final int maximumErrorMessages = Globals.getErrorLimit();
     /**
      * Maximum number of back-step operations to buffer
      */
-    public static final int maximumBacksteps = getBackstepLimit();
+    public static final int maximumBacksteps = Globals.getBackstepLimit();
     /**
      * Copyright years
      */
-    public static final String copyrightYears = getCopyrightYears();
+    public static final String copyrightYears = Globals.getCopyrightYears();
     /**
      * Copyright holders
      */
-    public static final String copyrightHolders = getCopyrightHolders();
+    public static final String copyrightHolders = Globals.getCopyrightHolders();
     /**
      * Placeholder for non-printable ASCII codes
      */
-    public static final String ASCII_NON_PRINT = getAsciiNonPrint();
+    public static final String ASCII_NON_PRINT = Globals.getAsciiNonPrint();
     /**
      * Array of strings to display for ASCII codes in ASCII display of data segment.
      * ASCII code 0-255 is array index.
      */
-    public static final String[] ASCII_TABLE = getAsciiStrings();
+    public static final String[] ASCII_TABLE = Globals.getAsciiStrings();
     /**
      * Exit code -- useful with SYSCALL 17 when running from command line (not GUI)
      */
@@ -160,8 +160,8 @@ public class Globals {
      *
      * @param g a {@link io.github.chr1sps.rars.venus.VenusUI} object
      */
-    public static void setGui(VenusUI g) {
-        gui = g;
+    public static void setGui(final VenusUI g) {
+        Globals.gui = g;
     }
 
     /**
@@ -170,7 +170,7 @@ public class Globals {
      * @return a {@link io.github.chr1sps.rars.venus.VenusUI} object
      */
     public static VenusUI getGui() {
-        return gui;
+        return Globals.gui;
     }
 
     /**
@@ -179,7 +179,7 @@ public class Globals {
      * @return a {@link io.github.chr1sps.rars.Settings} object
      */
     public static Settings getSettings() {
-        return settings;
+        return Globals.settings;
     }
 
     /**
@@ -187,31 +187,31 @@ public class Globals {
      * structures.
      */
     public static void initialize() {
-        if (!initialized) {
-            memory = Memory.getInstance(); // clients can use Memory.getInstance instead of Globals.memory
-            symbolTable = new SymbolTable("global");
-            settings = new Settings();
-            instructionSet = new InstructionSet();
-            instructionSet.populate();
-            initialized = true;
-            debug = false;
-            memory.clear(); // will establish memory configuration from setting
+        if (!Globals.initialized) {
+            Globals.memory = Memory.getInstance(); // clients can use Memory.getInstance instead of Globals.memory
+            Globals.symbolTable = new SymbolTable("global");
+            Globals.settings = new Settings();
+            Globals.instructionSet = new InstructionSet();
+            Globals.instructionSet.populate();
+            Globals.initialized = true;
+            Globals.debug = false;
+            Globals.memory.clear(); // will establish memory configuration from setting
         }
     }
 
     // Read byte limit of Run I/O or RARS Messages text to buffer.
     private static int getMessageLimit() {
-        return getIntegerProperty(configPropertiesFile, "MessageLimit", 1000000);
+        return Globals.getIntegerProperty(Globals.configPropertiesFile, "MessageLimit", 1000000);
     }
 
     // Read limit on number of error messages produced by one assemble operation.
     private static int getErrorLimit() {
-        return getIntegerProperty(configPropertiesFile, "ErrorLimit", 200);
+        return Globals.getIntegerProperty(Globals.configPropertiesFile, "ErrorLimit", 200);
     }
 
     // Read backstep limit (number of operations to buffer) from properties file.
     private static int getBackstepLimit() {
-        return getIntegerProperty(configPropertiesFile, "BackstepLimit", 1000);
+        return Globals.getIntegerProperty(Globals.configPropertiesFile, "BackstepLimit", 1000);
     }
 
     // Read ASCII default display character for non-printing characters, from
@@ -223,7 +223,7 @@ public class Globals {
      * @return a {@link java.lang.String} object
      */
     public static String getAsciiNonPrint() {
-        String anp = getPropertyEntry(configPropertiesFile, "AsciiNonPrint");
+        final String anp = Globals.getPropertyEntry(Globals.configPropertiesFile, "AsciiNonPrint");
         return (anp == null) ? "." : ((anp.equals("space")) ? " " : anp);
     }
 
@@ -237,11 +237,11 @@ public class Globals {
      * @return an array of {@link java.lang.String} objects
      */
     public static String[] getAsciiStrings() {
-        String let = getPropertyEntry(configPropertiesFile, "AsciiTable");
-        String placeHolder = getAsciiNonPrint();
+        final String let = Globals.getPropertyEntry(Globals.configPropertiesFile, "AsciiTable");
+        final String placeHolder = Globals.getAsciiNonPrint();
         if (let == null) {
             // If config isn't loaded, give a decent default value.
-            String[] table = new String[((int) '~') + 1];
+            final String[] table = new String[((int) '~') + 1];
             for (int i = 0; i < table.length; i++) {
                 if (i == 0)
                     table[i] = "\0";
@@ -254,7 +254,7 @@ public class Globals {
             }
             return table;
         } else {
-            String[] lets = let.split(" +");
+            final String[] lets = let.split(" +");
             int maxLength = 0;
             for (int i = 0; i < lets.length; i++) {
                 if (lets[i].equals("null"))
@@ -264,7 +264,7 @@ public class Globals {
                 if (lets[i].length() > maxLength)
                     maxLength = lets[i].length();
             }
-            String padding = "        ";
+            final String padding = "        ";
             maxLength++;
             for (int i = 0; i < lets.length; i++) {
                 lets[i] = padding.substring(0, maxLength - lets[i].length()) + lets[i];
@@ -275,12 +275,12 @@ public class Globals {
 
     // Read and return integer property value for given file and property name.
     // Default value is returned if property file or name not found.
-    private static int getIntegerProperty(String propertiesFile, String propertyName, int defaultValue) {
+    private static int getIntegerProperty(final String propertiesFile, final String propertyName, final int defaultValue) {
         int limit = defaultValue; // just in case no entry is found
-        Properties properties = PropertiesFile.loadPropertiesFromFile(propertiesFile);
+        final Properties properties = PropertiesFile.loadPropertiesFromFile(propertiesFile);
         try {
             limit = Integer.parseInt(properties.getProperty(propertyName, Integer.toString(defaultValue)));
-        } catch (NumberFormatException ignored) {
+        } catch (final NumberFormatException ignored) {
         } // do nothing, I already have a default
         return limit;
     }
@@ -289,10 +289,10 @@ public class Globals {
     // string is tokenized into array list (assume StringTokenizer default
     // delimiters).
     private static ArrayList<String> getFileExtensions() {
-        ArrayList<String> extensionsList = new ArrayList<>();
-        String extensions = getPropertyEntry(configPropertiesFile, "Extensions");
+        final ArrayList<String> extensionsList = new ArrayList<>();
+        final String extensions = Globals.getPropertyEntry(Globals.configPropertiesFile, "Extensions");
         if (extensions != null) {
-            StringTokenizer st = new StringTokenizer(extensions);
+            final StringTokenizer st = new StringTokenizer(extensions);
             while (st.hasMoreTokens()) {
                 extensionsList.add(st.nextToken());
             }
@@ -309,7 +309,7 @@ public class Globals {
      * @param propertyName   String containing desired property name
      * @return String containing associated value; null if property not found
      */
-    public static String getPropertyEntry(String propertiesFile, String propertyName) {
+    public static String getPropertyEntry(final String propertiesFile, final String propertyName) {
         return PropertiesFile.loadPropertiesFromFile(propertiesFile).getProperty(propertyName);
     }
 
@@ -319,11 +319,11 @@ public class Globals {
      * @return ArrayList of SyscallNumberOverride objects
      */
     public ArrayList<SyscallNumberOverride> getSyscallOverrides() {
-        ArrayList<SyscallNumberOverride> overrides = new ArrayList<>();
-        Properties properties = PropertiesFile.loadPropertiesFromFile(syscallPropertiesFile);
-        Enumeration<Object> keys = properties.keys();
+        final ArrayList<SyscallNumberOverride> overrides = new ArrayList<>();
+        final Properties properties = PropertiesFile.loadPropertiesFromFile(Globals.syscallPropertiesFile);
+        final Enumeration<Object> keys = properties.keys();
         while (keys.hasMoreElements()) {
-            String key = (String) keys.nextElement();
+            final String key = (String) keys.nextElement();
             overrides.add(new SyscallNumberOverride(key, properties.getProperty(key)));
         }
         return overrides;

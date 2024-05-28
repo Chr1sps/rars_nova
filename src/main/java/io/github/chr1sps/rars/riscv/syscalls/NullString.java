@@ -1,9 +1,9 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
-import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
+import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
 import java.nio.charset.StandardCharsets;
@@ -40,7 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Small helper class to wrap getting null terminated strings from memory
- *
  */
 public class NullString {
     /**
@@ -51,8 +50,8 @@ public class NullString {
      * @return a {@link java.lang.String} object
      * @throws ExitingException if any.
      */
-    public static String get(ProgramStatement statement) throws ExitingException {
-        return get(statement, "a0");
+    public static String get(final ProgramStatement statement) throws ExitingException {
+        return NullString.get(statement, "a0");
     }
 
     /**
@@ -64,22 +63,22 @@ public class NullString {
      * @return the string read from memory
      * @throws ExitingException if it hits a #AddressErrorException
      */
-    public static String get(ProgramStatement statement, String reg) throws ExitingException {
+    public static String get(final ProgramStatement statement, final String reg) throws ExitingException {
         int byteAddress = RegisterFile.getValue(reg);
-        ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
+        final ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
         try {
             utf8BytesList.add((byte) Globals.memory.getByte(byteAddress));
-            while (utf8BytesList.get(utf8BytesList.size() - 1) != 0) // until null terminator
+            while (utf8BytesList.getLast() != 0) // until null terminator
             {
                 byteAddress++;
                 utf8BytesList.add((byte) Globals.memory.getByte(byteAddress));
             }
-        } catch (AddressErrorException e) {
+        } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }
 
-        int size = utf8BytesList.size() - 1; // size - 1 so we dont include the null terminator in the utf8Bytes array
-        byte[] utf8Bytes = new byte[size];
+        final int size = utf8BytesList.size() - 1; // size - 1 so we dont include the null terminator in the utf8Bytes array
+        final byte[] utf8Bytes = new byte[size];
         for (int i = 0; i < size; i++) {
             utf8Bytes[i] = utf8BytesList.get(i);
         }

@@ -29,59 +29,60 @@ public class DefaultInputHandler extends InputHandler {
      * Creates a new input handler with no key bindings defined.
      */
     public DefaultInputHandler() {
-        bindings = currentBindings = new BindingMap();
+        this.bindings = this.currentBindings = new BindingMap();
     }
 
     /**
      * Sets up the default key bindings.
      */
+    @Override
     public void addDefaultKeyBindings() {
-        addKeyBinding("BACK_SPACE", BACKSPACE);
-        addKeyBinding("C+BACK_SPACE", BACKSPACE_WORD);
-        addKeyBinding("DELETE", DELETE);
-        addKeyBinding("C+DELETE", DELETE_WORD);
+        this.addKeyBinding("BACK_SPACE", InputHandler.BACKSPACE);
+        this.addKeyBinding("C+BACK_SPACE", InputHandler.BACKSPACE_WORD);
+        this.addKeyBinding("DELETE", InputHandler.DELETE);
+        this.addKeyBinding("C+DELETE", InputHandler.DELETE_WORD);
 
-        addKeyBinding("ENTER", INSERT_BREAK);
-        addKeyBinding("TAB", INSERT_TAB);
-        addKeyBinding("S+TAB", DELETE_TAB);
+        this.addKeyBinding("ENTER", InputHandler.INSERT_BREAK);
+        this.addKeyBinding("TAB", InputHandler.INSERT_TAB);
+        this.addKeyBinding("S+TAB", InputHandler.DELETE_TAB);
 
-        addKeyBinding("INSERT", OVERWRITE);
-        addKeyBinding("C+\\", TOGGLE_RECT);
+        this.addKeyBinding("INSERT", InputHandler.OVERWRITE);
+        this.addKeyBinding("C+\\", InputHandler.TOGGLE_RECT);
 
-        addKeyBinding("HOME", HOME);
-        addKeyBinding("END", END);
-        addKeyBinding("C+A", SELECT_ALL);
-        addKeyBinding("S+HOME", SELECT_HOME);
-        addKeyBinding("S+END", SELECT_END);
-        addKeyBinding("C+HOME", DOCUMENT_HOME);
-        addKeyBinding("C+END", DOCUMENT_END);
-        addKeyBinding("CS+HOME", SELECT_DOC_HOME);
-        addKeyBinding("CS+END", SELECT_DOC_END);
+        this.addKeyBinding("HOME", InputHandler.HOME);
+        this.addKeyBinding("END", InputHandler.END);
+        this.addKeyBinding("C+A", InputHandler.SELECT_ALL);
+        this.addKeyBinding("S+HOME", InputHandler.SELECT_HOME);
+        this.addKeyBinding("S+END", InputHandler.SELECT_END);
+        this.addKeyBinding("C+HOME", InputHandler.DOCUMENT_HOME);
+        this.addKeyBinding("C+END", InputHandler.DOCUMENT_END);
+        this.addKeyBinding("CS+HOME", InputHandler.SELECT_DOC_HOME);
+        this.addKeyBinding("CS+END", InputHandler.SELECT_DOC_END);
 
-        addKeyBinding("PAGE_UP", PREV_PAGE);
-        addKeyBinding("PAGE_DOWN", NEXT_PAGE);
-        addKeyBinding("S+PAGE_UP", SELECT_PREV_PAGE);
-        addKeyBinding("S+PAGE_DOWN", SELECT_NEXT_PAGE);
+        this.addKeyBinding("PAGE_UP", InputHandler.PREV_PAGE);
+        this.addKeyBinding("PAGE_DOWN", InputHandler.NEXT_PAGE);
+        this.addKeyBinding("S+PAGE_UP", InputHandler.SELECT_PREV_PAGE);
+        this.addKeyBinding("S+PAGE_DOWN", InputHandler.SELECT_NEXT_PAGE);
 
-        addKeyBinding("LEFT", PREV_CHAR);
-        addKeyBinding("S+LEFT", SELECT_PREV_CHAR);
-        addKeyBinding("C+LEFT", PREV_WORD);
-        addKeyBinding("CS+LEFT", SELECT_PREV_WORD);
-        addKeyBinding("RIGHT", NEXT_CHAR);
-        addKeyBinding("S+RIGHT", SELECT_NEXT_CHAR);
-        addKeyBinding("C+RIGHT", NEXT_WORD);
-        addKeyBinding("CS+RIGHT", SELECT_NEXT_WORD);
-        addKeyBinding("UP", PREV_LINE);
-        addKeyBinding("S+UP", SELECT_PREV_LINE);
-        addKeyBinding("DOWN", NEXT_LINE);
-        addKeyBinding("S+DOWN", SELECT_NEXT_LINE);
+        this.addKeyBinding("LEFT", InputHandler.PREV_CHAR);
+        this.addKeyBinding("S+LEFT", InputHandler.SELECT_PREV_CHAR);
+        this.addKeyBinding("C+LEFT", InputHandler.PREV_WORD);
+        this.addKeyBinding("CS+LEFT", InputHandler.SELECT_PREV_WORD);
+        this.addKeyBinding("RIGHT", InputHandler.NEXT_CHAR);
+        this.addKeyBinding("S+RIGHT", InputHandler.SELECT_NEXT_CHAR);
+        this.addKeyBinding("C+RIGHT", InputHandler.NEXT_WORD);
+        this.addKeyBinding("CS+RIGHT", InputHandler.SELECT_NEXT_WORD);
+        this.addKeyBinding("UP", InputHandler.PREV_LINE);
+        this.addKeyBinding("S+UP", InputHandler.SELECT_PREV_LINE);
+        this.addKeyBinding("DOWN", InputHandler.NEXT_LINE);
+        this.addKeyBinding("S+DOWN", InputHandler.SELECT_NEXT_LINE);
 
-        addKeyBinding("C+ENTER", REPEAT);
+        this.addKeyBinding("C+ENTER", InputHandler.REPEAT);
 
         // Clipboard
-        addKeyBinding("C+C", CLIP_COPY);
-        addKeyBinding("C+V", CLIP_PASTE);
-        addKeyBinding("C+X", CLIP_CUT);
+        this.addKeyBinding("C+C", InputHandler.CLIP_COPY);
+        this.addKeyBinding("C+V", InputHandler.CLIP_PASTE);
+        this.addKeyBinding("C+X", InputHandler.CLIP_CUT);
     }
 
     /**
@@ -93,24 +94,23 @@ public class DefaultInputHandler extends InputHandler {
      * or S for Shift, and key is either a character (a-z) or a field
      * name in the KeyEvent class prefixed with VK_ (e.g., BACK_SPACE)
      */
-    public void addKeyBinding(String keyBinding, ActionListener action) {
-        BindingMap current = bindings;
+    @Override
+    public void addKeyBinding(final String keyBinding, final ActionListener action) {
+        BindingMap current = this.bindings;
 
-        StringTokenizer st = new StringTokenizer(keyBinding);
+        final StringTokenizer st = new StringTokenizer(keyBinding);
         while (st.hasMoreTokens()) {
-            KeyStroke keyStroke = parseKeyStroke(st.nextToken());
+            final KeyStroke keyStroke = DefaultInputHandler.parseKeyStroke(st.nextToken());
             if (keyStroke == null)
                 return;
 
             if (st.hasMoreTokens()) {
                 Binding o = current.get(keyStroke);
-                if (o instanceof BindingMap)
-                    current = (BindingMap) o;
-                else {
+                if (!(o instanceof BindingMap)) {
                     o = new BindingMap();
                     current.put(keyStroke, o);
-                    current = (BindingMap) o;
                 }
+                current = (BindingMap) o;
             } else
                 current.put(keyStroke, new BindingAction(action));
         }
@@ -122,15 +122,17 @@ public class DefaultInputHandler extends InputHandler {
      * Removes a key binding from this input handler. This is not yet
      * implemented.
      */
-    public void removeKeyBinding(String keyBinding) {
+    @Override
+    public void removeKeyBinding(final String keyBinding) {
         throw new InternalError("Not yet implemented");
     }
 
     /**
      * Removes all key bindings from this input handler.
      */
+    @Override
     public void removeAllKeyBindings() {
-        bindings.clear();
+        this.bindings.clear();
     }
 
     /**
@@ -140,6 +142,7 @@ public class DefaultInputHandler extends InputHandler {
      *
      * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.InputHandler} object
      */
+    @Override
     public InputHandler copy() {
         return new DefaultInputHandler(this);
     }
@@ -150,57 +153,64 @@ public class DefaultInputHandler extends InputHandler {
      * Handle a key pressed event. This will look up the binding for
      * the key stroke and execute it.
      */
-    public void keyPressed(KeyEvent evt) {
-        int keyCode = evt.getKeyCode();
-        int modifiers = evt.getModifiers();
+    @Override
+    public void keyPressed(final KeyEvent evt) {
+        final int keyCode = evt.getKeyCode();
+        final int modifiers = evt.getModifiersEx();
         if (keyCode == KeyEvent.VK_CONTROL ||
                 keyCode == KeyEvent.VK_SHIFT ||
                 keyCode == KeyEvent.VK_ALT ||
                 keyCode == KeyEvent.VK_META)
             return;
 
-        if ((modifiers & ~KeyEvent.SHIFT_MASK) != 0
+        if ((modifiers & ~KeyEvent.SHIFT_DOWN_MASK) != 0
                 || evt.isActionKey()
                 || keyCode == KeyEvent.VK_BACK_SPACE
                 || keyCode == KeyEvent.VK_DELETE
                 || keyCode == KeyEvent.VK_ENTER
                 || keyCode == KeyEvent.VK_TAB
                 || keyCode == KeyEvent.VK_ESCAPE) {
-            if (grabAction != null) {
-                handleGrabAction(evt);
+            if (this.grabAction != null) {
+                this.handleGrabAction(evt);
                 return;
             }
 
-            KeyStroke keyStroke = KeyStroke.getKeyStroke(keyCode, modifiers);
-            Binding o = currentBindings.get(keyStroke);
+            final KeyStroke keyStroke = KeyStroke.getKeyStroke(keyCode, modifiers);
+            final Binding o = this.currentBindings.get(keyStroke);
 
-            if (o == null) {
-                // Don't beep if the user presses some
-                // key we don't know about unless a
-                // prefix is active. Otherwise it will
-                // beep when caps lock is pressed, etc.
-                if (currentBindings != bindings) {
-                    Toolkit.getDefaultToolkit().beep();
-                    // F10 should be passed on, but C+e F10
-                    // shouldn't
-                    repeatCount = 0;
-                    repeat = false;
+            switch (o) {
+                case null -> {
+                    // Don't beep if the user presses some
+                    // key we don't know about unless a
+                    // prefix is active. Otherwise it will
+                    // beep when caps lock is pressed, etc.
+                    if (this.currentBindings != this.bindings) {
+                        Toolkit.getDefaultToolkit().beep();
+                        // F10 should be passed on, but C+e F10
+                        // shouldn't
+                        this.repeatCount = 0;
+                        this.repeat = false;
+                        evt.consume();
+                    }
+                    this.currentBindings = this.bindings;
+                    // No binding for this keyStroke, pass it to menu
+                    // (mnemonic, accelerator). DPS 4-may-2010
+                    io.github.chr1sps.rars.Globals.getGui().dispatchEventToMenu(evt);
                     evt.consume();
                 }
-                currentBindings = bindings;
-                // No binding for this keyStroke, pass it to menu
-                // (mnemonic, accelerator). DPS 4-may-2010
-                io.github.chr1sps.rars.Globals.getGui().dispatchEventToMenu(evt);
-                evt.consume();
-            } else if (o instanceof BindingAction) {
-                currentBindings = bindings;
-                executeAction(((BindingAction) o).actionListener,
-                        evt.getSource(), null);
+                case final BindingAction bindingAction -> {
+                    this.currentBindings = this.bindings;
+                    this.executeAction(bindingAction.actionListener,
+                            evt.getSource(), null);
 
-                evt.consume();
-            } else if (o instanceof BindingMap) {
-                currentBindings = (BindingMap) o;
-                evt.consume();
+                    evt.consume();
+                }
+                case final BindingMap bindingMap -> {
+                    this.currentBindings = bindingMap;
+                    evt.consume();
+                }
+                default -> {
+                }
             }
         }
     }
@@ -210,14 +220,15 @@ public class DefaultInputHandler extends InputHandler {
      * <p>
      * Handle a key typed event. This inserts the key into the text area.
      */
-    public void keyTyped(KeyEvent evt) {
-        int modifiers = evt.getModifiers();
-        char c = evt.getKeyChar();
+    @Override
+    public void keyTyped(final KeyEvent evt) {
+        final int modifiers = evt.getModifiersEx();
+        final char c = evt.getKeyChar();
         // This IF statement needed to prevent Macintosh shortcut keyChar from
         // being echoed to the text area. E.g. Command-s, for Save, will echo
         // the 's' character unless filtered out here. Command modifier
         // matches KeyEvent.META_MASK. DPS 30-Nov-2010
-        if ((modifiers & KeyEvent.META_MASK) != 0)
+        if ((modifiers & KeyEvent.META_DOWN_MASK) != 0)
             return;
         // DPS 9-Jan-2013. Umberto Villano from Italy describes Alt combinations
         // not working on Italian Mac keyboards, where # requires Alt (Option).
@@ -259,40 +270,40 @@ public class DefaultInputHandler extends InputHandler {
         // Until this is resolved upstream, don't ignore characters
         // on OS X, which have been entered with the ALT modifier:
         if (c != KeyEvent.CHAR_UNDEFINED
-                && (((modifiers & KeyEvent.ALT_MASK) == 0) || System.getProperty("os.name").contains("OS X"))) {
+                && (((modifiers & KeyEvent.ALT_DOWN_MASK) == 0) || System.getProperty("os.name").contains("OS X"))) {
             if (c >= 0x20 && c != 0x7f) {
-                KeyStroke keyStroke = KeyStroke.getKeyStroke(
+                final KeyStroke keyStroke = KeyStroke.getKeyStroke(
                         Character.toUpperCase(c));
-                Binding o = currentBindings.get(keyStroke);
+                final Binding o = this.currentBindings.get(keyStroke);
 
                 if (o instanceof BindingMap) {
-                    currentBindings = (BindingMap) o;
+                    this.currentBindings = (BindingMap) o;
                     return;
                 } else if (o instanceof ActionListener) {
-                    currentBindings = bindings;
-                    executeAction((ActionListener) o,
+                    this.currentBindings = this.bindings;
+                    this.executeAction((ActionListener) o,
                             evt.getSource(),
                             String.valueOf(c));
                     return;
                 }
 
-                currentBindings = bindings;
+                this.currentBindings = this.bindings;
 
-                if (grabAction != null) {
-                    handleGrabAction(evt);
+                if (this.grabAction != null) {
+                    this.handleGrabAction(evt);
                     return;
                 }
 
                 // 0-9 adds another 'digit' to the repeat number
-                if (repeat && Character.isDigit(c)) {
-                    repeatCount *= 10;
-                    repeatCount += (c - '0');
+                if (this.repeat && Character.isDigit(c)) {
+                    this.repeatCount *= 10;
+                    this.repeatCount += (c - '0');
                     return;
                 }
-                executeAction(INSERT_CHAR, evt.getSource(),
+                this.executeAction(InputHandler.INSERT_CHAR, evt.getSource(),
                         String.valueOf(evt.getKeyChar()));
-                repeatCount = 0;
-                repeat = false;
+                this.repeatCount = 0;
+                this.repeat = false;
             }
         }
     }
@@ -308,47 +319,47 @@ public class DefaultInputHandler extends InputHandler {
      * @param keyStroke A string description of the key stroke
      * @return a {@link javax.swing.KeyStroke} object
      */
-    public static KeyStroke parseKeyStroke(String keyStroke) {
+    public static KeyStroke parseKeyStroke(final String keyStroke) {
         if (keyStroke == null)
             return null;
         int modifiers = 0;
-        int index = keyStroke.indexOf('+');
+        final int index = keyStroke.indexOf('+');
         if (index != -1) {
             for (int i = 0; i < index; i++) {
                 switch (Character.toUpperCase(keyStroke
                         .charAt(i))) {
                     case 'A':
-                        modifiers |= InputEvent.ALT_MASK;
+                        modifiers |= InputEvent.ALT_DOWN_MASK;
                         break;
                     case 'C':
-                        modifiers |= InputEvent.CTRL_MASK;
+                        modifiers |= InputEvent.CTRL_DOWN_MASK;
                         break;
                     case 'M':
-                        modifiers |= InputEvent.META_MASK;
+                        modifiers |= InputEvent.META_DOWN_MASK;
                         break;
                     case 'S':
-                        modifiers |= InputEvent.SHIFT_MASK;
+                        modifiers |= InputEvent.SHIFT_DOWN_MASK;
                         break;
                 }
             }
         }
-        String key = keyStroke.substring(index + 1);
+        final String key = keyStroke.substring(index + 1);
         if (key.length() == 1) {
-            char ch = Character.toUpperCase(key.charAt(0));
+            final char ch = Character.toUpperCase(key.charAt(0));
             if (modifiers == 0)
                 return KeyStroke.getKeyStroke(ch);
             else
                 return KeyStroke.getKeyStroke(ch, modifiers);
-        } else if (key.length() == 0) {
+        } else if (key.isEmpty()) {
             System.err.println("Invalid key stroke: " + keyStroke);
             return null;
         } else {
-            int ch;
+            final int ch;
 
             try {
                 ch = KeyEvent.class.getField("VK_".concat(key))
                         .getInt(null);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.err.println("Invalid key stroke: "
                         + keyStroke);
                 return null;
@@ -362,38 +373,38 @@ public class DefaultInputHandler extends InputHandler {
     private final BindingMap bindings;
     private BindingMap currentBindings;
 
-    private class Binding {
+    private static class Binding {
     }
 
-    private class BindingAction extends Binding {
-        ActionListener actionListener;
+    private static class BindingAction extends Binding {
+        final ActionListener actionListener;
 
-        BindingAction(ActionListener ac) {
-            actionListener = ac;
+        BindingAction(final ActionListener ac) {
+            this.actionListener = ac;
         }
     }
 
-    private class BindingMap extends Binding {
-        Hashtable<KeyStroke, Binding> map;
+    private static class BindingMap extends Binding {
+        final Hashtable<KeyStroke, Binding> map;
 
         BindingMap() {
-            map = new Hashtable<>();
+            this.map = new Hashtable<>();
         }
 
         void clear() {
-            map.clear();
+            this.map.clear();
         }
 
-        void put(KeyStroke k, Binding b) {
-            map.put(k, b);
+        void put(final KeyStroke k, final Binding b) {
+            this.map.put(k, b);
         }
 
-        Binding get(KeyStroke k) {
-            return map.get(k);
+        Binding get(final KeyStroke k) {
+            return this.map.get(k);
         }
     }
 
-    private DefaultInputHandler(DefaultInputHandler copy) {
-        bindings = currentBindings = copy.bindings;
+    private DefaultInputHandler(final DefaultInputHandler copy) {
+        this.bindings = this.currentBindings = copy.bindings;
     }
 }

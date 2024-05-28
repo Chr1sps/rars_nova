@@ -11,7 +11,6 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -52,7 +51,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action for the Help -> Help menu item
- *
  */
 public class HelpHelpAction extends GuiAction {
     private final VenusUI mainUI;
@@ -67,10 +65,10 @@ public class HelpHelpAction extends GuiAction {
      * @param accel    a {@link javax.swing.KeyStroke} object
      * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
      */
-    public HelpHelpAction(String name, Icon icon, String descrip,
-                          Integer mnemonic, KeyStroke accel, VenusUI gui) {
+    public HelpHelpAction(final String name, final Icon icon, final String descrip,
+                          final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
-        mainUI = gui;
+        this.mainUI = gui;
     }
 
     // ideally read or computed from config file...
@@ -79,7 +77,7 @@ public class HelpHelpAction extends GuiAction {
     }
 
     // Light gray background color for alternating lines of the instruction lists
-    static Color altBackgroundColor = new Color(0xEE, 0xEE, 0xEE);
+    static final Color altBackgroundColor = new Color(0xEE, 0xEE, 0xEE);
 
     /**
      * Separates Instruction name descriptor from detailed (operation) description
@@ -92,40 +90,40 @@ public class HelpHelpAction extends GuiAction {
      * <p>
      * Displays tabs with categories of information
      */
-    public void actionPerformed(ActionEvent e) {
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("RISCV", createHelpInfoPanel());
-        tabbedPane.addTab("RARS", createRarsHelpInfoPanel());
-        tabbedPane.addTab("License", createCopyrightInfoPanel());
-        tabbedPane.addTab("Bugs/Comments", createHTMLHelpPanel("BugReportingHelp.html"));
-        tabbedPane.addTab("Acknowledgements", createHTMLHelpPanel("Acknowledgements.html"));
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        final JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("RISCV", this.createHelpInfoPanel());
+        tabbedPane.addTab("RARS", this.createRarsHelpInfoPanel());
+        tabbedPane.addTab("License", this.createCopyrightInfoPanel());
+        tabbedPane.addTab("Bugs/Comments", this.createHTMLHelpPanel("BugReportingHelp.html"));
+        tabbedPane.addTab("Acknowledgements", this.createHTMLHelpPanel("Acknowledgements.html"));
         // Create non-modal dialog. Based on java.sun.com "How to Make Dialogs",
         // DialogDemo.java
-        final JDialog dialog = new JDialog(mainUI, "RARS " + Globals.version + " Help");
+        final JDialog dialog = new JDialog(this.mainUI, "RARS " + Globals.version + " Help");
         // assure the dialog goes away if user clicks the X
         dialog.addWindowListener(
                 new WindowAdapter() {
-                    public void windowClosing(WindowEvent e) {
+                    @Override
+                    public void windowClosing(final WindowEvent e) {
                         dialog.setVisible(false);
                         dialog.dispose();
                     }
                 });
         // Add a "close" button to the non-modal help dialog.
-        JButton closeButton = new JButton("Close");
+        final JButton closeButton = new JButton("Close");
         closeButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        dialog.setVisible(false);
-                        dialog.dispose();
-                    }
+                e1 -> {
+                    dialog.setVisible(false);
+                    dialog.dispose();
                 });
-        JPanel closePanel = new JPanel();
+        final JPanel closePanel = new JPanel();
         closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
         closePanel.add(Box.createHorizontalGlue());
         closePanel.add(closeButton);
         closePanel.add(Box.createHorizontalGlue());
         closePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 5));
-        JPanel contentPane = new JPanel();
+        final JPanel contentPane = new JPanel();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
         contentPane.add(tabbedPane);
         contentPane.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -134,26 +132,26 @@ public class HelpHelpAction extends GuiAction {
         dialog.setContentPane(contentPane);
         // Show it.
         dialog.setSize(this.getSize());
-        dialog.setLocationRelativeTo(mainUI);
+        dialog.setLocationRelativeTo(this.mainUI);
         dialog.setVisible(true);
 
         //////////////////////////////////////////////////////////////////
     }
 
     // Create panel containing Help Info read from html document.
-    private JPanel createHTMLHelpPanel(String filename) {
-        JPanel helpPanel = new JPanel(new BorderLayout());
+    private JPanel createHTMLHelpPanel(final String filename) {
+        final JPanel helpPanel = new JPanel(new BorderLayout());
         JScrollPane helpScrollPane;
-        JEditorPane helpDisplay;
+        final JEditorPane helpDisplay;
         try {
-            StringBuilder text = loadFiletoStringBuilder(Globals.helpPath + filename);
+            final StringBuilder text = this.loadFiletoStringBuilder(Globals.helpPath + filename);
             helpDisplay = new JEditorPane("text/html", text.toString());
             helpDisplay.setEditable(false);
             helpDisplay.setCaretPosition(0); // assure top of document displayed
             helpScrollPane = new JScrollPane(helpDisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             helpDisplay.addHyperlinkListener(new HelpHyperlinkListener());
-        } catch (Exception ie) {
+        } catch (final Exception ie) {
             helpScrollPane = new JScrollPane(
                     new JLabel("Error (" + ie + "): " + filename + " contents could not be loaded."));
         }
@@ -163,17 +161,17 @@ public class HelpHelpAction extends GuiAction {
 
     // Set up the copyright notice for display.
     private JPanel createCopyrightInfoPanel() {
-        JPanel copyrightInfo = new JPanel(new BorderLayout());
+        final JPanel copyrightInfo = new JPanel(new BorderLayout());
         JScrollPane copyrightScrollPane;
-        JEditorPane copyrightDisplay;
+        final JEditorPane copyrightDisplay;
         try {
-            StringBuilder text = loadFiletoStringBuilder("/License.txt").append("</pre>");
+            final StringBuilder text = this.loadFiletoStringBuilder("/License.txt").append("</pre>");
             copyrightDisplay = new JEditorPane("text/html", "<pre>" + text);
             copyrightDisplay.setEditable(false);
             copyrightDisplay.setCaretPosition(0); // assure top of document displayed
             copyrightScrollPane = new JScrollPane(copyrightDisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        } catch (Exception ioe) {
+        } catch (final Exception ioe) {
             copyrightScrollPane = new JScrollPane(
                     new JLabel("Error: license contents could not be loaded."));
         }
@@ -183,26 +181,26 @@ public class HelpHelpAction extends GuiAction {
 
     // Set up MARS help tab. Subtabs get their contents from HTML files.
     private JPanel createRarsHelpInfoPanel() {
-        JPanel helpInfo = new JPanel(new BorderLayout());
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Intro", createHTMLHelpPanel("Intro.html"));
-        tabbedPane.addTab("IDE", createHTMLHelpPanel("IDE.html"));
-        tabbedPane.addTab("Debugging", createHTMLHelpPanel("Debugging.html"));
-        tabbedPane.addTab("Tools", createHTMLHelpPanel("Tools.html"));
-        tabbedPane.addTab("Command", createHTMLHelpPanel("Command.html"));
-        tabbedPane.addTab("Limits", createHTMLHelpPanel("Limits.html"));
-        tabbedPane.addTab("History", createHTMLHelpPanel("History.html"));
+        final JPanel helpInfo = new JPanel(new BorderLayout());
+        final JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Intro", this.createHTMLHelpPanel("Intro.html"));
+        tabbedPane.addTab("IDE", this.createHTMLHelpPanel("IDE.html"));
+        tabbedPane.addTab("Debugging", this.createHTMLHelpPanel("Debugging.html"));
+        tabbedPane.addTab("Tools", this.createHTMLHelpPanel("Tools.html"));
+        tabbedPane.addTab("Command", this.createHTMLHelpPanel("Command.html"));
+        tabbedPane.addTab("Limits", this.createHTMLHelpPanel("Limits.html"));
+        tabbedPane.addTab("History", this.createHTMLHelpPanel("History.html"));
         helpInfo.add(tabbedPane);
         return helpInfo;
     }
 
     // Set up MIPS help tab. Most contents are generated from instruction set info.
     private JPanel createHelpInfoPanel() {
-        JPanel helpInfo = new JPanel(new BorderLayout());
-        String helpRemarksColor = "CCFF99";
+        final JPanel helpInfo = new JPanel(new BorderLayout());
+        final String helpRemarksColor = "CCFF99";
         // Introductory remarks go at the top as a label
         // TODO: update this to consider 12 and 20 bit numbers rather than 16
-        String helpRemarks = "<html><center><table bgcolor=\"#" + helpRemarksColor + "\" border=0 cellpadding=0>" + // width="+this.getSize().getWidth()+">"+
+        final String helpRemarks = "<html><center><table bgcolor=\"#" + helpRemarksColor + "\" border=0 cellpadding=0>" + // width="+this.getSize().getWidth()+">"+
                 "<tr>" +
                 "<th colspan=2><b><i><font size=+1>&nbsp;&nbsp;Operand Key for Example Instructions&nbsp;&nbsp;</font></i></b></th>"
                 +
@@ -258,26 +256,26 @@ public class HelpHelpAction extends GuiAction {
                 "</table></center></html>";
         // Original code: mipsHelpInfo.add(new JLabel(helpRemarks, JLabel.CENTER),
         // BorderLayout.NORTH);
-        JLabel helpRemarksLabel = new JLabel(helpRemarks, JLabel.CENTER);
+        final JLabel helpRemarksLabel = new JLabel(helpRemarks, JLabel.CENTER);
         helpRemarksLabel.setOpaque(true);
         helpRemarksLabel.setBackground(Color.decode("0x" + helpRemarksColor));
-        JScrollPane operandsScrollPane = new JScrollPane(helpRemarksLabel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        final JScrollPane operandsScrollPane = new JScrollPane(helpRemarksLabel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         helpInfo.add(operandsScrollPane, BorderLayout.NORTH);
         // Below the label is a tabbed pane with categories of MIPS help
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Basic Instructions", createInstructionHelpPane(BasicInstruction.class));
-        tabbedPane.addTab("Extended (pseudo) Instructions", createInstructionHelpPane(ExtendedInstruction.class));
-        tabbedPane.addTab("Directives", createDirectivesHelpPane());
-        tabbedPane.addTab("Syscalls", createSyscallsHelpPane());
-        tabbedPane.addTab("Exceptions", createHTMLHelpPanel("ExceptionsHelp.html"));
-        tabbedPane.addTab("Macros", createHTMLHelpPanel("MacrosHelp.html"));
+        final JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Basic Instructions", this.createInstructionHelpPane(BasicInstruction.class));
+        tabbedPane.addTab("Extended (pseudo) Instructions", this.createInstructionHelpPane(ExtendedInstruction.class));
+        tabbedPane.addTab("Directives", this.createDirectivesHelpPane());
+        tabbedPane.addTab("Syscalls", this.createSyscallsHelpPane());
+        tabbedPane.addTab("Exceptions", this.createHTMLHelpPanel("ExceptionsHelp.html"));
+        tabbedPane.addTab("Macros", this.createHTMLHelpPanel("MacrosHelp.html"));
         operandsScrollPane.setPreferredSize(
                 new Dimension((int) this.getSize().getWidth(), (int) (this.getSize().getHeight() * .2)));
         operandsScrollPane.getVerticalScrollBar().setUnitIncrement(10);
         tabbedPane.setPreferredSize(
                 new Dimension((int) this.getSize().getWidth(), (int) (this.getSize().getHeight() * .6)));
-        JSplitPane splitsville = new JSplitPane(JSplitPane.VERTICAL_SPLIT, operandsScrollPane, tabbedPane);
+        final JSplitPane splitsville = new JSplitPane(JSplitPane.VERTICAL_SPLIT, operandsScrollPane, tabbedPane);
         splitsville.setOneTouchExpandable(true);
         splitsville.resetToPreferredSizes();
         helpInfo.add(splitsville);
@@ -290,16 +288,16 @@ public class HelpHelpAction extends GuiAction {
 
     /////////////////////////////////////////////////////////////////////////////
     private JScrollPane createDirectivesHelpPane() {
-        Vector<String> exampleList = new Vector<>();
-        String blanks = "            "; // 12 blanks
-        for (Directive direct : Directive.getDirectiveList()) {
+        final Vector<String> exampleList = new Vector<>();
+        final String blanks = "            "; // 12 blanks
+        for (final Directive direct : Directive.getDirectiveList()) {
             exampleList.add(direct.toString()
                     + blanks.substring(0, Math.max(0, blanks.length() - direct.toString().length()))
                     + direct.getDescription());
         }
         Collections.sort(exampleList);
-        JList<String> examples = new JList<>(exampleList);
-        JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        final JList<String> examples = new JList<>(exampleList);
+        final JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         examples.setFont(new Font("Monospaced", Font.PLAIN, 12));
         return scrollPane;
@@ -310,13 +308,13 @@ public class HelpHelpAction extends GuiAction {
      * tried were far uglier / not useful.
      */
     private JScrollPane createSyscallsHelpPane() {
-        ArrayList<AbstractSyscall> list = SyscallLoader.getSyscallList();
-        String[] columnNames = {"Name", "Number", "Description", "Inputs", "Ouputs"};
-        String[][] data = new String[list.size()][5];
+        final ArrayList<AbstractSyscall> list = SyscallLoader.getSyscallList();
+        final String[] columnNames = {"Name", "Number", "Description", "Inputs", "Ouputs"};
+        final String[][] data = new String[list.size()][5];
         Collections.sort(list);
 
         int i = 0;
-        for (AbstractSyscall syscall : list) {
+        for (final AbstractSyscall syscall : list) {
             data[i][0] = syscall.getName();
             data[i][1] = Integer.toString(syscall.getNumber());
             data[i][2] = syscall.getDescription();
@@ -325,10 +323,10 @@ public class HelpHelpAction extends GuiAction {
             i++;
         }
 
-        JEditorPane html = new JEditorPane("text/html",
-                loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpPrelude.html") +
-                        convertToHTMLTable(data, columnNames).toString()
-                        + loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpConclusion.html"));
+        final JEditorPane html = new JEditorPane("text/html",
+                this.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpPrelude.html") +
+                        this.convertToHTMLTable(data, columnNames).toString()
+                        + this.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpConclusion.html"));
 
         html.setCaretPosition(0); // this affects scroll position
         html.setEditable(false);
@@ -337,11 +335,11 @@ public class HelpHelpAction extends GuiAction {
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    private JScrollPane createInstructionHelpPane(Class<? extends Instruction> instructionClass) {
-        ArrayList<Instruction> instructionList = Globals.instructionSet.getInstructionList();
-        Vector<String> exampleList = new Vector<>(instructionList.size());
-        String blanks = "                        "; // 24 blanks
-        for (Instruction instr : instructionList) {
+    private JScrollPane createInstructionHelpPane(final Class<? extends Instruction> instructionClass) {
+        final ArrayList<Instruction> instructionList = Globals.instructionSet.getInstructionList();
+        final Vector<String> exampleList = new Vector<>(instructionList.size());
+        final String blanks = "                        "; // 24 blanks
+        for (final Instruction instr : instructionList) {
             if (instructionClass.isInstance(instr)) {
                 exampleList.add(instr.getExampleFormat()
                         + blanks.substring(0, Math.max(0, blanks.length() - instr.getExampleFormat().length()))
@@ -349,24 +347,24 @@ public class HelpHelpAction extends GuiAction {
             }
         }
         Collections.sort(exampleList);
-        JList<String> examples = new JList<>(exampleList);
-        JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        final JList<String> examples = new JList<>(exampleList);
+        final JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         examples.setFont(new Font("Monospaced", Font.PLAIN, 12));
         examples.setCellRenderer(new MyCellRenderer());
         return scrollPane;
     }
 
-    private StringBuilder convertToHTMLTable(String[][] data, String[] headers) {
-        StringBuilder sb = new StringBuilder("<table border=1>");
+    private StringBuilder convertToHTMLTable(final String[][] data, final String[] headers) {
+        final StringBuilder sb = new StringBuilder("<table border=1>");
         sb.append("<tr>");
-        for (String elem : headers) {
+        for (final String elem : headers) {
             sb.append("<td>").append(elem).append("</td>");
         }
         sb.append("</tr>");
-        for (String[] row : data) {
+        for (final String[] row : data) {
             sb.append("<tr>");
-            for (String elem : row) {
+            for (final String elem : row) {
                 sb.append("<td>").append(elem).append("</td>");
             }
             sb.append("</tr>");
@@ -375,17 +373,17 @@ public class HelpHelpAction extends GuiAction {
         return sb;
     }
 
-    private StringBuilder loadFiletoStringBuilder(String path) {
-        InputStream is = this.getClass().getResourceAsStream(path);
-        BufferedReader in = new BufferedReader(new InputStreamReader(is));
+    private StringBuilder loadFiletoStringBuilder(final String path) {
+        final InputStream is = this.getClass().getResourceAsStream(path);
+        final BufferedReader in = new BufferedReader(new InputStreamReader(is));
         String line;
-        StringBuilder out = new StringBuilder();
+        final StringBuilder out = new StringBuilder();
         try {
             while ((line = in.readLine()) != null) {
                 out.append(line).append("\n");
             }
             in.close();
-        } catch (IOException io) {
+        } catch (final IOException io) {
             return new StringBuilder(path + " could not be loaded.");
         }
         return out;
@@ -395,24 +393,25 @@ public class HelpHelpAction extends GuiAction {
     private class MyCellRenderer extends JLabel implements ListCellRenderer<String> {
         // This is the only method defined by ListCellRenderer.
         // We just reconfigure the JLabel each time we're called.
+        @Override
         public Component getListCellRendererComponent(
-                JList<? extends String> list, // the list
-                String s, // value to display
-                int index, // cell index
-                boolean isSelected, // is the cell selected
-                boolean cellHasFocus) // does the cell have focus
+                final JList<? extends String> list, // the list
+                final String s, // value to display
+                final int index, // cell index
+                final boolean isSelected, // is the cell selected
+                final boolean cellHasFocus) // does the cell have focus
         {
-            setText(s);
+            this.setText(s);
             if (isSelected) {
-                setBackground(list.getSelectionBackground());
-                setForeground(list.getSelectionForeground());
+                this.setBackground(list.getSelectionBackground());
+                this.setForeground(list.getSelectionForeground());
             } else {
-                setBackground((index % 2 == 0) ? altBackgroundColor : list.getBackground());
-                setForeground(list.getForeground());
+                this.setBackground((index % 2 == 0) ? HelpHelpAction.altBackgroundColor : list.getBackground());
+                this.setForeground(list.getForeground());
             }
-            setEnabled(list.isEnabled());
-            setFont(list.getFont());
-            setOpaque(true);
+            this.setEnabled(list.isEnabled());
+            this.setFont(list.getFont());
+            this.setOpaque(true);
             return this;
         }
     }
@@ -428,73 +427,70 @@ public class HelpHelpAction extends GuiAction {
         JTextField webpageURL;
         private static final String cannotDisplayMessage = "<html><title></title><body><strong>Unable to display requested document.</strong></body></html>";
 
-        public void hyperlinkUpdate(HyperlinkEvent e) {
+        @Override
+        public void hyperlinkUpdate(final HyperlinkEvent e) {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                JEditorPane pane = (JEditorPane) e.getSource();
-                if (e instanceof HTMLFrameHyperlinkEvent evt) {
-                    HTMLDocument doc = (HTMLDocument) pane.getDocument();
+                final JEditorPane pane = (JEditorPane) e.getSource();
+                if (e instanceof final HTMLFrameHyperlinkEvent evt) {
+                    final HTMLDocument doc = (HTMLDocument) pane.getDocument();
                     doc.processHTMLFrameHyperlinkEvent(evt);
                 } else {
-                    webpageDisplay = new JDialog(mainUI, "Primitive HTML Viewer");
-                    webpageDisplay.setLayout(new BorderLayout());
-                    webpageDisplay.setLocation(mainUI.getSize().width / 6, mainUI.getSize().height / 6);
+                    this.webpageDisplay = new JDialog(HelpHelpAction.this.mainUI, "Primitive HTML Viewer");
+                    this.webpageDisplay.setLayout(new BorderLayout());
+                    this.webpageDisplay.setLocation(HelpHelpAction.this.mainUI.getSize().width / 6, HelpHelpAction.this.mainUI.getSize().height / 6);
                     JEditorPane webpagePane;
                     try {
                         webpagePane = new JEditorPane(e.getURL());
-                    } catch (Throwable t) {
-                        webpagePane = new JEditorPane("text/html", cannotDisplayMessage);
+                    } catch (final Throwable t) {
+                        webpagePane = new JEditorPane("text/html", HelpHyperlinkListener.cannotDisplayMessage);
                     }
                     webpagePane.addHyperlinkListener(
-                            new HyperlinkListener() {
-                                public void hyperlinkUpdate(HyperlinkEvent e) {
-                                    if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                                        JEditorPane pane = (JEditorPane) e.getSource();
-                                        if (e instanceof HTMLFrameHyperlinkEvent evt) {
-                                            HTMLDocument doc = (HTMLDocument) pane.getDocument();
-                                            doc.processHTMLFrameHyperlinkEvent(evt);
-                                        } else {
-                                            try {
-                                                pane.setPage(e.getURL());
-                                            } catch (Throwable t) {
-                                                pane.setText(cannotDisplayMessage);
-                                            }
-                                            webpageURL.setText(e.getURL().toString());
+                            e12 -> {
+                                if (e12.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                                    final JEditorPane pane1 = (JEditorPane) e12.getSource();
+                                    if (e12 instanceof final HTMLFrameHyperlinkEvent evt) {
+                                        final HTMLDocument doc = (HTMLDocument) pane1.getDocument();
+                                        doc.processHTMLFrameHyperlinkEvent(evt);
+                                    } else {
+                                        try {
+                                            pane1.setPage(e12.getURL());
+                                        } catch (final Throwable t) {
+                                            pane1.setText(HelpHyperlinkListener.cannotDisplayMessage);
                                         }
+                                        HelpHyperlinkListener.this.webpageURL.setText(e12.getURL().toString());
                                     }
                                 }
                             });
                     webpagePane.setPreferredSize(
-                            new Dimension(mainUI.getSize().width * 2 / 3, mainUI.getSize().height * 2 / 3));
+                            new Dimension(HelpHelpAction.this.mainUI.getSize().width * 2 / 3, HelpHelpAction.this.mainUI.getSize().height * 2 / 3));
                     webpagePane.setEditable(false);
                     webpagePane.setCaretPosition(0);
-                    JScrollPane webpageScrollPane = new JScrollPane(webpagePane,
+                    final JScrollPane webpageScrollPane = new JScrollPane(webpagePane,
                             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-                    webpageURL = new JTextField(e.getURL().toString(), 50);
-                    webpageURL.setEditable(false);
-                    webpageURL.setBackground(Color.WHITE);
-                    JPanel URLPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 4));
+                    this.webpageURL = new JTextField(e.getURL().toString(), 50);
+                    this.webpageURL.setEditable(false);
+                    this.webpageURL.setBackground(Color.WHITE);
+                    final JPanel URLPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 4));
                     URLPanel.add(new JLabel("URL: "));
-                    URLPanel.add(webpageURL);
-                    webpageDisplay.add(URLPanel, BorderLayout.NORTH);
-                    webpageDisplay.add(webpageScrollPane);
-                    JButton closeButton = new JButton("Close");
+                    URLPanel.add(this.webpageURL);
+                    this.webpageDisplay.add(URLPanel, BorderLayout.NORTH);
+                    this.webpageDisplay.add(webpageScrollPane);
+                    final JButton closeButton = new JButton("Close");
                     closeButton.addActionListener(
-                            new ActionListener() {
-                                public void actionPerformed(ActionEvent e) {
-                                    webpageDisplay.setVisible(false);
-                                    webpageDisplay.dispose();
-                                }
+                            e1 -> {
+                                HelpHyperlinkListener.this.webpageDisplay.setVisible(false);
+                                HelpHyperlinkListener.this.webpageDisplay.dispose();
                             });
-                    JPanel closePanel = new JPanel();
+                    final JPanel closePanel = new JPanel();
                     closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
                     closePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 5));
                     closePanel.add(Box.createHorizontalGlue());
                     closePanel.add(closeButton);
                     closePanel.add(Box.createHorizontalGlue());
-                    webpageDisplay.add(closePanel, BorderLayout.SOUTH);
-                    webpageDisplay.pack();
-                    webpageDisplay.setVisible(true);
+                    this.webpageDisplay.add(closePanel, BorderLayout.SOUTH);
+                    this.webpageDisplay.pack();
+                    this.webpageDisplay.setVisible(true);
                 }
             }
         }

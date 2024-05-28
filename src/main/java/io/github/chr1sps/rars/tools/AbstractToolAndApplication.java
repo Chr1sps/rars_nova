@@ -718,7 +718,7 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
     // it will call actionPerformed for the first action listener in the
     // button's list.
     protected static class EnterKeyListener extends KeyAdapter {
-        AbstractButton myButton;
+        final AbstractButton myButton;
 
         public EnterKeyListener(final AbstractButton who) {
             this.myButton = who;
@@ -889,14 +889,12 @@ public abstract class AbstractToolAndApplication extends JFrame implements Tool,
 
     @Override
     public void onSubscribe(@NotNull final Flow.Subscription subscription) {
-        System.out.println("onSubscribe called for: " + this);
         this.subscription = subscription;
         this.subscription.request(1);
     }
 
     @Override
     public void onNext(final AccessNotice notice) {
-        System.out.println("onNext called for: " + this);
         if (notice.accessIsFromRISCV()) {
             this.processRISCVUpdate(notice);
             this.updateDisplay();

@@ -52,7 +52,7 @@ public abstract class Floating extends BasicInstruction {
      * @param description a {@link java.lang.String} object
      * @param funct       a {@link java.lang.String} object
      */
-    protected Floating(String name, String description, String funct) {
+    protected Floating(final String name, final String description, final String funct) {
         super(name + " f1, f2, f3, dyn", description, BasicInstructionFormat.R_FORMAT,
                 funct + "ttttt sssss qqq fffff 1010011");
     }
@@ -65,7 +65,7 @@ public abstract class Floating extends BasicInstruction {
      * @param funct       a {@link java.lang.String} object
      * @param rm          a {@link java.lang.String} object
      */
-    protected Floating(String name, String description, String funct, String rm) {
+    protected Floating(final String name, final String description, final String funct, final String rm) {
         super(name + " f1, f2, f3", description, BasicInstructionFormat.R_FORMAT,
                 funct + "ttttt sssss " + rm + " fffff 1010011");
     }
@@ -73,13 +73,14 @@ public abstract class Floating extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws SimulationException {
-        int[] operands = statement.getOperands();
-        Environment e = new Environment();
-        e.mode = getRoundingMode(operands[3], statement);
-        Float32 result = compute(new Float32(FloatingPointRegisterFile.getValue(operands[1])),
+    @Override
+    public void simulate(final ProgramStatement statement) throws SimulationException {
+        final int[] operands = statement.getOperands();
+        final Environment e = new Environment();
+        e.mode = Floating.getRoundingMode(operands[3], statement);
+        final Float32 result = this.compute(new Float32(FloatingPointRegisterFile.getValue(operands[1])),
                 new Float32(FloatingPointRegisterFile.getValue(operands[2])), e);
-        setfflags(e);
+        Floating.setfflags(e);
         FloatingPointRegisterFile.updateRegister(operands[0], result.bits);
     }
 
@@ -88,8 +89,8 @@ public abstract class Floating extends BasicInstruction {
      *
      * @param e a {@link io.github.chr1sps.jsoftfloat.Environment} object
      */
-    public static void setfflags(Environment e) {
-        int fflags = (e.flags.contains(Flags.inexact) ? 1 : 0) +
+    public static void setfflags(final Environment e) {
+        final int fflags = (e.flags.contains(Flags.inexact) ? 1 : 0) +
                 (e.flags.contains(Flags.underflow) ? 2 : 0) +
                 (e.flags.contains(Flags.overflow) ? 4 : 0) +
                 (e.flags.contains(Flags.divByZero) ? 8 : 0) +
@@ -106,25 +107,25 @@ public abstract class Floating extends BasicInstruction {
      * @return a {@link io.github.chr1sps.jsoftfloat.RoundingMode} object
      * @throws SimulationException if any.
      */
-    public static RoundingMode getRoundingMode(int RM, ProgramStatement statement) throws SimulationException {
+    public static RoundingMode getRoundingMode(final int RM, final ProgramStatement statement) throws SimulationException {
         int rm = RM;
-        int frm = ControlAndStatusRegisterFile.getValue("frm");
+        final int frm = ControlAndStatusRegisterFile.getValue("frm");
         if (rm == 7)
             rm = frm;
-        switch (rm) {
-            case 0: // RNE
-                return RoundingMode.even;
-            case 1: // RTZ
-                return RoundingMode.zero;
-            case 2: // RDN
-                return RoundingMode.min;
-            case 3: // RUP
-                return RoundingMode.max;
-            case 4: // RMM
-                return RoundingMode.away;
-            default:
-                throw new SimulationException(statement, "Invalid rounding mode. RM = " + RM + " and frm = " + frm);
-        }
+        return switch (rm) {
+            case 0 -> // RNE
+                    RoundingMode.even;
+            case 1 -> // RTZ
+                    RoundingMode.zero;
+            case 2 -> // RDN
+                    RoundingMode.min;
+            case 3 -> // RUP
+                    RoundingMode.max;
+            case 4 -> // RMM
+                    RoundingMode.away;
+            default ->
+                    throw new SimulationException(statement, "Invalid rounding mode. RM = " + RM + " and frm = " + frm);
+        };
     }
 
     /**
@@ -143,7 +144,7 @@ public abstract class Floating extends BasicInstruction {
      * @param num a int
      * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
      */
-    public static Float32 getFloat(int num) {
+    public static Float32 getFloat(final int num) {
         return new Float32(FloatingPointRegisterFile.getValue(num));
     }
 }

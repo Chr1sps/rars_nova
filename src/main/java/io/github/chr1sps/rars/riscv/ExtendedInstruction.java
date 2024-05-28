@@ -1,12 +1,12 @@
 package io.github.chr1sps.rars.riscv;
 
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-
 import io.github.chr1sps.rars.RISCVprogram;
 import io.github.chr1sps.rars.assembler.Symbol;
 import io.github.chr1sps.rars.assembler.TokenList;
 import io.github.chr1sps.rars.util.Binary;
+
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -62,12 +62,12 @@ public class ExtendedInstruction extends Instruction {
      *                    of one or more MIPS basic instructions.
      * @param description a helpful description to be included on help requests
      */
-    public ExtendedInstruction(String example, String translation, String description) {
+    public ExtendedInstruction(final String example, final String translation, final String description) {
         this.exampleFormat = example;
         this.description = description;
         this.mnemonic = this.extractOperator(example);
         this.createExampleTokenList();
-        this.translationStrings = buildTranslationList(translation);
+        this.translationStrings = this.buildTranslationList(translation);
     }
 
     /**
@@ -80,7 +80,7 @@ public class ExtendedInstruction extends Instruction {
      *                    sequence
      *                    of one or more MIPS basic instructions.
      */
-    public ExtendedInstruction(String example, String translation) {
+    public ExtendedInstruction(final String example, final String translation) {
         this(example, translation, "");
     }
 
@@ -91,8 +91,9 @@ public class ExtendedInstruction extends Instruction {
      *
      * @return int length in bytes of corresponding binary instruction(s).
      */
+    @Override
     public int getInstructionLength() {
-        return getInstructionLength(translationStrings);
+        return this.getInstructionLength(this.translationStrings);
     }
 
     /**
@@ -102,7 +103,7 @@ public class ExtendedInstruction extends Instruction {
      * @return ArrayList of Strings.
      */
     public ArrayList<String> getBasicIntructionTemplateList() {
-        return translationStrings;
+        return this.translationStrings;
     }
 
     /**
@@ -144,65 +145,65 @@ public class ExtendedInstruction extends Instruction {
      * @param PC        a int
      * @return String representing basic assembler statement.
      */
-    public static String makeTemplateSubstitutions(RISCVprogram program, String template, TokenList tokenList, int PC) {
+    public static String makeTemplateSubstitutions(final RISCVprogram program, final String template, final TokenList tokenList, final int PC) {
         String instruction = template;
         // substitute first operand token for template's RG1 or OP1, second for RG2 or
         // OP2, etc
         for (int op = 1; op < tokenList.size(); op++) {
-            instruction = substitute(instruction, "RG" + op, tokenList.get(op).getValue());
+            instruction = ExtendedInstruction.substitute(instruction, "RG" + op, tokenList.get(op).getValue());
 
-            String strValue = tokenList.get(op).getValue();
+            final String strValue = tokenList.get(op).getValue();
             int val;
             try {
                 val = Binary.stringToInt(strValue); // KENV 1/6/05
-            } catch (NumberFormatException e) {
-                long lval;
+            } catch (final NumberFormatException e) {
+                final long lval;
                 try {
                     lval = Binary.stringToLong(strValue);
-                } catch (NumberFormatException nfe) {
+                } catch (final NumberFormatException nfe) {
                     continue;
                 }
                 val = (int) (lval >> 32);
-                int vall = (int) lval;
+                final int vall = (int) lval;
                 // this shouldn't happen if is is for LL .. VH
                 if (instruction.contains("LIA" + op)) {
-                    int extra = Binary.bitValue(val, 11); // add extra to compesate for sign extension
-                    instruction = substitute(instruction, "LIA" + op, String.valueOf((val >> 12) + extra));
+                    final int extra = Binary.bitValue(val, 11); // add extra to compesate for sign extension
+                    instruction = ExtendedInstruction.substitute(instruction, "LIA" + op, String.valueOf((val >> 12) + extra));
                 } else if (instruction.contains("LIB" + op)) {
-                    instruction = substitute(instruction, "LIB" + op, String.valueOf(val << 20 >> 20));
+                    instruction = ExtendedInstruction.substitute(instruction, "LIB" + op, String.valueOf(val << 20 >> 20));
                 } else if (instruction.contains("LIC" + op)) {
-                    instruction = substitute(instruction, "LIC" + op, String.valueOf((vall >> 21) & 0x7FF));
+                    instruction = ExtendedInstruction.substitute(instruction, "LIC" + op, String.valueOf((vall >> 21) & 0x7FF));
                 } else if (instruction.contains("LID" + op)) {
-                    instruction = substitute(instruction, "LID" + op, String.valueOf((vall >> 10) & 0x7FF));
+                    instruction = ExtendedInstruction.substitute(instruction, "LID" + op, String.valueOf((vall >> 10) & 0x7FF));
                 } else if (instruction.contains("LIE" + op)) {
-                    instruction = substitute(instruction, "LIE" + op, String.valueOf(vall & 0x3FF));
+                    instruction = ExtendedInstruction.substitute(instruction, "LIE" + op, String.valueOf(vall & 0x3FF));
                 }
                 continue;
             }
 
-            int relative = val - PC;
+            final int relative = val - PC;
             if (instruction.contains("PCH" + op)) {
-                int extra = Binary.bitValue(relative, 11);// add extra to compesate for sign extension
-                instruction = substitute(instruction, "PCH" + op, String.valueOf((relative >> 12) + extra));
+                final int extra = Binary.bitValue(relative, 11);// add extra to compesate for sign extension
+                instruction = ExtendedInstruction.substitute(instruction, "PCH" + op, String.valueOf((relative >> 12) + extra));
             }
             if (instruction.contains("PCL" + op)) {
-                instruction = substitute(instruction, "PCL" + op, String.valueOf(relative << 20 >> 20));
+                instruction = ExtendedInstruction.substitute(instruction, "PCL" + op, String.valueOf(relative << 20 >> 20));
             }
 
             if (instruction.contains("LH" + op)) {
-                int extra = Binary.bitValue(val, 11);// add extra to compesate for sign extension
-                instruction = substitute(instruction, "LH" + op, String.valueOf((val >> 12) + extra));
+                final int extra = Binary.bitValue(val, 11);// add extra to compesate for sign extension
+                instruction = ExtendedInstruction.substitute(instruction, "LH" + op, String.valueOf((val >> 12) + extra));
             }
             if (instruction.contains("LL" + op)) {
-                instruction = substitute(instruction, "LL" + op, String.valueOf(val << 20 >> 20));
+                instruction = ExtendedInstruction.substitute(instruction, "LL" + op, String.valueOf(val << 20 >> 20));
             }
 
             if (instruction.contains("VH" + op)) {
-                int extra = Binary.bitValue(val, 11); // add extra to compesate for sign extension
-                instruction = substitute(instruction, "VH" + op, String.valueOf((val >> 12) + extra));
+                final int extra = Binary.bitValue(val, 11); // add extra to compesate for sign extension
+                instruction = ExtendedInstruction.substitute(instruction, "VH" + op, String.valueOf((val >> 12) + extra));
             }
             if (instruction.contains("VL" + op)) {
-                instruction = substitute(instruction, "VL" + op, String.valueOf(val << 20 >> 20));
+                instruction = ExtendedInstruction.substitute(instruction, "VL" + op, String.valueOf(val << 20 >> 20));
             }
         }
         // substitute label if necessary
@@ -210,8 +211,8 @@ public class ExtendedInstruction extends Instruction {
             // label has to be last token. It has already been translated to address
             // by symtab lookup, so I need to get the text label back so parseLine() won't
             // puke.
-            String label = tokenList.get(tokenList.size() - 1).getValue();
-            Symbol sym = program.getLocalSymbolTable().getSymbolGivenAddressLocalOrGlobal(label);
+            final String label = tokenList.get(tokenList.size() - 1).getValue();
+            final Symbol sym = program.getLocalSymbolTable().getSymbolGivenAddressLocalOrGlobal(label);
             if (sym != null) {
                 // should never be null, since there would not be an address if label were not
                 // in symtab!
@@ -224,7 +225,7 @@ public class ExtendedInstruction extends Instruction {
                 // contains the substring "LAB", then substitute() will go into an infinite loop
                 // because
                 // it will keep matching the substituted string!
-                instruction = substituteFirst(instruction, "LAB", sym.getName());
+                instruction = ExtendedInstruction.substituteFirst(instruction, "LAB", sym.getName());
             }
         }
         return instruction;
@@ -235,7 +236,7 @@ public class ExtendedInstruction extends Instruction {
     // method to
     // do this directly but I wanted to stay 1.4 compatible.
     // Modified 12 July 2006 to "substitute all occurances", not just the first.
-    private static String substitute(String original, String find, String replacement) {
+    private static String substitute(final String original, final String find, final String replacement) {
         if (!original.contains(find) || find.equals(replacement)) {
             return original; // second condition prevents infinite loop below
         }
@@ -251,11 +252,11 @@ public class ExtendedInstruction extends Instruction {
     // Performs a String substitution, but will only substitute for the first match.
     // Java 1.5 adds an overloaded String.replace method to do this directly but I
     // wanted to stay 1.4 compatible.
-    private static String substituteFirst(String original, String find, String replacement) {
+    private static String substituteFirst(final String original, final String find, final String replacement) {
         if (!original.contains(find) || find.equals(replacement)) {
             return original; // second condition prevents infinite loop below
         }
-        int i;
+        final int i;
         String modified = original;
         if ((i = modified.indexOf(find)) >= 0) {
             modified = modified.substring(0, i) + replacement + modified.substring(i + find.length());
@@ -267,12 +268,12 @@ public class ExtendedInstruction extends Instruction {
     // expands to, which is a string, and breaks out into separate
     // instructions. They are separated by '\n' character.
 
-    private ArrayList<String> buildTranslationList(String translation) {
-        if (translation == null || translation.length() == 0) {
+    private ArrayList<String> buildTranslationList(final String translation) {
+        if (translation == null || translation.isEmpty()) {
             return null;
         }
-        ArrayList<String> translationList = new ArrayList<>();
-        StringTokenizer st = new StringTokenizer(translation, "\n");
+        final ArrayList<String> translationList = new ArrayList<>();
+        final StringTokenizer st = new StringTokenizer(translation, "\n");
         while (st.hasMoreTokens()) {
             translationList.add(st.nextToken());
         }
@@ -286,8 +287,8 @@ public class ExtendedInstruction extends Instruction {
      * Returns length in bytes of corresponding binary instruction(s).
      * Returns 0 if the ArrayList is null or empty.
      */
-    private int getInstructionLength(ArrayList<String> translationList) {
-        if (translationList == null || translationList.size() == 0) {
+    private int getInstructionLength(final ArrayList<String> translationList) {
+        if (translationList == null || translationList.isEmpty()) {
             return 0;
         }
         return 4 * translationList.size();

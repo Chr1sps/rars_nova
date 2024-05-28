@@ -72,6 +72,7 @@ public class RegistersWindow extends RegisterBlockWindow {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected String formatRegister(Register value, int base) {
         if (Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED)) {
             return NumberDisplayBaseChooser.formatNumber(value.getValue(), base);
@@ -83,6 +84,7 @@ public class RegistersWindow extends RegisterBlockWindow {
     /**
      * <p>beginObserving.</p>
      */
+    @Override
     protected void beginObserving() {
         RegisterFile.addRegistersObserver(this);
     }
@@ -90,6 +92,7 @@ public class RegistersWindow extends RegisterBlockWindow {
     /**
      * <p>endObserving.</p>
      */
+    @Override
     protected void endObserving() {
         RegisterFile.deleteRegistersObserver(this);
     }
@@ -97,6 +100,7 @@ public class RegistersWindow extends RegisterBlockWindow {
     /**
      * <p>resetRegisters.</p>
      */
+    @Override
     protected void resetRegisters() {
         RegisterFile.resetRegisters();
     }

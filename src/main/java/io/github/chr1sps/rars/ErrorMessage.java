@@ -72,8 +72,8 @@ public class ErrorMessage {
      *                      position of source token.
      * @param message       String containing appropriate error message.
      */
-    public ErrorMessage(RISCVprogram sourceProgram, int line, int position, String message) {
-        this(ERROR, sourceProgram, line, position, message);
+    public ErrorMessage(final RISCVprogram sourceProgram, final int line, final int position, final String message) {
+        this(ErrorMessage.ERROR, sourceProgram, line, position, message);
     }
 
     /**
@@ -93,7 +93,7 @@ public class ErrorMessage {
      *                      position of source token.
      * @param message       String containing appropriate error message.
      */
-    public ErrorMessage(boolean isWarning, RISCVprogram sourceProgram, int line, int position, String message) {
+    public ErrorMessage(final boolean isWarning, final RISCVprogram sourceProgram, final int line, final int position, final String message) {
         this.isWarning = isWarning;
         if (sourceProgram == null) {
             this.filename = "";
@@ -103,7 +103,7 @@ public class ErrorMessage {
                 this.filename = sourceProgram.getFilename();
                 this.line = line;
             } else {
-                io.github.chr1sps.rars.assembler.SourceLine sourceLine = sourceProgram.getSourceLineList()
+                final io.github.chr1sps.rars.assembler.SourceLine sourceLine = sourceProgram.getSourceLineList()
                         .get(line - 1);
                 this.filename = sourceLine.getFilename();
                 this.line = sourceLine.getLineNumber();
@@ -111,7 +111,7 @@ public class ErrorMessage {
         }
         this.position = position;
         this.message = message;
-        this.macroExpansionHistory = getExpansionHistory(sourceProgram);
+        this.macroExpansionHistory = ErrorMessage.getExpansionHistory(sourceProgram);
     }
 
     /**
@@ -122,8 +122,8 @@ public class ErrorMessage {
      * @param message   String containing appropriate error message.
      */
     // Added January 2013
-    public ErrorMessage(ProgramStatement statement, String message) {
-        this.isWarning = ERROR;
+    public ErrorMessage(final ProgramStatement statement, final String message) {
+        this.isWarning = ErrorMessage.ERROR;
         this.filename = (statement.getSourceProgram() == null)
                 ? ""
                 : statement.getSourceProgram().getFilename();
@@ -141,28 +141,28 @@ public class ErrorMessage {
         // Looks bass-ackwards, but to get the line numbers to display correctly
         // for runtime error occurring in macro expansion (expansion->definition), need
         // to assign to the opposite variables.
-        ArrayList<Integer> defineLine = parseMacroHistory(statement.getSource());
-        if (defineLine.size() == 0) {
+        final ArrayList<Integer> defineLine = this.parseMacroHistory(statement.getSource());
+        if (defineLine.isEmpty()) {
             this.line = statement.getSourceLine();
             this.macroExpansionHistory = "";
         } else {
-            this.line = defineLine.get(0);
+            this.line = defineLine.getFirst();
             this.macroExpansionHistory = "" + statement.getSourceLine();
         }
     }
 
-    private ArrayList<Integer> parseMacroHistory(String string) {
-        Pattern pattern = Pattern.compile("<\\d+>");
-        Matcher matcher = pattern.matcher(string);
+    private ArrayList<Integer> parseMacroHistory(final String string) {
+        final Pattern pattern = Pattern.compile("<\\d+>");
+        final Matcher matcher = pattern.matcher(string);
         String verify = string.trim();
-        ArrayList<Integer> macroHistory = new ArrayList<>();
+        final ArrayList<Integer> macroHistory = new ArrayList<>();
         while (matcher.find()) {
-            String match = matcher.group();
+            final String match = matcher.group();
             if (verify.indexOf(match) == 0) {
                 try {
-                    int line = Integer.parseInt(match.substring(1, match.length() - 1));
+                    final int line = Integer.parseInt(match.substring(1, match.length() - 1));
                     macroHistory.add(line);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     break;
                 }
                 verify = verify.substring(match.length()).trim();
@@ -180,7 +180,7 @@ public class ErrorMessage {
      */
     // Added October 2006
     public String getFilename() {
-        return filename;
+        return this.filename;
     }
 
     /**
@@ -189,7 +189,7 @@ public class ErrorMessage {
      * @return Returns line number in source program where error occurred.
      */
     public int getLine() {
-        return line;
+        return this.line;
     }
 
     /**
@@ -198,7 +198,7 @@ public class ErrorMessage {
      * @return Returns position within line of source program where error occurred.
      */
     public int getPosition() {
-        return position;
+        return this.position;
     }
 
     /**
@@ -207,7 +207,7 @@ public class ErrorMessage {
      * @return Returns String containing textual error message.
      */
     public String getMessage() {
-        return message;
+        return this.message;
     }
 
     /**
@@ -226,15 +226,15 @@ public class ErrorMessage {
      * @return a {@link java.lang.String} object
      */
     public String generateReport() {
-        String out = ((isWarning) ? ErrorList.WARNING_MESSAGE_PREFIX : ErrorList.ERROR_MESSAGE_PREFIX)
+        String out = ((this.isWarning) ? ErrorList.WARNING_MESSAGE_PREFIX : ErrorList.ERROR_MESSAGE_PREFIX)
                 + ErrorList.FILENAME_PREFIX;
-        if (getFilename().length() > 0)
-            out = out + (new File(getFilename()).getPath()); // .getName());
-        if (getLine() > 0)
-            out = out + ErrorList.LINE_PREFIX + getMacroExpansionHistory() + getLine();
-        if (getPosition() > 0)
-            out = out + ErrorList.POSITION_PREFIX + getPosition();
-        out = out + ErrorList.MESSAGE_SEPARATOR + getMessage() + "\n";
+        if (!this.getFilename().isEmpty())
+            out = out + (new File(this.getFilename()).getPath()); // .getName());
+        if (this.getLine() > 0)
+            out = out + ErrorList.LINE_PREFIX + this.getMacroExpansionHistory() + this.getLine();
+        if (this.getPosition() > 0)
+            out = out + ErrorList.POSITION_PREFIX + this.getPosition();
+        out = out + ErrorList.MESSAGE_SEPARATOR + this.getMessage() + "\n";
         return out;
     }
 
@@ -245,13 +245,13 @@ public class ErrorMessage {
      */
     // Method added by Mohammad Sekavat Dec 2012
     public String getMacroExpansionHistory() {
-        if (macroExpansionHistory == null || macroExpansionHistory.length() == 0)
+        if (this.macroExpansionHistory == null || this.macroExpansionHistory.isEmpty())
             return "";
-        return macroExpansionHistory + "->";
+        return this.macroExpansionHistory + "->";
     }
 
     // Added by Mohammad Sekavat Dec 2012
-    private static String getExpansionHistory(RISCVprogram sourceProgram) {
+    private static String getExpansionHistory(final RISCVprogram sourceProgram) {
         if (sourceProgram == null || sourceProgram.getLocalMacroPool() == null)
             return "";
         return sourceProgram.getLocalMacroPool().getExpansionHistory();

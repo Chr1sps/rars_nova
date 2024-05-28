@@ -111,7 +111,6 @@ public class CustomPublisher<T> implements Flow.Publisher<T> {
             try {
                 if (this.requested.get() > 0 && !this.completed.get()) {
                     this.subscriber.onNext(item);
-                    System.out.println("value sent");
                     this.requested.decrementAndGet();
                 }
             } finally {

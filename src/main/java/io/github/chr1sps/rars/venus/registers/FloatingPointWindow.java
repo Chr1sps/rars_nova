@@ -56,6 +56,7 @@ public class FloatingPointWindow extends RegisterBlockWindow {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected String formatRegister(Register value, int base) {
         long val = value.getValue();
         if ((val & 0xFFFFFFFF_00000000L) == 0xFFFFFFFF_00000000L) {
@@ -68,6 +69,7 @@ public class FloatingPointWindow extends RegisterBlockWindow {
     /**
      * <p>beginObserving.</p>
      */
+    @Override
     protected void beginObserving() {
         FloatingPointRegisterFile.addRegistersSubscriber(this);
     }
@@ -75,6 +77,7 @@ public class FloatingPointWindow extends RegisterBlockWindow {
     /**
      * <p>endObserving.</p>
      */
+    @Override
     protected void endObserving() {
         FloatingPointRegisterFile.deleteRegistersObserver(this);
     }
@@ -82,6 +85,7 @@ public class FloatingPointWindow extends RegisterBlockWindow {
     /**
      * <p>resetRegisters.</p>
      */
+    @Override
     protected void resetRegisters() {
         FloatingPointRegisterFile.resetRegisters();
     }

@@ -18,6 +18,7 @@ public class FMAXS extends Floating {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Float32 compute(Float32 f1, Float32 f2, Environment env) {
         return io.github.chr1sps.jsoftfloat.operations.Comparisons.maximumNumber(f1, f2, env);
     }

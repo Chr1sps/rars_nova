@@ -98,10 +98,10 @@ class ToneGenerator {
      *                   Tone (MIDI velocity) represented by a positive byte value
      *                   (0-127).
      */
-    public void generateTone(byte pitch, int duration,
-                             byte instrument, byte volume) {
-        Runnable tone = new Tone(pitch, duration, instrument, volume);
-        threadPool.execute(tone);
+    public void generateTone(final byte pitch, final int duration,
+                             final byte instrument, final byte volume) {
+        final Runnable tone = new Tone(pitch, duration, instrument, volume);
+        ToneGenerator.threadPool.execute(tone);
     }
 
     /**
@@ -121,9 +121,9 @@ class ToneGenerator {
      *                   Tone (MIDI velocity) represented by a positive byte value
      *                   (0-127).
      */
-    public void generateToneSynchronously(byte pitch, int duration,
-                                          byte instrument, byte volume) {
-        Runnable tone = new Tone(pitch, duration, instrument, volume);
+    public void generateToneSynchronously(final byte pitch, final int duration,
+                                          final byte instrument, final byte volume) {
+        final Runnable tone = new Tone(pitch, duration, instrument, volume);
         tone.run();
     }
 
@@ -169,7 +169,7 @@ class Tone implements Runnable {
      *                   127 being
      *                   loud, and 0 being silent.
      */
-    public Tone(byte pitch, int duration, byte instrument, byte volume) {
+    public Tone(final byte pitch, final int duration, final byte instrument, final byte volume) {
         this.pitch = pitch;
         this.duration = duration;
         this.instrument = instrument;
@@ -179,8 +179,9 @@ class Tone implements Runnable {
     /**
      * Plays the tone.
      */
+    @Override
     public void run() {
-        playTone();
+        this.playTone();
     }
 
     /*
@@ -207,32 +208,32 @@ class Tone implements Runnable {
 
         try {
             Sequencer player = null;
-            openLock.lock();
+            Tone.openLock.lock();
             try {
                 player = MidiSystem.getSequencer();
                 player.open();
             } finally {
-                openLock.unlock();
+                Tone.openLock.unlock();
             }
 
-            Sequence seq = new Sequence(Sequence.PPQ, 1);
-            player.setTempoInMPQ(TEMPO);
-            Track t = seq.createTrack();
+            final Sequence seq = new Sequence(Sequence.PPQ, 1);
+            player.setTempoInMPQ(Tone.TEMPO);
+            final Track t = seq.createTrack();
 
             // select instrument
-            ShortMessage inst = new ShortMessage();
-            inst.setMessage(ShortMessage.PROGRAM_CHANGE, DEFAULT_CHANNEL, instrument, 0);
-            MidiEvent instChange = new MidiEvent(inst, 0);
+            final ShortMessage inst = new ShortMessage();
+            inst.setMessage(ShortMessage.PROGRAM_CHANGE, Tone.DEFAULT_CHANNEL, this.instrument, 0);
+            final MidiEvent instChange = new MidiEvent(inst, 0);
             t.add(instChange);
 
-            ShortMessage on = new ShortMessage();
-            on.setMessage(ShortMessage.NOTE_ON, DEFAULT_CHANNEL, pitch, volume);
-            MidiEvent noteOn = new MidiEvent(on, 0);
+            final ShortMessage on = new ShortMessage();
+            on.setMessage(ShortMessage.NOTE_ON, Tone.DEFAULT_CHANNEL, this.pitch, this.volume);
+            final MidiEvent noteOn = new MidiEvent(on, 0);
             t.add(noteOn);
 
-            ShortMessage off = new ShortMessage();
-            off.setMessage(ShortMessage.NOTE_OFF, DEFAULT_CHANNEL, pitch, volume);
-            MidiEvent noteOff = new MidiEvent(off, duration);
+            final ShortMessage off = new ShortMessage();
+            off.setMessage(ShortMessage.NOTE_OFF, Tone.DEFAULT_CHANNEL, this.pitch, this.volume);
+            final MidiEvent noteOff = new MidiEvent(off, this.duration);
             t.add(noteOff);
 
             player.setSequence(seq);
@@ -245,22 +246,21 @@ class Tone implements Runnable {
              * might not start playing right away, the sleep could end
              * before the tone, clipping off the end of the tone.)
              */
-            EndOfTrackListener eot = new EndOfTrackListener();
+            final EndOfTrackListener eot = new EndOfTrackListener();
             player.addMetaEventListener(eot);
 
             player.start();
 
             try {
                 eot.awaitEndOfTrack();
-            } catch (InterruptedException ex) {
+            } catch (final InterruptedException ignored) {
             } finally {
                 player.close();
             }
 
-        } catch (MidiUnavailableException mue) {
+        } catch (final MidiUnavailableException |
+                       InvalidMidiDataException mue) {
             mue.printStackTrace();
-        } catch (InvalidMidiDataException imde) {
-            imde.printStackTrace();
         }
     }
 }
@@ -272,10 +272,11 @@ class EndOfTrackListener implements javax.sound.midi.MetaEventListener {
     /**
      * {@inheritDoc}
      */
-    public synchronized void meta(javax.sound.midi.MetaMessage m) {
+    @Override
+    public synchronized void meta(final javax.sound.midi.MetaMessage m) {
         if (m.getType() == 47) {
-            endedYet = true;
-            notifyAll();
+            this.endedYet = true;
+            this.notifyAll();
         }
     }
 
@@ -285,8 +286,8 @@ class EndOfTrackListener implements javax.sound.midi.MetaEventListener {
      * @throws java.lang.InterruptedException if any.
      */
     public synchronized void awaitEndOfTrack() throws InterruptedException {
-        while (!endedYet) {
-            wait();
+        while (!this.endedYet) {
+            this.wait();
         }
     }
 }
