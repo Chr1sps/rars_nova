@@ -7,6 +7,8 @@ import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.InterruptController;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.Binary;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +24,7 @@ import java.awt.event.MouseListener;
  * didier.teifreto@univ-fcomte.fr
  */
 public class DigitalLabSim extends AbstractToolAndApplication {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final String heading = "Digital Lab Sim";
     private static final String version = " Version 1.0 (Didier Teifreto)";
 
@@ -156,7 +159,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
                 try {
                     Globals.memory.setByte(dataAddr, dataValue);
                 } catch (final AddressErrorException aee) {
-                    System.out.println("Tool author specified incorrect MMIO address!" + aee);
+                    DigitalLabSim.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
                     System.exit(0);
                 }
             } finally {

@@ -9,6 +9,9 @@
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
@@ -35,6 +38,7 @@ import java.util.Hashtable;
  * 08/12/2002 Clipboard actions (Oliver Henning)
  */
 public abstract class InputHandler extends KeyAdapter {
+    private static final Logger LOGGER = LogManager.getLogger(InputHandler.class);
     /**
      * If this client property is set to Boolean.TRUE on the text area,
      * the home/end keys will support 'smart' BRIEF-like behaviour
@@ -479,8 +483,8 @@ public abstract class InputHandler extends KeyAdapter {
         }
 
         // this shouldn't happen
-        System.err.println("BUG: getTextArea() returning null");
-        System.err.println("Report this to Slava Pestov <sp@gjt.org>");
+        InputHandler.LOGGER.error("BUG: getTextArea() returning null");
+        InputHandler.LOGGER.error("Report this to Slava Pestov <sp@gjt.org>");
         return null;
     }
 
@@ -559,7 +563,7 @@ public abstract class InputHandler extends KeyAdapter {
                 try {
                     textArea.getDocument().remove(caret - 1, 1);
                 } catch (final BadLocationException bl) {
-                    bl.printStackTrace();
+                    InputHandler.LOGGER.error("Bad location exception", bl);
                 }
             }
         }
@@ -597,7 +601,7 @@ public abstract class InputHandler extends KeyAdapter {
                         caret + lineStart,
                         start - (caret + lineStart));
             } catch (final BadLocationException bl) {
-                bl.printStackTrace();
+                InputHandler.LOGGER.error("Bad location exception", bl);
             }
         }
     }
@@ -623,7 +627,7 @@ public abstract class InputHandler extends KeyAdapter {
                 try {
                     textArea.getDocument().remove(caret, 1);
                 } catch (final BadLocationException bl) {
-                    bl.printStackTrace();
+                    InputHandler.LOGGER.error("Bad location exception", bl);
                 }
             }
         }
@@ -660,7 +664,7 @@ public abstract class InputHandler extends KeyAdapter {
                 textArea.getDocument().remove(start,
                         (caret + lineStart) - start);
             } catch (final BadLocationException bl) {
-                bl.printStackTrace();
+                InputHandler.LOGGER.error("Bad location exception", bl);
             }
         }
     }
@@ -835,7 +839,7 @@ public abstract class InputHandler extends KeyAdapter {
                 try {
                     textArea.document.replace(startLineOffset, endLineOffset - startLineOffset - 1, prefixed, null);
                 } catch (final BadLocationException bl) {
-                    bl.printStackTrace();
+                    InputHandler.LOGGER.error("Bad location exception", bl);
                 }
                 textArea.select(startOffset + 1, endOffset + (prefixed.length() - selected.length()));
             } else {
@@ -874,7 +878,7 @@ public abstract class InputHandler extends KeyAdapter {
                 try {
                     textArea.document.replace(startLineOffset, endLineOffset - startLineOffset - 1, stripped, null);
                 } catch (final BadLocationException bl) {
-                    bl.printStackTrace();
+                    InputHandler.LOGGER.error("Bad location exception", bl);
                 }
 
                 textArea.select(Math.max(startOffset - 1, 0),
@@ -906,7 +910,7 @@ public abstract class InputHandler extends KeyAdapter {
                     final int tabIndex = caretLineOffset + tabLineIndex;
                     textArea.getDocument().remove(tabIndex, 1);
                 } catch (final BadLocationException bl) {
-                    bl.printStackTrace();
+                    InputHandler.LOGGER.error("Bad location exception", bl);
                 }
             }
         }

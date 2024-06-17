@@ -33,6 +33,8 @@ import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,6 +48,7 @@ import java.awt.*;
  * @author Felipe Lessa &lt;felipe.lessa@gmail.com&gt;
  */
 public class InstructionCounter extends AbstractToolAndApplication {
+    private static final Logger LOGGER = LogManager.getLogger(InstructionCounter.class);
     private static final String name = "Instruction Counter";
     private static final String version = "Version 1.0 (Felipe Lessa)";
     private static final String heading = "Counting the number of instructions executed";
@@ -322,7 +325,8 @@ public class InstructionCounter extends AbstractToolAndApplication {
             }
         } catch (final AddressErrorException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+
+            InstructionCounter.LOGGER.error("Error in InstructionCounter", e);
         }
         this.updateDisplay();
     }

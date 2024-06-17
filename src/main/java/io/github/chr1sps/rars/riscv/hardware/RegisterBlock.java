@@ -2,6 +2,8 @@ package io.github.chr1sps.rars.riscv.hardware;
 
 import io.github.chr1sps.rars.notices.RegisterAccessNotice;
 import io.github.chr1sps.rars.util.Binary;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.Flow;
 
@@ -43,6 +45,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public class RegisterBlock {
+    private static final Logger LOGGER = LogManager.getLogger();
     private final Register[] regFile;
     private final char prefix;
 
@@ -62,10 +65,10 @@ public class RegisterBlock {
      */
     public void showRegisters() {
         for (final Register r : this.regFile) {
-            System.out.println("Name: " + r.getName());
-            System.out.println("Number: " + r.getNumber());
-            System.out.println("Value: " + r.getValue());
-            System.out.println();
+            RegisterBlock.LOGGER.debug("Name: {}", r.getName());
+            RegisterBlock.LOGGER.debug("Number: {}", r.getNumber());
+            RegisterBlock.LOGGER.debug("Value: {}", r.getValue());
+            RegisterBlock.LOGGER.debug('\n');
         }
     }
 

@@ -9,14 +9,16 @@
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax;
 
+import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 import javax.swing.undo.UndoableEdit;
-
-import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
 
 /**
  * A document implementation that can be tokenized by the syntax highlighting
@@ -26,6 +28,8 @@ import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
  * @version $Id: SyntaxDocument.java,v 1.14 1999/12/13 03:40:30 sp Exp $
  */
 public class SyntaxDocument extends PlainDocument {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     /**
      * Returns the token marker that is to be used to split lines
      * of this document up into tokens. May return null if this
@@ -34,7 +38,7 @@ public class SyntaxDocument extends PlainDocument {
      * @return a {@link io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker} object
      */
     public TokenMarker getTokenMarker() {
-        return tokenMarker;
+        return this.tokenMarker;
     }
 
     /**
@@ -44,13 +48,13 @@ public class SyntaxDocument extends PlainDocument {
      *
      * @param tm The new token marker
      */
-    public void setTokenMarker(TokenMarker tm) {
-        tokenMarker = tm;
+    public void setTokenMarker(final TokenMarker tm) {
+        this.tokenMarker = tm;
         if (tm == null)
             return;
-        tokenMarker.insertLines(0, getDefaultRootElement()
+        this.tokenMarker.insertLines(0, this.getDefaultRootElement()
                 .getElementCount());
-        tokenizeLines();
+        this.tokenizeLines();
     }
 
     /**
@@ -59,7 +63,7 @@ public class SyntaxDocument extends PlainDocument {
      * loaded.
      */
     public void tokenizeLines() {
-        tokenizeLines(0, getDefaultRootElement().getElementCount());
+        this.tokenizeLines(0, this.getDefaultRootElement().getElementCount());
     }
 
     /**
@@ -70,25 +74,25 @@ public class SyntaxDocument extends PlainDocument {
      * @param start The first line to parse
      * @param len   The number of lines, after the first one to parse
      */
-    public void tokenizeLines(int start, int len) {
-        if (tokenMarker == null || !tokenMarker.supportsMultilineTokens())
+    public void tokenizeLines(final int start, int len) {
+        if (this.tokenMarker == null || !this.tokenMarker.supportsMultilineTokens())
             return;
 
-        Segment lineSegment = new Segment();
-        Element map = getDefaultRootElement();
+        final Segment lineSegment = new Segment();
+        final Element map = this.getDefaultRootElement();
 
         len += start;
 
         try {
             for (int i = start; i < len; i++) {
-                Element lineElement = map.getElement(i);
-                int lineStart = lineElement.getStartOffset();
-                getText(lineStart, lineElement.getEndOffset()
+                final Element lineElement = map.getElement(i);
+                final int lineStart = lineElement.getStartOffset();
+                this.getText(lineStart, lineElement.getEndOffset()
                         - lineStart - 1, lineSegment);
-                tokenMarker.markTokens(lineSegment, i);
+                this.tokenMarker.markTokens(lineSegment, i);
             }
-        } catch (BadLocationException bl) {
-            bl.printStackTrace();
+        } catch (final BadLocationException bl) {
+            SyntaxDocument.LOGGER.error("Error when tokenizing lines.", bl);
         }
     }
 
@@ -117,7 +121,7 @@ public class SyntaxDocument extends PlainDocument {
      * @param edit The undoable edit
      * @since jEdit 2.2pre1
      */
-    public void addUndoableEdit(UndoableEdit edit) {
+    public void addUndoableEdit(final UndoableEdit edit) {
     }
 
     // protected members
@@ -130,12 +134,13 @@ public class SyntaxDocument extends PlainDocument {
      * state immediately so that any event listeners get a
      * consistent token marker.
      */
-    protected void fireInsertUpdate(DocumentEvent evt) {
-        if (tokenMarker != null) {
-            DocumentEvent.ElementChange ch = evt.getChange(
-                    getDefaultRootElement());
+    @Override
+    protected void fireInsertUpdate(final DocumentEvent evt) {
+        if (this.tokenMarker != null) {
+            final DocumentEvent.ElementChange ch = evt.getChange(
+                    this.getDefaultRootElement());
             if (ch != null) {
-                tokenMarker.insertLines(ch.getIndex() + 1,
+                this.tokenMarker.insertLines(ch.getIndex() + 1,
                         ch.getChildrenAdded().length -
                                 ch.getChildrenRemoved().length);
             }
@@ -151,12 +156,13 @@ public class SyntaxDocument extends PlainDocument {
      * state immediately so that any event listeners get a
      * consistent token marker.
      */
-    protected void fireRemoveUpdate(DocumentEvent evt) {
-        if (tokenMarker != null) {
-            DocumentEvent.ElementChange ch = evt.getChange(
-                    getDefaultRootElement());
+    @Override
+    protected void fireRemoveUpdate(final DocumentEvent evt) {
+        if (this.tokenMarker != null) {
+            final DocumentEvent.ElementChange ch = evt.getChange(
+                    this.getDefaultRootElement());
             if (ch != null) {
-                tokenMarker.deleteLines(ch.getIndex() + 1,
+                this.tokenMarker.deleteLines(ch.getIndex() + 1,
                         ch.getChildrenRemoved().length -
                                 ch.getChildrenAdded().length);
             }

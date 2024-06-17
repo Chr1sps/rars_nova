@@ -5,6 +5,8 @@ import io.github.chr1sps.rars.ErrorMessage;
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.RISCVprogram;
 import io.github.chr1sps.rars.exceptions.AssemblyException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -60,6 +62,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public class Tokenizer {
+    private static final Logger LOGGER = LogManager.getLogger(Tokenizer.class);
 
     private ErrorList errors;
     private RISCVprogram sourceRISCVprogram;
@@ -85,9 +88,9 @@ public class Tokenizer {
      *
      * @param program A previously-existing RISCVprogram object or null if none.
      */
-    public Tokenizer(RISCVprogram program) {
-        errors = new ErrorList();
-        sourceRISCVprogram = program;
+    public Tokenizer(final RISCVprogram program) {
+        this.errors = new ErrorList();
+        this.sourceRISCVprogram = program;
     }
 
     /**
@@ -99,12 +102,12 @@ public class Tokenizer {
      * that represents a tokenized source statement from the program.
      * @throws AssemblyException if any.
      */
-    public ArrayList<TokenList> tokenize(RISCVprogram p) throws AssemblyException {
-        sourceRISCVprogram = p;
-        equivalents = new HashMap<>(); // DPS 11-July-2012
-        ArrayList<TokenList> tokenList = new ArrayList<>();
+    public ArrayList<TokenList> tokenize(final RISCVprogram p) throws AssemblyException {
+        this.sourceRISCVprogram = p;
+        this.equivalents = new HashMap<>(); // DPS 11-July-2012
+        final ArrayList<TokenList> tokenList = new ArrayList<>();
         // ArrayList source = p.getSourceList();
-        ArrayList<SourceLine> source = processIncludes(p, new HashMap<>()); // DPS 9-Jan-2013
+        final ArrayList<SourceLine> source = this.processIncludes(p, new HashMap<>()); // DPS 9-Jan-2013
         p.setSourceLineList(source);
         TokenList currentLineTokens;
         String sourceLine;
@@ -125,8 +128,8 @@ public class Tokenizer {
                         source.get(i).getLineNumber()));
             }
         }
-        if (errors.errorsOccurred()) {
-            throw new AssemblyException(errors);
+        if (this.errors.errorsOccurred()) {
+            throw new AssemblyException(this.errors);
         }
         return tokenList;
     }
@@ -141,13 +144,13 @@ public class Tokenizer {
     // files that themselves have .include. Plus it will detect and report recursive
     // includes both direct and indirect.
     // DPS 11-Jan-2013
-    private ArrayList<SourceLine> processIncludes(RISCVprogram program, Map<String, String> inclFiles)
+    private ArrayList<SourceLine> processIncludes(final RISCVprogram program, final Map<String, String> inclFiles)
             throws AssemblyException {
-        ArrayList<String> source = program.getSourceList();
-        ArrayList<SourceLine> result = new ArrayList<>(source.size());
+        final ArrayList<String> source = program.getSourceList();
+        final ArrayList<SourceLine> result = new ArrayList<>(source.size());
         for (int i = 0; i < source.size(); i++) {
-            String line = source.get(i);
-            TokenList tl = tokenizeLine(program, i + 1, line, false);
+            final String line = source.get(i);
+            final TokenList tl = this.tokenizeLine(program, i + 1, line, false);
             boolean hasInclude = false;
             for (int ii = 0; ii < tl.size(); ii++) {
                 if (tl.get(ii).getValue().equalsIgnoreCase(Directive.INCLUDE.getName())
@@ -161,22 +164,22 @@ public class Tokenizer {
                     }
                     if (inclFiles.containsKey(filename)) {
                         // This is a recursive include. Generate error message and return immediately.
-                        Token t = tl.get(ii + 1);
-                        errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
+                        final Token t = tl.get(ii + 1);
+                        this.errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
                                 "Recursive include of file " + filename));
-                        throw new AssemblyException(errors);
+                        throw new AssemblyException(this.errors);
                     }
                     inclFiles.put(filename, filename);
-                    RISCVprogram incl = new RISCVprogram();
+                    final RISCVprogram incl = new RISCVprogram();
                     try {
                         incl.readSource(filename);
-                    } catch (AssemblyException p) {
-                        Token t = tl.get(ii + 1);
-                        errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
+                    } catch (final AssemblyException p) {
+                        final Token t = tl.get(ii + 1);
+                        this.errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
                                 "Error reading include file " + filename));
-                        throw new AssemblyException(errors);
+                        throw new AssemblyException(this.errors);
                     }
-                    ArrayList<SourceLine> allLines = processIncludes(incl, inclFiles);
+                    final ArrayList<SourceLine> allLines = this.processIncludes(incl, inclFiles);
                     result.addAll(allLines);
                     hasInclude = true;
                     break;
@@ -202,10 +205,10 @@ public class Tokenizer {
      *                           itself
      *                           contains one or more lexical (i.e. token) errors.
      */
-    public TokenList tokenizeExampleInstruction(String example) throws AssemblyException {
-        TokenList result = tokenizeLine(sourceRISCVprogram, 0, example, false);
-        if (errors.errorsOccurred()) {
-            throw new AssemblyException(errors);
+    public TokenList tokenizeExampleInstruction(final String example) throws AssemblyException {
+        final TokenList result = this.tokenizeLine(this.sourceRISCVprogram, 0, example, false);
+        if (this.errors.errorsOccurred()) {
+            throw new AssemblyException(this.errors);
         }
         return result;
     }
@@ -240,8 +243,8 @@ public class Tokenizer {
      */
 
     // Modified for release 4.3, to preserve existing API.
-    public TokenList tokenizeLine(int lineNum, String theLine) {
-        return tokenizeLine(sourceRISCVprogram, lineNum, theLine, true);
+    public TokenList tokenizeLine(final int lineNum, final String theLine) {
+        return this.tokenizeLine(this.sourceRISCVprogram, lineNum, theLine, true);
     }
 
     /**
@@ -256,10 +259,10 @@ public class Tokenizer {
      *                        list.
      * @return the generated token list for that line
      */
-    public TokenList tokenizeLine(int lineNum, String theLine, ErrorList callerErrorList) {
-        ErrorList saveList = this.errors;
+    public TokenList tokenizeLine(final int lineNum, final String theLine, final ErrorList callerErrorList) {
+        final ErrorList saveList = this.errors;
         this.errors = callerErrorList;
-        TokenList tokens = this.tokenizeLine(lineNum, theLine);
+        final TokenList tokens = this.tokenizeLine(lineNum, theLine);
         this.errors = saveList;
         return tokens;
     }
@@ -278,10 +281,10 @@ public class Tokenizer {
      *                         else false
      * @return the generated token list for that line
      */
-    public TokenList tokenizeLine(int lineNum, String theLine, ErrorList callerErrorList, boolean doEqvSubstitutes) {
-        ErrorList saveList = this.errors;
+    public TokenList tokenizeLine(final int lineNum, final String theLine, final ErrorList callerErrorList, final boolean doEqvSubstitutes) {
+        final ErrorList saveList = this.errors;
         this.errors = callerErrorList;
-        TokenList tokens = this.tokenizeLine(sourceRISCVprogram, lineNum, theLine, doEqvSubstitutes);
+        final TokenList tokens = this.tokenizeLine(this.sourceRISCVprogram, lineNum, theLine, doEqvSubstitutes);
         this.errors = saveList;
         return tokens;
     }
@@ -299,20 +302,20 @@ public class Tokenizer {
      *                         else false
      * @return the generated token list for that line
      */
-    public TokenList tokenizeLine(RISCVprogram program, int lineNum, String theLine, boolean doEqvSubstitutes) {
+    public TokenList tokenizeLine(final RISCVprogram program, final int lineNum, final String theLine, final boolean doEqvSubstitutes) {
         TokenList result = new TokenList();
         if (theLine.isEmpty())
             return result;
         // will be faster to work with char arrays instead of strings
         char c;
-        char[] line = theLine.toCharArray();
+        final char[] line = theLine.toCharArray();
         int linePos = 0;
-        char[] token = new char[line.length];
+        final char[] token = new char[line.length];
         int tokenPos = 0;
         int tokenStartPos = 1;
         boolean insideQuotedString = false;
         if (Globals.debug)
-            System.out.println("source line --->" + theLine + "<---");
+            Tokenizer.LOGGER.debug("source line --->{}<---", theLine);
         // Each iteration of this loop processes one character in the source line.
         while (linePos < line.length) {
             c = line[linePos];
@@ -419,7 +422,7 @@ public class Tokenizer {
                         // Our strategy is to process the whole thing right now...
                         tokenStartPos = linePos + 1;
                         token[tokenPos++] = c; // Put the quote in token[0]
-                        int lookaheadChars = line.length - linePos - 1;
+                        final int lookaheadChars = line.length - linePos - 1;
                         // need minimum 2 more characters, 1 for char and 1 for ending quote
                         if (lookaheadChars < 2)
                             break; // gonna be an error
@@ -478,13 +481,13 @@ public class Tokenizer {
         } // while
         if (tokenPos > 0) {
             if (insideQuotedString) {
-                errors.add(new ErrorMessage(program, lineNum, tokenStartPos,
+                this.errors.add(new ErrorMessage(program, lineNum, tokenStartPos,
                         "String is not terminated."));
             }
             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result);
         }
         if (doEqvSubstitutes) {
-            result = processEqv(program, lineNum, theLine, result); // DPS 11-July-2012
+            result = this.processEqv(program, lineNum, theLine, result); // DPS 11-July-2012
         }
         return result;
     }
@@ -499,7 +502,7 @@ public class Tokenizer {
     // case
     // the substitution needs to be made.
     // DPS 11-July-2012
-    private TokenList processEqv(RISCVprogram program, int lineNum, String theLine, TokenList tokens) {
+    private TokenList processEqv(final RISCVprogram program, final int lineNum, String theLine, final TokenList tokens) {
         // See if it is .eqv directive. If so, record it...
         // Have to assure it is a well-formed statement right now (can't wait for
         // assembler).
@@ -508,30 +511,30 @@ public class Tokenizer {
                 || tokens.get(2).getType() == TokenTypes.DIRECTIVE)) {
             // There should not be a label but if there is, the directive is in token
             // position 2 (ident, colon, directive).
-            int dirPos = (tokens.get(0).getType() == TokenTypes.DIRECTIVE) ? 0 : 2;
+            final int dirPos = (tokens.get(0).getType() == TokenTypes.DIRECTIVE) ? 0 : 2;
             if (Directive.matchDirective(tokens.get(dirPos).getValue()) == Directive.EQV) {
                 // Get position in token list of last non-comment token
-                int tokenPosLastOperand = tokens.size()
+                final int tokenPosLastOperand = tokens.size()
                         - ((tokens.get(tokens.size() - 1).getType() == TokenTypes.COMMENT) ? 2 : 1);
                 // There have to be at least two non-comment tokens beyond the directive
                 if (tokenPosLastOperand < dirPos + 2) {
-                    errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
+                    this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
                             "Too few operands for " + Directive.EQV.getName() + " directive"));
                     return tokens;
                 }
                 // Token following the directive has to be IDENTIFIER
                 if (tokens.get(dirPos + 1).getType() != TokenTypes.IDENTIFIER) {
-                    errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
+                    this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
                             "Malformed " + Directive.EQV.getName() + " directive"));
                     return tokens;
                 }
-                String symbol = tokens.get(dirPos + 1).getValue();
+                final String symbol = tokens.get(dirPos + 1).getValue();
                 // Make sure the symbol is not contained in the expression. Not likely to occur
                 // but if left
                 // undetected it will result in infinite recursion. e.g. .eqv ONE, (ONE)
                 for (int i = dirPos + 2; i < tokens.size(); i++) {
                     if (tokens.get(i).getValue().equals(symbol)) {
-                        errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
+                        this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
                                 "Cannot substitute " + symbol + " for itself in " + Directive.EQV.getName()
                                         + " directive"));
                         return tokens;
@@ -542,30 +545,30 @@ public class Tokenizer {
                 // multiple tokens, so I want to get everything from the IDENTIFIER to either
                 // the
                 // COMMENT or to the end.
-                int startExpression = tokens.get(dirPos + 2).getStartPos();
-                int endExpression = tokens.get(tokenPosLastOperand).getStartPos()
+                final int startExpression = tokens.get(dirPos + 2).getStartPos();
+                final int endExpression = tokens.get(tokenPosLastOperand).getStartPos()
                         + tokens.get(tokenPosLastOperand).getValue().length();
-                String expression = theLine.substring(startExpression - 1, endExpression - 1);
+                final String expression = theLine.substring(startExpression - 1, endExpression - 1);
                 // Symbol cannot be redefined - the only reason for this is to act like the Gnu
                 // .eqv
-                if (equivalents.containsKey(symbol) && !equivalents.get(symbol).equals(expression)) {
-                    errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos + 1).getStartPos(),
+                if (this.equivalents.containsKey(symbol) && !this.equivalents.get(symbol).equals(expression)) {
+                    this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos + 1).getStartPos(),
                             "\"" + symbol + "\" is already defined"));
                     return tokens;
                 }
-                equivalents.put(symbol, expression);
+                this.equivalents.put(symbol, expression);
                 return tokens;
             }
         }
         // Check if a substitution from defined .eqv is to be made. If so, make one.
         boolean substitutionMade = false;
         for (int i = 0; i < tokens.size(); i++) {
-            Token token = tokens.get(i);
-            if (token.getType() == TokenTypes.IDENTIFIER && equivalents != null
-                    && equivalents.containsKey(token.getValue())) {
+            final Token token = tokens.get(i);
+            if (token.getType() == TokenTypes.IDENTIFIER && this.equivalents != null
+                    && this.equivalents.containsKey(token.getValue())) {
                 // do the substitution
-                String sub = equivalents.get(token.getValue());
-                int startPos = token.getStartPos();
+                final String sub = this.equivalents.get(token.getValue());
+                final int startPos = token.getStartPos();
                 theLine = theLine.substring(0, startPos - 1) + sub
                         + theLine.substring(startPos + token.getValue().length() - 1);
                 substitutionMade = true; // one substitution per call. If there are multiple, will catch next one on the
@@ -575,7 +578,7 @@ public class Tokenizer {
         }
         tokens.setProcessedLine(theLine); // DPS 03-Jan-2013. Related to changes of 11-July-2012.
 
-        return (substitutionMade) ? tokenizeLine(lineNum, theLine) : tokens;
+        return (substitutionMade) ? this.tokenizeLine(lineNum, theLine) : tokens;
     }
 
     /**
@@ -584,33 +587,33 @@ public class Tokenizer {
      * @return the error list
      */
     public ErrorList getErrors() {
-        return errors;
+        return this.errors;
     }
 
     // Given candidate token and its position, will classify and record it.
-    private void processCandidateToken(char[] token, RISCVprogram program, int line, String theLine,
-                                       int tokenPos, int tokenStartPos, TokenList tokenList) {
+    private void processCandidateToken(final char[] token, final RISCVprogram program, final int line, final String theLine,
+                                       final int tokenPos, final int tokenStartPos, final TokenList tokenList) {
         String value = new String(token, 0, tokenPos);
         if (!value.isEmpty() && value.charAt(0) == '\'')
-            value = preprocessCharacterLiteral(value);
-        TokenTypes type = TokenTypes.matchTokenType(value);
+            value = this.preprocessCharacterLiteral(value);
+        final TokenTypes type = TokenTypes.matchTokenType(value);
         if (type == TokenTypes.ERROR) {
-            errors.add(new ErrorMessage(program, line, tokenStartPos,
+            this.errors.add(new ErrorMessage(program, line, tokenStartPos,
                     theLine + "\nInvalid language element: " + value));
         }
-        Token toke = new Token(type, value, program, line, tokenStartPos);
+        final Token toke = new Token(type, value, program, line, tokenStartPos);
         tokenList.add(toke);
     }
 
     // If passed a candidate character literal, attempt to translate it into integer
     // constant.
     // If the translation fails, return original value.
-    private String preprocessCharacterLiteral(String value) {
+    private String preprocessCharacterLiteral(final String value) {
         // must start and end with quote and have something in between
         if (value.length() < 3 || value.charAt(0) != '\'' || value.charAt(value.length() - 1) != '\'') {
             return value;
         }
-        String quotesRemoved = value.substring(1, value.length() - 1);
+        final String quotesRemoved = value.substring(1, value.length() - 1);
         // if not escaped, then if one character left return its value else return
         // original.
         if (quotesRemoved.charAt(0) != '\\') {
@@ -619,17 +622,17 @@ public class Tokenizer {
         // now we know it is escape sequence and have to decode which of the 8:
         // ',",\,n,t,b,r,f
         if (quotesRemoved.length() == 2) {
-            int escapedCharacterIndex = escapedCharacters.indexOf(quotesRemoved.charAt(1));
-            return (escapedCharacterIndex >= 0) ? escapedCharactersValues[escapedCharacterIndex] : value;
+            final int escapedCharacterIndex = Tokenizer.escapedCharacters.indexOf(quotesRemoved.charAt(1));
+            return (escapedCharacterIndex >= 0) ? Tokenizer.escapedCharactersValues[escapedCharacterIndex] : value;
         }
         // last valid possibility is 3 digit octal code 000 through 377
         if (quotesRemoved.length() == 4) {
             try {
-                int intValue = Integer.parseInt(quotesRemoved.substring(1), 8);
+                final int intValue = Integer.parseInt(quotesRemoved.substring(1), 8);
                 if (intValue >= 0 && intValue <= 255) {
                     return Integer.toString(intValue);
                 }
-            } catch (NumberFormatException ignored) {
+            } catch (final NumberFormatException ignored) {
             } // if not valid octal, will fall through and reject
         }
         return value;

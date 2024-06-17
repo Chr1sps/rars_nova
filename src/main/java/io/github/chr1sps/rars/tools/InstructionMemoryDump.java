@@ -65,6 +65,8 @@ import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -83,6 +85,7 @@ import java.io.IOException;
  * @author John Owens &lt;jowens@ece.ucdavis.edu&gt;
  */
 public class InstructionMemoryDump extends AbstractToolAndApplication {
+    private static final Logger LOGGER = LogManager.getLogger(InstructionMemoryDump.class);
     private static final String name = "Instruction/Memory Dump";
     private static final String version = "Version 1.0 (John Owens)";
     private static final String heading = "Dumps every executed instruction and data memory access to a file";
@@ -206,7 +209,7 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
                 }
             } catch (final AddressErrorException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                InstructionMemoryDump.LOGGER.error("Error while trying to get statement at address {}", a, e);
             }
         }
 

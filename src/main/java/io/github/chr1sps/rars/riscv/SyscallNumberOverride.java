@@ -28,13 +28,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Represents User override of default syscall number assignment.
  * Such overrides are specified in the Syscall.properties file read when
  * RARS starts up.
- *
  */
 public class SyscallNumberOverride {
+    private static final Logger LOGGER = LogManager.getLogger();
     private final String serviceName;
     private int newServiceNumber;
 
@@ -51,13 +54,12 @@ public class SyscallNumberOverride {
      *                    numbers will
      *                    be issued at RARS launch.
      */
-    public SyscallNumberOverride(String serviceName, String value) {
+    public SyscallNumberOverride(final String serviceName, final String value) {
         this.serviceName = serviceName;
         try {
             this.newServiceNumber = Integer.parseInt(value.trim());
-        } catch (NumberFormatException e) {
-            System.out
-                    .println("Error processing Syscall number override: '" + value.trim() + "' is not a valid integer");
+        } catch (final NumberFormatException e) {
+            SyscallNumberOverride.LOGGER.fatal("Error processing Syscall number override: '{}' is not a valid integer", value.trim());
             System.exit(0);
         }
     }
@@ -68,7 +70,7 @@ public class SyscallNumberOverride {
      * @return the service name
      */
     public String getName() {
-        return serviceName;
+        return this.serviceName;
     }
 
     /**
@@ -77,7 +79,7 @@ public class SyscallNumberOverride {
      * @return the service number
      */
     public int getNumber() {
-        return newServiceNumber;
+        return this.newServiceNumber;
     }
 
 }

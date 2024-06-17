@@ -13,6 +13,8 @@ import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.Token;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -64,6 +66,7 @@ import java.util.Vector;
  * @version $Id: JEditTextArea.java,v 1.36 1999/12/13 03:40:30 sp Exp $
  */
 public class JEditTextArea extends JComponent {
+    private static final Logger LOGGER = LogManager.getLogger(JEditTextArea.class);
     /**
      * Adding components with this name to the text area will place
      * them left of the horizontal scroll bar. In jEdit, the status
@@ -830,7 +833,7 @@ public class JEditTextArea extends JComponent {
         try {
             return this.document.getText(0, this.document.getLength());
         } catch (final BadLocationException bl) {
-            bl.printStackTrace();
+            JEditTextArea.LOGGER.error("Error getting text from document", bl);
             return null;
         }
     }
@@ -846,7 +849,7 @@ public class JEditTextArea extends JComponent {
             this.document.remove(0, this.document.getLength());
             this.document.insertString(0, text, null);
         } catch (final BadLocationException bl) {
-            bl.printStackTrace();
+            JEditTextArea.LOGGER.error("Error setting text in document", bl);
         } finally {
             this.document.endCompoundEdit();
         }
@@ -863,7 +866,7 @@ public class JEditTextArea extends JComponent {
         try {
             return this.document.getText(start, len);
         } catch (final BadLocationException bl) {
-            bl.printStackTrace();
+            JEditTextArea.LOGGER.error("Error getting text from document", bl);
             return null;
         }
     }
@@ -880,7 +883,7 @@ public class JEditTextArea extends JComponent {
         try {
             this.document.getText(start, len, segment);
         } catch (final BadLocationException bl) {
-            bl.printStackTrace();
+            JEditTextArea.LOGGER.error("Error getting text from document", bl);
             segment.offset = segment.count = 0;
         }
     }
@@ -1275,7 +1278,7 @@ public class JEditTextArea extends JComponent {
                 }
             }
         } catch (final BadLocationException bl) {
-            bl.printStackTrace();
+            JEditTextArea.LOGGER.error("Error setting selected text", bl);
             throw new InternalError("Cannot replace"
                     + " selection");
         }
@@ -1377,7 +1380,7 @@ public class JEditTextArea extends JComponent {
             this.document.remove(caret, str.length());
             this.document.insertString(caret, str, null);
         } catch (final BadLocationException bl) {
-            bl.printStackTrace();
+            JEditTextArea.LOGGER.error("Error overwriting text", bl);
         } finally {
             this.document.endCompoundEdit();
         }
@@ -1510,8 +1513,7 @@ public class JEditTextArea extends JComponent {
                 this.setSelectedText(selection);
             } catch (final Exception e) {
                 this.getToolkit().beep();
-                System.err.println("Clipboard does not"
-                        + " contain a string");
+                JEditTextArea.LOGGER.error("Clipboard does not contain a string", e);
             }
         }
     }
@@ -1656,7 +1658,7 @@ public class JEditTextArea extends JComponent {
                 return;
             }
         } catch (final BadLocationException bl) {
-            bl.printStackTrace();
+            JEditTextArea.LOGGER.error("Error updating bracket highlight", bl);
         }
 
         this.bracketLine = this.bracketPosition = -1;
@@ -1700,8 +1702,7 @@ public class JEditTextArea extends JComponent {
                 case JEditTextArea.CENTER -> this.center = comp;
                 case JEditTextArea.RIGHT -> this.right = comp;
                 case JEditTextArea.BOTTOM -> this.bottom = comp;
-                case JEditTextArea.LEFT_OF_SCROLLBAR ->
-                        this.leftOfScrollBar.addElement(comp);
+                case JEditTextArea.LEFT_OF_SCROLLBAR -> this.leftOfScrollBar.addElement(comp);
             }
         }
 
@@ -2036,7 +2037,7 @@ public class JEditTextArea extends JComponent {
                     return;
                 }
             } catch (final BadLocationException bl) {
-                bl.printStackTrace();
+                JEditTextArea.LOGGER.error("Error finding matching bracket", bl);
             }
 
             // Ok, it's not a bracket... select the word

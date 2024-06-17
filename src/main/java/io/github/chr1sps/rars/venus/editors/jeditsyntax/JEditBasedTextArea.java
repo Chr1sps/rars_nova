@@ -5,6 +5,8 @@ import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.venus.EditPane;
 import io.github.chr1sps.rars.venus.editors.TextEditingArea;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.RISCVTokenMarker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
@@ -27,6 +29,7 @@ import java.awt.*;
  * @since 4.0
  */
 public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea, CaretListener {
+    private final static Logger LOGGER = LogManager.getLogger(JEditBasedTextArea.class);
 
     private final JComponent lineNumbers;
     private final EditPane editPane;
@@ -272,8 +275,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         try {
             this.undoManager.undo();
         } catch (final CannotUndoException ex) {
-            System.out.println("Unable to undo: " + ex);
-            ex.printStackTrace();
+            JEditBasedTextArea.LOGGER.error("Unable to undo: {}", ex.getMessage(), ex);
         }
         this.unredoing = false;
         this.setCaretVisible(true);
@@ -291,8 +293,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         try {
             this.undoManager.redo();
         } catch (final CannotRedoException ex) {
-            System.out.println("Unable to redo: " + ex);
-            ex.printStackTrace();
+            JEditBasedTextArea.LOGGER.error("Unable to redo: {}", ex.getMessage(), ex);
         }
         this.unredoing = false;
         this.setCaretVisible(true);

@@ -11,6 +11,8 @@ import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.SimpleSubscriber;
 import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
 import io.github.chr1sps.rars.venus.util.RepeatButton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -60,6 +62,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson and Bumgarner
  */
 public class DataSegmentWindow extends JInternalFrame implements SimpleSubscriber<Notice> {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private static final String[] dataSegmentNames = {"Data", "Stack", "Kernel"};
     private static Object[][] dataData;
@@ -148,7 +151,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             this.mmioButton = new JButton();// "MMIO");
             this.textButton = new JButton();// ".text");
         } catch (final NullPointerException e) {
-            System.out.println("Internal Error: images folder not found");
+            DataSegmentWindow.LOGGER.fatal("Internal Error: images folder not found");
             System.exit(0);
         }
 
@@ -1054,13 +1057,13 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             final int numCols = this.getColumnCount();
 
             for (int i = 0; i < numRows; i++) {
-                System.out.print("    row " + i + ":");
+                DataSegmentWindow.LOGGER.debug("    row {}:", i);
                 for (int j = 0; j < numCols; j++) {
-                    System.out.print("  " + this.data[i][j]);
+                    DataSegmentWindow.LOGGER.debug("  {}", this.data[i][j]);
                 }
-                System.out.println();
+                DataSegmentWindow.LOGGER.debug("\n");
             }
-            System.out.println("--------------------------");
+            DataSegmentWindow.LOGGER.debug("--------------------------");
         }
     }
 

@@ -9,6 +9,8 @@ import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.SystemIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -51,6 +53,7 @@ import java.util.Collections;
  * @version August 2003
  */
 public class Assembler {
+    private static final Logger LOGGER = LogManager.getLogger(Assembler.class);
     private ErrorList errors;
     private boolean inDataSegment; // status maintained by parser
     private boolean inMacroSegment; // status maintained by parser, true if in
@@ -116,7 +119,8 @@ public class Assembler {
         final ArrayList<ProgramStatement> machineList = new ArrayList<>();
         this.errors = new ErrorList();
         if (Globals.debug)
-            System.out.println("Assembler first pass begins:");
+            LOGGER.debug("Assembler first pass begins:");
+
         // PROCESS THE FIRST ASSEMBLY PASS FOR ALL SOURCE FILES BEFORE PROCEEDING
         // TO SECOND PASS. THIS ASSURES ALL SYMBOL TABLES ARE CORRECTLY BUILT.
         // THERE IS ONE GLOBAL SYMBOL TABLE (for identifiers declared .globl) PLUS
@@ -201,7 +205,7 @@ public class Assembler {
             throw new AssemblyException(this.errors);
         }
         if (Globals.debug)
-            System.out.println("Assembler second pass begins");
+            LOGGER.debug("Assembler second pass begins");
         // SECOND PASS OF ASSEMBLER GENERATES BASIC ASSEMBLER THEN MACHINE CODE.
         // Generates basic assembler statements...
         for (final RISCVprogram program : tokenizedProgramFiles) {
@@ -264,7 +268,7 @@ public class Assembler {
                         // All substitutions have been made so we have generated
                         // a valid basic instruction!
                         if (Globals.debug)
-                            System.out.println("PSEUDO generated: " + instruction);
+                            LOGGER.debug("PSEUDO generated: {}", instruction);
                         // For generated instruction: tokenize, build program
                         // statement, add to list.
                         final TokenList newTokenList = new Tokenizer().tokenizeLine(sourceLine,
@@ -286,7 +290,7 @@ public class Assembler {
             } // end of assembler second pass.
         }
         if (Globals.debug)
-            System.out.println("Code generation begins");
+            LOGGER.debug("Code generation begins");
         ///////////// THIRD MAJOR STEP IS PRODUCE MACHINE CODE FROM ASSEMBLY //////////
         // Generates machine code statements from the list of basic assembler statements
         // and writes the statement to memory.
@@ -296,7 +300,7 @@ public class Assembler {
                 break;
             statement.buildMachineStatementFromBasicStatement(this.errors);
             if (Globals.debug)
-                System.out.println(statement);
+                LOGGER.debug(statement);
             try {
                 Globals.memory.setStatement(statement.getAddress(), statement);
             } catch (final AddressErrorException e) {
@@ -615,7 +619,7 @@ public class Assembler {
         final Token token = tokens.get(0);
         final Directive direct = Directive.matchDirective(token.getValue());
         if (Globals.debug)
-            System.out.println("line " + token.getSourceLine() + " is directive " + direct);
+            LOGGER.debug("line {} is directive {}", token.getSourceLine(), direct);
         if (direct == null) {
             this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token
                     .getStartPos(),

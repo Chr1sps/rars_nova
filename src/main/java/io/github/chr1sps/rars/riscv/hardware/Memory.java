@@ -9,6 +9,8 @@ import io.github.chr1sps.rars.notices.AccessNotice;
 import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.util.CustomPublisher;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.Vector;
@@ -51,6 +53,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * base address for (user) text segment: 0x00400000
@@ -469,7 +472,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     public int set(final int address, int value, final int length) throws AddressErrorException {
         int oldValue = 0;
         if (Globals.debug)
-            System.out.println("memory[" + address + "] set to " + value + "(" + length + " bytes)");
+            Memory.LOGGER.debug("memory[{}] set to {}({} bytes)", address, value, length);
         final int relativeByteAddress;
         if (Memory.inDataSegment(address)) {
             // in data segment. Will write one byte at a time, w/o regard to boundaries.
@@ -701,7 +704,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
                     ExceptionReason.STORE_ACCESS_FAULT, address);
         }
         if (Globals.debug)
-            System.out.println("memory[" + address + "] set to " + statement.getBinaryStatement());
+            Memory.LOGGER.debug("memory[{}] set to {}", address, statement.getBinaryStatement());
         Memory.storeProgramStatement(address, statement, Memory.textBaseAddress, this.textBlockTable);
     }
 
@@ -1137,7 +1140,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
             this.subscribe(obs, 0, 0x7ffffffc);
             this.subscribe(obs, 0x80000000, 0xfffffffc);
         } catch (final AddressErrorException aee) {
-            System.out.println("Internal Error in Memory.addObserver: " + aee);
+            Memory.LOGGER.error("Internal error in Memory.addObserver.", aee);
         }
     }
 

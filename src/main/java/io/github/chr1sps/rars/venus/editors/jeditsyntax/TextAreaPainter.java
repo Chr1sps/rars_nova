@@ -13,6 +13,8 @@ package io.github.chr1sps.rars.venus.editors.jeditsyntax;
 
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.Token;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.text.Segment;
@@ -30,6 +32,8 @@ import java.awt.image.BufferedImage;
  * @version $Id: TextAreaPainter.java,v 1.24 1999/12/13 03:40:30 sp Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander {
+    private static final Logger LOGGER = LogManager.getLogger(TextAreaPainter.class);
+
     /**
      * Creates a new repaint manager. This should be not be called
      * directly.
@@ -455,10 +459,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
                 this.repaint(0, h, this.getWidth(), this.getHeight() - h);
             }
         } catch (final Exception e) {
-            System.err.println("Error repainting line"
-                    + " range {" + firstInvalid + ","
-                    + lastInvalid + "}:");
-            e.printStackTrace();
+            LOGGER.error("Error repainting line range {{},{}}: {}", firstInvalid, lastInvalid, e);
         }
     }
 

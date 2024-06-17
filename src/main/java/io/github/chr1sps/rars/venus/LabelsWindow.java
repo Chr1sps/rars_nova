@@ -7,6 +7,8 @@ import io.github.chr1sps.rars.assembler.SymbolTable;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.venus.run.RunAssembleAction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -55,6 +57,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson and Team JSpim
  */
 public class LabelsWindow extends JInternalFrame {
+    private static final Logger LOGGER = LogManager.getLogger();
     private final JPanel labelPanel; // holds J
     private final JCheckBox dataLabels;
     private final JCheckBox textLabels;
@@ -429,13 +432,13 @@ public class LabelsWindow extends JInternalFrame {
             final int numCols = this.getColumnCount();
 
             for (int i = 0; i < numRows; i++) {
-                System.out.print("    row " + i + ":");
+                LabelsWindow.LOGGER.debug("    row {}:", i);
                 for (int j = 0; j < numCols; j++) {
-                    System.out.print("  " + this.data[i][j]);
+                    LabelsWindow.LOGGER.debug("  {}", this.data[i][j]);
                 }
-                System.out.println();
+                LabelsWindow.LOGGER.debug('\n');
             }
-            System.out.println("--------------------------");
+            LabelsWindow.LOGGER.debug("--------------------------");
         }
     }
 

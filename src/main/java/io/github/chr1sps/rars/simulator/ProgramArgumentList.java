@@ -4,6 +4,8 @@ import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +48,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version July 2008
  */
 public class ProgramArgumentList {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final ArrayList<String> programArgumentList;
 
@@ -196,7 +199,7 @@ public class ProgramArgumentList {
             RegisterFile.getRegister("a0").setValue(argStartAddress.length); // argc
             RegisterFile.getRegister("a1").setValue(stackAddress + Memory.WORD_LENGTH_BYTES + Memory.WORD_LENGTH_BYTES); // argv
         } catch (final AddressErrorException aee) {
-            System.out.println("Internal Error: Memory write error occurred while storing program arguments! " + aee);
+            ProgramArgumentList.LOGGER.fatal("Internal Error: Memory write error occurred while storing program arguments!", aee);
             System.exit(0);
         }
     }

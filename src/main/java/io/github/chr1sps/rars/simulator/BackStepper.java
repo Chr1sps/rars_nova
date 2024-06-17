@@ -6,6 +6,8 @@ import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -42,6 +44,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version February 2006
  */
 public class BackStepper {
+    private static final Logger LOGGER = LogManager.getLogger(BackStepper.class);
+
     private enum Action {
         MEMORY_RESTORE_RAW_WORD,
         MEMORY_RESTORE_DOUBLE_WORD,
@@ -175,7 +179,7 @@ public class BackStepper {
                     }
                 } catch (final Exception e) {
                     // if the original action did not cause an exception this will not either.
-                    System.out.println("Internal RARS error: address exception while back-stepping.");
+                    BackStepper.LOGGER.fatal("Internal RARS error: address exception while back-stepping.");
                     System.exit(0);
                 }
             } while (!this.backSteps.empty() && statement == this.backSteps.peek().ps);

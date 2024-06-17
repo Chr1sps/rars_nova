@@ -9,6 +9,8 @@ import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.riscv.syscalls.*;
 import io.github.chr1sps.rars.util.FilenameFinder;
 import io.github.chr1sps.rars.util.SystemIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,6 +58,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003-5
  */
 public class InstructionSet {
+    private static final Logger LOGGER = LogManager.getLogger(InstructionSet.class);
     private static final String CLASS_PREFIX = "io.github.chr1sps.rars.riscv.instructions.";
     private static final String INSTRUCTIONS_DIRECTORY_PATH = "io/github/chr1sps/rars/riscv/instructions";
     private static final String CLASS_EXTENSION = "class";
@@ -183,8 +186,7 @@ public class InstructionSet {
                     throw target;
                 }
             } catch (final Throwable e) {
-                System.out.println("Error instantiating Instruction from file " + file + ":");
-                e.printStackTrace();
+                InstructionSet.LOGGER.error("Error instantiating Instruction from file {}:", file, e);
                 System.exit(0);
             }
         }
@@ -201,8 +203,7 @@ public class InstructionSet {
             is = this.getClass().getResourceAsStream(file);
             in = new BufferedReader(new InputStreamReader(is));
         } catch (final NullPointerException e) {
-            System.out.println(
-                    "Error: Pseudo-instruction file PseudoOps.txt not found.");
+            InstructionSet.LOGGER.error("Error: Pseudo-instruction file PseudoOps.txt not found.");
             System.exit(0);
         }
         try {
@@ -240,12 +241,10 @@ public class InstructionSet {
             }
             in.close();
         } catch (final IOException ioe) {
-            System.out.println(
-                    "Internal Error: Pseudo-instructions could not be loaded.");
+            InstructionSet.LOGGER.error("Internal error: Pseudo-instructions could not be loaded.");
             System.exit(0);
         } catch (final Exception ioe) {
-            System.out.println(
-                    "Internal Error: Invalid pseudo-instruction specification.");
+            InstructionSet.LOGGER.error("Internal error: Invalid pseudo-instruction specification.");
             System.exit(0);
         }
 

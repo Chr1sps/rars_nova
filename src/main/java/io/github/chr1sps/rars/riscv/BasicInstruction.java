@@ -2,6 +2,8 @@ package io.github.chr1sps.rars.riscv;
 
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.exceptions.SimulationException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Class to represent a basic instruction in the MIPS instruction set.
@@ -12,7 +14,7 @@ import io.github.chr1sps.rars.exceptions.SimulationException;
  * @version August 2003
  */
 public abstract class BasicInstruction extends Instruction {
-
+    private static final Logger LOGGER = LogManager.getLogger(BasicInstruction.class);
     private String instructionName;
     private final BasicInstructionFormat instructionFormat;
     private final String operationMask;
@@ -50,15 +52,15 @@ public abstract class BasicInstruction extends Instruction {
      * correct
      * instruction simulator -- it needs to match all and only the 0's and 1's.
      */
-    public BasicInstruction(String example, String description, BasicInstructionFormat instrFormat,
-                            String operMask) {
+    public BasicInstruction(final String example, final String description, final BasicInstructionFormat instrFormat,
+                            final String operMask) {
         this.exampleFormat = example;
         this.mnemonic = this.extractOperator(example);
         this.description = description;
         this.instructionFormat = instrFormat;
         this.operationMask = operMask.replaceAll(" ", ""); // squeeze out any/all spaces
-        if (operationMask.length() != Instruction.INSTRUCTION_LENGTH_BITS) {
-            System.out.println(example + " mask not " + Instruction.INSTRUCTION_LENGTH_BITS + " bits!");
+        if (this.operationMask.length() != Instruction.INSTRUCTION_LENGTH_BITS) {
+            BasicInstruction.LOGGER.warn("{} mask not " + Instruction.INSTRUCTION_LENGTH_BITS + " bits!", example);
         }
 
         this.opcodeMask = (int) Long.parseLong(this.operationMask.replaceAll("[01]", "1").replaceAll("[^01]", "0"), 2);
@@ -74,8 +76,8 @@ public abstract class BasicInstruction extends Instruction {
      * @param operMask    a {@link java.lang.String} object
      * @param onlyinrv64  a boolean
      */
-    public BasicInstruction(String example, String description, BasicInstructionFormat instrFormat,
-                            String operMask, boolean onlyinrv64) {
+    public BasicInstruction(final String example, final String description, final BasicInstructionFormat instrFormat,
+                            final String operMask, final boolean onlyinrv64) {
         this(example, description, instrFormat, operMask);
         if (InstructionSet.rv64 != onlyinrv64) {
             throw new NullPointerException("rv64");
@@ -92,8 +94,8 @@ public abstract class BasicInstruction extends Instruction {
      * @param instrFormat a {@link io.github.chr1sps.rars.riscv.BasicInstructionFormat} object
      * @param operMask    a {@link java.lang.String} object
      */
-    public BasicInstruction(String example, BasicInstructionFormat instrFormat,
-                            String operMask) {
+    public BasicInstruction(final String example, final BasicInstructionFormat instrFormat,
+                            final String operMask) {
         this(example, "", instrFormat, operMask);
     }
 
@@ -107,7 +109,7 @@ public abstract class BasicInstruction extends Instruction {
      * @return The 32 bit mask, as a String
      */
     public String getOperationMask() {
-        return operationMask;
+        return this.operationMask;
     }
 
     /**
@@ -122,7 +124,7 @@ public abstract class BasicInstruction extends Instruction {
      * @return The machine instruction format, R, I, J or I-branch.
      */
     public BasicInstructionFormat getInstructionFormat() {
-        return instructionFormat;
+        return this.instructionFormat;
     }
 
     /**

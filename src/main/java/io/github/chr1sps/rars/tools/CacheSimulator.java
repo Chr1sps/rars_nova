@@ -814,8 +814,7 @@ public class CacheSimulator extends AbstractToolAndApplication {
                 if (!block.valid) {// it's a miss but I got it now because it is empty!
                     if (CacheSimulator.debug) // System.out.print
                         CacheSimulator.this.writeLog(" -- MISS\n");
-                    final int MISS = 2;
-                    result = MISS;
+                    result = 2; // miss value
                     block.valid = true;
                     block.tag = this.getTag(address);
                     block.mostRecentAccessTime = CacheSimulator.this.memoryAccessCount;

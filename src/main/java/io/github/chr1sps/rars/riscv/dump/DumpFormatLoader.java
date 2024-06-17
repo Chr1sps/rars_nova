@@ -1,6 +1,8 @@
 package io.github.chr1sps.rars.riscv.dump;
 
 import io.github.chr1sps.rars.util.FilenameFinder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -42,6 +44,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * <p>DumpFormatLoader class.</p>
  */
 public class DumpFormatLoader {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private static final String CLASS_PREFIX = "com.chrisps.rars.riscv.dump.";
     private static final String DUMP_DIRECTORY_PATH = "com/chrisps/rars/riscv/dump";
@@ -65,7 +68,7 @@ public class DumpFormatLoader {
                     DumpFormatLoader.formatList.add((DumpFormat) clas.getDeclaredConstructor().newInstance());
                 }
             } catch (final Exception e) {
-                System.out.println("Error instantiating DumpFormat from file " + file + ": " + e);
+                DumpFormatLoader.LOGGER.error("Error instantiating DumpFormat from file {}: {}", file, e);
             }
         }
     }

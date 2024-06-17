@@ -11,6 +11,8 @@ package io.github.chr1sps.rars.venus.editors.jeditsyntax;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.Token;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.text.Segment;
@@ -27,6 +29,7 @@ import java.awt.event.MouseEvent;
  * @version $Id: SyntaxUtilities.java,v 1.9 1999/12/13 03:40:30 sp Exp $
  */
 public class SyntaxUtilities {
+
     /**
      * Checks if a subregion of a <code>Segment</code> is equal to a
      * string.
@@ -235,6 +238,7 @@ public class SyntaxUtilities {
 
 class InstructionMouseEvent extends MouseEvent {
     // private members
+    private static final Logger LOGGER = LogManager.getLogger();
     private final Segment line;
 
     /**
@@ -247,7 +251,7 @@ class InstructionMouseEvent extends MouseEvent {
      */
     public InstructionMouseEvent(final Component component, final int x, final int y, final Segment line) {
         super(component, MouseEvent.MOUSE_MOVED, new java.util.Date().getTime(), 0, x, y, 0, false);
-        System.out.println("Create InstructionMouseEvent " + x + " " + y + " " + line);
+        InstructionMouseEvent.LOGGER.debug("Create InstructionMouseEvent " + x + " " + y + " " + line);
         this.line = line;
     }
 

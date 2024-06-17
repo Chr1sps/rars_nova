@@ -16,8 +16,8 @@ import java.util.HashSet;
  * Currently it makes some Markdown tables, but in the future it could do
  * something
  * with javadocs or generate a website with all of the help information
- *
  */
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class Documentation {
 
     /**
@@ -25,14 +25,14 @@ public class Documentation {
      *
      * @param args an array of {@link java.lang.String} objects
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         Globals.initialize();
-        System.out.println(createDirectiveMarkdown());
-        System.out.println(createSyscallMarkdown());
-        System.out.println(createInstructionMarkdown(BasicInstruction.class));
-        System.out.println(createInstructionMarkdown(ExtendedInstruction.class));
-        System.out.println(createInstructionMarkdown64Only(BasicInstruction.class));
-        System.out.println(createInstructionMarkdown64Only(ExtendedInstruction.class));
+        System.out.println(Documentation.createDirectiveMarkdown());
+        System.out.println(Documentation.createSyscallMarkdown());
+        System.out.println(Documentation.createInstructionMarkdown(BasicInstruction.class));
+        System.out.println(Documentation.createInstructionMarkdown(ExtendedInstruction.class));
+        System.out.println(Documentation.createInstructionMarkdown64Only(BasicInstruction.class));
+        System.out.println(Documentation.createInstructionMarkdown64Only(ExtendedInstruction.class));
     }
 
     /**
@@ -41,10 +41,10 @@ public class Documentation {
      * @return a {@link java.lang.String} object
      */
     public static String createDirectiveMarkdown() {
-        ArrayList<Directive> directives = Directive.getDirectiveList();
+        final ArrayList<Directive> directives = Directive.getDirectiveList();
         directives.sort(Comparator.comparing(Directive::getName));
-        StringBuilder output = new StringBuilder("| Name | Description|\n|------|------------|");
-        for (var direct : directives) {
+        final StringBuilder output = new StringBuilder("| Name | Description|\n|------|------------|");
+        for (final var direct : directives) {
             output.append("\n|");
             output.append(direct.getName());
             output.append('|');
@@ -60,11 +60,11 @@ public class Documentation {
      * @return a {@link java.lang.String} object
      */
     public static String createSyscallMarkdown() {
-        ArrayList<AbstractSyscall> list = SyscallLoader.getSyscallList();
+        final ArrayList<AbstractSyscall> list = SyscallLoader.getSyscallList();
         Collections.sort(list);
-        StringBuilder output = new StringBuilder(
+        final StringBuilder output = new StringBuilder(
                 "| Name | Call Number (a7) | Description | Inputs | Outputs |\n|------|------------------|-------------|--------|---------|");
-        for (AbstractSyscall syscall : list) {
+        for (final AbstractSyscall syscall : list) {
             output.append("\n|");
             output.append(syscall.getName());
             output.append('|');
@@ -87,16 +87,16 @@ public class Documentation {
      * @param instructionClass a {@link java.lang.Class} object
      * @return a {@link java.lang.String} object
      */
-    public static String createInstructionMarkdown(Class<? extends Instruction> instructionClass) {
+    public static String createInstructionMarkdown(final Class<? extends Instruction> instructionClass) {
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, false);
         InstructionSet.rv64 = false;
         Globals.instructionSet.populate();
 
-        ArrayList<Instruction> instructionList = Globals.instructionSet.getInstructionList();
+        final ArrayList<Instruction> instructionList = Globals.instructionSet.getInstructionList();
         instructionList.sort(Comparator.comparing(Instruction::getExampleFormat));
 
-        StringBuilder output = new StringBuilder("| Example Usage | Description |\n|---------------|-------------|");
-        for (Instruction instr : instructionList) {
+        final StringBuilder output = new StringBuilder("| Example Usage | Description |\n|---------------|-------------|");
+        for (final Instruction instr : instructionList) {
             if (instructionClass.isInstance(instr)) {
                 output.append("\n|");
                 output.append(instr.getExampleFormat());
@@ -114,14 +114,14 @@ public class Documentation {
      * @param instructionClass a {@link java.lang.Class} object
      * @return a {@link java.lang.String} object
      */
-    public static String createInstructionMarkdown64Only(Class<? extends Instruction> instructionClass) {
+    public static String createInstructionMarkdown64Only(final Class<? extends Instruction> instructionClass) {
 
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, false);
         InstructionSet.rv64 = false;
         Globals.instructionSet.populate();
 
-        HashSet<String> set = new HashSet<>();
-        for (Instruction i : Globals.instructionSet.getInstructionList()) {
+        final HashSet<String> set = new HashSet<>();
+        for (final Instruction i : Globals.instructionSet.getInstructionList()) {
             set.add(i.getExampleFormat());
         }
 
@@ -129,18 +129,18 @@ public class Documentation {
         InstructionSet.rv64 = true;
         Globals.instructionSet.populate();
 
-        ArrayList<Instruction> instructionList64 = Globals.instructionSet.getInstructionList();
+        final ArrayList<Instruction> instructionList64 = Globals.instructionSet.getInstructionList();
         instructionList64.sort(Comparator.comparing(Instruction::getExampleFormat));
-        StringBuilder output = new StringBuilder("| Example Usage | Description |\n|---------------|-------------|");
-        for (Instruction instr : instructionList64) {
+        final var builder = new StringBuilder("| Example Usage | Description |\n|---------------|-------------|");
+        for (final Instruction instr : instructionList64) {
             if (instructionClass.isInstance(instr) && !set.contains(instr.getExampleFormat())) {
-                output.append("\n|");
-                output.append(instr.getExampleFormat());
-                output.append('|');
-                output.append(instr.getDescription());
-                output.append('|');
+                builder.append("\n|");
+                builder.append(instr.getExampleFormat());
+                builder.append('|');
+                builder.append(instr.getDescription());
+                builder.append('|');
             }
         }
-        return output.toString();
+        return builder.toString();
     }
 }

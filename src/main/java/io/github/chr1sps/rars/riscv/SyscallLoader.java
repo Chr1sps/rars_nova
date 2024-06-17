@@ -2,6 +2,8 @@ package io.github.chr1sps.rars.riscv;
 
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.util.FilenameFinder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,6 +46,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * from Bret Barker's GameServer class from the book "Developing Games In Java".
  */
 public class SyscallLoader {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private static final String CLASS_PREFIX = "io.github.chr1sps.rars.riscv.syscalls.";
     private static final String SYSCALLS_DIRECTORY_PATH = "io/github/chr1sps/rars/riscv/syscalls";
@@ -85,7 +88,7 @@ public class SyscallLoader {
                     throw new Exception("Syscalls must assign -1 for number");
                 }
             } catch (final Exception e) {
-                System.out.println("Error instantiating Syscall from file " + file + ": " + e);
+                SyscallLoader.LOGGER.fatal("Error instantiating Syscall from file {}: {}", file, e);
                 System.exit(0);
             }
         }
@@ -96,29 +99,27 @@ public class SyscallLoader {
     private static ArrayList<AbstractSyscall> processSyscallNumberOverrides(final ArrayList<AbstractSyscall> syscallList) {
         final ArrayList<SyscallNumberOverride> overrides = new Globals().getSyscallOverrides();
         if (syscallList.size() != overrides.size()) {
-            System.out.println(
+            SyscallLoader.LOGGER.fatal(
                     "Error: the number of entries in the config file does not match the number of syscalls loaded");
-            System.out.println(
+            SyscallLoader.LOGGER.fatal(
                     "Ensure there is a Syscall.properties file in the directory you are executing if you are a developer");
-            System.out.printf("syscall list: %d, overrides: %d", syscallList.size(), overrides.size());
+            SyscallLoader.LOGGER.fatal("syscall list: {}, overrides: {}", syscallList.size(), overrides.size());
             System.exit(0);
         }
         for (final SyscallNumberOverride override : overrides) {
             boolean match = false;
             for (final AbstractSyscall syscall : syscallList) {
                 if (syscall.getNumber() == override.getNumber()) {
-                    System.out.println("Duplicate service number: " + syscall.getNumber() + " already registered to " +
-                            SyscallLoader.findSyscall(syscall.getNumber()).getName());
+                    SyscallLoader.LOGGER.fatal("Duplicate service number: {} already registered to {}", syscall.getNumber(), SyscallLoader.findSyscall(syscall.getNumber()).getName());
                     System.exit(0);
                 }
                 if (override.getName().equals(syscall.getName())) {
                     if (syscall.getNumber() != -1) {
-                        System.out.println(
-                                "Error: " + syscall.getName() + " was assigned a numebr twice in the config file");
+                        SyscallLoader.LOGGER.fatal("Error: {} was assigned a numebr twice in the config file", syscall.getName());
                         System.exit(0);
                     }
                     if (override.getNumber() < 0) {
-                        System.out.println("Error: " + override.getName() + " was assigned a negative number");
+                        SyscallLoader.LOGGER.fatal("Error: {} was assigned a negative number", override.getName());
                         System.exit(0);
                     }
                     // we have a match to service name, assign new number
@@ -127,8 +128,7 @@ public class SyscallLoader {
                 }
             }
             if (!match) {
-                System.out.println("Error: syscall name '" + override.getName() +
-                        "' in config file does not match any name in syscall list");
+                SyscallLoader.LOGGER.fatal("Error: syscall name '{}' in config file does not match any name in syscall list", override.getName());
                 System.exit(0);
             }
         }

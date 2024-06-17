@@ -1,13 +1,12 @@
 package io.github.chr1sps.rars.venus;
 
-import javax.swing.*;
-
 import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.venus.registers.ControlAndStatusWindow;
 import io.github.chr1sps.rars.venus.registers.FloatingPointWindow;
 import io.github.chr1sps.rars.venus.registers.RegistersWindow;
 
+import javax.swing.*;
 import java.awt.*;
 
 /*
@@ -64,37 +63,37 @@ public class ExecutePane extends JDesktopPane {
      * @param fpRegs  window containing floating point register set
      * @param csrRegs window containing the CSR set
      */
-    public ExecutePane(VenusUI mainUI, RegistersWindow regs, FloatingPointWindow fpRegs,
-                       ControlAndStatusWindow csrRegs) {
+    public ExecutePane(final VenusUI mainUI, final RegistersWindow regs, final FloatingPointWindow fpRegs,
+                       final ControlAndStatusWindow csrRegs) {
         this.mainUI = mainUI;
         // Although these are displayed in Data Segment, they apply to all three
         // internal
         // windows within the Execute pane. So they will be housed here.
-        addressDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Addresses",
+        this.addressDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Addresses",
                 Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX));
-        valueDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Values",
+        this.valueDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Values",
                 Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX));// VenusUI.DEFAULT_NUMBER_BASE);
-        addressDisplayBase
+        this.addressDisplayBase
                 .setToolTipText("If checked, displays all memory addresses in hexadecimal.  Otherwise, decimal.");
-        valueDisplayBase.setToolTipText(
+        this.valueDisplayBase.setToolTipText(
                 "If checked, displays all memory and register contents in hexadecimal.  Otherwise, decimal.");
-        NumberDisplayBaseChooser[] choosers = {addressDisplayBase, valueDisplayBase};
-        registerValues = regs;
-        fpRegValues = fpRegs;
-        csrValues = csrRegs;
-        textSegment = new TextSegmentWindow();
-        dataSegment = new DataSegmentWindow(choosers);
-        labelValues = new LabelsWindow();
-        labelWindowVisible = Globals.getSettings().getBooleanSetting(Settings.Bool.LABEL_WINDOW_VISIBILITY);
-        this.add(textSegment); // these 3 LOC moved up. DPS 3-Sept-2014
-        this.add(dataSegment);
-        this.add(labelValues);
-        textSegment.pack(); // these 3 LOC added. DPS 3-Sept-2014
-        dataSegment.pack();
-        labelValues.pack();
-        textSegment.setVisible(true);
-        dataSegment.setVisible(true);
-        labelValues.setVisible(labelWindowVisible);
+        final NumberDisplayBaseChooser[] choosers = {this.addressDisplayBase, this.valueDisplayBase};
+        this.registerValues = regs;
+        this.fpRegValues = fpRegs;
+        this.csrValues = csrRegs;
+        this.textSegment = new TextSegmentWindow();
+        this.dataSegment = new DataSegmentWindow(choosers);
+        this.labelValues = new LabelsWindow();
+        this.labelWindowVisible = Globals.getSettings().getBooleanSetting(Settings.Bool.LABEL_WINDOW_VISIBILITY);
+        this.add(this.textSegment); // these 3 LOC moved up. DPS 3-Sept-2014
+        this.add(this.dataSegment);
+        this.add(this.labelValues);
+        this.textSegment.pack(); // these 3 LOC added. DPS 3-Sept-2014
+        this.dataSegment.pack();
+        this.labelValues.pack();
+        this.textSegment.setVisible(true);
+        this.dataSegment.setVisible(true);
+        this.labelValues.setVisible(this.labelWindowVisible);
 
     }
 
@@ -113,21 +112,21 @@ public class ExecutePane extends JDesktopPane {
      */
     public void setWindowBounds() {
 
-        int fullWidth = this.getSize().width - this.getInsets().left - this.getInsets().right;
-        int fullHeight = this.getSize().height - this.getInsets().top - this.getInsets().bottom;
-        int halfHeight = fullHeight / 2;
-        Dimension textDim = new Dimension((int) (fullWidth * .75), halfHeight);
-        Dimension dataDim = new Dimension(fullWidth, halfHeight);
-        Dimension lablDim = new Dimension((int) (fullWidth * .25), halfHeight);
-        Dimension textFullDim = new Dimension(fullWidth, halfHeight);
-        dataSegment.setBounds(0, textDim.height + 1, dataDim.width, dataDim.height);
-        if (labelWindowVisible) {
-            System.out.println("YEA");
-            textSegment.setBounds(0, 0, textDim.width, textDim.height);
-            labelValues.setBounds(textDim.width + 1, 0, lablDim.width, lablDim.height);
+        final int fullWidth = this.getSize().width - this.getInsets().left - this.getInsets().right;
+        final int fullHeight = this.getSize().height - this.getInsets().top - this.getInsets().bottom;
+        final int halfHeight = fullHeight / 2;
+        final Dimension textDim = new Dimension((int) (fullWidth * .75), halfHeight);
+        final Dimension dataDim = new Dimension(fullWidth, halfHeight);
+        final Dimension lablDim = new Dimension((int) (fullWidth * .25), halfHeight);
+        final Dimension textFullDim = new Dimension(fullWidth, halfHeight);
+        this.dataSegment.setBounds(0, textDim.height + 1, dataDim.width, dataDim.height);
+        if (this.labelWindowVisible) {
+//            System.out.println("YEA");
+            this.textSegment.setBounds(0, 0, textDim.width, textDim.height);
+            this.labelValues.setBounds(textDim.width + 1, 0, lablDim.width, lablDim.height);
         } else {
-            textSegment.setBounds(0, 0, textFullDim.width, textFullDim.height);
-            labelValues.setBounds(0, 0, 0, 0);
+            this.textSegment.setBounds(0, 0, textFullDim.width, textFullDim.height);
+            this.labelValues.setBounds(0, 0, 0, 0);
         }
     }
 
@@ -137,19 +136,19 @@ public class ExecutePane extends JDesktopPane {
      *
      * @param visibility set to true or false
      */
-    public void setLabelWindowVisibility(boolean visibility) {
-        if (!visibility && labelWindowVisible) {
-            labelWindowVisible = false;
-            textSegment.setVisible(false);
-            labelValues.setVisible(false);
-            setWindowBounds();
-            textSegment.setVisible(true);
-        } else if (visibility && !labelWindowVisible) {
-            labelWindowVisible = true;
-            textSegment.setVisible(false);
-            setWindowBounds();
-            textSegment.setVisible(true);
-            labelValues.setVisible(true);
+    public void setLabelWindowVisibility(final boolean visibility) {
+        if (!visibility && this.labelWindowVisible) {
+            this.labelWindowVisible = false;
+            this.textSegment.setVisible(false);
+            this.labelValues.setVisible(false);
+            this.setWindowBounds();
+            this.textSegment.setVisible(true);
+        } else if (visibility && !this.labelWindowVisible) {
+            this.labelWindowVisible = true;
+            this.textSegment.setVisible(false);
+            this.setWindowBounds();
+            this.textSegment.setVisible(true);
+            this.labelValues.setVisible(true);
         }
     }
 
@@ -166,9 +165,9 @@ public class ExecutePane extends JDesktopPane {
         this.getControlAndStatusWindow().clearWindow();
         this.getLabelsWindow().clearWindow();
         // seems to be required, to display cleared Execute tab contents...
-        if (mainUI.getMainPane().getSelectedComponent() == this) {
-            mainUI.getMainPane().setSelectedComponent(mainUI.getMainPane().getEditTabbedPane());
-            mainUI.getMainPane().setSelectedComponent(this);
+        if (this.mainUI.getMainPane().getSelectedComponent() == this) {
+            this.mainUI.getMainPane().setSelectedComponent(this.mainUI.getMainPane().getEditTabbedPane());
+            this.mainUI.getMainPane().setSelectedComponent(this);
         }
     }
 
@@ -178,7 +177,7 @@ public class ExecutePane extends JDesktopPane {
      * @return a {@link io.github.chr1sps.rars.venus.TextSegmentWindow} object
      */
     public TextSegmentWindow getTextSegmentWindow() {
-        return textSegment;
+        return this.textSegment;
     }
 
     /**
@@ -187,7 +186,7 @@ public class ExecutePane extends JDesktopPane {
      * @return a {@link io.github.chr1sps.rars.venus.DataSegmentWindow} object
      */
     public DataSegmentWindow getDataSegmentWindow() {
-        return dataSegment;
+        return this.dataSegment;
     }
 
     /**
@@ -196,7 +195,7 @@ public class ExecutePane extends JDesktopPane {
      * @return a {@link io.github.chr1sps.rars.venus.registers.RegistersWindow} object
      */
     public RegistersWindow getRegistersWindow() {
-        return registerValues;
+        return this.registerValues;
     }
 
     /**
@@ -205,7 +204,7 @@ public class ExecutePane extends JDesktopPane {
      * @return a {@link io.github.chr1sps.rars.venus.registers.FloatingPointWindow} object
      */
     public FloatingPointWindow getFloatingPointWindow() {
-        return fpRegValues;
+        return this.fpRegValues;
     }
 
     /**
@@ -214,7 +213,7 @@ public class ExecutePane extends JDesktopPane {
      * @return a {@link io.github.chr1sps.rars.venus.registers.ControlAndStatusWindow} object
      */
     public ControlAndStatusWindow getControlAndStatusWindow() {
-        return csrValues;
+        return this.csrValues;
     }
 
     /**
@@ -223,7 +222,7 @@ public class ExecutePane extends JDesktopPane {
      * @return a {@link io.github.chr1sps.rars.venus.LabelsWindow} object
      */
     public LabelsWindow getLabelsWindow() {
-        return labelValues;
+        return this.labelValues;
     }
 
     /**
@@ -232,7 +231,7 @@ public class ExecutePane extends JDesktopPane {
      * @return a int
      */
     public int getValueDisplayBase() {
-        return valueDisplayBase.getBase();
+        return this.valueDisplayBase.getBase();
     }
 
     /**
@@ -241,7 +240,7 @@ public class ExecutePane extends JDesktopPane {
      * @return a int
      */
     public int getAddressDisplayBase() {
-        return addressDisplayBase.getBase();
+        return this.addressDisplayBase.getBase();
     }
 
     /**
@@ -251,7 +250,7 @@ public class ExecutePane extends JDesktopPane {
      * @return the chooser
      */
     public NumberDisplayBaseChooser getValueDisplayBaseChooser() {
-        return valueDisplayBase;
+        return this.valueDisplayBase;
     }
 
     /**
@@ -260,7 +259,7 @@ public class ExecutePane extends JDesktopPane {
      * @return the chooser
      */
     public NumberDisplayBaseChooser getAddressDisplayBaseChooser() {
-        return addressDisplayBase;
+        return this.addressDisplayBase;
     }
 
     /**
@@ -269,20 +268,20 @@ public class ExecutePane extends JDesktopPane {
      *
      * @param chooser the GUI object manipulated by the user to change number base
      */
-    public void numberDisplayBaseChanged(NumberDisplayBaseChooser chooser) {
-        if (chooser == valueDisplayBase) {
+    public void numberDisplayBaseChanged(final NumberDisplayBaseChooser chooser) {
+        if (chooser == this.valueDisplayBase) {
             // Have all internal windows update their value columns
-            registerValues.updateRegisters();
-            fpRegValues.updateRegisters();
-            csrValues.updateRegisters();
-            dataSegment.updateValues();
-            textSegment.updateBasicStatements();
+            this.registerValues.updateRegisters();
+            this.fpRegValues.updateRegisters();
+            this.csrValues.updateRegisters();
+            this.dataSegment.updateValues();
+            this.textSegment.updateBasicStatements();
         } else { // addressDisplayBase
             // Have all internal windows update their address columns
-            dataSegment.updateDataAddresses();
-            labelValues.updateLabelAddresses();
-            textSegment.updateCodeAddresses();
-            textSegment.updateBasicStatements();
+            this.dataSegment.updateDataAddresses();
+            this.labelValues.updateLabelAddresses();
+            this.textSegment.updateCodeAddresses();
+            this.textSegment.updateBasicStatements();
         }
     }
 

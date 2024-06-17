@@ -8,6 +8,8 @@ import io.github.chr1sps.rars.riscv.hardware.InterruptController;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.venus.util.AbstractFontSettingDialog;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -88,6 +90,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * row.
  */
 public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private static final String version = "Version 1.4";
     private static final String heading = "Keyboard and Display MMIO Simulator";
@@ -812,7 +815,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
                     if (!controlOnly)
                         Globals.memory.setRawWord(dataAddr, dataValue);
                 } catch (final AddressErrorException aee) {
-                    System.out.println("Tool author specified incorrect MMIO address!" + aee);
+                    KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
                     System.exit(0);
                 }
             } finally {
@@ -839,7 +842,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         try {
             return (Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) & 1) == 1;
         } catch (final AddressErrorException aee) {
-            System.out.println("Tool author specified incorrect MMIO address!" + aee);
+            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
             System.exit(0);
         }
         return false; // to satisfy the compiler -- this will never happen.
@@ -854,7 +857,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         try {
             return Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) | 1;
         } catch (final AddressErrorException aee) {
-            System.out.println("Tool author specified incorrect MMIO address!" + aee);
+            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
             System.exit(0);
         }
         return 1; // to satisfy the compiler -- this will never happen.
@@ -871,7 +874,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
         try {
             return Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) & 2;
         } catch (final AddressErrorException aee) {
-            System.out.println("Tool author specified incorrect MMIO address!" + aee);
+            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
             System.exit(0);
         }
         return 0; // to satisfy the compiler -- this will never happen.

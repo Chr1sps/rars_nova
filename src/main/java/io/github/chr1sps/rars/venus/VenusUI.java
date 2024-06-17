@@ -13,6 +13,8 @@ import io.github.chr1sps.rars.venus.registers.RegistersPane;
 import io.github.chr1sps.rars.venus.registers.RegistersWindow;
 import io.github.chr1sps.rars.venus.run.*;
 import io.github.chr1sps.rars.venus.settings.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,6 +67,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * here primarily so both can share the Action objects.
  */
 public class VenusUI extends JFrame {
+    private static final Logger LOGGER = LogManager.getLogger(VenusUI.class);
     private final VenusUI mainUI;
     public final JMenuBar menu;
     private final MainPane mainPane;
@@ -147,7 +150,7 @@ public class VenusUI extends JFrame {
         // image courtesy of NASA/JPL.
         final URL im = this.getClass().getResource(Globals.imagesPath + "RISC-V.png");
         if (im == null) {
-            System.out.println("Internal Error: images folder or file not found");
+            VenusUI.LOGGER.fatal("Internal Error: images folder or file not found.");
             System.exit(0);
         }
         final Image mars = Toolkit.getDefaultToolkit().getImage(im);
@@ -242,7 +245,7 @@ public class VenusUI extends JFrame {
 
         // Open files
         if (!this.editor.open(paths)) {
-            System.out.println("Internal Error: could not open files" + String.join(", ", paths));
+            VenusUI.LOGGER.fatal("Internal Error: could not open files {}", String.join(", ", paths));
             System.exit(1);
         }
     }
@@ -426,7 +429,7 @@ public class VenusUI extends JFrame {
                 @Override
                 public void handler(final boolean visibility) {
                     VenusUI.this.mainPane.getExecutePane().setLabelWindowVisibility(visibility);
-                    System.out.println("ExecutePane reference 2");
+                    VenusUI.LOGGER.info("ExecutePane reference 2");
                 }
             };
             this.settingsPopupInputAction = new SettingsAction("Popup dialog for input syscalls (5,6,7,8,12)",
@@ -515,9 +518,7 @@ public class VenusUI extends JFrame {
             this.helpAboutAction = new HelpAboutAction("About ...", null,
                     "Information about Rars", null, null, this.mainUI);
         } catch (final NullPointerException e) {
-            System.out.println(
-                    "Internal Error: images folder not found, or other null pointer exception while creating Action objects");
-            e.printStackTrace();
+            VenusUI.LOGGER.fatal("Internal Error: images folder not found, or other null pointer exception while creating Action objects", e);
             System.exit(0);
         }
     }
@@ -851,7 +852,7 @@ public class VenusUI extends JFrame {
             case FileStatus.OPENING:// This is a temporary state. DPS 9-Aug-2011
                 break;
             default:
-                System.out.println("Invalid File Status: " + status);
+                VenusUI.LOGGER.error("Invalid File Status: {}", status);
                 break;
         }
     }

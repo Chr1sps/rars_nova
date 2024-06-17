@@ -3,6 +3,8 @@ package io.github.chr1sps.rars.riscv;
 import io.github.chr1sps.rars.assembler.TokenList;
 import io.github.chr1sps.rars.assembler.Tokenizer;
 import io.github.chr1sps.rars.exceptions.AssemblyException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.StringTokenizer;
 
@@ -41,6 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public abstract class Instruction {
+    private static final Logger LOGGER = LogManager.getLogger();
     /**
      * Length in bytes of a machine instruction. Currently just 4 because other
      * instruction sizes defined in the specification are nor supported.
@@ -149,8 +152,7 @@ public abstract class Instruction {
         try {
             this.tokenList = ((new Tokenizer()).tokenizeExampleInstruction(this.exampleFormat));
         } catch (final AssemblyException pe) {
-            System.out.println(
-                    "CONFIGURATION ERROR: Instruction example \"" + this.exampleFormat + "\" contains invalid token(s).");
+            Instruction.LOGGER.error("CONFIGURATION ERROR: Instruction example \"{}\" contains invalid token(s).", this.exampleFormat);
         }
     }
 }

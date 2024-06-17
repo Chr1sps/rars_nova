@@ -1,5 +1,8 @@
 package io.github.chr1sps.rars.venus.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,6 +39,7 @@ import java.awt.event.MouseListener;
  */
 public class RepeatButton extends JButton
         implements ActionListener, MouseListener {
+    private static final Logger LOGGER = LogManager.getLogger();
     /**
      * The pressed state for this button.
      */
@@ -230,7 +234,7 @@ public class RepeatButton extends JButton
         }
         // testing code...
         else if (RepeatButton.testing && ae.getSource() == this) {
-            System.out.println(ae.getActionCommand());
+            RepeatButton.LOGGER.debug(ae.getActionCommand());
         }
     }
 

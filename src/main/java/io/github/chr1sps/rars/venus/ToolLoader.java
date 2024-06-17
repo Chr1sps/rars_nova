@@ -2,6 +2,8 @@ package io.github.chr1sps.rars.venus;
 
 import io.github.chr1sps.rars.tools.Tool;
 import io.github.chr1sps.rars.util.FilenameFinder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
@@ -50,6 +52,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2005
  */
 public class ToolLoader {
+    private static final Logger LOGGER = LogManager.getLogger(ToolLoader.class);
 
     private static final String CLASS_PREFIX = "io.github.chr1sps.rars.tools.";
     private static final String TOOLS_DIRECTORY_PATH = "io/github/chr1sps/rars/tools";
@@ -68,12 +71,12 @@ public class ToolLoader {
      */
     public static JMenu buildToolsMenu() {
         JMenu menu = null;
-        ArrayList<Tool> toolList = loadTools();
+        final ArrayList<Tool> toolList = ToolLoader.loadTools();
         if (!toolList.isEmpty()) {
-            menu = new JMenu(TOOLS_MENU_NAME);
+            menu = new JMenu(ToolLoader.TOOLS_MENU_NAME);
             menu.setMnemonic(KeyEvent.VK_T);
             // traverse array list and build menu
-            for (Tool tool : toolList) {
+            for (final Tool tool : toolList) {
                 menu.add(new ToolAction(tool));
             }
         }
@@ -101,9 +104,9 @@ public class ToolLoader {
      * folder, then continue as before.
      */
     private static ArrayList<Tool> loadTools() {
-        ArrayList<Tool> toolList = new ArrayList<>();
-        ArrayList<String> candidates = FilenameFinder.getFilenameList(ToolLoader.class.getClassLoader(),
-                TOOLS_DIRECTORY_PATH, CLASS_EXTENSION);
+        final ArrayList<Tool> toolList = new ArrayList<>();
+        final ArrayList<String> candidates = FilenameFinder.getFilenameList(ToolLoader.class.getClassLoader(),
+                ToolLoader.TOOLS_DIRECTORY_PATH, ToolLoader.CLASS_EXTENSION);
         // Add any tools stored externally, as listed in Config.properties file.
         // This needs some work, because com.chrisps.rars.Globals.getExternalTools()
         // returns
@@ -114,8 +117,8 @@ public class ToolLoader {
         // pathname.
         // candidates.addAll(rars.Globals.getExternalTools()); // this by itself is not
         // enough...
-        HashSet<String> tools = new HashSet<>();
-        for (String file : candidates) {
+        final HashSet<String> tools = new HashSet<>();
+        for (final String file : candidates) {
             // Do not add class if already encountered (happens if run in MARS development
             // directory)
             if (tools.contains(file)) {
@@ -123,11 +126,11 @@ public class ToolLoader {
             } else {
                 tools.add(file);
             }
-            if (!file.equals(TOOL_INTERFACE)) {
+            if (!file.equals(ToolLoader.TOOL_INTERFACE)) {
                 try {
                     // grab the class, make sure it implements Tool, instantiate, add to menu
-                    String toolClassName = CLASS_PREFIX + file.substring(0, file.indexOf(CLASS_EXTENSION) - 1);
-                    Class<?> clas = Class.forName(toolClassName);
+                    final String toolClassName = ToolLoader.CLASS_PREFIX + file.substring(0, file.indexOf(ToolLoader.CLASS_EXTENSION) - 1);
+                    final Class<?> clas = Class.forName(toolClassName);
                     if (!Tool.class.isAssignableFrom(clas) ||
                             Modifier.isAbstract(clas.getModifiers()) ||
                             Modifier.isInterface(clas.getModifiers())) {
@@ -135,8 +138,8 @@ public class ToolLoader {
                     }
 
                     toolList.add((Tool) clas.getDeclaredConstructor().newInstance());
-                } catch (Exception e) {
-                    System.out.println("Error instantiating Tool from file " + file + ": " + e);
+                } catch (final Exception e) {
+                    ToolLoader.LOGGER.error("Error instantiating Tool from file {}: {}", file, e);
                 }
             }
         }

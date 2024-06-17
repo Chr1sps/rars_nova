@@ -1,5 +1,8 @@
 package io.github.chr1sps.rars.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.swing.filechooser.FileFilter;
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +53,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version October 2006
  */
 public class FilenameFinder {
+    private static final Logger LOGGER = LogManager.getLogger(FilenameFinder.class);
     private static final String JAR_EXTENSION = ".jar";
     private static final String FILE_URL = "file:";
     private static final String JAR_URI_PREFIX = "jar:";
@@ -135,7 +139,7 @@ public class FilenameFinder {
             return filenameList;
 
         } catch (final URISyntaxException | IOException e) {
-            e.printStackTrace();
+            FilenameFinder.LOGGER.error("Error occurred while trying to get filename list", e);
             return filenameList;
         }
 
@@ -371,8 +375,7 @@ public class FilenameFinder {
         if (jarName == null) {
             return nameList;
         }
-        try {
-            final ZipFile zf = new ZipFile(new File(jarName));
+        try (final var zf = new ZipFile(new File(jarName))) {
             final Enumeration<? extends ZipEntry> list = zf.entries();
             while (list.hasMoreElements()) {
                 final ZipEntry ze = list.nextElement();
@@ -382,7 +385,7 @@ public class FilenameFinder {
                 }
             }
         } catch (final Exception e) {
-            System.out.println("Exception occurred reading Filename list from JAR: " + e);
+            FilenameFinder.LOGGER.error("Exception occurred reading Filename list from JAR: ", e);
         }
         return nameList;
     }

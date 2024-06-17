@@ -5,6 +5,8 @@ import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.EditorFont;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxUtilities;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -61,6 +63,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  */
 public class Settings extends SubmissionPublisher<SettingsNotice> {
+    private static final Logger LOGGER = LogManager.getLogger();
     /* Properties file used to hold default settings. */
     private static final String settingsFile = "Settings";
     private final ColorMode defaultColorMode = ColorMode.SYSTEM;
@@ -1029,8 +1032,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         this.initSystemProviders();
         this.applyDefaultSettings();
         if (!this.readSettingsFromPropertiesFile(Settings.settingsFile)) {
-            System.out.println(
-                    "RARS System error: unable to read Settings.properties defaults. Using built-in defaults.");
+            Settings.LOGGER.error("RARS System error: unable to read Settings.properties defaults. Using built-in defaults.");
         }
         this.getSettingsFromPreferences();
     }

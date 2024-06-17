@@ -59,6 +59,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version December 2009
  */
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class Main {
 
     /**

@@ -11,6 +11,8 @@ import io.github.chr1sps.rars.simulator.Simulator;
 import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.EditorFont;
 import io.github.chr1sps.rars.util.SimpleSubscriber;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -57,6 +59,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Team JSpim
  */
 public class TextSegmentWindow extends JInternalFrame implements SimpleSubscriber<Notice> {
+    private static final Logger LOGGER = LogManager.getLogger();
     private final JPanel programArgumentsPanel; // DPS 17-July-2008
     private final JTextField programArgumentsTextField; // DPS 17-July-2008
     private static final int PROGRAM_ARGUMENT_TEXTFIELD_COLUMNS = 40;
@@ -825,13 +828,13 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             final int numCols = this.getColumnCount();
 
             for (int i = 0; i < numRows; i++) {
-                System.out.print("    row " + i + ":");
+                TextSegmentWindow.LOGGER.debug("    row {}:", i);
                 for (int j = 0; j < numCols; j++) {
-                    System.out.print("  " + this.data[i][j]);
+                    TextSegmentWindow.LOGGER.debug("  {}", this.data[i][j]);
                 }
-                System.out.println();
+                TextSegmentWindow.LOGGER.debug('\n');
             }
-            System.out.println("--------------------------");
+            TextSegmentWindow.LOGGER.debug("--------------------------");
         }
     }
 

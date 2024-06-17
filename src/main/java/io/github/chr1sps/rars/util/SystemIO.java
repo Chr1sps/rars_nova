@@ -45,6 +45,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson and Ken Vollmar
  * @version August 2003-2005
  */
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class SystemIO {
     /**
      * Buffer size for syscalls for file I/O

@@ -9,6 +9,9 @@
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -25,6 +28,8 @@ import java.util.StringTokenizer;
  * @version $Id: DefaultInputHandler.java,v 1.18 1999/12/13 03:40:30 sp Exp $
  */
 public class DefaultInputHandler extends InputHandler {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     /**
      * Creates a new input handler with no key bindings defined.
      */
@@ -351,7 +356,7 @@ public class DefaultInputHandler extends InputHandler {
             else
                 return KeyStroke.getKeyStroke(ch, modifiers);
         } else if (key.isEmpty()) {
-            System.err.println("Invalid key stroke: " + keyStroke);
+            DefaultInputHandler.LOGGER.error("Invalid key stroke: {} - empty key", keyStroke);
             return null;
         } else {
             final int ch;
@@ -360,8 +365,7 @@ public class DefaultInputHandler extends InputHandler {
                 ch = KeyEvent.class.getField("VK_".concat(key))
                         .getInt(null);
             } catch (final Exception e) {
-                System.err.println("Invalid key stroke: "
-                        + keyStroke);
+                DefaultInputHandler.LOGGER.error("Invalid key stroke: {} - couldn't get the int value", keyStroke);
                 return null;
             }
 

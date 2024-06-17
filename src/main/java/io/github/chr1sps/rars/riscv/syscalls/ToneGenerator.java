@@ -1,5 +1,8 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.sound.midi.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -135,7 +138,7 @@ class ToneGenerator {
  * and will be played using MIDI.
  */
 class Tone implements Runnable {
-
+    private static final Logger LOGGER = LogManager.getLogger();
     /**
      * Tempo of the tone is in milliseconds: 1000 beats per second.
      */
@@ -260,7 +263,7 @@ class Tone implements Runnable {
 
         } catch (final MidiUnavailableException |
                        InvalidMidiDataException mue) {
-            mue.printStackTrace();
+            Tone.LOGGER.error("Error playing tone.", mue);
         }
     }
 }

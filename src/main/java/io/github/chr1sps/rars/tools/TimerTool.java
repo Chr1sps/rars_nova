@@ -32,6 +32,8 @@ import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.InterruptController;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import io.github.chr1sps.rars.util.SimpleSubscriber;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,6 +45,8 @@ import java.util.concurrent.Flow;
  * A RARS tool used to implement a timing module and timer inturrpts.
  */
 public class TimerTool extends AbstractToolAndApplication {
+    private static final Logger LOGGER = LogManager.getLogger(TimerTool.class);
+
     private static final String heading = "Timer Tool";
     private static final String version = "Version 1.0 (Zachary Selk)";
     private static final int TIME_ADDRESS = Memory.memoryMapBaseAddress + 0x18;
@@ -229,7 +233,7 @@ public class TimerTool extends AbstractToolAndApplication {
             try {
                 Globals.memory.subscribe(this, TimerTool.TIME_CMP_ADDRESS, TimerTool.TIME_CMP_ADDRESS + 8);
             } catch (final AddressErrorException aee) {
-                System.out.println("Error while adding observer in Timer Tool");
+                LOGGER.fatal("Error while adding observer in Timer Tool");
                 System.exit(0);
             }
         }
@@ -322,7 +326,7 @@ public class TimerTool extends AbstractToolAndApplication {
             try {
                 Globals.memory.setRawWord(dataAddr, dataValue);
             } catch (final AddressErrorException aee) {
-                System.out.println("Tool author specified incorrect MMIO address!" + aee);
+                LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
                 System.exit(0);
             }
         } finally {
