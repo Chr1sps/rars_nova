@@ -156,13 +156,11 @@ public class RISCVTokenMarker extends TokenMarker {
                         case '#':
                             backslash = false;
                             this.doKeyword(line, i, c);
-                            if (length - i >= 1) {
-                                this.addToken(i - this.lastOffset, token);
-                                this.addToken(length - i, Token.COMMENT1);
-                                this.lastOffset = this.lastKeyword = length;
-                                break loop;
-                            }
-                            break;
+                            this.addToken(i - this.lastOffset, token);
+                            this.addToken(length - i, Token.COMMENT1);
+                            this.lastOffset = this.lastKeyword = length;
+                            break loop;
+
                         default:
                             backslash = false;
                             // . and $ added 4/6/10 DPS; % added 12/12 M.Sekhavat
@@ -357,15 +355,13 @@ public class RISCVTokenMarker extends TokenMarker {
 
             final String trimmedTokenText = tokenText.trim();
 
-            // Subcase: no KEYWORD1 or KEYWORD2 but current token contains nothing but white
-            // space. We're done.
-            if (keywordTokenText == null && trimmedTokenText.isEmpty()) {
+            if (trimmedTokenText.isEmpty()) {
+                // Subcase: no KEYWORD1 or KEYWORD2 but current token contains nothing but white
+                // space. We're done.
                 return null;
-            }
-
-            // Subcase: no KEYWORD1 or KEYWORD2. Generate text based on prefix match of
-            // trimmed current token.
-            if (keywordTokenText == null && !trimmedTokenText.isEmpty()) {
+            } else {
+                // Subcase: no KEYWORD1 or KEYWORD2. Generate text based on prefix match of
+                // trimmed current token.
                 if (trimmedTokenText.charAt(0) == '.') {
                     return this.getTextFromDirectiveMatch(trimmedTokenText, false);
                 } else if (trimmedTokenText.length() >= Globals.getSettings().getEditorPopupPrefixLength()) {
@@ -423,7 +419,7 @@ public class RISCVTokenMarker extends TokenMarker {
             if (Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED)
                     || inst instanceof BasicInstruction) {
                 if (exact) {
-                    results.add(new PopupHelpItem(tokenText, inst.getExampleFormat(), inst.getDescription(), exact));
+                    results.add(new PopupHelpItem(tokenText, inst.getExampleFormat(), inst.getDescription(), true));
                 } else {
                     final String mnemonic = inst.getExampleFormat().split(" ")[0];
                     if (!insts.containsKey(mnemonic)) {
@@ -436,7 +432,7 @@ public class RISCVTokenMarker extends TokenMarker {
         }
         if (realMatches == 0) {
             if (exact) {
-                results.add(new PopupHelpItem(tokenText, tokenText, "(not a basic instruction)", exact));
+                results.add(new PopupHelpItem(tokenText, tokenText, "(not a basic instruction)", true));
             } else {
                 return null;
             }
@@ -444,7 +440,7 @@ public class RISCVTokenMarker extends TokenMarker {
             if (!exact) {
                 for (final String mnemonic : mnemonics) {
                     final String info = insts.get(mnemonic);
-                    results.add(new PopupHelpItem(tokenText, mnemonic, info, exact));
+                    results.add(new PopupHelpItem(tokenText, mnemonic, info, false));
                 }
             }
         }

@@ -346,11 +346,7 @@ public class EditTabbedPane extends JTabbedPane {
                     saveDialog = new JFileChooser(this.editor.getCurrentSaveDirectory());
                 } else {
                     final File f = new File(editPane.getPathname());
-                    if (f != null) {
-                        saveDialog = new JFileChooser(f.getParent());
-                    } else {
-                        saveDialog = new JFileChooser(this.editor.getCurrentSaveDirectory());
-                    }
+                    saveDialog = new JFileChooser(f.getParent());
                 }
                 final String paneFile = editPane.getFilename();
                 if (paneFile != null)

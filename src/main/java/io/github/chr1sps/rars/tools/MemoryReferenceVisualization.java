@@ -686,10 +686,10 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
         // set label wording depending on current speed setting
         private String setLabel(final int value) {
             String spaces = "  ";
-            if (value >= 10) {
-                spaces = " ";
-            } else if (value >= 100) {
+            if (value >= 100) {
                 spaces = "";
+            } else if (value >= 10) {
+                spaces = " ";
             }
             return "Counter value " + spaces + value;
         }

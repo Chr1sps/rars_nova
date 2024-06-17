@@ -336,9 +336,9 @@ public class LabelsWindow extends JInternalFrame {
             final int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
             if (LabelsWindow.this.textLabels.isSelected() && LabelsWindow.this.dataLabels.isSelected()) {
                 this.symbols = symbolTable.getAllSymbols();
-            } else if (LabelsWindow.this.textLabels.isSelected() && !LabelsWindow.this.dataLabels.isSelected()) {
+            } else if (LabelsWindow.this.textLabels.isSelected()) {
                 this.symbols = symbolTable.getTextSymbols();
-            } else if (!LabelsWindow.this.textLabels.isSelected() && LabelsWindow.this.dataLabels.isSelected()) {
+            } else if (LabelsWindow.this.dataLabels.isSelected()) {
                 this.symbols = symbolTable.getDataSymbols();
             } else {
                 this.symbols = new ArrayList<>();

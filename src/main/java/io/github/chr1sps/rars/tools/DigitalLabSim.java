@@ -153,7 +153,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     }
 
     private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
-        if (!this.isBeingUsedAsATool || (this.isBeingUsedAsATool && this.connectButton.isConnected())) {
+        if (!this.isBeingUsedAsATool || this.connectButton.isConnected()) {
             Globals.memoryAndRegistersLock.lock();
             try {
                 try {

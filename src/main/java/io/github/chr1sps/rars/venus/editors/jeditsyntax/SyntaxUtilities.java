@@ -98,6 +98,21 @@ public class SyntaxUtilities {
     public static SyntaxStyle[] getDefaultSyntaxStyles() {
         final SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
 
+//        final var styleMap = new HashMap<TokenType, SyntaxStyle>();
+//        styleMap.put(TokenType.NULL, new SyntaxStyle(Color.black, false, false));
+//        styleMap.put(TokenType.COMMENT1, new SyntaxStyle(new Color(0x00CC33), true, false));
+//        styleMap.put(TokenType.COMMENT2, new SyntaxStyle(new Color(0x990033), true, false));
+//        styleMap.put(TokenType.KEYWORD1, new SyntaxStyle(Color.blue, false, false));
+//        styleMap.put(TokenType.KEYWORD2, new SyntaxStyle(Color.magenta, false, false));
+//        styleMap.put(TokenType.KEYWORD3, new SyntaxStyle(Color.red, false, false));
+//        styleMap.put(TokenType.LITERAL1, new SyntaxStyle(new Color(0x00CC33), false, false));
+//        styleMap.put(TokenType.LITERAL2, new SyntaxStyle(new Color(0x00CC33), false, false));
+//        styleMap.put(TokenType.LABEL, new SyntaxStyle(Color.black, true, false));
+//        styleMap.put(TokenType.OPERATOR, new SyntaxStyle(Color.black, false, true));
+//        styleMap.put(TokenType.INVALID, new SyntaxStyle(Color.red, false, false));
+//        styleMap.put(TokenType.MACRO_ARG, new SyntaxStyle(new Color(150, 150, 0), false, false));
+
+
         // SyntaxStyle constructor params: color, italic?, bold?
         // All need to be assigned even if not used by language (no gaps in array)
         styles[Token.NULL] = new SyntaxStyle(Color.black, false, false);
@@ -251,7 +266,7 @@ class InstructionMouseEvent extends MouseEvent {
      */
     public InstructionMouseEvent(final Component component, final int x, final int y, final Segment line) {
         super(component, MouseEvent.MOUSE_MOVED, new java.util.Date().getTime(), 0, x, y, 0, false);
-        InstructionMouseEvent.LOGGER.debug("Create InstructionMouseEvent " + x + " " + y + " " + line);
+        InstructionMouseEvent.LOGGER.debug("Create InstructionMouseEvent {} {} {}", x, y, line);
         this.line = line;
     }
 

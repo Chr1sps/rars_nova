@@ -632,9 +632,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                     if (this.maxSteps != 1 &&
                             RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                         try {
-                            // TODO: potentially use this.wait so it can be interrupted
-                            Thread.sleep((int) (1000 / RunSpeedPanel.getInstance().getRunSpeed())); // make sure it's
-                            // never zero!
+                            this.wait((int) (1000 / RunSpeedPanel.getInstance().getRunSpeed()));
                         } catch (final InterruptedException ignored) {
                         }
                     }

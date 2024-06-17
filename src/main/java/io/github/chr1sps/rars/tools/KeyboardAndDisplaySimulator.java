@@ -380,7 +380,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
             // displays will replace, not append, in the text.
             if (!this.displayRandomAccessMode) {
                 this.displayRandomAccessMode = true;
-                this.initializeDisplay(this.displayRandomAccessMode);
+                this.initializeDisplay(true);
             }
             // For SET_CURSOR_X_Y, we need data from the rest of the word.
             // High order 3 bytes are split in half to store (X,Y) value.
@@ -388,12 +388,8 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
             int x = (intWithCharacterToDisplay & 0xFFF00000) >>> 20;
             int y = (intWithCharacterToDisplay & 0x000FFF00) >>> 8;
             // If X or Y values are outside current range, set to range limit.
-            if (x < 0)
-                x = 0;
             if (x >= this.columns)
                 x = this.columns - 1;
-            if (y < 0)
-                y = 0;
             if (y >= this.rows)
                 y = this.rows - 1;
             // display is a JTextArea whose character positioning in the text is linear.
@@ -807,7 +803,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     ///////////////////////////////////////////////////////////////////////////////////////////////////// Data.
     private void updateMMIOControlAndData(final int controlAddr, final int controlValue, final int dataAddr, final int dataValue,
                                           final boolean controlOnly) {
-        if (!this.isBeingUsedAsATool || (this.isBeingUsedAsATool && this.connectButton.isConnected())) {
+        if (!this.isBeingUsedAsATool || this.connectButton.isConnected()) {
             Globals.memoryAndRegistersLock.lock();
             try {
                 try {

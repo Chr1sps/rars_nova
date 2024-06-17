@@ -67,16 +67,16 @@ public class MainPane extends JTabbedPane {
         this.executeTab = new ExecutePane(appFrame, regs, cop1Regs, cop0Regs);
         final String editTabTitle = "Edit";
         final String executeTabTitle = "Execute"; // "<html><center>&nbsp;<br>E<br>x<br>e<br>c<br>u<br>t<br>e<br>&nbsp;</center></html>";
-        final Icon editTabIcon = null;// new
+        // final Icon editTabIcon = null;// new
         // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Edit_tab.jpg")));
-        final Icon executeTabIcon = null;// new
+        // final Icon executeTabIcon = null;// new
         // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Execute_tab.jpg")));
 
         this.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        this.addTab(editTabTitle, editTabIcon, this.editTabbedPane);
+        this.addTab(editTabTitle, null, this.editTabbedPane);
         this.setForeground(Color.black);
 
-        this.addTab(executeTabTitle, executeTabIcon, this.executeTab);
+        this.addTab(executeTabTitle, null, this.executeTab);
 
         this.setToolTipTextAt(0, "Text editor for composing RISCV programs.");
         this.setToolTipTextAt(1,

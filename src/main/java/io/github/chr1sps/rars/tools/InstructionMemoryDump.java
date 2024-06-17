@@ -226,13 +226,6 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void initializePreGUI() {
-    }
-
-    /**
      * <p>dumpLog.</p>
      */
     public void dumpLog() {
@@ -266,12 +259,6 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
         this.updateDisplay();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void updateDisplay() {
-    }
 
     /**
      * <p>getHelpComponent.</p>
