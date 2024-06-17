@@ -51,34 +51,29 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     private static final String heading = "Bitmap Display";
 
     // Major GUI components
-    private JComboBox<String> visualizationUnitPixelWidthSelector, visualizationUnitPixelHeightSelector,
-            visualizationPixelWidthSelector, visualizationPixelHeightSelector, displayBaseAddressSelector;
-    private Graphics drawingArea;
+    private JComboBox<String> visualizationPixelWidthSelector, visualizationPixelHeightSelector, displayBaseAddressSelector;
+
+    private JSlider pixelWidthSlider;
+    private JLabel pixelWidthLabel;
+
     private JPanel canvas;
 
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
-    private final Font countFonts = new Font("Times", Font.BOLD, 12);
     private final Color backgroundColor = Color.WHITE;
 
     // Values for Combo Boxes
 
-    private static final String[] visualizationUnitPixelWidthChoices = {"1", "2", "4", "8", "16", "32"};
-    private static final int defaultVisualizationUnitPixelWidthIndex = 0;
-    private static final String[] visualizationUnitPixelHeightChoices = {"1", "2", "4", "8", "16", "32"};
-    private static final int defaultVisualizationUnitPixelHeightIndex = 0;
     private static final String[] displayAreaPixelWidthChoices = {"64", "128", "256", "512", "1024"};
     private static final int defaultDisplayWidthIndex = 3;
     private static final String[] displayAreaPixelHeightChoices = {"64", "128", "256", "512", "1024"};
     private static final int defaultDisplayHeightIndex = 2;
 
+
     // Values for display canvas. Note their initialization uses the identifiers
     // just above.
 
-    private int unitPixelWidth = Integer
-            .parseInt(BitmapDisplay.visualizationUnitPixelWidthChoices[BitmapDisplay.defaultVisualizationUnitPixelWidthIndex]);
-    private int unitPixelHeight = Integer
-            .parseInt(BitmapDisplay.visualizationUnitPixelHeightChoices[BitmapDisplay.defaultVisualizationUnitPixelHeightIndex]);
+    private int unitPixelSize = 1;
     private int displayAreaWidthInPixels = Integer.parseInt(BitmapDisplay.displayAreaPixelWidthChoices[BitmapDisplay.defaultDisplayWidthIndex]);
     private int displayAreaHeightInPixels = Integer.parseInt(BitmapDisplay.displayAreaPixelHeightChoices[BitmapDisplay.defaultDisplayHeightIndex]);
 
@@ -206,8 +201,8 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         // NOTE: Can't call "createNewGrid()" here because it uses settings from
         // several combo boxes that have not been created yet. But a default grid
         // needs to be allocated for initial canvas display.
-        this.theGrid = new Grid(this.displayAreaHeightInPixels / this.unitPixelHeight,
-                this.displayAreaWidthInPixels / this.unitPixelWidth);
+        this.theGrid = new Grid(this.displayAreaHeightInPixels / this.unitPixelSize,
+                this.displayAreaWidthInPixels / this.unitPixelSize);
     }
 
     /**
@@ -286,27 +281,19 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     private JComponent buildOrganizationArea() {
         final JPanel organization = new JPanel(new GridLayout(8, 1));
 
-        this.visualizationUnitPixelWidthSelector = new JComboBox<>(BitmapDisplay.visualizationUnitPixelWidthChoices);
-        this.visualizationUnitPixelWidthSelector.setEditable(false);
-        this.visualizationUnitPixelWidthSelector.setBackground(this.backgroundColor);
-        this.visualizationUnitPixelWidthSelector.setSelectedIndex(BitmapDisplay.defaultVisualizationUnitPixelWidthIndex);
-        this.visualizationUnitPixelWidthSelector.setToolTipText("Width in pixels of rectangle representing memory word");
-        this.visualizationUnitPixelWidthSelector.addActionListener(
+        this.pixelWidthLabel = new JLabel("Unit size in pixels: " + this.unitPixelSize);
+        this.pixelWidthSlider = new JSlider(JSlider.HORIZONTAL, 1, 32, 1);
+        this.pixelWidthSlider.setMajorTickSpacing(31);
+        this.pixelWidthSlider.setMinorTickSpacing(1);
+        this.pixelWidthSlider.setPaintTicks(true);
+        this.pixelWidthSlider.setPaintLabels(true);
+        this.pixelWidthSlider.setToolTipText("Width in pixels of rectangle representing memory word");
+        this.pixelWidthSlider.addChangeListener(
                 e -> {
-                    BitmapDisplay.this.unitPixelWidth = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationUnitPixelWidthSelector);
+                    BitmapDisplay.this.unitPixelSize = BitmapDisplay.this.pixelWidthSlider.getValue();
                     BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
                     BitmapDisplay.this.updateDisplay();
-                });
-        this.visualizationUnitPixelHeightSelector = new JComboBox<>(BitmapDisplay.visualizationUnitPixelHeightChoices);
-        this.visualizationUnitPixelHeightSelector.setEditable(false);
-        this.visualizationUnitPixelHeightSelector.setBackground(this.backgroundColor);
-        this.visualizationUnitPixelHeightSelector.setSelectedIndex(BitmapDisplay.defaultVisualizationUnitPixelHeightIndex);
-        this.visualizationUnitPixelHeightSelector.setToolTipText("Height in pixels of rectangle representing memory word");
-        this.visualizationUnitPixelHeightSelector.addActionListener(
-                e -> {
-                    BitmapDisplay.this.unitPixelHeight = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationUnitPixelHeightSelector);
-                    BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
-                    BitmapDisplay.this.updateDisplay();
+                    BitmapDisplay.this.pixelWidthLabel.setText("Unit size in pixels: " + BitmapDisplay.this.unitPixelSize);
                 });
         this.visualizationPixelWidthSelector = new JComboBox<>(BitmapDisplay.displayAreaPixelWidthChoices);
         this.visualizationPixelWidthSelector.setEditable(false);
@@ -363,15 +350,10 @@ public class BitmapDisplay extends AbstractToolAndApplication {
 
         // ALL COMPONENTS FOR "ORGANIZATION" SECTION
 
-        final JPanel unitWidthInPixelsRow = this.getPanelWithBorderLayout();
-        unitWidthInPixelsRow.setBorder(this.emptyBorder);
-        unitWidthInPixelsRow.add(new JLabel("Unit Width in Pixels "), BorderLayout.WEST);
-        unitWidthInPixelsRow.add(this.visualizationUnitPixelWidthSelector, BorderLayout.EAST);
-
-        final JPanel unitHeightInPixelsRow = this.getPanelWithBorderLayout();
-        unitHeightInPixelsRow.setBorder(this.emptyBorder);
-        unitHeightInPixelsRow.add(new JLabel("Unit Height in Pixels "), BorderLayout.WEST);
-        unitHeightInPixelsRow.add(this.visualizationUnitPixelHeightSelector, BorderLayout.EAST);
+        final JPanel pixelWidthSliderRow = this.getPanelWithBorderLayout();
+        pixelWidthSliderRow.setBorder(this.emptyBorder);
+        pixelWidthSliderRow.add(this.pixelWidthLabel, BorderLayout.WEST);
+        pixelWidthSliderRow.add(this.pixelWidthSlider, BorderLayout.EAST);
 
         final JPanel widthInPixelsRow = this.getPanelWithBorderLayout();
         widthInPixelsRow.setBorder(this.emptyBorder);
@@ -389,8 +371,7 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         baseAddressRow.add(this.displayBaseAddressSelector, BorderLayout.EAST);
 
         // Lay 'em out in the grid...
-        organization.add(unitWidthInPixelsRow);
-        organization.add(unitHeightInPixelsRow);
+        organization.add(pixelWidthSliderRow);
         organization.add(widthInPixelsRow);
         organization.add(heightInPixelsRow);
         organization.add(baseAddressRow);
@@ -477,8 +458,8 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     // Method to determine grid dimensions based on current control settings.
     // Each grid element corresponds to one visualization unit.
     private Grid createNewGrid() {
-        final int rows = this.displayAreaHeightInPixels / this.unitPixelHeight;
-        final int columns = this.displayAreaWidthInPixels / this.unitPixelWidth;
+        final int rows = this.displayAreaHeightInPixels / this.unitPixelSize;
+        final int columns = this.displayAreaWidthInPixels / this.unitPixelSize;
         return new Grid(rows, columns);
     }
 
@@ -518,12 +499,12 @@ public class BitmapDisplay extends AbstractToolAndApplication {
             for (int i = 0; i < grid.getRows(); i++) {
                 for (int j = 0; j < grid.getColumns(); j++) {
                     g.setColor(grid.getElementFast(i, j));
-                    g.fillRect(upperLeftX, upperLeftY, BitmapDisplay.this.unitPixelWidth, BitmapDisplay.this.unitPixelHeight);
-                    upperLeftX += BitmapDisplay.this.unitPixelWidth; // faster than multiplying
+                    g.fillRect(upperLeftX, upperLeftY, BitmapDisplay.this.unitPixelSize, BitmapDisplay.this.unitPixelSize);
+                    upperLeftX += BitmapDisplay.this.unitPixelSize; // faster than multiplying
                 }
                 // get ready for next row...
                 upperLeftX = 0;
-                upperLeftY += BitmapDisplay.this.unitPixelHeight; // faster than multiplying
+                upperLeftY += BitmapDisplay.this.unitPixelSize; // faster than multiplying
             }
         }
     }
