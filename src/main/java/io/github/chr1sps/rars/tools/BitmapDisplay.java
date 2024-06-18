@@ -51,31 +51,23 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     private static final String heading = "Bitmap Display";
 
     // Major GUI components
-    private JComboBox<String> visualizationPixelWidthSelector, visualizationPixelHeightSelector, displayBaseAddressSelector;
+    private JComboBox<String> displayBaseAddressSelector;
 
-    private JSlider pixelWidthSlider;
-    private JLabel pixelWidthLabel;
+    private JSlider pixelSizeSlider, displayHeightSlider, displayWidthSlider;
+    private JLabel pixelSizeLabel, displayHeightLabel, displayWidthLabel;
 
-    private JPanel canvas;
+//    private JPanel canvas;
 
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
     private final Color backgroundColor = Color.WHITE;
 
-    // Values for Combo Boxes
 
-    private static final String[] displayAreaPixelWidthChoices = {"64", "128", "256", "512", "1024"};
-    private static final int defaultDisplayWidthIndex = 3;
-    private static final String[] displayAreaPixelHeightChoices = {"64", "128", "256", "512", "1024"};
-    private static final int defaultDisplayHeightIndex = 2;
-
-
-    // Values for display canvas. Note their initialization uses the identifiers
-    // just above.
+    // Values for display canvas.
 
     private int unitPixelSize = 1;
-    private int displayAreaWidthInPixels = Integer.parseInt(BitmapDisplay.displayAreaPixelWidthChoices[BitmapDisplay.defaultDisplayWidthIndex]);
-    private int displayAreaHeightInPixels = Integer.parseInt(BitmapDisplay.displayAreaPixelHeightChoices[BitmapDisplay.defaultDisplayHeightIndex]);
+    private int displayAreaWidthInPixels = 512;
+    private int displayAreaHeightInPixels = 256;
 
     // The next four are initialized dynamically in initializeDisplayBaseChoices()
     private String[] displayBaseAddressChoices;
@@ -84,6 +76,8 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     private int baseAddress;
 
     private Grid theGrid;
+
+    private GridWindow gridWindow;
 
     /**
      * Simple constructor, likely used to run a stand-alone bitmap display tool.
@@ -99,8 +93,9 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     /**
      * Simple constructor, likely used by the RARS Tools menu mechanism
      */
+    @SuppressWarnings("unused")
     public BitmapDisplay() {
-        super("Bitmap Display, " + BitmapDisplay.version, BitmapDisplay.heading);
+        this("Bitmap Display, " + BitmapDisplay.version, BitmapDisplay.heading);
     }
 
     /**
@@ -166,10 +161,8 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      */
     @Override
     protected JComponent buildMainDisplayArea() {
-        final JPanel results = new JPanel();
-        results.add(this.buildOrganizationArea());
-        results.add(this.buildVisualizationArea());
-        return results;
+        this.gridWindow = new GridWindow();
+        return this.buildOrganizationArea();
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -212,6 +205,8 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      */
     @Override
     protected void initializePostGUI() {
+        this.connectButton.addActionListener(
+                e -> this.gridWindow.setVisible(BitmapDisplay.this.connectButton.isConnected()));
         this.theGrid = this.createNewGrid();
         this.updateBaseAddress();
     }
@@ -235,7 +230,8 @@ public class BitmapDisplay extends AbstractToolAndApplication {
      */
     @Override
     protected void updateDisplay() {
-        this.canvas.repaint();
+//        this.canvas.repaint();
+        // TODO: implement repainting in a separate window
     }
 
     /**
@@ -281,49 +277,57 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     private JComponent buildOrganizationArea() {
         final JPanel organization = new JPanel(new GridLayout(8, 1));
 
-        this.pixelWidthLabel = new JLabel("Unit size in pixels: " + this.unitPixelSize);
-        this.pixelWidthSlider = new JSlider(JSlider.HORIZONTAL, 1, 32, 1);
-        this.pixelWidthSlider.setMajorTickSpacing(31);
-        this.pixelWidthSlider.setMinorTickSpacing(1);
-        this.pixelWidthSlider.setPaintTicks(true);
-        this.pixelWidthSlider.setPaintLabels(true);
-        this.pixelWidthSlider.setToolTipText("Width in pixels of rectangle representing memory word");
-        this.pixelWidthSlider.addChangeListener(
+        this.pixelSizeLabel = new JLabel("Unit size in pixels: " + this.unitPixelSize);
+        this.displayWidthLabel = new JLabel("Display width in pixels: " + this.displayAreaWidthInPixels);
+        this.displayHeightLabel = new JLabel("Display height in pixels: " + this.displayAreaHeightInPixels);
+        this.pixelSizeSlider = new JSlider(JSlider.HORIZONTAL, 1, 32, 1);
+        this.pixelSizeSlider.setMajorTickSpacing(31);
+        this.pixelSizeSlider.setMinorTickSpacing(1);
+        this.pixelSizeSlider.setSnapToTicks(true);
+        this.pixelSizeSlider.setPaintTicks(true);
+        this.pixelSizeSlider.setPaintLabels(true);
+        this.pixelSizeSlider.setToolTipText("Width in pixels of rectangle representing memory word");
+        this.pixelSizeSlider.addChangeListener(
                 e -> {
-                    BitmapDisplay.this.unitPixelSize = BitmapDisplay.this.pixelWidthSlider.getValue();
+                    BitmapDisplay.this.unitPixelSize = BitmapDisplay.this.pixelSizeSlider.getValue();
                     BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
                     BitmapDisplay.this.updateDisplay();
-                    BitmapDisplay.this.pixelWidthLabel.setText("Unit size in pixels: " + BitmapDisplay.this.unitPixelSize);
+                    BitmapDisplay.this.pixelSizeLabel.setText("Unit size in pixels: " + BitmapDisplay.this.unitPixelSize);
                 });
-        this.visualizationPixelWidthSelector = new JComboBox<>(BitmapDisplay.displayAreaPixelWidthChoices);
-        this.visualizationPixelWidthSelector.setEditable(false);
-        this.visualizationPixelWidthSelector.setBackground(this.backgroundColor);
-        this.visualizationPixelWidthSelector.setSelectedIndex(BitmapDisplay.defaultDisplayWidthIndex);
-        this.visualizationPixelWidthSelector.setToolTipText("Total width in pixels of display area");
-        this.visualizationPixelWidthSelector.addActionListener(
+        this.displayWidthSlider = new JSlider(JSlider.HORIZONTAL, 64, 1024, 64);
+        this.displayWidthSlider.setMajorTickSpacing(960);
+        this.displayWidthSlider.setMinorTickSpacing(64);
+        this.displayWidthSlider.setSnapToTicks(true);
+        this.displayWidthSlider.setPaintTicks(true);
+        this.displayWidthSlider.setPaintLabels(true);
+        this.displayWidthSlider.setToolTipText("Total width in pixels of display area");
+        this.displayWidthSlider.addChangeListener(
                 e -> {
-                    BitmapDisplay.this.displayAreaWidthInPixels = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationPixelWidthSelector);
-                    BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
-                    BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
+                    BitmapDisplay.this.displayWidthLabel.setText("Display width in pixels: " + BitmapDisplay.this.displayAreaWidthInPixels);
+                    BitmapDisplay.this.displayAreaWidthInPixels = BitmapDisplay.this.displayWidthSlider.getValue();
+//                    BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
+//                    BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
                     BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
                     BitmapDisplay.this.updateDisplay();
                 });
-        this.visualizationPixelHeightSelector = new JComboBox<>(BitmapDisplay.displayAreaPixelHeightChoices);
-        this.visualizationPixelHeightSelector.setEditable(false);
-        this.visualizationPixelHeightSelector.setBackground(this.backgroundColor);
-        this.visualizationPixelHeightSelector.setSelectedIndex(BitmapDisplay.defaultDisplayHeightIndex);
-        this.visualizationPixelHeightSelector.setToolTipText("Total height in pixels of display area");
-        this.visualizationPixelHeightSelector.addActionListener(
+        this.displayHeightSlider = new JSlider(JSlider.HORIZONTAL, 64, 1024, 64);
+        this.displayHeightSlider.setMajorTickSpacing(960);
+        this.displayHeightSlider.setMinorTickSpacing(64);
+        this.displayHeightSlider.setSnapToTicks(true);
+        this.displayHeightSlider.setPaintTicks(true);
+        this.displayHeightSlider.setPaintLabels(true);
+        this.displayHeightSlider.setToolTipText("Total height in pixels of display area");
+        this.displayHeightSlider.addChangeListener(
                 e -> {
-                    BitmapDisplay.this.displayAreaHeightInPixels = BitmapDisplay.this.getIntComboBoxSelection(BitmapDisplay.this.visualizationPixelHeightSelector);
-                    BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
-                    BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
+                    BitmapDisplay.this.displayHeightLabel.setText("Display height in pixels: " + BitmapDisplay.this.displayAreaHeightInPixels);
+                    BitmapDisplay.this.displayAreaHeightInPixels = BitmapDisplay.this.displayHeightSlider.getValue();
+//                    BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
+//                    BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
                     BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
                     BitmapDisplay.this.updateDisplay();
                 });
         this.displayBaseAddressSelector = new JComboBox<>(this.displayBaseAddressChoices);
         this.displayBaseAddressSelector.setEditable(false);
-        this.displayBaseAddressSelector.setBackground(this.backgroundColor);
         this.displayBaseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
         this.displayBaseAddressSelector.setToolTipText("Base address for display area (upper left corner)");
         this.displayBaseAddressSelector.addActionListener(
@@ -350,20 +354,20 @@ public class BitmapDisplay extends AbstractToolAndApplication {
 
         // ALL COMPONENTS FOR "ORGANIZATION" SECTION
 
-        final JPanel pixelWidthSliderRow = this.getPanelWithBorderLayout();
-        pixelWidthSliderRow.setBorder(this.emptyBorder);
-        pixelWidthSliderRow.add(this.pixelWidthLabel, BorderLayout.WEST);
-        pixelWidthSliderRow.add(this.pixelWidthSlider, BorderLayout.EAST);
+        final JPanel pixelSizeRow = this.getPanelWithBorderLayout();
+        pixelSizeRow.setBorder(this.emptyBorder);
+        pixelSizeRow.add(this.pixelSizeLabel, BorderLayout.WEST);
+        pixelSizeRow.add(this.pixelSizeSlider, BorderLayout.EAST);
 
-        final JPanel widthInPixelsRow = this.getPanelWithBorderLayout();
-        widthInPixelsRow.setBorder(this.emptyBorder);
-        widthInPixelsRow.add(new JLabel("Display Width in Pixels "), BorderLayout.WEST);
-        widthInPixelsRow.add(this.visualizationPixelWidthSelector, BorderLayout.EAST);
+        final JPanel displayWidthRow = this.getPanelWithBorderLayout();
+        displayWidthRow.setBorder(this.emptyBorder);
+        displayWidthRow.add(this.displayWidthLabel, BorderLayout.WEST);
+        displayWidthRow.add(this.displayWidthSlider, BorderLayout.EAST);
 
-        final JPanel heightInPixelsRow = this.getPanelWithBorderLayout();
-        heightInPixelsRow.setBorder(this.emptyBorder);
-        heightInPixelsRow.add(new JLabel("Display Height in Pixels "), BorderLayout.WEST);
-        heightInPixelsRow.add(this.visualizationPixelHeightSelector, BorderLayout.EAST);
+        final JPanel displayHeightRow = this.getPanelWithBorderLayout();
+        displayHeightRow.setBorder(this.emptyBorder);
+        displayHeightRow.add(this.displayHeightLabel, BorderLayout.WEST);
+        displayHeightRow.add(this.displayHeightSlider, BorderLayout.EAST);
 
         final JPanel baseAddressRow = this.getPanelWithBorderLayout();
         baseAddressRow.setBorder(this.emptyBorder);
@@ -371,21 +375,21 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         baseAddressRow.add(this.displayBaseAddressSelector, BorderLayout.EAST);
 
         // Lay 'em out in the grid...
-        organization.add(pixelWidthSliderRow);
-        organization.add(widthInPixelsRow);
-        organization.add(heightInPixelsRow);
+        organization.add(pixelSizeRow);
+        organization.add(displayWidthRow);
+        organization.add(displayHeightRow);
         organization.add(baseAddressRow);
         return organization;
     }
 
     // UI components and layout for right half of GUI, the visualization display
     // area.
-    private JComponent buildVisualizationArea() {
-        this.canvas = new GraphicsPanel();
-        this.canvas.setPreferredSize(this.getDisplayAreaDimension());
-        this.canvas.setToolTipText("Bitmap display area");
-        return this.canvas;
-    }
+//    private JComponent buildVisualizationArea() {
+//        this.canvas = new GraphicsPanel();
+//        this.canvas.setPreferredSize(this.getDisplayAreaDimension());
+//        this.canvas.setToolTipText("Bitmap display area");
+//        return this.canvas;
+//    }
 
     // For greatest flexibility, initialize the display base choices directly from
     // the constants defined in the Memory class. This method called prior to
@@ -437,18 +441,6 @@ public class BitmapDisplay extends AbstractToolAndApplication {
         this.theGrid.reset();
     }
 
-    // Will return int equivalent of specified combo box's current selection.
-    // The selection must be a String that parses to an int.
-    private int getIntComboBoxSelection(final JComboBox<String> comboBox) {
-        try {
-            return Integer.parseInt((String) comboBox.getSelectedItem());
-        } catch (final NumberFormatException nfe) {
-            // Can occur only if initialization list contains badly formatted numbers. This
-            // is a developer's error, not a user error, and better be caught before
-            // release.
-            return 1;
-        }
-    }
 
     // Use this for consistent results.
     private JPanel getPanelWithBorderLayout() {
@@ -485,6 +477,15 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     ///////////////////////////////////////////////////////////////////////////// reference
     // patterns.
     private class GraphicsPanel extends JPanel {
+        GraphicsPanel() {
+            super();
+            this.setMinimumSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
+                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
+            this.setPreferredSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
+                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
+            this.setMaximumSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
+                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
+        }
 
         // override default paint method to assure display updated correctly every time
         // the panel is repainted.
@@ -563,6 +564,19 @@ public class BitmapDisplay extends AbstractToolAndApplication {
                     this.grid[i][j] = Color.BLACK;
                 }
             }
+        }
+    }
+
+    private class GridWindow extends JFrame {
+        private final GraphicsPanel canvas;
+
+        GridWindow() {
+            this.canvas = new GraphicsPanel();
+            this.setTitle("Bitmap Display");
+            this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+            this.add(this.canvas);
+            this.setResizable(false);
+            this.pack();
         }
     }
 }

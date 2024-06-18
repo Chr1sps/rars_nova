@@ -139,7 +139,8 @@ public class ToolLoader {
 
                     toolList.add((Tool) clas.getDeclaredConstructor().newInstance());
                 } catch (final Exception e) {
-                    ToolLoader.LOGGER.error("Error instantiating Tool from file {}: {}", file, e);
+                    final var msg = "Error instantiating Tool from file " + file + ":";
+                    ToolLoader.LOGGER.error(msg, e);
                 }
             }
         }
