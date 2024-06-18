@@ -47,7 +47,7 @@ import java.util.Arrays;
  *
  * @author Ingo Kofler &lt;ingo.kofler@itec.uni-klu.ac.at&gt;
  */
-public class InstructionStatistics extends AbstractToolAndApplication {
+public class InstructionStatistics extends AbstractTool {
 
     /**
      * name of the tool
@@ -133,18 +133,6 @@ public class InstructionStatistics extends AbstractToolAndApplication {
      * loop, which is not insteresting in the POV of counting instructions.
      */
     protected int lastAddress = -1;
-
-    /**
-     * Simple constructor, likely used to run a stand-alone enhanced instruction
-     * counter.
-     *
-     * @param title   String containing title for title bar
-     * @param heading String containing text for heading shown in upper part of
-     *                window.
-     */
-    public InstructionStatistics(final String title, final String heading) {
-        super(title, heading);
-    }
 
     /**
      * Simple construction, likely used by the RARS Tools menu mechanism.

@@ -1,6 +1,6 @@
 package io.github.chr1sps.rars.venus;
 
-import io.github.chr1sps.rars.tools.Tool;
+import io.github.chr1sps.rars.tools.AbstractTool;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -42,14 +42,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2005
  */
 public class ToolAction extends AbstractAction {
-    private final Tool tool; // Tool tool;
+    private final AbstractTool tool; // Tool tool;
 
     /**
      * Simple constructor.
      *
-     * @param tool a {@link io.github.chr1sps.rars.tools.Tool} object
+     * @param tool an {@link io.github.chr1sps.rars.tools.AbstractTool} object
      */
-    public ToolAction(final Tool tool) {
+    public ToolAction(final AbstractTool tool) {
         super(tool.getName(), null);
         this.tool = tool;
     }

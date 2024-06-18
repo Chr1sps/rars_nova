@@ -44,7 +44,7 @@ import java.util.concurrent.Flow;
 /**
  * A RARS tool used to implement a timing module and timer inturrpts.
  */
-public class TimerTool extends AbstractToolAndApplication {
+public class TimerTool extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger(TimerTool.class);
 
     private static final String heading = "Timer Tool";
@@ -53,7 +53,6 @@ public class TimerTool extends AbstractToolAndApplication {
     private static final int TIME_CMP_ADDRESS = Memory.memoryMapBaseAddress + 0x20;
 
     // GUI window sections
-    private static JPanel panelTools;
     private TimePanel timePanel;
 
     // Internal time values
@@ -76,26 +75,6 @@ public class TimerTool extends AbstractToolAndApplication {
     public TimerTool() {
         super(TimerTool.heading + ", " + TimerTool.version, TimerTool.heading);
         this.startTimeCmpDaemon();
-    }
-
-    /**
-     * <p>Constructor for TimerTool.</p>
-     *
-     * @param title   a {@link java.lang.String} object
-     * @param heading a {@link java.lang.String} object
-     */
-    public TimerTool(final String title, final String heading) {
-        super(title, heading);
-        this.startTimeCmpDaemon();
-    }
-
-    /**
-     * <p>main.</p>
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
-    public static void main(final String[] args) {
-        new TimerTool(TimerTool.heading + ", " + TimerTool.version, TimerTool.heading);
     }
 
     /**
@@ -233,7 +212,7 @@ public class TimerTool extends AbstractToolAndApplication {
             try {
                 Globals.memory.subscribe(this, TimerTool.TIME_CMP_ADDRESS, TimerTool.TIME_CMP_ADDRESS + 8);
             } catch (final AddressErrorException aee) {
-                LOGGER.fatal("Error while adding observer in Timer Tool");
+                SimpleSubscriber.LOGGER.fatal("Error while adding observer in Timer Tool");
                 System.exit(0);
             }
         }
@@ -326,7 +305,7 @@ public class TimerTool extends AbstractToolAndApplication {
             try {
                 Globals.memory.setRawWord(dataAddr, dataValue);
             } catch (final AddressErrorException aee) {
-                LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
+                TimerTool.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
                 System.exit(0);
             }
         } finally {

@@ -49,7 +49,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * "float" data type. As written, it can ALMOST be adapted to 64 bit by
  * changing a few constants.
  */
-public class FloatRepresentation extends AbstractToolAndApplication {
+public class FloatRepresentation extends AbstractTool {
     private static final String version = "Version 1.1";
     private static final String heading = "32-bit IEEE 754 Floating Point Representation";
     private static final String title = "Floating Point Representation, ";
@@ -76,7 +76,6 @@ public class FloatRepresentation extends AbstractToolAndApplication {
     private static final Color binaryDisplayColor = Color.black;
     private static final Color decimalDisplayColor = Color.blue;
     private static final String expansionFontTag = "<font size=\"+1\" face=\"Courier\" color=\"#000000\">";
-    private static final String instructionFontTag = "<font size=\"+0\" face=\"Verdana, Arial, Helvetica\" color=\"#000000\">";
     private static final int exponentBias = 127; // 32 bit floating point exponent bias
 
     private Register attachedRegister = null;
@@ -112,21 +111,6 @@ public class FloatRepresentation extends AbstractToolAndApplication {
      */
     public FloatRepresentation() {
         this(FloatRepresentation.title + FloatRepresentation.version, FloatRepresentation.heading);
-    }
-
-    /**
-     * Main provided for pure stand-alone use. Recommended stand-alone use is to
-     * write a
-     * driver program that instantiates a FloatRepresentation object then invokes
-     * its go() method.
-     * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
-     * there
-     * is no driver program to invoke the application.
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
-    public static void main(final String[] args) {
-        new FloatRepresentation(FloatRepresentation.title + FloatRepresentation.version, FloatRepresentation.heading).go();
     }
 
     /**
@@ -727,7 +711,6 @@ public class FloatRepresentation extends AbstractToolAndApplication {
         // will consume the stroke and beep.
         @Override
         public void keyTyped(final KeyEvent e) {
-            final JTextField source = (JTextField) e.getComponent();
             if (e.getKeyChar() == KeyEvent.VK_BACK_SPACE)
                 return;
             if (!this.isDecimalFloatDigit(e.getKeyChar())) {

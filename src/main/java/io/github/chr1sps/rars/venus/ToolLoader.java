@@ -1,15 +1,10 @@
 package io.github.chr1sps.rars.venus;
 
-import io.github.chr1sps.rars.tools.Tool;
-import io.github.chr1sps.rars.util.FilenameFinder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.github.chr1sps.rars.tools.*;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -52,13 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2005
  */
 public class ToolLoader {
-    private static final Logger LOGGER = LogManager.getLogger(ToolLoader.class);
-
-    private static final String CLASS_PREFIX = "io.github.chr1sps.rars.tools.";
-    private static final String TOOLS_DIRECTORY_PATH = "io/github/chr1sps/rars/tools";
     private static final String TOOLS_MENU_NAME = "Tools";
-    private static final String TOOL_INTERFACE = "Tool.class";
-    private static final String CLASS_EXTENSION = "class";
 
     /**
      * Called in VenusUI to build its Tools menu. If there are no qualifying tools
@@ -70,80 +59,28 @@ public class ToolLoader {
      * @return a Tools JMenu if qualifying tool classes are found, otherwise null
      */
     public static JMenu buildToolsMenu() {
-        JMenu menu = null;
-        final ArrayList<Tool> toolList = ToolLoader.loadTools();
-        if (!toolList.isEmpty()) {
-            menu = new JMenu(ToolLoader.TOOLS_MENU_NAME);
-            menu.setMnemonic(KeyEvent.VK_T);
-            // traverse array list and build menu
-            for (final Tool tool : toolList) {
-                menu.add(new ToolAction(tool));
-            }
+        final var menu = new JMenu(ToolLoader.TOOLS_MENU_NAME);
+        menu.setMnemonic(KeyEvent.VK_T);
+        // traverse array list and build menu
+        for (final var tool : ToolLoader.tools) {
+            menu.add(new ToolAction(tool));
         }
         return menu;
     }
 
-    /*
-     * Dynamically loads MarsTools into an ArrayList. This method is adapted from
-     * the loadGameControllers() method in Bret Barker's GameServer class.
-     * Barker (bret@hypefiend.com) is co-author of the book "Developing Games
-     * in Java". It was demo'ed to me by Otterbein student Chris Dieterle
-     * as part of his Spring 2005 independent study of implementing a networked
-     * multi-player game playing system. Thanks Bret and Chris!
-     *
-     * Bug Fix 25 Feb 06, DPS: method did not recognize tools folder if its
-     * absolute pathname contained one or more spaces (e.g. C:\Program
-     * Files\rars\tools).
-     * Problem was, class loader's getResource method returns a URL, in which spaces
-     * are replaced with "%20". So I added a replaceAll() to change them back.
-     *
-     * Enhanced 3 Oct 06, DPS: method did not work if running MARS from a JAR file.
-     * The array of files returned is null, but the File object contains the name
-     * of the JAR file (using toString, not getName). Extract that name, open it
-     * as a ZipFile, get the ZipEntry enumeration, find the class files in the tools
-     * folder, then continue as before.
-     */
-    private static ArrayList<Tool> loadTools() {
-        final ArrayList<Tool> toolList = new ArrayList<>();
-        final ArrayList<String> candidates = FilenameFinder.getFilenameList(ToolLoader.class.getClassLoader(),
-                ToolLoader.TOOLS_DIRECTORY_PATH, ToolLoader.CLASS_EXTENSION);
-        // Add any tools stored externally, as listed in Config.properties file.
-        // This needs some work, because com.chrisps.rars.Globals.getExternalTools()
-        // returns
-        // whatever is in the properties file entry. Since the class file will
-        // not be located in the com.chrisps.rars.tools folder, the loop below will not
-        // process
-        // it correctly. Not sure how to create a Class object given an absolute
-        // pathname.
-        // candidates.addAll(rars.Globals.getExternalTools()); // this by itself is not
-        // enough...
-        final HashSet<String> tools = new HashSet<>();
-        for (final String file : candidates) {
-            // Do not add class if already encountered (happens if run in MARS development
-            // directory)
-            if (tools.contains(file)) {
-                continue;
-            } else {
-                tools.add(file);
-            }
-            if (!file.equals(ToolLoader.TOOL_INTERFACE)) {
-                try {
-                    // grab the class, make sure it implements Tool, instantiate, add to menu
-                    final String toolClassName = ToolLoader.CLASS_PREFIX + file.substring(0, file.indexOf(ToolLoader.CLASS_EXTENSION) - 1);
-                    final Class<?> clas = Class.forName(toolClassName);
-                    if (!Tool.class.isAssignableFrom(clas) ||
-                            Modifier.isAbstract(clas.getModifiers()) ||
-                            Modifier.isInterface(clas.getModifiers())) {
-                        continue;
-                    }
+    private static final ArrayList<AbstractTool> tools = new ArrayList<>();
 
-                    toolList.add((Tool) clas.getDeclaredConstructor().newInstance());
-                } catch (final Exception e) {
-                    final var msg = "Error instantiating Tool from file " + file + ":";
-                    ToolLoader.LOGGER.error(msg, e);
-                }
-            }
-        }
-        return toolList;
+    static {
+        ToolLoader.tools.add(new BHTSimulator());
+        ToolLoader.tools.add(new BitmapDisplay());
+        ToolLoader.tools.add(new CacheSimulator());
+        ToolLoader.tools.add(new DigitalLabSim());
+        ToolLoader.tools.add(new FloatRepresentation());
+        ToolLoader.tools.add(new InstructionCounter());
+        ToolLoader.tools.add(new InstructionMemoryDump());
+        ToolLoader.tools.add(new InstructionStatistics());
+        ToolLoader.tools.add(new KeyboardAndDisplaySimulator());
+        ToolLoader.tools.add(new MemoryReferenceVisualization());
+        ToolLoader.tools.add(new TimerTool());
     }
 }

@@ -45,7 +45,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * AbstractToolAndApplication.
  * Pete Sanderson, verison 1.0, 23 December 2010.
  */
-public class BitmapDisplay extends AbstractToolAndApplication {
+public class BitmapDisplay extends AbstractTool {
 
     private static final String version = "Version 1.0";
     private static final String heading = "Bitmap Display";
@@ -60,8 +60,6 @@ public class BitmapDisplay extends AbstractToolAndApplication {
 
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
-    private final Color backgroundColor = Color.WHITE;
-
 
     // Values for display canvas.
 
@@ -96,21 +94,6 @@ public class BitmapDisplay extends AbstractToolAndApplication {
     @SuppressWarnings("unused")
     public BitmapDisplay() {
         this("Bitmap Display, " + BitmapDisplay.version, BitmapDisplay.heading);
-    }
-
-    /**
-     * Main provided for pure stand-alone use. Recommended stand-alone use is to
-     * write a
-     * driver program that instantiates a Bitmap object then invokes its go()
-     * method.
-     * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
-     * there
-     * is no driver program to invoke the application.
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
-    public static void main(final String[] args) {
-        new BitmapDisplay("Bitmap Display stand-alone, " + BitmapDisplay.version, BitmapDisplay.heading).go();
     }
 
     /**

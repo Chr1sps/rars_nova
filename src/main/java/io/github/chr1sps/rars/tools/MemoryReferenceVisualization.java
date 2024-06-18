@@ -48,7 +48,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * AbstractToolAndApplication.
  * Pete Sanderson, verison 1.0, 14 November 2006.
  */
-public class MemoryReferenceVisualization extends AbstractToolAndApplication {
+public class MemoryReferenceVisualization extends AbstractTool {
 
     private static final String version = "Version 1.0";
     private static final String heading = "Visualizing memory reference patterns";
@@ -58,12 +58,10 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
             visualizationUnitPixelHeightSelector,
             visualizationPixelWidthSelector, visualizationPixelHeightSelector, displayBaseAddressSelector;
     private JCheckBox drawHashMarksSelector;
-    private Graphics drawingArea;
     private JPanel canvas;
 
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
-    private final Font countFonts = new Font("Times", Font.BOLD, 12);
     private final Color backgroundColor = Color.WHITE;
 
     // Values for Combo Boxes
@@ -131,37 +129,10 @@ public class MemoryReferenceVisualization extends AbstractToolAndApplication {
     private CounterColorScale counterColorScale;
 
     /**
-     * Simple constructor, likely used to run a stand-alone memory reference
-     * visualizer.
-     *
-     * @param title   String containing title for title bar
-     * @param heading String containing text for heading shown in upper part of
-     *                window.
-     */
-    public MemoryReferenceVisualization(final String title, final String heading) {
-        super(title, heading);
-    }
-
-    /**
      * Simple constructor, likely used by the RARS Tools menu mechanism
      */
     public MemoryReferenceVisualization() {
         super("Memory Reference Visualization, " + MemoryReferenceVisualization.version, MemoryReferenceVisualization.heading);
-    }
-
-    /**
-     * Main provided for pure stand-alone use. Recommended stand-alone use is to
-     * write a
-     * driver program that instantiates a MemoryReferenceVisualization object then
-     * invokes its go() method.
-     * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
-     * there
-     * is no driver program to invoke the application.
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
-    public static void main(final String[] args) {
-        new MemoryReferenceVisualization("Memory Reference Visualization stand-alone, " + MemoryReferenceVisualization.version, MemoryReferenceVisualization.heading).go();
     }
 
     /**

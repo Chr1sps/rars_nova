@@ -89,7 +89,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * position of a virtual text-based terminal. X represents column, Y represents
  * row.
  */
-public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
+public class KeyboardAndDisplaySimulator extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private static final String version = "Version 1.4";
@@ -132,7 +132,6 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     private boolean countingInstructions;
     private int instructionCount;
     private int transmitDelayInstructionCountLimit;
-    private int currentDelayInstructionLimit;
 
     // Should the transmitted character be displayed before the transmitter delay
     // period?
@@ -184,21 +183,6 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
      */
     public KeyboardAndDisplaySimulator() {
         this(KeyboardAndDisplaySimulator.heading + ", " + KeyboardAndDisplaySimulator.version, KeyboardAndDisplaySimulator.heading);
-    }
-
-    /**
-     * Main provided for pure stand-alone use. Recommended stand-alone use is to
-     * write a
-     * driver program that instantiates a KeyboardAndDisplaySimulator object then
-     * invokes its go() method.
-     * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
-     * there
-     * is no driver program to invoke the application.
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
-    public static void main(final String[] args) {
-        new KeyboardAndDisplaySimulator(KeyboardAndDisplaySimulator.heading + " stand-alone, " + KeyboardAndDisplaySimulator.version, KeyboardAndDisplaySimulator.heading).go();
     }
 
     /**
@@ -803,7 +787,7 @@ public class KeyboardAndDisplaySimulator extends AbstractToolAndApplication {
     ///////////////////////////////////////////////////////////////////////////////////////////////////// Data.
     private void updateMMIOControlAndData(final int controlAddr, final int controlValue, final int dataAddr, final int dataValue,
                                           final boolean controlOnly) {
-        if (!this.isBeingUsedAsATool || this.connectButton.isConnected()) {
+        if (this.connectButton.isConnected()) {
             Globals.memoryAndRegistersLock.lock();
             try {
                 try {

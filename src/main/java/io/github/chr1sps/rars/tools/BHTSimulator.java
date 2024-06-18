@@ -62,7 +62,7 @@ import java.awt.event.ActionListener;
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
  */
-public class BHTSimulator extends AbstractToolAndApplication implements ActionListener {
+public class BHTSimulator extends AbstractTool implements ActionListener {
     /**
      * constant for the default size of the BHT
      */
@@ -126,8 +126,8 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      */
     @Override
     protected void addAsObserver() {
-        addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
-        addAsObserver(RegisterFile.getProgramCounterRegister());
+        this.addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
+        this.addAsObserver(RegisterFile.getProgramCounterRegister());
     }
 
     /**
@@ -138,19 +138,19 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
     @Override
     protected JComponent buildMainDisplayArea() {
 
-        m_gui = new BHTSimGUI();
-        m_bhtModel = new BHTableModel(BHTSimulator.BHT_DEFAULT_SIZE, BHTSimulator.BHT_DEFAULT_HISTORY,
-                BHT_DEFAULT_INITVAL);
+        this.m_gui = new BHTSimGUI();
+        this.m_bhtModel = new BHTableModel(BHTSimulator.BHT_DEFAULT_SIZE, BHTSimulator.BHT_DEFAULT_HISTORY,
+                BHTSimulator.BHT_DEFAULT_INITVAL);
 
-        m_gui.getTabBHT().setModel(m_bhtModel);
-        m_gui.getCbBHThistory().setSelectedItem(BHTSimulator.BHT_DEFAULT_HISTORY);
-        m_gui.getCbBHTentries().setSelectedItem(BHTSimulator.BHT_DEFAULT_SIZE);
+        this.m_gui.getTabBHT().setModel(this.m_bhtModel);
+        this.m_gui.getCbBHThistory().setSelectedItem(BHTSimulator.BHT_DEFAULT_HISTORY);
+        this.m_gui.getCbBHTentries().setSelectedItem(BHTSimulator.BHT_DEFAULT_SIZE);
 
-        m_gui.getCbBHTentries().addActionListener(this);
-        m_gui.getCbBHThistory().addActionListener(this);
-        m_gui.getCbBHTinitVal().addActionListener(this);
+        this.m_gui.getCbBHTentries().addActionListener(this);
+        this.m_gui.getCbBHThistory().addActionListener(this);
+        this.m_gui.getCbBHTinitVal().addActionListener(this);
 
-        return m_gui;
+        return this.m_gui;
     }
 
     /**
@@ -167,7 +167,7 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      */
     @Override
     protected void reset() {
-        resetSimulator();
+        this.resetSimulator();
     }
 
     /**
@@ -177,12 +177,13 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      * boxes.
      * Selecting a different BHT size or history causes a reset of the simulator.
      */
-    public void actionPerformed(ActionEvent event) {
+    @Override
+    public void actionPerformed(final ActionEvent event) {
         // change of the BHT size or BHT bit configuration
         // resets the simulator
-        if (event.getSource() == m_gui.getCbBHTentries() || event.getSource() == m_gui.getCbBHThistory()
-                || event.getSource() == m_gui.getCbBHTinitVal()) {
-            resetSimulator();
+        if (event.getSource() == this.m_gui.getCbBHTentries() || event.getSource() == this.m_gui.getCbBHThistory()
+                || event.getSource() == this.m_gui.getCbBHTinitVal()) {
+            this.resetSimulator();
         }
     }
 
@@ -190,16 +191,16 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      * Resets the simulator by clearing the GUI elements and resetting the BHT.
      */
     protected void resetSimulator() {
-        m_gui.getTfInstruction().setText("");
-        m_gui.getTfAddress().setText("");
-        m_gui.getTfIndex().setText("");
-        m_gui.getTaLog().setText("");
-        m_bhtModel.initBHT((Integer) m_gui.getCbBHTentries().getSelectedItem(),
-                (Integer) m_gui.getCbBHThistory().getSelectedItem(),
-                m_gui.getCbBHTinitVal().getSelectedItem().equals(BHTSimGUI.BHT_TAKE_BRANCH));
+        this.m_gui.getTfInstruction().setText("");
+        this.m_gui.getTfAddress().setText("");
+        this.m_gui.getTfIndex().setText("");
+        this.m_gui.getTaLog().setText("");
+        this.m_bhtModel.initBHT((Integer) this.m_gui.getCbBHTentries().getSelectedItem(),
+                (Integer) this.m_gui.getCbBHThistory().getSelectedItem(),
+                this.m_gui.getCbBHTinitVal().getSelectedItem().equals(BHTSimGUI.BHT_TAKE_BRANCH));
 
-        m_pendingBranchInstAddress = 0;
-        m_lastBranchTaken = false;
+        this.m_pendingBranchInstAddress = 0;
+        this.m_lastBranchTaken = false;
     }
 
     /**
@@ -212,28 +213,28 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      *
      * @param stmt the branch statement that is executed
      */
-    protected void handlePreBranchInst(ProgramStatement stmt) {
+    protected void handlePreBranchInst(final ProgramStatement stmt) {
 
-        String strStmt = stmt.getBasicAssemblyStatement();
-        int address = stmt.getAddress();
-        int idx = m_bhtModel.getIdxForAddress(address);
+        final String strStmt = stmt.getBasicAssemblyStatement();
+        final int address = stmt.getAddress();
+        final int idx = this.m_bhtModel.getIdxForAddress(address);
 
         // update the GUI
-        m_gui.getTfInstruction().setText(strStmt);
-        m_gui.getTfAddress().setText("0x" + Integer.toHexString(address));
-        m_gui.getTfIndex().setText("" + idx);
+        this.m_gui.getTfInstruction().setText(strStmt);
+        this.m_gui.getTfAddress().setText("0x" + Integer.toHexString(address));
+        this.m_gui.getTfIndex().setText("" + idx);
 
         // mark the affected BHT row
-        m_gui.getTabBHT().setSelectionBackground(BHTSimGUI.COLOR_PREPREDICTION);
-        m_gui.getTabBHT().addRowSelectionInterval(idx, idx);
+        this.m_gui.getTabBHT().setSelectionBackground(BHTSimGUI.COLOR_PREPREDICTION);
+        this.m_gui.getTabBHT().addRowSelectionInterval(idx, idx);
 
         // add output to log
-        m_gui.getTaLog().append("instruction " + strStmt + " at address 0x" + Integer.toHexString(address)
+        this.m_gui.getTaLog().append("instruction " + strStmt + " at address 0x" + Integer.toHexString(address)
                 + ", maps to index " + idx + "\n");
-        m_gui.getTaLog().append("branches to address 0x" + BHTSimulator.extractBranchAddress(stmt) + "\n");
-        m_gui.getTaLog()
-                .append("prediction is: " + (m_bhtModel.getPredictionAtIdx(idx) ? "take" : "do not take") + "...\n");
-        m_gui.getTaLog().setCaretPosition(m_gui.getTaLog().getDocument().getLength());
+        this.m_gui.getTaLog().append("branches to address 0x" + BHTSimulator.extractBranchAddress(stmt) + "\n");
+        this.m_gui.getTaLog()
+                .append("prediction is: " + (this.m_bhtModel.getPredictionAtIdx(idx) ? "take" : "do not take") + "...\n");
+        this.m_gui.getTaLog().setCaretPosition(this.m_gui.getTaLog().getDocument().getLength());
 
     }
 
@@ -248,24 +249,24 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      * @param branchTaken    the information if the branch is taken or not
      *                       (determined in a step before)
      */
-    protected void handleExecBranchInst(int branchInstAddr, boolean branchTaken) {
+    protected void handleExecBranchInst(final int branchInstAddr, final boolean branchTaken) {
 
         // determine the index in the BHT for the branch instruction
-        int idx = m_bhtModel.getIdxForAddress(branchInstAddr);
+        final int idx = this.m_bhtModel.getIdxForAddress(branchInstAddr);
 
         // check if the prediction is correct
-        boolean correctPrediction = m_bhtModel.getPredictionAtIdx(idx) == branchTaken;
+        final boolean correctPrediction = this.m_bhtModel.getPredictionAtIdx(idx) == branchTaken;
 
-        m_gui.getTabBHT().setSelectionBackground(
+        this.m_gui.getTabBHT().setSelectionBackground(
                 correctPrediction ? BHTSimGUI.COLOR_PREDICTION_CORRECT : BHTSimGUI.COLOR_PREDICTION_INCORRECT);
 
         // add some output at the log
-        m_gui.getTaLog().append("branch " + (branchTaken ? "taken" : "not taken") + ", prediction was "
+        this.m_gui.getTaLog().append("branch " + (branchTaken ? "taken" : "not taken") + ", prediction was "
                 + (correctPrediction ? "correct" : "incorrect") + "\n\n");
-        m_gui.getTaLog().setCaretPosition(m_gui.getTaLog().getDocument().getLength());
+        this.m_gui.getTaLog().setCaretPosition(this.m_gui.getTaLog().getDocument().getLength());
 
         // update the BHT -> causes refresh of the table
-        m_bhtModel.updatePredictionAtIdx(idx, branchTaken);
+        this.m_bhtModel.updatePredictionAtIdx(idx, branchTaken);
     }
 
     /**
@@ -275,9 +276,9 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      * @return the address of the instruction that is executed if the branch is
      * taken
      */
-    protected static int extractBranchAddress(ProgramStatement stmt) {
+    protected static int extractBranchAddress(final ProgramStatement stmt) {
         assert stmt.getInstruction() instanceof Branch : "Should only be called on branch instructions";
-        int offset = stmt.getOperand(2);
+        final int offset = stmt.getOperand(2);
 
         return stmt.getAddress() + (offset << 1);
     }
@@ -295,18 +296,18 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
      * branch prediction is analyzed and visualized.
      */
     @Override
-    protected void processRISCVUpdate(AccessNotice notice) {
+    protected void processRISCVUpdate(final AccessNotice notice) {
 
         if (!notice.accessIsFromRISCV())
             return;
 
-        if (notice.getAccessType() == AccessNotice.READ && notice instanceof MemoryAccessNotice memAccNotice) {
+        if (notice.getAccessType() == AccessNotice.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
 
             // now it is safe to make a cast of the notice
 
             try {
                 // access the statement in the text segment without notifying other tools etc.
-                ProgramStatement stmt = Memory.getInstance().getStatementNoNotify(memAccNotice.getAddress());
+                final ProgramStatement stmt = Memory.getInstance().getStatementNoNotify(memAccNotice.getAddress());
 
                 // necessary to handle possible null pointers at the end of the program
                 // (e.g., if the simulator tries to execute the next instruction after the last
@@ -316,35 +317,35 @@ public class BHTSimulator extends AbstractToolAndApplication implements ActionLi
                     boolean clearTextFields = true;
 
                     // first, check if there's a pending branch to handle
-                    if (m_pendingBranchInstAddress != 0) {
-                        handleExecBranchInst(m_pendingBranchInstAddress, m_lastBranchTaken);
+                    if (this.m_pendingBranchInstAddress != 0) {
+                        this.handleExecBranchInst(this.m_pendingBranchInstAddress, this.m_lastBranchTaken);
                         clearTextFields = false;
-                        m_pendingBranchInstAddress = 0;
+                        this.m_pendingBranchInstAddress = 0;
                     }
 
                     // if current instruction is branch instruction
                     if (stmt.getInstruction() instanceof Branch) {
-                        handlePreBranchInst(stmt);
-                        m_lastBranchTaken = ((Branch) stmt.getInstruction()).willBranch(stmt);
-                        m_pendingBranchInstAddress = stmt.getAddress();
+                        this.handlePreBranchInst(stmt);
+                        this.m_lastBranchTaken = ((Branch) stmt.getInstruction()).willBranch(stmt);
+                        this.m_pendingBranchInstAddress = stmt.getAddress();
                         clearTextFields = false;
                     }
 
                     // clear text fields and selection
                     if (clearTextFields) {
-                        m_gui.getTfInstruction().setText("");
-                        m_gui.getTfAddress().setText("");
-                        m_gui.getTfIndex().setText("");
-                        m_gui.getTabBHT().clearSelection();
+                        this.m_gui.getTfInstruction().setText("");
+                        this.m_gui.getTfAddress().setText("");
+                        this.m_gui.getTfIndex().setText("");
+                        this.m_gui.getTabBHT().clearSelection();
                     }
                 } else {
                     // check if there's a pending branch to handle
-                    if (m_pendingBranchInstAddress != 0) {
-                        handleExecBranchInst(m_pendingBranchInstAddress, m_lastBranchTaken);
-                        m_pendingBranchInstAddress = 0;
+                    if (this.m_pendingBranchInstAddress != 0) {
+                        this.handleExecBranchInst(this.m_pendingBranchInstAddress, this.m_lastBranchTaken);
+                        this.m_pendingBranchInstAddress = 0;
                     }
                 }
-            } catch (AddressErrorException e) {
+            } catch (final AddressErrorException e) {
                 // silently ignore these exceptions
             }
 

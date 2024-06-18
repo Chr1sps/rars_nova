@@ -62,8 +62,6 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.notices.AccessNotice;
 import io.github.chr1sps.rars.notices.MemoryAccessNotice;
-import io.github.chr1sps.rars.riscv.BasicInstruction;
-import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,7 +82,7 @@ import java.io.IOException;
  *
  * @author John Owens &lt;jowens@ece.ucdavis.edu&gt;
  */
-public class InstructionMemoryDump extends AbstractToolAndApplication {
+public class InstructionMemoryDump extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger(InstructionMemoryDump.class);
     private static final String name = "Instruction/Memory Dump";
     private static final String version = "Version 1.0 (John Owens)";
@@ -107,18 +105,6 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
      */
     private JTextField dumpLogFilename;
     private JLabel logSuccess;
-
-    /**
-     * Simple constructor, likely used to run a stand-alone memory
-     * reference visualizer.
-     *
-     * @param title   String containing title for title bar
-     * @param heading String containing text for heading shown in
-     *                upper part of window.
-     */
-    public InstructionMemoryDump(final String title, final String heading) {
-        super(title, heading);
-    }
 
     /**
      * Simple construction, likely used by the RARS Tools menu mechanism.
@@ -200,8 +186,6 @@ public class InstructionMemoryDump extends AbstractToolAndApplication {
                 // If the program is finished, getStatement() will return null,
                 // A null statement will cause the simulator to stall.
                 if (stmt != null) {
-                    final BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
-                    final BasicInstructionFormat format = instr.getInstructionFormat();
                     // First dump the instruction address, prefixed by "I:"
                     this.log.append("I: 0x").append(Integer.toUnsignedString(a, 16)).append("\n");
                     // Then dump the instruction, prefixed by "i:"

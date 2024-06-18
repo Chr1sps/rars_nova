@@ -58,7 +58,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * GUI (previously System.out).
  * </p>
  */
-public class CacheSimulator extends AbstractToolAndApplication {
+public class CacheSimulator extends AbstractTool {
     private static boolean debug = false; // controls display of debugging info
     private static final String version = "Version 1.2";
     private static final String heading = "Simulate and illustrate data cache performance";
@@ -122,21 +122,6 @@ public class CacheSimulator extends AbstractToolAndApplication {
      */
     public CacheSimulator() {
         super("Data Cache Simulation Tool, " + CacheSimulator.version, CacheSimulator.heading);
-    }
-
-    /**
-     * Main provided for pure stand-alone use. Recommended stand-alone use is to
-     * write a
-     * driver program that instantiates a CacheSimulator object then invokes its
-     * go() method.
-     * "stand-alone" means it is not invoked from the RARS Tools menu. "Pure" means
-     * there
-     * is no driver program to invoke the Cache Simulator.
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
-    public static void main(final String[] args) {
-        new CacheSimulator("Data Cache Simulator stand-alone, " + CacheSimulator.version, CacheSimulator.heading).go();
     }
 
     /**

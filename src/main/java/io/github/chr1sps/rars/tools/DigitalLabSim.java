@@ -23,7 +23,7 @@ import java.awt.event.MouseListener;
  * www.lifc.univ-fcomte.fr/~teifreto
  * didier.teifreto@univ-fcomte.fr
  */
-public class DigitalLabSim extends AbstractToolAndApplication {
+public class DigitalLabSim extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final String heading = "Digital Lab Sim";
     private static final String version = " Version 1.0 (Didier Teifreto)";
@@ -75,15 +75,6 @@ public class DigitalLabSim extends AbstractToolAndApplication {
      */
     public DigitalLabSim() {
         this(DigitalLabSim.heading + ", " + DigitalLabSim.version, DigitalLabSim.heading);
-    }
-
-    /**
-     * <p>main.</p>
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
-    public static void main(final String[] args) {
-        new DigitalLabSim(DigitalLabSim.heading + ", " + DigitalLabSim.version, DigitalLabSim.heading).go();
     }
 
     /**
@@ -153,7 +144,7 @@ public class DigitalLabSim extends AbstractToolAndApplication {
     }
 
     private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
-        if (!this.isBeingUsedAsATool || this.connectButton.isConnected()) {
+        if (this.connectButton.isConnected()) {
             Globals.memoryAndRegistersLock.lock();
             try {
                 try {

@@ -47,7 +47,7 @@ import java.awt.*;
  *
  * @author Felipe Lessa &lt;felipe.lessa@gmail.com&gt;
  */
-public class InstructionCounter extends AbstractToolAndApplication {
+public class InstructionCounter extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger(InstructionCounter.class);
     private static final String name = "Instruction Counter";
     private static final String version = "Version 1.0 (Felipe Lessa)";
@@ -114,18 +114,6 @@ public class InstructionCounter extends AbstractToolAndApplication {
      * loop, which is not insteresting in the POV of counting instructions.
      */
     private int lastAddress = -1;
-
-    /**
-     * Simple constructor, likely used to run a stand-alone memory reference
-     * visualizer.
-     *
-     * @param title   String containing title for title bar
-     * @param heading String containing text for heading shown in upper part of
-     *                window.
-     */
-    public InstructionCounter(final String title, final String heading) {
-        super(title, heading);
-    }
 
     /**
      * Simple construction, likely used by the RARS Tools menu mechanism.
