@@ -219,6 +219,7 @@ public class BitmapDisplay extends AbstractTool {
         this.gridWindow.canvas.repaint();
     }
 
+
     /**
      * Overrides default method, to provide a Help button for this tool/app.
      *
@@ -275,9 +276,11 @@ public class BitmapDisplay extends AbstractTool {
         this.pixelSizeSlider.addChangeListener(
                 e -> {
                     BitmapDisplay.this.unitPixelSize = BitmapDisplay.this.pixelSizeSlider.getValue();
+                    BitmapDisplay.this.pixelSizeLabel.setText("Unit size in pixels: " + BitmapDisplay.this.unitPixelSize);
                     BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
                     BitmapDisplay.this.updateDisplay();
-                    BitmapDisplay.this.pixelSizeLabel.setText("Unit size in pixels: " + BitmapDisplay.this.unitPixelSize);
+                    BitmapDisplay.this.gridWindow.resize();
+                    BitmapDisplay.this.gridWindow.pack();
                 });
         this.displayWidthSlider = new JSlider(JSlider.HORIZONTAL, 64, 1024, 64);
         this.displayWidthSlider.setMajorTickSpacing(960);
@@ -288,12 +291,12 @@ public class BitmapDisplay extends AbstractTool {
         this.displayWidthSlider.setToolTipText("Total width in pixels of display area");
         this.displayWidthSlider.addChangeListener(
                 e -> {
-                    BitmapDisplay.this.displayWidthLabel.setText("Display width in pixels: " + BitmapDisplay.this.displayAreaWidthInPixels);
                     BitmapDisplay.this.displayAreaWidthInPixels = BitmapDisplay.this.displayWidthSlider.getValue();
-//                    BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
-//                    BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
+                    BitmapDisplay.this.displayWidthLabel.setText("Display width in pixels: " + BitmapDisplay.this.displayAreaWidthInPixels);
                     BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
                     BitmapDisplay.this.updateDisplay();
+                    BitmapDisplay.this.gridWindow.resize();
+                    BitmapDisplay.this.gridWindow.pack();
                 });
         this.displayHeightSlider = new JSlider(JSlider.HORIZONTAL, 64, 1024, 64);
         this.displayHeightSlider.setMajorTickSpacing(960);
@@ -304,12 +307,12 @@ public class BitmapDisplay extends AbstractTool {
         this.displayHeightSlider.setToolTipText("Total height in pixels of display area");
         this.displayHeightSlider.addChangeListener(
                 e -> {
-                    BitmapDisplay.this.displayHeightLabel.setText("Display height in pixels: " + BitmapDisplay.this.displayAreaHeightInPixels);
                     BitmapDisplay.this.displayAreaHeightInPixels = BitmapDisplay.this.displayHeightSlider.getValue();
-//                    BitmapDisplay.this.canvas.setPreferredSize(BitmapDisplay.this.getDisplayAreaDimension());
-//                    BitmapDisplay.this.canvas.setSize(BitmapDisplay.this.getDisplayAreaDimension());
+                    BitmapDisplay.this.displayHeightLabel.setText("Display height in pixels: " + BitmapDisplay.this.displayAreaHeightInPixels);
                     BitmapDisplay.this.theGrid = BitmapDisplay.this.createNewGrid();
                     BitmapDisplay.this.updateDisplay();
+                    BitmapDisplay.this.gridWindow.resize();
+                    BitmapDisplay.this.gridWindow.pack();
                 });
         this.displayBaseAddressSelector = new JComboBox<>(this.displayBaseAddressChoices);
         this.displayBaseAddressSelector.setEditable(false);
@@ -435,9 +438,7 @@ public class BitmapDisplay extends AbstractTool {
     // Method to determine grid dimensions based on current control settings.
     // Each grid element corresponds to one visualization unit.
     private Grid createNewGrid() {
-        final int rows = this.displayAreaHeightInPixels / this.unitPixelSize;
-        final int columns = this.displayAreaWidthInPixels / this.unitPixelSize;
-        return new Grid(rows, columns);
+        return new Grid(this.displayAreaHeightInPixels, this.displayAreaWidthInPixels);
     }
 
     // Given memory address, update color for the corresponding grid element.
@@ -570,6 +571,15 @@ public class BitmapDisplay extends AbstractTool {
                 }
             });
 
+        }
+
+        void resize() {
+            this.setPreferredSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
+                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
+            this.setMinimumSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
+                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
+            this.setMaximumSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
+                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
         }
     }
 }
