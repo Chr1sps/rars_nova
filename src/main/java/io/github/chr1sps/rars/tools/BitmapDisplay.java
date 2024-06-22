@@ -7,6 +7,8 @@ import io.github.chr1sps.rars.riscv.hardware.Memory;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /*
 Copyright (c) 2010-2011,  Pete Sanderson and Kenneth Vollmar
@@ -49,20 +51,16 @@ public class BitmapDisplay extends AbstractTool {
 
     private static final String version = "Version 1.0";
     private static final String heading = "Bitmap Display";
-
-    // Major GUI components
-    private JComboBox<String> displayBaseAddressSelector;
-
-    private JSlider pixelSizeSlider, displayHeightSlider, displayWidthSlider;
-    private JLabel pixelSizeLabel, displayHeightLabel, displayWidthLabel;
-
-//    private JPanel canvas;
-
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
+    // Major GUI components
+    private JComboBox<String> displayBaseAddressSelector;
+    private JSlider pixelSizeSlider, displayHeightSlider, displayWidthSlider;
+
+    //    private JPanel canvas;
+    private JLabel pixelSizeLabel, displayHeightLabel, displayWidthLabel;
 
     // Values for display canvas.
-
     private int unitPixelSize = 1;
     private int displayAreaWidthInPixels = 512;
     private int displayAreaHeightInPixels = 256;
@@ -188,8 +186,13 @@ public class BitmapDisplay extends AbstractTool {
      */
     @Override
     protected void initializePostGUI() {
-        this.connectButton.addActionListener(
-                e -> this.gridWindow.setVisible(BitmapDisplay.this.connectButton.isConnected()));
+        this.connectButton.addConnectListener((connected) -> {
+            this.gridWindow.setVisible(connected);
+            this.displayHeightSlider.setEnabled(!connected);
+            this.displayWidthSlider.setEnabled(!connected);
+            this.pixelSizeSlider.setEnabled(!connected);
+            this.displayBaseAddressSelector.setEnabled(!connected);
+        });
         this.theGrid = this.createNewGrid();
         this.updateBaseAddress();
     }
@@ -213,8 +216,7 @@ public class BitmapDisplay extends AbstractTool {
      */
     @Override
     protected void updateDisplay() {
-//        this.canvas.repaint();
-        // TODO: implement repainting in a separate window
+        this.gridWindow.canvas.repaint();
     }
 
     /**
@@ -443,6 +445,7 @@ public class BitmapDisplay extends AbstractTool {
         final int address = notice.getAddress();
         final int offset = (address - this.baseAddress) / Memory.WORD_LENGTH_BYTES;
 
+
         try {
             this.theGrid.setElement(offset / this.theGrid.getColumns(), offset % this.theGrid.getColumns(),
                     Memory.getInstance().getWord(address / Memory.WORD_LENGTH_BYTES * Memory.WORD_LENGTH_BYTES));
@@ -454,44 +457,6 @@ public class BitmapDisplay extends AbstractTool {
     //////////////////////////////////////////////////////////////////////////////////////
     // Specialized inner classes for modeling and animation.
     //////////////////////////////////////////////////////////////////////////////////////
-
-    /////////////////////////////////////////////////////////////////////////////
-    // Class that represents the panel for visualizing and animating memory
-    ///////////////////////////////////////////////////////////////////////////// reference
-    // patterns.
-    private class GraphicsPanel extends JPanel {
-        GraphicsPanel() {
-            super();
-            this.setMinimumSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
-                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
-            this.setPreferredSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
-                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
-            this.setMaximumSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
-                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
-        }
-
-        // override default paint method to assure display updated correctly every time
-        // the panel is repainted.
-        @Override
-        public void paint(final Graphics g) {
-            this.paintGrid(g, BitmapDisplay.this.theGrid);
-        }
-
-        // Paint the color codes.
-        private void paintGrid(final Graphics g, final Grid grid) {
-            int upperLeftX = 0, upperLeftY = 0;
-            for (int i = 0; i < grid.getRows(); i++) {
-                for (int j = 0; j < grid.getColumns(); j++) {
-                    g.setColor(grid.getElementFast(i, j));
-                    g.fillRect(upperLeftX, upperLeftY, BitmapDisplay.this.unitPixelSize, BitmapDisplay.this.unitPixelSize);
-                    upperLeftX += BitmapDisplay.this.unitPixelSize; // faster than multiplying
-                }
-                // get ready for next row...
-                upperLeftX = 0;
-                upperLeftY += BitmapDisplay.this.unitPixelSize; // faster than multiplying
-            }
-        }
-    }
 
     ////////////////////////////////////////////////////////////////////////
     // Represents grid of colors
@@ -550,6 +515,44 @@ public class BitmapDisplay extends AbstractTool {
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////////
+    // Class that represents the panel for visualizing and animating memory
+    ///////////////////////////////////////////////////////////////////////////// reference
+    // patterns.
+    private class GraphicsPanel extends JPanel {
+        GraphicsPanel() {
+            super();
+            this.setMinimumSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
+                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
+            this.setPreferredSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
+                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
+            this.setMaximumSize(new Dimension(BitmapDisplay.this.displayAreaWidthInPixels * BitmapDisplay.this.unitPixelSize,
+                    BitmapDisplay.this.displayAreaHeightInPixels * BitmapDisplay.this.unitPixelSize));
+        }
+
+        // override default paint method to assure display updated correctly every time
+        // the panel is repainted.
+        @Override
+        public void paint(final Graphics g) {
+            this.paintGrid(g, BitmapDisplay.this.theGrid);
+        }
+
+        // Paint the color codes.
+        private void paintGrid(final Graphics g, final Grid grid) {
+            int upperLeftX = 0, upperLeftY = 0;
+            for (int i = 0; i < grid.getRows(); i++) {
+                for (int j = 0; j < grid.getColumns(); j++) {
+                    g.setColor(grid.getElementFast(i, j));
+                    g.fillRect(upperLeftX, upperLeftY, BitmapDisplay.this.unitPixelSize, BitmapDisplay.this.unitPixelSize);
+                    upperLeftX += BitmapDisplay.this.unitPixelSize; // faster than multiplying
+                }
+                // get ready for next row...
+                upperLeftX = 0;
+                upperLeftY += BitmapDisplay.this.unitPixelSize; // faster than multiplying
+            }
+        }
+    }
+
     private class GridWindow extends JFrame {
         private final GraphicsPanel canvas;
 
@@ -560,6 +563,13 @@ public class BitmapDisplay extends AbstractTool {
             this.add(this.canvas);
             this.setResizable(false);
             this.pack();
+            this.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    connectButton.disconnect();
+                }
+            });
+
         }
     }
 }
