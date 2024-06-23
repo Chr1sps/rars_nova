@@ -4,6 +4,7 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>SRAIW class.</p>
@@ -22,7 +23,7 @@ public class SRAIW extends BasicInstruction {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         // Use the code directly from SRAI
         final int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0], RegisterFile.getValue(operands[1]) >> operands[2]);

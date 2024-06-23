@@ -6,6 +6,7 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -48,7 +49,7 @@ public abstract class Store extends BasicInstruction {
      * @param description a {@link java.lang.String} object
      * @param funct       a {@link java.lang.String} object
      */
-    public Store(String usage, String description, String funct) {
+    public Store(@NotNull String usage, String description, String funct) {
         super(usage, description, BasicInstructionFormat.S_FORMAT,
                 "sssssss fffff ttttt " + funct + " sssss 0100011");
     }
@@ -61,7 +62,7 @@ public abstract class Store extends BasicInstruction {
      * @param funct       a {@link java.lang.String} object
      * @param rv64        a boolean
      */
-    public Store(String usage, String description, String funct, boolean rv64) {
+    public Store(@NotNull String usage, String description, String funct, boolean rv64) {
         super(usage, description, BasicInstructionFormat.S_FORMAT,
                 "sssssss fffff ttttt " + funct + " sssss 0100011", rv64);
     }
@@ -69,7 +70,7 @@ public abstract class Store extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         operands[1] = (operands[1] << 20) >> 20;
         try {

@@ -8,6 +8,7 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -38,7 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>FCVTWUS class.</p>
- *
  */
 public class FCVTWUS extends BasicInstruction {
     /**
@@ -52,7 +52,7 @@ public class FCVTWUS extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         Environment e = new Environment();
         e.mode = Floating.getRoundingMode(operands[2], statement);

@@ -1,6 +1,7 @@
 package io.github.chr1sps.rars.riscv.syscalls;
 
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -37,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * This small class serves only to hold a static HashMap for storing
  * random number generators for use by all the random number generator
  * syscalls.
- *
  */
 public class RandomStreams {
     /**
@@ -53,7 +53,7 @@ public class RandomStreams {
      * @param reg The name of the register that holds the stream index
      * @return the stream a that index
      */
-    static Random get(String reg) {
+    static @NotNull Random get(String reg) {
         int index = RegisterFile.getValue(reg);
         Random stream = randomStreams.get(index);
         if (stream == null) {

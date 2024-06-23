@@ -5,10 +5,10 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FCLASSD class.</p>
- *
  */
 public class FCLASSD extends BasicInstruction {
     /**
@@ -22,7 +22,7 @@ public class FCLASSD extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         int[] operands = statement.getOperands();
         Float64 in = new Float64(FloatingPointRegisterFile.getValueLong(operands[1]));
         FCLASSS.fclass(in, operands[0]);

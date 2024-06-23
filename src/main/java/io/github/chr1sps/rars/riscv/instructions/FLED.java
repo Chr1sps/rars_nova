@@ -6,10 +6,10 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FLED class.</p>
- *
  */
 public class FLED extends BasicInstruction {
     /**
@@ -23,7 +23,7 @@ public class FLED extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         int[] operands = statement.getOperands();
         Float64 f1 = Double.getDouble(operands[1]), f2 = Double.getDouble(operands[2]);
         Environment e = new Environment();

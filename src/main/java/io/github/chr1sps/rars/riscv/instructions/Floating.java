@@ -10,6 +10,7 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.ControlAndStatusRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -71,25 +72,11 @@ public abstract class Floating extends BasicInstruction {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void simulate(final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
-        final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[3], statement);
-        final Float32 result = this.compute(new Float32(FloatingPointRegisterFile.getValue(operands[1])),
-                new Float32(FloatingPointRegisterFile.getValue(operands[2])), e);
-        Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(operands[0], result.bits);
-    }
-
-    /**
      * <p>setfflags.</p>
      *
      * @param e a {@link io.github.chr1sps.jsoftfloat.Environment} object
      */
-    public static void setfflags(final Environment e) {
+    public static void setfflags(final @NotNull Environment e) {
         final int fflags = (e.flags.contains(Flags.inexact) ? 1 : 0) +
                 (e.flags.contains(Flags.underflow) ? 2 : 0) +
                 (e.flags.contains(Flags.overflow) ? 4 : 0) +
@@ -107,7 +94,7 @@ public abstract class Floating extends BasicInstruction {
      * @return a {@link io.github.chr1sps.jsoftfloat.RoundingMode} object
      * @throws SimulationException if any.
      */
-    public static RoundingMode getRoundingMode(final int RM, final ProgramStatement statement) throws SimulationException {
+    public static @NotNull RoundingMode getRoundingMode(final int RM, final ProgramStatement statement) throws SimulationException {
         int rm = RM;
         final int frm = ControlAndStatusRegisterFile.getValue("frm");
         if (rm == 7)
@@ -129,6 +116,30 @@ public abstract class Floating extends BasicInstruction {
     }
 
     /**
+     * <p>getFloat.</p>
+     *
+     * @param num a int
+     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
+     */
+    public static @NotNull Float32 getFloat(final int num) {
+        return new Float32(FloatingPointRegisterFile.getValue(num));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+        final int[] operands = statement.getOperands();
+        final Environment e = new Environment();
+        e.mode = Floating.getRoundingMode(operands[3], statement);
+        final Float32 result = this.compute(new Float32(FloatingPointRegisterFile.getValue(operands[1])),
+                new Float32(FloatingPointRegisterFile.getValue(operands[2])), e);
+        Floating.setfflags(e);
+        FloatingPointRegisterFile.updateRegister(operands[0], result.bits);
+    }
+
+    /**
      * <p>compute.</p>
      *
      * @param f1 a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
@@ -137,14 +148,4 @@ public abstract class Floating extends BasicInstruction {
      * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
      */
     public abstract Float32 compute(Float32 f1, Float32 f2, Environment e);
-
-    /**
-     * <p>getFloat.</p>
-     *
-     * @param num a int
-     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float32} object
-     */
-    public static Float32 getFloat(final int num) {
-        return new Float32(FloatingPointRegisterFile.getValue(num));
-    }
 }

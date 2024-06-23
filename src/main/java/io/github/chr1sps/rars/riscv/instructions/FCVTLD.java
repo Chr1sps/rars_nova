@@ -8,10 +8,10 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FCVTLD class.</p>
- *
  */
 public class FCVTLD extends BasicInstruction {
     /**
@@ -25,7 +25,7 @@ public class FCVTLD extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         Environment e = new Environment();
         e.mode = Floating.getRoundingMode(operands[2], statement);

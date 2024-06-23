@@ -6,6 +6,7 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -50,7 +51,7 @@ public class FEQS extends BasicInstruction {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         final Float32 f1 = Floating.getFloat(operands[1]);
         final Float32 f2 = Floating.getFloat(operands[2]);

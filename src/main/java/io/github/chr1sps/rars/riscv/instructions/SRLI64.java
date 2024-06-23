@@ -4,10 +4,10 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>SRLI64 class.</p>
- *
  */
 public class SRLI64 extends BasicInstruction {
     /**
@@ -22,7 +22,7 @@ public class SRLI64 extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0], RegisterFile.getValueLong(operands[1]) >>> operands[2]);
     }

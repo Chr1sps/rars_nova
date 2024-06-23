@@ -4,6 +4,7 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.exceptions.SimulationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Class to represent a basic instruction in the MIPS instruction set.
@@ -15,9 +16,8 @@ import org.apache.logging.log4j.Logger;
  */
 public abstract class BasicInstruction extends Instruction {
     private static final Logger LOGGER = LogManager.getLogger(BasicInstruction.class);
-    private String instructionName;
     private final BasicInstructionFormat instructionFormat;
-    private final String operationMask;
+    private final @NotNull String operationMask;
 
     private final int opcodeMask; // integer with 1's where constants required (0/1 become 1, f/s/t become 0)
     private final int opcodeMatch; // integer matching constants required (0/1 become 0/1, f/s/t become 0)
@@ -52,8 +52,8 @@ public abstract class BasicInstruction extends Instruction {
      * correct
      * instruction simulator -- it needs to match all and only the 0's and 1's.
      */
-    public BasicInstruction(final String example, final String description, final BasicInstructionFormat instrFormat,
-                            final String operMask) {
+    public BasicInstruction(final @NotNull String example, final String description, final BasicInstructionFormat instrFormat,
+                            final @NotNull String operMask) {
         this.exampleFormat = example;
         this.mnemonic = this.extractOperator(example);
         this.description = description;
@@ -76,8 +76,8 @@ public abstract class BasicInstruction extends Instruction {
      * @param operMask    a {@link java.lang.String} object
      * @param onlyinrv64  a boolean
      */
-    public BasicInstruction(final String example, final String description, final BasicInstructionFormat instrFormat,
-                            final String operMask, final boolean onlyinrv64) {
+    public BasicInstruction(final @NotNull String example, final String description, final BasicInstructionFormat instrFormat,
+                            final @NotNull String operMask, final boolean onlyinrv64) {
         this(example, description, instrFormat, operMask);
         if (InstructionSet.rv64 != onlyinrv64) {
             throw new NullPointerException("rv64");
@@ -94,8 +94,8 @@ public abstract class BasicInstruction extends Instruction {
      * @param instrFormat a {@link io.github.chr1sps.rars.riscv.BasicInstructionFormat} object
      * @param operMask    a {@link java.lang.String} object
      */
-    public BasicInstruction(final String example, final BasicInstructionFormat instrFormat,
-                            final String operMask) {
+    public BasicInstruction(final @NotNull String example, final BasicInstructionFormat instrFormat,
+                            final @NotNull String operMask) {
         this(example, "", instrFormat, operMask);
     }
 
@@ -108,7 +108,7 @@ public abstract class BasicInstruction extends Instruction {
      *
      * @return The 32 bit mask, as a String
      */
-    public String getOperationMask() {
+    public @NotNull String getOperationMask() {
         return this.operationMask;
     }
 

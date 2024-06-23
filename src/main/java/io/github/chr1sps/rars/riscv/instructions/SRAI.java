@@ -4,6 +4,7 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -34,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SRAI class.</p>
- *
  */
 public class SRAI extends BasicInstruction {
     /**
@@ -49,7 +49,7 @@ public class SRAI extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         int[] operands = statement.getOperands();
         // Uses >> because sign fill
         RegisterFile.updateRegister(operands[0], RegisterFile.getValue(operands[1]) >> operands[2]);

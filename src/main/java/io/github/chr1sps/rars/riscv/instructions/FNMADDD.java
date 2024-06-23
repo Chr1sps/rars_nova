@@ -2,10 +2,10 @@ package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.types.Float64;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FNMADDD class.</p>
- *
  */
 public class FNMADDD extends FusedDouble {
     /**
@@ -18,7 +18,7 @@ public class FNMADDD extends FusedDouble {
     /**
      * {@inheritDoc}
      */
-    public Float64 compute(Float64 f1, Float64 f2, Float64 f3, Environment e) {
+    public Float64 compute(@NotNull Float64 f1, Float64 f2, Float64 f3, @NotNull Environment e) {
         // TODO: test if this is the right behaviour
         FusedFloat.flipRounding(e);
         return io.github.chr1sps.jsoftfloat.operations.Arithmetic.fusedMultiplyAdd(f1, f2, f3, e).negate();

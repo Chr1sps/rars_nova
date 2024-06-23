@@ -8,6 +8,7 @@ import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -38,7 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Helper class for 4 argument floating point instructions
- *
  */
 public abstract class FusedFloat extends BasicInstruction {
     /**
@@ -54,9 +54,22 @@ public abstract class FusedFloat extends BasicInstruction {
     }
 
     /**
+     * <p>flipRounding.</p>
+     *
+     * @param e a {@link io.github.chr1sps.jsoftfloat.Environment} object
+     */
+    public static void flipRounding(@NotNull Environment e) {
+        if (e.mode == RoundingMode.max) {
+            e.mode = RoundingMode.min;
+        } else if (e.mode == RoundingMode.min) {
+            e.mode = RoundingMode.max;
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         Environment e = new Environment();
         e.mode = Floating.getRoundingMode(operands[4], statement);
@@ -65,19 +78,6 @@ public abstract class FusedFloat extends BasicInstruction {
                 new Float32(FloatingPointRegisterFile.getValue(operands[3])), e);
         Floating.setfflags(e);
         FloatingPointRegisterFile.updateRegister(operands[0], result.bits);
-    }
-
-    /**
-     * <p>flipRounding.</p>
-     *
-     * @param e a {@link io.github.chr1sps.jsoftfloat.Environment} object
-     */
-    public static void flipRounding(Environment e) {
-        if (e.mode == RoundingMode.max) {
-            e.mode = RoundingMode.min;
-        } else if (e.mode == RoundingMode.min) {
-            e.mode = RoundingMode.max;
-        }
     }
 
     /**

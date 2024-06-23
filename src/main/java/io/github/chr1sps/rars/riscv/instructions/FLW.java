@@ -8,6 +8,7 @@ import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -38,7 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>FLW class.</p>
- *
  */
 public class FLW extends BasicInstruction {
     /**
@@ -52,7 +52,7 @@ public class FLW extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         operands[1] = (operands[1] << 20) >> 20;
         try {

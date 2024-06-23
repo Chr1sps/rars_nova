@@ -4,10 +4,10 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>SLLIW class.</p>
- *
  */
 public class SLLIW extends BasicInstruction {
     /**
@@ -22,7 +22,7 @@ public class SLLIW extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         // Copy from SLLI
         int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0], (long) RegisterFile.getValue(operands[1]) << operands[2]);

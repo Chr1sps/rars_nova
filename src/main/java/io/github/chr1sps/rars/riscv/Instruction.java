@@ -5,6 +5,7 @@ import io.github.chr1sps.rars.assembler.Tokenizer;
 import io.github.chr1sps.rars.exceptions.AssemblyException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.StringTokenizer;
 
@@ -43,7 +44,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public abstract class Instruction {
-    private static final Logger LOGGER = LogManager.getLogger();
     /**
      * Length in bytes of a machine instruction. Currently just 4 because other
      * instruction sizes defined in the specification are nor supported.
@@ -58,6 +58,7 @@ public abstract class Instruction {
      * for 'f'irst, 's'econd, 't'hird, 'q'uad, and 'p'enta operands .
      **/
     public static final char[] operandMask = {'f', 's', 't', 'q', 'p'};
+    private static final Logger LOGGER = LogManager.getLogger();
     /**
      * The instruction name.
      **/
@@ -139,7 +140,7 @@ public abstract class Instruction {
      * @param example a {@link java.lang.String} object
      * @return a {@link java.lang.String} object
      */
-    protected String extractOperator(final String example) {
+    protected String extractOperator(final @NotNull String example) {
         final StringTokenizer st = new StringTokenizer(example, " ,\t");
         return st.nextToken();
     }

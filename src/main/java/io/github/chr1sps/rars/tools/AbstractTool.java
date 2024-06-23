@@ -73,7 +73,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
     protected ConnectButton connectButton;
     protected Flow.Subscription subscription;
-    private JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.
+    protected JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.
     // Major GUI components
     private JLabel headingLabel;
     // For Tool, is set true when "Connect" clicked, false when "Disconnect"
