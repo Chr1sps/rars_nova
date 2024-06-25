@@ -36,7 +36,8 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
     mergeServiceFiles()
     manifest {
         attributes(
-            "Main-Class" to "io.github.chr1sps.rars.Main"
+            "Main-Class" to "io.github.chr1sps.rars.Main",
+            "Multi-Release" to "true"
         )
     }
 }

@@ -3,6 +3,7 @@ package io.github.chr1sps.rars.tools;
 import io.github.chr1sps.rars.notices.AccessNotice;
 import io.github.chr1sps.rars.notices.MemoryAccessNotice;
 import io.github.chr1sps.rars.riscv.hardware.Memory;
+import io.github.chr1sps.rars.util.SimpleSubscriber;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -85,7 +86,12 @@ public class BitmapDisplay extends AbstractTool {
      * Simple constructor.
      */
     public BitmapDisplay() {
-        super(name, BitmapDisplay.name);
+        super(BitmapDisplay.name, BitmapDisplay.name);
+    }
+
+    // Use this for consistent results.
+    private static JPanel getPanelWithBorderLayout() {
+        return new JPanel(new BorderLayout(2, 2));
     }
 
     /**
@@ -93,7 +99,7 @@ public class BitmapDisplay extends AbstractTool {
      */
     @Override
     public String getName() {
-        return name;
+        return BitmapDisplay.name;
     }
 
     /**
@@ -126,6 +132,12 @@ public class BitmapDisplay extends AbstractTool {
         this.addAsObserver(this.baseAddress, highAddress);
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Rest of the protected methods. These override do-nothing methods inherited
+    ////////////////////////////////////////////////////////////////////////////////////// from
+    // the abstract superclass.
+    //////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * Method that constructs the main display area. It is organized vertically
      * into two major components: the display configuration which an be modified
@@ -140,12 +152,6 @@ public class BitmapDisplay extends AbstractTool {
         this.dialog.setResizable(false);
         return this.buildOrganizationArea();
     }
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    // Rest of the protected methods. These override do-nothing methods inherited
-    ////////////////////////////////////////////////////////////////////////////////////// from
-    // the abstract superclass.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * {@inheritDoc}
@@ -189,7 +195,7 @@ public class BitmapDisplay extends AbstractTool {
             this.preSpinnerLabel.setEnabled(!connected);
             this.postSpinnerLabel.setEnabled(!connected);
             if (connected) {
-                LOGGER.debug("Connected. Expected window size: {}. Actual window size: {}", this.getNewGridWindowSize(), this.gridWindow.getSize());
+                SimpleSubscriber.LOGGER.debug("Connected. Expected window size: {}. Actual window size: {}", this.getNewGridWindowSize(), this.gridWindow.getSize());
             }
         });
         this.theGrid = this.createNewGrid();
@@ -218,6 +224,9 @@ public class BitmapDisplay extends AbstractTool {
         this.gridWindow.canvas.repaint();
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Private methods defined to support the above.
+    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Overrides default method, to provide a Help button for this tool/app.
@@ -249,10 +258,6 @@ public class BitmapDisplay extends AbstractTool {
         return help;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    // Private methods defined to support the above.
-    //////////////////////////////////////////////////////////////////////////////////////
-
     // UI components and layout for left half of GUI, where settings are specified.
     private JComponent buildOrganizationArea() {
         final JPanel organization = new JPanel(new GridLayout(4, 1));
@@ -260,7 +265,7 @@ public class BitmapDisplay extends AbstractTool {
         this.pixelSizeLabel = new JLabel("Unit size in pixels: " + this.unitPixelSize);
         this.displayWidthLabel = new JLabel("Display width in pixels: " + this.displayAreaWidthInPixels);
         this.displayHeightLabel = new JLabel("Display height in pixels: " + this.displayAreaHeightInPixels);
-        this.pixelSizeSlider = new JSlider(JSlider.HORIZONTAL, 1, 32, 1);
+        this.pixelSizeSlider = new JSlider(JSlider.HORIZONTAL, 1, 32, this.unitPixelSize);
         this.pixelSizeSlider.setMajorTickSpacing(31);
         this.pixelSizeSlider.setMinorTickSpacing(1);
         this.pixelSizeSlider.setSnapToTicks(true);
@@ -275,7 +280,7 @@ public class BitmapDisplay extends AbstractTool {
                     BitmapDisplay.this.gridWindow.resize();
                     BitmapDisplay.this.updateDisplay();
                 });
-        this.displayWidthSlider = new JSlider(JSlider.HORIZONTAL, 64, 1024, 64);
+        this.displayWidthSlider = new JSlider(JSlider.HORIZONTAL, 64, 1024, this.displayAreaWidthInPixels);
         this.displayWidthSlider.setMajorTickSpacing(960);
         this.displayWidthSlider.setMinorTickSpacing(64);
         this.displayWidthSlider.setSnapToTicks(true);
@@ -290,7 +295,7 @@ public class BitmapDisplay extends AbstractTool {
                     BitmapDisplay.this.gridWindow.resize();
                     BitmapDisplay.this.updateDisplay();
                 });
-        this.displayHeightSlider = new JSlider(JSlider.HORIZONTAL, 64, 1024, 64);
+        this.displayHeightSlider = new JSlider(JSlider.HORIZONTAL, 64, 1024, this.displayAreaHeightInPixels);
         this.displayHeightSlider.setMajorTickSpacing(960);
         this.displayHeightSlider.setMinorTickSpacing(64);
         this.displayHeightSlider.setSnapToTicks(true);
@@ -306,25 +311,25 @@ public class BitmapDisplay extends AbstractTool {
                     BitmapDisplay.this.updateDisplay();
                 });
         this.baseAddressSpinner = new JSpinner(new SpinnerNumberModel(this.baseAddress >> 16, 0x0000, 0xFFFF, 1));
-        var editor = (JSpinner.DefaultEditor) baseAddressSpinner.getEditor();
-        var txt = (JFormattedTextField) editor.getTextField();
+        final var editor = (JSpinner.DefaultEditor) this.baseAddressSpinner.getEditor();
+        final var txt = (JFormattedTextField) editor.getTextField();
         txt.setFormatterFactory(new DefaultFormatterFactory() {
             @Override
             public JFormattedTextField.AbstractFormatter getDefaultFormatter() {
-                var formatter = new NumberFormatter() {
+                final var formatter = new NumberFormatter() {
                     @Override
-                    public Object stringToValue(String text) {
+                    public Object stringToValue(final String text) {
                         try {
                             var value = Integer.parseInt(text, 16);
                             value = Math.clamp(value, 0, 0xFFFF);
                             return value;
-                        } catch (NumberFormatException e) {
+                        } catch (final NumberFormatException e) {
                             return 0;
                         }
                     }
 
                     @Override
-                    public String valueToString(Object value) {
+                    public String valueToString(final Object value) {
                         return Integer.toHexString((int) value).toUpperCase();
                     }
 
@@ -332,23 +337,23 @@ public class BitmapDisplay extends AbstractTool {
                 formatter.setValueClass(Integer.class);
                 formatter.setFormat(new NumberFormat() {
                     @Override
-                    public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+                    public StringBuffer format(final double number, final StringBuffer toAppendTo, final FieldPosition pos) {
                         return new StringBuffer(Integer.toHexString((int) number).toUpperCase());
                     }
 
                     @Override
-                    public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+                    public StringBuffer format(final long number, final StringBuffer toAppendTo, final FieldPosition pos) {
                         return new StringBuffer(Integer.toHexString((int) number).toUpperCase());
                     }
 
                     @Override
-                    public Number parse(String source, ParsePosition parsePosition) {
+                    public Number parse(final String source, final ParsePosition parsePosition) {
                         try {
                             int value = Integer.parseInt(source, 16);
                             value = Math.clamp(value, 0, 0xFFFF);
                             parsePosition.setIndex(source.length());
                             return value;
-                        } catch (NumberFormatException e) {
+                        } catch (final NumberFormatException e) {
                             parsePosition.setErrorIndex(0);
                             return null;
                         }
@@ -382,28 +387,28 @@ public class BitmapDisplay extends AbstractTool {
 
         // ALL COMPONENTS FOR "ORGANIZATION" SECTION
 
-        final JPanel pixelSizeRow = this.getPanelWithBorderLayout();
+        final JPanel pixelSizeRow = BitmapDisplay.getPanelWithBorderLayout();
         pixelSizeRow.setBorder(this.emptyBorder);
         pixelSizeRow.add(this.pixelSizeLabel, BorderLayout.WEST);
         pixelSizeRow.add(this.pixelSizeSlider, BorderLayout.EAST);
 
-        final JPanel displayWidthRow = this.getPanelWithBorderLayout();
+        final JPanel displayWidthRow = BitmapDisplay.getPanelWithBorderLayout();
         displayWidthRow.setBorder(this.emptyBorder);
         displayWidthRow.add(this.displayWidthLabel, BorderLayout.WEST);
         displayWidthRow.add(this.displayWidthSlider, BorderLayout.EAST);
 
-        final JPanel displayHeightRow = this.getPanelWithBorderLayout();
+        final JPanel displayHeightRow = BitmapDisplay.getPanelWithBorderLayout();
         displayHeightRow.setBorder(this.emptyBorder);
         displayHeightRow.add(this.displayHeightLabel, BorderLayout.WEST);
         displayHeightRow.add(this.displayHeightSlider, BorderLayout.EAST);
 
         final var baseAddressPickerPanel = new JPanel();
         baseAddressPickerPanel.setLayout(new BoxLayout(baseAddressPickerPanel, BoxLayout.X_AXIS));
-        baseAddressPickerPanel.add(preSpinnerLabel);
+        baseAddressPickerPanel.add(this.preSpinnerLabel);
         baseAddressPickerPanel.add(this.baseAddressSpinner);
-        baseAddressPickerPanel.add(postSpinnerLabel);
+        baseAddressPickerPanel.add(this.postSpinnerLabel);
 
-        final JPanel baseAddressRow = this.getPanelWithBorderLayout();
+        final JPanel baseAddressRow = BitmapDisplay.getPanelWithBorderLayout();
         baseAddressRow.setBorder(this.emptyBorder);
         baseAddressRow.add(new JLabel("Base address for display "), BorderLayout.WEST);
         baseAddressRow.add(baseAddressPickerPanel, BorderLayout.EAST);
@@ -421,12 +426,6 @@ public class BitmapDisplay extends AbstractTool {
         this.baseAddress = (int) this.baseAddressSpinner.getValue() << 16;
     }
 
-
-    // Use this for consistent results.
-    private JPanel getPanelWithBorderLayout() {
-        return new JPanel(new BorderLayout(2, 2));
-    }
-
     // Method to determine grid dimensions based on current control settings.
     // Each grid element corresponds to one visualization unit.
     private Grid createNewGrid() {
@@ -440,9 +439,9 @@ public class BitmapDisplay extends AbstractTool {
 
 
         try {
-            var color = new Color(Memory.getInstance().getWord(address / Memory.WORD_LENGTH_BYTES * Memory.WORD_LENGTH_BYTES));
-            var row = offset / this.theGrid.columns;
-            var column = offset % this.theGrid.columns;
+            final var color = new Color(Memory.getInstance().getWord(address / Memory.WORD_LENGTH_BYTES * Memory.WORD_LENGTH_BYTES));
+            final var row = offset / this.theGrid.columns;
+            final var column = offset % this.theGrid.columns;
             this.theGrid.grid[row][column] = color;
         } catch (final Exception e) {
             // If address is out of range for display, do nothing.
@@ -475,7 +474,7 @@ public class BitmapDisplay extends AbstractTool {
 
         // Just set all grid elements to black.
         private void reset() {
-            for (var row : this.grid) {
+            for (final var row : this.grid) {
                 Arrays.fill(row, Color.BLACK);
             }
         }
@@ -488,7 +487,7 @@ public class BitmapDisplay extends AbstractTool {
     private class GraphicsPanel extends JPanel {
         GraphicsPanel() {
             super();
-            var size = getNewGridWindowSize();
+            final var size = BitmapDisplay.this.getNewGridWindowSize();
             this.setMinimumSize(size);
             this.setPreferredSize(size);
             this.setMaximumSize(size);
@@ -504,8 +503,8 @@ public class BitmapDisplay extends AbstractTool {
         // Paint the color codes.
         private void paintGrid(final Graphics g, final Grid grid) {
             int upperLeftX = 0, upperLeftY = 0;
-            for (var row : grid.grid) {
-                for (var color : row) {
+            for (final var row : grid.grid) {
+                for (final var color : row) {
                     g.setColor(color);
                     g.fillRect(upperLeftX, upperLeftY, BitmapDisplay.this.unitPixelSize, BitmapDisplay.this.unitPixelSize);
                     upperLeftX += BitmapDisplay.this.unitPixelSize; // faster than multiplying
@@ -529,20 +528,20 @@ public class BitmapDisplay extends AbstractTool {
             this.setResizable(false);
             this.addWindowListener(new WindowAdapter() {
                 @Override
-                public void windowClosing(WindowEvent e) {
-                    connectButton.disconnect();
+                public void windowClosing(final WindowEvent e) {
+                    BitmapDisplay.this.connectButton.disconnect();
                 }
             });
             this.resize();
         }
 
         void resize() {
-            var newSize = getNewGridWindowSize();
+            final var newSize = BitmapDisplay.this.getNewGridWindowSize();
             this.canvas.setPreferredSize(newSize);
             this.canvas.setMinimumSize(newSize);
             this.canvas.setMaximumSize(newSize);
             this.pack();
-            LOGGER.debug("Resized to {}", newSize);
+            SimpleSubscriber.LOGGER.debug("Resized to {}", newSize);
         }
     }
 }
