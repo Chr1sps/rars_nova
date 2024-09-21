@@ -12,14 +12,9 @@ import io.github.chr1sps.rars.venus.run.RunSpeedPanel;
  * @author Pete Sanderson
  * @version January 2009
  */
-public final class SimulatorNotice implements Notice {
-    private final int action;
-    private final int maxSteps;
-    private final Simulator.Reason reason;
-    private final boolean done;
-    private final SimulationException exception;
-    private final double runSpeed;
-    private final int programCounter;
+
+public record SimulatorNotice(int action, int maxSteps, double runSpeed, int programCounter, Simulator.Reason reason,
+                              SimulationException exception, boolean done) implements Notice {
     /**
      * Constant <code>SIMULATOR_START=0</code>
      */
@@ -29,99 +24,9 @@ public final class SimulatorNotice implements Notice {
      */
     public static final int SIMULATOR_STOP = 1;
 
-    /**
-     * Constructor will be called only within this package, so assume
-     * address and length are in valid ranges.
-     *
-     * @param action         a int
-     * @param maxSteps       a int
-     * @param runSpeed       a double
-     * @param programCounter a int
-     * @param reason         a {@link io.github.chr1sps.rars.simulator.Simulator.Reason} object
-     * @param se             a {@link SimulationException} object
-     * @param done           a boolean
-     */
-    public SimulatorNotice(int action, int maxSteps, double runSpeed, int programCounter, Simulator.Reason reason,
-                           SimulationException se, boolean done) {
-        this.action = action;
-        this.maxSteps = maxSteps;
-        this.runSpeed = runSpeed;
-        this.programCounter = programCounter;
-        this.reason = reason;
-        this.exception = se;
-        this.done = done;
-    }
-
-    /**
-     * <p>Getter for the field <code>action</code>.</p>
-     *
-     * @return a int
-     */
-    public int getAction() {
-        return this.action;
-    }
-
-    /**
-     * <p>Getter for the field <code>maxSteps</code>.</p>
-     *
-     * @return a int
-     */
-    public int getMaxSteps() {
-        return this.maxSteps;
-    }
-
-    /**
-     * <p>Getter for the field <code>runSpeed</code>.</p>
-     *
-     * @return a double
-     */
-    public double getRunSpeed() {
-        return this.runSpeed;
-    }
-
-    /**
-     * <p>Getter for the field <code>programCounter</code>.</p>
-     *
-     * @return a int
-     */
-    public int getProgramCounter() {
-        return this.programCounter;
-    }
-
-    /**
-     * <p>Getter for the field <code>reason</code>.</p>
-     *
-     * @return a {@link io.github.chr1sps.rars.simulator.Simulator.Reason} object
-     */
-    public Simulator.Reason getReason() {
-        return this.reason;
-    }
-
-    /**
-     * <p>Getter for the field <code>exception</code>.</p>
-     *
-     * @return a {@link SimulationException} object
-     */
-    public SimulationException getException() {
-        return this.exception;
-    }
-
-    /**
-     * <p>Getter for the field <code>done</code>.</p>
-     *
-     * @return a boolean
-     */
-    public boolean getDone() {
-        return this.done;
-    }
-
-    /**
-     * String representation indicates access type, address and length in bytes
-     *
-     * @return a {@link java.lang.String} object
-     */
+    @Override
     public String toString() {
-        return ((this.getAction() == SIMULATOR_START) ? "START " : "STOP  ") +
+        return ((this.action == SimulatorNotice.SIMULATOR_START) ? "START " : "STOP  ") +
                 "Max Steps " + this.maxSteps + " " +
                 "Speed "
                 + ((this.runSpeed == RunSpeedPanel.UNLIMITED_SPEED) ? "unlimited " : this.runSpeed + " inst/sec") +

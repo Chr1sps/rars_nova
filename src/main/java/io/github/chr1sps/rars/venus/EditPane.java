@@ -5,6 +5,7 @@ import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.notices.SettingsNotice;
 import io.github.chr1sps.rars.util.SimpleSubscriber;
 import io.github.chr1sps.rars.venus.editors.TextEditingArea;
+import io.github.chr1sps.rars.venus.editors.TextEditingArea.FindReplaceResult;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.JEditBasedTextArea;
 
 import javax.swing.*;
@@ -59,15 +60,31 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice> {
 
+    private static final int count = 0;
+    /**
+     * Form string with source code line numbers.
+     * Resulting string is HTML, for which JLabel will happily honor <br>
+     * to do
+     * multiline label (it ignores '\n'). The line number list is a JLabel with
+     * one line number per line.
+     */
+    private static final String spaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    private static final char newline = '\n';
     private final TextEditingArea sourceCode;
     private final VenusUI mainUI;
     private final JLabel caretPositionLabel;
     private final JCheckBox showLineNumbers;
     private final JLabel lineNumbers;
-    private static final int count = 0;
     private final boolean isCompoundEdit = false;
-    private CompoundEdit compoundEdit;
     private final FileStatus fileStatus;
+    private CompoundEdit compoundEdit;
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Update, if source code is visible, when Font setting changes.
+     * This method is specified by the Observer interface.
+     */
+    private Flow.Subscription subscription;
 
     /**
      * Constructor for the EditPane class.
@@ -212,15 +229,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     }
 
     /**
-     * Form string with source code line numbers.
-     * Resulting string is HTML, for which JLabel will happily honor <br>
-     * to do
-     * multiline label (it ignores '\n'). The line number list is a JLabel with
-     * one line number per line.
-     */
-    private static final String spaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-
-    /**
      * <p>getLineNumbersList.</p>
      *
      * @param doc a {@link javax.swing.text.Document} object
@@ -280,16 +288,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     }
 
     /**
-     * Set the editing status for this EditPane's associated document.
-     * For the argument, use one of the constants from class FileStatus.
-     *
-     * @param fileStatus the status constant from class FileStatus
-     */
-    public void setFileStatus(final int fileStatus) {
-        this.fileStatus.setFileStatus(fileStatus);
-    }
-
-    /**
      * Get the editing status for this EditPane's associated document.
      * This will be one of the constants from class FileStatus.
      *
@@ -297,6 +295,16 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      */
     public int getFileStatus() {
         return this.fileStatus.getFileStatus();
+    }
+
+    /**
+     * Set the editing status for this EditPane's associated document.
+     * For the argument, use one of the constants from class FileStatus.
+     *
+     * @param fileStatus the status constant from class FileStatus
+     */
+    public void setFileStatus(final int fileStatus) {
+        this.fileStatus.setFileStatus(fileStatus);
     }
 
     /**
@@ -351,6 +359,17 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         this.sourceCode.requestFocusInWindow();
     }
 
+    /*
+     * Note: these are invoked only when copy/cut/paste are used from the
+     * toolbar or menu or the defined menu Alt codes. When
+     * Ctrl-C, Ctrl-X or Ctrl-V are used, this code is NOT invoked
+     * but the operation works correctly!
+     * The "set visible" operations are used because clicking on the toolbar
+     * icon causes both the selection highlighting AND the blinking cursor
+     * to disappear! This does not happen when using menu selection or
+     * Ctrl-C/X/V
+     */
+
     /**
      * Delegates to corresponding FileStatus method
      */
@@ -366,17 +385,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     public UndoManager getUndoManager() {
         return this.sourceCode.getUndoManager();
     }
-
-    /*
-     * Note: these are invoked only when copy/cut/paste are used from the
-     * toolbar or menu or the defined menu Alt codes. When
-     * Ctrl-C, Ctrl-X or Ctrl-V are used, this code is NOT invoked
-     * but the operation works correctly!
-     * The "set visible" operations are used because clicking on the toolbar
-     * icon causes both the selection highlighting AND the blinking cursor
-     * to disappear! This does not happen when using menu selection or
-     * Ctrl-C/X/V
-     */
 
     /**
      * copy currently-selected text into clipboard
@@ -471,8 +479,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     public void displayCaretPosition(final Point p) {
         this.caretPositionLabel.setText("Line: " + p.y + " Column: " + p.x);
     }
-
-    private static final char newline = '\n';
 
     /**
      * Given byte stream position in text being edited, calculate its column and
@@ -575,7 +581,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      * @param caseSensitive true if search is to be case-sensitive, false otherwise
      * @return TEXT_FOUND or TEXT_NOT_FOUND, depending on the result.
      */
-    public int doFindText(final String find, final boolean caseSensitive) {
+    public FindReplaceResult doFindText(final String find, final boolean caseSensitive) {
         return this.sourceCode.doFindText(find, caseSensitive);
     }
 
@@ -600,7 +606,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      * reaplacement is
      * successful and there is at least one additional match.
      */
-    public int doReplace(final String find, final String replace, final boolean caseSensitive) {
+    public FindReplaceResult doReplace(final String find, final String replace, final boolean caseSensitive) {
         return this.sourceCode.doReplace(find, replace, caseSensitive);
     }
 
@@ -620,14 +626,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     public int doReplaceAll(final String find, final String replace, final boolean caseSensitive) {
         return this.sourceCode.doReplaceAll(find, replace, caseSensitive);
     }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Update, if source code is visible, when Font setting changes.
-     * This method is specified by the Observer interface.
-     */
-    private Flow.Subscription subscription;
 
     @Override
     public void onSubscribe(final Flow.Subscription subscription) {

@@ -110,6 +110,9 @@ public final class DataTypes {
      **/
     public static final double LOW_FLOAT_VALUE = -Float.MAX_VALUE;
 
+    private DataTypes() {
+    }
+
     /**
      * Get length in bytes for numeric RISCV directives.
      *
@@ -147,7 +150,7 @@ public final class DataTypes {
         return (direct == Directive.HALF && (value < MIN_HALF_VALUE || value > 0xFFFF)) ||
                 (direct == Directive.BYTE && (value < MIN_BYTE_VALUE || value > 0xFF));
     }
-
+    
     /**
      * Determines whether given floating point value falls within value range for
      * given directive.

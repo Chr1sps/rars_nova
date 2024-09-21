@@ -8,6 +8,7 @@ import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 /*
 Copyright (c) 2013-2014.
@@ -40,10 +41,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author M.H.Sekhavat sekhavat17@gmail.com
  */
 public class Macro {
+    private final ArrayList<String> labels;
     private String name;
     private RISCVprogram program;
-    private final ArrayList<String> labels;
-
     /**
      * first and last line number of macro definition. first line starts with
      * .macro directive and last line is .end_macro directive.
@@ -65,6 +65,59 @@ public class Macro {
         this.origFromLine = this.origToLine = 0;
         this.args = new ArrayList<>();
         this.labels = new ArrayList<>();
+    }
+
+    /**
+     * replaces token <code>tokenToBeReplaced</code> which is occurred in
+     * <code>source</code> with <code>substitute</code>.
+     *
+     * @param source
+     * @param tokenToBeReplaced
+     * @param substitute
+     * @return
+     */
+    // Initially the position of the substitute was based on token position but that
+    // proved problematic
+    // in that the source string does not always match the token list from which the
+    // token comes. The
+    // token list has already had .eqv equivalences applied whereas the source may
+    // not. This is because
+    // the source comes from a macro definition? That has proven to be a tough
+    // question to answer.
+    // DPS 12-feb-2013
+    private static String replaceToken(final String source, final Token tokenToBeReplaced, final String substitute) {
+        final String stringToBeReplaced = tokenToBeReplaced.getValue();
+        final int pos = source.indexOf(stringToBeReplaced);
+        return (pos < 0) ? source
+                : source.substring(0, pos) + substitute + source.substring(pos + stringToBeReplaced.length());
+    }
+
+    /**
+     * returns whether <code>tokenValue</code> is macro parameter or not
+     *
+     * @param tokenValue                a {@link java.lang.String} object
+     * @param acceptSpimStyleParameters accepts SPIM-style parameters which begin
+     *                                  with '$' if true
+     * @return a boolean
+     */
+    public static boolean tokenIsMacroParameter(final String tokenValue, final boolean acceptSpimStyleParameters) {
+        if (acceptSpimStyleParameters) {
+            // Bug fix: SPIM accepts parameter names that start with $ instead of %. This
+            // can
+            // lead to problems since register names also start with $. This IF condition
+            // should filter out register names. Originally filtered those from regular set
+            // but not
+            // from ControlAndStatusRegisterFile or FloatingPointRegisterFile register sets.
+            // Expanded the condition.
+            // DPS 7-July-2014.
+            if (!tokenValue.isEmpty() && tokenValue.charAt(0) == '$' &&
+                    RegisterFile.getRegister(tokenValue) == null &&
+                    FloatingPointRegisterFile.getRegister(tokenValue) == null) // added 7-July-2014
+            {
+                return true;
+            }
+        }
+        return tokenValue.length() > 1 && tokenValue.charAt(0) == '%';
     }
 
     /**
@@ -113,21 +166,21 @@ public class Macro {
     }
 
     /**
-     * <p>getOriginalFromLine.</p>
-     *
-     * @return a int
-     */
-    public int getOriginalFromLine() {
-        return this.origFromLine;
-    }
-
-    /**
      * <p>Setter for the field <code>fromLine</code>.</p>
      *
      * @param fromLine a int
      */
     public void setFromLine(final int fromLine) {
         this.fromLine = fromLine;
+    }
+
+    /**
+     * <p>getOriginalFromLine.</p>
+     *
+     * @return a int
+     */
+    public int getOriginalFromLine() {
+        return this.origFromLine;
     }
 
     /**
@@ -149,21 +202,21 @@ public class Macro {
     }
 
     /**
-     * <p>getOriginalToLine.</p>
-     *
-     * @return a int
-     */
-    public int getOriginalToLine() {
-        return this.origToLine;
-    }
-
-    /**
      * <p>Setter for the field <code>toLine</code>.</p>
      *
      * @param toLine a int
      */
     public void setToLine(final int toLine) {
         this.toLine = toLine;
+    }
+
+    /**
+     * <p>getOriginalToLine.</p>
+     *
+     * @return a int
+     */
+    public int getOriginalToLine() {
+        return this.origToLine;
     }
 
     /**
@@ -247,10 +300,10 @@ public class Macro {
                     errors.add(new ErrorMessage(this.program, token.getSourceLine(),
                             token.getStartPos(), "Unknown macro parameter"));
                 }
-                s = this.replaceToken(s, token, substitute);
+                s = Macro.replaceToken(s, token, substitute);
             } else if (this.tokenIsMacroLabel(token.getValue())) {
                 final String substitute = token.getValue() + "_M" + counter;
-                s = this.replaceToken(s, token, substitute);
+                s = Macro.replaceToken(s, token, substitute);
             }
         }
         return s;
@@ -268,59 +321,6 @@ public class Macro {
     }
 
     /**
-     * replaces token <code>tokenToBeReplaced</code> which is occurred in
-     * <code>source</code> with <code>substitute</code>.
-     *
-     * @param source
-     * @param tokenToBeReplaced
-     * @param substitute
-     * @return
-     */
-    // Initially the position of the substitute was based on token position but that
-    // proved problematic
-    // in that the source string does not always match the token list from which the
-    // token comes. The
-    // token list has already had .eqv equivalences applied whereas the source may
-    // not. This is because
-    // the source comes from a macro definition? That has proven to be a tough
-    // question to answer.
-    // DPS 12-feb-2013
-    private String replaceToken(final String source, final Token tokenToBeReplaced, final String substitute) {
-        final String stringToBeReplaced = tokenToBeReplaced.getValue();
-        final int pos = source.indexOf(stringToBeReplaced);
-        return (pos < 0) ? source
-                : source.substring(0, pos) + substitute + source.substring(pos + stringToBeReplaced.length());
-    }
-
-    /**
-     * returns whether <code>tokenValue</code> is macro parameter or not
-     *
-     * @param tokenValue                a {@link java.lang.String} object
-     * @param acceptSpimStyleParameters accepts SPIM-style parameters which begin
-     *                                  with '$' if true
-     * @return a boolean
-     */
-    public static boolean tokenIsMacroParameter(final String tokenValue, final boolean acceptSpimStyleParameters) {
-        if (acceptSpimStyleParameters) {
-            // Bug fix: SPIM accepts parameter names that start with $ instead of %. This
-            // can
-            // lead to problems since register names also start with $. This IF condition
-            // should filter out register names. Originally filtered those from regular set
-            // but not
-            // from ControlAndStatusRegisterFile or FloatingPointRegisterFile register sets.
-            // Expanded the condition.
-            // DPS 7-July-2014.
-            if (!tokenValue.isEmpty() && tokenValue.charAt(0) == '$' &&
-                    RegisterFile.getRegister(tokenValue) == null &&
-                    FloatingPointRegisterFile.getRegister(tokenValue) == null) // added 7-July-2014
-            {
-                return true;
-            }
-        }
-        return tokenValue.length() > 1 && tokenValue.charAt(0) == '%';
-    }
-
-    /**
      * <p>addLabel.</p>
      *
      * @param value a {@link java.lang.String} object
@@ -334,5 +334,10 @@ public class Macro {
      */
     public void readyForCommit() {
         Collections.sort(this.labels);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name, this.program, this.labels, this.fromLine, this.toLine, this.origFromLine, this.origToLine, this.args);
     }
 }

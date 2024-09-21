@@ -1,6 +1,8 @@
 package io.github.chr1sps.rars.assembler;
 
 import io.github.chr1sps.rars.RISCVprogram;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -45,17 +47,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author M.H.Sekhavat sekhavat17@gmail.com
  */
 public class MacroPool {
-    private final RISCVprogram program;
+    private final @NotNull RISCVprogram program;
     /**
      * List of macros defined by now
      */
-    private final ArrayList<Macro> macroList;
+    private final @NotNull ArrayList<Macro> macroList;
+    private final @NotNull ArrayList<Integer> callStack;
+    private final @NotNull ArrayList<Integer> callStackOrigLines;
     /**
      * @see #beginMacro(Token)
      */
-    private Macro current;
-    private final ArrayList<Integer> callStack;
-    private final ArrayList<Integer> callStackOrigLines;
+    private @Nullable Macro current;
     /**
      * @see #getNextCounter()
      */
@@ -66,7 +68,7 @@ public class MacroPool {
      *
      * @param program associated program
      */
-    public MacroPool(final RISCVprogram program) {
+    public MacroPool(final @NotNull RISCVprogram program) {
         this.program = program;
         this.macroList = new ArrayList<>();
         this.callStack = new ArrayList<>();
@@ -85,7 +87,7 @@ public class MacroPool {
      * @param nameToken Token containing name of macro after <code>.macro</code>
      *                  directive
      */
-    public void beginMacro(final Token nameToken) {
+    public void beginMacro(final @NotNull Token nameToken) {
         this.current = new Macro();
         this.current.setName(nameToken.getValue());
         this.current.setFromLine(nameToken.getSourceLine());
@@ -101,7 +103,7 @@ public class MacroPool {
      * @param endToken Token containing <code>.end_macro</code> directive in source
      *                 code
      */
-    public void commitMacro(final Token endToken) {
+    public void commitMacro(final @NotNull Token endToken) {
         this.current.setToLine(endToken.getSourceLine());
         this.current.setOriginalToLine(endToken.getOriginalSourceLine());
         this.current.readyForCommit();
@@ -112,12 +114,11 @@ public class MacroPool {
     /**
      * Will be called by parser when reaches a macro expansion call
      *
-     * @param tokens     tokens passed to macro expansion call
-     * @param callerLine a int
+     * @param tokens tokens passed to macro expansion call
      * @return {@link io.github.chr1sps.rars.assembler.Macro} object matching the name and argument count of
      * tokens passed
      */
-    public Macro getMatchingMacro(final TokenList tokens, final int callerLine) {
+    public @Nullable Macro getMatchingMacro(final @NotNull TokenList tokens) {
         if (tokens.isEmpty())
             return null;
         Macro ret = null;
@@ -140,7 +141,7 @@ public class MacroPool {
      * @return true if any macros have been defined with name <code>value</code>
      * by now, not concerning arguments count.
      */
-    public boolean matchesAnyMacroName(final String value) {
+    public boolean matchesAnyMacroName(final @NotNull String value) {
         for (final Macro macro : this.macroList)
             if (macro.getName().equals(value))
                 return true;
@@ -152,17 +153,8 @@ public class MacroPool {
      *
      * @return a {@link io.github.chr1sps.rars.assembler.Macro} object
      */
-    public Macro getCurrent() {
+    public @Nullable Macro getCurrent() {
         return this.current;
-    }
-
-    /**
-     * <p>Setter for the field <code>current</code>.</p>
-     *
-     * @param current a {@link io.github.chr1sps.rars.assembler.Macro} object
-     */
-    public void setCurrent(final Macro current) {
-        this.current = current;
     }
 
     /**
@@ -177,21 +169,12 @@ public class MacroPool {
     }
 
     /**
-     * <p>Getter for the field <code>callStack</code>.</p>
-     *
-     * @return a {@link java.util.ArrayList} object
-     */
-    public ArrayList<Integer> getCallStack() {
-        return this.callStack;
-    }
-
-    /**
      * <p>pushOnCallStack.</p>
      *
      * @param token a {@link io.github.chr1sps.rars.assembler.Token} object
      * @return a boolean
      */
-    public boolean pushOnCallStack(final Token token) { // returns true if detected expansion loop
+    public boolean pushOnCallStack(final @NotNull Token token) { // returns true if detected expansion loop
         final int sourceLine = token.getSourceLine();
         final int origSourceLine = token.getOriginalSourceLine();
         if (this.callStack.contains(sourceLine))
@@ -214,7 +197,7 @@ public class MacroPool {
      *
      * @return a {@link java.lang.String} object
      */
-    public String getExpansionHistory() {
+    public @NotNull String getExpansionHistory() {
         final StringBuilder ret = new StringBuilder();
         for (int i = 0; i < this.callStackOrigLines.size(); i++) {
             if (i > 0)

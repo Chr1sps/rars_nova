@@ -53,19 +53,58 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson, Bumgarner
  */
 public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscriber<Notice> {
-    private final JTable table;
-    private boolean highlighting;
-    private int highlightRow;
-    private final Register[] registers;
-
     private static final int NUMBER_COLUMN = 0;
     private static final int NAME_COLUMN = 1;
     private static final int VALUE_COLUMN = 2;
-
     private static final int NUMBER_SIZE = 45;
     private static final int NAME_SIZE = 80;
     private static final int VALUE_SIZE = 150;
+    private final JTable table;
+    private final Register[] registers;
     private final Settings settings;
+    private boolean highlighting;
+    private int highlightRow;
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Required by Observer interface. Called when notified by an Observable that we
+     * are registered with.
+     * Observables include:
+     * The Simulator object, which lets us know when it starts and stops running
+     * A register object, which lets us know of register operations
+     * The Simulator keeps us informed of when simulated MIPS execution is active.
+     * This is the only time we care about register operations.
+     */
+//    @Override
+//    public void update(final Observable observable, final Object obj) {
+//        if (observable == io.github.chr1sps.rars.simulator.Simulator.getInstance()) {
+//            final SimulatorNotice notice = (SimulatorNotice) obj;
+//            if (notice.getAction() == SimulatorNotice.SIMULATOR_START) {
+//                // Simulated MIPS execution starts. Respond to memory changes if running in
+//                // timed
+//                // or stepped mode.
+//                if (notice.getRunSpeed() != RunSpeedPanel.UNLIMITED_SPEED || notice.getMaxSteps() == 1) {
+//                    this.beginObserving();
+//                    this.highlighting = true;
+//                }
+//            } else {
+//                // Simulated MIPS execution stops. Stop responding.
+//                this.endObserving();
+//            }
+//        } else if (observable == this.settings) {
+//            this.updateRowHeight();
+//        } else if (obj instanceof final RegisterAccessNotice access) {
+//            // NOTE: each register is a separate Observable
+//            if (access.getAccessType() == AccessNotice.WRITE) {
+//                // Uses the same highlighting technique as for Text Segment -- see
+//                // AddressCellRenderer class in DataSegmentWindow.java.
+//                this.highlighting = true;
+//                this.highlightCellForRegister((Register) observable);
+//                Globals.getGui().getRegistersPane().setSelectedComponent(this);
+//            }
+//        }
+//    }
+    private Flow.Subscription subscription;
 
     /**
      * Constructor which sets up a fresh window with a table that contains the
@@ -202,48 +241,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         this.highlightRow = -1;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Required by Observer interface. Called when notified by an Observable that we
-     * are registered with.
-     * Observables include:
-     * The Simulator object, which lets us know when it starts and stops running
-     * A register object, which lets us know of register operations
-     * The Simulator keeps us informed of when simulated MIPS execution is active.
-     * This is the only time we care about register operations.
-     */
-//    @Override
-//    public void update(final Observable observable, final Object obj) {
-//        if (observable == io.github.chr1sps.rars.simulator.Simulator.getInstance()) {
-//            final SimulatorNotice notice = (SimulatorNotice) obj;
-//            if (notice.getAction() == SimulatorNotice.SIMULATOR_START) {
-//                // Simulated MIPS execution starts. Respond to memory changes if running in
-//                // timed
-//                // or stepped mode.
-//                if (notice.getRunSpeed() != RunSpeedPanel.UNLIMITED_SPEED || notice.getMaxSteps() == 1) {
-//                    this.beginObserving();
-//                    this.highlighting = true;
-//                }
-//            } else {
-//                // Simulated MIPS execution stops. Stop responding.
-//                this.endObserving();
-//            }
-//        } else if (observable == this.settings) {
-//            this.updateRowHeight();
-//        } else if (obj instanceof final RegisterAccessNotice access) {
-//            // NOTE: each register is a separate Observable
-//            if (access.getAccessType() == AccessNotice.WRITE) {
-//                // Uses the same highlighting technique as for Text Segment -- see
-//                // AddressCellRenderer class in DataSegmentWindow.java.
-//                this.highlighting = true;
-//                this.highlightCellForRegister((Register) observable);
-//                Globals.getGui().getRegistersPane().setSelectedComponent(this);
-//            }
-//        }
-//    }
-    private Flow.Subscription subscription;
-
     @Override
     public void onSubscribe(final Flow.Subscription subscription) {
         this.subscription = subscription;
@@ -254,11 +251,11 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     public void onNext(final Notice notice) {
         switch (notice) {
             case final SimulatorNotice s -> {
-                if (s.getAction() == SimulatorNotice.SIMULATOR_START) {
+                if (s.action() == SimulatorNotice.SIMULATOR_START) {
                     // Simulated MIPS execution starts. Respond to memory changes if running in
                     // timed
                     // or stepped mode.
-                    if (s.getRunSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.getMaxSteps() == 1) {
+                    if (s.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps() == 1) {
                         this.beginObserving();
                         this.highlighting = true;
                     }
@@ -438,6 +435,9 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     // http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
     //
     private class MyTippedJTable extends JTable {
+        private final String[] regToolTips;
+        private final String[] columnToolTips;
+
         private MyTippedJTable(final RegTableModel m, final String[] row, final String[] col) {
             super(m);
             this.regToolTips = row;
@@ -445,8 +445,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             this.setRowSelectionAllowed(true); // highlights background color of entire row
             this.setSelectionBackground(Color.GREEN);
         }
-
-        private final String[] regToolTips;
 
         // Implement table cell tool tips.
         @Override
@@ -463,8 +461,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
                 return super.getToolTipText(e);
             }
         }
-
-        private final String[] columnToolTips;
 
         // Implement table header tool tips.
         @Override

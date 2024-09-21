@@ -9,9 +9,9 @@
 
 package io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker;
 
-import io.github.chr1sps.rars.Globals;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.assembler.Directive;
+import io.github.chr1sps.rars.assembler.TokenType;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.Instruction;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
@@ -25,12 +25,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+import static io.github.chr1sps.rars.Globals.*;
+
 /**
  * RISCV token marker.
  *
  * @author Pete Sanderson (2010) and Slava Pestov (1999)
  */
 public class RISCVTokenMarker extends TokenMarker {
+    // private members
+    private static KeywordMap cKeywords;
+    private static String[] tokenLabels, tokenExamples;
+    private final KeywordMap keywords;
+    private int lastOffset;
+    private int lastKeyword;
+
     /**
      * <p>Constructor for RISCVTokenMarker.</p>
      */
@@ -89,6 +98,116 @@ public class RISCVTokenMarker extends TokenMarker {
         return RISCVTokenMarker.tokenExamples;
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Return ArrayList of PopupHelpItem for match of directives. If second argument
+    // true, will do exact match. If false, will do prefix match. Returns null
+    // if no matches.
+    private static ArrayList<PopupHelpItem> getTextFromDirectiveMatch(final String tokenText, final boolean exact) {
+        ArrayList<PopupHelpItem> matches = null;
+        ArrayList<Directive> directiveMatches = null;
+        if (exact) {
+            final Directive dir = Directive.matchDirective(tokenText);
+            if (dir != null) {
+                directiveMatches = new ArrayList<>();
+                directiveMatches.add(dir);
+            }
+        } else {
+            directiveMatches = Directive.prefixMatchDirectives(tokenText);
+        }
+        if (directiveMatches != null) {
+            matches = new ArrayList<>();
+            for (final Directive direct : directiveMatches) {
+                matches.add(new PopupHelpItem(tokenText, direct.getName(), direct.getDescription(), exact));
+            }
+        }
+        return matches;
+    }
+
+    // Return text for match of instruction mnemonic. If second argument true, will
+    // do exact match. If false, will do prefix match. Text is returned as ArrayList
+    // of PopupHelpItem objects. If no matches, returns null.
+    private static ArrayList<PopupHelpItem> getTextFromInstructionMatch(final String tokenText, final boolean exact) {
+        final ArrayList<Instruction> matches;
+        final ArrayList<PopupHelpItem> results = new ArrayList<>();
+        if (exact) {
+            matches = instructionSet.matchOperator(tokenText);
+        } else {
+            matches = instructionSet.prefixMatchOperator(tokenText);
+        }
+        if (matches == null) {
+            return null;
+        }
+        int realMatches = 0;
+        final HashMap<String, String> insts = new HashMap<>();
+        final TreeSet<String> mnemonics = new TreeSet<>();
+        for (final Instruction inst : matches) {
+            if (getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED)
+                    || inst instanceof BasicInstruction) {
+                if (exact) {
+                    results.add(new PopupHelpItem(tokenText, inst.getExampleFormat(), inst.getDescription(), true));
+                } else {
+                    final String mnemonic = inst.getExampleFormat().split(" ")[0];
+                    if (!insts.containsKey(mnemonic)) {
+                        mnemonics.add(mnemonic);
+                        insts.put(mnemonic, inst.getDescription());
+                    }
+                }
+                realMatches++;
+            }
+        }
+        if (realMatches == 0) {
+            if (exact) {
+                results.add(new PopupHelpItem(tokenText, tokenText, "(not a basic instruction)", true));
+            } else {
+                return null;
+            }
+        } else {
+            if (!exact) {
+                for (final String mnemonic : mnemonics) {
+                    final String info = insts.get(mnemonic);
+                    results.add(new PopupHelpItem(tokenText, mnemonic, info, false));
+                }
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Get KeywordMap containing all MIPS key words. This includes all instruction
+     * mnemonics,
+     * assembler directives, and register names.
+     *
+     * @return KeywordMap where key is the keyword and associated value is the token
+     * type (e.g. Token.KEYWORD1).
+     */
+    private static KeywordMap getKeywords() {
+        if (RISCVTokenMarker.cKeywords == null) {
+            RISCVTokenMarker.cKeywords = new KeywordMap(false);
+            // add Instruction mnemonics
+            for (final Instruction inst : instructionSet.getInstructionList()) {
+                RISCVTokenMarker.cKeywords.add(inst.getName(), Token.KEYWORD1);
+            }
+            // add assembler directives
+            for (final Directive direct : Directive.getDirectiveList()) {
+                RISCVTokenMarker.cKeywords.add(direct.getName(), Token.KEYWORD2);
+            }
+            // add integer register file
+            for (final Register r : RegisterFile.getRegisters()) {
+                RISCVTokenMarker.cKeywords.add(r.getName(), Token.KEYWORD3);
+                RISCVTokenMarker.cKeywords.add("x" + r.getNumber(), Token.KEYWORD3); // also recognize x0, x1, x2, etc
+            }
+
+            RISCVTokenMarker.cKeywords.add("fp", Token.KEYWORD3);
+
+            // add floating point register file
+            for (final Register r : FloatingPointRegisterFile.getRegisters()) {
+                RISCVTokenMarker.cKeywords.add(r.getName(), Token.KEYWORD3);
+                RISCVTokenMarker.cKeywords.add("f" + r.getNumber(), Token.KEYWORD3);
+            }
+        }
+        return RISCVTokenMarker.cKeywords;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -143,7 +262,7 @@ public class RISCVTokenMarker extends TokenMarker {
                             // String lab = new String(array, lastOffset, i1-lastOffset-1).trim();
                             boolean validIdentifier;
                             try {
-                                validIdentifier = io.github.chr1sps.rars.assembler.TokenTypes
+                                validIdentifier = TokenType
                                         .isValidIdentifier(new String(array, this.lastOffset, i1 - this.lastOffset - 1).trim());
                             } catch (final StringIndexOutOfBoundsException e) {
                                 validIdentifier = false;
@@ -225,12 +344,12 @@ public class RISCVTokenMarker extends TokenMarker {
     public ArrayList<PopupHelpItem> getTokenExactMatchHelp(final Token token, final String tokenText) {
         ArrayList<PopupHelpItem> matches = null;
         if (token != null && token.id == Token.KEYWORD1) {
-            final ArrayList<Instruction> instrMatches = Globals.instructionSet.matchOperator(tokenText);
+            final ArrayList<Instruction> instrMatches = instructionSet.matchOperator(tokenText);
             if (!instrMatches.isEmpty()) {
                 int realMatches = 0;
                 matches = new ArrayList<>();
                 for (final Instruction inst : instrMatches) {
-                    if (Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED)
+                    if (getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED)
                             || inst instanceof BasicInstruction) {
                         matches.add(new PopupHelpItem(tokenText, inst.getExampleFormat(), inst.getDescription()));
                         realMatches++;
@@ -302,10 +421,10 @@ public class RISCVTokenMarker extends TokenMarker {
         // token.
         if (token != null && token.id == Token.KEYWORD1) {
             if (moreThanOneKeyword) {
-                return (keywordType == Token.KEYWORD1) ? this.getTextFromInstructionMatch(keywordTokenText, true)
-                        : this.getTextFromDirectiveMatch(keywordTokenText, true);
+                return (keywordType == Token.KEYWORD1) ? RISCVTokenMarker.getTextFromInstructionMatch(keywordTokenText, true)
+                        : RISCVTokenMarker.getTextFromDirectiveMatch(keywordTokenText, true);
             } else {
-                return this.getTextFromInstructionMatch(tokenText, false);
+                return RISCVTokenMarker.getTextFromInstructionMatch(tokenText, false);
             }
         }
 
@@ -316,10 +435,10 @@ public class RISCVTokenMarker extends TokenMarker {
         // directives for which this is a prefix, so do a prefix match on current token.
         if (token != null && token.id == Token.KEYWORD2) {
             if (moreThanOneKeyword) {
-                return (keywordType == Token.KEYWORD1) ? this.getTextFromInstructionMatch(keywordTokenText, true)
-                        : this.getTextFromDirectiveMatch(keywordTokenText, true);
+                return (keywordType == Token.KEYWORD1) ? RISCVTokenMarker.getTextFromInstructionMatch(keywordTokenText, true)
+                        : RISCVTokenMarker.getTextFromDirectiveMatch(keywordTokenText, true);
             } else {
-                return this.getTextFromDirectiveMatch(tokenText, false);
+                return RISCVTokenMarker.getTextFromDirectiveMatch(tokenText, false);
             }
         }
 
@@ -328,10 +447,10 @@ public class RISCVTokenMarker extends TokenMarker {
         // than KEYWORD1 or KEYWORD2. Generate text based on exact match of that token.
         if (keywordTokenText != null) {
             if (keywordType == Token.KEYWORD1) {
-                return this.getTextFromInstructionMatch(keywordTokenText, true);
+                return RISCVTokenMarker.getTextFromInstructionMatch(keywordTokenText, true);
             }
             if (keywordType == Token.KEYWORD2) {
-                return this.getTextFromDirectiveMatch(keywordTokenText, true);
+                return RISCVTokenMarker.getTextFromDirectiveMatch(keywordTokenText, true);
             }
         }
 
@@ -363,132 +482,15 @@ public class RISCVTokenMarker extends TokenMarker {
                 // Subcase: no KEYWORD1 or KEYWORD2. Generate text based on prefix match of
                 // trimmed current token.
                 if (trimmedTokenText.charAt(0) == '.') {
-                    return this.getTextFromDirectiveMatch(trimmedTokenText, false);
-                } else if (trimmedTokenText.length() >= Globals.getSettings().getEditorPopupPrefixLength()) {
-                    return this.getTextFromInstructionMatch(trimmedTokenText, false);
+                    return RISCVTokenMarker.getTextFromDirectiveMatch(trimmedTokenText, false);
+                } else if (trimmedTokenText.length() >= getSettings().getEditorPopupPrefixLength()) {
+                    return RISCVTokenMarker.getTextFromInstructionMatch(trimmedTokenText, false);
                 }
             }
         }
         // should never get here...
         return null;
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Return ArrayList of PopupHelpItem for match of directives. If second argument
-    // true, will do exact match. If false, will do prefix match. Returns null
-    // if no matches.
-    private ArrayList<PopupHelpItem> getTextFromDirectiveMatch(final String tokenText, final boolean exact) {
-        ArrayList<PopupHelpItem> matches = null;
-        ArrayList<Directive> directiveMatches = null;
-        if (exact) {
-            final Directive dir = Directive.matchDirective(tokenText);
-            if (dir != null) {
-                directiveMatches = new ArrayList<>();
-                directiveMatches.add(dir);
-            }
-        } else {
-            directiveMatches = Directive.prefixMatchDirectives(tokenText);
-        }
-        if (directiveMatches != null) {
-            matches = new ArrayList<>();
-            for (final Directive direct : directiveMatches) {
-                matches.add(new PopupHelpItem(tokenText, direct.getName(), direct.getDescription(), exact));
-            }
-        }
-        return matches;
-    }
-
-    // Return text for match of instruction mnemonic. If second argument true, will
-    // do exact match. If false, will do prefix match. Text is returned as ArrayList
-    // of PopupHelpItem objects. If no matches, returns null.
-    private ArrayList<PopupHelpItem> getTextFromInstructionMatch(final String tokenText, final boolean exact) {
-        final ArrayList<Instruction> matches;
-        final ArrayList<PopupHelpItem> results = new ArrayList<>();
-        if (exact) {
-            matches = Globals.instructionSet.matchOperator(tokenText);
-        } else {
-            matches = Globals.instructionSet.prefixMatchOperator(tokenText);
-        }
-        if (matches == null) {
-            return null;
-        }
-        int realMatches = 0;
-        final HashMap<String, String> insts = new HashMap<>();
-        final TreeSet<String> mnemonics = new TreeSet<>();
-        for (final Instruction inst : matches) {
-            if (Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED)
-                    || inst instanceof BasicInstruction) {
-                if (exact) {
-                    results.add(new PopupHelpItem(tokenText, inst.getExampleFormat(), inst.getDescription(), true));
-                } else {
-                    final String mnemonic = inst.getExampleFormat().split(" ")[0];
-                    if (!insts.containsKey(mnemonic)) {
-                        mnemonics.add(mnemonic);
-                        insts.put(mnemonic, inst.getDescription());
-                    }
-                }
-                realMatches++;
-            }
-        }
-        if (realMatches == 0) {
-            if (exact) {
-                results.add(new PopupHelpItem(tokenText, tokenText, "(not a basic instruction)", true));
-            } else {
-                return null;
-            }
-        } else {
-            if (!exact) {
-                for (final String mnemonic : mnemonics) {
-                    final String info = insts.get(mnemonic);
-                    results.add(new PopupHelpItem(tokenText, mnemonic, info, false));
-                }
-            }
-        }
-        return results;
-    }
-
-    /**
-     * Get KeywordMap containing all MIPS key words. This includes all instruction
-     * mnemonics,
-     * assembler directives, and register names.
-     *
-     * @return KeywordMap where key is the keyword and associated value is the token
-     * type (e.g. Token.KEYWORD1).
-     */
-    private static KeywordMap getKeywords() {
-        if (RISCVTokenMarker.cKeywords == null) {
-            RISCVTokenMarker.cKeywords = new KeywordMap(false);
-            // add Instruction mnemonics
-            for (final Instruction inst : io.github.chr1sps.rars.Globals.instructionSet.getInstructionList()) {
-                RISCVTokenMarker.cKeywords.add(inst.getName(), Token.KEYWORD1);
-            }
-            // add assembler directives
-            for (final Directive direct : Directive.getDirectiveList()) {
-                RISCVTokenMarker.cKeywords.add(direct.getName(), Token.KEYWORD2);
-            }
-            // add integer register file
-            for (final Register r : RegisterFile.getRegisters()) {
-                RISCVTokenMarker.cKeywords.add(r.getName(), Token.KEYWORD3);
-                RISCVTokenMarker.cKeywords.add("x" + r.getNumber(), Token.KEYWORD3); // also recognize x0, x1, x2, etc
-            }
-
-            RISCVTokenMarker.cKeywords.add("fp", Token.KEYWORD3);
-
-            // add floating point register file
-            for (final Register r : FloatingPointRegisterFile.getRegisters()) {
-                RISCVTokenMarker.cKeywords.add(r.getName(), Token.KEYWORD3);
-                RISCVTokenMarker.cKeywords.add("f" + r.getNumber(), Token.KEYWORD3);
-            }
-        }
-        return RISCVTokenMarker.cKeywords;
-    }
-
-    // private members
-    private static KeywordMap cKeywords;
-    private static String[] tokenLabels, tokenExamples;
-    private final KeywordMap keywords;
-    private int lastOffset;
-    private int lastKeyword;
 
     private void doKeyword(final Segment line, final int i, final char c) {
         final int i1 = i + 1;

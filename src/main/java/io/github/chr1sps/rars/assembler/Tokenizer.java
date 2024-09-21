@@ -7,6 +7,7 @@ import io.github.chr1sps.rars.RISCVprogram;
 import io.github.chr1sps.rars.exceptions.AssemblyException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -63,17 +64,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class Tokenizer {
     private static final Logger LOGGER = LogManager.getLogger(Tokenizer.class);
-
-    private ErrorList errors;
-    private RISCVprogram sourceRISCVprogram;
-    private HashMap<String, String> equivalents; // DPS 11-July-2012
     // The 8 escaped characters are: single quote, double quote, backslash, newline
     // (linefeed),
     // tab, backspace, return, form feed. The characters and their corresponding
     // decimal codes:
-    // TODO: potentially make this automatic
     private static final String escapedCharacters = "'\"\\ntbrf0";
-    private static final String[] escapedCharactersValues = {"39", "34", "92", "10", "9", "8", "13", "12", "0"};
+    private static final String[] escapedCharactersValues = Tokenizer.escapedCharacters.chars().mapToObj(String::valueOf).toArray(String[]::new);
+    private ErrorList errors;
+    private RISCVprogram sourceRISCVprogram;
+    private HashMap<String, String> equivalents; // DPS 11-July-2012
 
     /**
      * Simple constructor. Initializes empty error list.
@@ -93,6 +92,39 @@ public class Tokenizer {
         this.sourceRISCVprogram = program;
     }
 
+    // If passed a candidate character literal, attempt to translate it into integer
+    // constant.
+    // If the translation fails, return original value.
+    private static String preprocessCharacterLiteral(final String value) {
+        // must start and end with quote and have something in between
+        if (value.length() < 3 || value.charAt(0) != '\'' || value.charAt(value.length() - 1) != '\'') {
+            return value;
+        }
+        final String quotesRemoved = value.substring(1, value.length() - 1);
+        // if not escaped, then if one character left return its value else return
+        // original.
+        if (quotesRemoved.charAt(0) != '\\') {
+            return (quotesRemoved.length() == 1) ? Integer.toString(quotesRemoved.charAt(0)) : value;
+        }
+        // now we know it is escape sequence and have to decode which of the 8:
+        // ',",\,n,t,b,r,f
+        if (quotesRemoved.length() == 2) {
+            final int escapedCharacterIndex = Tokenizer.escapedCharacters.indexOf(quotesRemoved.charAt(1));
+            return (escapedCharacterIndex >= 0) ? Tokenizer.escapedCharactersValues[escapedCharacterIndex] : value;
+        }
+        // last valid possibility is 3 digit octal code 000 through 377
+        if (quotesRemoved.length() == 4) {
+            try {
+                final int intValue = Integer.parseInt(quotesRemoved.substring(1), 8);
+                if (intValue >= 0 && intValue <= 255) {
+                    return Integer.toString(intValue);
+                }
+            } catch (final NumberFormatException ignored) {
+            } // if not valid octal, will fall through and reject
+        }
+        return value;
+    }
+
     /**
      * Will tokenize a complete soure program.
      *
@@ -102,7 +134,7 @@ public class Tokenizer {
      * that represents a tokenized source statement from the program.
      * @throws AssemblyException if any.
      */
-    public ArrayList<TokenList> tokenize(final RISCVprogram p) throws AssemblyException {
+    public ArrayList<TokenList> tokenize(final @NotNull RISCVprogram p) throws AssemblyException {
         this.sourceRISCVprogram = p;
         this.equivalents = new HashMap<>(); // DPS 11-July-2012
         final ArrayList<TokenList> tokenList = new ArrayList<>();
@@ -112,7 +144,7 @@ public class Tokenizer {
         TokenList currentLineTokens;
         String sourceLine;
         for (int i = 0; i < source.size(); i++) {
-            sourceLine = source.get(i).getSource();
+            sourceLine = source.get(i).source();
             currentLineTokens = this.tokenizeLine(i + 1, sourceLine);
             tokenList.add(currentLineTokens);
             // DPS 03-Jan-2013. Related to 11-July-2012. If source code substitution was
@@ -124,8 +156,8 @@ public class Tokenizer {
             // substitution.
             // Not needed by assembler, but looks better in the Text Segment Display.
             if (!sourceLine.isEmpty() && !sourceLine.equals(currentLineTokens.getProcessedLine())) {
-                source.set(i, new SourceLine(currentLineTokens.getProcessedLine(), source.get(i).getRISCVprogram(),
-                        source.get(i).getLineNumber()));
+                source.set(i, new SourceLine(currentLineTokens.getProcessedLine(), source.get(i).program(),
+                        source.get(i).lineNumber()));
             }
         }
         if (this.errors.errorsOccurred()) {
@@ -144,7 +176,7 @@ public class Tokenizer {
     // files that themselves have .include. Plus it will detect and report recursive
     // includes both direct and indirect.
     // DPS 11-Jan-2013
-    private ArrayList<SourceLine> processIncludes(final RISCVprogram program, final Map<String, String> inclFiles)
+    private ArrayList<SourceLine> processIncludes(final @NotNull RISCVprogram program, final Map<String, String> inclFiles)
             throws AssemblyException {
         final ArrayList<String> source = program.getSourceList();
         final ArrayList<SourceLine> result = new ArrayList<>(source.size());
@@ -155,7 +187,7 @@ public class Tokenizer {
             for (int ii = 0; ii < tl.size(); ii++) {
                 if (tl.get(ii).getValue().equalsIgnoreCase(Directive.INCLUDE.getName())
                         && (tl.size() > ii + 1)
-                        && tl.get(ii + 1).getType() == TokenTypes.QUOTED_STRING) {
+                        && tl.get(ii + 1).getType() == TokenType.QUOTED_STRING) {
                     String filename = tl.get(ii + 1).getValue();
                     filename = filename.substring(1, filename.length() - 1); // get rid of quotes
                     // Handle either absolute or relative pathname for .include file
@@ -376,12 +408,12 @@ public class Tokenizer {
                         token[tokenPos++] = c;
                         if (line.length > linePos + 3 && line[linePos + 1] == 'I' && line[linePos + 2] == 'n'
                                 && line[linePos + 3] == 'f') {
-                            result.add(new Token(TokenTypes.REAL_NUMBER, "-Inf", program, lineNum, tokenStartPos));
+                            result.add(new Token(TokenType.REAL_NUMBER, "-Inf", program, lineNum, tokenStartPos));
                             linePos += 3;
                             tokenPos = 0;
                             break;
                         }
-                        if (!((result.isEmpty() || result.get(result.size() - 1).getType() != TokenTypes.IDENTIFIER) &&
+                        if (!((result.isEmpty() || result.get(result.size() - 1).getType() != TokenType.IDENTIFIER) &&
                                 (line.length >= linePos + 2 && Character.isDigit(line[linePos + 1])))) {
                             // treat it as binary.....
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
@@ -507,15 +539,15 @@ public class Tokenizer {
         // Have to assure it is a well-formed statement right now (can't wait for
         // assembler).
 
-        if (tokens.size() > 2 && (tokens.get(0).getType() == TokenTypes.DIRECTIVE
-                || tokens.get(2).getType() == TokenTypes.DIRECTIVE)) {
+        if (tokens.size() > 2 && (tokens.get(0).getType() == TokenType.DIRECTIVE
+                || tokens.get(2).getType() == TokenType.DIRECTIVE)) {
             // There should not be a label but if there is, the directive is in token
             // position 2 (ident, colon, directive).
-            final int dirPos = (tokens.get(0).getType() == TokenTypes.DIRECTIVE) ? 0 : 2;
+            final int dirPos = (tokens.get(0).getType() == TokenType.DIRECTIVE) ? 0 : 2;
             if (Directive.matchDirective(tokens.get(dirPos).getValue()) == Directive.EQV) {
                 // Get position in token list of last non-comment token
                 final int tokenPosLastOperand = tokens.size()
-                        - ((tokens.get(tokens.size() - 1).getType() == TokenTypes.COMMENT) ? 2 : 1);
+                        - ((tokens.get(tokens.size() - 1).getType() == TokenType.COMMENT) ? 2 : 1);
                 // There have to be at least two non-comment tokens beyond the directive
                 if (tokenPosLastOperand < dirPos + 2) {
                     this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
@@ -523,7 +555,7 @@ public class Tokenizer {
                     return tokens;
                 }
                 // Token following the directive has to be IDENTIFIER
-                if (tokens.get(dirPos + 1).getType() != TokenTypes.IDENTIFIER) {
+                if (tokens.get(dirPos + 1).getType() != TokenType.IDENTIFIER) {
                     this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
                             "Malformed " + Directive.EQV.getName() + " directive"));
                     return tokens;
@@ -564,7 +596,7 @@ public class Tokenizer {
         boolean substitutionMade = false;
         for (int i = 0; i < tokens.size(); i++) {
             final Token token = tokens.get(i);
-            if (token.getType() == TokenTypes.IDENTIFIER && this.equivalents != null
+            if (token.getType() == TokenType.IDENTIFIER && this.equivalents != null
                     && this.equivalents.containsKey(token.getValue())) {
                 // do the substitution
                 final String sub = this.equivalents.get(token.getValue());
@@ -595,46 +627,13 @@ public class Tokenizer {
                                        final int tokenPos, final int tokenStartPos, final TokenList tokenList) {
         String value = new String(token, 0, tokenPos);
         if (!value.isEmpty() && value.charAt(0) == '\'')
-            value = this.preprocessCharacterLiteral(value);
-        final TokenTypes type = TokenTypes.matchTokenType(value);
-        if (type == TokenTypes.ERROR) {
+            value = Tokenizer.preprocessCharacterLiteral(value);
+        final TokenType type = TokenType.matchTokenType(value);
+        if (type == TokenType.ERROR) {
             this.errors.add(new ErrorMessage(program, line, tokenStartPos,
                     theLine + "\nInvalid language element: " + value));
         }
         final Token toke = new Token(type, value, program, line, tokenStartPos);
         tokenList.add(toke);
-    }
-
-    // If passed a candidate character literal, attempt to translate it into integer
-    // constant.
-    // If the translation fails, return original value.
-    private String preprocessCharacterLiteral(final String value) {
-        // must start and end with quote and have something in between
-        if (value.length() < 3 || value.charAt(0) != '\'' || value.charAt(value.length() - 1) != '\'') {
-            return value;
-        }
-        final String quotesRemoved = value.substring(1, value.length() - 1);
-        // if not escaped, then if one character left return its value else return
-        // original.
-        if (quotesRemoved.charAt(0) != '\\') {
-            return (quotesRemoved.length() == 1) ? Integer.toString(quotesRemoved.charAt(0)) : value;
-        }
-        // now we know it is escape sequence and have to decode which of the 8:
-        // ',",\,n,t,b,r,f
-        if (quotesRemoved.length() == 2) {
-            final int escapedCharacterIndex = Tokenizer.escapedCharacters.indexOf(quotesRemoved.charAt(1));
-            return (escapedCharacterIndex >= 0) ? Tokenizer.escapedCharactersValues[escapedCharacterIndex] : value;
-        }
-        // last valid possibility is 3 digit octal code 000 through 377
-        if (quotesRemoved.length() == 4) {
-            try {
-                final int intValue = Integer.parseInt(quotesRemoved.substring(1), 8);
-                if (intValue >= 0 && intValue <= 255) {
-                    return Integer.toString(intValue);
-                }
-            } catch (final NumberFormatException ignored) {
-            } // if not valid octal, will fall through and reject
-        }
-        return value;
     }
 }

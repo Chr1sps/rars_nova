@@ -1,7 +1,6 @@
 package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.jsoftfloat.Environment;
-import io.github.chr1sps.jsoftfloat.Flags;
 import io.github.chr1sps.jsoftfloat.RoundingMode;
 import io.github.chr1sps.jsoftfloat.types.Float32;
 import io.github.chr1sps.rars.ProgramStatement;
@@ -77,11 +76,11 @@ public abstract class Floating extends BasicInstruction {
      * @param e a {@link io.github.chr1sps.jsoftfloat.Environment} object
      */
     public static void setfflags(final @NotNull Environment e) {
-        final int fflags = (e.flags.contains(Flags.inexact) ? 1 : 0) +
-                (e.flags.contains(Flags.underflow) ? 2 : 0) +
-                (e.flags.contains(Flags.overflow) ? 4 : 0) +
-                (e.flags.contains(Flags.divByZero) ? 8 : 0) +
-                (e.flags.contains(Flags.invalid) ? 16 : 0);
+        final int fflags = (e.inexact ? 1 : 0) +
+                (e.underflow ? 2 : 0) +
+                (e.overflow ? 4 : 0) +
+                (e.divByZero ? 8 : 0) +
+                (e.invalid ? 16 : 0);
         if (fflags != 0)
             ControlAndStatusRegisterFile.orRegister("fflags", fflags);
     }

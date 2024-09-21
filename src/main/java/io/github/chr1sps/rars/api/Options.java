@@ -2,7 +2,6 @@ package io.github.chr1sps.rars.api;
 
 /**
  * <p>Options class.</p>
- *
  */
 public class Options {
     public boolean pseudo; // pseudo instructions allowed in source code or not.
@@ -15,10 +14,10 @@ public class Options {
      * <p>Constructor for Options.</p>
      */
     public Options() {
-        pseudo = true;
-        warningsAreErrors = false;
-        startAtMain = false;
-        selfModifyingCode = false;
-        maxSteps = -1;
+        this.pseudo = true;
+        this.warningsAreErrors = false;
+        this.startAtMain = false;
+        this.selfModifyingCode = false;
+        this.maxSteps = -1;
     }
 }

@@ -62,6 +62,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class Main {
 
+    private static final String rangeSeparator = "-";
+    private static final int memoryWordsPerLine = 4; // display 4 memory words, tab separated, per line
+    private static final int DECIMAL = 0; // memory and register display format
+    private static final int HEXADECIMAL = 1;// memory and register display format
+    private static final int ASCII = 2;// memory and register display format
     /**
      * Main takes a number of command line arguments.<br>
      * Usage: rars [options] filename<br>
@@ -122,6 +127,9 @@ public class Main {
      **/
 
     private final Options options;
+    private final ArrayList<String> registerDisplayList;
+    private final ArrayList<String> memoryDisplayList;
+    private final ArrayList<String> filenameList;
     private boolean gui;
     private boolean simulate;
     private boolean rv64;
@@ -129,28 +137,11 @@ public class Main {
     private boolean verbose; // display register name or address along with contents
     private boolean assembleProject; // assemble only the given file or all files in its directory
     private boolean countInstructions; // Whether to count and report number of instructions executed
-    private static final String rangeSeparator = "-";
-    private static final int memoryWordsPerLine = 4; // display 4 memory words, tab separated, per line
-    private static final int DECIMAL = 0; // memory and register display format
-    private static final int HEXADECIMAL = 1;// memory and register display format
-    private static final int ASCII = 2;// memory and register display format
-    private final ArrayList<String> registerDisplayList;
-    private final ArrayList<String> memoryDisplayList;
-    private final ArrayList<String> filenameList;
     private PrintStream out; // stream for display of command line output
     private ArrayList<String[]> dumpTriples = null; // each element holds 3 arguments for dump option
     private ArrayList<String> programArgumentList; // optional program args for program (becomes argc, argv)
     private int assembleErrorExitCode; // RARS command exit code to return if assemble error occurs
     private int simulateErrorExitCode;// RARS command exit code to return if simulation error occurs
-
-    /**
-     * <p>main.</p>
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
-    public static void main(final String[] args) {
-        new Main(args);
-    }
 
     private Main(final String[] args) {
         Globals.initialize();
@@ -187,14 +178,47 @@ public class Main {
         }
     }
 
+    /**
+     * <p>main.</p>
+     *
+     * @param args an array of {@link java.lang.String} objects
+     */
+    public static void main(final String[] args) {
+        new Main(args);
+    }
+
+    private static String[] checkMemoryAddressRange(final String arg) throws NumberFormatException {
+        String[] memoryRange = null;
+        if (arg.indexOf(Main.rangeSeparator) > 0 &&
+                arg.indexOf(Main.rangeSeparator) < arg.length() - 1) {
+            // assume correct format, two numbers separated by -, no embedded spaces.
+            // If that doesn't work it is invalid.
+            memoryRange = new String[2];
+            memoryRange[0] = arg.substring(0, arg.indexOf(Main.rangeSeparator));
+            memoryRange[1] = arg.substring(arg.indexOf(Main.rangeSeparator) + 1);
+            // NOTE: I will use homegrown decoder, because Integer.decode will throw
+            // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
+            if (Binary.stringToInt(memoryRange[0]) > Binary.stringToInt(memoryRange[1]) ||
+                    !Memory.wordAligned(Binary.stringToInt(memoryRange[0])) ||
+                    !Memory.wordAligned(Binary.stringToInt(memoryRange[1]))) {
+                throw new NumberFormatException();
+            }
+        }
+        return memoryRange;
+    }
+    /////////////////////////////////////////////////////////////
+    // Perform any specified dump operations. See "dump" option.
+    //
+
     private void displayAllPostMortem(final Program program) {
         this.displayMiscellaneousPostMortem(program);
         this.displayRegistersPostMortem(program);
         this.displayMemoryPostMortem(program.getMemory());
     }
-    /////////////////////////////////////////////////////////////
-    // Perform any specified dump operations. See "dump" option.
-    //
+
+    /////////////////////////////////////////////////////////////////
+    // There are no command arguments, so run in interactive mode by
+    // launching the GUI-fronted integrated development environment.
 
     private void dumpSegments(final Program program) {
         if (this.dumpTriples == null || program == null) {
@@ -207,7 +231,7 @@ public class Main {
             // If not segment name, see if it is address range instead. DPS 14-July-2008
             if (segInfo == null) {
                 try {
-                    final String[] memoryRange = this.checkMemoryAddressRange(triple[0]);
+                    final String[] memoryRange = Main.checkMemoryAddressRange(triple[0]);
                     segInfo = new Integer[2];
                     segInfo[0] = Binary.stringToInt(memoryRange[0]); // low end of range
                     segInfo[1] = Binary.stringToInt(memoryRange[1]); // high end of range
@@ -244,9 +268,12 @@ public class Main {
         }
     }
 
-    /////////////////////////////////////////////////////////////////
-    // There are no command arguments, so run in interactive mode by
-    // launching the GUI-fronted integrated development environment.
+    //////////////////////////////////////////////////////////////////////
+    // Parse command line arguments. The initial parsing has already been
+    // done, since each space-separated argument is already in a String array
+    // element. Here, we check for validity, set switch variables as appropriate
+    // and build data structures. For help option (h), display the help.
+    // Returns true if command args parse OK, false otherwise.
 
     private void launchIDE() {
         // System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts RARS menu
@@ -270,11 +297,8 @@ public class Main {
     }
 
     //////////////////////////////////////////////////////////////////////
-    // Parse command line arguments. The initial parsing has already been
-    // done, since each space-separated argument is already in a String array
-    // element. Here, we check for validity, set switch variables as appropriate
-    // and build data structures. For help option (h), display the help.
-    // Returns true if command args parse OK, false otherwise.
+    // Carry out the rars command: assemble then optionally run
+    // Returns false if no simulation (run) occurs, true otherwise.
 
     private boolean parseCommandArgs(final String[] args) {
         final String noCopyrightSwitch = "nc";
@@ -454,7 +478,7 @@ public class Main {
             }
             // Check for integer address range (m-n)
             try {
-                final String[] memoryRange = this.checkMemoryAddressRange(args[i]);
+                final String[] memoryRange = Main.checkMemoryAddressRange(args[i]);
                 this.memoryDisplayList.add(memoryRange[0]); // low end of range
                 this.memoryDisplayList.add(memoryRange[1]); // high end of range
                 continue;
@@ -472,8 +496,9 @@ public class Main {
     }
 
     //////////////////////////////////////////////////////////////////////
-    // Carry out the rars command: assemble then optionally run
-    // Returns false if no simulation (run) occurs, true otherwise.
+    // Check for memory address subrange. Has to be two integers separated
+    // by "-"; no embedded spaces. e.g. 0x00400000-0x00400010
+    // If number is not multiple of 4, will be rounded up to next higher.
 
     private Program runCommand() {
         if (this.filenameList.isEmpty()) {
@@ -562,36 +587,11 @@ public class Main {
     }
 
     //////////////////////////////////////////////////////////////////////
-    // Check for memory address subrange. Has to be two integers separated
-    // by "-"; no embedded spaces. e.g. 0x00400000-0x00400010
-    // If number is not multiple of 4, will be rounded up to next higher.
-
-    private String[] checkMemoryAddressRange(final String arg) throws NumberFormatException {
-        String[] memoryRange = null;
-        if (arg.indexOf(Main.rangeSeparator) > 0 &&
-                arg.indexOf(Main.rangeSeparator) < arg.length() - 1) {
-            // assume correct format, two numbers separated by -, no embedded spaces.
-            // If that doesn't work it is invalid.
-            memoryRange = new String[2];
-            memoryRange[0] = arg.substring(0, arg.indexOf(Main.rangeSeparator));
-            memoryRange[1] = arg.substring(arg.indexOf(Main.rangeSeparator) + 1);
-            // NOTE: I will use homegrown decoder, because Integer.decode will throw
-            // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
-            if (Binary.stringToInt(memoryRange[0]) > Binary.stringToInt(memoryRange[1]) ||
-                    !Memory.wordAligned(Binary.stringToInt(memoryRange[0])) ||
-                    !Memory.wordAligned(Binary.stringToInt(memoryRange[1]))) {
-                throw new NumberFormatException();
-            }
-        }
-        return memoryRange;
-    }
-
-    //////////////////////////////////////////////////////////////////////
     // Displays any specified runtime properties. Initially just instruction count
     // DPS 19 July 2012
     private void displayMiscellaneousPostMortem(final Program program) {
         if (this.countInstructions) {
-            this.out.println("\n" + program.getRegisterValue("cycle"));
+            this.out.println("\n" + Program.getRegisterValue("cycle"));
         }
     }
 
@@ -605,7 +605,7 @@ public class Main {
                 // TODO: do something for double vs float
                 // It isn't clear to me what the best behaviour is
                 // floating point register
-                final int ivalue = program.getRegisterValue(reg);
+                final int ivalue = Program.getRegisterValue(reg);
                 final float fvalue = Float.intBitsToFloat(ivalue);
                 if (this.verbose) {
                     this.out.print(reg + "\t");

@@ -5,6 +5,9 @@ import io.github.chr1sps.rars.ErrorMessage;
 import io.github.chr1sps.rars.Globals;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -43,17 +46,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2003
  */
 public class SymbolTable {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final String startLabel = "main";
-    private final String filename;
-    private ArrayList<Symbol> table;
-    // Note -1 is legal 32 bit address (0xFFFFFFFF) but it is the high address in
-    // kernel address space so highly unlikely that any symbol will have this as
-    // its associated address!
     /**
      * Constant <code>NOT_FOUND=-1</code>
      */
     public static final int NOT_FOUND = -1;
+    private static final @NotNull Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull String startLabel = "main";
+    private final @NotNull String filename;
+    // Note -1 is legal 32 bit address (0xFFFFFFFF) but it is the high address in
+    // kernel address space so highly unlikely that any symbol will have this as
+    // its associated address!
+    private @NotNull ArrayList<Symbol> table;
 
     /**
      * Create a new empty symbol table for given file
@@ -62,9 +65,20 @@ public class SymbolTable {
      *                 used only for output/display so it can be any descriptive
      *                 string.
      */
-    public SymbolTable(final String filename) {
+    public SymbolTable(final @NotNull String filename) {
         this.filename = filename;
         this.table = new ArrayList<>();
+    }
+
+    /**
+     * Fetches the text segment label (symbol) which, if declared global, indicates
+     * the starting address for execution.
+     *
+     * @return String containing global label whose text segment address is starting
+     * address for program execution.
+     */
+    public static @NotNull String getStartLabel() {
+        return SymbolTable.startLabel;
     }
 
     /**
@@ -75,7 +89,7 @@ public class SymbolTable {
      * @param b       The type of Symbol, true for data, false for text.
      * @param errors  List to which to add any processing errors that occur.
      */
-    public void addSymbol(final Token token, final int address, final boolean b, final ErrorList errors) {
+    public void addSymbol(final @NotNull Token token, final int address, final boolean b, final @NotNull ErrorList errors) {
         final String label = token.getValue();
         if (this.getSymbol(label) != null) {
             errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token.getStartPos(),
@@ -94,10 +108,10 @@ public class SymbolTable {
      *
      * @param token The token representing the Symbol.
      */
-    public void removeSymbol(final Token token) {
+    public void removeSymbol(final @NotNull Token token) {
         final String label = token.getValue();
         for (int i = 0; i < this.table.size(); i++) {
-            if (this.table.get(i).getName().equals(label)) {
+            if (this.table.get(i).name.equals(label)) {
                 this.table.remove(i);
                 if (Globals.debug)
                     SymbolTable.LOGGER.debug("The symbol {} has been removed from the {} symbol table.", label, this.filename);
@@ -113,10 +127,10 @@ public class SymbolTable {
      * @return The memory address of the label given, or NOT_FOUND if not found in
      * symbol table.
      */
-    public int getAddress(final String s) {
+    public int getAddress(final @NotNull String s) {
         for (final Symbol sym : this.table) {
-            if (sym.getName().equals(s)) {
-                return sym.getAddress();
+            if (sym.name.equals(s)) {
+                return sym.address;
             }
         }
         return SymbolTable.NOT_FOUND;
@@ -131,7 +145,7 @@ public class SymbolTable {
      * @return The memory address of the label given, or NOT_FOUND if not found in
      * symbol table.
      */
-    public int getAddressLocalOrGlobal(final String s) {
+    public int getAddressLocalOrGlobal(final @NotNull String s) {
         final int address = this.getAddress(s);
         return (address == SymbolTable.NOT_FOUND) ? Globals.symbolTable.getAddress(s) : address;
     }
@@ -143,9 +157,9 @@ public class SymbolTable {
      * @return Symbol object for requested target, null if not found in symbol
      * table.
      */
-    public Symbol getSymbol(final String s) {
+    public @Nullable Symbol getSymbol(final @NotNull String s) {
         for (final Symbol sym : this.table) {
-            if (sym.getName().equals(s)) {
+            if (sym.name.equals(s)) {
                 return sym;
             }
         }
@@ -159,7 +173,7 @@ public class SymbolTable {
      * @return Symbol object having requested address, null if address not found in
      * symbol table.
      */
-    public Symbol getSymbolGivenAddress(final String s) {
+    public @Nullable Symbol getSymbolGivenAddress(final @NotNull String s) {
         final int address;
         try {
             address = io.github.chr1sps.rars.util.Binary.stringToInt(s);// DPS 2-Aug-2010: was Integer.parseInt(s) but
@@ -169,7 +183,7 @@ public class SymbolTable {
             return null;
         }
         for (final Symbol sym : this.table) {
-            if (sym.getAddress() == address) {
+            if (sym.address == address) {
                 return sym;
             }
         }
@@ -184,7 +198,7 @@ public class SymbolTable {
      * @return Symbol object having requested address, null if address not found in
      * symbol table.
      */
-    public Symbol getSymbolGivenAddressLocalOrGlobal(final String s) {
+    public @Nullable Symbol getSymbolGivenAddressLocalOrGlobal(final @NotNull String s) {
         final Symbol sym = this.getSymbolGivenAddress(s);
         return (sym == null) ? Globals.symbolTable.getSymbolGivenAddress(s) : sym;
     }
@@ -194,10 +208,10 @@ public class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      */
-    public ArrayList<Symbol> getDataSymbols() {
+    public @NotNull ArrayList<Symbol> getDataSymbols() {
         final ArrayList<Symbol> list = new ArrayList<>();
         for (final Symbol sym : this.table) {
-            if (sym.getType()) {
+            if (sym.isData) {
                 list.add(sym);
             }
         }
@@ -209,10 +223,10 @@ public class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      */
-    public ArrayList<Symbol> getTextSymbols() {
+    public @NotNull ArrayList<Symbol> getTextSymbols() {
         final ArrayList<Symbol> list = new ArrayList<>();
         for (final Symbol sym : this.table) {
-            if (!sym.getType()) {
+            if (!sym.isData) {
                 list.add(sym);
             }
         }
@@ -225,7 +239,8 @@ public class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      */
-    public ArrayList<Symbol> getAllSymbols() {
+    @Contract()
+    public @NotNull ArrayList<Symbol> getAllSymbols() {
         return new ArrayList<>(this.table);
     }
 
@@ -258,21 +273,10 @@ public class SymbolTable {
      *                           do.
      */
     public void fixSymbolTableAddress(final int originalAddress, final int replacementAddress) {
-        Symbol label = this.getSymbolGivenAddress(Integer.toString(originalAddress));
+        @Nullable Symbol label = this.getSymbolGivenAddress(Integer.toString(originalAddress));
         while (label != null) {
-            label.setAddress(replacementAddress);
+            label.address = replacementAddress;
             label = this.getSymbolGivenAddress(Integer.toString(originalAddress));
         }
-    }
-
-    /**
-     * Fetches the text segment label (symbol) which, if declared global, indicates
-     * the starting address for execution.
-     *
-     * @return String containing global label whose text segment address is starting
-     * address for program execution.
-     */
-    public static String getStartLabel() {
-        return SymbolTable.startLabel;
     }
 }

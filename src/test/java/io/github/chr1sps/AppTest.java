@@ -10,9 +10,8 @@ import io.github.chr1sps.rars.exceptions.AssemblyException;
 import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.*;
 import io.github.chr1sps.rars.simulator.Simulator;
-import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
-import org.junit.Test;
+import io.github.chr1sps.utils.AppTestBase;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -21,27 +20,10 @@ import java.util.Objects;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class AppTest {
-    static final String test_path = "src/test/resources";
-/*
-
-    @Test
-    public void testGeneral() {
-        runTestFiles(test_path, false);
-    }
-*/
-
-    @Test
-    public void test32() {
-        runTestFiles(test_path + "/riscv-tests", false);
-    }
-
-    @Test
-    public void test64() {
-        runTestFiles(test_path + "/riscv-tests-64", true);
-    }
-
+public class AppTest extends AppTestBase {
     public static void runTestFiles(String path, boolean is64Bit) {
         Globals.initialize();
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, is64Bit);
@@ -58,7 +40,7 @@ public class AppTest {
         for (var test : Objects.requireNonNull(tests)) {
             if (test.isFile() && test.getName().toLowerCase().endsWith(".s")) {
                 var errors = run(test.getPath(), p);
-                Assert.assertEquals(errors, "", errors);
+                assertEquals(errors, "", errors);
             }
         }
     }
@@ -135,6 +117,16 @@ public class AppTest {
     }
 
     @Test
+    public void test32() {
+        runTestFiles(getTestDataPath().resolve("riscv-tests").toString(), false);
+    }
+
+    @Test
+    public void test64() {
+        runTestFiles(getTestDataPath().resolve("riscv-tests-64").toString(), true);
+    }
+
+    @Test
     public void testInstructions() {
         Options opt = new Options();
         opt.startAtMain = true;
@@ -156,15 +148,15 @@ public class AppTest {
                     int word = p.getMemory().getWord(0x400000);
 //                    ProgramStatement assembled = p.getMemory().getStatement(0x400000);
                     ProgramStatement ps = new ProgramStatement(word, 0x400000);
-                    Assert.assertNotNull("Error 1 on: " + program, ps.getInstruction());
-                    MatcherAssert.assertThat("Error 2 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
+                    assertNotNull(ps.getInstruction(), "Error 1 on: " + program);
+                    assertThat("Error 2 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
 //                    String decompiled = ps.getPrintableBasicAssemblyStatement();
 
                     p.assembleString(program);
                     p.setup(null, "");
                     int word2 = p.getMemory().getWord(0x400000);
-                    Assert.assertEquals("Error 3 on: " + program, word, word2);
-                    Assert.assertEquals("Error 4 on: " + program, binst, ps.getInstruction());
+                    assertEquals(word, word2, "Error 3 on: " + program);
+                    assertEquals(binst, ps.getInstruction(), "Error 4 on: " + program);
                     /*
                      * if (assembled.getInstruction() == null) {
                      * System.out.println("Error 5 on: " + program);
@@ -231,8 +223,8 @@ public class AppTest {
                     int first = p.getMemory().getWord(0x400000);
                     int second = p.getMemory().getWord(0x400004);
                     ProgramStatement ps = new ProgramStatement(first, 0x400000);
-                    Assert.assertNotNull("Error 11 on: " + program, ps.getInstruction());
-                    MatcherAssert.assertThat("Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
+                    assertNotNull(ps.getInstruction(), "Error 11 on: " + program);
+                    assertThat("Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
                     if (program.contains("t0") || program.contains("t1") || program.contains("t2") || program.contains("f1")) {
                         // TODO: test that each register individually is meaningful and test every
                         // register.
@@ -243,7 +235,7 @@ public class AppTest {
                         p.setup(null, "");
                         int word1 = p.getMemory().getWord(0x400000);
                         int word2 = p.getMemory().getWord(0x400004);
-                        Assert.assertFalse("Error 13 on: " + program, word1 == first && word2 == second);
+                        assertFalse(word1 == first && word2 == second, "Error 13 on: " + program);
                     } else {
                         skips++;
                     }
@@ -257,6 +249,6 @@ public class AppTest {
         // don't have those registers in them add to the register list above or add to
         // the count.
         // Updated to 10: because fsrmi and fsflagsi were removed
-        Assert.assertEquals("Unexpected number of psuedo-instructions skipped.", 10, skips);
+        assertEquals(10, skips, "Unexpected number of psuedo-instructions skipped.");
     }
 }

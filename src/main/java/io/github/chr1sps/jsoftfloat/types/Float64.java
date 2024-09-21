@@ -1,16 +1,16 @@
 package io.github.chr1sps.jsoftfloat.types;
 
 import io.github.chr1sps.jsoftfloat.Environment;
-import io.github.chr1sps.jsoftfloat.Flags;
 import io.github.chr1sps.jsoftfloat.RoundingMode;
 import io.github.chr1sps.jsoftfloat.internal.ExactFloat;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 
 /**
  * Represents the Binary32 format
  */
-public class Float64 extends Floating<Float64> {
+public class Float64 implements Floating<Float64> {
     // TODO: make a more abstract binary float class
     /**
      * Constant <code>Zero</code>
@@ -32,7 +32,11 @@ public class Float64 extends Floating<Float64> {
      * Constant <code>NegativeInfinity</code>
      */
     public static final Float64 NegativeInfinity = new Float64(0xFFF00000_00000000L);
-
+    // Some constants that allow fromExactFloat to be mostly copied
+    private static final int sigbits = 52, expbits = 11,
+            maxexp = 1 << (Float64.expbits - 1),
+            minexp = -(1 << (Float64.expbits - 1)) + 1;
+    private static final long sigmask = (1L << Float64.sigbits) - 1;
     public final long bits;
 
     /**
@@ -40,7 +44,7 @@ public class Float64 extends Floating<Float64> {
      *
      * @param bits a long
      */
-    public Float64(long bits) {
+    public Float64(final long bits) {
         this.bits = bits;
     }
 
@@ -51,9 +55,43 @@ public class Float64 extends Floating<Float64> {
      * @param exponent    a int
      * @param significand a long
      */
-    public Float64(boolean sign, int exponent, long significand) {
-        this(((sign) ? 0x80000000_00000000L : 0) | (((exponent + 1023) & 0x7FFL) << sigbits) | (significand & sigmask));
+    public Float64(final boolean sign, final int exponent, final long significand) {
+        this(((sign) ? 0x80000000_00000000L : 0) | (((exponent + 1023) & 0x7FFL) << Float64.sigbits) | (significand & Float64.sigmask));
     }
+
+//    /**
+//     * <p>fromInteger.</p>
+//     *
+//     * @param num An integer to be converted to
+//     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
+//     */
+//    public static Float64 fromInteger(long num) {
+//        if (num == 0)
+//            return Float64.Zero;
+//        final boolean sign = num < 0;
+//        num = sign ? -num : num;
+//        int exponent = 0;
+//        long significand = 0;
+//        for (int i = 62; i >= 0; i--) {
+//            if (((num >> i) & 1) == 1) {
+//                exponent = i;
+//                significand = (num << (64 - i)) >>> 11;
+//                break;
+//            }
+//        }
+//        return new Float64(sign, exponent, significand);
+//    }
+//
+//    /**
+//     * <p>fromExact.</p>
+//     *
+//     * @param ef a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
+//     * @param e  a {@link io.github.chr1sps.jsoftfloat.Environment} object
+//     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
+//     */
+//    public static Float64 fromExact(@NotNull final ExactFloat ef, @NotNull final Environment e) {
+//        return Float64.Zero.fromExactFloat(ef, e);
+//    }
 
     /**
      * <p>exponent.</p>
@@ -61,30 +99,7 @@ public class Float64 extends Floating<Float64> {
      * @return a int
      */
     public int exponent() {
-        return ((int) (bits >>> sigbits) & 0x7FF) - 1023;
-    }
-
-    /**
-     * <p>fromInteger.</p>
-     *
-     * @param num An integer to be converted to
-     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
-     */
-    public static Float64 fromInteger(long num) {
-        if (num == 0)
-            return Zero;
-        boolean sign = num < 0;
-        num = sign ? -num : num;
-        int exponent = 0;
-        long significand = 0;
-        for (int i = 62; i >= 0; i--) {
-            if (((num >> i) & 1) == 1) {
-                exponent = i;
-                significand = (num << (64 - i)) >>> 11;
-                break;
-            }
-        }
-        return new Float64(sign, exponent, significand);
+        return ((int) (this.bits >>> Float64.sigbits) & 0x7FF) - 1023;
     }
 
     /**
@@ -92,8 +107,9 @@ public class Float64 extends Floating<Float64> {
      *
      * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
      */
-    public Float64 negate() {
-        return new Float64(bits ^ 0x80000000_00000000L); // Flip the sign bit
+    @Override
+    public @NotNull Float64 negate() {
+        return new Float64(this.bits ^ 0x80000000_00000000L); // Flip the sign bit
     }
 
     /**
@@ -101,8 +117,8 @@ public class Float64 extends Floating<Float64> {
      *
      * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
      */
-    public Float64 abs() {
-        return new Float64(bits & 0x7FFFFFFF_FFFFFFFFL);
+    public @NotNull Float64 abs() {
+        return new Float64(this.bits & 0x7FFFFFFF_FFFFFFFFL);
     }
 
     /**
@@ -111,8 +127,8 @@ public class Float64 extends Floating<Float64> {
      * @param signToTake a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
      * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
      */
-    public Float64 copySign(Float64 signToTake) {
-        return new Float64((bits & 0x7FFFFFFF_FFFFFFFFL) | (signToTake.bits & 0x80000000_00000000L));
+    public @NotNull Float64 copySign(@NotNull final Float64 signToTake) {
+        return new Float64((this.bits & 0x7FFFFFFF_FFFFFFFFL) | (signToTake.bits & 0x80000000_00000000L));
     }
 
     /**
@@ -120,8 +136,9 @@ public class Float64 extends Floating<Float64> {
      *
      * @return a boolean
      */
+    @Override
     public boolean isSignMinus() {
-        return (bits >>> 63) == 1;
+        return (this.bits >>> 63) == 1;
     }
 
     /**
@@ -129,8 +146,9 @@ public class Float64 extends Floating<Float64> {
      *
      * @return a boolean
      */
+    @Override
     public boolean isInfinite() {
-        return exponent() == 1024 && (bits & sigmask) == 0;
+        return this.exponent() == 1024 && (this.bits & Float64.sigmask) == 0;
     }
 
     /**
@@ -138,8 +156,9 @@ public class Float64 extends Floating<Float64> {
      *
      * @return a boolean
      */
+    @Override
     public boolean isNormal() {
-        return exponent() != -1023 && exponent() != 1024;
+        return this.exponent() != -1023 && this.exponent() != 1024;
     }
 
     /**
@@ -147,8 +166,9 @@ public class Float64 extends Floating<Float64> {
      *
      * @return a boolean
      */
+    @Override
     public boolean isSubnormal() {
-        return exponent() == -1023 && !isZero();
+        return this.exponent() == -1023 && !this.isZero();
     }
 
     /**
@@ -156,8 +176,9 @@ public class Float64 extends Floating<Float64> {
      *
      * @return a boolean
      */
+    @Override
     public boolean isNaN() {
-        return exponent() == 1024 && !isInfinite();
+        return this.exponent() == 1024 && !this.isInfinite();
     }
 
     /**
@@ -165,20 +186,11 @@ public class Float64 extends Floating<Float64> {
      *
      * @return a boolean
      */
+    @Override
     public boolean isSignalling() {
-        if (!isNaN())
+        if (!this.isNaN())
             return false;
-        return (bits & 0x80000_00000000L) == 0;
-    }
-
-    /**
-     * <p>isCanonical.</p>
-     *
-     * @return a boolean
-     */
-    public boolean isCanonical() {
-        // TODO: implement
-        return true;
+        return (this.bits & 0x80000_00000000L) == 0;
     }
 
     /**
@@ -186,108 +198,104 @@ public class Float64 extends Floating<Float64> {
      *
      * @return a boolean
      */
+    @Override
     public boolean isZero() {
-        return bits == 0 || bits == 0x80000000_00000000L;
+        return this.bits == 0 || this.bits == 0x80000000_00000000L;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Float64 NaN() {
-        return NaN;
+    public @NotNull Float64 NaN() {
+        return Float64.NaN;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Float64 Zero() {
-        return Zero;
+    public @NotNull Float64 Zero() {
+        return Float64.Zero;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Float64 NegativeZero() {
-        return NegativeZero;
+    public @NotNull Float64 NegativeZero() {
+        return Float64.NegativeZero;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Float64 Infinity() {
-        return Infinity;
+    public @NotNull Float64 Infinity() {
+        return Float64.Infinity;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Float64 NegativeInfinity() {
-        return NegativeInfinity;
+    public @NotNull Float64 NegativeInfinity() {
+        return Float64.NegativeInfinity;
     }
-
-    // Some constants that allow fromExactFloat to be mostly copied
-    private static final int sigbits = 52, expbits = 11,
-            maxexp = 1 << (expbits - 1),
-            minexp = -(1 << (expbits - 1)) + 1;
-    private static final long sigmask = (1L << sigbits) - 1;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Float64 fromExactFloat(ExactFloat ef, Environment env) {
+    public @NotNull Float64 fromExactFloat(@NotNull ExactFloat ef, @NotNull final Environment env) {
         if (ef.isZero()) {
             return ef.sign ? Float64.NegativeZero : Float64.Zero;
         }
         ef = ef.normalize();
-        int normalizedExponent = ef.exponent + ef.significand.bitLength();
+        final int normalizedExponent = ef.exponent + ef.significand.bitLength();
 
         // Used to calculate how to round at the end
-        Float64 awayZero, towardsZero;
-        BigInteger roundedBits;
-        int bitsToRound;
+        final Float64 awayZero;
+        final Float64 towardsZero;
+        final BigInteger roundedBits;
+        final int bitsToRound;
 
-        if (normalizedExponent <= minexp + 1) {
+        if (normalizedExponent <= Float64.minexp + 1) {
             // Subnormal
 
-            if (ef.exponent > minexp - sigbits) {
-                assert ef.significand.bitLength() <= sigbits : "Its actually normal";
-                return new Float64(ef.sign, minexp,
-                        ef.significand.shiftLeft(-(minexp - sigbits + 1) + ef.exponent).longValueExact());
+            if (ef.exponent > Float64.minexp - Float64.sigbits) {
+                assert ef.significand.bitLength() <= Float64.sigbits : "Its actually normal";
+                return new Float64(ef.sign, Float64.minexp,
+                        ef.significand.shiftLeft(-(Float64.minexp - Float64.sigbits + 1) + ef.exponent).longValueExact());
             }
 
-            env.flags.add(Flags.inexact);
-            env.flags.add(Flags.underflow); // Section 7.5
-            bitsToRound = (minexp - sigbits + 1) - ef.exponent;
-            BigInteger mainBits = ef.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound);
+            env.inexact = true;
+            env.underflow = true; // Section 7.5
+            bitsToRound = (Float64.minexp - Float64.sigbits + 1) - ef.exponent;
+            final BigInteger mainBits = ef.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound);
             roundedBits = ef.significand.subtract(mainBits);
 
-            towardsZero = new Float64(ef.sign, minexp, ef.significand.shiftRight(bitsToRound).longValueExact());
-            BigInteger upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1));
-            if (upBits.testBit(0) || upBits.bitLength() <= sigbits) {
-                assert upBits.bitLength() <= sigbits;
-                awayZero = new Float64(ef.sign, minexp, upBits.longValueExact());
+            towardsZero = new Float64(ef.sign, Float64.minexp, ef.significand.shiftRight(bitsToRound).longValueExact());
+            final BigInteger upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1));
+            if (upBits.testBit(0) || upBits.bitLength() <= Float64.sigbits) {
+                assert upBits.bitLength() <= Float64.sigbits;
+                awayZero = new Float64(ef.sign, Float64.minexp, upBits.longValueExact());
             } else {
-                awayZero = new Float64(ef.sign, minexp + 1, upBits.longValueExact() & sigmask);
+                awayZero = new Float64(ef.sign, Float64.minexp + 1, upBits.longValueExact() & Float64.sigmask);
             }
-        } else if (normalizedExponent > maxexp) {
+        } else if (normalizedExponent > Float64.maxexp) {
             // Section 7.4
-            env.flags.add(Flags.overflow);
-            env.flags.add(Flags.inexact);
+            env.overflow = true;
+            env.inexact = true;
             switch (env.mode) {
                 case zero:
-                    return new Float64(ef.sign, maxexp - 1, -1); // Largest finite number
+                    return new Float64(ef.sign, Float64.maxexp - 1, -1); // Largest finite number
                 case min:
                 case max:
                     if (ef.sign != (env.mode == RoundingMode.max)) {
                         return ef.sign ? Float64.NegativeInfinity : Float64.Infinity;
                     } else {
-                        return new Float64(ef.sign, maxexp - 1, -1); // Largest finite number
+                        return new Float64(ef.sign, Float64.maxexp - 1, -1); // Largest finite number
                     }
                 case away:
                 case even:
@@ -296,29 +304,29 @@ public class Float64 extends Floating<Float64> {
             assert false : "Not reachable";
             return ef.sign ? Float64.NegativeInfinity : Float64.Infinity;
         } else {
-            if (ef.significand.bitLength() <= (sigbits + 1)) {
+            if (ef.significand.bitLength() <= (Float64.sigbits + 1)) {
                 // No rounding needed
-                int tmp = ef.exponent + ef.significand.bitLength() - 1;
-                assert tmp > minexp : "Its actually subnormal";
+                final int tmp = ef.exponent + ef.significand.bitLength() - 1;
+                assert tmp > Float64.minexp : "Its actually subnormal";
 
                 return new Float64(ef.sign, tmp,
-                        ef.significand.shiftLeft((sigbits + 1) - ef.significand.bitLength()).longValueExact()
-                                & sigmask);
+                        ef.significand.shiftLeft((Float64.sigbits + 1) - ef.significand.bitLength()).longValueExact()
+                                & Float64.sigmask);
             }
-            env.flags.add(Flags.inexact);
-            bitsToRound = ef.significand.bitLength() - (sigbits + 1);
-            BigInteger mainBits = ef.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound);
+            env.inexact = true;
+            bitsToRound = ef.significand.bitLength() - (Float64.sigbits + 1);
+            final BigInteger mainBits = ef.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound);
             roundedBits = ef.significand.subtract(mainBits);
 
-            BigInteger upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1));
+            final BigInteger upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1));
 
-            towardsZero = new Float64(ef.sign, ef.exponent + sigbits + bitsToRound,
-                    ef.significand.shiftRight(bitsToRound).longValueExact() & sigmask);
-            if (upBits.testBit(0) || upBits.bitLength() <= sigbits + 1) {
-                awayZero = new Float64(ef.sign, ef.exponent + sigbits + bitsToRound, upBits.longValueExact() & sigmask);
+            towardsZero = new Float64(ef.sign, ef.exponent + Float64.sigbits + bitsToRound,
+                    ef.significand.shiftRight(bitsToRound).longValueExact() & Float64.sigmask);
+            if (upBits.testBit(0) || upBits.bitLength() <= Float64.sigbits + 1) {
+                awayZero = new Float64(ef.sign, ef.exponent + Float64.sigbits + bitsToRound, upBits.longValueExact() & Float64.sigmask);
             } else {
-                awayZero = new Float64(ef.sign, ef.exponent + (sigbits + 1) + bitsToRound,
-                        upBits.shiftRight(1).longValueExact() & sigmask);
+                awayZero = new Float64(ef.sign, ef.exponent + (Float64.sigbits + 1) + bitsToRound,
+                        upBits.shiftRight(1).longValueExact() & Float64.sigmask);
             }
 
         }
@@ -353,37 +361,26 @@ public class Float64 extends Floating<Float64> {
     }
 
     /**
-     * <p>fromExact.</p>
-     *
-     * @param ef a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
-     * @param e  a {@link io.github.chr1sps.jsoftfloat.Environment} object
-     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
-     */
-    public static Float64 fromExact(ExactFloat ef, Environment e) {
-        return Zero.fromExactFloat(ef, e);
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
-    public ExactFloat toExactFloat() {
-        assert !isInfinite() : "Infinity is not exact";
-        assert !isNaN() : "NaNs are not exact";
-        assert !isZero() : "Zeros should be handled explicitly";
+    public @NotNull ExactFloat toExactFloat() {
+        assert !this.isInfinite() : "Infinity is not exact";
+        assert !this.isNaN() : "NaNs are not exact";
+        assert !this.isZero() : "Zeros should be handled explicitly";
 
-        boolean sign = isSignMinus();
-        int exponent;
-        BigInteger significand;
-        if (isZero()) {
+        final boolean sign = this.isSignMinus();
+        final int exponent;
+        final BigInteger significand;
+        if (this.isZero()) {
             exponent = 0;
             significand = BigInteger.ZERO;
-        } else if (isNormal()) {
-            exponent = exponent() - sigbits;
-            significand = BigInteger.valueOf((bits & sigmask) + (sigmask + 1)); // Add back the implied one
-        } else if (isSubnormal()) {
-            exponent = exponent() - (sigbits - 1);
-            significand = BigInteger.valueOf(bits & sigmask);
+        } else if (this.isNormal()) {
+            exponent = this.exponent() - Float64.sigbits;
+            significand = BigInteger.valueOf((this.bits & Float64.sigmask) + (Float64.sigmask + 1)); // Add back the implied one
+        } else if (this.isSubnormal()) {
+            exponent = this.exponent() - (Float64.sigbits - 1);
+            significand = BigInteger.valueOf(this.bits & Float64.sigmask);
         } else {
             assert false : "This should not be reachable";
             return null;

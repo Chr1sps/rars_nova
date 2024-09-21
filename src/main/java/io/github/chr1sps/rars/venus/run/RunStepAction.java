@@ -1,6 +1,7 @@
 package io.github.chr1sps.rars.venus.run;
 
 import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.RISCVprogram;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.notices.SimulatorNotice;
@@ -51,9 +52,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class RunStepAction extends GuiAction {
 
+    private final VenusUI mainUI;
     private String name;
     private ExecutePane executePane;
-    private final VenusUI mainUI;
 
     /**
      * <p>Constructor for RunStepAction.</p>
@@ -65,10 +66,10 @@ public class RunStepAction extends GuiAction {
      * @param accel    a {@link javax.swing.KeyStroke} object
      * @param gui      a {@link io.github.chr1sps.rars.venus.VenusUI} object
      */
-    public RunStepAction(String name, Icon icon, String descrip,
-                         Integer mnemonic, KeyStroke accel, VenusUI gui) {
+    public RunStepAction(final String name, final Icon icon, final String descrip,
+                         final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
-        mainUI = gui;
+        this.mainUI = gui;
     }
 
     /**
@@ -76,33 +77,34 @@ public class RunStepAction extends GuiAction {
      * <p>
      * perform next simulated instruction step.
      */
-    public void actionPerformed(ActionEvent e) {
-        name = this.getValue(Action.NAME).toString();
-        executePane = mainUI.getMainPane().getExecutePane();
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        this.name = this.getValue(Action.NAME).toString();
+        this.executePane = this.mainUI.getMainPane().getExecutePane();
         if (FileStatus.isAssembled()) {
-            if (!mainUI.getStarted()) { // DPS 17-July-2008
-                processProgramArgumentsIfAny();
+            if (!this.mainUI.getStarted()) { // DPS 17-July-2008
+                this.processProgramArgumentsIfAny();
             }
-            mainUI.setStarted(true);
-            mainUI.getMessagesPane().selectRunMessageTab();
-            executePane.getTextSegmentWindow().setCodeHighlighting(true);
+            this.mainUI.setStarted(true);
+            this.mainUI.getMessagesPane().selectRunMessageTab();
+            this.executePane.getTextSegmentWindow().setCodeHighlighting(true);
 
             final var stopListener = new SimpleSubscriber<SimulatorNotice>() {
                 private Flow.Subscription subscription;
 
                 @Override
-                public void onSubscribe(Flow.Subscription subscription) {
+                public void onSubscribe(final Flow.Subscription subscription) {
                     this.subscription = subscription;
                     this.subscription.request(1);
                 }
 
                 @Override
-                public void onNext(SimulatorNotice item) {
-                    if (item.getAction() != SimulatorNotice.SIMULATOR_STOP) {
+                public void onNext(final SimulatorNotice item) {
+                    if (item.action() != SimulatorNotice.SIMULATOR_STOP) {
                         this.subscription.request(1);
                         return;
                     }
-                    EventQueue.invokeLater(() -> stepped(item.getDone(), item.getReason(), item.getException()));
+                    EventQueue.invokeLater(() -> RunStepAction.this.stepped(item.done(), item.reason(), item.exception()));
                     this.subscription.cancel();
                 }
             };
@@ -116,11 +118,11 @@ public class RunStepAction extends GuiAction {
 //                }
             Simulator.getInstance().subscribe(stopListener);
 
-            Globals.program.startSimulation(1, null);
+            RISCVprogram.startSimulation(1, null);
         } else {
             // note: this should never occur since "Step" is only enabled after successful
             // assembly.
-            JOptionPane.showMessageDialog(mainUI, "The program must be assembled before it can be run.");
+            JOptionPane.showMessageDialog(this.mainUI, "The program must be assembled before it can be run.");
         }
     }
 
@@ -135,46 +137,46 @@ public class RunStepAction extends GuiAction {
      * @param reason a {@link io.github.chr1sps.rars.simulator.Simulator.Reason} object
      * @param pe     a {@link SimulationException} object
      */
-    public void stepped(boolean done, Simulator.Reason reason, SimulationException pe) {
-        executePane.getRegistersWindow().updateRegisters();
-        executePane.getFloatingPointWindow().updateRegisters();
-        executePane.getControlAndStatusWindow().updateRegisters();
-        executePane.getDataSegmentWindow().updateValues();
+    public void stepped(final boolean done, final Simulator.Reason reason, final SimulationException pe) {
+        this.executePane.getRegistersWindow().updateRegisters();
+        this.executePane.getFloatingPointWindow().updateRegisters();
+        this.executePane.getControlAndStatusWindow().updateRegisters();
+        this.executePane.getDataSegmentWindow().updateValues();
         if (!done) {
-            executePane.getTextSegmentWindow().highlightStepAtPC();
+            this.executePane.getTextSegmentWindow().highlightStepAtPC();
             FileStatus.set(FileStatus.RUNNABLE);
         }
         if (done) {
             RunGoAction.resetMaxSteps();
-            executePane.getTextSegmentWindow().unhighlightAllSteps();
+            this.executePane.getTextSegmentWindow().unhighlightAllSteps();
             FileStatus.set(FileStatus.TERMINATED);
         }
         if (done && pe == null) {
-            mainUI.getMessagesPane().postMessage(
-                    "\n" + name + ": execution " +
+            this.mainUI.getMessagesPane().postMessage(
+                    "\n" + this.name + ": execution " +
                             ((reason == Simulator.Reason.CLIFF_TERMINATION) ? "terminated due to null instruction."
                                     : "completed successfully.")
                             + "\n\n");
-            mainUI.getMessagesPane().postRunMessage(
+            this.mainUI.getMessagesPane().postRunMessage(
                     "\n-- program is finished running" +
                             ((reason == Simulator.Reason.CLIFF_TERMINATION) ? "(dropped off bottom)"
                                     : " (" + Globals.exitCode + ")")
                             + " --\n\n");
-            mainUI.getMessagesPane().selectRunMessageTab();
+            this.mainUI.getMessagesPane().selectRunMessageTab();
         }
         if (pe != null) {
             RunGoAction.resetMaxSteps();
-            mainUI.getMessagesPane().postMessage(
+            this.mainUI.getMessagesPane().postMessage(
                     pe.errorMessage.generateReport());
-            mainUI.getMessagesPane().postMessage(
-                    "\n" + name + ": execution terminated with errors.\n\n");
-            mainUI.getRegistersPane().setSelectedComponent(executePane.getControlAndStatusWindow());
+            this.mainUI.getMessagesPane().postMessage(
+                    "\n" + this.name + ": execution terminated with errors.\n\n");
+            this.mainUI.getRegistersPane().setSelectedComponent(this.executePane.getControlAndStatusWindow());
             FileStatus.set(FileStatus.TERMINATED); // should be redundant.
-            executePane.getTextSegmentWindow().setCodeHighlighting(true);
-            executePane.getTextSegmentWindow().unhighlightAllSteps();
-            executePane.getTextSegmentWindow().highlightStepAtAddress(RegisterFile.getProgramCounter() - 4);
+            this.executePane.getTextSegmentWindow().setCodeHighlighting(true);
+            this.executePane.getTextSegmentWindow().unhighlightAllSteps();
+            this.executePane.getTextSegmentWindow().highlightStepAtAddress(RegisterFile.getProgramCounter() - 4);
         }
-        mainUI.setReset(false);
+        this.mainUI.setReset(false);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +187,7 @@ public class RunStepAction extends GuiAction {
     // $a0 gets argument count (argc), $a1 gets stack address of first arg pointer
     //////////////////////////////////////////////////////////////////////////////////// (argv).
     private void processProgramArgumentsIfAny() {
-        String programArguments = executePane.getTextSegmentWindow().getProgramArguments();
+        final String programArguments = this.executePane.getTextSegmentWindow().getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||
                 !Globals.getSettings().getBooleanSetting(Settings.Bool.PROGRAM_ARGUMENTS)) {
             return;

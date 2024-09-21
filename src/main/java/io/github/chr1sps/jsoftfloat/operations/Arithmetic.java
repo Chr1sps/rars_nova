@@ -1,14 +1,13 @@
 package io.github.chr1sps.jsoftfloat.operations;
 
 import io.github.chr1sps.jsoftfloat.Environment;
-import io.github.chr1sps.jsoftfloat.Flags;
 import io.github.chr1sps.jsoftfloat.RoundingMode;
 import io.github.chr1sps.jsoftfloat.internal.ExactFloat;
 import io.github.chr1sps.jsoftfloat.types.Floating;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Groups any arithmetic operations such as addition, subtraction, etc
- *
  */
 public class Arithmetic {
     /**
@@ -20,7 +19,7 @@ public class Arithmetic {
      * @param <T> a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> T add(T a, T b, Environment env) {
+    public static <T extends Floating<T>> @NotNull T add(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
         // TODO: handle signalling correctly
 
         // Section 6.2
@@ -32,7 +31,7 @@ public class Arithmetic {
         // Section 6.1 and 7.2
         if (a.isInfinite()) {
             if (b.isInfinite() && (b.isSignMinus() != a.isSignMinus())) {
-                env.flags.add(Flags.invalid);
+                env.invalid = true;
                 return a.NaN(); // inf - inf is undefined
             } else {
                 return a;
@@ -57,7 +56,7 @@ public class Arithmetic {
             return a;
         }
 
-        ExactFloat out = (a.toExactFloat()).add(b.toExactFloat());
+        final ExactFloat out = (a.toExactFloat()).add(b.toExactFloat());
         // Check to see if it was x + (-x)
         if (out.isZero()) {
             return (env.mode == RoundingMode.min) ? a.NegativeZero() : a.Zero();
@@ -74,7 +73,7 @@ public class Arithmetic {
      * @param <T> a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> T subtraction(T a, T b, Environment env) {
+    public static <T extends Floating<T>> @NotNull T subtraction(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
         // TODO: handle signalling correctly
 
         // Section 6.2
@@ -84,7 +83,7 @@ public class Arithmetic {
             return b;
 
         // After this it is equivalent to adding a negative
-        return add(a, b.negate(), env);
+        return Arithmetic.add(a, b.negate(), env);
     }
 
     /**
@@ -96,7 +95,7 @@ public class Arithmetic {
      * @param <T> a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> T multiplication(T a, T b, Environment env) {
+    public static <T extends Floating<T>> @NotNull T multiplication(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
         // TODO: handle signalling correctly
 
         // Section 6.2
@@ -107,7 +106,7 @@ public class Arithmetic {
 
         // Section 7.2
         if ((a.isZero() && b.isInfinite()) || (b.isZero() && a.isInfinite())) {
-            env.flags.add(Flags.invalid);
+            env.invalid = true;
             return a.NaN();
         }
 
@@ -131,7 +130,7 @@ public class Arithmetic {
      * @param <T> a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> T squareRoot(T a, Environment env) {
+    public static <T extends Floating<T>> @NotNull T squareRoot(@NotNull final T a, @NotNull final Environment env) {
         // TODO: handle signalling correctly
 
         // Section 6.2
@@ -145,7 +144,7 @@ public class Arithmetic {
 
         // Section 7.2
         if (a.isSignMinus()) {
-            env.flags.add(Flags.invalid);
+            env.invalid = true;
             return a.NaN();
         }
 
@@ -167,7 +166,7 @@ public class Arithmetic {
      * @param <T> a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> T fusedMultiplyAdd(T a, T b, T c, Environment env) {
+    public static <T extends Floating<T>> @NotNull T fusedMultiplyAdd(@NotNull final T a, @NotNull final T b, @NotNull final T c, @NotNull final Environment env) {
         // TODO: handle signalling correctly
 
         // Section 6.2
@@ -181,20 +180,20 @@ public class Arithmetic {
 
         // Section 7.2
         if ((a.isZero() && b.isInfinite()) || (b.isZero() && a.isInfinite())) {
-            env.flags.add(Flags.invalid);
+            env.invalid = true;
             return a.NaN();
         }
 
         // Section 6.1
         if (a.isInfinite() || b.isInfinite()) {
-            return add(a.isSignMinus() == b.isSignMinus() ? a.Infinity() : a.NegativeInfinity(), c, env);
+            return Arithmetic.add(a.isSignMinus() == b.isSignMinus() ? a.Infinity() : a.NegativeInfinity(), c, env);
         }
 
         if (a.isZero() || b.isZero()) {
-            return add(a.isSignMinus() == b.isSignMinus() ? a.Zero() : a.NegativeZero(), c, env);
+            return Arithmetic.add(a.isSignMinus() == b.isSignMinus() ? a.Zero() : a.NegativeZero(), c, env);
         }
 
-        ExactFloat multiplication = a.toExactFloat().multiply(b.toExactFloat());
+        final ExactFloat multiplication = a.toExactFloat().multiply(b.toExactFloat());
 
         return a.fromExactFloat(multiplication.add(c.toExactFloat()), env);
     }
@@ -208,7 +207,7 @@ public class Arithmetic {
      * @param <T> a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> T division(T a, T b, Environment env) {
+    public static <T extends Floating<T>> @NotNull T division(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
         // TODO: handle signalling correctly
 
         // Section 6.2
@@ -219,7 +218,7 @@ public class Arithmetic {
 
         // Section 7.2
         if ((a.isZero() && b.isZero()) || (a.isInfinite() && b.isInfinite())) {
-            env.flags.add(Flags.invalid);
+            env.invalid = true;
             return a.NaN();
         }
 
@@ -234,7 +233,7 @@ public class Arithmetic {
 
         // Section 7.3
         if (b.isZero()) {
-            env.flags.add(Flags.divByZero);
+            env.divByZero = true;
             return (a.isSignMinus() == b.isSignMinus()) ? a.Infinity() : a.NegativeInfinity();
         }
 

@@ -42,15 +42,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class TokenList implements Cloneable, Iterable<Token> {
 
-    private ArrayList<Token> tokenList;
-    private String processedLine;// DPS 03-Jan-2013
+    private @NotNull ArrayList<Token> tokenList;
+    private @NotNull String processedLine;// DPS 03-Jan-2013
 
     /**
      * Constructor for objects of class TokenList
      */
     public TokenList() {
-        tokenList = new ArrayList<>();
-        processedLine = ""; // DPS 03-Jan-2013
+        this.tokenList = new ArrayList<>();
+        this.processedLine = ""; // DPS 03-Jan-2013
     }
 
     /**
@@ -58,8 +58,21 @@ public class TokenList implements Cloneable, Iterable<Token> {
      *
      * @return a {@link java.util.Iterator} object
      */
+    @Override
     public @NotNull Iterator<Token> iterator() {
-        return tokenList.iterator();
+        return this.tokenList.iterator();
+    }
+
+    /**
+     * Retrieve the source line String associated with this
+     * token list. It may or may not have been modified during
+     * assembly preprocessing.
+     *
+     * @return The source line for this token list.
+     */
+    // DPS 03-Jan-2013/
+    public @NotNull String getProcessedLine() {
+        return this.processedLine;
     }
 
     /**
@@ -71,20 +84,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * @param line The source line, possibly modified (possibly not)
      */
     // DPS 03-Jan-2013
-    public void setProcessedLine(String line) {
-        processedLine = line;
-    }
-
-    /**
-     * Retrieve the source line String associated with this
-     * token list. It may or may not have been modified during
-     * assembly preprocessing.
-     *
-     * @return The source line for this token list.
-     */
-    // DPS 03-Jan-2013/
-    public String getProcessedLine() {
-        return processedLine;
+    public void setProcessedLine(final String line) {
+        this.processedLine = line;
     }
 
     /**
@@ -93,8 +94,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * @param pos Position in token list.
      * @return the requested token, or ArrayIndexOutOfBounds exception
      */
-    public Token get(int pos) {
-        return tokenList.get(pos);
+    public @NotNull Token get(final int pos) {
+        return this.tokenList.get(pos);
     }
 
     /**
@@ -104,8 +105,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * @param pos         Position in token list.
      * @param replacement Replacement token
      */
-    public void set(int pos, Token replacement) {
-        tokenList.set(pos, replacement);
+    public void set(final int pos, final Token replacement) {
+        this.tokenList.set(pos, replacement);
     }
 
     /**
@@ -114,7 +115,7 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * @return token count.
      */
     public int size() {
-        return tokenList.size();
+        return this.tokenList.size();
     }
 
     /**
@@ -122,8 +123,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      *
      * @param token Token object to be added.
      */
-    public void add(Token token) {
-        tokenList.add(token);
+    public void add(final Token token) {
+        this.tokenList.add(token);
     }
 
     /**
@@ -135,8 +136,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * @throws java.lang.IndexOutOfBoundsException if <code>pos</code> is &lt; 0 or &ge;
      *                                             <code>size()</code>
      */
-    public void remove(int pos) {
-        tokenList.remove(pos);
+    public void remove(final int pos) {
+        this.tokenList.remove(pos);
     }
 
     /**
@@ -145,7 +146,7 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * @return <code>true</code> if list has no tokens, else <code>false</code>.
      */
     public boolean isEmpty() {
-        return tokenList.isEmpty();
+        return this.tokenList.isEmpty();
     }
 
     /**
@@ -154,9 +155,10 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * @return String version of the token list
      * (a blank is inserted after each token).
      */
+    @Override
     public String toString() {
-        StringBuilder stringified = new StringBuilder();
-        for (Token token : tokenList) {
+        final StringBuilder stringified = new StringBuilder();
+        for (final Token token : this.tokenList) {
             stringified.append(token.toString()).append(" ");
         }
         return stringified.toString();
@@ -169,8 +171,8 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * (a blank is inserted after each token type).
      */
     public String toTypeString() {
-        StringBuilder stringified = new StringBuilder();
-        for (Token t : tokenList) {
+        final StringBuilder stringified = new StringBuilder();
+        for (final Token t : this.tokenList) {
             stringified.append(t.getType().toString()).append(" ");
         }
         return stringified.toString();
@@ -186,12 +188,13 @@ public class TokenList implements Cloneable, Iterable<Token> {
     // but the ArrayList itself has to be cloned separately -- otherwise clone will
     // have
     // alias to original token list!!
+    @Override
     public Object clone() {
         try {
-            TokenList t = (TokenList) super.clone();
-            t.tokenList = new ArrayList<>(tokenList);
+            final TokenList t = (TokenList) super.clone();
+            t.tokenList = new ArrayList<>(this.tokenList);
             return t;
-        } catch (CloneNotSupportedException e) {
+        } catch (final CloneNotSupportedException e) {
             return null;
         }
     }

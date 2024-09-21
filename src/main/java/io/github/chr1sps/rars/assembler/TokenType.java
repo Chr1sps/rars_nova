@@ -6,6 +6,7 @@ import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.Register;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
 import io.github.chr1sps.rars.util.Binary;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -41,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public enum TokenTypes {
+public enum TokenType {
     COMMENT, DIRECTIVE, OPERATOR, DELIMITER,
     /**
      * note: REGISTER_NAME is token of form zero whereas REGISTER_NUMBER is token
@@ -64,15 +65,6 @@ public enum TokenTypes {
     public static final String TOKEN_DELIMITERS = "\t ,()";
 
     /**
-     * Produces String equivalent of this token type, which is its name.
-     *
-     * @return String containing descriptive name for token type.
-     */
-    public String toString() {
-        return name(); // Get the literal string from enum
-    }
-
-    /**
      * Classifies the given string into one of the types.
      *
      * @param value String containing candidate language element, extracted from
@@ -81,70 +73,70 @@ public enum TokenTypes {
      * a
      * defined MIPS token type, else returns <code>null</code>.
      */
-    public static TokenTypes matchTokenType(String value) {
+    public static @NotNull TokenType matchTokenType(@NotNull final String value) {
         // If it starts with single quote ('), it is a mal-formed character literal
         // because a well-formed character literal was converted to string-ified
         // integer before getting here...
         if (value.charAt(0) == '\'')
-            return TokenTypes.ERROR;
+            return TokenType.ERROR;
 
         // See if it is a comment
         if (value.charAt(0) == '#')
-            return TokenTypes.COMMENT;
+            return TokenType.COMMENT;
 
         if (value.charAt(0) == '@')
-            return TokenTypes.TAG;
+            return TokenType.TAG;
 
         // See if it is one of the simple tokens
         if (value.length() == 1) {
             switch (value.charAt(0)) {
                 case '(':
-                    return TokenTypes.LEFT_PAREN;
+                    return TokenType.LEFT_PAREN;
                 case ')':
-                    return TokenTypes.RIGHT_PAREN;
+                    return TokenType.RIGHT_PAREN;
                 case ':':
-                    return TokenTypes.COLON;
+                    return TokenType.COLON;
                 case '+':
-                    return TokenTypes.PLUS;
+                    return TokenType.PLUS;
                 case '-':
-                    return TokenTypes.MINUS;
+                    return TokenType.MINUS;
             }
         }
 
         switch (value) {
             case "%hi" -> {
-                return TokenTypes.HI;
+                return TokenType.HI;
             }
             case "%lo" -> {
-                return TokenTypes.LO;
+                return TokenType.LO;
             }
             case "rne", "rtz", "rdn", "rup", "rmm", "dyn" -> {
-                return TokenTypes.ROUNDING_MODE;
+                return TokenType.ROUNDING_MODE;
             }
         }
 
         // See if it is a macro parameter
         if (Macro.tokenIsMacroParameter(value, false))
-            return TokenTypes.MACRO_PARAMETER;
+            return TokenType.MACRO_PARAMETER;
 
         // See if it is a register
         Register reg = RegisterFile.getRegister(value);
         if (reg != null)
             if (value.startsWith("x"))
-                return TokenTypes.REGISTER_NUMBER;
+                return TokenType.REGISTER_NUMBER;
             else
-                return TokenTypes.REGISTER_NAME;
+                return TokenType.REGISTER_NAME;
         // See if it is a floating point register
 
         reg = FloatingPointRegisterFile.getRegister(value);
         if (reg != null)
-            return TokenTypes.FP_REGISTER_NAME;
+            return TokenType.FP_REGISTER_NAME;
 
         // Little bit of a hack because CSRFile doesn't supoprt getRegister(strinug)
-        Register[] regs = ControlAndStatusRegisterFile.getRegisters();
-        for (Register r : regs) {
+        final Register[] regs = ControlAndStatusRegisterFile.getRegisters();
+        for (final Register r : regs) {
             if (r.getName().equals(value))
-                return TokenTypes.CSR_NAME;
+                return TokenType.CSR_NAME;
         }
         // See if it is an immediate (constant) integer value
         // Classify based on # bits needed to represent in binary
@@ -153,35 +145,35 @@ public enum TokenTypes {
 
         try {
 
-            int i = Binary.stringToInt(value); // KENV 1/6/05
+            final int i = Binary.stringToInt(value); // KENV 1/6/05
 
             // Comments from 2008 and 2005 were removed - Benjamin Landers 2019
 
             // shift operands must be in range 0-31
             if (i >= 0 && i <= 31) {
-                return TokenTypes.INTEGER_5;
+                return TokenType.INTEGER_5;
             }
             if (i >= 0 && i <= 64) {
-                return TokenTypes.INTEGER_6;
+                return TokenType.INTEGER_6;
             }
             if (i >= DataTypes.MIN_IMMEDIATE_VALUE && i <= DataTypes.MAX_IMMEDIATE_VALUE) {
-                return TokenTypes.INTEGER_12;
+                return TokenType.INTEGER_12;
             }
             if (i >= 0 && i <= 0xFFF) {
-                return TokenTypes.INTEGER_12U;
+                return TokenType.INTEGER_12U;
             }
             if (i >= DataTypes.MIN_UPPER_VALUE && i <= DataTypes.MAX_UPPER_VALUE) {
-                return TokenTypes.INTEGER_20;
+                return TokenType.INTEGER_20;
             }
-            return TokenTypes.INTEGER_32; // default when no other type is applicable
-        } catch (NumberFormatException e) {
+            return TokenType.INTEGER_32; // default when no other type is applicable
+        } catch (final NumberFormatException e) {
             // NO ACTION -- exception suppressed
         }
 
         try {
             Binary.stringToLong(value);
-            return TokenTypes.INTEGER_64;
-        } catch (NumberFormatException e) {
+            return TokenType.INTEGER_64;
+        } catch (final NumberFormatException e) {
             // NO ACTION -- exception suppressed
         }
 
@@ -189,38 +181,38 @@ public enum TokenTypes {
         // accepts integer values but if it were an integer literal we wouldn't get this
         // far.
         if (value.equals("Inf") || value.equals("NaN"))
-            return TokenTypes.REAL_NUMBER;
+            return TokenType.REAL_NUMBER;
         if (('0' <= value.charAt(0) && value.charAt(0) <= '9') || value.charAt(0) == '.' || value.charAt(0) == '-') {
             try {
                 Double.parseDouble(value);
-                return TokenTypes.REAL_NUMBER;
-            } catch (NumberFormatException e) {
+                return TokenType.REAL_NUMBER;
+            } catch (final NumberFormatException e) {
                 // NO ACTION -- exception suppressed
             }
         }
 
         // See if it is a directive
         if (value.charAt(0) == '.' && Directive.matchDirective(value) != null) {
-            return TokenTypes.DIRECTIVE;
+            return TokenType.DIRECTIVE;
         }
 
         // See if it is a quoted string
         if (value.charAt(0) == '"')
-            return TokenTypes.QUOTED_STRING;
+            return TokenType.QUOTED_STRING;
 
         // See if it is an instruction operator
         if (Globals.instructionSet.matchOperator(value) != null)
-            return TokenTypes.OPERATOR;
+            return TokenType.OPERATOR;
 
         // Test for identifier goes last because I have defined tokens for various
         // MIPS constructs (such as operators and directives) that also could fit
         // the lexical specifications of an identifier, and those need to be
         // recognized first.
-        if (isValidIdentifier(value))
-            return TokenTypes.IDENTIFIER;
+        if (TokenType.isValidIdentifier(value))
+            return TokenType.IDENTIFIER;
 
         // Matches no language token.
-        return TokenTypes.ERROR;
+        return TokenType.ERROR;
     }
 
     /**
@@ -230,10 +222,10 @@ public enum TokenTypes {
      * @param type the TokenType of interest
      * @return true if type is an integer type, false otherwise.
      */
-    public static boolean isIntegerTokenType(TokenTypes type) {
-        return type == TokenTypes.INTEGER_5 || type == TokenTypes.INTEGER_6 || type == TokenTypes.INTEGER_12 ||
-                type == TokenTypes.INTEGER_12U || type == TokenTypes.INTEGER_20 || type == TokenTypes.INTEGER_32 ||
-                type == TokenTypes.INTEGER_64;
+    public static boolean isIntegerTokenType(final TokenType type) {
+        return type == TokenType.INTEGER_5 || type == TokenType.INTEGER_6 || type == TokenType.INTEGER_12 ||
+                type == TokenType.INTEGER_12U || type == TokenType.INTEGER_20 || type == TokenType.INTEGER_32 ||
+                type == TokenType.INTEGER_64;
     }
 
     /**
@@ -242,8 +234,27 @@ public enum TokenTypes {
      * @param type the TokenType of interest
      * @return true if type is an floating point type, false otherwise.
      */
-    public static boolean isFloatingTokenType(TokenTypes type) {
-        return type == TokenTypes.REAL_NUMBER;
+    public static boolean isFloatingTokenType(final TokenType type) {
+        return type == TokenType.REAL_NUMBER;
+    }
+
+    /**
+     * <p>isValidIdentifier.</p>
+     *
+     * @param value a {@link java.lang.String} object
+     * @return a boolean
+     */
+    public static boolean isValidIdentifier(final String value) {
+        boolean result = (Character.isLetter(value.charAt(0)) || value.charAt(0) == '_' || value.charAt(0) == '.'
+                || value.charAt(0) == '$');
+        int index = 1;
+        while (result && index < value.length()) {
+            if (!(Character.isLetterOrDigit(value.charAt(index)) || value.charAt(index) == '_'
+                    || value.charAt(index) == '.' || value.charAt(index) == '$'))
+                result = false;
+            index++;
+        }
+        return result;
     }
 
     // TODO: is $ still relevant?
@@ -259,22 +270,13 @@ public enum TokenTypes {
     // MIPS-target GCC will produce labels that start with $.
 
     /**
-     * <p>isValidIdentifier.</p>
+     * Produces String equivalent of this token type, which is its name.
      *
-     * @param value a {@link java.lang.String} object
-     * @return a boolean
+     * @return String containing descriptive name for token type.
      */
-    public static boolean isValidIdentifier(String value) {
-        boolean result = (Character.isLetter(value.charAt(0)) || value.charAt(0) == '_' || value.charAt(0) == '.'
-                || value.charAt(0) == '$');
-        int index = 1;
-        while (result && index < value.length()) {
-            if (!(Character.isLetterOrDigit(value.charAt(index)) || value.charAt(index) == '_'
-                    || value.charAt(index) == '.' || value.charAt(index) == '$'))
-                result = false;
-            index++;
-        }
-        return result;
+    @Override
+    public String toString() {
+        return this.name(); // Get the literal string from enum
     }
 
 }
