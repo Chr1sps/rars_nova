@@ -65,15 +65,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private static final Logger LOGGER = LogManager.getLogger();
 
     private static final String[] dataSegmentNames = {"Data", "Stack", "Kernel"};
-    private static Object[][] dataData;
-
-    private static JTable dataTable;
-    private JScrollPane dataTableScroller;
-    private final Container contentPane;
-    private final JPanel tablePanel;
-    private JButton dataButton, nextButton, prevButton, stakButton, globButton, heapButton, extnButton, mmioButton,
-            textButton;
-
     private static final int VALUES_PER_ROW = 8;
     private static final int NUMBER_OF_ROWS = 16; // with 8 value columns, this shows 512 bytes;
     private static final int NUMBER_OF_COLUMNS = DataSegmentWindow.VALUES_PER_ROW + 1;// 1 for address and 8 for values
@@ -90,29 +81,64 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private static final int ADDRESS_COLUMN = 0;
     private static final boolean USER_MODE = false;
     private static final boolean KERNEL_MODE = true;
-
-    private boolean addressHighlighting = false;
-    private boolean asciiDisplay = false;
-    private int addressColumn;
-    private int addressRowFirstAddress;
+    ////////////////////////////////////////////////////////////////////////
+    // Initalize arrays used with Base Address combo box chooser.
+    // The combo box replaced the row of buttons when number of buttons expanded to
+    //////////////////////////////////////////////////////////////////////// 7!
+    private static final int EXTERN_BASE_ADDRESS_INDEX = 0;
+    private static final int GLOBAL_POINTER_ADDRESS_INDEX = 3; // 1;
+    private static final int TEXT_BASE_ADDRESS_INDEX = 5; // 2;
+    private static final int DATA_BASE_ADDRESS_INDEX = 1; // 3;
+    private static final int HEAP_BASE_ADDRESS_INDEX = 2; // 4;
+    private static final int STACK_POINTER_BASE_ADDRESS_INDEX = 4; // 5;
+    private static final int MMIO_BASE_ADDRESS_INDEX = 6;
+    private static Object[][] dataData;
+    private static JTable dataTable;
+    // Must agree with above in number and order...
+    final String[] descriptions = {" (.extern)", " (.data)", " (heap)", "current gp",
+            "current sp", " (.text)", " (MMIO)"};
+    private final Container contentPane;
+    private final JPanel tablePanel;
     private final Settings settings;
-
-    private int firstAddress;
-    private int homeAddress;
-    private boolean userOrKernelMode;
-
     // The combo box replaced the row of buttons when number of buttons expanded to
     // 7!
     // We'll keep the button objects however and manually invoke their action
     // listeners
     // when the corresponding combo box item is selected. DPS 22-Nov-2006
     private final JComboBox<String> baseAddressSelector;
-
+    // Must agree with above in number and order...
+    private final int[] displayBaseAddressArray = {Memory.externBaseAddress,
+            Memory.dataBaseAddress, Memory.heapBaseAddress, -1 /* Memory.globalPointer */,
+            -1 /* Memory.stackPointer */, Memory.textBaseAddress,
+            Memory.memoryMapBaseAddress,};
+    private JScrollPane dataTableScroller;
+    private JButton dataButton, nextButton, prevButton, stakButton, globButton, heapButton, extnButton, mmioButton,
+            textButton;
+    private boolean addressHighlighting = false;
+    private boolean asciiDisplay = false;
+    private int addressColumn;
+    private int addressRowFirstAddress;
+    private int firstAddress;
+    private int homeAddress;
+    private boolean userOrKernelMode;
     // The next bunch are initialized dynamically in initializeBaseAddressChoices()
     private String[] displayBaseAddressChoices;
     private int[] displayBaseAddresses;
     private int defaultBaseAddressIndex;
     private JButton[] baseAddressButtons;
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Required by Observer interface. Called when notified by an Observable that we
+     * are registered with.
+     * Observables include:
+     * The Simulator object, which lets us know when it starts and stops running
+     * A delegate of the Memory object, which lets us know of memory operations
+     * The Simulator keeps us informed of when simulated MIPS execution is active.
+     * This is the only time we care about memory operations.
+     */
+
+    private Flow.Subscription subscription;
 
     /**
      * Constructor for the Data Segment window.
@@ -190,6 +216,74 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.contentPane.add(features, BorderLayout.SOUTH);
     }
 
+    // Create and fill String array containing labels for base address combo box.
+    private static String[] createBaseAddressLabelsArray(final int[] baseAddressArray, final String[] descriptions) {
+        final String[] baseAddressChoices = new String[baseAddressArray.length];
+        for (int i = 0; i < baseAddressChoices.length; i++) {
+            baseAddressChoices[i] = ((baseAddressArray[i] != -1)
+                    ? io.github.chr1sps.rars.util.Binary.intToHexString(baseAddressArray[i])
+                    : "")
+                    + descriptions[i];
+        }
+        return baseAddressChoices;
+    }
+
+    // Given an address, determine which segment it is in and return the
+    // corresponding
+    // combo box index. Note there is not a one-to-one correspondence between these
+    // indexes and the Memory tables. For instance, the heap (0x10040000), the
+    // global (0x10008000) and the data segment base (0x10000000) are all stored in
+    // the
+    // same table as the static (0x10010000) so all are "Memory.inDataSegment()".
+    private static int getBaseAddressIndexForAddress(final int address) {
+        int desiredComboBoxIndex = -1; // assume not a data address.
+        if (Memory.inMemoryMapSegment(address)) {
+            return DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX;
+        } else if (Memory.inTextSegment(address)) { // DPS. 8-July-2013
+            return DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX;
+        }
+        int shortDistance = 0x7fffffff;
+        int thisDistance;
+        // Check distance from .extern base. Cannot be below it
+        thisDistance = address - Memory.externBaseAddress;
+        if (thisDistance >= 0 && thisDistance < shortDistance) {
+            shortDistance = thisDistance;
+            desiredComboBoxIndex = DataSegmentWindow.EXTERN_BASE_ADDRESS_INDEX;
+        }
+        // Check distance from global pointer; can be either side of it...
+        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER)); // distance from
+        // global
+        // pointer
+        if (thisDistance < shortDistance) {
+            shortDistance = thisDistance;
+            desiredComboBoxIndex = DataSegmentWindow.GLOBAL_POINTER_ADDRESS_INDEX;
+        }
+        // Check distance from .data base. Cannot be below it
+        thisDistance = address - Memory.dataBaseAddress;
+        if (thisDistance >= 0 && thisDistance < shortDistance) {
+            shortDistance = thisDistance;
+            desiredComboBoxIndex = DataSegmentWindow.DATA_BASE_ADDRESS_INDEX;
+        }
+        // Check distance from heap base. Cannot be below it
+        thisDistance = address - Memory.heapBaseAddress;
+        if (thisDistance >= 0 && thisDistance < shortDistance) {
+            shortDistance = thisDistance;
+            desiredComboBoxIndex = DataSegmentWindow.HEAP_BASE_ADDRESS_INDEX;
+        }
+        // Check distance from stack pointer. Can be on either side of it...
+        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER));
+        if (thisDistance < shortDistance) {
+            desiredComboBoxIndex = DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX;
+        }
+        return desiredComboBoxIndex;
+    }
+
+    // Little helper. Is called when headers set up and each time number base
+    // changes.
+    private static String getHeaderStringForColumn(final int i, final int base) {
+        return (i == DataSegmentWindow.ADDRESS_COLUMN) ? "Address" : "Value (+" + Integer.toString((i - 1) * DataSegmentWindow.BYTES_PER_VALUE, base) + ")";
+    }
+
     /**
      * <p>updateBaseAddressComboBox.</p>
      */
@@ -201,7 +295,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.displayBaseAddressArray[DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX] = -1; /* Memory.stackPointer */
         this.displayBaseAddressArray[DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX] = Memory.memoryMapBaseAddress;
         this.displayBaseAddressArray[DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX] = Memory.textBaseAddress;
-        this.displayBaseAddressChoices = this.createBaseAddressLabelsArray(this.displayBaseAddressArray, this.descriptions);
+        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(this.displayBaseAddressArray, this.descriptions);
         this.baseAddressSelector.setModel(new CustomComboBoxModel(this.displayBaseAddressChoices));
         this.displayBaseAddresses = this.displayBaseAddressArray;
         this.baseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
@@ -289,7 +383,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         //////////////////////////////////////////////////////////
 
         // STEP 1: Determine which data segment contains this address.
-        final int desiredComboBoxIndex = this.getBaseAddressIndexForAddress(address);
+        final int desiredComboBoxIndex = DataSegmentWindow.getBaseAddressIndexForAddress(address);
         if (desiredComboBoxIndex < 0) {
             // It is not a data segment address so good bye!
             return null;
@@ -341,26 +435,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         return new Point(addrRow, addrColumn);
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    // Initalize arrays used with Base Address combo box chooser.
-    // The combo box replaced the row of buttons when number of buttons expanded to
-    //////////////////////////////////////////////////////////////////////// 7!
-    private static final int EXTERN_BASE_ADDRESS_INDEX = 0;
-    private static final int GLOBAL_POINTER_ADDRESS_INDEX = 3; // 1;
-    private static final int TEXT_BASE_ADDRESS_INDEX = 5; // 2;
-    private static final int DATA_BASE_ADDRESS_INDEX = 1; // 3;
-    private static final int HEAP_BASE_ADDRESS_INDEX = 2; // 4;
-    private static final int STACK_POINTER_BASE_ADDRESS_INDEX = 4; // 5;
-    private static final int MMIO_BASE_ADDRESS_INDEX = 6;
-    // Must agree with above in number and order...
-    private final int[] displayBaseAddressArray = {Memory.externBaseAddress,
-            Memory.dataBaseAddress, Memory.heapBaseAddress, -1 /* Memory.globalPointer */,
-            -1 /* Memory.stackPointer */, Memory.textBaseAddress,
-            Memory.memoryMapBaseAddress,};
-    // Must agree with above in number and order...
-    final String[] descriptions = {" (.extern)", " (.data)", " (heap)", "current gp",
-            "current sp", " (.text)", " (MMIO)"};
-
     private void initializeBaseAddressChoices() {
         // Also must agree in number and order. Upon combo box item selection, will
         // invoke
@@ -374,70 +448,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.baseAddressButtons[DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX] = this.mmioButton;
         this.baseAddressButtons[DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX] = this.textButton;
         this.displayBaseAddresses = this.displayBaseAddressArray;
-        this.displayBaseAddressChoices = this.createBaseAddressLabelsArray(this.displayBaseAddressArray, this.descriptions);
+        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(this.displayBaseAddressArray, this.descriptions);
         this.defaultBaseAddressIndex = DataSegmentWindow.DATA_BASE_ADDRESS_INDEX;
-    }
-
-    // Create and fill String array containing labels for base address combo box.
-    private String[] createBaseAddressLabelsArray(final int[] baseAddressArray, final String[] descriptions) {
-        final String[] baseAddressChoices = new String[baseAddressArray.length];
-        for (int i = 0; i < baseAddressChoices.length; i++) {
-            baseAddressChoices[i] = ((baseAddressArray[i] != -1)
-                    ? io.github.chr1sps.rars.util.Binary.intToHexString(baseAddressArray[i])
-                    : "")
-                    + descriptions[i];
-        }
-        return baseAddressChoices;
-    }
-
-    // Given an address, determine which segment it is in and return the
-    // corresponding
-    // combo box index. Note there is not a one-to-one correspondence between these
-    // indexes and the Memory tables. For instance, the heap (0x10040000), the
-    // global (0x10008000) and the data segment base (0x10000000) are all stored in
-    // the
-    // same table as the static (0x10010000) so all are "Memory.inDataSegment()".
-    private int getBaseAddressIndexForAddress(final int address) {
-        int desiredComboBoxIndex = -1; // assume not a data address.
-        if (Memory.inMemoryMapSegment(address)) {
-            return DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX;
-        } else if (Memory.inTextSegment(address)) { // DPS. 8-July-2013
-            return DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX;
-        }
-        int shortDistance = 0x7fffffff;
-        int thisDistance;
-        // Check distance from .extern base. Cannot be below it
-        thisDistance = address - Memory.externBaseAddress;
-        if (thisDistance >= 0 && thisDistance < shortDistance) {
-            shortDistance = thisDistance;
-            desiredComboBoxIndex = DataSegmentWindow.EXTERN_BASE_ADDRESS_INDEX;
-        }
-        // Check distance from global pointer; can be either side of it...
-        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER)); // distance from
-        // global
-        // pointer
-        if (thisDistance < shortDistance) {
-            shortDistance = thisDistance;
-            desiredComboBoxIndex = DataSegmentWindow.GLOBAL_POINTER_ADDRESS_INDEX;
-        }
-        // Check distance from .data base. Cannot be below it
-        thisDistance = address - Memory.dataBaseAddress;
-        if (thisDistance >= 0 && thisDistance < shortDistance) {
-            shortDistance = thisDistance;
-            desiredComboBoxIndex = DataSegmentWindow.DATA_BASE_ADDRESS_INDEX;
-        }
-        // Check distance from heap base. Cannot be below it
-        thisDistance = address - Memory.heapBaseAddress;
-        if (thisDistance >= 0 && thisDistance < shortDistance) {
-            shortDistance = thisDistance;
-            desiredComboBoxIndex = DataSegmentWindow.HEAP_BASE_ADDRESS_INDEX;
-        }
-        // Check distance from stack pointer. Can be on either side of it...
-        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER));
-        if (thisDistance < shortDistance) {
-            desiredComboBoxIndex = DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX;
-        }
-        return desiredComboBoxIndex;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -462,7 +474,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
         final String[] names = new String[DataSegmentWindow.NUMBER_OF_COLUMNS];
         for (int i = 0; i < DataSegmentWindow.NUMBER_OF_COLUMNS; i++) {
-            names[i] = this.getHeaderStringForColumn(i, addressBase);
+            names[i] = DataSegmentWindow.getHeaderStringForColumn(i, addressBase);
         }
         DataSegmentWindow.dataTable = new MyTippedJTable(new DataTableModel(DataSegmentWindow.dataData, names));
         this.updateRowHeight();
@@ -484,12 +496,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.dataTableScroller = new JScrollPane(DataSegmentWindow.dataTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         return this.dataTableScroller;
-    }
-
-    // Little helper. Is called when headers set up and each time number base
-    // changes.
-    private String getHeaderStringForColumn(final int i, final int base) {
-        return (i == DataSegmentWindow.ADDRESS_COLUMN) ? "Address" : "Value (+" + Integer.toString((i - 1) * DataSegmentWindow.BYTES_PER_VALUE, base) + ")";
     }
 
     /**
@@ -638,7 +644,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
         // column headers include address offsets, so translate them too
         for (int i = 1; i < DataSegmentWindow.NUMBER_OF_COLUMNS; i++) {
-            DataSegmentWindow.dataTable.getColumnModel().getColumn(i).setHeaderValue(this.getHeaderStringForColumn(i, addressBase));
+            DataSegmentWindow.dataTable.getColumnModel().getColumn(i).setHeaderValue(DataSegmentWindow.getHeaderStringForColumn(i, addressBase));
         }
         DataSegmentWindow.dataTable.getTableHeader().repaint();
     }
@@ -690,6 +696,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     }
 
     /*
+     * Establish action listeners for the data segment navigation buttons.
+     */
+
+    /*
      * Do this upon reset.
      */
     private void enableAllButtons() {
@@ -704,10 +714,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.nextButton.setEnabled(true);
         this.dataButton.setEnabled(true);
     }
-
-    /*
-     * Establish action listeners for the data segment navigation buttons.
-     */
 
     private void addButtonActionListenersAndInitialize() {
         // set initial states
@@ -846,20 +852,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         return lowAddress;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Required by Observer interface. Called when notified by an Observable that we
-     * are registered with.
-     * Observables include:
-     * The Simulator object, which lets us know when it starts and stops running
-     * A delegate of the Memory object, which lets us know of memory operations
-     * The Simulator keeps us informed of when simulated MIPS execution is active.
-     * This is the only time we care about memory operations.
-     */
-
-    private Flow.Subscription subscription;
-
     @Override
     public void onSubscribe(final Flow.Subscription subscription) {
         this.subscription = subscription;
@@ -870,11 +862,11 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public void onNext(final Notice notice) {
         switch (notice) {
             case final SimulatorNotice s -> {
-                if (s.getAction() == SimulatorNotice.SIMULATOR_START) {
+                if (s.action() == SimulatorNotice.SIMULATOR_START) {
                     // Simulated MIPS execution starts. Respond to memory changes if running in
                     // timed
                     // or stepped mode.
-                    if (s.getRunSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.getMaxSteps() == 1) {
+                    if (s.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps() == 1) {
                         Memory.getInstance().subscribe(this);
                         this.addressHighlighting = true;
                     }
@@ -1106,16 +1098,16 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
     //
     private class MyTippedJTable extends JTable {
-        MyTippedJTable(final DataTableModel m) {
-            super(m);
-        }
-
         private final String[] columnToolTips = {
                 /* address */ "Base memory address for this row of the table.",
                 /* value +0 */ "32-bit value stored at base address for its row.",
                 /* value +n */ "32-bit value stored ",
                 /* value +n */ " bytes beyond base address for its row."
         };
+
+        MyTippedJTable(final DataTableModel m) {
+            super(m);
+        }
 
         // Implement table header tool tips.
         @Override

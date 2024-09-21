@@ -1,6 +1,7 @@
 package io.github.chr1sps.rars.venus.run;
 
 import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.RISCVprogram;
 import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.notices.SimulatorNotice;
@@ -60,9 +61,9 @@ public class RunGoAction extends GuiAction {
      * Constant <code>maxSteps=defaultMaxSteps</code>
      */
     public static int maxSteps = RunGoAction.defaultMaxSteps;
+    private final VenusUI mainUI;
     private String name;
     private ExecutePane executePane;
-    private final VenusUI mainUI;
 
     /**
      * <p>Constructor for RunGoAction.</p>
@@ -78,6 +79,14 @@ public class RunGoAction extends GuiAction {
                        final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainUI = gui;
+    }
+
+    /**
+     * Reset max steps limit to default value at termination of a simulated
+     * execution.
+     */
+    public static void resetMaxSteps() {
+        RunGoAction.maxSteps = RunGoAction.defaultMaxSteps;
     }
 
     /**
@@ -117,15 +126,15 @@ public class RunGoAction extends GuiAction {
 
                     @Override
                     public void onNext(final SimulatorNotice notice) {
-                        if (notice.getAction() != SimulatorNotice.SIMULATOR_STOP) {
+                        if (notice.action() != SimulatorNotice.SIMULATOR_STOP) {
                             this.subscription.request(1);
                             return;
                         }
-                        final Simulator.Reason reason = notice.getReason();
+                        final Simulator.Reason reason = notice.reason();
                         if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
-                            EventQueue.invokeLater(() -> RunGoAction.this.paused(notice.getDone(), reason, notice.getException()));
+                            EventQueue.invokeLater(() -> RunGoAction.this.paused(notice.done(), reason, notice.exception()));
                         } else {
-                            EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.getException(), reason));
+                            EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.exception(), reason));
                         }
                         this.subscription.cancel();
                     }
@@ -133,7 +142,7 @@ public class RunGoAction extends GuiAction {
                 Simulator.getInstance().subscribe(stopListener);
 
                 final int[] breakPoints = this.executePane.getTextSegmentWindow().getSortedBreakPointsArray();
-                Globals.program.startSimulation(RunGoAction.maxSteps, breakPoints);
+                RISCVprogram.startSimulation(RunGoAction.maxSteps, breakPoints);
             } else {
                 // This should never occur because at termination the Go and Step buttons are
                 // disabled.
@@ -256,14 +265,6 @@ public class RunGoAction extends GuiAction {
         }
         RunGoAction.resetMaxSteps();
         this.mainUI.setReset(false);
-    }
-
-    /**
-     * Reset max steps limit to default value at termination of a simulated
-     * execution.
-     */
-    public static void resetMaxSteps() {
-        RunGoAction.maxSteps = RunGoAction.defaultMaxSteps;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////

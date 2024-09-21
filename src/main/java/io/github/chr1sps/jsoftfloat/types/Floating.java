@@ -2,13 +2,14 @@ package io.github.chr1sps.jsoftfloat.types;
 
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.internal.ExactFloat;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * General classifications that any floating point class needs to provide.
  *
  * @param <T>
  */
-public abstract class Floating<T extends Floating<T>> {
+public interface Floating<T extends Floating<T>> {
     // TODO: order/group these
 
     /**
@@ -16,22 +17,22 @@ public abstract class Floating<T extends Floating<T>> {
      *
      * @return a boolean
      */
-    public abstract boolean isSignMinus();
+    boolean isSignMinus();
 
     /**
      * <p>isInfinite.</p>
      *
      * @return a boolean
      */
-    public abstract boolean isInfinite();
+    boolean isInfinite();
 
     /**
      * <p>isFinite.</p>
      *
      * @return a boolean
      */
-    public boolean isFinite() {
-        return isZero() || isNormal() || isSubnormal();
+    default boolean isFinite() {
+        return this.isZero() || this.isNormal() || this.isSubnormal();
     }
 
     /**
@@ -39,42 +40,35 @@ public abstract class Floating<T extends Floating<T>> {
      *
      * @return a boolean
      */
-    public abstract boolean isNormal();
+    boolean isNormal();
 
     /**
      * <p>isSubnormal.</p>
      *
      * @return a boolean
      */
-    public abstract boolean isSubnormal();
+    boolean isSubnormal();
 
     /**
      * <p>isNaN.</p>
      *
      * @return a boolean
      */
-    public abstract boolean isNaN();
+    boolean isNaN();
 
     /**
      * <p>isSignalling.</p>
      *
      * @return a boolean
      */
-    public abstract boolean isSignalling();
-
-    /**
-     * <p>isCanonical.</p>
-     *
-     * @return a boolean
-     */
-    public abstract boolean isCanonical();
+    boolean isSignalling();
 
     /**
      * <p>isZero.</p>
      *
      * @return a boolean
      */
-    public abstract boolean isZero();
+    boolean isZero();
 
     // TODO: consider making a full bit field representation method for generic
     // conversions
@@ -84,42 +78,42 @@ public abstract class Floating<T extends Floating<T>> {
      *
      * @return a int
      */
-    public abstract int maxPrecision();
+    int maxPrecision();
 
     /**
      * <p>NaN.</p>
      *
      * @return a T object
      */
-    public abstract T NaN();
+    @NotNull T NaN();
 
     /**
      * <p>Zero.</p>
      *
      * @return a T object
      */
-    public abstract T Zero();
+    @NotNull T Zero();
 
     /**
      * <p>NegativeZero.</p>
      *
      * @return a T object
      */
-    public abstract T NegativeZero();
+    @NotNull T NegativeZero();
 
     /**
      * <p>Infinity.</p>
      *
      * @return a T object
      */
-    public abstract T Infinity();
+    @NotNull T Infinity();
 
     /**
      * <p>NegativeInfinity.</p>
      *
      * @return a T object
      */
-    public abstract T NegativeInfinity();
+    @NotNull T NegativeInfinity();
 
     /**
      * <p>fromExactFloat.</p>
@@ -128,20 +122,20 @@ public abstract class Floating<T extends Floating<T>> {
      * @param env a {@link io.github.chr1sps.jsoftfloat.Environment} object
      * @return a T object
      */
-    public abstract T fromExactFloat(ExactFloat f, Environment env);
+    @NotNull T fromExactFloat(@NotNull ExactFloat f, @NotNull Environment env);
 
     /**
      * <p>toExactFloat.</p>
      *
      * @return a {@link io.github.chr1sps.jsoftfloat.internal.ExactFloat} object
      */
-    public abstract ExactFloat toExactFloat();
+    @NotNull ExactFloat toExactFloat();
 
     /**
      * <p>negate.</p>
      *
      * @return a T object
      */
-    public abstract T negate();
+    @NotNull T negate();
 
 }

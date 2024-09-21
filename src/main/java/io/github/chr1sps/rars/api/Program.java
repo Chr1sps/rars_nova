@@ -1,6 +1,9 @@
 package io.github.chr1sps.rars.api;
 
-import io.github.chr1sps.rars.*;
+import io.github.chr1sps.rars.ErrorList;
+import io.github.chr1sps.rars.Globals;
+import io.github.chr1sps.rars.RISCVprogram;
+import io.github.chr1sps.rars.Settings;
 import io.github.chr1sps.rars.exceptions.AssemblyException;
 import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.hardware.*;
@@ -42,16 +45,15 @@ import java.util.ArrayList;
  * invalidate
  * a concurrent simulation.
  * </p>
- *
  */
 public class Program {
 
     private final Options set;
     private final RISCVprogram code;
-    private SystemIO.Data fds;
-    private ByteArrayOutputStream stdout, stderr;
     private final Memory assembled;
     private final Memory simulation;
+    private SystemIO.Data fds;
+    private ByteArrayOutputStream stdout, stderr;
     private int startPC, exitCode;
 
     /**
@@ -66,12 +68,55 @@ public class Program {
      *
      * @param set a {@link io.github.chr1sps.rars.api.Options} object
      */
-    public Program(Options set) {
+    public Program(final Options set) {
         Globals.initialize();
         this.set = set;
-        code = new RISCVprogram();
-        assembled = new Memory();
-        simulation = new Memory();
+        this.code = new RISCVprogram();
+        this.assembled = new Memory();
+        this.simulation = new Memory();
+    }
+
+    /**
+     * Gets the value of a normal, floating-point or control and status register.
+     *
+     * @param name Either the common usage (t0, a0, ft0), explicit numbering (x2,
+     *             x3, f0), or CSR name (ustatus)
+     * @return The value of the register as an int (floats are encoded as IEEE-754)
+     * @throws java.lang.NullPointerException if name is invalid; only needs to be checked if
+     *                                        code accesses arbitrary names
+     */
+    public static int getRegisterValue(final String name) {
+        Register r = RegisterFile.getRegister(name);
+        if (r == null) {
+            r = FloatingPointRegisterFile.getRegister(name);
+        }
+        if (r == null) {
+            return ControlAndStatusRegisterFile.getValue(name);
+        } else {
+            return (int) r.getValue();
+        }
+    }
+
+    /**
+     * Sets the value of a normal, floating-point or control and status register.
+     *
+     * @param name  Either the common usage (t0, a0, ft0), explicit numbering (x2,
+     *              x3, f0), or CSR name (ustatus)
+     * @param value The value of the register as an int (floats are encoded as
+     *              IEEE-754)
+     * @throws java.lang.NullPointerException if name is invalid; only needs to be checked if
+     *                                        code accesses arbitrary names
+     */
+    public static void setRegisterValue(final String name, final int value) {
+        Register r = RegisterFile.getRegister(name);
+        if (r == null) {
+            r = FloatingPointRegisterFile.getRegister(name);
+        }
+        if (r == null) {
+            ControlAndStatusRegisterFile.updateRegister(name, value);
+        } else {
+            r.setValue(value);
+        }
     }
 
     /**
@@ -84,9 +129,9 @@ public class Program {
      * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
-    public ErrorList assemble(ArrayList<String> files, String main) throws AssemblyException {
-        ArrayList<RISCVprogram> programs = code.prepareFilesForAssembly(files, main, null);
-        return assemble(programs);
+    public ErrorList assemble(final ArrayList<String> files, final String main) throws AssemblyException {
+        final ArrayList<RISCVprogram> programs = this.code.prepareFilesForAssembly(files, main, null);
+        return this.assemble(programs);
     }
 
     /**
@@ -97,12 +142,12 @@ public class Program {
      * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
-    public ErrorList assemble(String file) throws AssemblyException {
+    public ErrorList assemble(final String file) throws AssemblyException {
         // TODO: potentially inline prepareForAssembly
-        ArrayList<String> files = new ArrayList<>();
+        final ArrayList<String> files = new ArrayList<>();
         files.add(file);
-        ArrayList<RISCVprogram> programs = code.prepareFilesForAssembly(files, file, null);
-        return assemble(programs);
+        final ArrayList<RISCVprogram> programs = this.code.prepareFilesForAssembly(files, file, null);
+        return this.assemble(programs);
     }
 
     /**
@@ -113,29 +158,29 @@ public class Program {
      * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
-    public ErrorList assembleString(String source) throws AssemblyException {
-        ArrayList<RISCVprogram> programs = new ArrayList<>();
-        code.fromString(source);
-        code.tokenize();
-        programs.add(code);
-        return assemble(programs);
+    public ErrorList assembleString(final String source) throws AssemblyException {
+        final ArrayList<RISCVprogram> programs = new ArrayList<>();
+        this.code.fromString(source);
+        this.code.tokenize();
+        programs.add(this.code);
+        return this.assemble(programs);
     }
 
-    private ErrorList assemble(ArrayList<RISCVprogram> programs) throws AssemblyException {
-        Memory temp = Memory.swapInstance(assembled); // Assembling changes memory so we need to swap to capture that.
+    private ErrorList assemble(final ArrayList<RISCVprogram> programs) throws AssemblyException {
+        final Memory temp = Memory.swapInstance(this.assembled); // Assembling changes memory so we need to swap to capture that.
         ErrorList warnings = null;
         AssemblyException e = null;
         try {
-            warnings = code.assemble(programs, set.pseudo, set.warningsAreErrors);
-        } catch (AssemblyException ae) {
+            warnings = this.code.assemble(programs, this.set.pseudo, this.set.warningsAreErrors);
+        } catch (final AssemblyException ae) {
             e = ae;
         }
         Memory.swapInstance(temp);
         if (e != null)
             throw e;
 
-        RegisterFile.initializeProgramCounter(set.startAtMain);
-        startPC = RegisterFile.getProgramCounter();
+        RegisterFile.initializeProgramCounter(this.set.startAtMain);
+        this.startPC = RegisterFile.getProgramCounter();
 
         return warnings;
     }
@@ -148,28 +193,28 @@ public class Program {
      * @param STDIN A string that can be read in the program like its stdin or null
      *              to allow IO passthrough
      */
-    public void setup(ArrayList<String> args, String STDIN) {
+    public void setup(final ArrayList<String> args, final String STDIN) {
         RegisterFile.resetRegisters();
         FloatingPointRegisterFile.resetRegisters();
         ControlAndStatusRegisterFile.resetRegisters();
         InterruptController.reset();
-        RegisterFile.initializeProgramCounter(startPC);
+        RegisterFile.initializeProgramCounter(this.startPC);
         Globals.exitCode = 0;
 
         // Copy in assembled code and arguments
-        simulation.copyFrom(assembled);
-        Memory tmpMem = Memory.swapInstance(simulation);
+        this.simulation.copyFrom(this.assembled);
+        final Memory tmpMem = Memory.swapInstance(this.simulation);
         new ProgramArgumentList(args).storeProgramArguments();
         Memory.swapInstance(tmpMem);
 
         // To capture the IO we need to replace stdin and friends
         if (STDIN != null) {
-            stdout = new ByteArrayOutputStream();
-            stderr = new ByteArrayOutputStream();
-            fds = new SystemIO.Data(
-                    new ByteArrayInputStream(STDIN.getBytes()), stdout, stderr);
+            this.stdout = new ByteArrayOutputStream();
+            this.stderr = new ByteArrayOutputStream();
+            this.fds = new SystemIO.Data(
+                    new ByteArrayInputStream(STDIN.getBytes()), this.stdout, this.stderr);
         } else {
-            fds = new SystemIO.Data(true);
+            this.fds = new SystemIO.Data(true);
         }
     }
 
@@ -194,18 +239,18 @@ public class Program {
         SimulationException e = null;
 
         // Swap out global state for local state.
-        boolean selfMod = Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED);
+        final boolean selfMod = Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED);
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED,
-                set.selfModifyingCode);
-        SystemIO.Data tmpFiles = SystemIO.swapData(fds);
-        Memory tmpMem = Memory.swapInstance(simulation);
+                this.set.selfModifyingCode);
+        final SystemIO.Data tmpFiles = SystemIO.swapData(this.fds);
+        final Memory tmpMem = Memory.swapInstance(this.simulation);
 
         try {
-            ret = code.simulate(set.maxSteps);
-        } catch (SimulationException se) {
+            ret = RISCVprogram.simulate(this.set.maxSteps);
+        } catch (final SimulationException se) {
             e = se;
         }
-        exitCode = Globals.exitCode;
+        this.exitCode = Globals.exitCode;
 
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED, selfMod);
         SystemIO.swapData(tmpFiles);
@@ -223,7 +268,7 @@ public class Program {
      * setup is called)
      */
     public String getSTDOUT() {
-        return stdout.toString();
+        return this.stdout.toString();
     }
 
     /**
@@ -233,50 +278,7 @@ public class Program {
      * setup is called)
      */
     public String getSTDERR() {
-        return stderr.toString();
-    }
-
-    /**
-     * Gets the value of a normal, floating-point or control and status register.
-     *
-     * @param name Either the common usage (t0, a0, ft0), explicit numbering (x2,
-     *             x3, f0), or CSR name (ustatus)
-     * @return The value of the register as an int (floats are encoded as IEEE-754)
-     * @throws java.lang.NullPointerException if name is invalid; only needs to be checked if
-     *                                        code accesses arbitrary names
-     */
-    public int getRegisterValue(String name) {
-        Register r = RegisterFile.getRegister(name);
-        if (r == null) {
-            r = FloatingPointRegisterFile.getRegister(name);
-        }
-        if (r == null) {
-            return ControlAndStatusRegisterFile.getValue(name);
-        } else {
-            return (int) r.getValue();
-        }
-    }
-
-    /**
-     * Sets the value of a normal, floating-point or control and status register.
-     *
-     * @param name  Either the common usage (t0, a0, ft0), explicit numbering (x2,
-     *              x3, f0), or CSR name (ustatus)
-     * @param value The value of the register as an int (floats are encoded as
-     *              IEEE-754)
-     * @throws java.lang.NullPointerException if name is invalid; only needs to be checked if
-     *                                        code accesses arbitrary names
-     */
-    public void setRegisterValue(String name, int value) {
-        Register r = RegisterFile.getRegister(name);
-        if (r == null) {
-            r = FloatingPointRegisterFile.getRegister(name);
-        }
-        if (r == null) {
-            ControlAndStatusRegisterFile.updateRegister(name, value);
-        } else {
-            r.setValue(value);
-        }
+        return this.stderr.toString();
     }
 
     /**
@@ -286,7 +288,7 @@ public class Program {
      * @return a int
      */
     public int getExitCode() {
-        return exitCode;
+        return this.exitCode;
     }
 
     /**
@@ -297,6 +299,6 @@ public class Program {
      * @return a {@link io.github.chr1sps.rars.riscv.hardware.Memory} object
      */
     public Memory getMemory() {
-        return simulation;
+        return this.simulation;
     }
 }

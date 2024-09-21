@@ -7,6 +7,7 @@ import io.github.chr1sps.rars.venus.editors.TextEditingArea;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.tokenmarker.RISCVTokenMarker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
@@ -34,9 +35,9 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     private final JComponent lineNumbers;
     private final EditPane editPane;
     private final UndoManager undoManager;
+    private final JEditBasedTextArea sourceCode;
     private boolean isCompoundEdit = false;
     private CompoundEdit compoundEdit;
-    private final JEditBasedTextArea sourceCode;
 
     /**
      * <p>Constructor for JEditBasedTextArea.</p>
@@ -71,14 +72,6 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setFont(final Font f) {
-        this.getPainter().setFont(f);
-    }
-
-    /**
      * <p>getFont.</p>
      *
      * @return a {@link java.awt.Font} object
@@ -86,6 +79,14 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     @Override
     public Font getFont() {
         return this.getPainter().getFont();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setFont(final Font f) {
+        this.getPainter().setFont(f);
     }
 
     // public void repaint() { getPainter().repaint(); }
@@ -315,7 +316,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * is reached.
      */
     @Override
-    public int doFindText(final String find, final boolean caseSensitive) {
+    public @NotNull FindReplaceResult doFindText(final String find, final boolean caseSensitive) {
         final int findPosn = this.sourceCode.getCaretPosition();
         final int nextPosn;
         nextPosn = this.nextIndex(this.sourceCode.getText(), find, findPosn, caseSensitive);
@@ -326,9 +327,9 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
             // Need to repeat start due to quirk in JEditTextArea implementation of
             // setSelectionStart.
             this.sourceCode.setSelectionStart(nextPosn);
-            return TextEditingArea.TEXT_FOUND;
+            return FindReplaceResult.TEXT_FOUND;
         } else {
-            return TextEditingArea.TEXT_NOT_FOUND;
+            return FindReplaceResult.TEXT_NOT_FOUND;
         }
     }
 
@@ -373,7 +374,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * can be undone with one undo operation.
      */
     @Override
-    public int doReplace(final String find, final String replace, final boolean caseSensitive) {
+    public @NotNull FindReplaceResult doReplace(final String find, final String replace, final boolean caseSensitive) {
         final int nextPosn;
         int posn;
         // Will perform a "find" and return, unless positioned at the end of
@@ -398,10 +399,10 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         this.editPane.updateUndoAndRedoState();
         this.isCompoundEdit = false;
         this.sourceCode.setCaretPosition(nextPosn + replace.length());
-        if (this.doFindText(find, caseSensitive) == TextEditingArea.TEXT_NOT_FOUND) {
-            return TextEditingArea.TEXT_REPLACED_NOT_FOUND_NEXT;
+        if (this.doFindText(find, caseSensitive) == FindReplaceResult.TEXT_NOT_FOUND) {
+            return FindReplaceResult.TEXT_REPLACED_NOT_FOUND_NEXT;
         } else {
-            return TextEditingArea.TEXT_REPLACED_FOUND_NEXT;
+            return FindReplaceResult.TEXT_REPLACED_FOUND_NEXT;
         }
     }
 

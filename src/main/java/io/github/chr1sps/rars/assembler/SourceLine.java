@@ -1,6 +1,7 @@
 package io.github.chr1sps.rars.assembler;
 
 import io.github.chr1sps.rars.RISCVprogram;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -37,14 +38,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * a given line of code. When .include is used, it will migrate to a different
  * line and possibly different program but the migration should not be visible
  * to the user.
- *
  */
-public class SourceLine {
-    private final String source;
-    private String filename;
-    private final RISCVprogram program;
-    private final int lineNumber;
-
+public record SourceLine(@NotNull String source, @NotNull RISCVprogram program, @NotNull String filename,
+                         int lineNumber) {
     /**
      * SourceLine constructor
      *
@@ -53,47 +49,7 @@ public class SourceLine {
      *                   that line
      * @param lineNumber The line number within that program where source appears.
      */
-    public SourceLine(String source, RISCVprogram program, int lineNumber) {
-        this.source = source;
-        this.program = program;
-        if (program != null)
-            this.filename = program.getFilename();
-        this.lineNumber = lineNumber;
-    }
-
-    /**
-     * Retrieve source statement itself
-     *
-     * @return Source statement as String
-     */
-    public String getSource() {
-        return source;
-    }
-
-    /**
-     * Retrieve name of file containing source statement
-     *
-     * @return File name as String
-     */
-    public String getFilename() {
-        return filename;
-    }
-
-    /**
-     * Retrieve line number of source statement
-     *
-     * @return Line number of source statement
-     */
-    public int getLineNumber() {
-        return lineNumber;
-    }
-
-    /**
-     * Retrieve RISCVprogram object containing source statement
-     *
-     * @return program as RISCVprogram object
-     */
-    public RISCVprogram getRISCVprogram() {
-        return program;
+    public SourceLine(@NotNull final String source, @NotNull final RISCVprogram program, final int lineNumber) {
+        this(source, program, program.getFilename(), lineNumber);
     }
 }

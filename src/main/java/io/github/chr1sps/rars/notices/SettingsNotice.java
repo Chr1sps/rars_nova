@@ -7,7 +7,7 @@ public final class SettingsNotice implements Notice {
     }
 
     public static SettingsNotice get() {
-        return INSTANCE;
+        return SettingsNotice.INSTANCE;
     }
 
 }

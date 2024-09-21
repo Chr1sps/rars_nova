@@ -7,6 +7,7 @@ import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxUtilities;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -64,140 +65,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  */
 public class Settings extends SubmissionPublisher<SettingsNotice> {
-    private static final Logger LOGGER = LogManager.getLogger();
-    /* Properties file used to hold default settings. */
-    private static final String settingsFile = "Settings";
-    private final ColorMode defaultColorMode = ColorMode.SYSTEM;
-
-    // BOOLEAN SETTINGS...
-    public enum Bool {
-        /**
-         * Flag to determine whether or not program being assembled is limited to
-         * basic instructions and formats.
-         */
-        EXTENDED_ASSEMBLER_ENABLED("ExtendedAssembler", true),
-        /**
-         * Flag to determine whether or not a file is immediately and automatically
-         * assembled
-         * upon opening. Handy when using externa editor like mipster.
-         */
-        ASSEMBLE_ON_OPEN("AssembleOnOpen", false),
-        /**
-         * Flag to determine whether all files open currently source file will be
-         * assembled when assembly is selected.
-         */
-        ASSEMBLE_OPEN("AssembleOpen", false),
-        /**
-         * Flag to determine whether files in the directory of the current source file
-         * will be assembled when assembly is selected.
-         */
-        ASSEMBLE_ALL("AssembleAll", false),
-
-        /**
-         * Default visibilty of label window (symbol table). Default only, dynamic
-         * status
-         * maintained by ExecutePane
-         */
-        LABEL_WINDOW_VISIBILITY("LabelWindowVisibility", false),
-        /**
-         * Default setting for displaying addresses and values in hexidecimal in the
-         * Execute
-         * pane.
-         */
-        DISPLAY_ADDRESSES_IN_HEX("DisplayAddressesInHex", true),
-        DISPLAY_VALUES_IN_HEX("DisplayValuesInHex", true),
-        /**
-         * Flag to determine whether the currently selected exception handler source
-         * file will
-         * be included in each assembly operation.
-         */
-        EXCEPTION_HANDLER_ENABLED("LoadExceptionHandler", false),
-        /**
-         * Flag to determine whether or not the editor will display line numbers.
-         */
-        EDITOR_LINE_NUMBERS_DISPLAYED("EditorLineNumbersDisplayed", true),
-        /**
-         * Flag to determine whether or not assembler warnings are considered errors.
-         */
-        WARNINGS_ARE_ERRORS("WarningsAreErrors", false),
-        /**
-         * Flag to determine whether or not to display and use program arguments
-         */
-        PROGRAM_ARGUMENTS("ProgramArguments", false),
-        /**
-         * Flag to control whether or not highlighting is applied to data segment window
-         */
-        DATA_SEGMENT_HIGHLIGHTING("DataSegmentHighlighting", true),
-        /**
-         * Flag to control whether or not highlighting is applied to register windows
-         */
-        REGISTERS_HIGHLIGHTING("RegistersHighlighting", true),
-        /**
-         * Flag to control whether or not assembler automatically initializes program
-         * counter to 'main's address
-         */
-        START_AT_MAIN("StartAtMain", false),
-        /**
-         * Flag to control whether or not editor will highlight the line currently being
-         * edited
-         */
-        EDITOR_CURRENT_LINE_HIGHLIGHTING("EditorCurrentLineHighlighting", true),
-        /**
-         * Flag to control whether or not editor will provide popup instruction guidance
-         * while typing
-         */
-        POPUP_INSTRUCTION_GUIDANCE("PopupInstructionGuidance", true),
-        /**
-         * Flag to control whether or not simulator will use popup dialog for input
-         * syscalls
-         */
-        POPUP_SYSCALL_INPUT("PopupSyscallInput", false),
-        /**
-         * Flag to control whether or not language-aware editor will use auto-indent
-         * feature
-         */
-        AUTO_INDENT("AutoIndent", true),
-        /**
-         * Flag to determine whether a program can write binary code to the text or data
-         * segment and
-         * execute that code.
-         */
-        SELF_MODIFYING_CODE_ENABLED("SelfModifyingCode", false),
-        /**
-         * Flag to determine whether a program uses rv64i instead of rv32i
-         */
-        RV64_ENABLED("rv64Enabled", false),
-        /**
-         * Flag to determine whether to calculate relative paths from the current
-         * working directory
-         * or from the RARS executable path.
-         */
-        DERIVE_CURRENT_WORKING_DIRECTORY("DeriveCurrentWorkingDirectory", false);
-
-        // TODO: add option for turning off user trap handling and interrupts
-        private final String name;
-        private boolean value;
-
-        Bool(final String n, final boolean v) {
-            this.name = n;
-            this.value = v;
-        }
-
-        boolean getDefault() {
-            return this.value;
-        }
-
-        void setDefault(final boolean v) {
-            this.value = v;
-        }
-
-        String getName() {
-            return this.name;
-        }
-    }
-
-    // region String settings
-    // STRING SETTINGS. Each array position has associated name.
     /**
      * Current specified exception handler file (a RISCV assembly source file)
      */
@@ -214,6 +81,9 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * Identifier of current memory configuration
      */
     public static final int MEMORY_CONFIGURATION = 3;
+
+    // region String settings
+    // STRING SETTINGS. Each array position has associated name.
     /**
      * Caret blink rate in milliseconds, 0 means don't blink.
      */
@@ -227,20 +97,6 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * generated (if popup enabled)
      */
     public static final int EDITOR_POPUP_PREFIX_LENGTH = 6;
-    // Match the above by position.
-    // endregion String settings
-    private static final String[] stringSettingsKeys = {"ExceptionHandler", "TextColumnOrder", "LabelSortState",
-            "MemoryConfiguration", "CaretBlinkRate", "EditorTabSize", "EditorPopupPrefixLength"};
-
-    /**
-     * Last resort default values for String settings;
-     * will use only if neither the Preferences nor the properties file work.
-     * If you wish to change, do so before instantiating the Settings object.
-     * Must match key by list position.
-     */
-    private static final String[] defaultStringSettingsValues = {"", "0 1 2 3 4", "0", "", "500", "8", "2"};
-
-    // FONT SETTINGS. Each array position has associated name.
     /**
      * Font for the text editor
      */
@@ -265,48 +121,12 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * Font for text segment highlighted background
      */
     public static final int DATASEGMENT_HIGHLIGHT_FONT = 5;
+
+    // FONT SETTINGS. Each array position has associated name.
     /**
      * Font for register highlighted background
      */
     public static final int REGISTER_HIGHLIGHT_FONT = 6;
-
-    private static final String[] fontFamilySettingsKeys = {"EditorFontFamily", "EvenRowFontFamily",
-            "OddRowFontFamily", " TextSegmentHighlightFontFamily", "TextSegmentDelayslotHighightFontFamily",
-            "DataSegmentHighlightFontFamily", "RegisterHighlightFontFamily"
-    };
-    private static final String[] fontStyleSettingsKeys = {"EditorFontStyle", "EvenRowFontStyle",
-            "OddRowFontStyle", " TextSegmentHighlightFontStyle", "TextSegmentDelayslotHighightFontStyle",
-            "DataSegmentHighlightFontStyle", "RegisterHighlightFontStyle"
-    };
-    private static final String[] fontSizeSettingsKeys = {"EditorFontSize", "EvenRowFontSize",
-            "OddRowFontSize", " TextSegmentHighlightFontSize", "TextSegmentDelayslotHighightFontSize",
-            "DataSegmentHighlightFontSize", "RegisterHighlightFontSize"
-    };
-
-    /**
-     * Last resort default values for Font settings;
-     * will use only if neither the Preferences nor the properties file work.
-     * If you wish to change, do so before instantiating the Settings object.
-     * Must match key by list position shown above.
-     */
-
-    // DPS 3-Oct-2012
-    // Changed default font family from "Courier New" to "Monospaced" after
-    // receiving reports that Mac were not
-    // correctly rendering the left parenthesis character in the editor or text
-    // segment display.
-    // See
-    // http://www.mirthcorp.com/community/issues/browse/MIRTH-1921?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel
-    private static final String[] defaultFontFamilySettingsValues = {"Monospaced", "Monospaced", "Monospaced",
-            "Monospaced", "Monospaced", "Monospaced", "Monospaced"
-    };
-    private static final String[] defaultFontStyleSettingsValues = {"Plain", "Plain", "Plain", "Plain",
-            "Plain", "Plain", "Plain"
-    };
-    private static final String[] defaultFontSizeSettingsValues = {"12", "12", "12", "12", "12", "12", "12",
-    };
-
-    // COLOR SETTINGS. Each array position has associated name.
     /**
      * RGB color for table even row background (text, data, register displays)
      */
@@ -355,6 +175,8 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * RGB color for register highlighted foreground
      */
     public static final int REGISTER_HIGHLIGHT_FOREGROUND = 11;
+
+    // COLOR SETTINGS. Each array position has associated name.
     /**
      * RGB background color of Editor
      */
@@ -375,19 +197,54 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * RGB color of caret in Editor
      */
     public static final int EDITOR_CARET_COLOR = 16;
+    private static final Logger LOGGER = LogManager.getLogger();
+    /* Properties file used to hold default settings. */
+    private static final String settingsFile = "Settings";
+    // Match the above by position.
+    // endregion String settings
+    private static final String[] stringSettingsKeys = {"ExceptionHandler", "TextColumnOrder", "LabelSortState",
+            "MemoryConfiguration", "CaretBlinkRate", "EditorTabSize", "EditorPopupPrefixLength"};
+    /**
+     * Last resort default values for String settings;
+     * will use only if neither the Preferences nor the properties file work.
+     * If you wish to change, do so before instantiating the Settings object.
+     * Must match key by list position.
+     */
+    private static final String[] defaultStringSettingsValues = {"", "0 1 2 3 4", "0", "", "500", "8", "2"};
+    private static final String[] fontFamilySettingsKeys = {"EditorFontFamily", "EvenRowFontFamily",
+            "OddRowFontFamily", " TextSegmentHighlightFontFamily", "TextSegmentDelayslotHighightFontFamily",
+            "DataSegmentHighlightFontFamily", "RegisterHighlightFontFamily"
+    };
+    private static final String[] fontStyleSettingsKeys = {"EditorFontStyle", "EvenRowFontStyle",
+            "OddRowFontStyle", " TextSegmentHighlightFontStyle", "TextSegmentDelayslotHighightFontStyle",
+            "DataSegmentHighlightFontStyle", "RegisterHighlightFontStyle"
+    };
+    private static final String[] fontSizeSettingsKeys = {"EditorFontSize", "EvenRowFontSize",
+            "OddRowFontSize", " TextSegmentHighlightFontSize", "TextSegmentDelayslotHighightFontSize",
+            "DataSegmentHighlightFontSize", "RegisterHighlightFontSize"
+    };
+    /**
+     * Last resort default values for Font settings;
+     * will use only if neither the Preferences nor the properties file work.
+     * If you wish to change, do so before instantiating the Settings object.
+     * Must match key by list position shown above.
+     */
 
-    public enum ColorMode {
-        DEFAULT("DEF"),
-        SYSTEM("SYS"),
-        CUSTOM(null);
-
-        public final @Nullable String modeKey;
-
-        ColorMode(final @Nullable String modeKey) {
-            this.modeKey = modeKey;
-        }
-    }
-
+    // DPS 3-Oct-2012
+    // Changed default font family from "Courier New" to "Monospaced" after
+    // receiving reports that Mac were not
+    // correctly rendering the left parenthesis character in the editor or text
+    // segment display.
+    // See
+    // http://www.mirthcorp.com/community/issues/browse/MIRTH-1921?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel
+    private static final String[] defaultFontFamilySettingsValues = {"Monospaced", "Monospaced", "Monospaced",
+            "Monospaced", "Monospaced", "Monospaced", "Monospaced"
+    };
+    private static final String[] defaultFontStyleSettingsValues = {"Plain", "Plain", "Plain", "Plain",
+            "Plain", "Plain", "Plain"
+    };
+    private static final String[] defaultFontSizeSettingsValues = {"12", "12", "12", "12", "12", "12", "12",
+    };
     // Match the above by position.
     private static final String[] colorSettingsKeys = {
             "EvenRowBackground", "EvenRowForeground", "OddRowBackground", "OddRowForeground",
@@ -405,13 +262,14 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     private static final String[] defaultColorSettingsValues = {
             "0x00e0e0e0", "0", "0x00ffffff", "0", "0x00ffff99", "0", "0x0033ff00", "0", "0x0099ccff", "0", "0x0099cc55",
             "0", "0x00ffffff", "0x00000000", "0x00eeeeee", "0x00ccccff", "0x00000000"};
-
-    interface SystemColorProvider {
-        Color getColor();
-    }
-
-    private SystemColorProvider[] systemColors;
-
+    private static final String SYNTAX_STYLE_COLOR_PREFIX = "SyntaxStyleColor_";
+    private static final String SYNTAX_STYLE_BOLD_PREFIX = "SyntaxStyleBold_";
+    private static final String SYNTAX_STYLE_ITALIC_PREFIX = "SyntaxStyleItalic_";
+    private static String[] syntaxStyleColorSettingsKeys, syntaxStyleBoldSettingsKeys, syntaxStyleItalicSettingsKeys;
+    private static String[] defaultSyntaxStyleColorSettingsValues;
+    private static boolean[] defaultSyntaxStyleBoldSettingsValues;
+    private static boolean[] defaultSyntaxStyleItalicSettingsValues;
+    private final ColorMode defaultColorMode = ColorMode.SYSTEM;
     private final HashMap<Bool, Boolean> booleanSettingsValues;
     private final String[] stringSettingsValues;
     private final String[] fontFamilySettingsValues;
@@ -422,9 +280,23 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * {@link ColorMode#modeKey}
      */
     private final String[] colorSettingsValues;
-
     private final Preferences preferences;
-
+    private SystemColorProvider[] systemColors;
+    /*
+     * **************************************************************************
+     * This section contains all code related to syntax highlighting styles
+     * settings.
+     * A style includes 3 components: color, bold (t/f), italic (t/f)
+     *
+     * The fallback defaults will come not from an array here, but from the
+     * existing static method SyntaxUtilities.getDefaultSyntaxStyles()
+     * in the rars.venus.editors.jeditsyntax package. It returns an array
+     * of SyntaxStyle objects.
+     *
+     */
+    private String[] syntaxStyleColorSettingsValues;
+    private boolean[] syntaxStyleBoldSettingsValues;
+    private boolean[] syntaxStyleItalicSettingsValues;
     /**
      * Create Settings object and set to saved values. If saved values not found,
      * will set
@@ -471,36 +343,122 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
+     * Retrieve a default Font setting
+     *
+     * @param fontSettingPosition constant that identifies which item
+     * @return Font object for given item
+     */
+    public static Font getDefaultFontByPosition(final int fontSettingPosition) {
+        if (fontSettingPosition >= 0 && fontSettingPosition < Settings.defaultFontFamilySettingsValues.length) {
+            return EditorFont.createFontFromStringValues(Settings.defaultFontFamilySettingsValues[fontSettingPosition],
+                    Settings.defaultFontStyleSettingsValues[fontSettingPosition],
+                    Settings.defaultFontSizeSettingsValues[fontSettingPosition]);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the text editor default tab size in characters
+     *
+     * @return tab size in characters
+     */
+    public static int getDefaultEditorTabSize() {
+        return Integer.parseInt(Settings.defaultStringSettingsValues[Settings.EDITOR_TAB_SIZE]);
+    }
+
+    private static Color mixColors(final Color a, final Color b, final float ratio) {
+        return new Color(
+                ((float) a.getRed()) / 256 * ratio + ((float) b.getRed()) / 256 * (1 - ratio),
+                ((float) a.getGreen()) / 256 * ratio + ((float) b.getGreen()) / 256 * (1 - ratio),
+                ((float) a.getBlue()) / 256 * ratio + ((float) b.getBlue()) / 256 * (1 - ratio),
+                ((float) a.getAlpha()) / 256 * ratio + ((float) b.getAlpha()) / 256 * (1 - ratio));
+    }
+
+    private static Color getColorValueByString(final int position, String colorStr, final String[] defaults,
+                                               final SystemColorProvider[] system) {
+        Color color = null;
+        if (colorStr != null) {
+            if (colorStr.equalsIgnoreCase(ColorMode.DEFAULT.modeKey)) {
+                colorStr = null; // Trigger default
+            } else if (system != null && colorStr.equalsIgnoreCase(ColorMode.SYSTEM.modeKey)) {
+                color = Settings.getSystemColorByPosition(position, system);
+            }
+        }
+        if (color == null && colorStr == null) {
+            colorStr = Settings.getColorStringByPosition(position, defaults);
+        }
+        if (color == null && colorStr != null) {
+            try {
+                color = Color.decode(colorStr);
+            } catch (final NumberFormatException ignored) {
+            }
+        }
+        return color;
+    }
+
+    private static ColorMode getColorModeByPostion(final int position, final String[] values) {
+        final String colorStr = Settings.getColorStringByPosition(position, values);
+        if (colorStr == null)
+            return ColorMode.CUSTOM;
+
+        for (final ColorMode mode : ColorMode.values())
+            if (mode.modeKey != null && mode.modeKey.equalsIgnoreCase(colorStr))
+                return mode;
+
+        return ColorMode.CUSTOM;
+    }
+
+    private static String getColorStringByPosition(final int position, final String[] values) {
+        if (values == null)
+            return null;
+        if (position >= 0 && position < values.length)
+            return values[position];
+        return null;
+    }
+
+    private static Color getSystemColorByPosition(final int position, final SystemColorProvider[] providers) {
+        if (position >= 0 && position < providers.length) {
+            final SystemColorProvider provider = providers[position];
+            if (provider != null)
+                return provider.getColor();
+        }
+        return null;
+    }
+
+    /*
+     * Private helper to do the work of converting a string containing Text
+     * Segment window table column order into int array and returning it.
+     * If a problem occurs with the parameter string, will fall back to the
+     * default defined above.
+     */
+    private static int[] getTextSegmentColumnOrder(final String stringOfColumnIndexes) {
+        final StringTokenizer st = new StringTokenizer(stringOfColumnIndexes);
+        final int[] list = new int[st.countTokens()];
+        int index = 0, value;
+        boolean valuesOK = true;
+        while (st.hasMoreTokens()) {
+            try {
+                value = Integer.parseInt(st.nextToken());
+            } // could be either NumberFormatException or NoSuchElementException
+            catch (final Exception e) {
+                valuesOK = false;
+                break;
+            }
+            list[index++] = value;
+        }
+        if (!valuesOK && !stringOfColumnIndexes.equals(Settings.defaultStringSettingsValues[Settings.TEXT_COLUMN_ORDER])) {
+            return Settings.getTextSegmentColumnOrder(Settings.defaultStringSettingsValues[Settings.TEXT_COLUMN_ORDER]);
+        }
+        return list;
+    }
+
+    /**
      * Reset settings to default values, as described in the constructor comments.
      */
     public void reset() {
         this.initialize();
     }
-
-    /*
-     * **************************************************************************
-     * This section contains all code related to syntax highlighting styles
-     * settings.
-     * A style includes 3 components: color, bold (t/f), italic (t/f)
-     *
-     * The fallback defaults will come not from an array here, but from the
-     * existing static method SyntaxUtilities.getDefaultSyntaxStyles()
-     * in the rars.venus.editors.jeditsyntax package. It returns an array
-     * of SyntaxStyle objects.
-     *
-     */
-    private String[] syntaxStyleColorSettingsValues;
-    private boolean[] syntaxStyleBoldSettingsValues;
-    private boolean[] syntaxStyleItalicSettingsValues;
-
-    private static final String SYNTAX_STYLE_COLOR_PREFIX = "SyntaxStyleColor_";
-    private static final String SYNTAX_STYLE_BOLD_PREFIX = "SyntaxStyleBold_";
-    private static final String SYNTAX_STYLE_ITALIC_PREFIX = "SyntaxStyleItalic_";
-
-    private static String[] syntaxStyleColorSettingsKeys, syntaxStyleBoldSettingsKeys, syntaxStyleItalicSettingsKeys;
-    private static String[] defaultSyntaxStyleColorSettingsValues;
-    private static boolean[] defaultSyntaxStyleBoldSettingsValues;
-    private static boolean[] defaultSyntaxStyleItalicSettingsValues;
 
     /**
      * <p>setEditorSyntaxStyleByPosition.</p>
@@ -514,6 +472,11 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         this.syntaxStyleBoldSettingsValues[index] = syntaxStyle.isBold();
         this.saveEditorSyntaxStyle(index);
     }
+    // *********************************************************************************
+
+    ////////////////////////////////////////////////////////////////////////
+    // Setting Getters
+    ////////////////////////////////////////////////////////////////////////
 
     /**
      * <p>getEditorSyntaxStyleByPosition.</p>
@@ -595,11 +558,6 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
                     this.syntaxStyleItalicSettingsValues[i]);
         }
     }
-    // *********************************************************************************
-
-    ////////////////////////////////////////////////////////////////////////
-    // Setting Getters
-    ////////////////////////////////////////////////////////////////////////
 
     /**
      * Fetch value of a boolean setting given its identifier.
@@ -626,6 +584,15 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
+     * Set name of exception handler file and write it to persistent storage.
+     *
+     * @param newFilename name of exception handler file
+     */
+    public void setExceptionHandler(final String newFilename) {
+        this.setStringSetting(Settings.EXCEPTION_HANDLER, newFilename);
+    }
+
+    /**
      * Returns identifier of current built-in memory configuration.
      *
      * @return String identifier of current built-in memory configuration, empty if
@@ -636,6 +603,16 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
+     * Store the identifier of the memory configuration.
+     *
+     * @param config A string that identifies the current built-in memory
+     *               configuration
+     */
+    public void setMemoryConfiguration(final String config) {
+        this.setStringSetting(Settings.MEMORY_CONFIGURATION, config);
+    }
+
+    /**
      * Current editor font. Retained for compatibility but replaced
      * by: getFontByPosition(Settings.EDITOR_FONT)
      *
@@ -643,6 +620,18 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      */
     public Font getEditorFont() {
         return this.getFontByPosition(Settings.EDITOR_FONT);
+    }
+
+    /**
+     * Set editor font to the specified Font object and write it to persistent
+     * storage.
+     * This method retained for compatibility but replaced by:
+     * setFontByPosition(Settings.EDITOR_FONT, font)
+     *
+     * @param font Font object to be used by text editor.
+     */
+    public void setEditorFont(final Font font) {
+        this.setFontByPosition(Settings.EDITOR_FONT, font);
     }
 
     /**
@@ -662,28 +651,27 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
-     * Retrieve a default Font setting
-     *
-     * @param fontSettingPosition constant that identifies which item
-     * @return Font object for given item
-     */
-    public static Font getDefaultFontByPosition(final int fontSettingPosition) {
-        if (fontSettingPosition >= 0 && fontSettingPosition < Settings.defaultFontFamilySettingsValues.length) {
-            return EditorFont.createFontFromStringValues(Settings.defaultFontFamilySettingsValues[fontSettingPosition],
-                    Settings.defaultFontStyleSettingsValues[fontSettingPosition],
-                    Settings.defaultFontSizeSettingsValues[fontSettingPosition]);
-        } else {
-            return null;
-        }
-    }
-
-    /**
      * Order of text segment display columns (there are 5, numbered 0 to 4).
      *
      * @return Array of int indicating the order. Original order is 0 1 2 3 4.
      */
     public int[] getTextColumnOrder() {
         return Settings.getTextSegmentColumnOrder(this.stringSettingsValues[Settings.TEXT_COLUMN_ORDER]);
+    }
+
+    /**
+     * Store the current order of Text Segment window table columns, so the ordering
+     * can be preserved and restored.
+     *
+     * @param columnOrder An array of int indicating column order.
+     */
+    public void setTextColumnOrder(final int[] columnOrder) {
+        final StringBuilder stringifiedOrder = new StringBuilder();
+        for (final int column : columnOrder) {
+            stringifiedOrder.append(column).append(" ");
+        }
+        this.setStringSetting(Settings.TEXT_COLUMN_ORDER, stringifiedOrder.toString());
+
     }
 
     /**
@@ -703,6 +691,15 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
+     * Set the caret blinking rate in milliseconds. Rate of 0 means no blinking.
+     *
+     * @param rate blink rate in milliseconds
+     */
+    public void setCaretBlinkRate(final int rate) {
+        this.setStringSetting(Settings.CARET_BLINK_RATE, "" + rate);
+    }
+
+    /**
      * Get the tab size in characters.
      *
      * @return tab size in characters.
@@ -715,6 +712,19 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
             size = Settings.getDefaultEditorTabSize();
         }
         return size;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Setting Setters
+    ////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Set the tab size in characters.
+     *
+     * @param size tab size in characters.
+     */
+    public void setEditorTabSize(final int size) {
+        this.setStringSetting(Settings.EDITOR_TAB_SIZE, "" + size);
     }
 
     /**
@@ -737,12 +747,16 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
-     * Get the text editor default tab size in characters
+     * Set number of letters to be matched by editor's instruction guide before
+     * popup generated (if popup enabled).
+     * Should be 1 or 2. If 1, the popup will be generated after first letter typed,
+     * based on all matches; if 2,
+     * the popup will be generated after second letter typed.
      *
-     * @return tab size in characters
+     * @param length of letters (should be 1 or 2).
      */
-    public static int getDefaultEditorTabSize() {
-        return Integer.parseInt(Settings.defaultStringSettingsValues[Settings.EDITOR_TAB_SIZE]);
+    public void setEditorPopupPrefixLength(final int length) {
+        this.setStringSetting(Settings.EDITOR_POPUP_PREFIX_LENGTH, "" + length);
     }
 
     /**
@@ -754,6 +768,17 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      */
     public String getLabelSortState() {
         return this.stringSettingsValues[Settings.LABEL_SORT_STATE];
+    }
+
+    /**
+     * Store the current state of the Labels Window sorter. There are 8 possible
+     * states
+     * as described in LabelsWindow.java
+     *
+     * @param state The current labels window sorting state, as a String.
+     */
+    public void setLabelSortState(final String state) {
+        this.setStringSetting(Settings.LABEL_SORT_STATE, state);
     }
 
     /**
@@ -832,10 +857,6 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    // Setting Setters
-    ////////////////////////////////////////////////////////////////////////
-
     /**
      * Set value of a boolean setting given its id and the value.
      *
@@ -868,68 +889,6 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
-     * Set name of exception handler file and write it to persistent storage.
-     *
-     * @param newFilename name of exception handler file
-     */
-    public void setExceptionHandler(final String newFilename) {
-        this.setStringSetting(Settings.EXCEPTION_HANDLER, newFilename);
-    }
-
-    /**
-     * Store the identifier of the memory configuration.
-     *
-     * @param config A string that identifies the current built-in memory
-     *               configuration
-     */
-    public void setMemoryConfiguration(final String config) {
-        this.setStringSetting(Settings.MEMORY_CONFIGURATION, config);
-    }
-
-    /**
-     * Set the caret blinking rate in milliseconds. Rate of 0 means no blinking.
-     *
-     * @param rate blink rate in milliseconds
-     */
-    public void setCaretBlinkRate(final int rate) {
-        this.setStringSetting(Settings.CARET_BLINK_RATE, "" + rate);
-    }
-
-    /**
-     * Set the tab size in characters.
-     *
-     * @param size tab size in characters.
-     */
-    public void setEditorTabSize(final int size) {
-        this.setStringSetting(Settings.EDITOR_TAB_SIZE, "" + size);
-    }
-
-    /**
-     * Set number of letters to be matched by editor's instruction guide before
-     * popup generated (if popup enabled).
-     * Should be 1 or 2. If 1, the popup will be generated after first letter typed,
-     * based on all matches; if 2,
-     * the popup will be generated after second letter typed.
-     *
-     * @param length of letters (should be 1 or 2).
-     */
-    public void setEditorPopupPrefixLength(final int length) {
-        this.setStringSetting(Settings.EDITOR_POPUP_PREFIX_LENGTH, "" + length);
-    }
-
-    /**
-     * Set editor font to the specified Font object and write it to persistent
-     * storage.
-     * This method retained for compatibility but replaced by:
-     * setFontByPosition(Settings.EDITOR_FONT, font)
-     *
-     * @param font Font object to be used by text editor.
-     */
-    public void setEditorFont(final Font font) {
-        this.setFontByPosition(Settings.EDITOR_FONT, font);
-    }
-
-    /**
      * Store a Font setting
      *
      * @param fontSettingPosition Constant that identifies the item the font goes
@@ -949,32 +908,6 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
-     * Store the current order of Text Segment window table columns, so the ordering
-     * can be preserved and restored.
-     *
-     * @param columnOrder An array of int indicating column order.
-     */
-    public void setTextColumnOrder(final int[] columnOrder) {
-        final StringBuilder stringifiedOrder = new StringBuilder();
-        for (final int column : columnOrder) {
-            stringifiedOrder.append(column).append(" ");
-        }
-        this.setStringSetting(Settings.TEXT_COLUMN_ORDER, stringifiedOrder.toString());
-
-    }
-
-    /**
-     * Store the current state of the Labels Window sorter. There are 8 possible
-     * states
-     * as described in LabelsWindow.java
-     *
-     * @param state The current labels window sorting state, as a String.
-     */
-    public void setLabelSortState(final String state) {
-        this.setStringSetting(Settings.LABEL_SORT_STATE, state);
-    }
-
-    /**
      * Set Color object for specified settings key. Has no effect if key is invalid.
      *
      * @param key   the Setting key
@@ -988,6 +921,17 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
             }
         }
     }
+
+    /////////////////////////////////////////////////////////////////////////
+    //
+    // PRIVATE HELPER METHODS TO DO THE REAL WORK
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    // Initialize settings to default values.
+    // Strategy: First set from properties file.
+    // If that fails, set from array.
+    // In either case, use these values as defaults in call to Preferences.
 
     /**
      * Set Color object for specified settings name (a static constant). Has no
@@ -1020,17 +964,6 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         return this.defaultColorMode;
     }
 
-    /////////////////////////////////////////////////////////////////////////
-    //
-    // PRIVATE HELPER METHODS TO DO THE REAL WORK
-    //
-    /////////////////////////////////////////////////////////////////////////
-
-    // Initialize settings to default values.
-    // Strategy: First set from properties file.
-    // If that fails, set from array.
-    // In either case, use these values as defaults in call to Preferences.
-
     private void initialize() {
         this.initSystemProviders();
         this.applyDefaultSettings();
@@ -1054,72 +987,6 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         }
         Arrays.fill(this.colorSettingsValues, this.getDefaultColorMode().modeKey);
         this.initializeEditorSyntaxStyles();
-    }
-
-    /**
-     * Takes a color from the LookAndFeel
-     */
-    static class LookAndFeelColor implements SystemColorProvider {
-        private final String key;
-
-        public LookAndFeelColor(final String key) {
-            this.key = key;
-        }
-
-        @Override
-        public Color getColor() {
-            // Deep copy, because using the color directly in UI caused problems
-            return new Color(UIManager.getLookAndFeel().getDefaults().getColor(this.key).getRGB());
-        }
-    }
-
-    private static Color mixColors(final Color a, final Color b, final float ratio) {
-        return new Color(
-                ((float) a.getRed()) / 256 * ratio + ((float) b.getRed()) / 256 * (1 - ratio),
-                ((float) a.getGreen()) / 256 * ratio + ((float) b.getGreen()) / 256 * (1 - ratio),
-                ((float) a.getBlue()) / 256 * ratio + ((float) b.getBlue()) / 256 * (1 - ratio),
-                ((float) a.getAlpha()) / 256 * ratio + ((float) b.getAlpha()) / 256 * (1 - ratio));
-    }
-
-    /**
-     * Mixes two other setting-colors
-     */
-    @SuppressWarnings("unused")
-    class ColorSettingMix implements SystemColorProvider {
-        private final int posA;
-        private final int posB;
-        private final float ratio;
-
-        public ColorSettingMix(final int posA, final int posB, final float ratio) {
-            this.posA = posA;
-            this.posB = posB;
-            this.ratio = ratio;
-        }
-
-        @Override
-        public Color getColor() {
-            return Settings.mixColors(Settings.this.getColorSettingByPosition(this.posA), Settings.this.getColorSettingByPosition(this.posB), this.ratio);
-        }
-    }
-
-    /**
-     * Mixes color of two providers
-     */
-    static class ColorProviderMix implements SystemColorProvider {
-        private final SystemColorProvider proA;
-        private final SystemColorProvider proB;
-        private final float ratio;
-
-        public ColorProviderMix(final SystemColorProvider proA, final SystemColorProvider proB, final float ratio) {
-            this.proA = proA;
-            this.proB = proB;
-            this.ratio = ratio;
-        }
-
-        @Override
-        public Color getColor() {
-            return Settings.mixColors(this.proA.getColor(), this.proB.getColor(), this.ratio);
-        }
     }
 
     private void initSystemProviders() {
@@ -1183,57 +1050,6 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     private Color getColorValueByPosition(final int position, final String[] values, final String[] defaults,
                                           final SystemColorProvider[] system) {
         return Settings.getColorValueByString(position, Settings.getColorStringByPosition(position, values), defaults, this.systemColors);
-    }
-
-    private static Color getColorValueByString(final int position, String colorStr, final String[] defaults,
-                                               final SystemColorProvider[] system) {
-        Color color = null;
-        if (colorStr != null) {
-            if (colorStr.equalsIgnoreCase(ColorMode.DEFAULT.modeKey)) {
-                colorStr = null; // Trigger default
-            } else if (system != null && colorStr.equalsIgnoreCase(ColorMode.SYSTEM.modeKey)) {
-                color = Settings.getSystemColorByPosition(position, system);
-            }
-        }
-        if (color == null && colorStr == null) {
-            colorStr = Settings.getColorStringByPosition(position, defaults);
-        }
-        if (color == null && colorStr != null) {
-            try {
-                color = Color.decode(colorStr);
-            } catch (final NumberFormatException ignored) {
-            }
-        }
-        return color;
-    }
-
-    private static ColorMode getColorModeByPostion(final int position, final String[] values) {
-        final String colorStr = Settings.getColorStringByPosition(position, values);
-        if (colorStr == null)
-            return ColorMode.CUSTOM;
-
-        for (final ColorMode mode : ColorMode.values())
-            if (mode.modeKey != null && mode.modeKey.equalsIgnoreCase(colorStr))
-                return mode;
-
-        return ColorMode.CUSTOM;
-    }
-
-    private static String getColorStringByPosition(final int position, final String[] values) {
-        if (values == null)
-            return null;
-        if (position >= 0 && position < values.length)
-            return values[position];
-        return null;
-    }
-
-    private static Color getSystemColorByPosition(final int position, final SystemColorProvider[] providers) {
-        if (position >= 0 && position < providers.length) {
-            final SystemColorProvider provider = providers[position];
-            if (provider != null)
-                return provider.getColor();
-        }
-        return null;
     }
 
     // Establish the settings from the given properties file. Return true if it
@@ -1373,31 +1189,205 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         }
     }
 
-    /*
-     * Private helper to do the work of converting a string containing Text
-     * Segment window table column order into int array and returning it.
-     * If a problem occurs with the parameter string, will fall back to the
-     * default defined above.
+    // BOOLEAN SETTINGS...
+    public enum Bool {
+        /**
+         * Flag to determine whether or not program being assembled is limited to
+         * basic instructions and formats.
+         */
+        EXTENDED_ASSEMBLER_ENABLED("ExtendedAssembler", true),
+        /**
+         * Flag to determine whether or not a file is immediately and automatically
+         * assembled
+         * upon opening. Handy when using externa editor like mipster.
+         */
+        ASSEMBLE_ON_OPEN("AssembleOnOpen", false),
+        /**
+         * Flag to determine whether all files open currently source file will be
+         * assembled when assembly is selected.
+         */
+        ASSEMBLE_OPEN("AssembleOpen", false),
+        /**
+         * Flag to determine whether files in the directory of the current source file
+         * will be assembled when assembly is selected.
+         */
+        ASSEMBLE_ALL("AssembleAll", false),
+
+        /**
+         * Default visibilty of label window (symbol table). Default only, dynamic
+         * status
+         * maintained by ExecutePane
+         */
+        LABEL_WINDOW_VISIBILITY("LabelWindowVisibility", false),
+        /**
+         * Default setting for displaying addresses and values in hexidecimal in the
+         * Execute
+         * pane.
+         */
+        DISPLAY_ADDRESSES_IN_HEX("DisplayAddressesInHex", true),
+        DISPLAY_VALUES_IN_HEX("DisplayValuesInHex", true),
+        /**
+         * Flag to determine whether the currently selected exception handler source
+         * file will
+         * be included in each assembly operation.
+         */
+        EXCEPTION_HANDLER_ENABLED("LoadExceptionHandler", false),
+        /**
+         * Flag to determine whether or not the editor will display line numbers.
+         */
+        EDITOR_LINE_NUMBERS_DISPLAYED("EditorLineNumbersDisplayed", true),
+        /**
+         * Flag to determine whether or not assembler warnings are considered errors.
+         */
+        WARNINGS_ARE_ERRORS("WarningsAreErrors", false),
+        /**
+         * Flag to determine whether or not to display and use program arguments
+         */
+        PROGRAM_ARGUMENTS("ProgramArguments", false),
+        /**
+         * Flag to control whether or not highlighting is applied to data segment window
+         */
+        DATA_SEGMENT_HIGHLIGHTING("DataSegmentHighlighting", true),
+        /**
+         * Flag to control whether or not highlighting is applied to register windows
+         */
+        REGISTERS_HIGHLIGHTING("RegistersHighlighting", true),
+        /**
+         * Flag to control whether or not assembler automatically initializes program
+         * counter to 'main's address
+         */
+        START_AT_MAIN("StartAtMain", false),
+        /**
+         * Flag to control whether or not editor will highlight the line currently being
+         * edited
+         */
+        EDITOR_CURRENT_LINE_HIGHLIGHTING("EditorCurrentLineHighlighting", true),
+        /**
+         * Flag to control whether or not editor will provide popup instruction guidance
+         * while typing
+         */
+        POPUP_INSTRUCTION_GUIDANCE("PopupInstructionGuidance", true),
+        /**
+         * Flag to control whether or not simulator will use popup dialog for input
+         * syscalls
+         */
+        POPUP_SYSCALL_INPUT("PopupSyscallInput", false),
+        /**
+         * Flag to control whether or not language-aware editor will use auto-indent
+         * feature
+         */
+        AUTO_INDENT("AutoIndent", true),
+        /**
+         * Flag to determine whether a program can write binary code to the text or data
+         * segment and
+         * execute that code.
+         */
+        SELF_MODIFYING_CODE_ENABLED("SelfModifyingCode", false),
+        /**
+         * Flag to determine whether a program uses rv64i instead of rv32i
+         */
+        RV64_ENABLED("rv64Enabled", false),
+        /**
+         * Flag to determine whether to calculate relative paths from the current
+         * working directory
+         * or from the RARS executable path.
+         */
+        DERIVE_CURRENT_WORKING_DIRECTORY("DeriveCurrentWorkingDirectory", false);
+
+        // TODO: add option for turning off user trap handling and interrupts
+        private final @NotNull String name;
+        private boolean value;
+
+        Bool(final @NotNull String n, final boolean v) {
+            this.name = n;
+            this.value = v;
+        }
+
+        boolean getDefault() {
+            return this.value;
+        }
+
+        void setDefault(final boolean v) {
+            this.value = v;
+        }
+
+        @NotNull String getName() {
+            return this.name;
+        }
+    }
+
+    public enum ColorMode {
+        DEFAULT("DEF"),
+        SYSTEM("SYS"),
+        CUSTOM(null);
+
+        public final @Nullable String modeKey;
+
+        ColorMode(final @Nullable String modeKey) {
+            this.modeKey = modeKey;
+        }
+    }
+
+    interface SystemColorProvider {
+        Color getColor();
+    }
+
+    /**
+     * Takes a color from the LookAndFeel
      */
-    private static int[] getTextSegmentColumnOrder(final String stringOfColumnIndexes) {
-        final StringTokenizer st = new StringTokenizer(stringOfColumnIndexes);
-        final int[] list = new int[st.countTokens()];
-        int index = 0, value;
-        boolean valuesOK = true;
-        while (st.hasMoreTokens()) {
-            try {
-                value = Integer.parseInt(st.nextToken());
-            } // could be either NumberFormatException or NoSuchElementException
-            catch (final Exception e) {
-                valuesOK = false;
-                break;
-            }
-            list[index++] = value;
+    static class LookAndFeelColor implements SystemColorProvider {
+        private final String key;
+
+        public LookAndFeelColor(final String key) {
+            this.key = key;
         }
-        if (!valuesOK && !stringOfColumnIndexes.equals(Settings.defaultStringSettingsValues[Settings.TEXT_COLUMN_ORDER])) {
-            return Settings.getTextSegmentColumnOrder(Settings.defaultStringSettingsValues[Settings.TEXT_COLUMN_ORDER]);
+
+        @Override
+        public Color getColor() {
+            // Deep copy, because using the color directly in UI caused problems
+            return new Color(UIManager.getLookAndFeel().getDefaults().getColor(this.key).getRGB());
         }
-        return list;
+    }
+
+    /**
+     * Mixes color of two providers
+     */
+    static class ColorProviderMix implements SystemColorProvider {
+        private final SystemColorProvider proA;
+        private final SystemColorProvider proB;
+        private final float ratio;
+
+        public ColorProviderMix(final SystemColorProvider proA, final SystemColorProvider proB, final float ratio) {
+            this.proA = proA;
+            this.proB = proB;
+            this.ratio = ratio;
+        }
+
+        @Override
+        public Color getColor() {
+            return Settings.mixColors(this.proA.getColor(), this.proB.getColor(), this.ratio);
+        }
+    }
+
+    /**
+     * Mixes two other setting-colors
+     */
+    @SuppressWarnings("unused")
+    class ColorSettingMix implements SystemColorProvider {
+        private final int posA;
+        private final int posB;
+        private final float ratio;
+
+        public ColorSettingMix(final int posA, final int posB, final float ratio) {
+            this.posA = posA;
+            this.posB = posB;
+            this.ratio = ratio;
+        }
+
+        @Override
+        public Color getColor() {
+            return Settings.mixColors(Settings.this.getColorSettingByPosition(this.posA), Settings.this.getColorSettingByPosition(this.posB), this.ratio);
+        }
     }
 
 }

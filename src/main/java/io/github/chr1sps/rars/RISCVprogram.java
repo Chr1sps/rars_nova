@@ -66,27 +66,45 @@ public class RISCVprogram {
     private Tokenizer tokenizer;
 
     /**
+     * Simulates execution of the program (in this thread). Program must have
+     * already been assembled.
+     * Begins simulation at current program counter address and continues until
+     * stopped,
+     * paused, maximum steps exceeded, or exception occurs.
+     *
+     * @param maxSteps the maximum maximum number of steps to simulate.
+     * @return reason for the interruption of the program
+     * @throws SimulationException Will throw exception if errors occurred while
+     *                             simulating.
+     */
+    public static Simulator.Reason simulate(final int maxSteps) throws SimulationException {
+        final Simulator sim = Simulator.getInstance();
+        return sim.simulate(RegisterFile.getProgramCounter(), maxSteps, null);
+    }
+
+    /**
+     * Simulates execution of the program (in a new thread). Program must have
+     * already been assembled.
+     * Begins simulation at current program counter address and continues until
+     * stopped,
+     * paused, maximum steps exceeded, or exception occurs.
+     *
+     * @param maxSteps    maximum number of instruction executions. Default -1 means
+     *                    no maximum.
+     * @param breakPoints int array of breakpoints (PC addresses). Can be null.
+     */
+    public static void startSimulation(final int maxSteps, final int[] breakPoints) {
+        final Simulator sim = Simulator.getInstance();
+        sim.startSimulation(RegisterFile.getProgramCounter(), maxSteps, breakPoints);
+    }
+
+    /**
      * Produces list of source statements that comprise the program.
      *
      * @return ArrayList of String. Each String is one line of RISCV source code.
      */
     public ArrayList<String> getSourceList() {
-        return sourceList;
-    }
-
-    /**
-     * Set list of source statements that comprise the program.
-     *
-     * @param sourceLineList ArrayList of SourceLine.
-     *                       Each SourceLine represents one line of RISCV source
-     *                       code.
-     */
-    public void setSourceLineList(ArrayList<SourceLine> sourceLineList) {
-        this.sourceLineList = sourceLineList;
-        sourceList = new ArrayList<>();
-        for (SourceLine sl : sourceLineList) {
-            sourceList.add(sl.getSource());
-        }
+        return this.sourceList;
     }
 
     /**
@@ -100,12 +118,27 @@ public class RISCVprogram {
     }
 
     /**
+     * Set list of source statements that comprise the program.
+     *
+     * @param sourceLineList ArrayList of SourceLine.
+     *                       Each SourceLine represents one line of RISCV source
+     *                       code.
+     */
+    public void setSourceLineList(final ArrayList<SourceLine> sourceLineList) {
+        this.sourceLineList = sourceLineList;
+        this.sourceList = new ArrayList<>();
+        for (final SourceLine sl : sourceLineList) {
+            this.sourceList.add(sl.source());
+        }
+    }
+
+    /**
      * Produces name of associated source code file.
      *
      * @return File name as String.
      */
     public String getFilename() {
-        return filename;
+        return this.filename;
     }
 
     /**
@@ -116,7 +149,7 @@ public class RISCVprogram {
      * @see TokenList
      */
     public ArrayList<TokenList> getTokenList() {
-        return tokenList;
+        return this.tokenList;
     }
 
     /**
@@ -125,7 +158,7 @@ public class RISCVprogram {
      * @return Tokenizer
      */
     public Tokenizer getTokenizer() {
-        return tokenizer;
+        return this.tokenizer;
     }
 
     /**
@@ -136,8 +169,8 @@ public class RISCVprogram {
      * @see ProgramStatement
      */
     public ArrayList<ProgramStatement> createParsedList() {
-        parsedList = new ArrayList<>();
-        return parsedList;
+        this.parsedList = new ArrayList<>();
+        return this.parsedList;
     }
 
     /**
@@ -148,7 +181,7 @@ public class RISCVprogram {
      * @see ProgramStatement
      */
     public ArrayList<ProgramStatement> getParsedList() {
-        return parsedList;
+        return this.parsedList;
     }
 
     /**
@@ -160,7 +193,7 @@ public class RISCVprogram {
      * @see ProgramStatement
      */
     public ArrayList<ProgramStatement> getMachineList() {
-        return machineList;
+        return this.machineList;
     }
 
     /**
@@ -170,7 +203,7 @@ public class RISCVprogram {
      * @return BackStepper object, null if there is none.
      */
     public BackStepper getBackStepper() {
-        return backStepper;
+        return this.backStepper;
     }
 
     /**
@@ -181,7 +214,7 @@ public class RISCVprogram {
      * @return a {@link io.github.chr1sps.rars.assembler.SymbolTable} object
      */
     public SymbolTable getLocalSymbolTable() {
-        return localSymbolTable;
+        return this.localSymbolTable;
     }
 
     /**
@@ -190,7 +223,7 @@ public class RISCVprogram {
      * @return true if enabled, false if disabled or non-existant.
      */
     public boolean backSteppingEnabled() {
-        return (backStepper != null && backStepper.enabled());
+        return (this.backStepper != null && this.backStepper.enabled());
     }
 
     /**
@@ -200,9 +233,9 @@ public class RISCVprogram {
      * @return Returns specified line of RISCV source. If outside the line range,
      * it returns null. Line 1 is first line.
      */
-    public String getSourceLine(int i) {
-        if ((i >= 1) && (i <= sourceList.size()))
-            return sourceList.get(i - 1);
+    public String getSourceLine(final int i) {
+        if ((i >= 1) && (i <= this.sourceList.size()))
+            return this.sourceList.get(i - 1);
         else
             return null;
     }
@@ -212,7 +245,7 @@ public class RISCVprogram {
      *
      * @param source String containing the RISCV source code.
      */
-    public void fromString(String source) {
+    public void fromString(final String source) {
         this.filename = source;
         this.sourceList = new ArrayList<>(Arrays.asList(source.split("\n")));
     }
@@ -226,20 +259,20 @@ public class RISCVprogram {
      * @throws AssemblyException Will throw exception if there is any problem
      *                           reading the file.
      */
-    public void readSource(String file) throws AssemblyException {
+    public void readSource(final String file) throws AssemblyException {
         this.filename = file;
         this.sourceList = new ArrayList<>();
-        ErrorList errors;
-        BufferedReader inputFile;
+        final ErrorList errors;
+        final BufferedReader inputFile;
         String line;
         try {
             inputFile = new BufferedReader(new FileReader(file));
             line = inputFile.readLine();
             while (line != null) {
-                sourceList.add(line);
+                this.sourceList.add(line);
                 line = inputFile.readLine();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             errors = new ErrorList();
             errors.add(new ErrorMessage(null, 0, 0, e.toString()));
             throw new AssemblyException(errors);
@@ -255,7 +288,7 @@ public class RISCVprogram {
      */
     public void tokenize() throws AssemblyException {
         this.tokenizer = new Tokenizer();
-        this.tokenList = tokenizer.tokenize(this);
+        this.tokenList = this.tokenizer.tokenize(this);
         this.localSymbolTable = new SymbolTable(this.filename); // prepare for assembly
     }
 
@@ -282,16 +315,16 @@ public class RISCVprogram {
      * @throws AssemblyException Will throw exception if errors occurred while
      *                           reading or tokenizing.
      */
-    public ArrayList<RISCVprogram> prepareFilesForAssembly(ArrayList<String> filenames, String leadFilename,
-                                                           String exceptionHandler) throws AssemblyException {
-        ArrayList<RISCVprogram> programsToAssemble = new ArrayList<>();
+    public ArrayList<RISCVprogram> prepareFilesForAssembly(final ArrayList<String> filenames, final String leadFilename,
+                                                           final String exceptionHandler) throws AssemblyException {
+        final ArrayList<RISCVprogram> programsToAssemble = new ArrayList<>();
         int leadFilePosition = 0;
         if (exceptionHandler != null && !exceptionHandler.isEmpty()) {
             filenames.addFirst(exceptionHandler);
             leadFilePosition = 1;
         }
-        for (String filename : filenames) {
-            RISCVprogram preparee = (filename.equals(leadFilename)) ? this : new RISCVprogram();
+        for (final String filename : filenames) {
+            final RISCVprogram preparee = (filename.equals(leadFilename)) ? this : new RISCVprogram();
             preparee.readSource(filename);
             preparee.tokenize();
             // I want "this" RISCVprogram to be the first in the list...except for exception
@@ -321,9 +354,9 @@ public class RISCVprogram {
      * @throws AssemblyException Will throw exception if errors occurred while
      *                           assembling.
      */
-    public ErrorList assemble(ArrayList<RISCVprogram> programsToAssemble, boolean extendedAssemblerEnabled)
+    public ErrorList assemble(final ArrayList<RISCVprogram> programsToAssemble, final boolean extendedAssemblerEnabled)
             throws AssemblyException {
-        return assemble(programsToAssemble, extendedAssemblerEnabled, false);
+        return this.assemble(programsToAssemble, extendedAssemblerEnabled, false);
     }
 
     /**
@@ -348,46 +381,13 @@ public class RISCVprogram {
      * @throws AssemblyException Will throw exception if errors occurred while
      *                           assembling.
      */
-    public ErrorList assemble(ArrayList<RISCVprogram> programsToAssemble, boolean extendedAssemblerEnabled,
-                              boolean warningsAreErrors) throws AssemblyException {
+    public ErrorList assemble(final ArrayList<RISCVprogram> programsToAssemble, final boolean extendedAssemblerEnabled,
+                              final boolean warningsAreErrors) throws AssemblyException {
         this.backStepper = null;
-        Assembler asm = new Assembler();
+        final Assembler asm = new Assembler();
         this.machineList = asm.assemble(programsToAssemble, extendedAssemblerEnabled, warningsAreErrors);
         this.backStepper = new BackStepper();
         return asm.getErrorList();
-    }
-
-    /**
-     * Simulates execution of the program (in this thread). Program must have
-     * already been assembled.
-     * Begins simulation at current program counter address and continues until
-     * stopped,
-     * paused, maximum steps exceeded, or exception occurs.
-     *
-     * @param maxSteps the maximum maximum number of steps to simulate.
-     * @return reason for the interruption of the program
-     * @throws SimulationException Will throw exception if errors occurred while
-     *                             simulating.
-     */
-    public Simulator.Reason simulate(int maxSteps) throws SimulationException {
-        Simulator sim = Simulator.getInstance();
-        return sim.simulate(RegisterFile.getProgramCounter(), maxSteps, null);
-    }
-
-    /**
-     * Simulates execution of the program (in a new thread). Program must have
-     * already been assembled.
-     * Begins simulation at current program counter address and continues until
-     * stopped,
-     * paused, maximum steps exceeded, or exception occurs.
-     *
-     * @param maxSteps    maximum number of instruction executions. Default -1 means
-     *                    no maximum.
-     * @param breakPoints int array of breakpoints (PC addresses). Can be null.
-     */
-    public void startSimulation(int maxSteps, int[] breakPoints) {
-        Simulator sim = Simulator.getInstance();
-        sim.startSimulation(RegisterFile.getProgramCounter(), maxSteps, breakPoints);
     }
 
     /**
@@ -398,8 +398,8 @@ public class RISCVprogram {
      * @author M.H.Sekhavat &lt;sekhavat17@gmail.com&gt;
      */
     public MacroPool createMacroPool() {
-        macroPool = new MacroPool(this);
-        return macroPool;
+        this.macroPool = new MacroPool(this);
+        return this.macroPool;
     }
 
     /**
@@ -409,7 +409,7 @@ public class RISCVprogram {
      * @author M.H.Sekhavat &lt;sekhavat17@gmail.com&gt;
      */
     public MacroPool getLocalMacroPool() {
-        return macroPool;
+        return this.macroPool;
     }
 
     /**
@@ -418,7 +418,7 @@ public class RISCVprogram {
      * @param macroPool reference to MacroPool
      * @author M.H.Sekhavat &lt;sekhavat17@gmail.com&gt;
      */
-    public void setLocalMacroPool(MacroPool macroPool) {
+    public void setLocalMacroPool(final MacroPool macroPool) {
         this.macroPool = macroPool;
     }
 

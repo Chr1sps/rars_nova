@@ -98,7 +98,7 @@ public class OperandFormat {
     // operand position
     private static boolean operandTypeCheck(final TokenList cand, final Instruction spec, final ErrorList errors) {
         Token candToken, specToken;
-        TokenTypes candType, specType;
+        TokenType candType, specType;
         for (int i = 1; i < spec.getTokenList().size(); i++) {
             candToken = cand.get(i);
             specToken = spec.getTokenList().get(i);
@@ -119,55 +119,55 @@ public class OperandFormat {
             // Not an error if spec calls for identifier and candidate is operator, since
             // operator names can be used as labels.
             // TODO: maybe add more cases in here
-            if (specType == TokenTypes.IDENTIFIER && candType == TokenTypes.OPERATOR) {
-                final Token replacement = new Token(TokenTypes.IDENTIFIER, candToken.getValue(), candToken.getSourceProgram(),
+            if (specType == TokenType.IDENTIFIER && candType == TokenType.OPERATOR) {
+                final Token replacement = new Token(TokenType.IDENTIFIER, candToken.getValue(), candToken.getSourceProgram(),
                         candToken.getSourceLine(), candToken.getStartPos());
                 cand.set(i, replacement);
                 continue;
             }
             // end 2-July-2010 addition
 
-            if ((specType == TokenTypes.REGISTER_NAME || specType == TokenTypes.REGISTER_NUMBER) &&
-                    candType == TokenTypes.REGISTER_NAME) {
+            if ((specType == TokenType.REGISTER_NAME || specType == TokenType.REGISTER_NUMBER) &&
+                    candType == TokenType.REGISTER_NAME) {
                 continue;
             }
-            if (specType == TokenTypes.REGISTER_NAME &&
-                    candType == TokenTypes.REGISTER_NUMBER)
+            if (specType == TokenType.REGISTER_NAME &&
+                    candType == TokenType.REGISTER_NUMBER)
                 continue;
-            if (specType == TokenTypes.CSR_NAME &&
-                    (candType == TokenTypes.INTEGER_5 || candType == TokenTypes.INTEGER_6
-                            || candType == TokenTypes.INTEGER_12
-                            || candType == TokenTypes.INTEGER_12U || candType == TokenTypes.CSR_NAME))
+            if (specType == TokenType.CSR_NAME &&
+                    (candType == TokenType.INTEGER_5 || candType == TokenType.INTEGER_6
+                            || candType == TokenType.INTEGER_12
+                            || candType == TokenType.INTEGER_12U || candType == TokenType.CSR_NAME))
                 continue;
-            if ((specType == TokenTypes.INTEGER_6 && candType == TokenTypes.INTEGER_5) ||
-                    (specType == TokenTypes.INTEGER_12 && candType == TokenTypes.INTEGER_5) ||
-                    (specType == TokenTypes.INTEGER_20 && candType == TokenTypes.INTEGER_5) ||
-                    (specType == TokenTypes.INTEGER_12 && candType == TokenTypes.INTEGER_6) ||
-                    (specType == TokenTypes.INTEGER_20 && candType == TokenTypes.INTEGER_6) ||
-                    (specType == TokenTypes.INTEGER_20 && candType == TokenTypes.INTEGER_12) ||
-                    (specType == TokenTypes.INTEGER_20 && candType == TokenTypes.INTEGER_12U) ||
-                    (specType == TokenTypes.INTEGER_32 && candType == TokenTypes.INTEGER_5) ||
-                    (specType == TokenTypes.INTEGER_32 && candType == TokenTypes.INTEGER_6) ||
-                    (specType == TokenTypes.INTEGER_32 && candType == TokenTypes.INTEGER_12) ||
-                    (specType == TokenTypes.INTEGER_32 && candType == TokenTypes.INTEGER_12U) ||
-                    (specType == TokenTypes.INTEGER_32 && candType == TokenTypes.INTEGER_20))
+            if ((specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_5) ||
+                    (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_5) ||
+                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_5) ||
+                    (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_6) ||
+                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_6) ||
+                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_12) ||
+                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_12U) ||
+                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_5) ||
+                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_6) ||
+                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_12) ||
+                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_12U) ||
+                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_20))
                 continue;
-            if (specType == TokenTypes.INTEGER_12 && candType == TokenTypes.INTEGER_12U) {
+            if (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_12U) {
                 OperandFormat.generateMessage(candToken, "Unsigned value is too large to fit into a sign-extended immediate", errors);
                 return false;
             }
-            if ((specType == TokenTypes.INTEGER_5 && candType == TokenTypes.INTEGER_6) ||
-                    (specType == TokenTypes.INTEGER_5 && candType == TokenTypes.INTEGER_12) ||
-                    (specType == TokenTypes.INTEGER_5 && candType == TokenTypes.INTEGER_12U) ||
-                    (specType == TokenTypes.INTEGER_5 && candType == TokenTypes.INTEGER_20) ||
-                    (specType == TokenTypes.INTEGER_5 && candType == TokenTypes.INTEGER_32) ||
-                    (specType == TokenTypes.INTEGER_6 && candType == TokenTypes.INTEGER_12) ||
-                    (specType == TokenTypes.INTEGER_6 && candType == TokenTypes.INTEGER_12U) ||
-                    (specType == TokenTypes.INTEGER_6 && candType == TokenTypes.INTEGER_20) ||
-                    (specType == TokenTypes.INTEGER_6 && candType == TokenTypes.INTEGER_32) ||
-                    (specType == TokenTypes.INTEGER_12 && candType == TokenTypes.INTEGER_20) ||
-                    (specType == TokenTypes.INTEGER_12 && candType == TokenTypes.INTEGER_32) ||
-                    (specType == TokenTypes.INTEGER_20 && candType == TokenTypes.INTEGER_32)) {
+            if ((specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_6) ||
+                    (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_12) ||
+                    (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_12U) ||
+                    (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_20) ||
+                    (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_32) ||
+                    (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_12) ||
+                    (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_12U) ||
+                    (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_20) ||
+                    (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_32) ||
+                    (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_20) ||
+                    (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_32) ||
+                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_32)) {
                 OperandFormat.generateMessage(candToken, "operand is out of range", errors);
                 return false;
             }

@@ -41,9 +41,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Action for the Edit -> Find/Replace menu item
  */
 public class EditFindReplaceAction extends GuiAction {
+    private static final String DIALOG_TITLE = "Find and Replace";
     private static String searchString = "";
     private static boolean caseSensitivity = true;
-    private static final String DIALOG_TITLE = "Find and Replace";
     private final MainPane mainPane;
 
     /**
@@ -76,24 +76,22 @@ public class EditFindReplaceAction extends GuiAction {
     // Private class to do all the work!
     //
     private class FindReplaceDialog extends JDialog {
-        JButton findButton, replaceButton, replaceAllButton, closeButton;
-        JTextField findInputField, replaceInputField;
-        JCheckBox caseSensitiveCheckBox;
-        JRadioButton linearFromStart, circularFromCursor;
-        private JLabel resultsLabel;
-
         public static final String FIND_TOOL_TIP_TEXT = "Find next occurrence of given text; wraps around at end";
         public static final String REPLACE_TOOL_TIP_TEXT = "Replace current occurrence of text then find next";
         public static final String REPLACE_ALL_TOOL_TIP_TEXT = "Replace all occurrences of text";
         public static final String CLOSE_TOOL_TIP_TEXT = "Close the dialog";
         public static final String RESULTS_TOOL_TIP_TEXT = "Outcome of latest operation (button click)";
-
         public static final String RESULTS_TEXT_FOUND = "Text found";
         public static final String RESULTS_TEXT_NOT_FOUND = "Text not found";
         public static final String RESULTS_TEXT_REPLACED = "Text replaced and found next";
         public static final String RESULTS_TEXT_REPLACED_LAST = "Text replaced; last occurrence";
         public static final String RESULTS_TEXT_REPLACED_ALL = "Replaced";
         public static final String RESULTS_NO_TEXT_TO_FIND = "No text to find";
+        JButton findButton, replaceButton, replaceAllButton, closeButton;
+        JTextField findInputField, replaceInputField;
+        JCheckBox caseSensitiveCheckBox;
+        JRadioButton linearFromStart, circularFromCursor;
+        private JLabel resultsLabel;
 
         public FindReplaceDialog(final Frame owner, final String title, final boolean modality) {
             super(owner, title, modality);
@@ -214,8 +212,8 @@ public class EditFindReplaceAction extends GuiAction {
                 final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final int posn = editPane.doFindText(EditFindReplaceAction.searchString, this.caseSensitiveCheckBox.isSelected());
-                    if (posn == TextEditingArea.TEXT_NOT_FOUND) {
+                    final var posn = editPane.doFindText(EditFindReplaceAction.searchString, this.caseSensitiveCheckBox.isSelected());
+                    if (posn == TextEditingArea.FindReplaceResult.TEXT_NOT_FOUND) {
                         this.resultsLabel.setText(this.findButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {
                         this.resultsLabel.setText(this.findButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_FOUND);
@@ -243,21 +241,20 @@ public class EditFindReplaceAction extends GuiAction {
                 final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final int posn = editPane.doReplace(EditFindReplaceAction.searchString, this.replaceInputField.getText(),
+                    final var posn = editPane.doReplace(EditFindReplaceAction.searchString, this.replaceInputField.getText(),
                             this.caseSensitiveCheckBox.isSelected());
                     String result = this.replaceButton.getText() + ": ";
                     switch (posn) {
-
-                        case TextEditingArea.TEXT_NOT_FOUND:
+                        case TextEditingArea.FindReplaceResult.TEXT_NOT_FOUND:
                             result += FindReplaceDialog.RESULTS_TEXT_NOT_FOUND;
                             break;
-                        case TextEditingArea.TEXT_FOUND:
+                        case TextEditingArea.FindReplaceResult.TEXT_FOUND:
                             result += FindReplaceDialog.RESULTS_TEXT_FOUND;
                             break;
-                        case TextEditingArea.TEXT_REPLACED_NOT_FOUND_NEXT:
+                        case TextEditingArea.FindReplaceResult.TEXT_REPLACED_NOT_FOUND_NEXT:
                             result += FindReplaceDialog.RESULTS_TEXT_REPLACED_LAST;
                             break;
-                        case TextEditingArea.TEXT_REPLACED_FOUND_NEXT:
+                        case TextEditingArea.FindReplaceResult.TEXT_REPLACED_FOUND_NEXT:
                             result += FindReplaceDialog.RESULTS_TEXT_REPLACED;
                             break;
                     }

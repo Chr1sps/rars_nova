@@ -1,5 +1,7 @@
 package io.github.chr1sps.rars.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -39,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version October 2006
  */
-public class PropertiesFile {
+public interface PropertiesFile {
 
     /**
      * Produce Properties (a Hashtable) object containing key-value pairs
@@ -50,12 +52,12 @@ public class PropertiesFile {
      *             it is assumed to be ".properties" and is added here.
      * @return Properties (Hashtable) of key-value pairs read from the file.
      */
-    public static Properties loadPropertiesFromFile(String file) {
-        Properties properties = new Properties();
+    static @NotNull Properties loadPropertiesFromFile(@NotNull final String file) {
+        final Properties properties = new Properties();
         try {
-            InputStream is = PropertiesFile.class.getResourceAsStream("/" + file + ".properties");
+            final InputStream is = PropertiesFile.class.getResourceAsStream("/" + file + ".properties");
             properties.load(is);
-        } catch (IOException | NullPointerException ignored) {
+        } catch (final IOException | NullPointerException ignored) {
         } // If it doesn't work, properties will be empty
 
         return properties;

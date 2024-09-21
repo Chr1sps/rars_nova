@@ -1,5 +1,7 @@
 package io.github.chr1sps.rars;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
@@ -38,41 +40,51 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public class ErrorList {
-    private final ArrayList<ErrorMessage> messages;
-    private int errorCount;
-    private int warningCount;
     /**
      * Constant <code>ERROR_MESSAGE_PREFIX="Error"</code>
      */
-    public static final String ERROR_MESSAGE_PREFIX = "Error";
+    public static final @NotNull String ERROR_MESSAGE_PREFIX = "Error";
     /**
      * Constant <code>WARNING_MESSAGE_PREFIX="Warning"</code>
      */
-    public static final String WARNING_MESSAGE_PREFIX = "Warning";
+    public static final @NotNull String WARNING_MESSAGE_PREFIX = "Warning";
     /**
      * Constant <code>FILENAME_PREFIX=" in "</code>
      */
-    public static final String FILENAME_PREFIX = " in ";
+    public static final @NotNull String FILENAME_PREFIX = " in ";
     /**
      * Constant <code>LINE_PREFIX=" line "</code>
      */
-    public static final String LINE_PREFIX = " line ";
+    public static final @NotNull String LINE_PREFIX = " line ";
     /**
      * Constant <code>POSITION_PREFIX=" column "</code>
      */
-    public static final String POSITION_PREFIX = " column ";
+    public static final @NotNull String POSITION_PREFIX = " column ";
     /**
      * Constant <code>MESSAGE_SEPARATOR=": "</code>
      */
-    public static final String MESSAGE_SEPARATOR = ": ";
+    public static final @NotNull String MESSAGE_SEPARATOR = ": ";
+    private final @NotNull ArrayList<@NotNull ErrorMessage> messages;
+    private int errorCount;
+    private int warningCount;
 
     /**
      * Constructor for ErrorList
      */
     public ErrorList() {
-        messages = new ArrayList<>();
-        errorCount = 0;
-        warningCount = 0;
+        this.messages = new ArrayList<>();
+        this.errorCount = 0;
+        this.warningCount = 0;
+    }
+
+    /**
+     * Get limit on number of error messages to be generated
+     * by one assemble operation.
+     *
+     * @return error limit.
+     */
+    public static int getErrorLimit() {
+        return Globals.maximumErrorMessages;
     }
 
     /**
@@ -80,8 +92,8 @@ public class ErrorList {
      *
      * @return ArrayList of ErrorMessage objects
      */
-    public ArrayList<ErrorMessage> getErrorMessages() {
-        return messages;
+    public @NotNull ArrayList<ErrorMessage> getErrorMessages() {
+        return this.messages;
     }
 
     /**
@@ -91,7 +103,7 @@ public class ErrorList {
      * <code>false</code> otherwise.
      */
     public boolean errorsOccurred() {
-        return (errorCount != 0);
+        return (this.errorCount != 0);
     }
 
     /**
@@ -100,7 +112,7 @@ public class ErrorList {
      * @return <code>true</code> if an warning has occurred, <code>false</code> otherwise.
      */
     public boolean warningsOccurred() {
-        return (warningCount != 0);
+        return (this.warningCount != 0);
     }
 
     /**
@@ -108,8 +120,8 @@ public class ErrorList {
      *
      * @param mess ErrorMessage object to be added to end of error list.
      */
-    public void add(ErrorMessage mess) {
-        add(mess, messages.size());
+    public void add(final @NotNull ErrorMessage mess) {
+        this.add(mess, this.messages.size());
     }
 
     /**
@@ -118,21 +130,21 @@ public class ErrorList {
      * @param mess  ErrorMessage object to be added to end of error list.
      * @param index position in error list
      */
-    public void add(ErrorMessage mess, int index) {
-        if (errorCount > getErrorLimit()) {
+    public void add(final @NotNull ErrorMessage mess, final int index) {
+        if (this.errorCount > ErrorList.getErrorLimit()) {
             return;
         }
-        if (errorCount == getErrorLimit()) {
-            messages.add(new ErrorMessage(null, mess.getLine(), mess.getPosition(),
-                    "Error Limit of " + getErrorLimit() + " exceeded."));
-            errorCount++; // subsequent errors will not be added; see if statement above
+        if (this.errorCount == ErrorList.getErrorLimit()) {
+            this.messages.add(new ErrorMessage(null, mess.getLine(), mess.getPosition(),
+                    "Error Limit of " + ErrorList.getErrorLimit() + " exceeded."));
+            this.errorCount++; // subsequent errors will not be added; see if statement above
             return;
         }
-        messages.add(index, mess);
+        this.messages.add(index, mess);
         if (mess.isWarning()) {
-            warningCount++;
+            this.warningCount++;
         } else {
-            errorCount++;
+            this.errorCount++;
         }
     }
 
@@ -160,17 +172,7 @@ public class ErrorList {
      * @return True if error limit exceeded, false otherwise.
      */
     public boolean errorLimitExceeded() {
-        return this.errorCount > getErrorLimit();
-    }
-
-    /**
-     * Get limit on number of error messages to be generated
-     * by one assemble operation.
-     *
-     * @return error limit.
-     */
-    public int getErrorLimit() {
-        return Globals.maximumErrorMessages;
+        return this.errorCount > ErrorList.getErrorLimit();
     }
 
     /**
@@ -179,7 +181,7 @@ public class ErrorList {
      * @return String containing report.
      */
     public String generateErrorReport() {
-        return generateReport(ErrorMessage.ERROR);
+        return this.generateReport(ErrorMessage.ERROR);
     }
 
     /**
@@ -188,7 +190,7 @@ public class ErrorList {
      * @return String containing report.
      */
     public String generateWarningReport() {
-        return generateReport(ErrorMessage.WARNING);
+        return this.generateReport(ErrorMessage.WARNING);
     }
 
     /**
@@ -197,13 +199,13 @@ public class ErrorList {
      * @return String containing report.
      */
     public String generateErrorAndWarningReport() {
-        return generateWarningReport() + generateErrorReport();
+        return this.generateWarningReport() + this.generateErrorReport();
     }
 
     // Produces either error or warning report.
-    private String generateReport(boolean isWarning) {
-        StringBuilder report = new StringBuilder();
-        for (ErrorMessage m : messages) {
+    private String generateReport(final boolean isWarning) {
+        final StringBuilder report = new StringBuilder();
+        for (final ErrorMessage m : this.messages) {
             if ((isWarning && m.isWarning()) || (!isWarning && !m.isWarning())) {
                 report.append(m.generateReport());
             }

@@ -11,6 +11,7 @@ import io.github.chr1sps.rars.util.Binary;
 import io.github.chr1sps.rars.util.SystemIO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -67,6 +68,59 @@ public class Assembler {
     private AddressSpace dataAddress;
     private DataSegmentForwardReferences currentFileDataSegmentForwardReferences;
 
+    // //////////////////////////////////////////////////////////////////////
+    // Will check for duplicate text addresses, which can happen inadvertantly when
+    // using
+    // operand on .text directive. Will generate error message for each one that
+    // occurs.
+    private static void catchDuplicateAddresses(final ArrayList<ProgramStatement> instructions, final ErrorList errors) {
+        for (int i = 0; i < instructions.size() - 1; i++) {
+            final ProgramStatement ps1 = instructions.get(i);
+            final ProgramStatement ps2 = instructions.get(i + 1);
+            if (ps1.getAddress() == ps2.getAddress()) {
+                errors.add(new ErrorMessage(ps2.getSourceProgram(), ps2.getSourceLine(), 0,
+                        "Duplicate text segment address: "
+                                + io.github.chr1sps.rars.venus.NumberDisplayBaseChooser.formatUnsignedInteger(ps2
+                                        .getAddress(),
+                                (Globals.getSettings()
+                                        .getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX)) ? 16 : 10)
+                                + " already occupied by " + ps1.getSourceFile() + " line "
+                                + ps1.getSourceLine() + " (caused by use of "
+                                + ((Memory.inTextSegment(ps2.getAddress())) ? ".text" : ".ktext")
+                                + " operand)"));
+            }
+        }
+    }
+
+    private static void detectLabels(final TokenList tokens, final Macro current) {
+        if (Assembler.tokenListBeginsWithLabel(tokens))
+            current.addLabel(tokens.get(0).getValue());
+    }
+
+    // //////////////////////////////////////////////////////////////////////////////////
+    // Pre-process the token list for a statement by stripping off any comment.
+    // NOTE: the ArrayList parameter is not modified; a new one is cloned and
+    // returned.
+    private static TokenList stripComment(final TokenList tokenList) {
+        if (tokenList.isEmpty())
+            return tokenList;
+        final TokenList tokens = (TokenList) tokenList.clone();
+        // If there is a comment, strip it off.
+        final int last = tokens.size() - 1;
+        if (tokens.get(last).getType() == TokenType.COMMENT) {
+            tokens.remove(last);
+        }
+        return tokens;
+    } // stripComment()
+
+    private static boolean tokenListBeginsWithLabel(final TokenList tokens) {
+        // 2-July-2010. DPS. Remove prohibition of operator names as labels
+        if (tokens.size() < 2)
+            return false;
+        return (tokens.get(0).getType() == TokenType.IDENTIFIER || tokens.get(0).getType() == TokenType.OPERATOR)
+                && tokens.get(1).getType() == TokenType.COLON;
+    }
+
     /**
      * Get list of assembler errors and warnings
      *
@@ -103,9 +157,9 @@ public class Assembler {
      * @throws AssemblyException if any.
      * @see ProgramStatement
      */
-    public ArrayList<ProgramStatement> assemble(final ArrayList<RISCVprogram> tokenizedProgramFiles,
-                                                final boolean extendedAssemblerEnabled,
-                                                final boolean warningsAreErrors) throws AssemblyException {
+    public @Nullable ArrayList<ProgramStatement> assemble(final ArrayList<RISCVprogram> tokenizedProgramFiles,
+                                                          final boolean extendedAssemblerEnabled,
+                                                          final boolean warningsAreErrors) throws AssemblyException {
 
         if (tokenizedProgramFiles == null || tokenizedProgramFiles.isEmpty())
             return null;
@@ -119,7 +173,7 @@ public class Assembler {
         final ArrayList<ProgramStatement> machineList = new ArrayList<>();
         this.errors = new ErrorList();
         if (Globals.debug)
-            LOGGER.debug("Assembler first pass begins:");
+            Assembler.LOGGER.debug("Assembler first pass begins:");
 
         // PROCESS THE FIRST ASSEMBLY PASS FOR ALL SOURCE FILES BEFORE PROCEEDING
         // TO SECOND PASS. THIS ASSURES ALL SYMBOL TABLES ARE CORRECTLY BUILT.
@@ -161,11 +215,11 @@ public class Assembler {
                 for (final Token t : tokenList.get(i)) {
                     // record this token's original source program and line #. Differs from final,
                     // if .include used
-                    t.setOriginal(sourceLineList.get(i).getRISCVprogram(), sourceLineList.get(i).getLineNumber());
+                    t.setOriginal(sourceLineList.get(i).program(), sourceLineList.get(i).lineNumber());
                 }
                 statements = this.parseLine(tokenList.get(i),
-                        sourceLineList.get(i).getSource(),
-                        sourceLineList.get(i).getLineNumber(),
+                        sourceLineList.get(i).source(),
+                        sourceLineList.get(i).lineNumber(),
                         extendedAssemblerEnabled);
                 if (statements != null) {
                     parsedList.addAll(statements);
@@ -205,7 +259,7 @@ public class Assembler {
             throw new AssemblyException(this.errors);
         }
         if (Globals.debug)
-            LOGGER.debug("Assembler second pass begins");
+            Assembler.LOGGER.debug("Assembler second pass begins");
         // SECOND PASS OF ASSEMBLER GENERATES BASIC ASSEMBLER THEN MACHINE CODE.
         // Generates basic assembler statements...
         for (final RISCVprogram program : tokenizedProgramFiles) {
@@ -268,7 +322,7 @@ public class Assembler {
                         // All substitutions have been made so we have generated
                         // a valid basic instruction!
                         if (Globals.debug)
-                            LOGGER.debug("PSEUDO generated: {}", instruction);
+                            Assembler.LOGGER.debug("PSEUDO generated: {}", instruction);
                         // For generated instruction: tokenize, build program
                         // statement, add to list.
                         final TokenList newTokenList = new Tokenizer().tokenizeLine(sourceLine,
@@ -290,7 +344,7 @@ public class Assembler {
             } // end of assembler second pass.
         }
         if (Globals.debug)
-            LOGGER.debug("Code generation begins");
+            Assembler.LOGGER.debug("Code generation begins");
         ///////////// THIRD MAJOR STEP IS PRODUCE MACHINE CODE FROM ASSEMBLY //////////
         // Generates machine code statements from the list of basic assembler statements
         // and writes the statement to memory.
@@ -300,7 +354,7 @@ public class Assembler {
                 break;
             statement.buildMachineStatementFromBasicStatement(this.errors);
             if (Globals.debug)
-                LOGGER.debug(statement);
+                Assembler.LOGGER.debug(statement);
             try {
                 Globals.memory.setStatement(statement.getAddress(), statement);
             } catch (final AddressErrorException e) {
@@ -324,36 +378,12 @@ public class Assembler {
         // but in case of duplicate I like having both statements handy for error
         // message.
         Collections.sort(machineList);
-        this.catchDuplicateAddresses(machineList, this.errors);
+        Assembler.catchDuplicateAddresses(machineList, this.errors);
         if (this.errors.errorsOccurred() || this.errors.warningsOccurred() && warningsAreErrors) {
             throw new AssemblyException(this.errors);
         }
         return machineList;
     } // assemble()
-
-    // //////////////////////////////////////////////////////////////////////
-    // Will check for duplicate text addresses, which can happen inadvertantly when
-    // using
-    // operand on .text directive. Will generate error message for each one that
-    // occurs.
-    private void catchDuplicateAddresses(final ArrayList<ProgramStatement> instructions, final ErrorList errors) {
-        for (int i = 0; i < instructions.size() - 1; i++) {
-            final ProgramStatement ps1 = instructions.get(i);
-            final ProgramStatement ps2 = instructions.get(i + 1);
-            if (ps1.getAddress() == ps2.getAddress()) {
-                errors.add(new ErrorMessage(ps2.getSourceProgram(), ps2.getSourceLine(), 0,
-                        "Duplicate text segment address: "
-                                + io.github.chr1sps.rars.venus.NumberDisplayBaseChooser.formatUnsignedInteger(ps2
-                                        .getAddress(),
-                                (Globals.getSettings()
-                                        .getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX)) ? 16 : 10)
-                                + " already occupied by " + ps1.getSourceFile() + " line "
-                                + ps1.getSourceLine() + " (caused by use of "
-                                + ((Memory.inTextSegment(ps2.getAddress())) ? ".text" : ".ktext")
-                                + " operand)"));
-            }
-        }
-    }
 
     /**
      * This method parses one line of RISCV source code. It works with the list
@@ -368,18 +398,18 @@ public class Assembler {
      * @return ArrayList of ProgramStatements because parsing a macro expansion
      * request will return a list of ProgramStatements expanded
      */
-    private ArrayList<ProgramStatement> parseLine(final TokenList tokenList, final String source,
-                                                  final int sourceLineNumber, final boolean extendedAssemblerEnabled) {
+    private @Nullable ArrayList<ProgramStatement> parseLine(final TokenList tokenList, final String source,
+                                                            final int sourceLineNumber, final boolean extendedAssemblerEnabled) {
 
         final ArrayList<ProgramStatement> ret = new ArrayList<>();
 
         final ProgramStatement programStatement;
-        TokenList tokens = this.stripComment(tokenList);
+        TokenList tokens = Assembler.stripComment(tokenList);
 
         // Labels should not be processed in macro definition segment.
         final MacroPool macroPool = this.fileCurrentlyBeingAssembled.getLocalMacroPool();
         if (this.inMacroSegment) {
-            this.detectLabels(tokens, macroPool.getCurrent());
+            Assembler.detectLabels(tokens, macroPool.getCurrent());
         } else {
             this.stripLabels(tokens);
         }
@@ -387,10 +417,10 @@ public class Assembler {
             return null;
         // Grab first (operator) token...
         final Token token = tokens.get(0);
-        final TokenTypes tokenType = token.getType();
+        final TokenType tokenType = token.getType();
 
         // Let's handle the directives here...
-        if (tokenType == TokenTypes.DIRECTIVE) {
+        if (tokenType == TokenType.DIRECTIVE) {
             this.executeDirective(tokens);
             return null;
         }
@@ -401,13 +431,13 @@ public class Assembler {
 
         // SPIM-style macro calling:
         TokenList parenFreeTokens = tokens;
-        if (tokens.size() > 2 && tokens.get(1).getType() == TokenTypes.LEFT_PAREN
-                && tokens.get(tokens.size() - 1).getType() == TokenTypes.RIGHT_PAREN) {
+        if (tokens.size() > 2 && tokens.get(1).getType() == TokenType.LEFT_PAREN
+                && tokens.get(tokens.size() - 1).getType() == TokenType.RIGHT_PAREN) {
             parenFreeTokens = (TokenList) tokens.clone();
             parenFreeTokens.remove(tokens.size() - 1);
             parenFreeTokens.remove(1);
         }
-        final Macro macro = macroPool.getMatchingMacro(parenFreeTokens, sourceLineNumber);// parenFreeTokens.get(0).getSourceLine());
+        final Macro macro = macroPool.getMatchingMacro(parenFreeTokens);// parenFreeTokens.get(0).getSourceLine());
 
         // expand macro if this line is a macro expansion call
         if (macro != null) {
@@ -483,7 +513,7 @@ public class Assembler {
         // so this will catch anything, including a misspelling of a valid directive
         // (which is
         // a nice thing to do).
-        if (tokenType == TokenTypes.IDENTIFIER && token.getValue().charAt(0) == '.') {
+        if (tokenType == TokenType.IDENTIFIER && token.getValue().charAt(0) == '.') {
             this.errors.add(new ErrorMessage(ErrorMessage.WARNING, token.getSourceProgram(), token
                     .getSourceLine(), token.getStartPos(),
                     "RARS does not recognize the "
@@ -501,12 +531,12 @@ public class Assembler {
         // is contained in this.dataDirective (the current data directive).
         //
         if (this.inDataSegment && // 30-Dec-09 DPS Added data segment guard...
-                (tokenType == TokenTypes.PLUS
+                (tokenType == TokenType.PLUS
                         || // because invalid instructions were being caught...
-                        tokenType == TokenTypes.MINUS
+                        tokenType == TokenType.MINUS
                         || // here and reported as a directive in text segment!
-                        tokenType == TokenTypes.QUOTED_STRING || tokenType == TokenTypes.IDENTIFIER
-                        || TokenTypes.isIntegerTokenType(tokenType) || TokenTypes
+                        tokenType == TokenType.QUOTED_STRING || tokenType == TokenType.IDENTIFIER
+                        || TokenType.isIntegerTokenType(tokenType) || TokenType
                         .isFloatingTokenType(tokenType))) {
             this.executeDirectiveContinuation(tokens);
             return null;
@@ -546,27 +576,6 @@ public class Assembler {
         return null;
     } // parseLine()
 
-    private void detectLabels(final TokenList tokens, final Macro current) {
-        if (this.tokenListBeginsWithLabel(tokens))
-            current.addLabel(tokens.get(0).getValue());
-    }
-
-    // //////////////////////////////////////////////////////////////////////////////////
-    // Pre-process the token list for a statement by stripping off any comment.
-    // NOTE: the ArrayList parameter is not modified; a new one is cloned and
-    // returned.
-    private TokenList stripComment(final TokenList tokenList) {
-        if (tokenList.isEmpty())
-            return tokenList;
-        final TokenList tokens = (TokenList) tokenList.clone();
-        // If there is a comment, strip it off.
-        final int last = tokens.size() - 1;
-        if (tokens.get(last).getType() == TokenTypes.COMMENT) {
-            tokens.remove(last);
-        }
-        return tokens;
-    } // stripComment()
-
     /**
      * Pre-process the token list for a statement by stripping off any label, if
      * either are present. Any label definition will be recorded in the symbol
@@ -590,10 +599,10 @@ public class Assembler {
             return false;
         } else {
             final Token token = tokens.get(0);
-            if (this.tokenListBeginsWithLabel(tokens)) {
-                if (token.getType() == TokenTypes.OPERATOR) {
+            if (Assembler.tokenListBeginsWithLabel(tokens)) {
+                if (token.getType() == TokenType.OPERATOR) {
                     // an instruction name was used as label (e.g. lw:), so change its token type
-                    token.setType(TokenTypes.IDENTIFIER);
+                    token.setType(TokenType.IDENTIFIER);
                 }
                 this.fileCurrentlyBeingAssembled.getLocalSymbolTable().addSymbol(token,
                         (this.inDataSegment) ? this.dataAddress.get() : this.textAddress.get(),
@@ -605,21 +614,13 @@ public class Assembler {
         }
     } // parseLabel()
 
-    private boolean tokenListBeginsWithLabel(final TokenList tokens) {
-        // 2-July-2010. DPS. Remove prohibition of operator names as labels
-        if (tokens.size() < 2)
-            return false;
-        return (tokens.get(0).getType() == TokenTypes.IDENTIFIER || tokens.get(0).getType() == TokenTypes.OPERATOR)
-                && tokens.get(1).getType() == TokenTypes.COLON;
-    }
-
     // /////////////////////////////////////////////////////////////////////////////
     // This source code line is a directive, not a instruction. Let's carry it out.
     private void executeDirective(final TokenList tokens) {
         final Token token = tokens.get(0);
         final Directive direct = Directive.matchDirective(token.getValue());
         if (Globals.debug)
-            LOGGER.debug("line {} is directive {}", token.getSourceLine(), direct);
+            Assembler.LOGGER.debug("line {} is directive {}", token.getSourceLine(), direct);
         if (direct == null) {
             this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token
                     .getStartPos(),
@@ -634,7 +635,7 @@ public class Assembler {
                         + "\" directive requires at least one argument."));
                 return;
             }
-            if (tokens.get(1).getType() != TokenTypes.IDENTIFIER) {
+            if (tokens.get(1).getType() != TokenType.IDENTIFIER) {
                 this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         tokens.get(1).getStartPos(), "Invalid Macro name \""
                         + tokens.get(1).getValue() + "\""));
@@ -650,8 +651,8 @@ public class Assembler {
             pool.beginMacro(tokens.get(1));
             for (int i = 2; i < tokens.size(); i++) {
                 final Token arg = tokens.get(i);
-                if (arg.getType() == TokenTypes.RIGHT_PAREN
-                        || arg.getType() == TokenTypes.LEFT_PAREN)
+                if (arg.getType() == TokenType.RIGHT_PAREN
+                        || arg.getType() == TokenType.LEFT_PAREN)
                     continue;
                 if (!Macro.tokenIsMacroParameter(arg.getValue(), true)) {
                     this.errors.add(new ErrorMessage(arg.getSourceProgram(), arg.getSourceLine(),
@@ -678,18 +679,18 @@ public class Assembler {
         } else if (direct == Directive.DATA) {
             this.inDataSegment = true;
             this.autoAlign = true;
-            if (tokens.size() > 1 && TokenTypes.isIntegerTokenType(tokens.get(1).getType())) {
+            if (tokens.size() > 1 && TokenType.isIntegerTokenType(tokens.get(1).getType())) {
                 this.dataAddress.set(Binary.stringToInt(tokens.get(1).getValue())); // KENV 1/6/05
             }
         } else if (direct == Directive.TEXT) {
             this.inDataSegment = false;
-            if (tokens.size() > 1 && TokenTypes.isIntegerTokenType(tokens.get(1).getType())) {
+            if (tokens.size() > 1 && TokenType.isIntegerTokenType(tokens.get(1).getType())) {
                 this.textAddress.set(Binary.stringToInt(tokens.get(1).getValue())); // KENV 1/6/05
             }
         } else if (direct == Directive.SECTION) {
             if (tokens.size() >= 2) {
                 final Token section = tokens.get(1);
-                if (section.getType() == TokenTypes.QUOTED_STRING || section.getType() == TokenTypes.IDENTIFIER) {
+                if (section.getType() == TokenType.QUOTED_STRING || section.getType() == TokenType.IDENTIFIER) {
                     final String str = section.getValue();
                     if (str.startsWith(".data") || str.startsWith(".rodata") || str.startsWith(".sdata")) {
                         this.inDataSegment = true;
@@ -728,7 +729,7 @@ public class Assembler {
                         + "\" requires one operand"));
                 return;
             }
-            if (!TokenTypes.isIntegerTokenType(tokens.get(1).getType())
+            if (!TokenType.isIntegerTokenType(tokens.get(1).getType())
                     || Binary.stringToInt(tokens.get(1).getValue()) < 0) {
                 this.errors.add(new ErrorMessage(token.getSourceProgram(),
                         token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
@@ -755,7 +756,7 @@ public class Assembler {
                             + "\" requires one operand"));
                     return;
                 }
-                if (!TokenTypes.isIntegerTokenType(tokens.get(1).getType())
+                if (!TokenType.isIntegerTokenType(tokens.get(1).getType())
                         || Binary.stringToInt(tokens.get(1).getValue()) < 0) {
                     this.errors.add(new ErrorMessage(token.getSourceProgram(),
                             token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
@@ -772,7 +773,7 @@ public class Assembler {
                         + "\" directive requires two operands (label and size)."));
                 return;
             }
-            if (!TokenTypes.isIntegerTokenType(tokens.get(2).getType())
+            if (!TokenType.isIntegerTokenType(tokens.get(2).getType())
                     || Binary.stringToInt(tokens.get(2).getValue()) < 0) {
                 this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
@@ -799,7 +800,7 @@ public class Assembler {
                 // pass. At that point, transfer matching symbol definitions from
                 // local symbol table to global symbol table.
                 final Token label = tokens.get(i);
-                if (label.getType() != TokenTypes.IDENTIFIER) {
+                if (label.getType() != TokenType.IDENTIFIER) {
                     this.errors.add(new ErrorMessage(token.getSourceProgram(),
                             token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
                             + "\" directive argument must be label."));
@@ -838,8 +839,8 @@ public class Assembler {
                             + "\" already defined as global in a different file."));
                 } else {
                     this.fileCurrentlyBeingAssembled.getLocalSymbolTable().removeSymbol(label);
-                    Globals.symbolTable.addSymbol(label, symtabEntry.getAddress(),
-                            symtabEntry.getType(), this.errors);
+                    Globals.symbolTable.addSymbol(label, symtabEntry.address,
+                            symtabEntry.isData, this.errors);
                 }
             }
         }
@@ -866,7 +867,7 @@ public class Assembler {
     // Given token, find the corresponding Instruction object. If token was not
     // recognized as OPERATOR, there is a problem.
     private ArrayList<Instruction> matchInstruction(final Token token) {
-        if (token.getType() != TokenTypes.OPERATOR) {
+        if (token.getType() != TokenType.OPERATOR) {
             if (token.getSourceProgram().getLocalMacroPool()
                     .matchesAnyMacroName(token.getValue()))
                 this.errors.add(new ErrorMessage(token.getSourceProgram(), token
@@ -902,14 +903,14 @@ public class Assembler {
         assert this.passesDataSegmentCheck(token);
         // Correctly handles case where this is a "directive continuation" line.
         int tokenStart = 0;
-        if (token.getType() == TokenTypes.DIRECTIVE)
+        if (token.getType() == TokenType.DIRECTIVE)
             tokenStart = 1;
 
         // Set byte length in memory of each number (e.g. WORD is 4, BYTE is 1, etc)
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
 
         // Handle the "value : n" format, which replicates the value "n" times.
-        if (tokens.size() == 4 && tokens.get(2).getType() == TokenTypes.COLON) {
+        if (tokens.size() == 4 && tokens.get(2).getType() == TokenType.COLON) {
             final Token valueToken = tokens.get(1);
             final Token repetitionsToken = tokens.get(3);
             // DPS 15-jul-08, allow ":" for repetition for all numeric
@@ -919,7 +920,7 @@ public class Assembler {
             // (integer value OR floating value))
             // AND integer repetition value
             if (!(directive.isIntegerDirective())
-                    || !TokenTypes.isIntegerTokenType(repetitionsToken.getType())) {
+                    || !TokenType.isIntegerTokenType(repetitionsToken.getType())) {
                 errors.add(new ErrorMessage(this.fileCurrentlyBeingAssembled,
                         valueToken.getSourceLine(), valueToken.getStartPos(),
                         "malformed expression"));
@@ -967,10 +968,10 @@ public class Assembler {
     // to store the address of that label (into however many bytes specified).
     private void storeInteger(final Token token, final Directive directive, final ErrorList errors) {
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
-        if (TokenTypes.isIntegerTokenType(token.getType())) {
+        if (TokenType.isIntegerTokenType(token.getType())) {
             int value;
             final long longvalue;
-            if (TokenTypes.INTEGER_64 == token.getType()) {
+            if (TokenType.INTEGER_64 == token.getType()) {
                 longvalue = Binary.stringToLong(token.getValue());
                 value = (int) longvalue;
                 if (directive != Directive.DWORD) {
@@ -1031,7 +1032,7 @@ public class Assembler {
                 this.textAddress.increment(lengthInBytes);
             }
         } // end of "if integer token type"
-        else if (token.getType() == TokenTypes.IDENTIFIER) {
+        else if (token.getType() == TokenType.IDENTIFIER) {
             if (this.inDataSegment) {
                 final int value = this.fileCurrentlyBeingAssembled.getLocalSymbolTable()
                         .getAddressLocalOrGlobal(token.getValue());
@@ -1070,8 +1071,8 @@ public class Assembler {
             value = Float.POSITIVE_INFINITY;
         } else if (token.getValue().equals("-Inf")) {
             value = Float.NEGATIVE_INFINITY;
-        } else if (TokenTypes.isIntegerTokenType(token.getType())
-                || TokenTypes.isFloatingTokenType(token.getType())) {
+        } else if (TokenType.isIntegerTokenType(token.getType())
+                || TokenType.isFloatingTokenType(token.getType())) {
 
             try {
                 value = Double.parseDouble(token.getValue());
@@ -1114,12 +1115,12 @@ public class Assembler {
         Token token;
         // Correctly handles case where this is a "directive continuation" line.
         int tokenStart = 0;
-        if (tokens.get(0).getType() == TokenTypes.DIRECTIVE) {
+        if (tokens.get(0).getType() == TokenType.DIRECTIVE) {
             tokenStart = 1;
         }
         for (int i = tokenStart; i < tokens.size(); i++) {
             token = tokens.get(i);
-            if (token.getType() != TokenTypes.QUOTED_STRING) {
+            if (token.getType() != TokenType.QUOTED_STRING) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
                         + "\" is not a valid character string"));

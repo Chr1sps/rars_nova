@@ -40,22 +40,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public class ErrorMessage {
+    /**
+     * Constant to indicate this message is warning not error
+     */
+    public static final boolean WARNING = true;
+    /**
+     * Constant to indicate this message is error not warning
+     */
+    public static final boolean ERROR = false;
     private final boolean isWarning; // allow for warnings too (added Nov 2006)
     private final String filename; // name of source file (added Oct 2006)
     private final int line; // line in source code where error detected
     private final int position; // position in source line where error detected
     private final String message;
     private final String macroExpansionHistory;
-
-    /**
-     * Constant to indicate this message is warning not error
-     */
-    public static final boolean WARNING = true;
-
-    /**
-     * Constant to indicate this message is error not warning
-     */
-    public static final boolean ERROR = false;
 
     /**
      * Constructor for ErrorMessage. Assumes line number is calculated after any
@@ -105,8 +103,8 @@ public class ErrorMessage {
             } else {
                 final io.github.chr1sps.rars.assembler.SourceLine sourceLine = sourceProgram.getSourceLineList()
                         .get(line - 1);
-                this.filename = sourceLine.getFilename();
-                this.line = sourceLine.getLineNumber();
+                this.filename = sourceLine.filename();
+                this.line = sourceLine.lineNumber();
             }
         }
         this.position = position;
@@ -141,7 +139,7 @@ public class ErrorMessage {
         // Looks bass-ackwards, but to get the line numbers to display correctly
         // for runtime error occurring in macro expansion (expansion->definition), need
         // to assign to the opposite variables.
-        final ArrayList<Integer> defineLine = this.parseMacroHistory(statement.getSource());
+        final ArrayList<Integer> defineLine = ErrorMessage.parseMacroHistory(statement.getSource());
         if (defineLine.isEmpty()) {
             this.line = statement.getSourceLine();
             this.macroExpansionHistory = "";
@@ -151,7 +149,7 @@ public class ErrorMessage {
         }
     }
 
-    private ArrayList<Integer> parseMacroHistory(final String string) {
+    private static ArrayList<Integer> parseMacroHistory(final String string) {
         final Pattern pattern = Pattern.compile("<\\d+>");
         final Matcher matcher = pattern.matcher(string);
         String verify = string.trim();
@@ -171,6 +169,13 @@ public class ErrorMessage {
             }
         }
         return macroHistory;
+    }
+
+    // Added by Mohammad Sekavat Dec 2012
+    private static String getExpansionHistory(final RISCVprogram sourceProgram) {
+        if (sourceProgram == null || sourceProgram.getLocalMacroPool() == null)
+            return "";
+        return sourceProgram.getLocalMacroPool().getExpansionHistory();
     }
 
     /**
@@ -248,13 +253,6 @@ public class ErrorMessage {
         if (this.macroExpansionHistory == null || this.macroExpansionHistory.isEmpty())
             return "";
         return this.macroExpansionHistory + "->";
-    }
-
-    // Added by Mohammad Sekavat Dec 2012
-    private static String getExpansionHistory(final RISCVprogram sourceProgram) {
-        if (sourceProgram == null || sourceProgram.getLocalMacroPool() == null)
-            return "";
-        return sourceProgram.getLocalMacroPool().getExpansionHistory();
     }
 
 } // ErrorMessage

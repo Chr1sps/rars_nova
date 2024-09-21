@@ -1,5 +1,8 @@
 package io.github.chr1sps.rars.assembler;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 
@@ -146,18 +149,18 @@ public enum Directive {
     SECTION(".section",
             "Allows specifying sections without .text or .data directives. Included for gcc comparability");
 
-    private final String name;
-    private final String description; // help text
-
-    private static final ArrayList<Directive> directiveList = new ArrayList<>();
-
-    Directive(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
+    private static final @NotNull ArrayList<Directive> directiveList = new ArrayList<>();
 
     static {
-        directiveList.addAll(EnumSet.allOf(Directive.class));
+        Directive.directiveList.addAll(EnumSet.allOf(Directive.class));
+    }
+
+    private final @NotNull String name;
+    private final @NotNull String description; // help text
+
+    Directive(@NotNull final String name, @NotNull final String description) {
+        this.name = name;
+        this.description = description;
     }
 
     /**
@@ -167,8 +170,8 @@ public enum Directive {
      * @return If match is found, returns matching Directives object, else returns
      * <code>null</code>.
      */
-    public static Directive matchDirective(String str) {
-        for (Directive match : directiveList) {
+    public static @Nullable Directive matchDirective(final @NotNull String str) {
+        for (final Directive match : Directive.directiveList) {
             if (str.equalsIgnoreCase(match.name)) {
                 return match;
             }
@@ -185,9 +188,9 @@ public enum Directive {
      * @return If match is found, returns ArrayList of matching Directives objects,
      * else returns <code>null</code>.
      */
-    public static ArrayList<Directive> prefixMatchDirectives(String str) {
+    public static ArrayList<Directive> prefixMatchDirectives(final String str) {
         ArrayList<Directive> matches = null;
-        for (Directive direct : directiveList) {
+        for (final Directive direct : Directive.directiveList) {
             if (direct.name.toLowerCase().startsWith(str.toLowerCase())) {
                 if (matches == null) {
                     matches = new ArrayList<>();
@@ -199,10 +202,20 @@ public enum Directive {
     }
 
     /**
+     * Produces List of Directive objects
+     *
+     * @return All directives defined
+     */
+    public static @NotNull ArrayList<Directive> getDirectiveList() {
+        return Directive.directiveList;
+    }
+
+    /**
      * Produces String-ified version of Directive object
      *
      * @return String representing Directive: its MIPS name
      */
+    @Override
     public String toString() {
         return this.name;
     }
@@ -212,7 +225,7 @@ public enum Directive {
      *
      * @return name of this directive as a String
      */
-    public String getName() {
+    public @NotNull String getName() {
         return this.name;
     }
 
@@ -221,17 +234,8 @@ public enum Directive {
      *
      * @return description of this directive (for help purposes)
      */
-    public String getDescription() {
+    public @NotNull String getDescription() {
         return this.description;
-    }
-
-    /**
-     * Produces List of Directive objects
-     *
-     * @return All directives defined
-     */
-    public static ArrayList<Directive> getDirectiveList() {
-        return directiveList;
     }
 
     /**

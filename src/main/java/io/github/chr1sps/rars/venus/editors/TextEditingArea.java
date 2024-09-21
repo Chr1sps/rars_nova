@@ -1,5 +1,7 @@
 package io.github.chr1sps.rars.venus.editors;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.text.Document;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
@@ -38,24 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public interface TextEditingArea {
 
-    // Used by Find/Replace
-    /**
-     * Constant <code>TEXT_NOT_FOUND=0</code>
-     */
-    int TEXT_NOT_FOUND = 0;
-    /**
-     * Constant <code>TEXT_FOUND=1</code>
-     */
-    int TEXT_FOUND = 1;
-    /**
-     * Constant <code>TEXT_REPLACED_FOUND_NEXT=2</code>
-     */
-    int TEXT_REPLACED_FOUND_NEXT = 2;
-    /**
-     * Constant <code>TEXT_REPLACED_NOT_FOUND_NEXT=3</code>
-     */
-    int TEXT_REPLACED_NOT_FOUND_NEXT = 3;
-
     /**
      * <p>copy.</p>
      */
@@ -73,7 +57,7 @@ public interface TextEditingArea {
      * @param caseSensitive a boolean
      * @return a int
      */
-    int doFindText(String find, boolean caseSensitive);
+    @NotNull FindReplaceResult doFindText(String find, boolean caseSensitive);
 
     /**
      * <p>doReplace.</p>
@@ -83,7 +67,7 @@ public interface TextEditingArea {
      * @param caseSensitive a boolean
      * @return a int
      */
-    int doReplace(String find, String replace, boolean caseSensitive);
+    @NotNull FindReplaceResult doReplace(String find, String replace, boolean caseSensitive);
 
     /**
      * <p>doReplaceAll.</p>
@@ -101,6 +85,13 @@ public interface TextEditingArea {
      * @return a int
      */
     int getCaretPosition();
+
+    /**
+     * <p>setCaretPosition.</p>
+     *
+     * @param position a int
+     */
+    void setCaretPosition(int position);
 
     /**
      * <p>getDocument.</p>
@@ -124,11 +115,25 @@ public interface TextEditingArea {
     int getSelectionEnd();
 
     /**
+     * <p>setSelectionEnd.</p>
+     *
+     * @param pos a int
+     */
+    void setSelectionEnd(int pos);
+
+    /**
      * <p>getSelectionStart.</p>
      *
      * @return a int
      */
     int getSelectionStart();
+
+    /**
+     * <p>setSelectionStart.</p>
+     *
+     * @param pos a int
+     */
+    void setSelectionStart(int pos);
 
     /**
      * <p>select.</p>
@@ -151,6 +156,13 @@ public interface TextEditingArea {
     String getText();
 
     /**
+     * <p>setText.</p>
+     *
+     * @param text a {@link java.lang.String} object
+     */
+    void setText(String text);
+
+    /**
      * <p>getUndoManager.</p>
      *
      * @return a {@link javax.swing.undo.UndoManager} object
@@ -170,13 +182,6 @@ public interface TextEditingArea {
     void replaceSelection(String str);
 
     /**
-     * <p>setCaretPosition.</p>
-     *
-     * @param position a int
-     */
-    void setCaretPosition(int position);
-
-    /**
      * <p>setEditable.</p>
      *
      * @param editable a boolean
@@ -184,25 +189,11 @@ public interface TextEditingArea {
     void setEditable(boolean editable);
 
     /**
-     * <p>setSelectionEnd.</p>
+     * <p>getFont.</p>
      *
-     * @param pos a int
+     * @return a {@link java.awt.Font} object
      */
-    void setSelectionEnd(int pos);
-
-    /**
-     * <p>setSelectionStart.</p>
-     *
-     * @param pos a int
-     */
-    void setSelectionStart(int pos);
-
-    /**
-     * <p>setText.</p>
-     *
-     * @param text a {@link java.lang.String} object
-     */
-    void setText(String text);
+    Font getFont();
 
     /**
      * <p>setFont.</p>
@@ -210,13 +201,6 @@ public interface TextEditingArea {
      * @param f a {@link java.awt.Font} object
      */
     void setFont(Font f);
-
-    /**
-     * <p>getFont.</p>
-     *
-     * @return a {@link java.awt.Font} object
-     */
-    Font getFont();
 
     /**
      * <p>requestFocusInWindow.</p>
@@ -326,4 +310,12 @@ public interface TextEditingArea {
      * @return a {@link java.awt.Component} object
      */
     Component getOuterComponent();
+
+    // Used by Find/Replace
+    enum FindReplaceResult {
+        TEXT_NOT_FOUND,
+        TEXT_FOUND,
+        TEXT_REPLACED_FOUND_NEXT,
+        TEXT_REPLACED_NOT_FOUND_NEXT
+    }
 }
