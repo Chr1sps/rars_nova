@@ -4,10 +4,9 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 application {
-    mainClass = "io.github.chr1sps.rars.Main"
-    mainModule = "RARSNova"
+    mainClass = "rars.Main"
+//    mainModule = "RARSNova"
 }
-
 repositories {
     mavenCentral()
 }
@@ -22,7 +21,7 @@ dependencies {
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
-    graphDoclet("nl.talsmasoftware:umldoclet:2.1.2")
+    graphDoclet("nl.talsmasoftware:umldoclet:2.2.0")
 }
 
 
@@ -38,7 +37,7 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
     mergeServiceFiles()
     manifest {
         attributes(
-            "Main-Class" to "io.github.chr1sps.rars.Main",
+            "Main-Class" to "rars.Main",
             "Multi-Release" to "true"
         )
     }
@@ -51,7 +50,7 @@ tasks {
     jar {
         manifest {
             attributes(
-                "Main-Class" to "io.github.chr1sps.rars.Main"
+                "Main-Class" to "rars.Main"
             )
         }
         from(
@@ -67,10 +66,11 @@ tasks {
         useJUnitPlatform()
     }
     javadoc {
-        options {
+        val docletOptions = options as StandardJavadocDocletOptions
+        docletOptions.apply {
             encoding = "UTF-8"
             docletpath = graphDoclet.files.toList()
-            doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
+//            doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
         }
     }
 }
