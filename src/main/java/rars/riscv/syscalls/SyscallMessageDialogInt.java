@@ -53,6 +53,7 @@ public class SyscallMessageDialogInt extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         final String message = NullString.get(statement);
 

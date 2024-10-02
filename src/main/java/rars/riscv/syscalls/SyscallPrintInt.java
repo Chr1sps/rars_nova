@@ -35,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallPrintInt class.</p>
- *
  */
 public class SyscallPrintInt extends AbstractSyscall {
     /**
@@ -48,6 +47,7 @@ public class SyscallPrintInt extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         SystemIO.printString(Integer.toString(RegisterFile.getValue("a0")));
     }

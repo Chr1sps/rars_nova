@@ -1,7 +1,7 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
 import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
 
@@ -37,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallRandIntRange class.</p>
- *
  */
 public class SyscallRandIntRange extends AbstractSyscall {
     /**
@@ -52,6 +51,7 @@ public class SyscallRandIntRange extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         final Random stream = RandomStreams.get("a0");
         try {

@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallPrintIntBinary class.</p>
- *
  */
 public class SyscallPrintIntBinary extends AbstractSyscall {
     /**
@@ -50,6 +49,7 @@ public class SyscallPrintIntBinary extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         SystemIO.printString(Binary.intToBinaryString(RegisterFile.getValue("a0")));
     }

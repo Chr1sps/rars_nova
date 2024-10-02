@@ -45,6 +45,7 @@ public class LH extends Load {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long load(final int address) throws AddressErrorException {
         return ((long) Globals.memory.getHalf(address) << 16) >> 16; // Shifting sign extends
     }

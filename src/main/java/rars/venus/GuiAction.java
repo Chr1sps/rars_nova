@@ -34,7 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * parent class for Action subclasses to be defined for every menu/toolbar
  * option.
- *
  */
 public class GuiAction extends AbstractAction {
     /**
@@ -59,6 +58,7 @@ public class GuiAction extends AbstractAction {
      * <p>
      * does nothing by default. Should be over-ridden by subclass
      */
+    @Override
     public void actionPerformed(final ActionEvent e) {
 
     }

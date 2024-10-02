@@ -60,6 +60,7 @@ public class HelpAboutAction extends GuiAction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void actionPerformed(final ActionEvent e) {
         JOptionPane.showMessageDialog(mainUI,
                 "RARS " + Globals.version + "    Copyright " + Globals.copyrightYears + "\n" +

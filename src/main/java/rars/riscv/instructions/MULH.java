@@ -45,6 +45,7 @@ public class MULH extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long value2) {
         // if this is too slow, it is possible to do it with just long multiplication
         return BigInteger.valueOf(value).multiply(BigInteger.valueOf(value2)).shiftRight(64).longValue();
@@ -53,6 +54,7 @@ public class MULH extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int computeW(final int value, final int value2) {
         // Sign extend both arguments
         final long ext = ((long) value << 32) >> 32;

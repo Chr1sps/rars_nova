@@ -48,6 +48,7 @@ public class SyscallPrintFloat extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         SystemIO.printString(Float.toString(Float.intBitsToFloat(
                 FloatingPointRegisterFile.getValue("fa0"))));

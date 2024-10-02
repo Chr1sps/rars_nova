@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SLTI class.</p>
- *
  */
 public class SLTI extends ImmediateInstruction {
     /**
@@ -44,6 +43,7 @@ public class SLTI extends ImmediateInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long immediate) {
         return (value < immediate) ? 1 : 0;
     }

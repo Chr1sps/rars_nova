@@ -48,6 +48,7 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      * @return String containing file extension -- without the leading "." -- or
      * null if there is no standard extension.
      */
+    @Override
     public String getFileExtension() {
         return extension;
     }
@@ -59,6 +60,7 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      * @return String containing short description to go with the extension
      * or for use as tool tip. Possibly null.
      */
+    @Override
     public @NotNull String getDescription() {
         return description;
     }
@@ -78,6 +80,7 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      *
      * @return One-word String describing the format.
      */
+    @Override
     public @NotNull String getCommandDescriptor() {
         return commandDescriptor;
     }
@@ -88,6 +91,7 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      * Write memory contents according to the
      * specification for this format.
      */
+    @Override
     public abstract void dumpMemoryRange(@NotNull File file, int firstAddress, int lastAddress, @NotNull Memory memory)
             throws AddressErrorException, IOException;
 

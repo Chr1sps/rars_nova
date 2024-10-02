@@ -102,6 +102,8 @@ public final class SyscallLoader {
         syscallList.add(new SyscallTime());
         syscallList.add(new SyscallWrite());
 
+        syscallList.add(new SyscallDisplayBitmap());
+
         SyscallLoader.syscallList = SyscallLoader.processSyscallNumberOverrides(SyscallLoader.syscallList);
     }
 

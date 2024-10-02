@@ -48,6 +48,7 @@ public class LUI extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0], (long) operands[1] << 12);

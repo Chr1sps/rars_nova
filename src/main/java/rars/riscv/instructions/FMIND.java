@@ -19,6 +19,7 @@ public class FMIND extends Double {
     /**
      * {@inheritDoc}
      */
+    @Override
     public @NotNull Float64 compute(final Float64 f1, final Float64 f2, final Environment env) {
         return Comparisons.minimumNumber(f1, f2, env);
     }

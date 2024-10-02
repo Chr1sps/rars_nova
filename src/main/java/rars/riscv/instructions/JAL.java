@@ -51,6 +51,7 @@ public class JAL extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         InstructionSet.processReturnAddress(operands[0]);

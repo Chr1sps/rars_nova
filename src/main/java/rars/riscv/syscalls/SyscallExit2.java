@@ -1,8 +1,8 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
 
@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallExit2 class.</p>
- *
  */
 public class SyscallExit2 extends AbstractSyscall {
     /**
@@ -49,6 +48,7 @@ public class SyscallExit2 extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         Globals.exitCode = RegisterFile.getValue("a0");
         throw new ExitingException(); // empty error list

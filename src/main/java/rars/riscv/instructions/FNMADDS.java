@@ -19,6 +19,7 @@ public class FNMADDS extends FusedFloat {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Float32 compute(@NotNull final Float32 f1, final Float32 f2, final Float32 f3, @NotNull final Environment e) {
         // TODO: test if this is the right behaviour
         flipRounding(e);

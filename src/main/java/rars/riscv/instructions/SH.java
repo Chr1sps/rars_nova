@@ -46,6 +46,7 @@ public class SH extends Store {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void store(final int address, final long data) throws AddressErrorException {
         Globals.memory.setHalf(address, (int) data & 0x0000FFFF);
     }

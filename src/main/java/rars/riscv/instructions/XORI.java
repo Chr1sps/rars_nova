@@ -43,6 +43,7 @@ public class XORI extends ImmediateInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long immediate) {
         return value ^ immediate;
     }

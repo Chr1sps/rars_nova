@@ -1,8 +1,11 @@
 package rars.tools;
 
+import org.jetbrains.annotations.Nullable;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.hardware.Memory;
+import rars.util.GraphicsPanel;
+import rars.util.Grid;
 import rars.util.SimpleSubscriber;
 
 import javax.swing.*;
@@ -15,7 +18,6 @@ import java.awt.event.WindowEvent;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
-import java.util.Arrays;
 
 /*
 Copyright (c) 2010-2011,  Pete Sanderson and Kenneth Vollmar
@@ -347,7 +349,7 @@ public class BitmapDisplay extends AbstractTool {
                     }
 
                     @Override
-                    public Number parse(final String source, final ParsePosition parsePosition) {
+                    public @Nullable Number parse(final String source, final ParsePosition parsePosition) {
                         try {
                             int value = Integer.parseInt(source, 16);
                             value = Math.clamp(value, 0, 0xFFFF);
@@ -457,69 +459,11 @@ public class BitmapDisplay extends AbstractTool {
                 this.displayAreaHeightInPixels * this.unitPixelSize);
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    // Represents grid of colors
-    private static class Grid {
-
-        final Color[][] grid;
-        final int rows;
-        final int columns;
-
-        private Grid(final int rows, final int columns) {
-            this.grid = new Color[rows][columns];
-            this.rows = rows;
-            this.columns = columns;
-            this.reset();
-        }
-
-        // Just set all grid elements to black.
-        private void reset() {
-            for (final var row : this.grid) {
-                Arrays.fill(row, Color.BLACK);
-            }
-        }
-    }
-
-    /////////////////////////////////////////////////////////////////////////////
-    // Class that represents the panel for visualizing and animating memory
-    ///////////////////////////////////////////////////////////////////////////// reference
-    // patterns.
-    private class GraphicsPanel extends JPanel {
-        GraphicsPanel() {
-            super();
-            final var size = BitmapDisplay.this.getNewGridWindowSize();
-            this.setMinimumSize(size);
-            this.setPreferredSize(size);
-            this.setMaximumSize(size);
-        }
-
-        // override default paint method to assure display updated correctly every time
-        // the panel is repainted.
-        @Override
-        public void paint(final Graphics g) {
-            this.paintGrid(g, BitmapDisplay.this.theGrid);
-        }
-
-        // Paint the color codes.
-        private void paintGrid(final Graphics g, final Grid grid) {
-            int upperLeftX = 0, upperLeftY = 0;
-            for (final var row : grid.grid) {
-                for (final var color : row) {
-                    g.setColor(color);
-                    g.fillRect(upperLeftX, upperLeftY, BitmapDisplay.this.unitPixelSize, BitmapDisplay.this.unitPixelSize);
-                    upperLeftX += BitmapDisplay.this.unitPixelSize; // faster than multiplying
-                }
-                upperLeftX = 0;
-                upperLeftY += BitmapDisplay.this.unitPixelSize; // faster than multiplying
-            }
-        }
-    }
-
     private class GridWindow extends JFrame {
         private final GraphicsPanel canvas;
 
-        GridWindow() {
-            this.canvas = new GraphicsPanel();
+        public GridWindow() {
+            this.canvas = new GraphicsPanel(getNewGridWindowSize(), theGrid);
             this.setTitle("Bitmap Display");
             this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             this.setMinimumSize(new Dimension(0, 0));

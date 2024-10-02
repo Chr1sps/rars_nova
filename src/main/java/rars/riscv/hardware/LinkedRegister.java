@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * A register which aliases a subset of another register
- *
  */
 public class LinkedRegister extends Register {
     private final Register base;
@@ -55,17 +54,6 @@ public class LinkedRegister extends Register {
             shift++;
             mask >>>= 1;
         }
-    }
-
-    /**
-     * <p>getValue.</p>
-     *
-     * @return a long
-     */
-    @Override
-    public synchronized long getValue() {
-        super.getValue(); // to notify observers
-        return getValueNoNotify();
     }
 
     /**

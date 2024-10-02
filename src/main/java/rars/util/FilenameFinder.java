@@ -57,7 +57,7 @@ public final class FilenameFinder {
      * Constant <code>MATCH_ALL_EXTENSIONS="*"</code>
      */
     public static final String MATCH_ALL_EXTENSIONS = "*";
-    private static final Logger LOGGER = LogManager.getLogger(FilenameFinder.class);
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final String JAR_EXTENSION = ".jar";
     private static final String FILE_URL = "file:";
     private static final String JAR_URI_PREFIX = "jar:";

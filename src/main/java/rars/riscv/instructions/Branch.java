@@ -58,6 +58,7 @@ public abstract class Branch extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         if (willBranch(statement)) {
             InstructionSet.processBranch(statement.getOperands()[2]);

@@ -5,7 +5,6 @@ import rars.exceptions.AddressErrorException;
 
 /**
  * <p>LWU class.</p>
- *
  */
 public class LWU extends Load {
     /**
@@ -19,6 +18,7 @@ public class LWU extends Load {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long load(final int address) throws AddressErrorException {
         return Globals.memory.getWord(address) & 0xFFFF_FFFFL;
     }

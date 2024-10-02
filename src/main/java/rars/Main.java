@@ -2,6 +2,7 @@ package rars;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import org.jetbrains.annotations.Nullable;
 import rars.api.Options;
 import rars.api.Program;
 import rars.exceptions.AddressErrorException;
@@ -501,7 +502,7 @@ public class Main {
     // by "-"; no embedded spaces. e.g. 0x00400000-0x00400010
     // If number is not multiple of 4, will be rounded up to next higher.
 
-    private Program runCommand() {
+    private @Nullable Program runCommand() {
         if (this.filenameList.isEmpty()) {
             return null;
         }

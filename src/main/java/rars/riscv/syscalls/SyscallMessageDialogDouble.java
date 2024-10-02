@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.riscv.AbstractSyscall;
 import rars.exceptions.AddressErrorException;
+import rars.exceptions.ExitingException;
+import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
 
@@ -40,7 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Service to display a message to user.
- *
  */
 public class SyscallMessageDialogDouble extends AbstractSyscall {
     /**
@@ -56,6 +55,7 @@ public class SyscallMessageDialogDouble extends AbstractSyscall {
      * <p>
      * System call to display a message to user.
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         // TODO: maybe refactor this, other null strings are handled in a central place
         // now

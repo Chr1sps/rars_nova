@@ -89,6 +89,7 @@ public class FCLASSS extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         final Float32 in = new Float32(FloatingPointRegisterFile.getValue(operands[1]));

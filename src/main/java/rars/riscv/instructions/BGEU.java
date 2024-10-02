@@ -47,6 +47,7 @@ public class BGEU extends Branch {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean willBranch(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         return Long.compareUnsigned(RegisterFile.getValueLong(operands[0]),

@@ -19,6 +19,7 @@ public class FMSUBD extends FusedDouble {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Float64 compute(@NotNull final Float64 f1, final Float64 f2, @NotNull final Float64 f3, final Environment e) {
         return Arithmetic.fusedMultiplyAdd(f1, f2, f3.negate(), e);
     }

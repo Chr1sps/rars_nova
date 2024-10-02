@@ -22,6 +22,7 @@ public class SRLIW extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         // Use the code directly from SRLI
         final int[] operands = statement.getOperands();

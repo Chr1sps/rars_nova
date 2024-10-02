@@ -45,6 +45,7 @@ public class LB extends Load {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long load(final int address) throws AddressErrorException {
         return ((long) Globals.memory.getByte(address) << 24) >> 24; // Shifting sign extends
     }

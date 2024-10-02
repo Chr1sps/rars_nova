@@ -22,6 +22,7 @@ public class SLLIW extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         // Copy from SLLI
         final int[] operands = statement.getOperands();

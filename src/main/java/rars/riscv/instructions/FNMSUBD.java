@@ -19,6 +19,7 @@ public class FNMSUBD extends FusedDouble {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Float64 compute(@NotNull final Float64 f1, final Float64 f2, @NotNull final Float64 f3, @NotNull final Environment e) {
         FusedFloat.flipRounding(e);
         return Arithmetic.fusedMultiplyAdd(f1, f2, f3.negate(), e).negate();

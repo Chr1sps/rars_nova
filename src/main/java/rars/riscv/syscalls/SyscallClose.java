@@ -35,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallClose class.</p>
- *
  */
 public class SyscallClose extends AbstractSyscall {
     /**
@@ -48,6 +47,7 @@ public class SyscallClose extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         SystemIO.closeFile(RegisterFile.getValue("a0"));
     }

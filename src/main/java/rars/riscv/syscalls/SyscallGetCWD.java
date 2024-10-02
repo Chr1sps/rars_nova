@@ -53,6 +53,7 @@ public class SyscallGetCWD extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         final String path = System.getProperty("user.dir");
         final int buf = RegisterFile.getValue("a0");

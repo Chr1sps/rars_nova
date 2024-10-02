@@ -742,7 +742,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
         private final JButton currentColorButton;
         private final JPanel colorChooserRow;
         private final JPanel countDisplayRow;
-        private JLabel sliderLabel;
+        private final JLabel sliderLabel;
         private volatile int counterIndex;
 
         private ColorChooserControls() {

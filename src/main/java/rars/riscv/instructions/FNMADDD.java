@@ -19,6 +19,7 @@ public class FNMADDD extends FusedDouble {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Float64 compute(@NotNull final Float64 f1, final Float64 f2, final Float64 f3, @NotNull final Environment e) {
         // TODO: test if this is the right behaviour
         FusedFloat.flipRounding(e);

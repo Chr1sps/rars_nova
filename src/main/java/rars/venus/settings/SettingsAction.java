@@ -57,6 +57,7 @@ public class SettingsAction extends GuiAction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void actionPerformed(final ActionEvent e) {
         final boolean value = ((JCheckBoxMenuItem) e.getSource()).isSelected();
         Globals.getSettings().setBooleanSetting(setting, value);

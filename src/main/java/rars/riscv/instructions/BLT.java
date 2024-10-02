@@ -46,6 +46,7 @@ public class BLT extends Branch {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean willBranch(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         return RegisterFile.getValueLong(operands[0]) < RegisterFile.getValueLong(operands[1]);

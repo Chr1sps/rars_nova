@@ -49,6 +49,7 @@ public class SRAI extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         // Uses >> because sign fill

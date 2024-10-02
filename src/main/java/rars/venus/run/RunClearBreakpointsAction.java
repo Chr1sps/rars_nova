@@ -73,6 +73,7 @@ public class RunClearBreakpointsAction extends GuiAction implements TableModelLi
      * When this option is selected, tell text segment window to clear breakpoints
      * in its table model.
      */
+    @Override
     public void actionPerformed(final ActionEvent e) {
         Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow().clearAllBreakpoints();
     }
@@ -88,6 +89,7 @@ public class RunClearBreakpointsAction extends GuiAction implements TableModelLi
      * status
      * accordingly.
      */
+    @Override
     public void tableChanged(final TableModelEvent e) {
         setEnabled(
                 Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow().getBreakpointCount() > 0);

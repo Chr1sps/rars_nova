@@ -35,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallTime class.</p>
- *
  */
 public class SyscallTime extends AbstractSyscall {
     /**
@@ -49,6 +48,7 @@ public class SyscallTime extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         final long value = new java.util.Date().getTime();
         RegisterFile.updateRegister("a0", Binary.lowOrderLongToInt(value));

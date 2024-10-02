@@ -25,6 +25,7 @@ public abstract class ArithmeticW extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected long compute(final long value, final long value2) {
         return base.computeW((int) value, (int) value2);
     }

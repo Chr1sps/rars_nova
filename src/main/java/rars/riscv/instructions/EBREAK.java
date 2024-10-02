@@ -1,8 +1,8 @@
 package rars.riscv.instructions;
 
 import rars.ProgramStatement;
-import rars.exceptions.SimulationException;
 import rars.exceptions.BreakpointException;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
@@ -35,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>EBREAK class.</p>
- *
  */
 public class EBREAK extends BasicInstruction {
     /**
@@ -49,7 +48,8 @@ public class EBREAK extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws SimulationException {
-        throw new BreakpointException();
+        throw BreakpointException.INSTANCE;
     }
 }

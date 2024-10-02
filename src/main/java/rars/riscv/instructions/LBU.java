@@ -45,6 +45,7 @@ public class LBU extends Load {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long load(final int address) throws AddressErrorException {
         return Globals.memory.getByte(address) & 0x000000FF;
     }
