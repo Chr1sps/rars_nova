@@ -49,6 +49,7 @@ public class FSGNJS extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         final int result = (FloatingPointRegisterFile.getValue(operands[1]) & 0x7FFFFFFF)

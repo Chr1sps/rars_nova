@@ -44,6 +44,7 @@ public class AsciiTextDumpFormat extends AbstractDumpFormat {
      *
      * @see AbstractDumpFormat
      */
+    @Override
     public void dumpMemoryRange(@NotNull final File file, final int firstAddress, final int lastAddress, @NotNull final Memory memory)
             throws AddressErrorException, IOException {
         try (final PrintStream out = new PrintStream(new FileOutputStream(file))) {

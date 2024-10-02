@@ -44,6 +44,7 @@ public class SLL extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long value2) {
         return value << (value2 & 0x0000003F); // Use the bottom 6 bits
     }
@@ -51,6 +52,7 @@ public class SLL extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int computeW(final int value, final int value2) {
         return value << (value2 & 0x0000001F); // Only use the bottom 5 bits
     }

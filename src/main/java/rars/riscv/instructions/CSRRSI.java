@@ -52,6 +52,7 @@ public class CSRRSI extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
         final int[] operands = statement.getOperands();
         try {

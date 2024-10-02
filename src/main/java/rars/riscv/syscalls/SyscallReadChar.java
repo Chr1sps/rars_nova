@@ -1,7 +1,7 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
 import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallReadChar class.</p>
- *
  */
 public class SyscallReadChar extends AbstractSyscall {
     /**
@@ -49,6 +48,7 @@ public class SyscallReadChar extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         try {
             RegisterFile.updateRegister("a0", SystemIO.readChar(this.getNumber()));

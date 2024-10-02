@@ -44,6 +44,7 @@ public class SLTU extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long value2) {
         return (Long.compareUnsigned(value, value2) < 0) ? 1 : 0;
     }

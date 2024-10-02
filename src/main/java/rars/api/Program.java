@@ -58,13 +58,6 @@ public class Program {
 
     /**
      * <p>Constructor for Program.</p>
-     */
-    public Program() {
-        this(new Options());
-    }
-
-    /**
-     * <p>Constructor for Program.</p>
      *
      * @param set a {@link Options} object
      */

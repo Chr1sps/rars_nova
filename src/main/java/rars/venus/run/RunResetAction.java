@@ -67,6 +67,7 @@ public class RunResetAction extends GuiAction {
      * <p>
      * reset GUI components and MIPS resources
      */
+    @Override
     public void actionPerformed(final ActionEvent e) {
         RunGoAction.resetMaxSteps();
         final String name = this.getValue(Action.NAME).toString();

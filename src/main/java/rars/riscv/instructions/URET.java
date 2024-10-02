@@ -49,6 +49,7 @@ public class URET extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         final boolean upie = (ControlAndStatusRegisterFile.getValue("ustatus") & 0x10) == 0x10;
         ControlAndStatusRegisterFile.clearRegister("ustatus", 0x10); // Clear UPIE

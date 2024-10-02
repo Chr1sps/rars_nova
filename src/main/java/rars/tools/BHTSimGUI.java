@@ -137,6 +137,7 @@ public class BHTSimGUI extends JPanel {
         final DefaultTableCellRenderer doubleRenderer = new DefaultTableCellRenderer() {
             private final DecimalFormat formatter = new DecimalFormat("##0.00");
 
+            @Override
             public void setValue(final Object value) {
                 setText((value == null) ? "" : formatter.format(value));
             }

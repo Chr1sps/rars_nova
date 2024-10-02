@@ -18,6 +18,7 @@ public class LD extends Load {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long load(final int address) throws AddressErrorException {
         return Globals.memory.getDoubleWord(address);
     }

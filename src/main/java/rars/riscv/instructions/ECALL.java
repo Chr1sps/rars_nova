@@ -50,6 +50,7 @@ public class ECALL extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws SimulationException {
         InstructionSet.findAndSimulateSyscall(RegisterFile.getValue("a7"), statement);
     }

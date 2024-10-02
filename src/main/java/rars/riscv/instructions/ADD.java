@@ -42,6 +42,7 @@ public class ADD extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long value2) {
         return value + value2;
     }

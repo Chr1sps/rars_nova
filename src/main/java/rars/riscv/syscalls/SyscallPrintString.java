@@ -1,7 +1,7 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
 import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.util.SystemIO;
 
@@ -35,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallPrintString class.</p>
- *
  */
 public class SyscallPrintString extends AbstractSyscall {
     /**
@@ -49,6 +48,7 @@ public class SyscallPrintString extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         SystemIO.printString(NullString.get(statement));
     }

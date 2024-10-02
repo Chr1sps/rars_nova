@@ -52,6 +52,7 @@ public class SyscallMessageDialogString extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         // Display the dialog.
         JOptionPane.showMessageDialog(null,

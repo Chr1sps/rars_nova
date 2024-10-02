@@ -70,6 +70,7 @@ public class SyscallMidiOut extends AbstractSyscall {
      * MIDI instruments
      * use the range 1-128.
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         int pitch = RegisterFile.getValue("a0");
         int duration = RegisterFile.getValue("a1");

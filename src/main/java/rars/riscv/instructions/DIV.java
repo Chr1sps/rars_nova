@@ -43,6 +43,7 @@ public class DIV extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long value2) {
         // Signal illegal division with -1
         if (value2 == 0) {

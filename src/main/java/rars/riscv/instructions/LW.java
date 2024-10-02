@@ -45,6 +45,7 @@ public class LW extends Load {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long load(final int address) throws AddressErrorException {
         return Globals.memory.getWord(address);
     }

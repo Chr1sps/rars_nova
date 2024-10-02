@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallPrintIntHex class.</p>
- *
  */
 public class SyscallPrintIntHex extends AbstractSyscall {
     /**
@@ -50,6 +49,7 @@ public class SyscallPrintIntHex extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         SystemIO.printString(Binary.intToHexString(RegisterFile.getValue("a0")));
     }

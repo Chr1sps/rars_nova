@@ -1,8 +1,8 @@
 package rars.riscv;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Abstract class that a syscall system service must extend. A qualifying
@@ -16,11 +16,11 @@ import org.jetbrains.annotations.NotNull;
  * method will be invoked.
  */
 public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
-    private int serviceNumber;
     private final String serviceName;
     private final String description;
     private final String inputs;
     private final String outputs;
+    private int serviceNumber;
 
     /**
      * Constructor is provided so subclass may initialize instance variables.
@@ -102,16 +102,6 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     }
 
     /**
-     * Set the service number. This is provided to allow MARS implementer or user
-     * to override the default service number.
-     *
-     * @param num specified service number to override the default.
-     */
-    public void setNumber(final int num) {
-        serviceNumber = num;
-    }
-
-    /**
      * Return the assigned service number. This is the number the programmer
      * must store into a7 before issuing the ECALL instruction.
      *
@@ -119,6 +109,16 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      */
     public int getNumber() {
         return serviceNumber;
+    }
+
+    /**
+     * Set the service number. This is provided to allow MARS implementer or user
+     * to override the default service number.
+     *
+     * @param num specified service number to override the default.
+     */
+    public void setNumber(final int num) {
+        serviceNumber = num;
     }
 
     /**
@@ -137,6 +137,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      * @param other a {@link AbstractSyscall} object
      * @return a int
      */
+    @Override
     public int compareTo(@NotNull final AbstractSyscall other) {
         if (this == other)
             return 0;

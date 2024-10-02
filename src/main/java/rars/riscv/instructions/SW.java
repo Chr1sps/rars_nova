@@ -45,6 +45,7 @@ public class SW extends Store {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void store(final int address, final long data) throws AddressErrorException {
         Globals.memory.setWord(address, (int) data);
     }

@@ -55,6 +55,7 @@ public class PopupListener extends MouseAdapter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void mousePressed(final MouseEvent e) {
         maybeShowPopup(e);
     }
@@ -62,6 +63,7 @@ public class PopupListener extends MouseAdapter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void mouseReleased(final MouseEvent e) {
         maybeShowPopup(e);
     }

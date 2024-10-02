@@ -1,7 +1,7 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
 import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.util.SystemIO;
@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallReadFloat class.</p>
- *
  */
 public class SyscallReadFloat extends AbstractSyscall {
     /**
@@ -49,6 +48,7 @@ public class SyscallReadFloat extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         final float floatValue;
         try {

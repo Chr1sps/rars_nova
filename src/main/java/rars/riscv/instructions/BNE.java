@@ -1,8 +1,8 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -46,6 +46,7 @@ public class BNE extends Branch {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean willBranch(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         return RegisterFile.getValueLong(operands[0]) != RegisterFile.getValueLong(operands[1]);

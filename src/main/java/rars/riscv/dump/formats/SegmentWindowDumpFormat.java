@@ -51,6 +51,7 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
      *
      * @see AbstractDumpFormat
      */
+    @Override
     public void dumpMemoryRange(@NotNull final File file, final int firstAddress, final int lastAddress, @NotNull final Memory memory)
             throws AddressErrorException, IOException {
 

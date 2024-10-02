@@ -68,7 +68,7 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
      *
      * @return name The name of the Register.
      */
-    public String getName() {
+    public final String getName() {
         return this.name;
     }
 
@@ -78,9 +78,9 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
      *
      * @return value The value of the Register.
      */
-    public synchronized long getValue() {
+    public final synchronized long getValue() {
         this.submit(new RegisterAccessNotice(AccessNotice.READ, this.name));
-        return this.value;
+        return this.getValueNoNotify();
     }
 
     /**

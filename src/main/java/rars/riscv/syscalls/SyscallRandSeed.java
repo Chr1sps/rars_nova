@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallRandSeed class.</p>
- *
  */
 public class SyscallRandSeed extends AbstractSyscall {
     /**
@@ -50,6 +49,7 @@ public class SyscallRandSeed extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         final Integer index = RegisterFile.getValue("a0");
         final Random stream = RandomStreams.randomStreams.get(index);

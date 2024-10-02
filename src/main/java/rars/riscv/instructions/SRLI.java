@@ -49,6 +49,7 @@ public class SRLI extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         // Uses >>> because 0 fill

@@ -45,6 +45,7 @@ public class MULHU extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long value2) {
         BigInteger unsigned = BigInteger.valueOf(value);
         if (value < 0) {
@@ -60,6 +61,7 @@ public class MULHU extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int computeW(final int value, final int value2) {
         // Don't sign extend both arguments
         final long ext = ((long) value) & 0xFFFFFFFFL;

@@ -46,6 +46,7 @@ public class MULHSU extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long value2) {
         BigInteger unsigned = BigInteger.valueOf(value2);
         if (value2 < 0) {
@@ -57,6 +58,7 @@ public class MULHSU extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int computeW(final int value, final int value2) {
         // Sign extend t2, but not t3
         final long ext = ((long) value << 32) >> 32;

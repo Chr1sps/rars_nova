@@ -34,7 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>WFI class.</p>
- *
  */
 public class WFI extends BasicInstruction {
     /**
@@ -48,7 +47,8 @@ public class WFI extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws WaitException {
-        throw new WaitException();
+        throw WaitException.INSTANCE;
     }
 }

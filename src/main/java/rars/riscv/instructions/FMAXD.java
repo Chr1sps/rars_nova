@@ -1,8 +1,8 @@
 package rars.riscv.instructions;
 
 import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float64;
 import rars.jsoftfloat.operations.Comparisons;
+import rars.jsoftfloat.types.Float64;
 
 /**
  * <p>FMAXD class.</p>
@@ -18,6 +18,7 @@ public class FMAXD extends Double {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Float64 compute(final Float64 f1, final Float64 f2, final Environment env) {
         return Comparisons.maximumNumber(f1, f2, env);
     }

@@ -35,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallPrintChar class.</p>
- *
  */
 public class SyscallPrintChar extends AbstractSyscall {
     /**
@@ -49,6 +48,7 @@ public class SyscallPrintChar extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         final char t = (char) (RegisterFile.getValue("a0") & 0x000000ff);
         SystemIO.printString(Character.toString(t));

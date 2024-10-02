@@ -2,7 +2,6 @@ package rars.riscv.instructions;
 
 /**
  * <p>ADDIW class.</p>
- *
  */
 public class ADDIW extends ImmediateInstruction {
     /**
@@ -17,6 +16,7 @@ public class ADDIW extends ImmediateInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long immediate) {
         return (int) value + (int) immediate;
     }

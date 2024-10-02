@@ -46,6 +46,7 @@ public class SB extends Store {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void store(final int address, final long data) throws AddressErrorException {
         Globals.memory.setByte(address, (int) data & 0x000000FF);
     }

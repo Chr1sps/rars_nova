@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallPrintIntUnsigned class.</p>
- *
  */
 public class SyscallPrintIntUnsigned extends AbstractSyscall {
     /**
@@ -49,6 +48,7 @@ public class SyscallPrintIntUnsigned extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         SystemIO.printString(
                 Binary.unsignedIntToIntString(RegisterFile.getValue("a0")));

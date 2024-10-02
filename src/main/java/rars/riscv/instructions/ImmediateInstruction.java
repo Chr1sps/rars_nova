@@ -69,6 +69,7 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         if (InstructionSet.rv64) {

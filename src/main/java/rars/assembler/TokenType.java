@@ -1,12 +1,12 @@
 package rars.assembler;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
 import rars.util.Binary;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -133,11 +133,9 @@ public enum TokenType {
             return TokenType.FP_REGISTER_NAME;
 
         // Little bit of a hack because CSRFile doesn't supoprt getRegister(strinug)
-        final Register[] regs = ControlAndStatusRegisterFile.getRegisters();
-        for (final Register r : regs) {
-            if (r.getName().equals(value))
-                return TokenType.CSR_NAME;
-        }
+        reg = ControlAndStatusRegisterFile.getRegister(value);
+        if (reg != null)
+            return TokenType.CSR_NAME;
         // See if it is an immediate (constant) integer value
         // Classify based on # bits needed to represent in binary
         // This is needed because most immediate operands limited to 16 bits

@@ -45,6 +45,7 @@ public class LHU extends Load {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long load(final int address) throws AddressErrorException {
         return Globals.memory.getHalf(address) & 0x0000FFFF;
     }

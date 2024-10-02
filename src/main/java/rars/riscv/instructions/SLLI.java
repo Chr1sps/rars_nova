@@ -49,6 +49,7 @@ public class SLLI extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0], (long) RegisterFile.getValue(operands[1]) << operands[2]);

@@ -49,6 +49,7 @@ public class FSGNJXS extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         final int f2 = FloatingPointRegisterFile.getValue(operands[1]);

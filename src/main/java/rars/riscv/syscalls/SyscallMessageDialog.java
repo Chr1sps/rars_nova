@@ -1,7 +1,7 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
 import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
 
@@ -37,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallMessageDialog class.</p>
- *
  */
 public class SyscallMessageDialog extends AbstractSyscall {
     /**
@@ -54,6 +53,7 @@ public class SyscallMessageDialog extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         // Display the dialog.
         int msgType = RegisterFile.getValue("a1");

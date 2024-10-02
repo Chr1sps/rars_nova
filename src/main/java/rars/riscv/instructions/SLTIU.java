@@ -44,6 +44,7 @@ public class SLTIU extends ImmediateInstruction {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long immediate) {
         return (Long.compareUnsigned(value, immediate) < 0) ? 1 : 0;
     }

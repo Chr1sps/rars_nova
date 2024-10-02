@@ -43,6 +43,7 @@ public class SLT extends Arithmetic {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long compute(final long value, final long value2) {
         return (value < value2) ? 1 : 0;
     }

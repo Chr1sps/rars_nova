@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallRandFloat class.</p>
- *
  */
 public class SyscallRandFloat extends AbstractSyscall {
     /**
@@ -50,6 +49,7 @@ public class SyscallRandFloat extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) {
         final Random stream = RandomStreams.get("a0");
         FloatingPointRegisterFile.setRegisterToFloat(10, stream.nextFloat());// TODO: make this a string method fa0

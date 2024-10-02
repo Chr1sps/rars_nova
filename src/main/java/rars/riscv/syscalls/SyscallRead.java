@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.riscv.AbstractSyscall;
 import rars.exceptions.AddressErrorException;
+import rars.exceptions.ExitingException;
+import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
@@ -38,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallRead class.</p>
- *
  */
 public class SyscallRead extends AbstractSyscall {
     /**
@@ -53,6 +52,7 @@ public class SyscallRead extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         int byteAddress = RegisterFile.getValue("a1"); // destination of characters read from file
         int index = 0;

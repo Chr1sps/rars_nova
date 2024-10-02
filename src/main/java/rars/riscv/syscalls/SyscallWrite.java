@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.riscv.AbstractSyscall;
 import rars.exceptions.AddressErrorException;
+import rars.exceptions.ExitingException;
+import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
@@ -39,7 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Service to write to file descriptor given in a0. a1 specifies buffer
  * and a2 specifies length. Number of characters written is returned in a0.
- *
  */
 public class SyscallWrite extends AbstractSyscall {
     /**
@@ -54,6 +53,7 @@ public class SyscallWrite extends AbstractSyscall {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void simulate(final ProgramStatement statement) throws ExitingException {
         int byteAddress = RegisterFile.getValue("a1"); // source of characters to write to file
         final int reqLength = RegisterFile.getValue("a2"); // user-requested length
