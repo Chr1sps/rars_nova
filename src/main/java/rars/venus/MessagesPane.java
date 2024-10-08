@@ -1,5 +1,6 @@
 package rars.venus;
 
+import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
 import rars.simulator.Simulator;
@@ -469,6 +470,7 @@ public class MessagesPane extends JTabbedPane {
             }
         };
         final Simulator.StopListener stopListener = s -> Asker.this.returnResponse();
+
         Asker(final int maxLen) {
             this.maxLen = maxLen;
             // initialPos will be set in run()
@@ -508,7 +510,8 @@ public class MessagesPane extends JTabbedPane {
             }
         }
 
-        String response() {
+        @Nullable
+        private String response() {
             EventQueue.invokeLater(this);
             try {
                 return this.resultQueue.take();

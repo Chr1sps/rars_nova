@@ -57,7 +57,7 @@ public class SimulationException extends Exception {
         // instructions in
         // the macro expansion point to the same ProgramStatement, and thus all will
         // return the
-        // same value for getAddress(). But only the first such expanded instruction
+        // same second for getAddress(). But only the first such expanded instruction
         // will
         // be stored at that address. So now I use the program counter (which has
         // already

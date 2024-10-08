@@ -232,7 +232,7 @@ public final class Globals {
     }
 
     // Read ASCII strings for codes 0-255, from properties file. If string
-    // value is "null", substitute value of ASCII_NON_PRINT. If string is
+    // second is "null", substitute second of ASCII_NON_PRINT. If string is
     // "space", substitute string containing one space character.
 
     /**
@@ -244,7 +244,7 @@ public final class Globals {
         final String let = Globals.getPropertyEntry(Globals.configPropertiesFile, "AsciiTable");
         final String placeHolder = Globals.getAsciiNonPrint();
         if (let == null) {
-            // If config isn't loaded, give a decent default value.
+            // If config isn't loaded, give a decent default second.
             final String[] table = new String[((int) '~') + 1];
             for (int i = 0; i < table.length; i++) {
                 if (i == 0)
@@ -277,8 +277,8 @@ public final class Globals {
         }
     }
 
-    // Read and return integer property value for given file and property name.
-    // Default value is returned if property file or name not found.
+    // Read and return integer property second for given file and property name.
+    // Default second is returned if property file or name not found.
     private static int getIntegerProperty(final String propertiesFile, final String propertyName, final int defaultValue) {
         int limit = defaultValue; // just in case no entry is found
         final Properties properties = PropertiesFile.loadPropertiesFromFile(propertiesFile);
@@ -305,13 +305,13 @@ public final class Globals {
     }
 
     /**
-     * Read and return property file value (if any) for requested property.
+     * Read and return property file second (if any) for requested property.
      *
      * @param propertiesFile name of properties file (do NOT include filename
      *                       extension,
      *                       which is assumed to be ".properties")
      * @param propertyName   String containing desired property name
-     * @return String containing associated value; null if property not found
+     * @return String containing associated second; null if property not found
      */
     public static String getPropertyEntry(final String propertiesFile, final String propertyName) {
         return PropertiesFile.loadPropertiesFromFile(propertiesFile).getProperty(propertyName);

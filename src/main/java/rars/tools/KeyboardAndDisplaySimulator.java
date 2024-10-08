@@ -1,5 +1,8 @@
 package rars.tools;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
@@ -8,8 +11,6 @@ import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.Memory;
 import rars.util.Binary;
 import rars.venus.util.AbstractFontSettingDialog;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -90,27 +91,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * row.
  */
 public class KeyboardAndDisplaySimulator extends AbstractTool {
-    private static final Logger LOGGER = LogManager.getLogger();
-
-    private static final String version = "Version 1.4";
-    private static final String heading = "Keyboard and Display MMIO Simulator";
-    private static String displayPanelTitle, keyboardPanelTitle;
-    private static final char VT_FILL = ' '; // fill character for virtual terminal (random access mode)
-
     /**
      * Constant <code>preferredTextAreaDimension</code>
      */
     public static final Dimension preferredTextAreaDimension = new Dimension(400, 200);
+    /**
+     * Constant <code>EXTERNAL_INTERRUPT_KEYBOARD=0x00000040</code>
+     */
+    public static final int EXTERNAL_INTERRUPT_KEYBOARD = 0x00000040;
+    /**
+     * Constant <code>EXTERNAL_INTERRUPT_DISPLAY=0x00000080</code>
+     */
+    public static final int EXTERNAL_INTERRUPT_DISPLAY = 0x00000080;
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final String version = "Version 1.4";
+    private static final String heading = "Keyboard and Display MMIO Simulator";
+    private static final char VT_FILL = ' '; // fill character for virtual terminal (random access mode)
     private static final Insets textAreaInsets = new Insets(4, 4, 4, 4);
-
-    // Time delay to process Transmitter Data is simulated by counting instruction
-    // executions.
-    // After this many executions, the Transmitter Controller Ready bit set to 1.
-    private final TransmitterDelayTechnique[] delayTechniques = {
-            new FixedLengthDelay(),
-            new UniformlyDistributedDelay(),
-            new NormallyDistributedDelay()
-    };
+    private static final char CLEAR_SCREEN = 12; // ASCII Form Feed
+    private static final char SET_CURSOR_X_Y = 7; // ASCII Bell (ding ding!)
     /**
      * Constant <code>RECEIVER_CONTROL=</code>
      */
@@ -127,26 +126,33 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
      * Constant <code>TRANSMITTER_DATA=// display Ready in low-order bit</code>
      */
     public static int TRANSMITTER_DATA; // display character in low-order byte
+    private static String displayPanelTitle, keyboardPanelTitle;
+    // Time delay to process Transmitter Data is simulated by counting instruction
+    // executions.
+    // After this many executions, the Transmitter Controller Ready bit set to 1.
+    private final TransmitterDelayTechnique[] delayTechniques = {
+            new FixedLengthDelay(),
+            new UniformlyDistributedDelay(),
+            new NormallyDistributedDelay()
+    };
+    private final KeyboardAndDisplaySimulator simulator;
+    private final Font defaultFont = new Font(Font.MONOSPACED, Font.PLAIN, 12);
     // These are used to track instruction counts to simulate driver delay of
     // Transmitter Data
     private boolean countingInstructions;
     private int instructionCount;
     private int transmitDelayInstructionCountLimit;
-
     // Should the transmitted character be displayed before the transmitter delay
     // period?
     // If not, hold onto it and print at the end of delay period.
     private int intWithCharacterToDisplay;
     private boolean displayAfterDelay = true;
-
     // Whether or not display position is sequential (JTextArea append)
     // or random access (row, column). Supports new random access feature. DPS
     // 17-July-2014
     private boolean displayRandomAccessMode = false;
     private int rows, columns;
     private DisplayResizeAdapter updateDisplayBorder;
-    private final KeyboardAndDisplaySimulator simulator;
-
     private JTextArea display;
     private JPanel displayPanel;
     private JComboBox<TransmitterDelayTechnique> delayTechniqueChooser;
@@ -154,16 +160,6 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
     private JSlider delayLengthSlider;
     private JCheckBox displayAfterDelayCheckBox;
     private JTextArea keyEventAccepter;
-    private final Font defaultFont = new Font(Font.MONOSPACED, Font.PLAIN, 12);
-
-    /**
-     * Constant <code>EXTERNAL_INTERRUPT_KEYBOARD=0x00000040</code>
-     */
-    public static final int EXTERNAL_INTERRUPT_KEYBOARD = 0x00000040;
-    /**
-     * Constant <code>EXTERNAL_INTERRUPT_DISPLAY=0x00000080</code>
-     */
-    public static final int EXTERNAL_INTERRUPT_DISPLAY = 0x00000080;
 
     /**
      * Simple constructor, likely used to run a stand-alone keyboard/display
@@ -178,11 +174,69 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         this.simulator = this;
     }
 
+    // Set the MMIO addresses. Prior to MARS 3.7 these were final because
+    // address space was final as well. Now we will get MMIO base address
+    // each time to reflect possible change in memory configuration. DPS 6-Aug-09
+
     /**
      * Simple constructor, likely used by the RARS Tools menu mechanism
      */
     public KeyboardAndDisplaySimulator() {
         this(KeyboardAndDisplaySimulator.heading + ", " + KeyboardAndDisplaySimulator.version, KeyboardAndDisplaySimulator.heading);
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    // Return second of the given MMIO control register after ready (low order) bit
+    ///////////////////////////////////////////////////////////////////// set (to
+    ///////////////////////////////////////////////////////////////////// 1).
+    // Have to preserve the second of Interrupt Enable bit (bit 1)
+    private static boolean isReadyBitSet(final int mmioControlRegister) {
+        try {
+            return (Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) & 1) == 1;
+        } catch (final AddressErrorException aee) {
+            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
+            System.exit(0);
+        }
+        return false; // to satisfy the compiler -- this will never happen.
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    // Return second of the given MMIO control register after ready (low order) bit
+    ///////////////////////////////////////////////////////////////////// set (to
+    ///////////////////////////////////////////////////////////////////// 1).
+    // Have to preserve the second of Interrupt Enable bit (bit 1)
+    private static int readyBitSet(final int mmioControlRegister) {
+        try {
+            return Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) | 1;
+        } catch (final AddressErrorException aee) {
+            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
+            System.exit(0);
+        }
+        return 1; // to satisfy the compiler -- this will never happen.
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Rest of the protected methods. These all override do-nothing methods
+    ////////////////////////////////////////////////////////////////////////////////////// inherited
+    ////////////////////////////////////////////////////////////////////////////////////// from
+    // the abstract superclass.
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////
+    // Return second of the given MMIO control register after ready (low order) bit
+    ///////////////////////////////////////////////////////////////////// cleared
+    ///////////////////////////////////////////////////////////////////// (to 0).
+    // Have to preserve the second of Interrupt Enable bit (bit 1). Bits 2 and higher
+    ///////////////////////////////////////////////////////////////////// don't
+    ///////////////////////////////////////////////////////////////////// matter.
+    private static int readyBitCleared(final int mmioControlRegister) {
+        try {
+            return Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) & 2;
+        } catch (final AddressErrorException aee) {
+            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
+            System.exit(0);
+        }
+        return 0; // to satisfy the compiler -- this will never happen.
     }
 
     /**
@@ -192,10 +246,6 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
     public String getName() {
         return KeyboardAndDisplaySimulator.heading;
     }
-
-    // Set the MMIO addresses. Prior to MARS 3.7 these were final because
-    // address space was final as well. Now we will get MMIO base address
-    // each time to reflect possible change in memory configuration. DPS 6-Aug-09
 
     /**
      * <p>initializePreGUI.</p>
@@ -278,13 +328,6 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         return keyboardAndDisplay;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    // Rest of the protected methods. These all override do-nothing methods
-    ////////////////////////////////////////////////////////////////////////////////////// inherited
-    ////////////////////////////////////////////////////////////////////////////////////// from
-    // the abstract superclass.
-    //////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * {@inheritDoc}
      */
@@ -340,9 +383,6 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         }
     }
 
-    private static final char CLEAR_SCREEN = 12; // ASCII Form Feed
-    private static final char SET_CURSOR_X_Y = 7; // ASCII Bell (ding ding!)
-
     // Method to display the character stored in the low-order byte of
     // the parameter. We also recognize two non-printing characters:
     // Decimal 12 (Ascii Form Feed) to clear the display
@@ -367,8 +407,8 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
                 this.initializeDisplay(true);
             }
             // For SET_CURSOR_X_Y, we need data from the rest of the word.
-            // High order 3 bytes are split in half to store (X,Y) value.
-            // High 12 bits contain X value, next 12 bits contain Y value.
+            // High order 3 bytes are split in half to store (X,Y) second.
+            // High 12 bits contain X second, next 12 bits contain Y second.
             int x = (intWithCharacterToDisplay & 0xFFF00000) >>> 20;
             int y = (intWithCharacterToDisplay & 0x000FFF00) >>> 8;
             // If X or Y values are outside current range, set to range limit.
@@ -490,6 +530,10 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         this.displayPanel.repaint();
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Private methods defined to support the above.
+    //////////////////////////////////////////////////////////////////////////////////////
+
     // Calculate text display capacity of display window. Text dimensions are based
     // on pixel dimensions of window divided by font size properties.
     private Dimension getDisplayPanelTextDimensions() {
@@ -503,16 +547,6 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         // current font.
         // I subtract 1 because initial tests showed slight scroll otherwise.
         return new Dimension(widthInPixels / charWidth - 1, heightInPixels / rowHeight - 1);
-    }
-
-    // Trigger recalculation and update of display text dimensions when window
-    // resized.
-    private class DisplayResizeAdapter extends ComponentAdapter {
-        @Override
-        public void componentResized(final ComponentEvent e) {
-            KeyboardAndDisplaySimulator.this.getDisplayPanelTextDimensions();
-            KeyboardAndDisplaySimulator.this.repaintDisplayPanelBorder();
-        }
     }
 
     /**
@@ -575,7 +609,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
                 +
                 "The Ready bit is supposed to be read-only but in RARS it is not.\n" +
                 "\n" +
-                "IMPORTANT NOTE: The Transmitter Controller Ready bit is set to its initial value of 1 only when you click the tool's "
+                "IMPORTANT NOTE: The Transmitter Controller Ready bit is set to its initial second of 1 only when you click the tool's "
                 +
                 "'Connect to Program' button ('Assemble and Run' in the stand-alone version) or the tool's Reset button!  If you run a "
                 +
@@ -681,10 +715,6 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
                 });
         return help;
     }
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    // Private methods defined to support the above.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // UI components and layout for upper part of GUI, where simulated display is
@@ -801,7 +831,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
             } finally {
                 Globals.memoryAndRegistersLock.unlock();
             }
-            // HERE'S A HACK!! Want to immediately display the updated memory value in MARS
+            // HERE'S A HACK!! Want to immediately display the updated memory second in MARS
             // but that code was not written for event-driven update (e.g. Observer) --
             // it was written to poll the memory cells for their values. So we force it to
             // do so.
@@ -814,53 +844,6 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
     }
 
     /////////////////////////////////////////////////////////////////////
-    // Return value of the given MMIO control register after ready (low order) bit
-    ///////////////////////////////////////////////////////////////////// set (to
-    ///////////////////////////////////////////////////////////////////// 1).
-    // Have to preserve the value of Interrupt Enable bit (bit 1)
-    private static boolean isReadyBitSet(final int mmioControlRegister) {
-        try {
-            return (Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) & 1) == 1;
-        } catch (final AddressErrorException aee) {
-            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
-            System.exit(0);
-        }
-        return false; // to satisfy the compiler -- this will never happen.
-    }
-
-    /////////////////////////////////////////////////////////////////////
-    // Return value of the given MMIO control register after ready (low order) bit
-    ///////////////////////////////////////////////////////////////////// set (to
-    ///////////////////////////////////////////////////////////////////// 1).
-    // Have to preserve the value of Interrupt Enable bit (bit 1)
-    private static int readyBitSet(final int mmioControlRegister) {
-        try {
-            return Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) | 1;
-        } catch (final AddressErrorException aee) {
-            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
-            System.exit(0);
-        }
-        return 1; // to satisfy the compiler -- this will never happen.
-    }
-
-    /////////////////////////////////////////////////////////////////////
-    // Return value of the given MMIO control register after ready (low order) bit
-    ///////////////////////////////////////////////////////////////////// cleared
-    ///////////////////////////////////////////////////////////////////// (to 0).
-    // Have to preserve the value of Interrupt Enable bit (bit 1). Bits 2 and higher
-    ///////////////////////////////////////////////////////////////////// don't
-    ///////////////////////////////////////////////////////////////////// matter.
-    private static int readyBitCleared(final int mmioControlRegister) {
-        try {
-            return Globals.memory.get(mmioControlRegister, Memory.WORD_LENGTH_BYTES) & 2;
-        } catch (final AddressErrorException aee) {
-            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
-            System.exit(0);
-        }
-        return 0; // to satisfy the compiler -- this will never happen.
-    }
-
-    /////////////////////////////////////////////////////////////////////
     // Transmit delay is simulated by counting instruction executions.
     // Here we simly initialize (or reset) the variables.
     private void initializeTransmitDelaySimulator() {
@@ -869,14 +852,18 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         this.transmitDelayInstructionCountLimit = this.generateDelay();
     }
 
-    /////////////////////////////////////////////////////////////////////
-    // Calculate transmitter delay (# instruction executions) based on
-    // current combo box and slider settings.
-
     private int generateDelay() {
         final double sliderValue = this.delayLengthPanel.getDelayLength();
         final TransmitterDelayTechnique technique = (TransmitterDelayTechnique) this.delayTechniqueChooser.getSelectedItem();
         return technique.generateDelay(sliderValue);
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    // Calculate transmitter delay (# instruction executions) based on
+    // current combo box and slider settings.
+
+    private interface TransmitterDelayTechnique {
+        int generateDelay(double parameter);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -884,6 +871,81 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
     // Class to grab keystrokes going to keyboard echo area and send them to MMIO
     /////////////////////////////////////////////////////////////////////////////////// area
     //
+
+    // Delay second is fixed, and equal to slider second.
+    private static class FixedLengthDelay implements TransmitterDelayTechnique {
+        @Override
+        public String toString() {
+            return "Fixed transmitter delay, select using slider";
+        }
+
+        @Override
+        public int generateDelay(final double fixedDelay) {
+            return (int) fixedDelay;
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    //
+    // Class for selecting transmitter delay lengths (# of instruction executions).
+    //
+
+    // Randomly pick second from range 1 to slider setting, uniform distribution
+    // (each second has equal probability of being chosen).
+    private static class UniformlyDistributedDelay implements TransmitterDelayTechnique {
+        final Random randu;
+
+        public UniformlyDistributedDelay() {
+            this.randu = new Random();
+        }
+
+        @Override
+        public String toString() {
+            return "Uniformly distributed delay, min=1, max=slider";
+        }
+
+        @Override
+        public int generateDelay(final double max) {
+            return this.randu.nextInt((int) max) + 1;
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    //
+    // Interface and classes for Transmitter Delay-generating techniques.
+    //
+
+    // Pretty badly-hacked normal distribution, but is more realistic than uniform!
+    // Get sample from Normal(0,1) -- mean=0, s.d.=1 -- multiply it by slider
+    // second, take absolute second to make sure we don't get negative,
+    // add 1 to make sure we don't get 0.
+    private static class NormallyDistributedDelay implements TransmitterDelayTechnique {
+        final Random randn;
+
+        public NormallyDistributedDelay() {
+            this.randn = new Random();
+        }
+
+        @Override
+        public String toString() {
+            return "'Normally' distributed delay: floor(abs(N(0,1)*slider)+1)";
+        }
+
+        @Override
+        public int generateDelay(final double mult) {
+            return (int) (Math.abs(this.randn.nextGaussian() * mult) + 1);
+        }
+    }
+
+    // Trigger recalculation and update of display text dimensions when window
+    // resized.
+    private class DisplayResizeAdapter extends ComponentAdapter {
+        @Override
+        public void componentResized(final ComponentEvent e) {
+            KeyboardAndDisplaySimulator.this.getDisplayPanelTextDimensions();
+            KeyboardAndDisplaySimulator.this.repaintDisplayPanelBorder();
+        }
+    }
 
     private class KeyboardKeyListener implements KeyListener {
         @Override
@@ -896,21 +958,16 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
             }
         }
 
-        /* Ignore key pressed event from the text field. */
+        /* Ignore first pressed event from the text field. */
         @Override
         public void keyPressed(final KeyEvent e) {
         }
 
-        /* Ignore key released event from the text field. */
+        /* Ignore first released event from the text field. */
         @Override
         public void keyReleased(final KeyEvent e) {
         }
     }
-
-    //////////////////////////////////////////////////////////////////////////////////
-    //
-    // Class for selecting transmitter delay lengths (# of instruction executions).
-    //
 
     private class DelayLengthPanel extends JPanel {
         private final static int DELAY_INDEX_MIN = 0;
@@ -965,70 +1022,6 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////
-    //
-    // Interface and classes for Transmitter Delay-generating techniques.
-    //
-
-    private interface TransmitterDelayTechnique {
-        int generateDelay(double parameter);
-    }
-
-    // Delay value is fixed, and equal to slider value.
-    private static class FixedLengthDelay implements TransmitterDelayTechnique {
-        @Override
-        public String toString() {
-            return "Fixed transmitter delay, select using slider";
-        }
-
-        @Override
-        public int generateDelay(final double fixedDelay) {
-            return (int) fixedDelay;
-        }
-    }
-
-    // Randomly pick value from range 1 to slider setting, uniform distribution
-    // (each value has equal probability of being chosen).
-    private static class UniformlyDistributedDelay implements TransmitterDelayTechnique {
-        final Random randu;
-
-        public UniformlyDistributedDelay() {
-            this.randu = new Random();
-        }
-
-        @Override
-        public String toString() {
-            return "Uniformly distributed delay, min=1, max=slider";
-        }
-
-        @Override
-        public int generateDelay(final double max) {
-            return this.randu.nextInt((int) max) + 1;
-        }
-    }
-
-    // Pretty badly-hacked normal distribution, but is more realistic than uniform!
-    // Get sample from Normal(0,1) -- mean=0, s.d.=1 -- multiply it by slider
-    // value, take absolute value to make sure we don't get negative,
-    // add 1 to make sure we don't get 0.
-    private static class NormallyDistributedDelay implements TransmitterDelayTechnique {
-        final Random randn;
-
-        public NormallyDistributedDelay() {
-            this.randn = new Random();
-        }
-
-        @Override
-        public String toString() {
-            return "'Normally' distributed delay: floor(abs(N(0,1)*slider)+1)";
-        }
-
-        @Override
-        public int generateDelay(final double mult) {
-            return (int) (Math.abs(this.randn.nextGaussian() * mult) + 1);
-        }
-    }
-
     /**
      * Font dialog for the display panel
      * Almost all of the code is used from the SettingsHighlightingAction
@@ -1042,7 +1035,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
             super(owner, title, true, currentFont);
         }
 
-        private Font showDialog() {
+        private @Nullable Font showDialog() {
             this.resultOK = true;
             // Because dialog is modal, this blocks until user terminates the dialog.
             this.setVisible(true);

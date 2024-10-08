@@ -39,7 +39,7 @@ public class LB extends Load {
      * <p>Constructor for LB.</p>
      */
     public LB() {
-        super("lb t1, -100(t2)", "Set t1 to sign-extended 8-bit value from effective memory byte address", "000");
+        super("lb t1, -100(t2)", "Set t1 to sign-extended 8-bit second from effective memory byte address", "000");
     }
 
     /**

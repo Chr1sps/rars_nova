@@ -74,7 +74,7 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     public static final int BHT_DEFAULT_HISTORY = 1;
 
     /**
-     * constant for the default inital value
+     * constant for the default inital second
      */
     public static final boolean BHT_DEFAULT_INITVAL = false;
 
@@ -173,7 +173,7 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     /**
      * {@inheritDoc}
      * <p>
-     * Handles the actions when selecting another value in one of the two combo
+     * Handles the actions when selecting another second in one of the two combo
      * boxes.
      * Selecting a different BHT size or history causes a reset of the simulator.
      */

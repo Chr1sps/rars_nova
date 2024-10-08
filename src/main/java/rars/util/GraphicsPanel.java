@@ -35,17 +35,5 @@ public final class GraphicsPanel extends JPanel {
                 g.fillRect(col, grid.rows - row - 1, 1, 1);
             }
         }
-//        int upperLeftX = 0, upperLeftY = 0;
-//        for (final var row : this.grid.grid) {
-//            for (final var color : row) {
-//                g.setColor(color);
-//                g.fillRect(upperLeftX, upperLeftY, 1, 1);
-//                upperLeftX += 1; // faster than multiplying
-//            }
-//            upperLeftX = 0;
-//            upperLeftY += 1; // faster than multiplying
-//        }
     }
-
-    // Paint the color codes.
 }

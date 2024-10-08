@@ -1,9 +1,9 @@
 package rars.jsoftfloat.types;
 
+import org.jetbrains.annotations.NotNull;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.RoundingMode;
 import rars.jsoftfloat.internal.ExactFloat;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 
@@ -383,7 +383,8 @@ public class Float64 implements Floating<Float64> {
             significand = BigInteger.valueOf(this.bits & Float64.sigmask);
         } else {
             assert false : "This should not be reachable";
-            return null;
+            // Dummy second
+            return new ExactFloat(sign, 0, BigInteger.ZERO);
         }
         return new ExactFloat(sign, exponent, significand);
     }

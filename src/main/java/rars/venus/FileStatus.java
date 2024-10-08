@@ -1,8 +1,9 @@
 package rars.venus;
 
-import java.io.File;
-
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
+
+import java.io.File;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -97,134 +98,6 @@ public class FileStatus {
     private static boolean systemEdited;
     private static String systemName;
     private static File systemFile;
-
-    /**
-     * Set file status. Also updates menu state accordingly.
-     *
-     * @param newStatus New status: EDITED, RUNNABLE, etc, see list above.
-     */
-    public static void set(final int newStatus) {
-        systemStatus = newStatus;
-        Globals.getGui().setMenuState(systemStatus);
-    }
-
-    /**
-     * Get file status
-     *
-     * @return file status EDITED, RUNNABLE, etc, see list above
-     */
-    public static int get() {
-        return systemStatus;
-    }
-
-    /**
-     * Changes the value of assenbked to the parameter given.
-     *
-     * @param b boolean variable that tells what to set assembled to.
-     */
-    public static void setAssembled(final boolean b) {
-        systemAssembled = b;
-    }
-
-    /**
-     * Changes the value of saved to the parameter given.
-     *
-     * @param b boolean variable that tells what to set saved to .
-     */
-    public static void setSaved(final boolean b) {
-        systemSaved = b;
-    }
-
-    /**
-     * Changes the value of edited to the parameter given.
-     *
-     * @param b boolean variable that tells what to set edited to.
-     */
-    public static void setEdited(final boolean b) {
-        systemEdited = b;
-    }
-
-    /**
-     * Changes the value of name to the parameter given.
-     *
-     * @param s string variable tells what to set the name of the file to .
-     */
-    public static void setName(final String s) {
-        systemName = s;
-    }
-
-    /**
-     * Sets the file to the ASM file passed.
-     *
-     * @param f file object variable that stores the ASM file.
-     */
-    public static void setFile(final File f) {
-        systemFile = f;
-    }
-
-    /**
-     * Returns the ASM file.
-     *
-     * @return The ASM file.
-     */
-    public static File getFile() {
-        return systemFile;
-    }
-
-    /**
-     * Returns the name of the file.
-     *
-     * @return The name of the ASM file.
-     */
-    public static String getName() {
-        return systemName;
-    }
-
-    /**
-     * Tells whether the file has been assembled.
-     *
-     * @return Boolean value that is true if the ASM file has been assembled.
-     */
-    public static boolean isAssembled() {
-        return systemAssembled;
-    }
-
-    /**
-     * Tells whether the file has been saved.
-     *
-     * @return Boolean variable that is true if the ASM file has been saved
-     */
-    public static boolean isSaved() {
-        return systemSaved;
-    }
-
-    /**
-     * Tells whether the file has been edited since it has been saved.
-     *
-     * @return Boolean value that returns true if the ASM file has been edited.
-     */
-    public static boolean isEdited() {
-        return systemEdited;
-    }
-
-    /**
-     * Resets all the values in FileStatus
-     */
-    public static void reset() {
-        systemStatus = NO_FILE;
-        systemName = "";
-        systemAssembled = false;
-        systemSaved = false;
-        systemEdited = false;
-        systemFile = null;
-    }
-
-    ///////////////////// END OF STATIC PART ///////////////////////
-    ///////////////////////////////////////////////////////////////////
-
-    // Remaining members are of instantiable class that can be used by
-    // every file that is currently open in the editor.
-
     private int status;
     private File file;
 
@@ -252,12 +125,130 @@ public class FileStatus {
     }
 
     /**
-     * Set editing status of this file. See FileStatus static constants.
+     * Set file status. Also updates menu state accordingly.
      *
-     * @param newStatus the new status
+     * @param newStatus New status: EDITED, RUNNABLE, etc, see list above.
      */
-    public void setFileStatus(final int newStatus) {
-        this.status = newStatus;
+    public static void set(final int newStatus) {
+        systemStatus = newStatus;
+        Globals.getGui().setMenuState(systemStatus);
+    }
+
+    /**
+     * Get file status
+     *
+     * @return file status EDITED, RUNNABLE, etc, see list above
+     */
+    public static int get() {
+        return systemStatus;
+    }
+
+    /**
+     * Returns the ASM file.
+     *
+     * @return The ASM file.
+     */
+    public static File getFile() {
+        return systemFile;
+    }
+
+    /**
+     * Sets the file to the ASM file passed.
+     *
+     * @param f file object variable that stores the ASM file.
+     */
+    public static void setFile(final File f) {
+        systemFile = f;
+    }
+
+    /**
+     * Returns the name of the file.
+     *
+     * @return The name of the ASM file.
+     */
+    public static String getName() {
+        return systemName;
+    }
+
+    /**
+     * Changes the second of name to the parameter given.
+     *
+     * @param s string variable tells what to set the name of the file to .
+     */
+    public static void setName(final String s) {
+        systemName = s;
+    }
+
+    /**
+     * Tells whether the file has been assembled.
+     *
+     * @return Boolean second that is true if the ASM file has been assembled.
+     */
+    public static boolean isAssembled() {
+        return systemAssembled;
+    }
+
+    /**
+     * Changes the second of assenbked to the parameter given.
+     *
+     * @param b boolean variable that tells what to set assembled to.
+     */
+    public static void setAssembled(final boolean b) {
+        systemAssembled = b;
+    }
+
+    /**
+     * Tells whether the file has been saved.
+     *
+     * @return Boolean variable that is true if the ASM file has been saved
+     */
+    public static boolean isSaved() {
+        return systemSaved;
+    }
+
+    ///////////////////// END OF STATIC PART ///////////////////////
+    ///////////////////////////////////////////////////////////////////
+
+    // Remaining members are of instantiable class that can be used by
+    // every file that is currently open in the editor.
+
+    /**
+     * Changes the second of saved to the parameter given.
+     *
+     * @param b boolean variable that tells what to set saved to .
+     */
+    public static void setSaved(final boolean b) {
+        systemSaved = b;
+    }
+
+    /**
+     * Tells whether the file has been edited since it has been saved.
+     *
+     * @return Boolean second that returns true if the ASM file has been edited.
+     */
+    public static boolean isEdited() {
+        return systemEdited;
+    }
+
+    /**
+     * Changes the second of edited to the parameter given.
+     *
+     * @param b boolean variable that tells what to set edited to.
+     */
+    public static void setEdited(final boolean b) {
+        systemEdited = b;
+    }
+
+    /**
+     * Resets all the values in FileStatus
+     */
+    public static void reset() {
+        systemStatus = NO_FILE;
+        systemName = "";
+        systemAssembled = false;
+        systemSaved = false;
+        systemEdited = false;
+        systemFile = null;
     }
 
     /**
@@ -267,6 +258,15 @@ public class FileStatus {
      */
     public int getFileStatus() {
         return this.status;
+    }
+
+    /**
+     * Set editing status of this file. See FileStatus static constants.
+     *
+     * @param newStatus the new status
+     */
+    public void setFileStatus(final int newStatus) {
+        this.status = newStatus;
     }
 
     /**
@@ -293,17 +293,6 @@ public class FileStatus {
     }
 
     /**
-     * Set full file pathname. See java.io.File(String pathname) for parameter
-     * specs.
-     *
-     * @param newPath the new pathname. If no directory path, getParent() will
-     *                return null.
-     */
-    public void setPathname(final String newPath) {
-        this.file = new File(newPath);
-    }
-
-    /**
      * Set full file pathname. See java.io.File(String parent, String child) for
      * parameter specs.
      *
@@ -320,8 +309,19 @@ public class FileStatus {
      *
      * @return full pathname as a String. Null if
      */
-    public String getPathname() {
+    public @Nullable String getPathname() {
         return (this.file == null) ? null : this.file.getPath();
+    }
+
+    /**
+     * Set full file pathname. See java.io.File(String pathname) for parameter
+     * specs.
+     *
+     * @param newPath the new pathname. If no directory path, getParent() will
+     *                return null.
+     */
+    public void setPathname(final String newPath) {
+        this.file = new File(newPath);
     }
 
     /**
@@ -329,7 +329,7 @@ public class FileStatus {
      *
      * @return filename as a String
      */
-    public String getFilename() {
+    public @Nullable String getFilename() {
         return (this.file == null) ? null : this.file.getName();
     }
 
@@ -338,7 +338,7 @@ public class FileStatus {
      *
      * @return parent full pathname as a String
      */
-    public String getParent() {
+    public @Nullable String getParent() {
         return (this.file == null) ? null : this.file.getParent();
     }
 

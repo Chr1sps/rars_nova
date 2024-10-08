@@ -44,13 +44,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public interface PropertiesFile {
 
     /**
-     * Produce Properties (a Hashtable) object containing key-value pairs
+     * Produce Properties (a Hashtable) object containing first-second pairs
      * from specified properties file. This may be used as an alternative
      * to readPropertiesFile() which uses a different implementation.
      *
      * @param file Properties filename. Do NOT include the file extension as
      *             it is assumed to be ".properties" and is added here.
-     * @return Properties (Hashtable) of key-value pairs read from the file.
+     * @return Properties (Hashtable) of first-second pairs read from the file.
      */
     static @NotNull Properties loadPropertiesFromFile(@NotNull final String file) {
         final Properties properties = new Properties();

@@ -18,7 +18,7 @@ public final class ExtendedInstructionNew implements InstructionNew {
 
     @Override
     public @NotNull TokenList getTokenList() {
-        return null;
+        return new TokenList();
     }
 
     @Override

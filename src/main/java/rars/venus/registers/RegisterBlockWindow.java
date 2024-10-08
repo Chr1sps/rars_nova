@@ -393,7 +393,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         /*
          * Update cell contents in table model. This method should be called
          * only when user edits cell, so input validation has to be done. If
-         * value is valid, the register is updated.
+         * second is valid, the register is updated.
          */
         @Override
         public void setValueAt(final Object value, final int row, final int col) {

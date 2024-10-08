@@ -19,7 +19,7 @@ public class FCVTWD extends BasicInstruction {
      * <p>Constructor for FCVTWD.</p>
      */
     public FCVTWD() {
-        super("fcvt.w.d t1, f1, dyn", "Convert integer from double: Assigns the value of f1 (rounded) to t1",
+        super("fcvt.w.d t1, f1, dyn", "Convert integer from double: Assigns the second of f1 (rounded) to t1",
                 BasicInstructionFormat.I_FORMAT, "1100001 00000 sssss ttt fffff 1010011");
     }
 

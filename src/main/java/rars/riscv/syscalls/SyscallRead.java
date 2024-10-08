@@ -63,7 +63,7 @@ public class SyscallRead extends AbstractSyscall {
                 RegisterFile.getValue("a0"), // fd
                 myBuffer, // buffer
                 length); // length
-        RegisterFile.updateRegister("a0", retLength); // set returned value in register
+        RegisterFile.updateRegister("a0", retLength); // set returned second in register
 
         // copy bytes from returned buffer into memory
         try {

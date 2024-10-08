@@ -41,19 +41,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class Binary {
 
-    // Using int value 0-15 as index, yields equivalent hex digit as char.
+    // Using int second 0-15 as index, yields equivalent hex digit as char.
     private static final char[] chars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-    // Use this to produce String equivalent of unsigned int value (add it to int
-    // value, result is long)
+    // Use this to produce String equivalent of unsigned int second (add it to int
+    // second, result is long)
     private static final long UNSIGNED_BASE = (long) 0x7FFFFFFF + (long) 0x7FFFFFFF + (long) 2; // 0xFFFFFFFF+1
 
     private Binary() {
     }
 
     /**
-     * Translate int value into a String consisting of '1's and '0's.
+     * Translate int second into a String consisting of '1's and '0's.
      *
-     * @param value  The int value to convert.
+     * @param value  The int second to convert.
      * @param length The number of bit positions, starting at least significant, to
      *               process.
      * @return String consisting of '1' and '0' characters corresponding to the
@@ -70,11 +70,11 @@ public final class Binary {
     }
 
     /**
-     * Translate int value into a String consisting of '1's and '0's. Assumes all 32
+     * Translate int second into a String consisting of '1's and '0's. Assumes all 32
      * bits are
      * to be translated.
      *
-     * @param value The int value to convert.
+     * @param value The int second to convert.
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
@@ -83,9 +83,9 @@ public final class Binary {
     }
 
     /**
-     * Translate long value into a String consisting of '1's and '0's.
+     * Translate long second into a String consisting of '1's and '0's.
      *
-     * @param value  The long value to convert.
+     * @param value  The long second to convert.
      * @param length The number of bit positions, starting at least significant, to
      *               process.
      * @return String consisting of '1' and '0' characters corresponding to the
@@ -102,11 +102,11 @@ public final class Binary {
     }
 
     /**
-     * Translate long value into a String consisting of '1's and '0's. Assumes all
+     * Translate long second into a String consisting of '1's and '0's. Assumes all
      * 64 bits are
      * to be translated.
      *
-     * @param value The long value to convert.
+     * @param value The long second to convert.
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
@@ -115,15 +115,15 @@ public final class Binary {
     }
 
     /**
-     * Translate String consisting of '1's and '0's into an int value having that
+     * Translate String consisting of '1's and '0's into an int second having that
      * binary representation.
      * The String is assumed to be at most 32 characters long. No error checking is
      * performed.
      * String position 0 has most-significant bit, position length-1 has
      * least-significant.
      *
-     * @param value The String value to convert.
-     * @return int whose binary value corresponds to decoded String.
+     * @param value The String second to convert.
+     * @return int whose binary second corresponds to decoded String.
      */
     public static int binaryStringToInt(final String value) {
         int result = value.charAt(0) - 48;
@@ -134,15 +134,15 @@ public final class Binary {
     }
 
     /**
-     * Translate String consisting of '1's and '0's into a long value having that
+     * Translate String consisting of '1's and '0's into a long second having that
      * binary representation.
      * The String is assumed to be at most 64 characters long. No error checking is
      * performed.
      * String position 0 has most-significant bit, position length-1 has
      * least-significant.
      *
-     * @param value The String value to convert.
-     * @return long whose binary value corresponds to decoded String.
+     * @param value The String second to convert.
+     * @return long whose binary second corresponds to decoded String.
      */
     public static long binaryStringToLong(final String value) {
         long result = value.charAt(0) - 48;
@@ -155,11 +155,11 @@ public final class Binary {
     /**
      * Translate String consisting of '1's and '0's into String equivalent of the
      * corresponding
-     * hexadecimal value. No length limit.
+     * hexadecimal second. No length limit.
      * String position 0 has most-significant bit, position length-1 has
      * least-significant.
      *
-     * @param value The String value to convert.
+     * @param value The String second to convert.
      * @return String containing '0', '1', ...'F' characters which form hexadecimal
      * equivalent of decoded String.
      */
@@ -196,7 +196,7 @@ public final class Binary {
      *              characters which form hexadecimal. Letters may be either upper
      *              or lower case.
      *              Works either with or without leading "Ox".
-     * @return String with equivalent value in binary.
+     * @return String with equivalent second in binary.
      */
     public static String hexStringToBinaryString(String value) {
         final StringBuilder result = new StringBuilder();
@@ -272,7 +272,7 @@ public final class Binary {
      * String position 0 has most-significant bit, position length-1 has
      * least-significant.
      *
-     * @param value The String value to convert.
+     * @param value The String second to convert.
      * @return char '0', '1', ...'F' which form hexadecimal equivalent of decoded
      * String.
      * If string length > 4, returns '0'.
@@ -295,7 +295,7 @@ public final class Binary {
      * returned by the method "Integer.toHexString". Prepend leading zeroes
      * to that string as necessary to make it always eight hexadecimal digits.
      *
-     * @param d The int value to convert.
+     * @param d The int second to convert.
      * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
      * of int.
      */
@@ -313,14 +313,14 @@ public final class Binary {
     /**
      * Returns a 6 character string representing the 16-bit hexadecimal equivalent
      * of the
-     * given integer value. First two characters are "0x". It assumes value will
+     * given integer second. First two characters are "0x". It assumes second will
      * "fit"
      * in 16 bits. If non-negative, prepend leading zeroes to that string as
      * necessary
      * to make it always four hexadecimal digits. If negative, chop off the first
      * four 'f' digits so result is always four hexadecimal digits
      *
-     * @param d The int value to convert.
+     * @param d The int second to convert.
      * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
      * of int.
      */
@@ -340,10 +340,10 @@ public final class Binary {
 
     /**
      * Prefix a hexadecimal-indicating string "0x" to the string equivalent to the
-     * hexadecimal value in the long parameter. Prepend leading zeroes
+     * hexadecimal second in the long parameter. Prepend leading zeroes
      * to that string as necessary to make it always sixteen hexadecimal digits.
      *
-     * @param value The long value to convert.
+     * @param value The long second to convert.
      * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
      * of long.
      */
@@ -352,11 +352,11 @@ public final class Binary {
     }
 
     /**
-     * Produce String equivalent of integer value interpreting it as an unsigned
+     * Produce String equivalent of integer second interpreting it as an unsigned
      * integer.
      * For instance, -1 (0xffffffff) produces "4294967295" instead of "-1".
      *
-     * @param d The int value to interpret.
+     * @param d The int second to interpret.
      * @return String which forms unsigned 32 bit equivalent of int.
      */
     public static String unsignedIntToIntString(final int d) {
@@ -364,14 +364,14 @@ public final class Binary {
     }
 
     /**
-     * Produce ASCII string equivalent of integer value, interpreting it as 4
+     * Produce ASCII string equivalent of integer second, interpreting it as 4
      * one-byte
-     * characters. If the value in a given byte does not correspond to a printable
+     * characters. If the second in a given byte does not correspond to a printable
      * character, it will be assigned a default character (defined in
      * config.properties)
      * for a placeholder.
      *
-     * @param d The int value to interpret
+     * @param d The int second to interpret
      * @return String that represents ASCII equivalent
      */
     public static String intToAscii(final int d) {
@@ -391,7 +391,7 @@ public final class Binary {
      * optional negative (-) sign but no embedded spaces.
      *
      * @param s candidate string
-     * @return returns int value represented by given string
+     * @return returns int second represented by given string
      * @throws java.lang.NumberFormatException if string cannot be translated into an int
      */
     public static int stringToInt(final String s) throws NumberFormatException {
@@ -476,7 +476,7 @@ public final class Binary {
             if (result < 0)
                 return null;
         }
-        // Overflowing to min and negating keeps the value at min
+        // Overflowing to min and negating keeps the second at min
         if (result == Integer.MIN_VALUE && first == '-')
             return Integer.MIN_VALUE;
         // Don't allow overflow and negation as that produces unexpected values.
@@ -494,7 +494,7 @@ public final class Binary {
      * optional negative (-) sign but no embedded spaces.
      *
      * @param s candidate string
-     * @return returns long value represented by given string
+     * @return returns long second represented by given string
      * @throws java.lang.NumberFormatException if string cannot be translated into a long
      */
     public static long stringToLong(final String s) throws NumberFormatException {
@@ -532,9 +532,9 @@ public final class Binary {
 
     /**
      * Returns int representing the bit values of the high order 32 bits of given
-     * 64 bit long value.
+     * 64 bit long second.
      *
-     * @param longValue The long value from which to extract bits.
+     * @param longValue The long second from which to extract bits.
      * @return int containing high order 32 bits of argument
      */
     public static int highOrderLongToInt(final long longValue) {
@@ -543,9 +543,9 @@ public final class Binary {
 
     /**
      * Returns int representing the bit values of the low order 32 bits of given
-     * 64 bit long value.
+     * 64 bit long second.
      *
-     * @param longValue The long value from which to extract bits.
+     * @param longValue The long second from which to extract bits.
      * @return int containing low order 32 bits of argument
      */
     public static int lowOrderLongToInt(final long longValue) {
@@ -565,9 +565,9 @@ public final class Binary {
     }
 
     /**
-     * Returns the bit value of the given bit position of the given int value.
+     * Returns the bit second of the given bit position of the given int second.
      *
-     * @param value The value to read the bit from.
+     * @param value The second to read the bit from.
      * @param bit   bit position in range 0 (least significant) to 31 (most)
      * @return 0 if the bit position contains 0, and 1 otherwise.
      */
@@ -576,9 +576,9 @@ public final class Binary {
     }
 
     /**
-     * Returns the bit value of the given bit position of the given long value.
+     * Returns the bit second of the given bit position of the given long second.
      *
-     * @param value The value to read the bit from.
+     * @param value The second to read the bit from.
      * @param bit   bit position in range 0 (least significant) to 63 (most)
      * @return 0 if the bit position contains 0, and 1 otherwise.
      */
@@ -588,22 +588,22 @@ public final class Binary {
     }
 
     /**
-     * Sets the specified bit of the specified value to 1, and returns the result.
+     * Sets the specified bit of the specified second to 1, and returns the result.
      *
-     * @param value The value in which the bit is to be set.
+     * @param value The second in which the bit is to be set.
      * @param bit   bit position in range 0 (least significant) to 31 (most)
-     * @return value possibly modified with given bit set to 1.
+     * @return second possibly modified with given bit set to 1.
      */
     public static int setBit(final int value, final int bit) {
         return value | (1 << bit);
     }
 
     /**
-     * Sets the specified bit of the specified value to 0, and returns the result.
+     * Sets the specified bit of the specified second to 0, and returns the result.
      *
-     * @param value The value in which the bit is to be set.
+     * @param value The second in which the bit is to be set.
      * @param bit   bit position in range 0 (least significant) to 31 (most)
-     * @return value possibly modified with given bit set to 0.
+     * @return second possibly modified with given bit set to 0.
      */
     public static int clearBit(final int value, final int bit) {
         return value & ~(1 << bit);
@@ -612,24 +612,24 @@ public final class Binary {
     // setByte and getByte added by DPS on 12 July 2006
 
     /**
-     * Sets the specified byte of the specified value to the low order 8 bits of
-     * specified replacement value, and returns the result.
+     * Sets the specified byte of the specified second to the low order 8 bits of
+     * specified replacement second, and returns the result.
      *
-     * @param value   The value in which the byte is to be set.
+     * @param value   The second in which the byte is to be set.
      * @param bite    byte position in range 0 (least significant) to 3 (most)
-     * @param replace value to place into that byte position - use low order 8 bits
-     * @return value modified value.
+     * @param replace second to place into that byte position - use low order 8 bits
+     * @return second modified second.
      */
     public static int setByte(final int value, final int bite, final int replace) {
         return value & ~(0xFF << (bite << 3)) | ((replace & 0xFF) << (bite << 3));
     }
 
     /**
-     * Gets the specified byte of the specified value.
+     * Gets the specified byte of the specified second.
      *
-     * @param value The value in which the byte is to be retrieved.
+     * @param value The second in which the byte is to be retrieved.
      * @param bite  byte position in range 0 (least significant) to 3 (most)
-     * @return zero-extended byte value in low order byte.
+     * @return zero-extended byte second in low order byte.
      */
     public static int getByte(final int value, final int bite) {
         return value << ((3 - bite) << 3) >>> 24;
@@ -651,8 +651,8 @@ public final class Binary {
      */
     public static boolean isHex(final String v) {
         try {
-            // don't care about return value, just whether it threw exception.
-            // If value is EITHER a valid int OR a valid long, continue.
+            // don't care about return second, just whether it threw exception.
+            // If second is EITHER a valid int OR a valid long, continue.
             try {
                 Binary.stringToInt(v);
             } catch (final NumberFormatException nfe) {
@@ -695,7 +695,7 @@ public final class Binary {
     public static boolean isOctal(final String v) {
         // Don't mistake "0" or a string that starts "0x" for an octal string
         try {
-            // we don't care what value Binary.stringToInt(v) returns, just whether it threw
+            // we don't care what second Binary.stringToInt(v) returns, just whether it threw
             // exception
             final int dontCare = Binary.stringToInt(v);
 

@@ -9,12 +9,13 @@
 
 package rars.venus.editors.jeditsyntax;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.Settings;
 import rars.venus.editors.jeditsyntax.tokenmarker.Token;
 import rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -37,7 +38,7 @@ import java.util.Vector;
  * (images, variable-width lines, and so on) and adds a whole bunch of
  * useful goodies such as:
  * <ul>
- * <li>More flexible key binding scheme
+ * <li>More flexible first binding scheme
  * <li>Supports macro recorders
  * <li>Rectangular selection
  * <li>Bracket highlighting
@@ -66,7 +67,6 @@ import java.util.Vector;
  * @version $Id: JEditTextArea.java,v 1.36 1999/12/13 03:40:30 sp Exp $
  */
 public class JEditTextArea extends JComponent {
-    private static final Logger LOGGER = LogManager.getLogger(JEditTextArea.class);
     /**
      * Adding components with this name to the text area will place
      * them left of the horizontal scroll bar. In jEdit, the status
@@ -74,14 +74,86 @@ public class JEditTextArea extends JComponent {
      */
     public static final String LEFT_OF_SCROLLBAR = "los";
     /**
-     * Constant <code>POPUP_HELP_TEXT_COLOR</code>
+     * Constant <code>CENTER="center"</code>
      */
-    public static Color POPUP_HELP_TEXT_COLOR = Color.BLACK; // DPS 11-July-2014
-
+    protected static final String CENTER = "center";
+    /**
+     * Constant <code>RIGHT="right"</code>
+     */
+    protected static final String RIGHT = "right";
+    /**
+     * Constant <code>BOTTOM="bottom"</code>
+     */
+    protected static final String BOTTOM = "bottom";
+    /**
+     * Constant <code>caretTimer</code>
+     */
+    protected static final Timer caretTimer;
+    private static final Logger LOGGER = LogManager.getLogger(JEditTextArea.class);
     // Number of text lines moved for each click of the vertical scrollbar buttons.
     private static final int VERTICAL_SCROLLBAR_UNIT_INCREMENT_IN_LINES = 1;
     // Number of text lines moved for each "notch" of the mouse wheel scroller.
     private static final int LINES_PER_MOUSE_WHEEL_NOTCH = 3;
+
+    /*
+     * Returns if this component can be traversed by pressing
+     * the Tab first. This returns false.
+     */
+    // public final boolean isManagingFocus()
+    // {
+    // return true;
+    // }
+    /**
+     * Constant <code>POPUP_HELP_TEXT_COLOR</code>
+     */
+    public static Color POPUP_HELP_TEXT_COLOR = Color.BLACK; // DPS 11-July-2014
+    /**
+     * Constant <code>focusedComponent</code>
+     */
+    protected static JEditTextArea focusedComponent;
+
+    static {
+        caretTimer = new Timer(500, new CaretBlinker());
+        JEditTextArea.caretTimer.setInitialDelay(500);
+        JEditTextArea.caretTimer.start();
+    }
+
+    private final JScrollBar lineNumbersVertical;
+    protected TextAreaPainter painter;
+    protected JPopupMenu popup;
+    protected EventListenerList listenerList;
+    protected MutableCaretEvent caretEvent;
+    protected boolean caretBlinks;
+    protected boolean caretVisible;
+    protected boolean blink;
+    protected boolean editable;
+    protected int caretBlinkRate;
+    protected int firstLine;
+    protected int visibleLines;
+    protected int electricScroll;
+    protected int horizontalOffset;
+    protected JScrollBar vertical;
+    protected JScrollBar horizontal;
+    protected boolean scrollBarsInitialized;
+    protected InputHandler inputHandler;
+    protected SyntaxDocument document;
+    protected DocumentHandler documentHandler;
+    protected Segment lineSegment;
+    protected int selectionStart;
+    protected int selectionStartLine;
+    protected int selectionEnd;
+    protected int selectionEndLine;
+    protected boolean biasLeft;
+    protected int bracketPosition;
+    protected int bracketLine;
+    protected int magicCaret;
+    protected boolean overwrite;
+    protected boolean rectSelect;
+    // "unredoing" is mode used by DocumentHandler's insertUpdate() and
+    // removeUpdate()
+    // to pleasingly select the text and location of the undo. DPS 3-May-2010
+    protected boolean unredoing;
+    JPopupMenu popupMenu;
 
     /**
      * Creates a new JEditTextArea with the default settings.
@@ -91,8 +163,6 @@ public class JEditTextArea extends JComponent {
     public JEditTextArea(final JComponent lineNumbers) {
         this(TextAreaDefaults.getDefaults(), lineNumbers);
     }
-
-    private final JScrollBar lineNumbersVertical;
 
     /**
      * Creates a new JEditTextArea with the specified settings.
@@ -152,7 +222,7 @@ public class JEditTextArea extends JComponent {
         JEditTextArea.caretTimer.setDelay(this.caretBlinkRate);
 
         // Intercept keystrokes before focus manager gets them. If in editing window,
-        // pass (SHIFT) TAB keystrokes on to the key processor instead of letting focus
+        // pass (SHIFT) TAB keystrokes on to the first processor instead of letting focus
         // manager use them for focus traversal.
         // One can also accomplish this using: setFocusTraversalKeysEnabled(false);
         // but that seems heavy-handed.
@@ -172,15 +242,6 @@ public class JEditTextArea extends JComponent {
         // We don't seem to get the initial focus event?
         JEditTextArea.focusedComponent = this;
     }
-
-    /*
-     * Returns if this component can be traversed by pressing
-     * the Tab key. This returns false.
-     */
-    // public final boolean isManagingFocus()
-    // {
-    // return true;
-    // }
 
     /**
      * Returns the object responsible for painting this text area.
@@ -829,7 +890,7 @@ public class JEditTextArea extends JComponent {
      *
      * @return a {@link java.lang.String} object
      */
-    public String getText() {
+    public @Nullable String getText() {
         try {
             return this.document.getText(0, this.document.getLength());
         } catch (final BadLocationException bl) {
@@ -862,7 +923,7 @@ public class JEditTextArea extends JComponent {
      * @param len   The length of the substring
      * @return The substring, or null if the offsets are invalid
      */
-    public final String getText(final int start, final int len) {
+    public final @Nullable String getText(final int start, final int len) {
         try {
             return this.document.getText(start, len);
         } catch (final BadLocationException bl) {
@@ -920,6 +981,19 @@ public class JEditTextArea extends JComponent {
         return this.selectionStart;
     }
 
+    // protected members
+
+    /**
+     * Sets the selection start. The new selection will be the new
+     * selection start and the old selection end.
+     *
+     * @param selectionStart The selection start
+     * @see #select(int, int)
+     */
+    public final void setSelectionStart(final int selectionStart) {
+        this.select(selectionStart, this.selectionEnd);
+    }
+
     /**
      * Returns the offset where the selection starts on the specified
      * line.
@@ -953,23 +1027,23 @@ public class JEditTextArea extends JComponent {
     }
 
     /**
-     * Sets the selection start. The new selection will be the new
-     * selection start and the old selection end.
-     *
-     * @param selectionStart The selection start
-     * @see #select(int, int)
-     */
-    public final void setSelectionStart(final int selectionStart) {
-        this.select(selectionStart, this.selectionEnd);
-    }
-
-    /**
      * Returns the selection end offset.
      *
      * @return a int
      */
     public final int getSelectionEnd() {
         return this.selectionEnd;
+    }
+
+    /**
+     * Sets the selection end. The new selection will be the old
+     * selection start and the new selection end.
+     *
+     * @param selectionEnd The selection end
+     * @see #select(int, int)
+     */
+    public final void setSelectionEnd(final int selectionEnd) {
+        this.select(this.selectionStart, selectionEnd);
     }
 
     /**
@@ -1005,17 +1079,6 @@ public class JEditTextArea extends JComponent {
     }
 
     /**
-     * Sets the selection end. The new selection will be the old
-     * selection start and the new selection end.
-     *
-     * @param selectionEnd The selection end
-     * @see #select(int, int)
-     */
-    public final void setSelectionEnd(final int selectionEnd) {
-        this.select(this.selectionStart, selectionEnd);
-    }
-
-    /**
      * Returns the caret position. This will either be the selection
      * start or the selection end, depending on which direction the
      * selection was made in.
@@ -1024,6 +1087,17 @@ public class JEditTextArea extends JComponent {
      */
     public final int getCaretPosition() {
         return (this.biasLeft ? this.selectionStart : this.selectionEnd);
+    }
+
+    /**
+     * Sets the caret position. The new selection will consist of the
+     * caret position only (hence no text will be selected)
+     *
+     * @param caret The caret position
+     * @see #select(int, int)
+     */
+    public final void setCaretPosition(final int caret) {
+        this.select(caret, caret);
     }
 
     /**
@@ -1053,17 +1127,6 @@ public class JEditTextArea extends JComponent {
      */
     public final int getMarkLine() {
         return (this.biasLeft ? this.selectionEndLine : this.selectionStartLine);
-    }
-
-    /**
-     * Sets the caret position. The new selection will consist of the
-     * caret position only (hence no text will be selected)
-     *
-     * @param caret The caret position
-     * @see #select(int, int)
-     */
-    public final void setCaretPosition(final int caret) {
-        this.select(caret, caret);
     }
 
     /**
@@ -1159,7 +1222,7 @@ public class JEditTextArea extends JComponent {
      *
      * @return a {@link java.lang.String} object
      */
-    public final String getSelectedText() {
+    public final @Nullable String getSelectedText() {
         if (this.selectionStart == this.selectionEnd)
             return null;
 
@@ -1388,8 +1451,6 @@ public class JEditTextArea extends JComponent {
 
     }
 
-    JPopupMenu popupMenu;
-
     /**
      * Returns true if overwrite mode is enabled, false otherwise.
      *
@@ -1532,7 +1593,7 @@ public class JEditTextArea extends JComponent {
     /**
      * {@inheritDoc}
      * <p>
-     * Forwards key events directly to the input handler.
+     * Forwards first events directly to the input handler.
      * This is slightly faster than using a KeyListener
      * because some Swing overhead is avoided.
      */
@@ -1555,76 +1616,6 @@ public class JEditTextArea extends JComponent {
                 break;
         }
     }
-
-    // protected members
-    /**
-     * Constant <code>CENTER="center"</code>
-     */
-    protected static final String CENTER = "center";
-    /**
-     * Constant <code>RIGHT="right"</code>
-     */
-    protected static final String RIGHT = "right";
-    /**
-     * Constant <code>BOTTOM="bottom"</code>
-     */
-    protected static final String BOTTOM = "bottom";
-
-    /**
-     * Constant <code>focusedComponent</code>
-     */
-    protected static JEditTextArea focusedComponent;
-    /**
-     * Constant <code>caretTimer</code>
-     */
-    protected static final Timer caretTimer;
-
-    protected TextAreaPainter painter;
-
-    protected JPopupMenu popup;
-
-    protected EventListenerList listenerList;
-    protected MutableCaretEvent caretEvent;
-
-    protected boolean caretBlinks;
-    protected boolean caretVisible;
-    protected boolean blink;
-
-    protected boolean editable;
-
-    protected int caretBlinkRate;
-    protected int firstLine;
-    protected int visibleLines;
-    protected int electricScroll;
-
-    protected int horizontalOffset;
-
-    protected JScrollBar vertical;
-    protected JScrollBar horizontal;
-    protected boolean scrollBarsInitialized;
-
-    protected InputHandler inputHandler;
-    protected SyntaxDocument document;
-    protected DocumentHandler documentHandler;
-
-    protected Segment lineSegment;
-
-    protected int selectionStart;
-    protected int selectionStartLine;
-    protected int selectionEnd;
-    protected int selectionEndLine;
-    protected boolean biasLeft;
-
-    protected int bracketPosition;
-    protected int bracketLine;
-
-    protected int magicCaret;
-    protected boolean overwrite;
-    protected boolean rectSelect;
-    // "unredoing" is mode used by DocumentHandler's insertUpdate() and
-    // removeUpdate()
-    // to pleasingly select the text and location of the undo. DPS 3-May-2010
-    protected boolean unredoing;
 
     /**
      * <p>fireCaretEvent.</p>
@@ -1695,7 +1686,291 @@ public class JEditTextArea extends JComponent {
         }
     }
 
+    /**
+     * Return any relevant tool tip text for token at specified position. Keyword
+     * match
+     * must be exact. DPS 24-May-2010
+     *
+     * @param x x-coordinate of current position
+     * @param y y-coordinate of current position
+     * @return String containing appropriate tool tip text. Possibly HTML-encoded.
+     */
+    // Is used for tool tip only (not popup menu)
+    public @Nullable String getSyntaxSensitiveToolTipText(final int x, final int y) {
+        final StringBuilder result;
+        final int line = this.yToLine(y);
+        final ArrayList<PopupHelpItem> matches = this.getSyntaxSensitiveHelpAtLineOffset(line, this.xToOffset(line, x), true);
+        if (matches == null) {
+            return null;
+        }
+        final int length = PopupHelpItem.maxExampleLength(matches) + 2;
+        result = new StringBuilder("<html>");
+        for (int i = 0; i < matches.size(); i++) {
+            final PopupHelpItem match = matches.get(i);
+            result.append((i == 0) ? "" : "<br>").append("<tt>").append(match.getExamplePaddedToLength(length).replaceAll(" ", "&nbsp;")).append("</tt>").append(match.getDescription());
+        }
+        return result + "</html>";
+    }
+
+    /**
+     * Constructs string for auto-indent feature. Returns empty string
+     * if auto-intent is disabled or if line has no leading white space.
+     * Uses getLeadingWhiteSpace(). Is used by InputHandler when processing
+     * first press for Enter first. DPS 31-Dec-2010
+     *
+     * @return String containing auto-indent characters to be inserted into text
+     */
+    public String getAutoIndent() {
+        return (Globals.getSettings().getBooleanSetting(Settings.Bool.AUTO_INDENT)) ? this.getLeadingWhiteSpace() : "";
+    }
+
+    /**
+     * Makes a copy of leading white space (tab or space) from the current line and
+     * returns it. DPS 31-Dec-2010
+     *
+     * @return String containing leading white space of current line. Empty string
+     * if none.
+     */
+    public String getLeadingWhiteSpace() {
+        final int line = this.getCaretLine();
+        final int lineLength = this.getLineLength(line);
+        String indent = "";
+        if (lineLength > 0) {
+            final String text = this.getText(this.getLineStartOffset(line), lineLength);
+            for (int position = 0; position < text.length(); position++) {
+                final char character = text.charAt(position);
+                if (character == '\t' || character == ' ') {
+                    indent += character;
+                } else {
+                    break;
+                }
+            }
+        }
+        return indent;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Get relevant help information at specified position. Returns ArrayList of
+    // PopupHelpItem with one per match, or null if no matches.
+    // The "exact" parameter is set depending on whether the match has to be
+    // exact or whether a prefix match will do. The token "s" will not match
+    // any instruction names if exact is true, but will match "sw", "sh", etc
+    // if exact is false. The former is helpful for mouse-movement-based tool
+    // tips (this is what you have). The latter is helpful for caret-based tool
+    // tips (this is what you can do).
+    private ArrayList<PopupHelpItem> getSyntaxSensitiveHelpAtLineOffset(final int line, final int offset, final boolean exact) {
+        ArrayList<PopupHelpItem> matches = null;
+        final TokenMarker tokenMarker = this.getTokenMarker();
+        if (tokenMarker != null) {
+            final Segment lineSegment = new Segment();
+            this.getLineText(line, lineSegment); // fill segment with info from this line
+            Token tokens = tokenMarker.markTokens(lineSegment, line);
+            final Token tokenList = tokens;
+            int tokenOffset = 0;
+            Token tokenAtOffset = null;
+            for (; ; ) {
+                final byte id = tokens.id;
+                if (id == Token.END)
+                    break;
+                final int length = tokens.length;
+                if (offset > tokenOffset && offset <= tokenOffset + length) {
+                    tokenAtOffset = tokens;
+                    break;
+                }
+                tokenOffset += length;
+                tokens = tokens.next;
+            }
+            if (tokenAtOffset != null) {
+                final String tokenText = lineSegment.toString().substring(tokenOffset, tokenOffset + tokenAtOffset.length);
+                if (exact) {
+                    matches = tokenMarker.getTokenExactMatchHelp(tokenAtOffset, tokenText);
+                } else {
+                    matches = tokenMarker.getTokenPrefixMatchHelp(lineSegment.toString(), tokenList, tokenAtOffset,
+                            tokenText);
+                }
+            }
+        }
+        return matches;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Compose and display syntax-sensitive help. Typically invoked upon typing a
+    //////////////////////////////////////////////////////////////////////////////////// first.
+    // Results in popup menu. Is not used for creating tool tips.
+    private void applySyntaxSensitiveHelp() {
+        if (!Globals.getSettings().getBooleanSetting(Settings.Bool.POPUP_INSTRUCTION_GUIDANCE)) {
+            return;
+        }
+        final int line = this.getCaretLine();
+        final int lineStart = this.getLineStartOffset(line);
+        final int offset = Math.max(1, Math.min(this.getLineLength(line),
+                this.getCaretPosition() - lineStart));
+        final ArrayList<PopupHelpItem> helpItems = this.getSyntaxSensitiveHelpAtLineOffset(line, offset, false);
+        if (helpItems == null && this.popupMenu != null) {
+            this.popupMenu.setVisible(false);
+            this.popupMenu = null;
+        }
+        if (helpItems != null) {
+            this.popupMenu = new JPopupMenu();
+            final int length = PopupHelpItem.maxExampleLength(helpItems) + 2;
+            for (final PopupHelpItem item : helpItems) {
+                final JMenuItem menuItem = new JMenuItem(
+                        "<html><tt>" + item.getExamplePaddedToLength(length).replaceAll(" ", "&nbsp;") + "</tt>"
+                                + item.getDescription() + "</html>");
+                if (item.getExact()) {
+                    // The instruction name is completed so the role of the popup changes
+                    // to that of floating help to assist in operand specification.
+                    menuItem.setSelected(false);
+                    // Want menu item to be disabled but that causes rendered text to be hard to
+                    // see.
+                    // Spent a couple hours on workaround with no success. The UI uses
+                    // UIManager.get("MenuItem.disabledForeground") property to determine rendering
+                    // color but this is done each time the text is rendered (paintText). There is
+                    // no setter for the menu item itself. The UIManager property is used for all
+                    // menus not just the editor's popup help menu, so you can't just set the
+                    // disabled
+                    // foreground color to, say, black and leave it. Tried several techniques
+                    // without
+                    // success. The only solution I found was a hack: writing a BasicMenuItem UI
+                    // subclass that consists of hacked override of its paintText() method. But even
+                    // this required use of "SwingUtilities2" class which has been deprecated for
+                    // years
+                    // So in the end I decided just to leave the menu item enabled. It will
+                    // highlight
+                    // but does nothing if selected. DPS 11-July-2014
+
+                    // menuItem.setEnabled(false);
+                } else {
+                    // Typing of instruction/directive name is still in progress; the action
+                    // listener
+                    // will complete it when its menu item is selected.
+                    menuItem.addActionListener(new PopupHelpActionListener(item.getTokenText(), item.getExample()));
+                }
+                this.popupMenu.add(menuItem);
+            }
+            this.popupMenu.pack();
+            final int y = this.lineToY(line);
+            final int x = this.offsetToX(line, offset);
+            final int height = this.painter.getFontMetrics(this.painter.getFont()).getHeight();
+            final int width = this.painter.getFontMetrics(this.painter.getFont()).charWidth('w');
+            final int menuXLoc = x + width + width + width;
+            final int menuYLoc = y + height + height; // display below;
+            // Modified to always display popup BELOW the current line.
+            // This was done in response to negative student feedback about
+            // the popup blocking information they needed to (e.g. operands from
+            // previous instructions). Note that if menu is long enough and
+            // current cursor position is low enough, the menu will bottom out at the
+            // bottom of the screen and extend above the current line. DPS 23-Dec-2010
+            this.popupMenu.show(this, menuXLoc, menuYLoc);
+            this.requestFocusInWindow(); // get cursor back from the menu
+        }
+    }
+
+    private void checkAutoIndent(final KeyEvent evt) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            final int line = this.getCaretLine();
+            if (line <= 0)
+                return;
+            final int previousLine = line - 1;
+            final int previousLineLength = this.getLineLength(previousLine);
+            if (previousLineLength <= 0)
+                return;
+            final String previous = this.getText(this.getLineStartOffset(previousLine), previousLineLength);
+            String indent = "";
+            for (int position = 0; position < previous.length(); position++) {
+                final char character = previous.charAt(position);
+                if (character == '\t' || character == ' ') {
+                    indent += character;
+                } else {
+                    break;
+                }
+            }
+            this.overwriteSetSelectedText(indent);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Called after processing a Key Pressed event. Will make popup menu disappear
+    //////////////////////////////////////////////////////////////////////////////////// if
+    // Enter or Escape keys pressed. Will update if Backspace or Delete pressed.
+    // Not really concerned with modifiers here.
+    private void checkPopupMenu(final KeyEvent evt) {
+        if (evt.getKeyCode() == KeyEvent.VK_BACK_SPACE || evt.getKeyCode() == KeyEvent.VK_DELETE)
+            this.applySyntaxSensitiveHelp();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Called before processing Key Pressed event. If popup menu is visible, will
+    //////////////////////////////////////////////////////////////////////////////////// process
+    // tab and enter keys to select from the menu, and arrow keys to traverse the
+    //////////////////////////////////////////////////////////////////////////////////// menu.
+    private boolean checkPopupCompletion(final KeyEvent evt) {
+        if ((evt.getKeyCode() == KeyEvent.VK_UP || evt.getKeyCode() == KeyEvent.VK_DOWN)
+                && this.popupMenu != null && this.popupMenu.isVisible() && this.popupMenu.getComponentCount() > 0) {
+            final MenuElement[] path = MenuSelectionManager.defaultManager().getSelectedPath();
+            if (path.length < 1 || !(path[path.length - 1] instanceof AbstractButton))
+                return false;
+            final AbstractButton item = (AbstractButton) path[path.length - 1].getComponent();
+            if (item.isEnabled()) {
+                int index = this.popupMenu.getComponentIndex(item);
+                if (index < 0)
+                    return false;
+                if (evt.getKeyCode() == KeyEvent.VK_UP) {
+                    index = (index == 0) ? this.popupMenu.getComponentCount() - 1 : index - 1;
+                } else {
+                    index = (index == this.popupMenu.getComponentCount() - 1) ? 0 : index + 1;
+                }
+                // Neither popupMenu.setSelected() nor
+                // popupMenu.getSelectionModel().setSelectedIndex()
+                // have the desired effect (changing the menu item selected). Found references
+                // to
+                // this in a Sun forum.
+                // http://forums.sun.com/thread.jspa?forumID=57&threadID=641745
+                // The solution, as shown here, is to use invokeLater.
+                final MenuElement[] newPath = new MenuElement[2];
+                newPath[0] = path[0];
+                newPath[1] = (MenuElement) this.popupMenu.getComponent(index);
+                SwingUtilities.invokeLater(
+                        () -> MenuSelectionManager.defaultManager().setSelectedPath(newPath));
+                return true;
+            } else {
+                return false;
+            }
+        }
+        if ((evt.getKeyCode() == KeyEvent.VK_TAB || evt.getKeyCode() == KeyEvent.VK_ENTER)
+                && this.popupMenu != null && this.popupMenu.isVisible() && this.popupMenu.getComponentCount() > 0) {
+            final MenuElement[] path = MenuSelectionManager.defaultManager().getSelectedPath();
+            if (path.length < 1 || !(path[path.length - 1] instanceof AbstractButton))
+                return false;
+            final AbstractButton item = (AbstractButton) path[path.length - 1].getComponent();
+            if (item.isEnabled()) {
+                final ActionListener[] listeners = item.getActionListeners();
+                if (listeners.length > 0) {
+                    listeners[0].actionPerformed(new ActionEvent(item, ActionEvent.ACTION_FIRST,
+                            (evt.getKeyCode() == KeyEvent.VK_TAB) ? "\t" : " "));
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static class CaretBlinker implements ActionListener {
+        @Override
+        public void actionPerformed(final ActionEvent evt) {
+            if (JEditTextArea.focusedComponent != null
+                    && JEditTextArea.focusedComponent.hasFocus())
+                JEditTextArea.focusedComponent.blinkCaret();
+        }
+    }
+
     class ScrollLayout implements LayoutManager {
+        private final Vector<Component> leftOfScrollBar = new Vector<>();
+        // private members
+        private Component center;
+        private Component right;
+        private Component bottom;
+
         @Override
         public void addLayoutComponent(final String name, final Component comp) {
             switch (name) {
@@ -1795,21 +2070,6 @@ public class JEditTextArea extends JComponent {
                     itop + centerHeight,
                     size.width - rightWidth - ileft - iright,
                     bottomHeight);
-        }
-
-        // private members
-        private Component center;
-        private Component right;
-        private Component bottom;
-        private final Vector<Component> leftOfScrollBar = new Vector<>();
-    }
-
-    static class CaretBlinker implements ActionListener {
-        @Override
-        public void actionPerformed(final ActionEvent evt) {
-            if (JEditTextArea.focusedComponent != null
-                    && JEditTextArea.focusedComponent.hasFocus())
-                JEditTextArea.focusedComponent.blinkCaret();
         }
     }
 
@@ -2133,186 +2393,6 @@ public class JEditTextArea extends JComponent {
         }
     }
 
-    /**
-     * Return any relevant tool tip text for token at specified position. Keyword
-     * match
-     * must be exact. DPS 24-May-2010
-     *
-     * @param x x-coordinate of current position
-     * @param y y-coordinate of current position
-     * @return String containing appropriate tool tip text. Possibly HTML-encoded.
-     */
-    // Is used for tool tip only (not popup menu)
-    public String getSyntaxSensitiveToolTipText(final int x, final int y) {
-        final StringBuilder result;
-        final int line = this.yToLine(y);
-        final ArrayList<PopupHelpItem> matches = this.getSyntaxSensitiveHelpAtLineOffset(line, this.xToOffset(line, x), true);
-        if (matches == null) {
-            return null;
-        }
-        final int length = PopupHelpItem.maxExampleLength(matches) + 2;
-        result = new StringBuilder("<html>");
-        for (int i = 0; i < matches.size(); i++) {
-            final PopupHelpItem match = matches.get(i);
-            result.append((i == 0) ? "" : "<br>").append("<tt>").append(match.getExamplePaddedToLength(length).replaceAll(" ", "&nbsp;")).append("</tt>").append(match.getDescription());
-        }
-        return result + "</html>";
-    }
-
-    /**
-     * Constructs string for auto-indent feature. Returns empty string
-     * if auto-intent is disabled or if line has no leading white space.
-     * Uses getLeadingWhiteSpace(). Is used by InputHandler when processing
-     * key press for Enter key. DPS 31-Dec-2010
-     *
-     * @return String containing auto-indent characters to be inserted into text
-     */
-    public String getAutoIndent() {
-        return (Globals.getSettings().getBooleanSetting(Settings.Bool.AUTO_INDENT)) ? this.getLeadingWhiteSpace() : "";
-    }
-
-    /**
-     * Makes a copy of leading white space (tab or space) from the current line and
-     * returns it. DPS 31-Dec-2010
-     *
-     * @return String containing leading white space of current line. Empty string
-     * if none.
-     */
-    public String getLeadingWhiteSpace() {
-        final int line = this.getCaretLine();
-        final int lineLength = this.getLineLength(line);
-        String indent = "";
-        if (lineLength > 0) {
-            final String text = this.getText(this.getLineStartOffset(line), lineLength);
-            for (int position = 0; position < text.length(); position++) {
-                final char character = text.charAt(position);
-                if (character == '\t' || character == ' ') {
-                    indent += character;
-                } else {
-                    break;
-                }
-            }
-        }
-        return indent;
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // Get relevant help information at specified position. Returns ArrayList of
-    // PopupHelpItem with one per match, or null if no matches.
-    // The "exact" parameter is set depending on whether the match has to be
-    // exact or whether a prefix match will do. The token "s" will not match
-    // any instruction names if exact is true, but will match "sw", "sh", etc
-    // if exact is false. The former is helpful for mouse-movement-based tool
-    // tips (this is what you have). The latter is helpful for caret-based tool
-    // tips (this is what you can do).
-    private ArrayList<PopupHelpItem> getSyntaxSensitiveHelpAtLineOffset(final int line, final int offset, final boolean exact) {
-        ArrayList<PopupHelpItem> matches = null;
-        final TokenMarker tokenMarker = this.getTokenMarker();
-        if (tokenMarker != null) {
-            final Segment lineSegment = new Segment();
-            this.getLineText(line, lineSegment); // fill segment with info from this line
-            Token tokens = tokenMarker.markTokens(lineSegment, line);
-            final Token tokenList = tokens;
-            int tokenOffset = 0;
-            Token tokenAtOffset = null;
-            for (; ; ) {
-                final byte id = tokens.id;
-                if (id == Token.END)
-                    break;
-                final int length = tokens.length;
-                if (offset > tokenOffset && offset <= tokenOffset + length) {
-                    tokenAtOffset = tokens;
-                    break;
-                }
-                tokenOffset += length;
-                tokens = tokens.next;
-            }
-            if (tokenAtOffset != null) {
-                final String tokenText = lineSegment.toString().substring(tokenOffset, tokenOffset + tokenAtOffset.length);
-                if (exact) {
-                    matches = tokenMarker.getTokenExactMatchHelp(tokenAtOffset, tokenText);
-                } else {
-                    matches = tokenMarker.getTokenPrefixMatchHelp(lineSegment.toString(), tokenList, tokenAtOffset,
-                            tokenText);
-                }
-            }
-        }
-        return matches;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////
-    // Compose and display syntax-sensitive help. Typically invoked upon typing a
-    //////////////////////////////////////////////////////////////////////////////////// key.
-    // Results in popup menu. Is not used for creating tool tips.
-    private void applySyntaxSensitiveHelp() {
-        if (!Globals.getSettings().getBooleanSetting(Settings.Bool.POPUP_INSTRUCTION_GUIDANCE)) {
-            return;
-        }
-        final int line = this.getCaretLine();
-        final int lineStart = this.getLineStartOffset(line);
-        final int offset = Math.max(1, Math.min(this.getLineLength(line),
-                this.getCaretPosition() - lineStart));
-        final ArrayList<PopupHelpItem> helpItems = this.getSyntaxSensitiveHelpAtLineOffset(line, offset, false);
-        if (helpItems == null && this.popupMenu != null) {
-            this.popupMenu.setVisible(false);
-            this.popupMenu = null;
-        }
-        if (helpItems != null) {
-            this.popupMenu = new JPopupMenu();
-            final int length = PopupHelpItem.maxExampleLength(helpItems) + 2;
-            for (final PopupHelpItem item : helpItems) {
-                final JMenuItem menuItem = new JMenuItem(
-                        "<html><tt>" + item.getExamplePaddedToLength(length).replaceAll(" ", "&nbsp;") + "</tt>"
-                                + item.getDescription() + "</html>");
-                if (item.getExact()) {
-                    // The instruction name is completed so the role of the popup changes
-                    // to that of floating help to assist in operand specification.
-                    menuItem.setSelected(false);
-                    // Want menu item to be disabled but that causes rendered text to be hard to
-                    // see.
-                    // Spent a couple hours on workaround with no success. The UI uses
-                    // UIManager.get("MenuItem.disabledForeground") property to determine rendering
-                    // color but this is done each time the text is rendered (paintText). There is
-                    // no setter for the menu item itself. The UIManager property is used for all
-                    // menus not just the editor's popup help menu, so you can't just set the
-                    // disabled
-                    // foreground color to, say, black and leave it. Tried several techniques
-                    // without
-                    // success. The only solution I found was a hack: writing a BasicMenuItem UI
-                    // subclass that consists of hacked override of its paintText() method. But even
-                    // this required use of "SwingUtilities2" class which has been deprecated for
-                    // years
-                    // So in the end I decided just to leave the menu item enabled. It will
-                    // highlight
-                    // but does nothing if selected. DPS 11-July-2014
-
-                    // menuItem.setEnabled(false);
-                } else {
-                    // Typing of instruction/directive name is still in progress; the action
-                    // listener
-                    // will complete it when its menu item is selected.
-                    menuItem.addActionListener(new PopupHelpActionListener(item.getTokenText(), item.getExample()));
-                }
-                this.popupMenu.add(menuItem);
-            }
-            this.popupMenu.pack();
-            final int y = this.lineToY(line);
-            final int x = this.offsetToX(line, offset);
-            final int height = this.painter.getFontMetrics(this.painter.getFont()).getHeight();
-            final int width = this.painter.getFontMetrics(this.painter.getFont()).charWidth('w');
-            final int menuXLoc = x + width + width + width;
-            final int menuYLoc = y + height + height; // display below;
-            // Modified to always display popup BELOW the current line.
-            // This was done in response to negative student feedback about
-            // the popup blocking information they needed to (e.g. operands from
-            // previous instructions). Note that if menu is long enough and
-            // current cursor position is low enough, the menu will bottom out at the
-            // bottom of the screen and extend above the current line. DPS 23-Dec-2010
-            this.popupMenu.show(this, menuXLoc, menuYLoc);
-            this.requestFocusInWindow(); // get cursor back from the menu
-        }
-    }
-
     // Carries out the instruction/directive completion when popup menu
     // item is selected.
     private class PopupHelpActionListener implements ActionListener {
@@ -2325,7 +2405,7 @@ public class JEditTextArea extends JComponent {
         }
 
         // Completion action will insert either a tab or space character following the
-        // completed instruction mnemonic. Inserts a tab if tab key was pressed;
+        // completed instruction mnemonic. Inserts a tab if tab first was pressed;
         // space otherwise. Get this information from the ActionEvent.
         @Override
         public void actionPerformed(final ActionEvent e) {
@@ -2336,100 +2416,5 @@ public class JEditTextArea extends JComponent {
                 JEditTextArea.this.overwriteSetSelectedText(this.text.substring(this.tokenText.length()) + insert);
             }
         }
-    }
-
-    private void checkAutoIndent(final KeyEvent evt) {
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            final int line = this.getCaretLine();
-            if (line <= 0)
-                return;
-            final int previousLine = line - 1;
-            final int previousLineLength = this.getLineLength(previousLine);
-            if (previousLineLength <= 0)
-                return;
-            final String previous = this.getText(this.getLineStartOffset(previousLine), previousLineLength);
-            String indent = "";
-            for (int position = 0; position < previous.length(); position++) {
-                final char character = previous.charAt(position);
-                if (character == '\t' || character == ' ') {
-                    indent += character;
-                } else {
-                    break;
-                }
-            }
-            this.overwriteSetSelectedText(indent);
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////
-    // Called after processing a Key Pressed event. Will make popup menu disappear
-    //////////////////////////////////////////////////////////////////////////////////// if
-    // Enter or Escape keys pressed. Will update if Backspace or Delete pressed.
-    // Not really concerned with modifiers here.
-    private void checkPopupMenu(final KeyEvent evt) {
-        if (evt.getKeyCode() == KeyEvent.VK_BACK_SPACE || evt.getKeyCode() == KeyEvent.VK_DELETE)
-            this.applySyntaxSensitiveHelp();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////
-    // Called before processing Key Pressed event. If popup menu is visible, will
-    //////////////////////////////////////////////////////////////////////////////////// process
-    // tab and enter keys to select from the menu, and arrow keys to traverse the
-    //////////////////////////////////////////////////////////////////////////////////// menu.
-    private boolean checkPopupCompletion(final KeyEvent evt) {
-        if ((evt.getKeyCode() == KeyEvent.VK_UP || evt.getKeyCode() == KeyEvent.VK_DOWN)
-                && this.popupMenu != null && this.popupMenu.isVisible() && this.popupMenu.getComponentCount() > 0) {
-            final MenuElement[] path = MenuSelectionManager.defaultManager().getSelectedPath();
-            if (path.length < 1 || !(path[path.length - 1] instanceof AbstractButton))
-                return false;
-            final AbstractButton item = (AbstractButton) path[path.length - 1].getComponent();
-            if (item.isEnabled()) {
-                int index = this.popupMenu.getComponentIndex(item);
-                if (index < 0)
-                    return false;
-                if (evt.getKeyCode() == KeyEvent.VK_UP) {
-                    index = (index == 0) ? this.popupMenu.getComponentCount() - 1 : index - 1;
-                } else {
-                    index = (index == this.popupMenu.getComponentCount() - 1) ? 0 : index + 1;
-                }
-                // Neither popupMenu.setSelected() nor
-                // popupMenu.getSelectionModel().setSelectedIndex()
-                // have the desired effect (changing the menu item selected). Found references
-                // to
-                // this in a Sun forum.
-                // http://forums.sun.com/thread.jspa?forumID=57&threadID=641745
-                // The solution, as shown here, is to use invokeLater.
-                final MenuElement[] newPath = new MenuElement[2];
-                newPath[0] = path[0];
-                newPath[1] = (MenuElement) this.popupMenu.getComponent(index);
-                SwingUtilities.invokeLater(
-                        () -> MenuSelectionManager.defaultManager().setSelectedPath(newPath));
-                return true;
-            } else {
-                return false;
-            }
-        }
-        if ((evt.getKeyCode() == KeyEvent.VK_TAB || evt.getKeyCode() == KeyEvent.VK_ENTER)
-                && this.popupMenu != null && this.popupMenu.isVisible() && this.popupMenu.getComponentCount() > 0) {
-            final MenuElement[] path = MenuSelectionManager.defaultManager().getSelectedPath();
-            if (path.length < 1 || !(path[path.length - 1] instanceof AbstractButton))
-                return false;
-            final AbstractButton item = (AbstractButton) path[path.length - 1].getComponent();
-            if (item.isEnabled()) {
-                final ActionListener[] listeners = item.getActionListeners();
-                if (listeners.length > 0) {
-                    listeners[0].actionPerformed(new ActionEvent(item, ActionEvent.ACTION_FIRST,
-                            (evt.getKeyCode() == KeyEvent.VK_TAB) ? "\t" : " "));
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    static {
-        caretTimer = new Timer(500, new CaretBlinker());
-        JEditTextArea.caretTimer.setInitialDelay(500);
-        JEditTextArea.caretTimer.start();
     }
 }

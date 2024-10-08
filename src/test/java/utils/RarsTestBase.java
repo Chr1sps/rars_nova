@@ -8,7 +8,7 @@ import org.junit.jupiter.api.TestInfo;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public abstract class AppTestBase {
+public abstract class RarsTestBase {
     private @Nullable TestInfo testInfo;
 
     protected static @NotNull Path getTestDataPath() {

@@ -1,5 +1,6 @@
 package rars.riscv.hardware;
 
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2009
  */
-public class MemoryConfigurations {
+public final class MemoryConfigurations {
 
     // Be careful, these arrays are parallel and position-sensitive.
     // The getters in this and in MemoryConfiguration depend on this
@@ -130,7 +131,7 @@ public class MemoryConfigurations {
     /**
      * <p>Constructor for MemoryConfigurations.</p>
      */
-    public MemoryConfigurations() {
+    private MemoryConfigurations() {
 
     }
 
@@ -184,7 +185,7 @@ public class MemoryConfigurations {
      * @param name a {@link java.lang.String} object
      * @return a {@link MemoryConfiguration} object
      */
-    public static MemoryConfiguration getConfigurationByName(final String name) {
+    public static @Nullable MemoryConfiguration getConfigurationByName(final String name) {
         final Iterator<MemoryConfiguration> configurationsIterator = MemoryConfigurations.getConfigurationsIterator();
         while (configurationsIterator.hasNext()) {
             final MemoryConfiguration config = configurationsIterator.next();

@@ -47,7 +47,7 @@ public abstract class FusedDouble extends BasicInstruction {
      * @param r2 The second register
      * @param r3 The third register
      * @param e  a {@link Environment} object
-     * @return The value to store to the destination
+     * @return The second to store to the destination
      */
     protected abstract Float64 compute(Float64 r1, Float64 r2, Float64 r3, Environment e);
 }

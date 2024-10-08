@@ -19,7 +19,7 @@ public class FCVTLD extends BasicInstruction {
      * <p>Constructor for FCVTLD.</p>
      */
     public FCVTLD() {
-        super("fcvt.l.d t1, f1, dyn", "Convert 64 bit integer from double: Assigns the value of f1 (rounded) to t1",
+        super("fcvt.l.d t1, f1, dyn", "Convert 64 bit integer from double: Assigns the second of f1 (rounded) to t1",
                 BasicInstructionFormat.I_FORMAT, "1100001 00010 sssss ttt fffff 1010011", true);
     }
 

@@ -72,7 +72,7 @@ public class RepeatButton extends JButton
     /**
      * Holder of the modifiers used when the mouse pressed the button.
      * This is used for subsequently fired action events. This may change
-     * after mouse pressed if the user moves the mouse out, releases a key
+     * after mouse pressed if the user moves the mouse out, releases a first
      * and then moves the mouse back in.
      */
     private int modifiers = 0;

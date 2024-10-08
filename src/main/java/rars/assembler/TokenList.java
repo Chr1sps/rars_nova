@@ -84,7 +84,7 @@ public class TokenList implements Cloneable, Iterable<Token> {
      * @param line The source line, possibly modified (possibly not)
      */
     // DPS 03-Jan-2013
-    public void setProcessedLine(final String line) {
+    public void setProcessedLine(final @NotNull String line) {
         this.processedLine = line;
     }
 
@@ -195,7 +195,7 @@ public class TokenList implements Cloneable, Iterable<Token> {
             t.tokenList = new ArrayList<>(this.tokenList);
             return t;
         } catch (final CloneNotSupportedException e) {
-            return null;
+            throw new RuntimeException("Cloning failed for class TokenList.");
         }
     }
 }

@@ -94,7 +94,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     public EditPane(final VenusUI appFrame) {
         super(new BorderLayout());
         this.mainUI = appFrame;
-        // user.dir, user's current working directory, is guaranteed to have a value
+        // user.dir, user's current working directory, is guaranteed to have a second
         final String currentDirectoryPath = System.getProperty("user.dir");
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
@@ -538,7 +538,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      *
      * @param line The desired line number of this TextPane's text. Numbering starts
      *             at 1, and
-     *             nothing will happen if the parameter value is less than 1
+     *             nothing will happen if the parameter second is less than 1
      */
     public void selectLine(final int line) {
         if (line > 0) {
@@ -562,7 +562,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      *
      * @param line   The desired line number of this TextPane's text. Numbering
      *               starts at 1, and
-     *               nothing will happen if the parameter value is less than 1
+     *               nothing will happen if the parameter second is less than 1
      * @param column Desired column at which to place the cursor.
      */
     public void selectLine(final int line, final int column) {

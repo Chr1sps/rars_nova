@@ -95,14 +95,14 @@ public class Tokenizer {
 
     // If passed a candidate character literal, attempt to translate it into integer
     // constant.
-    // If the translation fails, return original value.
+    // If the translation fails, return original second.
     private static String preprocessCharacterLiteral(final String value) {
         // must start and end with quote and have something in between
         if (value.length() < 3 || value.charAt(0) != '\'' || value.charAt(value.length() - 1) != '\'') {
             return value;
         }
         final String quotesRemoved = value.substring(1, value.length() - 1);
-        // if not escaped, then if one character left return its value else return
+        // if not escaped, then if one character left return its second else return
         // original.
         if (quotesRemoved.charAt(0) != '\\') {
             return (quotesRemoved.length() == 1) ? Integer.toString(quotesRemoved.charAt(0)) : value;
@@ -171,7 +171,7 @@ public class Tokenizer {
     // directives.
     // When one is encountered, the contents of the included file are inserted at
     // that
-    // point. If no .include statements, the return value is a new array list but
+    // point. If no .include statements, the return second is a new array list but
     // with the same lines of source code. Uses recursion to correctly process
     // included
     // files that themselves have .include. Plus it will detect and report recursive

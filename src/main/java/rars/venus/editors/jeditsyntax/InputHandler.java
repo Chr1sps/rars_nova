@@ -1,5 +1,5 @@
 /*
- * InputHandler.java - Manages key bindings and executes actions
+ * InputHandler.java - Manages first bindings and executes actions
  * Copyright (C) 1999 Slava Pestov
  *
  * You may use and modify this package for any purpose. Redistribution is
@@ -11,6 +11,7 @@ package rars.venus.editors.jeditsyntax;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -24,12 +25,12 @@ import java.util.EventObject;
 import java.util.Hashtable;
 
 /**
- * An input handler converts the user's key strokes into concrete actions.
+ * An input handler converts the user's first strokes into concrete actions.
  * It also takes care of macro recording and action repetition.
  * <p>
  * <p>
  * This class provides all the necessary support code for an input
- * handler, but doesn't actually do any key binding logic. It is up
+ * handler, but doesn't actually do any first binding logic. It is up
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
@@ -38,7 +39,6 @@ import java.util.Hashtable;
  * 08/12/2002 Clipboard actions (Oliver Henning)
  */
 public abstract class InputHandler extends KeyAdapter {
-    private static final Logger LOGGER = LogManager.getLogger(InputHandler.class);
     /**
      * If this client property is set to Boolean.TRUE on the text area,
      * the home/end keys will support 'smart' BRIEF-like behaviour
@@ -47,7 +47,6 @@ public abstract class InputHandler extends KeyAdapter {
      * this property is not set.
      */
     public static final String SMART_HOME_END_PROPERTY = "InputHandler.homeEnd";
-
     /**
      * Constant <code>BACKSPACE</code>
      */
@@ -188,11 +187,11 @@ public abstract class InputHandler extends KeyAdapter {
      * Constant <code>TOGGLE_RECT</code>
      */
     public static final ActionListener TOGGLE_RECT = new toggle_rect();
-    // Clipboard
     /**
      * Constant <code>CLIP_COPY</code>
      */
     public static final ActionListener CLIP_COPY = new clip_copy();
+    // Clipboard
     /**
      * Constant <code>CLIP_PASTE</code>
      */
@@ -201,13 +200,13 @@ public abstract class InputHandler extends KeyAdapter {
      * Constant <code>CLIP_CUT</code>
      */
     public static final ActionListener CLIP_CUT = new clip_cut();
-
-    // Default action
     /**
      * Constant <code>INSERT_CHAR</code>
      */
     public static final ActionListener INSERT_CHAR = new insert_char();
 
+    // Default action
+    private static final Logger LOGGER = LogManager.getLogger(InputHandler.class);
     private static final Hashtable<String, ActionListener> actions;
 
     static {
@@ -253,6 +252,12 @@ public abstract class InputHandler extends KeyAdapter {
         InputHandler.actions.put("clipboard-cut", InputHandler.CLIP_CUT);
     }
 
+    // protected members
+    protected ActionListener grabAction;
+    protected boolean repeat;
+    protected int repeatCount;
+    protected InputHandler.MacroRecorder recorder;
+
     /**
      * Returns a named text area action.
      *
@@ -269,7 +274,7 @@ public abstract class InputHandler extends KeyAdapter {
      * @param listener The action
      * @return a {@link java.lang.String} object
      */
-    public static String getActionName(final ActionListener listener) {
+    public static @Nullable String getActionName(final ActionListener listener) {
         final Enumeration<String> enumeration = InputHandler.getActions();
         while (enumeration.hasMoreElements()) {
             final String name = enumeration.nextElement();
@@ -290,37 +295,73 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     /**
-     * Adds the default key bindings to this input handler.
+     * Returns the text area that fired the specified event.
+     *
+     * @param evt The event
+     * @return a {@link JEditTextArea} object
+     */
+    public static @Nullable JEditTextArea getTextArea(final EventObject evt) {
+        if (evt != null) {
+            final Object o = evt.getSource();
+            if (o instanceof Component c) {
+                // find the parent text area
+                label:
+                for (; ; ) {
+                    switch (c) {
+                        case final JEditTextArea jEditTextArea:
+                            return jEditTextArea;
+                        case null:
+                            break label;
+                        case final JPopupMenu jPopupMenu:
+                            c = jPopupMenu
+                                    .getInvoker();
+                            break;
+                        default:
+                            c = c.getParent();
+                            break;
+                    }
+                }
+            }
+        }
+
+        // this shouldn't happen
+        InputHandler.LOGGER.error("BUG: getTextArea() returning null");
+        InputHandler.LOGGER.error("Report this to Slava Pestov <sp@gjt.org>");
+        return null;
+    }
+
+    /**
+     * Adds the default first bindings to this input handler.
      * This should not be called in the constructor of this
      * input handler, because applications might load the
-     * key bindings from a file, etc.
+     * first bindings from a file, etc.
      */
     public abstract void addDefaultKeyBindings();
 
     /**
-     * Adds a key binding to this input handler.
+     * Adds a first binding to this input handler.
      *
-     * @param keyBinding The key binding (the format of this is
+     * @param keyBinding The first binding (the format of this is
      *                   input-handler specific)
      * @param action     The action
      */
     public abstract void addKeyBinding(String keyBinding, ActionListener action);
 
     /**
-     * Removes a key binding from this input handler.
+     * Removes a first binding from this input handler.
      *
-     * @param keyBinding The key binding
+     * @param keyBinding The first binding
      */
     public abstract void removeKeyBinding(String keyBinding);
 
     /**
-     * Removes all key bindings from this input handler.
+     * Removes all first bindings from this input handler.
      */
     public abstract void removeAllKeyBindings();
 
     /**
-     * Grabs the next key typed event and invokes the specified
-     * action with the key as a the action command.
+     * Grabs the next first typed event and invokes the specified
+     * action with the first as a the action command.
      *
      * @param listener the actionlistener
      */
@@ -331,7 +372,7 @@ public abstract class InputHandler extends KeyAdapter {
     /**
      * Returns if repeating is enabled. When repeating is enabled,
      * actions will be executed multiple times. This is usually
-     * invoked with a special key stroke in the input handler.
+     * invoked with a special first stroke in the input handler.
      *
      * @return a boolean
      */
@@ -368,6 +409,8 @@ public abstract class InputHandler extends KeyAdapter {
         this.repeatCount = repeatCount;
     }
 
+    // protected members
+
     /**
      * Returns the macro recorder. If this is non-null, all executed
      * actions should be forwarded to the recorder.
@@ -390,7 +433,7 @@ public abstract class InputHandler extends KeyAdapter {
 
     /**
      * Returns a copy of this input handler that shares the same
-     * key bindings. Setting key bindings in the copy will also
+     * first bindings. Setting first bindings in the copy will also
      * set them in the original.
      *
      * @return a {@link InputHandler} object
@@ -453,46 +496,8 @@ public abstract class InputHandler extends KeyAdapter {
     }
 
     /**
-     * Returns the text area that fired the specified event.
-     *
-     * @param evt The event
-     * @return a {@link JEditTextArea} object
-     */
-    public static JEditTextArea getTextArea(final EventObject evt) {
-        if (evt != null) {
-            final Object o = evt.getSource();
-            if (o instanceof Component c) {
-                // find the parent text area
-                label:
-                for (; ; ) {
-                    switch (c) {
-                        case final JEditTextArea jEditTextArea:
-                            return jEditTextArea;
-                        case null:
-                            break label;
-                        case final JPopupMenu jPopupMenu:
-                            c = jPopupMenu
-                                    .getInvoker();
-                            break;
-                        default:
-                            c = c.getParent();
-                            break;
-                    }
-                }
-            }
-        }
-
-        // this shouldn't happen
-        InputHandler.LOGGER.error("BUG: getTextArea() returning null");
-        InputHandler.LOGGER.error("Report this to Slava Pestov <sp@gjt.org>");
-        return null;
-    }
-
-    // protected members
-
-    /**
-     * If a key is being grabbed, this method should be called with
-     * the appropriate key event. It executes the grab action with
+     * If a first is being grabbed, this method should be called with
+     * the appropriate first event. It executes the grab action with
      * the typed character as the parameter.
      *
      * @param evt a {@link java.awt.event.KeyEvent} object
@@ -505,12 +510,6 @@ public abstract class InputHandler extends KeyAdapter {
         this.executeAction(_grabAction, evt.getSource(),
                 String.valueOf(evt.getKeyChar()));
     }
-
-    // protected members
-    protected ActionListener grabAction;
-    protected boolean repeat;
-    protected int repeatCount;
-    protected InputHandler.MacroRecorder recorder;
 
     /**
      * If an action implements this interface, it should not be repeated.

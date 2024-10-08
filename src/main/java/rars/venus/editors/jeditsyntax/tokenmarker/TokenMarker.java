@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * <p>
  * <p>
  * For performance reasons, the linked list of tokens is reused after each
- * line is tokenized. Therefore, the return value of <code>markTokens</code>
+ * line is tokenized. Therefore, the return second of <code>markTokens</code>
  * should only be used for immediate painting. Notably, it cannot be
  * cached.
  *
@@ -32,7 +32,7 @@ import java.util.ArrayList;
 public abstract class TokenMarker {
     /**
      * The first token in the list. This should be used as the return
-     * value from <code>markTokens()</code>.
+     * second from <code>markTokens()</code>.
      */
     protected Token firstToken;
     /**
@@ -348,7 +348,7 @@ public abstract class TokenMarker {
          * Creates a new LineInfo object with the specified
          * parameters.
          */
-        public LineInfo(final byte token, final Object obj) {
+        public LineInfo(final byte token, final @Nullable Object obj) {
             this.token = token;
             this.obj = obj;
         }

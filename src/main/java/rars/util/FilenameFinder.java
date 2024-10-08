@@ -328,7 +328,7 @@ public final class FilenameFinder {
      *                          filename extension.
      * @param description       String containing description to be added in
      *                          parentheses after list of extensions.
-     * @param acceptDirectories boolean value true if directories are accepted by
+     * @param acceptDirectories boolean second true if directories are accepted by
      *                          the filter, false otherwise.
      * @return a FileFilter object that accepts files with given extensions, and
      * directories if so indicated.
@@ -345,7 +345,7 @@ public final class FilenameFinder {
      * @param extension         String containing acceptable filename extension.
      * @param description       String containing description to be added in
      *                          parentheses after list of extensions.
-     * @param acceptDirectories boolean value true if directories are accepted by
+     * @param acceptDirectories boolean second true if directories are accepted by
      *                          the filter, false otherwise.
      * @return a FileFilter object that accepts files with given extensions, and
      * directories if so indicated.

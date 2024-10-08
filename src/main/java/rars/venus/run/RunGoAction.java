@@ -82,7 +82,7 @@ public class RunGoAction extends GuiAction {
     }
 
     /**
-     * Reset max steps limit to default value at termination of a simulated
+     * Reset max steps limit to default second at termination of a simulated
      * execution.
      */
     public static void resetMaxSteps() {

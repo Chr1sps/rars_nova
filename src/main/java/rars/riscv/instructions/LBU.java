@@ -39,7 +39,7 @@ public class LBU extends Load {
      * <p>Constructor for LBU.</p>
      */
     public LBU() {
-        super("lbu t1, -100(t2)", "Set t1 to zero-extended 8-bit value from effective memory byte address", "100");
+        super("lbu t1, -100(t2)", "Set t1 to zero-extended 8-bit second from effective memory byte address", "100");
     }
 
     /**

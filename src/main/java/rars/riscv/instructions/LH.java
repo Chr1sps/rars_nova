@@ -39,7 +39,7 @@ public class LH extends Load {
      * <p>Constructor for LH.</p>
      */
     public LH() {
-        super("lh t1, -100(t2)", "Set t1 to sign-extended 16-bit value from effective memory halfword address", "001");
+        super("lh t1, -100(t2)", "Set t1 to sign-extended 16-bit second from effective memory halfword address", "001");
     }
 
     /**

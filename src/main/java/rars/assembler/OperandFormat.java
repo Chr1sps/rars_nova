@@ -1,5 +1,7 @@
 package rars.assembler;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.ErrorMessage;
 import rars.riscv.Instruction;
@@ -66,9 +68,7 @@ public final class OperandFormat {
      * first such Instruction that has an exact operand match. If none match,
      * return the first Instruction and let client deal with operand mismatches.
      */
-    static Instruction bestOperandMatch(final TokenList tokenList, final ArrayList<Instruction> instrMatches) {
-        if (instrMatches == null)
-            return null;
+    static @Nullable Instruction bestOperandMatch(final TokenList tokenList, final @NotNull ArrayList<Instruction> instrMatches) {
         if (instrMatches.size() == 1)
             return instrMatches.getFirst();
         for (final Instruction potentialMatch : instrMatches) {
@@ -156,7 +156,7 @@ public final class OperandFormat {
                     (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_20))
                 continue;
             if (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_12U) {
-                OperandFormat.generateMessage(candToken, "Unsigned value is too large to fit into a sign-extended immediate", errors);
+                OperandFormat.generateMessage(candToken, "Unsigned second is too large to fit into a sign-extended immediate", errors);
                 return false;
             }
             if ((specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_6) ||

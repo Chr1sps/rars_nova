@@ -244,7 +244,7 @@ public class ExecutePane extends JDesktopPane {
     }
 
     /**
-     * Retrieve component used to set numerical base (10 or 16) of data value
+     * Retrieve component used to set numerical base (10 or 16) of data second
      * display.
      *
      * @return the chooser
@@ -270,7 +270,7 @@ public class ExecutePane extends JDesktopPane {
      */
     public void numberDisplayBaseChanged(final NumberDisplayBaseChooser chooser) {
         if (chooser == this.valueDisplayBase) {
-            // Have all internal windows update their value columns
+            // Have all internal windows update their second columns
             this.registerValues.updateRegisters();
             this.fpRegValues.updateRegisters();
             this.csrValues.updateRegisters();

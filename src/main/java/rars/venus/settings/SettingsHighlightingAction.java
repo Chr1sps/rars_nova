@@ -1,5 +1,6 @@
 package rars.venus.settings;
 
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.Settings;
 import rars.venus.ExecutePane;
@@ -14,6 +15,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Objects;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -48,58 +50,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class SettingsHighlightingAction extends GuiAction {
 
-    JDialog highlightDialog;
-
-    // NOTE: These must follow same sequence and buttons must
-    // follow this sequence too!
-    private static final int[] backgroundSettingPositions = {
-            Settings.TEXTSEGMENT_HIGHLIGHT_BACKGROUND,
-            Settings.TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_BACKGROUND,
-            Settings.DATASEGMENT_HIGHLIGHT_BACKGROUND,
-            Settings.REGISTER_HIGHLIGHT_BACKGROUND,
-            Settings.EVEN_ROW_BACKGROUND,
-            Settings.ODD_ROW_BACKGROUND
-    };
-
-    private static final int[] foregroundSettingPositions = {
-            Settings.TEXTSEGMENT_HIGHLIGHT_FOREGROUND,
-            Settings.TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_FOREGROUND,
-            Settings.DATASEGMENT_HIGHLIGHT_FOREGROUND,
-            Settings.REGISTER_HIGHLIGHT_FOREGROUND,
-            Settings.EVEN_ROW_FOREGROUND,
-            Settings.ODD_ROW_FOREGROUND
-    };
-
-    private static final int[] fontSettingPositions = {
-            Settings.TEXTSEGMENT_HIGHLIGHT_FONT,
-            Settings.TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_FONT,
-            Settings.DATASEGMENT_HIGHLIGHT_FONT,
-            Settings.REGISTER_HIGHLIGHT_FONT,
-            Settings.EVEN_ROW_FONT,
-            Settings.ODD_ROW_FONT
-    };
-
-    JButton[] backgroundButtons;
-    JButton[] foregroundButtons;
-    JButton[] fontButtons;
-    JCheckBox[] defaultCheckBoxes;
-    JLabel[] samples;
-    Color[] currentNondefaultBackground, currentNondefaultForeground;
-    Color[] initialSettingsBackground, initialSettingsForeground;
-    Font[] initialFont, currentFont, currentNondefaultFont;
-    JButton dataHighlightButton, registerHighlightButton;
-    boolean currentDataHighlightSetting, initialDataHighlightSetting;
-    boolean currentRegisterHighlightSetting, initialRegisterHighlightSetting;
-
-    private static final int gridVGap = 2;
-    private static final int gridHGap = 2;
-    // Tool tips for color buttons
-    private static final String SAMPLE_TOOL_TIP_TEXT = "Preview based on background and text color settings";
-    private static final String BACKGROUND_TOOL_TIP_TEXT = "Click, to select background color";
-    private static final String FOREGROUND_TOOL_TIP_TEXT = "Click, to select text color";
-    private static final String FONT_TOOL_TIP_TEXT = "Click, to select text font";
-    private static final String DEFAULT_TOOL_TIP_TEXT = "Check, to select default color (disables color select buttons)";
-    // Tool tips for the control buttons along the bottom
     /**
      * Constant <code>CLOSE_TOOL_TIP_TEXT="Apply current settings and close dialog"</code>
      */
@@ -116,10 +66,57 @@ public class SettingsHighlightingAction extends GuiAction {
      * Constant <code>CANCEL_TOOL_TIP_TEXT="Close dialog without applying current s"{trunked}</code>
      */
     public static final String CANCEL_TOOL_TIP_TEXT = "Close dialog without applying current settings";
+    // NOTE: These must follow same sequence and buttons must
+    // follow this sequence too!
+    private static final int[] backgroundSettingPositions = {
+            Settings.TEXTSEGMENT_HIGHLIGHT_BACKGROUND,
+            Settings.TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_BACKGROUND,
+            Settings.DATASEGMENT_HIGHLIGHT_BACKGROUND,
+            Settings.REGISTER_HIGHLIGHT_BACKGROUND,
+            Settings.EVEN_ROW_BACKGROUND,
+            Settings.ODD_ROW_BACKGROUND
+    };
+    private static final int[] foregroundSettingPositions = {
+            Settings.TEXTSEGMENT_HIGHLIGHT_FOREGROUND,
+            Settings.TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_FOREGROUND,
+            Settings.DATASEGMENT_HIGHLIGHT_FOREGROUND,
+            Settings.REGISTER_HIGHLIGHT_FOREGROUND,
+            Settings.EVEN_ROW_FOREGROUND,
+            Settings.ODD_ROW_FOREGROUND
+    };
+    private static final int[] fontSettingPositions = {
+            Settings.TEXTSEGMENT_HIGHLIGHT_FONT,
+            Settings.TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_FONT,
+            Settings.DATASEGMENT_HIGHLIGHT_FONT,
+            Settings.REGISTER_HIGHLIGHT_FONT,
+            Settings.EVEN_ROW_FONT,
+            Settings.ODD_ROW_FONT
+    };
+    private static final int gridVGap = 2;
+    private static final int gridHGap = 2;
+    // Tool tips for color buttons
+    private static final String SAMPLE_TOOL_TIP_TEXT = "Preview based on background and text color settings";
+    private static final String BACKGROUND_TOOL_TIP_TEXT = "Click, to select background color";
+    private static final String FOREGROUND_TOOL_TIP_TEXT = "Click, to select text color";
+    private static final String FONT_TOOL_TIP_TEXT = "Click, to select text font";
+    private static final String DEFAULT_TOOL_TIP_TEXT = "Check, to select default color (disables color select buttons)";
     // Tool tips for the data and register highlighting enable/disable controls
     private static final String DATA_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting in Data Segment window";
     private static final String REGISTER_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting in Register windows";
     private static final String fontButtonText = "font";
+    JDialog highlightDialog;
+    JButton[] backgroundButtons;
+    JButton[] foregroundButtons;
+    JButton[] fontButtons;
+    JCheckBox[] defaultCheckBoxes;
+    // Tool tips for the control buttons along the bottom
+    JLabel[] samples;
+    Color[] currentNondefaultBackground, currentNondefaultForeground;
+    Color[] initialSettingsBackground, initialSettingsForeground;
+    Font[] initialFont, currentFont, currentNondefaultFont;
+    JButton dataHighlightButton, registerHighlightButton;
+    boolean currentDataHighlightSetting, initialDataHighlightSetting;
+    boolean currentRegisterHighlightSetting, initialRegisterHighlightSetting;
 
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.
@@ -133,6 +130,10 @@ public class SettingsHighlightingAction extends GuiAction {
     public SettingsHighlightingAction(final String name, final Icon icon, final String descrip,
                                       final Integer mnemonic, final KeyStroke accel) {
         super(name, icon, descrip, mnemonic, accel);
+    }
+
+    private static String getHighlightControlText(final boolean enabled) {
+        return enabled ? "enabled" : "disabled";
     }
 
     /**
@@ -314,10 +315,6 @@ public class SettingsHighlightingAction extends GuiAction {
         return contents;
     }
 
-    private static String getHighlightControlText(final boolean enabled) {
-        return enabled ? "enabled" : "disabled";
-    }
-
     // Called once, upon dialog setup.
     private void initializeButtonColors() {
         final Settings settings = Globals.getSettings();
@@ -347,7 +344,7 @@ public class SettingsHighlightingAction extends GuiAction {
                     .equals(settings.getDefaultColorSettingByPosition(SettingsHighlightingAction.backgroundSettingPositions[i])) &&
                     foregroundSetting.equals(settings.getDefaultColorSettingByPosition(SettingsHighlightingAction.foregroundSettingPositions[i]))
                     &&
-                    fontSetting.equals(Settings.getDefaultFontByPosition(SettingsHighlightingAction.fontSettingPositions[i]));
+                    Objects.equals(fontSetting, Settings.getDefaultFontByPosition(SettingsHighlightingAction.fontSettingPositions[i]));
             this.defaultCheckBoxes[i].setSelected(usingDefaults);
             this.backgroundButtons[i].setEnabled(!usingDefaults);
             this.foregroundButtons[i].setEnabled(!usingDefaults);
@@ -423,6 +420,78 @@ public class SettingsHighlightingAction extends GuiAction {
         this.highlightDialog.dispose();
     }
 
+    ///////////////////////////////////////////////////////////////////
+    //
+    // Modal dialog to set a font.
+    //
+    private static class FontSettingDialog extends AbstractFontSettingDialog {
+        private boolean resultOK;
+
+        public FontSettingDialog(final Frame owner, final String title, final Font currentFont) {
+            super(owner, title, true, currentFont);
+        }
+
+        private @Nullable Font showDialog() {
+            this.resultOK = true;
+            // Because dialog is modal, this blocks until user terminates the dialog.
+            this.setVisible(true);
+            return this.resultOK ? this.getFont() : null;
+        }
+
+        @Override
+        protected void closeDialog() {
+            this.setVisible(false);
+        }
+
+        private void performOK() {
+            this.resultOK = true;
+        }
+
+        private void performCancel() {
+            this.resultOK = false;
+        }
+
+        // Control buttons for the dialog.
+        @Override
+        protected Component buildControlPanel() {
+            final Box controlPanel = Box.createHorizontalBox();
+            final JButton okButton = new JButton("OK");
+            okButton.addActionListener(
+                    e -> {
+                        FontSettingDialog.this.performOK();
+                        FontSettingDialog.this.closeDialog();
+                    });
+            final JButton cancelButton = new JButton("Cancel");
+            cancelButton.addActionListener(
+                    e -> {
+                        FontSettingDialog.this.performCancel();
+                        FontSettingDialog.this.closeDialog();
+                    });
+            final JButton resetButton = new JButton("Reset");
+            resetButton.addActionListener(
+                    e -> FontSettingDialog.this.reset());
+            controlPanel.add(Box.createHorizontalGlue());
+            controlPanel.add(okButton);
+            controlPanel.add(Box.createHorizontalGlue());
+            controlPanel.add(cancelButton);
+            controlPanel.add(Box.createHorizontalGlue());
+            controlPanel.add(resetButton);
+            controlPanel.add(Box.createHorizontalGlue());
+            return controlPanel;
+        }
+
+        // required by Abstract super class but not used here.
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected void apply(final Font font) {
+
+        }
+
+    }
+
     /////////////////////////////////////////////////////////////////
     //
     // Class that handles click on the background selection button
@@ -482,7 +551,7 @@ public class SettingsHighlightingAction extends GuiAction {
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-            final JButton button = (JButton) e.getSource();
+//            e.getSource();
             final FontSettingDialog fontDialog = new FontSettingDialog(null, "Select Text Font", SettingsHighlightingAction.this.samples[this.position].getFont());
             final Font newFont = fontDialog.showDialog();
             if (newFont != null) {
@@ -539,78 +608,6 @@ public class SettingsHighlightingAction extends GuiAction {
             SettingsHighlightingAction.this.samples[this.position].setForeground(newForeground);
             SettingsHighlightingAction.this.samples[this.position].setFont(newFont);
         }
-    }
-
-    ///////////////////////////////////////////////////////////////////
-    //
-    // Modal dialog to set a font.
-    //
-    private static class FontSettingDialog extends AbstractFontSettingDialog {
-        private boolean resultOK;
-
-        public FontSettingDialog(final Frame owner, final String title, final Font currentFont) {
-            super(owner, title, true, currentFont);
-        }
-
-        private Font showDialog() {
-            this.resultOK = true;
-            // Because dialog is modal, this blocks until user terminates the dialog.
-            this.setVisible(true);
-            return this.resultOK ? this.getFont() : null;
-        }
-
-        @Override
-        protected void closeDialog() {
-            this.setVisible(false);
-        }
-
-        private void performOK() {
-            this.resultOK = true;
-        }
-
-        private void performCancel() {
-            this.resultOK = false;
-        }
-
-        // Control buttons for the dialog.
-        @Override
-        protected Component buildControlPanel() {
-            final Box controlPanel = Box.createHorizontalBox();
-            final JButton okButton = new JButton("OK");
-            okButton.addActionListener(
-                    e -> {
-                        FontSettingDialog.this.performOK();
-                        FontSettingDialog.this.closeDialog();
-                    });
-            final JButton cancelButton = new JButton("Cancel");
-            cancelButton.addActionListener(
-                    e -> {
-                        FontSettingDialog.this.performCancel();
-                        FontSettingDialog.this.closeDialog();
-                    });
-            final JButton resetButton = new JButton("Reset");
-            resetButton.addActionListener(
-                    e -> FontSettingDialog.this.reset());
-            controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(okButton);
-            controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(cancelButton);
-            controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(resetButton);
-            controlPanel.add(Box.createHorizontalGlue());
-            return controlPanel;
-        }
-
-        // required by Abstract super class but not used here.
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected void apply(final Font font) {
-
-        }
-
     }
 
 }

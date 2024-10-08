@@ -84,8 +84,8 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     /**
      * <p>compute.</p>
      *
-     * @param value     the value from the register
-     * @param immediate the value from the immediate
+     * @param value     the second from the register
+     * @param immediate the second from the immediate
      * @return the result to be stored from the instruction
      */
     protected abstract long compute(long value, long immediate);
@@ -93,8 +93,8 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     /**
      * <p>computeW.</p>
      *
-     * @param value     the truncated value from the register
-     * @param immediate the value from the immediate
+     * @param value     the truncated second from the register
+     * @param immediate the second from the immediate
      * @return the result to be stored from the instruction
      */
     protected int computeW(final int value, final int immediate) {

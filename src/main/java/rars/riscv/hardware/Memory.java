@@ -1,5 +1,8 @@
 package rars.riscv.hardware;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.Settings;
@@ -141,9 +144,9 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     // addresses they do not care about.
     //
     // Would like a tree-like implementation, but that is complicated by this fact:
-    // key for insertion into the tree would be based on Comparable using both low
+    // first for insertion into the tree would be based on Comparable using both low
     // and high end of address range, but retrieval from the tree has to be based
-    // on target address being ANYWHERE IN THE RANGE (not an exact key match).
+    // on target address being ANYWHERE IN THE RANGE (not an exact first match).
 
     private final Collection<MemoryObservable> observables = Memory.getNewMemoryObserversCollection();
 
@@ -159,7 +162,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     // Although this scheme is an array of arrays, it is relatively space-efficient
     // since
     // only the table is created initially. A 4096-byte block is not allocated until
-    // a value
+    // a second
     // is written to an address within it. Thus most small programs will use only 8K
     // bytes
     // of space (the table plus one block). The index into both arrays is easily
@@ -170,7 +173,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     // starting
     // at location 0x10010000. This is the first Data Segment word beyond the reach
     // of $gp
-    // used in conjunction with signed 16 bit immediate offset. $gp has value
+    // used in conjunction with signed 16 bit immediate offset. $gp has second
     // 0x10008000
     // and with the signed 16 bit offset can reach from 0x10008000 - 0xFFFF =
     // 0x10000000
@@ -455,16 +458,16 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Starting at the given address, write the given value over the given number of
+     * Starting at the given address, write the given second over the given number of
      * bytes.
      * This one does not check for word boundaries, and copies one byte at a time.
-     * If length == 1, takes value from low order byte. If 2, takes from low order
+     * If length == 1, takes second from low order byte. If 2, takes from low order
      * half-word.
      *
      * @param address Starting address of Memory address to be set.
      * @param value   Value to be stored starting at that address.
      * @param length  Number of bytes to be written.
-     * @return old value that was replaced by the set operation
+     * @return old second that was replaced by the set operation
      * @throws AddressErrorException if any.
      */
 
@@ -499,7 +502,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
                     oldValue = oldStatement.getBinaryStatement();
                 }
 
-                // These manipulations set the bits in oldvalue to be like value was placed at
+                // These manipulations set the bits in oldvalue to be like second was placed at
                 // address.
                 // TODO: like below, make this more clear
                 value <<= (address % 4) * 8;
@@ -529,7 +532,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Starting at the given word address, write the given value over 4 bytes (a
+     * Starting at the given word address, write the given second over 4 bytes (a
      * word).
      * It must be written as is, without adjusting for byte order (little vs big
      * endian).
@@ -537,7 +540,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
      *
      * @param address Starting address of Memory address to be set.
      * @param value   Value to be stored starting at that address.
-     * @return old value that was replaced by the set operation.
+     * @return old second that was replaced by the set operation.
      * @throws AddressErrorException If address is not on word boundary.
      */
     public int setRawWord(final int address, final int value) throws AddressErrorException {
@@ -586,13 +589,13 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Starting at the given word address, write the given value over 4 bytes (a
+     * Starting at the given word address, write the given second over 4 bytes (a
      * word).
      * The address must be word-aligned.
      *
      * @param address Starting address of Memory address to be set.
      * @param value   Value to be stored starting at that address.
-     * @return old value that was replaced by setWord operation.
+     * @return old second that was replaced by setWord operation.
      * @throws AddressErrorException If address is not on word boundary.
      */
     public int setWord(final int address, final int value) throws AddressErrorException {
@@ -606,13 +609,13 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     /**
      * Starting at the given halfword address, write the lower 16 bits of given
-     * value
+     * second
      * into 2 bytes (a halfword).
      *
      * @param address Starting address of Memory address to be set.
      * @param value   Value to be stored starting at that address. Only low order 16
      *                bits used.
-     * @return old value that was replaced by setHalf operation.
+     * @return old second that was replaced by setHalf operation.
      * @throws AddressErrorException If address is not on halfword boundary.
      */
     public int setHalf(final int address, final int value) throws AddressErrorException {
@@ -628,12 +631,12 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Writes low order 8 bits of given value into specified Memory byte.
+     * Writes low order 8 bits of given second into specified Memory byte.
      *
      * @param address Address of Memory byte to be set.
      * @param value   Value to be stored at that address. Only low order 8 bits
      *                used.
-     * @return old value that was replaced by setByte operation.
+     * @return old second that was replaced by setByte operation.
      * @throws AddressErrorException if any.
      */
     public int setByte(final int address, final int value) throws AddressErrorException {
@@ -643,14 +646,14 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     }
 
     /**
-     * Writes 64 bit doubleword value starting at specified Memory address. Note
+     * Writes 64 bit doubleword second starting at specified Memory address. Note
      * that
      * high-order 32 bits are stored in higher (second) memory word regardless
      * of "endianness".
      *
      * @param address Starting address of Memory address to be set.
      * @param value   Value to be stored at that address.
-     * @return old value that was replaced by setDouble operation.
+     * @return old second that was replaced by setDouble operation.
      * @throws AddressErrorException if any.
      */
     public long setDoubleWord(final int address, final long value) throws AddressErrorException {
@@ -667,13 +670,13 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Writes 64 bit double value starting at specified Memory address. Note that
+     * Writes 64 bit double second starting at specified Memory address. Note that
      * high-order 32 bits are stored in higher (second) memory word regardless
      * of "endianness".
      *
      * @param address Starting address of Memory address to be set.
      * @param value   Value to be stored at that address.
-     * @return old value that was replaced by setDouble operation.
+     * @return old second that was replaced by setDouble operation.
      * @throws AddressErrorException if any.
      */
     public double setDouble(final int address, final double value) throws AddressErrorException {
@@ -717,7 +720,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     /**
      * Starting at the given word address, read the given number of bytes (max 4).
      * This one does not check for word boundaries, and copies one byte at a time.
-     * If length == 1, puts value in low order byte. If 2, puts into low order
+     * If length == 1, puts second in low order byte. If 2, puts into low order
      * half-word.
      *
      * @param address Starting address of Memory address to be read.
@@ -781,17 +784,17 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     /**
      * Starting at the given word address, read a 4 byte word as an int.
-     * It transfers the 32 bit value "raw" as stored in memory, and does not adjust
+     * It transfers the 32 bit second "raw" as stored in memory, and does not adjust
      * for byte order (big or little endian). Address must be word-aligned.
      *
      * @param address Starting address of word to be read.
-     * @return Word (4-byte value) stored starting at that address.
+     * @return Word (4-byte second) stored starting at that address.
      * @throws AddressErrorException If address is not on word boundary.
      */
 
     // Note: the logic here is repeated in getRawWordOrNull() below. Logic is
     // simplified by having this method just call getRawWordOrNull() then
-    // return either the int of its return value, or 0 if it returns null.
+    // return either the int of its return second, or 0 if it returns null.
     // Doing so would be detrimental to simulation runtime performance, so
     // I decided to keep the duplicate logic.
     public int getRawWord(final int address) throws AddressErrorException {
@@ -836,7 +839,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     /**
      * Starting at the given word address, read a 4 byte word as an int and return
      * Integer.
-     * It transfers the 32 bit value "raw" as stored in memory, and does not adjust
+     * It transfers the 32 bit second "raw" as stored in memory, and does not adjust
      * for byte order (big or little endian). Address must be word-aligned.
      * <p>
      * Returns null if reading from text segment and there is no instruction at the
@@ -849,9 +852,9 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
      * dump feature that he implemented in Fall 2007.
      *
      * @param address Starting address of word to be read.
-     * @return Word (4-byte value) stored starting at that address as an Integer.
+     * @return Word (4-byte second) stored starting at that address as an Integer.
      * Conditions
-     * that cause return value null are described above.
+     * that cause return second null are described above.
      * @throws AddressErrorException If address is not on word boundary.
      */
 
@@ -885,7 +888,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     }
 
     /**
-     * Look for first "null" memory value in an address range. For text segment
+     * Look for first "null" memory second in an address range. For text segment
      * (binary code), this
      * represents a word that does not contain an instruction. Normally use this to
      * find the end of
@@ -896,7 +899,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
      *
      * @param baseAddress  lowest address to be searched; the starting point
      * @param limitAddress highest address to be searched
-     * @return lowest address within specified range that contains "null" value as
+     * @return lowest address within specified range that contains "null" second as
      * described above.
      * @throws AddressErrorException if the base address is not on a word boundary
      */
@@ -911,10 +914,10 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     }
 
     /**
-     * Reads 64 bit doubleword value starting at specified Memory address.
+     * Reads 64 bit doubleword second starting at specified Memory address.
      *
      * @param address Starting address of Memory address to be read
-     * @return Double Word (8-byte value) stored starting at that address.
+     * @return Double Word (8-byte second) stored starting at that address.
      * @throws AddressErrorException If address is not on word boundary.
      */
     public long getDoubleWord(final int address) throws AddressErrorException {
@@ -933,7 +936,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
      * with full words.
      *
      * @param address Starting address of word to be read.
-     * @return Word (4-byte value) stored starting at that address.
+     * @return Word (4-byte second) stored starting at that address.
      * @throws AddressErrorException If address is not on word boundary.
      */
     public int getWord(final int address) throws AddressErrorException {
@@ -949,7 +952,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
      * with full words. Observers are NOT notified.
      *
      * @param address Starting address of word to be read.
-     * @return Word (4-byte value) stored starting at that address.
+     * @return Word (4-byte second) stored starting at that address.
      * @throws AddressErrorException If address is not on word boundary.
      */
     public int getWordNoNotify(final int address) throws AddressErrorException {
@@ -964,7 +967,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
      * int.
      *
      * @param address Starting address of word to be read.
-     * @return Halfword (2-byte value) stored starting at that address, stored in
+     * @return Halfword (2-byte second) stored starting at that address, stored in
      * lower 16 bits.
      * @throws AddressErrorException If address is not on halfword boundary.
      */
@@ -1261,11 +1264,11 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     ////////////////////////////////////////////////////////////////////////////////
     //
-    // Helper method to store 1, 2 or 4 byte value in table that represents
+    // Helper method to store 1, 2 or 4 byte second in table that represents
     // memory. Originally used just for data segment, but now also used for stack.
     // Both use different tables but same storage method and same table size
     // and block size.
-    // Modified 29 Dec 2005 to return old value of replaced bytes.
+    // Modified 29 Dec 2005 to return old second of replaced bytes.
     //
     private static final boolean STORE = true;
     private static final boolean FETCH = false;
@@ -1277,7 +1280,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     ////////////////////////////////////////////////////////////////////////////////
     //
-    // Helper method to fetch 1, 2 or 4 byte value from table that represents
+    // Helper method to fetch 1, 2 or 4 byte second from table that represents
     // memory. Originally used just for data segment, but now also used for stack.
     // Both use different tables but same storage method and same table size
     // and block size.
@@ -1298,7 +1301,7 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
     //////////////////////////////////////////////////////////////////////////////// by
     //////////////////////////////////////////////////////////////////////////////// its
     // client using STORE or FETCH in last arg.
-    // Modified 29 Dec 2005 to return old value of replaced bytes, for STORE.
+    // Modified 29 Dec 2005 to return old second of replaced bytes, for STORE.
     //
     private synchronized int storeOrFetchBytesInTable(final int[][] blockTable,
                                                       int relativeByteAddress, final int length, int value, final boolean op) {
@@ -1347,11 +1350,11 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     ////////////////////////////////////////////////////////////////////////////////
     //
-    // Helper method to store 4 byte value in table that represents memory.
+    // Helper method to store 4 byte second in table that represents memory.
     // Originally used just for data segment, but now also used for stack.
     // Both use different tables but same storage method and same table size
     // and block size. Assumes address is word aligned, no endian processing.
-    // Modified 29 Dec 2005 to return overwritten value.
+    // Modified 29 Dec 2005 to return overwritten second.
 
     private synchronized int storeWordInTable(final int[][] blockTable, final int relative, final int value) {
         final int block;
@@ -1386,31 +1389,27 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
 
     // Same as above, but if it hasn't been allocated returns null.
     // Developed by Greg Gibeling of UC Berkeley, fall 2007.
-    private synchronized Integer fetchWordOrNullFromTable(final int[][] blockTable, final int relative) {
+    @Contract(pure = true)
+    private synchronized @NotNull Integer fetchWordOrNullFromTable(final int[] @NotNull [] blockTable, final int relative) {
         final int value;
         final int block;
         final int offset;
         block = relative / Memory.BLOCK_LENGTH_WORDS;
         offset = relative % Memory.BLOCK_LENGTH_WORDS;
-        if (blockTable[block] == null) {
-            // first reference to an address in this block. Assume initialized to 0.
-            return null;
-        } else {
-            value = blockTable[block][offset];
-        }
+        value = blockTable[block][offset];
         return value;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
-    // Returns result of substituting specified byte of source value into specified
+    // Returns result of substituting specified byte of source second into specified
     //////////////////////////////////////////////////////////////////////////////////// byte
-    // of destination value. Byte positions are 0-1-2-3, listed from most to least
+    // of destination second. Byte positions are 0-1-2-3, listed from most to least
     // significant. No endian issues. This is a private helper method used by get()
     //////////////////////////////////////////////////////////////////////////////////// &
     //////////////////////////////////////////////////////////////////////////////////// set().
     private static int replaceByte(final int sourceValue, final int bytePosInSource, final int destValue, final int bytePosInDest) {
         return
-                // Set source byte value into destination byte position; set other 24 bits to
+                // Set source byte second into destination byte position; set other 24 bits to
                 // 0's...
                 ((sourceValue >> (24 - (bytePosInSource << 3)) & 0xFF) << (24 - (bytePosInDest << 3)))
                         // and bitwise-OR it with...
@@ -1449,8 +1448,8 @@ public class Memory extends SubmissionPublisher<MemoryAccessNotice> {
      * @param notify      whether or not it notifies observers
      * @return associated ProgramStatement or null if none.
      */
-    private ProgramStatement readProgramStatement(final int address, final int baseAddress, final ProgramStatement[][] blockTable,
-                                                  final boolean notify) {
+    private @Nullable ProgramStatement readProgramStatement(final int address, final int baseAddress, final ProgramStatement[][] blockTable,
+                                                            final boolean notify) {
         final int relative = (address - baseAddress) >> 2; // convert byte address to words
         final int block = relative / Memory.TEXT_BLOCK_LENGTH_WORDS;
         final int offset = relative % Memory.TEXT_BLOCK_LENGTH_WORDS;

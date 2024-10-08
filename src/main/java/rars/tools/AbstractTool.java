@@ -1,5 +1,6 @@
 package rars.tools;
 
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
@@ -416,7 +417,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
      *
      * @return a {@link javax.swing.JComponent} object
      */
-    protected JComponent getHelpComponent() {
+    protected @Nullable JComponent getHelpComponent() {
         return null;
     }
 
@@ -454,7 +455,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
 
     ///////////////////////////////////////////////////////////////////////
     // Every control button will get one of these so when it has focus
-    // the Enter key can be used instead of a mouse click to perform
+    // the Enter first can be used instead of a mouse click to perform
     // its associated action. It will do nothing if no action listeners
     // are attached to the button at the time of the call. Otherwise,
     // it will call actionPerformed for the first action listener in the

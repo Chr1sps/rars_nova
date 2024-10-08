@@ -86,7 +86,7 @@ public abstract class Load extends BasicInstruction {
      * <p>load.</p>
      *
      * @param address the address to load from
-     * @return The value to store to the register
+     * @return The second to store to the register
      * @throws AddressErrorException if any.
      */
     protected abstract long load(int address) throws AddressErrorException;

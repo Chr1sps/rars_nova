@@ -251,7 +251,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             // hex-stringified address. This will correctly handle kernel addresses,
             // whose int values are negative and thus normal sorting yields incorrect
             // results. There can be duplicate addresses, so I concatenate the name
-            // onto the address to make each key unique. Then slice off the name upon
+            // onto the address to make each first unique. Then slice off the name upon
             // extraction.
             final TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
             for (int i = 0; i < configurationItemValues.length; i++) {

@@ -16,6 +16,7 @@ import rars.simulator.Simulator;
 import rars.util.Binary;
 import rars.util.FilenameFinder;
 import rars.util.MemoryDump;
+import rars.util.Pair;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -229,17 +230,14 @@ public class Main {
 
         for (final String[] triple : this.dumpTriples) {
             final File file = new File(triple[2]);
-            Integer[] segInfo = MemoryDump.getSegmentBounds(triple[0]);
+            Pair<Integer, Integer> segInfo = MemoryDump.getSegmentBounds(triple[0]);
             // If not segment name, see if it is address range instead. DPS 14-July-2008
             if (segInfo == null) {
                 try {
                     final String[] memoryRange = Main.checkMemoryAddressRange(triple[0]);
-                    segInfo = new Integer[2];
-                    segInfo[0] = Binary.stringToInt(memoryRange[0]); // low end of range
-                    segInfo[1] = Binary.stringToInt(memoryRange[1]); // high end of range
+                    segInfo = new Pair<>(Binary.stringToInt(memoryRange[0]), Binary.stringToInt(memoryRange[1]));
                 } catch (final NumberFormatException |
-                               NullPointerException nfe) {
-                    segInfo = null;
+                               NullPointerException ignored) {
                 }
             }
             if (segInfo == null) {
@@ -252,13 +250,13 @@ public class Main {
                 continue;
             }
             try {
-                final int highAddress = program.getMemory().getAddressOfFirstNull(segInfo[0], segInfo[1])
+                final int highAddress = program.getMemory().getAddressOfFirstNull(segInfo.first(), segInfo.second())
                         - Memory.WORD_LENGTH_BYTES;
-                if (highAddress < segInfo[0]) {
+                if (highAddress < segInfo.first()) {
                     this.out.println("This segment has not been written to, there is nothing to dump.");
                     continue;
                 }
-                format.dumpMemoryRange(file, segInfo[0], highAddress, program.getMemory());
+                format.dumpMemoryRange(file, segInfo.first(), highAddress, program.getMemory());
             } catch (final FileNotFoundException e) {
                 this.out.println("Error while attempting to save dump, file " + file + " was not found!");
             } catch (final AddressErrorException e) {
@@ -278,7 +276,7 @@ public class Main {
     // Returns true if command args parse OK, false otherwise.
 
     private void launchIDE() {
-        // System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts RARS menu
+        System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts RARS menu
         // on Mac OS menu bar
         FlatMacDarkLaf.setup();
         if (SystemInfo.isLinux) {
@@ -634,7 +632,7 @@ public class Main {
     }
 
     //////////////////////////////////////////////////////////////////////
-    // Formats int value for display: decimal, hex, ascii
+    // Formats int second for display: decimal, hex, ascii
     private String formatIntForDisplay(final int value) {
         return switch (this.displayFormat) {
             case Main.DECIMAL -> "" + value;

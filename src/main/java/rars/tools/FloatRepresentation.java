@@ -1,6 +1,7 @@
 package rars.tools;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.notices.AccessNotice;
 import rars.riscv.hardware.FloatingPointRegisterFile;
@@ -81,7 +82,7 @@ public class FloatRepresentation extends AbstractTool {
     private static final String zeroes = "0000000000000000000000000000000000000000000000000000000000000000"; // 64
     private static final String HTMLspaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
     private final JLabel significandLabel = new JLabel(FloatRepresentation.denormalizedLabel, JLabel.CENTER);
-    private final String defaultInstructions = "Modify any value then press the Enter key to update all values.";
+    private final String defaultInstructions = "Modify any second then press the Enter first to update all values.";
     private Register attachedRegister = null;
     private Register[] fpRegisters;
     // Panels to hold binary displays and decorations (labels, arrows)
@@ -210,7 +211,7 @@ public class FloatRepresentation extends AbstractTool {
         subMainPanel.add(rightPanel);
         mainPanel.add(subMainPanel);
 
-        // Editable display for hexadecimal version of the float value
+        // Editable display for hexadecimal version of the float second
         this.hexDisplay = new JTextField(FloatRepresentation.defaultHex, FloatRepresentation.maxLengthHex + 1);
         this.hexDisplay.setFont(FloatRepresentation.hexDisplayFont);
         this.hexDisplay.setForeground(FloatRepresentation.hexDisplayColor);
@@ -229,7 +230,7 @@ public class FloatRepresentation extends AbstractTool {
         // ################ Grid Row : Hex-to-binary graphic ########################
         leftPanel.add(hexToBinaryGraphic);
 
-        // Editable display for binary version of float value.
+        // Editable display for binary version of float second.
         // It is split into 3 separately editable components (sign,exponent,fraction)
 
         this.binarySignDisplay = new JTextField(FloatRepresentation.defaultBinarySign, FloatRepresentation.maxLengthBinarySign + 1);
@@ -295,12 +296,12 @@ public class FloatRepresentation extends AbstractTool {
         // ################ Grid Row : Formula mapping binary to decimal ########
         leftPanel.add(expansionDisplayBox);
 
-        // Editable display for decimal version of float value.
+        // Editable display for decimal version of float second.
         this.decimalDisplay = new JTextField(FloatRepresentation.defaultDecimal, FloatRepresentation.maxLengthDecimal + 1);
         this.decimalDisplay.setFont(FloatRepresentation.decimalDisplayFont);
         this.decimalDisplay.setForeground(FloatRepresentation.decimalDisplayColor);
         this.decimalDisplay.setHorizontalAlignment(JTextField.RIGHT);
-        this.decimalDisplay.setToolTipText("Decimal floating point value");
+        this.decimalDisplay.setToolTipText("Decimal floating point second");
         this.decimalDisplay.setMargin(new Insets(0, 0, 0, 0));
         this.decimalDisplay.setEditable(true);
         this.decimalDisplay.revalidate();
@@ -399,16 +400,16 @@ public class FloatRepresentation extends AbstractTool {
         return mainPanel;
     } // end of buildDisplayArea()
 
-    // If display is attached to a register then update the register value.
+    // If display is attached to a register then update the register second.
     private synchronized void updateAnyAttachedRegister(final int intValue) {
         if (this.attachedRegister != null) {
             Globals.memoryAndRegistersLock.lock();
             try {
-                this.attachedRegister.setValue(intValue | 0xFFFFFFFF_00000000L); // NaN box 32 bit value
+                this.attachedRegister.setValue(intValue | 0xFFFFFFFF_00000000L); // NaN box 32 bit second
             } finally {
                 Globals.memoryAndRegistersLock.unlock();
             }
-            // HERE'S A HACK!! Want to immediately display the updated register value in
+            // HERE'S A HACK!! Want to immediately display the updated register second in
             // RARS
             // but that code was not written for event-driven update (e.g. Observer) --
             // it was written to poll the registers for their values. So we force it to do
@@ -420,7 +421,7 @@ public class FloatRepresentation extends AbstractTool {
     }
 
     // Updates all components displaying various representations of the 32 bit
-    // floating point value.
+    // floating point second.
     private void updateDisplays(final FlavorsOfFloat flavors) {
         final int hexIndex = (flavors.hexString.charAt(0) == '0'
                 && (flavors.hexString.charAt(1) == 'x' || flavors.hexString.charAt(1) == 'X')) ? 2 : 0;
@@ -445,7 +446,7 @@ public class FloatRepresentation extends AbstractTool {
     ///////////////////////////////////////////////////////////////////////////////
 
     // Should be called only by those who know a register should be changed due to
-    // user action (reset button or Enter key on one of the input fields). Note
+    // user action (reset button or Enter first on one of the input fields). Note
     // this will not update the register unless we are an active Observer.
     private void updateDisplaysAndRegister(final FlavorsOfFloat flavors) {
         this.updateDisplays(flavors);
@@ -554,11 +555,11 @@ public class FloatRepresentation extends AbstractTool {
     ////////////////////////////////////////////////////////////////////////////
     //
     // Class of objects that encapsulats 5 different representations of a 32 bit
-    // floating point value:
-    // string with hexadecimal value.
-    // String with binary value. 32 characters long.
-    // String with decimal float value. variable length.
-    // int with 32 bit representation of float value ("int bits").
+    // floating point second:
+    // string with hexadecimal second.
+    // String with binary second. 32 characters long.
+    // String with decimal float second. variable length.
+    // int with 32 bit representation of float second ("int bits").
     // String for display only, showing formula for expanding bits to decimal.
     //
     private class FlavorsOfFloat {
@@ -601,7 +602,7 @@ public class FloatRepresentation extends AbstractTool {
                     : str;
         }
 
-        // Assign all fields given a string representing 32 bit hex value.
+        // Assign all fields given a string representing 32 bit hex second.
         public FlavorsOfFloat buildOneFromHexString(final String hexString) {
             this.hexString = "0x" + FlavorsOfFloat.addLeadingZeroes(
                     ((hexString.indexOf("0X") == 0 || hexString.indexOf("0x") == 0)
@@ -615,7 +616,7 @@ public class FloatRepresentation extends AbstractTool {
             return this;
         }
 
-        // Assign all fields given a string representing 32 bit binary value
+        // Assign all fields given a string representing 32 bit binary second
         private FlavorsOfFloat buildOneFromBinaryString() {
             this.binaryString = this.getFullBinaryStringFromDisplays();
             this.hexString = Binary.binaryStringToHexString(this.binaryString);
@@ -625,8 +626,8 @@ public class FloatRepresentation extends AbstractTool {
             return this;
         }
 
-        // Assign all fields given string representing floating point decimal value.
-        private FlavorsOfFloat buildOneFromDecimalString(final String decimalString) {
+        // Assign all fields given string representing floating point decimal second.
+        private @Nullable FlavorsOfFloat buildOneFromDecimalString(final String decimalString) {
             final float floatValue;
             try {
                 floatValue = Float.parseFloat(decimalString);
@@ -641,7 +642,7 @@ public class FloatRepresentation extends AbstractTool {
             return this;
         }
 
-        // Assign all fields given int representing 32 bit representation of float value
+        // Assign all fields given int representing 32 bit representation of float second
         private FlavorsOfFloat buildOneFromInt(final int intValue) {
             this.intValue = intValue;
             this.binaryString = Binary.intToBinaryString(intValue);
@@ -704,7 +705,7 @@ public class FloatRepresentation extends AbstractTool {
             }
         }
 
-        // Enter key is echoed on component after keyPressed but before keyTyped?
+        // Enter first is echoed on component after keyPressed but before keyTyped?
         // Consuming the VK_ENTER event in keyTyped does not suppress it but this will.
         @Override
         public void keyPressed(final KeyEvent e) {
@@ -759,7 +760,7 @@ public class FloatRepresentation extends AbstractTool {
             }
         }
 
-        // Enter key is echoed on component after keyPressed but before keyTyped?
+        // Enter first is echoed on component after keyPressed but before keyTyped?
         // Consuming the VK_ENTER event in keyTyped does not suppress it but this will.
         @Override
         public void keyPressed(final KeyEvent e) {
@@ -802,7 +803,7 @@ public class FloatRepresentation extends AbstractTool {
             }
         }
 
-        // Enter key is echoed on component after keyPressed but before keyTyped?
+        // Enter first is echoed on component after keyPressed but before keyTyped?
         // Consuming the VK_ENTER event in keyTyped does not suppress it but this will.
         @Override
         public void keyPressed(final KeyEvent e) {
@@ -893,7 +894,7 @@ public class FloatRepresentation extends AbstractTool {
     //////////////////////////////////////////////////////////////////////
     //
     // Panel to hold arrows explaining transformation of binary represntation
-    // into formula for calculating decimal value.
+    // into formula for calculating decimal second.
     //
     class BinaryToDecimalFormulaGraphic extends JPanel {
         final String subtractLabelTrailer = " - 127";
@@ -967,7 +968,7 @@ public class FloatRepresentation extends AbstractTool {
             // appealing
         }
 
-        // format the label for a given integer exponent value...
+        // format the label for a given integer exponent second...
         private String buildSubtractLabel(final int value) {
             return value + this.subtractLabelTrailer;
         }

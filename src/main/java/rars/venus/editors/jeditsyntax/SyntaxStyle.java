@@ -50,7 +50,7 @@ public class SyntaxStyle {
      * This is used by Settings initialization to avoid direct
      * use of Color class. Long story. DPS 13-May-2010
      *
-     * @return String containing hex-coded color value.
+     * @return String containing hex-coded color second.
      */
     public String getColorAsHexString() {
         return Binary

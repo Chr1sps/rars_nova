@@ -21,7 +21,7 @@ public class FCVTDW extends BasicInstruction {
      * <p>Constructor for FCVTDW.</p>
      */
     public FCVTDW() {
-        super("fcvt.d.w f1, t1, dyn", "Convert double from integer: Assigns the value of t1 to f1",
+        super("fcvt.d.w f1, t1, dyn", "Convert double from integer: Assigns the second of t1 to f1",
                 BasicInstructionFormat.I_FORMAT, "1101001 00000 sssss ttt fffff 1010011");
     }
 
