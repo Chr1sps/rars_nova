@@ -21,7 +21,7 @@ public class FCVTSL extends BasicInstruction {
      * <p>Constructor for FCVTSL.</p>
      */
     public FCVTSL() {
-        super("fcvt.s.l f1, t1, dyn", "Convert float from long: Assigns the value of t1 to f1",
+        super("fcvt.s.l f1, t1, dyn", "Convert float from long: Assigns the second of t1 to f1",
                 BasicInstructionFormat.I_FORMAT, "1101000 00010 sssss ttt fffff 1010011", true);
     }
 

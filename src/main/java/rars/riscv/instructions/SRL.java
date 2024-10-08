@@ -37,7 +37,7 @@ public class SRL extends Arithmetic {
      */
     public SRL() {
         super("srl t1,t2,t3",
-                "Shift right logical: Set t1 to result of shifting t2 right by number of bits specified by value in low-order 5 bits of t3",
+                "Shift right logical: Set t1 to result of shifting t2 right by number of bits specified by second in low-order 5 bits of t3",
                 "0000000", "101");
     }
 

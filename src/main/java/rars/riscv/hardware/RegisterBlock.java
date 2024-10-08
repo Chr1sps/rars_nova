@@ -2,6 +2,8 @@ package rars.riscv.hardware;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.notices.RegisterAccessNotice;
 import rars.util.Binary;
 
@@ -61,10 +63,10 @@ public class RegisterBlock {
     }
 
     /**
-     * This method updates the register value to val
+     * This method updates the register second to val
      *
-     * @param r   Register to set the value of.
-     * @param val The desired value for the register.
+     * @param r   Register to set the second of.
+     * @param val The desired second for the register.
      * @return a long
      */
     public static long updateRegister(final Register r, final long val) {
@@ -108,20 +110,20 @@ public class RegisterBlock {
     }
 
     /**
-     * Returns the value of the register.
+     * Returns the second of the register.
      *
      * @param num The register's number.
-     * @return The value of the given register.
+     * @return The second of the given register.
      */
     public long getValue(final int num) {
         return this.getRegister(num).getValue();
     }
 
     /**
-     * Returns the value of the register.
+     * Returns the second of the register.
      *
      * @param name The register's name.
-     * @return The value of the given register.
+     * @return The second of the given register.
      */
     public long getValue(final String name) {
         return this.getRegister(name).getValue();
@@ -133,7 +135,7 @@ public class RegisterBlock {
      * @param num the number to search for
      * @return the register for num or null if none exists
      */
-    public Register getRegister(final int num) {
+    public @Nullable Register getRegister(final int num) {
         for (final Register r : this.regFile) {
             if (r.getNumber() == num) {
                 return r;
@@ -149,7 +151,7 @@ public class RegisterBlock {
      *             name.
      * @return The register object,or null if not found.
      */
-    public Register getRegister(final String name) {
+    public @Nullable Register getRegister(final @NotNull String name) {
         if (name.length() < 2)
             return null;
 

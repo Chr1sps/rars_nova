@@ -14,7 +14,7 @@ import rars.exceptions.SimulationException;
  * @author Pete Sanderson and Ken Vollmar
  * @version August 2003
  */
-public abstract class BasicInstruction extends Instruction {
+public abstract non-sealed class BasicInstruction extends Instruction {
     private static final Logger LOGGER = LogManager.getLogger();
     private final BasicInstructionFormat instructionFormat;
     private final @NotNull String operationMask;
@@ -103,7 +103,7 @@ public abstract class BasicInstruction extends Instruction {
      * is address formed from register base with immediate offset. J-format
      * is for jump destination addresses. I have added one more:
      * I-branch-format, for branch destination addresses. These are a variation
-     * of the I-format in that the computed value is address relative to the
+     * of the I-format in that the computed second is address relative to the
      * Program Counter. All four formats are represented by static objects.
      *
      * @return The machine instruction format, R, I, J or I-branch.

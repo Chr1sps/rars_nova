@@ -13,6 +13,6 @@ public class ReadOnlyRegister extends Register {
      * @param val  a int
      */
     public ReadOnlyRegister(final String name, final int num, final int val) {
-        super(name, num, val); // reset value does not matter
+        super(name, num, val); // reset second does not matter
     }
 }

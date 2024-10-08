@@ -43,7 +43,7 @@ public class ECALL extends BasicInstruction {
      * <p>Constructor for ECALL.</p>
      */
     public ECALL() {
-        super("ecall", "Issue a system call : Execute the system call specified by value in a7",
+        super("ecall", "Issue a system call : Execute the system call specified by second in a7",
                 BasicInstructionFormat.I_FORMAT, "000000000000 00000 000 00000 1110011");
     }
 

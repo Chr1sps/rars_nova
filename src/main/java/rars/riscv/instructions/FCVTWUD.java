@@ -19,7 +19,7 @@ public class FCVTWUD extends BasicInstruction {
      * <p>Constructor for FCVTWUD.</p>
      */
     public FCVTWUD() {
-        super("fcvt.wu.d t1, f1, dyn", "Convert unsinged integer from double: Assigns the value of f1 (rounded) to t1",
+        super("fcvt.wu.d t1, f1, dyn", "Convert unsinged integer from double: Assigns the second of f1 (rounded) to t1",
                 BasicInstructionFormat.I_FORMAT, "1100001 00001 sssss ttt fffff 1010011");
     }
 

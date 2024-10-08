@@ -9,7 +9,7 @@ import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.*;
 import rars.simulator.Simulator;
-import utils.AppTestBase;
+import utils.RarsTestBase;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AppTest extends AppTestBase {
+public class AppTest extends RarsTestBase {
     public static void runTestFiles(final String path, final boolean is64Bit) {
         Globals.initialize();
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, is64Bit);
@@ -38,7 +38,7 @@ public class AppTest extends AppTestBase {
         for (final var test : Objects.requireNonNull(tests)) {
             if (test.isFile() && test.getName().toLowerCase().endsWith(".s")) {
                 final var errors = run(test.getPath(), p);
-                assertEquals(errors, "", errors);
+                assertEquals("", errors, errors);
             }
         }
     }
@@ -242,7 +242,7 @@ public class AppTest extends AppTestBase {
                 }
             }
         }
-        // 12 was the value when this test was written, if instructions are added that
+        // 12 was the second when this test was written, if instructions are added that
         // intentionally
         // don't have those registers in them add to the register list above or add to
         // the count.

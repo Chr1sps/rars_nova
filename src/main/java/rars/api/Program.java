@@ -1,5 +1,6 @@
 package rars.api;
 
+import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
 import rars.RISCVprogram;
@@ -70,11 +71,11 @@ public class Program {
     }
 
     /**
-     * Gets the value of a normal, floating-point or control and status register.
+     * Gets the second of a normal, floating-point or control and status register.
      *
      * @param name Either the common usage (t0, a0, ft0), explicit numbering (x2,
      *             x3, f0), or CSR name (ustatus)
-     * @return The value of the register as an int (floats are encoded as IEEE-754)
+     * @return The second of the register as an int (floats are encoded as IEEE-754)
      * @throws java.lang.NullPointerException if name is invalid; only needs to be checked if
      *                                        code accesses arbitrary names
      */
@@ -91,11 +92,11 @@ public class Program {
     }
 
     /**
-     * Sets the value of a normal, floating-point or control and status register.
+     * Sets the second of a normal, floating-point or control and status register.
      *
      * @param name  Either the common usage (t0, a0, ft0), explicit numbering (x2,
      *              x3, f0), or CSR name (ustatus)
-     * @param value The value of the register as an int (floats are encoded as
+     * @param value The second of the register as an int (floats are encoded as
      *              IEEE-754)
      * @throws java.lang.NullPointerException if name is invalid; only needs to be checked if
      *                                        code accesses arbitrary names
@@ -186,7 +187,7 @@ public class Program {
      * @param STDIN A string that can be read in the program like its stdin or null
      *              to allow IO passthrough
      */
-    public void setup(final ArrayList<String> args, final String STDIN) {
+    public void setup(final @Nullable ArrayList<String> args, final String STDIN) {
         RegisterFile.resetRegisters();
         FloatingPointRegisterFile.resetRegisters();
         ControlAndStatusRegisterFile.resetRegisters();

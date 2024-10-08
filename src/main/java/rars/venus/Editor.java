@@ -80,7 +80,7 @@ public class Editor {
         FileStatus.reset();
         this.mainUIbaseTitle = this.mainUI.getTitle();
         this.newUsageCount = 0;
-        // Directory from which MARS was launched. Guaranteed to have a value.
+        // Directory from which MARS was launched. Guaranteed to have a second.
         this.defaultOpenDirectory = System.getProperty("user.dir");
         this.defaultSaveDirectory = System.getProperty("user.dir");
         this.currentOpenDirectory = this.defaultOpenDirectory;
@@ -186,7 +186,7 @@ public class Editor {
      * the application's title bar. The edit tab will contain only
      * the filename, the title bar will contain full pathname.
      * If file has been modified since created, opened or saved, as
-     * indicated by value of the status parameter, the name and path
+     * indicated by second of the status parameter, the name and path
      * will be followed with an '*'. If newly-created file has not
      * yet been saved, the title bar will show (temporary) file name
      * but not path.

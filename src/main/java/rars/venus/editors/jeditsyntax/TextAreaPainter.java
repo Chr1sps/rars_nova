@@ -11,10 +11,11 @@
 
 package rars.venus.editors.jeditsyntax;
 
-import rars.venus.editors.jeditsyntax.tokenmarker.Token;
-import rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
+import rars.venus.editors.jeditsyntax.tokenmarker.Token;
+import rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
 
 import javax.swing.*;
 import javax.swing.text.Segment;
@@ -33,6 +34,28 @@ import java.awt.image.BufferedImage;
  */
 public class TextAreaPainter extends JComponent implements TabExpander {
     private static final Logger LOGGER = LogManager.getLogger(TextAreaPainter.class);
+    // protected members
+    protected final JEditTextArea textArea;
+    protected final int cols;
+    protected final int rows;
+    final Segment currentLine;
+    protected SyntaxStyle[] styles;
+    protected Color caretColor;
+    protected Color selectionColor;
+    protected Color lineHighlightColor;
+    protected Color bracketHighlightColor;
+    protected Color eolMarkerColor;
+    protected boolean blockCaret;
+    protected boolean lineHighlight;
+    protected boolean bracketHighlight;
+    protected boolean paintInvalid;
+    protected boolean eolMarkers;
+    protected int tabSize, tabSizeChars;
+    protected FontMetrics fm;
+    protected Highlight highlights;
+    // package-private members
+    int currentLineIndex;
+    Token currentLineTokens;
 
     /**
      * Creates a new repaint manager. This should be not be called
@@ -75,7 +98,6 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         this.eolMarkers = defaults.eolMarkers;
     }
 
-
     /**
      * Fetch the tab size in characters. DPS 12-May-2010.
      *
@@ -88,7 +110,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
     /**
      * Set the tab size in characters. DPS 12-May-2010.
      * Originally it was fixed at PlainDocument property
-     * value (8).
+     * second (8).
      *
      * @param size tab size in characters
      */
@@ -325,45 +347,12 @@ public class TextAreaPainter extends JComponent implements TabExpander {
     }
 
     /**
-     * Highlight interface.
-     */
-    public interface Highlight {
-        /**
-         * Called after the highlight painter has been added.
-         *
-         * @param textArea The text area
-         * @param next     The painter this one should delegate to
-         */
-        void init(JEditTextArea textArea, Highlight next);
-
-        /**
-         * This should paint the highlight and delgate to the
-         * next highlight painter.
-         *
-         * @param gfx  The graphics context
-         * @param line The line number
-         * @param y    The y co-ordinate of the line
-         */
-        void paintHighlight(Graphics gfx, int line, int y);
-
-        /**
-         * Returns the tool tip to display at the specified
-         * location. If this highlighter doesn't know what to
-         * display, it should delegate to the next highlight
-         * painter.
-         *
-         * @param evt The mouse event
-         */
-        String getToolTipText(MouseEvent evt);
-    }
-
-    /**
      * {@inheritDoc}
      * <p>
      * Returns the tool tip to display at the specified location.
      */
     @Override
-    public String getToolTipText(final MouseEvent evt) {
+    public @Nullable String getToolTipText(final MouseEvent evt) {
         // if(highlights != null)
         // return highlights.getToolTipText(evt);
         // else
@@ -528,34 +517,6 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         return this.getPreferredSize();
     }
 
-    // package-private members
-    int currentLineIndex;
-    Token currentLineTokens;
-    final Segment currentLine;
-
-    // protected members
-    protected final JEditTextArea textArea;
-
-    protected SyntaxStyle[] styles;
-    protected Color caretColor;
-    protected Color selectionColor;
-    protected Color lineHighlightColor;
-    protected Color bracketHighlightColor;
-    protected Color eolMarkerColor;
-
-    protected boolean blockCaret;
-    protected boolean lineHighlight;
-    protected boolean bracketHighlight;
-    protected boolean paintInvalid;
-    protected boolean eolMarkers;
-    protected final int cols;
-    protected final int rows;
-
-    protected int tabSize, tabSizeChars;
-    protected FontMetrics fm;
-
-    protected Highlight highlights;
-
     /**
      * <p>paintLine.</p>
      *
@@ -613,8 +574,6 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         }
     }
 
-    // private int count=0;
-
     /**
      * <p>paintSyntaxLine.</p>
      *
@@ -654,6 +613,8 @@ public class TextAreaPainter extends JComponent implements TabExpander {
             gfx.drawString(".", x, y);
         }
     }
+
+    // private int count=0;
 
     /**
      * <p>paintHighlight.</p>
@@ -787,5 +748,38 @@ public class TextAreaPainter extends JComponent implements TabExpander {
                 gfx.drawRect(caretX, y, caretWidth, height - 1);
             }
         }
+    }
+
+    /**
+     * Highlight interface.
+     */
+    public interface Highlight {
+        /**
+         * Called after the highlight painter has been added.
+         *
+         * @param textArea The text area
+         * @param next     The painter this one should delegate to
+         */
+        void init(JEditTextArea textArea, Highlight next);
+
+        /**
+         * This should paint the highlight and delgate to the
+         * next highlight painter.
+         *
+         * @param gfx  The graphics context
+         * @param line The line number
+         * @param y    The y co-ordinate of the line
+         */
+        void paintHighlight(Graphics gfx, int line, int y);
+
+        /**
+         * Returns the tool tip to display at the specified
+         * location. If this highlighter doesn't know what to
+         * display, it should delegate to the next highlight
+         * painter.
+         *
+         * @param evt The mouse event
+         */
+        String getToolTipText(MouseEvent evt);
     }
 }

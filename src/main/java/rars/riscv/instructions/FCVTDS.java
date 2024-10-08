@@ -18,7 +18,7 @@ public class FCVTDS extends BasicInstruction {
      * <p>Constructor for FCVTDS.</p>
      */
     public FCVTDS() {
-        super("fcvt.d.s f1, f2, dyn", "Convert a float to a double: Assigned the value of f2 to f1",
+        super("fcvt.d.s f1, f2, dyn", "Convert a float to a double: Assigned the second of f2 to f1",
                 BasicInstructionFormat.R4_FORMAT, "0100001 00000 sssss ttt fffff 1010011");
     }
 

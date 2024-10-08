@@ -39,7 +39,7 @@ public class LHU extends Load {
      * <p>Constructor for LHU.</p>
      */
     public LHU() {
-        super("lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit value from effective memory halfword address", "101");
+        super("lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit second from effective memory halfword address", "101");
     }
 
     /**

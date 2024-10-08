@@ -136,7 +136,7 @@ public enum TokenType {
         reg = ControlAndStatusRegisterFile.getRegister(value);
         if (reg != null)
             return TokenType.CSR_NAME;
-        // See if it is an immediate (constant) integer value
+        // See if it is an immediate (constant) integer second
         // Classify based on # bits needed to represent in binary
         // This is needed because most immediate operands limited to 16 bits
         // others limited to 5 bits unsigned (shift amounts) others 32 bits.

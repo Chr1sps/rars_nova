@@ -1,5 +1,6 @@
 package rars.venus;
 
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.RISCVprogram;
 import rars.Settings;
@@ -51,12 +52,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson
  */
 public class EditTabbedPane extends JTabbedPane {
-    EditPane editTab;
     final MainPane mainPane;
-
     private final VenusUI mainUI;
     private final Editor editor;
     private final FileOpener fileOpener;
+    EditPane editTab;
 
     /**
      * Constructor for the EditTabbedPane class.
@@ -332,7 +332,7 @@ public class EditTabbedPane extends JTabbedPane {
 
     // perform Save As for selected edit pane. If the save is performed,
     // return its File object. Otherwise return null.
-    private File saveAsFile(final EditPane editPane) {
+    private @Nullable File saveAsFile(final EditPane editPane) {
         File theFile = null;
         if (editPane != null) {
             JFileChooser saveDialog;
@@ -541,12 +541,12 @@ public class EditTabbedPane extends JTabbedPane {
     }
 
     private class FileOpener {
-        private File mostRecentlyOpenedFile;
         private final JFileChooser fileChooser;
-        private int fileFilterCount;
         private final ArrayList<FileFilter> fileFilterList;
         private final PropertyChangeListener listenForUserAddedFileFilter;
         private final Editor theEditor;
+        private File mostRecentlyOpenedFile;
+        private int fileFilterCount;
 
         public FileOpener(final Editor theEditor) {
             this.mostRecentlyOpenedFile = null;
@@ -608,7 +608,7 @@ public class EditTabbedPane extends JTabbedPane {
             try {
                 theFile = theFile.getCanonicalFile();
             } catch (final IOException ioe) {
-                // nothing to do, theFile will keep current value
+                // nothing to do, theFile will keep current second
             }
             final String currentFilePath = theFile.getPath();
             // If this file is currently already open, then simply select its tab

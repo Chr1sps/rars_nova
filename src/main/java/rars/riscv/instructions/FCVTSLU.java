@@ -21,7 +21,7 @@ public class FCVTSLU extends BasicInstruction {
      * <p>Constructor for FCVTSLU.</p>
      */
     public FCVTSLU() {
-        super("fcvt.s.lu f1, t1, dyn", "Convert float from unsigned long: Assigns the value of t1 to f1",
+        super("fcvt.s.lu f1, t1, dyn", "Convert float from unsigned long: Assigns the second of t1 to f1",
                 BasicInstructionFormat.I_FORMAT, "1101000 00011 sssss ttt fffff 1010011", true);
     }
 

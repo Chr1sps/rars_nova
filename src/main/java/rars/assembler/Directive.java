@@ -58,12 +58,12 @@ public enum Directive {
      * Constant <code>WORD</code>
      */
     WORD(".word",
-            "Store the listed value(s) as 32 bit words on word boundary"),
+            "Store the listed second(s) as 32 bit words on word boundary"),
     /**
      * Constant <code>DWORD</code>
      */
     DWORD(".dword",
-            "Store the listed value(s) as 64 bit double-word on word boundary"),
+            "Store the listed second(s) as 64 bit double-word on word boundary"),
     /**
      * Constant <code>ASCII</code>
      */
@@ -81,7 +81,7 @@ public enum Directive {
     /**
      * Constant <code>BYTE</code>
      */
-    BYTE(".byte", "Store the listed value(s) as 8 bit bytes"),
+    BYTE(".byte", "Store the listed second(s) as 8 bit bytes"),
     /**
      * Constant <code>ALIGN</code>
      */
@@ -91,7 +91,7 @@ public enum Directive {
      * Constant <code>HALF</code>
      */
     HALF(".half",
-            "Store the listed value(s) as 16 bit halfwords on halfword boundary"),
+            "Store the listed second(s) as 16 bit halfwords on halfword boundary"),
     /**
      * Constant <code>SPACE</code>
      */
@@ -101,12 +101,12 @@ public enum Directive {
      * Constant <code>DOUBLE</code>
      */
     DOUBLE(".double",
-            "Store the listed value(s) as double precision floating point"),
+            "Store the listed second(s) as double precision floating point"),
     /**
      * Constant <code>FLOAT</code>
      */
     FLOAT(".float",
-            "Store the listed value(s) as single precision floating point"),
+            "Store the listed second(s) as single precision floating point"),
     /**
      * Constant <code>EXTERN</code>
      */

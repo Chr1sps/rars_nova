@@ -603,7 +603,7 @@ public class CacheSimulator extends AbstractTool {
 
     /////////////////////////////////////////////////////////////////////////
     // Represents the outcome of a cache access. There are two parts:
-    // whether it was a hit or not, and in which block is the value stored.
+    // whether it was a hit or not, and in which block is the second stored.
     // In the case of a hit, the block associated with address. In the case of
     // a miss, the block where new association is made. DPS 23-Dec-2010
     private record CacheAccessResult(boolean hitOrMiss, int blockNumber) {
@@ -720,7 +720,7 @@ public class CacheSimulator extends AbstractTool {
     // tag = #bytes in address - (byte+word+set)
     //
     // Direct Mapping (1 way set associative):
-    // The block value for a given address identifies its block index into the
+    // The block second for a given address identifies its block index into the
     ////////////////////////////////////////////////////////////////////////////// cache.
     // That's why its called "direct mapped." This is the only cache block it can
     // occupy. If that cache block is empty or if it is occupied by a different tag,
@@ -794,7 +794,7 @@ public class CacheSimulator extends AbstractTool {
                 if (!block.valid) {// it's a miss but I got it now because it is empty!
                     if (CacheSimulator.debug) // System.out.print
                         CacheSimulator.this.writeLog(" -- MISS\n");
-                    result = 2; // miss value
+                    result = 2; // miss second
                     block.valid = true;
                     block.tag = this.getTag(address);
                     block.mostRecentAccessTime = CacheSimulator.this.memoryAccessCount;

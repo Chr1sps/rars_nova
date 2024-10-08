@@ -2,6 +2,7 @@ package rars.assembler;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.*;
 import rars.exceptions.AddressErrorException;
@@ -139,12 +140,12 @@ public class Assembler {
      *                                 produced from a
      *                                 different source code file, representing the
      *                                 program source.
-     * @param extendedAssemblerEnabled A boolean value that if true permits use of
+     * @param extendedAssemblerEnabled A boolean second that if true permits use of
      *                                 extended (pseudo)
      *                                 instructions in the source code. If false,
      *                                 these are flagged
      *                                 as errors.
-     * @param warningsAreErrors        A boolean value - true means assembler
+     * @param warningsAreErrors        A boolean second - true means assembler
      *                                 warnings will be
      *                                 considered errors and terminate the assemble;
      *                                 false means the
@@ -368,7 +369,7 @@ public class Assembler {
         // Ensure that I/O "file descriptors" are initialized for a new program run
         SystemIO.resetFiles();
         // DPS 6 Dec 2006:
-        // We will now sort the ArrayList of ProgramStatements by getAddress() value.
+        // We will now sort the ArrayList of ProgramStatements by getAddress() second.
         // This is for display purposes, since they have already been stored to Memory.
         // Use of .ktext and .text with address operands has two implications:
         // (1) the addresses may not be ordered at this point. Requires unsigned int
@@ -402,7 +403,7 @@ public class Assembler {
     private @Nullable ArrayList<ProgramStatement> parseLine(final TokenList tokenList, final String source,
                                                             final int sourceLineNumber, final boolean extendedAssemblerEnabled) {
 
-        final ArrayList<ProgramStatement> ret = new ArrayList<>();
+        final var ret = new ArrayList<ProgramStatement>();
 
         final ProgramStatement programStatement;
         TokenList tokens = Assembler.stripComment(tokenList);
@@ -595,7 +596,7 @@ public class Assembler {
     // Parse and record label, if there is one. Note the identifier and its colon
     // are
     // two separate tokens, since they may be separated by spaces in source code.
-    private boolean parseAndRecordLabel(final TokenList tokens) {
+    private boolean parseAndRecordLabel(final @NotNull TokenList tokens) {
         if (tokens.size() < 2) {
             return false;
         } else {
@@ -617,7 +618,7 @@ public class Assembler {
 
     // /////////////////////////////////////////////////////////////////////////////
     // This source code line is a directive, not a instruction. Let's carry it out.
-    private void executeDirective(final TokenList tokens) {
+    private void executeDirective(final @NotNull TokenList tokens) {
         final Token token = tokens.get(0);
         final Directive direct = Directive.matchDirective(token.getValue());
         if (Globals.debug)
@@ -867,7 +868,7 @@ public class Assembler {
     // //////////////////////////////////////////////////////////////////////////////////
     // Given token, find the corresponding Instruction object. If token was not
     // recognized as OPERATOR, there is a problem.
-    private ArrayList<Instruction> matchInstruction(final Token token) {
+    private @Nullable ArrayList<Instruction> matchInstruction(final @NotNull Token token) {
         if (token.getType() != TokenType.OPERATOR) {
             if (token.getSourceProgram().getLocalMacroPool()
                     .matchesAnyMacroName(token.getValue()))
@@ -897,7 +898,7 @@ public class Assembler {
     // of a multiline list, which does not contain the directive token. Just pass
     // the
     // current directive as argument.
-    private void storeNumeric(final TokenList tokens, final Directive directive, final ErrorList errors) {
+    private void storeNumeric(final @NotNull TokenList tokens, final Directive directive, final ErrorList errors) {
         Token token = tokens.get(0);
         // A double-check; should have already been caught...removed ".word" exemption
         // 11/20/06
@@ -910,16 +911,16 @@ public class Assembler {
         // Set byte length in memory of each number (e.g. WORD is 4, BYTE is 1, etc)
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
 
-        // Handle the "value : n" format, which replicates the value "n" times.
+        // Handle the "second : n" format, which replicates the second "n" times.
         if (tokens.size() == 4 && tokens.get(2).getType() == TokenType.COLON) {
             final Token valueToken = tokens.get(1);
             final Token repetitionsToken = tokens.get(3);
             // DPS 15-jul-08, allow ":" for repetition for all numeric
             // directives (originally just .word)
             // Conditions for correctly-formed replication:
-            // (integer directive AND integer value OR floating directive AND
-            // (integer value OR floating value))
-            // AND integer repetition value
+            // (integer directive AND integer second OR floating directive AND
+            // (integer second OR floating second))
+            // AND integer repetition second
             if (!(directive.isIntegerDirective())
                     || !TokenType.isIntegerTokenType(repetitionsToken.getType())) {
                 errors.add(new ErrorMessage(this.fileCurrentlyBeingAssembled,
@@ -963,7 +964,7 @@ public class Assembler {
     } // storeNumeric()
 
     // //////////////////////////////////////////////////////////////////////////////
-    // Store integer value given integer (word, half, byte) directive.
+    // Store integer second given integer (word, half, byte) directive.
     // Called by storeNumeric()
     // NOTE: The token itself may be a label, in which case the correct action is
     // to store the address of that label (into however many bytes specified).
@@ -977,7 +978,7 @@ public class Assembler {
                 value = (int) longvalue;
                 if (directive != Directive.DWORD) {
                     errors.add(new ErrorMessage(ErrorMessage.WARNING, token.getSourceProgram(), token.getSourceLine(),
-                            token.getStartPos(), "value " + Binary.longToHexString(longvalue)
+                            token.getStartPos(), "second " + Binary.longToHexString(longvalue)
                             + " is out-of-range and truncated to " + Binary.intToHexString(value)));
                 }
             } else {
@@ -993,7 +994,7 @@ public class Assembler {
 
             final int fullvalue = value;
             // DPS 4-Jan-2013. Overriding 6-Jan-2005 KENV changes.
-            // If value is out of range for the directive, will simply truncate
+            // If second is out of range for the directive, will simply truncate
             // the leading bits (includes sign bits). This is what SPIM does.
             // But will issue a warning (not error) which SPIM does not do.
             if (directive == Directive.BYTE) {
@@ -1004,7 +1005,7 @@ public class Assembler {
 
             if (DataTypes.outOfRange(directive, fullvalue)) {
                 errors.add(new ErrorMessage(ErrorMessage.WARNING, token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "value " + Binary.intToHexString(fullvalue)
+                        token.getStartPos(), "second " + Binary.intToHexString(fullvalue)
                         + " is out-of-range and truncated to " + Binary.intToHexString(value)));
             }
             if (this.inDataSegment) {
@@ -1017,7 +1018,7 @@ public class Assembler {
              * segment check prior to this point, so this "else" will never be
              * executed. I'm leaving it in just in case MARS in the future adds
              * capability of writing to the text segment (e.g. ability to
-             * de-assemble a binary value into its corresponding MIPS
+             * de-assemble a binary second into its corresponding MIPS
              * instruction)
              */
             else {
@@ -1038,7 +1039,7 @@ public class Assembler {
                 final int value = this.fileCurrentlyBeingAssembled.getLocalSymbolTable()
                         .getAddressLocalOrGlobal(token.getValue());
                 if (value == SymbolTable.NOT_FOUND) {
-                    // Record value 0 for now, then set up backpatch entry
+                    // Record second 0 for now, then set up backpatch entry
                     final int dataAddress = this.writeToDataSegment(0, lengthInBytes, token, errors);
                     this.currentFileDataSegmentForwardReferences.add(dataAddress, lengthInBytes, token);
                 } else { // label already defined, so write its address
@@ -1061,7 +1062,7 @@ public class Assembler {
     }// storeInteger
 
     // //////////////////////////////////////////////////////////////////////////////
-    // Store real (fixed or floating point) value given floating (float, double)
+    // Store real (fixed or floating point) second given floating (float, double)
     // directive.
     // Called by storeNumeric()
     private void storeRealNumber(final Token token, final Directive directive, final ErrorList errors) {
@@ -1086,7 +1087,7 @@ public class Assembler {
             if (DataTypes.outOfRange(directive, value)) {
                 errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(), "\"" + token.getValue()
-                        + "\" is an out-of-range value"));
+                        + "\" is an out-of-range second"));
                 return;
             }
         } else {
@@ -1228,10 +1229,10 @@ public class Assembler {
     }
 
     // //////////////////////////////////////////////////////////////////////////////////
-    // Writes the given int value into current data segment address. Works for
+    // Writes the given int second into current data segment address. Works for
     // all the integer types plus float (caller is responsible for doing
     // floatToIntBits).
-    // Returns address at which the value was stored.
+    // Returns address at which the second was stored.
     private int writeToDataSegment(final int value, final int lengthInBytes, final Token token, final ErrorList errors) {
         if (this.autoAlign) {
             this.dataAddress.set(this.alignToBoundary(this.dataAddress.get(), lengthInBytes));
@@ -1251,7 +1252,7 @@ public class Assembler {
     }
 
     // //////////////////////////////////////////////////////////////////////////////////
-    // Writes the given double value into current data segment address. Works
+    // Writes the given double second into current data segment address. Works
     // only for DOUBLE floating
     // point values -- Memory class doesn't have method for writing 8 bytes, so
     // use setWord twice.
@@ -1320,7 +1321,7 @@ public class Assembler {
     // segment operands. This is needed because the data segment is comletely
     // processed by the end of the first assembly pass, and its directives may
     // contain labels as operands. When this occurs, the label's associated
-    // address becomes the operand value. If it is a forward reference, we will
+    // address becomes the operand second. If it is a forward reference, we will
     // save the necessary information in this object for finding and patching in
     // the correct address at the end of the first pass (for this file or for all
     // files if more than one).

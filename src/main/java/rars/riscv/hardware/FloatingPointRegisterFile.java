@@ -44,7 +44,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Adapted from RegisterFile class developed by Bumgarner et al in 2003.
 // The FPU registers will be implemented by Register objects. Such objects
 // can only hold int values, but we can use Float.floatToIntBits() to translate
-// a 32 bit float value into its equivalent 32-bit int representation, and
+// a 32 bit float second into its equivalent 32-bit int representation, and
 // Float.intBitsToFloat() to bring it back.
 public final class FloatingPointRegisterFile {
     private static final RegisterBlock instance = new RegisterBlock('f', new Register[]{
@@ -70,32 +70,32 @@ public final class FloatingPointRegisterFile {
     }
 
     /**
-     * Sets the value of the FPU register given to the value given.
+     * Sets the second of the FPU register given to the second given.
      *
-     * @param reg Register to set the value of.
-     * @param val The desired float value for the register.
+     * @param reg Register to set the second of.
+     * @param val The desired float second for the register.
      */
     public static void setRegisterToFloat(final int reg, final float val) {
         FloatingPointRegisterFile.updateRegister(reg, Float.floatToRawIntBits(val));
     }
 
     /**
-     * Gets the float value stored in the given FPU register.
+     * Gets the float second stored in the given FPU register.
      *
-     * @param name Register to get the value of.
-     * @return The float value stored by that register.
+     * @param name Register to get the second of.
+     * @return The float second stored by that register.
      */
     public static float getFloatFromRegister(final String name) {
         return Float.intBitsToFloat(FloatingPointRegisterFile.getValue(name));
     }
 
     /**
-     * This method updates the FPU register value who's number is num. Note the
-     * registers themselves hold an int value. There are helper methods available
+     * This method updates the FPU register second who's number is num. Note the
+     * registers themselves hold an int second. There are helper methods available
      * to which you can give a float or double to store.
      *
-     * @param num FPU register to set the value of.
-     * @param val The desired int value for the register.
+     * @param num FPU register to set the second of.
+     * @param val The desired int second for the register.
      */
     public static void updateRegister(final int num, final int val) {
         final long lval = val | 0xFFFFFFFF_00000000L; // NAN box if used as float
@@ -121,16 +121,16 @@ public final class FloatingPointRegisterFile {
     }
 
     /**
-     * Gets the raw int value actually stored in a Register. If you need a
+     * Gets the raw int second actually stored in a Register. If you need a
      * float, use Float.intBitsToFloat() to get the equivent float.
      *
      * @param num The FPU register number.
-     * @return The int value of the given register.
+     * @return The int second of the given register.
      */
     public static int getValue(final int num) {
         final long lval = FloatingPointRegisterFile.instance.getValue(num);
         if ((lval & 0xFFFFFFFF_00000000L) == 0xFFFFFFFF_00000000L) {
-            return (int) lval; // If NaN-Boxed return value
+            return (int) lval; // If NaN-Boxed return second
         } else {
             return 0x7FC00000; // Otherwise NaN
         }
@@ -147,11 +147,11 @@ public final class FloatingPointRegisterFile {
     }
 
     /**
-     * Gets the raw int value actually stored in a Register. If you need a
+     * Gets the raw int second actually stored in a Register. If you need a
      * float, use Float.intBitsToFloat() to get the equivent float.
      *
      * @param name The FPU register name.
-     * @return The int value of the given register.
+     * @return The int second of the given register.
      */
     public static int getValue(final String name) {
         final long lval = FloatingPointRegisterFile.instance.getValue(name);

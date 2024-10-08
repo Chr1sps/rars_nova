@@ -39,7 +39,7 @@ public class ControlAndStatusWindow extends RegisterBlockWindow {
      * <p>Constructor for ControlAndStatusWindow.</p>
      */
     public ControlAndStatusWindow() {
-        super(ControlAndStatusRegisterFile.getRegisters(), regToolTips, "Current 32 bit value");
+        super(ControlAndStatusRegisterFile.getRegisters(), regToolTips, "Current 32 bit second");
     }
 
     /**

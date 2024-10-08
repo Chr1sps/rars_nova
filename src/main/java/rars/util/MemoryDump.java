@@ -1,5 +1,7 @@
 package rars.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.riscv.hardware.Memory;
 
 /*
@@ -33,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>MemoryDump class.</p>
- *
  */
 public final class MemoryDump {
     private static final String[] segmentNames = {".text", ".data"};
@@ -51,13 +52,10 @@ public final class MemoryDump {
      * Null if parameter
      * name does not match a known segment name.
      */
-    public static Integer[] getSegmentBounds(final String segment) {
+    public static @Nullable Pair<Integer, Integer> getSegmentBounds(final @NotNull String segment) {
         for (int i = 0; i < segmentNames.length; i++) {
             if (segmentNames[i].equals(segment)) {
-                final Integer[] bounds = new Integer[2];
-                bounds[0] = getBaseAddresses(segmentNames)[i];
-                bounds[1] = getLimitAddresses(segmentNames)[i];
-                return bounds;
+                return new Pair<>(getBaseAddresses(segmentNames)[i], getLimitAddresses(segmentNames)[i]);
             }
         }
         return null;

@@ -87,8 +87,8 @@ public abstract class Arithmetic extends BasicInstruction {
     /**
      * <p>compute.</p>
      *
-     * @param value  the value from the first register
-     * @param value2 the value from the second register
+     * @param value  the second from the first register
+     * @param value2 the second from the second register
      * @return the result to be stored from the instruction
      */
     protected abstract long compute(long value, long value2);
@@ -97,8 +97,8 @@ public abstract class Arithmetic extends BasicInstruction {
      * A version for rv32 / W instructions in rv64, override if the default
      * behaviour is not correct
      *
-     * @param value  the value from the first register truncated to 32 bits
-     * @param value2 the value from the second register truncated to 32 bits
+     * @param value  the second from the first register truncated to 32 bits
+     * @param value2 the second from the second register truncated to 32 bits
      * @return the result to be stored from the instruction
      */
     protected int computeW(final int value, final int value2) {

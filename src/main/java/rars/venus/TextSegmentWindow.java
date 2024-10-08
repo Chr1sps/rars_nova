@@ -87,9 +87,9 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * to 16); the latter is used for highlighting. Both structures will remain
      * consistent once set up, since address column is not editable.
      */
-    private int[] intAddresses; // index is table model row, value is text address
-    private Hashtable<Integer, Integer> addressRows; // key is text address, value is table model row
-    private Hashtable<Integer, ModifiedCode> executeMods; // key is table model row, value is original code, basic,
+    private int[] intAddresses; // index is table model row, second is text address
+    private Hashtable<Integer, Integer> addressRows; // first is text address, second is table model row
+    private Hashtable<Integer, ModifiedCode> executeMods; // first is table model row, second is original code, basic,
     private TextTableModel tableModel;
     private boolean codeHighlighting;
     private boolean breakpointsEnabled; // Added 31 Dec 2009
@@ -284,7 +284,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
     /**
      * Redisplay the basic statements. This should only be done when address or
-     * value display base is
+     * second display base is
      * modified (e.g. between base 16 hex and base 10 dec).
      */
     public void updateBasicStatements() {
@@ -387,7 +387,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                         // make a ProgramStatement and get basic code to display in BASIC_COLUMN
                         strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
                     } else {
-                        // If restored to original value, restore the basic and source
+                        // If restored to original second, restore the basic and source
                         // This will be the case upon backstepping.
                         if (mc.code().equals(strValue)) {
                             strBasic = (String) mc.basic();
@@ -416,7 +416,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     // user.
                     this.tableModel.setValueAt(strBasic, row, TextSegmentWindow.BASIC_COLUMN);
                     this.tableModel.setValueAt(strSource, row, TextSegmentWindow.SOURCE_COLUMN);
-                    // Let's update the value displayed in the DataSegmentWindow too. But it only
+                    // Let's update the second displayed in the DataSegmentWindow too. But it only
                     // observes memory while
                     // the MIPS program is running, and even then only in timed or step mode. There
                     // are good reasons
@@ -489,7 +489,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public int[] getSortedBreakPointsArray() {
         int breakpointCount = this.getBreakpointCount();
         if (breakpointCount == 0 || !this.breakpointsEnabled) { // added second condition 31-dec-09 DPS
-            return null;
+            return new int[0];
         }
         final int[] breakpoints = new int[breakpointCount];
         breakpointCount = 0;
@@ -533,7 +533,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
     /**
      * Highlights the source code line whose address matches the current
-     * program counter value. This is used for stepping through code
+     * program counter second. This is used for stepping through code
      * execution and when reaching breakpoints.
      */
     public void highlightStepAtPC() {

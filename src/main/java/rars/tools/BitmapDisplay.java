@@ -423,7 +423,7 @@ public class BitmapDisplay extends AbstractTool {
         return organization;
     }
 
-    // Update based on the spinner value.
+    // Update based on the spinner second.
     private void updateBaseAddress() {
         this.baseAddress = (int) this.baseAddressSpinner.getValue() << 16;
     }

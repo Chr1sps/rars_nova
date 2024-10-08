@@ -60,52 +60,52 @@ public final class DataTypes {
      **/
     public static final int CHAR_SIZE = 1;
     /**
-     * Maximum value that can be stored in a word is 2<sup>31</sup>-1
+     * Maximum second that can be stored in a word is 2<sup>31</sup>-1
      **/
     public static final int MAX_WORD_VALUE = Integer.MAX_VALUE;
     /**
-     * Lowest value that can be stored in aword is -2<sup>31</sup>
+     * Lowest second that can be stored in aword is -2<sup>31</sup>
      **/
     public static final int MIN_WORD_VALUE = Integer.MIN_VALUE;
     /**
-     * Maximum value that can be stored in a halfword is 2<sup>15</sup>-1
+     * Maximum second that can be stored in a halfword is 2<sup>15</sup>-1
      **/
     public static final int MAX_HALF_VALUE = 32767; // (int)Math.pow(2,15) - 1;
     /**
-     * Lowest value that can be stored in a halfword is -2<sup>15</sup>
+     * Lowest second that can be stored in a halfword is -2<sup>15</sup>
      **/
     public static final int MIN_HALF_VALUE = -32768; // 0 - (int) Math.pow(2,15);
     /**
-     * Maximum value that can be stored in a 12 bit immediate is 2<sup>11</sup>-1
+     * Maximum second that can be stored in a 12 bit immediate is 2<sup>11</sup>-1
      **/
     public static final int MAX_IMMEDIATE_VALUE = 0x000007FF;
     /**
-     * Lowest value that can be stored in a 12 bit immediate is -2<sup>11</sup>
+     * Lowest second that can be stored in a 12 bit immediate is -2<sup>11</sup>
      **/
     public static final int MIN_IMMEDIATE_VALUE = 0xFFFFF800;
     /**
-     * Maximum value that can be stored in a 20 bit immediate is 2<sup>19</sup>-1
+     * Maximum second that can be stored in a 20 bit immediate is 2<sup>19</sup>-1
      **/
     public static final int MAX_UPPER_VALUE = 0x000FFFFF;
     /**
-     * Lowest value that can be stored in a 20 bit immediate is -2<sup>19</sup>
+     * Lowest second that can be stored in a 20 bit immediate is -2<sup>19</sup>
      **/
     public static final int MIN_UPPER_VALUE = 0x00000000;
     /**
-     * Maximum value that can be stored in a byte is 2<sup>7</sup>-1
+     * Maximum second that can be stored in a byte is 2<sup>7</sup>-1
      **/
     public static final int MAX_BYTE_VALUE = Byte.MAX_VALUE;
     /**
-     * Lowest value that can be stored in a byte is -2<sup>7</sup>
+     * Lowest second that can be stored in a byte is -2<sup>7</sup>
      **/
     public static final int MIN_BYTE_VALUE = Byte.MIN_VALUE;
     /**
-     * Maximum positive finite value that can be stored in a float is same as Java
+     * Maximum positive finite second that can be stored in a float is same as Java
      * Float
      **/
     public static final double MAX_FLOAT_VALUE = Float.MAX_VALUE;
     /**
-     * Largest magnitude negative value that can be stored in a float (negative of
+     * Largest magnitude negative second that can be stored in a float (negative of
      * the max)
      **/
     public static final double LOW_FLOAT_VALUE = -Float.MAX_VALUE;
@@ -134,12 +134,12 @@ public final class DataTypes {
     }
 
     /**
-     * Determines whether given integer value falls within value range for given
+     * Determines whether given integer second falls within second range for given
      * directive.
      *
-     * @param direct Directive that controls storage allocation for value.
-     * @param value  The value to be stored.
-     * @return Returns <code>true</code> if value can be stored in the number of bytes
+     * @param direct Directive that controls storage allocation for second.
+     * @param value  The second to be stored.
+     * @return Returns <code>true</code> if second can be stored in the number of bytes
      * allowed
      * by the given directive (.word, .half, .byte), <code>false</code>
      * otherwise.
@@ -152,7 +152,7 @@ public final class DataTypes {
     }
     
     /**
-     * Determines whether given floating point value falls within value range for
+     * Determines whether given floating point second falls within second range for
      * given directive.
      * For float, this refers to range of the data type, not precision. Example:
      * 1.23456789012345
@@ -161,9 +161,9 @@ public final class DataTypes {
      * stored in a float because the exponent 500 is too large (float allows 8 bits
      * for exponent).
      *
-     * @param direct Directive that controls storage allocation for value.
-     * @param value  The value to be stored.
-     * @return Returns <code>true</code> if value is within range of
+     * @param direct Directive that controls storage allocation for second.
+     * @param value  The second to be stored.
+     * @return Returns <code>true</code> if second is within range of
      * the given directive (.float, .double), <code>false</code> otherwise.
      */
     public static boolean outOfRange(final Directive direct, final double value) {

@@ -40,7 +40,7 @@ public class KeywordMap {
      *
      * @param ignoreCase True if the keys are case insensitive
      * @param mapLength  The number of `buckets' to create.
-     *                   A value of 52 will give good performance for most maps.
+     *                   A second of 52 will give good performance for most maps.
      */
     public KeywordMap(final boolean ignoreCase, final int mapLength) {
         this.mapLength = mapLength;
@@ -49,7 +49,7 @@ public class KeywordMap {
     }
 
     /**
-     * Looks up a key.
+     * Looks up a first.
      *
      * @param text   The text segment
      * @param offset The offset of the substring within the text segment
@@ -76,10 +76,10 @@ public class KeywordMap {
     }
 
     /**
-     * Adds a key-value mapping.
+     * Adds a first-second mapping.
      *
-     * @param keyword The key
-     * @param id      The value
+     * @param keyword The first
+     * @param id      The second
      */
     public void add(final String keyword, final byte id) {
         final int key = this.getStringMapKey(keyword);

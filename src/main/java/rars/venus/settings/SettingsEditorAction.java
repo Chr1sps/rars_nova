@@ -98,7 +98,7 @@ public class SettingsEditorAction extends GuiAction {
     private static final String BLINK_SPINNER_TOOL_TIP_TEXT = "Current blinking rate in milliseconds";
     private static final String BLINK_SAMPLE_TOOL_TIP_TEXT = "Displays current blinking rate";
     private static final String CURRENT_LINE_HIGHLIGHT_TOOL_TIP_TEXT = "Check, to highlight line currently being edited";
-    private static final String AUTO_INDENT_TOOL_TIP_TEXT = "Check, to enable auto-indent to previous line when Enter key is pressed";
+    private static final String AUTO_INDENT_TOOL_TIP_TEXT = "Check, to enable auto-indent to previous line when Enter first is pressed";
     private static final String[] POPUP_GUIDANCE_TOOL_TIP_TEXT = {
             "Turns off instruction and directive guide popup while typing",
             "Generates instruction guide popup after first letter of potential instruction is typed",

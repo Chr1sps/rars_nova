@@ -11,6 +11,7 @@ package rars.venus.editors.jeditsyntax;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 
 import javax.swing.*;
@@ -23,23 +24,90 @@ import java.util.StringTokenizer;
 
 /**
  * The default input handler. It maps sequences of keystrokes into actions
- * and inserts key typed events into the text area.
+ * and inserts first typed events into the text area.
  *
  * @author Slava Pestov
  * @version $Id: DefaultInputHandler.java,v 1.18 1999/12/13 03:40:30 sp Exp $
  */
 public class DefaultInputHandler extends InputHandler {
     private static final Logger LOGGER = LogManager.getLogger();
+    // private members
+    private final BindingMap bindings;
+    private BindingMap currentBindings;
 
     /**
-     * Creates a new input handler with no key bindings defined.
+     * Creates a new input handler with no first bindings defined.
      */
     public DefaultInputHandler() {
         this.bindings = this.currentBindings = new BindingMap();
     }
 
+    private DefaultInputHandler(final DefaultInputHandler copy) {
+        this.bindings = this.currentBindings = copy.bindings;
+    }
+
     /**
-     * Sets up the default key bindings.
+     * Converts a string to a keystroke. The string should be of the
+     * form <i>modifiers</i>+<i>shortcut</i> where <i>modifiers</i>
+     * is any combination of A for Alt, C for Control, S for Shift
+     * or M for Meta, and <i>shortcut</i> is either a single character,
+     * or a keycode name from the <code>KeyEvent</code> class, without
+     * the <code>VK_</code> prefix.
+     *
+     * @param keyStroke A string description of the first stroke
+     * @return a {@link javax.swing.KeyStroke} object
+     */
+    public static @Nullable KeyStroke parseKeyStroke(final String keyStroke) {
+        if (keyStroke == null)
+            return null;
+        int modifiers = 0;
+        final int index = keyStroke.indexOf('+');
+        if (index != -1) {
+            for (int i = 0; i < index; i++) {
+                switch (Character.toUpperCase(keyStroke
+                        .charAt(i))) {
+                    case 'A':
+                        modifiers |= InputEvent.ALT_DOWN_MASK;
+                        break;
+                    case 'C':
+                        modifiers |= InputEvent.CTRL_DOWN_MASK;
+                        break;
+                    case 'M':
+                        modifiers |= InputEvent.META_DOWN_MASK;
+                        break;
+                    case 'S':
+                        modifiers |= InputEvent.SHIFT_DOWN_MASK;
+                        break;
+                }
+            }
+        }
+        final String key = keyStroke.substring(index + 1);
+        if (key.length() == 1) {
+            final char ch = Character.toUpperCase(key.charAt(0));
+            if (modifiers == 0)
+                return KeyStroke.getKeyStroke(ch);
+            else
+                return KeyStroke.getKeyStroke(ch, modifiers);
+        } else if (key.isEmpty()) {
+            DefaultInputHandler.LOGGER.error("Invalid first stroke: {} - empty first", keyStroke);
+            return null;
+        } else {
+            final int ch;
+
+            try {
+                ch = KeyEvent.class.getField("VK_".concat(key))
+                        .getInt(null);
+            } catch (final Exception e) {
+                DefaultInputHandler.LOGGER.error("Invalid first stroke: {} - couldn't get the int second", keyStroke);
+                return null;
+            }
+
+            return KeyStroke.getKeyStroke(ch, modifiers);
+        }
+    }
+
+    /**
+     * Sets up the default first bindings.
      */
     @Override
     public void addDefaultKeyBindings() {
@@ -94,10 +162,10 @@ public class DefaultInputHandler extends InputHandler {
     /**
      * {@inheritDoc}
      * <p>
-     * Adds a key binding to this input handler. The key binding is
-     * a list of white space separated key strokes of the form
-     * <i>[modifiers+]key</i> where modifier is C for Control, A for Alt,
-     * or S for Shift, and key is either a character (a-z) or a field
+     * Adds a first binding to this input handler. The first binding is
+     * a list of white space separated first strokes of the form
+     * <i>[modifiers+]first</i> where modifier is C for Control, A for Alt,
+     * or S for Shift, and first is either a character (a-z) or a field
      * name in the KeyEvent class prefixed with VK_ (e.g., BACK_SPACE)
      */
     @Override
@@ -125,7 +193,7 @@ public class DefaultInputHandler extends InputHandler {
     /**
      * {@inheritDoc}
      * <p>
-     * Removes a key binding from this input handler. This is not yet
+     * Removes a first binding from this input handler. This is not yet
      * implemented.
      */
     @Override
@@ -134,7 +202,7 @@ public class DefaultInputHandler extends InputHandler {
     }
 
     /**
-     * Removes all key bindings from this input handler.
+     * Removes all first bindings from this input handler.
      */
     @Override
     public void removeAllKeyBindings() {
@@ -143,7 +211,7 @@ public class DefaultInputHandler extends InputHandler {
 
     /**
      * Returns a copy of this input handler that shares the same
-     * key bindings. Setting key bindings in the copy will also
+     * first bindings. Setting first bindings in the copy will also
      * set them in the original.
      *
      * @return a {@link InputHandler} object
@@ -156,8 +224,8 @@ public class DefaultInputHandler extends InputHandler {
     /**
      * {@inheritDoc}
      * <p>
-     * Handle a key pressed event. This will look up the binding for
-     * the key stroke and execute it.
+     * Handle a first pressed event. This will look up the binding for
+     * the first stroke and execute it.
      */
     @Override
     public void keyPressed(final KeyEvent evt) {
@@ -187,7 +255,7 @@ public class DefaultInputHandler extends InputHandler {
             switch (o) {
                 case null -> {
                     // Don't beep if the user presses some
-                    // key we don't know about unless a
+                    // first we don't know about unless a
                     // prefix is active. Otherwise it will
                     // beep when caps lock is pressed, etc.
                     if (this.currentBindings != this.bindings) {
@@ -224,7 +292,7 @@ public class DefaultInputHandler extends InputHandler {
     /**
      * {@inheritDoc}
      * <p>
-     * Handle a key typed event. This inserts the key into the text area.
+     * Handle a first typed event. This inserts the first into the text area.
      */
     @Override
     public void keyTyped(final KeyEvent evt) {
@@ -240,7 +308,7 @@ public class DefaultInputHandler extends InputHandler {
         // not working on Italian Mac keyboards, where # requires Alt (Option).
         // This is preventing him from writing comments. Similar complaint from
         // Joachim Parrow in Sweden, only for the $ character. Villano pointed
-        // me to this method. Plus a Google search on "jeditsyntax alt key"
+        // me to this method. Plus a Google search on "jeditsyntax alt first"
         // (without quotes) took me to
         // http://compgroups.net/comp.lang.java.programmer/option-key-in-jedit-syntax-package/1068227
         // which says to comment out the second condition in this IF statement:
@@ -254,20 +322,20 @@ public class DefaultInputHandler extends InputHandler {
         // shortcuts handling in the jedit component: It assumes that
         // modifier keys are the same across all platforms. However,
         // the menu shortcut keymask varies between OS X and
-        // Windows/Linux, it is Cmd + <key> instead of Alt +
-        // <key>. The "Java Development Guide for Mac" explicitly
+        // Windows/Linux, it is Cmd + <first> instead of Alt +
+        // <first>. The "Java Development Guide for Mac" explicitly
         // discusses the issue in:
         // <https://developer.apple.com/library/mac/#documentation/Java/Conceptual/Java14Development/07-NativePlatformIntegration/NativePlatformIntegration.html#//apple_ref/doc/uid/TP40001909-211884-TPXREF130>
         //
-        // As jedit always considers Alt + <key> as a keyboard
+        // As jedit always considers Alt + <first> as a keyboard
         // shortcut, they block their output in the editor, which
         // prevents the entry of special characters on OS X that uses
-        // Alt + <key> for this purpose instead of AltGr + <key>, as
+        // Alt + <first> for this purpose instead of AltGr + <first>, as
         // on Windows or Linux.
         //
         // For the latest jedit version (5.0.0), the menu
         // accelerators don't work on OS X, at least the special
-        // characters can be entered using Alt + <key>. The issue is
+        // characters can be entered using Alt + <first>. The issue is
         // still open, but there seems to be progress:
         //
         // http://sourceforge.net/tracker/index.php?func=detail&aid=3558572&group_id=588&atid=300588
@@ -314,70 +382,6 @@ public class DefaultInputHandler extends InputHandler {
         }
     }
 
-    /**
-     * Converts a string to a keystroke. The string should be of the
-     * form <i>modifiers</i>+<i>shortcut</i> where <i>modifiers</i>
-     * is any combination of A for Alt, C for Control, S for Shift
-     * or M for Meta, and <i>shortcut</i> is either a single character,
-     * or a keycode name from the <code>KeyEvent</code> class, without
-     * the <code>VK_</code> prefix.
-     *
-     * @param keyStroke A string description of the key stroke
-     * @return a {@link javax.swing.KeyStroke} object
-     */
-    public static KeyStroke parseKeyStroke(final String keyStroke) {
-        if (keyStroke == null)
-            return null;
-        int modifiers = 0;
-        final int index = keyStroke.indexOf('+');
-        if (index != -1) {
-            for (int i = 0; i < index; i++) {
-                switch (Character.toUpperCase(keyStroke
-                        .charAt(i))) {
-                    case 'A':
-                        modifiers |= InputEvent.ALT_DOWN_MASK;
-                        break;
-                    case 'C':
-                        modifiers |= InputEvent.CTRL_DOWN_MASK;
-                        break;
-                    case 'M':
-                        modifiers |= InputEvent.META_DOWN_MASK;
-                        break;
-                    case 'S':
-                        modifiers |= InputEvent.SHIFT_DOWN_MASK;
-                        break;
-                }
-            }
-        }
-        final String key = keyStroke.substring(index + 1);
-        if (key.length() == 1) {
-            final char ch = Character.toUpperCase(key.charAt(0));
-            if (modifiers == 0)
-                return KeyStroke.getKeyStroke(ch);
-            else
-                return KeyStroke.getKeyStroke(ch, modifiers);
-        } else if (key.isEmpty()) {
-            DefaultInputHandler.LOGGER.error("Invalid key stroke: {} - empty key", keyStroke);
-            return null;
-        } else {
-            final int ch;
-
-            try {
-                ch = KeyEvent.class.getField("VK_".concat(key))
-                        .getInt(null);
-            } catch (final Exception e) {
-                DefaultInputHandler.LOGGER.error("Invalid key stroke: {} - couldn't get the int value", keyStroke);
-                return null;
-            }
-
-            return KeyStroke.getKeyStroke(ch, modifiers);
-        }
-    }
-
-    // private members
-    private final BindingMap bindings;
-    private BindingMap currentBindings;
-
     private static class Binding {
     }
 
@@ -407,9 +411,5 @@ public class DefaultInputHandler extends InputHandler {
         Binding get(final KeyStroke k) {
             return this.map.get(k);
         }
-    }
-
-    private DefaultInputHandler(final DefaultInputHandler copy) {
-        this.bindings = this.currentBindings = copy.bindings;
     }
 }

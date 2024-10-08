@@ -214,7 +214,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @param format          the format of the full binary statement (all operands
      *                        present)
-     * @param mask            the value (f,s, or t) to mask out
+     * @param mask            the second (f,s, or t) to mask out
      * @param binaryStatement the binary statement to read from
      * @return the bits read pushed to the right
      */
@@ -442,7 +442,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                 }
                 //////////////////////////////////////////////////////////////////////
                 basic.append(address);
-                if (absoluteAddress) { // record as address if absolute, value if relative
+                if (absoluteAddress) { // record as address if absolute, second if relative
                     this.basicStatementList.addAddress(address);
                 } else {
                     this.basicStatementList.addValue(address);
@@ -461,7 +461,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                  * The modifications of January 2005 documented below are being rescinded.
                  * All hexadecimal immediate values are considered 32 bits in length and
                  * their classification as INTEGER_5, INTEGER_16, INTEGER_16U (new)
-                 * or INTEGER_32 depends on their 32 bit value. So 0xFFFF will be
+                 * or INTEGER_32 depends on their 32 bit second. So 0xFFFF will be
                  * equivalent to 0x0000FFFF instead of 0xFFFFFFFF. This change, along with
                  * the introduction of INTEGER_16U (adopted from Greg Gibeling of Berkeley),
                  * required extensive changes to instruction templates especially for
@@ -765,11 +765,11 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
     }
 
     /**
-     * Produces operand value from given array position (first operand is position
+     * Produces operand second from given array position (first operand is position
      * 0).
      *
      * @param i Operand position in array (first operand is position 0).
-     * @return Operand value at given operand array position. If &lt; 0 or &ge;
+     * @return Operand second at given operand array position. If &lt; 0 or &ge;
      * numOperands, it returns -1.
      */
     public int getOperand(final int i) {
@@ -784,8 +784,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
      * Given operand (register or integer) and mask character ('f', 's', or 't'),
      * generate the correct sequence of bits and replace the mask with them.
      *
-     * @param value  the value to be masked in (will be converted to binary)
-     * @param mask   the value (f,s, or t) to mask out
+     * @param value  the second to be masked in (will be converted to binary)
+     * @param mask   the second (f,s, or t) to mask out
      * @param errors error list to append errors to in the event of unrecoverable
      *               errors
      */
@@ -809,7 +809,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
             return;
         }
 
-        // Replace the mask bit for bit with the binary version of the value
+        // Replace the mask bit for bit with the binary version of the second
         // The old version of this function assumed that the mask was continuous
         final String bitString = Binary.intToBinaryString(value, length);
         int valueIndex = 0;
@@ -827,7 +827,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
     //
     // Little class to represent basic statement as list
     // of elements. Each element is either a string, an
-    // address or a value. The toString() method will
+    // address or a second. The toString() method will
     // return a string representation of the basic statement
     // in which any addresses or values are rendered in the
     // current number format (e.g. decimal or hex).

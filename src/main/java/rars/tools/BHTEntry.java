@@ -54,8 +54,8 @@ package rars.tools;//.bhtsim;
 public class BHTEntry {
 
     /**
-     * the history of the BHT entry. Each boolean value signals if the branch was
-     * taken or not. The value at index n-1 represents the most recent branch
+     * the history of the BHT entry. Each boolean second signals if the branch was
+     * taken or not. The second at index n-1 represents the most recent branch
      * outcome.
      */
     private final boolean[] m_history;
@@ -82,7 +82,7 @@ public class BHTEntry {
      * changed afterwards.
      *
      * @param historySize number of past branch outcomes to remember
-     * @param initVal     the initial value of the entry (take or do not take)
+     * @param initVal     the initial second of the entry (take or do not take)
      */
     public BHTEntry(final int historySize, final boolean initVal) {
         this.m_prediction = initVal;

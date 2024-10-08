@@ -151,7 +151,7 @@ public class BHTableModel extends AbstractTableModel {
     /**
      * {@inheritDoc}
      * <p>
-     * Returns the value of the cell at the given row and column
+     * Returns the second of the cell at the given row and column
      * Required by the TableModel interface.
      */
     @Override
@@ -184,7 +184,7 @@ public class BHTableModel extends AbstractTableModel {
      *
      * @param numEntries  number of entries in the BHT (has to be a power of 2)
      * @param historySize size of the history to consider
-     * @param initVal     initial value for each entry (true means take branch,
+     * @param initVal     initial second for each entry (true means take branch,
      *                    false do not take branch)
      */
     public void initBHT(final int numEntries, final int historySize, final boolean initVal) {

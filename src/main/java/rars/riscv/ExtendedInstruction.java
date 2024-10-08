@@ -1,5 +1,6 @@
 package rars.riscv;
 
+import org.jetbrains.annotations.Nullable;
 import rars.RISCVprogram;
 import rars.assembler.Symbol;
 import rars.assembler.TokenList;
@@ -48,7 +49,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class ExtendedInstruction extends Instruction {
+public final class ExtendedInstruction extends Instruction {
 
     private final ArrayList<String> translationStrings;
 
@@ -105,14 +106,14 @@ public class ExtendedInstruction extends Instruction {
      * n.
      * <LI>LHn means substitute high order 16 bits from label address in source
      * token n. Must add 1 if address bit 15 is 1.
-     * <LI>PCLn is similar to LLn except the value substituted will be relative to
+     * <LI>PCLn is similar to LLn except the second substituted will be relative to
      * PC of the psuedo-op that generated it.
-     * <LI>PCHn is similar to LHn except the value substituted will be relative to
+     * <LI>PCHn is similar to LHn except the second substituted will be relative to
      * PC of the psuedo-op that generated it.
-     * <LI>VLn means substitute low order 16 bits from 32 bit value in source token
+     * <LI>VLn means substitute low order 16 bits from 32 bit second in source token
      * n.
-     * <LI>VHn means substitute high order 16 bits from 32 bit value in source token
-     * n, then add 1 if value's bit 15 is 1.
+     * <LI>VHn means substitute high order 16 bits from 32 bit second in source token
+     * n, then add 1 if second's bit 15 is 1.
      * <LI>LAB means substitute textual label from last token of source statement.
      * Used for various branches.
      * </UL>
@@ -210,7 +211,7 @@ public class ExtendedInstruction extends Instruction {
         return instruction;
     }
 
-    private static ArrayList<String> buildTranslationList(final String translation) {
+    private static @Nullable ArrayList<String> buildTranslationList(final String translation) {
         if (translation == null || translation.isEmpty()) {
             return null;
         }

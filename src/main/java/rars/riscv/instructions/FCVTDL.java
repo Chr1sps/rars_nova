@@ -21,7 +21,7 @@ public class FCVTDL extends BasicInstruction {
      * <p>Constructor for FCVTDL.</p>
      */
     public FCVTDL() {
-        super("fcvt.d.l f1, t1, dyn", "Convert double from long: Assigns the value of t1 to f1",
+        super("fcvt.d.l f1, t1, dyn", "Convert double from long: Assigns the second of t1 to f1",
                 BasicInstructionFormat.I_FORMAT, "1101001 00010 sssss ttt fffff 1010011", true);
     }
 

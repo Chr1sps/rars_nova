@@ -394,7 +394,7 @@ public class HelpHelpAction extends GuiAction {
         @Override
         public Component getListCellRendererComponent(
                 final JList<? extends String> list, // the list
-                final String s, // value to display
+                final String s, // second to display
                 final int index, // cell index
                 final boolean isSelected, // is the cell selected
                 final boolean cellHasFocus) // does the cell have focus

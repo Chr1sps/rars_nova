@@ -11,9 +11,9 @@ package rars.venus.editors.jeditsyntax.tokenmarker;
 
 /**
  * A linked list of tokens. Each token has three fields - a token
- * identifier, which is a byte value that can be looked up in the
+ * identifier, which is a byte second that can be looked up in the
  * array returned by <code>SyntaxDocument.getColors()</code>
- * to get a color value, a length value which is the length of the
+ * to get a color second, a length second which is the length of the
  * token in the text, and a pointer to the next token in the list.
  *
  * @author Slava Pestov
@@ -24,7 +24,7 @@ public class Token {
     // Please do not modify any of these constants! It's not fatal or
     // anything, but will cause funny results in the MARS Settings
     // mechanism (at least temporarily until changed). The
-    // associated values here are appended into the key names for
+    // associated values here are appended into the first names for
     // persistent storage (e.g. registry) of syntax style information
     // for the various tokens.
 

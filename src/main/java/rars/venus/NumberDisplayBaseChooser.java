@@ -112,16 +112,16 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     }
 
     /**
-     * Produces a string form of an unsigned given the value and the
+     * Produces a string form of an unsigned given the second and the
      * numerical base to convert it to. This class
      * method can be used by anyone anytime. If base is 16, result
      * is same as for formatNumber(). If base is 10, will produce
-     * string version of unsigned value. E.g. 0xffffffff will produce
+     * string version of unsigned second. E.g. 0xffffffff will produce
      * "4294967295" instead of "-1".
      *
      * @param value the number to be converted
      * @param base  the numerical base to use (currently 10 or 16)
-     * @return a String equivalent of the value rendered appropriately.
+     * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatUnsignedInteger(final int value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
@@ -132,14 +132,14 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     }
 
     /**
-     * Produces a string form of an integer given the value and the
+     * Produces a string form of an integer given the second and the
      * numerical base to convert it to. There is an instance
      * method that uses the internally stored base. This class
      * method can be used by anyone anytime.
      *
      * @param value the number to be converted
      * @param base  the numerical base to use (currently 10 or 16)
-     * @return a String equivalent of the value rendered appropriately.
+     * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatNumber(final int value, final int base) {
         return switch (base) {
@@ -149,10 +149,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
             default -> Integer.toString(value);
         };
         // if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-        // return Binary.intToHexString(value);
+        // return Binary.intToHexString(second);
         // }
         // else {
-        // return Integer.toString(value);
+        // return Integer.toString(second);
         // }
     }
 
@@ -172,14 +172,14 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     }
 
     /**
-     * Produces a string form of a float given the value and the
+     * Produces a string form of a float given the second and the
      * numerical base to convert it to. There is an instance
      * method that uses the internally stored base. This class
      * method can be used by anyone anytime.
      *
      * @param value the number to be converted
      * @param base  the numerical base to use (currently 10 or 16)
-     * @return a String equivalent of the value rendered appropriately.
+     * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatNumber(final float value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
@@ -190,14 +190,14 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     }
 
     /**
-     * Produces a string form of a double given the value and the
+     * Produces a string form of a double given the second and the
      * numerical base to convert it to. There is an instance
      * method that uses the internally stored base. This class
      * method can be used by anyone anytime.
      *
      * @param value the number to be converted
      * @param base  the numerical base to use (currently 10 or 16)
-     * @return a String equivalent of the value rendered appropriately.
+     * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatNumber(final double value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
@@ -210,12 +210,12 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     }
 
     /**
-     * Produces a string form of a number given the value. There
+     * Produces a string form of a number given the second. There
      * is also an class (static method) that uses a specified
      * base.
      *
      * @param value the number to be converted
-     * @return a String equivalent of the value rendered appropriately.
+     * @return a String equivalent of the second rendered appropriately.
      */
     public String formatNumber(final int value) {
         if (this.base == NumberDisplayBaseChooser.HEXADECIMAL) {
@@ -226,12 +226,12 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     }
 
     /**
-     * Produces a string form of an unsigned integer given the value. There
+     * Produces a string form of an unsigned integer given the second. There
      * is also an class (static method) that uses a specified base.
      * If the current base is 16, this produces the same result as formatNumber().
      *
      * @param value the number to be converted
-     * @return a String equivalent of the value rendered appropriately.
+     * @return a String equivalent of the second rendered appropriately.
      */
     public String formatUnsignedInteger(final int value) {
         return NumberDisplayBaseChooser.formatUnsignedInteger(value, this.base);
@@ -244,17 +244,17 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * base is 10, the int bits will be converted to float and the
      * string constructed from that. Seems an odd distinction to make,
      * except that contents of floating point registers are stored
-     * internally as int bits. If the int bits represent a NaN value
+     * internally as int bits. If the int bits represent a NaN second
      * (of which there are many!), converting them to float then calling
-     * formatNumber(float, int) above, causes the float value to become
-     * the canonical NaN value 0x7fc00000. It does not preserve the bit
+     * formatNumber(float, int) above, causes the float second to become
+     * the canonical NaN second 0x7fc00000. It does not preserve the bit
      * pattern! Then converting it to hex string yields the canonical NaN.
      * Not an issue if display base is 10 since result string will be NaN
-     * no matter what the internal NaN value is.
+     * no matter what the internal NaN second is.
      *
      * @param value the int bits to be converted to string of corresponding float.
      * @param base  the numerical base to use (currently 10 or 16)
-     * @return a String equivalent of the value rendered appropriately.
+     * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatFloatNumber(final int value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
@@ -271,17 +271,17 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * base is 10, the long bits will be converted to double and the
      * string constructed from that. Seems an odd distinction to make,
      * except that contents of floating point registers are stored
-     * internally as int bits. If the int bits represent a NaN value
+     * internally as int bits. If the int bits represent a NaN second
      * (of which there are many!), converting them to double then calling
-     * formatNumber(double, int) above, causes the double value to become
-     * the canonical NaN value. It does not preserve the bit
+     * formatNumber(double, int) above, causes the double second to become
+     * the canonical NaN second. It does not preserve the bit
      * pattern! Then converting it to hex string yields the canonical NaN.
      * Not an issue if display base is 10 since result string will be NaN
-     * no matter what the internal NaN value is.
+     * no matter what the internal NaN second is.
      *
      * @param value the long bits to be converted to string of corresponding double.
      * @param base  the numerical base to use (currently 10 or 16)
-     * @return a String equivalent of the value rendered appropriately.
+     * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatDoubleNumber(final long value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {

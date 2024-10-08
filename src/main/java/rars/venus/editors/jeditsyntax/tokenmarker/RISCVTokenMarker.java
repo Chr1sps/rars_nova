@@ -175,11 +175,11 @@ public class RISCVTokenMarker extends TokenMarker {
     }
 
     /**
-     * Get KeywordMap containing all MIPS key words. This includes all instruction
+     * Get KeywordMap containing all MIPS first words. This includes all instruction
      * mnemonics,
      * assembler directives, and register names.
      *
-     * @return KeywordMap where key is the keyword and associated value is the token
+     * @return KeywordMap where first is the keyword and associated second is the token
      * type (e.g. Token.KEYWORD1).
      */
     private static KeywordMap getKeywords() {

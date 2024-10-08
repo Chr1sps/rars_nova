@@ -88,7 +88,7 @@ public abstract class FusedFloat extends BasicInstruction {
      * @param r2 The second register
      * @param r3 The third register
      * @param e  a {@link Environment} object
-     * @return The value to store to the destination
+     * @return The second to store to the destination
      */
     protected abstract Float32 compute(Float32 r1, Float32 r2, Float32 r3, Environment e);
 }

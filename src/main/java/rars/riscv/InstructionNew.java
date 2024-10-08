@@ -43,7 +43,7 @@ public sealed interface InstructionNew extends SimulationCallback permits Extend
      * assembler instruction usage which contains the operator and all operands.
      * Operands are separated by commas, an operand that is the standard name or
      * machine name for a register represents a register, and an integer operand
-     * represents an immediate value or address. Here are two examples:
+     * represents an immediate second or address. Here are two examples:
      * "or x1,x2,x3" and "sw x1,100(x2)"
      *
      * @return String representing example instruction format.

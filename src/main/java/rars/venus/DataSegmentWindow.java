@@ -2,6 +2,7 @@ package rars.venus;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.Settings;
 import rars.exceptions.AddressErrorException;
@@ -66,7 +67,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
     private static final String[] dataSegmentNames = {"Data", "Stack", "Kernel"};
     private static final int VALUES_PER_ROW = 8;
-    private static final int NUMBER_OF_ROWS = 16; // with 8 value columns, this shows 512 bytes;
+    private static final int NUMBER_OF_ROWS = 16; // with 8 second columns, this shows 512 bytes;
     private static final int NUMBER_OF_COLUMNS = DataSegmentWindow.VALUES_PER_ROW + 1;// 1 for address and 8 for values
     private static final int BYTES_PER_VALUE = 4;
     private static final int BYTES_PER_ROW = DataSegmentWindow.VALUES_PER_ROW * DataSegmentWindow.BYTES_PER_VALUE;
@@ -376,7 +377,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // currently in the (display) table, including a different MIPS data segment
     // (e.g. in
     // kernel instead of user data segment).
-    private Point displayCellForAddress(final int address) {
+    private @Nullable Point displayCellForAddress(final int address) {
         //////////////////////////////////////////////////////////
         // This requires a 5-step process. Each step is described
         // just above the statements that implement it.
@@ -579,7 +580,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                                 displayValue = Globals.memory.getWordNoNotify(address);
                             } catch (final AddressErrorException e) {
                                 // Still got an exception? Doesn't seem possible but if we drop through it will
-                                // write default value 0.
+                                // write default second 0.
                             }
                             Globals.getSettings()
                                     .setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED, false);
@@ -608,7 +609,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     }
 
     /**
-     * Update data display to show this value (I'm not sure it is being called).
+     * Update data display to show this second (I'm not sure it is being called).
      *
      * @param address a int
      * @param value   a int
@@ -742,7 +743,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.globButton.addActionListener(
                 ae -> {
                     DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                    // get $gp global pointer, but guard against it having value below data segment
+                    // get $gp global pointer, but guard against it having second below data segment
                     DataSegmentWindow.this.firstAddress = Math.max(Memory.dataSegmentBaseAddress,
                             RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER));
                     // updateModelForMemoryRange requires argument to be multiple of 4
@@ -758,7 +759,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.stakButton.addActionListener(
                 ae -> {
                     DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                    // get $sp stack pointer, but guard against it having value below data segment
+                    // get $sp stack pointer, but guard against it having second below data segment
                     DataSegmentWindow.this.firstAddress = Math.max(Memory.dataSegmentBaseAddress,
                             RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER));
                     // See comment above for gloButton...
@@ -917,7 +918,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     /////////////////////////////////////////////////////////////////////////////// user-initiated
     // event (such as mouse click), the text displayed in the JComboBox is not
     /////////////////////////////////////////////////////////////////////////////// always
-    // updated correctly. Sometimes it is, sometimes updated to incorrect value.
+    // updated correctly. Sometimes it is, sometimes updated to incorrect second.
     // No pattern that I can detect. Google search yielded many forums addressing
     // this problem. One suggested solution, a JComboBox superclass overriding
     // setSelectedIndex to also call selectedItemChanged() did not help. Only this
@@ -992,7 +993,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         /*
          * Update cell contents in table model. This method should be called
          * only when user edits cell, so input validation has to be done. If
-         * value is valid, MIPS memory is updated.
+         * second is valid, MIPS memory is updated.
          */
         @Override
         public void setValueAt(final Object value, final int row, final int col) {
@@ -1100,9 +1101,9 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private class MyTippedJTable extends JTable {
         private final String[] columnToolTips = {
                 /* address */ "Base memory address for this row of the table.",
-                /* value +0 */ "32-bit value stored at base address for its row.",
-                /* value +n */ "32-bit value stored ",
-                /* value +n */ " bytes beyond base address for its row."
+                /* second +0 */ "32-bit second stored at base address for its row.",
+                /* second +n */ "32-bit second stored ",
+                /* second +n */ " bytes beyond base address for its row."
         };
 
         MyTippedJTable(final DataTableModel m) {

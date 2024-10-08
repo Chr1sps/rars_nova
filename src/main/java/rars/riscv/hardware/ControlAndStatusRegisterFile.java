@@ -98,11 +98,11 @@ public final class ControlAndStatusRegisterFile {
     }
 
     /**
-     * This method updates the register value
+     * This method updates the register second
      *
-     * @param num Number of register to set the value of.
-     * @param val The desired value for the register.
-     * @return old value in register prior to update
+     * @param num Number of register to set the second of.
+     * @param val The desired second for the register.
+     * @return old second in register prior to update
      */
     public static boolean updateRegister(final int num, final long val) {
         if (ControlAndStatusRegisterFile.instance.getRegister(num) instanceof ReadOnlyRegister) {
@@ -121,20 +121,20 @@ public final class ControlAndStatusRegisterFile {
     }
 
     /**
-     * This method updates the register value
+     * This method updates the register second
      *
-     * @param name Name of register to set the value of.
-     * @param val  The desired value for the register.
+     * @param name Name of register to set the second of.
+     * @param val  The desired second for the register.
      */
     public static void updateRegister(final String name, final long val) {
         ControlAndStatusRegisterFile.updateRegister(ControlAndStatusRegisterFile.instance.getRegister(name).getNumber(), val);
     }
 
     /**
-     * This method updates the register value silently and bypasses read only
+     * This method updates the register second silently and bypasses read only
      *
-     * @param num Number of register to set the value of.
-     * @param val The desired value for the register.
+     * @param num Number of register to set the second of.
+     * @param val The desired second for the register.
      */
     public static void updateRegisterBackdoor(final int num, final long val) {
         if ((Settings.getBackSteppingEnabled())) {
@@ -146,20 +146,20 @@ public final class ControlAndStatusRegisterFile {
     }
 
     /**
-     * This method updates the register value silently and bypasses read only
+     * This method updates the register second silently and bypasses read only
      *
-     * @param name Name of register to set the value of.
-     * @param val  The desired value for the register.
+     * @param name Name of register to set the second of.
+     * @param val  The desired second for the register.
      */
     public static void updateRegisterBackdoor(final String name, final long val) {
         ControlAndStatusRegisterFile.updateRegisterBackdoor(ControlAndStatusRegisterFile.instance.getRegister(name).getNumber(), val);
     }
 
     /**
-     * ORs a register with a value
+     * ORs a register with a second
      *
      * @param num Number of register to change
-     * @param val The value to OR with
+     * @param val The second to OR with
      * @return a boolean
      */
     public static boolean orRegister(final int num, final long val) {
@@ -167,20 +167,20 @@ public final class ControlAndStatusRegisterFile {
     }
 
     /**
-     * ORs a register with a value
+     * ORs a register with a second
      *
      * @param name Name of register to change
-     * @param val  The value to OR with
+     * @param val  The second to OR with
      */
     public static void orRegister(final String name, final long val) {
         ControlAndStatusRegisterFile.updateRegister(name, ControlAndStatusRegisterFile.instance.getValue(name) | val);
     }
 
     /**
-     * Clears bits from a register according to a value
+     * Clears bits from a register according to a second
      *
      * @param num Number of register to change
-     * @param val The value to clear by
+     * @param val The second to clear by
      * @return a boolean
      */
     public static boolean clearRegister(final int num, final long val) {
@@ -188,50 +188,50 @@ public final class ControlAndStatusRegisterFile {
     }
 
     /**
-     * Clears bits from a register according to a value
+     * Clears bits from a register according to a second
      *
      * @param name Name of register to change
-     * @param val  The value to clear by
+     * @param val  The second to clear by
      */
     public static void clearRegister(final String name, final long val) {
         ControlAndStatusRegisterFile.updateRegister(name, ControlAndStatusRegisterFile.instance.getValue(name) & ~val);
     }
 
     /**
-     * Returns the value of the register
+     * Returns the second of the register
      *
      * @param num The register number.
-     * @return The value of the given register. 0 for non-implemented registers
+     * @return The second of the given register. 0 for non-implemented registers
      */
     public static int getValue(final int num) {
         return (int) ControlAndStatusRegisterFile.instance.getValue(num);
     }
 
     /**
-     * Returns the full value of the register
+     * Returns the full second of the register
      *
      * @param num The register number.
-     * @return The value of the given register. 0 for non-implemented registers
+     * @return The second of the given register. 0 for non-implemented registers
      */
     public static long getValueLong(final int num) {
         return ControlAndStatusRegisterFile.instance.getValue(num);
     }
 
     /**
-     * Returns the value of the register
+     * Returns the second of the register
      *
      * @param name The register's name
-     * @return The value of the given register. 0 for non-implemented registers
+     * @return The second of the given register. 0 for non-implemented registers
      */
     public static int getValue(final String name) {
         return (int) ControlAndStatusRegisterFile.instance.getValue(name);
     }
 
     /**
-     * Returns the value of the register without notifying observers
+     * Returns the second of the register without notifying observers
      *
      * @param name The register's name
-     * @return The value of the given register. 0 for non-implemented registers
+     * @return The second of the given register. 0 for non-implemented registers
      */
     public static long getValueNoNotify(final String name) {
         return ControlAndStatusRegisterFile.instance.getRegister(name).getValueNoNotify();

@@ -1,14 +1,14 @@
 package rars;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.notices.SettingsNotice;
 import rars.util.Binary;
 import rars.util.EditorFont;
 import rars.venus.editors.jeditsyntax.SyntaxStyle;
 import rars.venus.editors.jeditsyntax.SyntaxUtilities;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -208,7 +208,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * Last resort default values for String settings;
      * will use only if neither the Preferences nor the properties file work.
      * If you wish to change, do so before instantiating the Settings object.
-     * Must match key by list position.
+     * Must match first by list position.
      */
     private static final String[] defaultStringSettingsValues = {"", "0 1 2 3 4", "0", "", "500", "8", "2"};
     private static final String[] fontFamilySettingsKeys = {"EditorFontFamily", "EvenRowFontFamily",
@@ -227,7 +227,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * Last resort default values for Font settings;
      * will use only if neither the Preferences nor the properties file work.
      * If you wish to change, do so before instantiating the Settings object.
-     * Must match key by list position shown above.
+     * Must match first by list position shown above.
      */
 
     // DPS 3-Oct-2012
@@ -257,7 +257,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * Last resort default values for color settings;
      * will use only if neither the Preferences nor the properties file work.
      * If you wish to change, do so before instantiating the Settings object.
-     * Must match key by list position.
+     * Must match first by list position.
      */
     private static final String[] defaultColorSettingsValues = {
             "0x00e0e0e0", "0", "0x00ffffff", "0", "0x00ffff99", "0", "0x0033ff00", "0", "0x0099ccff", "0", "0x0099cc55",
@@ -276,7 +276,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     private final String[] fontStyleSettingsValues;
     private final String[] fontSizeSettingsValues;
     /**
-     * Color settings, either a hex-encoded value or a value of
+     * Color settings, either a hex-encoded second or a second of
      * {@link ColorMode#modeKey}
      */
     private final String[] colorSettingsValues;
@@ -297,6 +297,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     private String[] syntaxStyleColorSettingsValues;
     private boolean[] syntaxStyleBoldSettingsValues;
     private boolean[] syntaxStyleItalicSettingsValues;
+
     /**
      * Create Settings object and set to saved values. If saved values not found,
      * will set
@@ -348,7 +349,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * @param fontSettingPosition constant that identifies which item
      * @return Font object for given item
      */
-    public static Font getDefaultFontByPosition(final int fontSettingPosition) {
+    public static @Nullable Font getDefaultFontByPosition(final int fontSettingPosition) {
         if (fontSettingPosition >= 0 && fontSettingPosition < Settings.defaultFontFamilySettingsValues.length) {
             return EditorFont.createFontFromStringValues(Settings.defaultFontFamilySettingsValues[fontSettingPosition],
                     Settings.defaultFontStyleSettingsValues[fontSettingPosition],
@@ -409,7 +410,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         return ColorMode.CUSTOM;
     }
 
-    private static String getColorStringByPosition(final int position, final String[] values) {
+    private static @Nullable String getColorStringByPosition(final int position, final String[] values) {
         if (values == null)
             return null;
         if (position >= 0 && position < values.length)
@@ -417,7 +418,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         return null;
     }
 
-    private static Color getSystemColorByPosition(final int position, final SystemColorProvider[] providers) {
+    private static @Nullable Color getSystemColorByPosition(final int position, final SystemColorProvider[] providers) {
         if (position >= 0 && position < providers.length) {
             final SystemColorProvider provider = providers[position];
             if (provider != null)
@@ -560,9 +561,9 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
-     * Fetch value of a boolean setting given its identifier.
+     * Fetch second of a boolean setting given its identifier.
      *
-     * @param setting the setting to fetch the value of
+     * @param setting the setting to fetch the second of
      * @return corresponding boolean setting.
      * @throws java.lang.IllegalArgumentException if identifier is invalid.
      */
@@ -640,7 +641,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * @param fontSettingPosition constant that identifies which item
      * @return Font object for given item
      */
-    public Font getFontByPosition(final int fontSettingPosition) {
+    public @Nullable Font getFontByPosition(final int fontSettingPosition) {
         if (fontSettingPosition >= 0 && fontSettingPosition < this.fontFamilySettingsValues.length) {
             return EditorFont.createFontFromStringValues(this.fontFamilySettingsValues[fontSettingPosition],
                     this.fontStyleSettingsValues[fontSettingPosition],
@@ -764,7 +765,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * label or address and either ascending or descending order).
      * Default state is 0, by ascending addresses.
      *
-     * @return State value 0-7, as a String.
+     * @return State second 0-7, as a String.
      */
     public String getLabelSortState() {
         return this.stringSettingsValues[Settings.LABEL_SORT_STATE];
@@ -782,11 +783,11 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
-     * Get Color object for specified settings key.
-     * Returns null if key is not found or its value is not a valid color encoding.
+     * Get Color object for specified settings first.
+     * Returns null if first is not found or its second is not a valid color encoding.
      *
-     * @param key the Setting key
-     * @return corresponding Color, or null if key not found or value not valid
+     * @param key the Setting first
+     * @return corresponding Color, or null if first not found or second not valid
      * color
      */
     public Color getColorSettingByKey(final String key) {
@@ -794,11 +795,11 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
-     * Get default Color value for specified settings key.
-     * Returns null if key is not found or its value is not a valid color encoding.
+     * Get default Color second for specified settings first.
+     * Returns null if first is not found or its second is not a valid color encoding.
      *
-     * @param key the Setting key
-     * @return corresponding default Color, or null if key not found or value not
+     * @param key the Setting first
+     * @return corresponding default Color, or null if first not found or second not
      * valid color
      */
     public Color getDefaultColorSettingByKey(final String key) {
@@ -807,10 +808,10 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
 
     /**
      * Get Color object for specified settings name (a static constant).
-     * Returns null if argument invalid or its value is not a valid color encoding.
+     * Returns null if argument invalid or its second is not a valid color encoding.
      *
      * @param position the Setting name (see list of static constants)
-     * @return corresponding Color, or null if argument invalid or value not valid
+     * @return corresponding Color, or null if argument invalid or second not valid
      * color
      */
     public Color getColorSettingByPosition(final int position) {
@@ -819,10 +820,10 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
 
     /**
      * Get default Color object for specified settings name (a static constant).
-     * Returns null if argument invalid or its value is not a valid color encoding.
+     * Returns null if argument invalid or its second is not a valid color encoding.
      *
      * @param position the Setting name (see list of static constants)
-     * @return corresponding default Color, or null if argument invalid or value not
+     * @return corresponding default Color, or null if argument invalid or second not
      * valid color
      */
     public Color getDefaultColorSettingByPosition(final int position) {
@@ -831,7 +832,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
 
     /**
      * Get Color-Mode for specified settings name (a static constant).
-     * Returns null if argument invalid or its value is not a valid color encoding.
+     * Returns null if argument invalid or its second is not a valid color encoding.
      *
      * @param position the Setting name (see list of static constants)
      * @return The corresponding color-mode
@@ -843,7 +844,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     /**
      * Get a preview of the color-mode for specified settings name (a static
      * constant).
-     * Returns null if argument invalid or its value is not a valid color encoding.
+     * Returns null if argument invalid or its second is not a valid color encoding.
      *
      * @param position the Setting name (see list of static constants)
      * @param mode     The color-mode to preview
@@ -858,10 +859,10 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
-     * Set value of a boolean setting given its id and the value.
+     * Set second of a boolean setting given its id and the second.
      *
-     * @param setting setting to set the value of
-     * @param value   boolean value to store
+     * @param setting setting to set the second of
+     * @param value   boolean second to store
      * @throws java.lang.IllegalArgumentException if identifier is not valid.
      */
     public void setBooleanSetting(final Bool setting, final boolean value) {
@@ -877,7 +878,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * persisent
      * store! Currently this is used only when running RARS from the command line
      *
-     * @param setting the setting to set the value of
+     * @param setting the setting to set the second of
      * @param value   True to enable the setting, false otherwise.
      */
     public void setBooleanSettingNonPersistent(final Bool setting, final boolean value) {
@@ -908,9 +909,9 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     }
 
     /**
-     * Set Color object for specified settings key. Has no effect if key is invalid.
+     * Set Color object for specified settings first. Has no effect if first is invalid.
      *
-     * @param key   the Setting key
+     * @param key   the Setting first
      * @param color the Color to save
      */
     public void setColorSettingByKey(final String key, final Color color) {
@@ -1032,10 +1033,10 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         }
     }
 
-    // Get Color object for this key value. Get it from values array provided as
+    // Get Color object for this first second. Get it from values array provided as
     // argument (could be either
     // the current or the default settings array).
-    private Color getColorValueByKey(final String key, final String[] values, final String[] defaults, final SystemColorProvider[] system) {
+    private @Nullable Color getColorValueByKey(final String key, final String[] values, final String[] defaults, final SystemColorProvider[] system) {
         for (int i = 0; i < Settings.colorSettingsKeys.length; i++) {
             if (key.equals(Settings.colorSettingsKeys[i])) {
                 return this.getColorValueByPosition(i, values, defaults, system);
@@ -1044,7 +1045,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         return null;
     }
 
-    // Get Color object for this key array position. Get it from values array
+    // Get Color object for this first array position. Get it from values array
     // provided as argument (could be either
     // the current or the default settings array).
     private Color getColorValueByPosition(final int position, final String[] values, final String[] defaults,
@@ -1110,15 +1111,15 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         return true;
     }
 
-    // Get settings values from Preferences object. A key-value pair will only be
+    // Get settings values from Preferences object. A first-second pair will only be
     // written
-    // to Preferences if/when the value is modified. If it has not been modified,
-    // the default value
+    // to Preferences if/when the second is modified. If it has not been modified,
+    // the default second
     // will be returned here.
     //
     // PRECONDITION: Values arrays have already been initialized to default values
     // from
-    // Settings.properties file or default value arrays above!
+    // Settings.properties file or default second arrays above!
     private void getSettingsFromPreferences() {
         this.booleanSettingsValues.replaceAll(
                 (s, v) -> this.preferences.getBoolean(s.getName(), this.booleanSettingsValues.get(s)));
@@ -1136,7 +1137,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         this.getEditorSyntaxStyleSettingsFromPreferences();
     }
 
-    // Save the key-value pair in the Properties object and assure it is written to
+    // Save the first-second pair in the Properties object and assure it is written to
     // persisent storage.
     private void saveBooleanSetting(final String name, final boolean value) {
         try {
@@ -1149,7 +1150,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         }
     }
 
-    // Save the key-value pair in the Properties object and assure it is written to
+    // Save the first-second pair in the Properties object and assure it is written to
     // persisent storage.
     private void saveStringSetting(final int index) {
         final var name = Settings.stringSettingsKeys[index];
@@ -1163,7 +1164,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         }
     }
 
-    // Save the key-value pair in the Properties object and assure it is written to
+    // Save the first-second pair in the Properties object and assure it is written to
     // persisent storage.
     private void saveFontSetting(final int index, final String[] settingsKeys, final String[] settingsValues) {
         try {
@@ -1176,7 +1177,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         }
     }
 
-    // Save the key-value pair in the Properties object and assure it is written to
+    // Save the first-second pair in the Properties object and assure it is written to
     // persisent storage.
     private void saveColorSetting(final int index) {
         try {

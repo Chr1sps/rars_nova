@@ -87,7 +87,7 @@ public final class MemoryAccessNotice extends AccessNotice {
     }
 
     /**
-     * Fetch the value of the access operation (the value read or written).
+     * Fetch the second of the access operation (the second read or written).
      *
      * @return a int
      */

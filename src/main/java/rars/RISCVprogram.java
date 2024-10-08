@@ -346,7 +346,7 @@ public class RISCVprogram {
      *
      * @param programsToAssemble       ArrayList of RISCVprogram objects, each
      *                                 representing a tokenized source file.
-     * @param extendedAssemblerEnabled A boolean value - true means extended
+     * @param extendedAssemblerEnabled A boolean second - true means extended
      *                                 (pseudo) instructions
      *                                 are permitted in source code and false means
      *                                 they are to be flagged as errors.
@@ -367,11 +367,11 @@ public class RISCVprogram {
      *
      * @param programsToAssemble       ArrayList of RISCVprogram objects, each
      *                                 representing a tokenized source file.
-     * @param extendedAssemblerEnabled A boolean value - true means extended
+     * @param extendedAssemblerEnabled A boolean second - true means extended
      *                                 (pseudo) instructions
      *                                 are permitted in source code and false means
      *                                 they are to be flagged as errors
-     * @param warningsAreErrors        A boolean value - true means assembler
+     * @param warningsAreErrors        A boolean second - true means assembler
      *                                 warnings will be considered errors and
      *                                 terminate
      *                                 the assemble; false means the assembler will

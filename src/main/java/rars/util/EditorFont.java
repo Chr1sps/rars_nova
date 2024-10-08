@@ -115,7 +115,7 @@ public final class EditorFont {
      * is not case-sensitive.
      *
      * @param style String representing the font style name
-     * @return The int value of the corresponding Font style constant. If the
+     * @return The int second of the corresponding Font style constant. If the
      * string does not match any style name, returns Font.PLAIN.
      */
     public static int styleStringToStyleInt(final String style) {
@@ -149,7 +149,7 @@ public final class EditorFont {
      * Given an int representing font size, returns corresponding string.
      *
      * @param size Int representing size.
-     * @return String value of parameter, unless it is less than MIN_SIZE (returns
+     * @return String second of parameter, unless it is less than MIN_SIZE (returns
      * MIN_SIZE
      * as String) or greater than MAX_SIZE (returns MAX_SIZE as String).
      */
@@ -162,7 +162,7 @@ public final class EditorFont {
      * Given a String representing font size, returns corresponding int.
      *
      * @param size String representing size.
-     * @return int value of parameter, unless it is less than MIN_SIZE (returns
+     * @return int second of parameter, unless it is less than MIN_SIZE (returns
      * MIN_SIZE) or greater than MAX_SIZE (returns MAX_SIZE). If the string
      * cannot be parsed as a decimal integer, it returns DEFAULT_SIZE.
      */

@@ -123,9 +123,8 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
 
     /**
      * Performs syscall function. It will be invoked when the service is invoked
-     * at simulation time. Service is identified by value stored in a7.
+     * at simulation time. Service is identified by second stored in a7.
      *
-     * @param statement ProgramStatement object for this syscall instruction.
      * @throws ExitingException if any.
      */
     public abstract void simulate(ProgramStatement statement)

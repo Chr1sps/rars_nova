@@ -12,11 +12,11 @@ public class MaskedRegister extends Register {
      *
      * @param name the name to assign
      * @param num  the number to assign
-     * @param val  the reset value
+     * @param val  the reset second
      * @param mask the bits to use
      */
     public MaskedRegister(final String name, final int num, final long val, final long mask) {
-        super(name, num, val); // reset value does not matter
+        super(name, num, val); // reset second does not matter
         this.mask = mask;
     }
 
