@@ -1,7 +1,6 @@
 package instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.ErrorMessage;
 import rars.Globals;
 import rars.Settings;
 import rars.api.Options;
@@ -12,11 +11,11 @@ import rars.riscv.InstructionSet;
 import rars.simulator.Simulator;
 import utils.RarsTestBase;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class AbstractInstructionTest extends RarsTestBase {
 
@@ -28,6 +27,11 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
         runTest(code, false, testData);
     }
 
+    /**
+     * Runs a test with the given code for RV64 with no standard input/output and no errors.
+     *
+     * @param code A {@link String} containing the code to run.
+     */
     protected final void runTest64(@NotNull final String code) {
         runTest(code, true, new TestData());
     }
@@ -36,6 +40,13 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
         runTest(code, true, testData);
     }
 
+    /**
+     * Runs a test with the given code and test data.
+     *
+     * @param code     A {@link String} containing the code to run.
+     * @param is64     A boolean indicating whether the test is for RV64.
+     * @param testData A {@link TestData} object containing the test data (STD{IN,OUT,ERR}, error lines).
+     */
     protected final void runTest(@NotNull final String code, final boolean is64, final TestData testData) {
         Globals.initialize();
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, is64);
@@ -65,64 +76,109 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 """;
 
         final var finalCode = header + code + passAndFail;
-        final var errors = doRun(finalCode, program, testData);
-        assertEquals("", errors, errors);
+        doRun(finalCode, program, testData);
     }
 
-    private @NotNull String doRun(@NotNull final String code, @NotNull final Program program, @NotNull final TestData testData) {
+    private void doRun(@NotNull final String code, @NotNull final Program program, @NotNull final TestData testData) {
         try {
             program.assembleString(code);
             if (!testData.errorLines.isEmpty()) {
-                return "Expected assembly error, but successfully assembled `" + getTestName() + "`.";
+                fail("Expected assembly error, but successfully assembled `" + getTestName() + "`.");
             }
             program.setup(null, testData.stdin);
             final Simulator.Reason r = program.simulate();
             if (r != Simulator.Reason.NORMAL_TERMINATION) {
-                return "Ended abnormally while executing `" + getTestName() + "`.";
+                final var msg = "Ended abnormally while executing `" + getTestName() + "`.\n" +
+                        "Reason: " + r + ".\n";
+                fail(msg);
             } else {
                 if (program.getExitCode() != 42) {
-                    return "Final exit code was wrong for `" + getTestName() + "`.";
+                    final var msg = "Final exit code was wrong for `" + getTestName() + "`.\n" +
+                            "Expected: 42, but got " + program.getExitCode() + ".";
+                    fail(msg);
                 }
                 if (!program.getSTDOUT().equals(testData.stdout)) {
-                    return "STDOUT was wrong for `" + getTestName() + "`.\n Expected:\n\"" + testData.stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
+                    final var msg = "STDOUT was wrong for `" + getTestName() + "`.\n" +
+                            "Expected:\n\"" + testData.stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
+                    fail(msg);
                 }
                 if (!program.getSTDERR().equals(testData.stderr)) {
-                    return "STDERR was wrong for `" + getTestName() + "`.\n Expected:\n\"" + testData.stdout + "\",\nbut got \"" + program.getSTDERR() + "\".";
+                    final var msg = "STDERR was wrong for `" + getTestName() + "`.\n" +
+                            "Expected:\n\"" + testData.stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
+                    fail(msg);
                 }
-                return "";
             }
         } catch (final AssemblyException ae) {
             if (testData.errorLines.isEmpty()) {
-                return "Failed to assemble `" + getTestName() + "`.";
-            }
-            if (ae.errors().errorCount() != testData.errorLines.size()) {
-                return "Mismatched number of assembly errors in `" + getTestName() + "`.";
-            }
-            final Iterator<ErrorMessage> errors = ae.errors().getErrorMessages().iterator();
-            for (final int number : testData.errorLines) {
-                ErrorMessage error = errors.next();
-                while (error.isWarning()) error = errors.next();
-                if (error.getLine() != number) {
-                    return "Expected error on line " + number + ". Found error on line " + error.getLine() + " in `" + getTestName() + "`.";
+                var builder = new StringBuilder();
+                builder.append("Failed to assemble `" + getTestName() + "` due to following error(s):\n");
+                for (final var error : ae.errors().getErrorMessages()) {
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + "\n");
                 }
+                fail(builder.toString());
             }
-            return "";
+            final var errors = ae.errors().getErrorMessages();
+            final var foundErrorLines = new HashSet<Integer>();
+            for (final var error : errors) {
+                if (error.isWarning()) continue;
+                foundErrorLines.add(error.getLine());
+            }
+            if (!testData.errorLines.equals(foundErrorLines)) {
+                final var builder = new StringBuilder();
+                builder.append("Expected and actual error lines are not equal for `" + getTestName() + "`.\n");
+                builder.append("Expected lines: " + testData.errorLines + "\n");
+                builder.append("Errors found:\n");
+                for (final var error : errors) {
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + "\n");
+                }
+                fail(builder.toString());
+            }
+
         } catch (final SimulationException se) {
-            return "Crashed while executing `" + getTestName() + "`.";
+            final var msg = "Crashed while executing `" + getTestName() + "`.\n" +
+                    "Reason: " + se.reason + ".\n" +
+                    "Value: " + se.value + ".\n" +
+                    "Message: " + se.errorMessage.getMessage() + ".";
+            fail(msg);
         }
+    }
+
+    protected final void runArithmeticTest32(
+            @NotNull final String op,
+            @NotNull final String firstValue,
+            @NotNull final String secondValue,
+            @NotNull final String result) {
+        final var finalCode = "li x1, " + firstValue + "\n" +
+                "li x2, " + secondValue + "\n" +
+                op + " x30, x1, x2\n" +
+                "li x29, " + result + "\n" +
+                "bne x30, x29, fail\n";
+        runTest32(finalCode);
+    }
+
+    protected final void runArithmeticImmediateTest32(
+            @NotNull final String op,
+            @NotNull final String firstValue,
+            @NotNull final String immediate,
+            @NotNull final String result) {
+        final var finalCode = "li x1, " + firstValue + "\n" +
+                op + " x30, x1, " + immediate + "\n" +
+                "li x29, " + result + "\n" +
+                "bne x30, x29, fail\n";
+        runTest32(finalCode);
     }
 
     protected static final class TestData {
         public @NotNull String stdin;
         public @NotNull String stdout;
         public @NotNull String stderr;
-        public @NotNull List<Integer> errorLines;
+        public @NotNull Set<Integer> errorLines;
 
         public TestData() {
             this.stdin = "";
             this.stdout = "";
             this.stderr = "";
-            this.errorLines = List.of();
+            this.errorLines = Set.of();
         }
 
         @Override
