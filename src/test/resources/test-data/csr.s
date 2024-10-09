@@ -114,8 +114,8 @@ success:
  	li a0, 42
  	li a7, 93
  	ecall
- handler:
- 	addi s0, s0, 1
+handler:
+	addi s0, s0, 1
 	csrr t0, 65
 	addi t0, t0, 4
 	csrrw zero, 65, t0

@@ -3,7 +3,6 @@ package instructions.r32;
 import instructions.AbstractInstructionTest;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("NewClassNamingConvention")
 public class ADD extends AbstractInstructionTest {
     @Test
     public void test1() {
@@ -122,11 +121,6 @@ public class ADD extends AbstractInstructionTest {
 
 
     private void runAddTest(final String first, final String second, final String result) {
-        final String builder = "li x1, " + first + "\n" +
-                "li x2, " + second + "\n" +
-                "add x30, x1, x2\n" +
-                "li x29, " + result + "\n" +
-                "bne x30, x29, fail\n";
-        runTest32(builder);
+        runArithmeticTest32("add", first, second, result);
     }
 }
