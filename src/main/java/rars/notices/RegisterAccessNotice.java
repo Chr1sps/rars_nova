@@ -28,6 +28,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Object provided to Observers of runtime access to register.
  * Observer can get the access type (R/W) and register number.
@@ -42,7 +44,7 @@ public final class RegisterAccessNotice extends AccessNotice {
      * Constructor will be called only within this package, so assume
      * register number is in valid range.
      */
-    public RegisterAccessNotice(final int type, final String registerName) {
+    public RegisterAccessNotice(final @NotNull AccessType type, final String registerName) {
         super(type);
         this.registerName = registerName;
     }
@@ -62,7 +64,7 @@ public final class RegisterAccessNotice extends AccessNotice {
      * @return a {@link java.lang.String} object
      */
     public String toString() {
-        return ((this.getAccessType() == AccessNotice.READ) ? "R " : "W ") +
+        return ((this.getAccessType() == AccessType.READ) ? "R " : "W ") +
                 "Reg " + registerName;
     }
 

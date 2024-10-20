@@ -28,6 +28,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Object provided to Observers of runtime access to memory or registers.
  * The access types READ and WRITE defined here; use subclasses defined for
@@ -37,16 +39,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version July 2005
  */
 public abstract sealed class AccessNotice implements Notice permits MemoryAccessNotice, RegisterAccessNotice {
-    /**
-     * Indicates the purpose of access was to read.
-     */
-    public static final int READ = 0;
-    /**
-     * Indicates the purpose of access was to write.
-     */
-    public static final int WRITE = 1;
 
-    private final int accessType;
+    private final AccessType accessType;
     private final Thread thread;
 
     /**
@@ -54,10 +48,7 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
      *
      * @param type a int
      */
-    protected AccessNotice(final int type) {
-        if (type != AccessNotice.READ && type != AccessNotice.WRITE) {
-            throw new IllegalArgumentException();
-        }
+    protected AccessNotice(final @NotNull AccessType type) {
         this.accessType = type;
         this.thread = Thread.currentThread();
     }
@@ -67,7 +58,7 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
      *
      * @return Access type, either AccessNotice.READ or AccessNotice.WRITE
      */
-    public int getAccessType() {
+    public @NotNull AccessType getAccessType() {
         return this.accessType;
     }
 
@@ -92,6 +83,10 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
     // true or should be for all usages
     public boolean accessIsFromRISCV() {
         return this.thread.getName().startsWith("RISCV");
+    }
+
+    public enum AccessType {
+        READ, WRITE
     }
 
 }

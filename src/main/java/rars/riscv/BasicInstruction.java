@@ -15,6 +15,17 @@ import rars.exceptions.SimulationException;
  * @version August 2003
  */
 public abstract non-sealed class BasicInstruction extends Instruction {
+    /**
+     * Length in bytes of a machine instruction. Currently just 4 because other
+     * instruction sizes defined in the specification are nor supported.
+     */
+    public static final int BASIC_INSTRUCTION_LENGTH = 4;
+
+    /**
+     * Constant <code>INSTRUCTION_LENGTH_BITS=32</code>
+     */
+    public static final int BASIC_INSTRUCTION_LENGTH_BITS = 32;
+
     private static final Logger LOGGER = LogManager.getLogger();
     private final BasicInstructionFormat instructionFormat;
     private final @NotNull String operationMask;
@@ -59,8 +70,8 @@ public abstract non-sealed class BasicInstruction extends Instruction {
         this.description = description;
         this.instructionFormat = instrFormat;
         this.operationMask = operMask.replaceAll(" ", ""); // squeeze out any/all spaces
-        if (this.operationMask.length() != Instruction.INSTRUCTION_LENGTH_BITS) {
-            BasicInstruction.LOGGER.warn("{} mask not " + Instruction.INSTRUCTION_LENGTH_BITS + " bits!", example);
+        if (this.operationMask.length() != BASIC_INSTRUCTION_LENGTH_BITS) {
+            BasicInstruction.LOGGER.warn("{} mask not " + BASIC_INSTRUCTION_LENGTH_BITS + " bits!", example);
         }
 
         this.opcodeMask = (int) Long.parseLong(this.operationMask.replaceAll("[01]", "1").replaceAll("[^01]", "0"), 2);
@@ -110,6 +121,11 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      */
     public BasicInstructionFormat getInstructionFormat() {
         return this.instructionFormat;
+    }
+
+    @Override
+    public int getInstructionLength() {
+        return BasicInstruction.BASIC_INSTRUCTION_LENGTH;
     }
 
     /**

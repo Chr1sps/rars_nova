@@ -1,12 +1,11 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.Instruction;
 import rars.riscv.InstructionSet;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -55,6 +54,6 @@ public class JAL extends BasicInstruction {
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         InstructionSet.processReturnAddress(operands[0]);
-        InstructionSet.processJump(RegisterFile.getProgramCounter() - Instruction.INSTRUCTION_LENGTH + operands[1]);
+        InstructionSet.processJump(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + operands[1]);
     }
 }

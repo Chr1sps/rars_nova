@@ -1,14 +1,13 @@
 package rars.riscv.hardware;
 
 import rars.exceptions.SimulationException;
-import rars.riscv.Instruction;
+import rars.riscv.BasicInstruction;
 import rars.simulator.Simulator;
 
 /**
  * Manages the flow of interrupts to the processor
  * <p>
  * Roughly corresponds to PLIC in the spec, but it additionally (kindof) handles
- *
  */
 // TODO: add backstepper support
 public final class InterruptController {
@@ -162,7 +161,7 @@ public final class InterruptController {
     public static SimulationException claimTrap() {
         synchronized (lock) {
             assert trapPending : "Cannot claim, no trap pending";
-            assert trapPC == RegisterFile.getProgramCounter() - Instruction.INSTRUCTION_LENGTH
+            assert trapPC == RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH
                     : "trapPC doesn't match current pc";
             trapPending = false;
             return trapSE;

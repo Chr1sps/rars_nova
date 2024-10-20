@@ -3,7 +3,21 @@ package rars.riscv;
 import org.jetbrains.annotations.NotNull;
 import rars.assembler.TokenList;
 
-public sealed interface InstructionNew extends SimulationCallback permits ExtendedInstructionNew {
+import java.util.StringTokenizer;
+
+public sealed interface InstructionNew extends SimulationCallback permits BasicInstructionNew, ExtendedInstructionNew {
+
+    /**
+     * Used by subclass constructors to extract operator mnemonic from the
+     * instruction example.
+     *
+     * @param example a {@link java.lang.String} object
+     * @return a {@link java.lang.String} object
+     */
+    static String extractOperator(final @NotNull String example) {
+        final StringTokenizer st = new StringTokenizer(example, " ,\t");
+        return st.nextToken();
+    }
 
     /**
      * Get operation mnemonic

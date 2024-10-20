@@ -26,6 +26,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package rars.tools;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
@@ -33,8 +35,6 @@ import rars.notices.MemoryAccessNotice;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.Memory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -280,7 +280,7 @@ public class InstructionCounter extends AbstractTool {
     protected void processRISCVUpdate(final AccessNotice notice) {
         if (!notice.accessIsFromRISCV())
             return;
-        if (notice.getAccessType() != AccessNotice.READ)
+        if (notice.getAccessType() != AccessNotice.AccessType.READ)
             return;
         final MemoryAccessNotice m = (MemoryAccessNotice) notice;
         final int a = m.getAddress();

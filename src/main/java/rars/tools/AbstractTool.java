@@ -1,5 +1,6 @@
 package rars.tools;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
@@ -7,7 +8,6 @@ import rars.notices.AccessNotice;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.Register;
 import rars.util.SimpleSubscriber;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -445,7 +445,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     }
 
     @Override
-    public void onNext(final AccessNotice notice) {
+    public void onNext(final @NotNull AccessNotice notice) {
         if (notice.accessIsFromRISCV()) {
             this.processRISCVUpdate(notice);
             this.updateDisplay();

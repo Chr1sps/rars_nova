@@ -263,7 +263,7 @@ public class InstructionStatistics extends AbstractTool {
             return;
 
         // check for a read access in the text segment
-        if (notice.getAccessType() == AccessNotice.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
+        if (notice.getAccessType() == AccessNotice.AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
 
             // now it is safe to make a cast of the notice
 

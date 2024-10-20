@@ -79,7 +79,7 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
      * @return second The second of the Register.
      */
     public final synchronized long getValue() {
-        this.submit(new RegisterAccessNotice(AccessNotice.READ, this.name));
+        this.submit(new RegisterAccessNotice(AccessNotice.AccessType.READ, this.name));
         return this.getValueNoNotify();
     }
 
@@ -121,7 +121,7 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
     public synchronized long setValue(final long val) {
         final long old = this.value;
         this.value = val;
-        this.submit(new RegisterAccessNotice(AccessNotice.WRITE, this.name));
+        this.submit(new RegisterAccessNotice(AccessNotice.AccessType.WRITE, this.name));
         return old;
     }
 

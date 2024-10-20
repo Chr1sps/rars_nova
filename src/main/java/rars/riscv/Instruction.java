@@ -45,15 +45,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public abstract sealed class Instruction permits BasicInstruction, ExtendedInstruction {
     /**
-     * Length in bytes of a machine instruction. Currently just 4 because other
-     * instruction sizes defined in the specification are nor supported.
-     */
-    public static final int INSTRUCTION_LENGTH = 4;
-    /**
-     * Constant <code>INSTRUCTION_LENGTH_BITS=32</code>
-     */
-    public static final int INSTRUCTION_LENGTH_BITS = 32;
-    /**
      * Characters used in instruction mask to indicate bit positions
      * for 'f'irst, 's'econd, 't'hird, 'q'uad, and 'p'enta operands .
      **/
@@ -106,9 +97,7 @@ public abstract sealed class Instruction permits BasicInstruction, ExtendedInstr
         return this.tokenList;
     }
 
-    public int getInstructionLength() {
-        return Instruction.INSTRUCTION_LENGTH;
-    }
+    public abstract int getInstructionLength();
 
     /**
      * Used to build a token list from the example instruction

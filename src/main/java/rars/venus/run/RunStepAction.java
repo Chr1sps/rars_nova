@@ -100,7 +100,7 @@ public class RunStepAction extends GuiAction {
 
                 @Override
                 public void onNext(final SimulatorNotice item) {
-                    if (item.action() != SimulatorNotice.SIMULATOR_STOP) {
+                    if (item.action() != SimulatorNotice.Action.STOP) {
                         this.subscription.request(1);
                         return;
                     }

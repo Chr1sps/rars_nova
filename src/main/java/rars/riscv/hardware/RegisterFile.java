@@ -4,7 +4,7 @@ import rars.Globals;
 import rars.Settings;
 import rars.assembler.SymbolTable;
 import rars.notices.RegisterAccessNotice;
-import rars.riscv.Instruction;
+import rars.riscv.BasicInstruction;
 
 import java.util.concurrent.Flow;
 
@@ -255,7 +255,7 @@ public final class RegisterFile {
      * branch).
      */
     public static void incrementPC() {
-        RegisterFile.programCounter.setValue(RegisterFile.programCounter.getValue() + Instruction.INSTRUCTION_LENGTH);
+        RegisterFile.programCounter.setValue(RegisterFile.programCounter.getValue() + BasicInstruction.BASIC_INSTRUCTION_LENGTH);
     }
 
     /**

@@ -2,7 +2,7 @@ package rars.exceptions;
 
 import rars.ErrorMessage;
 import rars.ProgramStatement;
-import rars.riscv.Instruction;
+import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.RegisterFile;
 import rars.util.Binary;
 
@@ -10,7 +10,6 @@ import rars.util.Binary;
  * For exceptions thrown during runtime
  * <p>
  * if cause is -1, the exception is not-handlable is user code.
- *
  */
 public class SimulationException extends Exception {
 
@@ -41,7 +40,7 @@ public class SimulationException extends Exception {
      */
     public SimulationException(final ProgramStatement ps, final String m, final ExceptionReason reason) {
         this(reason, new ErrorMessage(ps, "Runtime exception at " +
-                Binary.intToHexString(RegisterFile.getProgramCounter() - Instruction.INSTRUCTION_LENGTH) +
+                Binary.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
                 ": " + m), 0);
     }
 
@@ -72,7 +71,7 @@ public class SimulationException extends Exception {
      */
     public SimulationException(final ProgramStatement ps, final AddressErrorException aee) {
         this(aee.reason, new ErrorMessage(ps, "Runtime exception at " +
-                Binary.intToHexString(RegisterFile.getProgramCounter() - Instruction.INSTRUCTION_LENGTH) +
+                Binary.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
                 ": " + aee.getMessage()), aee.address);
     }
 

@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import org.jetbrains.annotations.NotNull;
 import rars.riscv.hardware.Memory;
 
 /**
@@ -46,7 +47,7 @@ public final class MemoryAccessNotice extends AccessNotice {
      * Constructor will be called only within this package, so assume
      * address and length are in valid ranges.
      */
-    public MemoryAccessNotice(final int type, final int address, final int length, final int value) {
+    public MemoryAccessNotice(final @NotNull AccessType type, final int address, final int length, final int value) {
         super(type);
         this.address = address;
         this.length = length;
@@ -61,7 +62,7 @@ public final class MemoryAccessNotice extends AccessNotice {
      * @param address a int
      * @param value   a int
      */
-    public MemoryAccessNotice(final int type, final int address, final int value) {
+    public MemoryAccessNotice(final @NotNull AccessType type, final int address, final int value) {
         super(type);
         this.address = address;
         this.length = Memory.WORD_LENGTH_BYTES;
@@ -101,7 +102,7 @@ public final class MemoryAccessNotice extends AccessNotice {
      * @return a {@link java.lang.String} object
      */
     public String toString() {
-        return ((this.getAccessType() == AccessNotice.READ) ? "R " : "W ") +
+        return ((this.getAccessType() == AccessType.READ) ? "R " : "W ") +
                 "Mem " + address + " " + length + "B = " + value;
     }
 }

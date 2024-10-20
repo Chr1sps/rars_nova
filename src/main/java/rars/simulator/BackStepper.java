@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.riscv.Instruction;
+import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
@@ -71,7 +71,7 @@ public class BackStepper {
 
     private static int pc() {
         // PC incremented prior to instruction simulation, so need to adjust for that.
-        return RegisterFile.getProgramCounter() - Instruction.INSTRUCTION_LENGTH;
+        return RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH;
     }
 
     /**
@@ -268,7 +268,7 @@ public class BackStepper {
      */
     public int addPCRestore(int value) {
         // adjust for second reflecting incremented PC.
-        value -= Instruction.INSTRUCTION_LENGTH;
+        value -= BasicInstruction.BASIC_INSTRUCTION_LENGTH;
         // Use "second" insead of "pc()" for second arg because
         // RegisterFile.getProgramCounter()
         // returns branch target address at this point.

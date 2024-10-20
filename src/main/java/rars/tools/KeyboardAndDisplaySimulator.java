@@ -340,7 +340,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         // If Ready bit was initially clear, they'll get the old keystroke -- serves 'em
         // right
         // for not checking!
-        if (notice.getAddress() == KeyboardAndDisplaySimulator.RECEIVER_DATA && notice.getAccessType() == AccessNotice.READ) {
+        if (notice.getAddress() == KeyboardAndDisplaySimulator.RECEIVER_DATA && notice.getAccessType() == AccessNotice.AccessType.READ) {
             this.updateMMIOControl(KeyboardAndDisplaySimulator.RECEIVER_CONTROL, KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.RECEIVER_CONTROL));
         }
         // The program has just written (stored) the transmitter (display) data
@@ -352,7 +352,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         // Also start an intruction counter that will simulate the delay of the slower
         // display device processing the character.
         if (KeyboardAndDisplaySimulator.isReadyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL) && notice.getAddress() == KeyboardAndDisplaySimulator.TRANSMITTER_DATA
-                && notice.getAccessType() == AccessNotice.WRITE) {
+                && notice.getAccessType() == AccessNotice.AccessType.WRITE) {
             this.updateMMIOControl(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL, KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL));
             this.intWithCharacterToDisplay = notice.getValue();
             if (!this.displayAfterDelay)
@@ -368,7 +368,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         // Interrupt-Enabled
         // bit had been set by the program, generate an interrupt!
         if (this.countingInstructions &&
-                notice.getAccessType() == AccessNotice.READ && Memory.inTextSegment(notice.getAddress())) {
+                notice.getAccessType() == AccessNotice.AccessType.READ && Memory.inTextSegment(notice.getAddress())) {
             this.instructionCount++;
             if (this.instructionCount >= this.transmitDelayInstructionCountLimit) {
                 if (this.displayAfterDelay)

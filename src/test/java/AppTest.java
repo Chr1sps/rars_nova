@@ -1,5 +1,4 @@
 import org.junit.jupiter.api.Test;
-import rars.ErrorMessage;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.Settings;
@@ -13,7 +12,7 @@ import utils.RarsTestBase;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Objects;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -37,14 +36,13 @@ public class AppTest extends RarsTestBase {
 
         for (final var test : Objects.requireNonNull(tests)) {
             if (test.isFile() && test.getName().toLowerCase().endsWith(".s")) {
-                final var errors = run(test.getPath(), p);
-                assertEquals("", errors, errors);
+                run(test.getPath(), p);
             }
         }
     }
 
-    public static String run(final String path, final Program p) {
-        int[] errorlines = null;
+    public static void run(final String path, final Program program) {
+        final var errorLines = new HashSet<Integer>();
         String stdin = "", stdout = "", stderr = "";
         // TODO: better config system
         // This is just a temporary solution that should work for the tests I want to
@@ -54,11 +52,10 @@ public class AppTest extends RarsTestBase {
             while (line.startsWith("#")) {
                 if (line.startsWith("#error on lines:")) {
                     final String[] linenumbers = line.replaceFirst("#error on lines:", "").split(",");
-                    errorlines = new int[linenumbers.length];
-                    for (int i = 0; i < linenumbers.length; i++) {
-                        errorlines[i] = Integer.parseInt(linenumbers[i].trim());
+                    for (final var num : linenumbers) {
+                        errorLines.add(Integer.parseInt(num.trim()));
                     }
-                } else if (line.startsWith("stdin:")) {
+                } else if (line.startsWith("#stdin:")) {
                     stdin = line.replaceFirst("#stdin:", "").replaceAll("\\\\n", "\n");
                 } else if (line.startsWith("#stdout:")) {
                     stdout = line.replaceFirst("#stdout:", "").replaceAll("\\\\n", "\n");
@@ -68,49 +65,70 @@ public class AppTest extends RarsTestBase {
                 line = br.readLine();
             }
         } catch (final FileNotFoundException fe) {
-            return "Could not find " + path;
+            fail("Could not find file: " + path + ".\n");
         } catch (final IOException io) {
-            return "Error reading " + path;
+            fail("Error reading `" + path + "`.\n");
         }
         try {
-            p.assemble(path);
-            if (errorlines != null) {
-                return "Expected asssembly error, but successfully assembled " + path;
+            program.assemble(path);
+            if (!errorLines.isEmpty()) {
+                fail("Expected assembly error, but successfully assembled `" + path + "`.\n");
             }
-            p.setup(null, stdin);
-            final Simulator.Reason r = p.simulate();
+            program.setup(null, stdin);
+            final Simulator.Reason r = program.simulate();
             if (r != Simulator.Reason.NORMAL_TERMINATION) {
-                return "Ended abnormally while executing " + path;
+                final var msg = "Ended abnormally while executing `" + path + "`.\n" +
+                        "Reason: " + r + ".\n";
+                fail(msg);
             } else {
-                if (p.getExitCode() != 42) {
-                    return "Final exit code was wrong for " + path;
+                if (program.getExitCode() != 42) {
+                    final var msg = "Final exit code was wrong for `" + path + "`.\n" +
+                            "Expected: 42, but got " + program.getExitCode() + ".";
+                    fail(msg);
                 }
-                if (!p.getSTDOUT().equals(stdout)) {
-                    return "STDOUT was wrong for " + path + "\n Expected \"" + stdout + "\" got \"" + p.getSTDOUT() + "\"";
+                if (!program.getSTDOUT().equals(stdout)) {
+                    final var msg = "STDOUT was wrong for `" + path + "`.\n" +
+                            "Expected:\n\"" + stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
+                    fail(msg);
                 }
-                if (!p.getSTDERR().equals(stderr)) {
-                    return "STDERR was wrong for " + path;
+                if (!program.getSTDERR().equals(stderr)) {
+                    final var msg = "STDERR was wrong for `" + path + "`.\n" +
+                            "Expected:\n\"" + stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
+                    fail(msg);
                 }
-                return "";
             }
         } catch (final AssemblyException ae) {
-            if (errorlines == null) {
-                return "Failed to assemble " + path;
-            }
-            if (ae.errors().errorCount() != errorlines.length) {
-                return "Mismatched number of assembly errors in" + path;
-            }
-            final Iterator<ErrorMessage> errors = ae.errors().getErrorMessages().iterator();
-            for (final int number : errorlines) {
-                ErrorMessage error = errors.next();
-                while (error.isWarning()) error = errors.next();
-                if (error.getLine() != number) {
-                    return "Expected error on line " + number + ". Found error on line " + error.getLine() + " in " + path;
+            if (errorLines.isEmpty()) {
+                final var builder = new StringBuilder();
+                builder.append("Failed to assemble `" + path + "` due to following error(s):\n");
+                for (final var error : ae.errors().getErrorMessages()) {
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + "\n");
                 }
+                fail(builder.toString());
             }
-            return "";
+            final var errors = ae.errors().getErrorMessages();
+            final var foundErrorLines = new HashSet<Integer>();
+            for (final var error : errors) {
+                if (error.isWarning()) continue;
+                foundErrorLines.add(error.getLine());
+            }
+            if (!errorLines.equals(foundErrorLines)) {
+                final var builder = new StringBuilder();
+                builder.append("Expected and actual error lines are not equal for `" + path + "`.\n");
+                builder.append("Expected lines: " + errorLines + "\n");
+                builder.append("Errors found:\n");
+                for (final var error : errors) {
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + "\n");
+                }
+                fail(builder.toString());
+            }
+
         } catch (final SimulationException se) {
-            return "Crashed while executing " + path;
+            final var msg = "Crashed while executing `" + path + "`.\n" +
+                    "Reason: " + se.reason + ".\n" +
+                    "Value: " + se.value + ".\n" +
+                    "Message: " + se.errorMessage.getMessage() + ".";
+            fail(msg);
         }
     }
 
