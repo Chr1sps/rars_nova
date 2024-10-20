@@ -863,7 +863,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public void onNext(final Notice notice) {
         switch (notice) {
             case final SimulatorNotice s -> {
-                if (s.action() == SimulatorNotice.SIMULATOR_START) {
+                if (s.action() == SimulatorNotice.Action.START) {
                     // Simulated MIPS execution starts. Respond to memory changes if running in
                     // timed
                     // or stepped mode.
@@ -879,7 +879,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             case final SettingsNotice ignored -> this.updateRowHeight();
             case final MemoryAccessNotice m -> {
                 // NOTE: each register is a separate Observable
-                if (m.getAccessType() == AccessNotice.WRITE) {
+                if (m.getAccessType() == AccessNotice.AccessType.WRITE) {
                     // Uses the same highlighting technique as for Text Segment -- see
                     // AddressCellRenderer class in DataSegmentWindow.java.
                     final var address = m.getAddress();

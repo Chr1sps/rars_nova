@@ -52,6 +52,6 @@ public class AUIPC extends BasicInstruction {
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         RegisterFile.updateRegister(operands[0],
-                RegisterFile.getProgramCounter() - INSTRUCTION_LENGTH + ((long) operands[1] << 12));
+                RegisterFile.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + ((long) operands[1] << 12));
     }
 }

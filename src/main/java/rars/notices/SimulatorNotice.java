@@ -13,23 +13,19 @@ import rars.venus.run.RunSpeedPanel;
  * @version January 2009
  */
 
-public record SimulatorNotice(int action, int maxSteps, double runSpeed, int programCounter, Simulator.Reason reason,
+public record SimulatorNotice(Action action, int maxSteps, double runSpeed, int programCounter, Simulator.Reason reason,
                               SimulationException exception, boolean done) implements Notice {
-    /**
-     * Constant <code>SIMULATOR_START=0</code>
-     */
-    public static final int SIMULATOR_START = 0;
-    /**
-     * Constant <code>SIMULATOR_STOP=1</code>
-     */
-    public static final int SIMULATOR_STOP = 1;
 
     @Override
     public String toString() {
-        return ((this.action == SimulatorNotice.SIMULATOR_START) ? "START " : "STOP  ") +
+        return ((this.action == Action.START) ? "START " : "STOP  ") +
                 "Max Steps " + this.maxSteps + " " +
                 "Speed "
                 + ((this.runSpeed == RunSpeedPanel.UNLIMITED_SPEED) ? "unlimited " : this.runSpeed + " inst/sec") +
                 "Prog Ctr " + this.programCounter;
+    }
+
+    public enum Action {
+        START, STOP
     }
 }

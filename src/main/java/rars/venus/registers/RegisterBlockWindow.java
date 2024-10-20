@@ -251,7 +251,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     public void onNext(final Notice notice) {
         switch (notice) {
             case final SimulatorNotice s -> {
-                if (s.action() == SimulatorNotice.SIMULATOR_START) {
+                if (s.action() == SimulatorNotice.Action.START) {
                     // Simulated MIPS execution starts. Respond to memory changes if running in
                     // timed
                     // or stepped mode.
@@ -267,7 +267,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             case final SettingsNotice ignored -> this.updateRowHeight();
             case final RegisterAccessNotice a -> {
                 // NOTE: each register is a separate Observable
-                if (a.getAccessType() == AccessNotice.WRITE) {
+                if (a.getAccessType() == AccessNotice.AccessType.WRITE) {
                     // Uses the same highlighting technique as for Text Segment -- see
                     // AddressCellRenderer class in DataSegmentWindow.java.
                     this.highlighting = true;

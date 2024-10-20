@@ -162,7 +162,7 @@ public class BitmapDisplay extends AbstractTool {
      */
     @Override
     protected void processRISCVUpdate(final AccessNotice accessNotice) {
-        if (accessNotice.getAccessType() == AccessNotice.WRITE) {
+        if (accessNotice.getAccessType() == AccessNotice.AccessType.WRITE) {
             this.updateColorForAddress((MemoryAccessNotice) accessNotice);
         }
     }

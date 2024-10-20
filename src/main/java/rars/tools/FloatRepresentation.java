@@ -179,7 +179,7 @@ public class FloatRepresentation extends AbstractTool {
 
     @Override
     public void onNext(final AccessNotice notice) {
-        if (notice.getAccessType() == AccessNotice.WRITE) {
+        if (notice.getAccessType() == AccessNotice.AccessType.WRITE) {
             this.updateDisplays(new FlavorsOfFloat().buildOneFromInt((int) this.attachedRegister.getValue()));
         }
         this.subscription.request(1);

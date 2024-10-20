@@ -58,13 +58,13 @@
 
 package rars.tools;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.hardware.Memory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -87,19 +87,18 @@ public class InstructionMemoryDump extends AbstractTool {
     private static final String name = "Instruction/Memory Dump";
     private static final String version = "Version 1.0 (John Owens)";
     private static final String heading = "Dumps every executed instruction and data memory access to a file";
-
+    /**
+     * Instructions and memory accesses get logged here
+     */
+    private final StringBuffer log = new StringBuffer();
+    private final int lowDataSegmentAddress = Memory.dataSegmentBaseAddress;
+    private final int highDataSegmentAddress = Memory.stackBaseAddress;
     /**
      * The last address we saw. We ignore it because the only way for a
      * program to execute twice the same instruction is to enter an infinite
      * loop, which is not insteresting in the POV of counting instructions.
      */
     private int lastAddress = -1;
-
-    /**
-     * Instructions and memory accesses get logged here
-     */
-    private final StringBuffer log = new StringBuffer();
-
     /**
      * Filename when we dump the log
      */
@@ -148,9 +147,6 @@ public class InstructionMemoryDump extends AbstractTool {
         return InstructionMemoryDump.name;
     }
 
-    private final int lowDataSegmentAddress = Memory.dataSegmentBaseAddress;
-    private final int highDataSegmentAddress = Memory.stackBaseAddress;
-
     /**
      * {@inheritDoc}
      */
@@ -175,7 +171,7 @@ public class InstructionMemoryDump extends AbstractTool {
 
         // is a in the text segment (program)?
         if ((a >= Memory.textBaseAddress) && (a < Memory.textLimitAddress)) {
-            if (notice.getAccessType() != AccessNotice.READ)
+            if (notice.getAccessType() != AccessNotice.AccessType.READ)
                 return;
             if (a == this.lastAddress)
                 return;
@@ -199,9 +195,9 @@ public class InstructionMemoryDump extends AbstractTool {
 
         // is a in the data segment?
         if ((a >= this.lowDataSegmentAddress) && (a < this.highDataSegmentAddress)) {
-            if (notice.getAccessType() == AccessNotice.READ)
+            if (notice.getAccessType() == AccessNotice.AccessType.READ)
                 this.log.append("L: 0x");
-            if (notice.getAccessType() == AccessNotice.WRITE)
+            if (notice.getAccessType() == AccessNotice.AccessType.WRITE)
                 this.log.append("S: 0x");
             this.log.append(Integer.toUnsignedString(a, 16)).append("\n");
         }

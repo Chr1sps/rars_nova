@@ -8,7 +8,6 @@ import rars.Settings;
 import rars.exceptions.*;
 import rars.notices.SimulatorNotice;
 import rars.riscv.BasicInstruction;
-import rars.riscv.Instruction;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.RegisterFile;
@@ -271,7 +270,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
         }
 
         private void startExecution() {
-            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.SIMULATOR_START,
+            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.START,
                     this.maxSteps,
                     (Globals.getGui() != null || Globals.runSpeedPanelExists)
                             ? RunSpeedPanel.getInstance().getRunSpeed()
@@ -285,7 +284,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
             SystemIO.flush(true);
             if (done)
                 SystemIO.resetFiles(); // close any files opened in the process of simulating
-            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.SIMULATOR_STOP,
+            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.STOP,
                     this.maxSteps,
                     (Globals.getGui() != null || Globals.runSpeedPanelExists)
                             ? RunSpeedPanel.getInstance().getRunSpeed()
@@ -493,7 +492,7 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                             }
                         } else if (pendingTrap) { // if we have a pending trap and aren't handling an interrupt it must
                             // be handled
-                            if (!this.handleTrap(InterruptController.claimTrap(), this.pc - Instruction.INSTRUCTION_LENGTH)) {
+                            if (!this.handleTrap(InterruptController.claimTrap(), this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH)) {
                                 return;
                             }
                         }

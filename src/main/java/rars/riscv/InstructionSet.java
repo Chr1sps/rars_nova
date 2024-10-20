@@ -123,7 +123,7 @@ public class InstructionSet {
     public static void processBranch(final int displacement) {
         // Decrement needed because PC has already been incremented
         RegisterFile
-                .setProgramCounter(RegisterFile.getProgramCounter() + displacement - Instruction.INSTRUCTION_LENGTH);
+                .setProgramCounter(RegisterFile.getProgramCounter() + displacement - BasicInstruction.BASIC_INSTRUCTION_LENGTH);
     }
 
     /**

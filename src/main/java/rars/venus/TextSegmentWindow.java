@@ -358,7 +358,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 // notification duty.
                 // This will occur only if running program has written to text segment
                 // (self-modifying code)
-                if (m.getAccessType() == AccessNotice.WRITE) {
+                if (m.getAccessType() == AccessNotice.AccessType.WRITE) {
                     final int address = m.getAddress();
                     final int value = m.getValue();
                     final String strValue = Binary.intToHexString(m.getValue());
@@ -424,7 +424,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     // write update.
                     try {
                         Globals.getGui().getMainPane().getExecutePane().getDataSegmentWindow()
-                                .onNext(new MemoryAccessNotice(AccessNotice.WRITE, address, value));
+                                .onNext(new MemoryAccessNotice(AccessNotice.AccessType.WRITE, address, value));
                     } catch (final Exception e) {
                         // Not sure if anything bad can happen in this sequence, but if anything does we
                         // can let it go.

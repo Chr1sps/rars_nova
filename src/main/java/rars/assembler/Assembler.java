@@ -337,7 +337,7 @@ public class Assembler {
                                 this.fileCurrentlyBeingAssembled,
                                 (instrNumber == 0) ? statement.getSource() : "", newTokenList,
                                 newTokenList, instr, this.textAddress.get(), statement.getSourceLine());
-                        this.textAddress.increment(Instruction.INSTRUCTION_LENGTH);
+                        this.textAddress.increment(BasicInstruction.BASIC_INSTRUCTION_LENGTH);
                         ps.buildBasicStatementFromBasicInstruction(this.errors);
                         machineList.add(ps);
                     } // end of FOR loop, repeated for each template in list.

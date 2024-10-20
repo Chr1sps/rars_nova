@@ -16,55 +16,28 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.fail;
+import static rars.util.Utils.getStacktraceString;
 
 public abstract class AbstractInstructionTest extends RarsTestBase {
 
-    protected final void runTest32(@NotNull final String code) {
-        runTest(code, false, new TestData());
-    }
-
-    protected final void runTest32(@NotNull final String code, @NotNull final TestData testData) {
-        runTest(code, false, testData);
-    }
-
-    /**
-     * Runs a test with the given code for RV64 with no standard input/output and no errors.
-     *
-     * @param code A {@link String} containing the code to run.
-     */
-    protected final void runTest64(@NotNull final String code) {
-        runTest(code, true, new TestData());
-    }
-
-    protected final void runTest64(@NotNull final String code, @NotNull final TestData testData) {
-        runTest(code, true, testData);
-    }
-
-    /**
-     * Runs a test with the given code and test data.
-     *
-     * @param code     A {@link String} containing the code to run.
-     * @param is64     A boolean indicating whether the test is for RV64.
-     * @param testData A {@link TestData} object containing the test data (STD{IN,OUT,ERR}, error lines).
-     */
-    protected final void runTest(@NotNull final String code, final boolean is64, final TestData testData) {
-        Globals.initialize();
-        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, is64);
-        InstructionSet.rv64 = is64;
-        Globals.instructionSet.populate();
-
-        final var opt = new Options();
-        opt.startAtMain = true;
-        opt.maxSteps = 1000;
-        final var program = new Program(opt);
-
-        final var header = """
+    private static @NotNull String getDecoratedCode(@NotNull final String code, @NotNull final String dataPrelude) {
+        var header = """
+                # PRELUDE
                 .text
                 main:
                 
+                # TEST CODE
                 """;
+        if (!dataPrelude.isEmpty()) {
+            header = """
+                    # DATA
+                    .data
+                    """ + dataPrelude + "\n" + header;
+        }
 
         final var passAndFail = """
+                
+                # EPILOGUE
                 pass:
                     li a0, 42
                     li a7, 93
@@ -76,6 +49,57 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 """;
 
         final var finalCode = header + code + passAndFail;
+        return finalCode;
+    }
+
+    protected final void runTest32(@NotNull final String code) {
+        runTest(code, "", false, new TestData());
+    }
+
+    protected final void runTest32(@NotNull final String code, @NotNull final TestData testData) {
+        runTest(code, "", false, testData);
+    }
+
+    /**
+     * Runs a test with the given code for RV64 with no standard input/output and no errors.
+     *
+     * @param code A {@link String} containing the code to run.
+     */
+    protected final void runTest64(@NotNull final String code) {
+        runTest(code, "", true, new TestData());
+    }
+
+    protected final void runTest64(@NotNull final String code, @NotNull final String data) {
+        runTest(code, data, true, new TestData());
+    }
+
+    protected final void runTest64(@NotNull final String code, @NotNull final TestData testData) {
+        runTest(code, "", true, testData);
+    }
+
+    /**
+     * Runs a test with the given code and test data.
+     *
+     * @param code     A {@link String} containing the code to run.
+     * @param is64     A boolean indicating whether the test is for RV64.
+     * @param testData A {@link TestData} object containing the test data (STD{IN,OUT,ERR}, error lines).
+     */
+    private void runTest(@NotNull final String code, @NotNull final String dataPrelude, final boolean is64, final TestData testData) {
+        Globals.initialize();
+        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, is64);
+        InstructionSet.rv64 = is64;
+        Globals.instructionSet.populate();
+
+        final var opt = new Options();
+        opt.startAtMain = true;
+        opt.maxSteps = 1000;
+        final var program = new Program(opt);
+
+
+        final var finalCode = getDecoratedCode(code, dataPrelude);
+        System.out.println("═══════GENERATED═CODE═══════");
+        System.out.println(finalCode);
+        System.out.println("════════════════════════════");
         doRun(finalCode, program, testData);
     }
 
@@ -110,7 +134,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
             }
         } catch (final AssemblyException ae) {
             if (testData.errorLines.isEmpty()) {
-                var builder = new StringBuilder();
+                final var builder = new StringBuilder();
                 builder.append("Failed to assemble `" + getTestName() + "` due to following error(s):\n");
                 for (final var error : ae.errors().getErrorMessages()) {
                     builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + "\n");
@@ -136,9 +160,11 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
 
         } catch (final SimulationException se) {
             final var msg = "Crashed while executing `" + getTestName() + "`.\n" +
-                    "Reason: " + se.reason + ".\n" +
-                    "Value: " + se.value + ".\n" +
-                    "Message: " + se.errorMessage.getMessage() + ".";
+                    "Reason: " + se.reason + "\n" +
+                    "Value: " + se.value + "\n" +
+                    "Message: " + se.errorMessage.getMessage() + "\n" +
+                    "Stacktrace: " + getStacktraceString(se) + "\n";
+
             fail(msg);
         }
     }

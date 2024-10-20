@@ -41,7 +41,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version October 2006
  */
-public interface PropertiesFile {
+public final class PropertiesFile {
+
+    private PropertiesFile() {
+    }
 
     /**
      * Produce Properties (a Hashtable) object containing first-second pairs
@@ -52,7 +55,7 @@ public interface PropertiesFile {
      *             it is assumed to be ".properties" and is added here.
      * @return Properties (Hashtable) of first-second pairs read from the file.
      */
-    static @NotNull Properties loadPropertiesFromFile(@NotNull final String file) {
+    public static @NotNull Properties loadPropertiesFromFile(@NotNull final String file) {
         final Properties properties = new Properties();
         try {
             final InputStream is = PropertiesFile.class.getResourceAsStream("/" + file + ".properties");

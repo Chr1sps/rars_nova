@@ -126,7 +126,7 @@ public class RunGoAction extends GuiAction {
 
                     @Override
                     public void onNext(final SimulatorNotice notice) {
-                        if (notice.action() != SimulatorNotice.SIMULATOR_STOP) {
+                        if (notice.action() != SimulatorNotice.Action.STOP) {
                             this.subscription.request(1);
                             return;
                         }

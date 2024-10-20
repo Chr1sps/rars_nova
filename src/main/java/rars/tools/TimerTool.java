@@ -283,9 +283,9 @@ public class TimerTool extends AbstractTool {
 
         @Override
         public void onNext(final MemoryAccessNotice notice) {
-            final int accessType = notice.getAccessType();
+            final var accessType = notice.getAccessType();
             // If is was a WRITE operation
-            if (accessType == 1) {
+            if (accessType == MemoryAccessNotice.AccessType.WRITE) {
                 final int address = notice.getAddress();
                 final int value = notice.getValue();
 

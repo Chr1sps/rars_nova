@@ -122,6 +122,20 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     }
 
     /**
+     * Extracts the target address of the branch.
+     *
+     * @param stmt the branch instruction
+     * @return the address of the instruction that is executed if the branch is
+     * taken
+     */
+    protected static int extractBranchAddress(final ProgramStatement stmt) {
+        assert stmt.getInstruction() instanceof Branch : "Should only be called on branch instructions";
+        final int offset = stmt.getOperand(2);
+
+        return stmt.getAddress() + (offset << 1);
+    }
+
+    /**
      * Adds BHTSimulator as observer of the text segment.
      */
     @Override
@@ -270,20 +284,6 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     }
 
     /**
-     * Extracts the target address of the branch.
-     *
-     * @param stmt the branch instruction
-     * @return the address of the instruction that is executed if the branch is
-     * taken
-     */
-    protected static int extractBranchAddress(final ProgramStatement stmt) {
-        assert stmt.getInstruction() instanceof Branch : "Should only be called on branch instructions";
-        final int offset = stmt.getOperand(2);
-
-        return stmt.getAddress() + (offset << 1);
-    }
-
-    /**
      * {@inheritDoc}
      * <p>
      * Callback for text segment access by the RISCV simulator.
@@ -301,7 +301,7 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
         if (!notice.accessIsFromRISCV())
             return;
 
-        if (notice.getAccessType() == AccessNotice.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
+        if (notice.getAccessType() == AccessNotice.AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
 
             // now it is safe to make a cast of the notice
 
