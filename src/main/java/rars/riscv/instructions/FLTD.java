@@ -1,22 +1,24 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float64;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Comparisons;
+import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.operations.Comparisons;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FLTD class.</p>
  */
-public class FLTD extends BasicInstruction {
+public final class FLTD extends BasicInstruction {
+    public static final FLTD INSTANCE = new FLTD();
+
     /**
      * <p>Constructor for FLTD.</p>
      */
-    public FLTD() {
+    private FLTD() {
         super("flt.d t1, f1, f2", "Floating Less Than (64 bit): if f1 < f2, set t1 to 1, else set t1 to 0",
                 BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 001 fffff 1010011");
     }

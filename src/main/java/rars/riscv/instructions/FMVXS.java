@@ -37,11 +37,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FMVXS class.</p>
  */
-public class FMVXS extends BasicInstruction {
+public final class FMVXS extends BasicInstruction {
+    public static final FMVXS INSTANCE = new FMVXS();
+
     /**
      * <p>Constructor for FMVXS.</p>
      */
-    public FMVXS() {
+    private FMVXS() {
         super("fmv.x.s t1, f1", "Move float: move bits representing a float to an integer register",
                 BasicInstructionFormat.I_FORMAT, "1110000 00000 sssss 000 fffff 1010011");
     }

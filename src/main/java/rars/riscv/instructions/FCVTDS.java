@@ -1,23 +1,25 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
+import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.types.Float64;
-import rars.ProgramStatement;
-import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FCVTDS class.</p>
  */
-public class FCVTDS extends BasicInstruction {
+public final class FCVTDS extends BasicInstruction {
+    public static final FCVTDS INSTANCE = new FCVTDS();
+
     /**
      * <p>Constructor for FCVTDS.</p>
      */
-    public FCVTDS() {
+    private FCVTDS() {
         super("fcvt.d.s f1, f2, dyn", "Convert a float to a double: Assigned the second of f2 to f1",
                 BasicInstructionFormat.R4_FORMAT, "0100001 00000 sssss ttt fffff 1010011");
     }

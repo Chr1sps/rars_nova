@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Comparisons;
+import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.operations.Comparisons;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -39,11 +39,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FLTS class.</p>
  */
-public class FLTS extends BasicInstruction {
+public final class FLTS extends BasicInstruction {
+    public static final FLTS INSTANCE = new FLTS();
+
     /**
      * <p>Constructor for FLTS.</p>
      */
-    public FLTS() {
+    private FLTS() {
         super("flt.s t1, f1, f2", "Floating Less Than: if f1 < f2, set t1 to 1, else set t1 to 0",
                 BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 001 fffff 1010011");
     }

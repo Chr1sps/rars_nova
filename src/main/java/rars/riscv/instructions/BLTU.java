@@ -34,11 +34,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>BLTU class.</p>
  */
-public class BLTU extends Branch {
+public final class BLTU extends Branch {
+    public static final BLTU INSTANCE = new BLTU();
+
     /**
      * <p>Constructor for BLTU.</p>
      */
-    public BLTU() {
+    private BLTU() {
         super("bltu t1,t2,label",
                 "Branch if less than (unsigned): Branch to statement at label's address if t1 is less than t2 (with an unsigned interpretation)",
                 "110");

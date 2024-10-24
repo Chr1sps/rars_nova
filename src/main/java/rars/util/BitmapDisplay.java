@@ -42,7 +42,7 @@ public class BitmapDisplay extends JFrame implements SimpleSubscriber<MemoryAcce
 
         try {
             Memory.getInstance().subscribe(this, baseAddress, upperAddressBound);
-        } catch (AddressErrorException e) {
+        } catch (final AddressErrorException e) {
             throw new RuntimeException(e);
         }
     }
@@ -53,7 +53,7 @@ public class BitmapDisplay extends JFrame implements SimpleSubscriber<MemoryAcce
         this.upperAddressBound = newBaseAddress + (this.displayWidth * this.displayHeight * Memory.WORD_LENGTH_BYTES);
         try {
             Memory.getInstance().subscribe(this, this.baseAddress, this.upperAddressBound);
-        } catch (AddressErrorException e) {
+        } catch (final AddressErrorException e) {
             throw new RuntimeException(e);
         }
     }
@@ -77,7 +77,7 @@ public class BitmapDisplay extends JFrame implements SimpleSubscriber<MemoryAcce
     }
 
     @Override
-    public void onSubscribe(Flow.Subscription subscription) {
+    public void onSubscribe(final Flow.Subscription subscription) {
         this.subscription = subscription;
         this.subscription.request(1);
     }

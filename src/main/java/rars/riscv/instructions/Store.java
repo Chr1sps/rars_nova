@@ -55,19 +55,6 @@ public abstract class Store extends BasicInstruction {
     }
 
     /**
-     * <p>Constructor for Store.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct       a {@link java.lang.String} object
-     * @param rv64        a boolean
-     */
-    public Store(@NotNull final String usage, final String description, final String funct, final boolean rv64) {
-        super(usage, description, BasicInstructionFormat.S_FORMAT,
-                "sssssss fffff ttttt " + funct + " sssss 0100011", rv64);
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override

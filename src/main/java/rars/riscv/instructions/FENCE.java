@@ -33,13 +33,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>FENCE class.</p>
- *
  */
-public class FENCE extends BasicInstruction {
+public final class FENCE extends BasicInstruction {
+    public static final FENCE INSTANCE = new FENCE();
+
     /**
      * <p>Constructor for FENCE.</p>
      */
-    public FENCE() {
+    private FENCE() {
         super("fence 1, 1",
                 "Ensure that IO and memory accesses before the fence happen before the following IO and memory accesses as viewed by a different thread",
                 BasicInstructionFormat.I_FORMAT, "0000 ffff ssss 00000 000 00000 0001111");

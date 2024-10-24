@@ -1,23 +1,25 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FSD class.</p>
  */
-public class FSD extends BasicInstruction {
+public final class FSD extends BasicInstruction {
+    public static final FSD INSTANCE = new FSD();
+
     /**
      * <p>Constructor for FSD.</p>
      */
-    public FSD() {
+    private FSD() {
         super("fsd f1, -100(t1)", "Store a double to memory",
                 BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 011 sssss 0100111");
     }

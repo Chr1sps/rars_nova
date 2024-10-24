@@ -36,11 +36,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FSGNJNS class.</p>
  */
-public class FSGNJNS extends BasicInstruction {
+public final class FSGNJNS extends BasicInstruction {
+    public static final FSGNJNS INSTANCE = new FSGNJNS();
+
     /**
      * <p>Constructor for FSGNJNS.</p>
      */
-    public FSGNJNS() {
+    private FSGNJNS() {
         super("fsgnjn.s f1, f2, f3",
                 "Floating point sign injection (inverted):  replace the sign bit of f2 with the opposite of sign bit of f3 and assign it to f1",
                 BasicInstructionFormat.R_FORMAT, "0010000 ttttt sssss 001 fffff 1010011");

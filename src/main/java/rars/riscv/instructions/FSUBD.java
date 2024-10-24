@@ -1,18 +1,20 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float64;
-import rars.jsoftfloat.operations.Arithmetic;
 import org.jetbrains.annotations.NotNull;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Arithmetic;
+import rars.jsoftfloat.types.Float64;
 
 /**
  * <p>FSUBD class.</p>
  */
-public class FSUBD extends Double {
+public final class FSUBD extends Double {
+    public static final FSUBD INSTANCE = new FSUBD();
+
     /**
      * <p>Constructor for FSUBD.</p>
      */
-    public FSUBD() {
+    private FSUBD() {
         super("fsub.d", "Floating SUBtract (64 bit): assigns f1 to f2 - f3", "0000101");
     }
 

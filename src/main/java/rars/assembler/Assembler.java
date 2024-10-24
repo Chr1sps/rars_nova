@@ -10,6 +10,7 @@ import rars.exceptions.AssemblyException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.ExtendedInstruction;
 import rars.riscv.Instruction;
+import rars.riscv.Instructions;
 import rars.riscv.hardware.Memory;
 import rars.util.Binary;
 import rars.util.SystemIO;
@@ -18,6 +19,7 @@ import rars.venus.NumberDisplayBaseChooser;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /*
  Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
@@ -329,7 +331,7 @@ public class Assembler {
                         // statement, add to list.
                         final TokenList newTokenList = new Tokenizer().tokenizeLine(sourceLine,
                                 instruction, this.errors, false);
-                        final ArrayList<Instruction> instrMatches = this.matchInstruction(newTokenList.get(0));
+                        final var instrMatches = this.matchInstruction(newTokenList.get(0));
                         final Instruction instr = OperandFormat.bestOperandMatch(newTokenList,
                                 instrMatches);
                         // Only first generated instruction is linked to original source
@@ -550,7 +552,7 @@ public class Assembler {
         // is not
         // yet implemented.
         if (!this.inDataSegment) {
-            final ArrayList<Instruction> instrMatches = this.matchInstruction(token);
+            final var instrMatches = this.matchInstruction(token);
             if (instrMatches == null)
                 return ret;
             // OK, we've got an operator match, let's check the operands.
@@ -868,7 +870,7 @@ public class Assembler {
     // //////////////////////////////////////////////////////////////////////////////////
     // Given token, find the corresponding Instruction object. If token was not
     // recognized as OPERATOR, there is a problem.
-    private @Nullable ArrayList<Instruction> matchInstruction(final @NotNull Token token) {
+    private @Nullable List<Instruction> matchInstruction(final @NotNull Token token) {
         if (token.getType() != TokenType.OPERATOR) {
             if (token.getSourceProgram().getLocalMacroPool()
                     .matchesAnyMacroName(token.getValue()))
@@ -883,13 +885,14 @@ public class Assembler {
                                 + "\" is not a recognized operator"));
             return null;
         }
-        final ArrayList<Instruction> inst = Globals.instructionSet.matchOperator(token.getValue());
-        if (inst == null) { // This should NEVER happen...
+        final List<Instruction> instructions = Instructions.matchOperator(token.getValue());
+        if (instructions.isEmpty()) { // This should NEVER happen...
             this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                     token.getStartPos(), "Internal Assembler error: \"" + token.getValue()
                     + "\" tokenized OPERATOR then not recognized"));
+            return null;
         }
-        return inst;
+        return instructions;
     } // matchInstruction()
 
     // //////////////////////////////////////////////////////////////////////////////////

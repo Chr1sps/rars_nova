@@ -30,11 +30,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>ADD class.</p>
  */
-public class ADD extends Arithmetic {
+public final class ADD extends Arithmetic {
+    public static final ADD INSTANCE = new ADD();
+
     /**
      * <p>Constructor for ADD.</p>
      */
-    public ADD() {
+    private ADD() {
         super("add t1,t2,t3", "Addition: set t1 to (t2 plus t3)",
                 "0000000", "000");
     }

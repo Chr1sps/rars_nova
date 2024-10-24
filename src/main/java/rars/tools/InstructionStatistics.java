@@ -158,11 +158,11 @@ public class InstructionStatistics extends AbstractTool {
                 || instruction instanceof SLTI || instruction instanceof SLTIU
                 || instruction instanceof LUI || instruction instanceof AUIPC)
             return InstructionStatistics.CATEGORY_ALU; // addi, addiw, andi, ori, xori, slti, sltiu, lui, auipc
-        if (instruction instanceof SLLI || instruction instanceof SLLI64 || instruction instanceof SLLIW)
+        if (instruction instanceof SLLI || instruction instanceof SLLIW)
             return InstructionStatistics.CATEGORY_ALU; // slli, slliw
-        if (instruction instanceof SRLI || instruction instanceof SRLI64 || instruction instanceof SRLIW)
+        if (instruction instanceof SRLI || instruction instanceof SRLIW)
             return InstructionStatistics.CATEGORY_ALU; // srli, srliw
-        if (instruction instanceof SRAI || instruction instanceof SRAI64 || instruction instanceof SRAIW)
+        if (instruction instanceof SRAI || instruction instanceof SRAIW)
             return InstructionStatistics.CATEGORY_ALU; // srai, sraiw
         if (instruction instanceof JAL || instruction instanceof JALR)
             return InstructionStatistics.CATEGORY_JUMP; // jal, jalr

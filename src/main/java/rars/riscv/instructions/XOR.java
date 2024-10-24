@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>XOR class.</p>
- *
  */
-public class XOR extends Arithmetic {
+public final class XOR extends Arithmetic {
+    public static final XOR INSTANCE = new XOR();
+
     /**
      * <p>Constructor for XOR.</p>
      */
-    public XOR() {
+    private XOR() {
         super("xor t1,t2,t3", "Bitwise XOR : Set t1 to bitwise XOR of t2 and t3",
                 "0000000", "100");
     }

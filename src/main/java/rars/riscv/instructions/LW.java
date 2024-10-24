@@ -32,13 +32,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>LW class.</p>
- *
  */
-public class LW extends Load {
+public final class LW extends Load {
+    public static final LW INSTANCE = new LW();
+
     /**
      * <p>Constructor for LW.</p>
      */
-    public LW() {
+    private LW() {
         super("lw t1, -100(t2)", "Set t1 to contents of effective memory word address", "010");
     }
 

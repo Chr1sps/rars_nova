@@ -1,18 +1,20 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float64;
-import rars.jsoftfloat.operations.Arithmetic;
 import org.jetbrains.annotations.NotNull;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Arithmetic;
+import rars.jsoftfloat.types.Float64;
 
 /**
  * <p>FDIVD class.</p>
  */
-public class FDIVD extends Double {
+public final class FDIVD extends Double {
+    public static final FDIVD INSTANCE = new FDIVD();
+
     /**
      * <p>Constructor for FDIVD.</p>
      */
-    public FDIVD() {
+    private FDIVD() {
         super("fdiv.d", "Floating DIVide (64 bit): assigns f1 to f2 / f3", "0001101");
     }
 

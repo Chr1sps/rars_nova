@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>ANDI class.</p>
- *
  */
-public class ANDI extends ImmediateInstruction {
+public final class ANDI extends ImmediateInstruction {
+    public static final ImmediateInstruction INSTANCE = new ANDI();
+
     /**
      * <p>Constructor for ANDI.</p>
      */
-    public ANDI() {
+    private ANDI() {
         super("andi t1,t2,-100",
                 "Bitwise AND immediate : Set t1 to bitwise AND of t2 and sign-extended 12-bit immediate", "111");
     }

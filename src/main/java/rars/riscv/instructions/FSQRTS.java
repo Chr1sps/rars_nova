@@ -1,14 +1,14 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Arithmetic;
+import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.jsoftfloat.operations.Arithmetic;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -40,11 +40,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FSQRTS class.</p>
  */
-public class FSQRTS extends BasicInstruction {
+public final class FSQRTS extends BasicInstruction {
+    public static final FSQRTS INSTANCE = new FSQRTS();
+
     /**
      * <p>Constructor for FSQRTS.</p>
      */
-    public FSQRTS() {
+    private FSQRTS() {
         super("fsqrt.s f1, f2, dyn", "Floating SQuare RooT: Assigns f1 to the square root of f2",
                 BasicInstructionFormat.I_FORMAT, "0101100 00000 sssss ttt fffff 1010011");
     }

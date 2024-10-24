@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Comparisons;
+import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.operations.Comparisons;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -39,11 +39,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FLES class.</p>
  */
-public class FLES extends BasicInstruction {
+public final class FLES extends BasicInstruction {
+    public static final FLES INSTANCE = new FLES();
+
     /**
      * <p>Constructor for FLES.</p>
      */
-    public FLES() {
+    private FLES() {
         super("fle.s t1, f1, f2", "Floating Less than or Equals: if f1 <= f2, set t1 to 1, else set t1 to 0",
                 BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 000 fffff 1010011");
     }

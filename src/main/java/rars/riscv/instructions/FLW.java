@@ -1,14 +1,14 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -40,11 +40,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FLW class.</p>
  */
-public class FLW extends BasicInstruction {
+public final class FLW extends BasicInstruction {
+    public static final FLW INSTANCE = new FLW();
+
     /**
      * <p>Constructor for FLW.</p>
      */
-    public FLW() {
+    private FLW() {
         super("flw f1, -100(t1)", "Load a float from memory",
                 BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 0000111");
     }

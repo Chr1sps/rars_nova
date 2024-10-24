@@ -1,18 +1,20 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
-import rars.jsoftfloat.operations.Comparisons;
 import org.jetbrains.annotations.NotNull;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Comparisons;
+import rars.jsoftfloat.types.Float32;
 
 /**
  * <p>FMINS class.</p>
  */
-public class FMINS extends Floating {
+public final class FMINS extends Floating {
+    public static final FMINS INSTANCE = new FMINS();
+
     /**
      * <p>Constructor for FMINS.</p>
      */
-    public FMINS() {
+    private FMINS() {
         super("fmin.s", "Floating MINimum: assigns f1 to the smaller of f1 and f3", "0010100", "000");
     }
 

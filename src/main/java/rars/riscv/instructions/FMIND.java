@@ -1,18 +1,20 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float64;
-import rars.jsoftfloat.operations.Comparisons;
 import org.jetbrains.annotations.NotNull;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Comparisons;
+import rars.jsoftfloat.types.Float64;
 
 /**
  * <p>FMIND class.</p>
  */
-public class FMIND extends Double {
+public final class FMIND extends Double {
+    public static final FMIND INSTANCE = new FMIND();
+
     /**
      * <p>Constructor for FMIND.</p>
      */
-    public FMIND() {
+    private FMIND() {
         super("fmin.d", "Floating MINimum (64 bit): assigns f1 to the smaller of f1 and f3", "0010101", "000");
     }
 

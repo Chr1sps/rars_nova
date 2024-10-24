@@ -30,11 +30,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>DIVU class.</p>
  */
-public class DIVU extends Arithmetic {
+public final class DIVU extends Arithmetic {
+    public static final DIVU INSTANCE = new DIVU();
+
     /**
      * <p>Constructor for DIVU.</p>
      */
-    public DIVU() {
+    private DIVU() {
         super("divu t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division",
                 "0000001", "101");
     }

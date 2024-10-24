@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.InstructionSet;
+import rars.riscv.Instructions;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -50,23 +50,9 @@ public abstract class Arithmetic extends BasicInstruction {
      * @param funct7      a {@link java.lang.String} object
      * @param funct3      a {@link java.lang.String} object
      */
-    public Arithmetic(@NotNull final String usage, final String description, final String funct7, final String funct3) {
+    protected Arithmetic(@NotNull final String usage, final String description, final String funct7, final String funct3) {
         super(usage, description, BasicInstructionFormat.R_FORMAT,
                 funct7 + " ttttt sssss " + funct3 + " fffff 0110011");
-    }
-
-    /**
-     * <p>Constructor for Arithmetic.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct7      a {@link java.lang.String} object
-     * @param funct3      a {@link java.lang.String} object
-     * @param rv64        a boolean
-     */
-    public Arithmetic(@NotNull final String usage, final String description, final String funct7, final String funct3, final boolean rv64) {
-        super(usage, description, BasicInstructionFormat.R_FORMAT,
-                funct7 + " ttttt sssss " + funct3 + " fffff 0111011", rv64);
     }
 
     /**
@@ -75,7 +61,7 @@ public abstract class Arithmetic extends BasicInstruction {
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
-        if (InstructionSet.rv64) {
+        if (Instructions.RV64) {
             RegisterFile.updateRegister(operands[0],
                     compute(RegisterFile.getValueLong(operands[1]), RegisterFile.getValueLong(operands[2])));
         } else {

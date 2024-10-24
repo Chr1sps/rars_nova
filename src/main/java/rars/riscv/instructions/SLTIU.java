@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SLTIU class.</p>
- *
  */
-public class SLTIU extends ImmediateInstruction {
+public final class SLTIU extends ImmediateInstruction {
+    public static final ImmediateInstruction INSTANCE = new SLTIU();
+
     /**
      * <p>Constructor for SLTIU.</p>
      */
-    public SLTIU() {
+    private SLTIU() {
         super("sltiu t1,t2,-100",
                 "Set less than immediate unsigned : If t2 is less than  sign-extended 16-bit immediate using unsigned comparison, then set t1 to 1 else set t1 to 0",
                 "011");

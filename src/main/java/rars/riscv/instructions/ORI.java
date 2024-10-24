@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>ORI class.</p>
- *
  */
-public class ORI extends ImmediateInstruction {
+public final class ORI extends ImmediateInstruction {
+    public static final ORI INSTANCE = new ORI();
+
     /**
      * <p>Constructor for ORI.</p>
      */
-    public ORI() {
+    private ORI() {
         super("ori t1,t2,-100", "Bitwise OR immediate : Set t1 to bitwise OR of t2 and sign-extended 12-bit immediate",
                 "110");
     }

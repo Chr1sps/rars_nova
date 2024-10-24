@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SRA class.</p>
- *
  */
-public class SRA extends Arithmetic {
+public final class SRA extends Arithmetic {
+    public static final SRA INSTANCE = new SRA();
+
     /**
      * <p>Constructor for SRA.</p>
      */
-    public SRA() {
+    private SRA() {
         super("sra t1,t2,t3",
                 "Shift right arithmetic: Set t1 to result of sign-extended shifting t2 right by number of bits specified by second in low-order 5 bits of t3",
                 "0100000", "101");

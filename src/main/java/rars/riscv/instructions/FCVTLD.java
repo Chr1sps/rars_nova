@@ -14,13 +14,15 @@ import rars.riscv.hardware.RegisterFile;
 /**
  * <p>FCVTLD class.</p>
  */
-public class FCVTLD extends BasicInstruction {
+public final class FCVTLD extends BasicInstruction {
+    public static final FCVTLD INSTANCE = new FCVTLD();
+
     /**
      * <p>Constructor for FCVTLD.</p>
      */
-    public FCVTLD() {
+    private FCVTLD() {
         super("fcvt.l.d t1, f1, dyn", "Convert 64 bit integer from double: Assigns the second of f1 (rounded) to t1",
-                BasicInstructionFormat.I_FORMAT, "1100001 00010 sssss ttt fffff 1010011", true);
+                BasicInstructionFormat.I_FORMAT, "1100001 00010 sssss ttt fffff 1010011");
     }
 
     /**

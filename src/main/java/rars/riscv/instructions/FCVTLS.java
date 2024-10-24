@@ -1,26 +1,28 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Conversions;
+import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.operations.Conversions;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FCVTLS class.</p>
  */
-public class FCVTLS extends BasicInstruction {
+public final class FCVTLS extends BasicInstruction {
+    public static final FCVTLS INSTANCE = new FCVTLS();
+
     /**
      * <p>Constructor for FCVTLS.</p>
      */
-    public FCVTLS() {
+    private FCVTLS() {
         super("fcvt.l.s t1, f1, dyn", "Convert 64 bit integer from float: Assigns the second of f1 (rounded) to t1",
-                BasicInstructionFormat.I_FORMAT, "1100000 00010 sssss ttt fffff 1010011", true);
+                BasicInstructionFormat.I_FORMAT, "1100000 00010 sssss ttt fffff 1010011");
     }
 
     /**

@@ -52,15 +52,16 @@ public class SyscallDisplayBitmap extends AbstractSyscall implements SimpleSubsc
     }
 
     @Override
-    public void onSubscribe(Flow.Subscription subscription) {
+    public void onSubscribe(final Flow.Subscription subscription) {
         this.subscription = subscription;
         this.subscription.request(1);
     }
 
     @Override
-    public void onNext(SimulatorNotice item) {
+    public void onNext(final SimulatorNotice item) {
         if (item.action() == SimulatorNotice.Action.STOP) {
-            this.display.dispose();
+            if (this.display != null)
+                this.display.dispose();
             this.display = null;
         }
         this.subscription.request(1);

@@ -7,11 +7,13 @@ import rars.jsoftfloat.types.Float64;
 /**
  * <p>FMAXD class.</p>
  */
-public class FMAXD extends Double {
+public final class FMAXD extends Double {
+    public static final FMAXD INSTANCE = new FMAXD();
+
     /**
      * <p>Constructor for FMAXD.</p>
      */
-    public FMAXD() {
+    private FMAXD() {
         super("fmax.d", "Floating MAXimum (64 bit): assigns f1 to the larger of f1 and f3", "0010101", "001");
     }
 

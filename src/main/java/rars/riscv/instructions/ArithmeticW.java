@@ -18,7 +18,7 @@ public abstract class ArithmeticW extends Arithmetic {
      * @param base        a {@link Arithmetic} object
      */
     public ArithmeticW(@NotNull final String usage, final String description, final String funct7, final String funct3, final Arithmetic base) {
-        super(usage, description, funct7, funct3, true);
+        super(usage, description, funct7, funct3);
         this.base = base;
     }
 

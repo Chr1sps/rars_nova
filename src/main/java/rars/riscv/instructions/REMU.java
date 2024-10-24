@@ -30,11 +30,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>REMU class.</p>
  */
-public class REMU extends Arithmetic {
+public final class REMU extends Arithmetic {
+    public static REMU INSTANCE = new REMU();
+
     /**
      * <p>Constructor for REMU.</p>
      */
-    public REMU() {
+    private REMU() {
         super("remu t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3 using unsigned division",
                 "0000001", "111");
     }

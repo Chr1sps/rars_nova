@@ -1,12 +1,12 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -49,23 +49,9 @@ public abstract class Load extends BasicInstruction {
      * @param description a {@link java.lang.String} object
      * @param funct       a {@link java.lang.String} object
      */
-    public Load(@NotNull final String usage, final String description, final String funct) {
+    protected Load(@NotNull final String usage, final String description, final String funct) {
         super(usage, description, BasicInstructionFormat.I_FORMAT,
                 "ssssssssssss ttttt " + funct + " fffff 0000011");
-    }
-
-    /**
-     * <p>Constructor for Load.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct       a {@link java.lang.String} object
-     * @param rv64        a boolean
-     */
-    public Load(@NotNull final String usage, final String description, final String funct, final boolean rv64) {
-        super(usage, description, BasicInstructionFormat.I_FORMAT,
-                "ssssssssssss ttttt " + funct + " fffff 0000011", rv64);
-
     }
 
     /**

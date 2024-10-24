@@ -1,8 +1,8 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -34,11 +34,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>BGEU class.</p>
  */
-public class BGEU extends Branch {
+public final class BGEU extends Branch {
+    public static final BGEU INSTANCE = new BGEU();
+
     /**
      * <p>Constructor for BGEU.</p>
      */
-    public BGEU() {
+    private BGEU() {
         super("bgeu t1,t2,label",
                 "Branch if greater than or equal to (unsigned): Branch to statement at label's address if t1 is greater than or equal to t2 (with an unsigned interpretation)",
                 "111");

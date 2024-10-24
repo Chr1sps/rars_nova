@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.InstructionSet;
-import org.jetbrains.annotations.NotNull;
+import rars.util.Utils;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -61,7 +61,7 @@ public abstract class Branch extends BasicInstruction {
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         if (willBranch(statement)) {
-            InstructionSet.processBranch(statement.getOperands()[2]);
+            Utils.processBranch(statement.getOperands()[2]);
         }
     }
 

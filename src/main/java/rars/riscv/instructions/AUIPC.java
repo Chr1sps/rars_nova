@@ -36,11 +36,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>AUIPC class.</p>
  */
-public class AUIPC extends BasicInstruction {
+public final class AUIPC extends BasicInstruction {
+    public static final AUIPC INSTANCE = new AUIPC();
+
     /**
      * <p>Constructor for AUIPC.</p>
      */
-    public AUIPC() {
+    private AUIPC() {
         super("auipc t1,100000", "Add upper immediate to pc: set t1 to (pc plus an upper 20-bit immediate)",
                 BasicInstructionFormat.U_FORMAT, "ssssssssssssssssssss fffff 0010111");
     }

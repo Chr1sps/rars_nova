@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>XORI class.</p>
- *
  */
-public class XORI extends ImmediateInstruction {
+public final class XORI extends ImmediateInstruction {
+    public static final XORI INSTANCE = new XORI();
+
     /**
      * <p>Constructor for XORI.</p>
      */
-    public XORI() {
+    private XORI() {
         super("xori t1,t2,-100",
                 "Bitwise XOR immediate : Set t1 to bitwise XOR of t2 and sign-extended 12-bit immediate", "100");
     }

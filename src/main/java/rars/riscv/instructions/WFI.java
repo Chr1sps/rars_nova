@@ -35,11 +35,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>WFI class.</p>
  */
-public class WFI extends BasicInstruction {
+public final class WFI extends BasicInstruction {
+    public static final WFI INSTANCE = new WFI();
+
     /**
      * <p>Constructor for WFI.</p>
      */
-    public WFI() {
+    private WFI() {
         super("wfi", "Wait for Interrupt",
                 BasicInstructionFormat.I_FORMAT, "000100000101 00000 000 00000 1110011");
     }

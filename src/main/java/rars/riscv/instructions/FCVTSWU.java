@@ -1,15 +1,15 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Conversions;
+import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.operations.Conversions;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 
@@ -43,11 +43,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FCVTSWU class.</p>
  */
-public class FCVTSWU extends BasicInstruction {
+public final class FCVTSWU extends BasicInstruction {
+    public static final FCVTSWU INSTANCE = new FCVTSWU();
+
     /**
      * <p>Constructor for FCVTSWU.</p>
      */
-    public FCVTSWU() {
+    private FCVTSWU() {
         super("fcvt.s.wu f1, t1, dyn", "Convert float from unsigned integer: Assigns the second of t1 to f1",
                 BasicInstructionFormat.I_FORMAT, "1101000 00001 sssss ttt fffff 1010011");
     }

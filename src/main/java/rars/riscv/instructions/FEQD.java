@@ -1,22 +1,24 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float64;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Comparisons;
+import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.operations.Comparisons;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FEQD class.</p>
  */
-public class FEQD extends BasicInstruction {
+public final class FEQD extends BasicInstruction {
+    public static final FEQD INSTANCE = new FEQD();
+
     /**
      * <p>Constructor for FEQD.</p>
      */
-    public FEQD() {
+    private FEQD() {
         super("feq.d t1, f1, f2", "Floating EQuals (64 bit): if f1 = f2, set t1 to 1, else set t1 to 0",
                 BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 010 fffff 1010011");
     }

@@ -1,22 +1,24 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>SRLIW class.</p>
  */
-public class SRLIW extends BasicInstruction {
+public final class SRLIW extends BasicInstruction {
+    public static final SRLIW INSTANCE = new SRLIW();
+
     /**
      * <p>Constructor for SRLIW.</p>
      */
-    public SRLIW() {
+    private SRLIW() {
         super("srliw t1,t2,10",
                 "Shift right logical (32 bit): Set t1 to result of shifting t2 right by number of bits specified by immediate",
-                BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 101 fffff 0011011", true);
+                BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 101 fffff 0011011");
     }
 
     /**

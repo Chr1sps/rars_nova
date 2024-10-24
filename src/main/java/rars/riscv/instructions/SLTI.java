@@ -30,11 +30,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SLTI class.</p>
  */
-public class SLTI extends ImmediateInstruction {
+public final class SLTI extends ImmediateInstruction {
+    public static final ImmediateInstruction INSTANCE = new SLTI();
+
     /**
      * <p>Constructor for SLTI.</p>
      */
-    public SLTI() {
+    private SLTI() {
         super("slti t1,t2,-100",
                 "Set less than immediate : If t2 is less than sign-extended 12-bit immediate, then set t1 to 1 else set t1 to 0",
                 "010");

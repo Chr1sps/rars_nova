@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SLL class.</p>
- *
  */
-public class SLL extends Arithmetic {
+public final class SLL extends Arithmetic {
+    public static final SLL INSTANCE = new SLL();
+
     /**
      * <p>Constructor for SLL.</p>
      */
-    public SLL() {
+    private SLL() {
         super("sll t1,t2,t3",
                 "Shift left logical: Set t1 to result of shifting t2 left by number of bits specified by second in low-order 5 bits of t3",
                 "0000000", "001");

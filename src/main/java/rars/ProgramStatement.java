@@ -7,6 +7,7 @@ import rars.assembler.TokenType;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.Instruction;
+import rars.riscv.Instructions;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.Register;
@@ -129,7 +130,7 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
         this.originalTokenList = this.strippedTokenList = null;
         this.source = "";
         this.machineStatement = this.basicAssemblyStatement = null;
-        final BasicInstruction instr = Globals.instructionSet.findByBinaryCode(binaryStatement);
+        final var instr = Instructions.findBasicInstructionByBinaryCode(binaryStatement);
         if (instr == null) {
             this.operands = null;
             this.numOperands = 0;

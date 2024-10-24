@@ -30,11 +30,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>REM class.</p>
  */
-public class REM extends Arithmetic {
+public final class REM extends Arithmetic {
+    public static final REM INSTANCE = new REM();
+
     /**
      * <p>Constructor for REM.</p>
      */
-    public REM() {
+    private REM() {
         super("rem t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3",
                 "0000001", "110");
     }

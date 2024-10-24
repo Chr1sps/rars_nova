@@ -32,13 +32,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>LBU class.</p>
- *
  */
-public class LBU extends Load {
+public final class LBU extends Load {
+    public static final LBU INSTANCE = new LBU();
+
     /**
      * <p>Constructor for LBU.</p>
      */
-    public LBU() {
+    private LBU() {
         super("lbu t1, -100(t2)", "Set t1 to zero-extended 8-bit second from effective memory byte address", "100");
     }
 

@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.InstructionSet;
 import rars.riscv.hardware.RegisterFile;
+import rars.util.Utils;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -38,10 +38,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * <p>JAL class.</p>
  */
 public class JAL extends BasicInstruction {
+    public static final JAL INSTANCE = new JAL();
+
     /**
      * <p>Constructor for JAL.</p>
      */
-    public JAL() {
+    private JAL() {
         super("jal t1, target",
                 "Jump and link : Set t1 to Program Counter (return address) then jump to statement at target address",
                 BasicInstructionFormat.J_FORMAT, "s ssssssssss s ssssssss fffff 1101111 ");
@@ -53,7 +55,7 @@ public class JAL extends BasicInstruction {
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
-        InstructionSet.processReturnAddress(operands[0]);
-        InstructionSet.processJump(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + operands[1]);
+        Utils.processReturnAddress(operands[0]);
+        Utils.processJump(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + operands[1]);
     }
 }

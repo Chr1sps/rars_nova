@@ -102,7 +102,7 @@ public class HelpHelpAction extends GuiAction {
 
     ////////////////////////////////////////////////////////////////////////////
     private static JScrollPane createInstructionHelpPane(final Class<? extends Instruction> instructionClass) {
-        final ArrayList<Instruction> instructionList = Globals.instructionSet.getInstructionList();
+        final var instructionList = Instructions.INSTRUCTIONS_ALL;
         final Vector<String> exampleList = new Vector<>(instructionList.size());
         final String blanks = "                        "; // 24 blanks
         for (final Instruction instr : instructionList) {

@@ -10,13 +10,15 @@ import rars.riscv.hardware.RegisterFile;
 /**
  * <p>FMVXD class.</p>
  */
-public class FMVXD extends BasicInstruction {
+public final class FMVXD extends BasicInstruction {
+    public static final FMVXD INSTANCE = new FMVXD();
+
     /**
      * <p>Constructor for FMVXD.</p>
      */
-    public FMVXD() {
+    private FMVXD() {
         super("fmv.x.d t1, f1", "Move double: move bits representing a double to an 64 bit integer register",
-                BasicInstructionFormat.I_FORMAT, "1110001 00000 sssss 000 fffff 1010011", true);
+                BasicInstructionFormat.I_FORMAT, "1110001 00000 sssss 000 fffff 1010011");
     }
 
     /**

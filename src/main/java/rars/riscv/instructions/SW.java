@@ -32,13 +32,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SW class.</p>
- *
  */
-public class SW extends Store {
+public final class SW extends Store {
+    public static final SW INSTANCE = new SW();
+
     /**
      * <p>Constructor for SW.</p>
      */
-    public SW() {
+    private SW() {
         super("sw t1, -100(t2)", "Store word : Store contents of t1 into effective memory word address", "010");
     }
 

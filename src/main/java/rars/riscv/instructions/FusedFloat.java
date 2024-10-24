@@ -1,14 +1,13 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.RoundingMode;
-import rars.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -48,22 +47,9 @@ public abstract class FusedFloat extends BasicInstruction {
      * @param description a {@link java.lang.String} object
      * @param op          a {@link java.lang.String} object
      */
-    public FusedFloat(final String usage, final String description, final String op) {
+    protected FusedFloat(final String usage, final String description, final String op) {
         super(usage + ", dyn", description, BasicInstructionFormat.R4_FORMAT,
                 "qqqqq 00 ttttt sssss " + "ppp" + " fffff 100" + op + "11");
-    }
-
-    /**
-     * <p>flipRounding.</p>
-     *
-     * @param e a {@link Environment} object
-     */
-    public static void flipRounding(@NotNull final Environment e) {
-        if (e.mode == RoundingMode.max) {
-            e.mode = RoundingMode.min;
-        } else if (e.mode == RoundingMode.min) {
-            e.mode = RoundingMode.max;
-        }
     }
 
     /**
@@ -90,5 +76,5 @@ public abstract class FusedFloat extends BasicInstruction {
      * @param e  a {@link Environment} object
      * @return The second to store to the destination
      */
-    protected abstract Float32 compute(Float32 r1, Float32 r2, Float32 r3, Environment e);
+    protected abstract @NotNull Float32 compute(@NotNull Float32 r1, @NotNull Float32 r2, @NotNull Float32 r3, @NotNull Environment e);
 }

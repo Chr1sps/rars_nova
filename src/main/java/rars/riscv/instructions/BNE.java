@@ -34,11 +34,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>BNE class.</p>
  */
-public class BNE extends Branch {
+public final class BNE extends Branch {
+    public static final BNE INSTANCE = new BNE();
+
     /**
      * <p>Constructor for BNE.</p>
      */
-    public BNE() {
+    private BNE() {
         super("bne t1,t2,label",
                 "Branch if not equal : Branch to statement at label's address if t1 and t2 are not equal", "001");
     }

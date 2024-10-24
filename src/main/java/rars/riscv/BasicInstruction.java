@@ -63,8 +63,8 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * correct
      * instruction simulator -- it needs to match all and only the 0's and 1's.
      */
-    public BasicInstruction(final @NotNull String example, final String description, final BasicInstructionFormat instrFormat,
-                            final @NotNull String operMask) {
+    protected BasicInstruction(final @NotNull String example, final String description, final BasicInstructionFormat instrFormat,
+                               final @NotNull String operMask) {
         this.exampleFormat = example;
         this.mnemonic = Instruction.extractOperator(example);
         this.description = description;
@@ -76,23 +76,6 @@ public abstract non-sealed class BasicInstruction extends Instruction {
 
         this.opcodeMask = (int) Long.parseLong(this.operationMask.replaceAll("[01]", "1").replaceAll("[^01]", "0"), 2);
         this.opcodeMatch = (int) Long.parseLong(this.operationMask.replaceAll("[^1]", "0"), 2);
-    }
-
-    /**
-     * <p>Constructor for BasicInstruction.</p>
-     *
-     * @param example     a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param instrFormat a {@link BasicInstructionFormat} object
-     * @param operMask    a {@link java.lang.String} object
-     * @param onlyinrv64  a boolean
-     */
-    public BasicInstruction(final @NotNull String example, final String description, final BasicInstructionFormat instrFormat,
-                            final @NotNull String operMask, final boolean onlyinrv64) {
-        this(example, description, instrFormat, operMask);
-        if (InstructionSet.rv64 != onlyinrv64) {
-            throw new NullPointerException("rv64");
-        }
     }
 
     /**

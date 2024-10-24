@@ -1,18 +1,20 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
-import rars.jsoftfloat.operations.Arithmetic;
 import org.jetbrains.annotations.NotNull;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Arithmetic;
+import rars.jsoftfloat.types.Float32;
 
 /**
  * <p>FMSUBS class.</p>
  */
 public class FMSUBS extends FusedFloat {
+    public static final FMSUBS INSTANCE = new FMSUBS();
+
     /**
      * <p>Constructor for FMSUBS.</p>
      */
-    public FMSUBS() {
+    private FMSUBS() {
         super("fmsub.s f1, f2, f3, f4", "Fused Multiply Subatract: Assigns f2*f3-f4 to f1", "01");
     }
 

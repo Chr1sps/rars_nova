@@ -40,11 +40,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FSW class.</p>
  */
-public class FSW extends BasicInstruction {
+public final class FSW extends BasicInstruction {
+    public static final FSW INSTANCE = new FSW();
+
     /**
      * <p>Constructor for FSW.</p>
      */
-    public FSW() {
+    private FSW() {
         super("fsw f1, -100(t1)", "Store a float to memory",
                 BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 010 sssss 0100111");
     }
