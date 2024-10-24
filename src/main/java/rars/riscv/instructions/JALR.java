@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.InstructionSet;
 import rars.riscv.hardware.RegisterFile;
+import rars.util.Utils;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -37,11 +37,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>JALR class.</p>
  */
-public class JALR extends BasicInstruction {
+public final class JALR extends BasicInstruction {
+    public static final JALR INSTANCE = new JALR();
+
     /**
      * <p>Constructor for JALR.</p>
      */
-    public JALR() {
+    private JALR() {
         super("jalr t1, t2, -100",
                 "Jump and link register: Set t1 to Program Counter (return address) then jump to statement at t2 + immediate",
                 BasicInstructionFormat.I_FORMAT, "tttttttttttt sssss 000 fffff 1100111");
@@ -54,8 +56,8 @@ public class JALR extends BasicInstruction {
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
         final int target = RegisterFile.getValue(operands[1]);
-        InstructionSet.processReturnAddress(operands[0]);
+        Utils.processReturnAddress(operands[0]);
         // Set PC = $t2 + immediate with the last bit set to 0
-        InstructionSet.processJump((target + ((operands[2] << 20) >> 20)) & 0xFFFFFFFE);
+        Utils.processJump((target + ((operands[2] << 20) >> 20)) & 0xFFFFFFFE);
     }
 }

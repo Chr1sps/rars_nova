@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.InstructionSet;
+import rars.riscv.Instructions;
 import rars.riscv.hardware.RegisterFile;
 
 /*
@@ -48,36 +48,21 @@ public abstract class ImmediateInstruction extends BasicInstruction {
      * @param description a {@link java.lang.String} object
      * @param funct       a {@link java.lang.String} object
      */
-    public ImmediateInstruction(@NotNull final String usage, final String description, final String funct) {
-        super(usage, description, BasicInstructionFormat.I_FORMAT,
-                "tttttttttttt sssss " + funct + " fffff 0010011");
-    }
-
-    /**
-     * <p>Constructor for ImmediateInstruction.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct       a {@link java.lang.String} object
-     * @param rv64        a boolean
-     */
-    public ImmediateInstruction(@NotNull final String usage, final String description, final String funct, final boolean rv64) {
-        super(usage, description, BasicInstructionFormat.I_FORMAT,
-                "tttttttttttt sssss " + funct + " fffff 0011011", rv64);
+    public ImmediateInstruction(@NotNull final String usage, final @NotNull String description,
+                                final @NotNull String funct) {
+        super(usage, description, BasicInstructionFormat.I_FORMAT, "tttttttttttt sssss " + funct + " fffff 0010011");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final int[] operands = statement.getOperands();
-        if (InstructionSet.rv64) {
-            RegisterFile.updateRegister(operands[0], compute(RegisterFile.getValueLong(operands[1]),
-                    ((long) operands[2] << 20) >> 20)); // make sure the immediate is sign-extended
+        if (Instructions.RV64) {
+            RegisterFile.updateRegister(operands[0], compute(RegisterFile.getValueLong(operands[1]), ((long) operands[2] << 20) >> 20)); // make sure the immediate is sign-extended
         } else {
-            RegisterFile.updateRegister(operands[0], computeW(RegisterFile.getValue(operands[1]),
-                    (operands[2] << 20) >> 20)); // make sure the immediate is sign-extended
+            RegisterFile.updateRegister(operands[0], computeW(RegisterFile.getValue(operands[1]), (operands[2] << 20) >> 20)); // make sure the immediate is sign-extended
         }
     }
 

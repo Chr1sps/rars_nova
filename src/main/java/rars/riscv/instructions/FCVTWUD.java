@@ -1,24 +1,26 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float64;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Conversions;
+import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.operations.Conversions;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FCVTWUD class.</p>
  */
-public class FCVTWUD extends BasicInstruction {
+public final class FCVTWUD extends BasicInstruction {
+    public static final FCVTWUD INSTANCE = new FCVTWUD();
+
     /**
      * <p>Constructor for FCVTWUD.</p>
      */
-    public FCVTWUD() {
+    private FCVTWUD() {
         super("fcvt.wu.d t1, f1, dyn", "Convert unsinged integer from double: Assigns the second of f1 (rounded) to t1",
                 BasicInstructionFormat.I_FORMAT, "1100001 00001 sssss ttt fffff 1010011");
     }

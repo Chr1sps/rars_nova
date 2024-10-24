@@ -39,11 +39,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>CSRRCI class.</p>
  */
-public class CSRRCI extends BasicInstruction {
+public final class CSRRCI extends BasicInstruction {
+    public static final CSRRCI INSTANCE = new CSRRCI();
+
     /**
      * <p>Constructor for CSRRCI.</p>
      */
-    public CSRRCI() {
+    private CSRRCI() {
         super("csrrci t0, fcsr, 10",
                 "Atomic Read/Clear CSR Immediate: read from the CSR into t0 and clear bits of the CSR according to a constant",
                 BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 111 fffff 1110011");

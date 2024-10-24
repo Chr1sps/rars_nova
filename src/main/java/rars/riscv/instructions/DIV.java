@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>DIV class.</p>
- *
  */
-public class DIV extends Arithmetic {
+public final class DIV extends Arithmetic {
+    public static final DIV INSTANCE = new DIV();
+
     /**
      * <p>Constructor for DIV.</p>
      */
-    public DIV() {
+    private DIV() {
         super("div t1,t2,t3", "Division: set t1 to the result of t2/t3",
                 "0000001", "100");
     }

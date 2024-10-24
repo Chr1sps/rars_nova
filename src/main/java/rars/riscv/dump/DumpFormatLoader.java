@@ -2,7 +2,7 @@ package rars.riscv.dump;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.riscv.InstructionSet;
+import rars.riscv.Instructions;
 import rars.riscv.SyscallLoader;
 import rars.riscv.dump.formats.*;
 import rars.venus.ToolLoader;
@@ -68,7 +68,7 @@ public final class DumpFormatLoader {
      * @return a {@link java.util.ArrayList} object
      * @see SyscallLoader
      * @see ToolLoader
-     * @see InstructionSet
+     * @see Instructions
      */
     public static @NotNull List<DumpFormat> getDumpFormats() {
         return DumpFormatLoader.formatList;

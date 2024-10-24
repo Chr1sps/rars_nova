@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Comparisons;
+import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.operations.Comparisons;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -39,11 +39,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FEQS class.</p>
  */
-public class FEQS extends BasicInstruction {
+public final class FEQS extends BasicInstruction {
+    public static final FEQS INSTANCE = new FEQS();
+
     /**
      * <p>Constructor for FEQS.</p>
      */
-    public FEQS() {
+    private FEQS() {
         super("feq.s t1, f1, f2", "Floating EQuals: if f1 = f2, set t1 to 1, else set t1 to 0",
                 BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 010 fffff 1010011");
     }

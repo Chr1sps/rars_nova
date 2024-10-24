@@ -8,7 +8,7 @@ import rars.api.Program;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
-import rars.riscv.InstructionSet;
+import rars.riscv.Instructions;
 import rars.riscv.dump.DumpFormat;
 import rars.riscv.dump.DumpFormatLoader;
 import rars.riscv.hardware.*;
@@ -506,8 +506,7 @@ public class Main {
         }
 
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, this.rv64);
-        InstructionSet.rv64 = this.rv64;
-        Globals.instructionSet.populate();
+        Instructions.RV64 = this.rv64;
 
         final File mainFile = new File(this.filenameList.getFirst()).getAbsoluteFile();// First file is "main" file
         final ArrayList<String> filesToAssemble;

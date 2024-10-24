@@ -1,8 +1,8 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -34,11 +34,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>BGE class.</p>
  */
-public class BGE extends Branch {
+public final class BGE extends Branch {
+    public static final BGE INSTANCE = new BGE();
+
     /**
      * <p>Constructor for BGE.</p>
      */
-    public BGE() {
+    private BGE() {
         super("bge t1,t2,label",
                 "Branch if greater than or equal: Branch to statement at label's address if t1 is greater than or equal to t2",
                 "101");

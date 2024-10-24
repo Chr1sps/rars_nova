@@ -32,13 +32,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SH class.</p>
- *
  */
-public class SH extends Store {
+public final class SH extends Store {
+    public static final SH INSTANCE = new SH();
+
     /**
      * <p>Constructor for SH.</p>
      */
-    public SH() {
+    private SH() {
         super("sh t1, -100(t2)",
                 "Store halfword : Store the low-order 16 bits of t1 into the effective memory halfword address", "001");
     }

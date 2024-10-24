@@ -5,15 +5,16 @@ import rars.exceptions.AddressErrorException;
 
 /**
  * <p>SD class.</p>
- *
  */
-public class SD extends Store {
+public final class SD extends Store {
+    public static final SD INSTANCE = new SD();
+
     /**
      * <p>Constructor for SD.</p>
      */
-    public SD() {
+    private SD() {
         super("sd t1, -100(t2)", "Store double word : Store contents of t1 into effective memory double word address",
-                "011", true);
+                "011");
     }
 
     /**

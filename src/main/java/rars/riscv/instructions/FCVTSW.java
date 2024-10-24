@@ -43,11 +43,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FCVTSW class.</p>
  */
-public class FCVTSW extends BasicInstruction {
+public final class FCVTSW extends BasicInstruction {
+    public static final FCVTSW INSTANCE = new FCVTSW();
+
     /**
      * <p>Constructor for FCVTSW.</p>
      */
-    public FCVTSW() {
+    private FCVTSW() {
         super("fcvt.s.w f1, t1, dyn", "Convert float from integer: Assigns the second of t1 to f1",
                 BasicInstructionFormat.I_FORMAT, "1101000 00000 sssss ttt fffff 1010011");
     }

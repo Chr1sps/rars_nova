@@ -1,8 +1,8 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -34,11 +34,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>BEQ class.</p>
  */
-public class BEQ extends Branch {
+public final class BEQ extends Branch {
+    public static final BEQ INSTANCE = new BEQ();
+
     /**
      * <p>Constructor for BEQ.</p>
      */
-    public BEQ() {
+    private BEQ() {
         super("beq t1,t2,label", "Branch if equal : Branch to statement at label's address if t1 and t2 are equal",
                 "000");
     }

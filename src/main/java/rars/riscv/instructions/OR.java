@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>OR class.</p>
- *
  */
-public class OR extends Arithmetic {
+public final class OR extends Arithmetic {
+    public static final OR INSTANCE = new OR();
+
     /**
      * <p>Constructor for OR.</p>
      */
-    public OR() {
+    private OR() {
         super("or t1,t2,t3", "Bitwise OR : Set t1 to bitwise OR of t2 and t3",
                 "0000000", "110");
     }

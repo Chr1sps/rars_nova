@@ -1,7 +1,7 @@
 package rars.assembler;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
+import rars.riscv.Instructions;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.Register;
@@ -199,7 +199,7 @@ public enum TokenType {
             return TokenType.QUOTED_STRING;
 
         // See if it is an instruction operator
-        if (Globals.instructionSet.matchOperator(value) != null)
+        if (!Instructions.matchOperator(value).isEmpty())
             return TokenType.OPERATOR;
 
         // Test for identifier goes last because I have defined tokens for various

@@ -2,15 +2,16 @@ package rars.riscv.instructions;
 
 /**
  * <p>SRLW class.</p>
- *
  */
-public class SRLW extends ArithmeticW {
+public final class SRLW extends ArithmeticW {
+    public static final SRLW INSTANCE = new SRLW();
+
     /**
      * <p>Constructor for SRLW.</p>
      */
-    public SRLW() {
+    private SRLW() {
         super("srlw t1,t2,t3",
                 "Shift left logical (32 bit): Set t1 to result of shifting t2 left by number of bits specified by second in low-order 5 bits of t3",
-                "0000000", "101", new SRL());
+                "0000000", "101", SRL.INSTANCE);
     }
 }

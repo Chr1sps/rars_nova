@@ -32,13 +32,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>LHU class.</p>
- *
  */
-public class LHU extends Load {
+public final class LHU extends Load {
+    public static final LHU INSTANCE = new LHU();
+
     /**
      * <p>Constructor for LHU.</p>
      */
-    public LHU() {
+    private LHU() {
         super("lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit second from effective memory halfword address", "101");
     }
 

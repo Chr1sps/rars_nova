@@ -1,19 +1,21 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FSGNJD class.</p>
  */
-public class FSGNJD extends BasicInstruction {
+public final class FSGNJD extends BasicInstruction {
+    public static final FSGNJD INSTANCE = new FSGNJD();
+
     /**
      * <p>Constructor for FSGNJD.</p>
      */
-    public FSGNJD() {
+    private FSGNJD() {
         super("fsgnj.d f1, f2, f3",
                 "Floating point sign injection (64 bit): replace the sign bit of f2 with the sign bit of f3 and assign it to f1",
                 BasicInstructionFormat.R_FORMAT, "0010001 ttttt sssss 000 fffff 1010011");

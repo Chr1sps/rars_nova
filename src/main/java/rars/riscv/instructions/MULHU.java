@@ -31,13 +31,14 @@ import java.math.BigInteger;
 
 /**
  * <p>MULHU class.</p>
- *
  */
-public class MULHU extends Arithmetic {
+public final class MULHU extends Arithmetic {
+    public static final MULHU INSTANCE = new MULHU();
+
     /**
      * <p>Constructor for MULHU.</p>
      */
-    public MULHU() {
+    private MULHU() {
         super("mulhu t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using unsigned multiplication",
                 "0000001", "011");
     }

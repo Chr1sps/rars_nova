@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SLTU class.</p>
- *
  */
-public class SLTU extends Arithmetic {
+public final class SLTU extends Arithmetic {
+    public static final SLTU INSTANCE = new SLTU();
+
     /**
      * <p>Constructor for SLTU.</p>
      */
-    public SLTU() {
+    private SLTU() {
         super("sltu t1,t2,t3",
                 "Set less than : If t2 is less than t3 using unsigned comparision, then set t1 to 1 else set t1 to 0",
                 "0000000", "011");

@@ -31,13 +31,14 @@ import java.math.BigInteger;
 
 /**
  * <p>MULH class.</p>
- *
  */
-public class MULH extends Arithmetic {
+public final class MULH extends Arithmetic {
+    public static final MULH INSTANCE = new MULH();
+
     /**
      * <p>Constructor for MULH.</p>
      */
-    public MULH() {
+    private MULH() {
         super("mulh t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using signed multiplication",
                 "0000001", "001");
     }

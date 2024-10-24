@@ -32,13 +32,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>LB class.</p>
- *
  */
-public class LB extends Load {
+public final class LB extends Load {
+    public static final Load INSTANCE = new LB();
+
     /**
      * <p>Constructor for LB.</p>
      */
-    public LB() {
+    private LB() {
         super("lb t1, -100(t2)", "Set t1 to sign-extended 8-bit second from effective memory byte address", "000");
     }
 

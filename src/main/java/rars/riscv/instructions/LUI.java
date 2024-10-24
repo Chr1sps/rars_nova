@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -36,11 +36,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>LUI class.</p>
  */
-public class LUI extends BasicInstruction {
+public final class LUI extends BasicInstruction {
+    public static final LUI INSTANCE = new LUI();
+
     /**
      * <p>Constructor for LUI.</p>
      */
-    public LUI() {
+    private LUI() {
         super("lui t1,100000", "Load upper immediate: set t1 to 20-bit followed by 12 0s",
                 BasicInstructionFormat.U_FORMAT, "ssssssssssssssssssss fffff 0110111");
     }

@@ -1,5 +1,6 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
@@ -7,7 +8,6 @@ import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -39,11 +39,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>CSRRSI class.</p>
  */
-public class CSRRSI extends BasicInstruction {
+public final class CSRRSI extends BasicInstruction {
+    public static final CSRRSI INSTANCE = new CSRRSI();
+
     /**
      * <p>Constructor for CSRRSI.</p>
      */
-    public CSRRSI() {
+    private CSRRSI() {
         super("csrrsi t0, fcsr, 10",
                 "Atomic Read/Set CSR Immediate: read from the CSR into t0 and logical or a constant into the CSR",
                 BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 110 fffff 1110011");

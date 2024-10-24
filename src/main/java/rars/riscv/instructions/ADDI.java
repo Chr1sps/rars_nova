@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>ADDI class.</p>
- *
  */
-public class ADDI extends ImmediateInstruction {
+public final class ADDI extends ImmediateInstruction {
+    public static final ImmediateInstruction INSTANCE = new ADDI();
+
     /**
      * <p>Constructor for ADDI.</p>
      */
-    public ADDI() {
+    private ADDI() {
         super("addi t1,t2,-100", "Addition immediate: set t1 to (t2 plus signed 12-bit immediate)", "000");
     }
 

@@ -6,13 +6,14 @@ import rars.exceptions.AddressErrorException;
 /**
  * <p>LWU class.</p>
  */
-public class LWU extends Load {
+public final class LWU extends Load {
+    public static final Load INSTANCE = new LWU();
+
     /**
      * <p>Constructor for LWU.</p>
      */
-    public LWU() {
-        super("lwu t1, -100(t2)", "Set t1 to contents of effective memory word address without sign-extension", "110",
-                true);
+    private LWU() {
+        super("lwu t1, -100(t2)", "Set t1 to contents of effective memory word address without sign-extension", "110");
     }
 
     /**

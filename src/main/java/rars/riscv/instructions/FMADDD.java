@@ -1,18 +1,20 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float64;
-import rars.jsoftfloat.operations.Arithmetic;
 import org.jetbrains.annotations.NotNull;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Arithmetic;
+import rars.jsoftfloat.types.Float64;
 
 /**
  * <p>FMADDD class.</p>
  */
-public class FMADDD extends FusedDouble {
+public final class FMADDD extends FusedDouble {
+    public static final FMADDD INSTANCE = new FMADDD();
+
     /**
      * <p>Constructor for FMADDD.</p>
      */
-    public FMADDD() {
+    private FMADDD() {
         super("fmadd.d f1, f2, f3, f4", "Fused Multiply Add (64 bit): Assigns f2*f3+f4 to f1", "00");
     }
 

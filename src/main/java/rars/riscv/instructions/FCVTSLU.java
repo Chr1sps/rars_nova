@@ -1,28 +1,30 @@
 package rars.riscv.instructions;
 
-import java.math.BigInteger;
-
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Conversions;
+import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.operations.Conversions;
-import org.jetbrains.annotations.NotNull;
+
+import java.math.BigInteger;
 
 /**
  * <p>FCVTSLU class.</p>
  */
-public class FCVTSLU extends BasicInstruction {
+public final class FCVTSLU extends BasicInstruction {
+    public static final FCVTSLU INSTANCE = new FCVTSLU();
+
     /**
      * <p>Constructor for FCVTSLU.</p>
      */
-    public FCVTSLU() {
+    private FCVTSLU() {
         super("fcvt.s.lu f1, t1, dyn", "Convert float from unsigned long: Assigns the second of t1 to f1",
-                BasicInstructionFormat.I_FORMAT, "1101000 00011 sssss ttt fffff 1010011", true);
+                BasicInstructionFormat.I_FORMAT, "1101000 00011 sssss ttt fffff 1010011");
     }
 
     /**

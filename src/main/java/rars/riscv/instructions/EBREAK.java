@@ -36,11 +36,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>EBREAK class.</p>
  */
-public class EBREAK extends BasicInstruction {
+public final class EBREAK extends BasicInstruction {
+    public static final EBREAK INSTANCE = new EBREAK();
+
     /**
      * <p>Constructor for EBREAK.</p>
      */
-    public EBREAK() {
+    private EBREAK() {
         super("ebreak", "Pause execution",
                 BasicInstructionFormat.I_FORMAT, "000000000001 00000 000 00000 1110011");
     }

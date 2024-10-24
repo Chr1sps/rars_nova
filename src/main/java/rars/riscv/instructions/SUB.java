@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SUB class.</p>
- *
  */
-public class SUB extends Arithmetic {
+public final class SUB extends Arithmetic {
+    public static final SUB INSTANCE = new SUB();
+
     /**
      * <p>Constructor for SUB.</p>
      */
-    public SUB() {
+    private SUB() {
         super("sub t1,t2,t3", "Subtraction: set t1 to (t2 minus t3)",
                 "0100000", "000");
     }

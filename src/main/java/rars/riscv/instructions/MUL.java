@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>MUL class.</p>
- *
  */
-public class MUL extends Arithmetic {
+public final class MUL extends Arithmetic {
+    public static final MUL INSTANCE = new MUL();
+
     /**
      * <p>Constructor for MUL.</p>
      */
-    public MUL() {
+    private MUL() {
         super("mul t1,t2,t3", "Multiplication: set t1 to the lower 32 bits of t2*t3",
                 "0000001", "000");
     }

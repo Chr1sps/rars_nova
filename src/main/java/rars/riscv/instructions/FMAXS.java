@@ -1,17 +1,19 @@
 package rars.riscv.instructions;
 
 import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.operations.Comparisons;
+import rars.jsoftfloat.types.Float32;
 
 /**
  * <p>FMAXS class.</p>
  */
-public class FMAXS extends Floating {
+public final class FMAXS extends Floating {
+    public static final FMAXS INSTANCE = new FMAXS();
+
     /**
      * <p>Constructor for FMAXS.</p>
      */
-    public FMAXS() {
+    private FMAXS() {
         super("fmax.s", "Floating MAXimum: assigns f1 to the larger of f1 and f3", "0010100", "001");
     }
 

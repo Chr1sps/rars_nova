@@ -1,8 +1,8 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -34,11 +34,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>BLT class.</p>
  */
-public class BLT extends Branch {
+public final class BLT extends Branch {
+    public static final BLT INSTANCE = new BLT();
+
     /**
      * <p>Constructor for BLT.</p>
      */
-    public BLT() {
+    private BLT() {
         super("blt t1,t2,label", "Branch if less than: Branch to statement at label's address if t1 is less than t2",
                 "100");
     }

@@ -1,10 +1,11 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.Instructions;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -36,14 +37,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SRAI class.</p>
  */
-public class SRAI extends BasicInstruction {
+public final class SRAI extends BasicInstruction {
+    public static final SRAI INSTANCE = new SRAI();
+
     /**
      * <p>Constructor for SRAI.</p>
      */
-    public SRAI() {
+    private SRAI() {
         super("srai t1,t2,10",
                 "Shift right arithmetic : Set t1 to result of sign-extended shifting t2 right by number of bits specified by immediate",
-                BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0010011", false);
+                BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0010011");
     }
 
     /**
@@ -52,7 +55,10 @@ public class SRAI extends BasicInstruction {
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
-        // Uses >> because sign fill
-        RegisterFile.updateRegister(operands[0], RegisterFile.getValue(operands[1]) >> operands[2]);
+        if (Instructions.RV64)
+            RegisterFile.updateRegister(operands[0], RegisterFile.getValueLong(operands[1]) >> operands[2]);
+        else
+            // Uses >> because sign fill
+            RegisterFile.updateRegister(operands[0], RegisterFile.getValue(operands[1]) >> operands[2]);
     }
 }

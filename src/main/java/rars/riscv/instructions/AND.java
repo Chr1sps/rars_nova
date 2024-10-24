@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>AND class.</p>
- *
  */
-public class AND extends Arithmetic {
+public final class AND extends Arithmetic {
+    public static final AND INSTANCE = new AND();
+
     /**
      * <p>Constructor for AND.</p>
      */
-    public AND() {
+    private AND() {
         super("and t1,t2,t3", "Bitwise AND : Set t1 to bitwise AND of t2 and t3",
                 "0000000", "111");
     }

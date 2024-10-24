@@ -15,6 +15,7 @@ import rars.assembler.Directive;
 import rars.assembler.TokenType;
 import rars.riscv.BasicInstruction;
 import rars.riscv.Instruction;
+import rars.riscv.Instructions;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
@@ -24,10 +25,10 @@ import rars.venus.editors.jeditsyntax.PopupHelpItem;
 import javax.swing.text.Segment;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeSet;
 
 import static rars.Globals.getSettings;
-import static rars.Globals.instructionSet;
 
 /**
  * RISCV token marker.
@@ -129,14 +130,14 @@ public class RISCVTokenMarker extends TokenMarker {
     // do exact match. If false, will do prefix match. Text is returned as ArrayList
     // of PopupHelpItem objects. If no matches, returns null.
     private static @Nullable ArrayList<PopupHelpItem> getTextFromInstructionMatch(final String tokenText, final boolean exact) {
-        final ArrayList<Instruction> matches;
+        final List<Instruction> matches;
         final ArrayList<PopupHelpItem> results = new ArrayList<>();
         if (exact) {
-            matches = instructionSet.matchOperator(tokenText);
+            matches = Instructions.matchOperator(tokenText);
         } else {
-            matches = instructionSet.prefixMatchOperator(tokenText);
+            matches = Instructions.matchOperatorByPrefix(tokenText);
         }
-        if (matches == null) {
+        if (matches.isEmpty()) {
             return null;
         }
         int realMatches = 0;
@@ -186,7 +187,7 @@ public class RISCVTokenMarker extends TokenMarker {
         if (RISCVTokenMarker.cKeywords == null) {
             RISCVTokenMarker.cKeywords = new KeywordMap(false);
             // add Instruction mnemonics
-            for (final Instruction inst : instructionSet.getInstructionList()) {
+            for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {
                 RISCVTokenMarker.cKeywords.add(inst.getName(), Token.KEYWORD1);
             }
             // add assembler directives
@@ -346,7 +347,7 @@ public class RISCVTokenMarker extends TokenMarker {
     public @Nullable ArrayList<PopupHelpItem> getTokenExactMatchHelp(final Token token, final String tokenText) {
         ArrayList<PopupHelpItem> matches = null;
         if (token != null && token.id == Token.KEYWORD1) {
-            final ArrayList<Instruction> instrMatches = instructionSet.matchOperator(tokenText);
+            final List<Instruction> instrMatches = Instructions.matchOperator(tokenText);
             if (!instrMatches.isEmpty()) {
                 int realMatches = 0;
                 matches = new ArrayList<>();

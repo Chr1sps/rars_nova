@@ -6,7 +6,7 @@ import rars.ErrorList;
 import rars.ErrorMessage;
 import rars.riscv.Instruction;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -68,7 +68,7 @@ public final class OperandFormat {
      * first such Instruction that has an exact operand match. If none match,
      * return the first Instruction and let client deal with operand mismatches.
      */
-    static @Nullable Instruction bestOperandMatch(final TokenList tokenList, final @NotNull ArrayList<Instruction> instrMatches) {
+    static @Nullable Instruction bestOperandMatch(final TokenList tokenList, final @NotNull List<Instruction> instrMatches) {
         if (instrMatches.size() == 1)
             return instrMatches.getFirst();
         for (final Instruction potentialMatch : instrMatches) {

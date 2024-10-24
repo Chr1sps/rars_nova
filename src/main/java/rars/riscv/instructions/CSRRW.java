@@ -39,11 +39,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>CSRRW class.</p>
  */
-public class CSRRW extends BasicInstruction {
+public final class CSRRW extends BasicInstruction {
+    public static final CSRRW INSTANCE = new CSRRW();
+
     /**
      * <p>Constructor for CSRRW.</p>
      */
-    public CSRRW() {
+    private CSRRW() {
         super("csrrw t0, fcsr, t1", "Atomic Read/Write CSR: read from the CSR into t0 and write t1 into the CSR",
                 BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 001 fffff 1110011");
     }

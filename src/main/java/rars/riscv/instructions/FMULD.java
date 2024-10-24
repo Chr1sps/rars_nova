@@ -1,18 +1,20 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float64;
-import rars.jsoftfloat.operations.Arithmetic;
 import org.jetbrains.annotations.NotNull;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Arithmetic;
+import rars.jsoftfloat.types.Float64;
 
 /**
  * <p>FMULD class.</p>
  */
-public class FMULD extends Double {
+public final class FMULD extends Double {
+    public static final FMULD INSTANCE = new FMULD();
+
     /**
      * <p>Constructor for FMULD.</p>
      */
-    public FMULD() {
+    private FMULD() {
         super("fmul.d", "Floating MULtiply (64 bit): assigns f1 to f2 * f3", "0001001");
     }
 

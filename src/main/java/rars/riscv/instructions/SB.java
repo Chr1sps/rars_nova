@@ -32,13 +32,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SB class.</p>
- *
  */
-public class SB extends Store {
+public final class SB extends Store {
+    public static final SB INSTANCE = new SB();
+
     /**
      * <p>Constructor for SB.</p>
      */
-    public SB() {
+    private SB() {
         super("sb t1, -100(t2)", "Store byte : Store the low-order 8 bits of t1 into the effective memory byte address",
                 "000");
     }

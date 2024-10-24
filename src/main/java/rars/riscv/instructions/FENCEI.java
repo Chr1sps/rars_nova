@@ -33,13 +33,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>FENCEI class.</p>
- *
  */
-public class FENCEI extends BasicInstruction {
+public final class FENCEI extends BasicInstruction {
+    public static final FENCEI INSTANCE = new FENCEI();
+
     /**
      * <p>Constructor for FENCEI.</p>
      */
-    public FENCEI() {
+    private FENCEI() {
         super("fence.i", "Ensure that stores to instruction memory are visible to instruction fetches",
                 BasicInstructionFormat.I_FORMAT, "0000 0000 0000 00000 001 00000 0001111");
     }

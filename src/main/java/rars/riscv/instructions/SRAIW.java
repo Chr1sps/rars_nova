@@ -1,22 +1,24 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>SRAIW class.</p>
  */
-public class SRAIW extends BasicInstruction {
+public final class SRAIW extends BasicInstruction {
+    public static final SRAIW INSTANCE = new SRAIW();
+
     /**
      * <p>Constructor for SRAIW.</p>
      */
-    public SRAIW() {
+    private SRAIW() {
         super("sraiw t1,t2,10",
                 "Shift right arithmetic (32 bit): Set t1 to result of sign-extended shifting t2 right by number of bits specified by immediate",
-                BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0011011", true);
+                BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0011011");
     }
 
     /**

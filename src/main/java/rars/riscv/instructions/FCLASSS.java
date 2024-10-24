@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.jsoftfloat.types.Float32;
+import rars.jsoftfloat.types.Floating;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
-import rars.jsoftfloat.types.Floating;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -39,11 +39,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FCLASSS class.</p>
  */
-public class FCLASSS extends BasicInstruction {
+public final class FCLASSS extends BasicInstruction {
+    public static final FCLASSS INSTANCE = new FCLASSS();
+
     /**
      * <p>Constructor for FCLASSS.</p>
      */
-    public FCLASSS() {
+    private FCLASSS() {
         super("fclass.s t1, f1", "Classify a floating point number",
                 BasicInstructionFormat.I_FORMAT, "1110000 00000 sssss 001 fffff 1010011");
     }

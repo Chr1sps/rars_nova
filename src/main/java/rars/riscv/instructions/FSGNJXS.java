@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -36,11 +36,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FSGNJXS class.</p>
  */
-public class FSGNJXS extends BasicInstruction {
+public final class FSGNJXS extends BasicInstruction {
+    public static final FSGNJXS INSTANCE = new FSGNJXS();
+
     /**
      * <p>Constructor for FSGNJXS.</p>
      */
-    public FSGNJXS() {
+    private FSGNJXS() {
         super("fsgnjx.s f1, f2, f3",
                 "Floating point sign injection (xor):  xor the sign bit of f2 with the sign bit of f3 and assign it to f1",
                 BasicInstructionFormat.R_FORMAT, "0010000 ttttt sssss 010 fffff 1010011");

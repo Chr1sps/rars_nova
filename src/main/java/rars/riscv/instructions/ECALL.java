@@ -4,8 +4,8 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.InstructionSet;
 import rars.riscv.hardware.RegisterFile;
+import rars.util.Utils;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -36,13 +36,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>ECALL class.</p>
- *
  */
-public class ECALL extends BasicInstruction {
+public final class ECALL extends BasicInstruction {
+    public static final ECALL INSTANCE = new ECALL();
+
     /**
      * <p>Constructor for ECALL.</p>
      */
-    public ECALL() {
+    private ECALL() {
         super("ecall", "Issue a system call : Execute the system call specified by second in a7",
                 BasicInstructionFormat.I_FORMAT, "000000000000 00000 000 00000 1110011");
     }
@@ -52,6 +53,6 @@ public class ECALL extends BasicInstruction {
      */
     @Override
     public void simulate(final ProgramStatement statement) throws SimulationException {
-        InstructionSet.findAndSimulateSyscall(RegisterFile.getValue("a7"), statement);
+        Utils.findAndSimulateSyscall(RegisterFile.getValue("a7"), statement);
     }
 }

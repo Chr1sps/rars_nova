@@ -29,13 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SRL class.</p>
- *
  */
-public class SRL extends Arithmetic {
+public final class SRL extends Arithmetic {
+    public static final SRL INSTANCE = new SRL();
+
     /**
      * <p>Constructor for SRL.</p>
      */
-    public SRL() {
+    private SRL() {
         super("srl t1,t2,t3",
                 "Shift right logical: Set t1 to result of shifting t2 right by number of bits specified by second in low-order 5 bits of t3",
                 "0000000", "101");

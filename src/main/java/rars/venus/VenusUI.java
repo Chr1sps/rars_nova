@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import rars.Globals;
 import rars.Settings;
-import rars.riscv.InstructionSet;
+import rars.riscv.Instructions;
 import rars.riscv.dump.DumpFormatLoader;
 import rars.simulator.Simulator;
 import rars.venus.registers.ControlAndStatusWindow;
@@ -565,8 +565,7 @@ public class VenusUI extends JFrame {
                     Settings.Bool.RV64_ENABLED) {
                 @Override
                 public void handler(final boolean value) {
-                    InstructionSet.rv64 = value;
-                    Globals.instructionSet.populate();
+                    Instructions.RV64 = value;
                     VenusUI.this.registersTab.updateRegisters();
                     VenusUI.this.csrTab.updateRegisters();
                 }

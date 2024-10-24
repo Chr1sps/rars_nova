@@ -3,7 +3,6 @@ package rars;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import rars.assembler.SymbolTable;
-import rars.riscv.InstructionSet;
 import rars.riscv.SyscallNumberOverride;
 import rars.riscv.hardware.Memory;
 import rars.util.PropertiesFile;
@@ -111,10 +110,6 @@ public final class Globals {
     public static final String[] ASCII_TABLE = Globals.getAsciiStrings();
     private static final String syscallPropertiesFile = "Syscall";
     /**
-     * The set of implemented instructions.
-     **/
-    public static InstructionSet instructionSet;
-    /**
      * the program currently being worked with. Used by GUI only, not command line.
      **/
     public static RISCVprogram program;
@@ -195,8 +190,6 @@ public final class Globals {
             Globals.memory = Memory.getInstance(); // clients can use Memory.getInstance instead of Globals.memory
             Globals.symbolTable = new SymbolTable("global");
             Globals.settings = new Settings();
-            Globals.instructionSet = new InstructionSet();
-            Globals.instructionSet.populate();
             Globals.initialized = true;
             Globals.debug = false;
             Globals.memory.clear(); // will establish memory configuration from setting

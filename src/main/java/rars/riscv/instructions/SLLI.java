@@ -1,10 +1,11 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.Instructions;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -36,14 +37,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SLLI class.</p>
  */
-public class SLLI extends BasicInstruction {
+public final class SLLI extends BasicInstruction {
+    public static final SLLI INSTANCE = new SLLI();
+
     /**
      * <p>Constructor for SLLI.</p>
      */
-    public SLLI() {
+    private SLLI() {
         super("slli t1,t2,10",
                 "Shift left logical : Set t1 to result of shifting t2 left by number of bits specified by immediate",
-                BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 001 fffff 0010011", false);
+                BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 001 fffff 0010011");
     }
 
     /**
@@ -52,6 +55,9 @@ public class SLLI extends BasicInstruction {
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         final int[] operands = statement.getOperands();
-        RegisterFile.updateRegister(operands[0], (long) RegisterFile.getValue(operands[1]) << operands[2]);
+        if (Instructions.RV64)
+            RegisterFile.updateRegister(operands[0], RegisterFile.getValueLong(operands[1]) << operands[2]);
+        else
+            RegisterFile.updateRegister(operands[0], (long) RegisterFile.getValue(operands[1]) << operands[2]);
     }
 }

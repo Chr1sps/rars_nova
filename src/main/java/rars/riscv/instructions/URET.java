@@ -35,13 +35,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>URET class.</p>
- *
  */
-public class URET extends BasicInstruction {
+public final class URET extends BasicInstruction {
+    public static final URET INSTANCE = new URET();
+
     /**
      * <p>Constructor for URET.</p>
      */
-    public URET() {
+    private URET() {
         super("uret", "Return from handling an interrupt or exception (to uepc)",
                 BasicInstructionFormat.I_FORMAT, "000000000010 00000 000 00000 1110011");
     }

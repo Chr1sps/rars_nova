@@ -1,9 +1,9 @@
 package rars.riscv.instructions;
 
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
-import rars.jsoftfloat.operations.Arithmetic;
 import org.jetbrains.annotations.NotNull;
+import rars.jsoftfloat.Environment;
+import rars.jsoftfloat.operations.Arithmetic;
+import rars.jsoftfloat.types.Float32;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -35,11 +35,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>FDIVS class.</p>
  */
-public class FDIVS extends Floating {
+public final class FDIVS extends Floating {
+    public static final FDIVS INSTANCE = new FDIVS();
+
     /**
      * <p>Constructor for FDIVS.</p>
      */
-    public FDIVS() {
+    private FDIVS() {
         super("fdiv.s", "Floating DIVide: assigns f1 to f2 / f3", "0001100");
     }
 
