@@ -250,18 +250,19 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
         } else {
             statementList.addString(instr.getName() + " ");
         }
+        final var tokenList = Instructions.getTokenList(instr);
         for (int i = 0; i < numOperands; i++) {
             // add separator if not at end of token list AND neither current nor
             // next token is a parenthesis
-            if (tokenListCounter > 1 && tokenListCounter < instr.getTokenList().size()) {
-                final TokenType thisTokenType = instr.getTokenList().get(tokenListCounter).getType();
+            if (tokenListCounter > 1 && tokenListCounter < tokenList.size()) {
+                final TokenType thisTokenType = tokenList.get(tokenListCounter).getType();
                 if (thisTokenType != TokenType.LEFT_PAREN && thisTokenType != TokenType.RIGHT_PAREN) {
                     statementList.addString(",");
                 }
             }
             boolean notOperand = true;
-            while (notOperand && tokenListCounter < instr.getTokenList().size()) {
-                final TokenType tokenType = instr.getTokenList().get(tokenListCounter).getType();
+            while (notOperand && tokenListCounter < tokenList.size()) {
+                final TokenType tokenType = tokenList.get(tokenListCounter).getType();
                 if (tokenType.equals(TokenType.LEFT_PAREN)) {
                     statementList.addString("(");
                 } else if (tokenType.equals(TokenType.RIGHT_PAREN)) {
@@ -288,8 +289,8 @@ public class ProgramStatement implements Comparable<ProgramStatement> {
                 tokenListCounter++;
             }
         }
-        while (tokenListCounter < instr.getTokenList().size()) {
-            final TokenType tokenType = instr.getTokenList().get(tokenListCounter).getType();
+        while (tokenListCounter < tokenList.size()) {
+            final TokenType tokenType = tokenList.get(tokenListCounter).getType();
             if (tokenType.equals(TokenType.LEFT_PAREN)) {
                 statementList.addString("(");
             } else if (tokenType.equals(TokenType.RIGHT_PAREN)) {

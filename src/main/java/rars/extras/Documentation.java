@@ -66,7 +66,7 @@ public final class Documentation {
      * @return a {@link java.lang.String} object
      */
     public static @NotNull String createSyscallMarkdown() {
-        final ArrayList<AbstractSyscall> list = SyscallLoader.getSyscallList();
+        final var list = SyscallLoader.getSyscallList();
         Collections.sort(list);
         final StringBuilder output = new StringBuilder(
                 "| Name | Call Number (a7) | Description | Inputs | Outputs |\n|------|------------------|-------------|--------|---------|");

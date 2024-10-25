@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>JAL class.</p>
  */
-public class JAL extends BasicInstruction {
+public final class JAL extends BasicInstruction {
     public static final JAL INSTANCE = new JAL();
 
     /**

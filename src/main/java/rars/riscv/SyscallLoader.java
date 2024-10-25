@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Range;
 import rars.Globals;
 import rars.riscv.syscalls.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -50,80 +50,75 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class SyscallLoader {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static ArrayList<AbstractSyscall> syscallList = new ArrayList<>();
+    private static List<AbstractSyscall> syscallList;
 
-    /*
-     * Dynamically loads Syscalls into an ArrayList. This method is adapted from
-     * the loadGameControllers() method in Bret Barker's GameServer class.
-     * Barker (bret@hypefiend.com) is co-author of the book "Developing Games
-     * in Java".  Also see the "loadMarsTools()" method from ToolLoader class.
-     */
     static {
         // Replaced dynamic loading with static loading to avoid any funny loading errors.
-        syscallList.add(new SyscallClose());
-        syscallList.add(new SyscallConfirmDialog());
-        syscallList.add(new SyscallExit());
-        syscallList.add(new SyscallExit2());
-        syscallList.add(new SyscallGetCWD());
-        syscallList.add(new SyscallInputDialogDouble());
-        syscallList.add(new SyscallInputDialogFloat());
-        syscallList.add(new SyscallInputDialogInt());
-        syscallList.add(new SyscallInputDialogString());
-        syscallList.add(new SyscallLSeek());
-        syscallList.add(new SyscallMessageDialog());
-        syscallList.add(new SyscallMessageDialogDouble());
-        syscallList.add(new SyscallMessageDialogFloat());
-        syscallList.add(new SyscallMessageDialogInt());
-        syscallList.add(new SyscallMessageDialogString());
-        syscallList.add(new SyscallMidiOut());
-        syscallList.add(new SyscallMidiOutSync());
-        syscallList.add(new SyscallOpen());
-        syscallList.add(new SyscallPrintChar());
-        syscallList.add(new SyscallPrintDouble());
-        syscallList.add(new SyscallPrintFloat());
-        syscallList.add(new SyscallPrintInt());
-        syscallList.add(new SyscallPrintIntBinary());
-        syscallList.add(new SyscallPrintIntHex());
-        syscallList.add(new SyscallPrintIntUnsigned());
-        syscallList.add(new SyscallPrintString());
-        syscallList.add(new SyscallRandDouble());
-        syscallList.add(new SyscallRandFloat());
-        syscallList.add(new SyscallRandInt());
-        syscallList.add(new SyscallRandIntRange());
-        syscallList.add(new SyscallRandSeed());
-        syscallList.add(new SyscallRead());
-        syscallList.add(new SyscallReadChar());
-        syscallList.add(new SyscallReadDouble());
-        syscallList.add(new SyscallReadFloat());
-        syscallList.add(new SyscallReadInt());
-        syscallList.add(new SyscallReadString());
-        syscallList.add(new SyscallSbrk());
-        syscallList.add(new SyscallSleep());
-        syscallList.add(new SyscallTime());
-        syscallList.add(new SyscallWrite());
+        final var baseSyscallList = List.of(
+                new SyscallClose(),
+                new SyscallConfirmDialog(),
+                new SyscallExit(),
+                new SyscallExit2(),
+                new SyscallGetCWD(),
+                new SyscallInputDialogDouble(),
+                new SyscallInputDialogFloat(),
+                new SyscallInputDialogInt(),
+                new SyscallInputDialogString(),
+                new SyscallLSeek(),
+                new SyscallMessageDialog(),
+                new SyscallMessageDialogDouble(),
+                new SyscallMessageDialogFloat(),
+                new SyscallMessageDialogInt(),
+                new SyscallMessageDialogString(),
+                new SyscallMidiOut(),
+                new SyscallMidiOutSync(),
+                new SyscallOpen(),
+                new SyscallPrintChar(),
+                new SyscallPrintDouble(),
+                new SyscallPrintFloat(),
+                new SyscallPrintInt(),
+                new SyscallPrintIntBinary(),
+                new SyscallPrintIntHex(),
+                new SyscallPrintIntUnsigned(),
+                new SyscallPrintString(),
+                new SyscallRandDouble(),
+                new SyscallRandFloat(),
+                new SyscallRandInt(),
+                new SyscallRandIntRange(),
+                new SyscallRandSeed(),
+                new SyscallRead(),
+                new SyscallReadChar(),
+                new SyscallReadDouble(),
+                new SyscallReadFloat(),
+                new SyscallReadInt(),
+                new SyscallReadString(),
+                new SyscallSbrk(),
+                new SyscallSleep(),
+                new SyscallTime(),
+                new SyscallWrite(),
+                new SyscallDisplayBitmap()
+        );
 
-        syscallList.add(new SyscallDisplayBitmap());
-
-        SyscallLoader.syscallList = SyscallLoader.processSyscallNumberOverrides(SyscallLoader.syscallList);
+        SyscallLoader.syscallList = SyscallLoader.processSyscallNumberOverrides(baseSyscallList);
     }
 
     private SyscallLoader() {
     }
 
     // Loads system call numbers from Syscall.properties
-    private static @NotNull ArrayList<AbstractSyscall> processSyscallNumberOverrides(final @NotNull ArrayList<AbstractSyscall> syscallList) {
-        final ArrayList<SyscallNumberOverride> overrides = Globals.getSyscallOverrides();
-        if (syscallList.size() != overrides.size()) {
+    private static @NotNull List<AbstractSyscall> processSyscallNumberOverrides(final @NotNull List<AbstractSyscall> baseList) {
+        final var overrides = Globals.getSyscallOverrides();
+        if (baseList.size() != overrides.size()) {
             SyscallLoader.LOGGER.fatal(
                     "Error: the number of entries in the config file does not match the number of syscalls loaded");
             SyscallLoader.LOGGER.fatal(
                     "Ensure there is a Syscall.properties file in the directory you are executing if you are a developer");
-            SyscallLoader.LOGGER.fatal("syscall list: {}, overrides: {}", syscallList.size(), overrides.size());
+            SyscallLoader.LOGGER.fatal("syscall list: {}, overrides: {}", baseList.size(), overrides.size());
             System.exit(0);
         }
         for (final SyscallNumberOverride override : overrides) {
             boolean match = false;
-            for (final AbstractSyscall syscall : syscallList) {
+            for (final AbstractSyscall syscall : baseList) {
                 if (syscall.getNumber() == override.number()) {
                     final var syscallName = syscall.getName();
                     SyscallLoader.LOGGER.fatal("Duplicate service number: {} already registered to {}", syscall.getNumber(), syscallName);
@@ -148,7 +143,7 @@ public final class SyscallLoader {
                 System.exit(0);
             }
         }
-        return syscallList;
+        return baseList;
     }
 
     /**
@@ -167,7 +162,7 @@ public final class SyscallLoader {
      *
      * @return a {@link java.util.ArrayList} object
      */
-    public static @NotNull ArrayList<AbstractSyscall> getSyscallList() {
+    public static @NotNull List<AbstractSyscall> getSyscallList() {
         return SyscallLoader.syscallList;
     }
 }

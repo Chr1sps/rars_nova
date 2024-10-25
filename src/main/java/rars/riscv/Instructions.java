@@ -1,9 +1,14 @@
 package rars.riscv;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.Settings;
+import rars.assembler.TokenList;
+import rars.assembler.Tokenizer;
+import rars.exceptions.AssemblyException;
 import rars.riscv.instructions.*;
 
 import java.io.BufferedReader;
@@ -24,15 +29,17 @@ import java.util.stream.Stream;
 public final class Instructions {
     public final static List<BasicInstruction> INSTRUCTIONS_R32;
     public final static List<BasicInstruction> INSTRUCTIONS_R64;
-
     public final static List<ExtendedInstruction> INSTRUCTIONS_R32_EXTENDED;
     public final static List<ExtendedInstruction> INSTRUCTIONS_R64_EXTENDED;
     public final static List<Instruction> INSTRUCTIONS_ALL;
+
+    private final static Logger LOGGER = LogManager.getLogger();
     private final static List<Instruction> INSTRUCTIONS_ALL_R32_ONLY;
     private final static List<Instruction> INSTRUCTIONS_ALL_R64_ONLY;
     private final static List<MatchMap> R32_MATCH_MAPS;
     private final static List<MatchMap> R64_MATCH_MAPS;
     private static final boolean initialized;
+    private final static Map<Instruction, TokenList> tokenListMap;
     public static boolean RV64;
 
     static {
@@ -240,6 +247,7 @@ public final class Instructions {
 
         R32_MATCH_MAPS = createMatchMaps(INSTRUCTIONS_R32);
         R64_MATCH_MAPS = createMatchMaps(INSTRUCTIONS_R64);
+        tokenListMap = createTokenListMap();
         initialized = true;
     }
 
@@ -350,6 +358,24 @@ public final class Instructions {
         }
         Collections.sort(matchMaps);
         return matchMaps;
+    }
+
+    private static @NotNull Map<Instruction, TokenList> createTokenListMap() {
+        final var result = new HashMap<Instruction, TokenList>();
+        for (final var instruction : INSTRUCTIONS_ALL) {
+            final var exampleFormat = instruction.getExampleFormat();
+            try {
+                final var tokenList = ((new Tokenizer()).tokenizeExampleInstruction(exampleFormat));
+                result.put(instruction, tokenList);
+            } catch (final AssemblyException e) {
+                Instructions.LOGGER.error("CONFIGURATION ERROR: Instruction example \"{}\" contains invalid token(s).", exampleFormat);
+            }
+        }
+        return result;
+    }
+
+    public static @NotNull TokenList getTokenList(final @NotNull Instruction instruction) {
+        return tokenListMap.get(instruction);
     }
 
     private static class MatchMap implements Comparable<MatchMap> {

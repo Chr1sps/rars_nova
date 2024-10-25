@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.ErrorMessage;
 import rars.riscv.Instruction;
+import rars.riscv.Instructions;
 
 import java.util.List;
 
@@ -82,7 +83,7 @@ public final class OperandFormat {
     // message if not.
     private static boolean numOperandsCheck(final TokenList cand, final Instruction spec, final ErrorList errors) {
         final int numOperands = cand.size() - 1;
-        final int reqNumOperands = spec.getTokenList().size() - 1;
+        final int reqNumOperands = Instructions.getTokenList(spec).size() - 1;
         final Token operator = cand.get(0);
         if (numOperands == reqNumOperands) {
             return true;
@@ -102,9 +103,10 @@ public final class OperandFormat {
     private static boolean operandTypeCheck(final TokenList cand, final Instruction spec, final ErrorList errors) {
         Token candToken, specToken;
         TokenType candType, specType;
-        for (int i = 1; i < spec.getTokenList().size(); i++) {
+        final var tokenList = Instructions.getTokenList(spec);
+        for (int i = 1; i < tokenList.size(); i++) {
             candToken = cand.get(i);
-            specToken = spec.getTokenList().get(i);
+            specToken = tokenList.get(i);
             candType = candToken.getType();
             specType = specToken.getType();
             // Type mismatch is error EXCEPT when (1) spec calls for register name and

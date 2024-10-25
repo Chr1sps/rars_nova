@@ -7,8 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import rars.RISCVprogram;
 import rars.assembler.Symbol;
 import rars.assembler.TokenList;
-import rars.assembler.Tokenizer;
-import rars.exceptions.AssemblyException;
 import rars.util.Binary;
 
 import java.util.ArrayList;
@@ -73,7 +71,6 @@ public final class ExtendedInstruction extends Instruction {
         this.exampleFormat = example;
         this.description = description;
         this.mnemonic = Instruction.extractOperator(example);
-        this.createExampleTokenList();
         this.translationStrings = ExtendedInstruction.buildTranslationList(translation);
     }
 
@@ -267,17 +264,5 @@ public final class ExtendedInstruction extends Instruction {
      */
     public ArrayList<String> getBasicIntructionTemplateList() {
         return this.translationStrings;
-    }
-
-    /**
-     * Used to build a token list from the example instruction
-     * provided as constructor argument. Parser uses this for syntax checking.
-     */
-    private void createExampleTokenList() {
-        try {
-            this.tokenList = ((new Tokenizer()).tokenizeExampleInstruction(this.exampleFormat));
-        } catch (final AssemblyException pe) {
-            ExtendedInstruction.LOGGER.error("CONFIGURATION ERROR: Instruction example \"{}\" contains invalid token(s).", this.exampleFormat);
-        }
     }
 }

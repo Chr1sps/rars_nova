@@ -17,7 +17,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Vector;
 
@@ -345,13 +344,13 @@ public class HelpHelpAction extends GuiAction {
      * tried were far uglier / not useful.
      */
     private JScrollPane createSyscallsHelpPane() {
-        final ArrayList<AbstractSyscall> list = SyscallLoader.getSyscallList();
+        final var list = SyscallLoader.getSyscallList();
         final String[] columnNames = {"Name", "Number", "Description", "Inputs", "Ouputs"};
         final String[][] data = new String[list.size()][5];
-        Collections.sort(list);
+        final var sortedList = list.stream().sorted().toList();
 
         int i = 0;
-        for (final AbstractSyscall syscall : list) {
+        for (final var syscall : sortedList) {
             data[i][0] = syscall.getName();
             data[i][1] = Integer.toString(syscall.getNumber());
             data[i][2] = syscall.getDescription();

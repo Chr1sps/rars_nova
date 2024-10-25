@@ -8,10 +8,7 @@ import rars.riscv.hardware.Memory;
 import rars.util.PropertiesFile;
 import rars.venus.VenusUI;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 /*
@@ -315,7 +312,7 @@ public final class Globals {
      *
      * @return ArrayList of SyscallNumberOverride objects
      */
-    public static ArrayList<SyscallNumberOverride> getSyscallOverrides() {
+    public static List<SyscallNumberOverride> getSyscallOverrides() {
         final ArrayList<SyscallNumberOverride> overrides = new ArrayList<>();
         final Properties properties = PropertiesFile.loadPropertiesFromFile(Globals.syscallPropertiesFile);
         final Enumeration<Object> keys = properties.keys();
