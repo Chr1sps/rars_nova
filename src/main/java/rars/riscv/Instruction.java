@@ -1,11 +1,7 @@
 package rars.riscv;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.assembler.TokenList;
-import rars.assembler.Tokenizer;
-import rars.exceptions.AssemblyException;
 
 import java.util.StringTokenizer;
 
@@ -49,7 +45,6 @@ public abstract sealed class Instruction permits BasicInstruction, ExtendedInstr
      * for 'f'irst, 's'econd, 't'hird, 'q'uad, and 'p'enta operands .
      **/
     public static final char[] operandMask = {'f', 's', 't', 'q', 'p'};
-    private static final Logger LOGGER = LogManager.getLogger();
     /**
      * The instruction name.
      **/
@@ -98,16 +93,4 @@ public abstract sealed class Instruction permits BasicInstruction, ExtendedInstr
     }
 
     public abstract int getInstructionLength();
-
-    /**
-     * Used to build a token list from the example instruction
-     * provided as constructor argument. Parser uses this for syntax checking.
-     */
-    protected void createExampleTokenList() {
-        try {
-            this.tokenList = ((new Tokenizer()).tokenizeExampleInstruction(this.exampleFormat));
-        } catch (final AssemblyException pe) {
-            Instruction.LOGGER.error("CONFIGURATION ERROR: Instruction example \"{}\" contains invalid token(s).", this.exampleFormat);
-        }
-    }
 }

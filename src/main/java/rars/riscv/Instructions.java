@@ -32,7 +32,7 @@ public final class Instructions {
     private final static List<Instruction> INSTRUCTIONS_ALL_R64_ONLY;
     private final static List<MatchMap> R32_MATCH_MAPS;
     private final static List<MatchMap> R64_MATCH_MAPS;
-
+    private static final boolean initialized;
     public static boolean RV64;
 
     static {
@@ -240,6 +240,7 @@ public final class Instructions {
 
         R32_MATCH_MAPS = createMatchMaps(INSTRUCTIONS_R32);
         R64_MATCH_MAPS = createMatchMaps(INSTRUCTIONS_R64);
+        initialized = true;
     }
 
     private Instructions() {
@@ -265,13 +266,23 @@ public final class Instructions {
 
     public static @NotNull List<Instruction> matchOperator(final @NotNull String operator) {
         final var matchingInstructions = new ArrayList<Instruction>();
-        INSTRUCTIONS_ALL_R32_ONLY.stream()
-                .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
-                .forEach(matchingInstructions::add);
-        if (RV64)
-            INSTRUCTIONS_ALL_R64_ONLY.stream()
+        if (initialized) {
+            INSTRUCTIONS_ALL_R32_ONLY.stream()
                     .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
                     .forEach(matchingInstructions::add);
+            if (RV64)
+                INSTRUCTIONS_ALL_R64_ONLY.stream()
+                        .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
+                        .forEach(matchingInstructions::add);
+        } else {
+            INSTRUCTIONS_R32.stream()
+                    .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
+                    .forEach(matchingInstructions::add);
+            if (RV64)
+                INSTRUCTIONS_R64.stream()
+                        .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
+                        .forEach(matchingInstructions::add);
+        }
         return matchingInstructions;
     }
 
