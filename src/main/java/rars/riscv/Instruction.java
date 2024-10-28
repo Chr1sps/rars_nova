@@ -38,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson and Ken Vollmar
  * @version August 2003
  */
-public abstract sealed class Instruction permits BasicInstruction, ExtendedInstruction {
+public abstract sealed class Instruction permits BasicInstruction, ExtendedInstruction, CompressedInstruction {
     /**
      * Characters used in instruction mask to indicate bit positions
      * for 'f'irst, 's'econd, 't'hird, 'q'uad, and 'p'enta operands .
@@ -47,16 +47,28 @@ public abstract sealed class Instruction permits BasicInstruction, ExtendedInstr
     /**
      * The instruction name.
      **/
-    protected String mnemonic;
+    protected @NotNull String mnemonic;
     /**
      * Example usage of this instruction. Is provided as subclass constructor
      * argument.
      **/
-    protected String exampleFormat;
+    protected @NotNull String exampleFormat;
     /**
      * Description of instruction for display to user
      **/
-    protected String description;
+    protected @NotNull String description;
+
+    protected Instruction(final @NotNull String mnemonic, final @NotNull String example, final @NotNull String description) {
+        this.mnemonic = mnemonic;
+        this.exampleFormat = example;
+        this.description = description;
+    }
+
+    protected Instruction(final @NotNull String example, final @NotNull String description) {
+        this.mnemonic = extractOperator(example);
+        this.exampleFormat = example;
+        this.description = description;
+    }
 
     /**
      * Used by subclass constructors to extract operator mnemonic from the

@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
@@ -49,7 +50,7 @@ public class SyscallPrintIntUnsigned extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         SystemIO.printString(
                 Binary.unsignedIntToIntString(RegisterFile.getValue("a0")));
     }

@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
@@ -37,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallPrintIntHex class.</p>
  */
-public class SyscallPrintIntHex extends AbstractSyscall {
+public final class SyscallPrintIntHex extends AbstractSyscall {
     /**
      * <p>Constructor for SyscallPrintIntHex.</p>
      */
@@ -50,7 +51,7 @@ public class SyscallPrintIntHex extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         SystemIO.printString(Binary.intToHexString(RegisterFile.getValue("a0")));
     }
 }

@@ -1,7 +1,9 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 /*
 Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
@@ -55,19 +57,19 @@ public class Editor {
     public static final int MAX_BLINK_RATE = 1000; // once per second
 
     private final VenusUI mainUI;
-    private EditTabbedPane editTabbedPane;
     private final String mainUIbaseTitle;
+    // Current Directory for Open operation, same for Save operation
+    // Values will mainly be set by the EditTabbedPane as Open/Save operations
+    // occur.
+    private final String defaultOpenDirectory;
+    private final String defaultSaveDirectory;
+    private EditTabbedPane editTabbedPane;
     /*
      * number of times File->New has been selected. Used to generate
      * default filename until first Save or Save As.
      */
     private int newUsageCount;
-    // Current Directory for Open operation, same for Save operation
-    // Values will mainly be set by the EditTabbedPane as Open/Save operations
-    // occur.
-    private final String defaultOpenDirectory;
     private String currentOpenDirectory;
-    private final String defaultSaveDirectory;
     private String currentSaveDirectory;
 
     /**
@@ -273,7 +275,7 @@ public class Editor {
      * @param paths File paths to open
      * @return true if succeeded, else false.
      */
-    public boolean open(final ArrayList<String> paths) {
+    public boolean open(final @NotNull List<String> paths) {
         for (final String path : paths) {
             final File file = new File(path);
             if (!this.editTabbedPane.openFile(file)) {

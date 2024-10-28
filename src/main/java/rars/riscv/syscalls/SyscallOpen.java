@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
@@ -37,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallOpen class.</p>
  */
-public class SyscallOpen extends AbstractSyscall {
+public final class SyscallOpen extends AbstractSyscall {
     /**
      * <p>Constructor for SyscallOpen.</p>
      */
@@ -53,7 +54,7 @@ public class SyscallOpen extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final int retValue = SystemIO.openFile(NullString.get(statement),
                 RegisterFile.getValue("a1"));
         RegisterFile.updateRegister("a0", retValue); // set returned fd second in register

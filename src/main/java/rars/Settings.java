@@ -7,13 +7,16 @@ import org.jetbrains.annotations.Nullable;
 import rars.notices.SettingsNotice;
 import rars.util.Binary;
 import rars.util.EditorFont;
+import rars.util.PropertiesFile;
 import rars.venus.editors.jeditsyntax.SyntaxStyle;
 import rars.venus.editors.jeditsyntax.SyntaxUtilities;
+import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.prefs.BackingStoreException;
@@ -265,10 +268,22 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     private static final String SYNTAX_STYLE_COLOR_PREFIX = "SyntaxStyleColor_";
     private static final String SYNTAX_STYLE_BOLD_PREFIX = "SyntaxStyleBold_";
     private static final String SYNTAX_STYLE_ITALIC_PREFIX = "SyntaxStyleItalic_";
-    private static String[] syntaxStyleColorSettingsKeys, syntaxStyleBoldSettingsKeys, syntaxStyleItalicSettingsKeys;
-    private static String[] defaultSyntaxStyleColorSettingsValues;
-    private static boolean[] defaultSyntaxStyleBoldSettingsValues;
-    private static boolean[] defaultSyntaxStyleItalicSettingsValues;
+    private static Map<TokenType, String> syntaxStyleColorSettingsKeys, syntaxStyleBoldSettingsKeys,
+            syntaxStyleItalicSettingsKeys;
+
+    static {
+        final var syntaxStyles = SyntaxUtilities.getDefaultSyntaxStyles();
+        Settings.syntaxStyleColorSettingsKeys = new HashMap<>();
+        Settings.syntaxStyleBoldSettingsKeys = new HashMap<>();
+        Settings.syntaxStyleItalicSettingsKeys = new HashMap<>();
+
+        for (final var key : syntaxStyles.keySet()) {
+            Settings.syntaxStyleColorSettingsKeys.put(key, Settings.SYNTAX_STYLE_COLOR_PREFIX + key.value);
+            Settings.syntaxStyleBoldSettingsKeys.put(key, Settings.SYNTAX_STYLE_BOLD_PREFIX + key.value);
+            Settings.syntaxStyleItalicSettingsKeys.put(key, Settings.SYNTAX_STYLE_ITALIC_PREFIX + key.value);
+        }
+    }
+
     private final ColorMode defaultColorMode = ColorMode.SYSTEM;
     private final HashMap<Bool, Boolean> booleanSettingsValues;
     private final String[] stringSettingsValues;
@@ -294,9 +309,9 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * of SyntaxStyle objects.
      *
      */
-    private String[] syntaxStyleColorSettingsValues;
-    private boolean[] syntaxStyleBoldSettingsValues;
-    private boolean[] syntaxStyleItalicSettingsValues;
+    private HashMap<TokenType, String> syntaxStyleColorSettingsValues;
+    private HashMap<TokenType, Boolean> syntaxStyleBoldSettingsValues;
+    private HashMap<TokenType, Boolean> syntaxStyleItalicSettingsValues;
 
     /**
      * Create Settings object and set to saved values. If saved values not found,
@@ -460,19 +475,6 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     public void reset() {
         this.initialize();
     }
-
-    /**
-     * <p>setEditorSyntaxStyleByPosition.</p>
-     *
-     * @param index       a int
-     * @param syntaxStyle a {@link SyntaxStyle} object
-     */
-    public void setEditorSyntaxStyleByPosition(final int index, final SyntaxStyle syntaxStyle) {
-        this.syntaxStyleColorSettingsValues[index] = syntaxStyle.getColorAsHexString();
-        this.syntaxStyleItalicSettingsValues[index] = syntaxStyle.isItalic();
-        this.syntaxStyleBoldSettingsValues[index] = syntaxStyle.isBold();
-        this.saveEditorSyntaxStyle(index);
-    }
     // *********************************************************************************
 
     ////////////////////////////////////////////////////////////////////////
@@ -480,36 +482,37 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     ////////////////////////////////////////////////////////////////////////
 
     /**
-     * <p>getEditorSyntaxStyleByPosition.</p>
+     * <p>setEditorSyntaxStyleByPosition.</p>
      *
-     * @param index a int
-     * @return a {@link SyntaxStyle} object
+     * @param type        a {@link TokenType} object
+     * @param syntaxStyle a {@link SyntaxStyle} object
      */
-    public SyntaxStyle getEditorSyntaxStyleByPosition(final int index) {
-        return new SyntaxStyle(
-                this.getColorValueByPosition(index, this.syntaxStyleColorSettingsValues, Settings.defaultSyntaxStyleColorSettingsValues,
-                        null),
-                this.syntaxStyleItalicSettingsValues[index],
-                this.syntaxStyleBoldSettingsValues[index]);
+    public void setEditorSyntaxStyleByTokenType(final @NotNull TokenType type, final SyntaxStyle syntaxStyle) {
+        this.syntaxStyleColorSettingsValues.put(type, syntaxStyle.getColorAsHexString());
+        this.syntaxStyleItalicSettingsValues.put(type, syntaxStyle.isItalic());
+        this.syntaxStyleBoldSettingsValues.put(type, syntaxStyle.isBold());
+        this.saveEditorSyntaxStyle(type);
     }
 
     /**
-     * <p>getDefaultEditorSyntaxStyleByPosition.</p>
+     * <p>getEditorSyntaxStyleByPosition.</p>
      *
-     * @param index a int
+     * @param type a int
      * @return a {@link SyntaxStyle} object
      */
-    public SyntaxStyle getDefaultEditorSyntaxStyleByPosition(final int index) {
-        return new SyntaxStyle(this.getColorValueByPosition(index, Settings.defaultSyntaxStyleColorSettingsValues, null, null),
-                Settings.defaultSyntaxStyleItalicSettingsValues[index],
-                Settings.defaultSyntaxStyleBoldSettingsValues[index]);
+    public SyntaxStyle getEditorSyntaxStyleByTokenType(final @NotNull TokenType type) {
+        final var currentColor = this.syntaxStyleColorSettingsValues.get(type);
+        return new SyntaxStyle(
+                (currentColor != null) ? Color.decode(currentColor) : SyntaxUtilities.getDefaultSyntaxStyles().get(type).getColor(),
+                this.syntaxStyleItalicSettingsValues.get(type),
+                this.syntaxStyleBoldSettingsValues.get(type));
     }
 
-    private void saveEditorSyntaxStyle(final int index) {
+    private void saveEditorSyntaxStyle(final @NotNull TokenType type) {
         try {
-            this.preferences.put(Settings.syntaxStyleColorSettingsKeys[index], this.syntaxStyleColorSettingsValues[index]);
-            this.preferences.putBoolean(Settings.syntaxStyleBoldSettingsKeys[index], this.syntaxStyleBoldSettingsValues[index]);
-            this.preferences.putBoolean(Settings.syntaxStyleItalicSettingsKeys[index], this.syntaxStyleItalicSettingsValues[index]);
+            this.preferences.put(Settings.syntaxStyleColorSettingsKeys.get(type), this.syntaxStyleColorSettingsValues.get(type));
+            this.preferences.putBoolean(Settings.syntaxStyleBoldSettingsKeys.get(type), this.syntaxStyleBoldSettingsValues.get(type));
+            this.preferences.putBoolean(Settings.syntaxStyleItalicSettingsKeys.get(type), this.syntaxStyleItalicSettingsValues.get(type));
             this.preferences.flush();
         } catch (final SecurityException se) {
             LOGGER.error("Unable to write to persistent storage for security reasons");
@@ -527,36 +530,28 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     // to be created! It is possible but a real pain in the rear to avoid using
     // Color objects totally. Requires new methods for the SyntaxUtilities class.
     private void initializeEditorSyntaxStyles() {
-        final SyntaxStyle[] syntaxStyle = SyntaxUtilities.getDefaultSyntaxStyles();
-        final int tokens = syntaxStyle.length;
-        Settings.syntaxStyleColorSettingsKeys = new String[tokens];
-        Settings.syntaxStyleBoldSettingsKeys = new String[tokens];
-        Settings.syntaxStyleItalicSettingsKeys = new String[tokens];
-        Settings.defaultSyntaxStyleColorSettingsValues = new String[tokens];
-        Settings.defaultSyntaxStyleBoldSettingsValues = new boolean[tokens];
-        Settings.defaultSyntaxStyleItalicSettingsValues = new boolean[tokens];
-        this.syntaxStyleColorSettingsValues = new String[tokens];
-        this.syntaxStyleBoldSettingsValues = new boolean[tokens];
-        this.syntaxStyleItalicSettingsValues = new boolean[tokens];
-        for (int i = 0; i < tokens; i++) {
-            Settings.syntaxStyleColorSettingsKeys[i] = Settings.SYNTAX_STYLE_COLOR_PREFIX + i;
-            Settings.syntaxStyleBoldSettingsKeys[i] = Settings.SYNTAX_STYLE_BOLD_PREFIX + i;
-            Settings.syntaxStyleItalicSettingsKeys[i] = Settings.SYNTAX_STYLE_ITALIC_PREFIX + i;
-            this.syntaxStyleColorSettingsValues[i] = Settings.defaultSyntaxStyleColorSettingsValues[i] = syntaxStyle[i]
-                    .getColorAsHexString();
-            this.syntaxStyleBoldSettingsValues[i] = Settings.defaultSyntaxStyleBoldSettingsValues[i] = syntaxStyle[i].isBold();
-            this.syntaxStyleItalicSettingsValues[i] = Settings.defaultSyntaxStyleItalicSettingsValues[i] = syntaxStyle[i].isItalic();
+        final var defaultSyntaxStyles = SyntaxUtilities.getDefaultSyntaxStyles();
+        // TODO: move this to a static block
+        this.syntaxStyleColorSettingsValues = new HashMap<>();
+        this.syntaxStyleBoldSettingsValues = new HashMap<>();
+        this.syntaxStyleItalicSettingsValues = new HashMap<>();
+        for (final var key : defaultSyntaxStyles.keySet()) {
+            this.syntaxStyleColorSettingsValues.put(key, defaultSyntaxStyles.get(key).getColorAsHexString());
+            this.syntaxStyleBoldSettingsValues.put(key, defaultSyntaxStyles.get(key).isBold());
+            this.syntaxStyleItalicSettingsValues.put(key, defaultSyntaxStyles.get(key).isItalic());
         }
     }
 
     private void getEditorSyntaxStyleSettingsFromPreferences() {
-        for (int i = 0; i < Settings.syntaxStyleColorSettingsKeys.length; i++) {
-            this.syntaxStyleColorSettingsValues[i] = this.preferences.get(Settings.syntaxStyleColorSettingsKeys[i],
-                    this.syntaxStyleColorSettingsValues[i]);
-            this.syntaxStyleBoldSettingsValues[i] = this.preferences.getBoolean(Settings.syntaxStyleBoldSettingsKeys[i],
-                    this.syntaxStyleBoldSettingsValues[i]);
-            this.syntaxStyleItalicSettingsValues[i] = this.preferences.getBoolean(Settings.syntaxStyleItalicSettingsKeys[i],
-                    this.syntaxStyleItalicSettingsValues[i]);
+        for (final var entry : Settings.syntaxStyleColorSettingsKeys.entrySet()) {
+            final var key = entry.getKey();
+            final var syntaxStyleColorValue = entry.getValue();
+            this.syntaxStyleColorSettingsValues.put(key, this.preferences.get(syntaxStyleColorValue,
+                    this.syntaxStyleColorSettingsValues.get(key)));
+            this.syntaxStyleBoldSettingsValues.put(key, this.preferences.getBoolean(Settings.syntaxStyleBoldSettingsKeys.get(key),
+                    this.syntaxStyleBoldSettingsValues.get(key)));
+            this.syntaxStyleItalicSettingsValues.put(key, this.preferences.getBoolean(Settings.syntaxStyleItalicSettingsKeys.get(key),
+                    this.syntaxStyleItalicSettingsValues.get(key)));
         }
     }
 
@@ -791,7 +786,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * color
      */
     public Color getColorSettingByKey(final String key) {
-        return this.getColorValueByKey(key, this.colorSettingsValues, Settings.defaultColorSettingsValues, this.systemColors);
+        return this.getColorValueByKey(key, this.colorSettingsValues, Settings.defaultColorSettingsValues);
     }
 
     /**
@@ -803,7 +798,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * valid color
      */
     public Color getDefaultColorSettingByKey(final String key) {
-        return this.getColorValueByKey(key, Settings.defaultColorSettingsValues, null, null);
+        return this.getColorValueByKey(key, Settings.defaultColorSettingsValues, null);
     }
 
     /**
@@ -815,7 +810,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * color
      */
     public Color getColorSettingByPosition(final int position) {
-        return this.getColorValueByPosition(position, this.colorSettingsValues, Settings.defaultColorSettingsValues, this.systemColors);
+        return this.getColorValueByPosition(position, this.colorSettingsValues, Settings.defaultColorSettingsValues);
     }
 
     /**
@@ -827,7 +822,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      * valid color
      */
     public Color getDefaultColorSettingByPosition(final int position) {
-        return this.getColorValueByPosition(position, Settings.defaultColorSettingsValues, null, null);
+        return this.getColorValueByPosition(position, Settings.defaultColorSettingsValues, null);
     }
 
     /**
@@ -1036,10 +1031,10 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     // Get Color object for this first second. Get it from values array provided as
     // argument (could be either
     // the current or the default settings array).
-    private @Nullable Color getColorValueByKey(final String key, final String[] values, final String[] defaults, final SystemColorProvider[] system) {
+    private @Nullable Color getColorValueByKey(final String key, final String[] values, final String[] defaults) {
         for (int i = 0; i < Settings.colorSettingsKeys.length; i++) {
             if (key.equals(Settings.colorSettingsKeys[i])) {
-                return this.getColorValueByPosition(i, values, defaults, system);
+                return this.getColorValueByPosition(i, values, defaults);
             }
         }
         return null;
@@ -1048,8 +1043,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     // Get Color object for this first array position. Get it from values array
     // provided as argument (could be either
     // the current or the default settings array).
-    private Color getColorValueByPosition(final int position, final String[] values, final String[] defaults,
-                                          final SystemColorProvider[] system) {
+    private Color getColorValueByPosition(final int position, final String[] values, final String[] defaults) {
         return Settings.getColorValueByString(position, Settings.getColorStringByPosition(position, values), defaults, this.systemColors);
     }
 
@@ -1077,7 +1071,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         String settingValue;
         try {
             for (final Bool setting : Bool.values()) {
-                settingValue = Globals.getPropertyEntry(filename, setting.getName());
+                settingValue = PropertiesFile.getPropertyEntry(filename, setting.getName());
                 if (settingValue != null) {
                     final boolean value = Boolean.parseBoolean(settingValue);
                     setting.setDefault(value);
@@ -1085,23 +1079,23 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
                 }
             }
             for (int i = 0; i < Settings.stringSettingsKeys.length; i++) {
-                settingValue = Globals.getPropertyEntry(filename, Settings.stringSettingsKeys[i]);
+                settingValue = PropertiesFile.getPropertyEntry(filename, Settings.stringSettingsKeys[i]);
                 if (settingValue != null)
                     this.stringSettingsValues[i] = Settings.defaultStringSettingsValues[i] = settingValue;
             }
             for (int i = 0; i < this.fontFamilySettingsValues.length; i++) {
-                settingValue = Globals.getPropertyEntry(filename, Settings.fontFamilySettingsKeys[i]);
+                settingValue = PropertiesFile.getPropertyEntry(filename, Settings.fontFamilySettingsKeys[i]);
                 if (settingValue != null)
                     this.fontFamilySettingsValues[i] = Settings.defaultFontFamilySettingsValues[i] = settingValue;
-                settingValue = Globals.getPropertyEntry(filename, Settings.fontStyleSettingsKeys[i]);
+                settingValue = PropertiesFile.getPropertyEntry(filename, Settings.fontStyleSettingsKeys[i]);
                 if (settingValue != null)
                     this.fontStyleSettingsValues[i] = Settings.defaultFontStyleSettingsValues[i] = settingValue;
-                settingValue = Globals.getPropertyEntry(filename, Settings.fontSizeSettingsKeys[i]);
+                settingValue = PropertiesFile.getPropertyEntry(filename, Settings.fontSizeSettingsKeys[i]);
                 if (settingValue != null)
                     this.fontSizeSettingsValues[i] = Settings.defaultFontSizeSettingsValues[i] = settingValue;
             }
             for (int i = 0; i < Settings.colorSettingsKeys.length; i++) {
-                settingValue = Globals.getPropertyEntry(filename, Settings.colorSettingsKeys[i]);
+                settingValue = PropertiesFile.getPropertyEntry(filename, Settings.colorSettingsKeys[i]);
                 if (settingValue != null)
                     this.colorSettingsValues[i] = Settings.defaultColorSettingsValues[i] = settingValue;
             }

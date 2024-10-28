@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
@@ -49,7 +50,7 @@ public class SyscallReadFloat extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final float floatValue;
         try {
             floatValue = SystemIO.readFloat(this.getNumber());

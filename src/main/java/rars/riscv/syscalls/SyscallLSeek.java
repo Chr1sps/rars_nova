@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
@@ -35,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallLSeek class.</p>
  */
-public class SyscallLSeek extends AbstractSyscall {
+public final class SyscallLSeek extends AbstractSyscall {
     /**
      * <p>Constructor for SyscallLSeek.</p>
      */
@@ -50,7 +51,7 @@ public class SyscallLSeek extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final int result = SystemIO.seek(RegisterFile.getValue("a0"),
                 RegisterFile.getValue("a1"),
                 RegisterFile.getValue("a2"));

@@ -9,15 +9,17 @@
 
 package rars.venus.editors.jeditsyntax.tokenmarker;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.venus.editors.jeditsyntax.PopupHelpItem;
 
 import javax.swing.text.Segment;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A token marker that splits lines of text into tokens. Each token carries
- * a length field and an indentification tag that can be mapped to a color
+ * a length field and an identification tag that can be mapped to a color
  * for painting that token.
  * <p>
  * <p>
@@ -31,26 +33,11 @@ import java.util.ArrayList;
  */
 public abstract class TokenMarker {
     /**
-     * The first token in the list. This should be used as the return
-     * second from <code>markTokens()</code>.
-     */
-    protected Token firstToken;
-    /**
-     * The last token in the list. New tokens are added here.
-     * This should be set to null before a new line is to be tokenized.
-     */
-    protected Token lastToken;
-    /**
      * An array for storing information about lines. It is enlarged and
      * shrunk automatically by the <code>insertLines()</code> and
      * <code>deleteLines()</code> methods.
      */
-    protected LineInfo[] lineInfo;
-    /**
-     * The number of lines in the model being tokenized. This can be
-     * less than the length of the <code>lineInfo</code> array.
-     */
-    protected int length;
+    protected @NotNull ArrayList<LineInfo> lineInfo;
     /**
      * The last tokenized line.
      */
@@ -66,6 +53,7 @@ public abstract class TokenMarker {
      * does that.
      */
     protected TokenMarker() {
+        this.lineInfo = new ArrayList<>();
         this.lastLine = -1;
     }
 
@@ -86,30 +74,41 @@ public abstract class TokenMarker {
     }
 
     /**
+     * Adds a token to the token list.
+     *
+     * @param length The length of the token
+     * @param id     The id of the token
+     */
+    protected static void addToken(final ArrayList<Token> tokens, final int length, final @NotNull TokenType id) {
+        if (length == 0 && id != TokenType.END)
+            return;
+
+        tokens.add(new Token(length, id));
+    }
+
+    // protected members
+
+    /**
      * A wrapper for the lower-level <code>markTokensImpl</code> method
-     * that is called to split a line up into tokens.
+     * that is called to split up a line into tokens.
      *
      * @param line      The line
      * @param lineIndex The line number
-     * @return a {@link Token} object
+     * @return a {@link java.util.List} of {@link Token} objects
      */
-    public Token markTokens(final Segment line, final int lineIndex) {
-        if (lineIndex >= this.length) {
+    public @NotNull List<Token> markTokens(final Segment line, final int lineIndex) {
+        final var tokens = new ArrayList<Token>();
+        if (lineIndex >= this.lineInfo.size()) {
             throw new IllegalArgumentException("Tokenizing invalid line: "
                     + lineIndex);
         }
 
-        this.lastToken = null;
 
-        final LineInfo info = this.lineInfo[lineIndex];
-        final LineInfo prev;
-        if (lineIndex == 0)
-            prev = null;
-        else
-            prev = this.lineInfo[lineIndex - 1];
+        final LineInfo info = this.lineInfo.get(lineIndex);
+        final var prev = (lineIndex == 0) ? null : this.lineInfo.get(lineIndex - 1);
 
-        final byte oldToken = info.token;
-        final byte token = this.markTokensImpl(prev == null ? Token.NULL : prev.token, line, lineIndex);
+        final var oldTokenType = info.token;
+        final var token = this.markTokensImpl(tokens, prev == null ? TokenType.NULL : prev.token, line, lineIndex);
 
         info.token = token;
 
@@ -148,19 +147,17 @@ public abstract class TokenMarker {
          * relevant info down so that others wouldn't duplicate it.
          */
         if (!(this.lastLine == lineIndex && this.nextLineRequested))
-            this.nextLineRequested = (oldToken != token);
+            this.nextLineRequested = (oldTokenType != token);
 
         this.lastLine = lineIndex;
 
-        this.addToken(0, Token.END);
+        addToken(tokens, 0, TokenType.END);
 
-        return this.firstToken;
+        return tokens;
     }
 
-    // protected members
-
     /**
-     * An abstract method that splits a line up into tokens. It
+     * An abstract method that splits up a line into tokens. It
      * should parse the line, and call <code>addToken()</code> to
      * add syntax tokens to the token list. Then, it should return
      * the initial token type for the next line.
@@ -176,8 +173,8 @@ public abstract class TokenMarker {
      * @param lineIndex The index of the line in the document, starting at 0
      * @return The initial token type for the next line
      */
-    protected abstract byte markTokensImpl(byte token, Segment line,
-                                           int lineIndex);
+    protected abstract TokenType markTokensImpl(final @NotNull ArrayList<Token> tokens, @NotNull TokenType token, @NotNull Segment line,
+                                                int lineIndex);
 
     /**
      * Informs the token marker that lines have been inserted into
@@ -188,15 +185,8 @@ public abstract class TokenMarker {
      * @param lines The number of lines
      */
     public void insertLines(final int index, final int lines) {
-        if (lines <= 0)
-            return;
-        this.length += lines;
-        this.ensureCapacity(this.length);
-        final int len = index + lines;
-        System.arraycopy(this.lineInfo, index, this.lineInfo, len, this.lineInfo.length - len);
-
-        for (int i = index + lines - 1; i >= index; i--) {
-            this.lineInfo[i] = new LineInfo();
+        for (int i = 0; i < lines; i++) {
+            this.lineInfo.add(index, new LineInfo(null, null));
         }
     }
 
@@ -209,21 +199,7 @@ public abstract class TokenMarker {
      * @param lines The number of lines
      */
     public void deleteLines(final int index, final int lines) {
-        if (lines <= 0)
-            return;
-        final int len = index + lines;
-        this.length -= lines;
-        System.arraycopy(this.lineInfo, len, this.lineInfo,
-                index, this.lineInfo.length - len);
-    }
-
-    /**
-     * Returns the number of lines in this token marker.
-     *
-     * @return a int
-     */
-    public int getLineCount() {
-        return this.length;
+        this.lineInfo.removeAll(this.lineInfo.subList(index, index + lines));
     }
 
     /**
@@ -246,7 +222,7 @@ public abstract class TokenMarker {
      * @param tokenText the source String that matched to the token
      * @return ArrayList containing PopupHelpItem objects, one per match.
      */
-    public @Nullable ArrayList<PopupHelpItem> getTokenExactMatchHelp(final Token token, final String tokenText) {
+    public @Nullable ArrayList<PopupHelpItem> getTokenExactMatchHelp(final @NotNull List<Token> tokens, final Token token, final String tokenText) {
         return null;
     }
 
@@ -258,67 +234,14 @@ public abstract class TokenMarker {
      * override it in language-specific subclasses.
      *
      * @param line          String containing current line
-     * @param tokenList     first Token on the current line
+     * @param tokens        List of Token objects for the line
      * @param tokenAtOffset the pertinent Token object
      * @param tokenText     the source String that matched to the token
      * @return ArrayList containing PopupHelpItem objects, one per match.
      */
-    public @Nullable ArrayList<PopupHelpItem> getTokenPrefixMatchHelp(final String line, final Token tokenList, final Token tokenAtOffset,
+    public @Nullable ArrayList<PopupHelpItem> getTokenPrefixMatchHelp(final String line, final @NotNull List<Token> tokens, final @Nullable Token tokenAtOffset,
                                                                       final String tokenText) {
         return null;
-    }
-
-    /**
-     * Ensures that the <code>lineInfo</code> array can contain the
-     * specified index. This enlarges it if necessary. No action is
-     * taken if the array is large enough already.
-     * <p>
-     * <p>
-     * It should be unnecessary to call this under normal
-     * circumstances; <code>insertLine()</code> should take care of
-     * enlarging the line info array automatically.
-     *
-     * @param index The array index
-     */
-    protected void ensureCapacity(final int index) {
-        if (this.lineInfo == null)
-            this.lineInfo = new LineInfo[index + 1];
-        else if (this.lineInfo.length <= index) {
-            final LineInfo[] lineInfoN = new LineInfo[(index + 1) * 2];
-            System.arraycopy(this.lineInfo, 0, lineInfoN, 0,
-                    this.lineInfo.length);
-            this.lineInfo = lineInfoN;
-        }
-    }
-
-    /**
-     * Adds a token to the token list.
-     *
-     * @param length The length of the token
-     * @param id     The id of the token
-     */
-    protected void addToken(final int length, final byte id) {
-        if (id >= Token.INTERNAL_FIRST && id <= Token.INTERNAL_LAST)
-            throw new InternalError("Invalid id: " + id);
-
-        if (length == 0 && id != Token.END)
-            return;
-
-        if (this.firstToken == null) {
-            this.firstToken = new Token(length, id);
-            this.lastToken = this.firstToken;
-        } else if (this.lastToken == null) {
-            this.lastToken = this.firstToken;
-            this.firstToken.length = length;
-            this.firstToken.id = id;
-        } else if (this.lastToken.next == null) {
-            this.lastToken.next = new Token(length, id);
-            this.lastToken = this.lastToken.next;
-        } else {
-            this.lastToken = this.lastToken.next;
-            this.lastToken.length = length;
-            this.lastToken.id = id;
-        }
     }
 
     /**
@@ -328,7 +251,7 @@ public abstract class TokenMarker {
         /**
          * The id of the last token of the line.
          */
-        public byte token;
+        public @Nullable TokenType token;
         /**
          * This is for use by the token marker implementations
          * themselves. It can be used to store anything that
@@ -338,17 +261,10 @@ public abstract class TokenMarker {
         public @Nullable Object obj;
 
         /**
-         * Creates a new LineInfo object with token = Token.NULL
-         * and obj = null.
-         */
-        public LineInfo() {
-        }
-
-        /**
          * Creates a new LineInfo object with the specified
          * parameters.
          */
-        public LineInfo(final byte token, final @Nullable Object obj) {
+        public LineInfo(final @Nullable TokenType token, final @Nullable Object obj) {
             this.token = token;
             this.obj = obj;
         }

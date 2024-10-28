@@ -10,7 +10,8 @@
 
 package rars.venus.editors.jeditsyntax;
 
-import rars.venus.editors.jeditsyntax.tokenmarker.Token;
+import org.jetbrains.annotations.NotNull;
+import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 
 import javax.swing.text.Segment;
 
@@ -25,6 +26,11 @@ import javax.swing.text.Segment;
  * @version $Id: KeywordMap.java,v 1.16 1999/12/13 03:40:30 sp Exp $
  */
 public class KeywordMap {
+    // protected members
+    protected final int mapLength;
+    private final Keyword[] map;
+    private boolean ignoreCase;
+
     /**
      * Creates a new <code>KeywordMap</code>.
      *
@@ -56,11 +62,11 @@ public class KeywordMap {
      * @param length The length of the substring
      * @return a byte
      */
-    public byte lookup(final Segment text, final int offset, final int length) {
+    public TokenType lookup(final Segment text, final int offset, final int length) {
         if (length == 0)
-            return Token.NULL;
+            return TokenType.NULL;
         if (text.array[offset] == '%')
-            return Token.MACRO_ARG; // added 12/12 M. Sekhavat
+            return TokenType.MACRO_ARG; // added 12/12 M. Sekhavat
         Keyword k = this.map[this.getSegmentMapKey(text, offset, length)];
         while (k != null) {
             if (length != k.keyword.length) {
@@ -72,7 +78,7 @@ public class KeywordMap {
                 return k.id;
             k = k.next;
         }
-        return Token.NULL;
+        return TokenType.NULL;
     }
 
     /**
@@ -81,7 +87,7 @@ public class KeywordMap {
      * @param keyword The first
      * @param id      The second
      */
-    public void add(final String keyword, final byte id) {
+    public void add(final String keyword, final TokenType id) {
         final int key = this.getStringMapKey(keyword);
         this.map[key] = new Keyword(keyword.toCharArray(), id, this.map[key]);
     }
@@ -105,9 +111,6 @@ public class KeywordMap {
     public void setIgnoreCase(final boolean ignoreCase) {
         this.ignoreCase = ignoreCase;
     }
-
-    // protected members
-    protected final int mapLength;
 
     /**
      * <p>getStringMapKey.</p>
@@ -136,10 +139,7 @@ public class KeywordMap {
     }
 
     // private members
-    record Keyword(char[] keyword, byte id, KeywordMap.Keyword next) {
+    record Keyword(char[] keyword, @NotNull TokenType id, KeywordMap.Keyword next) {
 
     }
-
-    private final Keyword[] map;
-    private boolean ignoreCase;
 }

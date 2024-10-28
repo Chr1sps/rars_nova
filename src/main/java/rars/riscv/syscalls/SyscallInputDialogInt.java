@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
@@ -48,7 +49,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * -2: Cancel was chosen <br>
  * -3: OK was chosen but no data had been input into field <br>
  */
-public class SyscallInputDialogInt extends AbstractSyscall {
+public final class SyscallInputDialogInt extends AbstractSyscall {
     /**
      * <p>Constructor for SyscallInputDialogInt.</p>
      */
@@ -60,7 +61,7 @@ public class SyscallInputDialogInt extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String message = NullString.get(statement);
 
         // Values returned by Java's InputDialog:

@@ -5,7 +5,7 @@ package rars.exceptions;
  * <p>
  * Its a bit of a hack, but it works and somewhat makes logical sense.
  */
-public class BreakpointException extends SimulationException {
+public final class BreakpointException extends SimulationException {
     public static final BreakpointException INSTANCE = new BreakpointException();
 
     private BreakpointException() {

@@ -288,17 +288,17 @@ public class Float64 implements Floating<Float64> {
             env.overflow = true;
             env.inexact = true;
             switch (env.mode) {
-                case zero:
+                case ZERO:
                     return new Float64(ef.sign, Float64.maxexp - 1, -1); // Largest finite number
-                case min:
-                case max:
-                    if (ef.sign != (env.mode == RoundingMode.max)) {
+                case MIN:
+                case MAX:
+                    if (ef.sign != (env.mode == RoundingMode.MAX)) {
                         return ef.sign ? Float64.NegativeInfinity : Float64.Infinity;
                     } else {
                         return new Float64(ef.sign, Float64.maxexp - 1, -1); // Largest finite number
                     }
-                case away:
-                case even:
+                case AWAY:
+                case EVEN:
                     return ef.sign ? Float64.NegativeInfinity : Float64.Infinity;
             }
             assert false : "Not reachable";
@@ -333,11 +333,11 @@ public class Float64 implements Floating<Float64> {
 
         // Either round towards or away from zero based on rounding mode
         switch (env.mode) {
-            case zero:
+            case ZERO:
                 return towardsZero;
-            case max:
-            case min:
-                if (ef.sign != (env.mode == RoundingMode.max)) {
+            case MAX:
+            case MIN:
+                if (ef.sign != (env.mode == RoundingMode.MAX)) {
                     return awayZero;
                 } else {
                     return towardsZero;
@@ -348,7 +348,7 @@ public class Float64 implements Floating<Float64> {
 
         // See which result is closer to the non-rounded version
         if (roundedBits.equals(BigInteger.ONE.shiftLeft(bitsToRound - 1))) {
-            if (env.mode == RoundingMode.away || (awayZero.bits & 1) == 0) {
+            if (env.mode == RoundingMode.AWAY || (awayZero.bits & 1) == 0) {
                 return awayZero;
             } else {
                 return towardsZero;

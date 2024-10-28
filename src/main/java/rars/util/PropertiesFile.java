@@ -65,4 +65,29 @@ public final class PropertiesFile {
 
         return properties;
     }
+
+    // Read and return integer property second for given file and property name.
+    // Default second is returned if property file or name not found.
+    public static int getIntegerProperty(final @NotNull String propertiesFile, final @NotNull String propertyName, final int defaultValue) {
+        int limit = defaultValue; // just in case no entry is found
+        final Properties properties = loadPropertiesFromFile(propertiesFile);
+        try {
+            limit = Integer.parseInt(properties.getProperty(propertyName, Integer.toString(defaultValue)));
+        } catch (final NumberFormatException ignored) {
+        } // do nothing, I already have a default
+        return limit;
+    }
+
+    /**
+     * Read and return property file second (if any) for requested property.
+     *
+     * @param propertiesFile name of properties file (do NOT include filename
+     *                       extension,
+     *                       which is assumed to be ".properties")
+     * @param propertyName   String containing desired property name
+     * @return String containing associated second; null if property not found
+     */
+    public static String getPropertyEntry(final @NotNull String propertiesFile, final @NotNull String propertyName) {
+        return loadPropertiesFromFile(propertiesFile).getProperty(propertyName);
+    }
 }

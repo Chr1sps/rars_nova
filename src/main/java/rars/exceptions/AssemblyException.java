@@ -37,7 +37,7 @@ import rars.ErrorMessage;
  * @author Benjamin Landers
  * @version July 2017
  */
-public class AssemblyException extends Exception {
+public final class AssemblyException extends Exception {
     private final ErrorList errs;
 
     /**

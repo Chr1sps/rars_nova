@@ -195,17 +195,17 @@ public final class Globals {
 
     // Read byte limit of Run I/O or RARS Messages text to buffer.
     private static int getMessageLimit() {
-        return Globals.getIntegerProperty(Globals.configPropertiesFile, "MessageLimit", 1000000);
+        return PropertiesFile.getIntegerProperty(Globals.configPropertiesFile, "MessageLimit", 1000000);
     }
 
     // Read limit on number of error messages produced by one assemble operation.
     private static int getErrorLimit() {
-        return Globals.getIntegerProperty(Globals.configPropertiesFile, "ErrorLimit", 200);
+        return PropertiesFile.getIntegerProperty(Globals.configPropertiesFile, "ErrorLimit", 200);
     }
 
     // Read backstep limit (number of operations to buffer) from properties file.
     private static int getBackstepLimit() {
-        return Globals.getIntegerProperty(Globals.configPropertiesFile, "BackstepLimit", 1000);
+        return PropertiesFile.getIntegerProperty(Globals.configPropertiesFile, "BackstepLimit", 1000);
     }
 
     // Read ASCII default display character for non-printing characters, from
@@ -217,7 +217,7 @@ public final class Globals {
      * @return a {@link java.lang.String} object
      */
     public static String getAsciiNonPrint() {
-        final String anp = Globals.getPropertyEntry(Globals.configPropertiesFile, "AsciiNonPrint");
+        final String anp = PropertiesFile.getPropertyEntry(Globals.configPropertiesFile, "AsciiNonPrint");
         return (anp == null) ? "." : ((anp.equals("space")) ? " " : anp);
     }
 
@@ -231,7 +231,7 @@ public final class Globals {
      * @return an array of {@link java.lang.String} objects
      */
     public static String[] getAsciiStrings() {
-        final String let = Globals.getPropertyEntry(Globals.configPropertiesFile, "AsciiTable");
+        final String let = PropertiesFile.getPropertyEntry(Globals.configPropertiesFile, "AsciiTable");
         final String placeHolder = Globals.getAsciiNonPrint();
         if (let == null) {
             // If config isn't loaded, give a decent default second.
@@ -267,24 +267,12 @@ public final class Globals {
         }
     }
 
-    // Read and return integer property second for given file and property name.
-    // Default second is returned if property file or name not found.
-    private static int getIntegerProperty(final String propertiesFile, final String propertyName, final int defaultValue) {
-        int limit = defaultValue; // just in case no entry is found
-        final Properties properties = PropertiesFile.loadPropertiesFromFile(propertiesFile);
-        try {
-            limit = Integer.parseInt(properties.getProperty(propertyName, Integer.toString(defaultValue)));
-        } catch (final NumberFormatException ignored) {
-        } // do nothing, I already have a default
-        return limit;
-    }
-
     // Read assembly language file extensions from properties file. Resulting
     // string is tokenized into array list (assume StringTokenizer default
     // delimiters).
     private static ArrayList<String> getFileExtensions() {
         final ArrayList<String> extensionsList = new ArrayList<>();
-        final String extensions = Globals.getPropertyEntry(Globals.configPropertiesFile, "Extensions");
+        final String extensions = PropertiesFile.getPropertyEntry(Globals.configPropertiesFile, "Extensions");
         if (extensions != null) {
             final StringTokenizer st = new StringTokenizer(extensions);
             while (st.hasMoreTokens()) {
@@ -292,19 +280,6 @@ public final class Globals {
             }
         }
         return extensionsList;
-    }
-
-    /**
-     * Read and return property file second (if any) for requested property.
-     *
-     * @param propertiesFile name of properties file (do NOT include filename
-     *                       extension,
-     *                       which is assumed to be ".properties")
-     * @param propertyName   String containing desired property name
-     * @return String containing associated second; null if property not found
-     */
-    public static String getPropertyEntry(final String propertiesFile, final String propertyName) {
-        return PropertiesFile.loadPropertiesFromFile(propertiesFile).getProperty(propertyName);
     }
 
     /**

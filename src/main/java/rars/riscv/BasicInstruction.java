@@ -65,9 +65,7 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      */
     protected BasicInstruction(final @NotNull String example, final String description, final BasicInstructionFormat instrFormat,
                                final @NotNull String operMask) {
-        this.exampleFormat = example;
-        this.mnemonic = Instruction.extractOperator(example);
-        this.description = description;
+        super(example, description);
         this.instructionFormat = instrFormat;
         this.operationMask = operMask.replaceAll(" ", ""); // squeeze out any/all spaces
         if (this.operationMask.length() != BASIC_INSTRUCTION_LENGTH_BITS) {

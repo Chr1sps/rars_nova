@@ -1,5 +1,7 @@
 package rars.venus.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -68,7 +70,7 @@ public class PopupListener extends MouseAdapter {
         maybeShowPopup(e);
     }
 
-    private void maybeShowPopup(final MouseEvent e) {
+    private void maybeShowPopup(final @NotNull MouseEvent e) {
         if (e.isPopupTrigger()) {
             popup.show(e.getComponent(), e.getX(), e.getY());
         }

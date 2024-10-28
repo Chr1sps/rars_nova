@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
@@ -42,7 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Service to input data.
  */
 // TODO: Fill in desc, in and out for all input dialogs
-public class SyscallInputDialogDouble extends AbstractSyscall {
+public final class SyscallInputDialogDouble extends AbstractSyscall {
     /**
      * Build an instance of the syscall with its default service number and name.
      */
@@ -56,7 +57,7 @@ public class SyscallInputDialogDouble extends AbstractSyscall {
      * System call to input data.
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         // Input arguments: $a0 = address of null-terminated string that is the message
         // to user
         // Outputs:

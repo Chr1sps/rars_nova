@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
@@ -54,7 +55,7 @@ public class SyscallWrite extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         int byteAddress = RegisterFile.getValue("a1"); // source of characters to write to file
         final int reqLength = RegisterFile.getValue("a2"); // user-requested length
         if (reqLength < 0) {

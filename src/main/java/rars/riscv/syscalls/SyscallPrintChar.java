@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
@@ -36,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallPrintChar class.</p>
  */
-public class SyscallPrintChar extends AbstractSyscall {
+public final class SyscallPrintChar extends AbstractSyscall {
     /**
      * <p>Constructor for SyscallPrintChar.</p>
      */
@@ -49,7 +50,7 @@ public class SyscallPrintChar extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final char t = (char) (RegisterFile.getValue("a0") & 0x000000ff);
         SystemIO.printString(Character.toString(t));
     }

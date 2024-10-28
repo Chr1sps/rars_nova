@@ -1,15 +1,15 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
+import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.RoundingMode;
 import rars.jsoftfloat.types.Float32;
-import rars.ProgramStatement;
-import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -100,15 +100,15 @@ public abstract class Floating extends BasicInstruction {
             rm = frm;
         return switch (rm) {
             case 0 -> // RNE
-                    RoundingMode.even;
+                    RoundingMode.EVEN;
             case 1 -> // RTZ
-                    RoundingMode.zero;
+                    RoundingMode.ZERO;
             case 2 -> // RDN
-                    RoundingMode.min;
+                    RoundingMode.MIN;
             case 3 -> // RUP
-                    RoundingMode.max;
+                    RoundingMode.MAX;
             case 4 -> // RMM
-                    RoundingMode.away;
+                    RoundingMode.AWAY;
             default ->
                     throw new SimulationException(statement, "Invalid rounding mode. RM = " + RM + " and frm = " + frm);
         };

@@ -1,5 +1,6 @@
 package rars.util;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
@@ -14,6 +15,8 @@ import rars.riscv.syscalls.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public final class Utils {
     private Utils() {
@@ -96,11 +99,26 @@ public final class Utils {
      * @param e a {@link Environment} object
      */
     public static void flipRounding(@NotNull final Environment e) {
-        if (e.mode == RoundingMode.max) {
-            e.mode = RoundingMode.min;
-        } else if (e.mode == RoundingMode.min) {
-            e.mode = RoundingMode.max;
+        if (e.mode == RoundingMode.MAX) {
+            e.mode = RoundingMode.MIN;
+        } else if (e.mode == RoundingMode.MIN) {
+            e.mode = RoundingMode.MAX;
         }
     }
 
+    public static <T, U> Stream<Pair<T, U>> zip(@NotNull final Stream<T> first, @NotNull final Stream<U> second) {
+        final var firstIterator = first.iterator();
+        final var secondIterator = second.iterator();
+        return Stream.generate(() -> {
+            if (firstIterator.hasNext() && secondIterator.hasNext()) {
+                return new Pair<>(firstIterator.next(), secondIterator.next());
+            }
+            return null;
+        }).takeWhile(Objects::nonNull);
+    }
+
+    @Contract(value = "_ -> param1", pure = true)
+    public static <T> T id(final T t) {
+        return t;
+    }
 }

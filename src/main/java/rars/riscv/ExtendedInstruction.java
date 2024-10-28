@@ -1,7 +1,5 @@
 package rars.riscv;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.RISCVprogram;
@@ -53,9 +51,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public final class ExtendedInstruction extends Instruction {
-    private static final Logger LOGGER = LogManager.getLogger();
-
     private final ArrayList<String> translationStrings;
+//    private final List<Instruction> translatedInstructions;
 
     /**
      * Constructor for ExtendedInstruction. No compact translation is provided.
@@ -67,10 +64,8 @@ public final class ExtendedInstruction extends Instruction {
      *                    of one or more MIPS basic instructions.
      * @param description a helpful description to be included on help requests
      */
-    public ExtendedInstruction(final String example, final String translation, final String description) {
-        this.exampleFormat = example;
-        this.description = description;
-        this.mnemonic = Instruction.extractOperator(example);
+    public ExtendedInstruction(final @NotNull String example, final @NotNull String translation, final @NotNull String description) {
+        super(example, description);
         this.translationStrings = ExtendedInstruction.buildTranslationList(translation);
     }
 
@@ -127,7 +122,7 @@ public final class ExtendedInstruction extends Instruction {
      * @param PC        a int
      * @return String representing basic assembler statement.
      */
-    public static String makeTemplateSubstitutions(final RISCVprogram program, final String template, final @NotNull TokenList tokenList, final int PC) {
+    public static String makeTemplateSubstitutions(final @NotNull RISCVprogram program, final @NotNull String template, final @NotNull TokenList tokenList, final int PC) {
         String instruction = template;
         // substitute first operand token for template's RG1 or OP1, second for RG2 or
         // OP2, etc
@@ -233,10 +228,7 @@ public final class ExtendedInstruction extends Instruction {
      * Returns length in bytes of corresponding binary instruction(s).
      * Returns 0 if the ArrayList is null or empty.
      */
-    private static int getInstructionLength(final ArrayList<String> translationList) {
-        if (translationList == null || translationList.isEmpty()) {
-            return 0;
-        }
+    private static int getInstructionLength(final @NotNull ArrayList<String> translationList) {
         return 4 * translationList.size();
     }
 
@@ -254,6 +246,10 @@ public final class ExtendedInstruction extends Instruction {
     @Override
     public int getInstructionLength() {
         return ExtendedInstruction.getInstructionLength(this.translationStrings);
+//        return translatedInstructions
+//                .stream()
+//                .map(Instruction::getInstructionLength)
+//                .reduce(0, Integer::sum);
     }
 
     /**

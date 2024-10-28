@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
@@ -49,7 +50,7 @@ public class SyscallSbrk extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         try {
             RegisterFile.updateRegister("a0", Memory.allocateBytesFromHeap(RegisterFile.getValue("a0")));
         } catch (final IllegalArgumentException iae) {

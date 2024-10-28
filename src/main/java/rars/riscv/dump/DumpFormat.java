@@ -1,7 +1,6 @@
 package rars.riscv.dump;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 
@@ -18,14 +17,6 @@ import java.io.IOException;
  * @version December 2007
  */
 public interface DumpFormat {
-
-    /**
-     * Get the file extension associated with this format.
-     *
-     * @return String containing file extension -- without the leading "." -- or
-     * null if there is no standard extension.
-     */
-    @Nullable String getFileExtension();
 
     /**
      * Get a short description of the format, suitable

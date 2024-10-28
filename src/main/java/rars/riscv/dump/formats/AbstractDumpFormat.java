@@ -17,7 +17,7 @@ import java.io.IOException;
  */
 public abstract class AbstractDumpFormat implements DumpFormat {
 
-    private final String name, commandDescriptor, description, extension;
+    private final String name, commandDescriptor, description;
 
     /**
      * Typical constructor. Note you cannot creates objects from this
@@ -31,45 +31,19 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      * @param description       Description to go with standard file extension for
      *                          display in file save dialog or to be used as tool
      *                          tip.
-     * @param extension         Standard file extension for this format. Null if
-     *                          none.
      */
     public AbstractDumpFormat(final String name, final String commandDescriptor,
-                              final String description, final String extension) {
+                              final String description) {
         this.name = name;
         this.commandDescriptor = (commandDescriptor == null) ? null : commandDescriptor.replaceAll(" ", "");
         this.description = description;
-        this.extension = extension;
     }
 
-    /**
-     * Get the file extension associated with this format.
-     *
-     * @return String containing file extension -- without the leading "." -- or
-     * null if there is no standard extension.
-     */
-    @Override
-    public String getFileExtension() {
-        return extension;
-    }
-
-    /**
-     * Get a short description of the format, suitable for displaying along with
-     * the extension, in the file save dialog, or as a tool tip.
-     *
-     * @return String containing short description to go with the extension
-     * or for use as tool tip. Possibly null.
-     */
     @Override
     public @NotNull String getDescription() {
         return description;
     }
 
-    /**
-     * String representing this object.
-     *
-     * @return Name given for this object.
-     */
     public @NotNull String toString() {
         return name;
     }
@@ -85,12 +59,6 @@ public abstract class AbstractDumpFormat implements DumpFormat {
         return commandDescriptor;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Write memory contents according to the
-     * specification for this format.
-     */
     @Override
     public abstract void dumpMemoryRange(@NotNull File file, int firstAddress, int lastAddress, @NotNull Memory memory)
             throws AddressErrorException, IOException;

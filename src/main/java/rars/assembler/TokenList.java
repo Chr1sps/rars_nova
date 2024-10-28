@@ -3,6 +3,7 @@ package rars.assembler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 /*
@@ -40,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class TokenList implements Cloneable, Iterable<Token> {
+public class TokenList implements Cloneable, Collection<Token> {
 
     private @NotNull ArrayList<Token> tokenList;
     private @NotNull String processedLine;// DPS 03-Jan-2013
@@ -61,6 +62,16 @@ public class TokenList implements Cloneable, Iterable<Token> {
     @Override
     public @NotNull Iterator<Token> iterator() {
         return this.tokenList.iterator();
+    }
+
+    @Override
+    public @NotNull Object @NotNull [] toArray() {
+        return this.tokenList.toArray();
+    }
+
+    @Override
+    public @NotNull <T> T @NotNull [] toArray(final @NotNull T @NotNull [] a) {
+        return this.tokenList.toArray(a);
     }
 
     /**
@@ -114,6 +125,7 @@ public class TokenList implements Cloneable, Iterable<Token> {
      *
      * @return token count.
      */
+    @Override
     public int size() {
         return this.tokenList.size();
     }
@@ -123,8 +135,39 @@ public class TokenList implements Cloneable, Iterable<Token> {
      *
      * @param token Token object to be added.
      */
-    public void add(final Token token) {
-        this.tokenList.add(token);
+    @Override
+    public boolean add(final Token token) {
+        return this.tokenList.add(token);
+    }
+
+    @Override
+    public boolean remove(final Object o) {
+        return this.tokenList.remove(o);
+    }
+
+    @Override
+    public boolean containsAll(@NotNull final Collection<?> c) {
+        return false;
+    }
+
+    @Override
+    public boolean addAll(@NotNull final Collection<? extends Token> c) {
+        return this.tokenList.addAll(c);
+    }
+
+    @Override
+    public boolean removeAll(@NotNull final Collection<?> c) {
+        return this.tokenList.removeAll(c);
+    }
+
+    @Override
+    public boolean retainAll(@NotNull final Collection<?> c) {
+        return this.tokenList.retainAll(c);
+    }
+
+    @Override
+    public void clear() {
+        this.tokenList.clear();
     }
 
     /**
@@ -145,8 +188,14 @@ public class TokenList implements Cloneable, Iterable<Token> {
      *
      * @return <code>true</code> if list has no tokens, else <code>false</code>.
      */
+    @Override
     public boolean isEmpty() {
         return this.tokenList.isEmpty();
+    }
+
+    @Override
+    public boolean contains(final Object o) {
+        return this.tokenList.contains(o);
     }
 
     /**

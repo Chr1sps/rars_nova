@@ -7,21 +7,21 @@ public enum RoundingMode {
     /**
      * Round to nearest; in event of a tie, round towards even
      */
-    even,
+    EVEN,
     /**
      * Round to nearest; in event of a tie, round away from zero
      */
-    away,
+    AWAY,
     /**
      * Round towards -Infinity
      */
-    min,
+    MIN,
     /**
      * Round towards +Infinity
      */
-    max,
+    MAX,
     /**
      * Round towards zero
      */
-    zero
+    ZERO
 }

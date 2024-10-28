@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
@@ -35,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallMidiOut class.</p>
  */
-public class SyscallMidiOut extends AbstractSyscall {
+public final class SyscallMidiOut extends AbstractSyscall {
     // Endpoints of ranges for the three "byte" parameters. The duration
     // parameter is limited at the high end only by the int range.
     private static final int rangeLowEnd = 0;
@@ -71,7 +72,7 @@ public class SyscallMidiOut extends AbstractSyscall {
      * use the range 1-128.
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         int pitch = RegisterFile.getValue("a0");
         int duration = RegisterFile.getValue("a1");
         int instrument = RegisterFile.getValue("a2");

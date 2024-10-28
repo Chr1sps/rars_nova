@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
@@ -52,7 +53,7 @@ public class SyscallRandIntRange extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final Random stream = RandomStreams.get("a0");
         try {
             RegisterFile.updateRegister("a0", stream.nextInt(RegisterFile.getValue("a1")));

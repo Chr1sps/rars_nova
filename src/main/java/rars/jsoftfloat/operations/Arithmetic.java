@@ -1,10 +1,10 @@
 package rars.jsoftfloat.operations;
 
+import org.jetbrains.annotations.NotNull;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.RoundingMode;
 import rars.jsoftfloat.internal.ExactFloat;
 import rars.jsoftfloat.types.Floating;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Groups any arithmetic operations such as addition, subtraction, etc
@@ -50,7 +50,7 @@ public final class Arithmetic {
                     return a; // They are the same, just pick one
                 } else {
                     // Explicitly stated in the spec
-                    return (env.mode == RoundingMode.min) ? a.NegativeZero() : a.Zero();
+                    return (env.mode == RoundingMode.MIN) ? a.NegativeZero() : a.Zero();
                 }
             } else {
                 return b;
@@ -62,7 +62,7 @@ public final class Arithmetic {
         final ExactFloat out = (a.toExactFloat()).add(b.toExactFloat());
         // Check to see if it was x + (-x)
         if (out.isZero()) {
-            return (env.mode == RoundingMode.min) ? a.NegativeZero() : a.Zero();
+            return (env.mode == RoundingMode.MIN) ? a.NegativeZero() : a.Zero();
         }
         return a.fromExactFloat(out, env);
     }

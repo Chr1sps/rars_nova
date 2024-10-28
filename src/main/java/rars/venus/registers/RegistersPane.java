@@ -3,7 +3,6 @@ package rars.venus.registers;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
-import java.awt.*;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -66,7 +65,6 @@ public class RegistersPane extends JTabbedPane {
         this.addTab("Registers", this.regsTab);
         this.addTab("Floating Point", this.fpTab);
         this.addTab("Control and Status", this.csrTab);
-        this.setForeground(Color.black);
 
         this.setToolTipTextAt(0, "CPU registers");
         this.setToolTipTextAt(1, "Floating point unit registers");

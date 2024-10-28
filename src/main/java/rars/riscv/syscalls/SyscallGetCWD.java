@@ -1,10 +1,11 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.riscv.AbstractSyscall;
 import rars.exceptions.AddressErrorException;
+import rars.exceptions.ExitingException;
+import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
 
 import java.nio.charset.StandardCharsets;
@@ -38,9 +39,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallGetCWD class.</p>
- *
  */
-public class SyscallGetCWD extends AbstractSyscall {
+public final class SyscallGetCWD extends AbstractSyscall {
     /**
      * <p>Constructor for SyscallGetCWD.</p>
      */
@@ -54,7 +54,7 @@ public class SyscallGetCWD extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String path = System.getProperty("user.dir");
         final int buf = RegisterFile.getValue("a0");
         final int length = RegisterFile.getValue("a1");

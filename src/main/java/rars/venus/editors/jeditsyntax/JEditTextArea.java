@@ -16,6 +16,7 @@ import rars.Globals;
 import rars.Settings;
 import rars.venus.editors.jeditsyntax.tokenmarker.Token;
 import rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
+import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -611,7 +612,7 @@ public class JEditTextArea extends JComponent {
          * tokens can vary in width
          */
         else {
-            Token tokens;
+            java.util.List<Token> tokens;
             if (this.painter.currentLineIndex == line
                     && this.painter.currentLineTokens != null)
                 tokens = this.painter.currentLineTokens;
@@ -622,20 +623,21 @@ public class JEditTextArea extends JComponent {
 
             final Toolkit toolkit = this.painter.getToolkit();
             final Font defaultFont = this.painter.getFont();
-            final SyntaxStyle[] styles = this.painter.getStyles();
+            final var styles = this.painter.getStyles();
 
-            for (; ; ) {
-                final byte id = tokens.id;
-                if (id == Token.END) {
+            for (final var token : tokens) {
+                final var id = token.type();
+                final int length = token.length();
+
+                if (id == TokenType.END) {
                     return x;
                 }
 
-                if (id == Token.NULL)
+                if (id == TokenType.NULL)
                     fm = this.painter.getFontMetrics();
                 else
-                    fm = styles[id].getFontMetrics(defaultFont, this.getGraphics());
+                    fm = styles.get(id).getFontMetrics(defaultFont, this.getGraphics());
 
-                final int length = tokens.length;
 
                 if (offset + segmentOffset < this.lineSegment.offset + length) {
                     this.lineSegment.count = offset - (this.lineSegment.offset - segmentOffset);
@@ -647,8 +649,8 @@ public class JEditTextArea extends JComponent {
                             this.lineSegment, fm, (float) x, this.painter, 0);
                     this.lineSegment.offset += length;
                 }
-                tokens = tokens.next;
             }
+            return x;
         }
     }
 
@@ -696,7 +698,7 @@ public class JEditTextArea extends JComponent {
 
             return segmentCount;
         } else {
-            Token tokens;
+            java.util.List<Token> tokens;
             if (this.painter.currentLineIndex == line && this.painter.currentLineTokens != null)
                 tokens = this.painter.currentLineTokens;
             else {
@@ -707,19 +709,19 @@ public class JEditTextArea extends JComponent {
             int offset = 0;
             final Toolkit toolkit = this.painter.getToolkit();
             final Font defaultFont = this.painter.getFont();
-            final SyntaxStyle[] styles = this.painter.getStyles();
+            final var styles = this.painter.getStyles();
 
-            for (; ; ) {
-                final byte id = tokens.id;
-                if (id == Token.END)
+            for (final var token : tokens) {
+                final var tokenType = token.type();
+                final var length = token.length();
+                if (tokenType == TokenType.END)
                     return offset;
 
-                if (id == Token.NULL)
+                if (tokenType == TokenType.NULL)
                     fm = this.painter.getFontMetrics();
                 else
-                    fm = styles[id].getFontMetrics(defaultFont, this.getGraphics());
+                    fm = styles.get(tokenType).getFontMetrics(defaultFont, this.getGraphics());
 
-                final int length = tokens.length;
 
                 for (int i = 0; i < length; i++) {
                     final char c = segmentArray[segmentOffset + offset + i];
@@ -742,8 +744,9 @@ public class JEditTextArea extends JComponent {
                 }
 
                 offset += length;
-                tokens = tokens.next;
             }
+            // Unreachable
+            return offset;
         }
     }
 
@@ -1764,28 +1767,26 @@ public class JEditTextArea extends JComponent {
         if (tokenMarker != null) {
             final Segment lineSegment = new Segment();
             this.getLineText(line, lineSegment); // fill segment with info from this line
-            Token tokens = tokenMarker.markTokens(lineSegment, line);
-            final Token tokenList = tokens;
+            final var tokens = tokenMarker.markTokens(lineSegment, line);
             int tokenOffset = 0;
-            Token tokenAtOffset = null;
-            for (; ; ) {
-                final byte id = tokens.id;
-                if (id == Token.END)
+            @Nullable Token tokenAtOffset = null;
+            for (final var token : tokens) {
+                final var id = token.type();
+                final int length = token.length();
+                if (id == TokenType.END)
                     break;
-                final int length = tokens.length;
                 if (offset > tokenOffset && offset <= tokenOffset + length) {
-                    tokenAtOffset = tokens;
+                    tokenAtOffset = token;
                     break;
                 }
                 tokenOffset += length;
-                tokens = tokens.next;
             }
             if (tokenAtOffset != null) {
-                final String tokenText = lineSegment.toString().substring(tokenOffset, tokenOffset + tokenAtOffset.length);
+                final String tokenText = lineSegment.toString().substring(tokenOffset, tokenOffset + tokenAtOffset.length());
                 if (exact) {
-                    matches = tokenMarker.getTokenExactMatchHelp(tokenAtOffset, tokenText);
+                    matches = tokenMarker.getTokenExactMatchHelp(tokens, tokenAtOffset, tokenText);
                 } else {
-                    matches = tokenMarker.getTokenPrefixMatchHelp(lineSegment.toString(), tokenList, tokenAtOffset,
+                    matches = tokenMarker.getTokenPrefixMatchHelp(lineSegment.toString(), tokens, tokenAtOffset,
                             tokenText);
                 }
             }

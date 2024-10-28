@@ -174,7 +174,6 @@ public class MessagesPane extends JTabbedPane {
 
         this.addTab("Messages", this.assembleTab);
         this.addTab("Run I/O", this.runTab);
-        this.setForeground(Color.BLACK);
 
         this.setToolTipTextAt(0,
                 "Messages produced by Run menu. Click on assemble error message to select erroneous line");

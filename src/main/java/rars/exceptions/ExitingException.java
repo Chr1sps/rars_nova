@@ -7,9 +7,8 @@ import rars.ProgramStatement;
  * simulation
  * <p>
  * Used for exit syscalls and errors in syscalls
- *
  */
-public class ExitingException extends SimulationException {
+public final class ExitingException extends SimulationException {
     /**
      * <p>Constructor for ExitingException.</p>
      */

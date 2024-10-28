@@ -1,7 +1,8 @@
 package rars.riscv.syscalls;
 
-import rars.exceptions.ExitingException;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
 
@@ -37,9 +38,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallMessageDialogInt class.</p>
- *
  */
-public class SyscallMessageDialogInt extends AbstractSyscall {
+public final class SyscallMessageDialogInt extends AbstractSyscall {
     /**
      * <p>Constructor for SyscallMessageDialogInt.</p>
      */
@@ -54,7 +54,7 @@ public class SyscallMessageDialogInt extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String message = NullString.get(statement);
 
         // Display the dialog.

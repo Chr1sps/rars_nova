@@ -7,7 +7,7 @@ import rars.api.Options;
 import rars.api.Program;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
-import rars.riscv.InstructionSet;
+import rars.riscv.Instructions;
 import rars.simulator.Simulator;
 import utils.RarsTestBase;
 
@@ -87,8 +87,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
     private void runTest(@NotNull final String code, @NotNull final String dataPrelude, final boolean is64, final TestData testData) {
         Globals.initialize();
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, is64);
-        InstructionSet.rv64 = is64;
-        Globals.instructionSet.populate();
+        Instructions.RV64 = is64;
 
         final var opt = new Options();
         opt.startAtMain = true;

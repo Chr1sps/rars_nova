@@ -1,8 +1,8 @@
 package rars.jsoftfloat.internal;
 
+import org.jetbrains.annotations.NotNull;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.RoundingMode;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 
@@ -251,12 +251,12 @@ public class ExactFloat implements Comparable<ExactFloat> {
 
         final ExactFloat zeroRounded = new ExactFloat(f.sign, f.exponent, mainBits).normalize();
         final ExactFloat oneRounded = zeroRounded.add(new ExactFloat(f.sign, 0, BigInteger.valueOf(1)));
-        if (env.mode == RoundingMode.zero) {
+        if (env.mode == RoundingMode.ZERO) {
             return zeroRounded;
         }
 
-        if (env.mode == RoundingMode.max || env.mode == RoundingMode.min) {
-            if ((env.mode == RoundingMode.max) == f.sign) {
+        if (env.mode == RoundingMode.MAX || env.mode == RoundingMode.MIN) {
+            if ((env.mode == RoundingMode.MAX) == f.sign) {
                 // if we are rounding towards zero (max & < 0 or min & > 0)
                 return zeroRounded;
             } else {
@@ -267,7 +267,7 @@ public class ExactFloat implements Comparable<ExactFloat> {
 
         if (roundedBits.equals(BigInteger.ONE.shiftLeft(bitsToRound - 1))) {
             // If there is a tie round according to the rounding mode
-            if (env.mode == RoundingMode.away || zeroRounded.significand.testBit(0)) {
+            if (env.mode == RoundingMode.AWAY || zeroRounded.significand.testBit(0)) {
                 return oneRounded;
             } else {
                 return zeroRounded;

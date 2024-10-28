@@ -9,7 +9,6 @@ import rars.riscv.Instructions;
 import rars.riscv.SyscallLoader;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -67,10 +66,10 @@ public final class Documentation {
      */
     public static @NotNull String createSyscallMarkdown() {
         final var list = SyscallLoader.getSyscallList();
-        Collections.sort(list);
+        final var sorted = list.stream().sorted().toList();
         final StringBuilder output = new StringBuilder(
                 "| Name | Call Number (a7) | Description | Inputs | Outputs |\n|------|------------------|-------------|--------|---------|");
-        for (final AbstractSyscall syscall : list) {
+        for (final AbstractSyscall syscall : sorted) {
             output.append("\n|");
             output.append(syscall.getName());
             output.append('|');

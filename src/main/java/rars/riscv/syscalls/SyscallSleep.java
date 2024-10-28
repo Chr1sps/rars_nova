@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
@@ -48,7 +49,7 @@ public class SyscallSleep extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         try {
             Thread.sleep(RegisterFile.getValue("a0")); // units of milliseconds 1000 millisec = 1 sec.
         } catch (final InterruptedException ignored) {

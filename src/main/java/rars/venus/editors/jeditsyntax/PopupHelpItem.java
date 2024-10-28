@@ -30,19 +30,19 @@ package rars.venus.editors.jeditsyntax;
 
 import rars.venus.HelpHelpAction;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handly little class to contain help information for a popupMenu or
  * tool tip item.
  */
-public class PopupHelpItem {
+public final class PopupHelpItem {
+    private static final String spaces = "                                        "; // 40 spaces
     private final String tokenText;
+    private final boolean exact; // from exact match?
     private String example;
     private String description;
-    private final boolean exact; // from exact match?
     private int exampleLength;
-    private static final String spaces = "                                        "; // 40 spaces
 
     /**
      * Create popup help item. This is created as result of either an exact-match or
@@ -82,6 +82,22 @@ public class PopupHelpItem {
     }
 
     /**
+     * <p>maxExampleLength.</p>
+     *
+     * @param matches a {@link java.util.List} object
+     * @return a int
+     */
+    public static int maxExampleLength(final List<PopupHelpItem> matches) {
+        int length = 0;
+        if (matches != null) {
+            for (final PopupHelpItem match : matches) {
+                length = Math.max(length, match.getExampleLength());
+            }
+        }
+        return length;
+    }
+
+    /**
      * The document text that mached this item
      *
      * @return a {@link java.lang.String} object
@@ -100,12 +116,33 @@ public class PopupHelpItem {
     }
 
     /**
+     * <p>Setter for the field <code>example</code>.</p>
+     *
+     * @param example a {@link java.lang.String} object
+     */
+    public void setExample(final String example) {
+        this.example = example;
+        this.exampleLength = example.length();
+    }
+
+    /**
      * <p>Getter for the field <code>description</code>.</p>
      *
      * @return a {@link java.lang.String} object
      */
     public String getDescription() {
         return this.description;
+    }
+
+    // for performance purposes, length limited to example length + 40
+
+    /**
+     * <p>Setter for the field <code>description</code>.</p>
+     *
+     * @param description a {@link java.lang.String} object
+     */
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
     /**
@@ -130,7 +167,8 @@ public class PopupHelpItem {
         return this.exampleLength;
     }
 
-    // for performance purposes, length limited to example length + 40
+    // Utility method. Traverse ArrayList of PopupHelpItem objects
+    // and return String length of longest example.
 
     /**
      * <p>getExamplePaddedToLength.</p>
@@ -152,43 +190,5 @@ public class PopupHelpItem {
             result = this.example.substring(0, length);
         }
         return result;
-    }
-
-    /**
-     * <p>Setter for the field <code>example</code>.</p>
-     *
-     * @param example a {@link java.lang.String} object
-     */
-    public void setExample(final String example) {
-        this.example = example;
-        this.exampleLength = example.length();
-    }
-
-    /**
-     * <p>Setter for the field <code>description</code>.</p>
-     *
-     * @param description a {@link java.lang.String} object
-     */
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    // Utility method. Traverse ArrayList of PopupHelpItem objects
-    // and return String length of longest example.
-
-    /**
-     * <p>maxExampleLength.</p>
-     *
-     * @param matches a {@link java.util.ArrayList} object
-     * @return a int
-     */
-    public static int maxExampleLength(final ArrayList<PopupHelpItem> matches) {
-        int length = 0;
-        if (matches != null) {
-            for (final PopupHelpItem match : matches) {
-                length = Math.max(length, match.getExampleLength());
-            }
-        }
-        return length;
     }
 }

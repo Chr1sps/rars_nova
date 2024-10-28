@@ -68,7 +68,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      *
      * @return service name as a string
      */
-    public String getName() {
+    public @NotNull String getName() {
         return serviceName;
     }
 
@@ -77,7 +77,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      *
      * @return a string describing what the system call does
      */
-    public String getDescription() {
+    public @NotNull String getDescription() {
         return description;
     }
 
@@ -87,7 +87,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      * @return a string documenting what registers should be set to before the
      * system call runs
      */
-    public String getInputs() {
+    public @NotNull String getInputs() {
         return inputs;
     }
 
@@ -97,7 +97,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      * @return a string documenting what registers are set to after the system call
      * runs
      */
-    public String getOutputs() {
+    public @NotNull String getOutputs() {
         return outputs;
     }
 
@@ -127,7 +127,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      *
      * @throws ExitingException if any.
      */
-    public abstract void simulate(ProgramStatement statement)
+    public abstract void simulate(@NotNull ProgramStatement statement)
             throws ExitingException;
 
     /**

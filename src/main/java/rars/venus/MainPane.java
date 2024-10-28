@@ -45,9 +45,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson and Bumgarner
  */
 public class MainPane extends JTabbedPane {
-    EditPane editTab;
     final ExecutePane executeTab;
     final EditTabbedPane editTabbedPane;
+    EditPane editTab;
 
     /**
      * Constructor for the MainPane class.
@@ -74,7 +74,6 @@ public class MainPane extends JTabbedPane {
 
         this.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         this.addTab(editTabTitle, null, this.editTabbedPane);
-        this.setForeground(Color.black);
 
         this.addTab(executeTabTitle, null, this.executeTab);
 

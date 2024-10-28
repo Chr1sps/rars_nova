@@ -59,7 +59,7 @@ public final class OperandFormat {
      * specification, else returns <tt>false</tt>.
      */
 
-    static boolean tokenOperandMatch(final TokenList candidateList, final Instruction inst, final ErrorList errors) {
+    static boolean checkIfTokensMatchOperand(final TokenList candidateList, final Instruction inst, final ErrorList errors) {
         return OperandFormat.numOperandsCheck(candidateList, inst, errors) && OperandFormat.operandTypeCheck(candidateList, inst, errors);
     }
 
@@ -73,7 +73,7 @@ public final class OperandFormat {
         if (instrMatches.size() == 1)
             return instrMatches.getFirst();
         for (final Instruction potentialMatch : instrMatches) {
-            if (OperandFormat.tokenOperandMatch(tokenList, potentialMatch, new ErrorList()))
+            if (OperandFormat.checkIfTokensMatchOperand(tokenList, potentialMatch, new ErrorList()))
                 return potentialMatch;
         }
         return instrMatches.getFirst();
@@ -81,7 +81,7 @@ public final class OperandFormat {
 
     // Simply check to see if numbers of operands are correct and generate error
     // message if not.
-    private static boolean numOperandsCheck(final TokenList cand, final Instruction spec, final ErrorList errors) {
+    private static boolean numOperandsCheck(final @NotNull TokenList cand, final @NotNull Instruction spec, final @NotNull ErrorList errors) {
         final int numOperands = cand.size() - 1;
         final int reqNumOperands = Instructions.getTokenList(spec).size() - 1;
         final Token operator = cand.get(0);
@@ -101,9 +101,10 @@ public final class OperandFormat {
     // Generate error message if operand is not of correct type for this operation &
     // operand position
     private static boolean operandTypeCheck(final TokenList cand, final Instruction spec, final ErrorList errors) {
+        final var tokenList = Instructions.getTokenList(spec);
+
         Token candToken, specToken;
         TokenType candType, specType;
-        final var tokenList = Instructions.getTokenList(spec);
         for (int i = 1; i < tokenList.size(); i++) {
             candToken = cand.get(i);
             specToken = tokenList.get(i);

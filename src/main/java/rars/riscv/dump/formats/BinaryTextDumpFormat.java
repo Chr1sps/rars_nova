@@ -23,7 +23,7 @@ public class BinaryTextDumpFormat extends AbstractDumpFormat {
      * Constructor. There is no standard file extension for this format.
      */
     public BinaryTextDumpFormat() {
-        super("Binary Text", "BinaryText", "Written as '0' and '1' characters to text file", null);
+        super("Binary Text", "BinaryText", "Written as '0' and '1' characters to text file");
     }
 
     /**

@@ -11,9 +11,11 @@ package rars.venus.editors.jeditsyntax;
 
 import rars.Globals;
 import rars.Settings;
+import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
 
 /**
  * Encapsulates default settings for a text area. This can be passed
@@ -36,7 +38,7 @@ public class TextAreaDefaults {
 
     public int cols;
     public int rows;
-    public SyntaxStyle[] styles;
+    public Map<TokenType, SyntaxStyle> styles;
     public Color caretColor;
     public Color selectionColor;
     public Color lineHighlightColor;

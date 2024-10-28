@@ -77,7 +77,7 @@ public class Assembler {
     // using
     // operand on .text directive. Will generate error message for each one that
     // occurs.
-    private static void catchDuplicateAddresses(final ArrayList<ProgramStatement> instructions, final ErrorList errors) {
+    private static void catchDuplicateAddresses(final List<ProgramStatement> instructions, final ErrorList errors) {
         for (int i = 0; i < instructions.size() - 1; i++) {
             final ProgramStatement ps1 = instructions.get(i);
             final ProgramStatement ps2 = instructions.get(i + 1);
@@ -161,7 +161,7 @@ public class Assembler {
      * @throws AssemblyException if any.
      * @see ProgramStatement
      */
-    public @Nullable ArrayList<ProgramStatement> assemble(final ArrayList<RISCVprogram> tokenizedProgramFiles,
+    public @Nullable ArrayList<ProgramStatement> assemble(final List<RISCVprogram> tokenizedProgramFiles,
                                                           final boolean extendedAssemblerEnabled,
                                                           final boolean warningsAreErrors) throws AssemblyException {
 
@@ -556,22 +556,22 @@ public class Assembler {
             if (instrMatches == null)
                 return ret;
             // OK, we've got an operator match, let's check the operands.
-            final Instruction inst = OperandFormat.bestOperandMatch(tokens, instrMatches);
+            final Instruction instruction = OperandFormat.bestOperandMatch(tokens, instrMatches);
             // Here's the place to flag use of extended (pseudo) instructions
             // when setting disabled.
-            if (inst instanceof ExtendedInstruction && !extendedAssemblerEnabled) {
+            if (instruction instanceof ExtendedInstruction && !extendedAssemblerEnabled) {
                 this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
                         token.getStartPos(),
                         "Extended (pseudo) instruction or format not permitted.  See Settings."));
             }
-            if (OperandFormat.tokenOperandMatch(tokens, inst, this.errors)) {
+            if (OperandFormat.checkIfTokensMatchOperand(tokens, instruction, this.errors)) {
                 programStatement = new ProgramStatement(this.fileCurrentlyBeingAssembled, source,
-                        tokenList, tokens, inst, this.textAddress.get(), sourceLineNumber);
+                        tokenList, tokens, instruction, this.textAddress.get(), sourceLineNumber);
                 // instruction length is 4 for all basic instruction, varies for extended
                 // instruction
                 // Modified to permit use of compact expansion if address fits
                 // in 15 bits. DPS 4-Aug-2009
-                final int instLength = inst.getInstructionLength();
+                final int instLength = instruction.getInstructionLength();
                 this.textAddress.increment(instLength);
                 ret.add(programStatement);
                 return ret;

@@ -53,6 +53,6 @@ public class Environment {
      * <p>Constructor for Environment.</p>
      */
     public Environment() {
-        this(RoundingMode.even);
+        this(RoundingMode.EVEN);
     }
 }

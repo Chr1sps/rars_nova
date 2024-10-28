@@ -33,12 +33,9 @@ import java.util.Objects;
  */
 public class SegmentWindowDumpFormat extends AbstractDumpFormat {
 
-    /**
-     * Constructor. There is no standard file extension for this format.
-     */
     public SegmentWindowDumpFormat() {
         super("Text/Data Segment Window", "SegmentWindow",
-                " Text Segment Window or Data Segment Window format to text file", null);
+                " Text Segment Window or Data Segment Window format to text file");
     }
 
     /**

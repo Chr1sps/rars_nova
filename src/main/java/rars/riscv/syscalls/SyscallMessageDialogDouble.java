@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
@@ -41,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Service to display a message to user.
  */
-public class SyscallMessageDialogDouble extends AbstractSyscall {
+public final class SyscallMessageDialogDouble extends AbstractSyscall {
     /**
      * Build an instance of the syscall with its default service number and name.
      */
@@ -56,7 +57,7 @@ public class SyscallMessageDialogDouble extends AbstractSyscall {
      * System call to display a message to user.
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         // TODO: maybe refactor this, other null strings are handled in a central place
         // now
         String message = ""; // = "";

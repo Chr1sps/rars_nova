@@ -1,5 +1,6 @@
 package rars.venus.settings;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
 import rars.venus.Editor;
@@ -7,6 +8,7 @@ import rars.venus.GuiAction;
 import rars.venus.editors.jeditsyntax.SyntaxStyle;
 import rars.venus.editors.jeditsyntax.SyntaxUtilities;
 import rars.venus.editors.jeditsyntax.tokenmarker.RISCVTokenMarker;
+import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 import rars.venus.util.AbstractFontSettingDialog;
 
 import javax.swing.*;
@@ -16,6 +18,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.text.Caret;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
@@ -50,6 +54,30 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class SettingsEditorAction extends GuiAction {
 
+    private static final int gridVGap = 2;
+    private static final int gridHGap = 2;
+    private static final Border ColorSelectButtonEnabledBorder = new BevelBorder(BevelBorder.RAISED, Color.WHITE,
+            Color.GRAY);
+    private static final Border ColorSelectButtonDisabledBorder = new LineBorder(Color.GRAY, 2);
+    private static final String GENERIC_TOOL_TIP_TEXT = "Use generic editor (original RARS editor, similar to Notepad) instead of language-aware styled editor";
+    private static final String SAMPLE_TOOL_TIP_TEXT = "Current setting; modify using buttons to the right";
+    private static final String FOREGROUND_TOOL_TIP_TEXT = "Click, to select text color";
+    private static final String BOLD_TOOL_TIP_TEXT = "Toggle text bold style";
+    private static final String ITALIC_TOOL_TIP_TEXT = "Toggle text italic style";
+    private static final String DEFAULT_TOOL_TIP_TEXT = "Check, to select defaults (disables buttons)";
+    private static final String BOLD_BUTTON_TOOL_TIP_TEXT = "B";
+    private static final String ITALIC_BUTTON_TOOL_TIP_TEXT = "I";
+    private static final String TAB_SIZE_TOOL_TIP_TEXT = "Current tab size in characters";
+    private static final String BLINK_SPINNER_TOOL_TIP_TEXT = "Current blinking rate in milliseconds";
+    private static final String BLINK_SAMPLE_TOOL_TIP_TEXT = "Displays current blinking rate";
+    private static final String CURRENT_LINE_HIGHLIGHT_TOOL_TIP_TEXT = "Check, to highlight line currently being edited";
+    private static final String AUTO_INDENT_TOOL_TIP_TEXT = "Check, to enable auto-indent to previous line when Enter first is pressed";
+    private static final String[] POPUP_GUIDANCE_TOOL_TIP_TEXT = {
+            "Turns off instruction and directive guide popup while typing",
+            "Generates instruction guide popup after first letter of potential instruction is typed",
+            "Generates instruction guide popup after second letter of potential instruction is typed"
+    };
+
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.
      *
@@ -78,33 +106,6 @@ public class SettingsEditorAction extends GuiAction {
 
     }
 
-    private static final int gridVGap = 2;
-    private static final int gridHGap = 2;
-    private static final Border ColorSelectButtonEnabledBorder = new BevelBorder(BevelBorder.RAISED, Color.WHITE,
-            Color.GRAY);
-    private static final Border ColorSelectButtonDisabledBorder = new LineBorder(Color.GRAY, 2);
-
-    private static final String GENERIC_TOOL_TIP_TEXT = "Use generic editor (original RARS editor, similar to Notepad) instead of language-aware styled editor";
-
-    private static final String SAMPLE_TOOL_TIP_TEXT = "Current setting; modify using buttons to the right";
-    private static final String FOREGROUND_TOOL_TIP_TEXT = "Click, to select text color";
-    private static final String BOLD_TOOL_TIP_TEXT = "Toggle text bold style";
-    private static final String ITALIC_TOOL_TIP_TEXT = "Toggle text italic style";
-    private static final String DEFAULT_TOOL_TIP_TEXT = "Check, to select defaults (disables buttons)";
-    private static final String BOLD_BUTTON_TOOL_TIP_TEXT = "B";
-    private static final String ITALIC_BUTTON_TOOL_TIP_TEXT = "I";
-
-    private static final String TAB_SIZE_TOOL_TIP_TEXT = "Current tab size in characters";
-    private static final String BLINK_SPINNER_TOOL_TIP_TEXT = "Current blinking rate in milliseconds";
-    private static final String BLINK_SAMPLE_TOOL_TIP_TEXT = "Displays current blinking rate";
-    private static final String CURRENT_LINE_HIGHLIGHT_TOOL_TIP_TEXT = "Check, to highlight line currently being edited";
-    private static final String AUTO_INDENT_TOOL_TIP_TEXT = "Check, to enable auto-indent to previous line when Enter first is pressed";
-    private static final String[] POPUP_GUIDANCE_TOOL_TIP_TEXT = {
-            "Turns off instruction and directive guide popup while typing",
-            "Generates instruction guide popup after first letter of potential instruction is typed",
-            "Generates instruction guide popup after second letter of potential instruction is typed"
-    };
-
     // Concrete font chooser class.
     private static class EditorFontDialog extends AbstractFontSettingDialog {
 
@@ -113,8 +114,8 @@ public class SettingsEditorAction extends GuiAction {
         private JToggleButton[] bold, italic;
         private JCheckBox[] useDefault;
 
-        private int[] syntaxStyleIndex;
-        private SyntaxStyle[] defaultStyles, initialStyles, currentStyles;
+        private TokenType[] syntaxStyleIndex;
+        private Map<TokenType, SyntaxStyle> defaultStyles, initialStyles, currentStyles;
         private Font previewFont;
 
         private JSlider tabSizeSelector;
@@ -230,7 +231,7 @@ public class SettingsEditorAction extends GuiAction {
 
             if (this.syntaxStylesAction) {
                 for (int i = 0; i < this.syntaxStyleIndex.length; i++) {
-                    Globals.getSettings().setEditorSyntaxStyleByPosition(this.syntaxStyleIndex[i],
+                    Globals.getSettings().setEditorSyntaxStyleByTokenType(this.syntaxStyleIndex[i],
                             new SyntaxStyle(this.samples[i].getForeground(),
                                     this.italic[i].isSelected(), this.bold[i].isSelected()));
                 }
@@ -408,60 +409,63 @@ public class SettingsEditorAction extends GuiAction {
             final JPanel syntaxStylePanel = new JPanel();
             this.defaultStyles = SyntaxUtilities.getDefaultSyntaxStyles();
             this.initialStyles = SyntaxUtilities.getCurrentSyntaxStyles();
-            final String[] labels = RISCVTokenMarker.getRISCVTokenLabels();
-            final String[] sampleText = RISCVTokenMarker.getRISCVTokenExamples();
+            final var labels = RISCVTokenMarker.getRISCVTokenLabels();
+            final var sampleText = RISCVTokenMarker.getRISCVTokenExamples();
             this.syntaxStylesAction = false;
-            int count = 0;
             // Count the number of actual styles specified
-            for (final String label : labels) {
-                if (label != null) {
-                    count++;
-                }
-            }
             // create new arrays (no gaps) for grid display, refer to original index
-            this.syntaxStyleIndex = new int[count];
-            this.currentStyles = new SyntaxStyle[count];
-            final String[] label = new String[count];
-            this.samples = new JLabel[count];
-            this.foregroundButtons = new JButton[count];
-            this.bold = new JToggleButton[count];
-            this.italic = new JToggleButton[count];
-            this.useDefault = new JCheckBox[count];
+            this.syntaxStyleIndex = new TokenType[labels.size()];
+            this.currentStyles = new HashMap<>();
+            final String[] someOtherLabel = new String[labels.size()];
+            this.samples = new JLabel[labels.size()];
+            this.foregroundButtons = new JButton[labels.size()];
+            this.bold = new JToggleButton[labels.size()];
+            this.italic = new JToggleButton[labels.size()];
+            this.useDefault = new JCheckBox[labels.size()];
             final Font genericFont = new JLabel().getFont();
             this.previewFont = new Font(Font.MONOSPACED, Font.PLAIN, genericFont.getSize());// no bold on button text
             final Font boldFont = new Font(Font.SERIF, Font.BOLD, genericFont.getSize());
             final Font italicFont = new Font(Font.SERIF, Font.ITALIC, genericFont.getSize());
-            count = 0;
+            var count = 0;
             // Set all the fixed features. Changeable features set/reset in
             // initializeSyntaxStyleChangeables
-            for (int i = 0; i < labels.length; i++) {
-                if (labels[i] != null) {
-                    this.syntaxStyleIndex[count] = i;
-                    this.samples[count] = new JLabel();
-                    this.samples[count].setOpaque(true);
-                    this.samples[count].setHorizontalAlignment(SwingConstants.CENTER);
-                    this.samples[count].setBorder(BorderFactory.createLineBorder(Color.black));
-                    this.samples[count].setText(sampleText[i]);
-                    this.samples[count].setBackground(Color.WHITE);
-                    this.samples[count].setToolTipText(SettingsEditorAction.SAMPLE_TOOL_TIP_TEXT);
-                    this.foregroundButtons[count] = new ColorSelectButton(); // defined in SettingsHighlightingAction
-                    this.foregroundButtons[count].addActionListener(new ForegroundChanger(count));
-                    this.foregroundButtons[count].setToolTipText(SettingsEditorAction.FOREGROUND_TOOL_TIP_TEXT);
-                    final BoldItalicChanger boldItalicChanger = new BoldItalicChanger(count);
-                    this.bold[count] = new JToggleButton(SettingsEditorAction.BOLD_BUTTON_TOOL_TIP_TEXT, false);
-                    this.bold[count].setFont(boldFont);
-                    this.bold[count].addActionListener(boldItalicChanger);
-                    this.bold[count].setToolTipText(SettingsEditorAction.BOLD_TOOL_TIP_TEXT);
-                    this.italic[count] = new JToggleButton(SettingsEditorAction.ITALIC_BUTTON_TOOL_TIP_TEXT, false);
-                    this.italic[count].setFont(italicFont);
-                    this.italic[count].addActionListener(boldItalicChanger);
-                    this.italic[count].setToolTipText(SettingsEditorAction.ITALIC_TOOL_TIP_TEXT);
-                    label[count] = labels[i];
-                    this.useDefault[count] = new JCheckBox();
-                    this.useDefault[count].addItemListener(new DefaultChanger(count));
-                    this.useDefault[count].setToolTipText(SettingsEditorAction.DEFAULT_TOOL_TIP_TEXT);
-                    count++;
-                }
+            for (final var entry : labels.entrySet()) {
+                final var key = entry.getKey();
+                this.syntaxStyleIndex[count] = key;
+
+                final var label = new JLabel();
+                label.setOpaque(true);
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                label.setBorder(BorderFactory.createLineBorder(Color.black));
+                label.setText(sampleText.get(key));
+                label.setBackground(Color.WHITE);
+                label.setToolTipText(SettingsEditorAction.SAMPLE_TOOL_TIP_TEXT);
+                this.samples[count] = label;
+
+                final var foregroundButton = new ColorSelectButton();
+                foregroundButton.addActionListener(new ForegroundChanger(count, key));
+                foregroundButton.setToolTipText(SettingsEditorAction.FOREGROUND_TOOL_TIP_TEXT);
+                this.foregroundButtons[count] = foregroundButton;
+
+                final BoldItalicChanger boldItalicChanger = new BoldItalicChanger(count, key);
+
+                final var boldButton = new JToggleButton(SettingsEditorAction.BOLD_BUTTON_TOOL_TIP_TEXT, false);
+                boldButton.setFont(boldFont);
+                boldButton.addActionListener(boldItalicChanger);
+                boldButton.setToolTipText(SettingsEditorAction.BOLD_TOOL_TIP_TEXT);
+                this.bold[count] = boldButton;
+
+                final var italicButton = new JToggleButton(SettingsEditorAction.ITALIC_BUTTON_TOOL_TIP_TEXT, false);
+                italicButton.setFont(italicFont);
+                italicButton.addActionListener(boldItalicChanger);
+                italicButton.setToolTipText(SettingsEditorAction.ITALIC_TOOL_TIP_TEXT);
+                this.italic[count] = italicButton;
+
+                someOtherLabel[count] = entry.getValue();
+                this.useDefault[count] = new JCheckBox();
+                this.useDefault[count].addItemListener(new DefaultChanger(count, key));
+                this.useDefault[count].setToolTipText(SettingsEditorAction.DEFAULT_TOOL_TIP_TEXT);
+                count++;
             }
             this.initializeSyntaxStyleChangeables();
             // build a grid
@@ -471,7 +475,7 @@ public class SettingsEditorAction extends GuiAction {
             // column 1: label, column 2: preview, column 3: foreground chooser, column 4/5:
             // bold/italic, column 6: default
             for (int i = 0; i < this.syntaxStyleIndex.length; i++) {
-                labelPreviewPanel.add(new JLabel(label[i], SwingConstants.RIGHT));
+                labelPreviewPanel.add(new JLabel(someOtherLabel[i], SwingConstants.RIGHT));
                 labelPreviewPanel.add(this.samples[i]);
                 buttonsPanel.add(this.foregroundButtons[i]);
                 buttonsPanel.add(this.bold[i]);
@@ -503,23 +507,23 @@ public class SettingsEditorAction extends GuiAction {
         // Set or reset the changeable features of component for syntax style
         private void initializeSyntaxStyleChangeables() {
             for (int count = 0; count < this.samples.length; count++) {
-                final int i = this.syntaxStyleIndex[count];
+                final TokenType type = this.syntaxStyleIndex[count];
                 this.samples[count].setFont(this.previewFont);
-                this.samples[count].setForeground(this.initialStyles[i].getColor());
-                this.foregroundButtons[count].setBackground(this.initialStyles[i].getColor());
+                this.samples[count].setForeground(this.initialStyles.get(type).getColor());
+                this.foregroundButtons[count].setBackground(this.initialStyles.get(type).getColor());
                 this.foregroundButtons[count].setEnabled(true);
-                this.currentStyles[count] = this.initialStyles[i];
-                this.bold[count].setSelected(this.initialStyles[i].isBold());
+                this.currentStyles.put(type, this.initialStyles.get(type));
+                this.bold[count].setSelected(this.initialStyles.get(type).isBold());
                 if (this.bold[count].isSelected()) {
                     final Font f = this.samples[count].getFont();
                     this.samples[count].setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
                 }
-                this.italic[count].setSelected(this.initialStyles[i].isItalic());
+                this.italic[count].setSelected(this.initialStyles.get(type).isItalic());
                 if (this.italic[count].isSelected()) {
                     final Font f = this.samples[count].getFont();
                     this.samples[count].setFont(f.deriveFont(f.getStyle() ^ Font.ITALIC));
                 }
-                this.useDefault[count].setSelected(this.initialStyles[i].toString().equals(this.defaultStyles[i].toString()));
+                this.useDefault[count].setSelected(this.initialStyles.get(type).toString().equals(this.defaultStyles.get(type).toString()));
                 if (this.useDefault[count].isSelected()) {
                     this.foregroundButtons[count].setEnabled(false);
                     this.bold[count].setEnabled(false);
@@ -539,63 +543,6 @@ public class SettingsEditorAction extends GuiAction {
             }
             sample.setFont(f);
             sample.setForeground(style.getColor());
-        }
-
-        ///////////////////////////////////////////////////////////////////////////
-        // Toggle bold or italic style on preview button when B or I button clicked
-        private class BoldItalicChanger implements ActionListener {
-            private final int row;
-
-            public BoldItalicChanger(final int row) {
-                this.row = row;
-            }
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                final Font f = EditorFontDialog.this.samples[this.row].getFont();
-                if (e.getActionCommand().equals(SettingsEditorAction.BOLD_BUTTON_TOOL_TIP_TEXT)) {
-                    if (EditorFontDialog.this.bold[this.row].isSelected()) {
-                        EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() | Font.BOLD));
-                    } else {
-                        EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
-                    }
-                } else {
-                    if (EditorFontDialog.this.italic[this.row].isSelected()) {
-                        EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() | Font.ITALIC));
-                    } else {
-                        EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() ^ Font.ITALIC));
-                    }
-                }
-                EditorFontDialog.this.currentStyles[this.row] = new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
-                        EditorFontDialog.this.italic[this.row].isSelected(), EditorFontDialog.this.bold[this.row].isSelected());
-                EditorFontDialog.this.syntaxStylesAction = true;
-
-            }
-        }
-
-        /////////////////////////////////////////////////////////////////
-        //
-        // Class that handles click on the foreground selection button
-        //
-        private class ForegroundChanger implements ActionListener {
-            private final int row;
-
-            public ForegroundChanger(final int pos) {
-                this.row = pos;
-            }
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                final JButton button = (JButton) e.getSource();
-                final Color newColor = JColorChooser.showDialog(null, "Set Text Color", button.getBackground());
-                if (newColor != null) {
-                    button.setBackground(newColor);
-                    EditorFontDialog.this.samples[this.row].setForeground(newColor);
-                }
-                EditorFontDialog.this.currentStyles[this.row] = new SyntaxStyle(button.getBackground(),
-                        EditorFontDialog.this.italic[this.row].isSelected(), EditorFontDialog.this.bold[this.row].isSelected());
-                EditorFontDialog.this.syntaxStylesAction = true;
-            }
         }
 
         /**
@@ -679,15 +626,78 @@ public class SettingsEditorAction extends GuiAction {
             }
         }
 
+        ///////////////////////////////////////////////////////////////////////////
+        // Toggle bold or italic style on preview button when B or I button clicked
+        private class BoldItalicChanger implements ActionListener {
+            private final int row;
+            private final @NotNull TokenType type;
+
+            public BoldItalicChanger(final int row, final @NotNull TokenType type) {
+                this.row = row;
+                this.type = type;
+            }
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final Font f = EditorFontDialog.this.samples[this.row].getFont();
+                if (e.getActionCommand().equals(SettingsEditorAction.BOLD_BUTTON_TOOL_TIP_TEXT)) {
+                    if (EditorFontDialog.this.bold[this.row].isSelected()) {
+                        EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+                    } else {
+                        EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
+                    }
+                } else {
+                    if (EditorFontDialog.this.italic[this.row].isSelected()) {
+                        EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() | Font.ITALIC));
+                    } else {
+                        EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() ^ Font.ITALIC));
+                    }
+                }
+                EditorFontDialog.this.currentStyles.put(type, new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
+                        EditorFontDialog.this.italic[this.row].isSelected(), EditorFontDialog.this.bold[this.row].isSelected()));
+                EditorFontDialog.this.syntaxStylesAction = true;
+
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////
+        //
+        // Class that handles click on the foreground selection button
+        //
+        private class ForegroundChanger implements ActionListener {
+            private final int row;
+            private final @NotNull TokenType type;
+
+            public ForegroundChanger(final int pos, final @NotNull TokenType type) {
+                this.row = pos;
+                this.type = type;
+            }
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final JButton button = (JButton) e.getSource();
+                final Color newColor = JColorChooser.showDialog(null, "Set Text Color", button.getBackground());
+                if (newColor != null) {
+                    button.setBackground(newColor);
+                    EditorFontDialog.this.samples[this.row].setForeground(newColor);
+                }
+                currentStyles.put(type, new SyntaxStyle(button.getBackground(),
+                        EditorFontDialog.this.italic[this.row].isSelected(), EditorFontDialog.this.bold[this.row].isSelected()));
+                EditorFontDialog.this.syntaxStylesAction = true;
+            }
+        }
+
         /////////////////////////////////////////////////////////////////
         //
         // Class that handles action (check, uncheck) on the Default checkbox.
         //
         private class DefaultChanger implements ItemListener {
             private final int row;
+            private final @NotNull TokenType type;
 
-            public DefaultChanger(final int pos) {
+            public DefaultChanger(final int pos, final @NotNull TokenType type) {
                 this.row = pos;
+                this.type = type;
             }
 
             @Override
@@ -699,18 +709,18 @@ public class SettingsEditorAction extends GuiAction {
                     EditorFontDialog.this.foregroundButtons[this.row].setEnabled(false);
                     EditorFontDialog.this.bold[this.row].setEnabled(false);
                     EditorFontDialog.this.italic[this.row].setEnabled(false);
-                    EditorFontDialog.this.currentStyles[this.row] = new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
-                            EditorFontDialog.this.italic[this.row].isSelected(), EditorFontDialog.this.bold[this.row].isSelected());
-                    final SyntaxStyle defaultStyle = EditorFontDialog.this.defaultStyles[EditorFontDialog.this.syntaxStyleIndex[this.row]];
+                    currentStyles.put(this.type, new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
+                            EditorFontDialog.this.italic[this.row].isSelected(), EditorFontDialog.this.bold[this.row].isSelected()));
+                    final var defaultStyle = EditorFontDialog.this.defaultStyles.get(this.type);
                     EditorFontDialog.this.setSampleStyles(EditorFontDialog.this.samples[this.row], defaultStyle);
                     EditorFontDialog.this.foregroundButtons[this.row].setBackground(defaultStyle.getColor());
                     EditorFontDialog.this.bold[this.row].setSelected(defaultStyle.isBold());
                     EditorFontDialog.this.italic[this.row].setSelected(defaultStyle.isItalic());
                 } else {
-                    EditorFontDialog.this.setSampleStyles(EditorFontDialog.this.samples[this.row], EditorFontDialog.this.currentStyles[this.row]);
-                    EditorFontDialog.this.foregroundButtons[this.row].setBackground(EditorFontDialog.this.currentStyles[this.row].getColor());
-                    EditorFontDialog.this.bold[this.row].setSelected(EditorFontDialog.this.currentStyles[this.row].isBold());
-                    EditorFontDialog.this.italic[this.row].setSelected(EditorFontDialog.this.currentStyles[this.row].isItalic());
+                    EditorFontDialog.this.setSampleStyles(EditorFontDialog.this.samples[this.row], EditorFontDialog.this.currentStyles.get(this.type));
+                    EditorFontDialog.this.foregroundButtons[this.row].setBackground(EditorFontDialog.this.currentStyles.get(this.type).getColor());
+                    EditorFontDialog.this.bold[this.row].setSelected(EditorFontDialog.this.currentStyles.get(this.type).isBold());
+                    EditorFontDialog.this.italic[this.row].setSelected(EditorFontDialog.this.currentStyles.get(this.type).isItalic());
                     EditorFontDialog.this.foregroundButtons[this.row].setEnabled(true);
                     EditorFontDialog.this.bold[this.row].setEnabled(true);
                     EditorFontDialog.this.italic[this.row].setEnabled(true);

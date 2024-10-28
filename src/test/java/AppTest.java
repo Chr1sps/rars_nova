@@ -11,7 +11,6 @@ import rars.simulator.Simulator;
 import utils.RarsTestBase;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -24,8 +23,7 @@ public class AppTest extends RarsTestBase {
     public static void runTestFiles(final String path, final boolean is64Bit) {
         Globals.initialize();
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, is64Bit);
-        InstructionSet.rv64 = is64Bit;
-        Globals.instructionSet.populate();
+        Instructions.RV64 = is64Bit;
 
         final var opt = new Options();
         opt.startAtMain = true;
@@ -151,8 +149,7 @@ public class AppTest extends RarsTestBase {
         final Program p = new Program(opt);
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED, true);
 
-        final ArrayList<Instruction> insts = Globals.instructionSet.getInstructionList();
-        for (final Instruction inst : insts) {
+        for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {
             if (inst instanceof final BasicInstruction binst) {
                 if (binst.getInstructionFormat() == BasicInstructionFormat.B_FORMAT || binst.getInstructionFormat() == BasicInstructionFormat.J_FORMAT)
                     continue;
@@ -228,9 +225,8 @@ public class AppTest extends RarsTestBase {
         final var p = new Program(opt);
         Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED, true);
 
-        final var insts = Globals.instructionSet.getInstructionList();
         int skips = 0;
-        for (final Instruction inst : insts) {
+        for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {
             if (inst instanceof ExtendedInstruction) {
                 final String program = "label:" + inst.getExampleFormat();
                 try {

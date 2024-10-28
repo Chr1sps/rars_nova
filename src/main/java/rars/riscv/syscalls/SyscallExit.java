@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
@@ -36,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * <p>SyscallExit class.</p>
  */
-public class SyscallExit extends AbstractSyscall {
+public final class SyscallExit extends AbstractSyscall {
     /**
      * <p>Constructor for SyscallExit.</p>
      */
@@ -48,7 +49,7 @@ public class SyscallExit extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         Globals.exitCode = 0;
         throw new ExitingException(); // empty exception list.
     }

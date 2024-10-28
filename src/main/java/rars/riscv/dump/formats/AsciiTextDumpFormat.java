@@ -23,11 +23,8 @@ import java.io.PrintStream;
  */
 public class AsciiTextDumpFormat extends AbstractDumpFormat {
 
-    /**
-     * Constructor. There is no standard file extension for this format.
-     */
     public AsciiTextDumpFormat() {
-        super("ASCII Text", "AsciiText", "Memory contents interpreted as ASCII characters", null);
+        super("ASCII Text", "AsciiText", "Memory contents interpreted as ASCII characters");
     }
 
     /**

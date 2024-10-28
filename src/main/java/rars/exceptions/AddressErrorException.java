@@ -38,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class AddressErrorException extends Exception {
+public final class AddressErrorException extends Exception {
     public final int address;
     public final @NotNull ExceptionReason reason; // SimulationException.(STORE|LOAD|INSTRUCTION)_(ADDRESS_MISALIGNED|ACCESS_FAULT)
 

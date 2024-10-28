@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
@@ -13,7 +14,7 @@ import rars.util.SimpleSubscriber;
 
 import java.util.concurrent.Flow;
 
-public class SyscallDisplayBitmap extends AbstractSyscall implements SimpleSubscriber<SimulatorNotice> {
+public final class SyscallDisplayBitmap extends AbstractSyscall implements SimpleSubscriber<SimulatorNotice> {
     private @Nullable BitmapDisplay display;
     private Flow.Subscription subscription;
 
@@ -28,7 +29,7 @@ public class SyscallDisplayBitmap extends AbstractSyscall implements SimpleSubsc
     }
 
     @Override
-    public void simulate(final ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final int baseAddress = RegisterFile.getValue("a0");
         final int width = RegisterFile.getValue("a1");
         final int height = RegisterFile.getValue("a2");

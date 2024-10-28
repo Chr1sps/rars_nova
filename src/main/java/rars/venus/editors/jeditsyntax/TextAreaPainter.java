@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import rars.venus.editors.jeditsyntax.tokenmarker.Token;
 import rars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
+import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 
 import javax.swing.*;
 import javax.swing.text.Segment;
@@ -24,6 +25,8 @@ import javax.swing.text.Utilities;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The text area repaint manager. It performs double buffering and paints
@@ -39,7 +42,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
     protected final int cols;
     protected final int rows;
     final Segment currentLine;
-    protected SyntaxStyle[] styles;
+    protected Map<TokenType, SyntaxStyle> styles;
     protected Color caretColor;
     protected Color selectionColor;
     protected Color lineHighlightColor;
@@ -55,7 +58,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
     protected Highlight highlights;
     // package-private members
     int currentLineIndex;
-    Token currentLineTokens;
+    List<Token> currentLineTokens;
 
     /**
      * Creates a new repaint manager. This should be not be called
@@ -124,7 +127,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
      *
      * @return an array of {@link SyntaxStyle} objects
      */
-    public final SyntaxStyle[] getStyles() {
+    public final Map<TokenType, SyntaxStyle> getStyles() {
         return this.styles;
     }
 
@@ -134,7 +137,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
      *
      * @param styles The syntax styles
      */
-    public final void setStyles(final SyntaxStyle[] styles) {
+    public final void setStyles(final Map<TokenType, SyntaxStyle> styles) {
         this.styles = styles;
         this.repaint();
     }
@@ -536,7 +539,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
         if (line < 0 || line >= this.textArea.getLineCount()) {
             if (this.paintInvalid) {
                 this.paintHighlight(gfx, line, y);
-                this.styles[Token.INVALID].setGraphicsFlags(gfx, defaultFont);
+                this.styles.get(TokenType.INVALID).setGraphicsFlags(gfx, defaultFont);
                 gfx.drawString("~", 0, y + this.fm.getHeight());
             }
         } else if (tokenMarker == null) {

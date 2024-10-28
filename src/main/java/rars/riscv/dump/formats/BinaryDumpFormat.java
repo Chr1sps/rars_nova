@@ -19,11 +19,8 @@ import java.io.PrintStream;
  */
 public class BinaryDumpFormat extends AbstractDumpFormat {
 
-    /**
-     * Constructor. There is no standard file extension for this format.
-     */
     public BinaryDumpFormat() {
-        super("Binary", "Binary", "Written as byte stream to binary file", null);
+        super("Binary", "Binary", "Written as byte stream to binary file");
     }
 
     /**

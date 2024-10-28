@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.FloatingPointRegisterFile;
@@ -35,9 +36,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>SyscallPrintFloat class.</p>
- *
  */
-public class SyscallPrintFloat extends AbstractSyscall {
+public final class SyscallPrintFloat extends AbstractSyscall {
     /**
      * <p>Constructor for SyscallPrintFloat.</p>
      */
@@ -49,7 +49,7 @@ public class SyscallPrintFloat extends AbstractSyscall {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         SystemIO.printString(Float.toString(Float.intBitsToFloat(
                 FloatingPointRegisterFile.getValue("fa0"))));
     }
