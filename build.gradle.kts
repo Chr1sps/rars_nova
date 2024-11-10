@@ -19,6 +19,7 @@ dependencies {
     testCompileOnly("org.jetbrains:annotations:24.0.0")
     implementation("org.apache.logging.log4j:log4j-core:2.23.1")
     implementation("org.apache.logging.log4j:log4j-api:2.23.1")
+    implementation("com.fifesoft:rsyntaxtextarea:3.5.2")
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")

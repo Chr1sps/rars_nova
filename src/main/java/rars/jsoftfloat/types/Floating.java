@@ -1,8 +1,11 @@
 package rars.jsoftfloat.types;
 
+import org.jetbrains.annotations.NotNull;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.internal.ExactFloat;
-import org.jetbrains.annotations.NotNull;
+
+import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 /**
  * General classifications that any floating point class needs to provide.
@@ -11,6 +14,26 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface Floating<T extends Floating<T>> {
     // TODO: order/group these
+
+    static @NotNull BitSet fromLong(final long l) {
+        return BitSet.valueOf(new long[]{l});
+    }
+
+    static @NotNull BitSet fromInt(final int i) {
+        final var bytes = ByteBuffer.allocate(Integer.BYTES).putInt(i);
+        return BitSet.valueOf(bytes);
+    }
+
+    static @NotNull BitSet shiftLeft(@NotNull final BitSet bits, final int shift) {
+        final var result = new BitSet(bits.length());
+        for (int i = 0; i < bits.length(); i++) {
+            result.set(i + shift, bits.get(i));
+        }
+//        for (int i = 0; i < bits.length(); i++) {
+//            result.set(i + shift, bits.get(i));
+//        }
+        return result;
+    }
 
     /**
      * <p>isSignMinus.</p>
@@ -56,6 +79,9 @@ public interface Floating<T extends Floating<T>> {
      */
     boolean isNaN();
 
+    // TODO: consider making a full bit field representation method for generic
+    // conversions
+
     /**
      * <p>isSignalling.</p>
      *
@@ -69,9 +95,6 @@ public interface Floating<T extends Floating<T>> {
      * @return a boolean
      */
     boolean isZero();
-
-    // TODO: consider making a full bit field representation method for generic
-    // conversions
 
     /**
      * <p>maxPrecision.</p>
@@ -137,5 +160,4 @@ public interface Floating<T extends Floating<T>> {
      * @return a T object
      */
     @NotNull T negate();
-
 }

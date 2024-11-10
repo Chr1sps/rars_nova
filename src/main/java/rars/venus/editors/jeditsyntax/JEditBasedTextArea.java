@@ -35,7 +35,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     private final JComponent lineNumbers;
     private final EditPane editPane;
     private final UndoManager undoManager;
-    private final JEditBasedTextArea sourceCode;
+    private final TextEditingArea sourceCode;
     private boolean isCompoundEdit = false;
     private CompoundEdit compoundEdit;
 
@@ -221,6 +221,21 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         return this;
     }
 
+    @Override
+    public boolean canUndo() {
+        return this.undoManager.canUndo();
+    }
+
+    @Override
+    public boolean canRedo() {
+        return this.undoManager.canRedo();
+    }
+
+    @Override
+    public int getCaretPosition() {
+        return super.getCaretPosition();
+    }
+
     /**
      * Get rid of any accumulated undoable edits. It is useful to call
      * this method after opening a file into the text area. The
@@ -266,14 +281,6 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * {@inheritDoc}
      */
     @Override
-    public void setSelectionVisible(final boolean vis) {
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void setSourceCode(final String s, final boolean editable) {
         this.setText(s);
         this.setEditable(editable);
@@ -283,16 +290,6 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         this.updateEditorColors();
         if (editable)
             this.requestFocusInWindow();
-    }
-
-    /**
-     * Returns the undo manager for this editing area
-     *
-     * @return the undo manager
-     */
-    @Override
-    public UndoManager getUndoManager() {
-        return this.undoManager;
     }
 
     /**

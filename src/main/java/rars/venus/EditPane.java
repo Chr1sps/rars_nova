@@ -4,15 +4,14 @@ import rars.Globals;
 import rars.Settings;
 import rars.notices.SettingsNotice;
 import rars.util.SimpleSubscriber;
+import rars.venus.editors.RSyntaxTextAreaBasedEditor;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
-import rars.venus.editors.jeditsyntax.JEditBasedTextArea;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.undo.CompoundEdit;
-import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -102,7 +101,8 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         this.fileStatus = new FileStatus();
         this.lineNumbers = new JLabel();
 
-        this.sourceCode = new JEditBasedTextArea(this, this.lineNumbers);
+//        this.sourceCode = new JEditBasedTextArea(this, this.lineNumbers);
+        this.sourceCode = new RSyntaxTextAreaBasedEditor();
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);
 
@@ -159,9 +159,18 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
                         this.insertUpdate(evt);
                     }
 
+                    //                    @Override
+//                    public void changedUpdate(final DocumentEvent evt) {
+//                        this.insertUpdate(evt);
+//                    }
                     @Override
-                    public void changedUpdate(final DocumentEvent evt) {
-                        this.insertUpdate(evt);
+                    public void changedUpdate(final DocumentEvent e) {
+
+                    }
+
+                    @Override
+                    public String toString() {
+                        return "EditPane DocumentListener";
                     }
                 });
 
@@ -193,7 +202,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
                     Globals.getSettings().setBooleanSetting(Settings.Bool.EDITOR_LINE_NUMBERS_DISPLAYED,
                             EditPane.this.showLineNumbers.isSelected());
                     // needed because caret disappears when checkbox clicked
-                    EditPane.this.sourceCode.setCaretVisible(true);
                     EditPane.this.sourceCode.requestFocusInWindow();
                 });
 
@@ -378,21 +386,10 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     }
 
     /**
-     * get the manager in charge of Undo and Redo operations
-     *
-     * @return the UnDo manager
-     */
-    public UndoManager getUndoManager() {
-        return this.sourceCode.getUndoManager();
-    }
-
-    /**
      * copy currently-selected text into clipboard
      */
     public void copyText() {
         this.sourceCode.copy();
-        this.sourceCode.setCaretVisible(true);
-        this.sourceCode.setSelectionVisible(true);
     }
 
     /**
@@ -400,7 +397,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      */
     public void cutText() {
         this.sourceCode.cut();
-        this.sourceCode.setCaretVisible(true);
     }
 
     /**
@@ -408,7 +404,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      */
     public void pasteText() {
         this.sourceCode.paste();
-        this.sourceCode.setCaretVisible(true);
     }
 
     /**
@@ -416,8 +411,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      */
     public void selectAllText() {
         this.sourceCode.selectAll();
-        this.sourceCode.setCaretVisible(true);
-        this.sourceCode.setSelectionVisible(true);
     }
 
     /**
@@ -550,7 +543,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
             }
             if (lineStartPosition >= 0) {
                 this.sourceCode.select(lineStartPosition, lineEndPosition);
-                this.sourceCode.setSelectionVisible(true);
             }
         }
     }
@@ -608,6 +600,14 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      */
     public FindReplaceResult doReplace(final String find, final String replace, final boolean caseSensitive) {
         return this.sourceCode.doReplace(find, replace, caseSensitive);
+    }
+
+    public boolean canUndo() {
+        return this.sourceCode.canUndo();
+    }
+
+    public boolean canRedo() {
+        return this.sourceCode.canRedo();
     }
 
     /**

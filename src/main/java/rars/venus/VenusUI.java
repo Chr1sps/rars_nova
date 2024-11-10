@@ -1192,8 +1192,8 @@ public class VenusUI extends JFrame {
      */
     void updateUndoAndRedoState() {
         final EditPane editPane = this.getMainPane().getEditPane();
-        this.editUndoAction.setEnabled(editPane != null && editPane.getUndoManager().canUndo());
-        this.editRedoAction.setEnabled(editPane != null && editPane.getUndoManager().canRedo());
+        this.editUndoAction.setEnabled(editPane != null && editPane.canUndo());
+        this.editRedoAction.setEnabled(editPane != null && editPane.canRedo());
     }
 
 //    private FlatSVGIcon loadSVGIcon(final String name) {

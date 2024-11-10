@@ -1088,7 +1088,7 @@ public class JEditTextArea extends JComponent {
      *
      * @return a int
      */
-    public final int getCaretPosition() {
+    int getCaretPosition() {
         return (this.biasLeft ? this.selectionStart : this.selectionEnd);
     }
 

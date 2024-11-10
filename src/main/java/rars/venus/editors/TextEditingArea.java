@@ -3,7 +3,6 @@ package rars.venus.editors;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.text.Document;
-import javax.swing.undo.UndoManager;
 import java.awt.*;
 
 /*
@@ -36,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Specifies capabilities that any test editor used in MARS must have.
- *
  */
 public interface TextEditingArea {
 
@@ -78,20 +76,6 @@ public interface TextEditingArea {
      * @return a int
      */
     int doReplaceAll(String find, String replace, boolean caseSensitive);
-
-    /**
-     * <p>getCaretPosition.</p>
-     *
-     * @return a int
-     */
-    int getCaretPosition();
-
-    /**
-     * <p>setCaretPosition.</p>
-     *
-     * @param position a int
-     */
-    void setCaretPosition(int position);
 
     /**
      * <p>getDocument.</p>
@@ -161,13 +145,6 @@ public interface TextEditingArea {
      * @param text a {@link java.lang.String} object
      */
     void setText(String text);
-
-    /**
-     * <p>getUndoManager.</p>
-     *
-     * @return a {@link javax.swing.undo.UndoManager} object
-     */
-    UndoManager getUndoManager();
 
     /**
      * <p>paste.</p>
@@ -255,20 +232,6 @@ public interface TextEditingArea {
     void setSourceCode(String code, boolean editable);
 
     /**
-     * <p>setCaretVisible.</p>
-     *
-     * @param vis a boolean
-     */
-    void setCaretVisible(boolean vis);
-
-    /**
-     * <p>setSelectionVisible.</p>
-     *
-     * @param vis a boolean
-     */
-    void setSelectionVisible(boolean vis);
-
-    /**
      * <p>undo.</p>
      */
     void undo();
@@ -310,6 +273,21 @@ public interface TextEditingArea {
      * @return a {@link java.awt.Component} object
      */
     Component getOuterComponent();
+
+    boolean canUndo();
+
+    boolean canRedo();
+
+    int getCaretPosition();
+
+    /**
+     * <p>setCaretPosition.</p>
+     *
+     * @param position a int
+     */
+    void setCaretPosition(int position);
+
+    void requestFocus();
 
     // Used by Find/Replace
     enum FindReplaceResult {
