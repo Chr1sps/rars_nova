@@ -77,15 +77,12 @@ public class VenusUI extends JFrame {
     private final ControlAndStatusWindow csrTab;
     private final MessagesPane messagesPane;
     private final Editor editor;
-    private int frameState; // see windowActivated() and windowDeactivated()
     // PLEASE PUT THESE TWO (& THEIR METHODS) SOMEWHERE THEY BELONG, NOT HERE
     private boolean reset = true; // registers/memory reset for execution
     private boolean started = false; // started execution
     private JMenu window;
     private JCheckBoxMenuItem settingsValueDisplayBase;
     private JCheckBoxMenuItem settingsAddressDisplayBase;
-
-    private JButton SaveAll;
 
     // The "action" objects, which include action listeners. One of each will be
     // created then
@@ -175,10 +172,7 @@ public class VenusUI extends JFrame {
         this.registersPane = new RegistersPane(this.mainUI, this.registersTab, fpTab, this.csrTab);
         this.registersPane.setPreferredSize(registersPanePreferredSize);
 
-        // Insets defaultTabInsets = (Insets)UIManager.get("TabbedPane.tabInsets");
-        // UIManager.put("TabbedPane.tabInsets", new Insets(1, 1, 1, 1));
         this.mainPane = new MainPane(this.mainUI, this.editor, this.registersTab, fpTab, this.csrTab);
-        // UIManager.put("TabbedPane.tabInsets", defaultTabInsets);
 
         this.mainPane.setPreferredSize(mainPanePreferredSize);
         this.messagesPane = new MessagesPane();
@@ -247,20 +241,20 @@ public class VenusUI extends JFrame {
         }
     }
 
-    /**
-     * Get current menu state. State values are constants in FileStatus class. DPS
-     * 23 July 2008
-     *
-     * @return current menu state.
-     */
-    public static int getMenuState() {
-        return VenusUI.menuState;
-    }
-
     /*
      * build the menus and connect them to action objects (which serve as action
      * listeners
      * shared between menu item and corresponding toolbar icon).
+     */
+
+    private static KeyStroke makeShortcut(final int key) {
+        return KeyStroke.getKeyStroke(key, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+    }
+
+    /*
+     * build the toolbar and connect items to action objects (which serve as action
+     * listeners
+     * shared between toolbar icon and corresponding menu item).
      */
 
     /**
@@ -298,16 +292,6 @@ public class VenusUI extends JFrame {
                 VenusUI.LOGGER.error("Invalid File Status: {}", status);
                 break;
         }
-    }
-
-    /*
-     * build the toolbar and connect items to action objects (which serve as action
-     * listeners
-     * shared between toolbar icon and corresponding menu item).
-     */
-
-    private static KeyStroke makeShortcut(final int key) {
-        return KeyStroke.getKeyStroke(key, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
     }
 
     /*
@@ -1174,26 +1158,6 @@ public class VenusUI extends JFrame {
      */
     public RegistersPane getRegistersPane() {
         return this.registersPane;
-    }
-
-    /**
-     * Get reference to settings menu item for display base of memory/register
-     * values.
-     *
-     * @return the menu item
-     */
-    public JCheckBoxMenuItem getValueDisplayBaseMenuItem() {
-        return this.settingsValueDisplayBase;
-    }
-
-    /**
-     * Get reference to settings menu item for display base of memory/register
-     * values.
-     *
-     * @return the menu item
-     */
-    public JCheckBoxMenuItem getAddressDisplayBaseMenuItem() {
-        return this.settingsAddressDisplayBase;
     }
 
     /**

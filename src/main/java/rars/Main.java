@@ -538,7 +538,7 @@ public class Main {
             if (Globals.debug) {
                 this.out.println("---  TOKENIZING & ASSEMBLY BEGINS  ---");
             }
-            final ErrorList warnings = program.assemble(filesToAssemble, mainFile.getAbsolutePath());
+            final ErrorList warnings = program.assembleFiles(filesToAssemble, mainFile.getAbsolutePath());
             if (warnings != null && warnings.warningsOccurred()) {
                 this.out.println(warnings.generateWarningReport());
             }

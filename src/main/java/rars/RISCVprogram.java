@@ -342,27 +342,6 @@ public class RISCVprogram {
     /**
      * Assembles the RISCV source program. All files comprising the program must
      * have
-     * already been tokenized. Assembler warnings are not considered errors.
-     *
-     * @param programsToAssemble       ArrayList of RISCVprogram objects, each
-     *                                 representing a tokenized source file.
-     * @param extendedAssemblerEnabled A boolean second - true means extended
-     *                                 (pseudo) instructions
-     *                                 are permitted in source code and false means
-     *                                 they are to be flagged as errors.
-     * @return ErrorList containing nothing or only warnings (otherwise would have
-     * thrown exception).
-     * @throws AssemblyException Will throw exception if errors occurred while
-     *                           assembling.
-     */
-    public ErrorList assemble(final ArrayList<RISCVprogram> programsToAssemble, final boolean extendedAssemblerEnabled)
-            throws AssemblyException {
-        return this.assemble(programsToAssemble, extendedAssemblerEnabled, false);
-    }
-
-    /**
-     * Assembles the RISCV source program. All files comprising the program must
-     * have
      * already been tokenized.
      *
      * @param programsToAssemble       ArrayList of RISCVprogram objects, each

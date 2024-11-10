@@ -47,16 +47,16 @@ public abstract sealed class Instruction permits BasicInstruction, ExtendedInstr
     /**
      * The instruction name.
      **/
-    protected @NotNull String mnemonic;
+    protected final @NotNull String mnemonic;
     /**
      * Example usage of this instruction. Is provided as subclass constructor
      * argument.
      **/
-    protected @NotNull String exampleFormat;
+    protected final @NotNull String exampleFormat;
     /**
      * Description of instruction for display to user
      **/
-    protected @NotNull String description;
+    protected final @NotNull String description;
 
     protected Instruction(final @NotNull String mnemonic, final @NotNull String example, final @NotNull String description) {
         this.mnemonic = mnemonic;

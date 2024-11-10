@@ -192,29 +192,27 @@ public final class RegisterFile {
     }
 
     /**
-     * For setting the Program Counter. Note that ordinary PC update should be done
-     * using
-     * incrementPC() method. Use this only when processing jumps and branches.
-     *
-     * @param value The second to set the Program Counter to.
-     * @return previous PC second
-     */
-    public static int setProgramCounter(final int value) {
-        final int old = (int) RegisterFile.programCounter.getValue();
-        RegisterFile.programCounter.setValue(value);
-        if (Settings.getBackSteppingEnabled()) {
-            Globals.program.getBackStepper().addPCRestore(old);
-        }
-        return old;
-    }
-
-    /**
      * For returning the program counters second.
      *
      * @return The program counters second as an int.
      */
     public static int getProgramCounter() {
         return (int) RegisterFile.programCounter.getValue();
+    }
+
+    /**
+     * For setting the Program Counter. Note that ordinary PC update should be done
+     * using
+     * incrementPC() method. Use this only when processing jumps and branches.
+     *
+     * @param value The second to set the Program Counter to.
+     */
+    public static void setProgramCounter(final int value) {
+        final int old = (int) RegisterFile.programCounter.getValue();
+        RegisterFile.programCounter.setValue(value);
+        if (Settings.getBackSteppingEnabled()) {
+            Globals.program.getBackStepper().addPCRestore(old);
+        }
     }
 
     /**

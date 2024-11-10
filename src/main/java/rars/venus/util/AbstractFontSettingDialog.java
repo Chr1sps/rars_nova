@@ -47,7 +47,6 @@ public abstract class AbstractFontSettingDialog extends JDialog {
 
     private static final String SEPARATOR = "___SEPARATOR____";
     protected final Font currentFont;
-    JDialog editorDialog;
     JComboBox<String> fontFamilySelector, fontStyleSelector;
     JSlider fontSizeSelector;
     JSpinner fontSizeSpinSelector;

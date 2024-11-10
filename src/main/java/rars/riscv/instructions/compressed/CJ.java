@@ -19,7 +19,7 @@ public class CJ extends CompressedInstruction {
     }
 
     @Override
-    public void simulate(@NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
 
     }
 }

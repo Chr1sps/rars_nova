@@ -1,5 +1,6 @@
 package rars.api;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
@@ -116,15 +117,15 @@ public class Program {
     /**
      * Assembles from a list of files
      *
-     * @param files A list of files to assemble
-     * @param main  Which file should be considered the main file; it should be in
-     *              files
+     * @param files    A list of files to assemble
+     * @param mainFile Which file should be considered the main file; it should be in
+     *                 files
      * @return A list of warnings generated if Options.warningsAreErrors is true,
      * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
-    public ErrorList assemble(final ArrayList<String> files, final String main) throws AssemblyException {
-        final ArrayList<RISCVprogram> programs = this.code.prepareFilesForAssembly(files, main, null);
+    public ErrorList assembleFiles(final @NotNull ArrayList<String> files, final @NotNull String mainFile) throws AssemblyException {
+        final ArrayList<RISCVprogram> programs = this.code.prepareFilesForAssembly(files, mainFile, null);
         return this.assemble(programs);
     }
 
@@ -136,7 +137,7 @@ public class Program {
      * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
-    public ErrorList assemble(final String file) throws AssemblyException {
+    public ErrorList assembleFile(final @NotNull String file) throws AssemblyException {
         // TODO: potentially inline prepareForAssembly
         final ArrayList<String> files = new ArrayList<>();
         files.add(file);
@@ -152,7 +153,7 @@ public class Program {
      * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
-    public ErrorList assembleString(final String source) throws AssemblyException {
+    public ErrorList assembleString(final @NotNull String source) throws AssemblyException {
         final ArrayList<RISCVprogram> programs = new ArrayList<>();
         this.code.fromString(source);
         this.code.tokenize();

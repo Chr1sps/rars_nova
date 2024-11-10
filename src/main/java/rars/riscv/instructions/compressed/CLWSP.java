@@ -25,7 +25,7 @@ public final class CLWSP extends CompressedInstruction {
     }
 
     @Override
-    public void simulate(@NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
         final var destinationRegister = statement.getOperand(0);
         assert isRVCRegister(destinationRegister) : "Destination register must be one of the ones supported by the C extension (x8-x15)";
         final var currentStackPointer = RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER);
@@ -33,8 +33,8 @@ public final class CLWSP extends CompressedInstruction {
         final var address = currentStackPointer + offset;
         try {
             final var data = Globals.memory.getWord(address);
-            RegisterFile.updateRegister(destinationRegister, (long) data);
-        } catch (AddressErrorException e) {
+            RegisterFile.updateRegister(destinationRegister, data);
+        } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);
         }
     }

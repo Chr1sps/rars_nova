@@ -12,6 +12,7 @@ public final class CEBREAK extends CompressedInstruction {
         super("c.ebreak", "Pause execution", CompressedInstructionFormat.CB_FORMAT, "100 1 00000 00000 10");
     }
 
+    @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         throw BreakpointException.INSTANCE;
     }

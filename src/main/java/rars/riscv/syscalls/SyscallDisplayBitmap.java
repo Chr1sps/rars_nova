@@ -3,7 +3,6 @@ package rars.riscv.syscalls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ProgramStatement;
-import rars.exceptions.ExitingException;
 import rars.notices.SimulatorNotice;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.Memory;
@@ -29,7 +28,7 @@ public final class SyscallDisplayBitmap extends AbstractSyscall implements Simpl
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final int baseAddress = RegisterFile.getValue("a0");
         final int width = RegisterFile.getValue("a1");
         final int height = RegisterFile.getValue("a2");

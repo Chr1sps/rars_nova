@@ -50,19 +50,31 @@ public enum TokenType {
      * of basic assembler.
      **/
     // TODO: merge REGISTER_NUMBER and REGISTER_NAME
-    REGISTER_NAME, REGISTER_NUMBER, FP_REGISTER_NAME, CSR_NAME, ROUNDING_MODE,
-    IDENTIFIER, LEFT_PAREN, RIGHT_PAREN,
-    INTEGER_5, INTEGER_6, INTEGER_12, INTEGER_12U, INTEGER_20, INTEGER_32, INTEGER_64, REAL_NUMBER,
+    REGISTER_NAME,
+    REGISTER_NUMBER,
+    FP_REGISTER_NAME,
+    CSR_NAME,
+    ROUNDING_MODE,
+    IDENTIFIER,
+    LEFT_PAREN,
+    RIGHT_PAREN,
+    INTEGER_5,
+    INTEGER_6,
+    INTEGER_12,
+    INTEGER_12U,
+    INTEGER_20,
+    INTEGER_32,
+    INTEGER_64,
+    REAL_NUMBER,
     QUOTED_STRING,
-    PLUS, MINUS, COLON,
-    ERROR, MACRO_PARAMETER,
-    HI, LO,
-    TAG;
-
-    /**
-     * Constant <code>TOKEN_DELIMITERS="\t ,()"</code>
-     */
-    public static final String TOKEN_DELIMITERS = "\t ,()";
+    PLUS,
+    MINUS,
+    COLON, // TODO: consider removing it in favour of a combined LABEL element
+    ERROR,
+    MACRO_PARAMETER, // TODO: make it do something
+    HI,// TODO: make it do something
+    LO, // TODO: make it do something
+    TAG; // TODO: remove?
 
     /**
      * Classifies the given string into one of the types.

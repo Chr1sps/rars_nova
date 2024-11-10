@@ -188,11 +188,9 @@ public class BackStepper {
      *
      * @param address The affected memory address.
      * @param value   The "restore" second to be stored there.
-     * @return the argument second
      */
-    public int addMemoryRestoreRawWord(final int address, final int value) {
+    public void addMemoryRestoreRawWord(final int address, final int value) {
         this.backSteps.push(Action.MEMORY_RESTORE_RAW_WORD, BackStepper.pc(), address, value);
-        return value;
     }
 
     /**
@@ -252,11 +250,9 @@ public class BackStepper {
      *
      * @param register The affected register number.
      * @param value    The "restore" second to be stored there.
-     * @return the argument second
      */
-    public long addRegisterFileRestore(final int register, final long value) {
+    public void addRegisterFileRestore(final int register, final long value) {
         this.backSteps.push(Action.REGISTER_RESTORE, BackStepper.pc(), register, value);
-        return value;
     }
 
     /**
@@ -266,14 +262,14 @@ public class BackStepper {
      * @param value The "restore" second to be stored there.
      * @return the argument second
      */
-    public int addPCRestore(int value) {
+    public int addPCRestore(final int value) {
         // adjust for second reflecting incremented PC.
-        value -= BasicInstruction.BASIC_INSTRUCTION_LENGTH;
+        final var newValue = value - BasicInstruction.BASIC_INSTRUCTION_LENGTH;
         // Use "second" insead of "pc()" for second arg because
         // RegisterFile.getProgramCounter()
         // returns branch target address at this point.
-        this.backSteps.push(Action.PC_RESTORE, value, value);
-        return value;
+        this.backSteps.push(Action.PC_RESTORE, newValue, newValue);
+        return newValue;
     }
 
     /**
@@ -282,11 +278,9 @@ public class BackStepper {
      *
      * @param register The affected register number.
      * @param value    The "restore" second to be stored there.
-     * @return the argument second
      */
-    public long addControlAndStatusRestore(final int register, final long value) {
+    public void addControlAndStatusRestore(final int register, final long value) {
         this.backSteps.push(Action.CONTROL_AND_STATUS_REGISTER_RESTORE, BackStepper.pc(), register, value);
-        return value;
     }
 
     /**
@@ -296,11 +290,9 @@ public class BackStepper {
      *
      * @param register The affected register number.
      * @param value    The "restore" second to be stored there.
-     * @return the argument second
      */
-    public long addControlAndStatusBackdoor(final int register, final long value) {
+    public void addControlAndStatusBackdoor(final int register, final long value) {
         this.backSteps.push(Action.CONTROL_AND_STATUS_REGISTER_BACKDOOR, BackStepper.pc(), register, value);
-        return value;
     }
 
     /**
@@ -309,11 +301,9 @@ public class BackStepper {
      *
      * @param register The affected register number.
      * @param value    The "restore" second to be stored there.
-     * @return the argument second
      */
-    public long addFloatingPointRestore(final int register, final long value) {
+    public void addFloatingPointRestore(final int register, final long value) {
         this.backSteps.push(Action.FLOATING_POINT_REGISTER_RESTORE, BackStepper.pc(), register, value);
-        return value;
     }
 
     /**

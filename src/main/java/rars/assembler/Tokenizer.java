@@ -70,7 +70,7 @@ public class Tokenizer {
     // tab, backspace, return, form feed. The characters and their corresponding
     // decimal codes:
     private static final String escapedCharacters = "'\"\\ntbrf0";
-    private static final String[] escapedCharactersValues = Tokenizer.escapedCharacters.chars().mapToObj(String::valueOf).toArray(String[]::new);
+    private static final String[] escapedCharactersValues = {"39", "34", "92", "10", "9", "8", "13", "12", "0"};
     private ErrorList errors;
     private @Nullable RISCVprogram sourceRISCVprogram;
     private HashMap<String, String> equivalents; // DPS 11-July-2012
@@ -96,7 +96,7 @@ public class Tokenizer {
     // If passed a candidate character literal, attempt to translate it into integer
     // constant.
     // If the translation fails, return original second.
-    private static String preprocessCharacterLiteral(final String value) {
+    private static String preprocessCharacterLiteral(final @NotNull String value) {
         // must start and end with quote and have something in between
         if (value.length() < 3 || value.charAt(0) != '\'' || value.charAt(value.length() - 1) != '\'') {
             return value;
@@ -612,15 +612,6 @@ public class Tokenizer {
         tokens.setProcessedLine(theLine); // DPS 03-Jan-2013. Related to changes of 11-July-2012.
 
         return (substitutionMade) ? this.tokenizeLine(lineNum, theLine) : tokens;
-    }
-
-    /**
-     * Fetch this Tokenizer's error list.
-     *
-     * @return the error list
-     */
-    public ErrorList getErrors() {
-        return this.errors;
     }
 
     // Given candidate token and its position, will classify and record it.

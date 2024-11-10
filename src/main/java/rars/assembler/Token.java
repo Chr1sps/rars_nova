@@ -47,7 +47,6 @@ public class Token {
     private TokenType type;
     // original program and line will differ from the above if token was defined in
     // an included file
-    private RISCVprogram originalProgram;
     private int originalSourceLine;
 
     /**
@@ -68,7 +67,6 @@ public class Token {
         this.sourceProgram = sourceProgram;
         this.sourceLine = line;
         this.sourcePos = start;
-        this.originalProgram = sourceProgram;
         this.originalSourceLine = line;
     }
 
@@ -78,21 +76,10 @@ public class Token {
      * of the ".include" directive, and we need to keep the original
      * for later reference (error messages, text segment display).
      *
-     * @param origProgram    source program containing this token.
      * @param origSourceLine Line within that program of this token.
      */
-    public void setOriginal(final RISCVprogram origProgram, final int origSourceLine) {
-        this.originalProgram = origProgram;
+    public void setOriginal(final int origSourceLine) {
         this.originalSourceLine = origSourceLine;
-    }
-
-    /**
-     * Produces original program containing this token.
-     *
-     * @return RISCVprogram of origin for this token.
-     */
-    public RISCVprogram getOriginalProgram() {
-        return this.originalProgram;
     }
 
     /**

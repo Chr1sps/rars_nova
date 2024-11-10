@@ -83,6 +83,7 @@ public class ErrorList {
      *
      * @return error limit.
      */
+    @SuppressWarnings("SameReturnValue")
     public static int getErrorLimit() {
         return Globals.maximumErrorMessages;
     }

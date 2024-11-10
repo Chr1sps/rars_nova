@@ -12,11 +12,11 @@ package rars.venus.editors.jeditsyntax;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import rars.Globals;
 import rars.venus.editors.jeditsyntax.tokenmarker.Token;
 import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 
-import javax.swing.*;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
@@ -34,11 +34,7 @@ import java.util.Map;
  */
 public final class SyntaxUtilities {
 
-    /**
-     * Constant <code>popupShowing=false</code>
-     */
-    public static final boolean popupShowing = false;
-    private static final Map<TokenType, SyntaxStyle> defaultStyles = Map.ofEntries(
+    private static final @Unmodifiable Map<TokenType, SyntaxStyle> defaultStyles = Map.ofEntries(
             Map.entry(TokenType.NULL, new SyntaxStyle(Color.black, false, false)),
             Map.entry(TokenType.COMMENT1, new SyntaxStyle(new Color(0x00CC33), true, false)),
             Map.entry(TokenType.COMMENT2, new SyntaxStyle(new Color(0x990033), true, false)),
@@ -52,41 +48,8 @@ public final class SyntaxUtilities {
             Map.entry(TokenType.INVALID, new SyntaxStyle(Color.red, false, false)),
             Map.entry(TokenType.MACRO_ARG, new SyntaxStyle(new Color(150, 150, 0), false, false)
             ));
-    /**
-     * Constant <code>popup</code>
-     */
-    public static Popup popup;
 
     private SyntaxUtilities() {
-    }
-
-    /**
-     * Checks if a subregion of a <code>Segment</code> is equal to a
-     * string.
-     *
-     * @param ignoreCase True if case should be ignored, false otherwise
-     * @param text       The segment
-     * @param offset     The offset into the segment
-     * @param match      The string to match
-     * @return a boolean
-     */
-    public static boolean regionMatches(final boolean ignoreCase, final Segment text,
-                                        final int offset, final String match) {
-        final int length = offset + match.length();
-        final char[] textArray = text.array;
-        if (length > text.offset + text.count)
-            return false;
-        for (int i = offset, j = 0; i < length; i++, j++) {
-            char c1 = textArray[i];
-            char c2 = match.charAt(j);
-            if (ignoreCase) {
-                c1 = Character.toUpperCase(c1);
-                c2 = Character.toUpperCase(c2);
-            }
-            if (c1 != c2)
-                return false;
-        }
-        return true;
     }
 
     /**
@@ -99,8 +62,8 @@ public final class SyntaxUtilities {
      * @param match      The character array to match
      * @return a boolean
      */
-    public static boolean regionMatches(final boolean ignoreCase, final Segment text,
-                                        final int offset, final char[] match) {
+    public static boolean regionMatches(final boolean ignoreCase, final @NotNull Segment text,
+                                        final int offset, final char @NotNull [] match) {
         final int length = offset + match.length;
         final char[] textArray = text.array;
         if (length > text.offset + text.count)
@@ -123,9 +86,9 @@ public final class SyntaxUtilities {
      * <code>setStyles()</code> method of <code>SyntaxDocument</code>
      * to use the default syntax styles.
      *
-     * @return an array of {@link SyntaxStyle} objects
+     * @return a map of {@link SyntaxStyle} objects corresponding to each {@link TokenType}
      */
-    public static @NotNull Map<TokenType, SyntaxStyle> getDefaultSyntaxStyles() {
+    public static @NotNull @Unmodifiable Map<TokenType, SyntaxStyle> getDefaultSyntaxStyles() {
         return defaultStyles;
     }
 
@@ -136,9 +99,9 @@ public final class SyntaxUtilities {
      * via MARS Settings menu, the current settings will not be the
      * same as the default settings.
      *
-     * @return an array of {@link SyntaxStyle} objects
+     * @return a map of {@link SyntaxStyle} objects corresponding to each {@link TokenType}
      */
-    public static @NotNull Map<TokenType, SyntaxStyle> getCurrentSyntaxStyles() {
+    public static @NotNull @Unmodifiable Map<TokenType, SyntaxStyle> getCurrentSyntaxStyles() {
         return Map.ofEntries(
                 Map.entry(TokenType.NULL, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.NULL)),
                 Map.entry(TokenType.COMMENT1, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.COMMENT1)),

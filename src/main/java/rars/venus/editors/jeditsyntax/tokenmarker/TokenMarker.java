@@ -37,7 +37,7 @@ public abstract class TokenMarker {
      * shrunk automatically by the <code>insertLines()</code> and
      * <code>deleteLines()</code> methods.
      */
-    protected @NotNull ArrayList<LineInfo> lineInfo;
+    protected final @NotNull ArrayList<LineInfo> lineInfo;
     /**
      * The last tokenized line.
      */
@@ -69,6 +69,7 @@ public abstract class TokenMarker {
      *
      * @return a boolean
      */
+    @SuppressWarnings("SameReturnValue")
     public static boolean supportsMultilineTokens() {
         return true;
     }
@@ -249,16 +250,16 @@ public abstract class TokenMarker {
      */
     public static class LineInfo {
         /**
-         * The id of the last token of the line.
-         */
-        public @Nullable TokenType token;
-        /**
          * This is for use by the token marker implementations
          * themselves. It can be used to store anything that
          * is an object and that needs to exist on a per-line
          * basis.
          */
-        public @Nullable Object obj;
+        public final @Nullable Object obj;
+        /**
+         * The id of the last token of the line.
+         */
+        public @Nullable TokenType token;
 
         /**
          * Creates a new LineInfo object with the specified

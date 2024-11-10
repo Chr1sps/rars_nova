@@ -57,8 +57,7 @@ public class RISCVTokenMarker extends TokenMarker {
             Map.entry(TokenType.MACRO_ARG, "%arg")
     );
     // private members
-    private static KeywordMap cKeywords;
-    private final KeywordMap keywords;
+    private final static KeywordMap keywords = getKeywords();
     private int lastOffset;
     private int lastKeyword;
 
@@ -66,17 +65,7 @@ public class RISCVTokenMarker extends TokenMarker {
      * <p>Constructor for RISCVTokenMarker.</p>
      */
     public RISCVTokenMarker() {
-        this(RISCVTokenMarker.getKeywords());
-    }
-
-    /**
-     * <p>Constructor for RISCVTokenMarker.</p>
-     *
-     * @param keywords a {@link KeywordMap} object
-     */
-    public RISCVTokenMarker(final KeywordMap keywords) {
         super();
-        this.keywords = keywords;
     }
 
     public static @NotNull Map<TokenType, String> getRISCVTokenLabels() {
@@ -169,40 +158,39 @@ public class RISCVTokenMarker extends TokenMarker {
      * @return KeywordMap where first is the keyword and associated second is the token
      * type (e.g. Token.KEYWORD1).
      */
-    private static KeywordMap getKeywords() {
-        if (RISCVTokenMarker.cKeywords == null) {
-            RISCVTokenMarker.cKeywords = new KeywordMap(false);
-            // add Instruction mnemonics
-            for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {
-                RISCVTokenMarker.cKeywords.add(inst.getName(), TokenType.KEYWORD1);
-            }
-            // add assembler directives
-            for (final Directive direct : Directive.getDirectiveList()) {
-                RISCVTokenMarker.cKeywords.add(direct.getName(), TokenType.KEYWORD2);
-            }
-            // add integer register file
-            for (final Register r : RegisterFile.getRegisters()) {
-                RISCVTokenMarker.cKeywords.add(r.getName(), TokenType.KEYWORD3);
-                RISCVTokenMarker.cKeywords.add("x" + r.getNumber(), TokenType.KEYWORD3); // also recognize x0, x1, x2,
-                // etc
-            }
-
-            RISCVTokenMarker.cKeywords.add("fp", TokenType.KEYWORD3);
-
-            // add floating point register file
-            for (final Register r : FloatingPointRegisterFile.getRegisters()) {
-                RISCVTokenMarker.cKeywords.add(r.getName(), TokenType.KEYWORD3);
-                RISCVTokenMarker.cKeywords.add("f" + r.getNumber(), TokenType.KEYWORD3);
-            }
+    private static @NotNull KeywordMap getKeywords() {
+        final var keywords = new KeywordMap(false);
+        // add Instruction mnemonics
+        for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {
+            keywords.add(inst.getName(), TokenType.KEYWORD1);
         }
-        return RISCVTokenMarker.cKeywords;
+        // add assembler directives
+        for (final Directive direct : Directive.getDirectiveList()) {
+            keywords.add(direct.getName(), TokenType.KEYWORD2);
+        }
+        // add integer register file
+        for (final Register r : RegisterFile.getRegisters()) {
+            keywords.add(r.getName(), TokenType.KEYWORD3);
+            keywords.add("x" + r.getNumber(), TokenType.KEYWORD3); // also recognize x0, x1, x2,
+            // etc
+        }
+
+        keywords.add("fp", TokenType.KEYWORD3);
+
+        // add floating point register file
+        for (final Register r : FloatingPointRegisterFile.getRegisters()) {
+            keywords.add(r.getName(), TokenType.KEYWORD3);
+            keywords.add("f" + r.getNumber(), TokenType.KEYWORD3);
+        }
+
+        return keywords;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public rars.venus.editors.jeditsyntax.tokenmarker.TokenType markTokensImpl(final @NotNull ArrayList<Token> tokens, @NotNull rars.venus.editors.jeditsyntax.tokenmarker.TokenType token, final @NotNull Segment line, final int lineIndex) {
+    protected rars.venus.editors.jeditsyntax.tokenmarker.TokenType markTokensImpl(final @NotNull ArrayList<Token> tokens, @NotNull rars.venus.editors.jeditsyntax.tokenmarker.TokenType token, final @NotNull Segment line, final int lineIndex) {
         final char[] array = line.array;
         final int offset = line.offset;
         this.lastOffset = offset;
@@ -484,7 +472,7 @@ public class RISCVTokenMarker extends TokenMarker {
         final int i1 = i + 1;
 
         final int len = i - this.lastKeyword;
-        final var id = this.keywords.lookup(line, this.lastKeyword, len);
+        final var id = keywords.lookup(line, this.lastKeyword, len);
         if (id != TokenType.NULL) {
             // If this is a Token.KEYWORD1 and line already contains a keyword,
             // then assume this one is a label reference and ignore it.

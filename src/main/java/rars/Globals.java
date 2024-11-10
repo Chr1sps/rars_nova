@@ -143,6 +143,7 @@ public final class Globals {
     private Globals() {
     }
 
+    @SuppressWarnings("SameReturnValue")
     private static String getCopyrightYears() {
         return "2003-2019";
     }

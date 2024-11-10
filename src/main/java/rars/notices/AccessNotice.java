@@ -63,15 +63,6 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
     }
 
     /**
-     * Get reference to thread that created this notice
-     *
-     * @return Return reference to the thread that created this notice.
-     */
-    public Thread getThread() {
-        return this.thread;
-    }
-
-    /**
      * Query whether the access originated from executing program
      *
      * @return true if this access originated from executing program, false

@@ -1,8 +1,8 @@
 package rars.assembler;
 
-import rars.RISCVprogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.RISCVprogram;
 
 import java.util.ArrayList;
 
@@ -104,6 +104,7 @@ public class MacroPool {
      *                 code
      */
     public void commitMacro(final @NotNull Token endToken) {
+        assert this.current != null : "commitMacro called without beginMacro";
         this.current.setToLine(endToken.getSourceLine());
         this.current.setOriginalToLine(endToken.getOriginalSourceLine());
         this.current.readyForCommit();

@@ -22,7 +22,7 @@ public class CJAL extends CompressedInstruction {
     }
 
     @Override
-    public void simulate(@NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
         final var operands = statement.getOperands();
         Utils.processReturnAddress(operands[0]);
         Utils.processJump(RegisterFile.getProgramCounter() - getInstructionLength() + operands[1]);

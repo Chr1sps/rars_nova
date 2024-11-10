@@ -26,14 +26,14 @@ public abstract non-sealed class CompressedInstruction extends Instruction {
         this.opcodeMatch = (int) Long.parseLong(this.operationMask.replaceAll("[^01]", "0"), 2);
     }
 
+    protected static boolean isRVCRegister(final int register) {
+        return register >= 8 && register <= 15;
+    }
+
     @Override
     public int getInstructionLength() {
         return COMPRESSED_INSTRUCTION_LENGTH;
     }
 
     public abstract void simulate(final @NotNull ProgramStatement statement) throws SimulationException;
-
-    protected boolean isRVCRegister(final int register) {
-        return register >= 8 && register <= 15;
-    }
 }

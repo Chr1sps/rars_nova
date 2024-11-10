@@ -612,7 +612,7 @@ public class JEditTextArea extends JComponent {
          * tokens can vary in width
          */
         else {
-            java.util.List<Token> tokens;
+            final java.util.List<Token> tokens;
             if (this.painter.currentLineIndex == line
                     && this.painter.currentLineTokens != null)
                 tokens = this.painter.currentLineTokens;
@@ -698,7 +698,7 @@ public class JEditTextArea extends JComponent {
 
             return segmentCount;
         } else {
-            java.util.List<Token> tokens;
+            final java.util.List<Token> tokens;
             if (this.painter.currentLineIndex == line && this.painter.currentLineTokens != null)
                 tokens = this.painter.currentLineTokens;
             else {

@@ -31,7 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * <p>REMU class.</p>
  */
 public final class REMU extends Arithmetic {
-    public static REMU INSTANCE = new REMU();
+    public static final REMU INSTANCE = new REMU();
 
     /**
      * <p>Constructor for REMU.</p>

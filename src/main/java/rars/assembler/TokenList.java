@@ -214,20 +214,6 @@ public class TokenList implements Cloneable, Collection<Token> {
     }
 
     /**
-     * Get a String representing the sequence of token types for this list.
-     *
-     * @return String version of the token types for this list
-     * (a blank is inserted after each token type).
-     */
-    public String toTypeString() {
-        final StringBuilder stringified = new StringBuilder();
-        for (final Token t : this.tokenList) {
-            stringified.append(t.getType().toString()).append(" ");
-        }
-        return stringified.toString();
-    }
-
-    /**
      * Makes clone (shallow copy) of this token list object.
      *
      * @return the cloned list.

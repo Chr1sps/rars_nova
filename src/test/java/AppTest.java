@@ -68,7 +68,7 @@ public class AppTest extends RarsTestBase {
             fail("Error reading `" + path + "`.\n");
         }
         try {
-            program.assemble(path);
+            program.assembleFile(path);
             if (!errorLines.isEmpty()) {
                 fail("Expected assembly error, but successfully assembled `" + path + "`.\n");
             }

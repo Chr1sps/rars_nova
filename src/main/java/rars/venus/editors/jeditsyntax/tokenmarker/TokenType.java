@@ -81,8 +81,6 @@ public enum TokenType {
 
     END(127);
 
-    public static final byte ID_COUNT = (byte) (TokenType.values().length - 1);
-
     public final byte value;
 
     TokenType(final int value) {
