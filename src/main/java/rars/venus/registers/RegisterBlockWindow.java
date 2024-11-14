@@ -1,5 +1,6 @@
 package rars.venus.registers;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
 import rars.notices.*;
@@ -58,52 +59,10 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     private static final int VALUE_COLUMN = 2;
     private static final int NUMBER_SIZE = 45;
     private static final int NAME_SIZE = 80;
-    private static final int VALUE_SIZE = 150;
+    private static final int VALUE_SIZE = 160;
     private final JTable table;
     private final Register[] registers;
     private final Settings settings;
-    private boolean highlighting;
-    private int highlightRow;
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Required by Observer interface. Called when notified by an Observable that we
-     * are registered with.
-     * Observables include:
-     * The Simulator object, which lets us know when it starts and stops running
-     * A register object, which lets us know of register operations
-     * The Simulator keeps us informed of when simulated MIPS execution is active.
-     * This is the only time we care about register operations.
-     */
-//    @Override
-//    public void update(final Observable observable, final Object obj) {
-//        if (observable == rars.simulator.rars.Simulator.getInstance()) {
-//            final SimulatorNotice notice = (SimulatorNotice) obj;
-//            if (notice.getAction() == SimulatorNotice.SIMULATOR_START) {
-//                // Simulated MIPS execution starts. Respond to memory changes if running in
-//                // timed
-//                // or stepped mode.
-//                if (notice.getRunSpeed() != RunSpeedPanel.UNLIMITED_SPEED || notice.getMaxSteps() == 1) {
-//                    this.beginObserving();
-//                    this.highlighting = true;
-//                }
-//            } else {
-//                // Simulated MIPS execution stops. Stop responding.
-//                this.endObserving();
-//            }
-//        } else if (observable == this.settings) {
-//            this.updateRowHeight();
-//        } else if (obj instanceof final RegisterAccessNotice access) {
-//            // NOTE: each register is a separate Observable
-//            if (access.getAccessType() == AccessNotice.WRITE) {
-//                // Uses the same highlighting technique as for Text Segment -- see
-//                // AddressCellRenderer class in DataSegmentWindow.java.
-//                this.highlighting = true;
-//                this.highlightCellForRegister((Register) observable);
-//                Globals.getGui().getRegistersPane().setSelectedComponent(this);
-//            }
-//        }
-//    }
     private Flow.Subscription subscription;
 
     /**
@@ -115,9 +74,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * @param valueTip             a {@link java.lang.String} object
      */
     RegisterBlockWindow(final Register[] registers, final String[] registerDescriptions, final String valueTip) {
-//        Simulator.getInstance().addObserver(this);
         this.settings = Globals.getSettings();
-//        this.settings.addObserver(this);
         this.registers = registers;
         this.clearHighlighting();
         this.table = new MyTippedJTable(new RegTableModel(this.setupWindow()), registerDescriptions,
@@ -174,7 +131,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * @return The array object with the data for the window.
      **/
 
-    private Object[][] setupWindow() {
+    private Object @NotNull [] @NotNull [] setupWindow() {
         final Object[][] tableData = new Object[this.registers.length][3];
         for (int i = 0; i < this.registers.length; i++) {
             tableData[i][RegisterBlockWindow.NAME_COLUMN] = this.registers[i].getName();
@@ -199,11 +156,9 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * Clear highlight background color from any row currently highlighted.
      */
     public void clearHighlighting() {
-        this.highlighting = false;
         if (this.table != null) {
             this.table.tableChanged(new TableModelEvent(this.table.getModel()));
         }
-        this.highlightRow = -1; // assure highlight will not occur upon re-assemble.
     }
 
     /**
@@ -225,22 +180,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         }
     }
 
-    /**
-     * Highlight the row corresponding to the given register.
-     *
-     * @param register Register object corresponding to row to be selected.
-     */
-    private void highlightCellForRegister(final Register register) {
-        for (int i = 0; i < this.registers.length; i++) {
-            if (this.registers[i] == register) {
-                this.highlightRow = i;
-                this.table.tableChanged(new TableModelEvent(this.table.getModel()));
-                return;
-            }
-        }
-        this.highlightRow = -1;
-    }
-
     @Override
     public void onSubscribe(final Flow.Subscription subscription) {
         this.subscription = subscription;
@@ -248,7 +187,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     }
 
     @Override
-    public void onNext(final Notice notice) {
+    public void onNext(final @NotNull Notice notice) {
         switch (notice) {
             case final SimulatorNotice s -> {
                 if (s.action() == SimulatorNotice.Action.START) {
@@ -257,7 +196,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
                     // or stepped mode.
                     if (s.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps() == 1) {
                         this.beginObserving();
-                        this.highlighting = true;
                     }
                 } else {
                     // Simulated MIPS execution stops. Stop responding.
@@ -270,8 +208,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
                 if (a.getAccessType() == AccessNotice.AccessType.WRITE) {
                     // Uses the same highlighting technique as for Text Segment -- see
                     // AddressCellRenderer class in DataSegmentWindow.java.
-                    this.highlighting = true;
-//                  TODO:  this.highlightCellForRegister((Register) observable);
+                    //                  TODO:  this.highlightCellForRegister((Register) observable);
                     Globals.getGui().getRegistersPane().setSelectedComponent(this);
                 }
             }
@@ -315,26 +252,12 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         }
 
         @Override
-        public Component getTableCellRendererComponent(final JTable table, final Object value,
-                                                       final boolean isSelected, final boolean hasFocus, final int row, final int column) {
+        public @NotNull Component getTableCellRendererComponent(final JTable table, final Object value,
+                                                                final boolean isSelected, final boolean hasFocus, final int row, final int column) {
             final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
             cell.setFont(this.font);
             cell.setHorizontalAlignment(this.alignment);
-//            if (RegisterBlockWindow.this.settings.getBooleanSetting(Settings.Bool.REGISTERS_HIGHLIGHTING) && RegisterBlockWindow.this.highlighting
-//                    && row == RegisterBlockWindow.this.highlightRow) {
-//                cell.setBackground(RegisterBlockWindow.this.settings.getColorSettingByPosition(Settings.REGISTER_HIGHLIGHT_BACKGROUND));
-//                cell.setForeground(RegisterBlockWindow.this.settings.getColorSettingByPosition(Settings.REGISTER_HIGHLIGHT_FOREGROUND));
-//                cell.setFont(RegisterBlockWindow.this.settings.getFontByPosition(Settings.REGISTER_HIGHLIGHT_FONT));
-//            } else if (row % 2 == 0) {
-//                cell.setBackground(RegisterBlockWindow.this.settings.getColorSettingByPosition(Settings.EVEN_ROW_BACKGROUND));
-//                cell.setForeground(RegisterBlockWindow.this.settings.getColorSettingByPosition(Settings.EVEN_ROW_FOREGROUND));
-//                cell.setFont(RegisterBlockWindow.this.settings.getFontByPosition(Settings.EVEN_ROW_FONT));
-//            } else {
-//                cell.setBackground(RegisterBlockWindow.this.settings.getColorSettingByPosition(Settings.ODD_ROW_BACKGROUND));
-//                cell.setForeground(RegisterBlockWindow.this.settings.getColorSettingByPosition(Settings.ODD_ROW_FOREGROUND));
-//                cell.setFont(RegisterBlockWindow.this.settings.getFontByPosition(Settings.ODD_ROW_FONT));
-//            }
             return cell;
         }
     }
@@ -427,7 +350,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         }
     }
 
-    ///////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////
     //
     // JTable subclass to provide custom tool tips for each of the
     // register table column headers and for each register name in

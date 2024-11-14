@@ -3,6 +3,7 @@ package rars.venus.registers;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
+import java.awt.*;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -96,5 +97,16 @@ public class RegistersPane extends JTabbedPane {
      */
     public ControlAndStatusWindow getControlAndStatusWindow() {
         return this.csrTab;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        final var size = super.getPreferredSize();
+        int preferredWidth = 0;
+        for (int i = 0; i < getTabCount(); i++) {
+            final var component = getComponentAt(i);
+            preferredWidth = Math.max(preferredWidth, component.getPreferredSize().width);
+        }
+        return new Dimension(preferredWidth, size.height);
     }
 }

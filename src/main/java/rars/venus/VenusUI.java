@@ -180,9 +180,9 @@ public class VenusUI extends JFrame {
         final JSplitPane splitter = new JSplitPane(JSplitPane.VERTICAL_SPLIT, this.mainPane, this.messagesPane);
         splitter.setOneTouchExpandable(true);
         splitter.resetToPreferredSizes();
-        final JSplitPane horizonSplitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, splitter, this.registersPane);
-        horizonSplitter.setOneTouchExpandable(true);
-        horizonSplitter.resetToPreferredSizes();
+        final var horizontalLayout = new JPanel(new BorderLayout());
+        horizontalLayout.add(splitter, BorderLayout.CENTER);
+        horizontalLayout.add(this.registersPane, BorderLayout.EAST);
 
         // due to dependencies, do not set up menu/toolbar until now.
         this.createActionObjects();
@@ -196,7 +196,7 @@ public class VenusUI extends JFrame {
         jp.add(RunSpeedPanel.getInstance());
         final JPanel center = new JPanel(new BorderLayout());
         center.add(jp, BorderLayout.NORTH);
-        center.add(horizonSplitter);
+        center.add(horizontalLayout);
 
         this.getContentPane().add(center);
 

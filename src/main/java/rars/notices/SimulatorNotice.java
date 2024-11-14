@@ -1,5 +1,8 @@
 package rars.notices;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.exceptions.SimulationException;
 import rars.simulator.Simulator;
 import rars.venus.run.RunSpeedPanel;
@@ -13,11 +16,13 @@ import rars.venus.run.RunSpeedPanel;
  * @version January 2009
  */
 
-public record SimulatorNotice(Action action, int maxSteps, double runSpeed, int programCounter, Simulator.Reason reason,
+public record SimulatorNotice(Action action, int maxSteps, double runSpeed, int programCounter,
+                              @Nullable Simulator.Reason reason,
                               SimulationException exception, boolean done) implements Notice {
 
+    @Contract(pure = true)
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return ((this.action == Action.START) ? "START " : "STOP  ") +
                 "Max Steps " + this.maxSteps + " " +
                 "Speed "

@@ -1,16 +1,16 @@
 package rars.venus.registers;
 
-import java.util.Arrays;
-
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
 import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
 import rars.venus.NumberDisplayBaseChooser;
 
+import java.util.Arrays;
+
 /**
  * <p>RegistersWindow class.</p>
- *
  */
 public class RegistersWindow extends RegisterBlockWindow {
     /*
@@ -62,7 +62,7 @@ public class RegistersWindow extends RegisterBlockWindow {
     /*
      * A simple wrapper to add pc into the Registers array
      */
-    private static Register[] getRegisters() {
+    private static Register @NotNull [] getRegisters() {
         final Register[] base = RegisterFile.getRegisters();
         final Register[] out = Arrays.copyOf(base, base.length + 1);
         out[base.length] = RegisterFile.getProgramCounterRegister();

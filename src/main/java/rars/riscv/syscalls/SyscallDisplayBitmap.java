@@ -58,8 +58,8 @@ public final class SyscallDisplayBitmap extends AbstractSyscall implements Simpl
     }
 
     @Override
-    public void onNext(final SimulatorNotice item) {
-        if (item.action() == SimulatorNotice.Action.STOP) {
+    public void onNext(final @NotNull SimulatorNotice item) {
+        if (item.action() == SimulatorNotice.Action.START) {
             if (this.display != null)
                 this.display.dispose();
             this.display = null;
