@@ -4,9 +4,9 @@ import rars.Globals;
 import rars.Settings;
 import rars.notices.SettingsNotice;
 import rars.util.SimpleSubscriber;
-import rars.venus.editors.RSyntaxTextAreaBasedEditor;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
+import rars.venus.editors.rsyntaxtextarea.RSyntaxTextAreaBasedEditor;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -640,7 +640,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
                 Globals.getSettings().getBooleanSetting(Settings.Bool.EDITOR_CURRENT_LINE_HIGHLIGHTING));
         this.sourceCode.setCaretBlinkRate(Globals.getSettings().getCaretBlinkRate());
         this.sourceCode.setTabSize(Globals.getSettings().getEditorTabSize());
-        this.sourceCode.updateSyntaxStyles();
+        // TODO: Change this to the new ColorScheme API
         this.sourceCode.revalidate();
         // We want line numbers to be displayed same size but always PLAIN style.
         // Easiest way to get same pixel height as source code is to set to same

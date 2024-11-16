@@ -43,7 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public enum TokenType {
-    COMMENT, DIRECTIVE, OPERATOR, DELIMITER,
+    COMMENT, DIRECTIVE, OPERATOR,
     /**
      * note: REGISTER_NAME is token of form zero whereas REGISTER_NUMBER is token
      * of form x0. The former is part of extended assembler, and latter is part

@@ -1,11 +1,11 @@
 package rars.venus.settings;
 
-import javax.swing.*;
-
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
 import rars.venus.GuiAction;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /*
@@ -37,10 +37,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Simple wrapper for boolean settings actions
- *
  */
 public class SettingsAction extends GuiAction {
     private final Settings.Bool setting;
+    private final Handler handler;
 
     /**
      * <p>Constructor for SettingsAction.</p>
@@ -49,27 +49,38 @@ public class SettingsAction extends GuiAction {
      * @param descrip a {@link java.lang.String} object
      * @param setting a {@link Settings.Bool} object
      */
-    public SettingsAction(final String name, final String descrip, final Settings.Bool setting) {
+    public SettingsAction(final String name, final String descrip, final Settings.Bool setting, final @NotNull Handler handler) {
         super(name, null, descrip, null, null);
         this.setting = setting;
+        this.handler = handler;
     }
+
+    public SettingsAction(final String name, final String descrip, final Settings.Bool setting) {
+        this(name, descrip, setting, (ignored) -> {
+        });
+    }
+
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void actionPerformed(final ActionEvent e) {
+    public void actionPerformed(final @NotNull ActionEvent e) {
         final boolean value = ((JCheckBoxMenuItem) e.getSource()).isSelected();
         Globals.getSettings().setBooleanSetting(setting, value);
-        handler(value);
+        this.handler.handler(value);
     }
 
-    /**
-     * <p>handler.</p>
-     *
-     * @param value a boolean
-     */
-    public void handler(final boolean value) {
+    public interface Handler {
+        void handler(boolean value);
     }
+//
+//    /**
+//     * <p>handler.</p>
+//     *
+//     * @param value a boolean
+//     */
+//    public void handler(final boolean value) {
+//    }
 
 }

@@ -1,5 +1,6 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
 import rars.tools.*;
 
 import javax.swing.*;
@@ -76,7 +77,7 @@ public final class ToolLoader {
      *
      * @return a Tools JMenu if qualifying tool classes are found, otherwise null
      */
-    public static JMenu buildToolsMenu() {
+    public static @NotNull JMenu buildToolsMenu() {
         final var menu = new JMenu(ToolLoader.TOOLS_MENU_NAME);
         menu.setMnemonic(KeyEvent.VK_T);
         // traverse array list and build menu

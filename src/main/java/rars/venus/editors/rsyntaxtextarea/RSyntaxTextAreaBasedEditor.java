@@ -1,6 +1,8 @@
 package rars.venus.editors.rsyntaxtextarea;
 
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -9,11 +11,13 @@ import org.fife.ui.rtextarea.SearchEngine;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
+import rars.venus.editors.ColorScheme;
 import rars.venus.editors.TextEditingArea;
 
 import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.font.TextAttribute;
+import java.util.Collections;
 import java.util.Map;
 
 public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
@@ -24,22 +28,25 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
 
     static {
         FoldParserManager.get().addFoldParserMapping(RVSyntax.SYNTAX_STYLE_RISCV, new RVFoldParser());
+        final var factory = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
+        factory.putMapping(RVSyntax.SYNTAX_STYLE_RISCV, RSTATokensProducer.class.getName());
     }
 
     private final RSyntaxTextArea textArea;
     private final RTextScrollPane scrollPane;
     private final Gutter gutter;
+    private @NotNull ColorScheme colorScheme;
 
     public RSyntaxTextAreaBasedEditor() {
         textArea = new RSyntaxTextArea();
+        colorScheme = new ColorScheme(Collections.emptyMap());
+        textArea.setSyntaxScheme(new RVSyntaxScheme());
         textArea.setSyntaxEditingStyle(RVSyntax.SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);
         textArea.setMarkOccurrencesDelay(1);
         scrollPane = new RTextScrollPane(textArea);
         gutter = scrollPane.getGutter();
-        this.updateEditorColours();
-        final var theme = new SwingLAFTheme(textArea);
-        theme.apply(textArea);
+//        this.updateEditorColours();
         this.setFont(Globals.getSettings().getEditorFont());
     }
 
@@ -164,7 +171,7 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public void setFont(final Font f) {
+    public void setFont(final @NotNull Font f) {
         final var derived = f.deriveFont(ligatureAttributes);
         textArea.setFont(derived);
         gutter.setFont(derived);
@@ -254,11 +261,6 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public void updateSyntaxStyles() {
-        updateEditorColours();
-    }
-
-    @Override
     public Component getOuterComponent() {
         return scrollPane;
     }
@@ -286,5 +288,20 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void requestFocus() {
         textArea.requestFocus();
+    }
+
+    @Override
+    public @NotNull ColorScheme getColorScheme() {
+        return colorScheme;
+    }
+
+    @Override
+    public void setColorScheme(final @NotNull ColorScheme colorScheme) {
+        this.colorScheme = colorScheme;
+    }
+
+    private void applyColorScheme(final @NotNull ColorScheme colorScheme) {
+        final var converted = RSTASchemeConverter.INSTANCE.convert(colorScheme);
+        this.textArea.setSyntaxScheme(converted);
     }
 }

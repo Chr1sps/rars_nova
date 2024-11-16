@@ -25,6 +25,8 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Map.entry;
+
 /**
  * Class with several utility functions used by jEdit's syntax colorizing
  * subsystem.
@@ -35,18 +37,18 @@ import java.util.Map;
 public final class SyntaxUtilities {
 
     private static final @Unmodifiable Map<TokenType, SyntaxStyle> defaultStyles = Map.ofEntries(
-            Map.entry(TokenType.NULL, new SyntaxStyle(Color.black, false, false)),
-            Map.entry(TokenType.COMMENT1, new SyntaxStyle(new Color(0x00CC33), true, false)),
-            Map.entry(TokenType.COMMENT2, new SyntaxStyle(new Color(0x990033), true, false)),
-            Map.entry(TokenType.KEYWORD1, new SyntaxStyle(Color.blue, false, false)),
-            Map.entry(TokenType.KEYWORD2, new SyntaxStyle(Color.magenta, false, false)),
-            Map.entry(TokenType.KEYWORD3, new SyntaxStyle(Color.red, false, false)),
-            Map.entry(TokenType.LITERAL1, new SyntaxStyle(new Color(0x00CC33), false, false)),
-            Map.entry(TokenType.LITERAL2, new SyntaxStyle(new Color(0x00CC33), false, false)),
-            Map.entry(TokenType.LABEL, new SyntaxStyle(Color.black, true, false)),
-            Map.entry(TokenType.OPERATOR, new SyntaxStyle(Color.black, false, true)),
-            Map.entry(TokenType.INVALID, new SyntaxStyle(Color.red, false, false)),
-            Map.entry(TokenType.MACRO_ARG, new SyntaxStyle(new Color(150, 150, 0), false, false)
+            entry(TokenType.NULL, new SyntaxStyle(Color.black, false, false)),
+            entry(TokenType.COMMENT1, new SyntaxStyle(new Color(0x00CC33), true, false)),
+            entry(TokenType.COMMENT2, new SyntaxStyle(new Color(0x990033), true, false)),
+            entry(TokenType.KEYWORD1, new SyntaxStyle(Color.blue, false, false)),
+            entry(TokenType.KEYWORD2, new SyntaxStyle(Color.magenta, false, false)),
+            entry(TokenType.KEYWORD3, new SyntaxStyle(Color.red, false, false)),
+            entry(TokenType.LITERAL1, new SyntaxStyle(new Color(0x00CC33), false, false)),
+            entry(TokenType.LITERAL2, new SyntaxStyle(new Color(0x00CC33), false, false)),
+            entry(TokenType.LABEL, new SyntaxStyle(Color.black, true, false)),
+            entry(TokenType.OPERATOR, new SyntaxStyle(Color.black, false, true)),
+            entry(TokenType.INVALID, new SyntaxStyle(Color.red, false, false)),
+            entry(TokenType.MACRO_ARG, new SyntaxStyle(new Color(150, 150, 0), false, false)
             ));
 
     private SyntaxUtilities() {
@@ -103,18 +105,18 @@ public final class SyntaxUtilities {
      */
     public static @NotNull @Unmodifiable Map<TokenType, SyntaxStyle> getCurrentSyntaxStyles() {
         return Map.ofEntries(
-                Map.entry(TokenType.NULL, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.NULL)),
-                Map.entry(TokenType.COMMENT1, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.COMMENT1)),
-                Map.entry(TokenType.COMMENT2, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.COMMENT2)),
-                Map.entry(TokenType.KEYWORD1, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.KEYWORD1)),
-                Map.entry(TokenType.KEYWORD2, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.KEYWORD2)),
-                Map.entry(TokenType.KEYWORD3, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.KEYWORD3)),
-                Map.entry(TokenType.LITERAL1, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.LITERAL1)),
-                Map.entry(TokenType.LITERAL2, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.LITERAL2)),
-                Map.entry(TokenType.LABEL, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.LABEL)),
-                Map.entry(TokenType.OPERATOR, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.OPERATOR)),
-                Map.entry(TokenType.INVALID, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.INVALID)),
-                Map.entry(TokenType.MACRO_ARG, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.MACRO_ARG))
+                entry(TokenType.NULL, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.NULL)),
+                entry(TokenType.COMMENT1, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.COMMENT1)),
+                entry(TokenType.COMMENT2, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.COMMENT2)),
+                entry(TokenType.KEYWORD1, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.KEYWORD1)),
+                entry(TokenType.KEYWORD2, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.KEYWORD2)),
+                entry(TokenType.KEYWORD3, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.KEYWORD3)),
+                entry(TokenType.LITERAL1, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.LITERAL1)),
+                entry(TokenType.LITERAL2, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.LITERAL2)),
+                entry(TokenType.LABEL, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.LABEL)),
+                entry(TokenType.OPERATOR, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.OPERATOR)),
+                entry(TokenType.INVALID, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.INVALID)),
+                entry(TokenType.MACRO_ARG, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.MACRO_ARG))
         );
     }
 

@@ -25,6 +25,7 @@ import rars.venus.editors.jeditsyntax.PopupHelpItem;
 import javax.swing.text.Segment;
 import java.util.*;
 
+import static java.util.Map.entry;
 import static rars.Globals.getSettings;
 import static rars.assembler.TokenType.isValidIdentifier;
 
@@ -35,26 +36,26 @@ import static rars.assembler.TokenType.isValidIdentifier;
  */
 public class RISCVTokenMarker extends TokenMarker {
     private static final @NotNull Map<TokenType, String> tokenLabels = Map.ofEntries(
-            Map.entry(TokenType.COMMENT1, "Comment"),
-            Map.entry(TokenType.LITERAL1, "String literal"),
-            Map.entry(TokenType.LITERAL2, "Character literal"),
-            Map.entry(TokenType.LABEL, "Label"),
-            Map.entry(TokenType.KEYWORD1, "Instruction"),
-            Map.entry(TokenType.KEYWORD2, "Assembler directive"),
-            Map.entry(TokenType.KEYWORD3, "Register"),
-            Map.entry(TokenType.INVALID, "In-progress, invalid"),
-            Map.entry(TokenType.MACRO_ARG, "Macro parameter")
+            entry(TokenType.COMMENT1, "Comment"),
+            entry(TokenType.LITERAL1, "String literal"),
+            entry(TokenType.LITERAL2, "Character literal"),
+            entry(TokenType.LABEL, "Label"),
+            entry(TokenType.KEYWORD1, "Instruction"),
+            entry(TokenType.KEYWORD2, "Assembler directive"),
+            entry(TokenType.KEYWORD3, "Register"),
+            entry(TokenType.INVALID, "In-progress, invalid"),
+            entry(TokenType.MACRO_ARG, "Macro parameter")
     );
     private static final @NotNull Map<TokenType, String> tokenExamples = Map.ofEntries(
-            Map.entry(TokenType.COMMENT1, "# Load"),
-            Map.entry(TokenType.LITERAL1, "\"First\""),
-            Map.entry(TokenType.LITERAL2, "'\\n'"),
-            Map.entry(TokenType.LABEL, "main:"),
-            Map.entry(TokenType.KEYWORD1, "lui"),
-            Map.entry(TokenType.KEYWORD2, ".text"),
-            Map.entry(TokenType.KEYWORD3, "zero"),
-            Map.entry(TokenType.INVALID, "\"Regi"),
-            Map.entry(TokenType.MACRO_ARG, "%arg")
+            entry(TokenType.COMMENT1, "# Load"),
+            entry(TokenType.LITERAL1, "\"First\""),
+            entry(TokenType.LITERAL2, "'\\n'"),
+            entry(TokenType.LABEL, "main:"),
+            entry(TokenType.KEYWORD1, "lui"),
+            entry(TokenType.KEYWORD2, ".text"),
+            entry(TokenType.KEYWORD3, "zero"),
+            entry(TokenType.INVALID, "\"Regi"),
+            entry(TokenType.MACRO_ARG, "%arg")
     );
     // private members
     private final static KeywordMap keywords = getKeywords();

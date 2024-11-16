@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
 import rars.venus.EditPane;
+import rars.venus.editors.ColorScheme;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.jeditsyntax.tokenmarker.RISCVTokenMarker;
 
@@ -38,6 +39,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     private final TextEditingArea sourceCode;
     private boolean isCompoundEdit = false;
     private CompoundEdit compoundEdit;
+    private ColorScheme colorScheme = ColorScheme.getDefaultScheme();
 
     /**
      * <p>Constructor for JEditBasedTextArea.</p>
@@ -102,6 +104,10 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         return textPosn;
     }
 
+    // public void repaint() { getPainter().repaint(); }
+    // public Dimension getSize() { return painter.getSize(); }
+    // public void setSize(Dimension d) { painter.setSize(d);}
+
     /**
      * <p>getFont.</p>
      *
@@ -111,10 +117,6 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     public Font getFont() {
         return this.getPainter().getFont();
     }
-
-    // public void repaint() { getPainter().repaint(); }
-    // public Dimension getSize() { return painter.getSize(); }
-    // public void setSize(Dimension d) { painter.setSize(d);}
 
     /**
      * {@inheritDoc}
@@ -189,7 +191,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
      * Update editor-colors based on the information
      * from {@link Globals#getSettings()}
      */
-    public void updateEditorColors() {
+    private void updateEditorColors() {
         final boolean editable = this.isEditable();
         final Settings settings = Globals.getSettings();
         final Color background = settings.getColorSettingByPosition(Settings.EDITOR_BACKGROUND);
@@ -201,15 +203,14 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         this.setForeground((editable) ? foreground : foreground.darker());
     }
 
-    /**
-     * Update editor colors and update the syntax style table,
-     * which is obtained from {@link SyntaxUtilities}.
-     */
-    @Override
-    public void updateSyntaxStyles() {
-        this.updateEditorColors();
-        this.painter.setStyles(SyntaxUtilities.getCurrentSyntaxStyles());
-    }
+//    /**
+//     * Update editor colors and update the syntax style table,
+//     * which is obtained from {@link SyntaxUtilities}.
+//     */
+//    public void updateSyntaxStyles() {
+//        this.updateEditorColors();
+//        this.painter.setStyles(SyntaxUtilities.getCurrentSyntaxStyles());
+//    }
 
     /**
      * <p>getOuterComponent.</p>
@@ -234,6 +235,16 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     @Override
     public int getCaretPosition() {
         return super.getCaretPosition();
+    }
+
+    @Override
+    public @NotNull ColorScheme getColorScheme() {
+        return this.colorScheme;
+    }
+
+    @Override
+    public void setColorScheme(@NotNull final ColorScheme colorScheme) {
+        this.colorScheme = colorScheme;
     }
 
     /**
@@ -285,7 +296,6 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
         this.setText(s);
         this.setEditable(editable);
         this.setEnabled(editable);
-        // this.getCaret().setVisible(editable);
         this.setCaretPosition(0);
         this.updateEditorColors();
         if (editable)

@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-/////////////////////////////  CREDIT  /////////////////////////////////////
+/// //////////////////////////  CREDIT  /////////////////////////////////////
 // http://forums.sun.com/thread.jspa?threadID=499183&messageID=2505646
 // bsampieri, 4 March 2004
 // Java Developer Forum, Useful Code of the Day: Button Fires Events While Held
@@ -41,34 +41,33 @@ public class RepeatButton extends JButton
         implements ActionListener, MouseListener {
     private static final Logger LOGGER = LogManager.getLogger();
     /**
+     * Testing flag. Set in main method.
+     */
+    private static boolean testing = false;
+    /**
      * The pressed state for this button.
      */
     private boolean pressed = false;
-
     /**
      * Flag to indicate that the button should fire events when held.
      * If false, the button is effectively a plain old JButton, but
      * there may be times when this feature might wish to be disabled.
      */
     private boolean repeatEnabled = true;
-
     /**
      * The hold-down timer for this button.
      */
     private Timer timer = null;
-
     /**
      * The initial delay for this button. Hold-down time before first
      * timer firing. In milliseconds.
      */
     private int initialDelay = 300;
-
     /**
      * The delay between timer firings for this button once the delay
      * period is past. In milliseconds.
      */
     private int delay = 60;
-
     /**
      * Holder of the modifiers used when the mouse pressed the button.
      * This is used for subsequently fired action events. This may change
@@ -76,24 +75,6 @@ public class RepeatButton extends JButton
      * and then moves the mouse back in.
      */
     private int modifiers = 0;
-
-    /**
-     * Creates a button with no set text or icon.
-     */
-    public RepeatButton() {
-        super();
-        this.init();
-    }
-
-    /**
-     * Creates a button where properties are taken from the Action supplied.
-     *
-     * @param a the button action
-     */
-    public RepeatButton(final Action a) {
-        super(a);
-        this.init();
-    }
 
     /**
      * Creates a button with an icon.
@@ -116,14 +97,23 @@ public class RepeatButton extends JButton
     }
 
     /**
-     * Creates a button with initial text and an icon.
+     * Main method, for testing. Creates a frame with both styles of menu.
      *
-     * @param text the button text
-     * @param icon the button icon
+     * @param args the command-line arguments
      */
-    public RepeatButton(final String text, final Icon icon) {
-        super(text, icon);
-        this.init();
+    public static void main(final String[] args) {
+        RepeatButton.testing = true;
+        final JFrame f = new JFrame("RepeatButton Test");
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        final JPanel p = new JPanel();
+        final RepeatButton b = new RepeatButton("hold me");
+        b.setActionCommand("test");
+        b.addActionListener(b);
+        p.add(b);
+        f.getContentPane().add(p);
+        f.pack();
+        f.setVisible(true);
     }
 
     /**
@@ -318,30 +308,5 @@ public class RepeatButton extends JButton
                 this.timer.stop();
             }
         }
-    }
-
-    /**
-     * Testing flag. Set in main method.
-     */
-    private static boolean testing = false;
-
-    /**
-     * Main method, for testing. Creates a frame with both styles of menu.
-     *
-     * @param args the command-line arguments
-     */
-    public static void main(final String[] args) {
-        RepeatButton.testing = true;
-        final JFrame f = new JFrame("RepeatButton Test");
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        final JPanel p = new JPanel();
-        final RepeatButton b = new RepeatButton("hold me");
-        b.setActionCommand("test");
-        b.addActionListener(b);
-        p.add(b);
-        f.getContentPane().add(p);
-        f.pack();
-        f.setVisible(true);
     }
 }

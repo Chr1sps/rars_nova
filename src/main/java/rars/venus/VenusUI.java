@@ -68,7 +68,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class VenusUI extends JFrame {
     private static final Logger LOGGER = LogManager.getLogger(VenusUI.class);
-    private static int menuState = FileStatus.NO_FILE;
     public final JMenuBar menu;
     private final VenusUI mainUI;
     private final MainPane mainPane;
@@ -80,9 +79,6 @@ public class VenusUI extends JFrame {
     // PLEASE PUT THESE TWO (& THEIR METHODS) SOMEWHERE THEY BELONG, NOT HERE
     private boolean reset = true; // registers/memory reset for execution
     private boolean started = false; // started execution
-    private JMenu window;
-    private JCheckBoxMenuItem settingsValueDisplayBase;
-    private JCheckBoxMenuItem settingsAddressDisplayBase;
 
     // The "action" objects, which include action listeners. One of each will be
     // created then
@@ -263,7 +259,6 @@ public class VenusUI extends JFrame {
      * @param status a int
      */
     public void setMenuState(final int status) {
-        VenusUI.menuState = status;
         switch (status) {
             case FileStatus.NO_FILE:
                 this.setMenuStateInitial();
@@ -482,33 +477,23 @@ public class VenusUI extends JFrame {
             };
             this.settingsLabelAction = new SettingsAction("Show Labels Window (symbol table)",
                     "Toggle visibility of Labels window (symbol table) in the Execute tab",
-                    Settings.Bool.LABEL_WINDOW_VISIBILITY) {
-                @Override
-                public void handler(final boolean visibility) {
-                    VenusUI.this.mainPane.getExecutePane().setLabelWindowVisibility(visibility);
-                    VenusUI.LOGGER.info("ExecutePane reference 2");
-                }
-            };
+                    Settings.Bool.LABEL_WINDOW_VISIBILITY, (value) -> {
+                VenusUI.this.mainPane.getExecutePane().setLabelWindowVisibility(value);
+                VenusUI.LOGGER.info("ExecutePane reference 2");
+            });
             this.settingsPopupInputAction = new SettingsAction("Popup dialog for input syscalls (5,6,7,8,12)",
                     "If set, use popup dialog for input syscalls (5,6,7,8,12) instead of cursor in Run I/O window",
-                    Settings.Bool.POPUP_SYSCALL_INPUT);
+                    Settings.Bool.POPUP_SYSCALL_INPUT, (v) -> {
+            });
 
             this.settingsValueDisplayBaseAction = new SettingsAction("Values displayed in hexadecimal",
                     "Toggle between hexadecimal and decimal display of memory/register values",
-                    Settings.Bool.DISPLAY_VALUES_IN_HEX) {
-                @Override
-                public void handler(final boolean isHex) {
-                    VenusUI.this.mainPane.getExecutePane().getValueDisplayBaseChooser().setSelected(isHex);
-                }
-            };
+                    Settings.Bool.DISPLAY_VALUES_IN_HEX,
+                    (isHex) -> VenusUI.this.mainPane.getExecutePane().getValueDisplayBaseChooser().setSelected(isHex));
             this.settingsAddressDisplayBaseAction = new SettingsAction("Addresses displayed in hexadecimal",
                     "Toggle between hexadecimal and decimal display of memory addresses",
-                    Settings.Bool.DISPLAY_ADDRESSES_IN_HEX) {
-                @Override
-                public void handler(final boolean isHex) {
-                    VenusUI.this.mainPane.getExecutePane().getAddressDisplayBaseChooser().setSelected(isHex);
-                }
-            };
+                    Settings.Bool.DISPLAY_ADDRESSES_IN_HEX, (isHex) ->
+                    VenusUI.this.mainPane.getExecutePane().getAddressDisplayBaseChooser().setSelected(isHex));
             this.settingsExtendedAction = new SettingsAction("Permit extended (pseudo) instructions and formats",
                     "If set, extended (pseudo) instructions are formats are permitted.",
                     Settings.Bool.EXTENDED_ASSEMBLER_ENABLED);
@@ -529,16 +514,14 @@ public class VenusUI extends JFrame {
                     Settings.Bool.START_AT_MAIN);
             this.settingsProgramArgumentsAction = new SettingsAction("Program arguments provided to program",
                     "If set, program arguments for the program can be entered in border of Text Segment window.",
-                    Settings.Bool.PROGRAM_ARGUMENTS) {
-                @Override
-                public void handler(final boolean selected) {
-                    if (selected) {
-                        VenusUI.this.mainPane.getExecutePane().getTextSegmentWindow().addProgramArgumentsPanel();
-                    } else {
-                        VenusUI.this.mainPane.getExecutePane().getTextSegmentWindow().removeProgramArgumentsPanel();
-                    }
+                    Settings.Bool.PROGRAM_ARGUMENTS, (selected) -> {
+                if (selected) {
+                    VenusUI.this.mainPane.getExecutePane().getTextSegmentWindow().addProgramArgumentsPanel();
+                } else {
+                    VenusUI.this.mainPane.getExecutePane().getTextSegmentWindow().removeProgramArgumentsPanel();
                 }
-            };
+            })
+            ;
             this.settingsSelfModifyingCodeAction = new SettingsAction("Self-modifying code",
                     "If set, the program can write and branch to both text and data segments.",
                     Settings.Bool.SELF_MODIFYING_CODE_ENABLED);
@@ -546,14 +529,11 @@ public class VenusUI extends JFrame {
             // TODO: review this
             this.settingsRV64Action = new SettingsAction("64 bit",
                     "If set, registers are 64 bits wide and new instructions are available",
-                    Settings.Bool.RV64_ENABLED) {
-                @Override
-                public void handler(final boolean value) {
-                    Instructions.RV64 = value;
-                    VenusUI.this.registersTab.updateRegisters();
-                    VenusUI.this.csrTab.updateRegisters();
-                }
-            };
+                    Settings.Bool.RV64_ENABLED, (isRV64) -> {
+                Instructions.RV64 = isRV64;
+                VenusUI.this.registersTab.updateRegisters();
+                VenusUI.this.csrTab.updateRegisters();
+            });
             this.settingsDeriveCurrentWorkingDirectoryAction = new SettingsAction("Derive current working directory",
                     "If set, the working directory is derived from the main file instead of the RARS executable directory.",
                     Settings.Bool.DERIVE_CURRENT_WORKING_DIRECTORY);
@@ -689,18 +669,18 @@ public class VenusUI extends JFrame {
         settingsLabel.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.LABEL_WINDOW_VISIBILITY));
         final JCheckBoxMenuItem settingsPopupInput = new JCheckBoxMenuItem(this.settingsPopupInputAction);
         settingsPopupInput.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.POPUP_SYSCALL_INPUT));
-        this.settingsValueDisplayBase = new JCheckBoxMenuItem(this.settingsValueDisplayBaseAction);
-        this.settingsValueDisplayBase
+        final JCheckBoxMenuItem settingsValueDisplayBase = new JCheckBoxMenuItem(this.settingsValueDisplayBaseAction);
+        settingsValueDisplayBase
                 .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX));// mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
         // Tell the corresponding JCheckBox in the Execute Pane about me -- it has
         // already been created.
-        this.mainPane.getExecutePane().getValueDisplayBaseChooser().setSettingsMenuItem(this.settingsValueDisplayBase);
-        this.settingsAddressDisplayBase = new JCheckBoxMenuItem(this.settingsAddressDisplayBaseAction);
-        this.settingsAddressDisplayBase
+        this.mainPane.getExecutePane().getValueDisplayBaseChooser().setSettingsMenuItem(settingsValueDisplayBase);
+        final JCheckBoxMenuItem settingsAddressDisplayBase = new JCheckBoxMenuItem(this.settingsAddressDisplayBaseAction);
+        settingsAddressDisplayBase
                 .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX));// mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
         // Tell the corresponding JCheckBox in the Execute Pane about me -- it has
         // already been created.
-        this.mainPane.getExecutePane().getAddressDisplayBaseChooser().setSettingsMenuItem(this.settingsAddressDisplayBase);
+        this.mainPane.getExecutePane().getAddressDisplayBaseChooser().setSettingsMenuItem(settingsAddressDisplayBase);
         final JCheckBoxMenuItem settingsExtended = new JCheckBoxMenuItem(this.settingsExtendedAction);
         settingsExtended.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED));
         final JCheckBoxMenuItem settingsSelfModifyingCode = new JCheckBoxMenuItem(this.settingsSelfModifyingCodeAction);
@@ -732,8 +712,8 @@ public class VenusUI extends JFrame {
         settings.add(settingsLabel);
         settings.add(settingsProgramArguments);
         settings.add(settingsPopupInput);
-        settings.add(this.settingsAddressDisplayBase);
-        settings.add(this.settingsValueDisplayBase);
+        settings.add(settingsAddressDisplayBase);
+        settings.add(settingsValueDisplayBase);
         settings.addSeparator();
         settings.add(settingsAssembleOnOpen);
         settings.add(settingsAssembleAll);

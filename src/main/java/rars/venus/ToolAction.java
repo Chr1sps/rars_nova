@@ -1,5 +1,6 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
 import rars.tools.AbstractTool;
 
 import javax.swing.*;
@@ -49,7 +50,7 @@ public class ToolAction extends AbstractAction {
      *
      * @param tool an {@link AbstractTool} object
      */
-    public ToolAction(final AbstractTool tool) {
+    public ToolAction(final @NotNull AbstractTool tool) {
         super(tool.getName(), null);
         this.tool = tool;
     }
