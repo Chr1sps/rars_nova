@@ -10,6 +10,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 
+import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_TAB_CLOSABLE;
+
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
 
@@ -73,7 +75,12 @@ public class MainPane extends JTabbedPane {
         // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Execute_tab.jpg")));
 
         this.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        this.addTab(editTabTitle, null, this.editTabbedPane);
+        // IMPORTANT: we have to wrap the EditTabbedPane object because of a bug that causes
+        // Flatlaf to also make the pane's tab have a close button in the MainPane despite
+        // not setting it properly. This issue has to be raised upstream.
+        final var wrappedEditTab = new JPanel(new BorderLayout());
+        wrappedEditTab.add(this.editTabbedPane, BorderLayout.CENTER);
+        this.addTab(editTabTitle, null, wrappedEditTab);
 
         this.addTab(executeTabTitle, null, this.executeTab);
 
@@ -102,6 +109,8 @@ public class MainPane extends JTabbedPane {
                         }
                     }
                 });
+
+        this.putClientProperty(TABBED_PANE_TAB_CLOSABLE, false);
     }
 
     /**

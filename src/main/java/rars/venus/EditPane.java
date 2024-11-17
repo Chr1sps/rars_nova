@@ -11,7 +11,6 @@ import rars.venus.editors.rsyntaxtextarea.RSyntaxTextAreaBasedEditor;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.undo.CompoundEdit;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,7 +58,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice> {
 
-    private static final int count = 0;
     /**
      * Form string with source code line numbers.
      * Resulting string is HTML, for which JLabel will happily honor <br>
@@ -74,9 +72,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     private final JLabel caretPositionLabel;
     private final JCheckBox showLineNumbers;
     private final JLabel lineNumbers;
-    private final boolean isCompoundEdit = false;
     private final FileStatus fileStatus;
-    private CompoundEdit compoundEdit;
     /**
      * {@inheritDoc}
      * <p>
@@ -94,7 +90,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         super(new BorderLayout());
         this.mainUI = appFrame;
         // user.dir, user's current working directory, is guaranteed to have a second
-        final String currentDirectoryPath = System.getProperty("user.dir");
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
         Globals.getSettings().subscribe(this);

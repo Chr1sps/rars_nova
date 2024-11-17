@@ -12,7 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.Flow;
 
-public class BitmapDisplay extends JFrame implements SimpleSubscriber<MemoryAccessNotice> {
+public final class BitmapDisplay extends JFrame implements SimpleSubscriber<MemoryAccessNotice> {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public final int displayWidth;

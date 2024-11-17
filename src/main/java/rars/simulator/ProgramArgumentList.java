@@ -1,14 +1,13 @@
 package rars.simulator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 /*
@@ -65,29 +64,6 @@ public class ProgramArgumentList {
         while (st.hasMoreTokens()) {
             this.programArgumentList.add(st.nextToken());
         }
-    }
-
-    /**
-     * Constructor that gets list from String array, one argument per element.
-     *
-     * @param list Array of String, each element containing one argument
-     */
-    public ProgramArgumentList(final String[] list) {
-        this(list, 0);
-    }
-
-    /**
-     * Constructor that gets list from section of String array, one
-     * argument per element.
-     *
-     * @param list          Array of String, each element containing one argument
-     * @param startPosition Index of array element containing the first argument;
-     *                      all remaining
-     *                      elements are assumed to contain an argument.
-     */
-    public ProgramArgumentList(final String[] list, final int startPosition) {
-        this.programArgumentList = new ArrayList<>(list.length - startPosition);
-        this.programArgumentList.addAll(Arrays.asList(list).subList(startPosition, list.length));
     }
 
     /**

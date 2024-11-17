@@ -74,13 +74,4 @@ public class SettingsAction extends GuiAction {
     public interface Handler {
         void handler(boolean value);
     }
-//
-//    /**
-//     * <p>handler.</p>
-//     *
-//     * @param value a boolean
-//     */
-//    public void handler(final boolean value) {
-//    }
-
 }
