@@ -49,7 +49,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public class MainPane extends JTabbedPane {
     final ExecutePane executeTab;
     final EditTabbedPane editTabbedPane;
-    EditPane editTab;
 
     /**
      * Constructor for the MainPane class.
@@ -75,12 +74,7 @@ public class MainPane extends JTabbedPane {
         // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Execute_tab.jpg")));
 
         this.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        // IMPORTANT: we have to wrap the EditTabbedPane object because of a bug that causes
-        // Flatlaf to also make the pane's tab have a close button in the MainPane despite
-        // not setting it properly. This issue has to be raised upstream.
-        final var wrappedEditTab = new JPanel(new BorderLayout());
-        wrappedEditTab.add(this.editTabbedPane, BorderLayout.CENTER);
-        this.addTab(editTabTitle, null, wrappedEditTab);
+        this.addTab(editTabTitle, null, this.editTabbedPane);
 
         this.addTab(executeTabTitle, null, this.executeTab);
 
@@ -140,15 +134,4 @@ public class MainPane extends JTabbedPane {
     public ExecutePane getExecutePane() {
         return this.executeTab;
     }
-
-    /**
-     * returns component containing execution-time display.
-     * Same as getExecutePane().
-     *
-     * @return the execute pane
-     */
-    public ExecutePane getExecuteTab() {
-        return this.executeTab;
-    }
-
 }

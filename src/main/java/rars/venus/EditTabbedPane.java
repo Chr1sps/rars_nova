@@ -94,8 +94,7 @@ public class EditTabbedPane extends JPanel {
                 });
         this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSABLE, true);
         this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "Close current file");
-        this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (pane,
-                                                                                                              index) -> this.closeFile(index));
+        this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (pane, index) -> this.closeFile(index));
         this.setLayout(new BorderLayout());
         this.add(this.tabbedPane, BorderLayout.CENTER);
     }

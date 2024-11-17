@@ -205,8 +205,8 @@ public class Editor {
             final String titleName = (status == FileStatus.NEW_EDITED || status == FileStatus.NEW_NOT_EDITED) ? name 
                     : path;
             this.mainUI.setTitle(titleName + edited + " - " + this.mainUIbaseTitle);
-            this.editTabbedPane.getTabbedPane().setTitleAt(this.editTabbedPane.getTabbedPane().getSelectedIndex(),
-                    name + edited);
+            final var tabbedPane = this.editTabbedPane.getTabbedPane();
+            tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(), name + edited);
         }
     }
 
