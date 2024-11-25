@@ -1,12 +1,12 @@
 package rars.riscv.hardware;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
 import rars.assembler.SymbolTable;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.BasicInstruction;
-
-import java.util.concurrent.Flow;
+import rars.util.SimpleSubscriber;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -87,7 +87,8 @@ public final class RegisterFile {
     public static void updateRegister(final int num, final long val) {
         if (num != 0) {
             if ((Settings.getBackSteppingEnabled())) {
-                Globals.program.getBackStepper().addRegisterFileRestore(num, RegisterFile.instance.updateRegister(num, val));
+                Globals.program.getBackStepper().addRegisterFileRestore(num, RegisterFile.instance.updateRegister(num
+                        , val));
             } else {
                 RegisterFile.instance.updateRegister(num, val);
             }
@@ -243,7 +244,8 @@ public final class RegisterFile {
      */
     public static void resetRegisters() {
         RegisterFile.instance.resetRegisters();
-        RegisterFile.initializeProgramCounter(Globals.getSettings().getBooleanSetting(Settings.Bool.START_AT_MAIN));// replaces
+        RegisterFile.initializeProgramCounter(Globals.getSettings().getBooleanSetting(Settings.Bool.START_AT_MAIN));
+        // replaces
         // "programCounter.resetValue()",
         // DPS 3/3/09
     }
@@ -264,7 +266,7 @@ public final class RegisterFile {
      *
      * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void addRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+    public static void addRegistersObserver(final @NotNull SimpleSubscriber<? super RegisterAccessNotice> observer) {
         RegisterFile.instance.addRegistersObserver(observer);
     }
 
@@ -277,7 +279,7 @@ public final class RegisterFile {
      *
      * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void deleteRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+    public static void deleteRegistersObserver(final @NotNull SimpleSubscriber<? super RegisterAccessNotice> observer) {
         RegisterFile.instance.deleteRegistersSubscriber(observer);
     }
 }

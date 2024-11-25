@@ -12,13 +12,13 @@ import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.RegisterFile;
 import rars.util.Binary;
+import rars.util.CustomPublisher;
 import rars.util.SystemIO;
 import rars.venus.run.RunSpeedPanel;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.SubmissionPublisher;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -54,7 +54,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  */
-public class Simulator extends SubmissionPublisher<SimulatorNotice> {
+public class Simulator extends CustomPublisher<SimulatorNotice> {
     private static @Nullable Simulator simulator = null; // Singleton object
     private static @Nullable Runnable interactiveGUIUpdater = null;
     private final @NotNull ArrayList<StopListener> stopListeners = new ArrayList<>(1);
@@ -482,7 +482,8 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                                 // thats an error
                             }
                         } else if (IE && pendingTimer && (uie & ControlAndStatusRegisterFile.TIMER_INTERRUPT) != 0) {
-                            if (this.handleInterrupt(InterruptController.claimTimer(), ExceptionReason.TIMER_INTERRUPT.value,
+                            if (this.handleInterrupt(InterruptController.claimTimer(),
+                                    ExceptionReason.TIMER_INTERRUPT.value,
                                     this.pc)) {
                                 pendingTimer = false;
                                 uip &= ~0x10;
@@ -492,7 +493,8 @@ public class Simulator extends SubmissionPublisher<SimulatorNotice> {
                             }
                         } else if (pendingTrap) { // if we have a pending trap and aren't handling an interrupt it must
                             // be handled
-                            if (!this.handleTrap(InterruptController.claimTrap(), this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH)) {
+                            if (!this.handleTrap(InterruptController.claimTrap(),
+                                    this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH)) {
                                 return;
                             }
                         }

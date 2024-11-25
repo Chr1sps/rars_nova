@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class CustomPublisher<T> implements Flow.Publisher<T> {
     private final List<@NotNull CustomSubscription> subscriptions = new ArrayList<>();
-    private final ReentrantLock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantReadWriteLock().writeLock();
 
     @Override
     public void subscribe(final @NotNull Flow.Subscriber<? super T> subscriber) {
@@ -37,9 +39,8 @@ public class CustomPublisher<T> implements Flow.Publisher<T> {
     public void submit(final T item) {
         this.lock.lock();
         try {
-            for (final CustomSubscription subscription : this.subscriptions) {
-                subscription.sendNext(item);
-            }
+            this.subscriptions.forEach(subscription -> subscription.sendNext(item));
+            this.subscriptions.removeIf(subscription -> subscription.completed.get());
         } finally {
             this.lock.unlock();
         }
@@ -48,9 +49,7 @@ public class CustomPublisher<T> implements Flow.Publisher<T> {
     public void complete() {
         this.lock.lock();
         try {
-            for (final CustomSubscription subscription : this.subscriptions) {
-                subscription.complete();
-            }
+            this.subscriptions.forEach(CustomSubscription::complete);
             this.subscriptions.clear();
         } finally {
             this.lock.unlock();
@@ -60,9 +59,7 @@ public class CustomPublisher<T> implements Flow.Publisher<T> {
     public void error(final Throwable throwable) {
         this.lock.lock();
         try {
-            for (final CustomSubscription subscription : this.subscriptions) {
-                subscription.error(throwable);
-            }
+            this.subscriptions.forEach(subscription -> subscription.error(throwable));
             this.subscriptions.clear();
         } finally {
             this.lock.unlock();
@@ -72,7 +69,8 @@ public class CustomPublisher<T> implements Flow.Publisher<T> {
     private class CustomSubscription implements Flow.Subscription {
         private final Flow.Subscriber<? super T> subscriber;
         private final AtomicLong requested = new AtomicLong(0);
-        private final AtomicBoolean completed = new AtomicBoolean(false);
+        private final AtomicBoolean completed = new AtomicBoolean(false),
+                cancelled = new AtomicBoolean(false);
         private final ReentrantLock subscriptionLock = new ReentrantLock();
 
         public CustomSubscription(final Flow.Subscriber<? super T> subscriber) {
@@ -102,7 +100,7 @@ public class CustomPublisher<T> implements Flow.Publisher<T> {
             this.subscriptionLock.lock();
             try {
                 this.completed.set(true);
-                CustomPublisher.this.subscriptions.remove(this);
+//                CustomPublisher.this.subscriptions.remove(this);
             } finally {
                 this.subscriptionLock.unlock();
             }

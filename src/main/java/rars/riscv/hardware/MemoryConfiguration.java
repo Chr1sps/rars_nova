@@ -28,6 +28,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Models the memory configuration for the simulated MIPS machine.
  * "configuration" refers to the starting memory addresses for
@@ -42,10 +44,10 @@ public class MemoryConfiguration {
     // TODO: remove kernel mode maybe?
     // TODO: move away from a multi-array approach to array of ranges approach
     // Identifier is used for saving setting; name is used for display
-    private final String configurationIdentifier;
-    private final String configurationName;
-    private final String[] configurationItemNames;
-    private final int[] configurationItemValues;
+    private final @NotNull String configurationIdentifier;
+    private final @NotNull String configurationName;
+    private final @NotNull String @NotNull [] configurationItemNames;
+    private final int @NotNull [] configurationItemValues;
 
     /**
      * <p>Constructor for MemoryConfiguration.</p>
@@ -55,7 +57,8 @@ public class MemoryConfiguration {
      * @param items  an array of {@link java.lang.String} objects
      * @param values an array of {@link int} objects
      */
-    public MemoryConfiguration(final String ident, final String name, final String[] items, final int[] values) {
+    public MemoryConfiguration(final @NotNull String ident, final @NotNull String name,
+                               final @NotNull String @NotNull [] items, final int @NotNull [] values) {
         this.configurationIdentifier = ident;
         this.configurationName = name;
         this.configurationItemNames = items;
@@ -67,7 +70,7 @@ public class MemoryConfiguration {
      *
      * @return a {@link java.lang.String} object
      */
-    public String getConfigurationIdentifier() {
+    public @NotNull String getConfigurationIdentifier() {
         return configurationIdentifier;
     }
 
@@ -76,7 +79,7 @@ public class MemoryConfiguration {
      *
      * @return a {@link java.lang.String} object
      */
-    public String getConfigurationName() {
+    public @NotNull String getConfigurationName() {
         return configurationName;
     }
 

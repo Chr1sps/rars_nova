@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.notices.RegisterAccessNotice;
 import rars.util.Binary;
+import rars.util.SimpleSubscriber;
 
 import java.util.concurrent.Flow;
 
@@ -203,7 +204,7 @@ public class RegisterBlock {
      *
      * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public void addRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+    public void addRegistersObserver(final SimpleSubscriber<? super RegisterAccessNotice> observer) {
         for (final Register r : this.regFile) {
             r.subscribe(observer);
         }

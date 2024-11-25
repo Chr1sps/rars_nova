@@ -11,6 +11,7 @@ import rars.Globals;
 import rars.util.Binary;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -54,7 +55,7 @@ public class SymbolTable {
     private static final @NotNull Logger LOGGER = LogManager.getLogger();
     private static final @NotNull String startLabel = "main";
     private final @NotNull String filename;
-    // Note -1 is legal 32 bit address (0xFFFFFFFF) but it is the high address in
+    // Note -1 is legal 32-bit address (0xFFFFFFFF) but it is the high address in
     // kernel address space so highly unlikely that any symbol will have this as
     // its associated address!
     private @NotNull ArrayList<Symbol> table;
@@ -90,7 +91,8 @@ public class SymbolTable {
      * @param b       The type of Symbol, true for data, false for text.
      * @param errors  List to which to add any processing errors that occur.
      */
-    public void addSymbol(final @NotNull Token token, final int address, final boolean b, final @NotNull ErrorList errors) {
+    public void addSymbol(final @NotNull Token token, final int address, final boolean b,
+                          final @NotNull ErrorList errors) {
         final String label = token.getValue();
         if (this.getSymbol(label) != null) {
             errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token.getStartPos(),
@@ -98,7 +100,8 @@ public class SymbolTable {
         } else {
             this.table.add(new Symbol(label, address, b));
             if (Globals.debug)
-                SymbolTable.LOGGER.debug("The symbol {} with address {} has been added to the {} symbol table.", label, address, this.filename);
+                SymbolTable.LOGGER.debug("The symbol {} with address {} has been added to the {} symbol table.",
+                        label, address, this.filename);
         }
     }
 
@@ -115,7 +118,8 @@ public class SymbolTable {
             if (this.table.get(i).name.equals(label)) {
                 this.table.remove(i);
                 if (Globals.debug)
-                    SymbolTable.LOGGER.debug("The symbol {} has been removed from the {} symbol table.", label, this.filename);
+                    SymbolTable.LOGGER.debug("The symbol {} has been removed from the {} symbol table.", label,
+                            this.filename);
                 break;
             }
         }
@@ -209,14 +213,8 @@ public class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      */
-    public @NotNull ArrayList<Symbol> getDataSymbols() {
-        final ArrayList<Symbol> list = new ArrayList<>();
-        for (final Symbol sym : this.table) {
-            if (sym.isData) {
-                list.add(sym);
-            }
-        }
-        return list;
+    public @NotNull List<Symbol> getDataSymbols() {
+        return table.stream().filter(symbol -> symbol.isData).toList();
     }
 
     /**
@@ -224,15 +222,8 @@ public class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      */
-    public @NotNull ArrayList<Symbol> getTextSymbols() {
-        final ArrayList<Symbol> list = new ArrayList<>();
-        for (final Symbol sym : this.table) {
-            if (!sym.isData) {
-                list.add(sym);
-            }
-        }
-
-        return list;
+    public @NotNull List<Symbol> getTextSymbols() {
+        return table.stream().filter(symbol -> !symbol.isData).toList();
     }
 
     /**
@@ -241,7 +232,7 @@ public class SymbolTable {
      * @return An ArrayList of Symbol objects.
      */
     @Contract()
-    public @NotNull ArrayList<Symbol> getAllSymbols() {
+    public @NotNull List<Symbol> getAllSymbols() {
         return new ArrayList<>(this.table);
     }
 
@@ -275,7 +266,7 @@ public class SymbolTable {
      */
     public void fixSymbolTableAddress(final int originalAddress, final int replacementAddress) {
         // TODO: make it not work through reference
-        @Nullable Symbol label = this.getSymbolGivenAddress(Integer.toString(originalAddress));
+        var label = this.getSymbolGivenAddress(Integer.toString(originalAddress));
         while (label != null) {
             label.address = replacementAddress;
             label = this.getSymbolGivenAddress(Integer.toString(originalAddress));

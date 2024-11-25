@@ -67,7 +67,6 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private static final int CODE_COLUMN = 2;
     private static final int BASIC_COLUMN = 3;
     private static final int SOURCE_COLUMN = 4;
-    private static final Font monospacedPlain12Point = new Font("Monospaced", Font.PLAIN, 12);
     // The following is displayed in the Basic and Source columns if existing code
     // is overwritten using self-modifying code feature
     private static final String modifiedCodeMarker = " ------ ";
@@ -75,7 +74,6 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private final JTextField programArgumentsTextField; // DPS 17-July-2008
     // source.
     private final Container contentPane;
-    private final Font tableCellFont = new Font("Monospaced", Font.PLAIN, 12);
     private JTable table;
     private JScrollPane tableScroller;
     private Object[][] data;
@@ -150,9 +148,11 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             this.intAddresses[i] = statement.getAddress();
             this.addressRows.put(this.intAddresses[i], i);
             this.data[i][TextSegmentWindow.BREAK_COLUMN] = false;
-            this.data[i][TextSegmentWindow.ADDRESS_COLUMN] = NumberDisplayBaseChooser.formatUnsignedInteger(statement.getAddress(),
-                    addressBase);
-            this.data[i][TextSegmentWindow.CODE_COLUMN] = NumberDisplayBaseChooser.formatNumber(statement.getBinaryStatement(), 16);
+            this.data[i][TextSegmentWindow.ADDRESS_COLUMN] =
+                    NumberDisplayBaseChooser.formatUnsignedInteger(statement.getAddress(),
+                            addressBase);
+            this.data[i][TextSegmentWindow.CODE_COLUMN] =
+                    NumberDisplayBaseChooser.formatNumber(statement.getBinaryStatement(), 16);
             this.data[i][TextSegmentWindow.BASIC_COLUMN] = statement.getPrintableBasicAssemblyStatement();
             String sourceString = "";
             if (!statement.getSource().isEmpty()) {
@@ -299,15 +299,19 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             // then display its basic code. DPS 11-July-2013
             if (this.executeMods.get(i) == null) { // not modified, so use original logic.
                 final ProgramStatement statement = sourceStatementList.get(i);
-                this.table.getModel().setValueAt(statement.getPrintableBasicAssemblyStatement(), i, TextSegmentWindow.BASIC_COLUMN);
+                this.table.getModel().setValueAt(statement.getPrintableBasicAssemblyStatement(), i,
+                        TextSegmentWindow.BASIC_COLUMN);
             } else {
                 try {
                     final ProgramStatement statement = new ProgramStatement(
                             Binary
-                                    .stringToInt((String) this.table.getModel().getValueAt(i, TextSegmentWindow.CODE_COLUMN)),
+                                    .stringToInt((String) this.table.getModel().getValueAt(i,
+                                            TextSegmentWindow.CODE_COLUMN)),
                             Binary
-                                    .stringToInt((String) this.table.getModel().getValueAt(i, TextSegmentWindow.ADDRESS_COLUMN)));
-                    this.table.getModel().setValueAt(statement.getPrintableBasicAssemblyStatement(), i, TextSegmentWindow.BASIC_COLUMN);
+                                    .stringToInt((String) this.table.getModel().getValueAt(i,
+                                            TextSegmentWindow.ADDRESS_COLUMN)));
+                    this.table.getModel().setValueAt(statement.getPrintableBasicAssemblyStatement(), i,
+                            TextSegmentWindow.BASIC_COLUMN);
                 } catch (
                         final
                         NumberFormatException e) { // should never happen but just in case...
@@ -591,8 +595,10 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public void unhighlightAllSteps() {
         final boolean saved = this.getCodeHighlighting();
         this.setCodeHighlighting(false);
-        this.table.tableChanged(new TableModelEvent(this.tableModel, 0, this.data.length - 1, TextSegmentWindow.BASIC_COLUMN));
-        this.table.tableChanged(new TableModelEvent(this.tableModel, 0, this.data.length - 1, TextSegmentWindow.SOURCE_COLUMN));
+        this.table.tableChanged(new TableModelEvent(this.tableModel, 0, this.data.length - 1,
+                TextSegmentWindow.BASIC_COLUMN));
+        this.table.tableChanged(new TableModelEvent(this.tableModel, 0, this.data.length - 1,
+                TextSegmentWindow.SOURCE_COLUMN));
         this.setCodeHighlighting(saved);
     }
 
@@ -618,7 +624,8 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final double cellHeight = sourceCell.getHeight();
         final double viewHeight = this.tableScroller.getViewport().getExtentSize().getHeight();
         final int numberOfVisibleRows = (int) (viewHeight / cellHeight);
-        final int newViewPositionY = Math.max((int) ((addressRow - ((double) numberOfVisibleRows / 2)) * cellHeight), 0);
+        final int newViewPositionY = Math.max((int) ((addressRow - ((double) numberOfVisibleRows / 2)) * cellHeight),
+                0);
         this.tableScroller.getViewport().setViewPosition(new Point(0, newViewPositionY));
         // Select the source code cell for this row by generating a fake Mouse Pressed
         // event
@@ -847,7 +854,8 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     static class MachineCodeCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(final JTable table, final Object value,
-                                                       final boolean isSelected, final boolean hasFocus, final int row, final int column) {
+                                                       final boolean isSelected, final boolean hasFocus,
+                                                       final int row, final int column) {
             final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
             cell.setFont(MonoRightCellRenderer.MONOSPACED_PLAIN_12POINT);
@@ -871,11 +879,13 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
         @Override
         public Component getTableCellRendererComponent(final JTable table, final Object value,
-                                                       final boolean isSelected, final boolean hasFocus, final int row, final int column) {
+                                                       final boolean isSelected, final boolean hasFocus,
+                                                       final int row, final int column) {
             final Component cell = super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
             // cell.setFont(tableCellFont);
-            final TextSegmentWindow textSegment = Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow();
+            final TextSegmentWindow textSegment =
+                    Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow();
             final Settings settings = Globals.getSettings();
             final boolean highlighting = textSegment.getCodeHighlighting();
 
@@ -999,7 +1009,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
     }
 
-    ///////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////
     //
     // JTable subclass to provide custom tool tips for each of the
     // text table column headers. From Sun's JTable tutorial.
@@ -1049,7 +1059,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             return this.tableHeader.getHeaderRect(realIndex);
         }
 
-        ////////////////////////////////////////////////////////////////
+        /// /////////////////////////////////////////////////////////////
         //
         // Customized table header that will both display tool tip when
         // mouse hovers over each column, and also enable/disable breakpoints
@@ -1071,7 +1081,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 return MyTippedJTable.this.columnToolTips[realIndex];
             }
 
-            /////////////////////////////////////////////////////////////////////
+            /// //////////////////////////////////////////////////////////////////
             // When user clicks on beakpoint column header, breakpoints are
             // toggled (enabled/disabled). DPS 31-Dec-2009
             private class TextTableHeaderMouseListener implements MouseListener {
@@ -1081,11 +1091,13 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     final int index = TextTableHeader.this.columnModel.getColumnIndexAtX(p.x);
                     final int realIndex = TextTableHeader.this.columnModel.getColumn(index).getModelIndex();
                     if (realIndex == TextSegmentWindow.BREAK_COLUMN) {
-                        final JCheckBox check = ((JCheckBox) ((DefaultCellEditor) TextTableHeader.this.table.getCellEditor(0, index))
-                                .getComponent());
+                        final JCheckBox check =
+                                ((JCheckBox) ((DefaultCellEditor) TextTableHeader.this.table.getCellEditor(0, index))
+                                        .getComponent());
                         TextSegmentWindow.this.breakpointsEnabled = !TextSegmentWindow.this.breakpointsEnabled;
                         check.setEnabled(TextSegmentWindow.this.breakpointsEnabled);
-                        TextTableHeader.this.table.tableChanged(new TableModelEvent(TextSegmentWindow.this.tableModel, 0, TextSegmentWindow.this.data.length - 1, TextSegmentWindow.BREAK_COLUMN));
+                        TextTableHeader.this.table.tableChanged(new TableModelEvent(TextSegmentWindow.this.tableModel
+                                , 0, TextSegmentWindow.this.data.length - 1, TextSegmentWindow.BREAK_COLUMN));
                     }
                 }
 

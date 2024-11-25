@@ -42,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class ErrorMessage {
+public final class ErrorMessage {
     /**
      * Constant to indicate this message is warning not error
      */
@@ -94,7 +94,8 @@ public class ErrorMessage {
      *                      position of source token.
      * @param message       String containing appropriate error message.
      */
-    public ErrorMessage(final boolean isWarning, final RISCVprogram sourceProgram, final int line, final int position, final @NotNull String message) {
+    public ErrorMessage(final boolean isWarning, final RISCVprogram sourceProgram, final int line, final int position
+            , final @NotNull String message) {
         this.isWarning = isWarning;
         if (sourceProgram == null) {
             this.filename = "";
@@ -123,7 +124,7 @@ public class ErrorMessage {
      * @param message   String containing appropriate error message.
      */
     // Added January 2013
-    public ErrorMessage(final ProgramStatement statement, final @NotNull String message) {
+    public ErrorMessage(final @NotNull ProgramStatement statement, final @NotNull String message) {
         this.isWarning = ErrorMessage.ERROR;
         this.filename = (statement.getSourceProgram() == null)
                 ? ""
@@ -234,16 +235,25 @@ public class ErrorMessage {
      * @return a {@link java.lang.String} object
      */
     public String generateReport() {
-        String out = ((this.isWarning) ? ErrorList.WARNING_MESSAGE_PREFIX : ErrorList.ERROR_MESSAGE_PREFIX)
-                + ErrorList.FILENAME_PREFIX;
-        if (!this.getFilename().isEmpty())
-            out = out + (new File(this.getFilename()).getPath()); // .getName());
-        if (this.getLine() > 0)
-            out = out + ErrorList.LINE_PREFIX + this.getMacroExpansionHistory() + this.getLine();
-        if (this.getPosition() > 0)
-            out = out + ErrorList.POSITION_PREFIX + this.getPosition();
-        out = out + ErrorList.MESSAGE_SEPARATOR + this.getMessage() + "\n";
-        return out;
+        final var builder = new StringBuilder();
+        builder.append((this.isWarning ? ErrorList.WARNING_MESSAGE_PREFIX : ErrorList.ERROR_MESSAGE_PREFIX))
+                .append(ErrorList.FILENAME_PREFIX);
+        if (!this.getFilename().isEmpty()) {
+            builder.append(new File(this.getFilename()).getPath());
+        }
+        if (this.getLine() > 0) {
+            builder.append(ErrorList.LINE_PREFIX)
+                    .append(this.getMacroExpansionHistory())
+                    .append(this.getLine());
+        }
+        if (this.getPosition() > 0) {
+            builder.append(ErrorList.POSITION_PREFIX)
+                    .append(this.getPosition());
+        }
+        builder.append(ErrorList.MESSAGE_SEPARATOR)
+                .append(this.getMessage())
+                .append("\n");
+        return builder.toString();
     }
 
     /**

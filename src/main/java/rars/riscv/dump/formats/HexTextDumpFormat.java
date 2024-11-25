@@ -34,19 +34,19 @@ public class HexTextDumpFormat extends AbstractDumpFormat {
      * @see AbstractDumpFormat
      */
     @Override
-    public void dumpMemoryRange(@NotNull final File file, final int firstAddress, final int lastAddress, @NotNull final Memory memory)
+    public void dumpMemoryRange(@NotNull final File file, final int firstAddress, final int lastAddress,
+                                @NotNull final Memory memory)
             throws AddressErrorException, IOException {
         try (final PrintStream out = new PrintStream(new FileOutputStream(file))) {
-            StringBuilder string;
             for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
                 final Integer temp = memory.getRawWordOrNull(address);
                 if (temp == null)
                     break;
-                string = new StringBuilder(Integer.toHexString(temp));
-                while (string.length() < 8) {
-                    string.insert(0, '0');
+                final var hexString = Integer.toHexString(temp);
+                for (int i = hexString.length(); i < 8; i++) {
+                    out.print('0');
                 }
-                out.println(string);
+                out.println(hexString);
             }
         }
     }

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.notices.SettingsNotice;
 import rars.util.Binary;
+import rars.util.CustomPublisher;
 import rars.util.EditorFont;
 import rars.util.PropertiesFile;
 import rars.venus.editors.jeditsyntax.SyntaxStyle;
@@ -18,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.SubmissionPublisher;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -67,7 +67,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  */
-public class Settings extends SubmissionPublisher<SettingsNotice> {
+public class Settings extends CustomPublisher<SettingsNotice> {
     /**
      * Current specified exception handler file (a RISCV assembly source file)
      */
@@ -503,16 +503,20 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     public SyntaxStyle getEditorSyntaxStyleByTokenType(final @NotNull TokenType type) {
         final var currentColor = this.syntaxStyleColorSettingsValues.get(type);
         return new SyntaxStyle(
-                (currentColor != null) ? Color.decode(currentColor) : SyntaxUtilities.getDefaultSyntaxStyles().get(type).getColor(),
+                (currentColor != null) ? Color.decode(currentColor) :
+                        SyntaxUtilities.getDefaultSyntaxStyles().get(type).getColor(),
                 this.syntaxStyleItalicSettingsValues.get(type),
                 this.syntaxStyleBoldSettingsValues.get(type));
     }
 
     private void saveEditorSyntaxStyle(final @NotNull TokenType type) {
         try {
-            this.preferences.put(Settings.syntaxStyleColorSettingsKeys.get(type), this.syntaxStyleColorSettingsValues.get(type));
-            this.preferences.putBoolean(Settings.syntaxStyleBoldSettingsKeys.get(type), this.syntaxStyleBoldSettingsValues.get(type));
-            this.preferences.putBoolean(Settings.syntaxStyleItalicSettingsKeys.get(type), this.syntaxStyleItalicSettingsValues.get(type));
+            this.preferences.put(Settings.syntaxStyleColorSettingsKeys.get(type),
+                    this.syntaxStyleColorSettingsValues.get(type));
+            this.preferences.putBoolean(Settings.syntaxStyleBoldSettingsKeys.get(type),
+                    this.syntaxStyleBoldSettingsValues.get(type));
+            this.preferences.putBoolean(Settings.syntaxStyleItalicSettingsKeys.get(type),
+                    this.syntaxStyleItalicSettingsValues.get(type));
             this.preferences.flush();
         } catch (final SecurityException se) {
             LOGGER.error("Unable to write to persistent storage for security reasons");
@@ -548,10 +552,12 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
             final var syntaxStyleColorValue = entry.getValue();
             this.syntaxStyleColorSettingsValues.put(key, this.preferences.get(syntaxStyleColorValue,
                     this.syntaxStyleColorSettingsValues.get(key)));
-            this.syntaxStyleBoldSettingsValues.put(key, this.preferences.getBoolean(Settings.syntaxStyleBoldSettingsKeys.get(key),
-                    this.syntaxStyleBoldSettingsValues.get(key)));
-            this.syntaxStyleItalicSettingsValues.put(key, this.preferences.getBoolean(Settings.syntaxStyleItalicSettingsKeys.get(key),
-                    this.syntaxStyleItalicSettingsValues.get(key)));
+            this.syntaxStyleBoldSettingsValues.put(key,
+                    this.preferences.getBoolean(Settings.syntaxStyleBoldSettingsKeys.get(key),
+                            this.syntaxStyleBoldSettingsValues.get(key)));
+            this.syntaxStyleItalicSettingsValues.put(key,
+                    this.preferences.getBoolean(Settings.syntaxStyleItalicSettingsKeys.get(key),
+                            this.syntaxStyleItalicSettingsValues.get(key)));
         }
     }
 
@@ -847,7 +853,8 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      */
     public Color previewColorModeByPosition(final int position, final ColorMode mode) {
         if (mode.modeKey != null && !mode.modeKey.isEmpty()) {
-            return Settings.getColorValueByString(position, mode.modeKey, Settings.defaultColorSettingsValues, this.systemColors);
+            return Settings.getColorValueByString(position, mode.modeKey, Settings.defaultColorSettingsValues,
+                    this.systemColors);
         } else {
             return this.getColorSettingByPosition(position);
         }
@@ -964,7 +971,8 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         this.initSystemProviders();
         this.applyDefaultSettings();
         if (!this.readSettingsFromPropertiesFile(Settings.settingsFile)) {
-            Settings.LOGGER.error("RARS System error: unable to read Settings.properties defaults. Using built-in defaults.");
+            Settings.LOGGER.error("RARS System error: unable to read Settings.properties defaults. Using built-in " +
+                    "defaults.");
         }
         this.getSettingsFromPreferences();
     }
@@ -975,7 +983,8 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         for (final Bool setting : Bool.values()) {
             this.booleanSettingsValues.put(setting, setting.getDefault());
         }
-        System.arraycopy(Settings.defaultStringSettingsValues, 0, this.stringSettingsValues, 0, this.stringSettingsValues.length);
+        System.arraycopy(Settings.defaultStringSettingsValues, 0, this.stringSettingsValues, 0,
+                this.stringSettingsValues.length);
         for (int i = 0; i < this.fontFamilySettingsValues.length; i++) {
             this.fontFamilySettingsValues[i] = Settings.defaultFontFamilySettingsValues[i];
             this.fontStyleSettingsValues[i] = Settings.defaultFontStyleSettingsValues[i];
@@ -992,8 +1001,9 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         this.systemColors[Settings.EDITOR_SELECTION_COLOR] = new LookAndFeelColor("TextArea.selectionBackground");
         this.systemColors[Settings.EDITOR_CARET_COLOR] = new LookAndFeelColor("TextArea.caretForeground");
         // Mixes based on the system-color of the background and selection-color
-        this.systemColors[Settings.EDITOR_LINE_HIGHLIGHT] = new ColorProviderMix(this.systemColors[Settings.EDITOR_SELECTION_COLOR],
-                this.systemColors[Settings.EDITOR_BACKGROUND], 0.2f);
+        this.systemColors[Settings.EDITOR_LINE_HIGHLIGHT] =
+                new ColorProviderMix(this.systemColors[Settings.EDITOR_SELECTION_COLOR],
+                        this.systemColors[Settings.EDITOR_BACKGROUND], 0.2f);
         // Mixes based on the set color of the background and selection-color
         // systemColors[EDITOR_LINE_HIGHLIGHT] = new
         // ColorSettingMix(EDITOR_SELECTION_COLOR, EDITOR_BACKGROUND, 0.2f);
@@ -1044,7 +1054,8 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
     // provided as argument (could be either
     // the current or the default settings array).
     private Color getColorValueByPosition(final int position, final String[] values, final String[] defaults) {
-        return Settings.getColorValueByString(position, Settings.getColorStringByPosition(position, values), defaults, this.systemColors);
+        return Settings.getColorValueByString(position, Settings.getColorStringByPosition(position, values), defaults
+                , this.systemColors);
     }
 
     // Establish the settings from the given properties file. Return true if it
@@ -1118,15 +1129,20 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         this.booleanSettingsValues.replaceAll(
                 (s, v) -> this.preferences.getBoolean(s.getName(), this.booleanSettingsValues.get(s)));
         for (int i = 0; i < Settings.stringSettingsKeys.length; i++) {
-            this.stringSettingsValues[i] = this.preferences.get(Settings.stringSettingsKeys[i], this.stringSettingsValues[i]);
+            this.stringSettingsValues[i] = this.preferences.get(Settings.stringSettingsKeys[i],
+                    this.stringSettingsValues[i]);
         }
         for (int i = 0; i < Settings.fontFamilySettingsKeys.length; i++) {
-            this.fontFamilySettingsValues[i] = this.preferences.get(Settings.fontFamilySettingsKeys[i], this.fontFamilySettingsValues[i]);
-            this.fontStyleSettingsValues[i] = this.preferences.get(Settings.fontStyleSettingsKeys[i], this.fontStyleSettingsValues[i]);
-            this.fontSizeSettingsValues[i] = this.preferences.get(Settings.fontSizeSettingsKeys[i], this.fontSizeSettingsValues[i]);
+            this.fontFamilySettingsValues[i] = this.preferences.get(Settings.fontFamilySettingsKeys[i],
+                    this.fontFamilySettingsValues[i]);
+            this.fontStyleSettingsValues[i] = this.preferences.get(Settings.fontStyleSettingsKeys[i],
+                    this.fontStyleSettingsValues[i]);
+            this.fontSizeSettingsValues[i] = this.preferences.get(Settings.fontSizeSettingsKeys[i],
+                    this.fontSizeSettingsValues[i]);
         }
         for (int i = 0; i < Settings.colorSettingsKeys.length; i++) {
-            this.colorSettingsValues[i] = this.preferences.get(Settings.colorSettingsKeys[i], this.colorSettingsValues[i]);
+            this.colorSettingsValues[i] = this.preferences.get(Settings.colorSettingsKeys[i],
+                    this.colorSettingsValues[i]);
         }
         this.getEditorSyntaxStyleSettingsFromPreferences();
     }
@@ -1140,7 +1156,8 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         } catch (final SecurityException se) {
             LOGGER.error("Unable to write the boolean setting {} to persistent storage for security reasons.", name);
         } catch (final BackingStoreException bse) {
-            LOGGER.error("Unable to communicate with persistent storage when trying to write the \"{}\" bool setting.", name);
+            LOGGER.error("Unable to communicate with persistent storage when trying to write the \"{}\" bool setting" +
+                    ".", name);
         }
     }
 
@@ -1154,7 +1171,8 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         } catch (final SecurityException se) {
             LOGGER.error("Unable to write the {} string setting to persistent storage for security reasons.", name);
         } catch (final BackingStoreException bse) {
-            LOGGER.error("Unable to communicate with persistent storage when trying to write the \"{}\" string setting.", name);
+            LOGGER.error("Unable to communicate with persistent storage when trying to write the \"{}\" string " +
+                    "setting.", name);
         }
     }
 
@@ -1381,7 +1399,8 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
 
         @Override
         public Color getColor() {
-            return Settings.mixColors(Settings.this.getColorSettingByPosition(this.posA), Settings.this.getColorSettingByPosition(this.posB), this.ratio);
+            return Settings.mixColors(Settings.this.getColorSettingByPosition(this.posA),
+                    Settings.this.getColorSettingByPosition(this.posB), this.ratio);
         }
     }
 

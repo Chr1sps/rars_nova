@@ -1,10 +1,10 @@
 package rars.riscv.hardware;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
 import rars.notices.RegisterAccessNotice;
-
-import java.util.concurrent.Flow;
+import rars.util.SimpleSubscriber;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -100,7 +100,8 @@ public final class FloatingPointRegisterFile {
     public static void updateRegister(final int num, final int val) {
         final long lval = val | 0xFFFFFFFF_00000000L; // NAN box if used as float
         if ((Settings.getBackSteppingEnabled())) {
-            Globals.program.getBackStepper().addFloatingPointRestore(num, FloatingPointRegisterFile.instance.updateRegister(num, lval));
+            Globals.program.getBackStepper().addFloatingPointRestore(num,
+                    FloatingPointRegisterFile.instance.updateRegister(num, lval));
         } else {
             FloatingPointRegisterFile.instance.updateRegister(num, lval);
         }
@@ -114,7 +115,8 @@ public final class FloatingPointRegisterFile {
      */
     public static void updateRegisterLong(final int num, final long val) {
         if ((Settings.getBackSteppingEnabled())) {
-            Globals.program.getBackStepper().addFloatingPointRestore(num, FloatingPointRegisterFile.instance.updateRegister(num, val));
+            Globals.program.getBackStepper().addFloatingPointRestore(num,
+                    FloatingPointRegisterFile.instance.updateRegister(num, val));
         } else {
             FloatingPointRegisterFile.instance.updateRegister(num, val);
         }
@@ -195,7 +197,7 @@ public final class FloatingPointRegisterFile {
      *
      * @param subscriber a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void addRegistersSubscriber(final Flow.Subscriber<? super RegisterAccessNotice> subscriber) {
+    public static void addRegistersSubscriber(final @NotNull SimpleSubscriber<? super RegisterAccessNotice> subscriber) {
         FloatingPointRegisterFile.instance.addRegistersObserver(subscriber);
     }
 
@@ -206,7 +208,7 @@ public final class FloatingPointRegisterFile {
      *
      * @param subscriber a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void deleteRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> subscriber) {
+    public static void deleteRegistersObserver(final @NotNull SimpleSubscriber<? super RegisterAccessNotice> subscriber) {
         FloatingPointRegisterFile.instance.deleteRegistersSubscriber(subscriber);
     }
 }

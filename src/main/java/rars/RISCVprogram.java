@@ -52,9 +52,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class RISCVprogram {
 
-    // See explanation of method inSteppedExecution() below.
-    private final boolean steppedExecution = false;
-
     private String filename;
     private ArrayList<String> sourceList;
     private ArrayList<TokenList> tokenList;

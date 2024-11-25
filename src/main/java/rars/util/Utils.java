@@ -113,6 +113,7 @@ public final class Utils {
             if (firstIterator.hasNext() && secondIterator.hasNext()) {
                 return new Pair<>(firstIterator.next(), secondIterator.next());
             }
+            //noinspection ReturnOfNull
             return null;
         }).takeWhile(Objects::nonNull);
     }

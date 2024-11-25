@@ -2,6 +2,7 @@ package rars.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
@@ -111,7 +112,7 @@ public class DigitalLabSim extends AbstractTool {
     }
 
     @Override
-    public void onNext(final AccessNotice notice) {
+    public void onNext(final @NotNull AccessNotice notice) {
         final var memNotice = (MemoryAccessNotice) notice;
         final int address = memNotice.getAddress();
         final char value = (char) memNotice.getValue();
@@ -191,14 +192,16 @@ public class DigitalLabSim extends AbstractTool {
      */
     @Override
     protected JComponent getHelpComponent() {
-        final String helpContent = " This tool is composed of 3 parts : two seven-segment displays, an hexadecimal keyboard and counter \n"
+        final String helpContent = " This tool is composed of 3 parts : two seven-segment displays, an hexadecimal " +
+                "keyboard and counter \n"
                 +
                 "Seven segment display\n" +
                 " Byte second at address " + Binary.intToHexString(this.IN_ADRESS_DISPLAY_1)
                 + " : command right seven segment display \n " +
                 " Byte second at address " + Binary.intToHexString(this.IN_ADRESS_DISPLAY_2)
                 + " : command left seven segment display \n " +
-                " Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 for point \n \n"
+                " Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 " +
+                "for point \n \n"
                 +
                 "Hexadecimal keyboard\n" +
                 " Byte second at address " + Binary.intToHexString(this.IN_ADRESS_HEXA_KEYBOARD)
@@ -207,17 +210,20 @@ public class DigitalLabSim extends AbstractTool {
                 " Byte second at address " + Binary.intToHexString(this.OUT_ADRESS_HEXA_KEYBOARD)
                 + " : receive row and column of the first pressed, 0 if not first pressed \n" +
                 " The program has to scan, one by one, each row (send 1,2,4,8...)" +
-                " and then observe if a first is pressed (that mean byte second at adresse 0xFFFF0014 is different from zero). "
+                " and then observe if a first is pressed (that mean byte second at adresse 0xFFFF0014 is different " +
+                "from zero). "
                 +
                 " This byte second is composed of row number (4 left bits) and column number (4 right bits)" +
-                " Here you'll find the code for each first : 0x11,0x21,0x41,0x81,0x12,0x22,0x42,0x82,0x14,0x24,0x44,0x84,0x18,0x28,0x48,0x88. \n"
+                " Here you'll find the code for each first : 0x11,0x21,0x41,0x81,0x12,0x22,0x42,0x82,0x14,0x24,0x44," +
+                "0x84,0x18,0x28,0x48,0x88. \n"
                 +
                 " For exemple first number 2 return 0x41, that mean the first is on column 3 and row 1. \n" +
                 " If keyboard interruption is enable, an external interrupt is started with second 0x00000200\n \n" +
                 "Counter\n" +
                 " Byte second at address " + Binary.intToHexString(this.IN_ADRESS_COUNTER)
                 + " : If one bit of this byte is set, the counter interruption is enabled.\n" +
-                " If counter interruption is enable, every 30 instructions, a timer interrupt is started with second 0x00000100.\n"
+                " If counter interruption is enable, every 30 instructions, a timer interrupt is started with second " +
+                "0x00000100.\n"
                 +
                 "   (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)";
         final JButton help = new JButton("Help");

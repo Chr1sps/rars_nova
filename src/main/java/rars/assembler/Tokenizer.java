@@ -127,7 +127,7 @@ public class Tokenizer {
     }
 
     /**
-     * Will tokenize a complete soure program.
+     * Will tokenize a complete source program.
      *
      * @param p The RISCVprogram to be tokenized.
      * @return An ArrayList representing the tokenized program. Each list member is
@@ -177,7 +177,8 @@ public class Tokenizer {
     // files that themselves have .include. Plus it will detect and report recursive
     // includes both direct and indirect.
     // DPS 11-Jan-2013
-    private ArrayList<SourceLine> processIncludes(final @NotNull RISCVprogram program, final Map<String, String> inclFiles)
+    private ArrayList<SourceLine> processIncludes(final @NotNull RISCVprogram program,
+                                                  final Map<String, String> inclFiles)
             throws AssemblyException {
         final ArrayList<String> source = program.getSourceList();
         final ArrayList<SourceLine> result = new ArrayList<>(source.size());
@@ -314,7 +315,8 @@ public class Tokenizer {
      *                         else false
      * @return the generated token list for that line
      */
-    public TokenList tokenizeLine(final int lineNum, final String theLine, final ErrorList callerErrorList, final boolean doEqvSubstitutes) {
+    public TokenList tokenizeLine(final int lineNum, final String theLine, final ErrorList callerErrorList,
+                                  final boolean doEqvSubstitutes) {
         final ErrorList saveList = this.errors;
         this.errors = callerErrorList;
         final TokenList tokens = this.tokenizeLine(this.sourceRISCVprogram, lineNum, theLine, doEqvSubstitutes);
@@ -335,7 +337,8 @@ public class Tokenizer {
      *                         else false
      * @return the generated token list for that line
      */
-    public TokenList tokenizeLine(final @Nullable RISCVprogram program, final int lineNum, final @NotNull String theLine, final boolean doEqvSubstitutes) {
+    public TokenList tokenizeLine(final @Nullable RISCVprogram program, final int lineNum,
+                                  final @NotNull String theLine, final boolean doEqvSubstitutes) {
         TokenList result = new TokenList();
         if (theLine.isEmpty())
             return result;
@@ -535,7 +538,8 @@ public class Tokenizer {
     // case
     // the substitution needs to be made.
     // DPS 11-July-2012
-    private TokenList processEqv(final @Nullable RISCVprogram program, final int lineNum, @NotNull String theLine, final TokenList tokens) {
+    private TokenList processEqv(final @Nullable RISCVprogram program, final int lineNum, @NotNull String theLine,
+                                 final @NotNull TokenList tokens) {
         // See if it is .eqv directive. If so, record it...
         // Have to assure it is a well-formed statement right now (can't wait for
         // assembler).
@@ -615,8 +619,10 @@ public class Tokenizer {
     }
 
     // Given candidate token and its position, will classify and record it.
-    private void processCandidateToken(final char[] token, final @Nullable RISCVprogram program, final int line, final @NotNull String theLine,
-                                       final int tokenPos, final int tokenStartPos, final @NotNull TokenList tokenList) {
+    private void processCandidateToken(final char[] token, final @Nullable RISCVprogram program, final int line,
+                                       final @NotNull String theLine,
+                                       final int tokenPos, final int tokenStartPos,
+                                       final @NotNull TokenList tokenList) {
         String value = new String(token, 0, tokenPos);
         if (!value.isEmpty() && value.charAt(0) == '\'')
             value = Tokenizer.preprocessCharacterLiteral(value);

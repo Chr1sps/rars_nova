@@ -1,5 +1,7 @@
 package rars.venus;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import rars.Globals;
 import rars.RISCVprogram;
 import rars.assembler.Symbol;
@@ -7,8 +9,6 @@ import rars.assembler.SymbolTable;
 import rars.riscv.hardware.Memory;
 import rars.util.Binary;
 import rars.venus.run.RunAssembleAction;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -112,7 +113,7 @@ public class LabelsWindow extends JInternalFrame {
     // 7 Name descend descend 5 3
     // "Click Name" column shows which state to go to when Name column is clicked.
     // "Click Addr" column shows which state to go to when Addr column is clicked.
-    //////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////
     // The array of comparators; index corresponds to state in table above.
     private final ArrayList<Comparator<Symbol>> tableSortingComparators = new ArrayList<>(Arrays.asList(
             /* 0 */ new LabelAddressAscendingComparator(),
@@ -285,7 +286,7 @@ public class LabelsWindow extends JInternalFrame {
     // Suggested by Ken Vollmar, implemented by Pete Sanderson
     // July 2007.
 
-    ///////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////
     // Class representing label table data
     static class LabelTableModel extends AbstractTableModel {
         final String[] columns;
@@ -353,9 +354,10 @@ public class LabelsWindow extends JInternalFrame {
     ////////////////////////////////////////////////////////////////////////////
     //
     // Comparator class used to sort in ascending order a List of symbols
-    //////////////////////////////////////////////////////////////////////////// alphabetically
-    //////////////////////////////////////////////////////////////////////////// by
-    //////////////////////////////////////////////////////////////////////////// name
+
+    /// ///////////////////////////////////////////////////////////////////////// alphabetically
+    /// ///////////////////////////////////////////////////////////////////////// by
+    /// ///////////////////////////////////////////////////////////////////////// name
     private static class LabelNameAscendingComparator implements Comparator<Symbol> {
         @Override
         public int compare(final Symbol a, final Symbol b) {
@@ -369,7 +371,8 @@ public class LabelsWindow extends JInternalFrame {
     // Comparator class used to sort in ascending order a List of symbols
     //////////////////////////////////////////////////////////////////////////// numerically
     // by address. The kernel address space is all negative integers, so we need
-    //////////////////////////////////////////////////////////////////////////// some
+
+    /// ///////////////////////////////////////////////////////////////////////// some
     // special processing to treat int address as unsigned 32 bit second.
     // Note: Integer.signum() is Java 1.5 and MARS is 1.4 so I can't use it.
     // Remember, if not equal then any second with correct sign will work.
@@ -388,7 +391,8 @@ public class LabelsWindow extends JInternalFrame {
     //
     // Comparator class used to sort in descending order a List of symbols. It will
     // sort either alphabetically by name or numerically by address, depending on
-    //////////////////////////////////////////////////////////////////////////// the
+
+    /// ///////////////////////////////////////////////////////////////////////// the
     // Comparator object provided as the argument constructor. This works because it
     // is implemented by returning the result of the Ascending comparator when
     // arguments are reversed.
@@ -401,7 +405,7 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    ///////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////
     // Listener class to respond to "Text" or "Data" checkbox click
     private class LabelItemListener implements ItemListener {
         @Override
@@ -412,7 +416,7 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////
     // Represents one symbol table for the display.
     private class LabelsForSymbolTable {
         private final RISCVprogram program;
@@ -420,7 +424,7 @@ public class LabelsWindow extends JInternalFrame {
         private final String tableName;
         private Object[][] labelData;
         private JTable labelTable;
-        private ArrayList<Symbol> symbols;
+        private List<Symbol> symbols;
 
         // Associated RISCVprogram object. If null, this represents global symbol table.
         public LabelsForSymbolTable(final RISCVprogram program) {
@@ -463,7 +467,8 @@ public class LabelsWindow extends JInternalFrame {
             for (int i = 0; i < this.symbols.size(); i++) {// sets up the label table
                 final Symbol s = this.symbols.get(i);
                 this.labelData[i][LabelsWindow.LABEL_COLUMN] = s.name;
-                this.labelData[i][LabelsWindow.ADDRESS_COLUMN] = NumberDisplayBaseChooser.formatNumber(s.address, addressBase);
+                this.labelData[i][LabelsWindow.ADDRESS_COLUMN] = NumberDisplayBaseChooser.formatNumber(s.address,
+                        addressBase);
             }
             final LabelTableModel m = new LabelTableModel(this.labelData, LabelsWindow.columnNames);
             if (this.labelTable == null) {
@@ -490,7 +495,7 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////
     //
     // JTable subclass to provide custom tool tips for each of the
     // label table column headers. From Sun's JTable tutorial.
@@ -518,7 +523,7 @@ public class LabelsWindow extends JInternalFrame {
             return c;
         }
 
-        /////////////////////////////////////////////////////////////////
+        /// //////////////////////////////////////////////////////////////
         //
         // Customized table header that will both display tool tip when
         // mouse hovers over each column, and also sort the table when
@@ -540,7 +545,7 @@ public class LabelsWindow extends JInternalFrame {
                 return LabelsWindow.columnToolTips[realIndex];
             }
 
-            /////////////////////////////////////////////////////////////////////
+            /// //////////////////////////////////////////////////////////////////
             // When user clicks on table column header, system will sort the
             // table based on that column then redraw it.
             private class SymbolTableHeaderMouseListener implements MouseListener {
@@ -549,8 +554,10 @@ public class LabelsWindow extends JInternalFrame {
                     final Point p = e.getPoint();
                     final int index = SymbolTableHeader.this.columnModel.getColumnIndexAtX(p.x);
                     final int realIndex = SymbolTableHeader.this.columnModel.getColumn(index).getModelIndex();
-                    LabelsWindow.this.sortState = LabelsWindow.sortStateTransitions[LabelsWindow.this.sortState][realIndex];
-                    LabelsWindow.this.tableSortComparator = LabelsWindow.this.tableSortingComparators.get(LabelsWindow.this.sortState);
+                    LabelsWindow.this.sortState =
+                            LabelsWindow.sortStateTransitions[LabelsWindow.this.sortState][realIndex];
+                    LabelsWindow.this.tableSortComparator =
+                            LabelsWindow.this.tableSortingComparators.get(LabelsWindow.this.sortState);
                     LabelsWindow.columnNames = LabelsWindow.sortColumnHeadings[LabelsWindow.this.sortState];
                     Globals.getSettings().setLabelSortState(Integer.toString(LabelsWindow.this.sortState));
                     LabelsWindow.this.setupTable();

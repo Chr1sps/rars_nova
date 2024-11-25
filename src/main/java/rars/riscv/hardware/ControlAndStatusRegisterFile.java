@@ -3,6 +3,7 @@ package rars.riscv.hardware;
 import rars.Globals;
 import rars.Settings;
 import rars.notices.RegisterAccessNotice;
+import rars.util.SimpleSubscriber;
 
 import java.util.concurrent.Flow;
 
@@ -113,7 +114,8 @@ public final class ControlAndStatusRegisterFile {
             return true;
         }
         if ((Settings.getBackSteppingEnabled())) {
-            Globals.program.getBackStepper().addControlAndStatusRestore(num, ControlAndStatusRegisterFile.instance.updateRegister(num, val));
+            Globals.program.getBackStepper().addControlAndStatusRestore(num,
+                    ControlAndStatusRegisterFile.instance.updateRegister(num, val));
         } else {
             ControlAndStatusRegisterFile.instance.updateRegister(num, val);
         }
@@ -163,7 +165,8 @@ public final class ControlAndStatusRegisterFile {
      * @return a boolean
      */
     public static boolean orRegister(final int num, final long val) {
-        return ControlAndStatusRegisterFile.updateRegister(num, ControlAndStatusRegisterFile.instance.getValue(num) | val);
+        return ControlAndStatusRegisterFile.updateRegister(num,
+                ControlAndStatusRegisterFile.instance.getValue(num) | val);
     }
 
     /**
@@ -184,7 +187,8 @@ public final class ControlAndStatusRegisterFile {
      * @return a boolean
      */
     public static boolean clearRegister(final int num, final long val) {
-        return ControlAndStatusRegisterFile.updateRegister(num, ControlAndStatusRegisterFile.instance.getValue(num) & ~val);
+        return ControlAndStatusRegisterFile.updateRegister(num,
+                ControlAndStatusRegisterFile.instance.getValue(num) & ~val);
     }
 
     /**
@@ -287,7 +291,7 @@ public final class ControlAndStatusRegisterFile {
      *
      * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void addRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+    public static void addRegistersObserver(final SimpleSubscriber<? super RegisterAccessNotice> observer) {
         ControlAndStatusRegisterFile.instance.addRegistersObserver(observer);
     }
 

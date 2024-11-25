@@ -28,6 +28,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Information about data types.
  *
@@ -121,7 +124,8 @@ public final class DataTypes {
      * numeric
      * (or not implemented yet), returns 0.
      */
-    public static int getLengthInBytes(final Directive direct) {
+    @Contract(pure = true)
+    public static int getLengthInBytes(final @NotNull Directive direct) {
         return switch (direct) {
             case FLOAT -> FLOAT_SIZE;
             case DOUBLE -> DOUBLE_SIZE;
@@ -150,7 +154,7 @@ public final class DataTypes {
         return (direct == Directive.HALF && (value < MIN_HALF_VALUE || value > 0xFFFF)) ||
                 (direct == Directive.BYTE && (value < MIN_BYTE_VALUE || value > 0xFF));
     }
-    
+
     /**
      * Determines whether given floating point second falls within second range for
      * given directive.

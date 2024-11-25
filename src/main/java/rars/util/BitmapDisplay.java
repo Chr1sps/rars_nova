@@ -64,7 +64,7 @@ public class BitmapDisplay extends JFrame implements SimpleSubscriber<MemoryAcce
             for (int col = 0; col < this.displayWidth; col++) {
                 final int address = this.baseAddress + currentOffset;
                 try {
-                    final var word = Memory.getInstance().getWord(address);
+                    final var word = Memory.getInstance().getWordNoNotify(address);
                     final var color = new Color(word);
                     this.grid.setColor(row, col, color);
                 } catch (final AddressErrorException e) {
@@ -109,7 +109,7 @@ public class BitmapDisplay extends JFrame implements SimpleSubscriber<MemoryAcce
             var col = (start - this.baseAddress) % (this.displayWidth * 4) / 4;
             for (int i = start; i < end; i += 4) {
                 try {
-                    final var word = Memory.getInstance().getWord(i);
+                    final var word = Memory.getInstance().getWordNoNotify(i);
                     final var color = new Color(word);
                     this.grid.setColor(row, col, color);
                 } catch (final AddressErrorException e) {

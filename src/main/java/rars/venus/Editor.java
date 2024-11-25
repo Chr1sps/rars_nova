@@ -202,9 +202,11 @@ public class Editor {
             this.mainUI.setTitle(this.mainUIbaseTitle);
         } else {
             final String edited = (status == FileStatus.NEW_EDITED || status == FileStatus.EDITED) ? "*" : " ";
-            final String titleName = (status == FileStatus.NEW_EDITED || status == FileStatus.NEW_NOT_EDITED) ? name : path;
+            final String titleName = (status == FileStatus.NEW_EDITED || status == FileStatus.NEW_NOT_EDITED) ? name 
+                    : path;
             this.mainUI.setTitle(titleName + edited + " - " + this.mainUIbaseTitle);
-            this.editTabbedPane.setTitleAt(this.editTabbedPane.getSelectedIndex(), name + edited);
+            this.editTabbedPane.getTabbedPane().setTitleAt(this.editTabbedPane.getTabbedPane().getSelectedIndex(),
+                    name + edited);
         }
     }
 
