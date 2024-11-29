@@ -34,7 +34,7 @@ public final class RSTASchemeConverter implements ColorSchemeConverter<RVSyntaxS
     @Override
     public @NotNull RVSyntaxScheme convert(final @NotNull ColorScheme colorScheme, final @NotNull Font baseFont) {
         final var result = new RVSyntaxScheme();
-        for (final var entry : colorScheme.getStyleMap().entrySet()) {
+        for (final var entry : colorScheme.getEntries()) {
             final var newKey = tokenValue(entry.getKey());
             final var convertedStyle = convertStyle(entry.getValue(), baseFont);
             result.setStyle(newKey, convertedStyle);

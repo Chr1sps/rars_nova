@@ -5,19 +5,25 @@ import org.jetbrains.annotations.Unmodifiable;
 import rars.riscv.lang.lexing.RVTokenType;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Map.entry;
 import static java.util.Map.ofEntries;
 
 public final class ColorScheme {
-    private static final ColorScheme defaultScheme = new ColorScheme(getDefaultStylesMap());
     private static final TokenStyle defaultStyle = new TokenStyle();
+    private static final ColorScheme defaultScheme = new ColorScheme(getDefaultStylesMap());
     private final HashMap<RVTokenType, TokenStyle> styles;
 
     public ColorScheme(final @NotNull Map<RVTokenType, TokenStyle> map) {
         this.styles = new HashMap<>(map);
+        // fill in the missing token types with the default style
+        Arrays.stream(RVTokenType.values())
+                .forEach(tokenType ->
+                        styles.putIfAbsent(tokenType, defaultStyle));
     }
 
     private static @NotNull @Unmodifiable Map<RVTokenType, TokenStyle> getDefaultStylesMap() {
@@ -63,14 +69,11 @@ public final class ColorScheme {
     }
 
     public @NotNull TokenStyle getStyle(final @NotNull RVTokenType tokenType) {
-        if (styles.containsKey(tokenType)) {
-            return styles.get(tokenType);
-        }
-        return defaultStyle;
+        return styles.get(tokenType);
     }
 
-    public @NotNull Map<RVTokenType, TokenStyle> getStyleMap() {
-        return styles;
+    public @NotNull Set<Map.Entry<RVTokenType, TokenStyle>> getEntries() {
+        return styles.entrySet();
     }
 
     public void setStyle(final @NotNull RVTokenType tokenType, final @NotNull TokenStyle tokenStyle) {
