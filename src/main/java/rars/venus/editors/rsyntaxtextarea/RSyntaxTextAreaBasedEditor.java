@@ -17,7 +17,6 @@ import rars.venus.editors.TextEditingArea;
 import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.font.TextAttribute;
-import java.util.Collections;
 import java.util.Map;
 
 public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
@@ -39,8 +38,8 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
 
     public RSyntaxTextAreaBasedEditor() {
         textArea = new RSyntaxTextArea();
-        colorScheme = new ColorScheme(Collections.emptyMap());
-        textArea.setSyntaxScheme(new RVSyntaxScheme());
+        this.setColorScheme(ColorScheme.getDefaultScheme());
+//        textArea.setSyntaxScheme(new RVSyntaxScheme());
         textArea.setSyntaxEditingStyle(RVSyntax.SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);
         textArea.setMarkOccurrencesDelay(1);
@@ -298,10 +297,11 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void setColorScheme(final @NotNull ColorScheme colorScheme) {
         this.colorScheme = colorScheme;
+        this.applyColorScheme(colorScheme);
     }
 
     private void applyColorScheme(final @NotNull ColorScheme colorScheme) {
-        final var converted = RSTASchemeConverter.INSTANCE.convert(colorScheme);
+        final var converted = RSTASchemeConverter.INSTANCE.convert(colorScheme, textArea.getFont());
         this.textArea.setSyntaxScheme(converted);
     }
 }

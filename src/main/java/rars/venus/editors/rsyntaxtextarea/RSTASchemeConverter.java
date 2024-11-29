@@ -16,7 +16,7 @@ public final class RSTASchemeConverter implements ColorSchemeConverter<RVSyntaxS
     private RSTASchemeConverter() {
     }
 
-    private static @NotNull Style convertStyle(final @NotNull TokenStyle style) {
+    private static @NotNull Style convertStyle(final @NotNull TokenStyle style, final @NotNull Font baseFont) {
         final var result = new Style();
         result.foreground = style.foreground();
         result.background = style.background();
@@ -24,17 +24,19 @@ public final class RSTASchemeConverter implements ColorSchemeConverter<RVSyntaxS
         if (style.isBold()) fontStyle |= Font.BOLD;
         if (style.isItalic()) fontStyle |= Font.ITALIC;
         //noinspection MagicConstant
+        if (result.font == null)
+            result.font = baseFont;
         result.font = result.font.deriveFont(fontStyle);
         result.underline = style.isUnderline();
         return result;
     }
 
     @Override
-    public @NotNull RVSyntaxScheme convert(final @NotNull ColorScheme colorScheme) {
+    public @NotNull RVSyntaxScheme convert(final @NotNull ColorScheme colorScheme, final @NotNull Font baseFont) {
         final var result = new RVSyntaxScheme();
         for (final var entry : colorScheme.getStyleMap().entrySet()) {
             final var newKey = tokenValue(entry.getKey());
-            final var convertedStyle = convertStyle(entry.getValue());
+            final var convertedStyle = convertStyle(entry.getValue(), baseFont);
             result.setStyle(newKey, convertedStyle);
         }
         return result;
