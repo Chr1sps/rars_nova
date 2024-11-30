@@ -13,6 +13,7 @@ import rars.Globals;
 import rars.Settings;
 import rars.venus.editors.ColorScheme;
 import rars.venus.editors.TextEditingArea;
+import rars.venus.editors.Theme;
 
 import javax.swing.text.Document;
 import java.awt.*;
@@ -38,15 +39,13 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
 
     public RSyntaxTextAreaBasedEditor() {
         textArea = new RSyntaxTextArea();
-        this.setColorScheme(ColorScheme.getDefaultScheme());
-//        textArea.setSyntaxScheme(new RVSyntaxScheme());
+        scrollPane = new RTextScrollPane(textArea);
+        gutter = scrollPane.getGutter();
+        this.setFont(Globals.getSettings().getEditorFont());
+        this.applyTheme(Theme.getDefaultDarkTheme());
         textArea.setSyntaxEditingStyle(RVSyntax.SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);
         textArea.setMarkOccurrencesDelay(1);
-        scrollPane = new RTextScrollPane(textArea);
-        gutter = scrollPane.getGutter();
-//        this.updateEditorColours();
-        this.setFont(Globals.getSettings().getEditorFont());
     }
 
     @Override
@@ -173,7 +172,7 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     public void setFont(final @NotNull Font f) {
         final var derived = f.deriveFont(ligatureAttributes);
         textArea.setFont(derived);
-        gutter.setFont(derived);
+        gutter.setFont(derived.deriveFont(Font.BOLD));
     }
 
     @Override
@@ -238,6 +237,7 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
 
     @Override
     public void setCaretBlinkRate(final int rate) {
+        this.textArea.getCaret().setBlinkRate(rate);
     }
 
     @Override
@@ -298,6 +298,18 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     public void setColorScheme(final @NotNull ColorScheme colorScheme) {
         this.colorScheme = colorScheme;
         this.applyColorScheme(colorScheme);
+    }
+
+    @Override
+    public void applyTheme(final @NotNull Theme theme) {
+        this.textArea.setBackground(theme.backgroundColor);
+        this.textArea.setForeground(theme.foregroundColor);
+        this.textArea.setCurrentLineHighlightColor(theme.lineHighlightColor);
+        this.textArea.setCaretColor(theme.caretColor);
+        this.textArea.setSelectionColor(theme.selectionColor);
+        this.gutter.setBackground(theme.backgroundColor);
+        this.gutter.setForeground(theme.foregroundColor);
+        this.setColorScheme(theme.colorScheme);
     }
 
     private void applyColorScheme(final @NotNull ColorScheme colorScheme) {

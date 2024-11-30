@@ -119,6 +119,8 @@ public interface TextEditingArea {
     @NotNull ColorScheme getColorScheme();
 
     void setColorScheme(final @NotNull ColorScheme colorScheme);
+    
+    void applyTheme(final @NotNull Theme theme);
 
     // Used by Find/Replace
     enum FindReplaceResult {

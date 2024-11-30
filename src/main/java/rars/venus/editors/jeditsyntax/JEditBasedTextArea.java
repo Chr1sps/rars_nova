@@ -8,6 +8,7 @@ import rars.Settings;
 import rars.venus.EditPane;
 import rars.venus.editors.ColorScheme;
 import rars.venus.editors.TextEditingArea;
+import rars.venus.editors.Theme;
 import rars.venus.editors.jeditsyntax.tokenmarker.RISCVTokenMarker;
 
 import javax.swing.*;
@@ -39,7 +40,7 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     private final TextEditingArea sourceCode;
     private boolean isCompoundEdit = false;
     private CompoundEdit compoundEdit;
-    private ColorScheme colorScheme = ColorScheme.getDefaultScheme();
+    private ColorScheme colorScheme = ColorScheme.getDefaultLightScheme();
 
     /**
      * <p>Constructor for JEditBasedTextArea.</p>
@@ -245,6 +246,11 @@ public class JEditBasedTextArea extends JEditTextArea implements TextEditingArea
     @Override
     public void setColorScheme(@NotNull final ColorScheme colorScheme) {
         this.colorScheme = colorScheme;
+    }
+
+    @Override
+    public void applyTheme(@NotNull Theme theme) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     /**

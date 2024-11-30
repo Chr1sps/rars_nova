@@ -10,7 +10,7 @@ import static java.util.Map.entry;
 import static java.util.Map.ofEntries;
 
 public final class RSTAUtils {
-    private static Map<RVTokenType, Integer> tokenValueMap = ofEntries(
+    private static final Map<RVTokenType, Integer> tokenValueMap = ofEntries(
             entry(RVTokenType.NULL, Token.NULL),
             entry(RVTokenType.WHITESPACE, Token.WHITESPACE),
             entry(RVTokenType.COMMENT, Token.COMMENT_EOL),
