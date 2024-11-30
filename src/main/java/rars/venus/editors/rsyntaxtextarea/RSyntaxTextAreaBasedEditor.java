@@ -42,7 +42,7 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         scrollPane = new RTextScrollPane(textArea);
         gutter = scrollPane.getGutter();
         this.setFont(Globals.getSettings().getEditorFont());
-        this.applyTheme(Theme.getDefaultDarkTheme());
+        this.applyTheme(Theme.getDefaultLightTheme());
         textArea.setSyntaxEditingStyle(RVSyntax.SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);
         textArea.setMarkOccurrencesDelay(1);
@@ -193,6 +193,13 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void setEnabled(final boolean enabled) {
         textArea.setEnabled(enabled);
+        // HACK: for some reason, when you set the background color to
+        // white, the folded area gutter hint that shows up when you hover
+        // over the folded area indicator doesn't have the correct background
+        // color. This is a workaround to fix that.
+        textArea.setBackground(textArea.getBackground().darker());
+        textArea.setBackground(textArea.getBackground().brighter());
+        textArea.setBackground(textArea.getBackground());
     }
 
     @Override
@@ -214,7 +221,7 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     public void setSourceCode(final String code, final boolean editable) {
         textArea.setText(code);
         textArea.setEditable(editable);
-        textArea.setEnabled(editable);
+        setEnabled(editable);
         textArea.setCaretPosition(0);
         if (editable)
             textArea.requestFocusInWindow();
