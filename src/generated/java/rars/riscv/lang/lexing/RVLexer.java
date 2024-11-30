@@ -4,6 +4,10 @@
 
 package rars.riscv.lang.lexing;
 
+import rars.riscv.Instructions;
+import rars.riscv.hardware.ControlAndStatusRegisterFile;
+import rars.riscv.hardware.FloatingPointRegisterFile;
+import rars.riscv.hardware.RegisterFile;
 import javax.swing.text.Segment;
 import java.io.IOException;
 import java.io.Reader;
@@ -69,15 +73,14 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
   private static final String ZZ_CMAP_BLOCKS_PACKED_0 =
     "\11\0\1\1\1\2\1\3\1\4\1\3\22\0\1\1"+
     "\1\0\1\5\1\6\1\7\1\10\1\0\1\11\1\12"+
-    "\1\13\2\0\1\14\1\15\1\16\1\0\1\17\1\20"+
-    "\5\21\1\22\2\23\1\24\6\0\1\25\2\7\1\26"+
-    "\1\27\1\7\1\30\1\31\1\32\2\7\1\33\1\34"+
-    "\1\35\1\36\1\37\1\7\1\40\1\41\1\42\1\43"+
-    "\2\7\1\44\1\45\1\46\4\0\1\7\1\0\1\25"+
-    "\2\7\1\26\1\27\1\7\1\30\1\31\1\32\2\7"+
-    "\1\33\1\34\1\35\1\36\1\37\1\7\1\40\1\41"+
-    "\1\42\1\43\2\7\1\44\1\45\1\46\12\0\1\3"+
-    "\252\0\2\47\115\0\1\50\u01a8\0\2\3\326\0\u0100\3";
+    "\1\13\2\0\1\14\1\15\1\16\1\0\12\17\1\20"+
+    "\6\0\3\7\1\21\1\22\2\7\1\23\1\24\2\7"+
+    "\1\25\1\26\1\27\1\30\1\31\1\7\1\32\1\7"+
+    "\1\33\1\34\3\7\1\35\1\36\4\0\1\7\1\0"+
+    "\3\7\1\21\1\22\2\7\1\23\1\24\2\7\1\25"+
+    "\1\26\1\27\1\30\1\31\1\7\1\32\1\7\1\33"+
+    "\1\34\3\7\1\35\1\36\12\0\1\3\252\0\2\37"+
+    "\u01f6\0\2\3\326\0\u0100\3";
 
   private static int [] zzUnpackcmap_blocks() {
     int [] result = new int[1280];
@@ -105,13 +108,12 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
 
   private static final String ZZ_ACTION_PACKED_0 =
     "\1\0\1\1\1\2\1\3\1\4\1\5\1\6\1\1"+
-    "\1\7\1\10\1\11\1\12\1\1\1\6\1\13\10\6"+
-    "\1\1\1\14\1\15\3\16\1\17\1\13\1\20\1\21"+
-    "\5\6\2\21\1\6\2\21\2\22\1\23\1\0\1\24"+
-    "\1\6\1\25";
+    "\1\7\1\10\1\11\1\12\1\1\1\6\1\13\2\6"+
+    "\1\14\1\15\3\16\1\17\1\13\1\20\5\6\2\21"+
+    "\1\22\1\0\1\23\1\24";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[50];
+    int [] result = new int[36];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -136,16 +138,14 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
   private static final int [] ZZ_ROWMAP = zzUnpackRowMap();
 
   private static final String ZZ_ROWMAP_PACKED_0 =
-    "\0\0\0\51\0\122\0\51\0\173\0\244\0\315\0\366"+
-    "\0\u011f\0\51\0\51\0\51\0\u0148\0\u0171\0\u019a\0\u01c3"+
-    "\0\u01ec\0\u0215\0\u023e\0\u0267\0\u0290\0\u02b9\0\u02e2\0\u030b"+
-    "\0\51\0\51\0\u0334\0\u035d\0\u0386\0\51\0\u03af\0\u03d8"+
-    "\0\315\0\u0401\0\u042a\0\u0453\0\u047c\0\u04a5\0\u04ce\0\u04f7"+
-    "\0\u0520\0\51\0\u0549\0\u0334\0\51\0\u0334\0\u0572\0\315"+
-    "\0\u059b\0\u0572";
+    "\0\0\0\40\0\100\0\40\0\140\0\200\0\240\0\300"+
+    "\0\340\0\40\0\40\0\40\0\u0100\0\u0120\0\u0140\0\u0160"+
+    "\0\u0180\0\40\0\40\0\u01a0\0\u01c0\0\u01e0\0\40\0\u0200"+
+    "\0\u0220\0\u0240\0\u0260\0\u0280\0\u02a0\0\u02c0\0\u01a0\0\40"+
+    "\0\u01a0\0\u02e0\0\240\0\u02e0";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[50];
+    int [] result = new int[36];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -169,41 +169,28 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
 
   private static final String ZZ_TRANS_PACKED_0 =
     "\1\2\1\3\1\4\1\0\1\3\1\5\1\6\1\7"+
-    "\1\10\1\11\1\12\1\13\1\14\1\15\1\16\5\17"+
-    "\1\2\1\20\1\21\1\7\1\22\7\7\1\23\1\24"+
-    "\1\25\1\7\1\26\1\7\1\27\1\2\1\30\52\0"+
-    "\1\3\2\0\1\3\44\0\5\5\1\31\43\5\2\6"+
-    "\3\0\44\6\7\0\1\7\6\0\6\7\1\32\22\7"+
-    "\11\0\1\33\6\0\1\33\6\0\4\33\1\34\1\33"+
-    "\1\35\13\33\2\0\11\11\1\36\37\11\17\0\5\37"+
-    "\34\0\1\40\6\0\1\40\5\7\1\32\22\40\21\0"+
-    "\5\17\34\0\1\7\6\0\1\7\4\41\1\7\1\32"+
-    "\22\7\11\0\1\7\6\0\6\7\1\32\20\7\1\42"+
-    "\1\7\11\0\1\7\6\0\6\7\1\32\12\7\1\41"+
-    "\7\7\11\0\1\7\6\0\6\7\1\32\1\41\1\42"+
-    "\5\7\1\43\1\44\4\7\1\45\1\46\3\7\11\0"+
-    "\1\7\6\0\1\7\1\41\1\47\3\41\1\32\12\7"+
-    "\1\41\7\7\11\0\1\7\6\0\1\7\3\41\2\7"+
-    "\1\32\12\7\1\41\7\7\11\0\1\7\6\0\1\7"+
-    "\1\41\4\50\1\32\22\7\11\0\1\7\6\0\6\7"+
-    "\1\32\2\7\1\51\17\7\21\0\1\52\1\53\3\52"+
-    "\13\0\1\52\20\0\1\33\6\0\6\33\1\0\22\33"+
-    "\11\0\1\33\6\0\6\33\1\0\5\33\1\54\14\33"+
-    "\1\55\10\0\1\33\6\0\6\33\1\0\11\33\1\56"+
-    "\10\33\20\0\1\57\5\37\34\0\1\40\6\0\6\40"+
-    "\1\32\22\40\11\0\1\7\6\0\6\7\1\32\10\7"+
-    "\1\60\11\7\11\0\1\7\6\0\6\7\1\32\7\7"+
-    "\1\60\12\7\11\0\1\7\6\0\6\7\1\32\2\7"+
-    "\1\60\17\7\11\0\1\7\6\0\6\7\1\32\21\7"+
-    "\1\60\11\0\1\7\6\0\6\7\1\32\12\7\1\60"+
-    "\7\7\11\0\1\7\6\0\1\7\2\41\3\7\1\32"+
-    "\22\7\11\0\1\7\6\0\1\7\5\50\1\32\22\7"+
-    "\11\0\1\7\6\0\6\7\1\32\13\7\1\61\6\7"+
-    "\21\0\2\52\47\0\5\62\34\0\1\7\6\0\6\7"+
-    "\1\32\11\7\1\41\10\7\2\0";
+    "\1\10\1\11\1\12\1\13\1\14\1\15\1\16\1\17"+
+    "\1\2\1\20\10\7\1\21\4\7\1\2\41\0\1\3"+
+    "\2\0\1\3\33\0\5\5\1\22\32\5\2\6\3\0"+
+    "\33\6\7\0\1\7\6\0\2\7\1\23\16\7\10\0"+
+    "\1\24\6\0\1\24\2\0\2\24\1\25\1\24\1\26"+
+    "\11\24\1\0\11\11\1\27\26\11\17\0\1\30\27\0"+
+    "\1\31\6\0\1\31\1\7\1\23\16\31\20\0\1\17"+
+    "\27\0\1\7\6\0\2\7\1\23\14\7\1\32\1\7"+
+    "\10\0\1\7\6\0\2\7\1\23\1\32\4\7\1\33"+
+    "\1\34\3\7\1\35\1\36\2\7\10\0\1\24\6\0"+
+    "\2\24\1\0\16\24\10\0\1\24\6\0\2\24\1\0"+
+    "\3\24\1\37\12\24\1\40\7\0\1\24\6\0\2\24"+
+    "\1\0\7\24\1\41\6\24\17\0\1\42\1\30\27\0"+
+    "\1\31\6\0\2\31\1\23\16\31\10\0\1\7\6\0"+
+    "\2\7\1\23\6\7\1\43\7\7\10\0\1\7\6\0"+
+    "\2\7\1\23\5\7\1\43\10\7\10\0\1\7\6\0"+
+    "\2\7\1\23\1\7\1\43\14\7\10\0\1\7\6\0"+
+    "\2\7\1\23\15\7\1\43\10\0\1\7\6\0\2\7"+
+    "\1\23\10\7\1\43\5\7\20\0\1\44\20\0";
 
   private static int [] zzUnpacktrans() {
-    int [] result = new int[1476];
+    int [] result = new int[768];
     int offset = 0;
     offset = zzUnpacktrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -246,12 +233,11 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
   private static final int [] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
-    "\1\0\1\11\1\1\1\11\5\1\3\11\14\1\2\11"+
-    "\3\1\1\11\13\1\1\11\2\1\1\11\1\1\1\0"+
-    "\3\1";
+    "\1\0\1\11\1\1\1\11\5\1\3\11\5\1\2\11"+
+    "\3\1\1\11\10\1\1\11\1\1\1\0\2\1";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[50];
+    int [] result = new int[36];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -334,283 +320,6 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
     private Segment s;
             private int offsetShift;
             private P producer;
-            
-            private static final Set<String> instructions = Set.of(
-                    // region Arithmetic
-                    "add",
-                    "and",
-                    "div",
-                    "divu",
-                    "mul",
-                    "mulh",
-                    "mulhsu",
-                    "mulhu",
-                    "or",
-                    "rem",
-                    "remu",
-                    "sll",
-                    "slt",
-                    "sltu",
-                    "sra",
-                    "srl",
-                    "sub",
-                    "xor",
-                    // endregion Arithmetic
-                    
-                    // region Branch
-                    "beq",
-                    "bge",
-                    "bgeu",
-                    "blt",
-                    "bltu",
-                    "bne",
-                    // endregion Branch
-                    
-                    // region Double
-                    "fadd.d",
-                    "fdiv.d",
-                    "fmax.d",
-                    "fmin.d",
-                    "fmul.d",
-                    "fsub.d",
-                    // endregion Double
-                    
-                    // region Floating
-                    "fadd.s",
-                    "fdiv.s",
-                    "fmax.s",
-                    "fmin.s",
-                    "fmul.s",
-                    "fsub.s",
-                    // endregion Floating
-                    
-                    // region FusedDouble
-                    "fmadd.d",
-                    "fmsub.d",
-                    "fnmadd.d",
-                    "fnmsub.d",
-                    // endregion FusedDouble
-                    
-                    // region FusedFloat
-                    "fmadd.s",
-                    "fmsub.s",
-                    "fnmadd.s",
-                    "fnmsub.s",
-                    // endregion FusedFloat
-                    
-                    // region ImmediateInstruction
-                    "addi",
-                    "andi",
-                    "ori",
-                    "slti",
-                    "sltiu",
-                    "xori",
-                    // endregion ImmediateInstruction
-                    
-                    // region Load
-                    "lb",
-                    "lbu",
-                    "lh",
-                    "lhu",
-                    "lw",
-                    // endregion Load
-                    
-                    // region Store
-                    "sb",
-                    "sh",
-                    "sw",
-                    // endregion Store
-                    
-                    // region Other
-                    "auipc",
-                    "csrrc",
-                    "csrrci",
-                    "csrrs",
-                    "csrrsi",
-                    "csrrw",
-                    "csrrwi",
-                    "ebreak",
-                    "ecall",
-                    "fclass.d",
-                    "fclass.s",
-                    "fcvt.d.s",
-                    "fcvt.d.w",
-                    "fcvt.d.wu",
-                    "fcvt.s.d",
-                    "fcvt.s.w",
-                    "fcvt.s.wu",
-                    "fcvt.w.d",
-                    "fcvt.w.s",
-                    "fcvt.wu.d",
-                    "fcvt.wu.s",
-                    "fence",
-                    "fence.i",
-                    "feq.d",
-                    "feq.s",
-                    "fld",
-                    "fle.d",
-                    "fle.s",
-                    "flt.d",
-                    "flt.s",
-                    "flw",
-                    "fmv.s.x",
-                    "fmv.x.s",
-                    "fsd",
-                    "fsgnj.d",
-                    "fsgnjn.d",
-                    "fsgnjn.s",
-                    "fsgnj.s",
-                    "fsgnjx.d",
-                    "fsgnjx.s",
-                    "fsqrt.d",
-                    "fsqrt.s",
-                    "fsw",
-                    "jal",
-                    "jalr",
-                    "lui",
-                    "slli",
-                    "srai",
-                    "srli",
-                    "uret",
-                    "wfi"
-                    // endregion Other
-            );
-            
-            private static final Set<String> extendedInstructions = Set.of(
-                    "nop",
-                    
-                    "not",
-                    "mv",
-                    "neg",
-                    
-                    "fmv.s",
-                    "fabs.s",
-                    "fneg.s",
-                    "fmv.d",
-                    "fabs.d",
-                    "fneg.d",
-                    
-                    "sgt",
-                    "sgtu",
-                    "seqz",
-                    "snez",
-                    "sgtz",
-                    "sltz",
-                    
-                    "b",
-                    "beqz",
-                    "bnez",
-                    "bgez",
-                    "bltz",
-                    "bgtz",
-                    "blez",
-                    "bgt",
-                    "bgtu",
-                    "ble",
-                    "bleu",
-                    
-                    "j",
-                    "jal",
-                    "jr",
-                    "jalr",
-                    "ret",
-                    "call",
-                    "tail",
-                    
-                    "li",
-                    "la",
-                    "lw",
-                    "sw",
-                    "lh",
-                    "sh",
-                    "lb",
-                    "sb",
-                    "lhu",
-                    "lbu",
-                    "flw",
-                    "fsw",
-                    "fld",
-                    "fsd",
-                    
-                    "csrr",
-                    "csrw",
-                    "csrs",
-                    "csrc",
-                    
-                    "csrwi",
-                    "csrsi",
-                    "csrci",
-                    
-                    "frcsr",
-                    "fscsr",
-                    
-                    "frsr",
-                    "fssr",
-                    
-                    "frrm",
-                    "fsrm",
-                    
-                    "frflags",
-                    "fsflags",
-                    
-                    "rdcycle",
-                    "rdtime",
-                    "rdinstret",
-                    "rdcycleh",
-                    "rdtimeh",
-                    "rdinstreth",
-                        
-                    "fscrt.s",
-                    "fsub.s",
-                    "fadd.s",
-                    "fmul.s",
-                    "fdiv.s",
-                    "fmadd.s",
-                    "fnmadd.s",
-                    "fmsub.s",
-                    "fnmsub.s",
-                    "fcvt.s.wu",
-                    "fcvt.s.w",
-                    "fcvt.w.s",
-                    "fcvt.wu.s",
-                    
-                    "fsqrt.d",
-                    "fsub.d",
-                    "fadd.d",
-                    "fmul.d",
-                    "fdiv.d",
-                    "fmadd.d",
-                    "fnmadd.d",
-                    "fmsub.d",
-                    "fnmsub.d",
-                    "fcvt.d.wu",
-                    "fcvt.d.w",
-                    "fcvt.w.d",
-                    "fcvt.wu.d",
-                    "fcvt.s.d",
-                    "fcvt.d.s",
-                    
-                    "sext.b",
-                    "sext.h",
-                    "zext.b",
-                    "zext.h",
-                    
-                    "fmv.x.w",
-                    "fmv.w.x",
-                    
-                    "lui",
-                    "addi",
-    //                "lb",
-    //                "lh",
-    //                "lw",
-    //                "flw",
-    //                "fld",
-                    
-                    "fgt.s",
-                    "fge.s",
-                    "fgt.d",
-                    "fge.d"
-            );
         
             public RVLexer() {
                 super();
@@ -1007,7 +716,7 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
             case YYINITIAL: {
               addNullToken(); return getResult();
             }  // fall though
-            case 51: break;
+            case 37: break;
             default:
         return null;
         }
@@ -1018,111 +727,114 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
             { addToken(RVTokenType.ERROR);
             }
           // fall through
-          case 22: break;
+          case 21: break;
           case 2:
             { addToken(RVTokenType.WHITESPACE);
             }
           // fall through
-          case 23: break;
+          case 22: break;
           case 3:
             { addNullToken(); return getResult();
             }
           // fall through
-          case 24: break;
+          case 23: break;
           case 4:
             { addToken(RVTokenType.UNFINISHED_STRING); addNullToken(); return getResult();
             }
           // fall through
-          case 25: break;
+          case 24: break;
           case 5:
             { addToken(RVTokenType.COMMENT); addNullToken(); return getResult();
             }
           // fall through
-          case 26: break;
+          case 25: break;
           case 6:
-            { if (instructions.contains(yytext()) || extendedInstructions.contains(yytext())) {
-            addToken(RVTokenType.INSTRUCTION);
-        } else {
-            addToken(RVTokenType.IDENTIFIER);
-        }
+            { final var foundOps = Instructions.matchOperator(yytext());
+                        if (foundOps.isEmpty()) {
+                            final var foundRegister = RegisterFile.getRegister(yytext());
+                            final var foundFPRegister = FloatingPointRegisterFile.getRegister(yytext());
+                            final var foundCASRegister = ControlAndStatusRegisterFile.getRegister(yytext());
+                            if (foundRegister != null || foundFPRegister != null || foundCASRegister != null) {
+                                addToken(RVTokenType.REGISTER_NAME);
+                            } else {
+                                addToken(RVTokenType.IDENTIFIER);
+                            }
+                        } else {
+                            addToken(RVTokenType.INSTRUCTION);
+                        }
             }
           // fall through
-          case 27: break;
+          case 26: break;
           case 7:
             { addToken(RVTokenType.UNFINISHED_CHAR); /*addNullToken(); return firstToken;*/
             }
           // fall through
-          case 28: break;
+          case 27: break;
           case 8:
             { addToken(RVTokenType.LEFT_PAREN);
             }
           // fall through
-          case 29: break;
+          case 28: break;
           case 9:
             { addToken(RVTokenType.RIGHT_PAREN);
             }
           // fall through
-          case 30: break;
+          case 29: break;
           case 10:
             { addToken(RVTokenType.COMMA);
             }
           // fall through
-          case 31: break;
+          case 30: break;
           case 11:
             { addToken(RVTokenType.INTEGER);
             }
           // fall through
-          case 32: break;
+          case 31: break;
           case 12:
             { addToken(RVTokenType.STRING);
             }
           // fall through
-          case 33: break;
+          case 32: break;
           case 13:
             { addToken(RVTokenType.LABEL);
             }
           // fall through
-          case 34: break;
+          case 33: break;
           case 14:
             { addToken(RVTokenType.MACRO_PARAMETER);
             }
           // fall through
-          case 35: break;
+          case 34: break;
           case 15:
             { addToken(RVTokenType.CHAR);
             }
           // fall through
-          case 36: break;
+          case 35: break;
           case 16:
             { addToken(RVTokenType.DIRECTIVE);
             }
           // fall through
-          case 37: break;
+          case 36: break;
           case 17:
-            { addToken(RVTokenType.REGISTER_NAME);
-            }
-          // fall through
-          case 38: break;
-          case 18:
             { addToken(RVTokenType.HI);
             }
           // fall through
-          case 39: break;
-          case 19:
+          case 37: break;
+          case 18:
             { addToken(RVTokenType.LO);
             }
           // fall through
-          case 40: break;
-          case 20:
+          case 38: break;
+          case 19:
             { addToken(RVTokenType.ROUNDING_MODE);
             }
           // fall through
-          case 41: break;
-          case 21:
+          case 39: break;
+          case 20:
             { addToken(RVTokenType.FLOATING);
             }
           // fall through
-          case 42: break;
+          case 40: break;
           default:
             zzScanError(ZZ_NO_MATCH);
         }
