@@ -13,6 +13,7 @@ import rars.exceptions.AssemblyException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /*
@@ -63,40 +64,39 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class Tokenizer {
-    private static final Logger LOGGER = LogManager.getLogger(Tokenizer.class);
+public final class Tokenizer {
+    private static final Logger LOGGER = LogManager.getLogger();
     // The 8 escaped characters are: single quote, double quote, backslash, newline
     // (linefeed),
     // tab, backspace, return, form feed. The characters and their corresponding
     // decimal codes:
     private static final String escapedCharacters = "'\"\\ntbrf0";
     private static final String[] escapedCharactersValues = {"39", "34", "92", "10", "9", "8", "13", "12", "0"};
-    private ErrorList errors;
-    private @Nullable RISCVprogram sourceRISCVprogram;
-    private HashMap<String, String> equivalents; // DPS 11-July-2012
+    private final @NotNull ErrorList errors;
+    private final @Nullable RISCVprogram program;
+    private final @NotNull HashMap<String, String> equivalents; // DPS 11-July-2012
 
-    /**
-     * Simple constructor. Initializes empty error list.
-     */
-    public Tokenizer() {
-        this(null);
+    private Tokenizer(
+            final @Nullable RISCVprogram program,
+            final @NotNull ErrorList errorList
+    ) {
+        this.errors = errorList;
+        this.program = program;
+        this.equivalents = new HashMap<>();
     }
 
-    /**
-     * Constructor for use with existing RISCVprogram. Designed to be used with
-     * Macro feature.
-     *
-     * @param program A previously-existing RISCVprogram object or null if none.
-     */
-    public Tokenizer(final @Nullable RISCVprogram program) {
-        this.errors = new ErrorList();
-        this.sourceRISCVprogram = program;
+    private Tokenizer(final @Nullable RISCVprogram program) {
+        this(program, new ErrorList());
     }
 
-    // If passed a candidate character literal, attempt to translate it into integer
-    // constant.
-    // If the translation fails, return original second.
-    private static String preprocessCharacterLiteral(final @NotNull String value) {
+    private Tokenizer() {
+        this(null, new ErrorList());
+    }
+
+    /// If passed a candidate character literal, attempt to translate it into integer
+    /// constant.
+    /// If the translation fails, return original second.
+    private static @NotNull String preprocessCharacterLiteral(final @NotNull String value) {
         // must start and end with quote and have something in between
         if (value.length() < 3 || value.charAt(0) != '\'' || value.charAt(value.length() - 1) != '\'') {
             return value;
@@ -110,8 +110,8 @@ public class Tokenizer {
         // now we know it is escape sequence and have to decode which of the 8:
         // ',",\,n,t,b,r,f
         if (quotesRemoved.length() == 2) {
-            final int escapedCharacterIndex = Tokenizer.escapedCharacters.indexOf(quotesRemoved.charAt(1));
-            return (escapedCharacterIndex >= 0) ? Tokenizer.escapedCharactersValues[escapedCharacterIndex] : value;
+            final int escapedCharacterIndex = escapedCharacters.indexOf(quotesRemoved.charAt(1));
+            return (escapedCharacterIndex >= 0) ? escapedCharactersValues[escapedCharacterIndex] : value;
         }
         // last valid possibility is 3 digit octal code 000 through 377
         if (quotesRemoved.length() == 4) {
@@ -126,27 +126,22 @@ public class Tokenizer {
         return value;
     }
 
-    /**
-     * Will tokenize a complete source program.
-     *
-     * @param p The RISCVprogram to be tokenized.
-     * @return An ArrayList representing the tokenized program. Each list member is
-     * a TokenList
-     * that represents a tokenized source statement from the program.
-     * @throws AssemblyException if any.
-     */
-    public ArrayList<TokenList> tokenize(final @NotNull RISCVprogram p) throws AssemblyException {
-        this.sourceRISCVprogram = p;
-        this.equivalents = new HashMap<>(); // DPS 11-July-2012
-        final ArrayList<TokenList> tokenList = new ArrayList<>();
-        // ArrayList source = p.getSourceList();
-        final ArrayList<SourceLine> source = this.processIncludes(p, new HashMap<>()); // DPS 9-Jan-2013
-        p.setSourceLineList(source);
-        TokenList currentLineTokens;
-        String sourceLine;
+    /// Will tokenize a complete source program.
+    ///
+    /// @param program The [RISCVprogram] to be tokenized.
+    /// @return A [List] representing the tokenized program. Each list member is a [TokenList].
+    /// that represents a tokenized source statement from the program.
+    /// @throws AssemblyException if any.
+    public static @NotNull List<TokenList> tokenize(final @NotNull RISCVprogram program) throws AssemblyException {
+
+        final var tokenizer = new Tokenizer(program);
+        final var tokenList = new ArrayList<TokenList>();
+        final var source = tokenizer.processIncludes(program, new HashMap<>()); // DPS 9-Jan-2013
+        program.setSourceLineList(source);
+
         for (int i = 0; i < source.size(); i++) {
-            sourceLine = source.get(i).source();
-            currentLineTokens = this.tokenizeLine(i + 1, sourceLine);
+            final var sourceLine = source.get(i).source();
+            final var currentLineTokens = tokenizer.tokenizeLineImpl(tokenizer.program, i + 1, sourceLine, true);
             tokenList.add(currentLineTokens);
             // DPS 03-Jan-2013. Related to 11-July-2012. If source code substitution was
             // made
@@ -161,144 +156,26 @@ public class Tokenizer {
                         source.get(i).lineNumber()));
             }
         }
-        if (this.errors.errorsOccurred()) {
-            throw new AssemblyException(this.errors);
+        if (tokenizer.errors.errorsOccurred()) {
+            throw new AssemblyException(tokenizer.errors);
         }
         return tokenList;
     }
 
-    // pre-pre-processing pass through source code to process any ".include"
-    // directives.
-    // When one is encountered, the contents of the included file are inserted at
-    // that
-    // point. If no .include statements, the return second is a new array list but
-    // with the same lines of source code. Uses recursion to correctly process
-    // included
-    // files that themselves have .include. Plus it will detect and report recursive
-    // includes both direct and indirect.
-    // DPS 11-Jan-2013
-    private ArrayList<SourceLine> processIncludes(final @NotNull RISCVprogram program,
-                                                  final Map<String, String> inclFiles)
-            throws AssemblyException {
-        final ArrayList<String> source = program.getSourceList();
-        final ArrayList<SourceLine> result = new ArrayList<>(source.size());
-        for (int i = 0; i < source.size(); i++) {
-            final String line = source.get(i);
-            final TokenList tl = this.tokenizeLine(program, i + 1, line, false);
-            boolean hasInclude = false;
-            for (int ii = 0; ii < tl.size(); ii++) {
-                if (tl.get(ii).getValue().equalsIgnoreCase(Directive.INCLUDE.getName())
-                        && (tl.size() > ii + 1)
-                        && tl.get(ii + 1).getType() == TokenType.QUOTED_STRING) {
-                    String filename = tl.get(ii + 1).getValue();
-                    filename = filename.substring(1, filename.length() - 1); // get rid of quotes
-                    // Handle either absolute or relative pathname for .include file
-                    if (!new File(filename).isAbsolute()) {
-                        filename = new File(program.getFilename()).getParent() + File.separator + filename;
-                    }
-                    if (inclFiles.containsKey(filename)) {
-                        // This is a recursive include. Generate error message and return immediately.
-                        final Token t = tl.get(ii + 1);
-                        this.errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
-                                "Recursive include of file " + filename));
-                        throw new AssemblyException(this.errors);
-                    }
-                    inclFiles.put(filename, filename);
-                    final RISCVprogram incl = new RISCVprogram();
-                    try {
-                        incl.readSource(filename);
-                    } catch (final AssemblyException p) {
-                        final Token t = tl.get(ii + 1);
-                        this.errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
-                                "Error reading include file " + filename));
-                        throw new AssemblyException(this.errors);
-                    }
-                    final ArrayList<SourceLine> allLines = this.processIncludes(incl, inclFiles);
-                    result.addAll(allLines);
-                    hasInclude = true;
-                    break;
-                }
-            }
-            if (!hasInclude) {
-                result.add(new SourceLine(line, program, i + 1));// line);
-            }
+    /// Used only to create a token list for the example provided with each
+    /// instruction specification.
+    ///
+    /// @param example The example RISCV instruction to be tokenized.
+    /// @return A [TokenList] object representing the tokenized instruction.
+    /// @throws AssemblyException This occurs only if the instruction specification itself contains one or more
+    ///                           lexical (i.e. token) errors.
+    public static @NotNull TokenList tokenizeExampleInstruction(final @NotNull String example) throws AssemblyException {
+        final var tokenizer = new Tokenizer();
+        final var result = tokenizer.tokenizeLineImpl(null, 0, example, false);
+        if (tokenizer.errors.errorsOccurred()) {
+            throw new AssemblyException(tokenizer.errors);
         }
         return result;
-    }
-
-    /**
-     * Used only to create a token list for the example provided with each
-     * instruction
-     * specification.
-     *
-     * @param example The example RISCV instruction to be tokenized.
-     * @return An TokenList representing the tokenized instruction. Each list member
-     * is a Token
-     * that represents one language element.
-     * @throws AssemblyException This occurs only if the instruction specification
-     *                           itself
-     *                           contains one or more lexical (i.e. token) errors.
-     */
-    public TokenList tokenizeExampleInstruction(final String example) throws AssemblyException {
-        final TokenList result = this.tokenizeLine(this.sourceRISCVprogram, 0, example, false);
-        if (this.errors.errorsOccurred()) {
-            throw new AssemblyException(this.errors);
-        }
-        return result;
-    }
-
-    /**
-     * Will tokenize one line of source code. If lexical errors are discovered,
-     * they are noted in an ErrorMessage object which is added to the ErrorList.
-     * Will NOT throw an exception yet because we want to persevere beyond first
-     * error.
-     *
-     * @param lineNum line number from source code (used in error message)
-     * @param theLine String containing source code
-     * @return the generated token list for that line
-     */
-    /*
-     *
-     * Tokenizing is not as easy as it appears at first blush, because the typical
-     * delimiters: space, tab, comma, can all appear inside quoted ASCII strings!
-     * Also, spaces are not as necessary as they seem, the following line is
-     * accepted
-     * and parsed correctly by SPIM: label:lw,$t4,simple#comment
-     * as is this weird variation: label :lw $t4 ,simple , , , # comment
-     *
-     * as is this line: stuff:.asciiz"# ,\n\"","aaaaa" (interestingly, if you put
-     * additional characters after the \", they are ignored!!)
-     *
-     * I also would like to know the starting character position in the line of each
-     * token, for error reporting purposes. StringTokenizer cannot give you this.
-     *
-     * Given all the above, it is just as easy to "roll my own" as to use
-     * StringTokenizer
-     */
-
-    // Modified for release 4.3, to preserve existing API.
-    public TokenList tokenizeLine(final int lineNum, final String theLine) {
-        return this.tokenizeLine(this.sourceRISCVprogram, lineNum, theLine, true);
-    }
-
-    /**
-     * Will tokenize one line of source code. If lexical errors are discovered,
-     * they are noted in an ErrorMessage object which is added to the provided
-     * ErrorList
-     * instead of the Tokenizer's error list. Will NOT throw an exception.
-     *
-     * @param lineNum         line number from source code (used in error message)
-     * @param theLine         String containing source code
-     * @param callerErrorList errors will go into this list instead of tokenizer's
-     *                        list.
-     * @return the generated token list for that line
-     */
-    public TokenList tokenizeLine(final int lineNum, final String theLine, final ErrorList callerErrorList) {
-        final ErrorList saveList = this.errors;
-        this.errors = callerErrorList;
-        final TokenList tokens = this.tokenizeLine(lineNum, theLine);
-        this.errors = saveList;
-        return tokens;
     }
 
     /**
@@ -315,14 +192,14 @@ public class Tokenizer {
      *                         else false
      * @return the generated token list for that line
      */
-    public TokenList tokenizeLine(final int lineNum, final String theLine, final ErrorList callerErrorList,
-                                  final boolean doEqvSubstitutes) {
-        final ErrorList saveList = this.errors;
-        this.errors = callerErrorList;
-        final TokenList tokens = this.tokenizeLine(this.sourceRISCVprogram, lineNum, theLine, doEqvSubstitutes);
-        this.errors = saveList;
-        return tokens;
+    public static @NotNull TokenList tokenizeLine(final int lineNum, final @NotNull String theLine,
+                                                  final @NotNull ErrorList callerErrorList,
+                                                  final boolean doEqvSubstitutes) {
+        final var tokenizer = new Tokenizer(null, callerErrorList);
+        return tokenizer.tokenizeLineImpl(null, lineNum, theLine, doEqvSubstitutes);
     }
+
+    // Modified for release 4.3, to preserve existing API.
 
     /**
      * Will tokenize one line of source code. If lexical errors are discovered,
@@ -337,8 +214,8 @@ public class Tokenizer {
      *                         else false
      * @return the generated token list for that line
      */
-    public TokenList tokenizeLine(final @Nullable RISCVprogram program, final int lineNum,
-                                  final @NotNull String theLine, final boolean doEqvSubstitutes) {
+    private @NotNull TokenList tokenizeLineImpl(final @Nullable RISCVprogram program, final int lineNum,
+                                                final @NotNull String theLine, final boolean doEqvSubstitutes) {
         TokenList result = new TokenList();
         if (theLine.isEmpty())
             return result;
@@ -528,18 +405,69 @@ public class Tokenizer {
         return result;
     }
 
-    // Process the .eqv directive, which needs to be applied prior to tokenizing of
-    // subsequent statements.
-    // This handles detecting that theLine contains a .eqv directive, in which case
-    // it needs
-    // to be added to the HashMap of equivalents. It also handles detecting that
-    // theLine
-    // contains a symbol that was previously defined in an .eqv directive, in which
-    // case
-    // the substitution needs to be made.
-    // DPS 11-July-2012
-    private TokenList processEqv(final @Nullable RISCVprogram program, final int lineNum, @NotNull String theLine,
-                                 final @NotNull TokenList tokens) {
+    // pre-pre-processing pass through source code to process any ".include"
+    // directives.
+    // When one is encountered, the contents of the included file are inserted at
+    // that
+    // point. If no .include statements, the return second is a new array list but
+    // with the same lines of source code. Uses recursion to correctly process
+    // included
+    // files that themselves have .include. Plus it will detect and report recursive
+    // includes both direct and indirect.
+    // DPS 11-Jan-2013
+    private @NotNull List<SourceLine> processIncludes(final @NotNull RISCVprogram program,
+                                                      final @NotNull Map<String, String> inclFiles)
+            throws AssemblyException {
+        final ArrayList<String> source = program.getSourceList();
+        final ArrayList<SourceLine> result = new ArrayList<>(source.size());
+        for (int i = 0; i < source.size(); i++) {
+            final String line = source.get(i);
+            final TokenList tl = this.tokenizeLineImpl(program, i + 1, line, false);
+            boolean hasInclude = false;
+            for (int ii = 0; ii < tl.size(); ii++) {
+                if (tl.get(ii).getValue().equalsIgnoreCase(Directive.INCLUDE.getName())
+                        && (tl.size() > ii + 1)
+                        && tl.get(ii + 1).getType() == TokenType.QUOTED_STRING) {
+                    String filename = tl.get(ii + 1).getValue();
+                    filename = filename.substring(1, filename.length() - 1); // get rid of quotes
+                    // Handle either absolute or relative pathname for .include file
+                    if (!new File(filename).isAbsolute()) {
+                        filename = new File(program.getFilename()).getParent() + File.separator + filename;
+                    }
+                    if (inclFiles.containsKey(filename)) {
+                        // This is a recursive include. Generate error message and return immediately.
+                        final Token t = tl.get(ii + 1);
+                        this.errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
+                                "Recursive include of file " + filename));
+                        throw new AssemblyException(this.errors);
+                    }
+                    inclFiles.put(filename, filename);
+                    final RISCVprogram incl = new RISCVprogram();
+                    try {
+                        incl.readSource(filename);
+                    } catch (final AssemblyException p) {
+                        final Token t = tl.get(ii + 1);
+                        this.errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
+                                "Error reading include file " + filename));
+                        throw new AssemblyException(this.errors);
+                    }
+                    final var allLines = this.processIncludes(incl, inclFiles);
+                    result.addAll(allLines);
+                    hasInclude = true;
+                    break;
+                }
+            }
+            if (!hasInclude) {
+                result.add(new SourceLine(line, program, i + 1));// line);
+            }
+        }
+        return result;
+    }
+
+
+    private @NotNull TokenList processEqv(final @Nullable RISCVprogram program, final int lineNum,
+                                          @NotNull String theLine,
+                                          final @NotNull TokenList tokens) {
         // See if it is .eqv directive. If so, record it...
         // Have to assure it is a well-formed statement right now (can't wait for
         // assembler).
@@ -586,13 +514,7 @@ public class Tokenizer {
                 final int endExpression = tokens.get(tokenPosLastOperand).getStartPos()
                         + tokens.get(tokenPosLastOperand).getValue().length();
                 final String expression = theLine.substring(startExpression - 1, endExpression - 1);
-                // Symbol cannot be redefined - the only reason for this is to act like the Gnu
-                // .eqv
-                if (this.equivalents.containsKey(symbol) && !this.equivalents.get(symbol).equals(expression)) {
-                    this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos + 1).getStartPos(),
-                            "\"" + symbol + "\" is already defined"));
-                    return tokens;
-                }
+                // Removed equivalents checking - this is a tokenizer, not a semantic checker
                 this.equivalents.put(symbol, expression);
                 return tokens;
             }
@@ -601,7 +523,7 @@ public class Tokenizer {
         boolean substitutionMade = false;
         for (int i = 0; i < tokens.size(); i++) {
             final Token token = tokens.get(i);
-            if (token.getType() == TokenType.IDENTIFIER && this.equivalents != null
+            if (token.getType() == TokenType.IDENTIFIER
                     && this.equivalents.containsKey(token.getValue())) {
                 // do the substitution
                 final String sub = this.equivalents.get(token.getValue());
@@ -615,17 +537,17 @@ public class Tokenizer {
         }
         tokens.setProcessedLine(theLine); // DPS 03-Jan-2013. Related to changes of 11-July-2012.
 
-        return (substitutionMade) ? this.tokenizeLine(lineNum, theLine) : tokens;
+        return substitutionMade ? this.tokenizeLineImpl(this.program, lineNum, theLine, true) : tokens;
     }
 
-    // Given candidate token and its position, will classify and record it.
+    /// Given candidate token and its position, will classify and record it.
     private void processCandidateToken(final char[] token, final @Nullable RISCVprogram program, final int line,
                                        final @NotNull String theLine,
                                        final int tokenPos, final int tokenStartPos,
                                        final @NotNull TokenList tokenList) {
         String value = new String(token, 0, tokenPos);
         if (!value.isEmpty() && value.charAt(0) == '\'')
-            value = Tokenizer.preprocessCharacterLiteral(value);
+            value = preprocessCharacterLiteral(value);
         final TokenType type = TokenType.matchTokenType(value);
         if (type == TokenType.ERROR) {
             this.errors.add(new ErrorMessage(program, line, tokenStartPos,

@@ -47,7 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Jason Bumgarner, Jason Shrewsbury
  * @version June 2003
  */
-public class SymbolTable {
+public final class SymbolTable {
     /**
      * Constant <code>NOT_FOUND=-1</code>
      */

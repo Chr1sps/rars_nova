@@ -1,5 +1,7 @@
 package rars.assembler;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.RISCVprogram;
 
 /*
@@ -38,13 +40,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class Token {
+public final class Token {
 
-    private final String value;
-    private final RISCVprogram sourceProgram;
+    private final @NotNull String value;
+    private final @Nullable RISCVprogram sourceProgram;
     private final int sourceLine;
     private final int sourcePos;
-    private TokenType type;
+    private @NotNull TokenType type;
     // original program and line will differ from the above if token was defined in
     // an included file
     private int originalSourceLine;
@@ -61,7 +63,13 @@ public class Token {
      *                      token's source second.
      * @see TokenType
      */
-    public Token(final TokenType type, final String value, final RISCVprogram sourceProgram, final int line, final int start) {
+    public Token(
+            final @NotNull TokenType type,
+            final @NotNull String value,
+            final @Nullable RISCVprogram sourceProgram,
+            final int line,
+            final int start
+    ) {
         this.type = type;
         this.value = value;
         this.sourceProgram = sourceProgram;
@@ -97,7 +105,7 @@ public class Token {
      *
      * @return TokenType of this token.
      */
-    public TokenType getType() {
+    public @NotNull TokenType getType() {
         return this.type;
     }
 
@@ -108,7 +116,7 @@ public class Token {
      *
      * @param type new TokenTypes for this token.
      */
-    public void setType(final TokenType type) {
+    public void setType(final @NotNull TokenType type) {
         this.type = type;
     }
 
@@ -117,7 +125,7 @@ public class Token {
      *
      * @return String containing source code of this token.
      */
-    public String getValue() {
+    public @NotNull String getValue() {
         return this.value;
     }
 
@@ -137,7 +145,7 @@ public class Token {
      *
      * @return RISCVprogram object associated with this token.
      */
-    public RISCVprogram getSourceProgram() {
+    public @Nullable RISCVprogram getSourceProgram() {
         return this.sourceProgram;
     }
 

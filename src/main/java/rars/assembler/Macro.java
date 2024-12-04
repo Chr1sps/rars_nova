@@ -8,6 +8,7 @@ import rars.riscv.hardware.RegisterFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /*
@@ -40,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author M.H.Sekhavat sekhavat17@gmail.com
  */
-public class Macro {
+public final class Macro {
     private final ArrayList<String> labels;
     private String name;
     private RISCVprogram program;
@@ -53,7 +54,7 @@ public class Macro {
     /**
      * arguments like <code>%arg</code> will be substituted by macro expansion
      */
-    private ArrayList<String> args;
+    private final ArrayList<String> args;
 
     /**
      * <p>Constructor for Macro.</p>
@@ -211,15 +212,6 @@ public class Macro {
     }
 
     /**
-     * <p>getOriginalToLine.</p>
-     *
-     * @return a int
-     */
-    public int getOriginalToLine() {
-        return this.origToLine;
-    }
-
-    /**
      * <p>setOriginalToLine.</p>
      *
      * @param origToLine a int
@@ -233,17 +225,8 @@ public class Macro {
      *
      * @return a {@link java.util.ArrayList} object
      */
-    public ArrayList<String> getArgs() {
+    public List<String> getArgs() {
         return this.args;
-    }
-
-    /**
-     * <p>Setter for the field <code>args</code>.</p>
-     *
-     * @param args a {@link java.util.ArrayList} object
-     */
-    public void setArgs(final ArrayList<String> args) {
-        this.args = args;
     }
 
     /**
@@ -281,7 +264,7 @@ public class Macro {
      */
     public String getSubstitutedLine(final int line, final TokenList args, final long counter, final ErrorList errors) {
         final TokenList tokens = this.program.getTokenList().get(line - 1);
-        String s = this.program.getSourceLine(line);
+        var sourceLine = this.program.getSourceLine(line);
 
         for (int i = tokens.size() - 1; i >= 0; i--) {
             final Token token = tokens.get(i);
@@ -300,13 +283,13 @@ public class Macro {
                     errors.add(new ErrorMessage(this.program, token.getSourceLine(),
                             token.getStartPos(), "Unknown macro parameter"));
                 }
-                s = Macro.replaceToken(s, token, substitute);
+                sourceLine = Macro.replaceToken(sourceLine, token, substitute);
             } else if (this.tokenIsMacroLabel(token.getValue())) {
                 final String substitute = token.getValue() + "_M" + counter;
-                s = Macro.replaceToken(s, token, substitute);
+                sourceLine = Macro.replaceToken(sourceLine, token, substitute);
             }
         }
-        return s;
+        return sourceLine;
     }
 
     /**

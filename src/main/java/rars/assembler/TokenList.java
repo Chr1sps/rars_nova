@@ -41,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class TokenList implements Cloneable, Collection<Token> {
+public final class TokenList implements Cloneable, Collection<Token> {
 
     private @NotNull ArrayList<Token> tokenList;
     private @NotNull String processedLine;// DPS 03-Jan-2013

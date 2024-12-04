@@ -46,7 +46,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author M.H.Sekhavat sekhavat17@gmail.com
  */
-public class MacroPool {
+public final class MacroPool {
     private final @NotNull RISCVprogram program;
     /**
      * List of macros defined by now

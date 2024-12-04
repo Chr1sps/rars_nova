@@ -48,7 +48,7 @@ import java.util.ArrayList;
  * a concurrent simulation.
  * </p>
  */
-public class Program {
+public final class Program {
 
     private final Options set;
     private final RISCVprogram code;

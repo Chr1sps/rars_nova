@@ -54,7 +54,7 @@ import java.util.List;
  * @author Pete Sanderson
  * @version August 2003
  */
-public class Assembler {
+public final class Assembler {
     private static final Logger LOGGER = LogManager.getLogger(Assembler.class);
     private ErrorList errors;
     private boolean inDataSegment; // status maintained by parser
@@ -74,7 +74,8 @@ public class Assembler {
     // using
     // operand on .text directive. Will generate error message for each one that
     // occurs.
-    private static void catchDuplicateAddresses(final List<ProgramStatement> instructions, final ErrorList errors) {
+    private static void catchDuplicateAddresses(final @NotNull List<ProgramStatement> instructions,
+                                                final ErrorList errors) {
         for (int i = 0; i < instructions.size() - 1; i++) {
             final ProgramStatement ps1 = instructions.get(i);
             final ProgramStatement ps2 = instructions.get(i + 1);
@@ -93,7 +94,7 @@ public class Assembler {
         }
     }
 
-    private static void detectLabels(final TokenList tokens, final Macro current) {
+    private static void detectLabels(final @NotNull TokenList tokens, final @NotNull Macro current) {
         if (Assembler.tokenListBeginsWithLabel(tokens))
             current.addLabel(tokens.get(0).getValue());
     }
@@ -102,7 +103,7 @@ public class Assembler {
     // Pre-process the token list for a statement by stripping off any comment.
     // NOTE: the ArrayList parameter is not modified; a new one is cloned and
     // returned.
-    private static TokenList stripComment(final TokenList tokenList) {
+    private static @NotNull TokenList stripComment(final @NotNull TokenList tokenList) {
         if (tokenList.isEmpty())
             return tokenList;
         final TokenList tokens = (TokenList) tokenList.clone();
@@ -114,7 +115,7 @@ public class Assembler {
         return tokens;
     } // stripComment()
 
-    private static boolean tokenListBeginsWithLabel(final TokenList tokens) {
+    private static boolean tokenListBeginsWithLabel(final @NotNull TokenList tokens) {
         // 2-July-2010. DPS. Remove prohibition of operator names as labels
         if (tokens.size() < 2)
             return false;
@@ -158,11 +159,11 @@ public class Assembler {
      * @throws AssemblyException if any.
      * @see ProgramStatement
      */
-    public @Nullable ArrayList<ProgramStatement> assemble(final List<RISCVprogram> tokenizedProgramFiles,
-                                                          final boolean extendedAssemblerEnabled,
-                                                          final boolean warningsAreErrors) throws AssemblyException {
+    public @Nullable List<ProgramStatement> assemble(final @NotNull List<RISCVprogram> tokenizedProgramFiles,
+                                                     final boolean extendedAssemblerEnabled,
+                                                     final boolean warningsAreErrors) throws AssemblyException {
 
-        if (tokenizedProgramFiles == null || tokenizedProgramFiles.isEmpty())
+        if (tokenizedProgramFiles.isEmpty())
             return null;
         this.textAddress = new AddressSpace(Memory.textBaseAddress);
         this.dataAddress = new AddressSpace(Memory.dataBaseAddress);
@@ -202,8 +203,8 @@ public class Assembler {
             // sourceList is an ArrayList of String objects, one per source line.
             // tokenList is an ArrayList of TokenList objects, one per source line;
             // each ArrayList in tokenList consists of Token objects.
-            final ArrayList<SourceLine> sourceLineList = this.fileCurrentlyBeingAssembled.getSourceLineList();
-            final ArrayList<TokenList> tokenList = this.fileCurrentlyBeingAssembled.getTokenList();
+            final var sourceLineList = this.fileCurrentlyBeingAssembled.getSourceLineList();
+            final var tokenList = this.fileCurrentlyBeingAssembled.getTokenList();
             final ArrayList<ProgramStatement> parsedList = this.fileCurrentlyBeingAssembled.createParsedList();
             // each file keeps its own macro definitions
             this.fileCurrentlyBeingAssembled.createMacroPool();
@@ -300,7 +301,7 @@ public class Assembler {
                         // TODO: consider making this recursive
                         final String basicAssembly = statement.getBasicAssemblyStatement();
                         final int sourceLine = statement.getSourceLine();
-                        final TokenList theTokenList = new Tokenizer().tokenizeLine(sourceLine,
+                        final TokenList theTokenList = Tokenizer.tokenizeLine(sourceLine,
                                 basicAssembly, this.errors, false);
 
                         // ////////////////////////////////////////////////////////////////////////////
@@ -313,7 +314,8 @@ public class Assembler {
                         // address.
                         this.textAddress.set(statement.getAddress());
                         // Will generate one basic instruction for each template in the list.
-                        final int PC = this.textAddress.get(); // Save the starting PC so that it can be used for PC relative stuff
+                        final int PC = this.textAddress.get(); // Save the starting PC so that it can be used for PC 
+                        // relative stuff
                         for (int instrNumber = 0; instrNumber < templateList.size(); instrNumber++) {
                             final String instruction = ExtendedInstruction.makeTemplateSubstitutions(
                                     this.fileCurrentlyBeingAssembled,
@@ -325,7 +327,7 @@ public class Assembler {
                                 Assembler.LOGGER.debug("PSEUDO generated: {}", instruction);
                             // For generated instruction: tokenize, build program
                             // statement, add to list.
-                            final TokenList newTokenList = new Tokenizer().tokenizeLine(sourceLine,
+                            final TokenList newTokenList = Tokenizer.tokenizeLine(sourceLine,
                                     instruction, this.errors, false);
                             final var instrMatches = this.matchInstruction(newTokenList.get(0));
                             final Instruction instr = OperandFormat.bestOperandMatch(newTokenList,
@@ -402,7 +404,8 @@ public class Assembler {
      * request will return a list of ProgramStatements expanded
      */
     private @Nullable ArrayList<ProgramStatement> parseLine(final TokenList tokenList, final String source,
-                                                            final int sourceLineNumber, final boolean extendedAssemblerEnabled) {
+                                                            final int sourceLineNumber,
+                                                            final boolean extendedAssemblerEnabled) {
 
         final var ret = new ArrayList<ProgramStatement>();
 
@@ -454,8 +457,8 @@ public class Assembler {
                 for (int i = macro.getFromLine() + 1; i < macro.getToLine(); i++) {
 
                     String substituted = macro.getSubstitutedLine(i, tokens, counter, this.errors);
-                    final TokenList tokenList2 = this.fileCurrentlyBeingAssembled.getTokenizer().tokenizeLine(
-                            i, substituted, this.errors);
+                    final TokenList tokenList2 = Tokenizer.tokenizeLine(
+                            i, substituted, this.errors, true);
 
                     // If token list getProcessedLine() is not empty, then .eqv was performed and it
                     // contains the modified source.
@@ -687,11 +690,13 @@ public class Assembler {
                                 "section name \"" + str + "\" is ignored"));
                     }
                 } else {
-                    this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token.getStartPos(),
+                    this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
+                            token.getStartPos(),
                             ".section must be followed by a section name "));
                 }
             } else {
-                this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(), token.getStartPos(),
+                this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(),
+                        token.getStartPos(),
                         ".section without arguments is ignored"));
             }
         } else if (direct == Directive.WORD || direct == Directive.HALF
@@ -723,8 +728,10 @@ public class Assembler {
             }
             final int value = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
             if (value < 2 && !this.inDataSegment) {
-                this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(), token.getStartPos(),
-                        "Alignments less than 4 bytes are not supported in the text section. The alignment has been rounded up to 4 bytes."));
+                this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(),
+                        token.getStartPos(),
+                        "Alignments less than 4 bytes are not supported in the text section. The alignment has been " +
+                                "rounded up to 4 bytes."));
                 this.dataAddress.set(this.alignToBoundary(this.dataAddress.get(), 4));
             } else if (value == 0) {
                 this.autoAlign = false;
@@ -1217,7 +1224,8 @@ public class Assembler {
     // all the integer types plus float (caller is responsible for doing
     // floatToIntBits).
     // Returns address at which the second was stored.
-    private int writeToDataSegment(final int value, final int lengthInBytes, final Token token, final ErrorList errors) {
+    private int writeToDataSegment(final int value, final int lengthInBytes, final Token token,
+                                   final ErrorList errors) {
         if (this.autoAlign) {
             this.dataAddress.set(this.alignToBoundary(this.dataAddress.get(), lengthInBytes));
         }
@@ -1275,6 +1283,24 @@ public class Assembler {
             this.fileCurrentlyBeingAssembled.getLocalSymbolTable().fixSymbolTableAddress(address,
                     alignedAddress);
             return alignedAddress;
+        }
+    }
+
+    private static final class AssemblyData {
+        public final @NotNull ErrorList errors;
+        public final @NotNull DataSegmentForwardReferences currentFileDataSegmentForwardReferences;
+        public final @NotNull AddressSpace textAddressSpace, dataAddressSpace;
+        public boolean inDataSegment;
+        public boolean inMacroSegment;
+        public int externAddress;
+        public @NotNull RISCVprogram fileCurrentlyBeingAssembled;
+
+        public AssemblyData(final @NotNull RISCVprogram currentlyAssembledProgram) {
+            this.errors = new ErrorList();
+            this.fileCurrentlyBeingAssembled = currentlyAssembledProgram;
+            this.currentFileDataSegmentForwardReferences = new DataSegmentForwardReferences();
+            this.textAddressSpace = new AddressSpace(Memory.textBaseAddress);
+            this.dataAddressSpace = new AddressSpace(Memory.dataBaseAddress);
         }
     }
 

@@ -1,5 +1,6 @@
 package rars;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.*;
 import rars.exceptions.AssemblyException;
@@ -12,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -50,18 +52,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class RISCVprogram {
+public final class RISCVprogram {
 
     private String filename;
     private ArrayList<String> sourceList;
-    private ArrayList<TokenList> tokenList;
+    private List<TokenList> tokenList;
     private ArrayList<ProgramStatement> parsedList;
-    private ArrayList<ProgramStatement> machineList;
+    private List<ProgramStatement> machineList;
     private BackStepper backStepper;
     private SymbolTable localSymbolTable;
     private MacroPool macroPool;
-    private ArrayList<SourceLine> sourceLineList;
-    private Tokenizer tokenizer;
+    private List<SourceLine> sourceLineList;
 
     /**
      * Simulates execution of the program (in this thread). Program must have
@@ -111,7 +112,7 @@ public class RISCVprogram {
      * @return ArrayList of SourceLine.
      * Each SourceLine represents one line of RISCV source code
      */
-    public ArrayList<SourceLine> getSourceLineList() {
+    public @NotNull List<SourceLine> getSourceLineList() {
         return this.sourceLineList;
     }
 
@@ -122,7 +123,7 @@ public class RISCVprogram {
      *                       Each SourceLine represents one line of RISCV source
      *                       code.
      */
-    public void setSourceLineList(final ArrayList<SourceLine> sourceLineList) {
+    public void setSourceLineList(final @NotNull List<SourceLine> sourceLineList) {
         this.sourceLineList = sourceLineList;
         this.sourceList = new ArrayList<>();
         for (final SourceLine sl : sourceLineList) {
@@ -146,17 +147,8 @@ public class RISCVprogram {
      * corresponding line of RISCV source code.
      * @see TokenList
      */
-    public ArrayList<TokenList> getTokenList() {
+    public List<TokenList> getTokenList() {
         return this.tokenList;
-    }
-
-    /**
-     * Retrieves Tokenizer for this program
-     *
-     * @return Tokenizer
-     */
-    public Tokenizer getTokenizer() {
-        return this.tokenizer;
     }
 
     /**
@@ -190,7 +182,7 @@ public class RISCVprogram {
      * basic RISCV instruction.
      * @see ProgramStatement
      */
-    public ArrayList<ProgramStatement> getMachineList() {
+    public List<ProgramStatement> getMachineList() {
         return this.machineList;
     }
 
@@ -285,8 +277,7 @@ public class RISCVprogram {
      *                           tokenizing.
      */
     public void tokenize() throws AssemblyException {
-        this.tokenizer = new Tokenizer();
-        this.tokenList = this.tokenizer.tokenize(this);
+        this.tokenList = Tokenizer.tokenize(this);
         this.localSymbolTable = new SymbolTable(this.filename); // prepare for assembly
     }
 
@@ -361,10 +352,10 @@ public class RISCVprogram {
     public ErrorList assemble(final ArrayList<RISCVprogram> programsToAssemble, final boolean extendedAssemblerEnabled,
                               final boolean warningsAreErrors) throws AssemblyException {
         this.backStepper = null;
-        final Assembler asm = new Assembler();
-        this.machineList = asm.assemble(programsToAssemble, extendedAssemblerEnabled, warningsAreErrors);
+        final var assembler = new Assembler();
+        this.machineList = assembler.assemble(programsToAssemble, extendedAssemblerEnabled, warningsAreErrors);
         this.backStepper = new BackStepper();
-        return asm.getErrorList();
+        return assembler.getErrorList();
     }
 
     /**

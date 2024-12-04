@@ -3,6 +3,7 @@ package rars.riscv.instructions.compressed;
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
+import rars.riscv.BasicInstruction;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 import rars.riscv.hardware.RegisterFile;
@@ -16,15 +17,18 @@ import rars.util.Utils;
  * x1, offset</code>.
  * </p>
  */
-public class CJAL extends CompressedInstruction {
+public final class CJAL extends CompressedInstruction {
+    public static final CompressedInstruction INSTANCE = new CJAL();
+
     private CJAL() {
-        super("c.jal t1, target", "Compressed jump and link: Set t1 to Program Counter (return address) then jump to statement at target address", CompressedInstructionFormat.CJ_FORMAT, "001 fffffffffff 01");
+        super("c.jal offset", "Compressed jump and link: Set t1 to Program Counter (return address) then jump to " +
+                "statement at target address", CompressedInstructionFormat.CJ_FORMAT, "001 fffffffffff 01");
     }
 
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final var operands = statement.getOperands();
-        Utils.processReturnAddress(operands[0]);
-        Utils.processJump(RegisterFile.getProgramCounter() - getInstructionLength() + operands[1]);
+        final int[] operands = statement.getOperands();
+        Utils.processReturnAddress(1); // x1 is the link register
+        Utils.processJump(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + operands[0]);
     }
 }

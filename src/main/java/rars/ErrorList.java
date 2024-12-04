@@ -122,16 +122,6 @@ public class ErrorList {
      * @param mess ErrorMessage object to be added to end of error list.
      */
     public void add(final @NotNull ErrorMessage mess) {
-        this.add(mess, this.messages.size());
-    }
-
-    /**
-     * Add new error message at specified index position.
-     *
-     * @param mess  ErrorMessage object to be added to end of error list.
-     * @param index position in error list
-     */
-    public void add(final @NotNull ErrorMessage mess, final int index) {
         if (this.errorCount > ErrorList.getErrorLimit()) {
             return;
         }
@@ -141,7 +131,7 @@ public class ErrorList {
             this.errorCount++; // subsequent errors will not be added; see if statement above
             return;
         }
-        this.messages.add(index, mess);
+        this.messages.add(this.messages.size(), mess);
         if (mess.isWarning()) {
             this.warningCount++;
         } else {

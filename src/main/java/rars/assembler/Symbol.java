@@ -36,7 +36,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Jason Bumgarner, Jason Shrewsbury
  * @version June 2003
  */
-public class Symbol {
+public final class Symbol {
     public final @NotNull String name;
     public final boolean isData; // boolean true if data symbol false if text symbol.
     public int address;

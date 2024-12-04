@@ -2,6 +2,7 @@ package rars;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.api.Options;
 import rars.api.Program;
@@ -70,64 +71,6 @@ public class Main {
     private static final int DECIMAL = 0; // memory and register display format
     private static final int HEXADECIMAL = 1;// memory and register display format
     private static final int ASCII = 2;// memory and register display format
-    /**
-     * Main takes a number of command line arguments.<br>
-     * Usage: rars [options] filename<br>
-     * Valid options (not case sensitive, separate by spaces) are:<br>
-     * a -- assemble only, do not simulate<br>
-     * ad -- both a and d<br>
-     * ae<n> -- terminate RARS with integer exit code <n> if an assemble error
-     * occurs.<br>
-     * ascii -- display memory or register contents interpreted as ASCII
-     * b -- brief - do not display register/memory address along with contents<br>
-     * d -- print debugging statements<br>
-     * da -- both a and d<br>
-     * dec -- display memory or register contents in decimal.<br>
-     * dump -- dump memory contents to file. Option has 3 arguments, e.g. <br>
-     * <tt>dump &lt;segment&gt; &lt;format&gt; &lt;file&gt;</tt>. Also supports<br>
-     * an address range (see <i>m-n</i> below). Current supported <br>
-     * segments are <tt>.text</tt> and <tt>.data</tt>. Current supported dump
-     * formats <br>
-     * are <tt>Binary</tt>, <tt>HexText</tt>, <tt>BinaryText</tt>.<br>
-     * g -- force GUI mode
-     * h -- display help. Use by itself and with no filename</br>
-     * hex -- display memory or register contents in hexadecimal (default)<br>
-     * ic -- display count of basic instructions 'executed'");
-     * mc -- set memory configuration. Option has 1 argument, e.g.<br>
-     * <tt>mc &lt;config$gt;</tt>, where &lt;config$gt; is <tt>Default</tt><br>
-     * for the RARS default 32-bit address space, <tt>CompactDataAtZero</tt> for<br>
-     * a 32KB address space with data segment at address 0, or
-     * <tt>CompactTextAtZero</tt><br>
-     * for a 32KB address space with text segment at address 0.<br>
-     * me -- display RARS messages to standard err instead of standard out. Can
-     * separate via redirection.</br>
-     * nc -- do not display copyright notice (for cleaner redirected/piped
-     * output).</br>
-     * np -- No Pseudo-instructions allowed ("ne" will work also).<br>
-     * p -- Project mode - assemble all files in the same directory as given
-     * file.<br>
-     * se<n> -- terminate RARS with integer exit code <n> if a simulation (run)
-     * error occurs.<br>
-     * sm -- Start execution at Main - Execution will start at program statement
-     * globally labeled main.<br>
-     * smc -- Self Modifying Code - Program can write and branch to either text or
-     * data segment<br>
-     * we -- assembler Warnings will be considered Errors<br>
-     * <n> -- where <n> is an integer maximum count of steps to simulate.<br>
-     * If 0, negative or not specified, there is no maximum.<br>
-     * $<reg> -- where <reg> is number or name (e.g. 5, t3, f10) of register whose
-     * <br>
-     * content to display at end of run. Option may be repeated.<br>
-     * <reg_name> -- where <reg_name> is name (e.g. t3, f10) of register whose <br>
-     * content to display at end of run. Option may be repeated. $ not required.<br>
-     * <m>-<n> -- memory address range from <m> to <n> whose contents to<br>
-     * display at end of run. <m> and <n> may be hex or decimal,<br>
-     * <m> <= <n>, both must be on word boundary. Option may be repeated.<br>
-     * pa -- Program Arguments follow in a space-separated list. This<br>
-     * option must be placed AFTER ALL FILE NAMES, because everything<br>
-     * that follows it is interpreted as a program argument to be<br>
-     * made available to the program at runtime.<br>
-     **/
 
     private final Options options;
     private final ArrayList<String> registerDisplayList;
@@ -209,20 +152,19 @@ public class Main {
         }
         return memoryRange;
     }
-    /////////////////////////////////////////////////////////////
+
+    /// //////////////////////////////////////////////////////////
     // Perform any specified dump operations. See "dump" option.
     //
-
     private void displayAllPostMortem(final Program program) {
         this.displayMiscellaneousPostMortem(program);
         this.displayRegistersPostMortem(program);
         this.displayMemoryPostMortem(program.getMemory());
     }
 
-    /////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////
     // There are no command arguments, so run in interactive mode by
     // launching the GUI-fronted integrated development environment.
-
     private void dumpSegments(final Program program) {
         if (this.dumpTriples == null || program == null) {
             return;
@@ -241,7 +183,8 @@ public class Main {
                 }
             }
             if (segInfo == null) {
-                this.out.println("Error while attempting to save dump, segment/address-range " + triple[0] + " is invalid!");
+                this.out.println("Error while attempting to save dump, segment/address-range " + triple[0] + " is " +
+                        "invalid!");
                 continue;
             }
             final DumpFormat format = DumpFormatLoader.findDumpFormatGivenCommandDescriptor(triple[1]);
@@ -268,13 +211,12 @@ public class Main {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////
     // Parse command line arguments. The initial parsing has already been
     // done, since each space-separated argument is already in a String array
     // element. Here, we check for validity, set switch variables as appropriate
     // and build data structures. For help option (h), display the help.
     // Returns true if command args parse OK, false otherwise.
-
     private void launchIDE() {
         System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts RARS menu
         // on Mac OS menu bar
@@ -296,11 +238,10 @@ public class Main {
                 });
     }
 
-    //////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////
     // Carry out the rars command: assemble then optionally run
     // Returns false if no simulation (run) occurs, true otherwise.
-
-    private boolean parseCommandArgs(final String[] args) {
+    private boolean parseCommandArgs(final String @NotNull [] args) {
         final String noCopyrightSwitch = "nc";
         final String displayMessagesToErrSwitch = "me";
         boolean argsOK = true;
@@ -495,11 +436,10 @@ public class Main {
         return argsOK;
     }
 
-    //////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////
     // Check for memory address subrange. Has to be two integers separated
     // by "-"; no embedded spaces. e.g. 0x00400000-0x00400010
     // If number is not multiple of 4, will be rounded up to next higher.
-
     private @Nullable Program runCommand() {
         if (this.filenameList.isEmpty()) {
             return null;
@@ -558,7 +498,8 @@ public class Main {
                 while (true) {
                     final Simulator.Reason done = program.simulate();
                     if (done == Simulator.Reason.MAX_STEPS) {
-                        this.out.println("\nProgram terminated when maximum step limit " + this.options.maxSteps + " reached.");
+                        this.out.println("\nProgram terminated when maximum step limit " + this.options.maxSteps + " " +
+                                "reached.");
                         break;
                     } else if (done == Simulator.Reason.CLIFF_TERMINATION) {
                         this.out.println("\nProgram terminated by dropping off the bottom.");
@@ -585,7 +526,7 @@ public class Main {
         return program;
     }
 
-    //////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////
     // Displays any specified runtime properties. Initially just instruction count
     // DPS 19 July 2012
     private void displayMiscellaneousPostMortem(final Program program) {
@@ -594,9 +535,8 @@ public class Main {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////
     // Displays requested register or registers
-
     private void displayRegistersPostMortem(final Program program) {
         // Display requested register contents
         for (final String reg : this.registerDisplayList) {
@@ -630,7 +570,7 @@ public class Main {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////
     // Formats int second for display: decimal, hex, ascii
     private String formatIntForDisplay(final int value) {
         return switch (this.displayFormat) {
@@ -640,9 +580,8 @@ public class Main {
         };
     }
 
-    //////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////
     // Displays requested memory range or ranges
-
     private void displayMemoryPostMortem(final Memory memory) {
         int value;
         // Display requested memory range contents
@@ -683,7 +622,7 @@ public class Main {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////
     // If option to display RARS messages to standard err (System.err) is
     // present, it must be processed before all others. Since messages may
     // be output as early as during the command parse.
@@ -695,10 +634,10 @@ public class Main {
             }
         }
     }
-    ///////////////////////////////////////////////////////////////////////
+
+    /// ////////////////////////////////////////////////////////////////////
     // Decide whether copyright should be displayed, and display
     // if so.
-
     private void displayCopyright(final String[] args, final String noCopyrightSwitch) {
         for (final String arg : args) {
             if (arg.toLowerCase().equals(noCopyrightSwitch)) {
@@ -709,9 +648,8 @@ public class Main {
                 + "\n");
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////
     // Display command line help text
-
     private void displayHelp() {
         final String[] segmentNames = MemoryDump.getSegmentNames();
         final StringBuilder segments = new StringBuilder();
@@ -729,10 +667,13 @@ public class Main {
                 formats.append(", ");
             }
         }
-        this.out.println("Usage:  Rars  [options] filename [additional filenames]");
-        this.out.println("  Valid options (not case sensitive, separate by spaces) are:");
-        this.out.println("      a  -- assemble only, do not simulate");
-        this.out.println("  ae<n>  -- terminate RARS with integer exit code <n> if an assemble error occurs.");
+        final var helpMessage = """
+                Usage:  Rars  [options] filename [additional filenames]
+                
+                Valid options (not case sensitive, separate by spaces) are:
+                      a  -- assemble only, do not simulate
+                  ae<n>  -- terminate RARS with integer exit code <n> if an assemble error occurs.
+                """;
         this.out.println("  ascii  -- display memory or register contents interpreted as ASCII codes.");
         this.out.println("      b  -- brief - do not display register/memory address along with contents");
         this.out.println("      d  -- display RARS debugging statements");
@@ -741,25 +682,43 @@ public class Main {
         this.out.println("            in specified format to specified file.  Option may be repeated.");
         this.out.println("            Dump occurs at the end of simulation unless 'a' option is used.");
         this.out.println("            Segment and format are case-sensitive and possible values are:");
-        this.out.println("            <segment> = " + segments + ", or a range like 0x400000-0x10000000");
+        this.out.println("            <segment> = " + segments + ", or a range like 0x400000-0x10000000              " +
+                "       ");
         this.out.println("            <format> = " + formats);
-        this.out.println("      g  -- force GUI mode");
-        this.out.println("      h  -- display this help.  Use by itself with no filename.");
-        this.out.println("    hex  -- display memory or register contents in hexadecimal (default)");
-        this.out.println("     ic  -- display count of basic instructions 'executed'");
-        this.out.println("     mc <config>  -- set memory configuration.  Argument <config> is");
-        this.out.println("            case-sensitive and possible values are: Default for the default");
-        this.out.println("            32-bit address space, CompactDataAtZero for a 32KB memory with");
-        this.out.println("            data segment at address 0, or CompactTextAtZero for a 32KB");
-        this.out.println("            memory with text segment at address 0.");
-        this.out.println("     me  -- display RARS messages to standard err instead of standard out. ");
-        this.out.println("            Can separate messages from program output using redirection");
-        this.out.println("     nc  -- do not display copyright notice (for cleaner redirected/piped output).");
-        this.out.println("     np  -- use of pseudo instructions and formats not permitted");
-        this.out.println("      p  -- Project mode - assemble all files in the same directory as given file.");
-        this.out.println("  se<n>  -- terminate RARS with integer exit code <n> if a simulation (run) error occurs.");
-        this.out.println("     sm  -- start execution at statement with global label main, if defined");
-        this.out.println("    smc  -- Self Modifying Code - Program can write and branch to either text or data segment");
+        this.out.println("      g  -- force GUI mode                                                                 " +
+                "       ");
+        this.out.println("      h  -- display this help.  Use by itself with no filename.                            " +
+                "       ");
+        this.out.println("    hex  -- display memory or register contents in hexadecimal (default)                   " +
+                "       ");
+        this.out.println("     ic  -- display count of basic instructions 'executed'                                 " +
+                "       ");
+        this.out.println("     mc <config>  -- set memory configuration.  Argument <config> is                       " +
+                "       ");
+        this.out.println("            case-sensitive and possible values are: Default for the default                " +
+                "       ");
+        this.out.println("            32-bit address space, CompactDataAtZero for a 32KB memory with                 " +
+                "       ");
+        this.out.println("            data segment at address 0, or CompactTextAtZero for a 32KB                     " +
+                "       ");
+        this.out.println("            memory with text segment at address 0.                                         " +
+                "       ");
+        this.out.println("     me  -- display RARS messages to standard err instead of standard out.                 " +
+                "       ");
+        this.out.println("            Can separate messages from program output using redirection                    " +
+                "       ");
+        this.out.println("     nc  -- do not display copyright notice (for cleaner redirected/piped output).         " +
+                "       ");
+        this.out.println("     np  -- use of pseudo instructions and formats not permitted                           " +
+                "       ");
+        this.out.println("      p  -- Project mode - assemble all files in the same directory as given file.         " +
+                "       ");
+        this.out.println("  se<n>  -- terminate RARS with integer exit code <n> if a simulation (run) error occurs.  " +
+                "       ");
+        this.out.println("     sm  -- start execution at statement with global label main, if defined                " +
+                "       ");
+        this.out.println("    smc  -- Self Modifying Code - Program can write and branch to either text or data " + 
+                "segment");
         this.out.println("    rv64 -- Enables 64 bit assembly and executables (Not fully compatible with rv32)");
         this.out.println("    <n>  -- where <n> is an integer maximum count of steps to simulate.");
         this.out.println("            If 0, negative or not specified, there is no maximum.");
@@ -777,7 +736,7 @@ public class Main {
         this.out.println("If more than one filename is listed, the first is assumed to be the main");
         this.out.println("unless the global statement label 'main' is defined in one of the files.");
         this.out.println("Exception handler not automatically assembled.  Add it to the file list.");
-        this.out.println("Options used here do not affect RARS Settings menu values and vice versa.");
+        this.out.println("Options used here do not affect RARS Settings menu values and vice versa.         ");
     }
 
 }

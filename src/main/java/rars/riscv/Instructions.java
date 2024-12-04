@@ -365,10 +365,11 @@ public final class Instructions {
         for (final var instruction : INSTRUCTIONS_ALL) {
             final var exampleFormat = instruction.getExampleFormat();
             try {
-                final var tokenList = ((new Tokenizer()).tokenizeExampleInstruction(exampleFormat));
+                final var tokenList = Tokenizer.tokenizeExampleInstruction(exampleFormat);
                 result.put(instruction, tokenList);
             } catch (final AssemblyException e) {
-                Instructions.LOGGER.error("CONFIGURATION ERROR: Instruction example \"{}\" contains invalid token(s).", exampleFormat);
+                Instructions.LOGGER.error("CONFIGURATION ERROR: Instruction example \"{}\" contains invalid token(s)" +
+                        ".", exampleFormat);
             }
         }
         return result;

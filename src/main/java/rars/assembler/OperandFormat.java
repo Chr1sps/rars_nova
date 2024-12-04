@@ -59,7 +59,8 @@ public final class OperandFormat {
      * specification, else returns <tt>false</tt>.
      */
 
-    static boolean checkIfTokensMatchOperand(final TokenList candidateList, final Instruction inst, final ErrorList errors) {
+    static boolean checkIfTokensMatchOperand(final TokenList candidateList, final Instruction inst,
+                                             final ErrorList errors) {
         return OperandFormat.numOperandsCheck(candidateList, inst, errors) && OperandFormat.operandTypeCheck(candidateList, inst, errors);
     }
 
@@ -69,7 +70,8 @@ public final class OperandFormat {
      * first such Instruction that has an exact operand match. If none match,
      * return the first Instruction and let client deal with operand mismatches.
      */
-    static @Nullable Instruction bestOperandMatch(final TokenList tokenList, final @NotNull List<Instruction> instrMatches) {
+    static @Nullable Instruction bestOperandMatch(final TokenList tokenList,
+                                                  final @NotNull List<Instruction> instrMatches) {
         if (instrMatches.size() == 1)
             return instrMatches.getFirst();
         for (final Instruction potentialMatch : instrMatches) {
@@ -81,7 +83,8 @@ public final class OperandFormat {
 
     // Simply check to see if numbers of operands are correct and generate error
     // message if not.
-    private static boolean numOperandsCheck(final @NotNull TokenList cand, final @NotNull Instruction spec, final @NotNull ErrorList errors) {
+    private static boolean numOperandsCheck(final @NotNull TokenList cand, final @NotNull Instruction spec,
+                                            final @NotNull ErrorList errors) {
         final int numOperands = cand.size() - 1;
         final int reqNumOperands = Instructions.getTokenList(spec).size() - 1;
         final Token operator = cand.get(0);
@@ -126,7 +129,8 @@ public final class OperandFormat {
             // operator names can be used as labels.
             // TODO: maybe add more cases in here
             if (specType == TokenType.IDENTIFIER && candType == TokenType.OPERATOR) {
-                final Token replacement = new Token(TokenType.IDENTIFIER, candToken.getValue(), candToken.getSourceProgram(),
+                final Token replacement = new Token(TokenType.IDENTIFIER, candToken.getValue(),
+                        candToken.getSourceProgram(),
                         candToken.getSourceLine(), candToken.getStartPos());
                 cand.set(i, replacement);
                 continue;
@@ -159,7 +163,8 @@ public final class OperandFormat {
                     (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_20))
                 continue;
             if (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_12U) {
-                OperandFormat.generateMessage(candToken, "Unsigned second is too large to fit into a sign-extended immediate", errors);
+                OperandFormat.generateMessage(candToken, "Unsigned second is too large to fit into a sign-extended " +
+                        "immediate", errors);
                 return false;
             }
             if ((specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_6) ||
@@ -178,7 +183,10 @@ public final class OperandFormat {
                 return false;
             }
             if (candType != specType) {
-                OperandFormat.generateMessage(candToken, "operand is of incorrect type", errors);
+                final var messageString =
+                        "Operand is of incorrect type. Excepted: %s, but got: %s."
+                                .formatted(specType.name(), candType.name());
+                generateMessage(candToken, messageString, errors);
                 return false;
             }
         }
@@ -187,8 +195,12 @@ public final class OperandFormat {
     }
 
     // Handy utility for all parse errors...
-    private static void generateMessage(final Token token, final String mess, final ErrorList errors) {
-        errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token.getStartPos(),
+    private static void generateMessage(final @NotNull Token token, final @NotNull String mess,
+                                        final @NotNull ErrorList errors) {
+        errors.add(new ErrorMessage(
+                token.getSourceProgram(),
+                token.getSourceLine(),
+                token.getStartPos(),
                 "\"" + token.getValue() + "\": " + mess));
     }
 

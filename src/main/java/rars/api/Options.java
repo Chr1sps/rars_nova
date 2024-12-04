@@ -3,7 +3,7 @@ package rars.api;
 /**
  * <p>Options class.</p>
  */
-public class Options {
+public final class Options {
     public boolean pseudo; // pseudo instructions allowed in source code or not.
     public boolean warningsAreErrors; // Whether assembler warnings should be considered errors.
     public boolean startAtMain; // Whether to start execution at statement labeled 'main'

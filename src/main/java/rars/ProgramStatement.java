@@ -55,7 +55,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson and Jason Bumgarner
  * @version August 2003
  */
-public class ProgramStatement implements Comparable<ProgramStatement> {
+public final class ProgramStatement implements Comparable<ProgramStatement> {
     private static final String invalidOperator = "<INVALID>";
     private final RISCVprogram sourceProgram;
     private final TokenList originalTokenList;

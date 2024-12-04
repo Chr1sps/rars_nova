@@ -123,7 +123,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
-        final ArrayList<ProgramStatement> sourceStatementList = Globals.program.getMachineList();
+        final var sourceStatementList = Globals.program.getMachineList();
         this.data = new Object[sourceStatementList.size()][TextSegmentWindow.columnNames.length];
         this.intAddresses = new int[this.data.length];
         this.addressRows = new Hashtable<>(this.data.length);
@@ -290,7 +290,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public void updateBasicStatements() {
         if (this.contentPane.getComponentCount() == 0)
             return; // ignore if no content to change
-        final ArrayList<ProgramStatement> sourceStatementList = Globals.program.getMachineList();
+        final var sourceStatementList = Globals.program.getMachineList();
         for (int i = 0; i < sourceStatementList.size(); i++) {
             // Loop has been extended to cover self-modifying code. If code at this memory
             // location has been

@@ -67,7 +67,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  */
-public class Settings extends CustomPublisher<SettingsNotice> {
+public final class Settings extends CustomPublisher<SettingsNotice> {
     /**
      * Current specified exception handler file (a RISCV assembly source file)
      */
