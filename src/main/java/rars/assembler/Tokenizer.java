@@ -168,7 +168,8 @@ public final class Tokenizer {
     /// @param example The example RISCV instruction to be tokenized.
     /// @return A [TokenList] object representing the tokenized instruction.
     /// @throws AssemblyException This occurs only if the instruction specification itself contains one or more
-    ///                           lexical (i.e. token) errors.
+    ///                                                                                                         
+    /// lexical (i.e. token) errors.
     public static @NotNull TokenList tokenizeExampleInstruction(final @NotNull String example) throws AssemblyException {
         final var tokenizer = new Tokenizer();
         final var result = tokenizer.tokenizeLineImpl(null, 0, example, false);
@@ -394,7 +395,7 @@ public final class Tokenizer {
         } // while
         if (tokenPos > 0) {
             if (insideQuotedString) {
-                this.errors.add(new ErrorMessage(program, lineNum, tokenStartPos,
+                this.errors.add(ErrorMessage.error(program, lineNum, tokenStartPos,
                         "String is not terminated."));
             }
             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result);
@@ -405,16 +406,18 @@ public final class Tokenizer {
         return result;
     }
 
-    // pre-pre-processing pass through source code to process any ".include"
-    // directives.
-    // When one is encountered, the contents of the included file are inserted at
-    // that
-    // point. If no .include statements, the return second is a new array list but
-    // with the same lines of source code. Uses recursion to correctly process
-    // included
-    // files that themselves have .include. Plus it will detect and report recursive
-    // includes both direct and indirect.
-    // DPS 11-Jan-2013
+    /**
+     * pre-pre-processing pass through source code to process any ".include"
+     * directives.
+     * When one is encountered, the contents of the included file are inserted at
+     * that
+     * point. If no .include statements, the return second is a new array list but
+     * with the same lines of source code. Uses recursion to correctly process
+     * included
+     * files that themselves have .include. Plus it will detect and report recursive
+     * includes both direct and indirect.
+     * DPS 11-Jan-2013
+     */
     private @NotNull List<SourceLine> processIncludes(final @NotNull RISCVprogram program,
                                                       final @NotNull Map<String, String> inclFiles)
             throws AssemblyException {
@@ -422,22 +425,24 @@ public final class Tokenizer {
         final ArrayList<SourceLine> result = new ArrayList<>(source.size());
         for (int i = 0; i < source.size(); i++) {
             final String line = source.get(i);
-            final TokenList tl = this.tokenizeLineImpl(program, i + 1, line, false);
+            final TokenList tokenizedLine = this.tokenizeLineImpl(program, i + 1, line, false);
             boolean hasInclude = false;
-            for (int ii = 0; ii < tl.size(); ii++) {
-                if (tl.get(ii).getValue().equalsIgnoreCase(Directive.INCLUDE.getName())
-                        && (tl.size() > ii + 1)
-                        && tl.get(ii + 1).getType() == TokenType.QUOTED_STRING) {
-                    String filename = tl.get(ii + 1).getValue();
-                    filename = filename.substring(1, filename.length() - 1); // get rid of quotes
+            for (int ii = 0; ii < tokenizedLine.size(); ii++) {
+                if (tokenizedLine.get(ii).getValue().equalsIgnoreCase(Directive.INCLUDE.getName())
+                        && (tokenizedLine.size() > ii + 1)
+                        && tokenizedLine.get(ii + 1).getType() == TokenType.QUOTED_STRING) {
+                    String filename = tokenizedLine
+                            .get(ii + 1)
+                            .getValue()
+                            .transform((s) -> s.substring(1, s.length() - 1));
                     // Handle either absolute or relative pathname for .include file
                     if (!new File(filename).isAbsolute()) {
                         filename = new File(program.getFilename()).getParent() + File.separator + filename;
                     }
                     if (inclFiles.containsKey(filename)) {
                         // This is a recursive include. Generate error message and return immediately.
-                        final Token t = tl.get(ii + 1);
-                        this.errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
+                        final Token t = tokenizedLine.get(ii + 1);
+                        this.errors.add(ErrorMessage.error(program, t.getSourceLine(), t.getStartPos(),
                                 "Recursive include of file " + filename));
                         throw new AssemblyException(this.errors);
                     }
@@ -446,9 +451,8 @@ public final class Tokenizer {
                     try {
                         incl.readSource(filename);
                     } catch (final AssemblyException p) {
-                        final Token t = tl.get(ii + 1);
-                        this.errors.add(new ErrorMessage(program, t.getSourceLine(), t.getStartPos(),
-                                "Error reading include file " + filename));
+                        final Token token = tokenizedLine.get(ii + 1);
+                        this.errors.addTokenError(token, "Error reading include file " + filename);
                         throw new AssemblyException(this.errors);
                     }
                     final var allLines = this.processIncludes(incl, inclFiles);
@@ -483,13 +487,13 @@ public final class Tokenizer {
                         - ((tokens.get(tokens.size() - 1).getType() == TokenType.COMMENT) ? 2 : 1);
                 // There have to be at least two non-comment tokens beyond the directive
                 if (tokenPosLastOperand < dirPos + 2) {
-                    this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
+                    this.errors.add(ErrorMessage.error(program, lineNum, tokens.get(dirPos).getStartPos(),
                             "Too few operands for " + Directive.EQV.getName() + " directive"));
                     return tokens;
                 }
                 // Token following the directive has to be IDENTIFIER
                 if (tokens.get(dirPos + 1).getType() != TokenType.IDENTIFIER) {
-                    this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
+                    this.errors.add(ErrorMessage.error(program, lineNum, tokens.get(dirPos).getStartPos(),
                             "Malformed " + Directive.EQV.getName() + " directive"));
                     return tokens;
                 }
@@ -499,7 +503,7 @@ public final class Tokenizer {
                 // undetected it will result in infinite recursion. e.g. .eqv ONE, (ONE)
                 for (int i = dirPos + 2; i < tokens.size(); i++) {
                     if (tokens.get(i).getValue().equals(symbol)) {
-                        this.errors.add(new ErrorMessage(program, lineNum, tokens.get(dirPos).getStartPos(),
+                        this.errors.add(ErrorMessage.error(program, lineNum, tokens.get(dirPos).getStartPos(),
                                 "Cannot substitute " + symbol + " for itself in " + Directive.EQV.getName()
                                         + " directive"));
                         return tokens;
@@ -550,7 +554,7 @@ public final class Tokenizer {
             value = preprocessCharacterLiteral(value);
         final TokenType type = TokenType.matchTokenType(value);
         if (type == TokenType.ERROR) {
-            this.errors.add(new ErrorMessage(program, line, tokenStartPos,
+            this.errors.add(ErrorMessage.error(program, line, tokenStartPos,
                     theLine + "\nInvalid language element: " + value));
         }
         final Token toke = new Token(type, value, program, line, tokenStartPos);

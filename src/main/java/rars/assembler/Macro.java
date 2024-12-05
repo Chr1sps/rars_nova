@@ -1,7 +1,6 @@
 package rars.assembler;
 
 import rars.ErrorList;
-import rars.ErrorMessage;
 import rars.RISCVprogram;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
@@ -43,6 +42,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class Macro {
     private final ArrayList<String> labels;
+    /**
+     * arguments like <code>%arg</code> will be substituted by macro expansion
+     */
+    private final ArrayList<String> args;
     private String name;
     private RISCVprogram program;
     /**
@@ -51,10 +54,6 @@ public final class Macro {
      */
     private int fromLine, toLine;
     private int origFromLine, origToLine;
-    /**
-     * arguments like <code>%arg</code> will be substituted by macro expansion
-     */
-    private final ArrayList<String> args;
 
     /**
      * <p>Constructor for Macro.</p>
@@ -280,8 +279,7 @@ public final class Macro {
                 if (repl != -1)
                     substitute = args.get(repl + 1).toString();
                 else {
-                    errors.add(new ErrorMessage(this.program, token.getSourceLine(),
-                            token.getStartPos(), "Unknown macro parameter"));
+                    errors.addTokenError(token, "Unknown macro parameter");
                 }
                 sourceLine = Macro.replaceToken(sourceLine, token, substitute);
             } else if (this.tokenIsMacroLabel(token.getValue())) {
@@ -322,6 +320,7 @@ public final class Macro {
     @SuppressWarnings("ObjectInstantiationInEqualsHashCode")
     @Override
     public int hashCode() {
-        return Objects.hash(this.name, this.program, this.labels, this.fromLine, this.toLine, this.origFromLine, this.origToLine, this.args);
+        return Objects.hash(this.name, this.program, this.labels, this.fromLine, this.toLine, this.origFromLine,
+                this.origToLine, this.args);
     }
 }

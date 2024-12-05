@@ -112,7 +112,7 @@ public final class RISCVprogram {
      * @return ArrayList of SourceLine.
      * Each SourceLine represents one line of RISCV source code
      */
-    public @NotNull List<SourceLine> getSourceLineList() {
+    public List<SourceLine> getSourceLineList() {
         return this.sourceLineList;
     }
 
@@ -249,7 +249,7 @@ public final class RISCVprogram {
      * @throws AssemblyException Will throw exception if there is any problem
      *                           reading the file.
      */
-    public void readSource(final String file) throws AssemblyException {
+    public void readSource(final @NotNull String file) throws AssemblyException {
         this.filename = file;
         this.sourceList = new ArrayList<>();
         final ErrorList errors;
@@ -264,7 +264,7 @@ public final class RISCVprogram {
             }
         } catch (final Exception e) {
             errors = new ErrorList();
-            errors.add(new ErrorMessage(null, 0, 0, e.toString()));
+            errors.add(ErrorMessage.error(null, 0, 0, e.toString()));
             throw new AssemblyException(errors);
         }
     }
@@ -304,8 +304,9 @@ public final class RISCVprogram {
      * @throws AssemblyException Will throw exception if errors occurred while
      *                           reading or tokenizing.
      */
-    public ArrayList<RISCVprogram> prepareFilesForAssembly(final ArrayList<String> filenames, final String leadFilename,
-                                                           final String exceptionHandler) throws AssemblyException {
+    public @NotNull List<RISCVprogram> prepareFilesForAssembly(final @NotNull List<String> filenames,
+                                                               final @NotNull String leadFilename,
+                                                               final @Nullable String exceptionHandler) throws AssemblyException {
         final ArrayList<RISCVprogram> programsToAssemble = new ArrayList<>();
         int leadFilePosition = 0;
         if (exceptionHandler != null && !exceptionHandler.isEmpty()) {
@@ -349,7 +350,8 @@ public final class RISCVprogram {
      * @throws AssemblyException Will throw exception if errors occurred while
      *                           assembling.
      */
-    public ErrorList assemble(final ArrayList<RISCVprogram> programsToAssemble, final boolean extendedAssemblerEnabled,
+    public ErrorList assemble(final @NotNull List<RISCVprogram> programsToAssemble,
+                              final boolean extendedAssemblerEnabled,
                               final boolean warningsAreErrors) throws AssemblyException {
         this.backStepper = null;
         final var assembler = new Assembler();

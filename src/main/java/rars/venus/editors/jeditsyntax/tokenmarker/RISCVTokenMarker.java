@@ -76,18 +76,18 @@ public class RISCVTokenMarker extends TokenMarker {
         return RISCVTokenMarker.tokenExamples;
     }
 
-    ///////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////
     // Return ArrayList of PopupHelpItem for match of directives. If second argument
     // true, will do exact match. If false, will do prefix match. Returns null
     // if no matches.
-    private static ArrayList<PopupHelpItem> getTextFromDirectiveMatch(final String tokenText, final boolean exact) {
+    private static @Nullable ArrayList<PopupHelpItem> getTextFromDirectiveMatch(final String tokenText,
+                                                                                final boolean exact) {
         ArrayList<PopupHelpItem> matches = null;
-        ArrayList<Directive> directiveMatches = null;
+        List<Directive> directiveMatches = null;
         if (exact) {
             final Directive dir = Directive.matchDirective(tokenText);
             if (dir != null) {
-                directiveMatches = new ArrayList<>();
-                directiveMatches.add(dir);
+                directiveMatches = List.of(dir);
             }
         } else {
             directiveMatches = Directive.prefixMatchDirectives(tokenText);
@@ -104,7 +104,8 @@ public class RISCVTokenMarker extends TokenMarker {
     // Return text for match of instruction mnemonic. If second argument true, will
     // do exact match. If false, will do prefix match. Text is returned as ArrayList
     // of PopupHelpItem objects. If no matches, returns null.
-    private static @Nullable ArrayList<PopupHelpItem> getTextFromInstructionMatch(final String tokenText, final boolean exact) {
+    private static @Nullable ArrayList<PopupHelpItem> getTextFromInstructionMatch(final String tokenText,
+                                                                                  final boolean exact) {
         final List<Instruction> matches;
         final ArrayList<PopupHelpItem> results = new ArrayList<>();
         if (exact) {
@@ -240,7 +241,8 @@ public class RISCVTokenMarker extends TokenMarker {
                             // String lab = new String(array, lastOffset, i1-lastOffset-1).trim();
                             boolean validIdentifier;
                             try {
-                                validIdentifier = isValidIdentifier(new String(array, this.lastOffset, i1 - this.lastOffset - 1).trim());
+                                validIdentifier = isValidIdentifier(new String(array, this.lastOffset,
+                                        i1 - this.lastOffset - 1).trim());
                             } catch (final StringIndexOutOfBoundsException e) {
                                 validIdentifier = false;
                             }
@@ -318,7 +320,8 @@ public class RISCVTokenMarker extends TokenMarker {
      * the given token.
      */
     @Override
-    public @Nullable ArrayList<PopupHelpItem> getTokenExactMatchHelp(final @NotNull List<Token> tokens, final Token token, final String tokenText) {
+    public @Nullable ArrayList<PopupHelpItem> getTokenExactMatchHelp(final @NotNull List<Token> tokens,
+                                                                     final Token token, final String tokenText) {
         ArrayList<PopupHelpItem> matches = null;
         if (token != null && token.type() == TokenType.KEYWORD1) {
             final List<Instruction> instrMatches = Instructions.matchOperator(tokenText);
@@ -399,7 +402,8 @@ public class RISCVTokenMarker extends TokenMarker {
         // token.
         if (tokenAtOffset != null && tokenAtOffset.type() == TokenType.KEYWORD1) {
             if (moreThanOneKeyword) {
-                return (keywordType == TokenType.KEYWORD1) ? RISCVTokenMarker.getTextFromInstructionMatch(keywordTokenText, true)
+                return (keywordType == TokenType.KEYWORD1) ?
+                        RISCVTokenMarker.getTextFromInstructionMatch(keywordTokenText, true)
                         : RISCVTokenMarker.getTextFromDirectiveMatch(keywordTokenText, true);
             } else {
                 return RISCVTokenMarker.getTextFromInstructionMatch(tokenText, false);
@@ -413,7 +417,8 @@ public class RISCVTokenMarker extends TokenMarker {
         // directives for which this is a prefix, so do a prefix match on current token.
         if (tokenAtOffset != null && tokenAtOffset.type() == TokenType.KEYWORD2) {
             if (moreThanOneKeyword) {
-                return (keywordType == TokenType.KEYWORD1) ? RISCVTokenMarker.getTextFromInstructionMatch(keywordTokenText, true)
+                return (keywordType == TokenType.KEYWORD1) ?
+                        RISCVTokenMarker.getTextFromInstructionMatch(keywordTokenText, true)
                         : RISCVTokenMarker.getTextFromDirectiveMatch(keywordTokenText, true);
             } else {
                 return RISCVTokenMarker.getTextFromDirectiveMatch(tokenText, false);

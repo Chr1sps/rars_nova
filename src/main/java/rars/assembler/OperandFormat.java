@@ -197,7 +197,7 @@ public final class OperandFormat {
     // Handy utility for all parse errors...
     private static void generateMessage(final @NotNull Token token, final @NotNull String mess,
                                         final @NotNull ErrorList errors) {
-        errors.add(new ErrorMessage(
+        errors.add(ErrorMessage.error(
                 token.getSourceProgram(),
                 token.getSourceLine(),
                 token.getStartPos(),

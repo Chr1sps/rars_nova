@@ -65,31 +65,40 @@ public final class Assembler {
     private Directive dataDirective;
     private RISCVprogram fileCurrentlyBeingAssembled;
     private TokenList globalDeclarationList;
-    private AddressSpace textAddress;
-    private AddressSpace dataAddress;
+    private int textAddress;
+    private int dataAddress;
     private DataSegmentForwardReferences currentFileDataSegmentForwardReferences;
 
-    // //////////////////////////////////////////////////////////////////////
-    // Will check for duplicate text addresses, which can happen inadvertantly when
-    // using
-    // operand on .text directive. Will generate error message for each one that
-    // occurs.
+    /**
+     * Will check for duplicate text addresses, which can happen inadvertently when
+     * using
+     * operand on .text directive. Will generate error message for each one that
+     * occurs.
+     */
     private static void catchDuplicateAddresses(final @NotNull List<ProgramStatement> instructions,
                                                 final ErrorList errors) {
         for (int i = 0; i < instructions.size() - 1; i++) {
             final ProgramStatement ps1 = instructions.get(i);
             final ProgramStatement ps2 = instructions.get(i + 1);
             if (ps1.getAddress() == ps2.getAddress()) {
-                errors.add(new ErrorMessage(ps2.getSourceProgram(), ps2.getSourceLine(), 0,
-                        "Duplicate text segment address: "
-                                + NumberDisplayBaseChooser.formatUnsignedInteger(ps2
-                                        .getAddress(),
-                                (Globals.getSettings()
-                                        .getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX)) ? 16 : 10)
-                                + " already occupied by " + ps1.getSourceFile() + " line "
-                                + ps1.getSourceLine() + " (caused by use of "
-                                + ((Memory.inTextSegment(ps2.getAddress())) ? ".text" : ".ktext")
-                                + " operand)"));
+                final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(
+                        ps2.getAddress(),
+                        (Globals.getSettings()
+                                .getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX)) ? 16 : 10);
+                final var directiveText = (Memory.inTextSegment(ps2.getAddress()))
+                        ? ".text"
+                        : ".ktext";
+                final var message = ("Duplicate text segment address: %s already occupied by %s line %d (caused by " +
+                        "use of %s operand)").formatted(
+                        formattedAddress,
+                        ps1.getSourceFile(),
+                        ps1.getSourceLine(),
+                        directiveText);
+                errors.add(ErrorMessage.error(ps2.getSourceProgram(),
+                        ps2.getSourceLine(),
+                        0,
+                        message
+                ));
             }
         }
     }
@@ -165,8 +174,8 @@ public final class Assembler {
 
         if (tokenizedProgramFiles.isEmpty())
             return null;
-        this.textAddress = new AddressSpace(Memory.textBaseAddress);
-        this.dataAddress = new AddressSpace(Memory.dataBaseAddress);
+        this.textAddress = Memory.textBaseAddress;
+        this.dataAddress = Memory.dataBaseAddress;
         this.externAddress = Memory.externBaseAddress;
         this.currentFileDataSegmentForwardReferences = new DataSegmentForwardReferences();
         final DataSegmentForwardReferences accumulatedDataSegmentForwardReferences = new DataSegmentForwardReferences();
@@ -176,6 +185,10 @@ public final class Assembler {
         this.errors = new ErrorList();
         if (Globals.debug)
             Assembler.LOGGER.debug("Assembler first pass begins:");
+
+        for (final var program : tokenizedProgramFiles) {
+            this.checkEqvDirectives(program);
+        }
 
         // PROCESS THE FIRST ASSEMBLY PASS FOR ALL SOURCE FILES BEFORE PROCEEDING
         // TO SECOND PASS. THIS ASSURES ALL SYMBOL TABLES ARE CORRECTLY BUILT.
@@ -210,7 +223,6 @@ public final class Assembler {
             this.fileCurrentlyBeingAssembled.createMacroPool();
             // FIRST PASS OF ASSEMBLER VERIFIES SYNTAX, GENERATES SYMBOL TABLE,
             // INITIALIZES DATA SEGMENT
-            ArrayList<ProgramStatement> statements;
             for (int i = 0; i < tokenList.size(); i++) {
                 if (this.errors.errorLimitExceeded())
                     break;
@@ -219,7 +231,7 @@ public final class Assembler {
                     // if .include used
                     t.setOriginal(sourceLineList.get(i).lineNumber());
                 }
-                statements = this.parseLine(tokenList.get(i),
+                final var statements = this.parseLine(tokenList.get(i),
                         sourceLineList.get(i).source(),
                         sourceLineList.get(i).lineNumber(),
                         extendedAssemblerEnabled);
@@ -228,7 +240,7 @@ public final class Assembler {
                 }
             }
             if (this.inMacroSegment) {
-                this.errors.add(new ErrorMessage(this.fileCurrentlyBeingAssembled,
+                this.errors.add(ErrorMessage.error(this.fileCurrentlyBeingAssembled,
                         this.fileCurrentlyBeingAssembled.getLocalMacroPool().getCurrent().getFromLine(),
                         0, "Macro started but not ended (no .end_macro directive)"));
             }
@@ -301,7 +313,7 @@ public final class Assembler {
                         // TODO: consider making this recursive
                         final String basicAssembly = statement.getBasicAssemblyStatement();
                         final int sourceLine = statement.getSourceLine();
-                        final TokenList theTokenList = Tokenizer.tokenizeLine(sourceLine,
+                        final var tokenList = Tokenizer.tokenizeLine(sourceLine,
                                 basicAssembly, this.errors, false);
 
                         // ////////////////////////////////////////////////////////////////////////////
@@ -312,14 +324,14 @@ public final class Assembler {
 
                         // subsequent ProgramStatement constructor needs the correct text segment
                         // address.
-                        this.textAddress.set(statement.getAddress());
+                        this.textAddress = statement.getAddress();
                         // Will generate one basic instruction for each template in the list.
-                        final int PC = this.textAddress.get(); // Save the starting PC so that it can be used for PC 
+                        final int PC = this.textAddress; // Save the starting PC so that it can be used for PC 
                         // relative stuff
                         for (int instrNumber = 0; instrNumber < templateList.size(); instrNumber++) {
                             final String instruction = ExtendedInstruction.makeTemplateSubstitutions(
                                     this.fileCurrentlyBeingAssembled,
-                                    templateList.get(instrNumber), theTokenList, PC);
+                                    templateList.get(instrNumber), tokenList, PC);
 
                             // All substitutions have been made so we have generated
                             // a valid basic instruction!
@@ -336,8 +348,8 @@ public final class Assembler {
                             final ProgramStatement ps = new ProgramStatement(
                                     this.fileCurrentlyBeingAssembled,
                                     (instrNumber == 0) ? statement.getSource() : "", newTokenList,
-                                    newTokenList, instr, this.textAddress.get(), statement.getSourceLine());
-                            this.textAddress.increment(BasicInstruction.BASIC_INSTRUCTION_LENGTH);
+                                    newTokenList, instr, this.textAddress, statement.getSourceLine());
+                            this.textAddress += (BasicInstruction.BASIC_INSTRUCTION_LENGTH);
                             ps.buildBasicStatementFromBasicInstruction(this.errors);
                             machineList.add(ps);
                         } // end of FOR loop, repeated for each template in list.
@@ -363,9 +375,8 @@ public final class Assembler {
             try {
                 Globals.memory.setStatement(statement.getAddress(), statement);
             } catch (final AddressErrorException e) {
-                final Token t = statement.getOriginalTokenList().get(0);
-                this.errors.add(new ErrorMessage(t.getSourceProgram(), t.getSourceLine(), t
-                        .getStartPos(), "Invalid address for text segment: " + e.address));
+                final Token token = statement.getOriginalTokenList().get(0);
+                errors.addTokenError(token, "Invalid address for text segment: %d".formatted(e.address));
             }
         }
         // Aug. 24, 2005 Ken Vollmar
@@ -390,6 +401,28 @@ public final class Assembler {
         return machineList;
     } // assemble()
 
+    private void checkEqvDirectives(final @NotNull RISCVprogram program) {
+        final var symbols = new ArrayList<String>();
+        final var tokens = program.getTokenList();
+        for (final var line : tokens) {
+            if (line.size() > 2 && (line.get(0).getType() == TokenType.DIRECTIVE ||
+                    line.get(2).getType() == TokenType.DIRECTIVE)) {
+                final int dirPos = (line.get(0).getType() == TokenType.DIRECTIVE) ? 0 : 2;
+                if (Directive.matchDirective(line.get(dirPos).getValue()) == Directive.EQV) {
+                    final String symbol = line.get(dirPos + 1).getValue();
+                    // Symbol cannot be redefined - the only reason for this is to act like the Gnu
+                    // .eqv
+                    if (symbols.contains(symbol)) {
+                        this.errors.addTokenError(line.get(dirPos + 1),
+                                "Symbol %s already defined in this file".formatted(symbol));
+                    } else {
+                        symbols.add(symbol);
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * This method parses one line of RISCV source code. It works with the list
      * of tokens, but original source is also provided. It also carries out
@@ -403,14 +436,13 @@ public final class Assembler {
      * @return ArrayList of ProgramStatements because parsing a macro expansion
      * request will return a list of ProgramStatements expanded
      */
-    private @Nullable ArrayList<ProgramStatement> parseLine(final TokenList tokenList, final String source,
-                                                            final int sourceLineNumber,
-                                                            final boolean extendedAssemblerEnabled) {
+    private @Nullable List<ProgramStatement> parseLine(final TokenList tokenList, final String source,
+                                                       final int sourceLineNumber,
+                                                       final boolean extendedAssemblerEnabled) {
 
-        final var ret = new ArrayList<ProgramStatement>();
+        final var result = new ArrayList<ProgramStatement>();
 
-        final ProgramStatement programStatement;
-        TokenList tokens = Assembler.stripComment(tokenList);
+        var tokens = Assembler.stripComment(tokenList);
 
         // Labels should not be processed in macro definition segment.
         final MacroPool macroPool = this.fileCurrentlyBeingAssembled.getLocalMacroPool();
@@ -451,7 +483,7 @@ public final class Assembler {
             // get unique id for this expansion
             final int counter = macroPool.getNextCounter();
             if (macroPool.pushOnCallStack(token)) {
-                this.errors.add(new ErrorMessage(this.fileCurrentlyBeingAssembled, tokens.get(0)
+                this.errors.add(ErrorMessage.error(this.fileCurrentlyBeingAssembled, tokens.get(0)
                         .getSourceLine(), 0, "Detected a macro expansion loop (recursive reference). "));
             } else {
                 for (int i = macro.getFromLine() + 1; i < macro.getToLine(); i++) {
@@ -468,16 +500,16 @@ public final class Assembler {
                         substituted = tokenList2.getProcessedLine();
 
                     // recursively parse lines of expanded macro
-                    final ArrayList<ProgramStatement> statements = this.parseLine(tokenList2,
+                    final var statements = this.parseLine(tokenList2,
                             "<" + (i - macro.getFromLine() + macro.getOriginalFromLine()) + "> "
                                     + substituted.trim(),
                             sourceLineNumber, extendedAssemblerEnabled);
                     if (statements != null)
-                        ret.addAll(statements);
+                        result.addAll(statements);
                 }
                 macroPool.popFromCallStack();
             }
-            return ret;
+            return result;
         }
 
         // TODO: check what gcc and clang generated assembly looks like currently
@@ -502,10 +534,8 @@ public final class Assembler {
         // (which is
         // a nice thing to do).
         if (tokenType == TokenType.IDENTIFIER && token.getValue().charAt(0) == '.') {
-            this.errors.add(new ErrorMessage(ErrorMessage.WARNING, token.getSourceProgram(), token
-                    .getSourceLine(), token.getStartPos(),
-                    "RARS does not recognize the "
-                            + token.getValue() + " directive.  Ignored."));
+            errors.addWarning(token,
+                    "RARS does not recognize the %s directive. Ignored.".formatted(token.getValue()));
             return null;
         }
 
@@ -538,27 +568,26 @@ public final class Assembler {
         if (!this.inDataSegment) {
             final var instrMatches = this.matchInstruction(token);
             if (instrMatches == null)
-                return ret;
+                return result;
             // OK, we've got an operator match, let's check the operands.
             final Instruction instruction = OperandFormat.bestOperandMatch(tokens, instrMatches);
             // Here's the place to flag use of extended (pseudo) instructions
             // when setting disabled.
             if (instruction instanceof ExtendedInstruction && !extendedAssemblerEnabled) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(),
-                        "Extended (pseudo) instruction or format not permitted.  See Settings."));
+                this.errors.addTokenError(token, "Extended (pseudo) instruction or format not permitted. See Settings" +
+                        ".");
             }
             if (OperandFormat.checkIfTokensMatchOperand(tokens, instruction, this.errors)) {
-                programStatement = new ProgramStatement(this.fileCurrentlyBeingAssembled, source,
-                        tokenList, tokens, instruction, this.textAddress.get(), sourceLineNumber);
+                final var programStatement = new ProgramStatement(this.fileCurrentlyBeingAssembled, source,
+                        tokenList, tokens, instruction, this.textAddress, sourceLineNumber);
                 // instruction length is 4 for all basic instruction, varies for extended
                 // instruction
                 // Modified to permit use of compact expansion if address fits
                 // in 15 bits. DPS 4-Aug-2009
                 final int instLength = instruction.getInstructionLength();
-                this.textAddress.increment(instLength);
-                ret.add(programStatement);
-                return ret;
+                this.textAddress += (instLength);
+                result.add(programStatement);
+                return result;
             }
         }
         return null;
@@ -593,7 +622,7 @@ public final class Assembler {
                     token.setType(TokenType.IDENTIFIER);
                 }
                 this.fileCurrentlyBeingAssembled.getLocalSymbolTable().addSymbol(token,
-                        (this.inDataSegment) ? this.dataAddress.get() : this.textAddress.get(),
+                        (this.inDataSegment) ? this.dataAddress : this.textAddress,
                         this.inDataSegment, this.errors);
                 return true;
             } else {
@@ -602,233 +631,218 @@ public final class Assembler {
         }
     } // parseLabel()
 
-    // /////////////////////////////////////////////////////////////////////////////
-    // This source code line is a directive, not a instruction. Let's carry it out.
+    /// This source code line is a directive, not a instruction. Let's carry it out.
     private void executeDirective(final @NotNull TokenList tokens) {
         final Token token = tokens.get(0);
         final Directive direct = Directive.matchDirective(token.getValue());
         if (Globals.debug)
             Assembler.LOGGER.debug("line {} is directive {}", token.getSourceLine(), direct);
-        if (direct == null) {
-            this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token
-                    .getStartPos(),
-                    "\"" + token.getValue()
-                            + "\" directive is invalid or not implemented in RARS"));
-        } else if (direct == Directive.EQV) { /* EQV added by DPS 11 July 2012 */
-            // Do nothing. This was vetted and processed during tokenizing.
-        } else if (direct == Directive.MACRO) {
-            if (tokens.size() < 2) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "\"" + token.getValue()
-                        + "\" directive requires at least one argument."));
-                return;
+        switch (direct) {
+            case null -> {
+                this.errors.addTokenError(token, "Unrecognized directive: %s".formatted(token.getValue()));
             }
-            if (tokens.get(1).getType() != TokenType.IDENTIFIER) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        tokens.get(1).getStartPos(), "Invalid Macro name \""
-                        + tokens.get(1).getValue() + "\""));
-                return;
+            case EQV -> {
+                // Do nothing. This was vetted and processed during tokenizing.
             }
-            if (this.inMacroSegment) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "Nested macros are not allowed"));
-                return;
-            }
-            this.inMacroSegment = true;
-            final MacroPool pool = this.fileCurrentlyBeingAssembled.getLocalMacroPool();
-            pool.beginMacro(tokens.get(1));
-            for (int i = 2; i < tokens.size(); i++) {
-                final Token arg = tokens.get(i);
-                if (arg.getType() == TokenType.RIGHT_PAREN
-                        || arg.getType() == TokenType.LEFT_PAREN)
-                    continue;
-                if (!Macro.tokenIsMacroParameter(arg.getValue(), true)) {
-                    this.errors.add(new ErrorMessage(arg.getSourceProgram(), arg.getSourceLine(),
-                            arg.getStartPos(), "Invalid macro argument '" + arg.getValue() + "'"));
+            case MACRO -> {
+                if (tokens.size() < 2) {
+                    final var message = "\"%s\" directive requires at least one argument.".formatted(token.getValue());
+                    this.errors.addTokenError(token, message);
                     return;
                 }
-                pool.getCurrent().addArg(arg.getValue());
+                final var nextToken = tokens.get(1);
+                if (nextToken.getType() != TokenType.IDENTIFIER) {
+                    this.errors.addTokenError(nextToken, "Invalid Macro name \"%s\"".formatted(nextToken.getValue()));
+                    return;
+                }
+                if (this.inMacroSegment) {
+                    this.errors.addTokenError(token, "Nested macros are not allowed");
+                    return;
+                }
+                this.inMacroSegment = true;
+                final MacroPool pool = this.fileCurrentlyBeingAssembled.getLocalMacroPool();
+                pool.beginMacro(tokens.get(1));
+                for (int i = 2; i < tokens.size(); i++) {
+                    final Token arg = tokens.get(i);
+                    if (arg.getType() == TokenType.RIGHT_PAREN
+                            || arg.getType() == TokenType.LEFT_PAREN)
+                        continue;
+                    if (!Macro.tokenIsMacroParameter(arg.getValue(), true)) {
+                        this.errors.addTokenError(arg, "Invalid macro argument '%s'".formatted(arg.getValue()));
+                        return;
+                    }
+                    pool.getCurrent().addArg(arg.getValue());
+                }
             }
-        } else if (direct == Directive.END_MACRO) {
-            if (tokens.size() > 1) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "invalid text after .END_MACRO"));
-                return;
+            case END_MACRO -> {
+                if (tokens.size() > 1) {
+                    this.errors.addTokenError(token, "invalid text after .END_MACRO");
+                    return;
+                }
+                if (!this.inMacroSegment) {
+                    this.errors.addTokenError(token, ".END_MACRO without .MACRO");
+                    return;
+                }
+                this.inMacroSegment = false;
+                this.fileCurrentlyBeingAssembled.getLocalMacroPool().commitMacro(token);
             }
-            if (!this.inMacroSegment) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), ".END_MACRO without .MACRO"));
-                return;
+            case Directive ignored when this.inMacroSegment -> {
+                // should not parse lines even directives in macro segment
             }
-            this.inMacroSegment = false;
-            this.fileCurrentlyBeingAssembled.getLocalMacroPool().commitMacro(token);
-        } else if (this.inMacroSegment) {
-            // should not parse lines even directives in macro segment
-        } else if (direct == Directive.DATA) {
-            this.inDataSegment = true;
-            this.autoAlign = true;
-            if (tokens.size() > 1 && TokenType.isIntegerTokenType(tokens.get(1).getType())) {
-                this.dataAddress.set(Binary.stringToInt(tokens.get(1).getValue())); // KENV 1/6/05
+            case DATA -> {
+                this.inDataSegment = true;
+                this.autoAlign = true;
+                if (tokens.size() > 1 && TokenType.isIntegerTokenType(tokens.get(1).getType())) {
+                    this.dataAddress = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
+                }
             }
-        } else if (direct == Directive.TEXT) {
-            this.inDataSegment = false;
-            if (tokens.size() > 1 && TokenType.isIntegerTokenType(tokens.get(1).getType())) {
-                this.textAddress.set(Binary.stringToInt(tokens.get(1).getValue())); // KENV 1/6/05
+            case TEXT -> {
+                this.inDataSegment = false;
+                if (tokens.size() > 1 && TokenType.isIntegerTokenType(tokens.get(1).getType())) {
+                    this.textAddress = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
+                }
             }
-        } else if (direct == Directive.SECTION) {
-            if (tokens.size() >= 2) {
-                final Token section = tokens.get(1);
-                if (section.getType() == TokenType.QUOTED_STRING || section.getType() == TokenType.IDENTIFIER) {
-                    final String str = section.getValue();
-                    if (str.startsWith(".data") || str.startsWith(".rodata") || str.startsWith(".sdata")) {
-                        this.inDataSegment = true;
-                    } else if (str.startsWith(".text")) {
-                        this.inDataSegment = false;
+            case SECTION -> {
+                if (tokens.size() >= 2) {
+                    final Token section = tokens.get(1);
+                    if (section.getType() == TokenType.QUOTED_STRING || section.getType() == TokenType.IDENTIFIER) {
+                        final String str = section.getValue();
+                        if (str.startsWith(".data") || str.startsWith(".rodata") || str.startsWith(".sdata")) {
+                            this.inDataSegment = true;
+                        } else if (str.startsWith(".text")) {
+                            this.inDataSegment = false;
+                        } else {
+                            final var message = "section name \"%s\" is ignored".formatted(str);
+                            errors.addWarning(token, message);
+                        }
                     } else {
-                        this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(),
-                                token.getStartPos(),
-                                "section name \"" + str + "\" is ignored"));
+                        this.errors.addTokenError(token, ".section must be followed by a section name.");
                     }
                 } else {
-                    this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                            token.getStartPos(),
-                            ".section must be followed by a section name "));
+                    errors.addWarning(token, ".section without arguments is ignored");
                 }
-            } else {
-                this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(),
-                        ".section without arguments is ignored"));
             }
-        } else if (direct == Directive.WORD || direct == Directive.HALF
-                || direct == Directive.BYTE || direct == Directive.FLOAT
-                || direct == Directive.DOUBLE || direct == Directive.DWORD) {
-            this.dataDirective = direct;
-            if (this.passesDataSegmentCheck(token) && tokens.size() > 1) { // DPS
-                // 11/20/06, added text segment prohibition
-                this.storeNumeric(tokens, direct, this.errors);
+            case WORD, HALF, BYTE, FLOAT, DOUBLE, DWORD -> {
+                this.dataDirective = direct;
+                if (this.passesDataSegmentCheck(token) && tokens.size() > 1) { // DPS
+                    // 11/20/06, added text segment prohibition
+                    this.storeNumeric(tokens, direct, this.errors);
+                }
             }
-        } else if (direct == Directive.ASCII || direct == Directive.ASCIZ || direct == Directive.STRING) {
-            this.dataDirective = direct;
-            if (this.passesDataSegmentCheck(token)) {
-                this.storeStrings(tokens, direct, this.errors);
+            case ASCII, ASCIZ, STRING -> {
+                this.dataDirective = direct;
+                if (this.passesDataSegmentCheck(token)) {
+                    this.storeStrings(tokens, direct, this.errors);
+                }
             }
-        } else if (direct == Directive.ALIGN) {
-            if (tokens.size() != 2) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(),
-                        token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                        + "\" requires one operand"));
-                return;
-            }
-            if (!TokenType.isIntegerTokenType(tokens.get(1).getType())
-                    || Binary.stringToInt(tokens.get(1).getValue()) < 0) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(),
-                        token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                        + "\" requires a non-negative integer"));
-                return;
-            }
-            final int value = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
-            if (value < 2 && !this.inDataSegment) {
-                this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(),
-                        "Alignments less than 4 bytes are not supported in the text section. The alignment has been " +
-                                "rounded up to 4 bytes."));
-                this.dataAddress.set(this.alignToBoundary(this.dataAddress.get(), 4));
-            } else if (value == 0) {
-                this.autoAlign = false;
-            } else {
-                this.dataAddress.set(this.alignToBoundary(this.dataAddress.get(), (int) Math.pow(2, value)));
-            }
-        } else if (direct == Directive.SPACE) {
-            // TODO: add a fill type option
-            // .space 90, 1 should fill memory with 90 bytes with the values 1
-            if (this.passesDataSegmentCheck(token)) {
+            case ALIGN -> {
                 if (tokens.size() != 2) {
-                    this.errors.add(new ErrorMessage(token.getSourceProgram(),
-                            token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                            + "\" requires one operand"));
+                    this.errors.addTokenError(token, "\"%s\" requires one operand".formatted(token.getValue()));
                     return;
                 }
                 if (!TokenType.isIntegerTokenType(tokens.get(1).getType())
                         || Binary.stringToInt(tokens.get(1).getValue()) < 0) {
-                    this.errors.add(new ErrorMessage(token.getSourceProgram(),
-                            token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                            + "\" requires a non-negative integer"));
+                    this.errors.addTokenError(token,
+                            "\"%s\" requires a non-negative integer".formatted(token.getValue()));
                     return;
                 }
                 final int value = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
-                this.dataAddress.increment(value);
+                if (value < 2 && !this.inDataSegment) {
+                    this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(),
+                            token.getStartPos(),
+                            "Alignments less than 4 bytes are not supported in the text section. The alignment has " +
+                                    "been " +
+                                    "rounded up to 4 bytes."));
+                    this.dataAddress = this.alignToBoundary(this.dataAddress, 4);
+                } else if (value == 0) {
+                    this.autoAlign = false;
+                } else {
+                    this.dataAddress = this.alignToBoundary(this.dataAddress, (int) Math.pow(2, value));
+                }
             }
-        } else if (direct == Directive.EXTERN) {
-            if (tokens.size() != 3) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "\"" + token.getValue()
-                        + "\" directive requires two operands (label and size)."));
-                return;
+            case SPACE -> {
+                // TODO: add a fill type option
+                // .space 90, 1 should fill memory with 90 bytes with the values 1
+                if (this.passesDataSegmentCheck(token)) {
+                    if (tokens.size() != 2) {
+                        this.errors.addTokenError(token, "\"%s\" requires one operand".formatted(token.getValue()));
+                        return;
+                    }
+                    if (!TokenType.isIntegerTokenType(tokens.get(1).getType())
+                            || Binary.stringToInt(tokens.get(1).getValue()) < 0) {
+                        this.errors.addTokenError(token,
+                                "\"%s\" requires a non-negative integer".formatted(token.getValue()));
+                        return;
+                    }
+                    final int value = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
+                    this.dataAddress += value;
+                }
             }
-            if (!TokenType.isIntegerTokenType(tokens.get(2).getType())
-                    || Binary.stringToInt(tokens.get(2).getValue()) < 0) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "\"" + token.getValue()
-                        + "\" requires a non-negative integer size"));
-                return;
-            }
-            final int size = Binary.stringToInt(tokens.get(2).getValue());
-            // If label already in global symtab, do nothing. If not, add it right now.
-            if (Globals.symbolTable.getAddress(tokens.get(1).getValue()) == SymbolTable.NOT_FOUND) {
-                Globals.symbolTable.addSymbol(tokens.get(1), this.externAddress,
-                        true, this.errors);
-                this.externAddress += size;
-            }
-        } else if (direct == Directive.GLOBL || direct == Directive.GLOBAL) {
-            if (tokens.size() < 2) {
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "\"" + token.getValue()
-                        + "\" directive requires at least one argument."));
-                return;
-            }
-            // SPIM limits .globl list to one label, why not extend it to a list?
-            for (int i = 1; i < tokens.size(); i++) {
-                // Add it to a list of labels to be processed at the end of the
-                // pass. At that point, transfer matching symbol definitions from
-                // local symbol table to global symbol table.
-                final Token label = tokens.get(i);
-                if (label.getType() != TokenType.IDENTIFIER) {
-                    this.errors.add(new ErrorMessage(token.getSourceProgram(),
-                            token.getSourceLine(), token.getStartPos(), "\"" + token.getValue()
-                            + "\" directive argument must be label."));
+            case EXTERN -> {
+                if (tokens.size() != 3) {
+                    this.errors.addTokenError(token, "\"%s\" directive requires two operands (label and size)."
+                            .formatted(token.getValue()));
                     return;
                 }
-                this.globalDeclarationList.add(label);
+                if (!TokenType.isIntegerTokenType(tokens.get(2).getType())
+                        || Binary.stringToInt(tokens.get(2).getValue()) < 0) {
+                    this.errors.addTokenError(token,
+                            "\"%s\" requires a non-negative integer size".formatted(token.getValue()));
+                    return;
+                }
+                final int size = Binary.stringToInt(tokens.get(2).getValue());
+                // If label already in global symtab, do nothing. If not, add it right now.
+                if (Globals.symbolTable.getAddress(tokens.get(1).getValue()) == SymbolTable.NOT_FOUND) {
+                    Globals.symbolTable.addSymbol(tokens.get(1), this.externAddress,
+                            true, this.errors);
+                    this.externAddress += size;
+                }
             }
-        } else {
-            this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token
-                    .getStartPos(),
-                    "\"" + token.getValue()
-                            + "\" directive recognized but not yet implemented."));
+            case GLOBL, GLOBAL -> {
+                if (tokens.size() < 2) {
+                    this.errors.addTokenError(token,
+                            "\"%s\" directive requires at least one argument.".formatted(token.getValue()));
+                    return;
+                }
+                // SPIM limits .globl list to one label, why not extend it to a list?
+                for (int i = 1; i < tokens.size(); i++) {
+                    // Add it to a list of labels to be processed at the end of the
+                    // pass. At that point, transfer matching symbol definitions from
+                    // local symbol table to global symbol table.
+                    final Token label = tokens.get(i);
+                    if (label.getType() != TokenType.IDENTIFIER) {
+                        this.errors.addTokenError(token,
+                                "\"%s\" directive argument must be label.".formatted(token.getValue()));
+                        return;
+                    }
+                    this.globalDeclarationList.add(label);
+                }
+            }
+            default -> {
+                this.errors.addTokenError(token,
+                        "Directive \"%s\" recognized but not yet implemented.".formatted(token.getValue()));
+            }
         }
     } // executeDirective()
 
-    // //////////////////////////////////////////////////////////////////////////////
-    // Process the list of .globl labels, if any, declared and defined in this file.
-    // We'll just move their symbol table entries from local symbol table to global
-    // symbol table at the end of the first assembly pass.
+    /// Process the list of .globl labels, if any, declared and defined in this file.
+    /// We'll just move their symbol table entries from local symbol table to global
+    /// symbol table at the end of the first assembly pass.
     private void transferGlobals() {
         for (int i = 0; i < this.globalDeclarationList.size(); i++) {
             final Token label = this.globalDeclarationList.get(i);
             final Symbol symtabEntry = this.fileCurrentlyBeingAssembled.getLocalSymbolTable().getSymbol(
                     label.getValue());
             if (symtabEntry == null) {
-                this.errors.add(new ErrorMessage(this.fileCurrentlyBeingAssembled, label.getSourceLine(),
-                        label.getStartPos(), "\"" + label.getValue()
-                        + "\" declared global label but not defined."));
+                this.errors.addTokenError(label,
+                        "Label \"%s\" declared global but not defined.".formatted(label.getValue()));
                 // TODO: allow this case, but check later to see if all requested globals are
                 // actually implemented in other files
                 // GCC outputs assembly that uses this
             } else {
                 if (Globals.symbolTable.getAddress(label.getValue()) != SymbolTable.NOT_FOUND) {
-                    this.errors.add(new ErrorMessage(this.fileCurrentlyBeingAssembled, label.getSourceLine(),
-                            label.getStartPos(), "\"" + label.getValue()
-                            + "\" already defined as global in a different file."));
+                    this.errors.addTokenError(label, "Label \"%s\" already defined as global in a different file."
+                            .formatted(label.getValue()));
                 } else {
                     this.fileCurrentlyBeingAssembled.getLocalSymbolTable().removeSymbol(label);
                     Globals.symbolTable.addSymbol(label, symtabEntry.address,
@@ -862,22 +876,16 @@ public final class Assembler {
         if (token.getType() != TokenType.OPERATOR) {
             if (token.getSourceProgram().getLocalMacroPool()
                     .matchesAnyMacroName(token.getValue()))
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token
-                        .getSourceLine(), token.getStartPos(),
-                        "forward reference or invalid parameters for macro \""
-                                + token.getValue() + "\""));
+                this.errors.addTokenError(token,
+                        "forward reference or invalid parameters for macro \"%s\"".formatted(token.getValue()));
             else
-                this.errors.add(new ErrorMessage(token.getSourceProgram(), token
-                        .getSourceLine(), token.getStartPos(),
-                        "\"" + token.getValue()
-                                + "\" is not a recognized operator"));
+                this.errors.addTokenError(token, "Expected operator, found \"%s\"".formatted(token.getValue()));
             return null;
         }
         final List<Instruction> instructions = Instructions.matchOperator(token.getValue());
         if (instructions.isEmpty()) { // This should NEVER happen...
-            this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                    token.getStartPos(), "Internal Assembler error: \"" + token.getValue()
-                    + "\" tokenized OPERATOR then not recognized"));
+            this.errors.addTokenError(token, ("Internal Assembler error: \"%s\" tokenized OPERATOR then not " +
+                    "recognized").formatted(token.getValue()));
             return null;
         }
         return instructions;
@@ -914,22 +922,17 @@ public final class Assembler {
             // AND integer repetition second
             if (!(directive.isIntegerDirective())
                     || !TokenType.isIntegerTokenType(repetitionsToken.getType())) {
-                errors.add(new ErrorMessage(this.fileCurrentlyBeingAssembled,
-                        valueToken.getSourceLine(), valueToken.getStartPos(),
-                        "malformed expression"));
+                errors.addTokenError(valueToken, "malformed expression");
                 return;
             }
             final int repetitions = Binary.stringToInt(repetitionsToken.getValue()); // KENV 1/6/05
             if (repetitions <= 0) {
-                errors.add(new ErrorMessage(this.fileCurrentlyBeingAssembled, repetitionsToken
-                        .getSourceLine(), repetitionsToken.getStartPos(),
-                        "repetition factor must be positive"));
+                errors.addTokenError(repetitionsToken, "repetition factor must be positive");
                 return;
             }
             if (this.inDataSegment) {
                 if (this.autoAlign) {
-                    this.dataAddress
-                            .set(this.alignToBoundary(this.dataAddress.get(), lengthInBytes));
+                    this.dataAddress = this.alignToBoundary(this.dataAddress, lengthInBytes);
                 }
                 for (int i = 0; i < repetitions; i++) {
                     if (directive.isIntegerDirective()) {
@@ -959,7 +962,7 @@ public final class Assembler {
     // Called by storeNumeric()
     // NOTE: The token itself may be a label, in which case the correct action is
     // to store the address of that label (into however many bytes specified).
-    private void storeInteger(final Token token, final Directive directive, final ErrorList errors) {
+    private void storeInteger(final @NotNull Token token, final Directive directive, final ErrorList errors) {
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
         if (TokenType.isIntegerTokenType(token.getType())) {
             int value;
@@ -968,9 +971,12 @@ public final class Assembler {
                 longvalue = Binary.stringToLong(token.getValue());
                 value = (int) longvalue;
                 if (directive != Directive.DWORD) {
-                    errors.add(new ErrorMessage(ErrorMessage.WARNING, token.getSourceProgram(), token.getSourceLine(),
-                            token.getStartPos(), "second " + Binary.longToHexString(longvalue)
-                            + " is out-of-range and truncated to " + Binary.intToHexString(value)));
+                    final var message = "second %s is out-of-range and truncated to %s"
+                            .formatted(
+                                    Binary.longToHexString(longvalue),
+                                    Binary.intToHexString(value)
+                            );
+                    errors.addTokenError(token, message);
                 }
             } else {
                 value = Binary.stringToInt(token.getValue());
@@ -995,9 +1001,11 @@ public final class Assembler {
             }
 
             if (DataTypes.outOfRange(directive, fullvalue)) {
-                errors.add(new ErrorMessage(ErrorMessage.WARNING, token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "second " + Binary.intToHexString(fullvalue)
-                        + " is out-of-range and truncated to " + Binary.intToHexString(value)));
+                errors.addWarning(
+                        token,
+                        "second %s is out-of-range and truncated to %s"
+                                .formatted(Binary.intToHexString(fullvalue),
+                                        Binary.intToHexString(value)));
             }
             if (this.inDataSegment) {
                 this.writeToDataSegment(value, lengthInBytes, token, errors);
@@ -1014,15 +1022,13 @@ public final class Assembler {
              */
             else {
                 try {
-                    Globals.memory.set(this.textAddress.get(), value, lengthInBytes);
+                    Globals.memory.set(this.textAddress, value, lengthInBytes);
                 } catch (final AddressErrorException e) {
-                    errors.add(new ErrorMessage(token.getSourceProgram(),
-                            token.getSourceLine(), token.getStartPos(), "\""
-                            + this.textAddress.get()
-                            + "\" is not a valid text segment address"));
+                    errors.addTokenError(token, "\"%s\" is not a valid text segment address"
+                            .formatted(this.textAddress));
                     return;
                 }
-                this.textAddress.increment(lengthInBytes);
+                this.textAddress += lengthInBytes;
             }
         } // end of "if integer token type"
         else if (token.getType() == TokenType.IDENTIFIER) {
@@ -1039,16 +1045,12 @@ public final class Assembler {
             } // Data segment check done previously, so this "else" will not be.
             // See 11/20/06 note above.
             else {
-                errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "\"" + token.getValue()
-                        + "\" label as directive operand not permitted in text segment"));
+                errors.addTokenError(token, "\"%s\" label as directive operand not permitted in text segment"
+                        .formatted(token.getValue()));
             }
         } // end of "if label"
         else {
-            errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token
-                    .getStartPos(),
-                    "\"" + token.getValue()
-                            + "\" is not a valid integer constant or label"));
+            errors.addTokenError(token, "\"%s\" is not a valid integer constant or label".formatted(token.getValue()));
         }
     }// storeInteger
 
@@ -1056,7 +1058,7 @@ public final class Assembler {
     // Store real (fixed or floating point) second given floating (float, double)
     // directive.
     // Called by storeNumeric()
-    private void storeRealNumber(final Token token, final Directive directive, final ErrorList errors) {
+    private void storeRealNumber(final @NotNull Token token, final Directive directive, final ErrorList errors) {
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
         final double value;
 
@@ -1070,22 +1072,17 @@ public final class Assembler {
             try {
                 value = Double.parseDouble(token.getValue());
             } catch (final NumberFormatException nfe) {
-                errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "\"" + token.getValue()
-                        + "\" is not a valid floating point constant"));
+                errors.addTokenError(token,
+                        "\"%s\" is not a valid floating point constant".formatted(token.getValue()));
                 return;
             }
             if (DataTypes.outOfRange(directive, value)) {
-                errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "\"" + token.getValue()
-                        + "\" is an out-of-range second"));
+                errors.addTokenError(token, "\"%s\" is an out-of-range second".formatted(token.getValue()));
                 return;
             }
         } else {
-            errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token
-                    .getStartPos(),
-                    "\"" + token.getValue()
-                            + "\" is not a valid floating point constant"));
+            final var message = "\"%s\" is not a valid floating point constant".formatted(token.getValue());
+            errors.addTokenError(token, message);
             return;
         }
 
@@ -1104,7 +1101,7 @@ public final class Assembler {
     // Use directive argument to distinguish between ASCII and ASCIZ. The
     // latter stores a terminating null byte. Can handle a list of one or more
     // strings on a single line.
-    private void storeStrings(final TokenList tokens, final Directive direct, final ErrorList errors) {
+    private void storeStrings(final @NotNull TokenList tokens, final Directive direct, final ErrorList errors) {
         Token token;
         // Correctly handles case where this is a "directive continuation" line.
         int tokenStart = 0;
@@ -1114,9 +1111,8 @@ public final class Assembler {
         for (int i = tokenStart; i < tokens.size(); i++) {
             token = tokens.get(i);
             if (token.getType() != TokenType.QUOTED_STRING) {
-                errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(),
-                        token.getStartPos(), "\"" + token.getValue()
-                        + "\" is not a valid character string"));
+                errors.addTokenError(token, "\"%s\" is not a valid character string"
+                        .formatted(token.getValue()));
             } else {
                 final String quote = token.getValue();
                 char theChar;
@@ -1156,15 +1152,13 @@ public final class Assembler {
                                 } catch (final
                                 StringIndexOutOfBoundsException e) {
                                     final String invalidCodePoint = quote.substring(j + 1);
-                                    errors.add(new ErrorMessage(token.getSourceProgram(), token
-                                            .getSourceLine(), token.getStartPos(),
-                                            "unicode escape \"\\u" +
-                                                    invalidCodePoint
-                                                    + "\" is incomplete. Only escapes with 4 digits are valid."));
+                                    final var message = ("unicode escape \"\\u%s\" is incomplete." +
+                                            " Only escapes with 4 digits are valid.")
+                                            .formatted(invalidCodePoint);
+                                    errors.addTokenError(token, message);
                                 } catch (final NumberFormatException e) {
-                                    errors.add(new ErrorMessage(token.getSourceProgram(), token
-                                            .getSourceLine(), token.getStartPos(),
-                                            "illegal unicode escape: \"\\u" + codePoint + "\""));
+                                    errors.addTokenError(token,
+                                            "illegal unicode escape: \"\\u%s\"".formatted(codePoint));
                                 }
                                 j = j + 4; // skip past the codepoint for next iteration
                                 break;
@@ -1178,28 +1172,24 @@ public final class Assembler {
                     final byte[] bytesOfChar = String.valueOf(theChar).getBytes(StandardCharsets.UTF_8);
                     try {
                         for (final byte b : bytesOfChar) {
-                            Globals.memory.set(this.dataAddress.get(), b,
+                            Globals.memory.set(this.dataAddress, b,
                                     DataTypes.CHAR_SIZE);
-                            this.dataAddress.increment(DataTypes.CHAR_SIZE);
+                            this.dataAddress += DataTypes.CHAR_SIZE;
                         }
                     } catch (final AddressErrorException e) {
-                        errors.add(new ErrorMessage(token.getSourceProgram(), token
-                                .getSourceLine(), token.getStartPos(),
-                                "\""
-                                        + this.dataAddress.get() + "\" is not a valid data segment address"));
+                        this.errors.addTokenError(token,
+                                "\"%d\" is not a valid data segment address".formatted(this.dataAddress));
                     }
 
                 }
                 if (direct == Directive.ASCIZ || direct == Directive.STRING) {
                     try {
-                        Globals.memory.set(this.dataAddress.get(), 0, DataTypes.CHAR_SIZE);
+                        Globals.memory.set(this.dataAddress, 0, DataTypes.CHAR_SIZE);
                     } catch (final AddressErrorException e) {
-                        errors.add(new ErrorMessage(token.getSourceProgram(), token
-                                .getSourceLine(), token.getStartPos(),
-                                "\""
-                                        + this.dataAddress.get() + "\" is not a valid data segment address"));
+                        this.errors.addTokenError(token,
+                                "\"%d\" is not a valid data segment address".formatted(this.dataAddress));
                     }
-                    this.dataAddress.increment(DataTypes.CHAR_SIZE);
+                    this.dataAddress += DataTypes.CHAR_SIZE;
                 }
             }
         }
@@ -1209,10 +1199,8 @@ public final class Assembler {
     // Simply check to see if we are in data segment. Generate error if not.
     private boolean passesDataSegmentCheck(final Token token) {
         if (!this.inDataSegment) {
-            this.errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token
-                    .getStartPos(),
-                    "\"" + token.getValue()
-                            + "\" directive cannot appear in text segment"));
+            final var message = "\"%s\" directive cannot appear in text segment".formatted(token.getValue());
+            this.errors.addTokenError(token, message);
             return false;
         } else {
             return true;
@@ -1227,53 +1215,49 @@ public final class Assembler {
     private int writeToDataSegment(final int value, final int lengthInBytes, final Token token,
                                    final ErrorList errors) {
         if (this.autoAlign) {
-            this.dataAddress.set(this.alignToBoundary(this.dataAddress.get(), lengthInBytes));
+            this.dataAddress = this.alignToBoundary(this.dataAddress, lengthInBytes);
         }
         try {
-            Globals.memory.set(this.dataAddress.get(), value, lengthInBytes);
+            Globals.memory.set(this.dataAddress, value, lengthInBytes);
         } catch (final AddressErrorException e) {
-            errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token
-                    .getStartPos(),
-                    "\"" + this.dataAddress.get()
-                            + "\" is not a valid data segment address"));
-            return this.dataAddress.get();
+            final var message = "\"%d\" is not a valid data segment address".formatted(this.dataAddress);
+            errors.addTokenError(token, message);
+            return this.dataAddress;
         }
-        final int address = this.dataAddress.get();
-        this.dataAddress.increment(lengthInBytes);
+        final int address = this.dataAddress;
+        this.dataAddress += lengthInBytes;
         return address;
     }
 
-    // //////////////////////////////////////////////////////////////////////////////////
-    // Writes the given double second into current data segment address. Works
-    // only for DOUBLE floating
-    // point values -- Memory class doesn't have method for writing 8 bytes, so
-    // use setWord twice.
+    /**
+     * Writes the given double second into current data segment address. Works
+     * only for DOUBLE floating
+     * point values -- Memory class doesn't have method for writing 8 bytes, so
+     * use setWord twice.
+     */
     private void writeDoubleToDataSegment(final double value, final Token token, final ErrorList errors) {
         final int lengthInBytes = DataTypes.DOUBLE_SIZE;
         if (this.autoAlign) {
-            this.dataAddress.set(this.alignToBoundary(this.dataAddress.get(), lengthInBytes));
+            this.dataAddress = (this.alignToBoundary(this.dataAddress, lengthInBytes));
         }
         try {
-            Globals.memory.setDouble(this.dataAddress.get(), value);
+            Globals.memory.setDouble(this.dataAddress, value);
         } catch (final AddressErrorException e) {
-            errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token
-                    .getStartPos(),
-                    "\"" + this.dataAddress.get()
-                            + "\" is not a valid data segment address"));
-            return;
+            this.errors.addTokenError(token, "\"%d\" is not a valid data segment address".formatted(this.dataAddress));
         }
-        this.dataAddress.increment(lengthInBytes);
+        this.dataAddress += lengthInBytes;
     }
 
-    // //////////////////////////////////////////////////////////////////////////////////
-    // If address is multiple of byte boundary, returns address. Otherwise, returns
-    // address
-    // which is next higher multiple of the byte boundary. Used for aligning data
-    // segment.
-    // For instance if args are 6 and 4, returns 8 (next multiple of 4 higher than
-    // 6).
-    // NOTE: it will fix any symbol table entries for this address too. See else
-    // part.
+    /**
+     * If address is multiple of byte boundary, returns address. Otherwise, returns
+     * address
+     * which is next higher multiple of the byte boundary. Used for aligning data
+     * segment.
+     * For instance if args are 6 and 4, returns 8 (next multiple of 4 higher than
+     * 6).
+     * NOTE: it will fix any symbol table entries for this address too. See else
+     * part.
+     */
     private int alignToBoundary(final int address, final int byteBoundary) {
         final int remainder = address % byteBoundary;
         if (remainder == 0) {
@@ -1286,63 +1270,23 @@ public final class Assembler {
         }
     }
 
-    private static final class AssemblyData {
-        public final @NotNull ErrorList errors;
-        public final @NotNull DataSegmentForwardReferences currentFileDataSegmentForwardReferences;
-        public final @NotNull AddressSpace textAddressSpace, dataAddressSpace;
-        public boolean inDataSegment;
-        public boolean inMacroSegment;
-        public int externAddress;
-        public @NotNull RISCVprogram fileCurrentlyBeingAssembled;
-
-        public AssemblyData(final @NotNull RISCVprogram currentlyAssembledProgram) {
-            this.errors = new ErrorList();
-            this.fileCurrentlyBeingAssembled = currentlyAssembledProgram;
-            this.currentFileDataSegmentForwardReferences = new DataSegmentForwardReferences();
-            this.textAddressSpace = new AddressSpace(Memory.textBaseAddress);
-            this.dataAddressSpace = new AddressSpace(Memory.dataBaseAddress);
-        }
-    }
-
-    // Private wrapper around an int; used to be more complicated
-    // TODO: evaluate if it makes sense to keep this
-    private static class AddressSpace {
-        int address;
-
-        private AddressSpace(final int userBase) {
-            this.address = userBase;
-        }
-
-        private int get() {
-            return this.address;
-        }
-
-        private void set(final int value) {
-            this.address = value;
-        }
-
-        private void increment(final int increment) {
-            this.address += increment;
-        }
-    }
-
-    // //////////////////////////////////////////////////////////////////////////
-    // Handy class to handle forward label references appearing as data
-    // segment operands. This is needed because the data segment is comletely
-    // processed by the end of the first assembly pass, and its directives may
-    // contain labels as operands. When this occurs, the label's associated
-    // address becomes the operand second. If it is a forward reference, we will
-    // save the necessary information in this object for finding and patching in
-    // the correct address at the end of the first pass (for this file or for all
-    // files if more than one).
-    //
-    // If such a parsed label refers to a local or global label not defined yet,
-    // pertinent information is added to this object:
-    // - memory address that needs the label's address,
-    // - number of bytes (addresses are 4 bytes but may be used with any of
-    // the integer directives: .word, .half, .byte)
-    // - the label's token. Normally need only the name but error message needs
-    // more.
+    /**
+     * Handy class to handle forward label references appearing as data
+     * segment operands. This is needed because the data segment is comletely
+     * processed by the end of the first assembly pass, and its directives may
+     * contain labels as operands. When this occurs, the label's associated
+     * address becomes the operand second. If it is a forward reference, we will
+     * save the necessary information in this object for finding and patching in
+     * the correct address at the end of the first pass (for this file or for all
+     * files if more than one).
+     * If such a parsed label refers to a local or global label not defined yet,
+     * pertinent information is added to this object:
+     * - memory address that needs the label's address,
+     * - number of bytes (addresses are 4 bytes but may be used with any of
+     * the integer directives: .word, .half, .byte)
+     * - the label's token. Normally need only the name but error message needs
+     * more.
+     */
     private static class DataSegmentForwardReferences {
         private final ArrayList<DataSegmentForwardReference> forwardReferenceList;
 
@@ -1400,10 +1344,9 @@ public final class Assembler {
         // undefined labels.
         private void generateErrorMessages(final ErrorList errors) {
             for (final DataSegmentForwardReference entry : this.forwardReferenceList) {
-                errors.add(new ErrorMessage(entry.token.getSourceProgram(), entry.token
-                        .getSourceLine(), entry.token.getStartPos(),
-                        "Symbol \""
-                                + entry.token.getValue() + "\" not found in symbol table."));
+                final var message = "Symbol \"%s\" not found in symbol table."
+                        .formatted(entry.token().getValue());
+                errors.addTokenError(entry.token(), message);
             }
         }
 

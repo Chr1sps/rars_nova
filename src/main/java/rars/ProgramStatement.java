@@ -155,14 +155,16 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             } else { // Everything else is normal
                 for (int i = 0; i < 5; i++) {
                     if (mask.indexOf(Instruction.operandMask[i]) != -1) {
-                        this.operands[i] = ProgramStatement.readBinaryCode(mask, Instruction.operandMask[i], binaryStatement);
+                        this.operands[i] = ProgramStatement.readBinaryCode(mask, Instruction.operandMask[i],
+                                binaryStatement);
                         this.numOperands++;
                     }
                 }
             }
         }
         this.altered = false;
-        this.basicStatementList = ProgramStatement.buildBasicStatementListFromBinaryCode(binaryStatement, instr, this.operands, this.numOperands);
+        this.basicStatementList = ProgramStatement.buildBasicStatementListFromBinaryCode(binaryStatement, instr,
+                this.operands, this.numOperands);
     }
 
     private static int toJumpImmediate(int address) {
@@ -174,7 +176,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 ((address & 0x7F800) >> 11); // move address[19:12] to the right place
     }
 
-    /////////////////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////////////////
 
     private static int fromJumpImmediate(final int immediate) {
         // trying to produce address[20:0] where immediate = address[20|10:1|11|19:12]
@@ -185,7 +187,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         return (tmp << 12) >> 11; // sign-extend and add extra 0
     }
 
-    /////////////////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////////////////
 
     private static int toBranchImmediate(int address) {
         // trying to produce imm[12:1] where immediate = address[12|10:1|11]
@@ -230,7 +232,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         return out;
     }
 
-    //////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////
     /*
      * Given a model BasicInstruction and the assembled (not source) operand array
      * for a statement,
@@ -240,7 +242,9 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * It is not
      * intended to be used when source code is available. DPS 11-July-2013
      */
-    private static BasicStatementList buildBasicStatementListFromBinaryCode(final int binary, final BasicInstruction instr, final int[] operands,
+    private static BasicStatementList buildBasicStatementListFromBinaryCode(final int binary,
+                                                                            final BasicInstruction instr,
+                                                                            final int[] operands,
                                                                             final int numOperands) {
         final BasicStatementList statementList = new BasicStatementList();
         int tokenListCounter = 1; // index 0 is operator; operands start at index 1
@@ -344,8 +348,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     registerNumber = RegisterFile.getRegister(tokenValue).getNumber();
                 } catch (final Exception e) {
                     // should never happen; should be caught before now...
-                    errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
-                            "invalid register name"));
+                    errors.addTokenError(token, "invalid register name");
                     return;
                 }
                 this.operands[this.numOperands++] = registerNumber;
@@ -356,8 +359,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 this.basicStatementList.addString(basicStatementElement);
                 if (registerNumber < 0) {
                     // should never happen; should be caught before now...
-                    errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
-                            "invalid register name"));
+                    errors.addTokenError(token, "invalid register name");
                     return;
                 }
                 this.operands[this.numOperands++] = registerNumber;
@@ -373,8 +375,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 }
                 if (registerNumber < 0) {
                     // should never happen; should be caught before now...
-                    errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
-                            "invalid CSR name"));
+                    errors.addTokenError(token, "invalid CSR name");
                     return;
                 }
                 basic.append(registerNumber);
@@ -387,8 +388,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 this.basicStatementList.addString(basicStatementElement);
                 if (registerNumber < 0) {
                     // should never happen; should be caught before now...
-                    errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
-                            "invalid FPU register name"));
+                    errors.addTokenError(token, "invalid FPU register name");
                     return;
                 }
                 this.operands[this.numOperands++] = registerNumber;
@@ -403,8 +403,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     default -> -1;
                 };
                 if (rounding_mode == -1) {
-                    errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
-                            "invalid rounding mode"));
+                    errors.addTokenError(token, "invalid rounding mode");
                     return;
                 }
                 basic.append(tokenValue);
@@ -414,8 +413,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
 
                 int address = this.sourceProgram.getLocalSymbolTable().getAddressLocalOrGlobal(tokenValue);
                 if (address == SymbolTable.NOT_FOUND) { // symbol used without being defined
-                    errors.add(new ErrorMessage(this.sourceProgram, token.getSourceLine(), token.getStartPos(),
-                            "Symbol \"" + tokenValue + "\" not found in symbol table."));
+                    errors.addTokenError(token, "Symbol \"%s\" not found in symbol table.".formatted(tokenValue));
                     return;
                 }
                 boolean absoluteAddress = true; // (used below)
@@ -427,7 +425,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         if (address >= (1 << 12) || address < -(1 << 12)) {
                             // SPIM flags as warning, I'll flag as error b/c RARS text segment not long
                             // enough for it to be OK.
-                            errors.add(new ErrorMessage(this.sourceProgram, this.sourceLine, 0,
+                            errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
                                     "Branch target word address beyond 12-bit range"));
                             return;
                         }
@@ -435,7 +433,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     } else if (format == BasicInstructionFormat.J_FORMAT) {
                         address -= this.textAddress;
                         if (address >= (1 << 20) || address < -(1 << 20)) {
-                            errors.add(new ErrorMessage(this.sourceProgram, this.sourceLine, 0,
+                            errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
                                     "Jump target word address beyond 20-bit range"));
                             return;
                         }
@@ -547,7 +545,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             // This means the pseudo-instruction expansion generated another
             // pseudo-instruction (expansion must be to all basic instructions).
             // This is an error on the part of the pseudo-instruction author.
-            errors.add(new ErrorMessage(this.sourceProgram, this.sourceLine, 0,
+            errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
                     "INTERNAL ERROR: pseudo-instruction expansion contained a pseudo-instruction"));
             return;
         }
@@ -558,11 +556,13 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
 
         if (format == BasicInstructionFormat.J_FORMAT) {
             this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
-            this.insertBinaryCode(ProgramStatement.toJumpImmediate(this.operands[1]), Instruction.operandMask[1], errors);
+            this.insertBinaryCode(ProgramStatement.toJumpImmediate(this.operands[1]), Instruction.operandMask[1],
+                    errors);
         } else if (format == BasicInstructionFormat.B_FORMAT) {
             this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
             this.insertBinaryCode(this.operands[1], Instruction.operandMask[1], errors);
-            this.insertBinaryCode(ProgramStatement.toBranchImmediate(this.operands[2]), Instruction.operandMask[2], errors);
+            this.insertBinaryCode(ProgramStatement.toBranchImmediate(this.operands[2]), Instruction.operandMask[2],
+                    errors);
         } else { // Everything else is normal
             for (int i = 0; i < this.numOperands; i++)
                 this.insertBinaryCode(this.operands[i], Instruction.operandMask[i], errors);
@@ -585,7 +585,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             result.append(blanks, 0, 16 - result.length()).append(this.basicAssemblyStatement, 0, firstSpace);
             result.append(blanks, 0, 24 - result.length()).append(this.basicAssemblyStatement.substring(firstSpace + 1));
         } else {
-            result.append(blanks, 0, 16 - result.length()).append("0x").append(Integer.toString(this.binaryStatement, 16));
+            result.append(blanks, 0, 16 - result.length()).append("0x").append(Integer.toString(this.binaryStatement,
+                    16));
         }
         result.append(blanks, 0, 40 - result.length()).append(";  "); // this.source;
         if (this.operands != null) {
@@ -806,7 +807,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         // should NEVER occur
         // if it does, then one of the BasicInstructions is malformed
         if (length == 0) {
-            errors.add(new ErrorMessage(this.sourceProgram, this.sourceLine, 0,
+            errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
                     "INTERNAL ERROR: mismatch in number of operands in statement vs mask"));
             return;
         }
@@ -825,7 +826,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         this.machineStatement = state.toString();
     }
 
-    //////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////
     //
     // Little class to represent basic statement as list
     // of elements. Each element is either a string, an

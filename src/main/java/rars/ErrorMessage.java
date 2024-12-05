@@ -1,10 +1,13 @@
 package rars;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.assembler.SourceLine;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 /*
@@ -43,39 +46,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public final class ErrorMessage {
-    /**
-     * Constant to indicate this message is warning not error
-     */
-    public static final boolean WARNING = true;
-    /**
-     * Constant to indicate this message is error not warning
-     */
-    public static final boolean ERROR = false;
     private final boolean isWarning; // allow for warnings too (added Nov 2006)
     private final @NotNull String filename; // name of source file (added Oct 2006)
     private final int line; // line in source code where error detected
     private final int position; // position in source line where error detected
     private final @NotNull String message;
     private final @NotNull String macroExpansionHistory;
-
-    /**
-     * Constructor for ErrorMessage. Assumes line number is calculated after any
-     * .include files expanded, and
-     * if there were, it will adjust filename and line number so message reflects
-     * original file and line number.
-     *
-     * @param sourceProgram RISCVprogram object of source file in which this error
-     *                      appears.
-     * @param line          Line number in source program being processed when error
-     *                      occurred.
-     * @param position      Position within line being processed when error
-     *                      occurred. Normally is starting
-     *                      position of source token.
-     * @param message       String containing appropriate error message.
-     */
-    public ErrorMessage(final RISCVprogram sourceProgram, final int line, final int position, final String message) {
-        this(ErrorMessage.ERROR, sourceProgram, line, position, message);
-    }
 
     /**
      * Constructor for ErrorMessage. Assumes line number is calculated after any
@@ -94,8 +70,12 @@ public final class ErrorMessage {
      *                      position of source token.
      * @param message       String containing appropriate error message.
      */
-    public ErrorMessage(final boolean isWarning, final RISCVprogram sourceProgram, final int line, final int position
-            , final @NotNull String message) {
+    public ErrorMessage(final boolean isWarning,
+                        final @Nullable RISCVprogram sourceProgram,
+                        final int line,
+                        final int position,
+                        final @NotNull String message
+    ) {
         this.isWarning = isWarning;
         if (sourceProgram == null) {
             this.filename = "";
@@ -124,8 +104,10 @@ public final class ErrorMessage {
      * @param message   String containing appropriate error message.
      */
     // Added January 2013
-    public ErrorMessage(final @NotNull ProgramStatement statement, final @NotNull String message) {
-        this.isWarning = ErrorMessage.ERROR;
+    public ErrorMessage(final @NotNull ProgramStatement statement,
+                        final @NotNull String message
+    ) {
+        this.isWarning = false;
         this.filename = (statement.getSourceProgram() == null)
                 ? ""
                 : statement.getSourceProgram().getFilename();
@@ -143,7 +125,7 @@ public final class ErrorMessage {
         // Looks bass-ackwards, but to get the line numbers to display correctly
         // for runtime error occurring in macro expansion (expansion->definition), need
         // to assign to the opposite variables.
-        final ArrayList<Integer> defineLine = ErrorMessage.parseMacroHistory(statement.getSource());
+        final var defineLine = ErrorMessage.parseMacroHistory(statement.getSource());
         if (defineLine.isEmpty()) {
             this.line = statement.getSourceLine();
             this.macroExpansionHistory = "";
@@ -153,11 +135,29 @@ public final class ErrorMessage {
         }
     }
 
-    private static ArrayList<Integer> parseMacroHistory(final String string) {
+    public static @NotNull ErrorMessage error(
+            final @Nullable RISCVprogram sourceProgram,
+            final int line,
+            final int position,
+            final @NotNull String message
+    ) {
+        return new ErrorMessage(false, sourceProgram, line, position, message);
+    }
+
+    public static @NotNull ErrorMessage warning(
+            final @Nullable RISCVprogram sourceProgram,
+            final int line,
+            final int position,
+            final @NotNull String message
+    ) {
+        return new ErrorMessage(true, sourceProgram, line, position, message);
+    }
+
+    private static @NotNull List<Integer> parseMacroHistory(final String string) {
         final Pattern pattern = Pattern.compile("<\\d+>");
         final Matcher matcher = pattern.matcher(string);
         String verify = string.trim();
-        final ArrayList<Integer> macroHistory = new ArrayList<>();
+        final var macroHistory = new ArrayList<Integer>();
         while (matcher.find()) {
             final String match = matcher.group();
             if (verify.indexOf(match) == 0) {
@@ -234,7 +234,7 @@ public final class ErrorMessage {
      *
      * @return a {@link java.lang.String} object
      */
-    public String generateReport() {
+    public @NotNull String generateReport() {
         final var builder = new StringBuilder();
         builder.append((this.isWarning ? ErrorList.WARNING_MESSAGE_PREFIX : ErrorList.ERROR_MESSAGE_PREFIX))
                 .append(ErrorList.FILENAME_PREFIX);
@@ -262,7 +262,8 @@ public final class ErrorMessage {
      * @return string describing macro expansion
      */
     // Method added by Mohammad Sekavat Dec 2012
-    public String getMacroExpansionHistory() {
+    @Contract(pure = true)
+    public @NotNull String getMacroExpansionHistory() {
         if (this.macroExpansionHistory.isEmpty())
             return "";
         return this.macroExpansionHistory + "->";

@@ -46,7 +46,7 @@ public final class Documentation {
      * @return a {@link java.lang.String} object
      */
     public static @NotNull String createDirectiveMarkdown() {
-        final ArrayList<Directive> directives = Directive.getDirectiveList();
+        final var directives = Directive.getDirectiveList();
         directives.sort(Comparator.comparing(Directive::getName));
         final StringBuilder output = new StringBuilder("| Name | Description|\n|------|------------|");
         for (final var direct : directives) {

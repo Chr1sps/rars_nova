@@ -64,7 +64,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version December 2009
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-public class Main {
+public final class Main {
 
     private static final String rangeSeparator = "-";
     private static final int memoryWordsPerLine = 4; // display 4 memory words, tab separated, per line

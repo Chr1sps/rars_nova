@@ -16,6 +16,7 @@ import rars.util.SystemIO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -125,7 +126,7 @@ public final class Program {
      * @throws AssemblyException thrown if any errors are found in the code
      */
     public ErrorList assembleFiles(final @NotNull ArrayList<String> files, final @NotNull String mainFile) throws AssemblyException {
-        final ArrayList<RISCVprogram> programs = this.code.prepareFilesForAssembly(files, mainFile, null);
+        final var programs = this.code.prepareFilesForAssembly(files, mainFile, null);
         return this.assemble(programs);
     }
 
@@ -141,7 +142,7 @@ public final class Program {
         // TODO: potentially inline prepareForAssembly
         final ArrayList<String> files = new ArrayList<>();
         files.add(file);
-        final ArrayList<RISCVprogram> programs = this.code.prepareFilesForAssembly(files, file, null);
+        final var programs = this.code.prepareFilesForAssembly(files, file, null);
         return this.assemble(programs);
     }
 
@@ -161,8 +162,9 @@ public final class Program {
         return this.assemble(programs);
     }
 
-    private ErrorList assemble(final ArrayList<RISCVprogram> programs) throws AssemblyException {
-        final Memory temp = Memory.swapInstance(this.assembled); // Assembling changes memory so we need to swap to capture that.
+    private ErrorList assemble(final @NotNull List<RISCVprogram> programs) throws AssemblyException {
+        final Memory temp = Memory.swapInstance(this.assembled); // Assembling changes memory so we need to swap to 
+        // capture that.
         ErrorList warnings = null;
         AssemblyException e = null;
         try {

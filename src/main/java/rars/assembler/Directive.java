@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
@@ -188,7 +189,7 @@ public enum Directive {
      * @return If match is found, returns ArrayList of matching Directives objects,
      * else returns <code>null</code>.
      */
-    public static ArrayList<Directive> prefixMatchDirectives(final String str) {
+    public static @Nullable List<Directive> prefixMatchDirectives(final @NotNull String str) {
         ArrayList<Directive> matches = null;
         for (final Directive direct : Directive.directiveList) {
             if (direct.name.toLowerCase().startsWith(str.toLowerCase())) {
@@ -206,7 +207,7 @@ public enum Directive {
      *
      * @return All directives defined
      */
-    public static @NotNull ArrayList<Directive> getDirectiveList() {
+    public static @NotNull List<Directive> getDirectiveList() {
         return Directive.directiveList;
     }
 

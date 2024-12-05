@@ -91,7 +91,7 @@ public class SimulationException extends Exception {
      * @param reason a int
      */
     public SimulationException(final String m, final ExceptionReason reason) {
-        this.errorMessage = new ErrorMessage(null, 0, 0, m);
+        this.errorMessage = ErrorMessage.error(null, 0, 0, m);
         this.reason = reason;
         this.value = 0;
     }

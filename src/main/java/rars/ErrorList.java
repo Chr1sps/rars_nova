@@ -1,8 +1,10 @@
 package rars;
 
 import org.jetbrains.annotations.NotNull;
+import rars.assembler.Token;
 
 import java.util.ArrayList;
+import java.util.List;
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
 
@@ -39,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public class ErrorList {
+public final class ErrorList {
     /**
      * Constant <code>ERROR_MESSAGE_PREFIX="Error"</code>
      */
@@ -93,7 +95,7 @@ public class ErrorList {
      *
      * @return ArrayList of ErrorMessage objects
      */
-    public @NotNull ArrayList<ErrorMessage> getErrorMessages() {
+    public @NotNull List<ErrorMessage> getErrorMessages() {
         return this.messages;
     }
 
@@ -126,8 +128,13 @@ public class ErrorList {
             return;
         }
         if (this.errorCount == ErrorList.getErrorLimit()) {
-            this.messages.add(new ErrorMessage(null, mess.getLine(), mess.getPosition(),
-                    "Error Limit of " + ErrorList.getErrorLimit() + " exceeded."));
+            this.messages.add(ErrorMessage.error(
+                    null,
+                    mess.getLine(),
+                    mess.getPosition(),
+                    "Error Limit of %d exceeded."
+                            .formatted(ErrorList.getErrorLimit())
+            ));
             this.errorCount++; // subsequent errors will not be added; see if statement above
             return;
         }
@@ -139,22 +146,22 @@ public class ErrorList {
         }
     }
 
-    /**
-     * Count of number of error messages in list.
-     *
-     * @return Number of error messages in list.
-     */
-    public int errorCount() {
-        return this.errorCount;
+    public void addTokenError(final @NotNull Token token, final @NotNull String message) {
+        final var errorMessage = ErrorMessage.error(
+                token.getSourceProgram(),
+                token.getSourceLine(),
+                token.getStartPos(),
+                message);
+        this.add(errorMessage);
     }
 
-    /**
-     * Count of number of warning messages in list.
-     *
-     * @return Number of warning messages in list.
-     */
-    public int warningCount() {
-        return this.warningCount;
+    public void addWarning(final @NotNull Token token, final @NotNull String message) {
+        final var errorMessage = ErrorMessage.warning(
+                token.getSourceProgram(),
+                token.getSourceLine(),
+                token.getStartPos(),
+                message);
+        this.add(errorMessage);
     }
 
     /**
@@ -171,8 +178,8 @@ public class ErrorList {
      *
      * @return String containing report.
      */
-    public String generateErrorReport() {
-        return this.generateReport(ErrorMessage.ERROR);
+    public @NotNull String generateErrorReport() {
+        return this.generateReport(false);
     }
 
     /**
@@ -180,8 +187,8 @@ public class ErrorList {
      *
      * @return String containing report.
      */
-    public String generateWarningReport() {
-        return this.generateReport(ErrorMessage.WARNING);
+    public @NotNull String generateWarningReport() {
+        return this.generateReport(true);
     }
 
     /**
@@ -189,12 +196,12 @@ public class ErrorList {
      *
      * @return String containing report.
      */
-    public String generateErrorAndWarningReport() {
+    public @NotNull String generateErrorAndWarningReport() {
         return this.generateWarningReport() + this.generateErrorReport();
     }
 
     // Produces either error or warning report.
-    private String generateReport(final boolean isWarning) {
+    private @NotNull String generateReport(final boolean isWarning) {
         final StringBuilder report = new StringBuilder();
         for (final ErrorMessage m : this.messages) {
             if ((isWarning && m.isWarning()) || (!isWarning && !m.isWarning())) {

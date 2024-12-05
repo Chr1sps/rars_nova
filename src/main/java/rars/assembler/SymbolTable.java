@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
-import rars.ErrorMessage;
 import rars.Globals;
 import rars.util.Binary;
 
@@ -95,8 +94,7 @@ public final class SymbolTable {
                           final @NotNull ErrorList errors) {
         final String label = token.getValue();
         if (this.getSymbol(label) != null) {
-            errors.add(new ErrorMessage(token.getSourceProgram(), token.getSourceLine(), token.getStartPos(),
-                    "label \"" + label + "\" already defined"));
+            errors.addTokenError(token, "label \"%s\" already defined".formatted(label));
         } else {
             this.table.add(new Symbol(label, address, b));
             if (Globals.debug)
