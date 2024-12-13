@@ -1,10 +1,45 @@
 package rars.venus.editors;
 
 import org.jetbrains.annotations.NotNull;
+import rars.util.Lazy;
 
 import java.awt.*;
 
 public final class Theme {
+    private static @NotNull Lazy<Theme> defaultDarkTheme = Lazy.of(() -> {
+        final var defaultScheme = ColorScheme.getDefaultDarkScheme();
+        final var backgroundColor = new Color(47, 47, 47);
+        final var foregroundColor = Color.WHITE;
+        final var lineHighlightColor = new Color(132, 176, 250, 48);
+        final var caretColor = Color.LIGHT_GRAY;
+        final var selectionColor = new Color(83, 146, 229, 48);
+        return new Theme(
+                defaultScheme,
+                backgroundColor,
+                foregroundColor,
+                lineHighlightColor,
+                caretColor,
+                selectionColor
+        );
+
+    });
+    private static @NotNull Lazy<Theme> defaultLightTheme = Lazy.of(() -> {
+        final var defaultScheme = ColorScheme.getDefaultLightScheme();
+        final var backgroundColor = Color.WHITE;
+        final var foregroundColor = Color.BLACK;
+        final var lineHighlightColor = new Color(132, 176, 250, 128);
+        final var caretColor = Color.DARK_GRAY;
+        final var selectionColor = new Color(83, 146, 229, 128);
+        return new Theme(
+                defaultScheme,
+                backgroundColor,
+                foregroundColor,
+                lineHighlightColor,
+                caretColor,
+                selectionColor
+        );
+    });
+
     public @NotNull ColorScheme colorScheme;
     public @NotNull Color backgroundColor;
     public @NotNull Color foregroundColor;
@@ -29,36 +64,10 @@ public final class Theme {
     }
 
     public static @NotNull Theme getDefaultLightTheme() {
-        final var defaultScheme = ColorScheme.getDefaultLightScheme();
-        final var backgroundColor = Color.WHITE;
-        final var foregroundColor = Color.BLACK;
-        final var lineHighlightColor = new Color(132, 176, 250, 128);
-        final var caretColor = Color.DARK_GRAY;
-        final var selectionColor = new Color(83, 146, 229, 128);
-        return new Theme(
-                defaultScheme,
-                backgroundColor,
-                foregroundColor,
-                lineHighlightColor,
-                caretColor,
-                selectionColor
-        );
+        return defaultLightTheme.get();
     }
 
     public static @NotNull Theme getDefaultDarkTheme() {
-        final var defaultScheme = ColorScheme.getDefaultDarkScheme();
-        final var backgroundColor = new Color(47, 47, 47);
-        final var foregroundColor = Color.WHITE;
-        final var lineHighlightColor = new Color(132, 176, 250, 48);
-        final var caretColor = Color.LIGHT_GRAY;
-        final var selectionColor = new Color(83, 146, 229, 48);
-        return new Theme(
-                defaultScheme,
-                backgroundColor,
-                foregroundColor,
-                lineHighlightColor,
-                caretColor,
-                selectionColor
-        );
+        return defaultDarkTheme.get();
     }
 }

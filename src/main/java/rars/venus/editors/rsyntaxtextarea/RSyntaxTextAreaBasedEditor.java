@@ -10,11 +10,11 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.Settings;
 import rars.venus.editors.ColorScheme;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.Theme;
 
+import javax.swing.*;
 import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.font.TextAttribute;
@@ -172,7 +172,7 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     public void setFont(final @NotNull Font f) {
         final var derived = f.deriveFont(ligatureAttributes);
         textArea.setFont(derived);
-        gutter.setFont(derived.deriveFont(Font.BOLD));
+        gutter.setLineNumberFont(derived.deriveFont(Font.BOLD));
     }
 
     @Override
@@ -193,13 +193,6 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void setEnabled(final boolean enabled) {
         textArea.setEnabled(enabled);
-        // HACK: for some reason, when you set the background color to
-        // white, the folded area gutter hint that shows up when you hover
-        // over the folded area indicator doesn't have the correct background
-        // color. This is a workaround to fix that.
-        textArea.setBackground(textArea.getBackground().darker());
-        textArea.setBackground(textArea.getBackground().brighter());
-        textArea.setBackground(textArea.getBackground());
     }
 
     @Override
@@ -252,19 +245,19 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         textArea.setTabSize(chars);
     }
 
-    private void updateEditorColours() {
-        final var isEditable = textArea.isEditable();
-        final var settings = Globals.getSettings();
-        final var background = settings.getColorSettingByPosition(Settings.EDITOR_BACKGROUND);
-        final var foreground = settings.getColorSettingByPosition(Settings.EDITOR_FOREGROUND);
-        textArea.setBackground(background);
-        textArea.setCurrentLineHighlightColor(settings.getColorSettingByPosition(Settings.EDITOR_LINE_HIGHLIGHT));
-        textArea.setSelectionColor(settings.getColorSettingByPosition(Settings.EDITOR_SELECTION_COLOR));
-        textArea.setCaretColor(settings.getColorSettingByPosition(Settings.EDITOR_CARET_COLOR));
-        textArea.setForeground(isEditable ? foreground : foreground.darker());
-        gutter.setBackground(background);
-        gutter.setForeground(foreground);
-    }
+//    private void updateEditorColours() {
+//        final var isEditable = textArea.isEditable();
+//        final var settings = Globals.getSettings();
+//        final var background = settings.getColorSettingByPosition(Settings.EDITOR_BACKGROUND);
+//        final var foreground = settings.getColorSettingByPosition(Settings.EDITOR_FOREGROUND);
+//        textArea.setBackground(background);
+//        textArea.setCurrentLineHighlightColor(settings.getColorSettingByPosition(Settings.EDITOR_LINE_HIGHLIGHT));
+//        textArea.setSelectionColor(settings.getColorSettingByPosition(Settings.EDITOR_SELECTION_COLOR));
+//        textArea.setCaretColor(settings.getColorSettingByPosition(Settings.EDITOR_CARET_COLOR));
+//        textArea.setForeground(isEditable ? foreground : foreground.darker());
+//        gutter.setBackground(background);
+//        gutter.setForeground(foreground);
+//    }
 
     @Override
     public Component getOuterComponent() {
@@ -316,6 +309,10 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         this.textArea.setSelectionColor(theme.selectionColor);
         this.gutter.setBackground(theme.backgroundColor);
         this.gutter.setForeground(theme.foregroundColor);
+        this.gutter.setFoldIndicatorForeground(theme.foregroundColor);
+        this.gutter.setFoldIndicatorArmedForeground(theme.foregroundColor);
+        this.gutter.setLineNumberColor(theme.foregroundColor);
+        UIManager.put("ToolTip.background", theme.backgroundColor);
         this.setColorScheme(theme.colorScheme);
     }
 
