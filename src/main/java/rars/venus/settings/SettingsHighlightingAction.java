@@ -612,7 +612,6 @@ public class SettingsHighlightingAction extends GuiAction {
 
 }
 
-/////////////////////////////////////////////////////////////////
 //
 // Dinky little custom button class to modify border based on
 // whether enabled or not. The default behavior does not work

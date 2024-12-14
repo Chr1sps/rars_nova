@@ -5,22 +5,20 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.notices.SettingsNotice;
+import rars.settings.EditorThemeSettings;
 import rars.util.Binary;
 import rars.util.CustomPublisher;
 import rars.util.EditorFont;
 import rars.util.PropertiesFile;
-import rars.venus.editors.jeditsyntax.SyntaxStyle;
-import rars.venus.editors.jeditsyntax.SyntaxUtilities;
-import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -265,24 +263,6 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
     private static final String[] defaultColorSettingsValues = {
             "0x00e0e0e0", "0", "0x00ffffff", "0", "0x00ffff99", "0", "0x0033ff00", "0", "0x0099ccff", "0", "0x0099cc55",
             "0", "0x00ffffff", "0x00000000", "0x00eeeeee", "0x00ccccff", "0x00000000"};
-    private static final String SYNTAX_STYLE_COLOR_PREFIX = "SyntaxStyleColor_";
-    private static final String SYNTAX_STYLE_BOLD_PREFIX = "SyntaxStyleBold_";
-    private static final String SYNTAX_STYLE_ITALIC_PREFIX = "SyntaxStyleItalic_";
-    private static Map<TokenType, String> syntaxStyleColorSettingsKeys, syntaxStyleBoldSettingsKeys,
-            syntaxStyleItalicSettingsKeys;
-
-    static {
-        final var syntaxStyles = SyntaxUtilities.getDefaultSyntaxStyles();
-        Settings.syntaxStyleColorSettingsKeys = new HashMap<>();
-        Settings.syntaxStyleBoldSettingsKeys = new HashMap<>();
-        Settings.syntaxStyleItalicSettingsKeys = new HashMap<>();
-
-        for (final var key : syntaxStyles.keySet()) {
-            Settings.syntaxStyleColorSettingsKeys.put(key, Settings.SYNTAX_STYLE_COLOR_PREFIX + key.value);
-            Settings.syntaxStyleBoldSettingsKeys.put(key, Settings.SYNTAX_STYLE_BOLD_PREFIX + key.value);
-            Settings.syntaxStyleItalicSettingsKeys.put(key, Settings.SYNTAX_STYLE_ITALIC_PREFIX + key.value);
-        }
-    }
 
     private final ColorMode defaultColorMode = ColorMode.SYSTEM;
     private final HashMap<Bool, Boolean> booleanSettingsValues;
@@ -296,22 +276,8 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
      */
     private final String[] colorSettingsValues;
     private final Preferences preferences;
+    private final EditorThemeSettings editorThemeSettings;
     private SystemColorProvider[] systemColors;
-    /*
-     * **************************************************************************
-     * This section contains all code related to syntax highlighting styles
-     * settings.
-     * A style includes 3 components: color, bold (t/f), italic (t/f)
-     *
-     * The fallback defaults will come not from an array here, but from the
-     * existing static method SyntaxUtilities.getDefaultSyntaxStyles()
-     * in the rars.venus.editors.jeditsyntax package. It returns an array
-     * of SyntaxStyle objects.
-     *
-     */
-    private HashMap<TokenType, String> syntaxStyleColorSettingsValues;
-    private HashMap<TokenType, Boolean> syntaxStyleBoldSettingsValues;
-    private HashMap<TokenType, Boolean> syntaxStyleItalicSettingsValues;
 
     /**
      * Create Settings object and set to saved values. If saved values not found,
@@ -341,8 +307,21 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
         // Swing
         // initialization which caused problems. Now this will only occur on demand from
         // Venus, which happens only when running as GUI.
+        this.editorThemeSettings = new EditorThemeSettings(this.preferences);
         this.initialize();
     }
+    /*
+     * **************************************************************************
+     * This section contains all code related to syntax highlighting styles
+     * settings.
+     * A style includes 3 components: color, bold (t/f), italic (t/f)
+     *
+     * The fallback defaults will come not from an array here, but from the
+     * existing static method SyntaxUtilities.getDefaultSyntaxStyles()
+     * in the rars.venus.editors.jeditsyntax package. It returns an array
+     * of SyntaxStyle objects.
+     *
+     */
 
     /**
      * Return whether backstepping is permitted at this time. Backstepping is
@@ -469,96 +448,18 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
         return list;
     }
 
+    public EditorThemeSettings getEditorThemeSettings() {
+        return editorThemeSettings;
+    }
+
     /**
      * Reset settings to default values, as described in the constructor comments.
      */
     public void reset() {
         this.initialize();
     }
-    // *********************************************************************************
 
-    ////////////////////////////////////////////////////////////////////////
     // Setting Getters
-    ////////////////////////////////////////////////////////////////////////
-
-    /**
-     * <p>setEditorSyntaxStyleByPosition.</p>
-     *
-     * @param type        a {@link TokenType} object
-     * @param syntaxStyle a {@link SyntaxStyle} object
-     */
-    public void setEditorSyntaxStyleByTokenType(final @NotNull TokenType type, final SyntaxStyle syntaxStyle) {
-        this.syntaxStyleColorSettingsValues.put(type, syntaxStyle.getColorAsHexString());
-        this.syntaxStyleItalicSettingsValues.put(type, syntaxStyle.italic());
-        this.syntaxStyleBoldSettingsValues.put(type, syntaxStyle.bold());
-        this.saveEditorSyntaxStyle(type);
-    }
-
-    /**
-     * <p>getEditorSyntaxStyleByPosition.</p>
-     *
-     * @param type a int
-     * @return a {@link SyntaxStyle} object
-     */
-    public SyntaxStyle getEditorSyntaxStyleByTokenType(final @NotNull TokenType type) {
-        final var currentColor = this.syntaxStyleColorSettingsValues.get(type);
-        return new SyntaxStyle(
-                (currentColor != null) ? Color.decode(currentColor) : SyntaxUtilities.getDefaultSyntaxStyles().get(type).color(),
-                this.syntaxStyleItalicSettingsValues.get(type),
-                this.syntaxStyleBoldSettingsValues.get(type));
-    }
-
-    private void saveEditorSyntaxStyle(final @NotNull TokenType type) {
-        try {
-            this.preferences.put(Settings.syntaxStyleColorSettingsKeys.get(type),
-                    this.syntaxStyleColorSettingsValues.get(type));
-            this.preferences.putBoolean(Settings.syntaxStyleBoldSettingsKeys.get(type),
-                    this.syntaxStyleBoldSettingsValues.get(type));
-            this.preferences.putBoolean(Settings.syntaxStyleItalicSettingsKeys.get(type),
-                    this.syntaxStyleItalicSettingsValues.get(type));
-            this.preferences.flush();
-        } catch (final SecurityException se) {
-            LOGGER.error("Unable to write to persistent storage for security reasons");
-        } catch (final BackingStoreException bse) {
-            LOGGER.error("Unable to communicate with persistent storage.");
-        }
-    }
-
-    // For syntax styles, need to initialize from SyntaxUtilities defaults.
-    // Taking care not to explicitly create a Color object, since it may trigger
-    // Swing initialization (that caused problems for UC Berkeley when we
-    // created Font objects here). It shouldn't, but then again Font shouldn't
-    // either but they said it did. (see HeadlessException)
-    // On othe other hand, the first statement of this method causes Color objects
-    // to be created! It is possible but a real pain in the rear to avoid using
-    // Color objects totally. Requires new methods for the SyntaxUtilities class.
-    private void initializeEditorSyntaxStyles() {
-        final var defaultSyntaxStyles = SyntaxUtilities.getDefaultSyntaxStyles();
-        // TODO: move this to a static block
-        this.syntaxStyleColorSettingsValues = new HashMap<>();
-        this.syntaxStyleBoldSettingsValues = new HashMap<>();
-        this.syntaxStyleItalicSettingsValues = new HashMap<>();
-        for (final var key : defaultSyntaxStyles.keySet()) {
-            this.syntaxStyleColorSettingsValues.put(key, defaultSyntaxStyles.get(key).getColorAsHexString());
-            this.syntaxStyleBoldSettingsValues.put(key, defaultSyntaxStyles.get(key).bold());
-            this.syntaxStyleItalicSettingsValues.put(key, defaultSyntaxStyles.get(key).italic());
-        }
-    }
-
-    private void getEditorSyntaxStyleSettingsFromPreferences() {
-        for (final var entry : Settings.syntaxStyleColorSettingsKeys.entrySet()) {
-            final var key = entry.getKey();
-            final var syntaxStyleColorValue = entry.getValue();
-            this.syntaxStyleColorSettingsValues.put(key, this.preferences.get(syntaxStyleColorValue,
-                    this.syntaxStyleColorSettingsValues.get(key)));
-            this.syntaxStyleBoldSettingsValues.put(key,
-                    this.preferences.getBoolean(Settings.syntaxStyleBoldSettingsKeys.get(key),
-                            this.syntaxStyleBoldSettingsValues.get(key)));
-            this.syntaxStyleItalicSettingsValues.put(key,
-                    this.preferences.getBoolean(Settings.syntaxStyleItalicSettingsKeys.get(key),
-                            this.syntaxStyleItalicSettingsValues.get(key)));
-        }
-    }
 
     /**
      * Fetch second of a boolean setting given its identifier.
@@ -783,30 +684,6 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
     }
 
     /**
-     * Get Color object for specified settings first.
-     * Returns null if first is not found or its second is not a valid color encoding.
-     *
-     * @param key the Setting first
-     * @return corresponding Color, or null if first not found or second not valid
-     * color
-     */
-    public Color getColorSettingByKey(final String key) {
-        return this.getColorValueByKey(key, this.colorSettingsValues, Settings.defaultColorSettingsValues);
-    }
-
-    /**
-     * Get default Color second for specified settings first.
-     * Returns null if first is not found or its second is not a valid color encoding.
-     *
-     * @param key the Setting first
-     * @return corresponding default Color, or null if first not found or second not
-     * valid color
-     */
-    public Color getDefaultColorSettingByKey(final String key) {
-        return this.getColorValueByKey(key, Settings.defaultColorSettingsValues, null);
-    }
-
-    /**
      * Get Color object for specified settings name (a static constant).
      * Returns null if argument invalid or its second is not a valid color encoding.
      *
@@ -909,26 +786,7 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
         this.submit(SettingsNotice.get());
     }
 
-    /**
-     * Set Color object for specified settings first. Has no effect if first is invalid.
-     *
-     * @param key   the Setting first
-     * @param color the Color to save
-     */
-    public void setColorSettingByKey(final String key, final Color color) {
-        for (int i = 0; i < Settings.colorSettingsKeys.length; i++) {
-            if (key.equals(Settings.colorSettingsKeys[i])) {
-                this.setColorSettingByPosition(i, color);
-                return;
-            }
-        }
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    //
     // PRIVATE HELPER METHODS TO DO THE REAL WORK
-    //
-    /////////////////////////////////////////////////////////////////////////
 
     // Initialize settings to default values.
     // Strategy: First set from properties file.
@@ -990,7 +848,7 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
             this.fontSizeSettingsValues[i] = Settings.defaultFontSizeSettingsValues[i];
         }
         Arrays.fill(this.colorSettingsValues, this.getDefaultColorMode().modeKey);
-        this.initializeEditorSyntaxStyles();
+//        this.initializeEditorSyntaxStyles();
     }
 
     private void initSystemProviders() {
@@ -1035,18 +893,6 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
             this.colorSettingsValues[settingIndex] = colorStr;
             this.saveColorSetting(settingIndex);
         }
-    }
-
-    // Get Color object for this first second. Get it from values array provided as
-    // argument (could be either
-    // the current or the default settings array).
-    private @Nullable Color getColorValueByKey(final String key, final String[] values, final String[] defaults) {
-        for (int i = 0; i < Settings.colorSettingsKeys.length; i++) {
-            if (key.equals(Settings.colorSettingsKeys[i])) {
-                return this.getColorValueByPosition(i, values, defaults);
-            }
-        }
-        return null;
     }
 
     // Get Color object for this first array position. Get it from values array
@@ -1143,7 +989,7 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
             this.colorSettingsValues[i] = this.preferences.get(Settings.colorSettingsKeys[i],
                     this.colorSettingsValues[i]);
         }
-        this.getEditorSyntaxStyleSettingsFromPreferences();
+//        this.getEditorSyntaxStyleSettingsFromPreferences();
     }
 
     // Save the first-second pair in the Properties object and assure it is written to

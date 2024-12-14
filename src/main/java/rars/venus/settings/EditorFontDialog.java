@@ -4,9 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
 import rars.venus.Editor;
-import rars.venus.editors.jeditsyntax.SyntaxStyle;
-import rars.venus.editors.jeditsyntax.SyntaxUtilities;
-import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 import rars.venus.util.AbstractFontSettingDialog;
 
 import javax.swing.*;
@@ -14,9 +11,6 @@ import javax.swing.text.Caret;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
-import java.util.Map;
-
-import static java.util.Map.entry;
 
 // Concrete font chooser class.
 public final class EditorFontDialog extends AbstractFontSettingDialog {
@@ -36,39 +30,12 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
             "edited";
     private static final String AUTO_INDENT_TOOL_TIP_TEXT = "Check, to enable auto-indent to previous line when Enter" +
             " first is pressed";
-    private static final String[] POPUP_GUIDANCE_TOOL_TIP_TEXT = {
-            "Turns off instruction and directive guide popup while typing",
-            "Generates instruction guide popup after first letter of potential instruction is typed",
-            "Generates instruction guide popup after second letter of potential instruction is typed"
-    };
-    private static final @NotNull Map<TokenType, String> tokenLabels = Map.ofEntries(
-            entry(TokenType.COMMENT1, "Comment"),
-            entry(TokenType.LITERAL1, "String literal"),
-            entry(TokenType.LITERAL2, "Character literal"),
-            entry(TokenType.LABEL, "Label"),
-            entry(TokenType.KEYWORD1, "Instruction"),
-            entry(TokenType.KEYWORD2, "Assembler directive"),
-            entry(TokenType.KEYWORD3, "Register"),
-            entry(TokenType.INVALID, "In-progress, invalid"),
-            entry(TokenType.MACRO_ARG, "Macro parameter")
-    );
-    private static final @NotNull Map<TokenType, String> tokenExamples = Map.ofEntries(
-            entry(TokenType.COMMENT1, "# Load"),
-            entry(TokenType.LITERAL1, "\"First\""),
-            entry(TokenType.LITERAL2, "'\\n'"),
-            entry(TokenType.LABEL, "main:"),
-            entry(TokenType.KEYWORD1, "lui"),
-            entry(TokenType.KEYWORD2, ".text"),
-            entry(TokenType.KEYWORD3, "zero"),
-            entry(TokenType.INVALID, "\"Regi"),
-            entry(TokenType.MACRO_ARG, "%arg")
-    );
     private JButton[] foregroundButtons;
     private JLabel[] samples;
     private JToggleButton[] bold, italic;
     private JCheckBox[] useDefault;
-    private TokenType[] syntaxStyleIndex;
-    private Map<TokenType, SyntaxStyle> defaultStyles, initialStyles, currentStyles;
+    //    private TokenType[] syntaxStyleIndex;
+//    private Map<TokenType, SyntaxStyle> defaultStyles, initialStyles, currentStyles;
     private Font previewFont;
     private JSlider tabSizeSelector;
     private JSpinner tabSizeSpinSelector, blinkRateSpinSelector;
@@ -586,7 +553,7 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
             }
             EditorFontDialog.this.currentStyles.put(type,
                     new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
-                    EditorFontDialog.this.italic[this.row].isSelected(),
+                            EditorFontDialog.this.italic[this.row].isSelected(),
                             EditorFontDialog.this.bold[this.row].isSelected()));
             EditorFontDialog.this.syntaxStylesAction = true;
 
@@ -645,7 +612,7 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
                 EditorFontDialog.this.italic[this.row].setEnabled(false);
                 currentStyles.put(this.type,
                         new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
-                        EditorFontDialog.this.italic[this.row].isSelected(),
+                                EditorFontDialog.this.italic[this.row].isSelected(),
                                 EditorFontDialog.this.bold[this.row].isSelected()));
                 final var defaultStyle = EditorFontDialog.this.defaultStyles.get(this.type);
                 EditorFontDialog.this.setSampleStyles(EditorFontDialog.this.samples[this.row], defaultStyle);

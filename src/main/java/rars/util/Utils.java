@@ -13,6 +13,7 @@ import rars.riscv.SyscallLoader;
 import rars.riscv.hardware.RegisterFile;
 import rars.riscv.syscalls.*;
 
+import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Objects;
@@ -121,5 +122,18 @@ public final class Utils {
     @Contract(value = "_ -> param1", pure = true)
     public static <T> T id(final T t) {
         return t;
+    }
+
+    /**
+     * Returns the color coded as Stringified 32-bit hex with
+     * Red in bits 16-23, Green in bits 8-15, Blue in bits 0-7
+     * e.g. "0x00FF3366" where Red is FF, Green is 33, Blue is 66.
+     * This is used by Settings initialization to avoid direct
+     * use of Color class. Long story. DPS 13-May-2010
+     *
+     * @return String containing hex-coded color second.
+     */
+    public static @NotNull String getColorAsHexString(final @NotNull Color color) {
+        return Binary.intToHexString(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
     }
 }

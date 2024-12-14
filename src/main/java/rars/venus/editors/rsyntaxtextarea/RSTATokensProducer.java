@@ -18,7 +18,7 @@ public class RSTATokensProducer extends TokenMakerBase implements TokensProducer
     private static final String[] LINE_COMMENT_START_AND_END = {"#", null};
     private final Lexer<Token, RSTATokensProducer> lexer;
 
-    public RSTATokensProducer(Lexer<Token, RSTATokensProducer> lexer) {
+    public RSTATokensProducer(final Lexer<Token, RSTATokensProducer> lexer) {
         this.lexer = lexer;
     }
 
@@ -27,7 +27,7 @@ public class RSTATokensProducer extends TokenMakerBase implements TokensProducer
     }
 
     @Override
-    public void addToken(char[] array, int start, int end, @NotNull RVTokenType tokenType, int startOffset) {
+    public void addToken(final char[] array, final int start, final int end, @NotNull final RVTokenType tokenType, final int startOffset) {
         this.addToken(array, start, end, tokenValue(tokenType), startOffset);
     }
 
@@ -37,12 +37,12 @@ public class RSTATokensProducer extends TokenMakerBase implements TokensProducer
     }
 
     @Override
-    public Token getTokenList(Segment text, int initialTokenType, int lineOffset, int lineNum) {
+    public Token getTokenList(final Segment text, final int initialTokenType, final int lineOffset, final int lineNum) {
         return getTokenList(text, initialTokenType, lineOffset);
     }
 
     @Override
-    public Token getTokenList(Segment segment, int initialTokenType, int initialOffset) {
+    public Token getTokenList(final Segment segment, final int initialTokenType, final int initialOffset) {
         resetTokenList();
         return lexer.getTokensList(segment, initialTokenType, initialOffset, this);
     }
@@ -53,7 +53,7 @@ public class RSTATokensProducer extends TokenMakerBase implements TokensProducer
     }
 
     @Override
-    public String[] getLineCommentStartAndEnd(int languageIndex) {
+    public String[] getLineCommentStartAndEnd(final int languageIndex) {
         return LINE_COMMENT_START_AND_END;
     }
 }
