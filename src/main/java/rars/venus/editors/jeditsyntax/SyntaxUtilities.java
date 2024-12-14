@@ -9,20 +9,12 @@
 
 package rars.venus.editors.jeditsyntax;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import rars.Globals;
-import rars.venus.editors.jeditsyntax.tokenmarker.Token;
 import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 
-import javax.swing.text.Segment;
-import javax.swing.text.TabExpander;
-import javax.swing.text.Utilities;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Map.entry;
@@ -52,35 +44,6 @@ public final class SyntaxUtilities {
             ));
 
     private SyntaxUtilities() {
-    }
-
-    /**
-     * Checks if a subregion of a <code>Segment</code> is equal to a
-     * character array.
-     *
-     * @param ignoreCase True if case should be ignored, false otherwise
-     * @param text       The segment
-     * @param offset     The offset into the segment
-     * @param match      The character array to match
-     * @return a boolean
-     */
-    public static boolean regionMatches(final boolean ignoreCase, final @NotNull Segment text,
-                                        final int offset, final char @NotNull [] match) {
-        final int length = offset + match.length;
-        final char[] textArray = text.array;
-        if (length > text.offset + text.count)
-            return false;
-        for (int i = offset, j = 0; i < length; i++, j++) {
-            char c1 = textArray[i];
-            char c2 = match[j];
-            if (ignoreCase) {
-                c1 = Character.toUpperCase(c1);
-                c2 = Character.toUpperCase(c2);
-            }
-            if (c1 != c2)
-                return false;
-        }
-        return true;
     }
 
     /**
@@ -118,77 +81,5 @@ public final class SyntaxUtilities {
                 entry(TokenType.INVALID, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.INVALID)),
                 entry(TokenType.MACRO_ARG, Globals.getSettings().getEditorSyntaxStyleByTokenType(TokenType.MACRO_ARG))
         );
-    }
-
-    /**
-     * Paints the specified line onto the graphics context. Note that this
-     * method munges the offset and count values of the segment.
-     *
-     * @param line     The line segment
-     * @param tokens   The token list for the line
-     * @param styles   The syntax style list
-     * @param expander The tab expander used to determine tab stops. May
-     *                 be null
-     * @param gfx      The graphics context
-     * @param x        The x co-ordinate
-     * @param y        The y co-ordinate
-     * @return The x co-ordinate, plus the width of the painted string
-     */
-    public static int paintSyntaxLine(final Segment line, final @NotNull List<Token> tokens,
-                                      final @NotNull Map<TokenType, SyntaxStyle> styles, final TabExpander expander, final @NotNull Graphics gfx,
-                                      int x, final int y) {
-        final Font defaultFont = gfx.getFont();
-        final Color defaultColor = gfx.getColor();
-
-        int offset = 0;
-        for (final var token : tokens) {
-            final var type = token.type();
-            final int length = token.length();
-            if (type == TokenType.END)
-                break;
-
-            if (type == TokenType.NULL) {
-                if (!defaultColor.equals(gfx.getColor()))
-                    gfx.setColor(defaultColor);
-                if (!defaultFont.equals(gfx.getFont()))
-                    gfx.setFont(defaultFont);
-            } else
-                styles.get(type).setGraphicsFlags(gfx, defaultFont);
-            line.count = length;
-
-            x = (int) Utilities.drawTabbedText(line, (float) x, (float) y, (Graphics2D) gfx, expander, 0);
-            line.offset += length;
-            offset += length;
-        }
-        return x;
-    }
-}
-
-class InstructionMouseEvent extends MouseEvent {
-    // private members
-    private static final Logger LOGGER = LogManager.getLogger();
-    private final Segment line;
-
-    /**
-     * <p>Constructor for InstructionMouseEvent.</p>
-     *
-     * @param component a {@link java.awt.Component} object
-     * @param x         a int
-     * @param y         a int
-     * @param line      a {@link javax.swing.text.Segment} object
-     */
-    public InstructionMouseEvent(final Component component, final int x, final int y, final Segment line) {
-        super(component, MouseEvent.MOUSE_MOVED, new java.util.Date().getTime(), 0, x, y, 0, false);
-        InstructionMouseEvent.LOGGER.debug("Create InstructionMouseEvent {} {} {}", x, y, line);
-        this.line = line;
-    }
-
-    /**
-     * <p>Getter for the field <code>line</code>.</p>
-     *
-     * @return a {@link javax.swing.text.Segment} object
-     */
-    public Segment getLine() {
-        return this.line;
     }
 }

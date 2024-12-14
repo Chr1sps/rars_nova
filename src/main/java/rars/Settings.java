@@ -489,8 +489,8 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
      */
     public void setEditorSyntaxStyleByTokenType(final @NotNull TokenType type, final SyntaxStyle syntaxStyle) {
         this.syntaxStyleColorSettingsValues.put(type, syntaxStyle.getColorAsHexString());
-        this.syntaxStyleItalicSettingsValues.put(type, syntaxStyle.isItalic());
-        this.syntaxStyleBoldSettingsValues.put(type, syntaxStyle.isBold());
+        this.syntaxStyleItalicSettingsValues.put(type, syntaxStyle.italic());
+        this.syntaxStyleBoldSettingsValues.put(type, syntaxStyle.bold());
         this.saveEditorSyntaxStyle(type);
     }
 
@@ -503,8 +503,7 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
     public SyntaxStyle getEditorSyntaxStyleByTokenType(final @NotNull TokenType type) {
         final var currentColor = this.syntaxStyleColorSettingsValues.get(type);
         return new SyntaxStyle(
-                (currentColor != null) ? Color.decode(currentColor) :
-                        SyntaxUtilities.getDefaultSyntaxStyles().get(type).getColor(),
+                (currentColor != null) ? Color.decode(currentColor) : SyntaxUtilities.getDefaultSyntaxStyles().get(type).color(),
                 this.syntaxStyleItalicSettingsValues.get(type),
                 this.syntaxStyleBoldSettingsValues.get(type));
     }
@@ -541,8 +540,8 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
         this.syntaxStyleItalicSettingsValues = new HashMap<>();
         for (final var key : defaultSyntaxStyles.keySet()) {
             this.syntaxStyleColorSettingsValues.put(key, defaultSyntaxStyles.get(key).getColorAsHexString());
-            this.syntaxStyleBoldSettingsValues.put(key, defaultSyntaxStyles.get(key).isBold());
-            this.syntaxStyleItalicSettingsValues.put(key, defaultSyntaxStyles.get(key).isItalic());
+            this.syntaxStyleBoldSettingsValues.put(key, defaultSyntaxStyles.get(key).bold());
+            this.syntaxStyleItalicSettingsValues.put(key, defaultSyntaxStyles.get(key).italic());
         }
     }
 

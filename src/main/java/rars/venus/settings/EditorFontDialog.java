@@ -6,7 +6,6 @@ import rars.Settings;
 import rars.venus.Editor;
 import rars.venus.editors.jeditsyntax.SyntaxStyle;
 import rars.venus.editors.jeditsyntax.SyntaxUtilities;
-import rars.venus.editors.jeditsyntax.tokenmarker.RISCVTokenMarker;
 import rars.venus.editors.jeditsyntax.tokenmarker.TokenType;
 import rars.venus.util.AbstractFontSettingDialog;
 
@@ -16,6 +15,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Map.entry;
 
 // Concrete font chooser class.
 public final class EditorFontDialog extends AbstractFontSettingDialog {
@@ -31,23 +32,44 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
     private static final String TAB_SIZE_TOOL_TIP_TEXT = "Current tab size in characters";
     private static final String BLINK_SPINNER_TOOL_TIP_TEXT = "Current blinking rate in milliseconds";
     private static final String BLINK_SAMPLE_TOOL_TIP_TEXT = "Displays current blinking rate";
-    private static final String CURRENT_LINE_HIGHLIGHT_TOOL_TIP_TEXT = "Check, to highlight line currently being edited";
-    private static final String AUTO_INDENT_TOOL_TIP_TEXT = "Check, to enable auto-indent to previous line when Enter first is pressed";
+    private static final String CURRENT_LINE_HIGHLIGHT_TOOL_TIP_TEXT = "Check, to highlight line currently being " +
+            "edited";
+    private static final String AUTO_INDENT_TOOL_TIP_TEXT = "Check, to enable auto-indent to previous line when Enter" +
+            " first is pressed";
     private static final String[] POPUP_GUIDANCE_TOOL_TIP_TEXT = {
             "Turns off instruction and directive guide popup while typing",
             "Generates instruction guide popup after first letter of potential instruction is typed",
             "Generates instruction guide popup after second letter of potential instruction is typed"
     };
-
+    private static final @NotNull Map<TokenType, String> tokenLabels = Map.ofEntries(
+            entry(TokenType.COMMENT1, "Comment"),
+            entry(TokenType.LITERAL1, "String literal"),
+            entry(TokenType.LITERAL2, "Character literal"),
+            entry(TokenType.LABEL, "Label"),
+            entry(TokenType.KEYWORD1, "Instruction"),
+            entry(TokenType.KEYWORD2, "Assembler directive"),
+            entry(TokenType.KEYWORD3, "Register"),
+            entry(TokenType.INVALID, "In-progress, invalid"),
+            entry(TokenType.MACRO_ARG, "Macro parameter")
+    );
+    private static final @NotNull Map<TokenType, String> tokenExamples = Map.ofEntries(
+            entry(TokenType.COMMENT1, "# Load"),
+            entry(TokenType.LITERAL1, "\"First\""),
+            entry(TokenType.LITERAL2, "'\\n'"),
+            entry(TokenType.LABEL, "main:"),
+            entry(TokenType.KEYWORD1, "lui"),
+            entry(TokenType.KEYWORD2, ".text"),
+            entry(TokenType.KEYWORD3, "zero"),
+            entry(TokenType.INVALID, "\"Regi"),
+            entry(TokenType.MACRO_ARG, "%arg")
+    );
     private JButton[] foregroundButtons;
     private JLabel[] samples;
     private JToggleButton[] bold, italic;
     private JCheckBox[] useDefault;
-
     private TokenType[] syntaxStyleIndex;
     private Map<TokenType, SyntaxStyle> defaultStyles, initialStyles, currentStyles;
     private Font previewFont;
-
     private JSlider tabSizeSelector;
     private JSpinner tabSizeSpinSelector, blinkRateSpinSelector;
     private JCheckBox lineHighlightCheck, autoIndentCheck;
@@ -58,7 +80,6 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
     // Flag to indicate whether any syntax style buttons have been clicked
     // since dialog created or most recent "apply".
     private boolean syntaxStylesAction = false;
-
     private int initialEditorTabSize, initialCaretBlinkRate, initialPopupGuidance;
     private boolean initialLineHighlighting, initialAutoIndent;
 
@@ -125,7 +146,8 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
     // abstract in superclass.
     @Override
     protected void apply(final Font font) {
-//            Globals.getSettings().setBooleanSetting(Settings.Bool.GENERIC_TEXT_EDITOR, genericEditorCheck.isSelected());
+//            Globals.getSettings().setBooleanSetting(Settings.Bool.GENERIC_TEXT_EDITOR, genericEditorCheck
+//            .isSelected());
         Globals.getSettings().setBooleanSetting(Settings.Bool.EDITOR_CURRENT_LINE_HIGHLIGHTING,
                 this.lineHighlightCheck.isSelected());
         Globals.getSettings().setBooleanSetting(Settings.Bool.AUTO_INDENT, this.autoIndentCheck.isSelected());
@@ -199,7 +221,8 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
                     final Integer value = ((JSlider) e.getSource()).getValue();
                     this.tabSizeSpinSelector.setValue(value);
                 });
-        final SpinnerNumberModel tabSizeSpinnerModel = new SpinnerNumberModel(this.initialEditorTabSize, Editor.MIN_TAB_SIZE,
+        final SpinnerNumberModel tabSizeSpinnerModel = new SpinnerNumberModel(this.initialEditorTabSize,
+                Editor.MIN_TAB_SIZE,
                 Editor.MAX_TAB_SIZE, 1);
         this.tabSizeSpinSelector = new JSpinner(tabSizeSpinnerModel);
         this.tabSizeSpinSelector.setToolTipText(TAB_SIZE_TOOL_TIP_TEXT);
@@ -315,8 +338,8 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
         final JPanel syntaxStylePanel = new JPanel();
         this.defaultStyles = SyntaxUtilities.getDefaultSyntaxStyles();
         this.initialStyles = SyntaxUtilities.getCurrentSyntaxStyles();
-        final var labels = RISCVTokenMarker.getRISCVTokenLabels();
-        final var sampleText = RISCVTokenMarker.getRISCVTokenExamples();
+        final var labels = tokenLabels;
+        final var sampleText = tokenExamples;
         this.syntaxStylesAction = false;
         // Count the number of actual styles specified
         // create new arrays (no gaps) for grid display, refer to original index
@@ -376,7 +399,8 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
         this.initializeSyntaxStyleChangeables();
         // build a grid
         syntaxStylePanel.setLayout(new BorderLayout());
-        final JPanel labelPreviewPanel = new JPanel(new GridLayout(this.syntaxStyleIndex.length, 2, gridVGap, gridHGap));
+        final JPanel labelPreviewPanel = new JPanel(new GridLayout(this.syntaxStyleIndex.length, 2, gridVGap,
+                gridHGap));
         final JPanel buttonsPanel = new JPanel(new GridLayout(this.syntaxStyleIndex.length, 4, gridVGap, gridHGap));
         // column 1: label, column 2: preview, column 3: foreground chooser, column 4/5:
         // bold/italic, column 6: default
@@ -415,16 +439,16 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
         for (int count = 0; count < this.samples.length; count++) {
             final TokenType type = this.syntaxStyleIndex[count];
             this.samples[count].setFont(this.previewFont);
-            this.samples[count].setForeground(this.initialStyles.get(type).getColor());
-            this.foregroundButtons[count].setBackground(this.initialStyles.get(type).getColor());
+            this.samples[count].setForeground(this.initialStyles.get(type).color());
+            this.foregroundButtons[count].setBackground(this.initialStyles.get(type).color());
             this.foregroundButtons[count].setEnabled(true);
             this.currentStyles.put(type, this.initialStyles.get(type));
-            this.bold[count].setSelected(this.initialStyles.get(type).isBold());
+            this.bold[count].setSelected(this.initialStyles.get(type).bold());
             if (this.bold[count].isSelected()) {
                 final Font f = this.samples[count].getFont();
                 this.samples[count].setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
             }
-            this.italic[count].setSelected(this.initialStyles.get(type).isItalic());
+            this.italic[count].setSelected(this.initialStyles.get(type).italic());
             if (this.italic[count].isSelected()) {
                 final Font f = this.samples[count].getFont();
                 this.samples[count].setFont(f.deriveFont(f.getStyle() ^ Font.ITALIC));
@@ -441,14 +465,14 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
     // set the foreground color, bold and italic of sample (a JLabel)
     private void setSampleStyles(final JLabel sample, final @NotNull SyntaxStyle style) {
         Font f = this.previewFont;
-        if (style.isBold()) {
+        if (style.bold()) {
             f = f.deriveFont(f.getStyle() ^ Font.BOLD);
         }
-        if (style.isItalic()) {
+        if (style.italic()) {
             f = f.deriveFont(f.getStyle() ^ Font.ITALIC);
         }
         sample.setFont(f);
-        sample.setForeground(style.getColor());
+        sample.setForeground(style.color());
     }
 
     /**
@@ -491,7 +515,8 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
             this.add(this.colorSelect);
 
             this.modeButton = new JButton(this.mode.name());
-            this.modeButton.addActionListener(e -> this.setMode(this.mode == Settings.ColorMode.DEFAULT ? Settings.ColorMode.SYSTEM
+            this.modeButton.addActionListener(e -> this.setMode(this.mode == Settings.ColorMode.DEFAULT ?
+                    Settings.ColorMode.SYSTEM
                     : Settings.ColorMode.DEFAULT));
             this.add(this.modeButton);
 
@@ -559,8 +584,10 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
                     EditorFontDialog.this.samples[this.row].setFont(f.deriveFont(f.getStyle() ^ Font.ITALIC));
                 }
             }
-            EditorFontDialog.this.currentStyles.put(type, new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
-                    EditorFontDialog.this.italic[this.row].isSelected(), EditorFontDialog.this.bold[this.row].isSelected()));
+            EditorFontDialog.this.currentStyles.put(type,
+                    new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
+                    EditorFontDialog.this.italic[this.row].isSelected(),
+                            EditorFontDialog.this.bold[this.row].isSelected()));
             EditorFontDialog.this.syntaxStylesAction = true;
 
         }
@@ -588,7 +615,8 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
                 EditorFontDialog.this.samples[this.row].setForeground(newColor);
             }
             currentStyles.put(type, new SyntaxStyle(button.getBackground(),
-                    EditorFontDialog.this.italic[this.row].isSelected(), EditorFontDialog.this.bold[this.row].isSelected()));
+                    EditorFontDialog.this.italic[this.row].isSelected(),
+                    EditorFontDialog.this.bold[this.row].isSelected()));
             EditorFontDialog.this.syntaxStylesAction = true;
         }
     }
@@ -615,18 +643,21 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
                 EditorFontDialog.this.foregroundButtons[this.row].setEnabled(false);
                 EditorFontDialog.this.bold[this.row].setEnabled(false);
                 EditorFontDialog.this.italic[this.row].setEnabled(false);
-                currentStyles.put(this.type, new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
-                        EditorFontDialog.this.italic[this.row].isSelected(), EditorFontDialog.this.bold[this.row].isSelected()));
+                currentStyles.put(this.type,
+                        new SyntaxStyle(EditorFontDialog.this.foregroundButtons[this.row].getBackground(),
+                        EditorFontDialog.this.italic[this.row].isSelected(),
+                                EditorFontDialog.this.bold[this.row].isSelected()));
                 final var defaultStyle = EditorFontDialog.this.defaultStyles.get(this.type);
                 EditorFontDialog.this.setSampleStyles(EditorFontDialog.this.samples[this.row], defaultStyle);
-                EditorFontDialog.this.foregroundButtons[this.row].setBackground(defaultStyle.getColor());
-                EditorFontDialog.this.bold[this.row].setSelected(defaultStyle.isBold());
-                EditorFontDialog.this.italic[this.row].setSelected(defaultStyle.isItalic());
+                EditorFontDialog.this.foregroundButtons[this.row].setBackground(defaultStyle.color());
+                EditorFontDialog.this.bold[this.row].setSelected(defaultStyle.bold());
+                EditorFontDialog.this.italic[this.row].setSelected(defaultStyle.italic());
             } else {
-                EditorFontDialog.this.setSampleStyles(EditorFontDialog.this.samples[this.row], EditorFontDialog.this.currentStyles.get(this.type));
-                EditorFontDialog.this.foregroundButtons[this.row].setBackground(EditorFontDialog.this.currentStyles.get(this.type).getColor());
-                EditorFontDialog.this.bold[this.row].setSelected(EditorFontDialog.this.currentStyles.get(this.type).isBold());
-                EditorFontDialog.this.italic[this.row].setSelected(EditorFontDialog.this.currentStyles.get(this.type).isItalic());
+                EditorFontDialog.this.setSampleStyles(EditorFontDialog.this.samples[this.row],
+                        EditorFontDialog.this.currentStyles.get(this.type));
+                EditorFontDialog.this.foregroundButtons[this.row].setBackground(EditorFontDialog.this.currentStyles.get(this.type).color());
+                EditorFontDialog.this.bold[this.row].setSelected(EditorFontDialog.this.currentStyles.get(this.type).bold());
+                EditorFontDialog.this.italic[this.row].setSelected(EditorFontDialog.this.currentStyles.get(this.type).italic());
                 EditorFontDialog.this.foregroundButtons[this.row].setEnabled(true);
                 EditorFontDialog.this.bold[this.row].setEnabled(true);
                 EditorFontDialog.this.italic[this.row].setEnabled(true);
