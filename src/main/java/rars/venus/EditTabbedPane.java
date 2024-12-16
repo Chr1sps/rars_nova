@@ -7,6 +7,7 @@ import rars.RISCVprogram;
 import rars.Settings;
 import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
 
 import javax.swing.*;
@@ -83,7 +84,7 @@ public class EditTabbedPane extends JPanel {
                     if (editPane != null) {
                         // New IF statement to permit free traversal of edit panes w/o invalidating
                         // assembly if assemble-all is selected. DPS 9-Aug-2011
-                        if (Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ALL)) {
+                        if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ALL)) {
                             EditTabbedPane.this.updateTitles(editPane);
                         } else {
                             EditTabbedPane.this.updateTitlesAndMenuState(editPane);
@@ -571,7 +572,7 @@ public class EditTabbedPane extends JPanel {
             // Set default to previous file opened, if any. This is useful in conjunction
             // with option to assemble file automatically upon opening. File likely to have
             // been edited externally (e.g. by Mipster).
-            if (Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ON_OPEN)
+            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ON_OPEN)
                     && this.mostRecentlyOpenedFile != null) {
                 this.fileChooser.setSelectedFile(this.mostRecentlyOpenedFile);
             }
@@ -587,7 +588,7 @@ public class EditTabbedPane extends JPanel {
                 // possibly send this file right through to the assembler by firing
                 // Run->Assemble's
                 // actionPerformed() method.
-                if (theFile.canRead() && Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ON_OPEN)) {
+                if (theFile.canRead() && Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ON_OPEN)) {
                     EditTabbedPane.this.mainUI.getRunAssembleAction().actionPerformed(null);
                 }
             }
@@ -655,7 +656,7 @@ public class EditTabbedPane extends JPanel {
 
                 // If assemble-all, then allow opening of any file w/o invalidating assembly.
                 // DPS 9-Aug-2011
-                if (Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ALL)) {
+                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ALL)) {
                     EditTabbedPane.this.updateTitles(editPane);
                 } else {// this was the original code...
                     EditTabbedPane.this.updateTitlesAndMenuState(editPane);

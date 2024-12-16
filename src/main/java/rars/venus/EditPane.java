@@ -1,8 +1,8 @@
 package rars.venus;
 
 import rars.Globals;
-import rars.Settings;
 import rars.notices.SettingsNotice;
+import rars.settings.BoolSetting;
 import rars.util.SimpleSubscriber;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
@@ -126,9 +126,11 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
                             EditPane.this.setFileStatus(FileStatus.EDITED);
                         }
                         if (EditPane.this.getFileStatus() == FileStatus.NEW_EDITED) {
-                            EditPane.this.mainUI.getEditor().setTitle("", EditPane.this.getFilename(), EditPane.this.getFileStatus());
+                            EditPane.this.mainUI.getEditor().setTitle("", EditPane.this.getFilename(),
+                                    EditPane.this.getFileStatus());
                         } else {
-                            EditPane.this.mainUI.getEditor().setTitle(EditPane.this.getPathname(), EditPane.this.getFilename(), EditPane.this.getFileStatus());
+                            EditPane.this.mainUI.getEditor().setTitle(EditPane.this.getPathname(),
+                                    EditPane.this.getFilename(), EditPane.this.getFileStatus());
                         }
 
                         FileStatus.setEdited(true);
@@ -174,7 +176,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         this.showLineNumbers.setEnabled(false);
         // Show line numbers by default.
         this.showLineNumbers
-                .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.EDITOR_LINE_NUMBERS_DISPLAYED));
+                .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED));
 
         this.setSourceCode("", false);
 
@@ -194,7 +196,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
                         EditPane.this.lineNumbers.setVisible(false);
                     }
                     EditPane.this.sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
-                    Globals.getSettings().setBooleanSetting(Settings.Bool.EDITOR_LINE_NUMBERS_DISPLAYED,
+                    Globals.getSettings().getBoolSettings().setSettingAndSave(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED,
                             EditPane.this.showLineNumbers.isSelected());
                     // needed because caret disappears when checkbox clicked
                     EditPane.this.sourceCode.requestFocusInWindow();
@@ -630,9 +632,9 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
 
     @Override
     public void onNext(final SettingsNotice ignored) {
-        this.sourceCode.setFont(Globals.getSettings().getEditorFont());
+        this.sourceCode.setFont(Globals.getSettings().getFontSettings().getCurrentFont());
         this.sourceCode.setLineHighlightEnabled(
-                Globals.getSettings().getBooleanSetting(Settings.Bool.EDITOR_CURRENT_LINE_HIGHLIGHTING));
+                Globals.getSettings().getBoolSettings().getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
         this.sourceCode.setCaretBlinkRate(Globals.getSettings().getCaretBlinkRate());
         this.sourceCode.setTabSize(Globals.getSettings().getEditorTabSize());
         // TODO: Change this to the new ColorScheme API

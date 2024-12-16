@@ -12,6 +12,7 @@ import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.BoolSetting;
 import rars.util.Binary;
 import rars.venus.NumberDisplayBaseChooser;
 
@@ -867,10 +868,10 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
 
         @Override
         public String toString() {
-            final int addressBase = (Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX))
+            final int addressBase = (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX))
                     ? NumberDisplayBaseChooser.HEXADECIMAL
                     : NumberDisplayBaseChooser.DECIMAL;
-            final int valueBase = (Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX))
+            final int valueBase = (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX))
                     ? NumberDisplayBaseChooser.HEXADECIMAL
                     : NumberDisplayBaseChooser.DECIMAL;
 

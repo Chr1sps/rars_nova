@@ -2,10 +2,10 @@ package rars.venus.run;
 
 import rars.Globals;
 import rars.RISCVprogram;
-import rars.Settings;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
 import rars.util.SimpleSubscriber;
@@ -132,7 +132,8 @@ public class RunGoAction extends GuiAction {
                         }
                         final Simulator.Reason reason = notice.reason();
                         if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
-                            EventQueue.invokeLater(() -> RunGoAction.this.paused(notice.done(), reason, notice.exception()));
+                            EventQueue.invokeLater(() -> RunGoAction.this.paused(notice.done(), reason,
+                                    notice.exception()));
                         } else {
                             EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.exception(), reason));
                         }
@@ -146,7 +147,8 @@ public class RunGoAction extends GuiAction {
             } else {
                 // This should never occur because at termination the Go and Step buttons are
                 // disabled.
-                JOptionPane.showMessageDialog(this.mainUI, "reset " + this.mainUI.getReset() + " started " + this.mainUI.getStarted());// "You
+                JOptionPane.showMessageDialog(this.mainUI,
+                        "reset " + this.mainUI.getReset() + " started " + this.mainUI.getStarted());// "You
                 // must
                 // reset
                 // before
@@ -273,11 +275,12 @@ public class RunGoAction extends GuiAction {
     // Argument pointers and count go into runtime stack and $sp is adjusted
     //////////////////////////////////////////////////////////////////////////////////// accordingly.
     // $a0 gets argument count (argc), $a1 gets stack address of first arg pointer
-    //////////////////////////////////////////////////////////////////////////////////// (argv).
+
+    /// ///////////////////////////////////////////////////////////////////////////////// (argv).
     private void processProgramArgumentsIfAny() {
         final String programArguments = this.executePane.getTextSegmentWindow().getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||
-                !Globals.getSettings().getBooleanSetting(Settings.Bool.PROGRAM_ARGUMENTS)) {
+                !Globals.getSettings().getBoolSettings().getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             return;
         }
         new ProgramArgumentList(programArguments).storeProgramArguments();

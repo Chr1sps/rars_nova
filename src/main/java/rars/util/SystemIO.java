@@ -2,6 +2,7 @@ package rars.util;
 
 import rars.Globals;
 import rars.Settings;
+import rars.settings.BoolSetting;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -103,7 +104,7 @@ public final class SystemIO {
             } catch (final IOException ignored) {
             }
         } else {
-            if (Globals.getSettings().getBooleanSetting(Settings.Bool.POPUP_SYSCALL_INPUT)) {
+            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.POPUP_SYSCALL_INPUT)) {
                 input = Globals.getGui().getMessagesPane().getInputString(prompt);
             } else {
                 input = Globals.getGui().getMessagesPane().getInputString(maxlength);
@@ -389,7 +390,7 @@ public final class SystemIO {
 
         File filepath = new File(filename);
         if (!filepath.isAbsolute() && Globals.program != null && Globals.getSettings()
-                .getBooleanSetting(Settings.Bool.DERIVE_CURRENT_WORKING_DIRECTORY)) {
+                .getBoolSettings().getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY)) {
             final String parent = new File(Globals.program.getFilename()).getParent();
             filepath = new File(parent, filename);
         }

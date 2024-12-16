@@ -8,6 +8,7 @@ import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
 
+import static rars.util.Utils.deriveFontFromStyle;
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
 public final class RSTASchemeConverter implements ColorSchemeConverter<RVSyntaxScheme> {
@@ -20,13 +21,9 @@ public final class RSTASchemeConverter implements ColorSchemeConverter<RVSyntaxS
         final var result = new Style();
         result.foreground = style.foreground();
         result.background = style.background();
-        var fontStyle = 0;
-        if (style.isBold()) fontStyle |= Font.BOLD;
-        if (style.isItalic()) fontStyle |= Font.ITALIC;
-        //noinspection MagicConstant
         if (result.font == null)
             result.font = baseFont;
-        result.font = result.font.deriveFont(fontStyle);
+        result.font = deriveFontFromStyle(result.font, style);
         result.underline = style.isUnderline();
         return result;
     }

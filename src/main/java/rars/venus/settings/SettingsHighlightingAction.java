@@ -68,30 +68,6 @@ public class SettingsHighlightingAction extends GuiAction {
     public static final String CANCEL_TOOL_TIP_TEXT = "Close dialog without applying current settings";
     // NOTE: These must follow same sequence and buttons must
     // follow this sequence too!
-    private static final int[] backgroundSettingPositions = {
-            Settings.TEXTSEGMENT_HIGHLIGHT_BACKGROUND,
-            Settings.TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_BACKGROUND,
-            Settings.DATASEGMENT_HIGHLIGHT_BACKGROUND,
-            Settings.REGISTER_HIGHLIGHT_BACKGROUND,
-            Settings.EVEN_ROW_BACKGROUND,
-            Settings.ODD_ROW_BACKGROUND
-    };
-    private static final int[] foregroundSettingPositions = {
-            Settings.TEXTSEGMENT_HIGHLIGHT_FOREGROUND,
-            Settings.TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_FOREGROUND,
-            Settings.DATASEGMENT_HIGHLIGHT_FOREGROUND,
-            Settings.REGISTER_HIGHLIGHT_FOREGROUND,
-            Settings.EVEN_ROW_FOREGROUND,
-            Settings.ODD_ROW_FOREGROUND
-    };
-    private static final int[] fontSettingPositions = {
-            Settings.TEXTSEGMENT_HIGHLIGHT_FONT,
-            Settings.TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_FONT,
-            Settings.DATASEGMENT_HIGHLIGHT_FONT,
-            Settings.REGISTER_HIGHLIGHT_FONT,
-            Settings.EVEN_ROW_FONT,
-            Settings.ODD_ROW_FONT
-    };
     private static final int gridVGap = 2;
     private static final int gridHGap = 2;
     // Tool tips for color buttons

@@ -40,7 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version July 2007
  */
-public final class EditorFont {
+public final class EditorFontUtils {
 
     // Note: These are parallel arrays so corresponding elements must match up.
     private static final String[] styleStrings = {"Plain", "Bold", "Italic", "Bold + Italic"};
@@ -48,11 +48,11 @@ public final class EditorFont {
     /**
      * Constant <code>DEFAULT_STYLE_STRING="styleStrings[0]"</code>
      */
-    public static final String DEFAULT_STYLE_STRING = EditorFont.styleStrings[0];
+    public static final String DEFAULT_STYLE_STRING = EditorFontUtils.styleStrings[0];
     /**
      * Constant <code>DEFAULT_STYLE_INT=styleInts[0]</code>
      */
-    public static final int DEFAULT_STYLE_INT = EditorFont.styleInts[0];
+    public static final int DEFAULT_STYLE_INT = EditorFontUtils.styleInts[0];
     /**
      * Constant <code>MIN_SIZE=6</code>
      */
@@ -76,7 +76,7 @@ public final class EditorFont {
     private static final String[] allCommonFamilies = {"Arial", "Courier New", "Georgia",
             "Lucida Sans Typewriter", "Times New Roman", "Verdana"};
 
-    private EditorFont() {
+    private EditorFontUtils() {
     }
 
     /**
@@ -87,7 +87,7 @@ public final class EditorFont {
      * @return Array of strings, each is a common and available font family name.
      */
     public static String[] getCommonFamilies() {
-        return EditorFont.commonFamilies;
+        return EditorFontUtils.commonFamilies;
     }
 
     /**
@@ -106,7 +106,7 @@ public final class EditorFont {
      * @return an array of {@link java.lang.String} objects
      */
     public static String[] getFontStyleStrings() {
-        return EditorFont.styleStrings;
+        return EditorFontUtils.styleStrings;
     }
 
     /**
@@ -120,12 +120,12 @@ public final class EditorFont {
      */
     public static int styleStringToStyleInt(final String style) {
         final String styleLower = style.toLowerCase();
-        for (int i = 0; i < EditorFont.styleStrings.length; i++) {
-            if (styleLower.equals(EditorFont.styleStrings[i].toLowerCase())) {
-                return EditorFont.styleInts[i];
+        for (int i = 0; i < EditorFontUtils.styleStrings.length; i++) {
+            if (styleLower.equals(EditorFontUtils.styleStrings[i].toLowerCase())) {
+                return EditorFontUtils.styleInts[i];
             }
         }
-        return EditorFont.DEFAULT_STYLE_INT;
+        return EditorFontUtils.DEFAULT_STYLE_INT;
     }
 
     /**
@@ -137,12 +137,12 @@ public final class EditorFont {
      * is not one of the above, returns "Plain".
      */
     public static String styleIntToStyleString(final int style) {
-        for (int i = 0; i < EditorFont.styleInts.length; i++) {
-            if (style == EditorFont.styleInts[i]) {
-                return EditorFont.styleStrings[i];
+        for (int i = 0; i < EditorFontUtils.styleInts.length; i++) {
+            if (style == EditorFontUtils.styleInts[i]) {
+                return EditorFontUtils.styleStrings[i];
             }
         }
-        return EditorFont.DEFAULT_STYLE_STRING;
+        return EditorFontUtils.DEFAULT_STYLE_STRING;
     }
 
     /**
@@ -154,7 +154,7 @@ public final class EditorFont {
      * as String) or greater than MAX_SIZE (returns MAX_SIZE as String).
      */
     public static String sizeIntToSizeString(final int size) {
-        final int result = (size < EditorFont.MIN_SIZE) ? EditorFont.MIN_SIZE : (Math.min(size, EditorFont.MAX_SIZE));
+        final int result = (size < EditorFontUtils.MIN_SIZE) ? EditorFontUtils.MIN_SIZE : (Math.min(size, EditorFontUtils.MAX_SIZE));
         return String.valueOf(result);
     }
 
@@ -167,12 +167,12 @@ public final class EditorFont {
      * cannot be parsed as a decimal integer, it returns DEFAULT_SIZE.
      */
     public static int sizeStringToSizeInt(final String size) {
-        int result = EditorFont.DEFAULT_SIZE;
+        int result = EditorFontUtils.DEFAULT_SIZE;
         try {
             result = Integer.parseInt(size);
         } catch (final NumberFormatException ignored) {
         }
-        return (result < EditorFont.MIN_SIZE) ? EditorFont.MIN_SIZE : (Math.min(result, EditorFont.MAX_SIZE));
+        return (result < EditorFontUtils.MIN_SIZE) ? EditorFontUtils.MIN_SIZE : (Math.min(result, EditorFontUtils.MAX_SIZE));
     }
 
     /**
@@ -190,7 +190,7 @@ public final class EditorFont {
      * @return a {@link java.awt.Font} object
      */
     public static Font createFontFromStringValues(final String family, final String style, final String size) {
-        return new Font(family, EditorFont.styleStringToStyleInt(style), EditorFont.sizeStringToSizeInt(size));
+        return new Font(family, EditorFontUtils.styleStringToStyleInt(style), EditorFontUtils.sizeStringToSizeInt(size));
     }
 
     private static final String TAB_STRING = "\t";
@@ -209,7 +209,7 @@ public final class EditorFont {
      * @throws java.lang.NullPointerException if string is null
      */
     public static String substituteSpacesForTabs(final String string) {
-        return EditorFont.substituteSpacesForTabs(string, Globals.getSettings().getEditorTabSize());
+        return EditorFontUtils.substituteSpacesForTabs(string, Globals.getSettings().getEditorTabSize());
     }
 
     /**
@@ -225,12 +225,12 @@ public final class EditorFont {
      * @throws java.lang.NullPointerException if string is null
      */
     public static String substituteSpacesForTabs(final String string, final int tabSize) {
-        if (!string.contains(EditorFont.TAB_STRING))
+        if (!string.contains(EditorFontUtils.TAB_STRING))
             return string;
         final StringBuilder result = new StringBuilder(string);
         for (int i = 0; i < result.length(); i++) {
-            if (result.charAt(i) == EditorFont.TAB_CHAR) {
-                result.replace(i, i + 1, EditorFont.SPACES.substring(0, tabSize - (i % tabSize)));
+            if (result.charAt(i) == EditorFontUtils.TAB_CHAR) {
+                result.replace(i, i + 1, EditorFontUtils.SPACES.substring(0, tabSize - (i % tabSize)));
             }
         }
         return result.toString();
@@ -240,20 +240,20 @@ public final class EditorFont {
      * We want to vett the above list against the actual available families and give
      * our client only those that are actually available.
      */
-    private static final String[] commonFamilies = EditorFont.actualCommonFamilies();
+    private static final String[] commonFamilies = EditorFontUtils.actualCommonFamilies();
 
     private static String[] actualCommonFamilies() {
-        String[] result = new String[EditorFont.allCommonFamilies.length];
+        String[] result = new String[EditorFontUtils.allCommonFamilies.length];
         final String[] availableFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         Arrays.sort(availableFamilies); // not sure if necessary; is the list already alphabetical?
         int k = 0;
-        for (final String family : EditorFont.allCommonFamilies) {
+        for (final String family : EditorFontUtils.allCommonFamilies) {
             if (Arrays.binarySearch(availableFamilies, family) >= 0) {
                 result[k++] = family;
             }
         }
         // If not all are found, creat a new array with only the ones that are.
-        if (k < EditorFont.allCommonFamilies.length) {
+        if (k < EditorFontUtils.allCommonFamilies.length) {
             final String[] temp = new String[k];
             System.arraycopy(result, 0, temp, 0, k);
             result = temp;

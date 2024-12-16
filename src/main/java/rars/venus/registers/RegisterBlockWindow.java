@@ -5,6 +5,7 @@ import rars.Globals;
 import rars.Settings;
 import rars.notices.*;
 import rars.riscv.hardware.Register;
+import rars.settings.BoolSetting;
 import rars.util.Binary;
 import rars.util.SimpleSubscriber;
 import rars.venus.MonoRightCellRenderer;
@@ -138,7 +139,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             final int temp = this.registers[i].getNumber();
             tableData[i][RegisterBlockWindow.NUMBER_COLUMN] = temp == -1 ? "" : temp;
             tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegister(this.registers[i],
-                    NumberDisplayBaseChooser.getBase(this.settings.getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX)));
+                    NumberDisplayBaseChooser.getBase(this.settings.getBoolSettings().getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)));
         }
         return tableData;
     }
@@ -176,7 +177,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     public void updateRegisters() {
         for (int i = 0; i < this.registers.length; i++) {
             ((RegTableModel) this.table.getModel()).setDisplayAndModelValueAt(this.formatRegister(this.registers[i],
-                    Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase()), i, RegisterBlockWindow.VALUE_COLUMN);
+                    Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase()), i,
+                    RegisterBlockWindow.VALUE_COLUMN);
         }
     }
 
@@ -219,19 +221,9 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     }
 
     private void updateRowHeight() {
-        final Font[] possibleFonts = {
-                this.settings.getFontByPosition(Settings.REGISTER_HIGHLIGHT_FONT),
-                this.settings.getFontByPosition(Settings.EVEN_ROW_FONT),
-                this.settings.getFontByPosition(Settings.ODD_ROW_FONT),
-        };
-        int maxHeight = 0;
-        for (final Font possibleFont : possibleFonts) {
-            final int height = this.getFontMetrics(possibleFont).getHeight();
-            if (height > maxHeight) {
-                maxHeight = height;
-            }
-        }
-        this.table.setRowHeight(maxHeight);
+        final var font = Globals.getSettings().getFontSettings().getCurrentFont();
+        final var height = this.getFontMetrics(font).getHeight();
+        this.table.setRowHeight(height);
     }
 
     /*
@@ -253,7 +245,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
 
         @Override
         public @NotNull Component getTableCellRendererComponent(final JTable table, final Object value,
-                                                                final boolean isSelected, final boolean hasFocus, final int row, final int column) {
+                                                                final boolean isSelected, final boolean hasFocus,
+                                                                final int row, final int column) {
             final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
             cell.setFont(this.font);

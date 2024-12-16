@@ -6,6 +6,9 @@ import rars.Settings;
 import rars.assembler.SymbolTable;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.BasicInstruction;
+import rars.settings.BoolSetting;
+
+import java.util.concurrent.Flow;
 import rars.util.SimpleSubscriber;
 
 /*
@@ -244,7 +247,7 @@ public final class RegisterFile {
      */
     public static void resetRegisters() {
         RegisterFile.instance.resetRegisters();
-        RegisterFile.initializeProgramCounter(Globals.getSettings().getBooleanSetting(Settings.Bool.START_AT_MAIN));
+        RegisterFile.initializeProgramCounter(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.START_AT_MAIN));
         // replaces
         // "programCounter.resetValue()",
         // DPS 3/3/09

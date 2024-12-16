@@ -10,6 +10,7 @@ import rars.assembler.TokenList;
 import rars.assembler.Tokenizer;
 import rars.exceptions.AssemblyException;
 import rars.riscv.instructions.*;
+import rars.settings.BoolSetting;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -243,7 +244,7 @@ public final class Instructions {
                 ).flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        RV64 = Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED);
+        RV64 = Globals.getSettings().getBoolSettings().getSetting(BoolSetting.RV64_ENABLED);
 
         R32_MATCH_MAPS = createMatchMaps(INSTRUCTIONS_R32);
         R64_MATCH_MAPS = createMatchMaps(INSTRUCTIONS_R64);

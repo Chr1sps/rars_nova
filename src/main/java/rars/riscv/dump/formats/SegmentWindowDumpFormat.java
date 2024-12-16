@@ -6,6 +6,7 @@ import rars.ProgramStatement;
 import rars.Settings;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
+import rars.settings.BoolSetting;
 import rars.util.Binary;
 
 import java.io.File;
@@ -55,11 +56,11 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
         final PrintStream out = new PrintStream(new FileOutputStream(file));
 
         // TODO: check if these settings work right
-        final boolean hexAddresses = Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX);
+        final boolean hexAddresses = Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
 
         // If address in data segment, print in same format as Data Segment Window
         if (Memory.inDataSegment(firstAddress)) {
-            final boolean hexValues = Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX);
+            final boolean hexValues = Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX);
             int offset = 0;
             StringBuilder string = new StringBuilder();
             try {

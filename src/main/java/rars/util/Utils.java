@@ -12,10 +12,13 @@ import rars.riscv.BasicInstruction;
 import rars.riscv.SyscallLoader;
 import rars.riscv.hardware.RegisterFile;
 import rars.riscv.syscalls.*;
+import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
+import java.awt.font.TextAttribute;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -135,5 +138,13 @@ public final class Utils {
      */
     public static @NotNull String getColorAsHexString(final @NotNull Color color) {
         return Binary.intToHexString(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
+    }
+    
+    public static @NotNull Font deriveFontFromStyle(final @NotNull Font baseFont, final @NotNull TokenStyle style) {
+        var fontStyle = 0;
+        if (style.isBold()) fontStyle |= Font.BOLD;
+        if (style.isItalic()) fontStyle |= Font.ITALIC;
+        //noinspection MagicConstant
+        return baseFont.deriveFont(fontStyle);
     }
 }

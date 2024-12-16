@@ -5,6 +5,7 @@ import rars.Globals;
 import rars.Settings;
 import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 
 import java.util.Arrays;
@@ -74,7 +75,7 @@ public class RegistersWindow extends RegisterBlockWindow {
      */
     @Override
     protected String formatRegister(final Register value, final int base) {
-        if (Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED)) {
+        if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.RV64_ENABLED)) {
             return NumberDisplayBaseChooser.formatNumber(value.getValue(), base);
         } else {
             return NumberDisplayBaseChooser.formatNumber((int) value.getValue(), base);

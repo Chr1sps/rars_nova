@@ -2,7 +2,7 @@ package rars.venus.settings;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.Settings;
+import rars.settings.BoolSetting;
 import rars.venus.GuiAction;
 
 import javax.swing.*;
@@ -39,7 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Simple wrapper for boolean settings actions
  */
 public class SettingsAction extends GuiAction {
-    private final Settings.Bool setting;
+    private final BoolSetting setting;
     private final Handler handler;
 
     /**
@@ -47,15 +47,15 @@ public class SettingsAction extends GuiAction {
      *
      * @param name    a {@link java.lang.String} object
      * @param descrip a {@link java.lang.String} object
-     * @param setting a {@link Settings.Bool} object
+     * @param setting a {@link BoolSetting} object
      */
-    public SettingsAction(final String name, final String descrip, final Settings.Bool setting, final @NotNull Handler handler) {
+    public SettingsAction(final String name, final String descrip, final @NotNull BoolSetting setting, final @NotNull Handler handler) {
         super(name, null, descrip, null, null);
         this.setting = setting;
         this.handler = handler;
     }
 
-    public SettingsAction(final String name, final String descrip, final Settings.Bool setting) {
+    public SettingsAction(final String name, final String descrip, final @NotNull BoolSetting setting) {
         this(name, descrip, setting, (ignored) -> {
         });
     }
@@ -67,7 +67,7 @@ public class SettingsAction extends GuiAction {
     @Override
     public void actionPerformed(final @NotNull ActionEvent e) {
         final boolean value = ((JCheckBoxMenuItem) e.getSource()).isSelected();
-        Globals.getSettings().setBooleanSetting(setting, value);
+        Globals.getSettings().getBoolSettings().setSettingAndSave(setting, value);
         this.handler.handler(value);
     }
 

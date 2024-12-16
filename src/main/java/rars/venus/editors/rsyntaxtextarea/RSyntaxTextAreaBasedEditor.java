@@ -41,7 +41,7 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         textArea = new RSyntaxTextArea();
         scrollPane = new RTextScrollPane(textArea);
         gutter = scrollPane.getGutter();
-        this.setFont(Globals.getSettings().getEditorFont());
+        this.setFont(Globals.getSettings().getFontSettings().getCurrentFont());
         this.applyTheme(Theme.getDefaultLightTheme());
         textArea.setSyntaxEditingStyle(RVSyntax.SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);

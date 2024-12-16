@@ -9,6 +9,7 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.AssemblyException;
 import rars.riscv.*;
 import rars.riscv.hardware.Memory;
+import rars.settings.BoolSetting;
 import rars.util.Binary;
 import rars.util.SystemIO;
 import rars.venus.NumberDisplayBaseChooser;
@@ -84,7 +85,7 @@ public final class Assembler {
                 final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(
                         ps2.getAddress(),
                         (Globals.getSettings()
-                                .getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX)) ? 16 : 10);
+                                .getBoolSettings().getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)) ? 16 : 10);
                 final var directiveText = (Memory.inTextSegment(ps2.getAddress()))
                         ? ".text"
                         : ".ktext";

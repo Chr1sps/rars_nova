@@ -2,10 +2,10 @@ package rars.venus.run;
 
 import rars.Globals;
 import rars.RISCVprogram;
-import rars.Settings;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
 import rars.util.SimpleSubscriber;
@@ -104,7 +104,8 @@ public class RunStepAction extends GuiAction {
                         this.subscription.request(1);
                         return;
                     }
-                    EventQueue.invokeLater(() -> RunStepAction.this.stepped(item.done(), item.reason(), item.exception()));
+                    EventQueue.invokeLater(() -> RunStepAction.this.stepped(item.done(), item.reason(),
+                            item.exception()));
                     this.subscription.cancel();
                 }
             };
@@ -113,7 +114,8 @@ public class RunStepAction extends GuiAction {
 //                    SimulatorNotice notice = ((SimulatorNotice) simulator);
 //                    if (notice.getAction() != SimulatorNotice.SIMULATOR_STOP)
 //                        return;
-//                    EventQueue.invokeLater(() -> stepped(notice.getDone(), notice.getReason(), notice.getException()));
+//                    EventQueue.invokeLater(() -> stepped(notice.getDone(), notice.getReason(), notice.getException
+//                    ()));
 //                    o.deleteObserver(this);
 //                }
             Simulator.getInstance().subscribe(stopListener);
@@ -185,11 +187,12 @@ public class RunStepAction extends GuiAction {
     // Argument pointers and count go into runtime stack and $sp is adjusted
     //////////////////////////////////////////////////////////////////////////////////// accordingly.
     // $a0 gets argument count (argc), $a1 gets stack address of first arg pointer
-    //////////////////////////////////////////////////////////////////////////////////// (argv).
+
+    /// ///////////////////////////////////////////////////////////////////////////////// (argv).
     private void processProgramArgumentsIfAny() {
         final String programArguments = this.executePane.getTextSegmentWindow().getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||
-                !Globals.getSettings().getBooleanSetting(Settings.Bool.PROGRAM_ARGUMENTS)) {
+                !Globals.getSettings().getBoolSettings().getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             return;
         }
         new ProgramArgumentList(programArguments).storeProgramArguments();

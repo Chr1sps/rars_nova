@@ -280,16 +280,16 @@ public final class EditorFontDialog extends AbstractFontSettingDialog {
     // Editor style panel
     private @NotNull JPanel buildEditorStylePanel() {
         final JPanel editorStylePanel = new JPanel(new GridLayout(5, 3, gridHGap, gridVGap));
-        this.bgChanger = new ColorChangerPanel("Background", "Select the Editor's Background-Color",
-                Settings.EDITOR_BACKGROUND);
-        this.fgChanger = new ColorChangerPanel("Foreground", "Select the Editor's Foreground-Color",
-                Settings.EDITOR_FOREGROUND);
-        this.lhChanger = new ColorChangerPanel("Line-Highlight", "Select the Editor's Line-Highlight-Color",
-                Settings.EDITOR_LINE_HIGHLIGHT);
-        this.textSelChanger = new ColorChangerPanel("Text-Selection", "Select the Editor's Text-Selection-Color",
-                Settings.EDITOR_SELECTION_COLOR);
-        this.caretChanger = new ColorChangerPanel("Caret", "Select the Editor's Caret-Color",
-                Settings.EDITOR_CARET_COLOR);
+//        this.bgChanger = new ColorChangerPanel("Background", "Select the Editor's Background-Color",
+//                Settings.EDITOR_BACKGROUND);
+//        this.fgChanger = new ColorChangerPanel("Foreground", "Select the Editor's Foreground-Color",
+//                Settings.EDITOR_FOREGROUND);
+//        this.lhChanger = new ColorChangerPanel("Line-Highlight", "Select the Editor's Line-Highlight-Color",
+//                Settings.EDITOR_LINE_HIGHLIGHT);
+//        this.textSelChanger = new ColorChangerPanel("Text-Selection", "Select the Editor's Text-Selection-Color",
+//                Settings.EDITOR_SELECTION_COLOR);
+//        this.caretChanger = new ColorChangerPanel("Caret", "Select the Editor's Caret-Color",
+//                Settings.EDITOR_CARET_COLOR);
 
         this.bgChanger.addElements(editorStylePanel);
         this.fgChanger.addElements(editorStylePanel);

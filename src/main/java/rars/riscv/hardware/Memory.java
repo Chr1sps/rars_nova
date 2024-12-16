@@ -13,6 +13,7 @@ import rars.exceptions.ExceptionReason;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.BasicInstruction;
+import rars.settings.BoolSetting;
 import rars.util.CustomPublisher;
 import rars.util.SimpleSubscriber;
 
@@ -638,7 +639,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             // Burch Mod (Jan 2013): replace throw with call to setStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
 
-            if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) {
+            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
@@ -705,7 +706,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         } else if (Memory.inTextSegment(address)) {
             // Burch Mod (Jan 2013): replace throw with call to setStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-            if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) {
+            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 final ProgramStatement oldStatement = this.getStatementNoNotify(address);
                 if (oldStatement != null) {
                     oldValue = oldStatement.getBinaryStatement();
@@ -902,7 +903,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             // Burch Mod (Jan 2013): replace throw with calls to getStatementNoNotify &
             // getBinaryStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-            if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) {
+            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
@@ -965,7 +966,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             // Burch Mod (Jan 2013): replace throw with calls to getStatementNoNotify &
             // getBinaryStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-            if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) {
+            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 final ProgramStatement stmt = this.getStatementNoNotify(address);
                 value = stmt == null ? 0 : stmt.getBinaryStatement();
             } else {
@@ -1166,7 +1167,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
 
     private ProgramStatement getStatement(final int address, final boolean notify) throws AddressErrorException {
         Memory.checkLoadWordAligned(address);
-        if (!Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)
+        if (!Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
                 && !Memory.inTextSegment(address)) {
             throw new AddressErrorException(
                     "fetch address for text segment out of range ",

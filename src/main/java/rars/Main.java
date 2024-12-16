@@ -13,6 +13,7 @@ import rars.riscv.Instructions;
 import rars.riscv.dump.DumpFormat;
 import rars.riscv.dump.DumpFormatLoader;
 import rars.riscv.hardware.*;
+import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.util.Binary;
 import rars.util.FilenameFinder;
@@ -445,7 +446,7 @@ public final class Main {
             return null;
         }
 
-        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, this.rv64);
+        Globals.getSettings().getBoolSettings().setSetting(BoolSetting.RV64_ENABLED, this.rv64);
         Instructions.RV64 = this.rv64;
 
         final File mainFile = new File(this.filenameList.getFirst()).getAbsoluteFile();// First file is "main" file

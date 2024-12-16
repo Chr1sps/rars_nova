@@ -1,6 +1,6 @@
 package rars.venus.util;
 
-import rars.util.EditorFont;
+import rars.util.EditorFontUtils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -65,7 +65,8 @@ public abstract class AbstractFontSettingDialog extends JDialog {
      * @param modality    a boolean
      * @param currentFont a {@link java.awt.Font} object
      */
-    public AbstractFontSettingDialog(final Frame owner, final String title, final boolean modality, final Font currentFont) {
+    public AbstractFontSettingDialog(final Frame owner, final String title, final boolean modality,
+                                     final Font currentFont) {
         super(owner, title, modality);
         this.currentFont = currentFont;
         final JPanel overallPanel = new JPanel(new BorderLayout());
@@ -118,10 +119,10 @@ public abstract class AbstractFontSettingDialog extends JDialog {
 
         // Font currentFont = Globals.getSettings().getEditorFont();
         this.initialFontFamily = this.currentFont.getFamily();
-        this.initialFontStyle = EditorFont.styleIntToStyleString(this.currentFont.getStyle());
-        this.initialFontSize = EditorFont.sizeIntToSizeString(this.currentFont.getSize());
-        final String[] commonFontFamilies = EditorFont.getCommonFamilies();
-        final String[] allFontFamilies = EditorFont.getAllFamilies();
+        this.initialFontStyle = EditorFontUtils.styleIntToStyleString(this.currentFont.getStyle());
+        this.initialFontSize = EditorFontUtils.sizeIntToSizeString(this.currentFont.getSize());
+        final String[] commonFontFamilies = EditorFontUtils.getCommonFamilies();
+        final String[] allFontFamilies = EditorFontUtils.getAllFamilies();
         // The makeVectorData() method will combine these two into one Vector
         // with a horizontal line separating the two groups.
         final String[][] fullList = {commonFontFamilies, allFontFamilies};
@@ -134,23 +135,25 @@ public abstract class AbstractFontSettingDialog extends JDialog {
         this.fontFamilySelector.setMaximumRowCount(commonFontFamilies.length);
         this.fontFamilySelector.setToolTipText("Short list of common font families followed by complete list.");
 
-        final String[] fontStyles = EditorFont.getFontStyleStrings();
+        final String[] fontStyles = EditorFontUtils.getFontStyleStrings();
         this.fontStyleSelector = new JComboBox<>(fontStyles);
-        this.fontStyleSelector.setSelectedItem(EditorFont.styleIntToStyleString(this.currentFont.getStyle()));
+        this.fontStyleSelector.setSelectedItem(EditorFontUtils.styleIntToStyleString(this.currentFont.getStyle()));
         this.fontStyleSelector.setEditable(false);
         this.fontStyleSelector.setToolTipText("List of available font styles.");
 
-        this.fontSizeSelector = new JSlider(EditorFont.MIN_SIZE, EditorFont.MAX_SIZE, this.currentFont.getSize());
+        this.fontSizeSelector = new JSlider(EditorFontUtils.MIN_SIZE, EditorFontUtils.MAX_SIZE,
+                this.currentFont.getSize());
         this.fontSizeSelector.setToolTipText(
-                "Use slider to select font size from " + EditorFont.MIN_SIZE + " to " + EditorFont.MAX_SIZE + ".");
+                "Use slider to select font size from " + EditorFontUtils.MIN_SIZE + " to " + EditorFontUtils.MAX_SIZE + ".");
         this.fontSizeSelector.addChangeListener(
                 e -> {
                     final Integer value = ((JSlider) e.getSource()).getValue();
                     AbstractFontSettingDialog.this.fontSizeSpinSelector.setValue(value);
                     AbstractFontSettingDialog.this.fontSample.setFont(AbstractFontSettingDialog.this.getFont());
                 });
-        final SpinnerNumberModel fontSizeSpinnerModel = new SpinnerNumberModel(this.currentFont.getSize(), EditorFont.MIN_SIZE,
-                EditorFont.MAX_SIZE, 1);
+        final SpinnerNumberModel fontSizeSpinnerModel = new SpinnerNumberModel(this.currentFont.getSize(),
+                EditorFontUtils.MIN_SIZE,
+                EditorFontUtils.MAX_SIZE, 1);
         this.fontSizeSpinSelector = new JSpinner(fontSizeSpinnerModel);
         this.fontSizeSpinSelector.setToolTipText("Current font size in points.");
         this.fontSizeSpinSelector.addChangeListener(
@@ -160,7 +163,8 @@ public abstract class AbstractFontSettingDialog extends JDialog {
                     AbstractFontSettingDialog.this.fontSample.setFont(AbstractFontSettingDialog.this.getFont());
                 });
         // Action listener to update sample when family or style selected
-        final ActionListener updateSample = e -> AbstractFontSettingDialog.this.fontSample.setFont(AbstractFontSettingDialog.this.getFont());
+        final ActionListener updateSample =
+                e -> AbstractFontSettingDialog.this.fontSample.setFont(AbstractFontSettingDialog.this.getFont());
         this.fontFamilySelector.addActionListener(updateSample);
         this.fontStyleSelector.addActionListener(updateSample);
 
@@ -204,7 +208,7 @@ public abstract class AbstractFontSettingDialog extends JDialog {
      */
     @Override
     public Font getFont() {
-        return EditorFont.createFontFromStringValues(
+        return EditorFontUtils.createFontFromStringValues(
                 (String) this.fontFamilySelector.getSelectedItem(),
                 (String) this.fontStyleSelector.getSelectedItem(),
                 this.fontSizeSpinSelector.getValue().toString());
@@ -246,8 +250,8 @@ public abstract class AbstractFontSettingDialog extends JDialog {
     protected void reset() {
         this.fontFamilySelector.setSelectedItem(this.initialFontFamily);
         this.fontStyleSelector.setSelectedItem(this.initialFontStyle);
-        this.fontSizeSelector.setValue(EditorFont.sizeStringToSizeInt(this.initialFontSize));
-        this.fontSizeSpinSelector.setValue(EditorFont.sizeStringToSizeInt(this.initialFontSize));
+        this.fontSizeSelector.setValue(EditorFontUtils.sizeStringToSizeInt(this.initialFontSize));
+        this.fontSizeSpinSelector.setValue(EditorFontUtils.sizeStringToSizeInt(this.initialFontSize));
     }
 
     /**
@@ -269,7 +273,8 @@ public abstract class AbstractFontSettingDialog extends JDialog {
 
         @Override
         public Component getListCellRendererComponent(final JList<? extends String> list,
-                                                      final String value, final int index, final boolean isSelected, final boolean cellHasFocus) {
+                                                      final String value, final int index, final boolean isSelected,
+                                                      final boolean cellHasFocus) {
             final String str = (value == null) ? "" : value;
             if (AbstractFontSettingDialog.SEPARATOR.equals(str)) {
                 return this.separator;

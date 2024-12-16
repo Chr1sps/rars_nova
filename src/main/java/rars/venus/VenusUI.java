@@ -8,6 +8,7 @@ import rars.Globals;
 import rars.Settings;
 import rars.riscv.Instructions;
 import rars.riscv.dump.DumpFormatLoader;
+import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.venus.registers.ControlAndStatusWindow;
 import rars.venus.registers.FloatingPointWindow;
@@ -477,44 +478,44 @@ public class VenusUI extends JFrame {
             };
             this.settingsLabelAction = new SettingsAction("Show Labels Window (symbol table)",
                     "Toggle visibility of Labels window (symbol table) in the Execute tab",
-                    Settings.Bool.LABEL_WINDOW_VISIBILITY, (value) -> {
+                    BoolSetting.LABEL_WINDOW_VISIBILITY, (value) -> {
                 VenusUI.this.mainPane.getExecutePane().setLabelWindowVisibility(value);
                 VenusUI.LOGGER.info("ExecutePane reference 2");
             });
             this.settingsPopupInputAction = new SettingsAction("Popup dialog for input syscalls (5,6,7,8,12)",
                     "If set, use popup dialog for input syscalls (5,6,7,8,12) instead of cursor in Run I/O window",
-                    Settings.Bool.POPUP_SYSCALL_INPUT, (v) -> {
+                    BoolSetting.POPUP_SYSCALL_INPUT, (v) -> {
             });
 
             this.settingsValueDisplayBaseAction = new SettingsAction("Values displayed in hexadecimal",
                     "Toggle between hexadecimal and decimal display of memory/register values",
-                    Settings.Bool.DISPLAY_VALUES_IN_HEX,
+                    BoolSetting.DISPLAY_VALUES_IN_HEX,
                     (isHex) -> VenusUI.this.mainPane.getExecutePane().getValueDisplayBaseChooser().setSelected(isHex));
             this.settingsAddressDisplayBaseAction = new SettingsAction("Addresses displayed in hexadecimal",
                     "Toggle between hexadecimal and decimal display of memory addresses",
-                    Settings.Bool.DISPLAY_ADDRESSES_IN_HEX, (isHex) ->
+                    BoolSetting.DISPLAY_ADDRESSES_IN_HEX, (isHex) ->
                     VenusUI.this.mainPane.getExecutePane().getAddressDisplayBaseChooser().setSelected(isHex));
             this.settingsExtendedAction = new SettingsAction("Permit extended (pseudo) instructions and formats",
                     "If set, extended (pseudo) instructions are formats are permitted.",
-                    Settings.Bool.EXTENDED_ASSEMBLER_ENABLED);
+                    BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
             this.settingsAssembleOnOpenAction = new SettingsAction("Assemble file upon opening",
                     "If set, a file will be automatically assembled as soon as it is opened.  File Open dialog will show most recently opened file.",
-                    Settings.Bool.ASSEMBLE_ON_OPEN);
+                    BoolSetting.ASSEMBLE_ON_OPEN);
             this.settingsAssembleAllAction = new SettingsAction("Assemble all files in directory",
                     "If set, all files in current directory will be assembled when Assemble operation is selected.",
-                    Settings.Bool.ASSEMBLE_ALL);
+                    BoolSetting.ASSEMBLE_ALL);
             this.settingsAssembleOpenAction = new SettingsAction("Assemble all files currently open",
                     "If set, all files currently open for editing will be assembled when Assemble operation is selected.",
-                    Settings.Bool.ASSEMBLE_OPEN);
+                    BoolSetting.ASSEMBLE_OPEN);
             this.settingsWarningsAreErrorsAction = new SettingsAction("Assembler warnings are considered errors",
                     "If set, assembler warnings will be interpreted as errors and prevent successful assembly.",
-                    Settings.Bool.WARNINGS_ARE_ERRORS);
+                    BoolSetting.WARNINGS_ARE_ERRORS);
             this.settingsStartAtMainAction = new SettingsAction("Initialize Program Counter to global 'main' if defined",
                     "If set, assembler will initialize Program Counter to text address globally labeled 'main', if defined.",
-                    Settings.Bool.START_AT_MAIN);
+                    BoolSetting.START_AT_MAIN);
             this.settingsProgramArgumentsAction = new SettingsAction("Program arguments provided to program",
                     "If set, program arguments for the program can be entered in border of Text Segment window.",
-                    Settings.Bool.PROGRAM_ARGUMENTS, (selected) -> {
+                    BoolSetting.PROGRAM_ARGUMENTS, (selected) -> {
                 if (selected) {
                     VenusUI.this.mainPane.getExecutePane().getTextSegmentWindow().addProgramArgumentsPanel();
                 } else {
@@ -524,19 +525,19 @@ public class VenusUI extends JFrame {
             ;
             this.settingsSelfModifyingCodeAction = new SettingsAction("Self-modifying code",
                     "If set, the program can write and branch to both text and data segments.",
-                    Settings.Bool.SELF_MODIFYING_CODE_ENABLED);
+                    BoolSetting.SELF_MODIFYING_CODE_ENABLED);
 
             // TODO: review this
             this.settingsRV64Action = new SettingsAction("64 bit",
                     "If set, registers are 64 bits wide and new instructions are available",
-                    Settings.Bool.RV64_ENABLED, (isRV64) -> {
+                    BoolSetting.RV64_ENABLED, (isRV64) -> {
                 Instructions.RV64 = isRV64;
                 VenusUI.this.registersTab.updateRegisters();
                 VenusUI.this.csrTab.updateRegisters();
             });
             this.settingsDeriveCurrentWorkingDirectoryAction = new SettingsAction("Derive current working directory",
                     "If set, the working directory is derived from the main file instead of the RARS executable directory.",
-                    Settings.Bool.DERIVE_CURRENT_WORKING_DIRECTORY);
+                    BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY);
 
             this.settingsEditorAction = new SettingsEditorAction("Editor...", null,
                     "View and modify text editor settings.", null, null);
@@ -666,44 +667,44 @@ public class VenusUI extends JFrame {
         run.add(runToggleBreakpoints);
 
         final JCheckBoxMenuItem settingsLabel = new JCheckBoxMenuItem(this.settingsLabelAction);
-        settingsLabel.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.LABEL_WINDOW_VISIBILITY));
+        settingsLabel.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY));
         final JCheckBoxMenuItem settingsPopupInput = new JCheckBoxMenuItem(this.settingsPopupInputAction);
-        settingsPopupInput.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.POPUP_SYSCALL_INPUT));
+        settingsPopupInput.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.POPUP_SYSCALL_INPUT));
         final JCheckBoxMenuItem settingsValueDisplayBase = new JCheckBoxMenuItem(this.settingsValueDisplayBaseAction);
         settingsValueDisplayBase
-                .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX));// mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
+                .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));// mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
         // Tell the corresponding JCheckBox in the Execute Pane about me -- it has
         // already been created.
         this.mainPane.getExecutePane().getValueDisplayBaseChooser().setSettingsMenuItem(settingsValueDisplayBase);
         final JCheckBoxMenuItem settingsAddressDisplayBase = new JCheckBoxMenuItem(this.settingsAddressDisplayBaseAction);
         settingsAddressDisplayBase
-                .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.DISPLAY_ADDRESSES_IN_HEX));// mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
+                .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX));// mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
         // Tell the corresponding JCheckBox in the Execute Pane about me -- it has
         // already been created.
         this.mainPane.getExecutePane().getAddressDisplayBaseChooser().setSettingsMenuItem(settingsAddressDisplayBase);
         final JCheckBoxMenuItem settingsExtended = new JCheckBoxMenuItem(this.settingsExtendedAction);
-        settingsExtended.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.EXTENDED_ASSEMBLER_ENABLED));
+        settingsExtended.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED));
         final JCheckBoxMenuItem settingsSelfModifyingCode = new JCheckBoxMenuItem(this.settingsSelfModifyingCodeAction);
         settingsSelfModifyingCode
-                .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED));
+                .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
         final JCheckBoxMenuItem settingsRV64 = new JCheckBoxMenuItem(this.settingsRV64Action);
-        settingsRV64.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.RV64_ENABLED));
+        settingsRV64.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.RV64_ENABLED));
         final JCheckBoxMenuItem settingsDeriveCurrentWorkingDirectory = new JCheckBoxMenuItem(this.settingsDeriveCurrentWorkingDirectoryAction);
         settingsDeriveCurrentWorkingDirectory
-                .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.DERIVE_CURRENT_WORKING_DIRECTORY));
+                .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY));
         final JCheckBoxMenuItem settingsAssembleOnOpen = new JCheckBoxMenuItem(this.settingsAssembleOnOpenAction);
-        settingsAssembleOnOpen.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ON_OPEN));
+        settingsAssembleOnOpen.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ON_OPEN));
         final JCheckBoxMenuItem settingsAssembleAll = new JCheckBoxMenuItem(this.settingsAssembleAllAction);
-        settingsAssembleAll.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ALL));
+        settingsAssembleAll.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ALL));
         final JCheckBoxMenuItem settingsAssembleOpen = new JCheckBoxMenuItem(this.settingsAssembleOpenAction);
-        settingsAssembleOpen.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_OPEN));
+        settingsAssembleOpen.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_OPEN));
         final JCheckBoxMenuItem settingsWarningsAreErrors = new JCheckBoxMenuItem(this.settingsWarningsAreErrorsAction);
         settingsWarningsAreErrors
-                .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.WARNINGS_ARE_ERRORS));
+                .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.WARNINGS_ARE_ERRORS));
         final JCheckBoxMenuItem settingsStartAtMain = new JCheckBoxMenuItem(this.settingsStartAtMainAction);
-        settingsStartAtMain.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.START_AT_MAIN));
+        settingsStartAtMain.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.START_AT_MAIN));
         final JCheckBoxMenuItem settingsProgramArguments = new JCheckBoxMenuItem(this.settingsProgramArgumentsAction);
-        settingsProgramArguments.setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.PROGRAM_ARGUMENTS));
+        settingsProgramArguments.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.PROGRAM_ARGUMENTS));
         final JMenuItem settingsEditor = new JMenuItem(this.settingsEditorAction);
         final JMenuItem settingsHighlighting = new JMenuItem(this.settingsHighlightingAction);
         final JMenuItem settingsExceptionHandler = new JMenuItem(this.settingsExceptionHandlerAction);
@@ -886,7 +887,7 @@ public class VenusUI extends JFrame {
         this.runAssembleAction.setEnabled(true);
         // If assemble-all, allow previous Run menu settings to remain.
         // Otherwise, clear them out. DPS 9-Aug-2011
-        if (!Globals.getSettings().getBooleanSetting(Settings.Bool.ASSEMBLE_ALL)) {
+        if (!Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ALL)) {
             this.runGoAction.setEnabled(false);
             this.runStepAction.setEnabled(false);
             this.runBackstepAction.setEnabled(false);

@@ -50,23 +50,23 @@ public final class EditorThemeSettings {
 
     // region Preferences prefix methods
 
-    public static @NotNull String foregroundPrefix(final @NotNull RVTokenType tokenType) {
+    private static @NotNull String foregroundPrefix(final @NotNull RVTokenType tokenType) {
         return THEME_PREFIX + STYLES + tokenValue(tokenType) + FOREGROUND;
     }
 
-    public static @NotNull String backgroundPrefix(final @NotNull RVTokenType tokenType) {
+    private static @NotNull String backgroundPrefix(final @NotNull RVTokenType tokenType) {
         return THEME_PREFIX + STYLES + tokenValue(tokenType) + BACKGROUND;
     }
 
-    public static @NotNull String boldPrefix(final @NotNull RVTokenType tokenType) {
+    private static @NotNull String boldPrefix(final @NotNull RVTokenType tokenType) {
         return THEME_PREFIX + STYLES + tokenValue(tokenType) + BOLD;
     }
 
-    public static @NotNull String italicPrefix(final @NotNull RVTokenType tokenType) {
+    private static @NotNull String italicPrefix(final @NotNull RVTokenType tokenType) {
         return THEME_PREFIX + STYLES + tokenValue(tokenType) + ITALIC;
     }
 
-    public static @NotNull String underlinePrefix(final @NotNull RVTokenType tokenType) {
+    private static @NotNull String underlinePrefix(final @NotNull RVTokenType tokenType) {
         return THEME_PREFIX + STYLES + tokenValue(tokenType) + UNDERLINE;
     }
 
@@ -104,7 +104,7 @@ public final class EditorThemeSettings {
         try {
             this.preferences.flush();
         } catch (final SecurityException se) {
-            LOGGER.error("Unable to write to persistent storage for security reasons");
+            LOGGER.error("Unable to write to persistent storage for security reasons.");
         } catch (final BackingStoreException bse) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }

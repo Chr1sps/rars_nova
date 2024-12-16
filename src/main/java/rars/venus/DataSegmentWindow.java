@@ -9,6 +9,7 @@ import rars.exceptions.AddressErrorException;
 import rars.notices.*;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.util.Binary;
 import rars.util.SimpleSubscriber;
@@ -28,6 +29,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Date;
 import java.util.concurrent.Flow;
+
+import static rars.util.Utils.deriveFontFromStyle;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -85,7 +88,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     ////////////////////////////////////////////////////////////////////////
     // Initalize arrays used with Base Address combo box chooser.
     // The combo box replaced the row of buttons when number of buttons expanded to
-    //////////////////////////////////////////////////////////////////////// 7!
+    /// ///////////////////////////////////////////////////////////////////// 7!
     private static final int EXTERN_BASE_ADDRESS_INDEX = 0;
     private static final int GLOBAL_POINTER_ADDRESS_INDEX = 3; // 1;
     private static final int TEXT_BASE_ADDRESS_INDEX = 5; // 2;
@@ -165,8 +168,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final Class<? extends DataSegmentWindow> cs = this.getClass();
         try {
             this.prevButton = new PrevButton(
-                    new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Previous22.png"))));// "Back16.gif"))));//"Down16.gif"))));
-            this.nextButton = new NextButton(new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Next22.png"))));// "Forward16.gif"))));
+                    new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Previous22.png"))));// "Back16
+            // .gif"))));//"Down16.gif"))));
+            this.nextButton = new NextButton(new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Next22" +
+                    ".png"))));// "Forward16.gif"))));
             // //"Up16.gif"))));
             // This group of buttons was replaced by a combo box. Keep the JButton objects
             // for their action listeners.
@@ -282,7 +287,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // Little helper. Is called when headers set up and each time number base
     // changes.
     private static String getHeaderStringForColumn(final int i, final int base) {
-        return (i == DataSegmentWindow.ADDRESS_COLUMN) ? "Address" : "Value (+" + Integer.toString((i - 1) * DataSegmentWindow.BYTES_PER_VALUE, base) + ")";
+        return (i == DataSegmentWindow.ADDRESS_COLUMN) ? "Address" :
+                "Value (+" + Integer.toString((i - 1) * DataSegmentWindow.BYTES_PER_VALUE, base) + ")";
     }
 
     /**
@@ -296,7 +302,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.displayBaseAddressArray[DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX] = -1; /* Memory.stackPointer */
         this.displayBaseAddressArray[DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX] = Memory.memoryMapBaseAddress;
         this.displayBaseAddressArray[DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX] = Memory.textBaseAddress;
-        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(this.displayBaseAddressArray, this.descriptions);
+        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(this.displayBaseAddressArray,
+                this.descriptions);
         this.baseAddressSelector.setModel(new CustomComboBoxModel(this.displayBaseAddressChoices));
         this.displayBaseAddresses = this.displayBaseAddressArray;
         this.baseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
@@ -358,7 +365,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // renderer
         // with highlight background color and all others get renderer with default
         // background.
-        DataSegmentWindow.dataTable.tableChanged(new TableModelEvent(DataSegmentWindow.dataTable.getModel(), 0, DataSegmentWindow.dataData.length - 1));
+        DataSegmentWindow.dataTable.tableChanged(new TableModelEvent(DataSegmentWindow.dataTable.getModel(), 0,
+                DataSegmentWindow.dataData.length - 1));
     }
 
     // Given address, will compute table cell location, adjusting table if necessary
@@ -416,7 +424,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // thing it does is increment firstAddress by MEMORY_CHUNK_SIZE. Here
         // we do an offsetting decrement in advance because we don't want the
         // increment but we want the other actions that method provides.
-        this.firstAddress = this.firstAddress + chunkOffset * DataSegmentWindow.MEMORY_CHUNK_SIZE - DataSegmentWindow.PREV_NEXT_CHUNK_SIZE;
+        this.firstAddress =
+                this.firstAddress + chunkOffset * DataSegmentWindow.MEMORY_CHUNK_SIZE - DataSegmentWindow.PREV_NEXT_CHUNK_SIZE;
         this.nextButton.getActionListeners()[0].actionPerformed(null);
         // STEP 4: Find cell containing this address. Add 1 to column calculation
         // because table column 0 displays address, not memory contents. The
@@ -449,11 +458,12 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.baseAddressButtons[DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX] = this.mmioButton;
         this.baseAddressButtons[DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX] = this.textButton;
         this.displayBaseAddresses = this.displayBaseAddressArray;
-        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(this.displayBaseAddressArray, this.descriptions);
+        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(this.displayBaseAddressArray,
+                this.descriptions);
         this.defaultBaseAddressIndex = DataSegmentWindow.DATA_BASE_ADDRESS_INDEX;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////
     // Generates the Address/Data part of the Data Segment window.
     // Returns the JScrollPane for the Address/Data part of the Data Segment window.
     private JScrollPane generateDataPanel() {
@@ -462,11 +472,13 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
         int address = this.homeAddress;
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
-            DataSegmentWindow.dataData[row][DataSegmentWindow.ADDRESS_COLUMN] = NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase);
+            DataSegmentWindow.dataData[row][DataSegmentWindow.ADDRESS_COLUMN] =
+                    NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase);
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 try {
-                    DataSegmentWindow.dataData[row][column] = NumberDisplayBaseChooser.formatNumber(Globals.memory.getRawWord(address),
-                            valueBase);
+                    DataSegmentWindow.dataData[row][column] =
+                            NumberDisplayBaseChooser.formatNumber(Globals.memory.getRawWord(address),
+                                    valueBase);
                 } catch (final AddressErrorException aee) {
                     DataSegmentWindow.dataData[row][column] = NumberDisplayBaseChooser.formatNumber(0, valueBase);
                 }
@@ -494,7 +506,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             DataSegmentWindow.dataTable.getColumnModel().getColumn(i).setPreferredWidth(60);
             DataSegmentWindow.dataTable.getColumnModel().getColumn(i).setCellRenderer(addressCellRenderer);
         }
-        this.dataTableScroller = new JScrollPane(DataSegmentWindow.dataTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+        this.dataTableScroller = new JScrollPane(DataSegmentWindow.dataTable,
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         return this.dataTableScroller;
     }
@@ -522,7 +535,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
      */
     public void clearHighlighting() {
         this.addressHighlighting = false;
-        DataSegmentWindow.dataTable.tableChanged(new TableModelEvent(DataSegmentWindow.dataTable.getModel(), 0, DataSegmentWindow.dataData.length - 1));
+        DataSegmentWindow.dataTable.tableChanged(new TableModelEvent(DataSegmentWindow.dataTable.getModel(), 0,
+                DataSegmentWindow.dataData.length - 1));
         // The below addresses situation in which addressRow and addressColum hold their
         // values across assemble operations. Whereupon at the first step of the next
         // run the last cells from the previous run are highlighted! This method is
@@ -556,7 +570,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final TableModel dataModel = DataSegmentWindow.dataTable.getModel();
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                    NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase), row, DataSegmentWindow.ADDRESS_COLUMN);
+                    NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase), row,
+                    DataSegmentWindow.ADDRESS_COLUMN);
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 try {
                     ((DataTableModel) dataModel).setDisplayAndModelValueAt(
@@ -573,17 +588,16 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     // through to the registry.
                     if (Memory.inTextSegment(address)) {
                         int displayValue = 0;
-                        if (!Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) {
-                            Globals.getSettings()
-                                    .setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED, true);
+                        final var boolSettings = Globals.getSettings().getBoolSettings();
+                        if (!boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+                            boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
                             try {
                                 displayValue = Globals.memory.getWordNoNotify(address);
                             } catch (final AddressErrorException e) {
                                 // Still got an exception? Doesn't seem possible but if we drop through it will
                                 // write default second 0.
                             }
-                            Globals.getSettings()
-                                    .setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED, false);
+                            boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, false);
                         }
                         ((DataTableModel) dataModel).setDisplayAndModelValueAt(
                                 NumberDisplayBaseChooser.formatNumber(displayValue, valueBase), row, column);
@@ -620,7 +634,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             return;
         }
         final int row = offset / DataSegmentWindow.BYTES_PER_ROW;
-        final int column = (offset % DataSegmentWindow.BYTES_PER_ROW) / DataSegmentWindow.BYTES_PER_VALUE + 1; // column 0 reserved for address
+        final int column = (offset % DataSegmentWindow.BYTES_PER_ROW) / DataSegmentWindow.BYTES_PER_VALUE + 1; // 
+        // column 0 reserved for address
         final int valueBase = Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase();
         ((DataTableModel) DataSegmentWindow.dataTable.getModel()).setDisplayAndModelValueAt(
                 NumberDisplayBaseChooser.formatNumber(value, valueBase),
@@ -710,7 +725,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.heapButton.setEnabled(true);
         this.extnButton.setEnabled(true);
         this.mmioButton.setEnabled(true);
-        this.textButton.setEnabled(this.settings.getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED));
+        this.textButton.setEnabled(this.settings.getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
         this.prevButton.setEnabled(true);
         this.nextButton.setEnabled(true);
         this.dataButton.setEnabled(true);
@@ -750,9 +765,11 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     // but for cleaner display we'll make it multiple of 32 (last nibble is 0).
                     // This makes it easier to mentally calculate address from row address + column
                     // offset.
-                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
+                    DataSegmentWindow.this.firstAddress =
+                            DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
                     DataSegmentWindow.this.homeAddress = DataSegmentWindow.this.firstAddress;
-                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.firstAddress =
+                            DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
                     DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
@@ -763,9 +780,11 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     DataSegmentWindow.this.firstAddress = Math.max(Memory.dataSegmentBaseAddress,
                             RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER));
                     // See comment above for gloButton...
-                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
+                    DataSegmentWindow.this.firstAddress =
+                            DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
                     DataSegmentWindow.this.homeAddress = Memory.stackBaseAddress;
-                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.firstAddress =
+                            DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
                     DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
@@ -773,7 +792,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 ae -> {
                     DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                     DataSegmentWindow.this.homeAddress = Memory.heapBaseAddress;
-                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
+                    DataSegmentWindow.this.firstAddress =
+                            DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
                     DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
@@ -781,7 +801,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 ae -> {
                     DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                     DataSegmentWindow.this.homeAddress = Memory.externBaseAddress;
-                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
+                    DataSegmentWindow.this.firstAddress =
+                            DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
                     DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
@@ -790,7 +811,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.KERNEL_MODE;
                     DataSegmentWindow.this.homeAddress = Memory.memoryMapBaseAddress;
                     DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
-                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.firstAddress =
+                            DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
                     DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
@@ -799,7 +821,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                     DataSegmentWindow.this.homeAddress = Memory.textBaseAddress;
                     DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
-                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.firstAddress =
+                            DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
                     DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
@@ -808,7 +831,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                     DataSegmentWindow.this.homeAddress = Memory.dataBaseAddress;
                     DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
-                    DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.firstAddress =
+                            DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
                     DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
                 });
 
@@ -822,7 +846,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     //////////////////////////////////////////////////////////////////////////////////// segment
     // for selected mode. For user mode, this means no lower than data segment base,
     // or higher than user memory boundary. For kernel mode, this means no lower
-    //////////////////////////////////////////////////////////////////////////////////// than
+
+    /// ///////////////////////////////////////////////////////////////////////////////// than
     // kernel data segment base or higher than kernel memory. It is called by the
     // above action listeners.
     //
@@ -832,9 +857,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // PrevButton and NextButton are enabled/disabled appropriately.
     //
     private int setFirstAddressAndPrevNextButtonEnableStatus(int lowAddress) {
-        final int lowLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE) ? Math.min(Math.min(Memory.textBaseAddress,
-                        Memory.dataSegmentBaseAddress),
-                Memory.dataBaseAddress)
+        final int lowLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE) ?
+                Math.min(Math.min(Memory.textBaseAddress,
+                                Memory.dataSegmentBaseAddress),
+                        Memory.dataBaseAddress)
                 : Memory.memoryMapBaseAddress;
         final int highLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE) ? Memory.userHighAddress
                 : Memory.kernelHighAddress;
@@ -896,19 +922,9 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         if (DataSegmentWindow.dataTable == null) {
             return;
         }
-        final Font[] possibleFonts = {
-                this.settings.getFontByPosition(Settings.DATASEGMENT_HIGHLIGHT_FONT),
-                this.settings.getFontByPosition(Settings.EVEN_ROW_FONT),
-                this.settings.getFontByPosition(Settings.ODD_ROW_FONT),
-        };
-        int maxHeight = 0;
-        for (final Font possibleFont : possibleFonts) {
-            final int height = this.getFontMetrics(possibleFont).getHeight();
-            if (height > maxHeight) {
-                maxHeight = height;
-            }
-        }
-        DataSegmentWindow.dataTable.setRowHeight(maxHeight);
+        final var font = Globals.getSettings().getFontSettings().getCurrentFont();
+        final var height = this.getFontMetrics(font).getHeight();
+        DataSegmentWindow.dataTable.setRowHeight(height);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -917,7 +933,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // is set programmatically using setSelectedIndex() rather than by
     /////////////////////////////////////////////////////////////////////////////// user-initiated
     // event (such as mouse click), the text displayed in the JComboBox is not
-    /////////////////////////////////////////////////////////////////////////////// always
+
+    /// //////////////////////////////////////////////////////////////////////////// always
     // updated correctly. Sometimes it is, sometimes updated to incorrect second.
     // No pattern that I can detect. Google search yielded many forums addressing
     // this problem. One suggested solution, a JComboBox superclass overriding
@@ -934,7 +951,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////
     // Class representing memory data table data
 
     class DataTableModel extends AbstractTableModel {
@@ -1009,7 +1026,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
             // calculate address from row and column
             try {
-                address = Binary.stringToInt((String) this.data[row][DataSegmentWindow.ADDRESS_COLUMN]) + (col - 1) * DataSegmentWindow.BYTES_PER_VALUE; // KENV
+                address =
+                        Binary.stringToInt((String) this.data[row][DataSegmentWindow.ADDRESS_COLUMN]) + (col - 1) * DataSegmentWindow.BYTES_PER_VALUE; // KENV
                 // 1/6/05
             } catch (final NumberFormatException nfe) {
                 // can't really happen since memory addresses are completely under
@@ -1067,32 +1085,42 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
         @Override
         public Component getTableCellRendererComponent(final JTable table, final Object value,
-                                                       final boolean isSelected, final boolean hasFocus, final int row, final int column) {
+                                                       final boolean isSelected, final boolean hasFocus,
+                                                       final int row, final int column) {
             final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
 
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
-            final int rowFirstAddress = Binary.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
-            if (DataSegmentWindow.this.settings.getBooleanSetting(Settings.Bool.DATA_SEGMENT_HIGHLIGHTING) && DataSegmentWindow.this.addressHighlighting &&
-                    rowFirstAddress == DataSegmentWindow.this.addressRowFirstAddress && column == DataSegmentWindow.this.addressColumn) {
-                cell.setBackground(DataSegmentWindow.this.settings.getColorSettingByPosition(Settings.DATASEGMENT_HIGHLIGHT_BACKGROUND));
-                cell.setForeground(DataSegmentWindow.this.settings.getColorSettingByPosition(Settings.DATASEGMENT_HIGHLIGHT_FOREGROUND));
-                cell.setFont(DataSegmentWindow.this.settings.getFontByPosition(Settings.DATASEGMENT_HIGHLIGHT_FONT));
-            } else if (row % 2 == 0) {
-                cell.setBackground(DataSegmentWindow.this.settings.getColorSettingByPosition(Settings.EVEN_ROW_BACKGROUND));
-                cell.setForeground(DataSegmentWindow.this.settings.getColorSettingByPosition(Settings.EVEN_ROW_FOREGROUND));
-                cell.setFont(DataSegmentWindow.this.settings.getFontByPosition(Settings.EVEN_ROW_FONT));
+            final int rowFirstAddress =
+                    Binary.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
+            final var theme = settings.getEditorThemeSettings().getTheme();
+            final var defaultFont = settings.getFontSettings().getCurrentFont();
+            if (/*DataSegmentWindow.this.settings.getBoolSettings().getSetting(BoolSetting.DATA_SEGMENT_HIGHLIGHTING)
+             &&*/
+                    DataSegmentWindow.this.addressHighlighting &&
+                            rowFirstAddress == DataSegmentWindow.this.addressRowFirstAddress &&
+                            column == DataSegmentWindow.this.addressColumn) {
+                final var style = settings.getRuntimeTableHighlightingSettings().getDataSegmentHighlightingStyle();
+                if (style != null) {
+                    cell.setBackground(style.background());
+                    cell.setForeground(style.foreground());
+                    cell.setFont(deriveFontFromStyle(defaultFont, style));
+                } else {
+                    cell.setBackground(theme.backgroundColor);
+                    cell.setForeground(theme.foregroundColor);
+                    cell.setFont(defaultFont);
+                }
             } else {
-                cell.setBackground(DataSegmentWindow.this.settings.getColorSettingByPosition(Settings.ODD_ROW_BACKGROUND));
-                cell.setForeground(DataSegmentWindow.this.settings.getColorSettingByPosition(Settings.ODD_ROW_FOREGROUND));
-                cell.setFont(DataSegmentWindow.this.settings.getFontByPosition(Settings.ODD_ROW_FONT));
+                cell.setBackground(theme.backgroundColor);
+                cell.setForeground(theme.foregroundColor);
+                cell.setFont(defaultFont);
             }
             return cell;
         }
 
     }
 
-    ///////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////
     //
     // JTable subclass to provide custom tool tips for each of the
     // text table column headers. From Sun's JTable tutorial.
@@ -1121,13 +1149,14 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     final int index = this.columnModel.getColumnIndexAtX(p.x);
                     final int realIndex = this.columnModel.getColumn(index).getModelIndex();
                     return (realIndex < 2) ? MyTippedJTable.this.columnToolTips[realIndex]
-                            : MyTippedJTable.this.columnToolTips[2] + ((realIndex - 1) * 4) + MyTippedJTable.this.columnToolTips[3];
+                            :
+                            MyTippedJTable.this.columnToolTips[2] + ((realIndex - 1) * 4) + MyTippedJTable.this.columnToolTips[3];
                 }
             };
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////
     //
     // The Prev button (left arrow) scrolls downward through the
     // selected address range. It is a RepeatButton, which means
@@ -1146,12 +1175,13 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         @Override
         public void actionPerformed(final ActionEvent ae) {
             DataSegmentWindow.this.firstAddress -= DataSegmentWindow.PREV_NEXT_CHUNK_SIZE;
-            DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+            DataSegmentWindow.this.firstAddress =
+                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
             DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
         }
     }//////////////////////////////////////////////////////////////////////
 
-    ///////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////
     //
     // The Next button (right arrow) scrolls upward through the
     // selected address range. It is a RepeatButton, which means
@@ -1170,7 +1200,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         @Override
         public void actionPerformed(final ActionEvent ae) {
             DataSegmentWindow.this.firstAddress += DataSegmentWindow.PREV_NEXT_CHUNK_SIZE;
-            DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+            DataSegmentWindow.this.firstAddress =
+                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
             DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
         }
     }//////////////////////////////////////////////////////////////////////

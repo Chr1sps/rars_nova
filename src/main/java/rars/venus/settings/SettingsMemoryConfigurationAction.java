@@ -77,7 +77,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         configDialog.setVisible(true);
     }
 
-    //////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////
     //
     // Private class to do all the work!
     //
@@ -118,7 +118,8 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         private Component buildConfigChooser() {
             final JPanel chooserPanel = new JPanel(new GridLayout(4, 1));
             final ButtonGroup choices = new ButtonGroup();
-            final Iterator<MemoryConfiguration> configurationsIterator = MemoryConfigurations.getConfigurationsIterator();
+            final Iterator<MemoryConfiguration> configurationsIterator =
+                    MemoryConfigurations.getConfigurationsIterator();
             while (configurationsIterator.hasNext()) {
                 final MemoryConfiguration config = configurationsIterator.next();
                 final ConfigurationButton button = new ConfigurationButton(config);
@@ -144,15 +145,14 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             final JPanel valuesPanel = new JPanel(new GridLayout(numItems, 1));
             final Font monospaced = new Font("Monospaced", Font.PLAIN, 12);
             this.nameDisplay = new JLabel[numItems];
-            // for (int i=numItems-1; i >= 0; i--) {
-            // namesPanel.add(new JLabel(configurationItemNames[i]));
-            // }
             this.addressDisplay = new JTextField[numItems];
             for (int i = 0; i < numItems; i++) {
                 this.nameDisplay[i] = new JLabel();
-                this.addressDisplay[i] = new JTextField();
-                this.addressDisplay[i].setEditable(false);
-                this.addressDisplay[i].setFont(monospaced);
+                final var textField = new JTextField();
+                textField.setEditable(false);
+                textField.setFont(monospaced);
+                textField.setFocusable(false);
+                this.addressDisplay[i] = textField;
             }
             // Display vertically from high to low memory addresses so
             // add the components in reverse order.

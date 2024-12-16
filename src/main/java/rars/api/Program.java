@@ -9,6 +9,7 @@ import rars.Settings;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.hardware.*;
+import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
 import rars.util.SystemIO;
@@ -236,8 +237,9 @@ public final class Program {
         SimulationException e = null;
 
         // Swap out global state for local state.
-        final boolean selfMod = Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED);
-        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED,
+        final var boolSettings = Globals.getSettings().getBoolSettings();
+        final boolean selfMod = boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED);
+        boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED,
                 this.set.selfModifyingCode);
         final SystemIO.Data tmpFiles = SystemIO.swapData(this.fds);
         final Memory tmpMem = Memory.swapInstance(this.simulation);
@@ -249,7 +251,7 @@ public final class Program {
         }
         this.exitCode = Globals.exitCode;
 
-        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED, selfMod);
+        boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, selfMod);
         SystemIO.swapData(tmpFiles);
         Memory.swapInstance(tmpMem);
 

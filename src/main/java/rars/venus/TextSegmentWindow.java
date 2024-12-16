@@ -4,20 +4,21 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.Settings;
 import rars.exceptions.AddressErrorException;
 import rars.notices.*;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.util.Binary;
-import rars.util.EditorFont;
+import rars.util.EditorFontUtils;
 import rars.util.SimpleSubscriber;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -162,7 +163,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 if (statement.getSourceLine() == lastLine)
                     lineNumber = "          ".substring(0, sourceLineDigits) + "  ";
                 sourceString = lineNumber
-                        + EditorFont.substituteSpacesForTabs(statement.getSource());
+                        + EditorFontUtils.substituteSpacesForTabs(statement.getSource());
             }
             this.data[i][TextSegmentWindow.SOURCE_COLUMN] = sourceString;
             lastLine = statement.getSourceLine();
@@ -193,19 +194,17 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.table.getColumnModel().getColumn(TextSegmentWindow.ADDRESS_COLUMN).setCellRenderer(new MonoRightCellRenderer());
         this.table.getColumnModel().getColumn(TextSegmentWindow.CODE_COLUMN).setCellRenderer(new MachineCodeCellRenderer());
         this.table.getColumnModel().getColumn(TextSegmentWindow.BREAK_COLUMN).setCellRenderer(new CheckBoxTableCellRenderer());
-        this.reorderColumns(); // Re-order columns according to current preference...
         // Add listener to catch column re-ordering for updating settings.
-        this.table.getColumnModel().addColumnModelListener(new MyTableColumnMovingListener());
 
         this.tableScroller = new JScrollPane(this.table, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         this.contentPane.add(this.tableScroller);
-        if (Globals.getSettings().getBooleanSetting(Settings.Bool.PROGRAM_ARGUMENTS)) {
+        if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             this.addProgramArgumentsPanel();
         }
 
         this.deleteAsTextSegmentObserver();
-        if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) {
+        if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
             this.addAsTextSegmentObserver();
         }
     }
@@ -339,7 +338,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 // existing code is overwritten
                 // even when running at unlimited speed. DPS 10-July-2013
                 this.deleteAsTextSegmentObserver();
-                if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) { // &&
+                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
                     // (notice.getRunSpeed()
                     // !=
                     // RunSpeedPanel.UNLIMITED_SPEED
@@ -351,7 +350,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             }
             case final SettingsNotice ignored -> {
                 this.deleteAsTextSegmentObserver();
-                if (Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED)) {
+                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                     this.addAsTextSegmentObserver();
                 }
                 this.updateRowHeight();
@@ -679,17 +678,6 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * Re-order the Text segment columns according to saved preferences.
      */
 
-    private void reorderColumns() {
-        final TableColumnModel oldtcm = this.table.getColumnModel();
-        final TableColumnModel newtcm = new DefaultTableColumnModel();
-        final int[] savedColumnOrder = Globals.getSettings().getTextColumnOrder();
-        // Apply ordering only if correct number of columns.
-        if (savedColumnOrder.length == this.table.getColumnCount()) {
-            for (final int columnOrder : savedColumnOrder)
-                newtcm.addColumn(oldtcm.getColumn(columnOrder));
-            this.table.setColumnModel(newtcm);
-        }
-    }
 
     /*
      * Helper method to find the table row corresponding to the given.
@@ -712,19 +700,9 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         if (this.table == null) {
             return;
         }
-        final Font[] possibleFonts = {
-                Globals.getSettings().getFontByPosition(Settings.TEXTSEGMENT_HIGHLIGHT_FONT),
-                Globals.getSettings().getFontByPosition(Settings.EVEN_ROW_FONT),
-                Globals.getSettings().getFontByPosition(Settings.ODD_ROW_FONT),
-        };
-        int maxHeight = 0;
-        for (final Font possibleFont : possibleFonts) {
-            final int height = this.getFontMetrics(possibleFont).getHeight();
-            if (height > maxHeight) {
-                maxHeight = height;
-            }
-        }
-        this.table.setRowHeight(maxHeight);
+        final var font = Globals.getSettings().getFontSettings().getCurrentFont();
+        final var height = this.getFontMetrics(font).getHeight();
+        this.table.setRowHeight(height);
     }
 
     /**
@@ -777,7 +755,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             // Note that the data/cell address is constant,
             // no matter where the cell appears onscreen.
             return col == TextSegmentWindow.BREAK_COLUMN || (col == TextSegmentWindow.CODE_COLUMN &&
-                    Globals.getSettings().getBooleanSetting(Settings.Bool.SELF_MODIFYING_CODE_ENABLED));
+                    Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
         }
 
         /**
@@ -858,15 +836,9 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                                                        final int row, final int column) {
             final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
-            cell.setFont(MonoRightCellRenderer.MONOSPACED_PLAIN_12POINT);
+            cell.setFont(Globals.getSettings().getFontSettings().getCurrentFont());
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
-            if (row % 2 == 0) {
-                cell.setBackground(Globals.getSettings().getColorSettingByPosition(Settings.EVEN_ROW_BACKGROUND));
-                cell.setForeground(Globals.getSettings().getColorSettingByPosition(Settings.EVEN_ROW_FOREGROUND));
-            } else {
-                cell.setBackground(Globals.getSettings().getColorSettingByPosition(Settings.ODD_ROW_BACKGROUND));
-                cell.setForeground(Globals.getSettings().getColorSettingByPosition(Settings.ODD_ROW_FOREGROUND));
-            }
+            // TODO: implement default background
             return cell;
         }
     }
@@ -886,21 +858,20 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             // cell.setFont(tableCellFont);
             final TextSegmentWindow textSegment =
                     Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow();
-            final Settings settings = Globals.getSettings();
+            final var settings = Globals.getSettings().getRuntimeTableHighlightingSettings();
             final boolean highlighting = textSegment.getCodeHighlighting();
 
+            // TODO: implement this
             if (highlighting && textSegment.getIntCodeAddressAtRow(row) == TextSegmentWindow.this.highlightAddress) {
-                cell.setBackground(settings.getColorSettingByPosition(Settings.TEXTSEGMENT_HIGHLIGHT_BACKGROUND));
-                cell.setForeground(settings.getColorSettingByPosition(Settings.TEXTSEGMENT_HIGHLIGHT_FOREGROUND));
-                cell.setFont(settings.getFontByPosition(Settings.TEXTSEGMENT_HIGHLIGHT_FONT));
-            } else if (row % 2 == 0) {
-                cell.setBackground(settings.getColorSettingByPosition(Settings.EVEN_ROW_BACKGROUND));
-                cell.setForeground(settings.getColorSettingByPosition(Settings.EVEN_ROW_FOREGROUND));
-                cell.setFont(settings.getFontByPosition(Settings.EVEN_ROW_FONT));
+                final var style = settings.getTextSegmentHighlightingStyle();
+                cell.setBackground(style.background());
+                cell.setForeground(style.foreground());
+//                cell.setFont(style);
             } else {
-                cell.setBackground(settings.getColorSettingByPosition(Settings.ODD_ROW_BACKGROUND));
-                cell.setForeground(settings.getColorSettingByPosition(Settings.ODD_ROW_FOREGROUND));
-                cell.setFont(settings.getFontByPosition(Settings.ODD_ROW_FONT));
+//                final var style = 
+//                cell.setBackground(settings.getColorSettingByPosition(Settings.ODD_ROW_BACKGROUND));
+//                cell.setForeground(settings.getColorSettingByPosition(Settings.ODD_ROW_FOREGROUND));
+//                cell.setFont(settings.getFontByPosition(Settings.ODD_ROW_FONT));
             }
             return cell;
         }
@@ -1119,46 +1090,4 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             }
         }
     }
-
-    /*
-     * Will capture movement of text columns. This info goes into persistent store.
-     */
-    private class MyTableColumnMovingListener implements TableColumnModelListener {
-        // Don't care about these events but no adapter provided so...
-        @Override
-        public void columnAdded(final TableColumnModelEvent e) {
-        }
-
-        @Override
-        public void columnRemoved(final TableColumnModelEvent e) {
-        }
-
-        @Override
-        public void columnMarginChanged(final ChangeEvent e) {
-        }
-
-        @Override
-        public void columnSelectionChanged(final ListSelectionEvent e) {
-        }
-
-        // When column moves, save the new column order.
-        @Override
-        public void columnMoved(final TableColumnModelEvent e) {
-            final int[] columnOrder = new int[TextSegmentWindow.this.table.getColumnCount()];
-            for (int i = 0; i < columnOrder.length; i++) {
-                columnOrder[i] = TextSegmentWindow.this.table.getColumnModel().getColumn(i).getModelIndex();
-            }
-            // If movement is slow, this event may fire multiple times w/o
-            // actually changing the column order. If new column order is
-            // same as previous, do not save changes to persistent store.
-            final int[] oldOrder = Globals.getSettings().getTextColumnOrder();
-            for (int i = 0; i < columnOrder.length; i++) {
-                if (oldOrder[i] != columnOrder[i]) {
-                    Globals.getSettings().setTextColumnOrder(columnOrder);
-                    break;
-                }
-            }
-        }
-    }
-
 }
