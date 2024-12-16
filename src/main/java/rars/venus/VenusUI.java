@@ -4,6 +4,7 @@ package rars.venus;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.Settings;
 import rars.riscv.Instructions;
@@ -25,6 +26,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -199,7 +201,7 @@ public class VenusUI extends JFrame {
 
         FileStatus.reset();
         // The following has side effect of establishing menu state
-        FileStatus.set(FileStatus.NO_FILE);
+        FileStatus.set(FileStatus.State.NO_FILE);
 
         // This is invoked when opening the app. It will set the app to
         // appear at full screen size.
@@ -254,40 +256,11 @@ public class VenusUI extends JFrame {
      * shared between toolbar icon and corresponding menu item).
      */
 
-    /**
-     * <p>Setter for the field <code>menuState</code>.</p>
-     *
-     * @param status a int
-     */
-    public void setMenuState(final int status) {
-        switch (status) {
-            case FileStatus.NO_FILE:
-                this.setMenuStateInitial();
-                break;
-            case FileStatus.NEW_NOT_EDITED, FileStatus.NEW_EDITED:
-                this.setMenuStateEditingNew();
-                break;
-            case FileStatus.NOT_EDITED:
-                this.setMenuStateNotEdited(); // was MenuStateEditing. DPS 9-Aug-2011
-                break;
-            case FileStatus.EDITED:
-                this.setMenuStateEditing();
-                break;
-            case FileStatus.RUNNABLE:
-                this.setMenuStateRunnable();
-                break;
-            case FileStatus.RUNNING:
-                this.setMenuStateRunning();
-                break;
-            case FileStatus.TERMINATED:
-                this.setMenuStateTerminated();
-                break;
-            case FileStatus.OPENING:// This is a temporary state. DPS 9-Aug-2011
-                break;
-            default:
-                VenusUI.LOGGER.error("Invalid File Status: {}", status);
-                break;
-        }
+    /// Sets each of the [Action] objects to be enabled.
+    ///
+    /// @param actions The actions to enable.
+    private static void setEnabled(final @NotNull Action... actions) {
+        Arrays.stream(actions).forEach((action) -> action.setEnabled(true));
     }
 
     /*
@@ -302,6 +275,26 @@ public class VenusUI extends JFrame {
      * setMenuStateRunning: set upon Run->Go
      * setMenuStateTerminated: set upon completion of simulated execution
      */
+
+    /// Sets each of the [Action] objects to be enabled.
+    ///
+    /// @param actions The actions to enable.
+    private static void setDisabled(final @NotNull Action... actions) {
+        Arrays.stream(actions).forEach((action) -> action.setEnabled(false));
+    }
+
+    public void setMenuState(final @NotNull FileStatus.State status) {
+        switch (status) {
+            case NO_FILE -> this.setMenuStateInitial();
+            case NEW_NOT_EDITED, NEW_EDITED -> this.setMenuStateEditingNew();
+            case NOT_EDITED -> this.setMenuStateNotEdited(); // was MenuStateEditing. DPS 9-Aug-2011
+            case EDITED -> this.setMenuStateEditing();
+            case RUNNABLE -> this.setMenuStateRunnable();
+            case RUNNING -> this.setMenuStateRunning();
+            case TERMINATED -> this.setMenuStateTerminated();
+//            case OPENING -> {}
+        }
+    }
 
     /*
      * Action objects are used instead of action listeners because one can be easily
@@ -363,7 +356,8 @@ public class VenusUI extends JFrame {
                 }
             };
             this.fileDumpMemoryAction = new FileDumpMemoryAction("Dump Memory ...", this.loadIcon("Dump22.png"),
-                    "Dump machine code or data in an available format", KeyEvent.VK_D, VenusUI.makeShortcut(KeyEvent.VK_D),
+                    "Dump machine code or data in an available format", KeyEvent.VK_D,
+                    VenusUI.makeShortcut(KeyEvent.VK_D),
                     this.mainUI);
             this.fileExitAction = new GuiAction("Exit", null, "Exit Rars", KeyEvent.VK_X, null) {
                 @Override
@@ -462,7 +456,8 @@ public class VenusUI extends JFrame {
                     // RunGoAction's "stopped" method will take care of the cleanup.
                 }
             };
-            this.runResetAction = new RunResetAction("Reset", this.loadIcon("Reset22.png"), "Reset memory and registers",
+            this.runResetAction = new RunResetAction("Reset", this.loadIcon("Reset22.png"), "Reset memory and " +
+                    "registers",
                     KeyEvent.VK_R, KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0), this.mainUI);
             this.runClearBreakpointsAction = new RunClearBreakpointsAction("Clear all breakpoints", null,
                     "Clears all execution breakpoints set since the last assemble.", KeyEvent.VK_K,
@@ -499,19 +494,23 @@ public class VenusUI extends JFrame {
                     "If set, extended (pseudo) instructions are formats are permitted.",
                     BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
             this.settingsAssembleOnOpenAction = new SettingsAction("Assemble file upon opening",
-                    "If set, a file will be automatically assembled as soon as it is opened.  File Open dialog will show most recently opened file.",
+                    "If set, a file will be automatically assembled as soon as it is opened.  File Open dialog will " +
+                            "show most recently opened file.",
                     BoolSetting.ASSEMBLE_ON_OPEN);
             this.settingsAssembleAllAction = new SettingsAction("Assemble all files in directory",
                     "If set, all files in current directory will be assembled when Assemble operation is selected.",
                     BoolSetting.ASSEMBLE_ALL);
             this.settingsAssembleOpenAction = new SettingsAction("Assemble all files currently open",
-                    "If set, all files currently open for editing will be assembled when Assemble operation is selected.",
+                    "If set, all files currently open for editing will be assembled when Assemble operation is " +
+                            "selected.",
                     BoolSetting.ASSEMBLE_OPEN);
             this.settingsWarningsAreErrorsAction = new SettingsAction("Assembler warnings are considered errors",
                     "If set, assembler warnings will be interpreted as errors and prevent successful assembly.",
                     BoolSetting.WARNINGS_ARE_ERRORS);
-            this.settingsStartAtMainAction = new SettingsAction("Initialize Program Counter to global 'main' if defined",
-                    "If set, assembler will initialize Program Counter to text address globally labeled 'main', if defined.",
+            this.settingsStartAtMainAction = new SettingsAction("Initialize Program Counter to global 'main' if " +
+                    "defined",
+                    "If set, assembler will initialize Program Counter to text address globally labeled 'main', if " +
+                            "defined.",
                     BoolSetting.START_AT_MAIN);
             this.settingsProgramArgumentsAction = new SettingsAction("Program arguments provided to program",
                     "If set, program arguments for the program can be entered in border of Text Segment window.",
@@ -536,7 +535,8 @@ public class VenusUI extends JFrame {
                 VenusUI.this.csrTab.updateRegisters();
             });
             this.settingsDeriveCurrentWorkingDirectoryAction = new SettingsAction("Derive current working directory",
-                    "If set, the working directory is derived from the main file instead of the RARS executable directory.",
+                    "If set, the working directory is derived from the main file instead of the RARS executable " +
+                            "directory.",
                     BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY);
 
             this.settingsEditorAction = new SettingsEditorAction("Editor...", null,
@@ -555,7 +555,8 @@ public class VenusUI extends JFrame {
             this.helpAboutAction = new HelpAboutAction("About ...", null,
                     "Information about Rars", null, null, this.mainUI);
         } catch (final NullPointerException e) {
-            VenusUI.LOGGER.fatal("Internal Error: images folder not found, or other null pointer exception while creating Action objects", e);
+            VenusUI.LOGGER.fatal("Internal Error: images folder not found, or other null pointer exception while " +
+                    "creating Action objects", e);
             System.exit(0);
         }
     }
@@ -672,11 +673,13 @@ public class VenusUI extends JFrame {
         settingsPopupInput.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.POPUP_SYSCALL_INPUT));
         final JCheckBoxMenuItem settingsValueDisplayBase = new JCheckBoxMenuItem(this.settingsValueDisplayBaseAction);
         settingsValueDisplayBase
-                .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));// mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
+                .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
+        // mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
         // Tell the corresponding JCheckBox in the Execute Pane about me -- it has
         // already been created.
         this.mainPane.getExecutePane().getValueDisplayBaseChooser().setSettingsMenuItem(settingsValueDisplayBase);
-        final JCheckBoxMenuItem settingsAddressDisplayBase = new JCheckBoxMenuItem(this.settingsAddressDisplayBaseAction);
+        final JCheckBoxMenuItem settingsAddressDisplayBase =
+                new JCheckBoxMenuItem(this.settingsAddressDisplayBaseAction);
         settingsAddressDisplayBase
                 .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX));// mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
         // Tell the corresponding JCheckBox in the Execute Pane about me -- it has
@@ -689,7 +692,8 @@ public class VenusUI extends JFrame {
                 .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
         final JCheckBoxMenuItem settingsRV64 = new JCheckBoxMenuItem(this.settingsRV64Action);
         settingsRV64.setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.RV64_ENABLED));
-        final JCheckBoxMenuItem settingsDeriveCurrentWorkingDirectory = new JCheckBoxMenuItem(this.settingsDeriveCurrentWorkingDirectoryAction);
+        final JCheckBoxMenuItem settingsDeriveCurrentWorkingDirectory =
+                new JCheckBoxMenuItem(this.settingsDeriveCurrentWorkingDirectoryAction);
         settingsDeriveCurrentWorkingDirectory
                 .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY));
         final JCheckBoxMenuItem settingsAssembleOnOpen = new JCheckBoxMenuItem(this.settingsAssembleOnOpenAction);
@@ -904,32 +908,14 @@ public class VenusUI extends JFrame {
 
     private void setMenuStateEditing() {
         /* Note: undo and redo are handled separately by the undo manager */
-        this.fileNewAction.setEnabled(true);
-        this.fileOpenAction.setEnabled(true);
-        this.fileCloseAction.setEnabled(true);
-        this.fileCloseAllAction.setEnabled(true);
-        this.fileSaveAction.setEnabled(true);
-        this.fileSaveAsAction.setEnabled(true);
-        this.fileSaveAllAction.setEnabled(true);
-        this.fileDumpMemoryAction.setEnabled(false);
-        this.fileExitAction.setEnabled(true);
-        this.editCutAction.setEnabled(true);
-        this.editCopyAction.setEnabled(true);
-        this.editPasteAction.setEnabled(true);
-        this.editFindReplaceAction.setEnabled(true);
-        this.editSelectAllAction.setEnabled(true);
-        this.settingsMemoryConfigurationAction.setEnabled(true); // added 21 July 2009
-        this.runAssembleAction.setEnabled(true);
-        this.runGoAction.setEnabled(false);
-        this.runStepAction.setEnabled(false);
-        this.runBackstepAction.setEnabled(false);
-        this.runResetAction.setEnabled(false);
-        this.runStopAction.setEnabled(false);
-        this.runPauseAction.setEnabled(false);
-        this.runClearBreakpointsAction.setEnabled(false);
-        this.runToggleBreakpointsAction.setEnabled(false);
-        this.helpHelpAction.setEnabled(true);
-        this.helpAboutAction.setEnabled(true);
+        setEnabled(fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
+                fileSaveAsAction, fileSaveAllAction);
+        setDisabled(fileDumpMemoryAction);
+        setEnabled(fileExitAction, editCutAction, editCopyAction, editPasteAction, editFindReplaceAction,
+                editSelectAllAction, settingsMemoryConfigurationAction, runAssembleAction);
+        setDisabled(runGoAction, runStepAction, runBackstepAction, runResetAction,
+                runStopAction, runPauseAction, runClearBreakpointsAction, runToggleBreakpointsAction);
+        setEnabled(helpHelpAction, helpAboutAction);
         this.updateUndoAndRedoState();
     }
 
@@ -938,32 +924,14 @@ public class VenusUI extends JFrame {
      */
     private void setMenuStateEditingNew() {
         /* Note: undo and redo are handled separately by the undo manager */
-        this.fileNewAction.setEnabled(true);
-        this.fileOpenAction.setEnabled(true);
-        this.fileCloseAction.setEnabled(true);
-        this.fileCloseAllAction.setEnabled(true);
-        this.fileSaveAction.setEnabled(true);
-        this.fileSaveAsAction.setEnabled(true);
-        this.fileSaveAllAction.setEnabled(true);
-        this.fileDumpMemoryAction.setEnabled(false);
-        this.fileExitAction.setEnabled(true);
-        this.editCutAction.setEnabled(true);
-        this.editCopyAction.setEnabled(true);
-        this.editPasteAction.setEnabled(true);
-        this.editFindReplaceAction.setEnabled(true);
-        this.editSelectAllAction.setEnabled(true);
-        this.settingsMemoryConfigurationAction.setEnabled(true); // added 21 July 2009
-        this.runAssembleAction.setEnabled(false);
-        this.runGoAction.setEnabled(false);
-        this.runStepAction.setEnabled(false);
-        this.runBackstepAction.setEnabled(false);
-        this.runResetAction.setEnabled(false);
-        this.runStopAction.setEnabled(false);
-        this.runPauseAction.setEnabled(false);
-        this.runClearBreakpointsAction.setEnabled(false);
-        this.runToggleBreakpointsAction.setEnabled(false);
-        this.helpHelpAction.setEnabled(true);
-        this.helpAboutAction.setEnabled(true);
+        setEnabled(fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
+                fileSaveAsAction, fileSaveAllAction);
+        setDisabled(fileDumpMemoryAction);
+        setEnabled(fileExitAction, editCutAction, editCopyAction, editPasteAction, editFindReplaceAction,
+                editSelectAllAction, settingsMemoryConfigurationAction);
+        setDisabled(runAssembleAction, runGoAction, runStepAction, runBackstepAction, runResetAction,
+                runStopAction, runPauseAction, runClearBreakpointsAction, runToggleBreakpointsAction);
+        setEnabled(helpHelpAction, helpAboutAction);
         this.updateUndoAndRedoState();
     }
 
@@ -972,32 +940,14 @@ public class VenusUI extends JFrame {
      */
     private void setMenuStateRunnable() {
         /* Note: undo and redo are handled separately by the undo manager */
-        this.fileNewAction.setEnabled(true);
-        this.fileOpenAction.setEnabled(true);
-        this.fileCloseAction.setEnabled(true);
-        this.fileCloseAllAction.setEnabled(true);
-        this.fileSaveAction.setEnabled(true);
-        this.fileSaveAsAction.setEnabled(true);
-        this.fileSaveAllAction.setEnabled(true);
-        this.fileDumpMemoryAction.setEnabled(true);
-        this.fileExitAction.setEnabled(true);
-        this.editCutAction.setEnabled(true);
-        this.editCopyAction.setEnabled(true);
-        this.editPasteAction.setEnabled(true);
-        this.editFindReplaceAction.setEnabled(true);
-        this.editSelectAllAction.setEnabled(true);
-        this.settingsMemoryConfigurationAction.setEnabled(true); // added 21 July 2009
-        this.runAssembleAction.setEnabled(true);
-        this.runGoAction.setEnabled(true);
-        this.runStepAction.setEnabled(true);
-        this.runBackstepAction.setEnabled(
-                Settings.getBackSteppingEnabled() && !Globals.program.getBackStepper().empty());
-        this.runResetAction.setEnabled(true);
-        this.runStopAction.setEnabled(false);
-        this.runPauseAction.setEnabled(false);
-        this.runToggleBreakpointsAction.setEnabled(true);
-        this.helpHelpAction.setEnabled(true);
-        this.helpAboutAction.setEnabled(true);
+        setEnabled(fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
+                fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction, editCutAction,
+                editCopyAction, editPasteAction, editFindReplaceAction, editSelectAllAction,
+                settingsMemoryConfigurationAction, runAssembleAction, runGoAction, runStepAction);
+        runBackstepAction.setEnabled(Settings.getBackSteppingEnabled() && !Globals.program.getBackStepper().empty());
+        setEnabled(runResetAction);
+        setDisabled(runStopAction, runPauseAction);
+        setEnabled(runToggleBreakpointsAction, helpHelpAction, helpAboutAction);
         this.updateUndoAndRedoState();
     }
 
@@ -1005,34 +955,15 @@ public class VenusUI extends JFrame {
      * Use this while program is running
      */
     private void setMenuStateRunning() {
-        /* Note: undo and redo are handled separately by the undo manager */
-        this.fileNewAction.setEnabled(false);
-        this.fileOpenAction.setEnabled(false);
-        this.fileCloseAction.setEnabled(false);
-        this.fileCloseAllAction.setEnabled(false);
-        this.fileSaveAction.setEnabled(false);
-        this.fileSaveAsAction.setEnabled(false);
-        this.fileSaveAllAction.setEnabled(false);
-        this.fileDumpMemoryAction.setEnabled(false);
-        this.fileExitAction.setEnabled(false);
-        this.editCutAction.setEnabled(false);
-        this.editCopyAction.setEnabled(false);
-        this.editPasteAction.setEnabled(false);
-        this.editFindReplaceAction.setEnabled(false);
-        this.editSelectAllAction.setEnabled(false);
-        this.settingsMemoryConfigurationAction.setEnabled(false); // added 21 July 2009
-        this.runAssembleAction.setEnabled(false);
-        this.runGoAction.setEnabled(false);
-        this.runStepAction.setEnabled(false);
-        this.runBackstepAction.setEnabled(false);
-        this.runResetAction.setEnabled(false);
-        this.runStopAction.setEnabled(true);
-        this.runPauseAction.setEnabled(true);
-        this.runToggleBreakpointsAction.setEnabled(false);
-        this.helpHelpAction.setEnabled(true);
-        this.helpAboutAction.setEnabled(true);
-        this.editUndoAction.setEnabled(false);// updateUndoState(); // DPS 10 Jan 2008
-        this.editRedoAction.setEnabled(false);// updateRedoState(); // DPS 10 Jan 2008
+        setDisabled(fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
+                fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction, editCutAction,
+                editCopyAction, editPasteAction, editFindReplaceAction, editSelectAllAction,
+                settingsMemoryConfigurationAction, runAssembleAction, runGoAction, runStepAction,
+                runBackstepAction, runResetAction);
+        setEnabled(runStopAction, runPauseAction);
+        setDisabled(runToggleBreakpointsAction);
+        setEnabled(helpHelpAction, helpAboutAction);
+        setDisabled(editUndoAction, editRedoAction);
     }
 
     /*
@@ -1040,32 +971,16 @@ public class VenusUI extends JFrame {
      */
     private void setMenuStateTerminated() {
         /* Note: undo and redo are handled separately by the undo manager */
-        this.fileNewAction.setEnabled(true);
-        this.fileOpenAction.setEnabled(true);
-        this.fileCloseAction.setEnabled(true);
-        this.fileCloseAllAction.setEnabled(true);
-        this.fileSaveAction.setEnabled(true);
-        this.fileSaveAsAction.setEnabled(true);
-        this.fileSaveAllAction.setEnabled(true);
-        this.fileDumpMemoryAction.setEnabled(true);
-        this.fileExitAction.setEnabled(true);
-        this.editCutAction.setEnabled(true);
-        this.editCopyAction.setEnabled(true);
-        this.editPasteAction.setEnabled(true);
-        this.editFindReplaceAction.setEnabled(true);
-        this.editSelectAllAction.setEnabled(true);
-        this.settingsMemoryConfigurationAction.setEnabled(true); // added 21 July 2009
-        this.runAssembleAction.setEnabled(true);
-        this.runGoAction.setEnabled(false);
-        this.runStepAction.setEnabled(false);
-        this.runBackstepAction.setEnabled(
-                Settings.getBackSteppingEnabled() && !Globals.program.getBackStepper().empty());
-        this.runResetAction.setEnabled(true);
-        this.runStopAction.setEnabled(false);
-        this.runPauseAction.setEnabled(false);
-        this.runToggleBreakpointsAction.setEnabled(true);
-        this.helpHelpAction.setEnabled(true);
-        this.helpAboutAction.setEnabled(true);
+        setEnabled(fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
+                fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction, editCutAction,
+                editCopyAction, editPasteAction, editFindReplaceAction, editSelectAllAction,
+                settingsMemoryConfigurationAction, runAssembleAction);
+        setDisabled(runGoAction, runStepAction);
+        runBackstepAction.setEnabled(Settings.getBackSteppingEnabled() && !Globals.program.getBackStepper().empty());
+        setEnabled(runResetAction);
+        setDisabled(runStopAction, runPauseAction);
+        setEnabled(runToggleBreakpointsAction, helpHelpAction, helpAboutAction);
+
         this.updateUndoAndRedoState();
     }
 
@@ -1176,10 +1091,6 @@ public class VenusUI extends JFrame {
         this.editUndoAction.setEnabled(editPane != null && editPane.canUndo());
         this.editRedoAction.setEnabled(editPane != null && editPane.canRedo());
     }
-
-//    private FlatSVGIcon loadSVGIcon(final String name) {
-//        return new FlatSVGIcon(this.getClass().getResource(Globals.imagesPath + name));
-//    }
 
     private ImageIcon loadIcon(final String name) {
         final var resource = this.getClass().getResource(Globals.imagesPath + name);

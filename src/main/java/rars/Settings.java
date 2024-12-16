@@ -4,8 +4,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import rars.notices.SettingsNotice;
 import rars.settings.*;
-import rars.settings.EditorThemeSettings;
 import rars.util.CustomPublisher;
+import rars.settings.BoolSettings;
+import rars.settings.EditorThemeSettings;
+import rars.settings.FontSettings;
+import rars.settings.RuntimeTableHighlightingSettings;
 
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -92,23 +95,6 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
 
     private final String[] stringSettingsValues;
     private final Preferences preferences;
-
-    public EditorThemeSettings getEditorThemeSettings() {
-        return editorThemeSettings;
-    }
-
-    public FontSettings getFontSettings() {
-        return fontSettings;
-    }
-
-    public BoolSettings getBoolSettings() {
-        return boolSettings;
-    }
-
-    public RuntimeTableHighlightingSettings getRuntimeTableHighlightingSettings() {
-        return runtimeTableHighlightingSettings;
-    }
-
     private final EditorThemeSettings editorThemeSettings;
     private final FontSettings fontSettings;
     private final BoolSettings boolSettings;
@@ -142,18 +128,6 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
         this.boolSettings = new BoolSettings(this.preferences);
         this.runtimeTableHighlightingSettings = new RuntimeTableHighlightingSettings(this.preferences);
     }
-    /*
-     * **************************************************************************
-     * This section contains all code related to syntax highlighting styles
-     * settings.
-     * A style includes 3 components: color, bold (t/f), italic (t/f)
-     *
-     * The fallback defaults will come not from an array here, but from the
-     * existing static method SyntaxUtilities.getDefaultSyntaxStyles()
-     * in the rars.venus.editors.jeditsyntax package. It returns an array
-     * of SyntaxStyle objects.
-     *
-     */
 
     /**
      * Return whether backstepping is permitted at this time. Backstepping is
@@ -176,6 +150,34 @@ public final class Settings extends CustomPublisher<SettingsNotice> {
      */
     public static int getDefaultEditorTabSize() {
         return Integer.parseInt(Settings.defaultStringSettingsValues[Settings.EDITOR_TAB_SIZE]);
+    }
+
+    public EditorThemeSettings getEditorThemeSettings() {
+        return editorThemeSettings;
+    }
+
+    public FontSettings getFontSettings() {
+        return fontSettings;
+    }
+    /*
+     * **************************************************************************
+     * This section contains all code related to syntax highlighting styles
+     * settings.
+     * A style includes 3 components: color, bold (t/f), italic (t/f)
+     *
+     * The fallback defaults will come not from an array here, but from the
+     * existing static method SyntaxUtilities.getDefaultSyntaxStyles()
+     * in the rars.venus.editors.jeditsyntax package. It returns an array
+     * of SyntaxStyle objects.
+     *
+     */
+
+    public BoolSettings getBoolSettings() {
+        return boolSettings;
+    }
+
+    public RuntimeTableHighlightingSettings getRuntimeTableHighlightingSettings() {
+        return runtimeTableHighlightingSettings;
     }
 
     /**

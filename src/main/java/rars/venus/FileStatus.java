@@ -1,5 +1,6 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 
@@ -40,73 +41,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Team JSpim
  */
-public class FileStatus {
-    /**
-     * initial state or after close
-     */
-    public static final int NO_FILE = 0;
-    /**
-     * New edit window with no edits
-     */
-    public static final int NEW_NOT_EDITED = 1;
-    /**
-     * New edit window with unsaved edits
-     */
-    public static final int NEW_EDITED = 2;
-    /**
-     * open/saved edit window with no edits
-     */
-    public static final int NOT_EDITED = 3;
-    /**
-     * open/saved edit window with unsaved edits
-     */
-    public static final int EDITED = 4;
-    /**
-     * successful assembly
-     */
-    public static final int RUNNABLE = 5;
-    /**
-     * execution is under way
-     */
-    public static final int RUNNING = 6;
-    /**
-     * execution terminated
-     */
-    public static final int TERMINATED = 7;
-    /**
-     * file is being opened. DPS 9-Aug-2011
-     */
-    public static final int OPENING = 8;
+public final class FileStatus {
 
-    ///////////////////////////////////////////////////////////////////
-    // //
-    // The static part. Legacy code from original student team's //
-    // 2003 Practicum project through MARS 3.8, when the editor //
-    // was limited to one file. The status of that file became //
-    // the de facto status of the system. Should have used a //
-    // singleton class but in 2003 did not know what that was! //
-    // My plan is to phase out all statics but the constants //
-    // in MARS 4.0 but will keep it in place while at the same time //
-    // defining non-static members for use by individual files //
-    // currently opened in the editor. DPS, 9 April 2010. //
-    // //
-    ///////////////////////////////////////////////////////////////////
+    private static @NotNull FileStatus.State systemStatus = State.NO_FILE;
 
-    private static int systemStatus; // set to one of the above
+    // The static part. Legacy code from original student team's
+    // 2003 Practicum project through MARS 3.8, when the editor
+    // was limited to one file. The status of that file became
+    // the de facto status of the system. Should have used a
+    // singleton class but in 2003 did not know what that was!
+    // My plan is to phase out all statics but the constants
+    // in MARS 4.0 but will keep it in place while at the same time
+    // defining non-static members for use by individual files
+    // currently opened in the editor. DPS, 9 April 2010.
     private static boolean systemAssembled;
     private static boolean systemSaved;
     private static boolean systemEdited;
     private static String systemName;
     private static File systemFile;
-    private int status;
-    private File file;
+    private @NotNull FileStatus.State status;
+    private @Nullable File file;
 
     /**
      * Create a FileStatus object with FileStatis.NO_FILE for status and null for
      * file getters.
      */
     public FileStatus() {
-        this(FileStatus.NO_FILE, null);
+        this(State.NO_FILE, null);
     }
 
     /**
@@ -115,7 +76,7 @@ public class FileStatus {
      * @param status   Initial file status. See FileStatus static constants.
      * @param pathname Full file pathname. See setPathname(String newPath) below.
      */
-    public FileStatus(final int status, final String pathname) {
+    public FileStatus(final @NotNull FileStatus.State status, final @Nullable String pathname) {
         this.status = status;
         if (pathname == null) {
             this.file = null;
@@ -129,7 +90,7 @@ public class FileStatus {
      *
      * @param newStatus New status: EDITED, RUNNABLE, etc, see list above.
      */
-    public static void set(final int newStatus) {
+    public static void set(final @NotNull FileStatus.State newStatus) {
         systemStatus = newStatus;
         Globals.getGui().setMenuState(systemStatus);
     }
@@ -139,7 +100,7 @@ public class FileStatus {
      *
      * @return file status EDITED, RUNNABLE, etc, see list above
      */
-    public static int get() {
+    public static @NotNull FileStatus.State get() {
         return systemStatus;
     }
 
@@ -206,12 +167,6 @@ public class FileStatus {
         return systemSaved;
     }
 
-    ///////////////////// END OF STATIC PART ///////////////////////
-    ///////////////////////////////////////////////////////////////////
-
-    // Remaining members are of instantiable class that can be used by
-    // every file that is currently open in the editor.
-
     /**
      * Changes the second of saved to the parameter given.
      *
@@ -220,6 +175,12 @@ public class FileStatus {
     public static void setSaved(final boolean b) {
         systemSaved = b;
     }
+
+    ///////////////////// END OF STATIC PART ///////////////////////
+    ///////////////////////////////////////////////////////////////////
+
+    // Remaining members are of instantiable class that can be used by
+    // every file that is currently open in the editor.
 
     /**
      * Tells whether the file has been edited since it has been saved.
@@ -243,7 +204,7 @@ public class FileStatus {
      * Resets all the values in FileStatus
      */
     public static void reset() {
-        systemStatus = NO_FILE;
+        systemStatus = State.NO_FILE;
         systemName = "";
         systemAssembled = false;
         systemSaved = false;
@@ -256,7 +217,7 @@ public class FileStatus {
      *
      * @return current editing status. See FileStatus static constants.
      */
-    public int getFileStatus() {
+    public @NotNull FileStatus.State getFileStatus() {
         return this.status;
     }
 
@@ -265,7 +226,7 @@ public class FileStatus {
      *
      * @param newStatus the new status
      */
-    public void setFileStatus(final int newStatus) {
+    public void setFileStatus(final @NotNull FileStatus.State newStatus) {
         this.status = newStatus;
     }
 
@@ -277,7 +238,10 @@ public class FileStatus {
      * otherwise.
      */
     public boolean isNew() {
-        return status == FileStatus.NEW_NOT_EDITED || status == FileStatus.NEW_EDITED;
+        return switch (status) {
+            case NEW_NOT_EDITED, NEW_EDITED -> true;
+            default -> false;
+        };
     }
 
     /**
@@ -289,19 +253,10 @@ public class FileStatus {
      * otherwise.
      */
     public boolean hasUnsavedEdits() {
-        return status == FileStatus.NEW_EDITED || status == FileStatus.EDITED;
-    }
-
-    /**
-     * Set full file pathname. See java.io.File(String parent, String child) for
-     * parameter specs.
-     *
-     * @param parent the parent directory of the file. If null, getParent() will
-     *               return null.
-     * @param name   the name of the file (no directory path)
-     */
-    public void setPathname(final String parent, final String name) {
-        this.file = new File(parent, name);
+        return switch (status) {
+            case NEW_EDITED, EDITED -> true;
+            default -> false;
+        };
     }
 
     /**
@@ -334,15 +289,6 @@ public class FileStatus {
     }
 
     /**
-     * Get file parent pathname. See java.io.File.getParent()
-     *
-     * @return parent full pathname as a String
-     */
-    public @Nullable String getParent() {
-        return (this.file == null) ? null : this.file.getParent();
-    }
-
-    /**
      * Update static FileStatus fields with values from this FileStatus object
      * To support legacy code that depends on the static.
      */
@@ -350,10 +296,35 @@ public class FileStatus {
         systemStatus = this.status;
         systemName = this.file.getPath();
         systemAssembled = false;
-        systemSaved = (status == NOT_EDITED || status == RUNNABLE || status == RUNNING || status == TERMINATED);
-        systemEdited = (status == NEW_EDITED || status == EDITED);
+        systemSaved = switch (status) {
+            case NOT_EDITED, RUNNABLE, RUNNING, TERMINATED -> true;
+            default -> false;
+        };
+        systemEdited = hasUnsavedEdits();
         systemFile = this.file;
 
+    }
+
+    public enum State {
+        /// Initial state or after close.
+        NO_FILE,
+        /// New edit window with no edits.
+        NEW_NOT_EDITED,
+        /// New edit window with unsaved edits.
+        NEW_EDITED,
+        /// Open/saved edit window with no edits.
+        NOT_EDITED,
+        /// Open/saved edit window with unsaved edits.
+        EDITED,
+        /// Successful assembly.
+        RUNNABLE,
+        /// Execution is under way
+        RUNNING,
+        /// Execution terminated.
+        TERMINATED,
+        // DPS 9-Aug-2011
+        /// File is being opened.
+        OPENING
     }
 
 }

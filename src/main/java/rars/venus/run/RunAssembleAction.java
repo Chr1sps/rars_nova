@@ -1,7 +1,10 @@
 package rars.venus.run;
 
+import rars.ErrorList;
+import rars.ErrorMessage;
+import rars.Globals;
+import rars.RISCVprogram;
 import org.jetbrains.annotations.NotNull;
-import rars.*;
 import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.*;
 import rars.settings.BoolSetting;
@@ -119,16 +122,19 @@ public class RunAssembleAction extends GuiAction {
         final MessagesPane messagesPane = this.mainUI.getMessagesPane();
         final ExecutePane executePane = this.mainUI.getMainPane().getExecutePane();
         final RegistersPane registersPane = this.mainUI.getRegistersPane();
-        RunAssembleAction.extendedAssemblerEnabled = Globals.getSettings().getBoolSettings().getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
-        RunAssembleAction.warningsAreErrors = Globals.getSettings().getBoolSettings().getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
+        RunAssembleAction.extendedAssemblerEnabled =
+                Globals.getSettings().getBoolSettings().getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
+        RunAssembleAction.warningsAreErrors =
+                Globals.getSettings().getBoolSettings().getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
         if (FileStatus.getFile() != null) {
-            if (FileStatus.get() == FileStatus.EDITED) {
+            if (FileStatus.get() == FileStatus.State.EDITED) {
                 this.mainUI.getEditor().save();
             }
             try {
                 Globals.program = new RISCVprogram();
                 final ArrayList<String> filesToAssemble;
-                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls for multiple
+                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls 
+                    // for multiple
                     // file assembly
                     filesToAssemble = FilenameFinder.getFilenameList(
                             new File(FileStatus.getName()).getParent(), Globals.fileExtensions);
@@ -165,7 +171,7 @@ public class RunAssembleAction extends GuiAction {
                 messagesPane.postMessage(
                         name + ": operation completed successfully.\n\n");
                 FileStatus.setAssembled(true);
-                FileStatus.set(FileStatus.RUNNABLE);
+                FileStatus.set(FileStatus.State.RUNNABLE);
 
                 RegisterFile.resetRegisters();
                 FloatingPointRegisterFile.resetRegisters();
@@ -221,7 +227,7 @@ public class RunAssembleAction extends GuiAction {
                     }
                 }
                 FileStatus.setAssembled(false);
-                FileStatus.set(FileStatus.NOT_EDITED);
+                FileStatus.set(FileStatus.State.NOT_EDITED);
             }
         }
     }

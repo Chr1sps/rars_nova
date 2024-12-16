@@ -197,13 +197,12 @@ public class Editor {
      * @param name   Name of file (last component of path)
      * @param status Edit status of file. See FileStatus static constants.
      */
-    public void setTitle(final String path, final String name, final int status) {
-        if (status == FileStatus.NO_FILE || name == null || name.isEmpty()) {
+    public void setTitle(final String path, final String name, final @NotNull FileStatus.State status) {
+        if (status == FileStatus.State.NO_FILE || name == null || name.isEmpty()) {
             this.mainUI.setTitle(this.mainUIbaseTitle);
         } else {
-            final String edited = (status == FileStatus.NEW_EDITED || status == FileStatus.EDITED) ? "*" : " ";
-            final String titleName = (status == FileStatus.NEW_EDITED || status == FileStatus.NEW_NOT_EDITED) ? name 
-                    : path;
+            final String edited = (status == FileStatus.State.NEW_EDITED || status == FileStatus.State.EDITED) ? "*" : " ";
+            final String titleName = (status == FileStatus.State.NEW_EDITED || status == FileStatus.State.NEW_NOT_EDITED) ? name : path;
             this.mainUI.setTitle(titleName + edited + " - " + this.mainUIbaseTitle);
             final var tabbedPane = this.editTabbedPane.getTabbedPane();
             tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(), name + edited);

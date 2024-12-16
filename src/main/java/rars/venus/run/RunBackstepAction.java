@@ -97,7 +97,7 @@ public class RunBackstepAction extends GuiAction {
             executePane.getControlAndStatusWindow().updateRegisters();
             executePane.getDataSegmentWindow().updateValues();
             executePane.getTextSegmentWindow().highlightStepAtPC(); // Argument aded 25 June 2007
-            FileStatus.set(FileStatus.RUNNABLE);
+            FileStatus.set(FileStatus.State.RUNNABLE);
             // if we've backed all the way, disable the button
             // if (Globals.program.getBackStepper().empty()) {
             // ((AbstractAction)((AbstractButton)e.getSource()).getAction()).setEnabled(false);

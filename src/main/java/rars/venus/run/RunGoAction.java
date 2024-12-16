@@ -112,7 +112,7 @@ public class RunGoAction extends GuiAction {
                 this.executePane.getTextSegmentWindow().setCodeHighlighting(false);
                 this.executePane.getTextSegmentWindow().unhighlightAllSteps();
                 // FileStatus.set(FileStatus.RUNNING);
-                this.mainUI.setMenuState(FileStatus.RUNNING);
+                this.mainUI.setMenuState(FileStatus.State.RUNNING);
 
                 // Setup cleanup procedures for the simulation
                 final var stopListener = new SimpleSubscriber<SimulatorNotice>() {
@@ -200,7 +200,7 @@ public class RunGoAction extends GuiAction {
         this.executePane.getFloatingPointWindow().updateRegisters();
         this.executePane.getControlAndStatusWindow().updateRegisters();
         this.executePane.getDataSegmentWindow().updateValues();
-        FileStatus.set(FileStatus.RUNNABLE);
+        FileStatus.set(FileStatus.State.RUNNABLE);
         this.mainUI.setReset(false);
     }
 
@@ -222,7 +222,7 @@ public class RunGoAction extends GuiAction {
         this.executePane.getFloatingPointWindow().updateRegisters();
         this.executePane.getControlAndStatusWindow().updateRegisters();
         this.executePane.getDataSegmentWindow().updateValues();
-        FileStatus.set(FileStatus.TERMINATED);
+        FileStatus.set(FileStatus.State.TERMINATED);
         SystemIO.resetFiles(); // close any files opened in MIPS program
         // Bring CSRs to the front if terminated due to exception.
         if (pe != null) {

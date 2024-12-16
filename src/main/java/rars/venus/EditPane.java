@@ -1,5 +1,6 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.notices.SettingsNotice;
 import rars.settings.BoolSetting;
@@ -110,22 +111,22 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
                         // This method is triggered when file contents added to document
                         // upon opening, even though not edited by user. The IF
                         // statement will sense this situation and immediately return.
-                        if (FileStatus.get() == FileStatus.OPENING) {
-                            EditPane.this.setFileStatus(FileStatus.NOT_EDITED);
-                            FileStatus.set(FileStatus.NOT_EDITED);
+                        if (FileStatus.get() == FileStatus.State.OPENING) {
+                            EditPane.this.setFileStatus(FileStatus.State.NOT_EDITED);
+                            FileStatus.set(FileStatus.State.NOT_EDITED);
                             if (EditPane.this.showingLineNumbers()) {
                                 EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
                             }
                             return;
                         }
                         // End of 9-Aug-2011 modification.
-                        if (EditPane.this.getFileStatus() == FileStatus.NEW_NOT_EDITED) {
-                            EditPane.this.setFileStatus(FileStatus.NEW_EDITED);
+                        if (EditPane.this.getFileStatus() == FileStatus.State.NEW_NOT_EDITED) {
+                            EditPane.this.setFileStatus(FileStatus.State.NEW_EDITED);
                         }
-                        if (EditPane.this.getFileStatus() == FileStatus.NOT_EDITED) {
-                            EditPane.this.setFileStatus(FileStatus.EDITED);
+                        if (EditPane.this.getFileStatus() == FileStatus.State.NOT_EDITED) {
+                            EditPane.this.setFileStatus(FileStatus.State.EDITED);
                         }
-                        if (EditPane.this.getFileStatus() == FileStatus.NEW_EDITED) {
+                        if (EditPane.this.getFileStatus() == FileStatus.State.NEW_EDITED) {
                             EditPane.this.mainUI.getEditor().setTitle("", EditPane.this.getFilename(),
                                     EditPane.this.getFileStatus());
                         } else {
@@ -135,13 +136,13 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
 
                         FileStatus.setEdited(true);
                         switch (FileStatus.get()) {
-                            case FileStatus.NEW_NOT_EDITED:
-                                FileStatus.set(FileStatus.NEW_EDITED);
+                            case FileStatus.State.NEW_NOT_EDITED:
+                                FileStatus.set(FileStatus.State.NEW_EDITED);
                                 break;
-                            case FileStatus.NEW_EDITED:
+                            case FileStatus.State.NEW_EDITED:
                                 break;
                             default:
-                                FileStatus.set(FileStatus.EDITED);
+                                FileStatus.set(FileStatus.State.EDITED);
                         }
 
                         Globals.getGui().getMainPane().getExecutePane().clearPane(); // DPS 9-Aug-2011
@@ -298,7 +299,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      *
      * @return a int
      */
-    public int getFileStatus() {
+    public @NotNull FileStatus.State getFileStatus() {
         return this.fileStatus.getFileStatus();
     }
 
@@ -308,7 +309,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      *
      * @param fileStatus the status constant from class FileStatus
      */
-    public void setFileStatus(final int fileStatus) {
+    public void setFileStatus(final @NotNull FileStatus.State fileStatus) {
         this.fileStatus.setFileStatus(fileStatus);
     }
 
