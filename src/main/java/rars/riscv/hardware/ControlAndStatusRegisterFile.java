@@ -1,8 +1,8 @@
 package rars.riscv.hardware;
 
 import rars.Globals;
-import rars.Settings;
 import rars.notices.RegisterAccessNotice;
+import rars.settings.OtherSettings;
 import rars.util.SimpleSubscriber;
 
 import java.util.concurrent.Flow;
@@ -113,7 +113,7 @@ public final class ControlAndStatusRegisterFile {
         if (num >= 0xC80 && num <= 0xC82) {
             return true;
         }
-        if ((Settings.getBackSteppingEnabled())) {
+        if ((OtherSettings.getBackSteppingEnabled())) {
             Globals.program.getBackStepper().addControlAndStatusRestore(num,
                     ControlAndStatusRegisterFile.instance.updateRegister(num, val));
         } else {
@@ -139,7 +139,7 @@ public final class ControlAndStatusRegisterFile {
      * @param val The desired second for the register.
      */
     public static void updateRegisterBackdoor(final int num, final long val) {
-        if ((Settings.getBackSteppingEnabled())) {
+        if ((OtherSettings.getBackSteppingEnabled())) {
             Globals.program.getBackStepper().addControlAndStatusBackdoor(num,
                     ControlAndStatusRegisterFile.instance.getRegister(num).setValueBackdoor(val));
         } else {

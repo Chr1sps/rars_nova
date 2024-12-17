@@ -307,7 +307,7 @@ public final class RISCVprogram {
     public @NotNull List<RISCVprogram> prepareFilesForAssembly(final @NotNull List<String> filenames,
                                                                final @NotNull String leadFilename,
                                                                final @Nullable String exceptionHandler) throws AssemblyException {
-        final ArrayList<RISCVprogram> programsToAssemble = new ArrayList<>();
+        final var programsToAssemble = new ArrayList<RISCVProgram>();
         int leadFilePosition = 0;
         if (exceptionHandler != null && !exceptionHandler.isEmpty()) {
             filenames.addFirst(exceptionHandler);

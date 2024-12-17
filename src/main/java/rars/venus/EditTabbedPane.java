@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.RISCVprogram;
-import rars.Settings;
 import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
@@ -22,6 +21,7 @@ import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
+import static rars.settings.Settings.boolSettings;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -84,7 +84,7 @@ public class EditTabbedPane extends JPanel {
                     if (editPane != null) {
                         // New IF statement to permit free traversal of edit panes w/o invalidating
                         // assembly if assemble-all is selected. DPS 9-Aug-2011
-                        if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ALL)) {
+                        if (boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {
                             EditTabbedPane.this.updateTitles(editPane);
                         } else {
                             EditTabbedPane.this.updateTitlesAndMenuState(editPane);
@@ -95,7 +95,8 @@ public class EditTabbedPane extends JPanel {
                 });
         this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSABLE, true);
         this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "Close current file");
-        this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (pane, index) -> this.closeFile(index));
+        this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (pane,
+                                                                                                              index) -> this.closeFile(index));
         this.setLayout(new BorderLayout());
         this.add(this.tabbedPane, BorderLayout.CENTER);
     }
@@ -572,7 +573,7 @@ public class EditTabbedPane extends JPanel {
             // Set default to previous file opened, if any. This is useful in conjunction
             // with option to assemble file automatically upon opening. File likely to have
             // been edited externally (e.g. by Mipster).
-            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ON_OPEN)
+            if (boolSettings.getSetting(BoolSetting.ASSEMBLE_ON_OPEN)
                     && this.mostRecentlyOpenedFile != null) {
                 this.fileChooser.setSelectedFile(this.mostRecentlyOpenedFile);
             }
@@ -588,8 +589,10 @@ public class EditTabbedPane extends JPanel {
                 // possibly send this file right through to the assembler by firing
                 // Run->Assemble's
                 // actionPerformed() method.
-                if (theFile.canRead() && Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ON_OPEN)) {
-                    EditTabbedPane.this.mainUI.getRunAssembleAction().actionPerformed(null);
+                if (theFile.canRead()) {
+                    if (boolSettings.getSetting(BoolSetting.ASSEMBLE_ON_OPEN)) {
+                        EditTabbedPane.this.mainUI.getRunAssembleAction().actionPerformed(null);
+                    }
                 }
             }
             return true;
@@ -656,7 +659,7 @@ public class EditTabbedPane extends JPanel {
 
                 // If assemble-all, then allow opening of any file w/o invalidating assembly.
                 // DPS 9-Aug-2011
-                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ALL)) {
+                if (boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {
                     EditTabbedPane.this.updateTitles(editPane);
                 } else {// this was the original code...
                     EditTabbedPane.this.updateTitlesAndMenuState(editPane);

@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static rars.settings.Settings.boolSettings;
+
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
 
@@ -91,8 +93,6 @@ public final class Main {
     private int simulateErrorExitCode;// RARS command exit code to return if simulation error occurs
 
     private Main(final String[] args) {
-        Globals.initialize();
-
         this.options = new Options();
         this.gui = args.length == 0;
         this.simulate = true;
@@ -106,7 +106,7 @@ public final class Main {
         this.registerDisplayList = new ArrayList<>();
         this.memoryDisplayList = new ArrayList<>();
         this.filenameList = new ArrayList<>();
-        MemoryConfigurations.setCurrentConfiguration(MemoryConfigurations.getDefaultConfiguration());
+        CurrentMemoryConfiguration.set(MemoryConfiguration.DEFAULT);
         this.out = System.out;
 
         if (!this.parseCommandArgs(args)) {
@@ -299,12 +299,12 @@ public final class Main {
             }
             if (args[i].equalsIgnoreCase("mc")) {
                 final String configName = args[++i];
-                final MemoryConfiguration config = MemoryConfigurations.getConfigurationByName(configName);
+                final var config = MemoryConfiguration.fromIdString(configName);
                 if (config == null) {
                     this.out.println("Invalid memory configuration: " + configName);
                     argsOK = false;
                 } else {
-                    MemoryConfigurations.setCurrentConfiguration(config);
+                    CurrentMemoryConfiguration.set(config);
                 }
                 continue;
             }
@@ -446,18 +446,18 @@ public final class Main {
             return null;
         }
 
-        Globals.getSettings().getBoolSettings().setSetting(BoolSetting.RV64_ENABLED, this.rv64);
+        boolSettings.setSetting(BoolSetting.RV64_ENABLED, this.rv64);
         Instructions.RV64 = this.rv64;
 
         final File mainFile = new File(this.filenameList.getFirst()).getAbsoluteFile();// First file is "main" file
-        final ArrayList<String> filesToAssemble;
+        final List<String> filesToAssemble;
         if (this.assembleProject) {
             filesToAssemble = FilenameFinder.getFilenameList(mainFile.getParent(), Globals.fileExtensions);
             if (this.filenameList.size() > 1) {
                 // Using "p" project option PLUS listing more than one filename on command line.
                 // Add the additional files, avoiding duplicates.
                 this.filenameList.removeFirst(); // first one has already been processed
-                final ArrayList<String> moreFilesToAssemble = FilenameFinder.getFilenameList(this.filenameList,
+                final var moreFilesToAssemble = FilenameFinder.getFilenameList(this.filenameList,
                         FilenameFinder.MATCH_ALL_EXTENSIONS);
                 // Remove any duplicates then merge the two lists.
                 for (int index2 = 0; index2 < moreFilesToAssemble.size(); index2++) {
@@ -686,40 +686,23 @@ public final class Main {
         this.out.println("            <segment> = " + segments + ", or a range like 0x400000-0x10000000              " +
                 "       ");
         this.out.println("            <format> = " + formats);
-        this.out.println("      g  -- force GUI mode                                                                 " +
-                "       ");
-        this.out.println("      h  -- display this help.  Use by itself with no filename.                            " +
-                "       ");
-        this.out.println("    hex  -- display memory or register contents in hexadecimal (default)                   " +
-                "       ");
-        this.out.println("     ic  -- display count of basic instructions 'executed'                                 " +
-                "       ");
-        this.out.println("     mc <config>  -- set memory configuration.  Argument <config> is                       " +
-                "       ");
-        this.out.println("            case-sensitive and possible values are: Default for the default                " +
-                "       ");
-        this.out.println("            32-bit address space, CompactDataAtZero for a 32KB memory with                 " +
-                "       ");
-        this.out.println("            data segment at address 0, or CompactTextAtZero for a 32KB                     " +
-                "       ");
-        this.out.println("            memory with text segment at address 0.                                         " +
-                "       ");
-        this.out.println("     me  -- display RARS messages to standard err instead of standard out.                 " +
-                "       ");
-        this.out.println("            Can separate messages from program output using redirection                    " +
-                "       ");
-        this.out.println("     nc  -- do not display copyright notice (for cleaner redirected/piped output).         " +
-                "       ");
-        this.out.println("     np  -- use of pseudo instructions and formats not permitted                           " +
-                "       ");
-        this.out.println("      p  -- Project mode - assemble all files in the same directory as given file.         " +
-                "       ");
-        this.out.println("  se<n>  -- terminate RARS with integer exit code <n> if a simulation (run) error occurs.  " +
-                "       ");
-        this.out.println("     sm  -- start execution at statement with global label main, if defined                " +
-                "       ");
-        this.out.println("    smc  -- Self Modifying Code - Program can write and branch to either text or data " + 
-                "segment");
+        this.out.println("      g  -- force GUI mode");
+        this.out.println("      h  -- display this help.  Use by itself with no filename.");
+        this.out.println("    hex  -- display memory or register contents in hexadecimal (default)");
+        this.out.println("     ic  -- display count of basic instructions 'executed'");
+        this.out.println("     mc <config>  -- set memory configuration.  Argument <config> is");
+        this.out.println("            case-sensitive and possible values are: Default for the default");
+        this.out.println("            32-bit address space, CompactDataAtZero for a 32KB memory with");
+        this.out.println("            data segment at address 0, or CompactTextAtZero for a 32KB");
+        this.out.println("            memory with text segment at address 0.");
+        this.out.println("     me  -- display RARS messages to standard err instead of standard out. ");
+        this.out.println("            Can separate messages from program output using redirection");
+        this.out.println("     nc  -- do not display copyright notice (for cleaner redirected/piped output).");
+        this.out.println("     np  -- use of pseudo instructions and formats not permitted");
+        this.out.println("      p  -- Project mode - assemble all files in the same directory as given file.");
+        this.out.println("  se<n>  -- terminate RARS with integer exit code <n> if a simulation (run) error occurs.");
+        this.out.println("     sm  -- start execution at statement with global label main, if defined");
+        this.out.println("    smc  -- Self Modifying Code - Program can write and branch to either text or data segment");
         this.out.println("    rv64 -- Enables 64 bit assembly and executables (Not fully compatible with rv32)");
         this.out.println("    <n>  -- where <n> is an integer maximum count of steps to simulate.");
         this.out.println("            If 0, negative or not specified, there is no maximum.");

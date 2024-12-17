@@ -4,13 +4,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.Settings;
 import rars.exceptions.*;
 import rars.notices.SimulatorNotice;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.OtherSettings;
 import rars.util.Binary;
 import rars.util.CustomPublisher;
 import rars.util.SystemIO;
@@ -556,17 +556,17 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                         instruction.simulate(statement);
 
                         // IF statement added 7/26/06 (explanation above)
-                        if (Settings.getBackSteppingEnabled()) {
+                        if (OtherSettings.getBackSteppingEnabled()) {
                             Globals.program.getBackStepper().addDoNothing(this.pc);
                         }
                     } catch (final BreakpointException b) {
                         // EBREAK needs backstepping support too.
-                        if (Settings.getBackSteppingEnabled()) {
+                        if (OtherSettings.getBackSteppingEnabled()) {
                             Globals.program.getBackStepper().addDoNothing(this.pc);
                         }
                         ebreak = true;
                     } catch (final WaitException w) {
-                        if (Settings.getBackSteppingEnabled()) {
+                        if (OtherSettings.getBackSteppingEnabled()) {
                             Globals.program.getBackStepper().addDoNothing(this.pc);
                         }
                         waiting = true;

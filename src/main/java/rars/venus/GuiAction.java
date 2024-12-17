@@ -36,6 +36,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * option.
  */
 public class GuiAction extends AbstractAction {
+    protected static final String CLOSE_TOOL_TIP_TEXT = "Apply current settings and close dialog";
+    public static final String APPLY_TOOL_TIP_TEXT = "Apply current settings now and leave dialog open";
+    public static final String RESET_TOOL_TIP_TEXT = "Reset to initial settings without applying";
+    public static final String CANCEL_TOOL_TIP_TEXT = "Close dialog without applying current settings";
+    // NOTE: These must follow same sequence and buttons must
+    // follow this sequence too!
+    private static final int gridVGap = 2;
+    private static final int gridHGap = 2;
+    // Tool tips for color buttons
+    private static final String SAMPLE_TOOL_TIP_TEXT = "Preview based on background and text color settings";
+    private static final String BACKGROUND_TOOL_TIP_TEXT = "Click, to select background color";
+    private static final String FOREGROUND_TOOL_TIP_TEXT = "Click, to select text color";
+    private static final String FONT_TOOL_TIP_TEXT = "Click, to select text font";
+    private static final String DEFAULT_TOOL_TIP_TEXT = "Check, to select default color (disables color select " +
+            "buttons)";
+    // Tool tips for the data and register highlighting enable/disable controls
+    private static final String DATA_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting in " +
+            "Data Segment window";
+    private static final String REGISTER_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting " +
+            "in Register windows";
+    private static final String fontButtonText = "font";
     /**
      * <p>Constructor for GuiAction.</p>
      *

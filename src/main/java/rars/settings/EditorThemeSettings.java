@@ -4,7 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.notices.SettingsNotice;
 import rars.riscv.lang.lexing.RVTokenType;
+import rars.util.CustomPublisher;
 import rars.venus.editors.ColorScheme;
 import rars.venus.editors.Theme;
 import rars.venus.editors.TokenStyle;
@@ -17,7 +19,7 @@ import java.util.prefs.Preferences;
 import static rars.util.Utils.getColorAsHexString;
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
-public final class EditorThemeSettings {
+public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // region Preferences keys
@@ -108,6 +110,7 @@ public final class EditorThemeSettings {
         } catch (final BackingStoreException bse) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }
+        submit(SettingsNotice.get());
     }
 
     // region Preference writing methods

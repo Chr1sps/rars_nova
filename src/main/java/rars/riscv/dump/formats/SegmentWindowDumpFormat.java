@@ -3,7 +3,6 @@ package rars.riscv.dump.formats;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.Settings;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 import rars.settings.BoolSetting;
@@ -14,6 +13,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Objects;
+
+import static rars.settings.Settings.boolSettings;
 
 /**
  * Dump memory contents in Segment Window format. Each line of
@@ -50,17 +51,19 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
      * @see AbstractDumpFormat
      */
     @Override
-    public void dumpMemoryRange(@NotNull final File file, final int firstAddress, final int lastAddress, @NotNull final Memory memory)
+    public void dumpMemoryRange(@NotNull final File file, final int firstAddress, final int lastAddress,
+                                @NotNull final Memory memory)
             throws AddressErrorException, IOException {
 
         final PrintStream out = new PrintStream(new FileOutputStream(file));
 
         // TODO: check if these settings work right
-        final boolean hexAddresses = Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
+        final boolean hexAddresses =
+                boolSettings.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
 
         // If address in data segment, print in same format as Data Segment Window
         if (Memory.inDataSegment(firstAddress)) {
-            final boolean hexValues = Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX);
+            final boolean hexValues = boolSettings.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX);
             int offset = 0;
             StringBuilder string = new StringBuilder();
             try {
@@ -107,7 +110,8 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
                     final ProgramStatement ps = memory.getStatement(address);
                     string += (ps.getPrintableBasicAssemblyStatement() + "                             ").substring(0,
                             29);
-                    string += (((Objects.equals(ps.getSource(), "")) ? "" : Integer.toString(ps.getSourceLine())) + "     ")
+                    string += (((Objects.equals(ps.getSource(), "")) ? "" : Integer.toString(ps.getSourceLine())) +
+                            "     ")
                             .substring(0, 5);
                     string += ps.getSource();
                 } catch (final AddressErrorException ignored) {

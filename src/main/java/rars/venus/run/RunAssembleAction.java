@@ -19,6 +19,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.otherSettings;
+
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
 
@@ -123,26 +126,25 @@ public class RunAssembleAction extends GuiAction {
         final ExecutePane executePane = this.mainUI.getMainPane().getExecutePane();
         final RegistersPane registersPane = this.mainUI.getRegistersPane();
         RunAssembleAction.extendedAssemblerEnabled =
-                Globals.getSettings().getBoolSettings().getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
+                boolSettings.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
         RunAssembleAction.warningsAreErrors =
-                Globals.getSettings().getBoolSettings().getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
+                boolSettings.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
         if (FileStatus.getFile() != null) {
             if (FileStatus.get() == FileStatus.State.EDITED) {
                 this.mainUI.getEditor().save();
             }
             try {
                 Globals.program = new RISCVprogram();
-                final ArrayList<String> filesToAssemble;
-                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls 
+                final List<String> filesToAssemble;
+                if (boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls 
                     // for multiple
                     // file assembly
                     filesToAssemble = FilenameFinder.getFilenameList(
                             new File(FileStatus.getName()).getParent(), Globals.fileExtensions);
                 } else {
-                    filesToAssemble = new ArrayList<>();
-                    filesToAssemble.add(FileStatus.getName());
+                    filesToAssemble = List.of(FileStatus.getName());
                 }
-                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.ASSEMBLE_OPEN)) {
+                if (boolSettings.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
                     this.mainUI.getEditor().saveAll();
                     final String[] paths = this.mainUI.getEditor().getOpenFilePaths();
                     for (final String path : paths) {
@@ -152,10 +154,10 @@ public class RunAssembleAction extends GuiAction {
                     }
                 }
                 String exceptionHandler = null;
-                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED) &&
-                        Globals.getSettings().getExceptionHandler() != null &&
-                        !Globals.getSettings().getExceptionHandler().isEmpty()) {
-                    exceptionHandler = Globals.getSettings().getExceptionHandler();
+                if (boolSettings.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)) {
+                    if (!otherSettings.getExceptionHandler().isEmpty()) {
+                        exceptionHandler = otherSettings.getExceptionHandler();
+                    }
                 }
                 RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(filesToAssemble,
                         FileStatus.getFile().getPath(), exceptionHandler);

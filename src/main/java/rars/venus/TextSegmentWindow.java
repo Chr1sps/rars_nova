@@ -26,6 +26,8 @@ import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.concurrent.Flow;
 
+import static rars.settings.Settings.*;
+
 /*
 Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
 
@@ -102,7 +104,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public TextSegmentWindow() {
         super("Text Segment", true, false, true, true);
         Simulator.getInstance().subscribe(this);
-        Globals.getSettings().subscribe(this);
+        boolSettings.subscribe(this);
         this.contentPane = this.getContentPane();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
@@ -199,12 +201,12 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.tableScroller = new JScrollPane(this.table, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         this.contentPane.add(this.tableScroller);
-        if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
+        if (boolSettings.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             this.addProgramArgumentsPanel();
         }
 
         this.deleteAsTextSegmentObserver();
-        if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+        if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
             this.addAsTextSegmentObserver();
         }
     }
@@ -338,7 +340,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 // existing code is overwritten
                 // even when running at unlimited speed. DPS 10-July-2013
                 this.deleteAsTextSegmentObserver();
-                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
+                if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
                     // (notice.getRunSpeed()
                     // !=
                     // RunSpeedPanel.UNLIMITED_SPEED
@@ -350,7 +352,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             }
             case final SettingsNotice ignored -> {
                 this.deleteAsTextSegmentObserver();
-                if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+                if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                     this.addAsTextSegmentObserver();
                 }
                 this.updateRowHeight();
@@ -700,7 +702,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         if (this.table == null) {
             return;
         }
-        final var font = Globals.getSettings().getFontSettings().getCurrentFont();
+        final var font = fontSettings.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         this.table.setRowHeight(height);
     }
@@ -754,8 +756,9 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         public boolean isCellEditable(final int row, final int col) {
             // Note that the data/cell address is constant,
             // no matter where the cell appears onscreen.
-            return col == TextSegmentWindow.BREAK_COLUMN || (col == TextSegmentWindow.CODE_COLUMN &&
-                    Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
+            if (col == TextSegmentWindow.BREAK_COLUMN) return true;
+            if (col != TextSegmentWindow.CODE_COLUMN) return false;
+            return boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED);
         }
 
         /**
@@ -836,7 +839,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                                                        final int row, final int column) {
             final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                     isSelected, hasFocus, row, column);
-            cell.setFont(Globals.getSettings().getFontSettings().getCurrentFont());
+            cell.setFont(fontSettings.getCurrentFont());
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
             // TODO: implement default background
             return cell;
@@ -858,7 +861,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             // cell.setFont(tableCellFont);
             final TextSegmentWindow textSegment =
                     Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow();
-            final var settings = Globals.getSettings().getRuntimeTableHighlightingSettings();
+            final var settings = runtimeTableHighlightingSettings;
             final boolean highlighting = textSegment.getCodeHighlighting();
 
             // TODO: implement this

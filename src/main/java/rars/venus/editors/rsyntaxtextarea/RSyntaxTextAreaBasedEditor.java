@@ -20,6 +20,8 @@ import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
+import static rars.settings.Settings.fontSettings;
+
 public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private static final Map<TextAttribute, Object> ligatureAttributes = Map.of(
             TextAttribute.KERNING, TextAttribute.KERNING_ON,
@@ -41,7 +43,7 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         textArea = new RSyntaxTextArea();
         scrollPane = new RTextScrollPane(textArea);
         gutter = scrollPane.getGutter();
-        this.setFont(Globals.getSettings().getFontSettings().getCurrentFont());
+        this.setFont(fontSettings.getCurrentFont());
         this.applyTheme(Theme.getDefaultLightTheme());
         textArea.setSyntaxEditingStyle(RVSyntax.SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);

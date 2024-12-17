@@ -2,14 +2,16 @@ package rars.riscv.hardware;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.Settings;
 import rars.assembler.SymbolTable;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.BasicInstruction;
 import rars.settings.BoolSetting;
+import rars.settings.OtherSettings;
 
 import java.util.concurrent.Flow;
 import rars.util.SimpleSubscriber;
+
+import static rars.settings.Settings.boolSettings;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -89,7 +91,7 @@ public final class RegisterFile {
      */
     public static void updateRegister(final int num, final long val) {
         if (num != 0) {
-            if ((Settings.getBackSteppingEnabled())) {
+            if ((OtherSettings.getBackSteppingEnabled())) {
                 Globals.program.getBackStepper().addRegisterFileRestore(num, RegisterFile.instance.updateRegister(num
                         , val));
             } else {
@@ -214,7 +216,7 @@ public final class RegisterFile {
     public static void setProgramCounter(final int value) {
         final int old = (int) RegisterFile.programCounter.getValue();
         RegisterFile.programCounter.setValue(value);
-        if (Settings.getBackSteppingEnabled()) {
+        if (OtherSettings.getBackSteppingEnabled()) {
             Globals.program.getBackStepper().addPCRestore(old);
         }
     }
@@ -247,7 +249,7 @@ public final class RegisterFile {
      */
     public static void resetRegisters() {
         RegisterFile.instance.resetRegisters();
-        RegisterFile.initializeProgramCounter(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.START_AT_MAIN));
+        RegisterFile.initializeProgramCounter(boolSettings.getSetting(BoolSetting.START_AT_MAIN));//
         // replaces
         // "programCounter.resetValue()",
         // DPS 3/3/09

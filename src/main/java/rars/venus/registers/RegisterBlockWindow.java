@@ -2,7 +2,6 @@ package rars.venus.registers;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.Settings;
 import rars.notices.*;
 import rars.riscv.hardware.Register;
 import rars.settings.BoolSetting;
@@ -20,6 +19,9 @@ import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.Flow;
+
+import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.fontSettings;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -63,7 +65,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     private static final int VALUE_SIZE = 160;
     private final JTable table;
     private final Register[] registers;
-    private final Settings settings;
     private Flow.Subscription subscription;
 
     /**
@@ -75,7 +76,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * @param valueTip             a {@link java.lang.String} object
      */
     RegisterBlockWindow(final Register[] registers, final String[] registerDescriptions, final String valueTip) {
-        this.settings = Globals.getSettings();
         this.registers = registers;
         this.clearHighlighting();
         this.table = new MyTippedJTable(new RegTableModel(this.setupWindow()), registerDescriptions,
@@ -139,7 +139,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             final int temp = this.registers[i].getNumber();
             tableData[i][RegisterBlockWindow.NUMBER_COLUMN] = temp == -1 ? "" : temp;
             tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegister(this.registers[i],
-                    NumberDisplayBaseChooser.getBase(this.settings.getBoolSettings().getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)));
+                    NumberDisplayBaseChooser.getBase(boolSettings.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)));
         }
         return tableData;
     }
@@ -177,7 +177,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     public void updateRegisters() {
         for (int i = 0; i < this.registers.length; i++) {
             ((RegTableModel) this.table.getModel()).setDisplayAndModelValueAt(this.formatRegister(this.registers[i],
-                    Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase()), i,
+                            Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase()), i,
                     RegisterBlockWindow.VALUE_COLUMN);
         }
     }
@@ -221,7 +221,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     }
 
     private void updateRowHeight() {
-        final var font = Globals.getSettings().getFontSettings().getCurrentFont();
+        final var font = fontSettings.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         this.table.setRowHeight(height);
     }

@@ -2,13 +2,15 @@ package rars.venus.registers;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.Settings;
 import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 
 import java.util.Arrays;
+
+import static rars.settings.Settings.boolSettings;
+
 
 /**
  * <p>RegistersWindow class.</p>
@@ -75,7 +77,7 @@ public class RegistersWindow extends RegisterBlockWindow {
      */
     @Override
     protected String formatRegister(final Register value, final int base) {
-        if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.RV64_ENABLED)) {
+        if (boolSettings.getSetting(BoolSetting.RV64_ENABLED)) {
             return NumberDisplayBaseChooser.formatNumber(value.getValue(), base);
         } else {
             return NumberDisplayBaseChooser.formatNumber((int) value.getValue(), base);

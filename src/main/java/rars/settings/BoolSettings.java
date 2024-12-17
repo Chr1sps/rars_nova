@@ -3,12 +3,14 @@ package rars.settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import rars.notices.SettingsNotice;
+import rars.util.CustomPublisher;
 
 import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public final class BoolSettings {
+public final class BoolSettings extends CustomPublisher<SettingsNotice> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final @NotNull Preferences preferences;
     private final @NotNull HashMap<BoolSetting, Boolean> currentSettings;
@@ -45,6 +47,7 @@ public final class BoolSettings {
         } catch (final BackingStoreException bse) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }
+        submit(SettingsNotice.get());
     }
 
     /**

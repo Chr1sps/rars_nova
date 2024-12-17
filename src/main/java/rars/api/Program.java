@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
 import rars.RISCVprogram;
-import rars.Settings;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.hardware.*;
@@ -17,6 +16,10 @@ import rars.util.SystemIO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.List;
+
+import static rars.settings.Settings.boolSettings;
+
 import java.util.List;
 
 /**
@@ -66,7 +69,6 @@ public final class Program {
      * @param set a {@link Options} object
      */
     public Program(final Options set) {
-        Globals.initialize();
         this.set = set;
         this.code = new RISCVprogram();
         this.assembled = new Memory();
@@ -126,7 +128,7 @@ public final class Program {
      * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
-    public ErrorList assembleFiles(final @NotNull ArrayList<String> files, final @NotNull String mainFile) throws AssemblyException {
+    public ErrorList assembleFiles(final @NotNull List<String> files, final @NotNull String mainFile) throws AssemblyException {
         final var programs = this.code.prepareFilesForAssembly(files, mainFile, null);
         return this.assemble(programs);
     }
@@ -237,7 +239,6 @@ public final class Program {
         SimulationException e = null;
 
         // Swap out global state for local state.
-        final var boolSettings = Globals.getSettings().getBoolSettings();
         final boolean selfMod = boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED);
         boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED,
                 this.set.selfModifyingCode);

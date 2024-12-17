@@ -7,19 +7,23 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.Settings;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExceptionReason;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.BasicInstruction;
 import rars.settings.BoolSetting;
+import rars.settings.OtherSettings;
 import rars.util.CustomPublisher;
 import rars.util.SimpleSubscriber;
 
 import java.util.Collection;
 import java.util.Vector;
 import java.util.concurrent.Flow;
+
+import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.otherSettings;
+
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -94,31 +98,31 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * base address for (user) text segment: 0x00400000
      **/
-    public static int textBaseAddress = MemoryConfigurations.getDefaultTextBaseAddress(); // 0x00400000;
+    public static int textBaseAddress = MemoryConfiguration.DEFAULT.textBaseAddress; // 0x00400000;
     /**
      * base address for (user) data segment: 0x10000000
      **/
-    public static int dataSegmentBaseAddress = MemoryConfigurations.getDefaultDataSegmentBaseAddress(); // 0x10000000;
+    public static int dataSegmentBaseAddress = MemoryConfiguration.DEFAULT.dataSegmentBaseAddress; // 0x10000000;
     /**
      * base address for .extern directive: 0x10000000
      **/
-    public static int externBaseAddress = MemoryConfigurations.getDefaultExternBaseAddress(); // 0x10000000;
+    public static int externBaseAddress = MemoryConfiguration.DEFAULT.externBaseAddress; // 0x10000000;
 
     // TODO: remove this as RISCV is little endian and it is only used in like one
     // spot
     /**
      * base address for storing globals
      **/
-    public static int globalPointer = MemoryConfigurations.getDefaultGlobalPointer(); // 0x10008000;
+    public static int globalPointer = MemoryConfiguration.DEFAULT.globalPointerAddress; // 0x10008000;
     /**
      * base address for storage of non-global static data in data segment:
      * 0x10010000 (from SPIM)
      **/
-    public static int dataBaseAddress = MemoryConfigurations.getDefaultDataBaseAddress(); // 0x10010000; // from SPIM
+    public static int dataBaseAddress = MemoryConfiguration.DEFAULT.dataBaseAddress; // 0x10010000; // from SPIM
     /**
      * base address for heap: 0x10040000 (I think from SPIM not MIPS)
      **/
-    public static int heapBaseAddress = MemoryConfigurations.getDefaultHeapBaseAddress(); // 0x10040000; // I think from
+    public static int heapBaseAddress = MemoryConfiguration.DEFAULT.heapBaseAddress; // 0x10040000; // I think from
 
     // Memory will maintain a collection of observables. Each one is associated
     // with a specific memory address or address range, and each will have at least
@@ -134,7 +138,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * starting address for stack: 0x7fffeffc (this is from SPIM not MIPS)
      **/
-    public static int stackPointer = MemoryConfigurations.getDefaultStackPointer(); // 0x7fffeffc;
+    public static int stackPointer = MemoryConfiguration.DEFAULT.stackPointerAddress; // 0x7fffeffc;
 
     // The data segment is allocated in blocks of 1024 ints (4096 bytes). Each block
     // is
@@ -179,15 +183,15 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * base address for stack: 0x7ffffffc (this is mine - start of highest word
      * below kernel space)
      **/
-    public static int stackBaseAddress = MemoryConfigurations.getDefaultStackBaseAddress(); // 0x7ffffffc;
+    public static int stackBaseAddress = MemoryConfiguration.DEFAULT.stackBaseAddress; // 0x7ffffffc;
     /**
      * highest address accessible in user (not kernel) mode.
      **/
-    public static int userHighAddress = MemoryConfigurations.getDefaultUserHighAddress(); // 0x7fffffff;
+    public static int userHighAddress = MemoryConfiguration.DEFAULT.userHighAddress; // 0x7fffffff;
     /**
      * kernel boundary. Only OS can access this or higher address
      **/
-    public static int kernelBaseAddress = MemoryConfigurations.getDefaultKernelBaseAddress(); // 0x80000000;
+    public static int kernelBaseAddress = MemoryConfiguration.DEFAULT.kernelBaseAddress; // 0x80000000;
 
     // The stack is modeled similarly to the data segment. It cannot share the same
     // data structure because the stack base address is very large. To store it in
@@ -215,7 +219,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * starting address for memory mapped I/O: 0xffff0000 (-65536)
      **/
-    public static int memoryMapBaseAddress = MemoryConfigurations.getDefaultMemoryMapBaseAddress(); // 0xffff0000;
+    public static int memoryMapBaseAddress = MemoryConfiguration.DEFAULT.memoryMapBaseAddress; // 0xffff0000;
 
     // Memory mapped I/O is simulated with a separate table using the same structure
     // and
@@ -232,7 +236,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * highest address acessible in kernel mode.
      **/
-    public static int kernelHighAddress = MemoryConfigurations.getDefaultKernelHighAddress(); // 0xffffffff;
+    public static int kernelHighAddress = MemoryConfiguration.DEFAULT.kernelHighAddress; // 0xffffffff;
     /**
      * Constant <code>heapAddress=</code>
      */
@@ -331,36 +335,38 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * address 0x00400000. Configuration can be modified starting with MARS 3.7.
      */
     public static void setConfiguration() {
-        Memory.textBaseAddress = MemoryConfigurations.getCurrentConfiguration().getTextBaseAddress(); // 0x00400000;
-        Memory.dataSegmentBaseAddress = MemoryConfigurations.getCurrentConfiguration().getDataSegmentBaseAddress();
+        final var currentConfig = CurrentMemoryConfiguration.get();
+        final var currentConfigFromPreferences = otherSettings.getMemoryConfiguration();
+        Memory.textBaseAddress = currentConfig.textBaseAddress; // 0x00400000;
+        Memory.dataSegmentBaseAddress = currentConfig.dataSegmentBaseAddress;
         // 0x10000000;
-        Memory.externBaseAddress = MemoryConfigurations.getCurrentConfiguration().getExternBaseAddress(); // 0x10000000;
-        Memory.globalPointer = MemoryConfigurations.getCurrentConfiguration().getGlobalPointer(); // 0x10008000;
-        Memory.dataBaseAddress = MemoryConfigurations.getCurrentConfiguration().getDataBaseAddress(); // 0x10010000; 
+        Memory.externBaseAddress = currentConfig.externBaseAddress; // 0x10000000;
+        Memory.globalPointer = currentConfig.globalPointerAddress; // 0x10008000;
+        Memory.dataBaseAddress = currentConfig.dataBaseAddress; // 0x10010000; 
         // from
         // SPIM not MIPS
-        Memory.heapBaseAddress = MemoryConfigurations.getCurrentConfiguration().getHeapBaseAddress(); // 0x10040000; 
+        Memory.heapBaseAddress = currentConfig.heapBaseAddress; // 0x10040000; 
         // I think
         // from SPIM not MIPS
-        Memory.stackPointer = MemoryConfigurations.getCurrentConfiguration().getStackPointer(); // 0x7fffeffc;
-        Memory.stackBaseAddress = MemoryConfigurations.getCurrentConfiguration().getStackBaseAddress(); // 0x7ffffffc;
-        Memory.userHighAddress = MemoryConfigurations.getCurrentConfiguration().getUserHighAddress(); // 0x7fffffff;
-        Memory.kernelBaseAddress = MemoryConfigurations.getCurrentConfiguration().getKernelBaseAddress(); // 0x80000000;
-        Memory.memoryMapBaseAddress = MemoryConfigurations.getCurrentConfiguration().getMemoryMapBaseAddress(); // 
+        Memory.stackPointer = currentConfig.stackPointerAddress; // 0x7fffeffc;
+        Memory.stackBaseAddress = currentConfig.stackBaseAddress; // 0x7ffffffc;
+        Memory.userHighAddress = currentConfig.userHighAddress; // 0x7fffffff;
+        Memory.kernelBaseAddress = currentConfig.kernelBaseAddress; // 0x80000000;
+        Memory.memoryMapBaseAddress = currentConfig.memoryMapBaseAddress; // 
         // 0xffff0000;
-        Memory.kernelHighAddress = MemoryConfigurations.getCurrentConfiguration().getKernelHighAddress(); // 0xffffffff;
+        Memory.kernelHighAddress = currentConfig.kernelHighAddress; // 0xffffffff;
         Memory.dataSegmentLimitAddress =
-                Math.min(MemoryConfigurations.getCurrentConfiguration().getDataSegmentLimitAddress(),
+                Math.min(currentConfig.dataSegmentLimitAddress,
                         Memory.dataSegmentBaseAddress +
                                 Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES);
-        Memory.textLimitAddress = Math.min(MemoryConfigurations.getCurrentConfiguration().getTextLimitAddress(),
+        Memory.textLimitAddress = Math.min(currentConfig.textLimitAddress,
                 Memory.textBaseAddress +
                         Memory.TEXT_BLOCK_LENGTH_WORDS * Memory.TEXT_BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES);
-        Memory.stackLimitAddress = Math.max(MemoryConfigurations.getCurrentConfiguration().getStackLimitAddress(),
+        Memory.stackLimitAddress = Math.max(currentConfig.stackLimitAddress,
                 Memory.stackBaseAddress -
                         Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES);
         Memory.memoryMapLimitAddress =
-                Math.min(MemoryConfigurations.getCurrentConfiguration().getMemoryMapLimitAddress(),
+                Math.min(currentConfig.memoryMapLimitAddress,
                         Memory.memoryMapBaseAddress +
                                 Memory.BLOCK_LENGTH_WORDS * Memory.MMIO_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES);
     }
@@ -639,7 +645,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             // Burch Mod (Jan 2013): replace throw with call to setStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
 
-            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+            if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
@@ -706,7 +712,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         } else if (Memory.inTextSegment(address)) {
             // Burch Mod (Jan 2013): replace throw with call to setStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+            if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 final ProgramStatement oldStatement = this.getStatementNoNotify(address);
                 if (oldStatement != null) {
                     oldValue = oldStatement.getBinaryStatement();
@@ -727,7 +733,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                     ExceptionReason.STORE_ACCESS_FAULT, address);
         }
         this.notifyAnyObservers(AccessNotice.AccessType.WRITE, address, Memory.WORD_LENGTH_BYTES, value);
-        if (Settings.getBackSteppingEnabled()) {
+        if (OtherSettings.getBackSteppingEnabled()) {
             Globals.program.getBackStepper().addMemoryRestoreRawWord(address, oldValue);
         }
         return oldValue;
@@ -746,7 +752,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      */
     public int setWord(final int address, final int value) throws AddressErrorException {
         Memory.checkStoreWordAligned(address);
-        return (Settings.getBackSteppingEnabled())
+        return (OtherSettings.getBackSteppingEnabled())
                 ? Globals.program.getBackStepper().addMemoryRestoreWord(address, this.set(address, value,
                 Memory.WORD_LENGTH_BYTES))
                 : this.set(address, value, Memory.WORD_LENGTH_BYTES);
@@ -770,7 +776,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             throw new AddressErrorException("store address not aligned on halfword boundary ",
                     ExceptionReason.STORE_ADDRESS_MISALIGNED, address);
         }
-        return (Settings.getBackSteppingEnabled())
+        return (OtherSettings.getBackSteppingEnabled())
                 ? Globals.program.getBackStepper().addMemoryRestoreHalf(address, this.set(address, value, 2))
                 : this.set(address, value, 2);
     }
@@ -787,7 +793,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * @throws AddressErrorException if any.
      */
     public int setByte(final int address, final int value) throws AddressErrorException {
-        return (Settings.getBackSteppingEnabled())
+        return (OtherSettings.getBackSteppingEnabled())
                 ? Globals.program.getBackStepper().addMemoryRestoreByte(address, this.set(address, value, 1))
                 : this.set(address, value, 1);
     }
@@ -811,7 +817,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         oldHighOrder = this.set(address + 4, (int) (value >> 32), 4);
         oldLowOrder = this.set(address, (int) value, 4);
         final long old = ((long) oldHighOrder << 32) | (oldLowOrder & 0xFFFFFFFFL);
-        return (Settings.getBackSteppingEnabled())
+        return (OtherSettings.getBackSteppingEnabled())
                 ? Globals.program.getBackStepper().addMemoryRestoreDoubleWord(address, old)
                 : old;
     }
@@ -903,7 +909,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             // Burch Mod (Jan 2013): replace throw with calls to getStatementNoNotify &
             // getBinaryStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+            if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
@@ -966,7 +972,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             // Burch Mod (Jan 2013): replace throw with calls to getStatementNoNotify &
             // getBinaryStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+            if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 final ProgramStatement stmt = this.getStatementNoNotify(address);
                 value = stmt == null ? 0 : stmt.getBinaryStatement();
             } else {
@@ -1167,7 +1173,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
 
     private ProgramStatement getStatement(final int address, final boolean notify) throws AddressErrorException {
         Memory.checkLoadWordAligned(address);
-        if (!Globals.getSettings().getBoolSettings().getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
+        if (!boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
                 && !Memory.inTextSegment(address)) {
             throw new AddressErrorException(
                     "fetch address for text segment out of range ",

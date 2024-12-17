@@ -31,7 +31,6 @@ public final class Documentation {
      * @param args an array of {@link java.lang.String} objects
      */
     public static void main(final String[] args) {
-        Globals.initialize();
         System.out.println(Documentation.createDirectiveMarkdown());
         System.out.println(Documentation.createSyscallMarkdown());
         System.out.println(Documentation.createInstructionMarkdownNew(false, false));

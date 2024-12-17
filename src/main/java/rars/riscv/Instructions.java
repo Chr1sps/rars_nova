@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
-import rars.Settings;
 import rars.assembler.TokenList;
 import rars.assembler.Tokenizer;
 import rars.exceptions.AssemblyException;
@@ -19,6 +18,8 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static rars.settings.Settings.boolSettings;
 
 /**
  * This class contains all the defined RISC-V instructions. It is intended
@@ -244,7 +245,7 @@ public final class Instructions {
                 ).flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        RV64 = Globals.getSettings().getBoolSettings().getSetting(BoolSetting.RV64_ENABLED);
+        RV64 = boolSettings.getSetting(BoolSetting.RV64_ENABLED);
 
         R32_MATCH_MAPS = createMatchMaps(INSTRUCTIONS_R32);
         R64_MATCH_MAPS = createMatchMaps(INSTRUCTIONS_R64);

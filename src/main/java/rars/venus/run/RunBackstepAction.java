@@ -1,11 +1,11 @@
 package rars.venus.run;
 
 import rars.Globals;
-import rars.Settings;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
@@ -84,7 +84,7 @@ public class RunBackstepAction extends GuiAction {
         this.mainUI.getMessagesPane().selectRunMessageTab();
         executePane.getTextSegmentWindow().setCodeHighlighting(true);
 
-        if (Settings.getBackSteppingEnabled()) {
+        if (OtherSettings.getBackSteppingEnabled()) {
             Memory.getInstance().subscribe(executePane.getDataSegmentWindow());
             RegisterFile.addRegistersObserver(executePane.getRegistersWindow());
             ControlAndStatusRegisterFile.addRegistersObserver(executePane.getControlAndStatusWindow());

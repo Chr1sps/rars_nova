@@ -62,10 +62,7 @@ public class SettingsEditorAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final JDialog editorDialog = new EditorFontDialog(Globals.getGui(), "Text Editor Settings", true,
-                Globals.getSettings().getEditorFont());
-        editorDialog.setVisible(true);
-
+        JOptionPane.showMessageDialog(Globals.getGui(), "SettingsEditorAction not implemented yet.");
     }
 
 }

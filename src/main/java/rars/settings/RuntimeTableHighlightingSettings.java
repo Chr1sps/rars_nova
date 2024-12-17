@@ -4,6 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.notices.SettingsNotice;
+import rars.util.CustomPublisher;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
@@ -12,7 +14,7 @@ import java.util.prefs.Preferences;
 
 import static rars.util.Utils.getColorAsHexString;
 
-public final class RuntimeTableHighlightingSettings {
+public final class RuntimeTableHighlightingSettings extends CustomPublisher<SettingsNotice> {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -28,23 +30,6 @@ public final class RuntimeTableHighlightingSettings {
     // endregion Preferences keys
 
     private final @NotNull Preferences preferences;
-
-    public @NotNull TokenStyle getTextSegmentHighlightingStyle() {
-        return textSegmentHighlightingStyle;
-    }
-
-    public @Nullable TokenStyle getRegisterHighlightingStyle() {
-        return registerHighlightingStyle;
-    }
-
-    public @Nullable TokenStyle getDataSegmentHighlightingStyle() {
-        return dataSegmentHighlightingStyle;
-    }
-
-    public @NotNull TokenStyle getDelaySlotHighlightingStyle() {
-        return delaySlotHighlightingStyle;
-    }
-
     private @NotNull TokenStyle textSegmentHighlightingStyle, delaySlotHighlightingStyle;
     private @Nullable TokenStyle dataSegmentHighlightingStyle, registerHighlightingStyle;
 
@@ -77,6 +62,22 @@ public final class RuntimeTableHighlightingSettings {
     private static @NotNull String enabledPrefix(final @NotNull HighlightingType type) {
         return HIGHLIGHTING_PREFIX + type.name + ENABLED;
     }
+
+    public @NotNull TokenStyle getTextSegmentHighlightingStyle() {
+        return textSegmentHighlightingStyle;
+    }
+
+    public @Nullable TokenStyle getRegisterHighlightingStyle() {
+        return registerHighlightingStyle;
+    }
+
+    public @Nullable TokenStyle getDataSegmentHighlightingStyle() {
+        return dataSegmentHighlightingStyle;
+    }
+
+    public @NotNull TokenStyle getDelaySlotHighlightingStyle() {
+        return delaySlotHighlightingStyle;
+    }
     // endregion Preferences prefix methods
 
     public void saveSettings() {
@@ -91,6 +92,7 @@ public final class RuntimeTableHighlightingSettings {
         } catch (final BackingStoreException bse) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }
+        submit(SettingsNotice.get());
     }
 
     // region Preference writing methods

@@ -1,7 +1,7 @@
 package rars.venus.settings;
 
 import rars.Globals;
-import rars.Settings;
+import rars.settings.BoolSetting;
 import rars.venus.GuiAction;
 
 import javax.swing.*;
@@ -12,6 +12,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+
+import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.otherSettings;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -69,15 +72,15 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         super(name, icon, descrip, mnemonic, accel);
     }
 
-    // launch dialog for setting and filename specification
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        this.initialSelected = Globals.getSettings().getBooleanSetting(Settings.Bool.EXCEPTION_HANDLER_ENABLED);
-        this.initialPathname = Globals.getSettings().getExceptionHandler();
+        this.initialSelected =
+                boolSettings.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED);
+        this.initialPathname = otherSettings.getExceptionHandler();
         this.exceptionHandlerDialog = new JDialog(Globals.getGui(), "Exception Handler", true);
         this.exceptionHandlerDialog.setContentPane(this.buildDialogPanel());
         this.exceptionHandlerDialog.setDefaultCloseOperation(
@@ -101,7 +104,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         // Top row - the check box for setting...
         this.exceptionHandlerSetting = new JCheckBox("Include this exception handler file in all assemble operations");
         this.exceptionHandlerSetting
-                .setSelected(Globals.getSettings().getBooleanSetting(Settings.Bool.EXCEPTION_HANDLER_ENABLED));
+                .setSelected(boolSettings.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED));
         this.exceptionHandlerSetting.addActionListener(new ExceptionHandlerSettingAction());
         contents.add(this.exceptionHandlerSetting, BorderLayout.NORTH);
         // Middle row - the button and text field for exception handler file selection
@@ -109,7 +112,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         this.exceptionHandlerSelectionButton = new JButton("Browse");
         this.exceptionHandlerSelectionButton.setEnabled(this.exceptionHandlerSetting.isSelected());
         this.exceptionHandlerSelectionButton.addActionListener(new ExceptionHandlerSelectionAction());
-        this.exceptionHandlerDisplay = new JTextField(Globals.getSettings().getExceptionHandler(), 30);
+        this.exceptionHandlerDisplay = new JTextField(otherSettings.getExceptionHandler(), 30);
         this.exceptionHandlerDisplay.setEditable(false);
         this.exceptionHandlerDisplay.setEnabled(this.exceptionHandlerSetting.isSelected());
         specifyHandlerFile.add(this.exceptionHandlerSelectionButton);
@@ -135,8 +138,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         return contents;
     }
 
-    // User has clicked "OK" button, so record status of the checkbox and text
-    // field.
+    /// User has clicked "OK" button, so record status of the checkbox and text field.
     private void performOK() {
         final boolean finalSelected = this.exceptionHandlerSetting.isSelected();
         final String finalPathname = this.exceptionHandlerDisplay.getText();
@@ -145,9 +147,10 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         if (this.initialSelected != finalSelected
                 || this.initialPathname == null && finalPathname != null
                 || this.initialPathname != null && !this.initialPathname.equals(finalPathname)) {
-            Globals.getSettings().setBooleanSetting(Settings.Bool.EXCEPTION_HANDLER_ENABLED, finalSelected);
+            boolSettings.setSettingAndSave(BoolSetting.EXCEPTION_HANDLER_ENABLED,
+                    finalSelected);
             if (finalSelected) {
-                Globals.getSettings().setExceptionHandler(finalPathname);
+                otherSettings.setExceptionHandlerAndSave(finalPathname);
             }
         }
     }
@@ -158,8 +161,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         this.exceptionHandlerDialog.dispose();
     }
 
-    /////////////////////////////////////////////////////////////////////////////////
-    // Associated action class: exception handler setting. Attached to check box.
+    /// Associated action class: exception handler setting. Attached to check box.
     private class ExceptionHandlerSettingAction implements ActionListener {
         @Override
         public void actionPerformed(final ActionEvent e) {
@@ -169,20 +171,15 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////////
-    // Associated action class: selecting exception handler file. Attached to
-    ///////////////////////////////////////////////////////////////////////////////// handler
-    ///////////////////////////////////////////////////////////////////////////////// selector.
+    /// Associated action class: selecting exception handler file. Attached to
     private class ExceptionHandlerSelectionAction implements ActionListener {
         @Override
         public void actionPerformed(final ActionEvent e) {
             final JFileChooser chooser = new JFileChooser();
-            String pathname = Globals.getSettings().getExceptionHandler();
-            if (pathname != null) {
-                final File file = new File(pathname);
-                if (file.exists())
-                    chooser.setSelectedFile(file);
-            }
+            String pathname = otherSettings.getExceptionHandler();
+            final File file = new File(pathname);
+            if (file.exists())
+                chooser.setSelectedFile(file);
             final int result = chooser.showOpenDialog(Globals.getGui());
             if (result == JFileChooser.APPROVE_OPTION) {
                 pathname = chooser.getSelectedFile().getPath();// .replaceAll("\\\\","/");

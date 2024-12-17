@@ -1,12 +1,11 @@
 import org.junit.jupiter.api.Test;
-import rars.Globals;
 import rars.ProgramStatement;
-import rars.Settings;
 import rars.api.Options;
 import rars.api.Program;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.*;
+import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import utils.RarsTestBase;
 
@@ -18,11 +17,11 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static rars.settings.Settings.boolSettings;
 
 public class AppTest extends RarsTestBase {
     public static void runTestFiles(final String path, final boolean is64Bit) {
-        Globals.initialize();
-        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, is64Bit);
+        boolSettings.setSetting(BoolSetting.RV64_ENABLED, is64Bit);
         Instructions.RV64 = is64Bit;
 
         final var opt = new Options();
@@ -100,7 +99,8 @@ public class AppTest extends RarsTestBase {
                 final var builder = new StringBuilder();
                 builder.append("Failed to assemble `" + path + "` due to following error(s):\n");
                 for (final var error : ae.errors().getErrorMessages()) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + "\n");
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
+                            "\n");
                 }
                 fail(builder.toString());
             }
@@ -116,7 +116,8 @@ public class AppTest extends RarsTestBase {
                 builder.append("Expected lines: " + errorLines + "\n");
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + "\n");
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
+                            "\n");
                 }
                 fail(builder.toString());
             }
@@ -147,7 +148,7 @@ public class AppTest extends RarsTestBase {
         opt.maxSteps = 500;
         opt.selfModifyingCode = true;
         final Program p = new Program(opt);
-        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED, true);
+        boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
 
         for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {
             if (inst instanceof final BasicInstruction binst) {
@@ -162,7 +163,8 @@ public class AppTest extends RarsTestBase {
 //                    ProgramStatement assembled = p.getMemory().getStatement(0x400000);
                     final ProgramStatement ps = new ProgramStatement(word, 0x400000);
                     assertNotNull(ps.getInstruction(), "Error 1 on: " + program);
-                    assertThat("Error 2 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
+                    assertThat("Error 2 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString(
+                            "invalid")));
 //                    String decompiled = ps.getPrintableBasicAssemblyStatement();
 
                     p.assembleString(program);
@@ -223,7 +225,7 @@ public class AppTest extends RarsTestBase {
         opt.maxSteps = 500;
         opt.selfModifyingCode = true;
         final var p = new Program(opt);
-        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.SELF_MODIFYING_CODE_ENABLED, true);
+        boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
 
         int skips = 0;
         for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {
@@ -236,13 +238,15 @@ public class AppTest extends RarsTestBase {
                     final int second = p.getMemory().getWord(0x400004);
                     final ProgramStatement ps = new ProgramStatement(first, 0x400000);
                     assertNotNull(ps.getInstruction(), "Error 11 on: " + program);
-                    assertThat("Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString("invalid")));
+                    assertThat("Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(),
+                            not(containsString("invalid")));
                     if (program.contains("t0") || program.contains("t1") || program.contains("t2") || program.contains("f1")) {
                         // TODO: test that each register individually is meaningful and test every
                         // register.
                         // Currently this covers all instructions and is an alert if I made a trivial
                         // mistake.
-                        final String register_substitute = program.replaceAll("t0", "x0").replaceAll("t1", "x0").replaceAll("t2", "x0").replaceAll("f1", "f0");
+                        final String register_substitute =
+                                program.replaceAll("t0", "x0").replaceAll("t1", "x0").replaceAll("t2", "x0").replaceAll("f1", "f0");
                         p.assembleString(register_substitute);
                         p.setup(null, "");
                         final int word1 = p.getMemory().getWord(0x400000);

@@ -1,5 +1,6 @@
 package rars.venus.settings;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.Settings;
@@ -9,8 +10,6 @@ import rars.venus.MonoRightCellRenderer;
 import rars.venus.util.AbstractFontSettingDialog;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -50,21 +49,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class SettingsHighlightingAction extends GuiAction {
 
-    /**
-     * Constant <code>CLOSE_TOOL_TIP_TEXT="Apply current settings and close dialog"</code>
-     */
     public static final String CLOSE_TOOL_TIP_TEXT = "Apply current settings and close dialog";
-    /**
-     * Constant <code>APPLY_TOOL_TIP_TEXT="Apply current settings now and leave di"{trunked}</code>
-     */
     public static final String APPLY_TOOL_TIP_TEXT = "Apply current settings now and leave dialog open";
-    /**
-     * Constant <code>RESET_TOOL_TIP_TEXT="Reset to initial settings without apply"{trunked}</code>
-     */
     public static final String RESET_TOOL_TIP_TEXT = "Reset to initial settings without applying";
-    /**
-     * Constant <code>CANCEL_TOOL_TIP_TEXT="Close dialog without applying current s"{trunked}</code>
-     */
     public static final String CANCEL_TOOL_TIP_TEXT = "Close dialog without applying current settings";
     // NOTE: These must follow same sequence and buttons must
     // follow this sequence too!
@@ -75,10 +62,13 @@ public class SettingsHighlightingAction extends GuiAction {
     private static final String BACKGROUND_TOOL_TIP_TEXT = "Click, to select background color";
     private static final String FOREGROUND_TOOL_TIP_TEXT = "Click, to select text color";
     private static final String FONT_TOOL_TIP_TEXT = "Click, to select text font";
-    private static final String DEFAULT_TOOL_TIP_TEXT = "Check, to select default color (disables color select buttons)";
+    private static final String DEFAULT_TOOL_TIP_TEXT = "Check, to select default color (disables color select " +
+            "buttons)";
     // Tool tips for the data and register highlighting enable/disable controls
-    private static final String DATA_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting in Data Segment window";
-    private static final String REGISTER_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting in Register windows";
+    private static final String DATA_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting in " +
+            "Data Segment window";
+    private static final String REGISTER_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting " +
+            "in Register windows";
     private static final String fontButtonText = "font";
     JDialog highlightDialog;
     JButton[] backgroundButtons;
@@ -140,7 +130,8 @@ public class SettingsHighlightingAction extends GuiAction {
     private JPanel buildDialogPanel() {
         final JPanel contents = new JPanel(new BorderLayout(20, 20));
         contents.setBorder(new EmptyBorder(10, 10, 10, 10));
-        final JPanel patches = new JPanel(new GridLayout(SettingsHighlightingAction.backgroundSettingPositions.length, 4, SettingsHighlightingAction.gridVGap, SettingsHighlightingAction.gridHGap));
+        final JPanel patches = new JPanel(new GridLayout(SettingsHighlightingAction.backgroundSettingPositions.length
+                , 4, SettingsHighlightingAction.gridVGap, SettingsHighlightingAction.gridHGap));
         this.currentNondefaultBackground = new Color[SettingsHighlightingAction.backgroundSettingPositions.length];
         this.currentNondefaultForeground = new Color[SettingsHighlightingAction.backgroundSettingPositions.length];
         this.initialSettingsBackground = new Color[SettingsHighlightingAction.backgroundSettingPositions.length];
@@ -180,7 +171,9 @@ public class SettingsHighlightingAction extends GuiAction {
             patches.add(this.defaultCheckBoxes[i]);
         }
 
-        final JPanel descriptions = new JPanel(new GridLayout(SettingsHighlightingAction.backgroundSettingPositions.length, 1, SettingsHighlightingAction.gridVGap, SettingsHighlightingAction.gridHGap));
+        final JPanel descriptions =
+                new JPanel(new GridLayout(SettingsHighlightingAction.backgroundSettingPositions.length, 1,
+                        SettingsHighlightingAction.gridVGap, SettingsHighlightingAction.gridHGap));
         // Note the labels have to match buttons by position...
         descriptions.add(new JLabel("Text Segment highlighting", SwingConstants.RIGHT));
         descriptions.add(new JLabel("Text Segment Delay Slot highlighting", SwingConstants.RIGHT));
@@ -189,7 +182,8 @@ public class SettingsHighlightingAction extends GuiAction {
         descriptions.add(new JLabel("Even row normal", SwingConstants.RIGHT));
         descriptions.add(new JLabel("Odd row normal", SwingConstants.RIGHT));
 
-        final JPanel sample = new JPanel(new GridLayout(SettingsHighlightingAction.backgroundSettingPositions.length, 1, SettingsHighlightingAction.gridVGap, SettingsHighlightingAction.gridHGap));
+        final JPanel sample = new JPanel(new GridLayout(SettingsHighlightingAction.backgroundSettingPositions.length,
+                1, SettingsHighlightingAction.gridVGap, SettingsHighlightingAction.gridHGap));
         for (int i = 0; i < SettingsHighlightingAction.backgroundSettingPositions.length; i++) {
             sample.add(this.samples[i]);
         }
@@ -232,7 +226,8 @@ public class SettingsHighlightingAction extends GuiAction {
         this.dataHighlightButton.setToolTipText(SettingsHighlightingAction.DATA_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT);
         this.dataHighlightButton.addActionListener(
                 e -> {
-                    SettingsHighlightingAction.this.currentDataHighlightSetting = !SettingsHighlightingAction.this.currentDataHighlightSetting;
+                    SettingsHighlightingAction.this.currentDataHighlightSetting =
+                            !SettingsHighlightingAction.this.currentDataHighlightSetting;
                     SettingsHighlightingAction.this.dataHighlightButton.setText(SettingsHighlightingAction.getHighlightControlText(SettingsHighlightingAction.this.currentDataHighlightSetting));
                 });
         this.registerHighlightButton = new JButton();
@@ -240,7 +235,8 @@ public class SettingsHighlightingAction extends GuiAction {
         this.registerHighlightButton.setToolTipText(SettingsHighlightingAction.REGISTER_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT);
         this.registerHighlightButton.addActionListener(
                 e -> {
-                    SettingsHighlightingAction.this.currentRegisterHighlightSetting = !SettingsHighlightingAction.this.currentRegisterHighlightSetting;
+                    SettingsHighlightingAction.this.currentRegisterHighlightSetting =
+                            !SettingsHighlightingAction.this.currentRegisterHighlightSetting;
                     SettingsHighlightingAction.this.registerHighlightButton.setText(SettingsHighlightingAction.getHighlightControlText(SettingsHighlightingAction.this.currentRegisterHighlightSetting));
                 });
         final JPanel dataHighlightPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -298,8 +294,10 @@ public class SettingsHighlightingAction extends GuiAction {
         Color backgroundSetting, foregroundSetting;
         Font fontSetting;
         for (int i = 0; i < SettingsHighlightingAction.backgroundSettingPositions.length; i++) {
-            backgroundSetting = settings.getColorSettingByPosition(SettingsHighlightingAction.backgroundSettingPositions[i]);
-            foregroundSetting = settings.getColorSettingByPosition(SettingsHighlightingAction.foregroundSettingPositions[i]);
+            backgroundSetting =
+                    settings.getColorSettingByPosition(SettingsHighlightingAction.backgroundSettingPositions[i]);
+            foregroundSetting =
+                    settings.getColorSettingByPosition(SettingsHighlightingAction.foregroundSettingPositions[i]);
             fontSetting = settings.getFontByPosition(SettingsHighlightingAction.fontSettingPositions[i]);
             this.backgroundButtons[i].setBackground(backgroundSetting);
             this.foregroundButtons[i].setBackground(foregroundSetting);
@@ -320,7 +318,8 @@ public class SettingsHighlightingAction extends GuiAction {
                     .equals(settings.getDefaultColorSettingByPosition(SettingsHighlightingAction.backgroundSettingPositions[i])) &&
                     foregroundSetting.equals(settings.getDefaultColorSettingByPosition(SettingsHighlightingAction.foregroundSettingPositions[i]))
                     &&
-                    Objects.equals(fontSetting, Settings.getDefaultFontByPosition(SettingsHighlightingAction.fontSettingPositions[i]));
+                    Objects.equals(fontSetting,
+                            Settings.getDefaultFontByPosition(SettingsHighlightingAction.fontSettingPositions[i]));
             this.defaultCheckBoxes[i].setSelected(usingDefaults);
             this.backgroundButtons[i].setEnabled(!usingDefaults);
             this.foregroundButtons[i].setEnabled(!usingDefaults);
@@ -337,8 +336,10 @@ public class SettingsHighlightingAction extends GuiAction {
     private void setHighlightingSettings() {
         final Settings settings = Globals.getSettings();
         for (int i = 0; i < SettingsHighlightingAction.backgroundSettingPositions.length; i++) {
-            settings.setColorSettingByPosition(SettingsHighlightingAction.backgroundSettingPositions[i], this.backgroundButtons[i].getBackground());
-            settings.setColorSettingByPosition(SettingsHighlightingAction.foregroundSettingPositions[i], this.foregroundButtons[i].getBackground());
+            settings.setColorSettingByPosition(SettingsHighlightingAction.backgroundSettingPositions[i],
+                    this.backgroundButtons[i].getBackground());
+            settings.setColorSettingByPosition(SettingsHighlightingAction.foregroundSettingPositions[i],
+                    this.foregroundButtons[i].getBackground());
             settings.setFontByPosition(SettingsHighlightingAction.fontSettingPositions[i], this.samples[i].getFont());// fontButtons[i].getFont());
         }
         settings.setBooleanSetting(Settings.Bool.DATA_SEGMENT_HIGHLIGHTING, this.currentDataHighlightSetting);
@@ -396,7 +397,7 @@ public class SettingsHighlightingAction extends GuiAction {
         this.highlightDialog.dispose();
     }
 
-    ///////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////
     //
     // Modal dialog to set a font.
     //
@@ -468,7 +469,7 @@ public class SettingsHighlightingAction extends GuiAction {
 
     }
 
-    /////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////
     //
     // Class that handles click on the background selection button
     //
@@ -491,7 +492,7 @@ public class SettingsHighlightingAction extends GuiAction {
         }
     }
 
-    /////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////
     //
     // Class that handles click on the foreground selection button
     //
@@ -514,33 +515,7 @@ public class SettingsHighlightingAction extends GuiAction {
         }
     }
 
-    /////////////////////////////////////////////////////////////////
-    //
-    // Class that handles click on the font select button
-    //
-    private class FontChanger implements ActionListener {
-        private final int position;
-
-        public FontChanger(final int pos) {
-            this.position = pos;
-        }
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-//            e.getSource();
-            final FontSettingDialog fontDialog = new FontSettingDialog(null, "Select Text Font", SettingsHighlightingAction.this.samples[this.position].getFont());
-            final Font newFont = fontDialog.showDialog();
-            if (newFont != null) {
-                // button.setFont(newFont);
-                SettingsHighlightingAction.this.samples[this.position].setFont(newFont);
-            }
-        }
-    }
-
-    /////////////////////////////////////////////////////////////////
-    //
-    // Class that handles action (check, uncheck) on the Default checkbox.
-    //
+    /// Class that handles action (check, uncheck) on the Default checkbox.
     private class DefaultChanger implements ItemListener {
         private final int position;
 
@@ -565,10 +540,14 @@ public class SettingsHighlightingAction extends GuiAction {
                         .getDefaultColorSettingByPosition(SettingsHighlightingAction.backgroundSettingPositions[this.position]);
                 newForeground = Globals.getSettings()
                         .getDefaultColorSettingByPosition(SettingsHighlightingAction.foregroundSettingPositions[this.position]);
-                newFont = Settings.getDefaultFontByPosition(SettingsHighlightingAction.fontSettingPositions[this.position]);
-                SettingsHighlightingAction.this.currentNondefaultBackground[this.position] = SettingsHighlightingAction.this.backgroundButtons[this.position].getBackground();
-                SettingsHighlightingAction.this.currentNondefaultForeground[this.position] = SettingsHighlightingAction.this.foregroundButtons[this.position].getBackground();
-                SettingsHighlightingAction.this.currentNondefaultFont[this.position] = SettingsHighlightingAction.this.samples[this.position].getFont();
+                newFont =
+                        Settings.getDefaultFontByPosition(SettingsHighlightingAction.fontSettingPositions[this.position]);
+                SettingsHighlightingAction.this.currentNondefaultBackground[this.position] =
+                        SettingsHighlightingAction.this.backgroundButtons[this.position].getBackground();
+                SettingsHighlightingAction.this.currentNondefaultForeground[this.position] =
+                        SettingsHighlightingAction.this.foregroundButtons[this.position].getBackground();
+                SettingsHighlightingAction.this.currentNondefaultFont[this.position] =
+                        SettingsHighlightingAction.this.samples[this.position].getFont();
             } else {
                 SettingsHighlightingAction.this.backgroundButtons[this.position].setEnabled(true);
                 SettingsHighlightingAction.this.foregroundButtons[this.position].setEnabled(true);
@@ -592,14 +571,22 @@ public class SettingsHighlightingAction extends GuiAction {
 // Dinky little custom button class to modify border based on
 // whether enabled or not. The default behavior does not work
 // well on buttons with black background.
-class ColorSelectButton extends JButton {
-    private static final Border ColorSelectButtonEnabledBorder = new BevelBorder(BevelBorder.RAISED, Color.WHITE,
-            Color.GRAY);
-    private static final Border ColorSelectButtonDisabledBorder = new LineBorder(Color.GRAY, 2);
+final class ColorSelectButton extends JButton {
+    private static Color getBestForegroundForBackground(final @NotNull Color background) {
+        final var r = background.getRed();
+        final var g = background.getGreen();
+        final var b = background.getBlue();
+
+        // Calculate luminance
+        final var luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+        // Return white or black based on luminance
+        return luminance > 127.5 ? Color.BLACK : Color.WHITE;
+    }
 
     @Override
-    public void setEnabled(final boolean status) {
-        super.setEnabled(status);
-        this.setBorder(status ? ColorSelectButton.ColorSelectButtonEnabledBorder : ColorSelectButton.ColorSelectButtonDisabledBorder);
+    public void setBackground(final Color bg) {
+        super.setBackground(bg);
+        this.setForeground(getBestForegroundForBackground(bg));
     }
 }

@@ -1,13 +1,12 @@
 package instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.Settings;
 import rars.api.Options;
 import rars.api.Program;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.Instructions;
+import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import utils.RarsTestBase;
 
@@ -16,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.fail;
+import static rars.settings.Settings.boolSettings;
 import static rars.util.Utils.getStacktraceString;
 
 public abstract class AbstractInstructionTest extends RarsTestBase {
@@ -84,9 +84,9 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
      * @param is64     A boolean indicating whether the test is for RV64.
      * @param testData A {@link TestData} object containing the test data (STD{IN,OUT,ERR}, error lines).
      */
-    private void runTest(@NotNull final String code, @NotNull final String dataPrelude, final boolean is64, final TestData testData) {
-        Globals.initialize();
-        Globals.getSettings().setBooleanSettingNonPersistent(Settings.Bool.RV64_ENABLED, is64);
+    private void runTest(@NotNull final String code, @NotNull final String dataPrelude, final boolean is64,
+                         final TestData testData) {
+        boolSettings.setSetting(BoolSetting.RV64_ENABLED, is64);
         Instructions.RV64 = is64;
 
         final var opt = new Options();
@@ -136,7 +136,8 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 final var builder = new StringBuilder();
                 builder.append("Failed to assemble `" + getTestName() + "` due to following error(s):\n");
                 for (final var error : ae.errors().getErrorMessages()) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + "\n");
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + 
+                            "\n");
                 }
                 fail(builder.toString());
             }
@@ -152,7 +153,8 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 builder.append("Expected lines: " + testData.errorLines + "\n");
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + "\n");
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + 
+                            "\n");
                 }
                 fail(builder.toString());
             }

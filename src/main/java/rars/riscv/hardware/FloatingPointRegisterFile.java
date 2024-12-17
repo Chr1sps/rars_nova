@@ -2,8 +2,8 @@ package rars.riscv.hardware;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.Settings;
 import rars.notices.RegisterAccessNotice;
+import rars.settings.OtherSettings;
 import rars.util.SimpleSubscriber;
 
 /*
@@ -99,7 +99,7 @@ public final class FloatingPointRegisterFile {
      */
     public static void updateRegister(final int num, final int val) {
         final long lval = val | 0xFFFFFFFF_00000000L; // NAN box if used as float
-        if ((Settings.getBackSteppingEnabled())) {
+        if ((OtherSettings.getBackSteppingEnabled())) {
             Globals.program.getBackStepper().addFloatingPointRestore(num,
                     FloatingPointRegisterFile.instance.updateRegister(num, lval));
         } else {
@@ -114,7 +114,7 @@ public final class FloatingPointRegisterFile {
      * @param val a long
      */
     public static void updateRegisterLong(final int num, final long val) {
-        if ((Settings.getBackSteppingEnabled())) {
+        if ((OtherSettings.getBackSteppingEnabled())) {
             Globals.program.getBackStepper().addFloatingPointRestore(num,
                     FloatingPointRegisterFile.instance.updateRegister(num, val));
         } else {

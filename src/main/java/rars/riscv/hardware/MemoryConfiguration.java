@@ -1,248 +1,132 @@
 package rars.riscv.hardware;
 
-/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-/**
- * Models the memory configuration for the simulated MIPS machine.
- * "configuration" refers to the starting memory addresses for
- * the various memory segments.
- * The default configuration is based on SPIM. Starting with MARS 3.7,
- * the configuration can be changed.
- *
- * @author Pete Sanderson
- * @version August 2009
- */
-public class MemoryConfiguration {
-    // TODO: remove kernel mode maybe?
-    // TODO: move away from a multi-array approach to array of ranges approach
-    // Identifier is used for saving setting; name is used for display
-    private final @NotNull String configurationIdentifier;
-    private final @NotNull String configurationName;
-    private final @NotNull String @NotNull [] configurationItemNames;
-    private final int @NotNull [] configurationItemValues;
+public enum MemoryConfiguration {
+    DEFAULT(
+            "Default",
+            "Default",
+            0x00400000, // .text Base Address
+            0x10000000, // Data Segment base address
+            0x10000000, // .extern Base Address
+            0x10008000, // Global Pointer $gp)
+            0x10010000, // .data base Address
+            0x10040000, // heap base address
+            0x7fffeffc, // stack pointer $sp (from SPIM not MIPS)
+            0x7ffffffc, // stack base address
+            0x7fffffff, // highest address in user space
+            0x80000000, // lowest address in kernel space
+            0xffff0000, // MMIO base address
+            0xffffffff, // highest address in kernel (and memory)
+            0x7fffffff, // data segment limit address
+            0x0ffffffc, // text limit address
+            0x10040000, // stack limit address
+            0xffffffff // memory map limit address
+    ),
+    DATA_BASED_COMPACT(
+            "CompactDataAtZero",
+            "Compact, data at address 0",
+            0x00003000, // .text Base Address
+            0x00000000, // Data Segment base address
+            0x00001000, // .extern Base Address
+            0x00001800, // Global Pointer $gp)
+            0x00000000, // .data base Address
+            0x00002000, // heap base address
+            0x00002ffc, // stack pointer $sp
+            0x00002ffc, // stack base address
+            0x00003fff, // highest address in user space
+            0x00004000, // lowest address in kernel space
+            0x00007f00, // MMIO base address
+            0x00007fff, // highest address in kernel (and memory)
+            0x00002fff, // data segment limit address
+            0x00003ffc, // text limit address
+            0x00002000, // stack limit address
+            0x00007fff // memory map limit address
+    ),
+    TEXT_BASED_COMPACT(
+            "CompactTextAtZero",
+            "Compact, text at address 0",
+            0x00000000, // .text Base Address
+            0x00001000, // Data Segment base address
+            0x00001000, // .extern Base Address
+            0x00001800, // Global Pointer $gp)
+            0x00002000, // .data base Address
+            0x00003000, // heap base address
+            0x00003ffc, // stack pointer $sp
+            0x00003ffc, // stack base address
+            0x00003fff, // highest address in user space
+            0x00004000, // lowest address in kernel space
+            0x00007f00, // MMIO base address
+            0x00007fff, // highest address in kernel (and memory)
+            0x00003fff, // data segment limit address
+            0x00000ffc, // text limit address
+            0x00003000, // stack limit address
+            0x00007fff // memory map limit address
+    );
 
-    /**
-     * <p>Constructor for MemoryConfiguration.</p>
-     *
-     * @param ident  a {@link java.lang.String} object
-     * @param name   a {@link java.lang.String} object
-     * @param items  an array of {@link java.lang.String} objects
-     * @param values an array of {@link int} objects
-     */
-    public MemoryConfiguration(final @NotNull String ident, final @NotNull String name,
-                               final @NotNull String @NotNull [] items, final int @NotNull [] values) {
-        this.configurationIdentifier = ident;
-        this.configurationName = name;
-        this.configurationItemNames = items;
-        this.configurationItemValues = values;
+    public final @NotNull String identifier, description;
+    public final int textBaseAddress;
+    public final int dataSegmentBaseAddress;
+    public final int externBaseAddress;
+    public final int globalPointerAddress;
+    public final int dataBaseAddress;
+    public final int heapBaseAddress;
+    public final int stackPointerAddress;
+    public final int stackBaseAddress;
+    public final int userHighAddress;
+    public final int kernelBaseAddress;
+    public final int memoryMapBaseAddress;
+    public final int kernelHighAddress;
+    public final int dataSegmentLimitAddress;
+    public final int textLimitAddress;
+    public final int stackLimitAddress;
+    public final int memoryMapLimitAddress;
+    MemoryConfiguration(
+            @NotNull final String identifier,
+            @NotNull final String description,
+            final int textBaseAddress,
+            final int dataSegmentBaseAddress,
+            final int externBaseAddress,
+            final int globalPointerAddress,
+            final int dataBaseAddress,
+            final int heapBaseAddress,
+            final int stackPointerAddress,
+            final int stackBaseAddress,
+            final int userHighAddress,
+            final int kernelBaseAddress,
+            final int memoryMapBaseAddress,
+            final int kernelHighAddress,
+            final int dataSegmentLimitAddress,
+            final int textLimitAddress,
+            final int stackLimitAddress,
+            final int memoryMapLimitAddress) {
+        this.identifier = identifier;
+        this.description = description;
+        this.textBaseAddress = textBaseAddress;
+        this.dataSegmentBaseAddress = dataSegmentBaseAddress;
+        this.externBaseAddress = externBaseAddress;
+        this.globalPointerAddress = globalPointerAddress;
+        this.dataBaseAddress = dataBaseAddress;
+        this.heapBaseAddress = heapBaseAddress;
+        this.stackPointerAddress = stackPointerAddress;
+        this.stackBaseAddress = stackBaseAddress;
+        this.userHighAddress = userHighAddress;
+        this.kernelBaseAddress = kernelBaseAddress;
+        this.memoryMapBaseAddress = memoryMapBaseAddress;
+        this.kernelHighAddress = kernelHighAddress;
+        this.dataSegmentLimitAddress = dataSegmentLimitAddress;
+        this.textLimitAddress = textLimitAddress;
+        this.stackLimitAddress = stackLimitAddress;
+        this.memoryMapLimitAddress = memoryMapLimitAddress;
     }
 
-    /**
-     * <p>Getter for the field <code>configurationIdentifier</code>.</p>
-     *
-     * @return a {@link java.lang.String} object
-     */
-    public @NotNull String getConfigurationIdentifier() {
-        return configurationIdentifier;
+    public static @Nullable MemoryConfiguration fromIdString(final @NotNull String id) {
+        for (final MemoryConfiguration configuration : MemoryConfiguration.values()) {
+            if (configuration.identifier.equals(id)) {
+                return configuration;
+            }
+        }
+        return null;
     }
-
-    /**
-     * <p>Getter for the field <code>configurationName</code>.</p>
-     *
-     * @return a {@link java.lang.String} object
-     */
-    public @NotNull String getConfigurationName() {
-        return configurationName;
-    }
-
-    /**
-     * <p>Getter for the field <code>configurationItemValues</code>.</p>
-     *
-     * @return an array of {@link int} objects
-     */
-    public int[] getConfigurationItemValues() {
-        return configurationItemValues;
-    }
-
-    /**
-     * <p>Getter for the field <code>configurationItemNames</code>.</p>
-     *
-     * @return an array of {@link java.lang.String} objects
-     */
-    public String[] getConfigurationItemNames() {
-        return configurationItemNames;
-    }
-
-    /**
-     * <p>getTextBaseAddress.</p>
-     *
-     * @return a int
-     */
-    public int getTextBaseAddress() {
-        return configurationItemValues[0];
-    }
-
-    /**
-     * <p>getDataSegmentBaseAddress.</p>
-     *
-     * @return a int
-     */
-    public int getDataSegmentBaseAddress() {
-        return configurationItemValues[1];
-    }
-
-    /**
-     * <p>getExternBaseAddress.</p>
-     *
-     * @return a int
-     */
-    public int getExternBaseAddress() {
-        return configurationItemValues[2];
-    }
-
-    /**
-     * <p>getGlobalPointer.</p>
-     *
-     * @return a int
-     */
-    public int getGlobalPointer() {
-        return configurationItemValues[3];
-    }
-
-    /**
-     * <p>getDataBaseAddress.</p>
-     *
-     * @return a int
-     */
-    public int getDataBaseAddress() {
-        return configurationItemValues[4];
-    }
-
-    /**
-     * <p>getHeapBaseAddress.</p>
-     *
-     * @return a int
-     */
-    public int getHeapBaseAddress() {
-        return configurationItemValues[5];
-    }
-
-    /**
-     * <p>getStackPointer.</p>
-     *
-     * @return a int
-     */
-    public int getStackPointer() {
-        return configurationItemValues[6];
-    }
-
-    /**
-     * <p>getStackBaseAddress.</p>
-     *
-     * @return a int
-     */
-    public int getStackBaseAddress() {
-        return configurationItemValues[7];
-    }
-
-    /**
-     * <p>getUserHighAddress.</p>
-     *
-     * @return a int
-     */
-    public int getUserHighAddress() {
-        return configurationItemValues[8];
-    }
-
-    /**
-     * <p>getKernelBaseAddress.</p>
-     *
-     * @return a int
-     */
-    public int getKernelBaseAddress() {
-        return configurationItemValues[9];
-    }
-
-    /**
-     * <p>getMemoryMapBaseAddress.</p>
-     *
-     * @return a int
-     */
-    public int getMemoryMapBaseAddress() {
-        return configurationItemValues[10];
-    }
-
-    /**
-     * <p>getKernelHighAddress.</p>
-     *
-     * @return a int
-     */
-    public int getKernelHighAddress() {
-        return configurationItemValues[11];
-    }
-
-    /**
-     * <p>getDataSegmentLimitAddress.</p>
-     *
-     * @return a int
-     */
-    public int getDataSegmentLimitAddress() {
-        return configurationItemValues[12];
-    }
-
-    /**
-     * <p>getTextLimitAddress.</p>
-     *
-     * @return a int
-     */
-    public int getTextLimitAddress() {
-        return configurationItemValues[13];
-    }
-
-    /**
-     * <p>getStackLimitAddress.</p>
-     *
-     * @return a int
-     */
-    public int getStackLimitAddress() {
-        return configurationItemValues[14];
-    }
-
-    /**
-     * <p>getMemoryMapLimitAddress.</p>
-     *
-     * @return a int
-     */
-    public int getMemoryMapLimitAddress() {
-        return configurationItemValues[15];
-    }
-
 }

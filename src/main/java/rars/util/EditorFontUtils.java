@@ -5,6 +5,8 @@ import rars.Globals;
 import java.awt.*;
 import java.util.Arrays;
 
+import static rars.settings.Settings.otherSettings;
+
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
 
@@ -42,17 +44,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class EditorFontUtils {
 
-    // Note: These are parallel arrays so corresponding elements must match up.
-    private static final String[] styleStrings = {"Plain", "Bold", "Italic", "Bold + Italic"};
-    private static final int[] styleInts = {Font.PLAIN, Font.BOLD, Font.ITALIC, Font.BOLD | Font.ITALIC};
-    /**
-     * Constant <code>DEFAULT_STYLE_STRING="styleStrings[0]"</code>
-     */
-    public static final String DEFAULT_STYLE_STRING = EditorFontUtils.styleStrings[0];
-    /**
-     * Constant <code>DEFAULT_STYLE_INT=styleInts[0]</code>
-     */
-    public static final int DEFAULT_STYLE_INT = EditorFontUtils.styleInts[0];
     /**
      * Constant <code>MIN_SIZE=6</code>
      */
@@ -65,6 +56,17 @@ public final class EditorFontUtils {
      * Constant <code>DEFAULT_SIZE=12</code>
      */
     public static final int DEFAULT_SIZE = 12;
+    // Note: These are parallel arrays so corresponding elements must match up.
+    private static final String[] styleStrings = {"Plain", "Bold", "Italic", "Bold + Italic"};
+    /**
+     * Constant <code>DEFAULT_STYLE_STRING="styleStrings[0]"</code>
+     */
+    public static final String DEFAULT_STYLE_STRING = EditorFontUtils.styleStrings[0];
+    private static final int[] styleInts = {Font.PLAIN, Font.BOLD, Font.ITALIC, Font.BOLD | Font.ITALIC};
+    /**
+     * Constant <code>DEFAULT_STYLE_INT=styleInts[0]</code>
+     */
+    public static final int DEFAULT_STYLE_INT = EditorFontUtils.styleInts[0];
     /*
      * Fonts in 3 categories that are common to major Java platforms: Win, Mac,
      * Linux.
@@ -75,6 +77,14 @@ public final class EditorFontUtils {
      */
     private static final String[] allCommonFamilies = {"Arial", "Courier New", "Georgia",
             "Lucida Sans Typewriter", "Times New Roman", "Verdana"};
+    private static final String TAB_STRING = "\t";
+    private static final char TAB_CHAR = '\t';
+    private static final String SPACES = "                                                  ";
+    /*
+     * We want to vett the above list against the actual available families and give
+     * our client only those that are actually available.
+     */
+    private static final String[] commonFamilies = EditorFontUtils.actualCommonFamilies();
 
     private EditorFontUtils() {
     }
@@ -154,7 +164,8 @@ public final class EditorFontUtils {
      * as String) or greater than MAX_SIZE (returns MAX_SIZE as String).
      */
     public static String sizeIntToSizeString(final int size) {
-        final int result = (size < EditorFontUtils.MIN_SIZE) ? EditorFontUtils.MIN_SIZE : (Math.min(size, EditorFontUtils.MAX_SIZE));
+        final int result = (size < EditorFontUtils.MIN_SIZE) ? EditorFontUtils.MIN_SIZE : (Math.min(size,
+                EditorFontUtils.MAX_SIZE));
         return String.valueOf(result);
     }
 
@@ -172,7 +183,8 @@ public final class EditorFontUtils {
             result = Integer.parseInt(size);
         } catch (final NumberFormatException ignored) {
         }
-        return (result < EditorFontUtils.MIN_SIZE) ? EditorFontUtils.MIN_SIZE : (Math.min(result, EditorFontUtils.MAX_SIZE));
+        return (result < EditorFontUtils.MIN_SIZE) ? EditorFontUtils.MIN_SIZE : (Math.min(result,
+                EditorFontUtils.MAX_SIZE));
     }
 
     /**
@@ -190,12 +202,9 @@ public final class EditorFontUtils {
      * @return a {@link java.awt.Font} object
      */
     public static Font createFontFromStringValues(final String family, final String style, final String size) {
-        return new Font(family, EditorFontUtils.styleStringToStyleInt(style), EditorFontUtils.sizeStringToSizeInt(size));
+        return new Font(family, EditorFontUtils.styleStringToStyleInt(style),
+                EditorFontUtils.sizeStringToSizeInt(size));
     }
-
-    private static final String TAB_STRING = "\t";
-    private static final char TAB_CHAR = '\t';
-    private static final String SPACES = "                                                  ";
 
     /**
      * Handy utility to produce a string that substitutes spaces for all tab
@@ -209,7 +218,7 @@ public final class EditorFontUtils {
      * @throws java.lang.NullPointerException if string is null
      */
     public static String substituteSpacesForTabs(final String string) {
-        return EditorFontUtils.substituteSpacesForTabs(string, Globals.getSettings().getEditorTabSize());
+        return EditorFontUtils.substituteSpacesForTabs(string, otherSettings.getEditorTabSize());
     }
 
     /**
@@ -236,15 +245,10 @@ public final class EditorFontUtils {
         return result.toString();
     }
 
-    /*
-     * We want to vett the above list against the actual available families and give
-     * our client only those that are actually available.
-     */
-    private static final String[] commonFamilies = EditorFontUtils.actualCommonFamilies();
-
     private static String[] actualCommonFamilies() {
         String[] result = new String[EditorFontUtils.allCommonFamilies.length];
-        final String[] availableFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+        final String[] availableFamilies =
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         Arrays.sort(availableFamilies); // not sure if necessary; is the list already alphabetical?
         int k = 0;
         for (final String family : EditorFontUtils.allCommonFamilies) {

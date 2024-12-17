@@ -8,6 +8,8 @@ import rars.venus.GuiAction;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import static rars.settings.Settings.boolSettings;
+
 /*
 Copyright (c) 20017,  Benjamin Landers
 
@@ -49,7 +51,8 @@ public class SettingsAction extends GuiAction {
      * @param descrip a {@link java.lang.String} object
      * @param setting a {@link BoolSetting} object
      */
-    public SettingsAction(final String name, final String descrip, final @NotNull BoolSetting setting, final @NotNull Handler handler) {
+    public SettingsAction(final String name, final String descrip, final @NotNull BoolSetting setting,
+                          final @NotNull Handler handler) {
         super(name, null, descrip, null, null);
         this.setting = setting;
         this.handler = handler;
@@ -67,7 +70,7 @@ public class SettingsAction extends GuiAction {
     @Override
     public void actionPerformed(final @NotNull ActionEvent e) {
         final boolean value = ((JCheckBoxMenuItem) e.getSource()).isSelected();
-        Globals.getSettings().getBoolSettings().setSettingAndSave(setting, value);
+        boolSettings.setSettingAndSave(setting, value);
         this.handler.handler(value);
     }
 

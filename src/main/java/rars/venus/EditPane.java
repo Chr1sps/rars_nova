@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.concurrent.Flow;
 
+import static rars.settings.Settings.*;
+
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
 
@@ -93,7 +95,10 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         // user.dir, user's current working directory, is guaranteed to have a second
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
-        Globals.getSettings().subscribe(this);
+        boolSettings.subscribe(this);
+        fontSettings.subscribe(this);
+        otherSettings.subscribe(this);
+
         this.fileStatus = new FileStatus();
         this.lineNumbers = new JLabel();
 
@@ -177,7 +182,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         this.showLineNumbers.setEnabled(false);
         // Show line numbers by default.
         this.showLineNumbers
-                .setSelected(Globals.getSettings().getBoolSettings().getSetting(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED));
+                .setSelected(boolSettings.getSetting(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED));
 
         this.setSourceCode("", false);
 
@@ -197,7 +202,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
                         EditPane.this.lineNumbers.setVisible(false);
                     }
                     EditPane.this.sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
-                    Globals.getSettings().getBoolSettings().setSettingAndSave(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED,
+                    boolSettings.setSettingAndSave(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED,
                             EditPane.this.showLineNumbers.isSelected());
                     // needed because caret disappears when checkbox clicked
                     EditPane.this.sourceCode.requestFocusInWindow();
@@ -633,11 +638,11 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
 
     @Override
     public void onNext(final SettingsNotice ignored) {
-        this.sourceCode.setFont(Globals.getSettings().getFontSettings().getCurrentFont());
+        this.sourceCode.setFont(fontSettings.getCurrentFont());
         this.sourceCode.setLineHighlightEnabled(
-                Globals.getSettings().getBoolSettings().getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
-        this.sourceCode.setCaretBlinkRate(Globals.getSettings().getCaretBlinkRate());
-        this.sourceCode.setTabSize(Globals.getSettings().getEditorTabSize());
+                boolSettings.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
+        this.sourceCode.setCaretBlinkRate(otherSettings.getCaretBlinkRate());
+        this.sourceCode.setTabSize(otherSettings.getEditorTabSize());
         // TODO: Change this to the new ColorScheme API
         this.sourceCode.revalidate();
         // We want line numbers to be displayed same size but always PLAIN style.

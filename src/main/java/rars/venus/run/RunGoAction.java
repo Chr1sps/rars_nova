@@ -20,6 +20,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.concurrent.Flow;
 
+import static rars.settings.Settings.boolSettings;
+
 /*
 Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
 
@@ -280,7 +282,7 @@ public class RunGoAction extends GuiAction {
     private void processProgramArgumentsIfAny() {
         final String programArguments = this.executePane.getTextSegmentWindow().getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||
-                !Globals.getSettings().getBoolSettings().getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
+                !boolSettings.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             return;
         }
         new ProgramArgumentList(programArguments).storeProgramArguments();

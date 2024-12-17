@@ -2,6 +2,7 @@ package rars;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rars.assembler.SymbolTable;
 import rars.riscv.SyscallNumberOverride;
 import rars.riscv.hardware.Memory;
@@ -76,6 +77,10 @@ public final class Globals {
      * Copyright holders
      */
     public static final String copyrightHolders = Globals.getCopyrightHolders();
+    /**
+     * Symbol table for file currently being assembled.
+     **/
+    public static final SymbolTable symbolTable = new SymbolTable("global");
     private static final Logger LOGGER = LogManager.getLogger();
     // List these first because they are referenced by methods called at
     // initialization.
@@ -83,7 +88,7 @@ public final class Globals {
     /**
      * List of accepted file extensions for RISCV assembly source files.
      */
-    public static final ArrayList<String> fileExtensions = Globals.getFileExtensions();
+    public static final List<String> fileExtensions = Globals.getFileExtensions();
     /**
      * Maximum length of scrolled message window (RARS Messages and Run I/O)
      */
@@ -107,17 +112,13 @@ public final class Globals {
     public static final String[] ASCII_TABLE = Globals.getAsciiStrings();
     private static final String syscallPropertiesFile = "Syscall";
     /**
+     * Simulated memory component.
+     **/
+    public static Memory memory = Memory.getInstance();
+    /**
      * the program currently being worked with. Used by GUI only, not command line.
      **/
     public static RISCVprogram program;
-    /**
-     * Symbol table for file currently being assembled.
-     **/
-    public static SymbolTable symbolTable;
-    /**
-     * Simulated memory component.
-     **/
-    public static Memory memory;
     /**
      * Flag to determine whether or not to produce internal debugging information.
      **/
@@ -130,15 +131,13 @@ public final class Globals {
      * Constant <code>runSpeedPanelExists=false</code>
      */
     public static boolean runSpeedPanelExists = false;
-    /**
-     * Object that contains various settings that can be accessed modified
-     * internally.
-     **/
-    static Settings settings;
     /* The GUI being used (if any) with this simulator. */
     static VenusUI gui = null;
     /* Flag that indicates whether or not instructionSet has been initialized. */
-    private static boolean initialized = false;
+
+    static {
+        Globals.memory.clear(); // will establish memory configuration from setting
+    }
 
     private Globals() {
     }
@@ -168,30 +167,6 @@ public final class Globals {
      */
     public static void setGui(final VenusUI g) {
         Globals.gui = g;
-    }
-
-    /**
-     * <p>Getter for the field <code>settings</code>.</p>
-     *
-     * @return a {@link Settings} object
-     */
-    public static Settings getSettings() {
-        return Globals.settings;
-    }
-
-    /**
-     * Method called once upon system initialization to create the global data
-     * structures.
-     */
-    public static void initialize() {
-        if (!Globals.initialized) {
-            Globals.memory = Memory.getInstance(); // clients can use Memory.getInstance instead of Globals.memory
-            Globals.symbolTable = new SymbolTable("global");
-            Globals.settings = new Settings();
-            Globals.initialized = true;
-            Globals.debug = false;
-            Globals.memory.clear(); // will establish memory configuration from setting
-        }
     }
 
     // Read byte limit of Run I/O or RARS Messages text to buffer.
@@ -271,7 +246,7 @@ public final class Globals {
     // Read assembly language file extensions from properties file. Resulting
     // string is tokenized into array list (assume StringTokenizer default
     // delimiters).
-    private static ArrayList<String> getFileExtensions() {
+    private static @NotNull List<String> getFileExtensions() {
         final ArrayList<String> extensionsList = new ArrayList<>();
         final String extensions = PropertiesFile.getPropertyEntry(Globals.configPropertiesFile, "Extensions");
         if (extensions != null) {
@@ -288,7 +263,7 @@ public final class Globals {
      *
      * @return ArrayList of SyscallNumberOverride objects
      */
-    public static List<SyscallNumberOverride> getSyscallOverrides() {
+    public static @NotNull List<SyscallNumberOverride> getSyscallOverrides() {
         final ArrayList<SyscallNumberOverride> overrides = new ArrayList<>();
         final Properties properties = PropertiesFile.loadPropertiesFromFile(Globals.syscallPropertiesFile);
         final Enumeration<Object> keys = properties.keys();

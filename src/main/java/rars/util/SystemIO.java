@@ -1,12 +1,14 @@
 package rars.util;
 
 import rars.Globals;
-import rars.Settings;
 import rars.settings.BoolSetting;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+
+import static rars.settings.Settings.boolSettings;
+
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -56,11 +58,6 @@ public final class SystemIO {
      * Maximum number of files that can be open
      */
     public static final int SYSCALL_MAXFILES = 32;
-    /**
-     * String used for description of file error
-     */
-    public static String fileErrorString = "File operation OK";
-
     private static final int O_RDONLY = 0x00000000;
     private static final int O_WRONLY = 0x00000001;
     private static final int O_RDWR = 0x00000002;
@@ -68,15 +65,22 @@ public final class SystemIO {
     private static final int O_CREAT = 0x00000200; // 512
     private static final int O_TRUNC = 0x00000400; // 1024
     private static final int O_EXCL = 0x00000800; // 2048
-
     private static final int SEEK_SET = 0;
     private static final int SEEK_CUR = 1;
     private static final int SEEK_END = 2;
-
     // standard I/O channels
     private static final int STDIN = 0;
     private static final int STDOUT = 1;
     private static final int STDERR = 2;
+    /**
+     * String used for description of file error
+     */
+    public static String fileErrorString = "File operation OK";
+    // The GUI doesn't handle lots of small messages well so I added this hacky way
+    // of buffering
+    // Currently it checks to flush every instruction run
+    private static String buffer = "";
+    private static long lasttime = 0;
 
     private SystemIO() {
     }
@@ -89,7 +93,8 @@ public final class SystemIO {
      * @return int second corresponding to user input
      */
     public static int readInteger(final int serviceNumber) {
-        final String input = SystemIO.readStringInternal("0", "Enter an integer second (syscall " + serviceNumber + ")", -1);
+        final String input = SystemIO.readStringInternal("0", "Enter an integer second (syscall " + serviceNumber +
+                ")", -1);
         // Client is responsible for catching NumberFormatException
         return Integer.parseInt(input.trim());
     }
@@ -104,7 +109,7 @@ public final class SystemIO {
             } catch (final IOException ignored) {
             }
         } else {
-            if (Globals.getSettings().getBoolSettings().getSetting(BoolSetting.POPUP_SYSCALL_INPUT)) {
+            if (boolSettings.getSetting(BoolSetting.POPUP_SYSCALL_INPUT)) {
                 input = Globals.getGui().getMessagesPane().getInputString(prompt);
             } else {
                 input = Globals.getGui().getMessagesPane().getInputString(maxlength);
@@ -122,7 +127,8 @@ public final class SystemIO {
      * Feb 14 2005 Ken Vollmar
      */
     public static float readFloat(final int serviceNumber) {
-        final String input = SystemIO.readStringInternal("0", "Enter a float second (syscall " + serviceNumber + ")", -1);
+        final String input = SystemIO.readStringInternal("0", "Enter a float second (syscall " + serviceNumber + ")",
+                -1);
         return Float.parseFloat(input.trim());
     }
 
@@ -135,7 +141,8 @@ public final class SystemIO {
      * Feb 14 2005 Ken Vollmar
      */
     public static double readDouble(final int serviceNumber) {
-        final String input = SystemIO.readStringInternal("0", "Enter a Double second (syscall " + serviceNumber + ")", -1);
+        final String input = SystemIO.readStringInternal("0", "Enter a Double second (syscall " + serviceNumber + ")"
+                , -1);
         return Double.parseDouble(input.trim());
     }
 
@@ -186,7 +193,8 @@ public final class SystemIO {
     public static int readChar(final int serviceNumber) {
         final int returnValue;
 
-        final String input = SystemIO.readStringInternal("0", "Enter a character second (syscall " + serviceNumber + ")", 1);
+        final String input = SystemIO.readStringInternal("0", "Enter a character second (syscall " + serviceNumber +
+                ")", 1);
         // The whole try-catch is not really necessary in this case since I'm
         // just propagating the runtime exception (the default behavior), but
         // I want to make it explicit. The client needs to catch it.
@@ -389,10 +397,11 @@ public final class SystemIO {
         } // fileErrorString would have been set
 
         File filepath = new File(filename);
-        if (!filepath.isAbsolute() && Globals.program != null && Globals.getSettings()
-                .getBoolSettings().getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY)) {
-            final String parent = new File(Globals.program.getFilename()).getParent();
-            filepath = new File(parent, filename);
+        if (!filepath.isAbsolute() && Globals.program != null) {
+            if (boolSettings.getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY)) {
+                final String parent = new File(Globals.program.getFilename()).getParent();
+                filepath = new File(parent, filename);
+            }
         }
         if (flags == SystemIO.O_RDONLY) // Open for reading only
         {
@@ -444,12 +453,11 @@ public final class SystemIO {
         return SystemIO.fileErrorString;
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////
     // Private method to simply return the BufferedReader used for
     // keyboard input, redirected input, or piped input.
     // These are all equivalent in the eyes of the program because they are
     // transparent to it. Lazy instantiation. DPS. 28 Feb 2008
-
     private static BufferedReader getInputReader() {
         if (FileIOData.inputReader == null) {
             FileIOData.inputReader = new BufferedReader(new InputStreamReader(System.in));
@@ -463,12 +471,6 @@ public final class SystemIO {
         }
         return FileIOData.outputWriter;
     }
-
-    // The GUI doesn't handle lots of small messages well so I added this hacky way
-    // of buffering
-    // Currently it checks to flush every instruction run
-    private static String buffer = "";
-    private static long lasttime = 0;
 
     private static void print2Gui(final String output) {
         final long time = System.currentTimeMillis();
@@ -521,13 +523,13 @@ public final class SystemIO {
     }
 
     public static class Data {
-        private String[] fileNames; // The filenames in use. Null if file descriptor i is not in use.
-        private int[] fileFlags; // The flags of this file, 0=READ, 1=WRITE. Invalid if this file descriptor is
         // not in use.
         public Closeable[] streams;
         public BufferedReader inputReader;
         public BufferedWriter outputWriter;
         public BufferedWriter errorWriter;
+        private String[] fileNames; // The filenames in use. Null if file descriptor i is not in use.
+        private int[] fileFlags; // The flags of this file, 0=READ, 1=WRITE. Invalid if this file descriptor is
 
         public Data(final boolean generate) {
             if (generate) {
@@ -563,15 +565,17 @@ public final class SystemIO {
     // Ken Vollmar, August 2005
 
     private static final class FileIOData {
-        private static String[] fileNames = new String[SystemIO.SYSCALL_MAXFILES]; // The filenames in use. Null if file
-        // descriptor i is not in use.
-        private static int[] fileFlags = new int[SystemIO.SYSCALL_MAXFILES]; // The flags of this file, 0=READ, 1=WRITE. Invalid
-        // if this file descriptor is not in use.
-        private static Closeable[] streams = new Closeable[SystemIO.SYSCALL_MAXFILES]; // The streams in use, associated with the
+        // associated with the
         // filenames
         public static BufferedReader inputReader;
         public static BufferedWriter outputWriter;
         public static BufferedWriter errorWriter;
+        private static String[] fileNames = new String[SystemIO.SYSCALL_MAXFILES]; // The filenames in use. Null if file
+        // descriptor i is not in use.
+        private static int[] fileFlags = new int[SystemIO.SYSCALL_MAXFILES]; // The flags of this file, 0=READ, 
+        // 1=WRITE. Invalid
+        // if this file descriptor is not in use.
+        private static Closeable[] streams = new Closeable[SystemIO.SYSCALL_MAXFILES]; // The streams in use, 
 
         // Reset all file information. Closes any open files and resets the arrays
         private static void resetFiles() {
@@ -641,7 +645,8 @@ public final class SystemIO {
                 return false;
             } else // O_WRONLY
                 // write-only
-                if (FileIOData.fileNames[fd] != null && FileIOData.fileFlags[fd] == 0 && flag == 0) { // O_RDONLY read-only
+                if (FileIOData.fileNames[fd] != null && FileIOData.fileFlags[fd] == 0 && flag == 0) { // O_RDONLY 
+                    // read-only
                     return true;
                 } else
                     return FileIOData.fileNames[fd] != null && ((FileIOData.fileFlags[fd] & flag & SystemIO.O_WRONLY) == SystemIO.O_WRONLY);
@@ -701,7 +706,8 @@ public final class SystemIO {
 
             if (i >= SystemIO.SYSCALL_MAXFILES) // no available file descriptors
             {
-                SystemIO.fileErrorString = "File name " + filename + " exceeds maximum open file limit of " + SystemIO.SYSCALL_MAXFILES;
+                SystemIO.fileErrorString =
+                        "File name " + filename + " exceeds maximum open file limit of " + SystemIO.SYSCALL_MAXFILES;
                 return -1;
             }
 

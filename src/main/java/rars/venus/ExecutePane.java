@@ -1,7 +1,5 @@
 package rars.venus;
 
-import rars.Globals;
-import rars.Settings;
 import rars.settings.BoolSetting;
 import rars.venus.registers.ControlAndStatusWindow;
 import rars.venus.registers.FloatingPointWindow;
@@ -9,6 +7,9 @@ import rars.venus.registers.RegistersWindow;
 
 import javax.swing.*;
 import java.awt.*;
+
+import static rars.settings.Settings.boolSettings;
+
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -71,9 +72,10 @@ public class ExecutePane extends JDesktopPane {
         // internal
         // windows within the Execute pane. So they will be housed here.
         this.addressDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Addresses",
-                Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX));
+                boolSettings.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX));
         this.valueDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Values",
-                Globals.getSettings().getBoolSettings().getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));// VenusUI.DEFAULT_NUMBER_BASE);
+                boolSettings.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));// VenusUI
+        // .DEFAULT_NUMBER_BASE);
         this.addressDisplayBase
                 .setToolTipText("If checked, displays all memory addresses in hexadecimal.  Otherwise, decimal.");
         this.valueDisplayBase.setToolTipText(
@@ -85,7 +87,7 @@ public class ExecutePane extends JDesktopPane {
         this.textSegment = new TextSegmentWindow();
         this.dataSegment = new DataSegmentWindow(choosers);
         this.labelValues = new LabelsWindow();
-        this.labelWindowVisible = Globals.getSettings().getBoolSettings().getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY);
+        this.labelWindowVisible = boolSettings.getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY);
         this.add(this.textSegment); // these 3 LOC moved up. DPS 3-Sept-2014
         this.add(this.dataSegment);
         this.add(this.labelValues);
