@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.fail;
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 import static rars.util.Utils.getStacktraceString;
 
 public abstract class AbstractInstructionTest extends RarsTestBase {
@@ -86,7 +86,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
      */
     private void runTest(@NotNull final String code, @NotNull final String dataPrelude, final boolean is64,
                          final TestData testData) {
-        boolSettings.setSetting(BoolSetting.RV64_ENABLED, is64);
+        BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, is64);
         Instructions.RV64 = is64;
 
         final var opt = new Options();
@@ -136,7 +136,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 final var builder = new StringBuilder();
                 builder.append("Failed to assemble `" + getTestName() + "` due to following error(s):\n");
                 for (final var error : ae.errors().getErrorMessages()) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + 
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
                             "\n");
                 }
                 fail(builder.toString());
@@ -153,7 +153,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 builder.append("Expected lines: " + testData.errorLines + "\n");
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() + 
+                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
                             "\n");
                 }
                 fail(builder.toString());

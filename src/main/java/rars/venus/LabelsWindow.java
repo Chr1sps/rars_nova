@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static rars.settings.Settings.otherSettings;
+import static rars.settings.Settings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -138,7 +138,7 @@ public class LabelsWindow extends JInternalFrame {
     public LabelsWindow() {
         super("Labels", true, false, true, true);
         try {
-            this.sortState = otherSettings.getLabelSortState();
+            this.sortState = OTHER_SETTINGS.getLabelSortState();
         } catch (final NumberFormatException nfe) {
             this.sortState = 0;
         }
@@ -561,7 +561,7 @@ public class LabelsWindow extends JInternalFrame {
                     LabelsWindow.this.tableSortComparator =
                             LabelsWindow.this.tableSortingComparators.get(LabelsWindow.this.sortState);
                     LabelsWindow.columnNames = LabelsWindow.sortColumnHeadings[LabelsWindow.this.sortState];
-                    otherSettings.setLabelSortStateAndSave(LabelsWindow.this.sortState);
+                    OTHER_SETTINGS.setLabelSortStateAndSave(LabelsWindow.this.sortState);
                     LabelsWindow.this.setupTable();
                     Globals.getGui().getMainPane().getExecutePane().setLabelWindowVisibility(false);
                     Globals.getGui().getMainPane().getExecutePane().setLabelWindowVisibility(true);

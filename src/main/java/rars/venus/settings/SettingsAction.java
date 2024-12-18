@@ -1,14 +1,13 @@
 package rars.venus.settings;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.settings.BoolSetting;
 import rars.venus.GuiAction;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 /*
 Copyright (c) 20017,  Benjamin Landers
@@ -70,7 +69,7 @@ public class SettingsAction extends GuiAction {
     @Override
     public void actionPerformed(final @NotNull ActionEvent e) {
         final boolean value = ((JCheckBoxMenuItem) e.getSource()).isSelected();
-        boolSettings.setSettingAndSave(setting, value);
+        BOOL_SETTINGS.setSettingAndSave(setting, value);
         this.handler.handler(value);
     }
 

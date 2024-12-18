@@ -13,8 +13,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
-import static rars.settings.Settings.boolSettings;
-import static rars.settings.Settings.otherSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.Settings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -79,8 +79,8 @@ public class SettingsExceptionHandlerAction extends GuiAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         this.initialSelected =
-                boolSettings.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED);
-        this.initialPathname = otherSettings.getExceptionHandler();
+                BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED);
+        this.initialPathname = OTHER_SETTINGS.getExceptionHandler();
         this.exceptionHandlerDialog = new JDialog(Globals.getGui(), "Exception Handler", true);
         this.exceptionHandlerDialog.setContentPane(this.buildDialogPanel());
         this.exceptionHandlerDialog.setDefaultCloseOperation(
@@ -104,7 +104,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         // Top row - the check box for setting...
         this.exceptionHandlerSetting = new JCheckBox("Include this exception handler file in all assemble operations");
         this.exceptionHandlerSetting
-                .setSelected(boolSettings.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED));
+                .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED));
         this.exceptionHandlerSetting.addActionListener(new ExceptionHandlerSettingAction());
         contents.add(this.exceptionHandlerSetting, BorderLayout.NORTH);
         // Middle row - the button and text field for exception handler file selection
@@ -112,7 +112,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         this.exceptionHandlerSelectionButton = new JButton("Browse");
         this.exceptionHandlerSelectionButton.setEnabled(this.exceptionHandlerSetting.isSelected());
         this.exceptionHandlerSelectionButton.addActionListener(new ExceptionHandlerSelectionAction());
-        this.exceptionHandlerDisplay = new JTextField(otherSettings.getExceptionHandler(), 30);
+        this.exceptionHandlerDisplay = new JTextField(OTHER_SETTINGS.getExceptionHandler(), 30);
         this.exceptionHandlerDisplay.setEditable(false);
         this.exceptionHandlerDisplay.setEnabled(this.exceptionHandlerSetting.isSelected());
         specifyHandlerFile.add(this.exceptionHandlerSelectionButton);
@@ -147,10 +147,10 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         if (this.initialSelected != finalSelected
                 || this.initialPathname == null && finalPathname != null
                 || this.initialPathname != null && !this.initialPathname.equals(finalPathname)) {
-            boolSettings.setSettingAndSave(BoolSetting.EXCEPTION_HANDLER_ENABLED,
+            BOOL_SETTINGS.setSettingAndSave(BoolSetting.EXCEPTION_HANDLER_ENABLED,
                     finalSelected);
             if (finalSelected) {
-                otherSettings.setExceptionHandlerAndSave(finalPathname);
+                OTHER_SETTINGS.setExceptionHandlerAndSave(finalPathname);
             }
         }
     }
@@ -176,7 +176,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         @Override
         public void actionPerformed(final ActionEvent e) {
             final JFileChooser chooser = new JFileChooser();
-            String pathname = otherSettings.getExceptionHandler();
+            String pathname = OTHER_SETTINGS.getExceptionHandler();
             final File file = new File(pathname);
             if (file.exists())
                 chooser.setSelectedFile(file);

@@ -1,7 +1,6 @@
 package rars.riscv.dump.formats;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
@@ -14,7 +13,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Objects;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 /**
  * Dump memory contents in Segment Window format. Each line of
@@ -59,11 +58,11 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
 
         // TODO: check if these settings work right
         final boolean hexAddresses =
-                boolSettings.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
+                BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
 
         // If address in data segment, print in same format as Data Segment Window
         if (Memory.inDataSegment(firstAddress)) {
-            final boolean hexValues = boolSettings.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX);
+            final boolean hexValues = BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX);
             int offset = 0;
             StringBuilder string = new StringBuilder();
             try {

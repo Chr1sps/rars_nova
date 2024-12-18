@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 
 /*
@@ -87,7 +87,7 @@ public final class Assembler {
             if (ps1.getAddress() == ps2.getAddress()) {
                 final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(
                         ps2.getAddress(),
-                        (boolSettings.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)) ?
+                        (BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)) ?
                                         16 : 10);
                 final var directiveText = (Memory.inTextSegment(ps2.getAddress()))
                         ? ".text"

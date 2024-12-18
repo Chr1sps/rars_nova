@@ -11,7 +11,7 @@ import rars.settings.OtherSettings;
 import java.util.concurrent.Flow;
 import rars.util.SimpleSubscriber;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -249,7 +249,7 @@ public final class RegisterFile {
      */
     public static void resetRegisters() {
         RegisterFile.instance.resetRegisters();
-        RegisterFile.initializeProgramCounter(boolSettings.getSetting(BoolSetting.START_AT_MAIN));//
+        RegisterFile.initializeProgramCounter(BOOL_SETTINGS.getSetting(BoolSetting.START_AT_MAIN));//
         // replaces
         // "programCounter.resetValue()",
         // DPS 3/3/09

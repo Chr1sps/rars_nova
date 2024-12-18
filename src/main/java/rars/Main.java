@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
@@ -446,7 +446,7 @@ public final class Main {
             return null;
         }
 
-        boolSettings.setSetting(BoolSetting.RV64_ENABLED, this.rv64);
+        BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, this.rv64);
         Instructions.RV64 = this.rv64;
 
         final File mainFile = new File(this.filenameList.getFirst()).getAbsoluteFile();// First file is "main" file

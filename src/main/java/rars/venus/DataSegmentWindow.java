@@ -154,10 +154,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
         Simulator.getInstance().subscribe(this);
 
-        boolSettings.subscribe(this);
-        fontSettings.subscribe(this);
-        runtimeTableHighlightingSettings.subscribe(this);
-        editorThemeSettings.subscribe(this);
+        BOOL_SETTINGS.subscribe(this);
+        FONT_SETTINGS.subscribe(this);
+        RUNTIME_TABLE_HIGHLIGHTING_SETTINGS.subscribe(this);
+        EDITOR_THEME_SETTINGS.subscribe(this);
 
         this.homeAddress = Memory.dataBaseAddress; // address for Home button
         this.firstAddress = this.homeAddress; // first address to display at any given time
@@ -590,15 +590,15 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     // through to the registry.
                     if (Memory.inTextSegment(address)) {
                         int displayValue = 0;
-                        if (!boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
-                            boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
+                        if (!BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+                            BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
                             try {
                                 displayValue = Globals.memory.getWordNoNotify(address);
                             } catch (final AddressErrorException e) {
                                 // Still got an exception? Doesn't seem possible but if we drop through it will
                                 // write default second 0.
                             }
-                            boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, false);
+                            BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, false);
                         }
                         ((DataTableModel) dataModel).setDisplayAndModelValueAt(
                                 NumberDisplayBaseChooser.formatNumber(displayValue, valueBase), row, column);
@@ -726,7 +726,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.heapButton.setEnabled(true);
         this.extnButton.setEnabled(true);
         this.mmioButton.setEnabled(true);
-        this.textButton.setEnabled(boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
+        this.textButton.setEnabled(BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
         this.prevButton.setEnabled(true);
         this.nextButton.setEnabled(true);
         this.dataButton.setEnabled(true);
@@ -923,7 +923,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         if (DataSegmentWindow.dataTable == null) {
             return;
         }
-        final var font = fontSettings.getCurrentFont();
+        final var font = FONT_SETTINGS.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         DataSegmentWindow.dataTable.setRowHeight(height);
     }
@@ -1094,14 +1094,14 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
             final int rowFirstAddress =
                     Binary.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
-            final var theme = editorThemeSettings.getTheme();
-            final var defaultFont = fontSettings.getCurrentFont();
+            final var theme = EDITOR_THEME_SETTINGS.getTheme();
+            final var defaultFont = FONT_SETTINGS.getCurrentFont();
             if (/*DataSegmentWindow.this.settings.getBoolSettings().getSetting(BoolSetting.DATA_SEGMENT_HIGHLIGHTING)
              &&*/
                     DataSegmentWindow.this.addressHighlighting &&
                             rowFirstAddress == DataSegmentWindow.this.addressRowFirstAddress &&
                             column == DataSegmentWindow.this.addressColumn) {
-                final var style = runtimeTableHighlightingSettings.getDataSegmentHighlightingStyle();
+                final var style = RUNTIME_TABLE_HIGHLIGHTING_SETTINGS.getDataSegmentHighlightingStyle();
                 if (style != null) {
                     cell.setBackground(style.background());
                     cell.setForeground(style.foreground());

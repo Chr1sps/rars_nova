@@ -7,7 +7,6 @@ import rars.riscv.hardware.Register;
 import rars.settings.BoolSetting;
 import rars.util.Binary;
 import rars.util.SimpleSubscriber;
-import rars.venus.MonoRightCellRenderer;
 import rars.venus.NumberDisplayBaseChooser;
 import rars.venus.run.RunSpeedPanel;
 
@@ -20,8 +19,8 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.Flow;
 
-import static rars.settings.Settings.boolSettings;
-import static rars.settings.Settings.fontSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.Settings.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -90,12 +89,13 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         this.table.getColumnModel().getColumn(RegisterBlockWindow.VALUE_COLUMN).setMinWidth(RegisterBlockWindow.VALUE_SIZE);
         this.table.getColumnModel().getColumn(RegisterBlockWindow.VALUE_COLUMN).setMaxWidth(RegisterBlockWindow.VALUE_SIZE);
         // Display register values (String-ified) right-justified in mono font
+        final var currentFont = FONT_SETTINGS.getCurrentFont();
         this.table.getColumnModel().getColumn(RegisterBlockWindow.NAME_COLUMN).setCellRenderer(
-                new RegisterCellRenderer(MonoRightCellRenderer.MONOSPACED_PLAIN_12POINT, SwingConstants.LEFT));
+                new RegisterCellRenderer(SwingConstants.LEFT));
         this.table.getColumnModel().getColumn(RegisterBlockWindow.NUMBER_COLUMN).setCellRenderer(
-                new RegisterCellRenderer(MonoRightCellRenderer.MONOSPACED_PLAIN_12POINT, SwingConstants.RIGHT));
+                new RegisterCellRenderer(SwingConstants.RIGHT));
         this.table.getColumnModel().getColumn(RegisterBlockWindow.VALUE_COLUMN).setCellRenderer(
-                new RegisterCellRenderer(MonoRightCellRenderer.MONOSPACED_PLAIN_12POINT, SwingConstants.RIGHT));
+                new RegisterCellRenderer(SwingConstants.RIGHT));
         this.table.setPreferredScrollableViewportSize(new Dimension(RegisterBlockWindow.NAME_SIZE + RegisterBlockWindow.NUMBER_SIZE + RegisterBlockWindow.VALUE_SIZE, 700));
         this.setLayout(new BorderLayout()); // table display will occupy entire width if widened
         this.add(new JScrollPane(this.table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -139,7 +139,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             final int temp = this.registers[i].getNumber();
             tableData[i][RegisterBlockWindow.NUMBER_COLUMN] = temp == -1 ? "" : temp;
             tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegister(this.registers[i],
-                    NumberDisplayBaseChooser.getBase(boolSettings.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)));
+                    NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)));
         }
         return tableData;
     }
@@ -221,26 +221,25 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     }
 
     private void updateRowHeight() {
-        final var font = fontSettings.getCurrentFont();
+        final var font = FONT_SETTINGS.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         this.table.setRowHeight(height);
     }
 
-    /*
-     * Cell renderer for displaying register entries. This does highlighting, so if
-     * you
-     * don't want highlighting for a given column, don't use this. Currently we
-     * highlight
+    /**
+     * Cell renderer for displaying register entries. This does highlighting, so if you
+     * don't want highlighting for a given column, don't use this. Currently we highlight
      * all columns.
      */
-    private static class RegisterCellRenderer extends DefaultTableCellRenderer {
-        private final Font font;
+    private static class RegisterCellRenderer extends DefaultTableCellRenderer implements SimpleSubscriber<SettingsNotice> {
         private final int alignment;
+        private Font font;
+        private Flow.Subscription subscription;
 
-        private RegisterCellRenderer(final Font font, final int alignment) {
+        private RegisterCellRenderer(final int alignment) {
             super();
-            this.font = font;
             this.alignment = alignment;
+            this.font = FONT_SETTINGS.getCurrentFont();
         }
 
         @Override
@@ -252,6 +251,18 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             cell.setFont(this.font);
             cell.setHorizontalAlignment(this.alignment);
             return cell;
+        }
+
+        @Override
+        public void onSubscribe(final Flow.Subscription subscription) {
+            this.subscription = subscription;
+            this.subscription.request(1);
+        }
+
+        @Override
+        public void onNext(final SettingsNotice item) {
+            this.font = FONT_SETTINGS.getCurrentFont();
+            this.subscription.request(1);
         }
     }
 

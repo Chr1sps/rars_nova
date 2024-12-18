@@ -7,7 +7,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 
 /*
@@ -109,7 +109,7 @@ public final class SystemIO {
             } catch (final IOException ignored) {
             }
         } else {
-            if (boolSettings.getSetting(BoolSetting.POPUP_SYSCALL_INPUT)) {
+            if (BOOL_SETTINGS.getSetting(BoolSetting.POPUP_SYSCALL_INPUT)) {
                 input = Globals.getGui().getMessagesPane().getInputString(prompt);
             } else {
                 input = Globals.getGui().getMessagesPane().getInputString(maxlength);
@@ -398,7 +398,7 @@ public final class SystemIO {
 
         File filepath = new File(filename);
         if (!filepath.isAbsolute() && Globals.program != null) {
-            if (boolSettings.getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY)) {
+            if (BOOL_SETTINGS.getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY)) {
                 final String parent = new File(Globals.program.getFilename()).getParent();
                 filepath = new File(parent, filename);
             }

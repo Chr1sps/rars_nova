@@ -19,7 +19,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.concurrent.Flow;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -194,7 +194,7 @@ public class RunStepAction extends GuiAction {
     private void processProgramArgumentsIfAny() {
         final String programArguments = this.executePane.getTextSegmentWindow().getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||
-                !boolSettings.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
+                !BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             return;
         }
         new ProgramArgumentList(programArguments).storeProgramArguments();

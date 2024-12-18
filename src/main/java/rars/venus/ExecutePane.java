@@ -8,7 +8,7 @@ import rars.venus.registers.RegistersWindow;
 import javax.swing.*;
 import java.awt.*;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 
 /*
@@ -72,9 +72,9 @@ public class ExecutePane extends JDesktopPane {
         // internal
         // windows within the Execute pane. So they will be housed here.
         this.addressDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Addresses",
-                boolSettings.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX));
+                BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX));
         this.valueDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Values",
-                boolSettings.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));// VenusUI
+                BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));// VenusUI
         // .DEFAULT_NUMBER_BASE);
         this.addressDisplayBase
                 .setToolTipText("If checked, displays all memory addresses in hexadecimal.  Otherwise, decimal.");
@@ -87,7 +87,7 @@ public class ExecutePane extends JDesktopPane {
         this.textSegment = new TextSegmentWindow();
         this.dataSegment = new DataSegmentWindow(choosers);
         this.labelValues = new LabelsWindow();
-        this.labelWindowVisible = boolSettings.getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY);
+        this.labelWindowVisible = BOOL_SETTINGS.getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY);
         this.add(this.textSegment); // these 3 LOC moved up. DPS 3-Sept-2014
         this.add(this.dataSegment);
         this.add(this.labelValues);

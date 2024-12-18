@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static rars.settings.Settings.otherSettings;
+import static rars.settings.Settings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -228,7 +228,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
 
         private void performApply() {
             if (CurrentMemoryConfiguration.set(this.selectedConfigurationButton.getConfiguration())) {
-                otherSettings.setMemoryConfigurationAndSave(
+                OTHER_SETTINGS.setMemoryConfigurationAndSave(
                         this.selectedConfigurationButton.getConfiguration());
                 Globals.getGui().getRegistersPane().getRegistersWindow().clearHighlighting();
                 Globals.getGui().getRegistersPane().getRegistersWindow().updateRegisters();

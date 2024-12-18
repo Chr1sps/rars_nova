@@ -3,13 +3,13 @@ package rars.riscv.hardware;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 
-import static rars.settings.Settings.otherSettings;
+import static rars.settings.Settings.OTHER_SETTINGS;
 
 public final class CurrentMemoryConfiguration {
     public static @NotNull MemoryConfiguration currentConfiguration;
 
     static {
-        currentConfiguration = otherSettings.getMemoryConfiguration();
+        currentConfiguration = OTHER_SETTINGS.getMemoryConfiguration();
     }
 
     private CurrentMemoryConfiguration() {

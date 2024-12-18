@@ -1,11 +1,9 @@
 package rars.util;
 
-import rars.Globals;
-
 import java.awt.*;
 import java.util.Arrays;
 
-import static rars.settings.Settings.otherSettings;
+import static rars.settings.Settings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -218,7 +216,7 @@ public final class EditorFontUtils {
      * @throws java.lang.NullPointerException if string is null
      */
     public static String substituteSpacesForTabs(final String string) {
-        return EditorFontUtils.substituteSpacesForTabs(string, otherSettings.getEditorTabSize());
+        return EditorFontUtils.substituteSpacesForTabs(string, OTHER_SETTINGS.getEditorTabSize());
     }
 
     /**

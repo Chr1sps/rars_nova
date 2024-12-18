@@ -17,11 +17,11 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 public class AppTest extends RarsTestBase {
     public static void runTestFiles(final String path, final boolean is64Bit) {
-        boolSettings.setSetting(BoolSetting.RV64_ENABLED, is64Bit);
+        BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, is64Bit);
         Instructions.RV64 = is64Bit;
 
         final var opt = new Options();
@@ -148,7 +148,7 @@ public class AppTest extends RarsTestBase {
         opt.maxSteps = 500;
         opt.selfModifyingCode = true;
         final Program p = new Program(opt);
-        boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
+        BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
 
         for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {
             if (inst instanceof final BasicInstruction binst) {
@@ -225,7 +225,7 @@ public class AppTest extends RarsTestBase {
         opt.maxSteps = 500;
         opt.selfModifyingCode = true;
         final var p = new Program(opt);
-        boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
+        BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
 
         int skips = 0;
         for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {

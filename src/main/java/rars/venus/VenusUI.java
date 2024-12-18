@@ -31,7 +31,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 
 /*
@@ -666,12 +666,12 @@ public class VenusUI extends JFrame {
         run.add(runToggleBreakpoints);
 
         final JCheckBoxMenuItem settingsLabel = new JCheckBoxMenuItem(this.settingsLabelAction);
-        settingsLabel.setSelected(boolSettings.getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY));
+        settingsLabel.setSelected(BOOL_SETTINGS.getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY));
         final JCheckBoxMenuItem settingsPopupInput = new JCheckBoxMenuItem(this.settingsPopupInputAction);
-        settingsPopupInput.setSelected(boolSettings.getSetting(BoolSetting.POPUP_SYSCALL_INPUT));
+        settingsPopupInput.setSelected(BOOL_SETTINGS.getSetting(BoolSetting.POPUP_SYSCALL_INPUT));
         final JCheckBoxMenuItem settingsValueDisplayBase = new JCheckBoxMenuItem(this.settingsValueDisplayBaseAction);
         settingsValueDisplayBase
-                .setSelected(boolSettings.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
+                .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
         // mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
         // Tell the corresponding JCheckBox in the Execute Pane about me -- it has
         // already been created.
@@ -679,35 +679,35 @@ public class VenusUI extends JFrame {
         final JCheckBoxMenuItem settingsAddressDisplayBase =
                 new JCheckBoxMenuItem(this.settingsAddressDisplayBaseAction);
         settingsAddressDisplayBase
-                .setSelected(boolSettings.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX));// 
+                .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX));// 
         // mainPane.getExecutePane().getValueDisplayBaseChooser().isSelected());
         // Tell the corresponding JCheckBox in the Execute Pane about me -- it has
         // already been created.
         this.mainPane.getExecutePane().getAddressDisplayBaseChooser().setSettingsMenuItem(settingsAddressDisplayBase);
         final JCheckBoxMenuItem settingsExtended = new JCheckBoxMenuItem(this.settingsExtendedAction);
-        settingsExtended.setSelected(boolSettings.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED));
+        settingsExtended.setSelected(BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED));
         final JCheckBoxMenuItem settingsSelfModifyingCode = new JCheckBoxMenuItem(this.settingsSelfModifyingCodeAction);
         settingsSelfModifyingCode
-                .setSelected(boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
+                .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
         final JCheckBoxMenuItem settingsRV64 = new JCheckBoxMenuItem(this.settingsRV64Action);
-        settingsRV64.setSelected(boolSettings.getSetting(BoolSetting.RV64_ENABLED));
+        settingsRV64.setSelected(BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED));
         final JCheckBoxMenuItem settingsDeriveCurrentWorkingDirectory =
                 new JCheckBoxMenuItem(this.settingsDeriveCurrentWorkingDirectoryAction);
         settingsDeriveCurrentWorkingDirectory
-                .setSelected(boolSettings.getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY));
+                .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY));
         final JCheckBoxMenuItem settingsAssembleOnOpen = new JCheckBoxMenuItem(this.settingsAssembleOnOpenAction);
-        settingsAssembleOnOpen.setSelected(boolSettings.getSetting(BoolSetting.ASSEMBLE_ON_OPEN));
+        settingsAssembleOnOpen.setSelected(BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ON_OPEN));
         final JCheckBoxMenuItem settingsAssembleAll = new JCheckBoxMenuItem(this.settingsAssembleAllAction);
-        settingsAssembleAll.setSelected(boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL));
+        settingsAssembleAll.setSelected(BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL));
         final JCheckBoxMenuItem settingsAssembleOpen = new JCheckBoxMenuItem(this.settingsAssembleOpenAction);
-        settingsAssembleOpen.setSelected(boolSettings.getSetting(BoolSetting.ASSEMBLE_OPEN));
+        settingsAssembleOpen.setSelected(BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN));
         final JCheckBoxMenuItem settingsWarningsAreErrors = new JCheckBoxMenuItem(this.settingsWarningsAreErrorsAction);
         settingsWarningsAreErrors
-                .setSelected(boolSettings.getSetting(BoolSetting.WARNINGS_ARE_ERRORS));
+                .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS));
         final JCheckBoxMenuItem settingsStartAtMain = new JCheckBoxMenuItem(this.settingsStartAtMainAction);
-        settingsStartAtMain.setSelected(boolSettings.getSetting(BoolSetting.START_AT_MAIN));
+        settingsStartAtMain.setSelected(BOOL_SETTINGS.getSetting(BoolSetting.START_AT_MAIN));
         final JCheckBoxMenuItem settingsProgramArguments = new JCheckBoxMenuItem(this.settingsProgramArgumentsAction);
-        settingsProgramArguments.setSelected(boolSettings.getSetting(BoolSetting.PROGRAM_ARGUMENTS));
+        settingsProgramArguments.setSelected(BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS));
         final JMenuItem settingsEditor = new JMenuItem(this.settingsEditorAction);
         final JMenuItem settingsExceptionHandler = new JMenuItem(this.settingsExceptionHandlerAction);
         final JMenuItem settingsMemoryConfiguration = new JMenuItem(this.settingsMemoryConfigurationAction);
@@ -888,7 +888,7 @@ public class VenusUI extends JFrame {
         this.runAssembleAction.setEnabled(true);
         // If assemble-all, allow previous Run menu settings to remain.
         // Otherwise, clear them out. DPS 9-Aug-2011
-        if (!boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {
+        if (!BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {
             this.runGoAction.setEnabled(false);
             this.runStepAction.setEnabled(false);
             this.runBackstepAction.setEnabled(false);

@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.Vector;
 import java.util.concurrent.Flow;
 
-import static rars.settings.Settings.boolSettings;
-import static rars.settings.Settings.otherSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.Settings.OTHER_SETTINGS;
 
 
 /*
@@ -336,7 +336,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      */
     public static void setConfiguration() {
         final var currentConfig = CurrentMemoryConfiguration.get();
-        final var currentConfigFromPreferences = otherSettings.getMemoryConfiguration();
+        final var currentConfigFromPreferences = OTHER_SETTINGS.getMemoryConfiguration();
         Memory.textBaseAddress = currentConfig.textBaseAddress; // 0x00400000;
         Memory.dataSegmentBaseAddress = currentConfig.dataSegmentBaseAddress;
         // 0x10000000;
@@ -645,7 +645,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             // Burch Mod (Jan 2013): replace throw with call to setStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
 
-            if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+            if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
@@ -712,7 +712,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         } else if (Memory.inTextSegment(address)) {
             // Burch Mod (Jan 2013): replace throw with call to setStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-            if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+            if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 final ProgramStatement oldStatement = this.getStatementNoNotify(address);
                 if (oldStatement != null) {
                     oldValue = oldStatement.getBinaryStatement();
@@ -909,7 +909,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             // Burch Mod (Jan 2013): replace throw with calls to getStatementNoNotify &
             // getBinaryStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-            if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+            if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
@@ -972,7 +972,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             // Burch Mod (Jan 2013): replace throw with calls to getStatementNoNotify &
             // getBinaryStatement
             // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-            if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+            if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 final ProgramStatement stmt = this.getStatementNoNotify(address);
                 value = stmt == null ? 0 : stmt.getBinaryStatement();
             } else {
@@ -1173,7 +1173,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
 
     private ProgramStatement getStatement(final int address, final boolean notify) throws AddressErrorException {
         Memory.checkLoadWordAligned(address);
-        if (!boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
+        if (!BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
                 && !Memory.inTextSegment(address)) {
             throw new AddressErrorException(
                     "fetch address for text segment out of range ",

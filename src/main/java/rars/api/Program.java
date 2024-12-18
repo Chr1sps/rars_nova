@@ -18,7 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 import java.util.List;
 
@@ -239,8 +239,8 @@ public final class Program {
         SimulationException e = null;
 
         // Swap out global state for local state.
-        final boolean selfMod = boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED);
-        boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED,
+        final boolean selfMod = BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED);
+        BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED,
                 this.set.selfModifyingCode);
         final SystemIO.Data tmpFiles = SystemIO.swapData(this.fds);
         final Memory tmpMem = Memory.swapInstance(this.simulation);
@@ -252,7 +252,7 @@ public final class Program {
         }
         this.exitCode = Globals.exitCode;
 
-        boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, selfMod);
+        BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, selfMod);
         SystemIO.swapData(tmpFiles);
         Memory.swapInstance(tmpMem);
 

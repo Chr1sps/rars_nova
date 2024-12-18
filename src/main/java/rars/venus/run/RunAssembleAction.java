@@ -19,8 +19,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static rars.settings.Settings.boolSettings;
-import static rars.settings.Settings.otherSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.Settings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -126,9 +126,9 @@ public class RunAssembleAction extends GuiAction {
         final ExecutePane executePane = this.mainUI.getMainPane().getExecutePane();
         final RegistersPane registersPane = this.mainUI.getRegistersPane();
         RunAssembleAction.extendedAssemblerEnabled =
-                boolSettings.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
+                BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
         RunAssembleAction.warningsAreErrors =
-                boolSettings.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
+                BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
         if (FileStatus.getFile() != null) {
             if (FileStatus.get() == FileStatus.State.EDITED) {
                 this.mainUI.getEditor().save();
@@ -136,7 +136,7 @@ public class RunAssembleAction extends GuiAction {
             try {
                 Globals.program = new RISCVprogram();
                 final List<String> filesToAssemble;
-                if (boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls 
+                if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls 
                     // for multiple
                     // file assembly
                     filesToAssemble = FilenameFinder.getFilenameList(
@@ -144,7 +144,7 @@ public class RunAssembleAction extends GuiAction {
                 } else {
                     filesToAssemble = List.of(FileStatus.getName());
                 }
-                if (boolSettings.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
+                if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
                     this.mainUI.getEditor().saveAll();
                     final String[] paths = this.mainUI.getEditor().getOpenFilePaths();
                     for (final String path : paths) {
@@ -154,9 +154,9 @@ public class RunAssembleAction extends GuiAction {
                     }
                 }
                 String exceptionHandler = null;
-                if (boolSettings.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)) {
-                    if (!otherSettings.getExceptionHandler().isEmpty()) {
-                        exceptionHandler = otherSettings.getExceptionHandler();
+                if (BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)) {
+                    if (!OTHER_SETTINGS.getExceptionHandler().isEmpty()) {
+                        exceptionHandler = OTHER_SETTINGS.getExceptionHandler();
                     }
                 }
                 RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(filesToAssemble,

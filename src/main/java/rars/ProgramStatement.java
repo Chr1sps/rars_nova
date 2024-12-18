@@ -18,7 +18,7 @@ import rars.venus.NumberDisplayBaseChooser;
 
 import java.util.ArrayList;
 
-import static rars.settings.Settings.boolSettings;
+import static rars.settings.Settings.BOOL_SETTINGS;
 
 
 /*
@@ -872,10 +872,10 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         @Override
         public String toString() {
             final int addressBase =
-                    (boolSettings.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX))
+                    (BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX))
                             ? NumberDisplayBaseChooser.HEXADECIMAL
                             : NumberDisplayBaseChooser.DECIMAL;
-            final int valueBase = (boolSettings.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX))
+            final int valueBase = (BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX))
                     ? NumberDisplayBaseChooser.HEXADECIMAL
                     : NumberDisplayBaseChooser.DECIMAL;
 

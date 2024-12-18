@@ -9,7 +9,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.venus.editors.ColorScheme;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.Theme;
@@ -20,7 +19,7 @@ import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
-import static rars.settings.Settings.fontSettings;
+import static rars.settings.Settings.FONT_SETTINGS;
 
 public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private static final Map<TextAttribute, Object> ligatureAttributes = Map.of(
@@ -43,7 +42,7 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         textArea = new RSyntaxTextArea();
         scrollPane = new RTextScrollPane(textArea);
         gutter = scrollPane.getGutter();
-        this.setFont(fontSettings.getCurrentFont());
+        this.setFont(FONT_SETTINGS.getCurrentFont());
         this.applyTheme(Theme.getDefaultLightTheme());
         textArea.setSyntaxEditingStyle(RVSyntax.SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);

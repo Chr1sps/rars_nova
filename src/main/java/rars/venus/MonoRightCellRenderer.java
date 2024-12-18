@@ -4,6 +4,9 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
+import static rars.settings.Settings.EDITOR_THEME_SETTINGS;
+import static rars.settings.Settings.FONT_SETTINGS;
+
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
 
@@ -32,32 +35,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
 */
 
-/*
+/**
  * Use this to render Monospaced and right-aligned data in JTables.
  * I am using it to render integer addresses and values that are stored as
  * Strings containing either the decimal or hexidecimal version
  * of the integer second.
  */
-
-/**
- * <p>MonoRightCellRenderer class.</p>
- */
 public class MonoRightCellRenderer extends DefaultTableCellRenderer {
-    /**
-     * Constant <code>MONOSPACED_PLAIN_12POINT</code>
-     */
-    public static final Font MONOSPACED_PLAIN_12POINT = new Font("Monospaced", Font.PLAIN, 12);
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Component getTableCellRendererComponent(final JTable table, final Object value,
                                                    final boolean isSelected, final boolean hasFocus, final int row, final int column) {
         final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
                 isSelected, hasFocus, row, column);
-        cell.setFont(MONOSPACED_PLAIN_12POINT);
+        cell.setFont(FONT_SETTINGS.getCurrentFont());
         cell.setHorizontalAlignment(SwingConstants.RIGHT);
+        final var theme = EDITOR_THEME_SETTINGS.getTheme();
+        cell.setForeground(theme.foregroundColor);
+        cell.setBackground(theme.backgroundColor);
         return cell;
     }
 }
