@@ -1,7 +1,6 @@
 package rars.extras;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.assembler.Directive;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.Instruction;

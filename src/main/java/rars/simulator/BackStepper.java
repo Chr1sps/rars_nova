@@ -7,6 +7,7 @@ import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
+import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 /*
@@ -134,19 +135,19 @@ public class BackStepper {
                 try {
                     switch (step.action) {
                         case MEMORY_RESTORE_RAW_WORD:
-                            Globals.memory.setRawWord(step.param1, (int) step.param2);
+                            Memory.getInstance().setRawWord(step.param1, (int) step.param2);
                             break;
                         case MEMORY_RESTORE_DOUBLE_WORD:
-                            Globals.memory.setDoubleWord(step.param1, step.param2);
+                            Memory.getInstance().setDoubleWord(step.param1, step.param2);
                             break;
                         case MEMORY_RESTORE_WORD:
-                            Globals.memory.setWord(step.param1, (int) step.param2);
+                            Memory.getInstance().setWord(step.param1, (int) step.param2);
                             break;
                         case MEMORY_RESTORE_HALF:
-                            Globals.memory.setHalf(step.param1, (int) step.param2);
+                            Memory.getInstance().setHalf(step.param1, (int) step.param2);
                             break;
                         case MEMORY_RESTORE_BYTE:
-                            Globals.memory.setByte(step.param1, (int) step.param2);
+                            Memory.getInstance().setByte(step.param1, (int) step.param2);
                             break;
                         case REGISTER_RESTORE:
                             RegisterFile.updateRegister(step.param1, step.param2);
@@ -354,7 +355,7 @@ public class BackStepper {
                 // making all
                 // of them go through the methods below to obtain it, we will do it here.
                 // Want the program statement but do not want observers notified.
-                this.ps = Globals.memory.getStatementNoNotify(programCounter);
+                this.ps = Memory.getInstance().getStatementNoNotify(programCounter);
             } catch (final Exception e) {
                 // The only situation causing this so far: user modifies memory or register
                 // contents through direct manipulation on the GUI, after assembling the program

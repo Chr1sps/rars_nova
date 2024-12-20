@@ -319,7 +319,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     protected void addAsObserver(final int lowEnd, final int highEnd) {
         final String errorMessage = "Error connecting to memory";
         try {
-            Globals.memory.subscribe(this, lowEnd, highEnd);
+            Memory.getInstance().subscribe(this, lowEnd, highEnd);
         } catch (final AddressErrorException aee) {
             this.headingLabel.setText(errorMessage);
         }
@@ -347,7 +347,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
      * app terminates (e.g. when the button is re-enabled).
      */
     protected void deleteAsSubscriber() {
-        Globals.memory.deleteSubscriber(this);
+        Memory.getInstance().deleteSubscriber(this);
     }
 
     /**
@@ -426,7 +426,8 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     //////////////////// PRIVATE HELPER CLASSES //////////////////////////////////
     // Specialized inner classes. Either used by stand-alone (JFrame-based) only //
     // or used by Tool (JDialog-based) only. //
-    //////////////////////////////////////////////////////////////////////////////////
+
+    /// ///////////////////////////////////////////////////////////////////////////////
 
     // Closing duties for Tool only.
     private void performToolClosingDuties() {
@@ -453,7 +454,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         this.subscription.request(1);
     }
 
-    ///////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////
     // Every control button will get one of these so when it has focus
     // the Enter first can be used instead of a mouse click to perform
     // its associated action. It will do nothing if no action listeners
@@ -472,7 +473,8 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
             if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                 e.consume();
                 try {
-                    this.myButton.getActionListeners()[0].actionPerformed(new ActionEvent(this.myButton, 0, this.myButton.getText()));
+                    this.myButton.getActionListeners()[0].actionPerformed(new ActionEvent(this.myButton, 0,
+                            this.myButton.getText()));
                 } catch (final ArrayIndexOutOfBoundsException oob) {
                     // do nothing, since there is no action listener.
                 }
@@ -480,7 +482,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         }
     }
 
-    //////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////
     // Little class for this dual-purpose button. It is used only by the Tool
     // (not by the stand-alone app).
     protected class ConnectButton extends JButton {

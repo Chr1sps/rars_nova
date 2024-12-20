@@ -479,7 +479,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 try {
                     DataSegmentWindow.dataData[row][column] =
-                            NumberDisplayBaseChooser.formatNumber(Globals.memory.getRawWord(address),
+                            NumberDisplayBaseChooser.formatNumber(Memory.getInstance().getRawWord(address),
                                     valueBase);
                 } catch (final AddressErrorException aee) {
                     DataSegmentWindow.dataData[row][column] = NumberDisplayBaseChooser.formatNumber(0, valueBase);
@@ -577,7 +577,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 try {
                     ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                            NumberDisplayBaseChooser.formatNumber(Globals.memory.getWordNoNotify(address), valueBase),
+                            NumberDisplayBaseChooser.formatNumber(Memory.getInstance().getWordNoNotify(address),
+                                    valueBase),
                             row, column);
                 } catch (final AddressErrorException aee) {
                     // Bit of a hack here. Memory will throw an exception if you try to read
@@ -593,7 +594,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                         if (!BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                             BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
                             try {
-                                displayValue = Globals.memory.getWordNoNotify(address);
+                                displayValue = Memory.getInstance().getWordNoNotify(address);
                             } catch (final AddressErrorException e) {
                                 // Still got an exception? Doesn't seem possible but if we drop through it will
                                 // write default second 0.
@@ -1039,7 +1040,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             Globals.memoryAndRegistersLock.lock();
             try {
                 try {
-                    Globals.memory.setRawWord(address, val);
+                    Memory.getInstance().setRawWord(address, val);
                 }
                 // somehow, user was able to display out-of-range address. Most likely to occur
                 // between
@@ -1157,13 +1158,13 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
     }
 
-    /// ////////////////////////////////////////////////////////////////////
-    //
-    // The Prev button (left arrow) scrolls downward through the
-    // selected address range. It is a RepeatButton, which means
-    // if the mouse is held down on the button, it will repeatedly
-    // fire after an initial delay. Allows rapid scrolling.
-    // DPS 20 July 2008
+    /**
+     * The Prev button (left arrow) scrolls downward through the
+     * selected address range. It is a RepeatButton, which means
+     * if the mouse is held down on the button, it will repeatedly
+     * fire after an initial delay. Allows rapid scrolling.
+     * DPS 20 July 2008
+     */
     private class PrevButton extends RepeatButton {
         public PrevButton(final Icon ico) {
             super(ico);
@@ -1180,15 +1181,15 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
             DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
         }
-    }//////////////////////////////////////////////////////////////////////
+    }
 
-    /// ////////////////////////////////////////////////////////////////////
-    //
-    // The Next button (right arrow) scrolls upward through the
-    // selected address range. It is a RepeatButton, which means
-    // if the mouse is held down on the button, it will repeatedly
-    // fire after an initial delay. Allows rapid scrolling.
-    // DPS 20 July 2008
+    /**
+     * The Next button (right arrow) scrolls upward through the
+     * selected address range. It is a RepeatButton, which means
+     * if the mouse is held down on the button, it will repeatedly
+     * fire after an initial delay. Allows rapid scrolling.
+     * DPS 20 July 2008
+     */
     private class NextButton extends RepeatButton {
         public NextButton(final Icon ico) {
             super(ico);
@@ -1205,6 +1206,5 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
             DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
         }
-    }//////////////////////////////////////////////////////////////////////
-
+    }
 }

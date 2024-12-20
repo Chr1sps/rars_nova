@@ -206,7 +206,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         basicInstructionsColumn.setCellRenderer(codeStepHighlighter);
 
         final var monoRightCellRenderer = new MonoRightCellRenderer();
-        
+
         final var instructionAddressColumn = columnModel.getColumn(ColumnData.INSTRUCTION_ADDRESS_COLUMN.number);
         instructionAddressColumn.setMinWidth(80);
         instructionAddressColumn.setPreferredWidth(80);
@@ -290,7 +290,8 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             return; // ignore if no content to change
         final int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
         for (int i = 0; i < this.intAddresses.length; i++) {
-            final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(this.intAddresses[i], addressBase);
+            final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(this.intAddresses[i],
+                    addressBase);
             this.table.getModel().setValueAt(formattedAddress, i, ColumnData.INSTRUCTION_ADDRESS_COLUMN.number);
         }
     }
@@ -837,7 +838,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             Globals.memoryAndRegistersLock.lock();
             try {
                 try {
-                    Globals.memory.setRawWord(address, val);
+                    Memory.getInstance().setRawWord(address, val);
                 }
                 // somehow, user was able to display out-of-range address. Most likely to occur
                 // between

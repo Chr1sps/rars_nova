@@ -1,7 +1,7 @@
 package rars.riscv.instructions;
 
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -48,6 +48,6 @@ public final class LBU extends Load {
      */
     @Override
     public long load(final int address) throws AddressErrorException {
-        return Globals.memory.getByte(address) & 0x000000FF;
+        return Memory.getInstance().getByte(address) & 0x000000FF;
     }
 }

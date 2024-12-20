@@ -1,7 +1,7 @@
 package rars.riscv.instructions;
 
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -48,6 +48,6 @@ public final class LH extends Load {
      */
     @Override
     public long load(final int address) throws AddressErrorException {
-        return ((long) Globals.memory.getHalf(address) << 16) >> 16; // Shifting sign extends
+        return ((long) Memory.getInstance().getHalf(address) << 16) >> 16; // Shifting sign extends
     }
 }

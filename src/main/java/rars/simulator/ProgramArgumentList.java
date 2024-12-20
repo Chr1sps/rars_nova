@@ -2,7 +2,6 @@ package rars.simulator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
@@ -141,10 +140,10 @@ public class ProgramArgumentList {
         try { // needed for all memory writes
             for (int i = 0; i < this.programArgumentList.size(); i++) {
                 programArgument = this.programArgumentList.get(i);
-                Globals.memory.set(highAddress, 0, 1); // trailing null byte for each argument
+                Memory.getInstance().set(highAddress, 0, 1); // trailing null byte for each argument
                 highAddress--;
                 for (int j = programArgument.length() - 1; j >= 0; j--) {
-                    Globals.memory.set(highAddress, programArgument.charAt(j), 1);
+                    Memory.getInstance().set(highAddress, programArgument.charAt(j), 1);
                     highAddress--;
                 }
                 argStartAddress[i] = highAddress + 1;
@@ -159,13 +158,13 @@ public class ProgramArgumentList {
                 // byte from highAddress+1 is filled).
                 stackAddress = highAddress - (highAddress % Memory.WORD_LENGTH_BYTES) - Memory.WORD_LENGTH_BYTES;
             }
-            Globals.memory.set(stackAddress, 0, Memory.WORD_LENGTH_BYTES); // null word for end of argv array
+            Memory.getInstance().set(stackAddress, 0, Memory.WORD_LENGTH_BYTES); // null word for end of argv array
             stackAddress -= Memory.WORD_LENGTH_BYTES;
             for (int i = argStartAddress.length - 1; i >= 0; i--) {
-                Globals.memory.set(stackAddress, argStartAddress[i], Memory.WORD_LENGTH_BYTES);
+                Memory.getInstance().set(stackAddress, argStartAddress[i], Memory.WORD_LENGTH_BYTES);
                 stackAddress -= Memory.WORD_LENGTH_BYTES;
             }
-            Globals.memory.set(stackAddress, argStartAddress.length, Memory.WORD_LENGTH_BYTES); // argc
+            Memory.getInstance().set(stackAddress, argStartAddress.length, Memory.WORD_LENGTH_BYTES); // argc
             stackAddress -= Memory.WORD_LENGTH_BYTES;
 
             // Need to set $sp register to stack address, $a0 to argc, $a1 to argv
@@ -175,7 +174,8 @@ public class ProgramArgumentList {
             RegisterFile.getRegister("a0").setValue(argStartAddress.length); // argc
             RegisterFile.getRegister("a1").setValue(stackAddress + Memory.WORD_LENGTH_BYTES + Memory.WORD_LENGTH_BYTES); // argv
         } catch (final AddressErrorException aee) {
-            ProgramArgumentList.LOGGER.fatal("Internal Error: Memory write error occurred while storing program arguments!", aee);
+            ProgramArgumentList.LOGGER.fatal("Internal Error: Memory write error occurred while storing program " +
+                    "arguments!", aee);
             System.exit(0);
         }
     }

@@ -184,7 +184,7 @@ public final class Assembler {
         this.currentFileDataSegmentForwardReferences = new DataSegmentForwardReferences();
         final DataSegmentForwardReferences accumulatedDataSegmentForwardReferences = new DataSegmentForwardReferences();
         Globals.symbolTable.clear();
-        Globals.memory.clear();
+        Memory.getInstance().clear();
         final ArrayList<ProgramStatement> machineList = new ArrayList<>();
         this.errors = new ErrorList();
         if (Globals.debug)
@@ -377,7 +377,7 @@ public final class Assembler {
             if (Globals.debug)
                 Assembler.LOGGER.debug(statement);
             try {
-                Globals.memory.setStatement(statement.getAddress(), statement);
+                Memory.getInstance().setStatement(statement.getAddress(), statement);
             } catch (final AddressErrorException e) {
                 final Token token = statement.getOriginalTokenList().get(0);
                 errors.addTokenError(token, "Invalid address for text segment: %d".formatted(e.address));
@@ -1026,7 +1026,7 @@ public final class Assembler {
              */
             else {
                 try {
-                    Globals.memory.set(this.textAddress, value, lengthInBytes);
+                    Memory.getInstance().set(this.textAddress, value, lengthInBytes);
                 } catch (final AddressErrorException e) {
                     errors.addTokenError(token, "\"%s\" is not a valid text segment address"
                             .formatted(this.textAddress));
@@ -1176,7 +1176,7 @@ public final class Assembler {
                     final byte[] bytesOfChar = String.valueOf(theChar).getBytes(StandardCharsets.UTF_8);
                     try {
                         for (final byte b : bytesOfChar) {
-                            Globals.memory.set(this.dataAddress, b,
+                            Memory.getInstance().set(this.dataAddress, b,
                                     DataTypes.CHAR_SIZE);
                             this.dataAddress += DataTypes.CHAR_SIZE;
                         }
@@ -1188,7 +1188,7 @@ public final class Assembler {
                 }
                 if (direct == Directive.ASCIZ || direct == Directive.STRING) {
                     try {
-                        Globals.memory.set(this.dataAddress, 0, DataTypes.CHAR_SIZE);
+                        Memory.getInstance().set(this.dataAddress, 0, DataTypes.CHAR_SIZE);
                     } catch (final AddressErrorException e) {
                         this.errors.addTokenError(token,
                                 "\"%d\" is not a valid data segment address".formatted(this.dataAddress));
@@ -1222,7 +1222,7 @@ public final class Assembler {
             this.dataAddress = this.alignToBoundary(this.dataAddress, lengthInBytes);
         }
         try {
-            Globals.memory.set(this.dataAddress, value, lengthInBytes);
+            Memory.getInstance().set(this.dataAddress, value, lengthInBytes);
         } catch (final AddressErrorException e) {
             final var message = "\"%d\" is not a valid data segment address".formatted(this.dataAddress);
             errors.addTokenError(token, message);
@@ -1245,7 +1245,7 @@ public final class Assembler {
             this.dataAddress = (this.alignToBoundary(this.dataAddress, lengthInBytes));
         }
         try {
-            Globals.memory.setDouble(this.dataAddress, value);
+            Memory.getInstance().setDouble(this.dataAddress, value);
         } catch (final AddressErrorException e) {
             this.errors.addTokenError(token, "\"%d\" is not a valid data segment address".formatted(this.dataAddress));
         }
@@ -1335,7 +1335,7 @@ public final class Assembler {
                 if (labelAddress != SymbolTable.NOT_FOUND) {
                     // patch address has to be valid b/c we already stored there...
                     try {
-                        Globals.memory.set(entry.patchAddress, labelAddress, entry.length);
+                        Memory.getInstance().set(entry.patchAddress, labelAddress, entry.length);
                     } catch (final AddressErrorException ignored) {
                     }
                     this.forwardReferenceList.remove(i);

@@ -1,12 +1,12 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.FloatingPointRegisterFile;
+import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
@@ -64,12 +64,12 @@ public final class SyscallMessageDialogDouble extends AbstractSyscall {
         int byteAddress = RegisterFile.getValue("a0");
         final char[] ch = {' '}; // Need an array to convert to String
         try {
-            ch[0] = (char) Globals.memory.getByte(byteAddress);
+            ch[0] = (char) Memory.getInstance().getByte(byteAddress);
             while (ch[0] != 0) // only uses single location ch[0]
             {
                 message = message.concat(new String(ch)); // parameter to String constructor is a char[] array
                 byteAddress++;
-                ch[0] = (char) Globals.memory.getByte(byteAddress);
+                ch[0] = (char) Memory.getInstance().getByte(byteAddress);
             }
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);

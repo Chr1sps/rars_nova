@@ -62,7 +62,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     private static final int NUMBER_SIZE = 45;
     private static final int NAME_SIZE = 80;
     private static final int VALUE_SIZE = 160;
-    private final JTable table;
+    private final @NotNull JTable table;
     private final Register[] registers;
     private Flow.Subscription subscription;
 
@@ -82,24 +82,31 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
                         "Corresponding register number", valueTip}) {
         };
         this.updateRowHeight();
-        this.table.getColumnModel().getColumn(RegisterBlockWindow.NAME_COLUMN).setMinWidth(RegisterBlockWindow.NAME_SIZE);
-        this.table.getColumnModel().getColumn(RegisterBlockWindow.NAME_COLUMN).setMaxWidth(RegisterBlockWindow.NAME_SIZE);
-        this.table.getColumnModel().getColumn(RegisterBlockWindow.NUMBER_COLUMN).setMinWidth(RegisterBlockWindow.NUMBER_SIZE);
-        this.table.getColumnModel().getColumn(RegisterBlockWindow.NUMBER_COLUMN).setMaxWidth(RegisterBlockWindow.NUMBER_SIZE);
-        this.table.getColumnModel().getColumn(RegisterBlockWindow.VALUE_COLUMN).setMinWidth(RegisterBlockWindow.VALUE_SIZE);
-        this.table.getColumnModel().getColumn(RegisterBlockWindow.VALUE_COLUMN).setMaxWidth(RegisterBlockWindow.VALUE_SIZE);
+        final var columnModel = this.table.getColumnModel();
+
+        final var nameColumn = columnModel.getColumn(RegisterBlockWindow.NAME_COLUMN);
+        nameColumn.setMinWidth(RegisterBlockWindow.NAME_SIZE);
+        nameColumn.setMaxWidth(RegisterBlockWindow.NAME_SIZE);
+        nameColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.LEFT));
+
+        final var numberColumn = columnModel.getColumn(RegisterBlockWindow.NUMBER_COLUMN);
+        numberColumn.setMinWidth(RegisterBlockWindow.NUMBER_SIZE);
+        numberColumn.setMaxWidth(RegisterBlockWindow.NUMBER_SIZE);
         // Display register values (String-ified) right-justified in mono font
-        final var currentFont = FONT_SETTINGS.getCurrentFont();
-        this.table.getColumnModel().getColumn(RegisterBlockWindow.NAME_COLUMN).setCellRenderer(
-                new RegisterCellRenderer(SwingConstants.LEFT));
-        this.table.getColumnModel().getColumn(RegisterBlockWindow.NUMBER_COLUMN).setCellRenderer(
-                new RegisterCellRenderer(SwingConstants.RIGHT));
-        this.table.getColumnModel().getColumn(RegisterBlockWindow.VALUE_COLUMN).setCellRenderer(
-                new RegisterCellRenderer(SwingConstants.RIGHT));
+        numberColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT));
+
+        final var valueColumn = columnModel.getColumn(RegisterBlockWindow.VALUE_COLUMN);
+        valueColumn.setMinWidth(RegisterBlockWindow.VALUE_SIZE);
+        valueColumn.setMaxWidth(RegisterBlockWindow.VALUE_SIZE);
+        valueColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT));
+
         this.table.setPreferredScrollableViewportSize(new Dimension(RegisterBlockWindow.NAME_SIZE + RegisterBlockWindow.NUMBER_SIZE + RegisterBlockWindow.VALUE_SIZE, 700));
         this.setLayout(new BorderLayout()); // table display will occupy entire width if widened
-        this.add(new JScrollPane(this.table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+        this.add(new JScrollPane(
+                this.table,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        ));
     }
 
     /**
@@ -166,9 +173,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * Refresh the table, triggering re-rendering.
      */
     public void refresh() {
-        if (this.table != null) {
-            this.table.tableChanged(new TableModelEvent(this.table.getModel()));
-        }
+        this.table.tableChanged(new TableModelEvent(this.table.getModel()));
     }
 
     /**
@@ -365,7 +370,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         private final String[] regToolTips;
         private final String[] columnToolTips;
 
-        private MyTippedJTable(final RegTableModel m, final String[] row, final String[] col) {
+        private MyTippedJTable(final @NotNull RegTableModel m, final String[] row, final String[] col) {
             super(m);
             this.regToolTips = row;
             this.columnToolTips = col;

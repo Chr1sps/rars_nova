@@ -4,12 +4,12 @@ import org.jetbrains.annotations.NotNull;
 
 public enum BoolSetting {
     /**
-     * Flag to determine whether or not program being assembled is limited to
+     * Flag to determine whether program being assembled is limited to
      * basic instructions and formats.
      */
     EXTENDED_ASSEMBLER_ENABLED("ExtendedAssembler", true),
     /**
-     * Flag to determine whether or not a file is immediately and automatically
+     * Flag to determine whether a file is immediately and automatically
      * assembled
      * upon opening. Handy when using externa editor like mipster.
      */
@@ -45,47 +45,47 @@ public enum BoolSetting {
      */
     EXCEPTION_HANDLER_ENABLED("LoadExceptionHandler", false),
     /**
-     * Flag to determine whether or not the editor will display line numbers.
+     * Flag to determine whether the editor will display line numbers.
      */
     EDITOR_LINE_NUMBERS_DISPLAYED("EditorLineNumbersDisplayed", true),
     /**
-     * Flag to determine whether or not assembler warnings are considered errors.
+     * Flag to determine whether assembler warnings are considered errors.
      */
     WARNINGS_ARE_ERRORS("WarningsAreErrors", false),
     /**
-     * Flag to determine whether or not to display and use program arguments
+     * Flag to determine whether to display and use program arguments
      */
     PROGRAM_ARGUMENTS("ProgramArguments", false),
     /**
-     * Flag to control whether or not highlighting is applied to data segment window
+     * Flag to control whether highlighting is applied to data segment window
      */
     DATA_SEGMENT_HIGHLIGHTING("DataSegmentHighlighting", true),
     /**
-     * Flag to control whether or not highlighting is applied to register windows
+     * Flag to control whether highlighting is applied to register windows
      */
     REGISTERS_HIGHLIGHTING("RegistersHighlighting", true),
     /**
-     * Flag to control whether or not assembler automatically initializes program
+     * Flag to control whether assembler automatically initializes program
      * counter to 'main's address
      */
     START_AT_MAIN("StartAtMain", false),
     /**
-     * Flag to control whether or not editor will highlight the line currently being
+     * Flag to control whether editor will highlight the line currently being
      * edited
      */
     EDITOR_CURRENT_LINE_HIGHLIGHTING("EditorCurrentLineHighlighting", true),
     /**
-     * Flag to control whether or not editor will provide popup instruction guidance
+     * Flag to control whether editor will provide popup instruction guidance
      * while typing
      */
     POPUP_INSTRUCTION_GUIDANCE("PopupInstructionGuidance", true),
     /**
-     * Flag to control whether or not simulator will use popup dialog for input
+     * Flag to control whether simulator will use popup dialog for input
      * syscalls
      */
     POPUP_SYSCALL_INPUT("PopupSyscallInput", false),
     /**
-     * Flag to control whether or not language-aware editor will use auto-indent
+     * Flag to control whether language-aware editor will use auto-indent
      * feature
      */
     AUTO_INDENT("AutoIndent", true),

@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
+import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 /*
@@ -60,7 +60,7 @@ public final class FLW extends BasicInstruction {
         operands[1] = (operands[1] << 20) >> 20;
         try {
             FloatingPointRegisterFile.updateRegister(operands[0],
-                    Globals.memory.getWord(RegisterFile.getValue(operands[2]) + operands[1]));
+                    Memory.getInstance().getWord(RegisterFile.getValue(operands[2]) + operands[1]));
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);
         }

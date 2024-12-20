@@ -134,39 +134,48 @@ public final class RuntimeTableHighlightingSettings extends CustomPublisher<Sett
     // region Preference loading methods
 
     private void loadSettingsFromPreferences() {
-        this.textSegmentHighlightingStyle = loadTokenStyleFromPreferences(HighlightingType.TEXT_SEGMENT);
-        this.delaySlotHighlightingStyle = loadTokenStyleFromPreferences(HighlightingType.DELAY_SLOT);
-        this.dataSegmentHighlightingStyle = loadNullableTokenStyleFromPreferences(HighlightingType.DATA_SEGMENT);
-        this.registerHighlightingStyle = loadNullableTokenStyleFromPreferences(HighlightingType.REGISTER);
+        this.textSegmentHighlightingStyle = loadTokenStyleFromPreferences(HighlightingType.TEXT_SEGMENT,
+                HighlightingDefaults.DEFAULT_TEXT_SEGMENT_STYLE);
+        this.delaySlotHighlightingStyle = loadTokenStyleFromPreferences(HighlightingType.DELAY_SLOT,
+                HighlightingDefaults.DEFAULT_DELAY_SLOT_STYLE);
+        this.dataSegmentHighlightingStyle = loadNullableTokenStyleFromPreferences(HighlightingType.DATA_SEGMENT,
+                HighlightingDefaults.DEFAULT_DATA_SEGMENT_STYLE);
+        this.registerHighlightingStyle = loadNullableTokenStyleFromPreferences(HighlightingType.REGISTER,
+                HighlightingDefaults.DEFAULT_REGISTER_STYLE);
     }
 
-    private @Nullable TokenStyle loadNullableTokenStyleFromPreferences(final @NotNull HighlightingType type) {
-        final var enabled = this.preferences.getBoolean(enabledPrefix(type), false);
+    private @Nullable TokenStyle loadNullableTokenStyleFromPreferences(final @NotNull HighlightingType type,
+                                                                       final @NotNull TokenStyle defaultStyle) {
+        final var enabled = this.preferences.getBoolean(enabledPrefix(type), true);
         if (!enabled) {
             return null;
         }
-        return loadTokenStyleFromPreferences(type);
+        return loadTokenStyleFromPreferences(type, defaultStyle);
     }
 
-    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull HighlightingType type) {
-        final var foreground = loadNullableColorFromPreferences(foregroundPrefix(type));
-        final var background = loadNullableColorFromPreferences(backgroundPrefix(type));
-        final var isBold = this.preferences.getBoolean(boldPrefix(type), false);
-        final var isItalic = this.preferences.getBoolean(italicPrefix(type), false);
-        final var isUnderline = this.preferences.getBoolean(underlinePrefix(type), false);
+    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull HighlightingType type,
+                                                              final @NotNull TokenStyle defaultStyle) {
+        final var foreground = loadNullableColorFromPreferences(foregroundPrefix(type), defaultStyle.foreground());
+        final var background = loadNullableColorFromPreferences(backgroundPrefix(type), defaultStyle.background());
+        final var isBold = this.preferences.getBoolean(boldPrefix(type), defaultStyle.isBold());
+        final var isItalic = this.preferences.getBoolean(italicPrefix(type), defaultStyle.isItalic());
+        final var isUnderline = this.preferences.getBoolean(underlinePrefix(type), defaultStyle.isUnderline());
         return new TokenStyle(foreground, background, isBold, isItalic, isUnderline);
     }
 
-    private @Nullable Color loadNullableColorFromPreferences(final @NotNull String key) {
+    private @Nullable Color loadNullableColorFromPreferences(final @NotNull String key,
+                                                             final @Nullable Color defaultValue) {
         final var value = this.preferences.get(key, null);
-        if (value == null || value.equals("null")) {
+        if (value == null) {
+            return defaultValue;
+        } else if (value.equals("null")) {
             return null;
         }
         try {
             return Color.decode(value);
         } catch (final NumberFormatException nfe) {
             LOGGER.error("Unable to decode color from preferences", nfe);
-            return null;
+            return defaultValue;
         }
     }
 

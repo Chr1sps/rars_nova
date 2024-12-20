@@ -170,7 +170,7 @@ public class DigitalLabSim extends AbstractTool {
             Globals.memoryAndRegistersLock.lock();
             try {
                 try {
-                    Globals.memory.setByte(dataAddr, dataValue);
+                    Memory.getInstance().setByte(dataAddr, dataValue);
                 } catch (final AddressErrorException aee) {
                     DigitalLabSim.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
                     System.exit(0);

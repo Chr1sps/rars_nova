@@ -1,7 +1,7 @@
 package rars.riscv.instructions;
 
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 /**
  * <p>LD class.</p>
@@ -21,6 +21,6 @@ public final class LD extends Load {
      */
     @Override
     public long load(final int address) throws AddressErrorException {
-        return Globals.memory.getDoubleWord(address);
+        return Memory.getInstance().getDoubleWord(address);
     }
 }

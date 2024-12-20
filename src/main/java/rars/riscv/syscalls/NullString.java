@@ -1,11 +1,11 @@
 package rars.riscv.syscalls;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
+import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -71,17 +71,18 @@ public final class NullString {
         int byteAddress = RegisterFile.getValue(reg);
         final ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
         try {
-            utf8BytesList.add((byte) Globals.memory.getByte(byteAddress));
+            utf8BytesList.add((byte) Memory.getInstance().getByte(byteAddress));
             while (utf8BytesList.getLast() != 0) // until null terminator
             {
                 byteAddress++;
-                utf8BytesList.add((byte) Globals.memory.getByte(byteAddress));
+                utf8BytesList.add((byte) Memory.getInstance().getByte(byteAddress));
             }
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }
 
-        final int size = utf8BytesList.size() - 1; // size - 1 so we dont include the null terminator in the utf8Bytes array
+        final int size = utf8BytesList.size() - 1; // size - 1 so we dont include the null terminator in the 
+        // utf8Bytes array
         final byte[] utf8Bytes = new byte[size];
         for (int i = 0; i < size; i++) {
             utf8Bytes[i] = utf8BytesList.get(i);

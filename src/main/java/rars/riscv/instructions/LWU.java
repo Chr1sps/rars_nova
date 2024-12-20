@@ -1,7 +1,7 @@
 package rars.riscv.instructions;
 
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 /**
  * <p>LWU class.</p>
@@ -21,6 +21,6 @@ public final class LWU extends Load {
      */
     @Override
     public long load(final int address) throws AddressErrorException {
-        return Globals.memory.getWord(address) & 0xFFFF_FFFFL;
+        return Memory.getInstance().getWord(address) & 0xFFFF_FFFFL;
     }
 }

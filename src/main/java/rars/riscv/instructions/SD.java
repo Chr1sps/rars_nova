@@ -1,7 +1,7 @@
 package rars.riscv.instructions;
 
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 /**
  * <p>SD class.</p>
@@ -22,6 +22,6 @@ public final class SD extends Store {
      */
     @Override
     public void store(final int address, final long data) throws AddressErrorException {
-        Globals.memory.setDoubleWord(address, data);
+        Memory.getInstance().setDoubleWord(address, data);
     }
 }

@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
+import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 /**
@@ -32,8 +32,8 @@ public final class FLD extends BasicInstruction {
         final int[] operands = statement.getOperands();
         operands[1] = (operands[1] << 20) >> 20;
         try {
-            final long low = Globals.memory.getWord(RegisterFile.getValue(operands[2]) + operands[1]);
-            final long high = Globals.memory.getWord(RegisterFile.getValue(operands[2]) + operands[1] + 4);
+            final long low = Memory.getInstance().getWord(RegisterFile.getValue(operands[2]) + operands[1]);
+            final long high = Memory.getInstance().getWord(RegisterFile.getValue(operands[2]) + operands[1] + 4);
             FloatingPointRegisterFile.updateRegisterLong(operands[0], (high << 32) | (low & 0xFFFFFFFFL));
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

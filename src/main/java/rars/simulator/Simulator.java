@@ -9,6 +9,7 @@ import rars.notices.SimulatorNotice;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
+import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.OtherSettings;
 import rars.util.Binary;
@@ -272,7 +273,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
         private void startExecution() {
             Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.START,
                     this.maxSteps,
-                    (Globals.getGui() != null || Globals.runSpeedPanelExists)
+                    (Globals.getGui() != null || RunSpeedPanel.exists())
                             ? RunSpeedPanel.getInstance().getRunSpeed()
                             : RunSpeedPanel.UNLIMITED_SPEED,
                     this.pc, null, this.pe, this.done));
@@ -286,7 +287,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                 SystemIO.resetFiles(); // close any files opened in the process of simulating
             Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.STOP,
                     this.maxSteps,
-                    (Globals.getGui() != null || Globals.runSpeedPanelExists)
+                    (Globals.getGui() != null || RunSpeedPanel.exists())
                             ? RunSpeedPanel.getInstance().getRunSpeed()
                             : RunSpeedPanel.UNLIMITED_SPEED,
                     this.pc, reason, this.pe, done));
@@ -314,7 +315,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
             ProgramStatement exceptionHandler = null;
             if ((ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) != 0) { // test user-interrupt enable (UIE)
                 try {
-                    exceptionHandler = Globals.memory.getStatement(base);
+                    exceptionHandler = Memory.getInstance().getStatement(base);
                 } catch (final AddressErrorException aee) {
                     // Handled below
                 }
@@ -360,7 +361,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
 
             ProgramStatement exceptionHandler = null;
             try {
-                exceptionHandler = Globals.memory.getStatement(base);
+                exceptionHandler = Memory.getInstance().getStatement(base);
             } catch (final AddressErrorException aee) {
                 // handled below
             }
@@ -519,7 +520,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                     RegisterFile.incrementPC();
                     // Get instuction
                     try {
-                        statement = Globals.memory.getStatement(this.pc);
+                        statement = Memory.getInstance().getStatement(this.pc);
                     } catch (final AddressErrorException e) {
                         final SimulationException tmp;
                         if (e.reason == ExceptionReason.LOAD_ACCESS_FAULT) {
@@ -629,7 +630,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                         RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                     SwingUtilities.invokeLater(Simulator.interactiveGUIUpdater);
                 }
-                if (Globals.getGui() != null || Globals.runSpeedPanelExists) { // OR added by DPS 24 July 2008 to enable
+                if (Globals.getGui() != null || RunSpeedPanel.exists()) { // OR added by DPS 24 July 2008 to enable
                     // speed control by stand-alone tool
                     if (this.maxSteps != 1 &&
                             RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {

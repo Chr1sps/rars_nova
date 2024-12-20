@@ -1,7 +1,7 @@
 package rars.util;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.Globals;
 
 import java.util.Arrays;
 
@@ -42,7 +42,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class Binary {
 
     // Using int second 0-15 as index, yields equivalent hex digit as char.
-    private static final char[] chars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    private static final char[] chars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
+            'f'};
     // Use this to produce String equivalent of unsigned int second (add it to int
     // second, result is long)
     private static final long UNSIGNED_BASE = (long) 0x7FFFFFFF + (long) 0x7FFFFFFF + (long) 2; // 0xFFFFFFFF+1
@@ -378,9 +379,42 @@ public final class Binary {
         final StringBuilder result = new StringBuilder(8);
         for (int i = 3; i >= 0; i--) {
             final int byteValue = Binary.getByte(d, i);
-            result.append((byteValue < Globals.ASCII_TABLE.length) ? Globals.ASCII_TABLE[byteValue]
-                    : Globals.ASCII_NON_PRINT);
+            result.append(getByteString((byte) byteValue, false));
         }
+        return result.toString();
+    }
+
+    private static @NotNull String getByteString(final byte value, final boolean printNonPrintableCodes) {
+        return switch (value) {
+            case '\0' -> "\\0";
+            case '\b' -> "\\b";
+            case '\t' -> "\\t";
+            case '\n' -> "\\n";
+            case '\u000b' -> "\\v";
+            case '\f' -> "\\f";
+            case '\r' -> "\\r";
+            case '\\' -> "\\\\";
+            case ' ' -> "␣";
+            default -> {
+                if (value >= 32 && value <= 126) {
+                    yield String.valueOf((char) value);
+                } else {
+                    if (printNonPrintableCodes) {
+                        yield String.format("\\x%02x", value);
+                    } else {
+                        yield " ";
+                    }
+                }
+            }
+        };
+    }
+
+    private static @NotNull String withEscapes(final @NotNull String input, final boolean printNonPrintableCodes) {
+        final var result = new StringBuilder();
+        input.chars().forEach(c -> {
+            final var toAppend = getByteString((byte) c, printNonPrintableCodes);
+            result.append(toAppend);
+        });
         return result.toString();
     }
 

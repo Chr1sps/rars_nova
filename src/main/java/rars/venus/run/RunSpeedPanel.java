@@ -76,9 +76,12 @@ public class RunSpeedPanel extends JPanel {
     public static RunSpeedPanel getInstance() {
         if (RunSpeedPanel.runSpeedPanel == null) {
             RunSpeedPanel.runSpeedPanel = new RunSpeedPanel();
-            Globals.runSpeedPanelExists = true; // DPS 24 July 2008 (needed for standalone tools)
         }
         return RunSpeedPanel.runSpeedPanel;
+    }
+    
+    public static boolean exists() {
+        return runSpeedPanel != null;
     }
 
     /*

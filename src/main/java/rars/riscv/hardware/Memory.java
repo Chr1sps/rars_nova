@@ -316,7 +316,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     public static Memory swapInstance(final Memory mem) {
         final Memory temp = Memory.uniqueMemoryInstance;
         Memory.uniqueMemoryInstance = mem;
-        Globals.memory = mem;
         return temp;
     }
 

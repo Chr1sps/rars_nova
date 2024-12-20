@@ -1,11 +1,11 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
+import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
@@ -62,9 +62,12 @@ public final class SyscallInputDialogString extends AbstractSyscall {
                 "a0 = address of null-terminated string that is the message to user<br>a1 = address of input buffer<br>"
                         +
                         "a2 = maximum number of characters to read (including the terminating null)",
-                "a1 contains status second.<br> 0: OK status. Buffer contains the input string.<br>-2: Cancel was chosen. No change to buffer.<br>"
+                "a1 contains status second.<br> 0: OK status. Buffer contains the input string.<br>-2: Cancel was " +
+                        "chosen. No change to buffer.<br>"
                         +
-                        "-3: OK was chosen but no data had been input into field. No change to buffer.<br>-4: length of the input string exceeded the specified maximum. Buffer contains the maximum allowable input string terminated with null.");
+                        "-3: OK was chosen but no data had been input into field. No change to buffer.<br>-4: length " +
+                        "of the input string exceeded the specified maximum. Buffer contains the maximum allowable " +
+                        "input string terminated with null.");
     }
 
     /**
@@ -96,14 +99,14 @@ public final class SyscallInputDialogString extends AbstractSyscall {
                 // Copy the input data to buffer as space permits
                 int stringLength = Math.min(maxLength - 1, utf8BytesList.length);
                 for (int index = 0; index < stringLength; index++) {
-                    Globals.memory.setByte(byteAddress + index,
+                    Memory.getInstance().setByte(byteAddress + index,
                             utf8BytesList[index]);
                 }
                 if (stringLength < maxLength - 1) {
-                    Globals.memory.setByte(byteAddress + stringLength, '\n');
+                    Memory.getInstance().setByte(byteAddress + stringLength, '\n');
                     stringLength++;
                 }
-                Globals.memory.setByte(byteAddress + stringLength, 0);
+                Memory.getInstance().setByte(byteAddress + stringLength, 0);
 
                 if (utf8BytesList.length > maxLength - 1) {
                     // length of the input string exceeded the specified maximum

@@ -198,7 +198,7 @@ public class TimerTool extends AbstractTool {
         Globals.memoryAndRegistersLock.lock();
         try {
             try {
-                Globals.memory.setRawWord(dataAddr, dataValue);
+                Memory.getInstance().setRawWord(dataAddr, dataValue);
             } catch (final AddressErrorException aee) {
                 TimerTool.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
                 System.exit(0);
@@ -268,7 +268,7 @@ public class TimerTool extends AbstractTool {
 
         public void addAsObserver() {
             try {
-                Globals.memory.subscribe(this, TimerTool.TIME_CMP_ADDRESS, TimerTool.TIME_CMP_ADDRESS + 8);
+                Memory.getInstance().subscribe(this, TimerTool.TIME_CMP_ADDRESS, TimerTool.TIME_CMP_ADDRESS + 8);
             } catch (final AddressErrorException aee) {
                 SimpleSubscriber.LOGGER.fatal("Error while adding observer in Timer Tool");
                 System.exit(0);
@@ -371,7 +371,8 @@ public class TimerTool extends AbstractTool {
         }
 
         public void updateTime() {
-            this.currentTime.setText(String.format("%02d:%02d.%02d", TimerTool.time / 60000, (TimerTool.time / 1000) % 60, TimerTool.time % 100));
+            this.currentTime.setText(String.format("%02d:%02d.%02d", TimerTool.time / 60000,
+                    (TimerTool.time / 1000) % 60, TimerTool.time % 100));
         }
     }
 }

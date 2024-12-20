@@ -146,7 +146,8 @@ public class FileDumpMemoryAction extends GuiAction {
 
         for (int i = 0; i < segmentArray.length; i++) {
             try {
-                highAddressArray[i] = Globals.memory.getAddressOfFirstNull(baseAddressArray[i], limitAddressArray[i])
+                highAddressArray[i] = Memory.getInstance().getAddressOfFirstNull(baseAddressArray[i],
+                        limitAddressArray[i])
                         - Memory.WORD_LENGTH_BYTES;
 
             } // Exception will not happen since the Memory base and limit addresses are on
@@ -259,7 +260,7 @@ public class FileDumpMemoryAction extends GuiAction {
             }
             if (operationOK) {
                 try {
-                    format.dumpMemoryRange(theFile, firstAddress, lastAddress, Globals.memory);
+                    format.dumpMemoryRange(theFile, firstAddress, lastAddress, Memory.getInstance());
                 } catch (final AddressErrorException | IOException ignored) {
 
                 }
