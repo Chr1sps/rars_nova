@@ -168,7 +168,7 @@ public class VenusUI extends JFrame {
         this.registersTab = new RegistersWindow();
         final FloatingPointWindow fpTab = new FloatingPointWindow();
         this.csrTab = new ControlAndStatusWindow();
-        this.registersPane = new RegistersPane(this.mainUI, this.registersTab, fpTab, this.csrTab);
+        this.registersPane = new RegistersPane(this.registersTab, fpTab, this.csrTab);
         this.registersPane.setPreferredSize(registersPanePreferredSize);
 
         this.mainPane = new MainPane(this.mainUI, this.editor, this.registersTab, fpTab, this.csrTab);

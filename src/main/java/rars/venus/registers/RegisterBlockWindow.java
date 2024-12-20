@@ -76,7 +76,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      */
     RegisterBlockWindow(final Register[] registers, final String[] registerDescriptions, final String valueTip) {
         this.registers = registers;
-        this.clearHighlighting();
         this.table = new MyTippedJTable(new RegTableModel(this.setupWindow()), registerDescriptions,
                 new String[]{"Each register has a tool tip describing its usage convention",
                         "Corresponding register number", valueTip}) {
@@ -164,15 +163,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * Clear highlight background color from any row currently highlighted.
      */
     public void clearHighlighting() {
-        if (this.table != null) {
-            this.table.tableChanged(new TableModelEvent(this.table.getModel()));
-        }
-    }
-
-    /**
-     * Refresh the table, triggering re-rendering.
-     */
-    public void refresh() {
         this.table.tableChanged(new TableModelEvent(this.table.getModel()));
     }
 
@@ -359,13 +349,12 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         }
     }
 
-    /// ////////////////////////////////////////////////////////////////
-    //
-    // JTable subclass to provide custom tool tips for each of the
-    // register table column headers and for each register name in
-    // the first column. From Sun's JTable tutorial.
-    // http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
-    //
+    /**
+     * JTable subclass to provide custom tool tips for each of the
+     * register table column headers and for each register name in
+     * the first column. From
+     * <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html">Sun's JTable tutorial</a>.
+     */
     private class MyTippedJTable extends JTable {
         private final String[] regToolTips;
         private final String[] columnToolTips;

@@ -1,7 +1,5 @@
 package rars.venus.registers;
 
-import rars.venus.VenusUI;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -47,12 +45,11 @@ public class RegistersPane extends JTabbedPane {
     /**
      * Constructor for the RegistersPane class.
      *
-     * @param appFrame a {@link VenusUI} object
      * @param regs     a {@link RegistersWindow} object
      * @param cop1     a {@link FloatingPointWindow} object
      * @param cop0     a {@link ControlAndStatusWindow} object
      */
-    public RegistersPane(final VenusUI appFrame, final RegistersWindow regs, final FloatingPointWindow cop1,
+    public RegistersPane(final RegistersWindow regs, final FloatingPointWindow cop1,
                          final ControlAndStatusWindow cop0) {
         super();
 

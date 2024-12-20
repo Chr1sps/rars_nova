@@ -157,24 +157,24 @@ public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
                 defaultTheme.lineHighlightColor);
         final var caret = loadColorFromPreferences(THEME_PREFIX + CARET, defaultTheme.caretColor);
         final var selection = loadColorFromPreferences(THEME_PREFIX + SELECTION, defaultTheme.selectionColor);
-        final ColorScheme colorScheme = loadColorSchemeFromPreferences();
+        final var colorScheme = loadColorSchemeFromPreferences(defaultTheme.colorScheme);
         return new Theme(colorScheme, background, foreground, lineHighlight, caret, selection);
     }
 
-    private @NotNull ColorScheme loadColorSchemeFromPreferences() {
+    private @NotNull ColorScheme loadColorSchemeFromPreferences(final @NotNull ColorScheme defaultColorScheme) {
         final var styleMap = new HashMap<RVTokenType, TokenStyle>();
         for (final var type : RVTokenType.values()) {
-            styleMap.put(type, loadTokenStyleFromPreferences(type));
+            styleMap.put(type, loadTokenStyleFromPreferences(type, defaultColorScheme.getStyle(type)));
         }
         return new ColorScheme(styleMap);
     }
 
-    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull RVTokenType type) {
-        final var foreground = loadNullableColorFromPreferences(foregroundPrefix(type));
-        final var background = loadNullableColorFromPreferences(backgroundPrefix(type));
-        final var isBold = this.preferences.getBoolean(boldPrefix(type), false);
-        final var isItalic = this.preferences.getBoolean(italicPrefix(type), false);
-        final var isUnderline = this.preferences.getBoolean(underlinePrefix(type), false);
+    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull RVTokenType type, final @NotNull TokenStyle defaultStyle) {
+        final var foreground = loadNullableColorFromPreferences(foregroundPrefix(type), defaultStyle.foreground());
+        final var background = loadNullableColorFromPreferences(backgroundPrefix(type), defaultStyle.background()); 
+        final var isBold = this.preferences.getBoolean(boldPrefix(type), defaultStyle.isBold());
+        final var isItalic = this.preferences.getBoolean(italicPrefix(type), defaultStyle.isItalic());
+        final var isUnderline = this.preferences.getBoolean(underlinePrefix(type), defaultStyle.isUnderline());
         return new TokenStyle(foreground, background, isBold, isItalic, isUnderline);
     }
 
@@ -191,16 +191,18 @@ public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
         }
     }
 
-    private @Nullable Color loadNullableColorFromPreferences(final @NotNull String key) {
+    private @Nullable Color loadNullableColorFromPreferences(final @NotNull String key, final @Nullable Color defaultValue) {
         final var value = this.preferences.get(key, null);
-        if (value == null || value.equals("null")) {
+        if (value == null) {
+            return defaultValue;
+        } else if (value.equals("null")) {
             return null;
         }
         try {
             return Color.decode(value);
         } catch (final NumberFormatException nfe) {
             LOGGER.error("Unable to decode color from preferences", nfe);
-            return null;
+            return defaultValue;
         }
     }
 

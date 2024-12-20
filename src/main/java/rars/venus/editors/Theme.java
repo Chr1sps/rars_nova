@@ -6,7 +6,7 @@ import rars.util.Lazy;
 import java.awt.*;
 
 public final class Theme {
-    private static @NotNull Lazy<Theme> defaultDarkTheme = Lazy.of(() -> {
+    private static final @NotNull Lazy<Theme> defaultDarkTheme = Lazy.of(() -> {
         final var defaultScheme = ColorScheme.getDefaultDarkScheme();
         final var backgroundColor = new Color(47, 47, 47);
         final var foregroundColor = Color.WHITE;
@@ -23,7 +23,7 @@ public final class Theme {
         );
 
     });
-    private static @NotNull Lazy<Theme> defaultLightTheme = Lazy.of(() -> {
+    private static final @NotNull Lazy<Theme> defaultLightTheme = Lazy.of(() -> {
         final var defaultScheme = ColorScheme.getDefaultLightScheme();
         final var backgroundColor = Color.WHITE;
         final var foregroundColor = Color.BLACK;

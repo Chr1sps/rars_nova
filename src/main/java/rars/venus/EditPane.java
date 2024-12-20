@@ -7,6 +7,7 @@ import rars.settings.BoolSetting;
 import rars.util.SimpleSubscriber;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
+import rars.venus.editors.TextEditingAreaFactory;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -94,6 +95,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         // user.dir, user's current working directory, is guaranteed to have a second
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
+        EDITOR_THEME_SETTINGS.subscribe(this);
         BOOL_SETTINGS.subscribe(this);
         FONT_SETTINGS.subscribe(this);
         OTHER_SETTINGS.subscribe(this);
@@ -102,7 +104,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         this.lineNumbers = new JLabel();
 
 //        this.sourceCode = new JEditBasedTextArea(this, this.lineNumbers);
-        this.sourceCode = TextEditingArea.createDefaultTextEditingArea();
+        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.getTheme());
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);
 
@@ -638,11 +640,11 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     @Override
     public void onNext(final SettingsNotice ignored) {
         this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
+        this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.getTheme());
         this.sourceCode.setLineHighlightEnabled(
                 BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
         this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
         this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
-        // TODO: Change this to the new ColorScheme API
         this.sourceCode.revalidate();
         // We want line numbers to be displayed same size but always PLAIN style.
         // Easiest way to get same pixel height as source code is to set to same

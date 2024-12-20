@@ -1,7 +1,6 @@
 package rars.venus.editors;
 
 import org.jetbrains.annotations.NotNull;
-import rars.venus.editors.rsyntaxtextarea.RSyntaxTextAreaBasedEditor;
 
 import javax.swing.text.Document;
 import java.awt.*;
@@ -120,8 +119,10 @@ public interface TextEditingArea {
     @NotNull ColorScheme getColorScheme();
 
     void setColorScheme(final @NotNull ColorScheme colorScheme);
+
+    void setTheme(final @NotNull Theme theme);
     
-    void applyTheme(final @NotNull Theme theme);
+    @NotNull Theme getTheme();
 
     // Used by Find/Replace
     enum FindReplaceResult {
@@ -129,9 +130,5 @@ public interface TextEditingArea {
         TEXT_FOUND,
         TEXT_REPLACED_FOUND_NEXT,
         TEXT_REPLACED_NOT_FOUND_NEXT
-    }
-    
-    static @NotNull TextEditingArea createDefaultTextEditingArea() {
-        return new RSyntaxTextAreaBasedEditor();
     }
 }

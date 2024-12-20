@@ -36,14 +36,15 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private final RSyntaxTextArea textArea;
     private final RTextScrollPane scrollPane;
     private final Gutter gutter;
+    private @NotNull Theme theme;
     private @NotNull ColorScheme colorScheme;
 
-    public RSyntaxTextAreaBasedEditor() {
+    public RSyntaxTextAreaBasedEditor(final @NotNull Theme theme) {
         textArea = new RSyntaxTextArea();
         scrollPane = new RTextScrollPane(textArea);
         gutter = scrollPane.getGutter();
         this.setFont(FONT_SETTINGS.getCurrentFont());
-        this.applyTheme(Theme.getDefaultLightTheme());
+        this.setTheme(theme);
         textArea.setSyntaxEditingStyle(RVSyntax.SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);
         textArea.setMarkOccurrencesDelay(1);
@@ -302,7 +303,13 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public void applyTheme(final @NotNull Theme theme) {
+    public @NotNull Theme getTheme() {
+        return theme;
+    }
+
+    @Override
+    public void setTheme(final @NotNull Theme theme) {
+        this.theme = theme;
         this.textArea.setBackground(theme.backgroundColor);
         this.textArea.setForeground(theme.foregroundColor);
         this.textArea.setCurrentLineHighlightColor(theme.lineHighlightColor);

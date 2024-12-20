@@ -4,7 +4,7 @@ import org.fife.ui.rsyntaxtextarea.Style;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import rars.riscv.lang.lexing.RVTokenType;
 
-public class RVSyntaxScheme extends SyntaxScheme {
+public final class RVSyntaxScheme extends SyntaxScheme {
     public RVSyntaxScheme() {
         super(false);
         final var styles = new Style[RVTokenType.values().length + SyntaxScheme.DEFAULT_NUM_TOKEN_TYPES];

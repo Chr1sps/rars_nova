@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
-public class RVFoldParser implements FoldParser {
+public final class RVFoldParser implements FoldParser {
     private static boolean canBeAChildInList(final @NotNull List<FoldData> folds, final @NotNull FoldData element) {
         return folds
                 .stream()
