@@ -1,7 +1,9 @@
-package rars.venus.settings.editor;
+package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
 import rars.venus.editors.TokenStyle;
+import rars.venus.settings.editor.ColorPickerButton;
+import rars.venus.settings.editor.OptionSection;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,12 +11,12 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public final class SyntaxStylePickerPanel extends JPanel {
+public final class SyntaxStyleView extends JPanel {
 
     public final @NotNull JCheckBox isBold, isItalic, isUnderline, useForeground, useBackground;
     public final @NotNull ColorPickerButton foregroundColorPicker, backgroundColorPicker;
 
-    public SyntaxStylePickerPanel() {
+    public SyntaxStyleView() {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // foreground

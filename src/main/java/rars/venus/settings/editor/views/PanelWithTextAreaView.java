@@ -1,4 +1,4 @@
-package rars.venus.settings.editor;
+package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
 import rars.venus.editors.TextEditingArea;
@@ -11,13 +11,13 @@ import java.awt.*;
 import static rars.settings.Settings.*;
 
 public final class PanelWithTextAreaView extends JPanel {
-    public final @NotNull PickerCardView upperComponent;
-    private final @NotNull TextEditingArea textArea;
+    public final @NotNull PickerCardView pickerCardView;
+    public final @NotNull TextEditingArea textArea;
 
     public PanelWithTextAreaView(final @NotNull PickerCardView pickerCardView) {
         super();
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.upperComponent = pickerCardView;
+        this.pickerCardView = pickerCardView;
         this.add(pickerCardView);
         this.add(Box.createVerticalGlue());
         this.textArea = createTextArea(EDITOR_THEME_SETTINGS.getCurrentTheme()); // TODO: default theme
@@ -69,5 +69,9 @@ public final class PanelWithTextAreaView extends JPanel {
 
     public void setCaretBlinkRate(final int rate) {
         this.textArea.setCaretBlinkRate(rate);
+    }
+
+    public void setTextAreaTabSize(final int size) {
+        this.textArea.setTabSize(size);
     }
 }

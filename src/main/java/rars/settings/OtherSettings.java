@@ -8,6 +8,7 @@ import rars.notices.SettingsNotice;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.util.CustomPublisher;
 
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 public final class OtherSettings extends CustomPublisher<SettingsNotice> {
@@ -45,68 +46,83 @@ public final class OtherSettings extends CustomPublisher<SettingsNotice> {
      */
     public static boolean getBackSteppingEnabled() {
         return (Globals.program != null &&
-                Globals.program.getBackStepper() != null &&
-                Globals.program.getBackStepper().enabled());
+            Globals.program.getBackStepper() != null &&
+            Globals.program.getBackStepper().enabled());
     }
 
     public void setMemoryConfigurationAndSave(final @NotNull MemoryConfiguration memoryConfiguration) {
-        this.memoryConfiguration = memoryConfiguration;
-        this.saveSettingsToPreferences();
+        if (!this.memoryConfiguration.equals(memoryConfiguration)) {
+            this.memoryConfiguration = memoryConfiguration;
+            this.saveSettingsToPreferences();
+        }
     }
-    
+
     public @NotNull MemoryConfiguration getMemoryConfiguration() {
         return memoryConfiguration;
     }
-    
+
     public void setExceptionHandlerAndSave(final @NotNull String exceptionHandler) {
-        this.exceptionHandler = exceptionHandler;
-        this.saveSettingsToPreferences();
+        if (!this.exceptionHandler.equals(exceptionHandler)) {
+            this.exceptionHandler = exceptionHandler;
+            this.saveSettingsToPreferences();
+        }
     }
-    
+
     public @NotNull String getExceptionHandler() {
         return exceptionHandler;
     }
-    
+
     public void setLabelSortStateAndSave(final int labelSortState) {
-        this.labelSortState = labelSortState;
-        this.saveSettingsToPreferences();
+        if (this.labelSortState != labelSortState) {
+            this.labelSortState = labelSortState;
+            this.saveSettingsToPreferences();
+        }
     }
-    
+
     public int getLabelSortState() {
         return labelSortState;
     }
-    
+
     public void setCaretBlinkRateAndSave(final int caretBlinkRate) {
-        this.caretBlinkRate = caretBlinkRate;
-        this.saveSettingsToPreferences();
+        if (this.caretBlinkRate != caretBlinkRate) {
+            this.caretBlinkRate = caretBlinkRate;
+            this.saveSettingsToPreferences();
+        }
     }
-    
+
     public int getCaretBlinkRate() {
         return caretBlinkRate;
     }
-    
+
     public void setEditorTabSizeAndSave(final int editorTabSize) {
-        this.editorTabSize = editorTabSize;
-        this.saveSettingsToPreferences();
+        if (this.editorTabSize != editorTabSize) {
+            this.editorTabSize = editorTabSize;
+            this.saveSettingsToPreferences();
+        }
     }
-    
+
     public int getEditorTabSize() {
         return editorTabSize;
     }
-    
+
     private void saveSettingsToPreferences() {
         this.preferences.putInt(OTHER_PREFIX + SORT_STATE, this.labelSortState);
         this.preferences.put(OTHER_PREFIX + MEMORY_CONFIGURATION, this.memoryConfiguration.identifier);
         this.preferences.putInt(OTHER_PREFIX + CARET_BLINK_RATE, this.caretBlinkRate);
         this.preferences.putInt(OTHER_PREFIX + EDITOR_TAB_SIZE, this.editorTabSize);
         this.preferences.put(OTHER_PREFIX + EXCEPTION_HANDLER, this.exceptionHandler);
+        commitChanges();
+    }
+
+    private void commitChanges() {
         try {
             this.preferences.flush();
         } catch (final SecurityException se) {
             LOGGER.error("Unable to write to persistent storage for security reasons.");
-        } catch (final Exception e) {
+        } catch (final BackingStoreException e) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }
+        submit(SettingsNotice.get());
     }
 
     // region Preference loading methods
@@ -120,7 +136,7 @@ public final class OtherSettings extends CustomPublisher<SettingsNotice> {
 
     private @NotNull MemoryConfiguration loadMemoryConfiguration() {
         final var memoryConfigurationName = preferences.get(OTHER_PREFIX + MEMORY_CONFIGURATION,
-                MemoryConfiguration.DEFAULT.identifier);
+            MemoryConfiguration.DEFAULT.identifier);
         //noinspection DataFlowIssue
         return MemoryConfiguration.fromIdString(memoryConfigurationName);
     }

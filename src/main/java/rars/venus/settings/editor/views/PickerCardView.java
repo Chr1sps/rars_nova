@@ -1,13 +1,15 @@
-package rars.venus.settings.editor;
+package rars.venus.settings.editor.views;
+
+import rars.venus.settings.editor.FontPickerPanel;
 
 import javax.swing.*;
 import java.awt.*;
 
 public final class PickerCardView extends JPanel {
-    public final BaseStylePickerPanel baseStylePicker;
-    public final SyntaxStylePickerPanel syntaxStylePicker;
+    public final BaseStyleView baseStylePicker;
+    public final SyntaxStyleView syntaxStylePicker;
     public final FontPickerPanel fontPicker;
-    public final OtherSettingsPanel otherSettingsPanel;
+    public final OtherSettingsView otherSettingsView;
     private final JPanel upperPanel;
     private final CardLayout upperLayout;
 
@@ -21,16 +23,16 @@ public final class PickerCardView extends JPanel {
         setMinimumSize(new Dimension(50, 50));
 
         final var emptyPanel = new JPanel();
-        baseStylePicker = new BaseStylePickerPanel();
-        syntaxStylePicker = new SyntaxStylePickerPanel();
+        baseStylePicker = new BaseStyleView();
+        syntaxStylePicker = new SyntaxStyleView();
         fontPicker = new FontPickerPanel();
-        otherSettingsPanel = new OtherSettingsPanel();
+        otherSettingsView = new OtherSettingsView();
 
         upperPanel.add(emptyPanel, "empty");
         upperPanel.add(fontPicker, "font");
         upperPanel.add(baseStylePicker, "base");
         upperPanel.add(syntaxStylePicker, "syntax");
-        upperPanel.add(otherSettingsPanel, "other");
+        upperPanel.add(otherSettingsView, "other");
 
         this.add(upperPanel, BorderLayout.NORTH);
     }
@@ -50,7 +52,7 @@ public final class PickerCardView extends JPanel {
     public void showEmpty() {
         upperLayout.show(upperPanel, "empty");
     }
-    
+
     public void showOtherSettings() {
         upperLayout.show(upperPanel, "other");
     }

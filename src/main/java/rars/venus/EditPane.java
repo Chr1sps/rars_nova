@@ -105,6 +105,7 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
 
 //        this.sourceCode = new JEditBasedTextArea(this, this.lineNumbers);
         this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.getCurrentTheme());
+        this.onNext(null);
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);
 

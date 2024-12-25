@@ -1,14 +1,16 @@
-package rars.venus.settings.editor;
+package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
+import rars.venus.settings.editor.ColorPickerButton;
+import rars.venus.settings.editor.OptionSection;
 
 import javax.swing.*;
 import java.util.Objects;
 
 import static rars.settings.Settings.EDITOR_THEME_SETTINGS;
-import static rars.venus.settings.editor.SyntaxStylePickerPanel.buildRow;
+import static rars.venus.settings.editor.views.SyntaxStyleView.buildRow;
 
-public final class BaseStylePickerPanel extends JPanel {
+public final class BaseStyleView extends JPanel {
     private static final @NotNull String FOREGROUND = "Foreground",
         BACKGROUND = "Background",
         LINE_HIGHLIGHT = "Line highlight",
@@ -21,7 +23,7 @@ public final class BaseStylePickerPanel extends JPanel {
         textSelectionColorButton,
         caretColorButton;
 
-    public BaseStylePickerPanel() {
+    public BaseStyleView() {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
