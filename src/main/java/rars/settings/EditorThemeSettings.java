@@ -79,7 +79,7 @@ public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
      *
      * @return the current theme
      */
-    public @NotNull Theme getTheme() {
+    public @NotNull Theme getCurrentTheme() {
         return this.currentTheme;
     }
 
@@ -154,7 +154,7 @@ public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
         final var background = loadColorFromPreferences(THEME_PREFIX + BACKGROUND, defaultTheme.backgroundColor);
         final var foreground = loadColorFromPreferences(THEME_PREFIX + FOREGROUND, defaultTheme.foregroundColor);
         final var lineHighlight = loadColorFromPreferences(THEME_PREFIX + LINE_HIGHLIGHT,
-                defaultTheme.lineHighlightColor);
+            defaultTheme.lineHighlightColor);
         final var caret = loadColorFromPreferences(THEME_PREFIX + CARET, defaultTheme.caretColor);
         final var selection = loadColorFromPreferences(THEME_PREFIX + SELECTION, defaultTheme.selectionColor);
         final var colorScheme = loadColorSchemeFromPreferences(defaultTheme.colorScheme);
@@ -169,9 +169,10 @@ public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
         return new ColorScheme(styleMap);
     }
 
-    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull RVTokenType type, final @NotNull TokenStyle defaultStyle) {
+    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull RVTokenType type,
+                                                              final @NotNull TokenStyle defaultStyle) {
         final var foreground = loadNullableColorFromPreferences(foregroundPrefix(type), defaultStyle.foreground());
-        final var background = loadNullableColorFromPreferences(backgroundPrefix(type), defaultStyle.background()); 
+        final var background = loadNullableColorFromPreferences(backgroundPrefix(type), defaultStyle.background());
         final var isBold = this.preferences.getBoolean(boldPrefix(type), defaultStyle.isBold());
         final var isItalic = this.preferences.getBoolean(italicPrefix(type), defaultStyle.isItalic());
         final var isUnderline = this.preferences.getBoolean(underlinePrefix(type), defaultStyle.isUnderline());
@@ -191,7 +192,8 @@ public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
         }
     }
 
-    private @Nullable Color loadNullableColorFromPreferences(final @NotNull String key, final @Nullable Color defaultValue) {
+    private @Nullable Color loadNullableColorFromPreferences(final @NotNull String key,
+                                                             final @Nullable Color defaultValue) {
         final var value = this.preferences.get(key, null);
         if (value == null) {
             return defaultValue;

@@ -3,76 +3,57 @@ package rars.venus.settings.editor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.awt.*;
+import java.util.Objects;
+
+import static rars.settings.Settings.EDITOR_THEME_SETTINGS;
+import static rars.venus.settings.editor.SyntaxStylePickerPanel.buildRow;
 
 public final class BaseStylePickerPanel extends JPanel {
-    private static final @NotNull JLabel FOREGROUND_LABEL = new JLabel("Foreground");
-    private static final @NotNull JLabel BACKGROUND_LABEL = new JLabel("Background");
-    private static final @NotNull JLabel LINE_HIGHLIGHT = new JLabel("Line highlight");
-    private static final @NotNull JLabel TEXT_SELECTION = new JLabel("Text selection");
-    private static final @NotNull JLabel CARET = new JLabel("Caret");
-    private final @NotNull ColorPickerButton foregroundColorButton, backgroundColorButton, lineHighlightColorButton,
-            textSelectionColorButton, caretColorButton;
+    private static final @NotNull String FOREGROUND = "Foreground",
+        BACKGROUND = "Background",
+        LINE_HIGHLIGHT = "Line highlight",
+        CARET = "Caret",
+        TEXT_SELECTION = "Text selection";
+    public final @NotNull ColorPickerButton
+        foregroundColorButton,
+        backgroundColorButton,
+        lineHighlightColorButton,
+        textSelectionColorButton,
+        caretColorButton;
 
     public BaseStylePickerPanel() {
-        this.setLayout(new GridBagLayout());
-        final var gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        gbc.gridy = 0;
-        gbc.gridx = 0;
-        this.add(FOREGROUND_LABEL, gbc);
-        this.foregroundColorButton = new ColorPickerButton();
-        gbc.gridx = 1;
-        this.add(foregroundColorButton, gbc);
+        final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
 
-        gbc.gridy = 1;
-        gbc.gridx = 0;
-        this.add(BACKGROUND_LABEL, gbc);
-        this.backgroundColorButton = new ColorPickerButton();
-        gbc.gridx = 1;
-        this.add(backgroundColorButton, gbc);
+        // foreground
+        final var foregroundSection = new OptionSection(FOREGROUND, null, theme.foregroundColor);
+        this.foregroundColorButton = Objects.requireNonNull(foregroundSection.colorPickerButton);
 
-        gbc.gridy = 2;
-        gbc.gridx = 0;
-        this.add(LINE_HIGHLIGHT, gbc);
-        this.lineHighlightColorButton = new ColorPickerButton();
-        gbc.gridx = 1;
-        this.add(lineHighlightColorButton, gbc);
+        // background
+        final var backgroundSection = new OptionSection(BACKGROUND, null, theme.backgroundColor);
+        this.backgroundColorButton = Objects.requireNonNull(backgroundSection.colorPickerButton);
 
-        gbc.gridy = 3;
-        gbc.gridx = 0;
-        this.add(TEXT_SELECTION, gbc);
-        this.textSelectionColorButton = new ColorPickerButton();
-        gbc.gridx = 1;
-        this.add(textSelectionColorButton, gbc);
+        // line highlight
+        final var lineHighlightSection = new OptionSection(LINE_HIGHLIGHT, null, theme.lineHighlightColor);
+        this.lineHighlightColorButton = Objects.requireNonNull(lineHighlightSection.colorPickerButton);
 
-        gbc.gridy = 4;
-        gbc.gridx = 0;
-        this.add(CARET, gbc);
-        this.caretColorButton = new ColorPickerButton();
-        gbc.gridx = 1;
-        this.add(caretColorButton, gbc);
-    }
+        // top row
+        final var topRow = buildRow(false, foregroundSection, backgroundSection, lineHighlightSection);
+        this.add(topRow);
+        this.add(Box.createVerticalStrut(5));
 
-    public @NotNull ColorPickerButton getForegroundColorButton() {
-        return foregroundColorButton;
-    }
+        // text selection
+        final var textSelectionSection = new OptionSection(TEXT_SELECTION, null, theme.selectionColor);
+        this.textSelectionColorButton = Objects.requireNonNull(textSelectionSection.colorPickerButton);
 
-    public @NotNull ColorPickerButton getBackgroundColorButton() {
-        return backgroundColorButton;
-    }
+        // caret
+        final var caretSection = new OptionSection(CARET, null, theme.caretColor);
+        this.caretColorButton = Objects.requireNonNull(caretSection.colorPickerButton);
 
-    public @NotNull ColorPickerButton getTextSelectionColorButton() {
-        return textSelectionColorButton;
-    }
-
-    public @NotNull ColorPickerButton getCaretColorButton() {
-        return caretColorButton;
-    }
-
-    public @NotNull ColorPickerButton getLineHighlightColorButton() {
-        return lineHighlightColorButton;
+        // bottom row
+        final var bottomRow = buildRow(true, textSelectionSection, caretSection);
+        this.add(bottomRow);
+        this.add(Box.createVerticalGlue());
     }
 }

@@ -38,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/////////////////////////////////////////////////////////////////////////
 //
 //  The ToneGenerator and Tone classes were developed by Otterbein College
 //  student Tony Brock in July 2007.  They simulate MIDI output through the
@@ -54,12 +53,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //      pool executor, and
 //  (3) simplify the interface by removing all the unused versions
 //       that provided default values for various parameters
-/////////////////////////////////////////////////////////////////////////
 
 /*
  * Creates a Tone object and passes it to a thread to "play" it using MIDI.
  */
-final class ToneGenerator {
+public final class ToneGenerator {
 
     /**
      * The default pitch second for the tone: 60 / middle C.
@@ -105,8 +103,7 @@ final class ToneGenerator {
      */
     public static void generateTone(final byte pitch, final int duration,
                                     final byte instrument, final byte volume) {
-        final Runnable tone = new Tone(pitch, duration, instrument, volume);
-        ToneGenerator.threadPool.execute(tone);
+        ToneGenerator.threadPool.execute(() -> Tone.play(pitch, duration, instrument, volume));
     }
 
     /**
@@ -128,8 +125,7 @@ final class ToneGenerator {
      */
     public static void generateToneSynchronously(final byte pitch, final int duration,
                                                  final byte instrument, final byte volume) {
-        final Runnable tone = new Tone(pitch, duration, instrument, volume);
-        tone.run();
+        Tone.play(pitch, duration, instrument, volume);
     }
 
 }
@@ -139,7 +135,7 @@ final class ToneGenerator {
  * instrument (patch), and volume. The tone can be passed to a thread
  * and will be played using MIDI.
  */
-class Tone implements Runnable {
+final class Tone {
     /**
      * Tempo of the tone is in milliseconds: 1000 beats per second.
      */
@@ -150,15 +146,31 @@ class Tone implements Runnable {
      */
     public final static int DEFAULT_CHANNEL = 0;
     private static final Logger LOGGER = LogManager.getLogger();
+    /**
+     * The following lock and the code which locks and unlocks it
+     * around the opening of the Sequencer were added 2009-10-19 by
+     * Max Hailperin <max@gustavus.edu> in order to work around a
+     * bug in Sun's JDK which causes crashing if two threads race:
+     * <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6888117">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6888117</a> .
+     * This routinely manifested native-code crashes when tones
+     * were played asynchronously, on dual-core machines with Sun's
+     * JDK (but not on one core or with OpenJDK). Even when tones
+     * were played only synchronously, crashes sometimes occurred.
+     * This is likely due to the fact that Thread.sleep was used
+     * for synchronization, a role it cannot reliably serve. In
+     * any case, this one lock seems to make all the crashes go
+     * away, and the sleeps are being eliminated (since they can
+     * cause other, less severe, problems), so that case should be
+     * double covered.
+     */
     private static final Lock openLock = new ReentrantLock();
-    private final byte pitch;
-    private final int duration;
-    private final byte instrument;
-    private final byte volume;
+
+    private Tone() {
+    }
+
 
     /**
-     * Instantiates a new Tone object, initializing the tone's pitch,
-     * duration, instrument (patch), and volume.
+     * Plays the tone
      *
      * @param pitch      the pitch in semitones. Pitch is represented by
      *                   a positive byte second - 0-127 where 60 is middle C.
@@ -174,40 +186,7 @@ class Tone implements Runnable {
      *                   127 being
      *                   loud, and 0 being silent.
      */
-    public Tone(final byte pitch, final int duration, final byte instrument, final byte volume) {
-        this.pitch = pitch;
-        this.duration = duration;
-        this.instrument = instrument;
-        this.volume = volume;
-    }
-
-    /*
-     * The following lock and the code which locks and unlocks it
-     * around the opening of the Sequencer were added 2009-10-19 by
-     * Max Hailperin <max@gustavus.edu> in order to work around a
-     * bug in Sun's JDK which causes crashing if two threads race:
-     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6888117 .
-     * This routinely manifested native-code crashes when tones
-     * were played asynchronously, on dual-core machines with Sun's
-     * JDK (but not on one core or with OpenJDK). Even when tones
-     * were played only synchronously, crashes sometimes occurred.
-     * This is likely due to the fact that Thread.sleep was used
-     * for synchronization, a role it cannot reliably serve. In
-     * any case, this one lock seems to make all the crashes go
-     * away, and the sleeps are being eliminated (since they can
-     * cause other, less severe, problems), so that case should be
-     * double covered.
-     */
-
-    /**
-     * Plays the tone.
-     */
-    @Override
-    public void run() {
-        this.playTone();
-    }
-
-    private void playTone() {
+    public static void play(final byte pitch, final int duration, final byte instrument, final byte volume) {
 
         try {
             Sequencer player;
@@ -225,18 +204,18 @@ class Tone implements Runnable {
 
             // select instrument
             final ShortMessage inst = new ShortMessage();
-            inst.setMessage(ShortMessage.PROGRAM_CHANGE, Tone.DEFAULT_CHANNEL, this.instrument, 0);
+            inst.setMessage(ShortMessage.PROGRAM_CHANGE, Tone.DEFAULT_CHANNEL, instrument, 0);
             final MidiEvent instChange = new MidiEvent(inst, 0);
             t.add(instChange);
 
             final ShortMessage on = new ShortMessage();
-            on.setMessage(ShortMessage.NOTE_ON, Tone.DEFAULT_CHANNEL, this.pitch, this.volume);
+            on.setMessage(ShortMessage.NOTE_ON, Tone.DEFAULT_CHANNEL, pitch, volume);
             final MidiEvent noteOn = new MidiEvent(on, 0);
             t.add(noteOn);
 
             final ShortMessage off = new ShortMessage();
-            off.setMessage(ShortMessage.NOTE_OFF, Tone.DEFAULT_CHANNEL, this.pitch, this.volume);
-            final MidiEvent noteOff = new MidiEvent(off, this.duration);
+            off.setMessage(ShortMessage.NOTE_OFF, Tone.DEFAULT_CHANNEL, pitch, volume);
+            final MidiEvent noteOff = new MidiEvent(off, duration);
             t.add(noteOff);
 
             player.setSequence(seq);
@@ -266,6 +245,7 @@ class Tone implements Runnable {
             Tone.LOGGER.error("Error playing tone.", mue);
         }
     }
+
 }
 
 class EndOfTrackListener implements javax.sound.midi.MetaEventListener {

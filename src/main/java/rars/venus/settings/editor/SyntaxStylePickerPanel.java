@@ -1,113 +1,99 @@
 package rars.venus.settings.editor;
 
 import org.jetbrains.annotations.NotNull;
+import rars.venus.editors.TokenStyle;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public final class SyntaxStylePickerPanel extends JPanel {
 
-    private static final @NotNull JLabel FOREGROUND_LABEL = new JLabel("Foreground");
-    private static final @NotNull JLabel BACKGROUND_LABEL = new JLabel("Background");
-    private static final @NotNull JLabel BOLD_LABEL = new JLabel("Bold");
-    private static final @NotNull JLabel ITALIC_LABEL = new JLabel("Italic");
-    private static final @NotNull JLabel UNDERLINE_LABEL = new JLabel("Underline");
-
-    private final @NotNull JCheckBox isBold, isItalic, isUnderline, useForeground, useBackground;
-    private final @NotNull ColorPickerButton foregroundColorPicker, backgroundColorPicker;
+    public final @NotNull JCheckBox isBold, isItalic, isUnderline, useForeground, useBackground;
+    public final @NotNull ColorPickerButton foregroundColorPicker, backgroundColorPicker;
 
     public SyntaxStylePickerPanel() {
-        this.setLayout(new GridBagLayout());
-                
-        final var gbc = new GridBagConstraints();
-        
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // foreground
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        this.add(FOREGROUND_LABEL, gbc);
-        
-        this.useForeground = new JCheckBox();
-        gbc.gridx = 1;
-        this.add(useForeground, gbc);
-        
-        this.foregroundColorPicker = new ColorPickerButton();
-        this.useForeground.addChangeListener((event) -> {
-            final var isSelected = useForeground.isSelected();
-            foregroundColorPicker.setEnabled(isSelected);
-        });
-        gbc.gridx = 2;
-        this.add(foregroundColorPicker, gbc);
+        final var foregroundSection = new OptionSection("Foreground", false, Color.BLACK);
+        this.useForeground = Objects.requireNonNull(foregroundSection.checkBox);
+        this.foregroundColorPicker = Objects.requireNonNull(foregroundSection.colorPickerButton);
 
         // background
-        
-        gbc.gridy = 1;
-        gbc.gridx = 0;
-        this.add(BACKGROUND_LABEL, gbc);
-        
-        this.useBackground = new JCheckBox();
-        gbc.gridx = 1;
-        this.add(useBackground, gbc);
-        this.backgroundColorPicker = new ColorPickerButton();
-        this.useBackground.addChangeListener((event) -> {
-            final var isSelected = useBackground.isSelected();
-            backgroundColorPicker.setEnabled(isSelected);
-        });
-        gbc.gridx = 2;
-        this.add(backgroundColorPicker, gbc);
+        final var backgroundSection = new OptionSection("Background", false, Color.WHITE);
+        this.useBackground = Objects.requireNonNull(backgroundSection.checkBox);
+        this.backgroundColorPicker = Objects.requireNonNull(backgroundSection.colorPickerButton);
+
+        // upper row
+        final var upperRow = buildRow(true, foregroundSection, backgroundSection);
+        this.add(upperRow);
+        this.add(Box.createVerticalStrut(10));
 
         // bold
-        gbc.gridy = 2;
-        gbc.gridx = 0;
-        this.add(BOLD_LABEL, gbc);
-        this.isBold = new JCheckBox();
-        gbc.gridx = 1;
-        this.add(isBold, gbc);
+        final var boldSection = new OptionSection("Bold", false, null);
+        this.isBold = Objects.requireNonNull(boldSection.checkBox);
 
         // italic
-        gbc.gridy = 3;
-        gbc.gridx = 0;
-        this.add(ITALIC_LABEL, gbc);
-        this.isItalic = new JCheckBox();
-        gbc.gridx = 1;
-        this.add(isItalic, gbc);
+        final var italicSection = new OptionSection("Italic", false, null);
+        this.isItalic = Objects.requireNonNull(italicSection.checkBox);
 
         // underline
-        gbc.gridy = 4;
-        gbc.gridx = 0;
-        this.add(UNDERLINE_LABEL, gbc);
-        this.isUnderline = new JCheckBox();
-        gbc.gridx = 1;
-        this.add(isUnderline, gbc);
+        final var underlineSection = new OptionSection("Underline", false, null);
+        this.isUnderline = Objects.requireNonNull(underlineSection.checkBox);
+
+        // bottom row
+        final var bottomRow = buildRow(true, boldSection, italicSection, underlineSection);
+        this.add(bottomRow, BorderLayout.SOUTH);
     }
 
-    private @NotNull ColorPickerButton getForegroundColorPicker() {
-        return foregroundColorPicker;
+    public static @NotNull JPanel buildRow(final boolean addMargins, final @NotNull JComponent... sections) {
+        final var panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        if (addMargins) {
+            panel.add(Box.createHorizontalGlue());
+        }
+        Arrays.stream(sections)
+            .flatMap(s -> Stream.of(Box.createHorizontalGlue(), s))
+            .skip(1)
+            .forEach(panel::add);
+        if (addMargins) {
+            panel.add(Box.createHorizontalGlue());
+        }
+        return panel;
     }
 
-    private @NotNull ColorPickerButton getBackgroundColorPicker() {
-        return backgroundColorPicker;
+    public void setFromTokenStyle(final @NotNull TokenStyle style) {
+        final var foreground = style.foreground();
+        if (foreground != null) {
+            this.useForeground.setSelected(true);
+            this.foregroundColorPicker.setColor(foreground);
+        } else {
+            this.useForeground.setSelected(false);
+        }
+
+        final var background = style.background();
+        if (background != null) {
+            this.useBackground.setSelected(true);
+            this.backgroundColorPicker.setColor(background);
+        } else {
+            this.useBackground.setSelected(false);
+        }
+
+        this.isBold.setSelected(style.isBold());
+        this.isItalic.setSelected(style.isItalic());
+        this.isUnderline.setSelected(style.isUnderline());
     }
 
-    private @NotNull JCheckBox getUseForegroundCheckbox() {
-        return useForeground;
-    }
-    
-    private @NotNull JCheckBox getUseBackgroundCheckbox() {
-        return useBackground;
-    }
-    
-    private @NotNull JCheckBox getBoldCheckbox() {
-        return isBold;
-    }
-
-    private @NotNull JCheckBox getItalicCheckbox() {
-        return isItalic;
-    }
-
-    private @NotNull JCheckBox getUnderlineCheckbox() {
-        return isUnderline;
+    public @NotNull TokenStyle getTokenStyle() {
+        return new TokenStyle(
+            this.useForeground.isSelected() ? this.foregroundColorPicker.getColor() : null,
+            this.useBackground.isSelected() ? this.backgroundColorPicker.getColor() : null,
+            this.isBold.isSelected(),
+            this.isItalic.isSelected(),
+            this.isUnderline.isSelected()
+        );
     }
 }

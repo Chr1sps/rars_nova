@@ -104,86 +104,86 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         this.lineNumbers = new JLabel();
 
 //        this.sourceCode = new JEditBasedTextArea(this, this.lineNumbers);
-        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.getTheme());
+        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.getCurrentTheme());
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);
 
         // If source code is modified, will set flag to trigger/request file save.
         this.sourceCode.getDocument().addDocumentListener(
-                new DocumentListener() {
-                    @Override
-                    public void insertUpdate(final DocumentEvent evt) {
-                        // IF statement added DPS 9-Aug-2011
-                        // This method is triggered when file contents added to document
-                        // upon opening, even though not edited by user. The IF
-                        // statement will sense this situation and immediately return.
-                        if (FileStatus.get() == FileStatus.State.OPENING) {
-                            EditPane.this.setFileStatus(FileStatus.State.NOT_EDITED);
-                            FileStatus.set(FileStatus.State.NOT_EDITED);
-                            if (EditPane.this.showingLineNumbers()) {
-                                EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
-                            }
-                            return;
-                        }
-                        // End of 9-Aug-2011 modification.
-                        if (EditPane.this.getFileStatus() == FileStatus.State.NEW_NOT_EDITED) {
-                            EditPane.this.setFileStatus(FileStatus.State.NEW_EDITED);
-                        }
-                        if (EditPane.this.getFileStatus() == FileStatus.State.NOT_EDITED) {
-                            EditPane.this.setFileStatus(FileStatus.State.EDITED);
-                        }
-                        if (EditPane.this.getFileStatus() == FileStatus.State.NEW_EDITED) {
-                            EditPane.this.mainUI.getEditor().setTitle("", EditPane.this.getFilename(),
-                                    EditPane.this.getFileStatus());
-                        } else {
-                            EditPane.this.mainUI.getEditor().setTitle(EditPane.this.getPathname(),
-                                    EditPane.this.getFilename(), EditPane.this.getFileStatus());
-                        }
-
-                        FileStatus.setEdited(true);
-                        switch (FileStatus.get()) {
-                            case FileStatus.State.NEW_NOT_EDITED:
-                                FileStatus.set(FileStatus.State.NEW_EDITED);
-                                break;
-                            case FileStatus.State.NEW_EDITED:
-                                break;
-                            default:
-                                FileStatus.set(FileStatus.State.EDITED);
-                        }
-
-                        Globals.getGui().getMainPane().getExecutePane().clearPane(); // DPS 9-Aug-2011
-
+            new DocumentListener() {
+                @Override
+                public void insertUpdate(final DocumentEvent evt) {
+                    // IF statement added DPS 9-Aug-2011
+                    // This method is triggered when file contents added to document
+                    // upon opening, even though not edited by user. The IF
+                    // statement will sense this situation and immediately return.
+                    if (FileStatus.get() == FileStatus.State.OPENING) {
+                        EditPane.this.setFileStatus(FileStatus.State.NOT_EDITED);
+                        FileStatus.set(FileStatus.State.NOT_EDITED);
                         if (EditPane.this.showingLineNumbers()) {
                             EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
                         }
+                        return;
+                    }
+                    // End of 9-Aug-2011 modification.
+                    if (EditPane.this.getFileStatus() == FileStatus.State.NEW_NOT_EDITED) {
+                        EditPane.this.setFileStatus(FileStatus.State.NEW_EDITED);
+                    }
+                    if (EditPane.this.getFileStatus() == FileStatus.State.NOT_EDITED) {
+                        EditPane.this.setFileStatus(FileStatus.State.EDITED);
+                    }
+                    if (EditPane.this.getFileStatus() == FileStatus.State.NEW_EDITED) {
+                        EditPane.this.mainUI.getEditor().setTitle("", EditPane.this.getFilename(),
+                            EditPane.this.getFileStatus());
+                    } else {
+                        EditPane.this.mainUI.getEditor().setTitle(EditPane.this.getPathname(),
+                            EditPane.this.getFilename(), EditPane.this.getFileStatus());
                     }
 
-                    @Override
-                    public void removeUpdate(final DocumentEvent evt) {
-                        this.insertUpdate(evt);
+                    FileStatus.setEdited(true);
+                    switch (FileStatus.get()) {
+                        case FileStatus.State.NEW_NOT_EDITED:
+                            FileStatus.set(FileStatus.State.NEW_EDITED);
+                            break;
+                        case FileStatus.State.NEW_EDITED:
+                            break;
+                        default:
+                            FileStatus.set(FileStatus.State.EDITED);
                     }
 
-                    //                    @Override
+                    Globals.getGui().getMainPane().getExecutePane().clearPane(); // DPS 9-Aug-2011
+
+                    if (EditPane.this.showingLineNumbers()) {
+                        EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
+                    }
+                }
+
+                @Override
+                public void removeUpdate(final DocumentEvent evt) {
+                    this.insertUpdate(evt);
+                }
+
+                //                    @Override
 //                    public void changedUpdate(final DocumentEvent evt) {
 //                        this.insertUpdate(evt);
 //                    }
-                    @Override
-                    public void changedUpdate(final DocumentEvent e) {
+                @Override
+                public void changedUpdate(final DocumentEvent e) {
 
-                    }
+                }
 
-                    @Override
-                    public String toString() {
-                        return "EditPane DocumentListener";
-                    }
-                });
+                @Override
+                public String toString() {
+                    return "EditPane DocumentListener";
+                }
+            });
 
         this.showLineNumbers = new JCheckBox("Show Line Numbers");
         this.showLineNumbers.setToolTipText("If checked, will display line number for each line of text.");
         this.showLineNumbers.setEnabled(false);
         // Show line numbers by default.
         this.showLineNumbers
-                .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED));
+            .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED));
 
         this.setSourceCode("", false);
 
@@ -194,20 +194,20 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
 
         // Listener fires when "Show Line Numbers" check box is clicked.
         this.showLineNumbers.addItemListener(
-                e -> {
-                    if (EditPane.this.showLineNumbers.isSelected()) {
-                        EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
-                        EditPane.this.lineNumbers.setVisible(true);
-                    } else {
-                        EditPane.this.lineNumbers.setText("");
-                        EditPane.this.lineNumbers.setVisible(false);
-                    }
-                    EditPane.this.sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
-                    BOOL_SETTINGS.setSettingAndSave(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED,
-                            EditPane.this.showLineNumbers.isSelected());
-                    // needed because caret disappears when checkbox clicked
-                    EditPane.this.sourceCode.requestFocusInWindow();
-                });
+            e -> {
+                if (EditPane.this.showLineNumbers.isSelected()) {
+                    EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
+                    EditPane.this.lineNumbers.setVisible(true);
+                } else {
+                    EditPane.this.lineNumbers.setText("");
+                    EditPane.this.lineNumbers.setVisible(false);
+                }
+                EditPane.this.sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
+                BOOL_SETTINGS.setSettingAndSave(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED,
+                    EditPane.this.showLineNumbers.isSelected());
+                // needed because caret disappears when checkbox clicked
+                EditPane.this.sourceCode.requestFocusInWindow();
+            });
 
         final JPanel editInfo = new JPanel(new BorderLayout());
         this.caretPositionLabel = new JLabel();
@@ -640,9 +640,9 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     @Override
     public void onNext(final SettingsNotice ignored) {
         this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-        this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.getTheme());
+        this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.getCurrentTheme());
         this.sourceCode.setLineHighlightEnabled(
-                BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
+            BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
         this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
         this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
         this.sourceCode.revalidate();
@@ -666,8 +666,8 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      */
     private Font getLineNumberFont(final Font sourceFont) {
         return (this.sourceCode.getFont().getStyle() == Font.PLAIN)
-                ? sourceFont
-                : new Font(sourceFont.getFamily(), Font.PLAIN, sourceFont.getSize());
+            ? sourceFont
+            : new Font(sourceFont.getFamily(), Font.PLAIN, sourceFont.getSize());
     }
 
 }

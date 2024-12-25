@@ -2,6 +2,7 @@ package rars.venus.editors;
 
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import java.awt.*;
 
@@ -54,11 +55,7 @@ public interface TextEditingArea {
 
     int getSelectionEnd();
 
-    void setSelectionEnd(int pos);
-
     int getSelectionStart();
-
-    void setSelectionStart(int pos);
 
     void select(int selectionStart, int selectionEnd);
 
@@ -73,6 +70,8 @@ public interface TextEditingArea {
     void replaceSelection(String str);
 
     void setEditable(boolean editable);
+    
+    void setFocusable(boolean focusable);
 
     Font getFont();
 
@@ -85,6 +84,8 @@ public interface TextEditingArea {
     void setBackground(Color c);
 
     void setEnabled(boolean enabled);
+    
+    void disableFully();
 
     void grabFocus();
 
@@ -99,7 +100,9 @@ public interface TextEditingArea {
     void discardAllUndoableEdits();
 
     void setLineHighlightEnabled(boolean highlight);
-
+    
+    void setCaret(final @NotNull Caret caret);
+    
     void setCaretBlinkRate(int rate);
 
     void setTabSize(int chars);

@@ -20,6 +20,7 @@ import rars.venus.run.RunSpeedPanel;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -55,17 +56,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  */
-public class Simulator extends CustomPublisher<SimulatorNotice> {
+public final class Simulator extends CustomPublisher<SimulatorNotice> {
     private static @Nullable Simulator simulator = null; // Singleton object
     private static @Nullable Runnable interactiveGUIUpdater = null;
-    private final @NotNull ArrayList<StopListener> stopListeners = new ArrayList<>(1);
+    private final @NotNull ArrayList<Consumer<Simulator>> stopListeners = new ArrayList<>(1);
     private @Nullable SimThread simulatorThread;
 
     private Simulator() {
         this.simulatorThread = null;
         if (Globals.getGui() != null) {
-            Simulator.interactiveGUIUpdater = new UpdateGUI();
+            Simulator.interactiveGUIUpdater = this::updateUi;
         }
+    }
+    
+    private void updateUi() {
+        if (Globals.getGui().getRegistersPane().getSelectedComponent() == Globals.getGui().getMainPane()
+            .getExecutePane().getRegistersWindow()) {
+            Globals.getGui().getMainPane().getExecutePane().getRegistersWindow().updateRegisters();
+        } else {
+            Globals.getGui().getMainPane().getExecutePane().getFloatingPointWindow().updateRegisters();
+        }
+        Globals.getGui().getMainPane().getExecutePane().getDataSegmentWindow().updateValues();
+        Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow().setCodeHighlighting(true);
+        Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow().highlightStepAtPC();       
     }
 
     /**
@@ -139,53 +152,39 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
     private void interruptExecution(final @NotNull Reason reason) {
         if (this.simulatorThread != null) {
             this.simulatorThread.setStop(reason);
-            for (final StopListener l : this.stopListeners) {
-                l.stopped(this);
+            for (final var listener : this.stopListeners) {
+                listener.accept(this);
             }
             this.simulatorThread = null;
         }
     }
 
-    /**
-     * <p>stopExecution.</p>
-     */
     public void stopExecution() {
         this.interruptExecution(Reason.STOP);
     }
 
-    /**
-     * <p>pauseExecution.</p>
-     */
     public void pauseExecution() {
         this.interruptExecution(Reason.PAUSE);
     }
 
-    /**
-     * <p>addStopListener.</p>
-     *
-     * @param l a {@link Simulator.StopListener} object
-     */
-    public void addStopListener(final StopListener l) {
+    public void addStopListener(final @NotNull Consumer<Simulator> l) {
         this.stopListeners.add(l);
     }
 
-    /**
-     * <p>removeStopListener.</p>
-     *
-     * @param l a {@link Simulator.StopListener} object
-     */
-    public void removeStopListener(final StopListener l) {
+    public void removeStopListener(final @NotNull Consumer<Simulator> l) {
         this.stopListeners.remove(l);
     }
 
-    // The Simthread object will call this method when it enters and returns from
-    // its run() method. These signal start and stop, respectively, of
-    // simulation execution. The observer can then adjust its own state depending
-    // on the execution state. Note that "stop" and "done" are not the same thing.
-    // "stop" just means it is leaving execution state; this could be triggered
-    // by Stop button, by Pause button, by Step button, by runtime exception, by
-    // instruction count limit, by breakpoint, or by end of simulation (truly done).
-    private void notifyObserversOfExecution(final SimulatorNotice notice) {
+    /**
+     * The Simthread object will call this method when it enters and returns from
+     * its run() method. These signal start and stop, respectively, of
+     * simulation execution. The observer can then adjust its own state depending
+     * on the execution state. Note that "stop" and "done" are not the same thing.
+     * "stop" just means it is leaving execution state; this could be triggered
+     * by Stop button, by Pause button, by Step button, by runtime exception, by
+     * instruction count limit, by breakpoint, or by end of simulation (truly done).
+     */
+    private void notifyObserversOfExecution(final @NotNull SimulatorNotice notice) {
         // TODO: this is not completely threadsafe, if anything using Swing is observing
         // This can be fixed by making a SwingObserver class that is thread-safe
         this.submit(notice);
@@ -211,16 +210,6 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
         CLIFF_TERMINATION, // run off bottom of program
         PAUSE,
         STOP
-    }
-
-    /*
-     * This interface is required by the Asker class in MessagesPane
-     * to be notified about the fact that the user has requested to
-     * stop the execution. When that happens, it must unblock the
-     * simulator thread.
-     */
-    public interface StopListener {
-        void stopped(Simulator s);
     }
 
     /**
@@ -272,11 +261,11 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
 
         private void startExecution() {
             Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.START,
-                    this.maxSteps,
-                    (Globals.getGui() != null || RunSpeedPanel.exists())
-                            ? RunSpeedPanel.getInstance().getRunSpeed()
-                            : RunSpeedPanel.UNLIMITED_SPEED,
-                    this.pc, null, this.pe, this.done));
+                this.maxSteps,
+                (Globals.getGui() != null || RunSpeedPanel.exists())
+                    ? RunSpeedPanel.getInstance().getRunSpeed()
+                    : RunSpeedPanel.UNLIMITED_SPEED,
+                this.pc, null, this.pe, this.done));
         }
 
         private void stopExecution(final boolean done, final Reason reason) {
@@ -286,11 +275,11 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
             if (done)
                 SystemIO.resetFiles(); // close any files opened in the process of simulating
             Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.STOP,
-                    this.maxSteps,
-                    (Globals.getGui() != null || RunSpeedPanel.exists())
-                            ? RunSpeedPanel.getInstance().getRunSpeed()
-                            : RunSpeedPanel.UNLIMITED_SPEED,
-                    this.pc, reason, this.pe, done));
+                this.maxSteps,
+                (Globals.getGui() != null || RunSpeedPanel.exists())
+                    ? RunSpeedPanel.getInstance().getRunSpeed()
+                    : RunSpeedPanel.UNLIMITED_SPEED,
+                this.pc, reason, this.pe, done));
         }
 
         private synchronized void interrupt() {
@@ -341,8 +330,8 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
 
             // Don't handle cases where that interrupt isn't enabled
             assert ((ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) != 0
-                    && (ControlAndStatusRegisterFile.getValue("uie") & (1 << code)) != 0)
-                    : "The interrupt handler must be enabled";
+                && (ControlAndStatusRegisterFile.getValue("uie") & (1 << code)) != 0)
+                : "The interrupt handler must be enabled";
 
             // set the relevant CSRs
             ControlAndStatusRegisterFile.updateRegister("ucause", cause);
@@ -378,10 +367,6 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                 return false;
             }
         }
-
-        /**
-         * Implements Runnable
-         */
 
         @Override
         public void run() {
@@ -457,7 +442,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                     long uip = ControlAndStatusRegisterFile.getValueNoNotify("uip");
                     final long uie = ControlAndStatusRegisterFile.getValueNoNotify("uie");
                     final boolean IE = (ControlAndStatusRegisterFile.getValueNoNotify("ustatus")
-                            & ControlAndStatusRegisterFile.INTERRUPT_ENABLE) != 0;
+                        & ControlAndStatusRegisterFile.INTERRUPT_ENABLE) != 0;
                     // make sure no interrupts sneak in while we are processing them
                     this.pc = RegisterFile.getProgramCounter();
                     synchronized (InterruptController.lock) {
@@ -467,7 +452,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                         // This is the explicit (in the spec) order that interrupts should be serviced
                         if (IE && pendingExternal && (uie & ControlAndStatusRegisterFile.EXTERNAL_INTERRUPT) != 0) {
                             if (this.handleInterrupt(InterruptController.claimExternal(),
-                                    ExceptionReason.EXTERNAL_INTERRUPT.value, this.pc)) {
+                                ExceptionReason.EXTERNAL_INTERRUPT.value, this.pc)) {
                                 pendingExternal = false;
                                 uip &= ~0x100;
                             } else {
@@ -475,7 +460,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                                 // thats an error
                             }
                         } else if (IE && (uip & 0x1) != 0
-                                && (uie & ControlAndStatusRegisterFile.SOFTWARE_INTERRUPT) != 0) {
+                            && (uie & ControlAndStatusRegisterFile.SOFTWARE_INTERRUPT) != 0) {
                             if (this.handleInterrupt(0, ExceptionReason.SOFTWARE_INTERRUPT.value, this.pc)) {
                                 uip &= ~0x1;
                             } else {
@@ -484,8 +469,8 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                             }
                         } else if (IE && pendingTimer && (uie & ControlAndStatusRegisterFile.TIMER_INTERRUPT) != 0) {
                             if (this.handleInterrupt(InterruptController.claimTimer(),
-                                    ExceptionReason.TIMER_INTERRUPT.value,
-                                    this.pc)) {
+                                ExceptionReason.TIMER_INTERRUPT.value,
+                                this.pc)) {
                                 pendingTimer = false;
                                 uip &= ~0x10;
                             } else {
@@ -495,12 +480,12 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                         } else if (pendingTrap) { // if we have a pending trap and aren't handling an interrupt it must
                             // be handled
                             if (!this.handleTrap(InterruptController.claimTrap(),
-                                    this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH)) {
+                                this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH)) {
                                 return;
                             }
                         }
                         uip |= (pendingExternal ? ControlAndStatusRegisterFile.EXTERNAL_INTERRUPT : 0)
-                                | (pendingTimer ? ControlAndStatusRegisterFile.TIMER_INTERRUPT : 0);
+                            | (pendingTimer ? ControlAndStatusRegisterFile.TIMER_INTERRUPT : 0);
                     }
                     if (uip != ControlAndStatusRegisterFile.getValueNoNotify("uip")) {
                         ControlAndStatusRegisterFile.updateRegister("uip", uip);
@@ -525,10 +510,10 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                         final SimulationException tmp;
                         if (e.reason == ExceptionReason.LOAD_ACCESS_FAULT) {
                             tmp = new SimulationException("Instruction load access error",
-                                    ExceptionReason.INSTRUCTION_ACCESS_FAULT);
+                                ExceptionReason.INSTRUCTION_ACCESS_FAULT);
                         } else {
                             tmp = new SimulationException("Instruction load alignment error",
-                                    ExceptionReason.INSTRUCTION_ADDR_MISALIGNED);
+                                ExceptionReason.INSTRUCTION_ADDR_MISALIGNED);
                         }
                         if (!InterruptController.registerSynchronousTrap(tmp, this.pc)) {
                             this.pe = tmp;
@@ -549,9 +534,9 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                         if (instruction == null) {
                             // TODO: Proper error handling here
                             throw new SimulationException(statement,
-                                    "undefined instruction (" + Binary.intToHexString(statement.getBinaryStatement())
-                                            + ")",
-                                    ExceptionReason.ILLEGAL_INSTRUCTION);
+                                "undefined instruction (" + Binary.intToHexString(statement.getBinaryStatement())
+                                    + ")",
+                                ExceptionReason.ILLEGAL_INSTRUCTION);
                         }
                         // THIS IS WHERE THE INSTRUCTION EXECUTION IS ACTUALLY SIMULATED!
                         instruction.simulate(statement);
@@ -604,7 +589,7 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
 
                 // Return if we've reached a breakpoint.
                 if (ebreak || (this.breakPoints != null) &&
-                        (Arrays.binarySearch(this.breakPoints, RegisterFile.getProgramCounter()) >= 0)) {
+                    (Arrays.binarySearch(this.breakPoints, RegisterFile.getProgramCounter()) >= 0)) {
                     this.stopExecution(false, Reason.BREAKPOINT);
                     return;
                 }
@@ -627,13 +612,13 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                 // using Run, not Step (maxSteps != 1) AND
                 // running slowly enough for GUI to keep up
                 if (Simulator.interactiveGUIUpdater != null && this.maxSteps != 1 &&
-                        RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
+                    RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                     SwingUtilities.invokeLater(Simulator.interactiveGUIUpdater);
                 }
                 if (Globals.getGui() != null || RunSpeedPanel.exists()) { // OR added by DPS 24 July 2008 to enable
                     // speed control by stand-alone tool
                     if (this.maxSteps != 1 &&
-                            RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
+                        RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                         try {
                             this.wait((int) (1000 / RunSpeedPanel.getInstance().getRunSpeed()));
                         } catch (final InterruptedException ignored) {
@@ -642,21 +627,6 @@ public class Simulator extends CustomPublisher<SimulatorNotice> {
                 }
             }
             this.stopExecution(false, this.constructReturnReason);
-        }
-    }
-
-    private static class UpdateGUI implements Runnable {
-        @Override
-        public void run() {
-            if (Globals.getGui().getRegistersPane().getSelectedComponent() == Globals.getGui().getMainPane()
-                    .getExecutePane().getRegistersWindow()) {
-                Globals.getGui().getMainPane().getExecutePane().getRegistersWindow().updateRegisters();
-            } else {
-                Globals.getGui().getMainPane().getExecutePane().getFloatingPointWindow().updateRegisters();
-            }
-            Globals.getGui().getMainPane().getExecutePane().getDataSegmentWindow().updateValues();
-            Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow().setCodeHighlighting(true);
-            Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow().highlightStepAtPC();
         }
     }
 }

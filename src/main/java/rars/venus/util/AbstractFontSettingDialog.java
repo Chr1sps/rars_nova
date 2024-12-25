@@ -87,10 +87,6 @@ public abstract class AbstractFontSettingDialog extends JDialog {
         this.setLocationRelativeTo(owner);
     }
 
-    // Build component containing the buttons for dialog control
-    // Such as OK, Cancel, Reset, Apply, etc. These may vary
-    // by application
-
     // Given an array of string arrays, will produce a Vector contenating
     // the arrays with a separator between each.
     private static Vector<String> makeVectorData(final String[][] strs) {
@@ -192,14 +188,14 @@ public abstract class AbstractFontSettingDialog extends JDialog {
 
     // User has clicked "Apply" or "Apply and Close" button.
 
+
     /**
-     * <p>buildControlPanel.</p>
-     *
-     * @return a {@link java.awt.Component} object
+     * Build component containing the buttons for dialog control
+     * Such as OK, Cancel, Reset, Apply, etc. These may vary
+     * by application
      */
     protected abstract Component buildControlPanel();
 
-    // We're finished with this modal dialog.
 
     /**
      * <p>getFont.</p>
@@ -217,13 +213,6 @@ public abstract class AbstractFontSettingDialog extends JDialog {
     // Reset font to its initial setting
 
     /**
-     * <p>performApply.</p>
-     */
-    protected void performApply() {
-        this.apply(this.getFont());
-    }
-
-    /**
      * <p>closeDialog.</p>
      */
     protected void closeDialog() {
@@ -231,18 +220,6 @@ public abstract class AbstractFontSettingDialog extends JDialog {
         this.dispose();
     }
 
-    /////////////////////////////////////////////////////////////////////
-    //
-    // Method and two classes to permit one or more horizontal separators
-    // within a combo box list. I obtained this code on 13 July 2007
-    // from http://www.codeguru.com/java/articles/164.shtml. Author
-    // is listed: Nobuo Tamemasa. Code is old, 1999, but fine for this.
-    // I will use it to separate the short list of "common" font
-    // families from the very long list of all font families. No attempt
-    // to keep a list of recently-used fonts like Word does. The list
-    // of common font families is static.
-    //
-    /////////////////////////////////////////////////////////////////////
 
     /**
      * <p>reset.</p>
@@ -260,6 +237,15 @@ public abstract class AbstractFontSettingDialog extends JDialog {
      * @param font a font to be applied by the client.
      */
     protected abstract void apply(Font font);
+
+    // Method and two classes to permit one or more horizontal separators
+    // within a combo box list. I obtained this code on 13 July 2007
+    // from http://www.codeguru.com/java/articles/164.shtml. Author
+    // is listed: Nobuo Tamemasa. Code is old, 1999, but fine for this.
+    // I will use it to separate the short list of "common" font
+    // families from the very long list of all font families. No attempt
+    // to keep a list of recently-used fonts like Word does. The list
+    // of common font families is static.
 
     // Required renderer for handling the separator bar.
     private static class ComboBoxRenderer extends JLabel implements ListCellRenderer<String> {

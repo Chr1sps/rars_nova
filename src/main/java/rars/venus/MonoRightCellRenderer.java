@@ -44,12 +44,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public class MonoRightCellRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(final JTable table, final Object value,
-                                                   final boolean isSelected, final boolean hasFocus, final int row, final int column) {
+                                                   final boolean isSelected, final boolean hasFocus, final int row,
+                                                   final int column) {
         final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
-                isSelected, hasFocus, row, column);
+            isSelected, hasFocus, row, column);
         cell.setFont(FONT_SETTINGS.getCurrentFont());
         cell.setHorizontalAlignment(SwingConstants.RIGHT);
-        final var theme = EDITOR_THEME_SETTINGS.getTheme();
+        final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
         cell.setForeground(theme.foregroundColor);
         cell.setBackground(theme.backgroundColor);
         return cell;

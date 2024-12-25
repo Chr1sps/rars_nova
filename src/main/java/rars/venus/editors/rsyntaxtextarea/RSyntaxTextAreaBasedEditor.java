@@ -14,8 +14,12 @@ import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.Theme;
 
 import javax.swing.*;
+import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
@@ -23,8 +27,8 @@ import static rars.settings.Settings.FONT_SETTINGS;
 
 public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private static final Map<TextAttribute, Object> ligatureAttributes = Map.of(
-            TextAttribute.KERNING, TextAttribute.KERNING_ON,
-            TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON
+        TextAttribute.KERNING, TextAttribute.KERNING_ON,
+        TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON
     );
 
     static {
@@ -116,23 +120,14 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public void setSelectionEnd(final int pos) {
-        textArea.setSelectionEnd(pos);
-    }
-
-    @Override
     public int getSelectionStart() {
         return textArea.getSelectionStart();
     }
 
     @Override
-    public void setSelectionStart(final int pos) {
-        textArea.setSelectionStart(pos);
-    }
-
-    @Override
     public void select(final int selectionStart, final int selectionEnd) {
         textArea.select(selectionStart, selectionEnd);
+        textArea.grabFocus();
     }
 
     @Override
@@ -163,6 +158,11 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void setEditable(final boolean editable) {
         textArea.setEditable(editable);
+    }
+
+    @Override
+    public void setFocusable(final boolean focusable) {
+        textArea.setFocusable(focusable);
     }
 
     @Override
@@ -198,8 +198,53 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
+    public void disableFully() {
+        scrollPane.setEnabled(false);
+        scrollPane.setFocusable(false);
+        textArea.setEditable(false);
+        textArea.setFocusable(false);
+        textArea.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(final MouseEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void mousePressed(final MouseEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void mouseReleased(final MouseEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void mouseEntered(final MouseEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void mouseExited(final MouseEvent e) {
+                e.consume();
+            }
+        });
+        textArea.addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(final MouseEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void mouseMoved(final MouseEvent e) {
+                e.consume();
+            }
+        });
+    }
+
+    @Override
     public void grabFocus() {
-        textArea.grabFocus();
+        scrollPane.grabFocus();
     }
 
     @Override
@@ -235,6 +280,11 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void setLineHighlightEnabled(final boolean highlight) {
         textArea.setHighlightCurrentLine(highlight);
+    }
+
+    @Override
+    public void setCaret(@NotNull final Caret caret) {
+        textArea.setCaret(caret);
     }
 
     @Override

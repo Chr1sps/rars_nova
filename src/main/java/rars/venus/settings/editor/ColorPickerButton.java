@@ -7,18 +7,14 @@ import java.awt.*;
 
 public final class ColorPickerButton extends JButton {
     private @NotNull Color color;
-    
-    public ColorPickerButton() {
-        this(Color.WHITE);
-    }
-
+   
     public ColorPickerButton(final Color color) {
         super("Pick Color");
-        this.updateColor(color);
+        this.setColor(color);
         this.addActionListener((event) -> {
             final var result = JColorChooser.showDialog(null, "Choose color", this.color);
             if (result != null) {
-                this.updateColor(result);
+                this.setColor(result);
             }
         });
     }
@@ -35,15 +31,15 @@ public final class ColorPickerButton extends JButton {
         return luminance > 127.5 ? Color.BLACK : Color.WHITE;
     }
 
-    private void updateColor(final @NotNull Color color) {
+    public @NotNull Color getColor() {
+        return this.color;
+    }
+
+    public void setColor(final @NotNull Color color) {
         this.color = color;
         final var foreground = getBestForegroundForBackground(color);
         this.setBackground(color);
         this.setForeground(foreground);
         this.setText(String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue()));
-    }
-    
-    public @NotNull Color getColor() {
-        return this.color;
     }
 }

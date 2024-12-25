@@ -4,51 +4,54 @@ import javax.swing.*;
 import java.awt.*;
 
 public final class PickerCardView extends JPanel {
-    private final CardLayout layout;
-    private final BaseStylePickerPanel baseStylePicker;
-    private final SyntaxStylePickerPanel syntaxStylePicker;
-    private final FontPickerPanel fontPicker;
+    public final BaseStylePickerPanel baseStylePicker;
+    public final SyntaxStylePickerPanel syntaxStylePicker;
+    public final FontPickerPanel fontPicker;
+    public final OtherSettingsPanel otherSettingsPanel;
+    private final JPanel upperPanel;
+    private final CardLayout upperLayout;
 
     public PickerCardView() {
-        super(new CardLayout());
-        layout = (CardLayout) getLayout();
+        super();
+        setLayout(new BorderLayout());
+        upperLayout = new CardLayout();
+        upperPanel = new JPanel(upperLayout);
 
-        JPanel emptyPanel = new JPanel();
+        setPreferredSize(new Dimension(450, 450));
+        setMinimumSize(new Dimension(50, 50));
+
+        final var emptyPanel = new JPanel();
         baseStylePicker = new BaseStylePickerPanel();
         syntaxStylePicker = new SyntaxStylePickerPanel();
         fontPicker = new FontPickerPanel();
+        otherSettingsPanel = new OtherSettingsPanel();
 
-        add(emptyPanel, "empty");
-        add(fontPicker, "font");
-        add(baseStylePicker, "base");
-        add(syntaxStylePicker, "syntax");
-    }
+        upperPanel.add(emptyPanel, "empty");
+        upperPanel.add(fontPicker, "font");
+        upperPanel.add(baseStylePicker, "base");
+        upperPanel.add(syntaxStylePicker, "syntax");
+        upperPanel.add(otherSettingsPanel, "other");
 
-    public FontPickerPanel getFontPicker() {
-        return fontPicker;
-    }
-
-    public SyntaxStylePickerPanel getSyntaxStylePicker() {
-        return syntaxStylePicker;
-    }
-
-    public BaseStylePickerPanel getBaseStylePicker() {
-        return baseStylePicker;
+        this.add(upperPanel, BorderLayout.NORTH);
     }
 
     public void showBasePicker() {
-        layout.show(this, "base");
+        upperLayout.show(upperPanel, "base");
     }
 
     public void showFontPicker() {
-        layout.show(this, "font");
+        upperLayout.show(upperPanel, "font");
     }
 
     public void showSyntaxStylePicker() {
-        layout.show(this, "syntax");
+        upperLayout.show(upperPanel, "syntax");
     }
 
     public void showEmpty() {
-        layout.show(this, "empty");
+        upperLayout.show(upperPanel, "empty");
+    }
+    
+    public void showOtherSettings() {
+        upperLayout.show(upperPanel, "other");
     }
 }

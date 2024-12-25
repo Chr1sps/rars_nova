@@ -2,9 +2,11 @@ package rars.venus.settings;
 
 import rars.Globals;
 import rars.venus.GuiAction;
+import rars.venus.settings.editor.EditorSettingsDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.Objects;
 
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
@@ -62,7 +64,8 @@ public class SettingsEditorAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        JOptionPane.showMessageDialog(Globals.getGui(), "SettingsEditorAction not implemented yet.");
+        final var editorDialog = new EditorSettingsDialog(Objects.requireNonNull(Globals.getGui()), "Editor Settings", true);
+        editorDialog.setVisible(true);
     }
 
 }

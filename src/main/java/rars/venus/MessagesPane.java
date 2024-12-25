@@ -1,5 +1,6 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
@@ -16,6 +17,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.function.Consumer;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -92,91 +94,92 @@ public class MessagesPane extends JTabbedPane {
         final JButton assembleTabClearButton = new JButton("Clear");
         assembleTabClearButton.setToolTipText("Clear the Messages area");
         assembleTabClearButton.addActionListener(
-                e -> this.assemble.setText(""));
+            e -> this.assemble.setText(""));
         this.assembleTab = new JPanel(new BorderLayout());
         this.assembleTab.add(MessagesPane.createBoxForButton(assembleTabClearButton), BorderLayout.WEST);
         this.assembleTab.add(new JScrollPane(this.assemble, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
         this.assemble.addMouseListener(
-                new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(final MouseEvent e) {
-                        String text;
-                        int lineStart = 0;
-                        int lineEnd = 0;
-                        try {
-                            final int line = MessagesPane.this.assemble.getLineOfOffset(MessagesPane.this.assemble.viewToModel2D(e.getPoint()));
-                            lineStart = MessagesPane.this.assemble.getLineStartOffset(line);
-                            lineEnd = MessagesPane.this.assemble.getLineEndOffset(line);
-                            text = MessagesPane.this.assemble.getText(lineStart, lineEnd - lineStart);
-                        } catch (final BadLocationException ble) {
-                            text = "";
-                        }
-                        if (!text.isEmpty()) {
-                            // If error or warning, parse out the line and column number.
-                            if (text.startsWith(ErrorList.ERROR_MESSAGE_PREFIX)
-                                    || text.startsWith(ErrorList.WARNING_MESSAGE_PREFIX)) {
-                                MessagesPane.this.assemble.select(lineStart, lineEnd);
-                                MessagesPane.this.assemble.setSelectionColor(Color.YELLOW);
-                                MessagesPane.this.assemble.setSelectedTextColor(Color.BLACK);
-                                MessagesPane.this.assemble.repaint();
-                                final int separatorPosition = text.indexOf(ErrorList.MESSAGE_SEPARATOR);
-                                if (separatorPosition >= 0) {
-                                    text = text.substring(0, separatorPosition);
-                                }
-                                final String[] stringTokens = text.split("\\s"); // tokenize with whitespace delimiter
-                                final String lineToken = ErrorList.LINE_PREFIX.trim();
-                                final String columnToken = ErrorList.POSITION_PREFIX.trim();
-                                String lineString = "";
-                                String columnString = "";
-                                for (int i = 0; i < stringTokens.length; i++) {
-                                    if (stringTokens[i].equals(lineToken) && i < stringTokens.length - 1)
-                                        lineString = stringTokens[i + 1];
-                                    if (stringTokens[i].equals(columnToken) && i < stringTokens.length - 1)
-                                        columnString = stringTokens[i + 1];
-                                }
-                                int line = 0;
-                                int column = 0;
-                                try {
-                                    line = Integer.parseInt(lineString);
-                                } catch (final NumberFormatException ignored) {
-                                }
-                                try {
-                                    column = Integer.parseInt(columnString);
-                                } catch (final NumberFormatException ignored) {
-                                }
-                                // everything between FILENAME_PREFIX and LINE_PREFIX is filename.
-                                final int fileNameStart = text.indexOf(ErrorList.FILENAME_PREFIX)
-                                        + ErrorList.FILENAME_PREFIX.length();
-                                final int fileNameEnd = text.indexOf(ErrorList.LINE_PREFIX);
-                                String fileName = "";
-                                if (fileNameStart < fileNameEnd
-                                        && fileNameStart >= ErrorList.FILENAME_PREFIX.length()) {
-                                    fileName = text.substring(fileNameStart, fileNameEnd).trim();
-                                }
-                                if (!fileName.isEmpty()) {
-                                    MessagesPane.selectEditorTextLine(fileName, line, column);
-                                    MessagesPane.this.selectErrorMessage(fileName, line, column);
-                                }
+            new MouseAdapter() {
+                @Override
+                public void mouseClicked(final MouseEvent e) {
+                    String text;
+                    int lineStart = 0;
+                    int lineEnd = 0;
+                    try {
+                        final int line =
+                            MessagesPane.this.assemble.getLineOfOffset(MessagesPane.this.assemble.viewToModel2D(e.getPoint()));
+                        lineStart = MessagesPane.this.assemble.getLineStartOffset(line);
+                        lineEnd = MessagesPane.this.assemble.getLineEndOffset(line);
+                        text = MessagesPane.this.assemble.getText(lineStart, lineEnd - lineStart);
+                    } catch (final BadLocationException ble) {
+                        text = "";
+                    }
+                    if (!text.isEmpty()) {
+                        // If error or warning, parse out the line and column number.
+                        if (text.startsWith(ErrorList.ERROR_MESSAGE_PREFIX)
+                            || text.startsWith(ErrorList.WARNING_MESSAGE_PREFIX)) {
+                            MessagesPane.this.assemble.select(lineStart, lineEnd);
+                            MessagesPane.this.assemble.setSelectionColor(Color.YELLOW);
+                            MessagesPane.this.assemble.setSelectedTextColor(Color.BLACK);
+                            MessagesPane.this.assemble.repaint();
+                            final int separatorPosition = text.indexOf(ErrorList.MESSAGE_SEPARATOR);
+                            if (separatorPosition >= 0) {
+                                text = text.substring(0, separatorPosition);
+                            }
+                            final String[] stringTokens = text.split("\\s"); // tokenize with whitespace delimiter
+                            final String lineToken = ErrorList.LINE_PREFIX.trim();
+                            final String columnToken = ErrorList.POSITION_PREFIX.trim();
+                            String lineString = "";
+                            String columnString = "";
+                            for (int i = 0; i < stringTokens.length; i++) {
+                                if (stringTokens[i].equals(lineToken) && i < stringTokens.length - 1)
+                                    lineString = stringTokens[i + 1];
+                                if (stringTokens[i].equals(columnToken) && i < stringTokens.length - 1)
+                                    columnString = stringTokens[i + 1];
+                            }
+                            int line = 0;
+                            int column = 0;
+                            try {
+                                line = Integer.parseInt(lineString);
+                            } catch (final NumberFormatException ignored) {
+                            }
+                            try {
+                                column = Integer.parseInt(columnString);
+                            } catch (final NumberFormatException ignored) {
+                            }
+                            // everything between FILENAME_PREFIX and LINE_PREFIX is filename.
+                            final int fileNameStart = text.indexOf(ErrorList.FILENAME_PREFIX)
+                                + ErrorList.FILENAME_PREFIX.length();
+                            final int fileNameEnd = text.indexOf(ErrorList.LINE_PREFIX);
+                            String fileName = "";
+                            if (fileNameStart < fileNameEnd
+                                && fileNameStart >= ErrorList.FILENAME_PREFIX.length()) {
+                                fileName = text.substring(fileNameStart, fileNameEnd).trim();
+                            }
+                            if (!fileName.isEmpty()) {
+                                MessagesPane.selectEditorTextLine(fileName, line, column);
+                                MessagesPane.this.selectErrorMessage(fileName, line, column);
                             }
                         }
                     }
-                });
+                }
+            });
 
         final JButton runTabClearButton = new JButton("Clear");
         runTabClearButton.setToolTipText("Clear the Run I/O area");
         runTabClearButton.addActionListener(
-                e -> MessagesPane.this.run.setText(""));
+            e -> MessagesPane.this.run.setText(""));
         this.runTab = new JPanel(new BorderLayout());
         this.runTab.add(MessagesPane.createBoxForButton(runTabClearButton), BorderLayout.WEST);
         this.runTab.add(new JScrollPane(this.run, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
 
         this.addTab("Messages", this.assembleTab);
         this.addTab("Run I/O", this.runTab);
 
         this.setToolTipTextAt(0,
-                "Messages produced by Run menu. Click on assemble error message to select erroneous line");
+            "Messages produced by Run menu. Click on assemble error message to select erroneous line");
         this.setToolTipTextAt(1, "Simulated console input and output");
     }
 
@@ -239,7 +242,7 @@ public class MessagesPane extends JTabbedPane {
      */
     public void selectErrorMessage(final String fileName, final int line, final int column) {
         final String errorReportSubstring = new java.io.File(fileName).getName() + ErrorList.LINE_PREFIX + line
-                + ErrorList.POSITION_PREFIX + column;
+            + ErrorList.POSITION_PREFIX + column;
         final int textPosition = this.assemble.getText().lastIndexOf(errorReportSubstring);
         if (textPosition >= 0) {
             final int textLine;
@@ -312,20 +315,20 @@ public class MessagesPane extends JTabbedPane {
     // DPS, 23 Aug 2005.
     public void postRunMessage(final String message) {
         SwingUtilities.invokeLater(
-                () -> {
-                    this.setSelectedComponent(this.runTab);
-                    this.run.append(message);
-                    // can do some crude cutting here. If the document gets "very large",
-                    // let's cut off the oldest text. This will limit scrolling but the limit
-                    // can be set reasonably high.
-                    if (this.run.getDocument().getLength() > MessagesPane.MAXIMUM_SCROLLED_CHARACTERS) {
-                        try {
-                            this.run.getDocument().remove(0, MessagesPane.NUMBER_OF_CHARACTERS_TO_CUT);
-                        } catch (final BadLocationException ble) {
-                            // only if NUMBER_OF_CHARACTERS_TO_CUT > MAXIMUM_SCROLLED_CHARACTERS
-                        }
+            () -> {
+                this.setSelectedComponent(this.runTab);
+                this.run.append(message);
+                // can do some crude cutting here. If the document gets "very large",
+                // let's cut off the oldest text. This will limit scrolling but the limit
+                // can be set reasonably high.
+                if (this.run.getDocument().getLength() > MessagesPane.MAXIMUM_SCROLLED_CHARACTERS) {
+                    try {
+                        this.run.getDocument().remove(0, MessagesPane.NUMBER_OF_CHARACTERS_TO_CUT);
+                    } catch (final BadLocationException ble) {
+                        // only if NUMBER_OF_CHARACTERS_TO_CUT > MAXIMUM_SCROLLED_CHARACTERS
                     }
-                });
+                }
+            });
     }
 
     /**
@@ -392,7 +395,7 @@ public class MessagesPane extends JTabbedPane {
         if (lock) {
             Globals.memoryAndRegistersLock.unlock();
         }
-        final Asker asker = new Asker(maxLen); // Asker defined immediately below.
+        final var asker = new Asker(maxLen); // Asker defined immediately below.
         final String out = asker.response();
         if (lock) {
             Globals.memoryAndRegistersLock.lock();
@@ -400,21 +403,27 @@ public class MessagesPane extends JTabbedPane {
         return out;
     }
 
-    ////////////////////////////////////////////////////////////////////////////
     // Thread class for obtaining user input in the Run I/O window (MessagesPane)
     // Written by Ricardo Fern�ndez Pascual [rfernandez@ditec.um.es] December 2009.
-    class Asker implements Runnable {
-        final ArrayBlockingQueue<String> resultQueue = new ArrayBlockingQueue<>(1);
-        final int maxLen;
-        int initialPos;
-        final DocumentListener listener = new DocumentListener() {
-            @Override
-            public void insertUpdate(final DocumentEvent e) {
-                EventQueue.invokeLater(
+    private class Asker {
+        private final @NotNull ArrayBlockingQueue<String> resultQueue;
+        private final int maxLen;
+        private int initialPos;
+        private final @NotNull DocumentListener listener;
+        private final @NotNull NavigationFilter navigationFilter;
+        private final @NotNull Consumer<Simulator> stopListener;
+
+        public Asker(final int maxLen) {
+            this.maxLen = maxLen;
+            // initialPos will be set in run()
+            listener = new DocumentListener() {
+                @Override
+                public void insertUpdate(final DocumentEvent e) {
+                    EventQueue.invokeLater(
                         () -> {
                             try {
-                                final String inserted = e.getDocument().getText(e.getOffset(), e.getLength());
-                                final int i = inserted.indexOf('\n');
+                                final var insertedText = e.getDocument().getText(e.getOffset(), e.getLength());
+                                final int i = insertedText.indexOf('\n');
                                 if (i >= 0) {
                                     final int offset = e.getOffset() + i;
                                     if (offset + 1 == e.getDocument().getLength()) {
@@ -433,50 +442,46 @@ public class MessagesPane extends JTabbedPane {
                                 Asker.this.returnResponse();
                             }
                         });
-            }
-
-            @Override
-            public void removeUpdate(final DocumentEvent e) {
-                EventQueue.invokeLater(
+                }
+    
+                @Override
+                public void removeUpdate(final DocumentEvent e) {
+                    EventQueue.invokeLater(
                         () -> {
                             if ((e.getDocument().getLength() < Asker.this.initialPos || e.getOffset() < Asker.this.initialPos)
-                                    && e instanceof UndoableEdit) {
+                                && e instanceof UndoableEdit) {
                                 ((UndoableEdit) e).undo();
                                 MessagesPane.this.run.setCaretPosition(e.getOffset() + e.getLength());
                             }
                         });
-            }
-
-            @Override
-            public void changedUpdate(final DocumentEvent e) {
-            }
-        };
-        final NavigationFilter navigationFilter = new NavigationFilter() {
-            @Override
-            public void moveDot(final FilterBypass fb, int dot, final Bias bias) {
-                if (dot < Asker.this.initialPos) {
-                    dot = Math.min(Asker.this.initialPos, MessagesPane.this.run.getDocument().getLength());
                 }
-                fb.moveDot(dot, bias);
-            }
-
-            @Override
-            public void setDot(final FilterBypass fb, int dot, final Bias bias) {
-                if (dot < Asker.this.initialPos) {
-                    dot = Math.min(Asker.this.initialPos, MessagesPane.this.run.getDocument().getLength());
+    
+                @Override
+                public void changedUpdate(final DocumentEvent e) {
                 }
-                fb.setDot(dot, bias);
-            }
-        };
-        final Simulator.StopListener stopListener = s -> Asker.this.returnResponse();
-
-        Asker(final int maxLen) {
-            this.maxLen = maxLen;
-            // initialPos will be set in run()
+            };
+            navigationFilter = new NavigationFilter() {
+                @Override
+                public void moveDot(final FilterBypass fb, int dot, final Bias bias) {
+                    if (dot < Asker.this.initialPos) {
+                        dot = Math.min(Asker.this.initialPos, MessagesPane.this.run.getDocument().getLength());
+                    }
+                    fb.moveDot(dot, bias);
+                }
+    
+                @Override
+                public void setDot(final FilterBypass fb, int dot, final Bias bias) {
+                    if (dot < Asker.this.initialPos) {
+                        dot = Math.min(Asker.this.initialPos, MessagesPane.this.run.getDocument().getLength());
+                    }
+                    fb.setDot(dot, bias);
+                }
+            };
+            stopListener = s -> Asker.this.returnResponse();
+            resultQueue = new ArrayBlockingQueue<>(1);
         }
 
-        @Override
-        public void run() { // must be invoked from the GUI thread
+        private void run() { // must be invoked from the GUI thread
             MessagesPane.this.selectRunMessageTab();
             MessagesPane.this.run.setEditable(true);
             MessagesPane.this.run.requestFocusInWindow();
@@ -487,21 +492,22 @@ public class MessagesPane extends JTabbedPane {
             Simulator.getInstance().addStopListener(this.stopListener);
         }
 
-        void cleanup() { // not required to be called from the GUI thread
+        private void cleanup() { // not required to be called from the GUI thread
             EventQueue.invokeLater(
-                    () -> {
-                        MessagesPane.this.run.getDocument().removeDocumentListener(Asker.this.listener);
-                        MessagesPane.this.run.setEditable(false);
-                        MessagesPane.this.run.setNavigationFilter(null);
-                        MessagesPane.this.run.setCaretPosition(MessagesPane.this.run.getDocument().getLength());
-                        Simulator.getInstance().removeStopListener(Asker.this.stopListener);
-                    });
+                () -> {
+                    MessagesPane.this.run.getDocument().removeDocumentListener(Asker.this.listener);
+                    MessagesPane.this.run.setEditable(false);
+                    MessagesPane.this.run.setNavigationFilter(null);
+                    MessagesPane.this.run.setCaretPosition(MessagesPane.this.run.getDocument().getLength());
+                    Simulator.getInstance().removeStopListener(Asker.this.stopListener);
+                });
         }
 
-        void returnResponse() {
+        private void returnResponse() {
             try {
                 final int p = Math.min(this.initialPos, MessagesPane.this.run.getDocument().getLength());
-                final int l = Math.min(MessagesPane.this.run.getDocument().getLength() - p, this.maxLen >= 0 ? this.maxLen : Integer.MAX_VALUE);
+                final int l = Math.min(MessagesPane.this.run.getDocument().getLength() - p, this.maxLen >= 0 ?
+                    this.maxLen : Integer.MAX_VALUE);
                 this.resultQueue.offer(MessagesPane.this.run.getText(p, l));
             } catch (final BadLocationException ex) {
                 // this cannot happen
@@ -509,9 +515,8 @@ public class MessagesPane extends JTabbedPane {
             }
         }
 
-        @Nullable
-        private String response() {
-            EventQueue.invokeLater(this);
+        private @Nullable String response() {
+            EventQueue.invokeLater(this::run);
             try {
                 return this.resultQueue.take();
             } catch (final InterruptedException ex) {
@@ -521,5 +526,4 @@ public class MessagesPane extends JTabbedPane {
             }
         }
     } // Asker class
-    ////////////////////////////////////////////////////////////////////////////
 }

@@ -11,10 +11,7 @@ import rars.simulator.Simulator;
  */
 // TODO: add backstepper support
 public final class InterruptController {
-    // Lock for synchronizing as this is a static class
-    /**
-     * Constant <code>lock</code>
-     */
+    /// Lock for synchronizing as this is a static class
     public static final Object lock = new Object();
 
     // Status for the interrupt state

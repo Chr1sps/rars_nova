@@ -4,6 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.riscv.lang.lexing.RVTokenType;
 
+/**
+ * Sometimes it's nice to group a couple of different token types together in a
+ * single color setting. This enum helps with that.
+ */
 public enum TokenSettingKey {
     ERROR,
 
@@ -14,10 +18,8 @@ public enum TokenSettingKey {
 
     IDENTIFIER,
 
-    INTEGER,
-    FLOATING,
+    NUMBER,
     STRING,
-    CHAR,
 
     LABEL,
     INSTRUCTION,
@@ -34,17 +36,15 @@ public enum TokenSettingKey {
             case DIRECTIVE -> DIRECTIVE;
             case REGISTER_NAME -> REGISTER_NAME;
             case IDENTIFIER -> IDENTIFIER;
-            case INTEGER -> INTEGER;
-            case FLOATING -> FLOATING;
-            case STRING -> STRING;
-            case CHAR -> CHAR;
+            case INTEGER, FLOATING -> NUMBER;
+            case STRING, CHAR -> STRING;
             case LABEL -> LABEL;
             case INSTRUCTION -> INSTRUCTION;
             case PLUS, MINUS, COMMA, LEFT_PAREN, RIGHT_PAREN, OPERATOR -> PUNCTUATION;
             case ROUNDING_MODE -> ROUNDING_MODE;
             case MACRO_PARAMETER -> MACRO_PARAMETER;
             case HI, LO -> HILO;
-            default -> null;
+            case NULL, WHITESPACE -> null;
         };
     }
 }
