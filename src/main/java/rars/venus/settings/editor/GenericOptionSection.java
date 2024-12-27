@@ -6,7 +6,6 @@ import javax.swing.*;
 
 public final class GenericOptionSection <T extends JComponent> extends JPanel {
     public final @NotNull T component;
-    
     public GenericOptionSection(
         final @NotNull String title,
         final @NotNull T component

@@ -175,7 +175,6 @@ public class FloatRepresentation extends AbstractTool {
         this.subscription.request(1);
     }
 
-    /// ///////////////////////////////////////////////////////////////////////////////////
     // Private methods defined to support the above.
     @Override
     public void onNext(final @NotNull AccessNotice notice) {
@@ -444,12 +443,8 @@ public class FloatRepresentation extends AbstractTool {
         this.updateSignificandLabel(flavors);
     }
 
-    /// ////////////////////////////////////////////////////////////////////////////
-    /// ////
-    /// //// THE REST OF THE TOOL CONSISTS OF LITTLE PRIVATE CLASSES THAT MAKE
-    /// //// LIFE EASIER FOR THE ABOVE CODE.
-    /// ////
-    /// ////////////////////////////////////////////////////////////////////////////
+    /////// THE REST OF THE TOOL CONSISTS OF LITTLE PRIVATE CLASSES THAT MAKE
+    /////// LIFE EASIER FOR THE ABOVE CODE.
 
     // Should be called only by those who know a register should be changed due to
     // user action (reset button or Enter first on one of the input fields). Note
@@ -482,10 +477,7 @@ public class FloatRepresentation extends AbstractTool {
         }
     }
 
-    /// /////////////////////////////////////////////////////////////////////////
-    //
     // Use this to draw custom background in the binary fraction display.
-    //
     static class BinaryFractionDisplayTextField extends JTextField {
 
         public BinaryFractionDisplayTextField(final String value, final int columns) {
@@ -560,8 +552,6 @@ public class FloatRepresentation extends AbstractTool {
     // but I want keystroke-level monitoring to assure that no invalid
     // keystrokes are echoed and that maximum string length is not exceeded.
 
-    /// /////////////////////////////////////////////////////////////////////////
-    //
     // Class of objects that encapsulats 5 different representations of a 32 bit
     // floating point second:
     // string with hexadecimal second.
@@ -569,7 +559,6 @@ public class FloatRepresentation extends AbstractTool {
     // String with decimal float second. variable length.
     // int with 32 bit representation of float second ("int bits").
     // String for display only, showing formula for expanding bits to decimal.
-    //
     private class FlavorsOfFloat {
         String hexString;
         String binaryString;
@@ -677,10 +666,7 @@ public class FloatRepresentation extends AbstractTool {
 
     }
 
-    /// ///////////////////////////////////////////////////////////////
-    //
     // Class to handle input keystrokes for hexadecimal field
-    //
     private class HexDisplayKeystrokeListener extends KeyAdapter {
 
         private final int digitLength; // maximum number of digits long
@@ -733,10 +719,7 @@ public class FloatRepresentation extends AbstractTool {
         }
     }
 
-    /// ///////////////////////////////////////////////////////////////
-    //
     // Class to handle input keystrokes for binary field
-    //
     private class BinaryDisplayKeystrokeListener extends KeyAdapter {
 
         private final int bitLength; // maximum number of bits permitted
@@ -788,10 +771,7 @@ public class FloatRepresentation extends AbstractTool {
 
     }
 
-    /// ///////////////////////////////////////////////////////////////
-    //
     // Class to handle input keystrokes for decimal field
-    //
     private class DecimalDisplayKeystokeListenter extends KeyAdapter {
 
         // handy utility
@@ -840,11 +820,8 @@ public class FloatRepresentation extends AbstractTool {
 
     }
 
-    /// /////////////////////////////////////////////////////////////////////////
-    //
     // Use this to draw graphics visually relating the hexadecimal values
     // displayed above) to the binary values (displayed below).
-    //
     class HexToBinaryGraphicPanel extends JPanel {
 
         // This overrides inherited JPanel method. Override is necessary to
@@ -903,17 +880,12 @@ public class FloatRepresentation extends AbstractTool {
 
     }
 
-    /////////////////////////////////////////////////////////////////////////
-    //
     // Handly little class defined only to allow client to use "setText()" without
     // needing to know how/whether the text needs to be formatted. This one is
     // used to display instructions.
 
-    /// ///////////////////////////////////////////////////////////////////
-    //
     // Panel to hold arrows explaining transformation of binary represntation
     // into formula for calculating decimal second.
-    //
     class BinaryToDecimalFormulaGraphic extends JPanel {
         final String subtractLabelTrailer = " - 127";
         final int arrowHeadOffset = 5;

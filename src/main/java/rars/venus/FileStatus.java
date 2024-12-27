@@ -177,7 +177,6 @@ public final class FileStatus {
     }
 
     ///////////////////// END OF STATIC PART ///////////////////////
-    ///////////////////////////////////////////////////////////////////
 
     // Remaining members are of instantiable class that can be used by
     // every file that is currently open in the editor.

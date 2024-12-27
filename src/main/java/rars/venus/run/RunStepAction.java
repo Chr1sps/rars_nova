@@ -183,7 +183,6 @@ public class RunStepAction extends GuiAction {
         this.mainUI.setReset(false);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
     // Method to store any program arguments into MIPS memory and registers before
     // execution begins. Arguments go into the gap between $sp and kernel memory.
     // Argument pointers and count go into runtime stack and $sp is adjusted

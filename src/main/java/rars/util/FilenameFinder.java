@@ -101,11 +101,9 @@ public final class FilenameFinder {
         // "toURI()" created a URI prefixed with "jar:" and the "getPath()" in
         // that case returns null! If you strip the "jar:" prefix and create a
         // new URI from the resulting string, it works! Thanks Felipe!
-        //
         // NOTE 5-Sep-2008: "toURI()" was introduced in Java 1.5. To maintain
         // 1.4 compatibility, I need to change it to call URI constructor with
         // string argument, as documented in Sun API.
-        //
         // Modified by Ingo Kofler 24-Sept-2009 to handle multiple JAR files.
         // This requires use of ClassLoader getResources() instead of
         // getResource(). The former will look in all JAR files listed in
@@ -419,7 +417,6 @@ public final class FilenameFinder {
                 : fileExtension.substring(1);
     }
 
-    ///////////////////////////////////////////////////////////////////////////
     // FileFilter subclass to be instantiated by the getFileFilter method above.
     // This extends javax.swing.filechooser.FileFilter
 

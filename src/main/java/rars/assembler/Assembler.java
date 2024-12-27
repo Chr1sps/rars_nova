@@ -112,7 +112,6 @@ public final class Assembler {
             current.addLabel(tokens.get(0).getValue());
     }
 
-    // //////////////////////////////////////////////////////////////////////////////////
     // Pre-process the token list for a statement by stripping off any comment.
     // NOTE: the ArrayList parameter is not modified; a new one is cloned and
     // returned.
@@ -320,7 +319,6 @@ public final class Assembler {
                         final var tokenList = Tokenizer.tokenizeLine(sourceLine,
                                 basicAssembly, this.errors, false);
 
-                        // ////////////////////////////////////////////////////////////////////////////
                         // If we are using compact memory config and there is a compact expansion, use
                         // it
                         final ArrayList<String> templateList;
@@ -551,7 +549,6 @@ public final class Assembler {
         // the next, to sense the context of this continuation line. That state
         // information
         // is contained in this.dataDirective (the current data directive).
-        //
         if (this.inDataSegment && // 30-Dec-09 DPS Added data segment guard...
                 (tokenType == TokenType.PLUS
                         || // because invalid instructions were being caught...
@@ -611,7 +608,6 @@ public final class Assembler {
         }
     }
 
-    // //////////////////////////////////////////////////////////////////////////////////
     // Parse and record label, if there is one. Note the identifier and its colon
     // are
     // two separate tokens, since they may be separated by spaces in source code.
@@ -856,7 +852,6 @@ public final class Assembler {
         }
     }
 
-    // //////////////////////////////////////////////////////////////////////////////////
     // This source code line, if syntactically correct, is a continuation of a
     // directive list begun on on previous line.
     private void executeDirectiveContinuation(final TokenList tokens) {
@@ -873,7 +868,6 @@ public final class Assembler {
         }
     } // executeDirectiveContinuation()
 
-    // //////////////////////////////////////////////////////////////////////////////////
     // Given token, find the corresponding Instruction object. If token was not
     // recognized as OPERATOR, there is a problem.
     private @Nullable List<Instruction> matchInstruction(final @NotNull Token token) {
@@ -895,7 +889,6 @@ public final class Assembler {
         return instructions;
     } // matchInstruction()
 
-    // //////////////////////////////////////////////////////////////////////////////////
     // Processes the .word/.half/.byte/.float/.double directive.
     // Can also handle "directive continuations", e.g. second or subsequent line
     // of a multiline list, which does not contain the directive token. Just pass
@@ -961,7 +954,6 @@ public final class Assembler {
         }
     } // storeNumeric()
 
-    // //////////////////////////////////////////////////////////////////////////////
     // Store integer second given integer (word, half, byte) directive.
     // Called by storeNumeric()
     // NOTE: The token itself may be a label, in which case the correct action is
@@ -1058,7 +1050,6 @@ public final class Assembler {
         }
     }// storeInteger
 
-    // //////////////////////////////////////////////////////////////////////////////
     // Store real (fixed or floating point) second given floating (float, double)
     // directive.
     // Called by storeNumeric()
@@ -1101,7 +1092,6 @@ public final class Assembler {
 
     } // storeRealNumber
 
-    // //////////////////////////////////////////////////////////////////////////////////
     // Use directive argument to distinguish between ASCII and ASCIZ. The
     // latter stores a terminating null byte. Can handle a list of one or more
     // strings on a single line.
@@ -1199,7 +1189,6 @@ public final class Assembler {
         }
     } // storeStrings()
 
-    // //////////////////////////////////////////////////////////////////////////////////
     // Simply check to see if we are in data segment. Generate error if not.
     private boolean passesDataSegmentCheck(final Token token) {
         if (!this.inDataSegment) {
@@ -1211,7 +1200,6 @@ public final class Assembler {
         }
     }
 
-    // //////////////////////////////////////////////////////////////////////////////////
     // Writes the given int second into current data segment address. Works for
     // all the integer types plus float (caller is responsible for doing
     // floatToIntBits).

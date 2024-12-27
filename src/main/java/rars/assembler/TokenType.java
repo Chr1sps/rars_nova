@@ -275,7 +275,6 @@ public enum TokenType {
     // need beyond this method (refactoring effort would probably identify other
     // uses
     // related to symbol table).
-    //
     // DPS 14-Jul-2008: added '$' as valid symbol. Permits labels to include $.
     // MIPS-target GCC will produce labels that start with $.
 

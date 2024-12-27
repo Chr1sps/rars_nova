@@ -156,11 +156,9 @@ public class MemoryReferenceVisualization extends AbstractTool {
         return "Memory Reference Visualization";
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Rest of the protected methods. These override do-nothing methods inherited
     ////////////////////////////////////////////////////////////////////////////////////// from
     // the abstract superclass.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Override the inherited method, which registers us as an Observer over the
@@ -255,9 +253,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
         this.updateDisplay();
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Private methods defined to support the above.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * {@inheritDoc}
@@ -280,7 +276,6 @@ public class MemoryReferenceVisualization extends AbstractTool {
                 from Tools menu or as a stand-alone application.  For
                 the latter, simply write a small driver to instantiate a
                 MemoryReferenceVisualization object and invoke its go() method.
-                
                 You can easily learn to use this small program by playing with
                 it!  For the best animation, set the program to run in
                 timed mode using the Run Speed slider.  Each rectangular unit
@@ -532,14 +527,10 @@ public class MemoryReferenceVisualization extends AbstractTool {
         this.theGrid.incrementElement(offset / this.theGrid.getColumns(), offset % this.theGrid.getColumns());
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Specialized inner classes for modeling and animation.
-    //////////////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////////
     // Object that represents mapping from counter second to color it is displayed
     //////////////////////////////////////////////////////////////////////////////// as.
-    //
     private static class CounterColorScale {
         CounterColor[] counterColors;
 
@@ -594,11 +585,9 @@ public class MemoryReferenceVisualization extends AbstractTool {
         }
     }
 
-    /////////////////////////////////////////////////////////////////////
     // Class that simply defines UI controls for use with slider to view and/or
     // change the color associated with each memory reference count second.
 
-    ///////////////////////////////////////////////////////////////////////////////////////
     // Each object represents beginning of a counter second range (non-negative
     /////////////////////////////////////////////////////////////////////////////////////// integer)
     /////////////////////////////////////////////////////////////////////////////////////// and
@@ -621,7 +610,6 @@ public class MemoryReferenceVisualization extends AbstractTool {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////
     // Represents grid of memory access counts
     private static class Grid {
 
@@ -674,7 +662,6 @@ public class MemoryReferenceVisualization extends AbstractTool {
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////
     // Class that represents the panel for visualizing and animating memory
     ///////////////////////////////////////////////////////////////////////////// reference
     // patterns.

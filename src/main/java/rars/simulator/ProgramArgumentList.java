@@ -96,7 +96,6 @@ public class ProgramArgumentList {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////
     // Place any program arguments into memory and registers
     // Arguments are stored starting at highest word of non-kernel
     // memory and working back toward runtime stack (there is a 4096
@@ -122,7 +121,6 @@ public class ProgramArgumentList {
         // $sp will be set to the address holding the arg list size
         // $a0 will be set to the arg list size (argc)
         // $a1 will be set to stack address just "below" arg list size (argv)
-        //
         // Each of the arguments themselves will be stored starting at
         // Memory.stackBaseAddress (0x7ffffffc) and working down from there:
         // 0x7ffffffc will contain null terminator for first arg

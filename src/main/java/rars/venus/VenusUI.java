@@ -261,7 +261,6 @@ public class VenusUI extends JFrame {
      */
 
     /// Sets each of the [Action] objects to be enabled.
-    ///
     /// @param actions The actions to enable.
     private static void setEnabled(final @NotNull Action... actions) {
         Arrays.stream(actions).forEach((action) -> action.setEnabled(true));
@@ -281,7 +280,6 @@ public class VenusUI extends JFrame {
      */
 
     /// Sets each of the [Action] objects to be enabled.
-    ///
     /// @param actions The actions to enable.
     private static void setDisabled(final @NotNull Action... actions) {
         Arrays.stream(actions).forEach((action) -> action.setEnabled(false));

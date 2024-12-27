@@ -68,7 +68,6 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             Simulator.interactiveGUIUpdater = this::updateUi;
         }
     }
-    
     private void updateUi() {
         if (Globals.getGui().getRegistersPane().getSelectedComponent() == Globals.getGui().getMainPane()
             .getExecutePane().getRegistersWindow()) {
@@ -410,7 +409,6 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             // simulation speed for flat-out runs, for every instruction executed even
             // though very few will require the "do nothing" stack entry. For stepped or
             // timed execution the slower execution speed is not noticeable.
-            //
             // To avoid this cost I tried a different technique: back-fill with "do
             // nothings"
             // during the backstepping itself when this situation is recognized. Problem

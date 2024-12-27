@@ -153,16 +153,13 @@ public final class Main {
         return memoryRange;
     }
 
-    /// //////////////////////////////////////////////////////////
     // Perform any specified dump operations. See "dump" option.
-    //
     private void displayAllPostMortem(final Program program) {
         this.displayMiscellaneousPostMortem(program);
         this.displayRegistersPostMortem(program);
         this.displayMemoryPostMortem(program.getMemory());
     }
 
-    /// //////////////////////////////////////////////////////////////
     // There are no command arguments, so run in interactive mode by
     // launching the GUI-fronted integrated development environment.
     private void dumpSegments(final Program program) {
@@ -211,7 +208,6 @@ public final class Main {
         }
     }
 
-    /// ///////////////////////////////////////////////////////////////////
     // Parse command line arguments. The initial parsing has already been
     // done, since each space-separated argument is already in a String array
     // element. Here, we check for validity, set switch variables as appropriate
@@ -237,7 +233,6 @@ public final class Main {
                 });
     }
 
-    /// ///////////////////////////////////////////////////////////////////
     // Carry out the rars command: assemble then optionally run
     // Returns false if no simulation (run) occurs, true otherwise.
     private boolean parseCommandArgs(final String @NotNull [] args) {
@@ -435,7 +430,6 @@ public final class Main {
         return argsOK;
     }
 
-    /// ///////////////////////////////////////////////////////////////////
     // Check for memory address subrange. Has to be two integers separated
     // by "-"; no embedded spaces. e.g. 0x00400000-0x00400010
     // If number is not multiple of 4, will be rounded up to next higher.
@@ -525,7 +519,6 @@ public final class Main {
         return program;
     }
 
-    /// ///////////////////////////////////////////////////////////////////
     // Displays any specified runtime properties. Initially just instruction count
     // DPS 19 July 2012
     private void displayMiscellaneousPostMortem(final Program program) {
@@ -534,7 +527,6 @@ public final class Main {
         }
     }
 
-    /// ///////////////////////////////////////////////////////////////////
     // Displays requested register or registers
     private void displayRegistersPostMortem(final Program program) {
         // Display requested register contents
@@ -569,7 +561,6 @@ public final class Main {
         }
     }
 
-    /// ///////////////////////////////////////////////////////////////////
     // Formats int second for display: decimal, hex, ascii
     private String formatIntForDisplay(final int value) {
         return switch (this.displayFormat) {
@@ -579,7 +570,6 @@ public final class Main {
         };
     }
 
-    /// ///////////////////////////////////////////////////////////////////
     // Displays requested memory range or ranges
     private void displayMemoryPostMortem(final Memory memory) {
         int value;
@@ -621,7 +611,6 @@ public final class Main {
         }
     }
 
-    /// ////////////////////////////////////////////////////////////////////
     // If option to display RARS messages to standard err (System.err) is
     // present, it must be processed before all others. Since messages may
     // be output as early as during the command parse.
@@ -634,7 +623,6 @@ public final class Main {
         }
     }
 
-    /// ////////////////////////////////////////////////////////////////////
     // Decide whether copyright should be displayed, and display
     // if so.
     private void displayCopyright(final String[] args, final String noCopyrightSwitch) {
@@ -647,7 +635,6 @@ public final class Main {
                 + "\n");
     }
 
-    /// ////////////////////////////////////////////////////////////////////
     // Display command line help text
     private void displayHelp() {
         final String[] segmentNames = MemoryDump.getSegmentNames();

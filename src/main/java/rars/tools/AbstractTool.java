@@ -83,9 +83,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     // terminates.
     private volatile boolean observing = false;
 
-    //////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// ABSTRACT METHODS ///////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Simple constructor
@@ -106,10 +104,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     @Override
     public abstract String getName();
 
-    //////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////// METHODS WITH DEFAULT IMPLEMENTATIONS
-    ////////////////////////////////////////////////////////////////////////////////////// //////////////////
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Abstract method that must be instantiated by subclass to build the main
@@ -217,9 +212,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         return headingPanel;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Rest of the methods.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * The Tool default set of controls has one row of 3 buttons. It includes a
@@ -404,9 +397,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     protected void processRISCVUpdate(final AccessNotice notice) {
     }
 
-    //////////////////////////////////////////////////////////////////////////////////
     //////////////////// PRIVATE HELPER METHODS //////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Override this method to provide a JComponent (probably a JButton) of your
@@ -422,12 +413,10 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     }
 
 
-    //////////////////////////////////////////////////////////////////////////////////
     //////////////////// PRIVATE HELPER CLASSES //////////////////////////////////
     // Specialized inner classes. Either used by stand-alone (JFrame-based) only //
     // or used by Tool (JDialog-based) only. //
 
-    /// ///////////////////////////////////////////////////////////////////////////////
 
     // Closing duties for Tool only.
     private void performToolClosingDuties() {
@@ -454,7 +443,6 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         this.subscription.request(1);
     }
 
-    /// ////////////////////////////////////////////////////////////////////
     // Every control button will get one of these so when it has focus
     // the Enter first can be used instead of a mouse click to perform
     // its associated action. It will do nothing if no action listeners
@@ -482,7 +470,6 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         }
     }
 
-    /// ///////////////////////////////////////////////////////////////////
     // Little class for this dual-purpose button. It is used only by the Tool
     // (not by the stand-alone app).
     protected class ConnectButton extends JButton {

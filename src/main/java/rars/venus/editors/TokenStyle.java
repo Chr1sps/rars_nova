@@ -29,7 +29,6 @@ public record TokenStyle(
     public static @NotNull TokenStyle italic(final @NotNull Color foreground) {
         return new TokenStyle(foreground, DEFAULT_BACKGROUND, false, true, false);
     }
-    
     public static @NotNull TokenStyle underline(final @NotNull Color foreground) {
         return new TokenStyle(foreground, DEFAULT_BACKGROUND, false, false, true);
     }

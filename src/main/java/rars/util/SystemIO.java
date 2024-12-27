@@ -214,7 +214,6 @@ public final class SystemIO {
      */
     public static int writeToFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
         /////////////// DPS 8-Jan-2013
-        /////////////// ////////////////////////////////////////////////////
         /// Write to STDOUT or STDERR file descriptor while using IDE - write to
         /////////////// Messages pane.
         if ((fd == SystemIO.STDOUT || fd == SystemIO.STDERR) && Globals.getGui() != null) {
@@ -222,7 +221,6 @@ public final class SystemIO {
             SystemIO.print2Gui(data);
             return myBuffer.length; // data.length would not count multi-byte characters
         }
-        ///////////////////////////////////////////////////////////////////////////////////
         //// When running in command mode, code below works for either regular file or
         /////////////////////////////////////////////////////////////////////////////////// STDOUT/STDERR
 
@@ -277,7 +275,6 @@ public final class SystemIO {
     public static int readFromFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
         int retValue;
         /////////////// DPS 8-Jan-2013
-        /////////////// //////////////////////////////////////////////////
         /// Read from STDIN file descriptor while using IDE - get input from Messages
         /////////////// pane.
         if (fd == SystemIO.STDIN && Globals.getGui() != null) {
@@ -289,7 +286,6 @@ public final class SystemIO {
             }
             return Math.min(myBuffer.length, bytesRead.length);
         }
-        ////////////////////////////////////////////////////////////////////////////////////
         //// When running in command mode, code below works for either regular file or
         //////////////////////////////////////////////////////////////////////////////////// STDIN
 
@@ -453,7 +449,6 @@ public final class SystemIO {
         return SystemIO.fileErrorString;
     }
 
-    /// ////////////////////////////////////////////////////////////////////
     // Private method to simply return the BufferedReader used for
     // keyboard input, redirected input, or piped input.
     // These are all equivalent in the eyes of the program because they are
@@ -559,7 +554,6 @@ public final class SystemIO {
         }
     }
 
-    // //////////////////////////////////////////////////////////////////////////////
     // Maintain information on files in use. The index to the arrays is the "file
     // descriptor."
     // Ken Vollmar, August 2005

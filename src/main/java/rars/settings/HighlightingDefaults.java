@@ -11,12 +11,10 @@ public final class HighlightingDefaults {
         final var defaultForeground = SettingsTheme.DEFAULT_THEME.foregroundColor;
         return new TokenStyle(defaultForeground, color, false, false, false);
     }
-    
     public static final @NotNull TokenStyle DEFAULT_TEXT_SEGMENT_STYLE = fromBackground(new Color(0xFFFF99)),
             DEFAULT_DELAY_SLOT_STYLE = fromBackground(new Color(0x33FF00)),
             DEFAULT_DATA_SEGMENT_STYLE = fromBackground(new Color(0x99CCFF)),
             DEFAULT_REGISTER_STYLE = fromBackground(new Color(0x99CC55));
-    
     private HighlightingDefaults() {
     }
 }

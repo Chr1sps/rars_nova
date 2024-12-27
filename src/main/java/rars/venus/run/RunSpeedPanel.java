@@ -79,7 +79,6 @@ public class RunSpeedPanel extends JPanel {
         }
         return RunSpeedPanel.runSpeedPanel;
     }
-    
     public static boolean exists() {
         return runSpeedPanel != null;
     }

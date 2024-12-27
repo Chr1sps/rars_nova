@@ -134,11 +134,9 @@ public class BitmapDisplay extends AbstractTool {
         this.addAsObserver(this.baseAddress, highAddress);
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Rest of the protected methods. These override do-nothing methods inherited
     ////////////////////////////////////////////////////////////////////////////////////// from
     // the abstract superclass.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Method that constructs the main display area. It is organized vertically
@@ -226,9 +224,7 @@ public class BitmapDisplay extends AbstractTool {
         this.gridWindow.canvas.repaint();
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Private methods defined to support the above.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Overrides default method, to provide a Help button for this tool/app.
@@ -243,7 +239,6 @@ public class BitmapDisplay extends AbstractTool {
                 one display pixel in row-major order starting at the upper left
                 corner of the display.  This tool may be run either from the
                 Tools menu or as a stand-alone application.
-                
                 You can easily learn to use this small program by playing with
                 it!   Each rectangular unit on the display represents one memory
                 word in a contiguous address space starting with the specified
@@ -450,9 +445,7 @@ public class BitmapDisplay extends AbstractTool {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Specialized inner classes for modeling and animation.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     private Dimension getNewGridWindowSize() {
         return new Dimension(this.displayAreaWidthInPixels * this.unitPixelSize,

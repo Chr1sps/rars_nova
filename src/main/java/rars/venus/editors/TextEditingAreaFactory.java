@@ -6,7 +6,6 @@ import rars.venus.editors.rsyntaxtextarea.RSyntaxTextAreaBasedEditor;
 public final class TextEditingAreaFactory {
     private TextEditingAreaFactory() {
     }
-    
     public static @NotNull TextEditingArea createTextEditingArea(final @NotNull Theme theme) {
         return new RSyntaxTextAreaBasedEditor(theme);
     }

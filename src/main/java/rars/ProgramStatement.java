@@ -74,7 +74,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     private int sourceLine;
     private int binaryStatement;
 
-    //////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Constructor for ProgramStatement when there are links back to all source and
@@ -113,7 +112,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         this.altered = false;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Constructor for ProgramStatement used only for writing a binary machine
@@ -180,7 +178,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 ((address & 0x7F800) >> 11); // move address[19:12] to the right place
     }
 
-    /// //////////////////////////////////////////////////////////////////////////
 
     private static int fromJumpImmediate(final int immediate) {
         // trying to produce address[20:0] where immediate = address[20|10:1|11|19:12]
@@ -191,7 +188,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         return (tmp << 12) >> 11; // sign-extend and add extra 0
     }
 
-    /// //////////////////////////////////////////////////////////////////////////
 
     private static int toBranchImmediate(int address) {
         // trying to produce imm[12:1] where immediate = address[12|10:1|11]
@@ -236,7 +232,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         return out;
     }
 
-    /// ///////////////////////////////////////////////////////////////////////////
     /*
      * Given a model BasicInstruction and the assembled (not source) operand array
      * for a statement,
@@ -444,7 +439,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         absoluteAddress = false;
                     }
                 }
-                //////////////////////////////////////////////////////////////////////
                 basic.append(address);
                 if (absoluteAddress) { // record as address if absolute, second if relative
                     this.basicStatementList.addAddress(address);
@@ -830,19 +824,15 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         this.machineStatement = state.toString();
     }
 
-    /// ///////////////////////////////////////////////////////
-    //
     // Little class to represent basic statement as list
     // of elements. Each element is either a string, an
     // address or a second. The toString() method will
     // return a string representation of the basic statement
     // in which any addresses or values are rendered in the
     // current number format (e.g. decimal or hex).
-    //
     // NOTE: Address operands on Branch instructions are
     // considered values instead of addresses because they
     // are relative to the PC.
-    //
     // DPS 29-July-2010
 
     private static class BasicStatementList {

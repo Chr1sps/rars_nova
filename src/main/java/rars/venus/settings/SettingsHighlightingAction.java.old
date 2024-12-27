@@ -397,10 +397,7 @@ public class SettingsHighlightingAction extends GuiAction {
         this.highlightDialog.dispose();
     }
 
-    /// ////////////////////////////////////////////////////////////////
-    //
     // Modal dialog to set a font.
-    //
     private static class FontSettingDialog extends AbstractFontSettingDialog {
         private boolean resultOK;
 
@@ -469,10 +466,7 @@ public class SettingsHighlightingAction extends GuiAction {
 
     }
 
-    /// //////////////////////////////////////////////////////////////
-    //
     // Class that handles click on the background selection button
-    //
     private class BackgroundChanger implements ActionListener {
         private final int position;
 
@@ -492,10 +486,7 @@ public class SettingsHighlightingAction extends GuiAction {
         }
     }
 
-    /// //////////////////////////////////////////////////////////////
-    //
     // Class that handles click on the foreground selection button
-    //
     private class ForegroundChanger implements ActionListener {
         private final int position;
 

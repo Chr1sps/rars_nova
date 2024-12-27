@@ -3,7 +3,6 @@ package rars.util;
 import java.awt.*;
 import java.util.Arrays;
 
-////////////////////////////////////////////////////////////////////////
 // Represents grid of colors
 public final class Grid {
 

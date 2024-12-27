@@ -861,10 +861,8 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         int generateDelay(double parameter);
     }
 
-    //
     // Class to grab keystrokes going to keyboard echo area and send them to MMIO
 
-    //
 
     // Delay second is fixed, and equal to slider second.
     private static class FixedLengthDelay implements TransmitterDelayTechnique {
@@ -879,9 +877,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         }
     }
 
-    //
     // Class for selecting transmitter delay lengths (# of instruction executions).
-    //
 
     // Randomly pick second from range 1 to slider setting, uniform distribution
     // (each second has equal probability of being chosen).

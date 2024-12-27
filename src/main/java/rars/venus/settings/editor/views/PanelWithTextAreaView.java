@@ -37,7 +37,6 @@ public final class PanelWithTextAreaView extends JPanel {
             # Some macro definitions to print strings
             string:
             \t.asciz "Some string"
-            
             char:
             \t.byte 'a'
             .macro printStr (%str) # print a string

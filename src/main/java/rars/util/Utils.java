@@ -139,7 +139,6 @@ public final class Utils {
     public static @NotNull String getColorAsHexString(final @NotNull Color color) {
         return Binary.intToHexString(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
     }
-    
     public static @NotNull Font deriveFontFromStyle(final @NotNull Font baseFont, final @NotNull TokenStyle style) {
         var fontStyle = 0;
         if (style.isBold()) fontStyle |= Font.BOLD;

@@ -174,7 +174,6 @@ public class CacheSimulator extends AbstractTool {
         return results;
     }
 
-    ////////////////////////////////////////////////////////////////////////////
     private JComponent buildLogArea() {
         this.logPanel = new JPanel();
         final TitledBorder ltb = new TitledBorder("Runtime Log");
@@ -200,13 +199,10 @@ public class CacheSimulator extends AbstractTool {
         return this.logPanel;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Rest of the protected methods. These override do-nothing methods inherited
     ////////////////////////////////////////////////////////////////////////////////////// from
     // the abstract superclass.
-    //////////////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////
     private JComponent buildOrganizationArea() {
         final JPanel organization = new JPanel(new GridLayout(3, 2));
         final TitledBorder otb = new TitledBorder("Cache Organization");
@@ -323,7 +319,6 @@ public class CacheSimulator extends AbstractTool {
         return organization;
     }
 
-    ////////////////////////////////////////////////////////////////////////////
     private JComponent buildPerformanceArea() {
         final JPanel performance = new JPanel(new GridLayout(1, 2));
         final TitledBorder ptb = new TitledBorder("Cache Performance");
@@ -487,9 +482,7 @@ public class CacheSimulator extends AbstractTool {
         this.theCache = this.createNewCache();
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Private methods defined to support the above.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Method to reset cache, counters and display when the Reset button selected.
@@ -582,11 +575,8 @@ public class CacheSimulator extends AbstractTool {
         this.logText.setCaretPosition(this.logText.getDocument().getLength());
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // Specialized inner classes for cache modeling and animation.
-    //////////////////////////////////////////////////////////////////////////////////////
 
-    /////////////////////////////////////////////////////////////////////////
     // Represents a block in the cache. Since we are only simulating
     // cache performance, there's no need to actually store memory contents.
     private static class CacheBlock {
@@ -601,7 +591,6 @@ public class CacheSimulator extends AbstractTool {
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////
     // Represents the outcome of a cache access. There are two parts:
     // whether it was a hit or not, and in which block is the second stored.
     // In the case of a hit, the block associated with address. In the case of
@@ -617,7 +606,6 @@ public class CacheSimulator extends AbstractTool {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////
     // Abstract Cache class. Subclasses will implement specific policies.
     private abstract static class AbstractCache {
         protected final CacheBlock[] blocks;
@@ -696,13 +684,11 @@ public class CacheSimulator extends AbstractTool {
         public abstract CacheAccessResult isItAHitThenReadOnMiss(int address);
     }
 
-    //////////////////////////////////////////////////////////////////////////////
     // Implements any of the well-known cache organizations. Physical memory
     // address is partitioned depending on organization:
     // Direct Mapping: [ tag | block | word | byte ]
     // Fully Associative: [ tag | word | byte ]
     // Set Associative: [ tag | set | word | byte ]
-    //
     // Bit lengths of each part are determined as follows:
     // Direct Mapping:
     // byte = log2 of #bytes in a word (typically 4)
@@ -718,7 +704,6 @@ public class CacheSimulator extends AbstractTool {
     // word = log2 of #words in a block
     // set = log2 of #sets in the cache
     // tag = #bytes in address - (byte+word+set)
-    //
     // Direct Mapping (1 way set associative):
     // The block second for a given address identifies its block index into the
     ////////////////////////////////////////////////////////////////////////////// cache.
@@ -730,7 +715,6 @@ public class CacheSimulator extends AbstractTool {
     ////////////////////////////////////////////////////////////////////////////// old
     // block is written out (unless write-through) and the new one read in.
     // Those actions are not simulated here.
-    //
     // Fully Associative:
     // There is one set, and very tag has to be searched before determining hit or
     ////////////////////////////////////////////////////////////////////////////// miss.
@@ -741,7 +725,6 @@ public class CacheSimulator extends AbstractTool {
     // and every block is occupied, it is a miss and one of the occupied blocks will
     ////////////////////////////////////////////////////////////////////////////// be
     // selected for removal and the new tag will replace it.
-    //
     // n-way Set Associative:
     // Each set consists of n blocks, and the number of sets in the cache is total
     ////////////////////////////////////////////////////////////////////////////// number
@@ -757,7 +740,6 @@ public class CacheSimulator extends AbstractTool {
     // and every block is occupied, it is a miss and one of the occupied blocks will
     ////////////////////////////////////////////////////////////////////////////// be
     // selected for removal and the new tag will replace it.
-    //
     private class AnyCache extends AbstractCache {
         public AnyCache(final int numberOfBlocks, final int blockSizeInWords, final int setSizeInBlocks) {
             super(numberOfBlocks, blockSizeInWords, setSizeInBlocks);
@@ -847,9 +829,7 @@ public class CacheSimulator extends AbstractTool {
         }
     }
 
-    //////////////////////////////////////////////////////////////
     // Class to display animated cache
-    //
     private class Animation {
 
         public final Color hitColor = Color.GREEN;

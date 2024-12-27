@@ -102,7 +102,6 @@ public class LabelsWindow extends JInternalFrame {
     private final JPanel labelPanel; // holds J
     private final JCheckBox dataLabels;
     private final JCheckBox textLabels;
-    /////////////////////////////////////////////////////////////////////////////////////
     // Use 8-state machine to track sort status for displaying tables
     // State Sort Column Name sort order Address sort order Click Name Click Addr
     // 0 Addr ascend ascend 4 1
@@ -115,7 +114,6 @@ public class LabelsWindow extends JInternalFrame {
     // 7 Name descend descend 5 3
     // "Click Name" column shows which state to go to when Name column is clicked.
     // "Click Addr" column shows which state to go to when Addr column is clicked.
-    /// ///////////////////////////////////////////////////////////////////////////////////
     // The array of comparators; index corresponds to state in table above.
     private final ArrayList<Comparator<Symbol>> tableSortingComparators = new ArrayList<>(Arrays.asList(
             /* 0 */ new LabelAddressAscendingComparator(),
@@ -175,7 +173,6 @@ public class LabelsWindow extends JInternalFrame {
         this.labelPanel.removeAll();
     }
 
-    //
     private JScrollPane generateLabelScrollPane() {
         this.listOfLabelsForSymbolTable = new ArrayList<>();
         this.listOfLabelsForSymbolTable.add(new LabelsForSymbolTable(null));// global symtab
@@ -281,14 +278,12 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    /////////////////////////////////////////////////////////////////
     // Private listener class to sense clicks on a table entry's
     // Label or Address. This will trigger action by Text or Data
     // segment to scroll to the corresponding label/address.
     // Suggested by Ken Vollmar, implemented by Pete Sanderson
     // July 2007.
 
-    /// ////////////////////////////////////////////////////////////
     // Class representing label table data
     static class LabelTableModel extends AbstractTableModel {
         final String[] columns;
@@ -353,8 +348,6 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    //
     // Comparator class used to sort in ascending order a List of symbols
 
     /// ///////////////////////////////////////////////////////////////////////// alphabetically
@@ -368,8 +361,6 @@ public class LabelsWindow extends JInternalFrame {
     }
     ////////////////////// end of LabelsForOneSymbolTable class //////////////////
 
-    ////////////////////////////////////////////////////////////////////////////
-    //
     // Comparator class used to sort in ascending order a List of symbols
     //////////////////////////////////////////////////////////////////////////// numerically
     // by address. The kernel address space is all negative integers, so we need
@@ -389,8 +380,6 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    //
     // Comparator class used to sort in descending order a List of symbols. It will
     // sort either alphabetically by name or numerically by address, depending on
 
@@ -407,7 +396,6 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    /// ////////////////////////////////////////////////////////////
     // Listener class to respond to "Text" or "Data" checkbox click
     private class LabelItemListener implements ItemListener {
         @Override
@@ -418,7 +406,6 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    /// ////////////////////////////////////////////////////////////////
     // Represents one symbol table for the display.
     private class LabelsForSymbolTable {
         private final RISCVprogram program;
@@ -497,12 +484,9 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    /// ////////////////////////////////////////////////////////////////
-    //
     // JTable subclass to provide custom tool tips for each of the
     // label table column headers. From Sun's JTable tutorial.
     // http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
-    //
     private class MyTippedJTable extends JTable {
         MyTippedJTable(final LabelTableModel m) {
             super(m);
@@ -525,8 +509,6 @@ public class LabelsWindow extends JInternalFrame {
             return c;
         }
 
-        /// //////////////////////////////////////////////////////////////
-        //
         // Customized table header that will both display tool tip when
         // mouse hovers over each column, and also sort the table when
         // mouse is clicked on each column. The tool tip and sort are

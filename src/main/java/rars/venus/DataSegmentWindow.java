@@ -93,7 +93,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private static final int ADDRESS_COLUMN = 0;
     private static final boolean USER_MODE = false;
     private static final boolean KERNEL_MODE = true;
-    ////////////////////////////////////////////////////////////////////////
     // Initalize arrays used with Base Address combo box chooser.
     // The combo box replaced the row of buttons when number of buttons expanded to
     /// ///////////////////////////////////////////////////////////////////// 7!
@@ -853,12 +852,9 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     /// ///////////////////////////////////////////////////////////////////////////////// than
     // kernel data segment base or higher than kernel memory. It is called by the
     // above action listeners.
-    //
     // lowAddress is lowest desired address to view, it is adjusted if necessary
     // and returned.
-    //
     // PrevButton and NextButton are enabled/disabled appropriately.
-    //
     private int setFirstAddressAndPrevNextButtonEnableStatus(int lowAddress) {
         final int lowLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE) ?
             Math.min(Math.min(Memory.textBaseAddress,

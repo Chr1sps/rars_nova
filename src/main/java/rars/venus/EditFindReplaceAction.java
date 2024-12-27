@@ -71,10 +71,7 @@ public class EditFindReplaceAction extends GuiAction {
         findReplaceDialog.setVisible(true);
     }
 
-    //////////////////////////////////////////////////////////////////////////////
-    //
     // Private class to do all the work!
-    //
     private class FindReplaceDialog extends JDialog {
         public static final String FIND_TOOL_TIP_TEXT = "Find next occurrence of given text; wraps around at end";
         public static final String REPLACE_TOOL_TIP_TEXT = "Replace current occurrence of text then find next";
@@ -196,8 +193,6 @@ public class EditFindReplaceAction extends GuiAction {
             return controlPanel;
         }
 
-        ////////////////////////////////////////////////////////////////////////
-        //
         // Private methods to carry out the button actions
 
         // Performs a find. The operation starts at the current cursor position
@@ -300,8 +295,6 @@ public class EditFindReplaceAction extends GuiAction {
             this.setVisible(false);
             this.dispose();
         }
-        //
-        ////////////////////////////////////////////////////////////////////////////////
     }
 
 }

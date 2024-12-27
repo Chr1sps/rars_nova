@@ -82,7 +82,6 @@ public class HelpHelpAction extends GuiAction {
         return new Dimension(800, 600);
     }
 
-    /////////////////////////////////////////////////////////////////////////////
     private static JScrollPane createDirectivesHelpPane() {
         final Vector<String> exampleList = new Vector<>();
         final String blanks = "            "; // 12 blanks
@@ -99,7 +98,6 @@ public class HelpHelpAction extends GuiAction {
         return scrollPane;
     }
 
-    ////////////////////////////////////////////////////////////////////////////
     private static JScrollPane createInstructionHelpPane(final Class<? extends Instruction> instructionClass) {
         final var instructionList = Instructions.INSTRUCTIONS_ALL;
         final Vector<String> exampleList = new Vector<>(instructionList.size());
@@ -188,7 +186,6 @@ public class HelpHelpAction extends GuiAction {
         dialog.setLocationRelativeTo(this.mainUI);
         dialog.setVisible(true);
 
-        //////////////////////////////////////////////////////////////////
     }
 
     // Create panel containing Help Info read from html document.
@@ -213,7 +210,6 @@ public class HelpHelpAction extends GuiAction {
     }
 
     /////////////// Methods to construct MIPS help tabs from internal MARS objects
-    /////////////// //////////////
 
     // Set up the copyright notice for display.
     private JPanel createCopyrightInfoPanel() {

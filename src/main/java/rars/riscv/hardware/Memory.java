@@ -85,14 +85,11 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // SPIM not MIPS
     private static final int TEXT_BLOCK_LENGTH_WORDS = 1024; // allocated blocksize 1024 ints == 4K bytes
     private static final int TEXT_BLOCK_TABLE_LENGTH = 1024; // Each entry of table points to a block.
-    /// /////////////////////////////////////////////////////////////////////////////
-    //
     // Helper method to store 1, 2 or 4 byte second in table that represents
     // memory. Originally used just for data segment, but now also used for stack.
     // Both use different tables but same storage method and same table size
     // and block size.
     // Modified 29 Dec 2005 to return old second of replaced bytes.
-    //
     private static final boolean STORE = true;
     private static final boolean FETCH = false;
     /**
@@ -130,7 +127,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // observables associated with that address send notices to their observers.
     // This assures that observers are not bombarded with notices from memory
     // addresses they do not care about.
-    //
     // Would like a tree-like implementation, but that is complicated by this fact:
     // first for insertion into the tree would be based on Comparable using both low
     // and high end of address range, but retrieval from the tree has to be based
@@ -148,7 +144,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // programs!! Beyond that it would go to an "indirect" block (similar to Unix
     // i-nodes),
     // which is not implemented.
-    //
     // Although this scheme is an array of arrays, it is relatively space-efficient
     // since
     // only the table is created initially. A 4096-byte block is not allocated until
@@ -158,7 +153,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // of space (the table plus one block). The index into both arrays is easily
     // computed
     // from the address; access time is constant.
-    //
     // SPIM stores statically allocated data (following first .data directive)
     // starting
     // at location 0x10010000. This is the first Data Segment word beyond the reach
@@ -169,7 +163,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // 0x10000000
     // (Data Segment base) to 0x10008000 + 0x7FFF = 0x1000FFFF (the byte preceding
     // 0x10010000).
-    //
     // Using my scheme, 0x10010000 falls at the beginning of the 17'th block --
     // table entry 16.
     // SPIM uses a heap base address of 0x10040000 which is not part of the MIPS
@@ -201,7 +194,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // been realized. So the stack gets its own table of blocks using the same
     // dimensions
     // and allocation scheme used for data segment.
-    //
     // The other major difference is the stack grows DOWNWARD from its base address,
     // not
     // upward. I.e., the stack base is the largest stack address. This turns the
@@ -414,7 +406,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * ******************************* THE SETTER METHODS
      ******************************/
 
-    /// ////////////////////////////////////////////////////////////////////////////////////
 
     private static void checkLoadWordAligned(final int address) throws AddressErrorException {
         if (!Memory.wordAligned(address)) {
@@ -424,7 +415,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         }
     }
 
-    /// ////////////////////////////////////////////////////////////////////////////////////
 
     private static void checkStoreWordAligned(final int address) throws AddressErrorException {
         if (!Memory.wordAligned(address)) {
@@ -434,7 +424,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Utility to determine if given address is doubleword-aligned.
@@ -446,7 +435,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         return (address % (Memory.WORD_LENGTH_BYTES + Memory.WORD_LENGTH_BYTES) == 0);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Handy little utility to find out if given address is in the text
@@ -463,7 +451,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         return address >= Memory.textBaseAddress && address < Memory.textLimitAddress;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Handy little utility to find out if given address is in RARS data
@@ -489,15 +476,12 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         return address >= Memory.memoryMapBaseAddress && address < Memory.kernelHighAddress;
     }
 
-    /// ////////////////////////////////////////////////////////////////////////////////////
 
     private static Collection<MemoryObservable> getNewMemoryObserversCollection() {
         return new Vector<>(); // Vectors are thread-safe
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////////////
     // Returns result of substituting specified byte of source second into specified
     //////////////////////////////////////////////////////////////////////////////////// byte
     // of destination second. Byte positions are 0-1-2-3, listed from most to least
@@ -521,9 +505,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * THE GETTER METHODS
      * *****************************/
 
-    //////////////////////////////////////////////////////////////////////////////////////////
 
-    ///////////////////////////////////////////////////////////////////////
     // Store a program statement at the given address. Address has already been
 
     /// //////////////////////////////////////////////////////////////////// verified
@@ -590,7 +572,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         return true;
     }
 
-    /////////////////////////////////////////////////////////////////////////
 
     /**
      * Explicitly clear the contents of memory. Typically done at start of assembly.
@@ -600,7 +581,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         this.initialize();
     }
 
-    /// //////////////////////////////////////////////////////////////////////
 
     private void initialize() {
         Memory.heapAddress = Memory.heapBaseAddress;
@@ -737,7 +717,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         }
         return oldValue;
     }
-    ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Starting at the given word address, write the given second over 4 bytes (a
@@ -757,7 +736,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 : this.set(address, value, Memory.WORD_LENGTH_BYTES);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Starting at the given halfword address, write the lower 16 bits of given
@@ -780,7 +758,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 : this.set(address, value, 2);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Writes low order 8 bits of given second into specified Memory byte.
@@ -797,7 +774,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 : this.set(address, value, 1);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Writes 64 bit doubleword second starting at specified Memory address. Note
@@ -821,7 +797,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 : old;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Writes 64 bit double second starting at specified Memory address. Note that
@@ -838,7 +813,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         return Double.longBitsToDouble(this.setDoubleWord(address, longValue));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Stores ProgramStatement in Text Segment.
@@ -865,7 +839,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         Memory.storeProgramStatement(address, statement, Memory.textBaseAddress, this.textBlockTable);
     }
 
-    //////////
 
     /**
      * Starting at the given word address, read the given number of bytes (max 4).
@@ -1106,7 +1079,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         return this.get(address, Memory.WORD_LENGTH_BYTES, false);
     }
 
-    ///////////////////////////////////////////////////////////////////////////
     // ALL THE OBSERVABLE STUFF GOES HERE. FOR COMPATIBILITY, Memory IS STILL
     // EXTENDING OBSERVABLE, BUT WILL NOT USE INHERITED METHODS. WILL INSTEAD
     // USE A COLLECTION OF MemoryObserver OBJECTS, EACH OF WHICH IS COMBINATION
@@ -1279,13 +1251,10 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         }
     }
 
-    /// /////////////////////////////////////////////////////////////////////////////
-    //
     // Helper method to fetch 1, 2 or 4 byte second from table that represents
     // memory. Originally used just for data segment, but now also used for stack.
     // Both use different tables but same storage method and same table size
     // and block size.
-    //
     private int storeBytesInTable(final int[][] blockTable,
                                   final int relativeByteAddress, final int length, final int value) {
         return this.storeOrFetchBytesInTable(blockTable, relativeByteAddress, length, value, Memory.STORE);
@@ -1295,16 +1264,12 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         return this.storeOrFetchBytesInTable(blockTable, relativeByteAddress, length, 0, Memory.FETCH);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
-    //
     // Helper method to store 4 byte second in table that represents memory.
     // Originally used just for data segment, but now also used for stack.
     // Both use different tables but same storage method and same table size
     // and block size. Assumes address is word aligned, no endian processing.
     // Modified 29 Dec 2005 to return overwritten second.
 
-    ////////////////////////////////////////////////////////////////////////////////
-    //
     // The helper's helper. Works for either storing or fetching, little or big
     //////////////////////////////////////////////////////////////////////////////// endian.
     // When storing/fetching bytes, most of the work is calculating the correct
@@ -1316,7 +1281,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /// ///////////////////////////////////////////////////////////////////////////// its
     // client using STORE or FETCH in last arg.
     // Modified 29 Dec 2005 to return old second of replaced bytes, for STORE.
-    //
     private synchronized int storeOrFetchBytesInTable(final int[][] blockTable,
                                                       int relativeByteAddress, final int length, int value,
                                                       final boolean op) {
@@ -1447,7 +1411,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         return null;
     }
 
-    /// //////////////////////////////////////////////////////////////////////
     // Private class whose objects will represent an observable-observer pair
     // for a given memory address or range.
     private static class MemoryObservable extends CustomPublisher<MemoryAccessNotice> implements Comparable<MemoryObservable> {
