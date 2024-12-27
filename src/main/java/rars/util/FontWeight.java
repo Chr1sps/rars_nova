@@ -15,13 +15,15 @@ public enum FontWeight implements Comparable<FontWeight> {
     HEAVY(TextAttribute.WEIGHT_HEAVY),
     EXTRA_BOLD(TextAttribute.WEIGHT_EXTRABOLD),
     ULTRA_BOLD(TextAttribute.WEIGHT_ULTRABOLD);
-    private final float weight;
+    public final float weight;
 
     FontWeight(final float weight) {
         this.weight = weight;
     }
 
-    public float getWeight() {
-        return weight;
+    @Override
+    public String toString() {
+        final var name = name().replace('_', ' ').toLowerCase();
+        return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 }

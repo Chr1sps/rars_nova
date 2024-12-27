@@ -7,7 +7,7 @@ import rars.venus.settings.editor.OptionSection;
 import javax.swing.*;
 import java.util.Objects;
 
-import static rars.settings.Settings.EDITOR_THEME_SETTINGS;
+import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
 import static rars.venus.settings.editor.views.SyntaxStyleView.buildRow;
 
 public final class BaseStyleView extends JPanel {
@@ -26,7 +26,7 @@ public final class BaseStyleView extends JPanel {
     public BaseStyleView() {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
+        final var theme = EDITOR_THEME_SETTINGS.currentTheme;
 
         // foreground
         final var foregroundSection = new OptionSection(FOREGROUND, null, theme.foregroundColor);

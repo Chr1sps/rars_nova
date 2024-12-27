@@ -11,6 +11,8 @@ import rars.notices.*;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
+import rars.settings.EditorThemeSettings;
+import rars.settings.FontSettings;
 import rars.simulator.Simulator;
 import rars.util.Binary;
 import rars.util.EditorFontUtils;
@@ -28,7 +30,8 @@ import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.concurrent.Flow;
 
-import static rars.settings.Settings.*;
+import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.Settings.RUNTIME_TABLE_HIGHLIGHTING_SETTINGS;
 import static rars.util.Utils.deriveFontFromStyle;
 
 /*
@@ -713,7 +716,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         if (this.table == null) {
             return;
         }
-        final var font = FONT_SETTINGS.getCurrentFont();
+        final var font = FontSettings.FONT_SETTINGS.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         this.table.setRowHeight(height);
     }
@@ -877,12 +880,12 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 final var style = RUNTIME_TABLE_HIGHLIGHTING_SETTINGS.getTextSegmentHighlightingStyle();
                 cell.setBackground(style.background());
                 cell.setForeground(style.foreground());
-                cell.setFont(deriveFontFromStyle(FONT_SETTINGS.getCurrentFont(), style));
+                cell.setFont(deriveFontFromStyle(FontSettings.FONT_SETTINGS.getCurrentFont(), style));
             } else {
-                final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
+                final var theme = EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme;
                 cell.setBackground(theme.backgroundColor);
                 cell.setForeground(theme.foregroundColor);
-                cell.setFont(FONT_SETTINGS.getCurrentFont());
+                cell.setFont(FontSettings.FONT_SETTINGS.getCurrentFont());
             }
             return cell;
         }

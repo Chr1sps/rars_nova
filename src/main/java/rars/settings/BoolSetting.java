@@ -104,7 +104,11 @@ public enum BoolSetting {
      * working directory
      * or from the RARS executable path.
      */
-    DERIVE_CURRENT_WORKING_DIRECTORY("DeriveCurrentWorkingDirectory", false);
+    DERIVE_CURRENT_WORKING_DIRECTORY("DeriveCurrentWorkingDirectory", false),
+    /**
+     * Flag to determine whether to use the FlatLaf dark or light look and feel.
+     */
+    DARK_MODE("dark_mode", false);
 
     // TODO: add option for turning off user trap handling and interrupts
     private final @NotNull String name;

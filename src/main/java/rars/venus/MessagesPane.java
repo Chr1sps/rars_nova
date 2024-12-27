@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
+import rars.notices.SettingsNotice;
 import rars.simulator.Simulator;
+import rars.util.SimpleSubscriber;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -17,7 +19,10 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Flow;
 import java.util.function.Consumer;
+
+import static rars.settings.FontSettings.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -52,14 +57,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Team JSpim
  */
-public class MessagesPane extends JTabbedPane {
-    /**
-     * Constant <code>MAXIMUM_SCROLLED_CHARACTERS=Globals.maximumMessageCharacters</code>
-     */
+public final class MessagesPane extends JTabbedPane implements SimpleSubscriber<SettingsNotice> {
     public static final int MAXIMUM_SCROLLED_CHARACTERS = Globals.maximumMessageCharacters;
-    /**
-     * Constant <code>NUMBER_OF_CHARACTERS_TO_CUT=Globals.maximumMessageCharacters / 10</code>
-     */
     public static final int NUMBER_OF_CHARACTERS_TO_CUT = Globals.maximumMessageCharacters / 10; // 10%
     final JTextArea assemble;
     final JTextArea run;
@@ -71,6 +70,7 @@ public class MessagesPane extends JTabbedPane {
     // must obviously be smaller than the former.
     private final JPanel assembleTab;
     private final JPanel runTab;
+    private Flow.Subscription subscription;
 
     /**
      * Constructor for the class, sets up two fresh tabbed text areas for program
@@ -87,9 +87,8 @@ public class MessagesPane extends JTabbedPane {
         // pane, will make messages more readable. For run
         // pane, will allow properly aligned "text graphics"
         // DPS 15 Dec 2008
-        final Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 12);
-        this.assemble.setFont(monoFont);
-        this.run.setFont(monoFont);
+        this.assemble.setFont(FONT_SETTINGS.getCurrentFont());
+        this.run.setFont(FONT_SETTINGS.getCurrentFont());
 
         final JButton assembleTabClearButton = new JButton("Clear");
         assembleTabClearButton.setToolTipText("Clear the Messages area");
@@ -403,15 +402,28 @@ public class MessagesPane extends JTabbedPane {
         return out;
     }
 
+    @Override
+    public void onSubscribe(final Flow.Subscription subscription) {
+        this.subscription = subscription;
+        subscription.request(1);
+    }
+
+    @Override
+    public void onNext(final SettingsNotice item) {
+        this.assemble.setFont(FONT_SETTINGS.getCurrentFont());
+        this.run.setFont(FONT_SETTINGS.getCurrentFont());
+        subscription.request(1);
+    }
+
     // Thread class for obtaining user input in the Run I/O window (MessagesPane)
     // Written by Ricardo Fern�ndez Pascual [rfernandez@ditec.um.es] December 2009.
     private class Asker {
         private final @NotNull ArrayBlockingQueue<String> resultQueue;
         private final int maxLen;
-        private int initialPos;
         private final @NotNull DocumentListener listener;
         private final @NotNull NavigationFilter navigationFilter;
         private final @NotNull Consumer<Simulator> stopListener;
+        private int initialPos;
 
         public Asker(final int maxLen) {
             this.maxLen = maxLen;
@@ -443,7 +455,7 @@ public class MessagesPane extends JTabbedPane {
                             }
                         });
                 }
-    
+
                 @Override
                 public void removeUpdate(final DocumentEvent e) {
                     EventQueue.invokeLater(
@@ -455,7 +467,7 @@ public class MessagesPane extends JTabbedPane {
                             }
                         });
                 }
-    
+
                 @Override
                 public void changedUpdate(final DocumentEvent e) {
                 }
@@ -468,7 +480,7 @@ public class MessagesPane extends JTabbedPane {
                     }
                     fb.moveDot(dot, bias);
                 }
-    
+
                 @Override
                 public void setDot(final FilterBypass fb, int dot, final Bias bias) {
                     if (dot < Asker.this.initialPos) {

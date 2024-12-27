@@ -5,22 +5,22 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.notices.SettingsNotice;
-import rars.riscv.lang.lexing.RVTokenType;
 import rars.util.CustomPublisher;
-import rars.venus.editors.ColorScheme;
-import rars.venus.editors.Theme;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.Settings.SETTINGS_PREFERENCES;
 import static rars.util.Utils.getColorAsHexString;
-import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
 public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull Logger LOGGER = LogManager.getLogger();
+    public static @NotNull EditorThemeSettings EDITOR_THEME_SETTINGS = new EditorThemeSettings(SETTINGS_PREFERENCES);
 
     // region Preferences keys
 
@@ -43,92 +43,92 @@ public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
     // endregion Preferences keys
 
     private final @NotNull Preferences preferences;
-    private @NotNull Theme currentTheme;
+    /**
+     * The current theme in memory. You can make changes to this theme and then
+     * call {@link #commitChanges()} to save the changes to the preferences.
+     * You can also call {@link #discardChanges()} to revert the changes to the
+     * state present in the preferences.
+     */
+    public @NotNull SettingsTheme currentTheme;
+    private @NotNull SettingsTheme backupTheme;
 
-    public EditorThemeSettings(final @NotNull Preferences preferences) {
+    private EditorThemeSettings(final @NotNull Preferences preferences) {
         this.preferences = preferences;
-        this.currentTheme = loadThemeFromPreferences();
+        this.currentTheme = this.backupTheme = loadThemeFromPreferences();
     }
 
     // region Preferences prefix methods
 
-    private static @NotNull String foregroundPrefix(final @NotNull RVTokenType tokenType) {
-        return THEME_PREFIX + STYLES + tokenValue(tokenType) + FOREGROUND;
+    private static @NotNull String foregroundPrefix(final @NotNull TokenSettingKey key) {
+        return THEME_PREFIX + STYLES + key.ordinal() + FOREGROUND;
     }
 
-    private static @NotNull String backgroundPrefix(final @NotNull RVTokenType tokenType) {
-        return THEME_PREFIX + STYLES + tokenValue(tokenType) + BACKGROUND;
+    private static @NotNull String backgroundPrefix(final @NotNull TokenSettingKey key) {
+        return THEME_PREFIX + STYLES + key.ordinal() + BACKGROUND;
     }
 
-    private static @NotNull String boldPrefix(final @NotNull RVTokenType tokenType) {
-        return THEME_PREFIX + STYLES + tokenValue(tokenType) + BOLD;
+    private static @NotNull String boldPrefix(final @NotNull TokenSettingKey key) {
+        return THEME_PREFIX + STYLES + key.ordinal() + BOLD;
     }
 
-    private static @NotNull String italicPrefix(final @NotNull RVTokenType tokenType) {
-        return THEME_PREFIX + STYLES + tokenValue(tokenType) + ITALIC;
+    private static @NotNull String italicPrefix(final @NotNull TokenSettingKey key) {
+        return THEME_PREFIX + STYLES + key.ordinal() + ITALIC;
     }
 
-    private static @NotNull String underlinePrefix(final @NotNull RVTokenType tokenType) {
-        return THEME_PREFIX + STYLES + tokenValue(tokenType) + UNDERLINE;
+    private static @NotNull String underlinePrefix(final @NotNull TokenSettingKey key) {
+        return THEME_PREFIX + STYLES + key.ordinal() + UNDERLINE;
     }
 
     // endregion Preferences prefix methods
 
     /**
-     * Returns the current theme in memory.
-     *
-     * @return the current theme
+     * Commits the theme currently in memory to the preferences. If the commit
+     * fails, the theme in memory will be reverted to the previous state.
      */
-    public @NotNull Theme getCurrentTheme() {
-        return this.currentTheme;
-    }
-
-    /**
-     * Sets the theme in memory to the given theme.
-     * Does not save to preferences.
-     *
-     * @param newTheme the new theme to set
-     */
-    public void setTheme(final @NotNull Theme newTheme) {
-        this.currentTheme = newTheme;
-    }
-
-    /**
-     * Commits the theme currently in memory to the preferences.
-     */
-    public void saveThemeToPreferences() {
-        this.preferences.put(THEME_PREFIX + BACKGROUND, getColorAsHexString(this.currentTheme.backgroundColor));
-        this.preferences.put(THEME_PREFIX + FOREGROUND, getColorAsHexString(this.currentTheme.foregroundColor));
-        this.preferences.put(THEME_PREFIX + LINE_HIGHLIGHT, getColorAsHexString(this.currentTheme.lineHighlightColor));
-        this.preferences.put(THEME_PREFIX + CARET, getColorAsHexString(this.currentTheme.caretColor));
-        this.preferences.put(THEME_PREFIX + SELECTION, getColorAsHexString(this.currentTheme.selectionColor));
-        this.writeColorSchemeToPreferences(this.currentTheme.colorScheme);
+    public void commitChanges() {
+        writeThemeToPreferences(this.currentTheme);
         try {
             this.preferences.flush();
+            this.backupTheme = this.currentTheme;
+            submit(SettingsNotice.get());
         } catch (final SecurityException se) {
-            LOGGER.error("Unable to write to persistent storage for security reasons.");
+            LOGGER.error("Unable to write to persistent storage for security reasons. Reverting to previous settings.");
+            // The reason why we need to write the backup theme to the preferences
+            // is because the Preferences API implementations are free to flush
+            // the changes to disk at any time.
+            writeThemeToPreferences(this.backupTheme);
+            this.currentTheme = this.backupTheme;
         } catch (final BackingStoreException bse) {
-            LOGGER.error("Unable to communicate with persistent storage.");
+            LOGGER.error("Unable to communicate with persistent storage. Reverting to previous settings.");
+            writeThemeToPreferences(this.backupTheme);
+            this.currentTheme = this.backupTheme;
         }
-        submit(SettingsNotice.get());
+    }
+
+    /**
+     * Restores the state of the theme settings in memory to the state in the
+     * preferences.
+     */
+    public void discardChanges() {
+        this.currentTheme = this.backupTheme;
     }
 
     // region Preference writing methods
-
-    private void writeColorSchemeToPreferences(final @NotNull ColorScheme colorScheme) {
-        for (final var entry : colorScheme.getEntries()) {
-            final var type = entry.getKey();
-            final var style = entry.getValue();
-            this.writeTokenStyleToPreferences(type, style);
-        }
+    private void writeThemeToPreferences(final @NotNull SettingsTheme settingsTheme) {
+        this.preferences.put(THEME_PREFIX + BACKGROUND, getColorAsHexString(settingsTheme.backgroundColor));
+        this.preferences.put(THEME_PREFIX + FOREGROUND, getColorAsHexString(settingsTheme.foregroundColor));
+        this.preferences.put(THEME_PREFIX + LINE_HIGHLIGHT, getColorAsHexString(settingsTheme.lineHighlightColor));
+        this.preferences.put(THEME_PREFIX + CARET, getColorAsHexString(settingsTheme.caretColor));
+        this.preferences.put(THEME_PREFIX + SELECTION, getColorAsHexString(settingsTheme.selectionColor));
+        settingsTheme.tokenStyles.forEach(this::writeTokenStyleToPreferences);
     }
 
-    private void writeTokenStyleToPreferences(final @NotNull RVTokenType type, final @NotNull TokenStyle style) {
-        putNullableColor(foregroundPrefix(type), style.foreground());
-        putNullableColor(backgroundPrefix(type), style.background());
-        this.preferences.putBoolean(boldPrefix(type), style.isBold());
-        this.preferences.putBoolean(italicPrefix(type), style.isItalic());
-        this.preferences.putBoolean(underlinePrefix(type), style.isUnderline());
+    private void writeTokenStyleToPreferences(final @NotNull TokenSettingKey key, final @NotNull TokenStyle style) {
+        putNullableColor(foregroundPrefix(key), style.foreground());
+        putNullableColor(backgroundPrefix(key), style.background());
+        this.preferences.putBoolean(boldPrefix(key), style.isBold());
+        this.preferences.putBoolean(italicPrefix(key), style.isItalic());
+        this.preferences.putBoolean(underlinePrefix(key), style.isUnderline());
     }
 
     /**
@@ -149,33 +149,33 @@ public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
 
     // region Preference loading methods
 
-    private @NotNull Theme loadThemeFromPreferences() {
-        final var defaultTheme = Theme.getDefaultLightTheme();
+    private @NotNull SettingsTheme loadThemeFromPreferences() {
+        final var defaultTheme = SettingsTheme.getDefaultTheme(BOOL_SETTINGS.getSetting(BoolSetting.DARK_MODE));
         final var background = loadColorFromPreferences(THEME_PREFIX + BACKGROUND, defaultTheme.backgroundColor);
         final var foreground = loadColorFromPreferences(THEME_PREFIX + FOREGROUND, defaultTheme.foregroundColor);
         final var lineHighlight = loadColorFromPreferences(THEME_PREFIX + LINE_HIGHLIGHT,
             defaultTheme.lineHighlightColor);
         final var caret = loadColorFromPreferences(THEME_PREFIX + CARET, defaultTheme.caretColor);
         final var selection = loadColorFromPreferences(THEME_PREFIX + SELECTION, defaultTheme.selectionColor);
-        final var colorScheme = loadColorSchemeFromPreferences(defaultTheme.colorScheme);
-        return new Theme(colorScheme, background, foreground, lineHighlight, caret, selection);
+        final var tokenStyles = loadTokenStylesFromPreferences(defaultTheme.tokenStyles);
+        return new SettingsTheme(background, foreground, lineHighlight, caret, selection, tokenStyles);
     }
 
-    private @NotNull ColorScheme loadColorSchemeFromPreferences(final @NotNull ColorScheme defaultColorScheme) {
-        final var styleMap = new HashMap<RVTokenType, TokenStyle>();
-        for (final var type : RVTokenType.values()) {
-            styleMap.put(type, loadTokenStyleFromPreferences(type, defaultColorScheme.getStyle(type)));
+    private @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> loadTokenStylesFromPreferences(final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> defaultColorScheme) {
+        final var styleMap = new HashMap<@NotNull TokenSettingKey, @NotNull TokenStyle>();
+        for (final var type : TokenSettingKey.values()) {
+            styleMap.put(type, loadTokenStyleFromPreferences(type, defaultColorScheme.get(type)));
         }
-        return new ColorScheme(styleMap);
+        return styleMap;
     }
 
-    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull RVTokenType type,
+    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull TokenSettingKey key,
                                                               final @NotNull TokenStyle defaultStyle) {
-        final var foreground = loadNullableColorFromPreferences(foregroundPrefix(type), defaultStyle.foreground());
-        final var background = loadNullableColorFromPreferences(backgroundPrefix(type), defaultStyle.background());
-        final var isBold = this.preferences.getBoolean(boldPrefix(type), defaultStyle.isBold());
-        final var isItalic = this.preferences.getBoolean(italicPrefix(type), defaultStyle.isItalic());
-        final var isUnderline = this.preferences.getBoolean(underlinePrefix(type), defaultStyle.isUnderline());
+        final var foreground = loadNullableColorFromPreferences(foregroundPrefix(key), defaultStyle.foreground());
+        final var background = loadNullableColorFromPreferences(backgroundPrefix(key), defaultStyle.background());
+        final var isBold = this.preferences.getBoolean(boldPrefix(key), defaultStyle.isBold());
+        final var isItalic = this.preferences.getBoolean(italicPrefix(key), defaultStyle.isItalic());
+        final var isUnderline = this.preferences.getBoolean(underlinePrefix(key), defaultStyle.isUnderline());
         return new TokenStyle(foreground, background, isBold, isItalic, isUnderline);
     }
 

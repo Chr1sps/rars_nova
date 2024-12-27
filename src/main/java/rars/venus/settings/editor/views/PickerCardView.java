@@ -1,14 +1,12 @@
 package rars.venus.settings.editor.views;
 
-import rars.venus.settings.editor.FontPickerPanel;
-
 import javax.swing.*;
 import java.awt.*;
 
 public final class PickerCardView extends JPanel {
     public final BaseStyleView baseStylePicker;
     public final SyntaxStyleView syntaxStylePicker;
-    public final FontPickerPanel fontPicker;
+    public final FontSettingsView fontSettingsView;
     public final OtherSettingsView otherSettingsView;
     private final JPanel upperPanel;
     private final CardLayout upperLayout;
@@ -25,11 +23,11 @@ public final class PickerCardView extends JPanel {
         final var emptyPanel = new JPanel();
         baseStylePicker = new BaseStyleView();
         syntaxStylePicker = new SyntaxStyleView();
-        fontPicker = new FontPickerPanel();
+        fontSettingsView = new FontSettingsView();
         otherSettingsView = new OtherSettingsView();
 
         upperPanel.add(emptyPanel, "empty");
-        upperPanel.add(fontPicker, "font");
+        upperPanel.add(fontSettingsView, "font");
         upperPanel.add(baseStylePicker, "base");
         upperPanel.add(syntaxStylePicker, "syntax");
         upperPanel.add(otherSettingsView, "other");

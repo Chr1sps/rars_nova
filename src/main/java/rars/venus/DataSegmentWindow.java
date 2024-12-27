@@ -9,6 +9,8 @@ import rars.notices.*;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
+import rars.settings.EditorThemeSettings;
+import rars.settings.FontSettings;
 import rars.simulator.Simulator;
 import rars.util.Binary;
 import rars.util.SimpleSubscriber;
@@ -29,7 +31,8 @@ import java.awt.event.MouseListener;
 import java.util.Date;
 import java.util.concurrent.Flow;
 
-import static rars.settings.Settings.*;
+import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.Settings.RUNTIME_TABLE_HIGHLIGHTING_SETTINGS;
 import static rars.util.Utils.deriveFontFromStyle;
 
 /*
@@ -155,9 +158,9 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         Simulator.getInstance().subscribe(this);
 
         BOOL_SETTINGS.subscribe(this);
-        FONT_SETTINGS.subscribe(this);
+        FontSettings.FONT_SETTINGS.subscribe(this);
         RUNTIME_TABLE_HIGHLIGHTING_SETTINGS.subscribe(this);
-        EDITOR_THEME_SETTINGS.subscribe(this);
+        EditorThemeSettings.EDITOR_THEME_SETTINGS.subscribe(this);
 
         this.homeAddress = Memory.dataBaseAddress; // address for Home button
         this.firstAddress = this.homeAddress; // first address to display at any given time
@@ -924,7 +927,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         if (DataSegmentWindow.dataTable == null) {
             return;
         }
-        final var font = FONT_SETTINGS.getCurrentFont();
+        final var font = FontSettings.FONT_SETTINGS.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         DataSegmentWindow.dataTable.setRowHeight(height);
     }
@@ -1095,8 +1098,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
             final int rowFirstAddress =
                 Binary.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
-            final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
-            final var defaultFont = FONT_SETTINGS.getCurrentFont();
+            final var theme = EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme;
+            final var defaultFont = FontSettings.FONT_SETTINGS.getCurrentFont();
             if (/*DataSegmentWindow.this.settings.getBoolSettings().getSetting(BoolSetting.DATA_SEGMENT_HIGHLIGHTING)
              &&*/
                 DataSegmentWindow.this.addressHighlighting &&

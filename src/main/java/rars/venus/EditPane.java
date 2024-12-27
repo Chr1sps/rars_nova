@@ -1,9 +1,12 @@
 package rars.venus;
 
+import org.fife.ui.rtextarea.RTextScrollPane;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.notices.SettingsNotice;
 import rars.settings.BoolSetting;
+import rars.settings.EditorThemeSettings;
+import rars.settings.FontSettings;
 import rars.util.SimpleSubscriber;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
@@ -18,7 +21,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.concurrent.Flow;
 
-import static rars.settings.Settings.*;
+import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.Settings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
@@ -95,16 +99,17 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         // user.dir, user's current working directory, is guaranteed to have a second
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
-        EDITOR_THEME_SETTINGS.subscribe(this);
+        EditorThemeSettings.EDITOR_THEME_SETTINGS.subscribe(this);
         BOOL_SETTINGS.subscribe(this);
-        FONT_SETTINGS.subscribe(this);
+        FontSettings.FONT_SETTINGS.subscribe(this);
         OTHER_SETTINGS.subscribe(this);
 
         this.fileStatus = new FileStatus();
         this.lineNumbers = new JLabel();
 
 //        this.sourceCode = new JEditBasedTextArea(this, this.lineNumbers);
-        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.getCurrentTheme());
+        this.sourceCode =
+            TextEditingAreaFactory.createTextEditingArea(EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme.toTheme());
         this.onNext(null);
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);
@@ -640,8 +645,8 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
 
     @Override
     public void onNext(final SettingsNotice ignored) {
-        this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-        this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.getCurrentTheme());
+        this.sourceCode.setFont(FontSettings.FONT_SETTINGS.getCurrentFont());
+        this.sourceCode.setTheme(EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme.toTheme());
         this.sourceCode.setLineHighlightEnabled(
             BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
         this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
@@ -671,4 +676,10 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
             : new Font(sourceFont.getFamily(), Font.PLAIN, sourceFont.getSize());
     }
 
+    public void updateRTextAreaUI() {
+        final var outer = (RTextScrollPane) this.sourceCode.getOuterComponent();
+        final var textAreaProper = outer.getTextArea();
+//        textAreaProper.setUI();
+//        textAreaProper.set
+    }
 }

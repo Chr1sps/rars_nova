@@ -23,12 +23,12 @@ import java.awt.event.MouseMotionListener;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
-import static rars.settings.Settings.FONT_SETTINGS;
+import static rars.settings.FontSettings.FONT_SETTINGS;
 
 public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private static final Map<TextAttribute, Object> ligatureAttributes = Map.of(
-        TextAttribute.KERNING, TextAttribute.KERNING_ON,
-        TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON
+        TextAttribute.KERNING, TextAttribute.KERNING_ON
+//        TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON
     );
 
     static {
@@ -172,9 +172,9 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
 
     @Override
     public void setFont(final @NotNull Font f) {
-        final var derived = f.deriveFont(ligatureAttributes);
-        textArea.setFont(derived);
-        gutter.setLineNumberFont(derived.deriveFont(Font.BOLD));
+//        final var derived = f.deriveFont(ligatureAttributes);
+        textArea.setFont(f);
+        gutter.setLineNumberFont(f);
     }
 
     @Override
@@ -188,8 +188,28 @@ public class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
+    public void setForeground(final Color c) {
+        textArea.setForeground(c);
+    }
+
+    @Override
     public void setBackground(final Color c) {
         textArea.setBackground(c);
+    }
+
+    @Override
+    public void setSelectionColor(final Color c) {
+        textArea.setSelectionColor(c);
+    }
+
+    @Override
+    public void setLineHighlightColor(final Color c) {
+        textArea.setCurrentLineHighlightColor(c);
+    }
+
+    @Override
+    public void setCaretColor(final Color c) {
+        textArea.setCaretColor(c);
     }
 
     @Override

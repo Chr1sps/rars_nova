@@ -36,6 +36,7 @@ public final class EditorSettingsPanel extends JPanel {
         this.treePanel = treePanel;
         this.panelWithTextAreaView = panelWithTextAreaView;
         this.bottomRowComponent = new BottomRowComponent();
+        this.bottomRowComponent.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         this.add(buildMainPart(treePanel, panelWithTextAreaView), BorderLayout.CENTER);
         this.add(bottomRowComponent, BorderLayout.SOUTH);

@@ -7,12 +7,12 @@ import java.awt.*;
 
 public final class ColorPickerButton extends JButton {
     private @NotNull Color color;
-   
+
     public ColorPickerButton(final Color color) {
         super("Pick Color");
         this.setColor(color);
         this.addActionListener((event) -> {
-            final var result = JColorChooser.showDialog(null, "Choose color", this.color);
+            final var result = JColorChooser.showDialog(null, "Choose color", this.color, false);
             if (result != null) {
                 this.setColor(result);
             }

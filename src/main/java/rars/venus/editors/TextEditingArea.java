@@ -81,8 +81,16 @@ public interface TextEditingArea {
 
     FontMetrics getFontMetrics(Font f);
 
+    void setForeground(Color c);
+    
     void setBackground(Color c);
-
+    
+    void setSelectionColor(Color c);
+    
+    void setCaretColor(Color c);
+    
+    void setLineHighlightColor(Color c);
+    
     void setEnabled(boolean enabled);
     
     void disableFully();

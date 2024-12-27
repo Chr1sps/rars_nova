@@ -6,9 +6,9 @@ import rars.venus.settings.editor.views.OtherSettingsView;
 import static rars.settings.Settings.OTHER_SETTINGS;
 
 public final class OtherSettingsController {
-    final @NotNull OtherSettingsView view;
-    final @NotNull EditorSettingsController parentController;
-    int caretBlinkRate, editorTabSize;
+    private final @NotNull OtherSettingsView view;
+    private final @NotNull EditorSettingsController parentController;
+    private int caretBlinkRate, editorTabSize;
 
     public OtherSettingsController(
         final @NotNull OtherSettingsView view,

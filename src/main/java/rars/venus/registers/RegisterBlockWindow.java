@@ -19,8 +19,8 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.Flow;
 
+import static rars.settings.FontSettings.FONT_SETTINGS;
 import static rars.settings.Settings.BOOL_SETTINGS;
-import static rars.settings.Settings.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -77,8 +77,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     RegisterBlockWindow(final Register[] registers, final String[] registerDescriptions, final String valueTip) {
         this.registers = registers;
         this.table = new MyTippedJTable(new RegTableModel(this.setupWindow()), registerDescriptions,
-                new String[]{"Each register has a tool tip describing its usage convention",
-                        "Corresponding register number", valueTip}) {
+            new String[]{"Each register has a tool tip describing its usage convention",
+                "Corresponding register number", valueTip}) {
         };
         this.updateRowHeight();
         final var columnModel = this.table.getColumnModel();
@@ -86,35 +86,28 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         final var nameColumn = columnModel.getColumn(RegisterBlockWindow.NAME_COLUMN);
         nameColumn.setMinWidth(RegisterBlockWindow.NAME_SIZE);
         nameColumn.setMaxWidth(RegisterBlockWindow.NAME_SIZE);
-        nameColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.LEFT));
+        nameColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.LEFT, table));
 
         final var numberColumn = columnModel.getColumn(RegisterBlockWindow.NUMBER_COLUMN);
         numberColumn.setMinWidth(RegisterBlockWindow.NUMBER_SIZE);
         numberColumn.setMaxWidth(RegisterBlockWindow.NUMBER_SIZE);
         // Display register values (String-ified) right-justified in mono font
-        numberColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT));
+        numberColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT, table));
 
         final var valueColumn = columnModel.getColumn(RegisterBlockWindow.VALUE_COLUMN);
         valueColumn.setMinWidth(RegisterBlockWindow.VALUE_SIZE);
         valueColumn.setMaxWidth(RegisterBlockWindow.VALUE_SIZE);
-        valueColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT));
+        valueColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT, table));
 
         this.table.setPreferredScrollableViewportSize(new Dimension(RegisterBlockWindow.NAME_SIZE + RegisterBlockWindow.NUMBER_SIZE + RegisterBlockWindow.VALUE_SIZE, 700));
         this.setLayout(new BorderLayout()); // table display will occupy entire width if widened
         this.add(new JScrollPane(
-                this.table,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+            this.table,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         ));
     }
 
-    /**
-     * <p>formatRegister.</p>
-     *
-     * @param value a {@link Register} object
-     * @param base  a int
-     * @return a {@link java.lang.String} object
-     */
     protected abstract String formatRegister(Register value, int base);
 
     /**
@@ -145,7 +138,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             final int temp = this.registers[i].getNumber();
             tableData[i][RegisterBlockWindow.NUMBER_COLUMN] = temp == -1 ? "" : temp;
             tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegister(this.registers[i],
-                    NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)));
+                NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)));
         }
         return tableData;
     }
@@ -172,8 +165,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     public void updateRegisters() {
         for (int i = 0; i < this.registers.length; i++) {
             ((RegTableModel) this.table.getModel()).setDisplayAndModelValueAt(this.formatRegister(this.registers[i],
-                            Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase()), i,
-                    RegisterBlockWindow.VALUE_COLUMN);
+                    Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase()), i,
+                RegisterBlockWindow.VALUE_COLUMN);
         }
     }
 
@@ -228,13 +221,16 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      */
     private static class RegisterCellRenderer extends DefaultTableCellRenderer implements SimpleSubscriber<SettingsNotice> {
         private final int alignment;
+        private final @NotNull JTable table;
         private Font font;
         private Flow.Subscription subscription;
 
-        private RegisterCellRenderer(final int alignment) {
+        private RegisterCellRenderer(final int alignment, final @NotNull JTable table) {
             super();
             this.alignment = alignment;
             this.font = FONT_SETTINGS.getCurrentFont();
+            this.table = table;
+            FONT_SETTINGS.subscribe(this);
         }
 
         @Override
@@ -242,7 +238,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
                                                                 final boolean isSelected, final boolean hasFocus,
                                                                 final int row, final int column) {
             final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
-                    isSelected, hasFocus, row, column);
+                isSelected, hasFocus, row, column);
             cell.setFont(this.font);
             cell.setHorizontalAlignment(this.alignment);
             return cell;
@@ -257,6 +253,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         @Override
         public void onNext(final SettingsNotice item) {
             this.font = FONT_SETTINGS.getCurrentFont();
+            this.table.repaint();
             this.subscription.request(1);
         }
     }

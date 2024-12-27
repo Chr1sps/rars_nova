@@ -1,11 +1,13 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
-import static rars.settings.Settings.EDITOR_THEME_SETTINGS;
-import static rars.settings.Settings.FONT_SETTINGS;
+import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
+import static rars.settings.FontSettings.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -41,16 +43,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Strings containing either the decimal or hexidecimal version
  * of the integer second.
  */
-public class MonoRightCellRenderer extends DefaultTableCellRenderer {
+public final class MonoRightCellRenderer extends DefaultTableCellRenderer {
     @Override
-    public Component getTableCellRendererComponent(final JTable table, final Object value,
-                                                   final boolean isSelected, final boolean hasFocus, final int row,
-                                                   final int column) {
+    public @NotNull Component getTableCellRendererComponent(final JTable table, final Object value,
+                                                            final boolean isSelected, final boolean hasFocus, final int row,
+                                                            final int column) {
         final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
             isSelected, hasFocus, row, column);
         cell.setFont(FONT_SETTINGS.getCurrentFont());
         cell.setHorizontalAlignment(SwingConstants.RIGHT);
-        final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
+        final var theme = EDITOR_THEME_SETTINGS.currentTheme;
         cell.setForeground(theme.foregroundColor);
         cell.setBackground(theme.backgroundColor);
         return cell;

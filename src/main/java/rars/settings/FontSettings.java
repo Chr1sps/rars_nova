@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.notices.SettingsNotice;
 import rars.util.CustomPublisher;
+import rars.util.FontWeight;
 
 import java.awt.*;
 import java.awt.font.TextAttribute;
@@ -21,8 +22,9 @@ public final class FontSettings extends CustomPublisher<SettingsNotice> {
 
     private static final String SIZE = "Size";
     private static final String FAMILY = "Family";
-    //    private static final String WEIGHT = "Weight";
+    private static final String WEIGHT = "Weight";
     private static final String LIGATURES = "Ligatures";
+    public static @NotNull FontSettings FONT_SETTINGS;
 
     // endregion Preferences keys
 
@@ -30,61 +32,60 @@ public final class FontSettings extends CustomPublisher<SettingsNotice> {
 
     private int fontSize;
     private @NotNull String fontFamily;
-    //    private FontWeight fontWeight;
+    private @NotNull FontWeight fontWeight;
     private boolean isLigaturized;
 
     public FontSettings(final @NotNull Preferences preferences) {
         this.preferences = preferences;
         loadSettingsFromPreferences();
     }
-    
+
     // region Getters and setters
-    
+
     public @NotNull Font getCurrentFont() {
         final var attributes = new HashMap<TextAttribute, Object>();
         attributes.put(TextAttribute.FAMILY, fontFamily);
         attributes.put(TextAttribute.SIZE, fontSize);
-//        attributes.put(TextAttribute.WEIGHT, fontWeight.getWeight());
-        attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
+        attributes.put(TextAttribute.WEIGHT, fontWeight.weight);
         if (isLigaturized)
             attributes.put(TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON);
         return new Font(attributes);
     }
-    
+
     public @NotNull String getFontFamily() {
         return fontFamily;
     }
-    
+
     public void setFontFamily(final @NotNull String fontFamily) {
         this.fontFamily = fontFamily;
     }
-    
+
     public int getFontSize() {
         return fontSize;
     }
-    
+
     public void setFontSize(final int fontSize) {
         this.fontSize = fontSize;
     }
-    
-//    public @NotNull FontWeight getFontWeight() {
-//        return fontWeight;
-//    }
-    
-//    public void setFontWeight(final @NotNull FontWeight fontWeight) {
-//        this.fontWeight = fontWeight;
-//    }
-    
+
+    public @NotNull FontWeight getFontWeight() {
+        return fontWeight;
+    }
+
+    public void setFontWeight(final @NotNull FontWeight fontWeight) {
+        this.fontWeight = fontWeight;
+    }
+
     public boolean isLigaturized() {
         return isLigaturized;
     }
-    
+
     public void setLigaturized(final boolean isLigaturized) {
         this.isLigaturized = isLigaturized;
     }
 
     // endregion Getters and setters
-    
+
     public void saveSettingsToPreferences() {
         preferences.put(FONT_PREFIX + FAMILY, fontFamily);
         preferences.putInt(FONT_PREFIX + SIZE, fontSize);
@@ -98,11 +99,11 @@ public final class FontSettings extends CustomPublisher<SettingsNotice> {
         }
         submit(SettingsNotice.get());
     }
-    
+
     private void loadSettingsFromPreferences() {
         this.fontFamily = preferences.get(FONT_PREFIX + FAMILY, "Monospaced");
         this.fontSize = preferences.getInt(FONT_PREFIX + SIZE, 12);
-//        this.fontWeight = FontWeight.valueOf(preferences.get(FONT_PREFIX + WEIGHT, FontWeight.REGULAR.getWeight()));
+        this.fontWeight = FontWeight.valueOf(preferences.get(FONT_PREFIX + WEIGHT, FontWeight.REGULAR.name()));
         this.isLigaturized = preferences.getBoolean(FONT_PREFIX + LIGATURES, false);
     }
 }

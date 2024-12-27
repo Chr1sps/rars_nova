@@ -1,6 +1,7 @@
 package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
+import rars.settings.EditorThemeSettings;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingAreaFactory;
 import rars.venus.editors.Theme;
@@ -8,7 +9,8 @@ import rars.venus.editors.Theme;
 import javax.swing.*;
 import java.awt.*;
 
-import static rars.settings.Settings.*;
+import static rars.settings.FontSettings.FONT_SETTINGS;
+import static rars.settings.Settings.OTHER_SETTINGS;
 
 public final class PanelWithTextAreaView extends JPanel {
     public final @NotNull PickerCardView pickerCardView;
@@ -20,7 +22,7 @@ public final class PanelWithTextAreaView extends JPanel {
         this.pickerCardView = pickerCardView;
         this.add(pickerCardView);
         this.add(Box.createVerticalGlue());
-        this.textArea = createTextArea(EDITOR_THEME_SETTINGS.getCurrentTheme()); // TODO: default theme
+        this.textArea = createTextArea(EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme.toTheme());
         final var outerComponent = this.textArea.getOuterComponent();
         final var textAreaSize = new Dimension(500, 300);
         outerComponent.setMinimumSize(textAreaSize);

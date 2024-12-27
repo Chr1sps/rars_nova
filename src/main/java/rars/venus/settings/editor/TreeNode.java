@@ -1,6 +1,7 @@
 package rars.venus.settings.editor;
 
 import org.jetbrains.annotations.NotNull;
+import rars.settings.TokenSettingKey;
 
 public class TreeNode {
     final @NotNull String display;

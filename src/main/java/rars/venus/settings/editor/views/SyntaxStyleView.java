@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public final class SyntaxStyleView extends JPanel {
 
     public final @NotNull JCheckBox isBold, isItalic, isUnderline, useForeground, useBackground;
-    public final @NotNull ColorPickerButton foregroundColorPicker, backgroundColorPicker;
+    public final @NotNull ColorPickerButton foregroundColorButton, backgroundColorButton;
 
     public SyntaxStyleView() {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -22,12 +22,12 @@ public final class SyntaxStyleView extends JPanel {
         // foreground
         final var foregroundSection = new OptionSection("Foreground", false, Color.BLACK);
         this.useForeground = Objects.requireNonNull(foregroundSection.checkBox);
-        this.foregroundColorPicker = Objects.requireNonNull(foregroundSection.colorPickerButton);
+        this.foregroundColorButton = Objects.requireNonNull(foregroundSection.colorPickerButton);
 
         // background
         final var backgroundSection = new OptionSection("Background", false, Color.WHITE);
         this.useBackground = Objects.requireNonNull(backgroundSection.checkBox);
-        this.backgroundColorPicker = Objects.requireNonNull(backgroundSection.colorPickerButton);
+        this.backgroundColorButton = Objects.requireNonNull(backgroundSection.colorPickerButton);
 
         // upper row
         final var upperRow = buildRow(true, foregroundSection, backgroundSection);
@@ -71,7 +71,7 @@ public final class SyntaxStyleView extends JPanel {
         final var foreground = style.foreground();
         if (foreground != null) {
             this.useForeground.setSelected(true);
-            this.foregroundColorPicker.setColor(foreground);
+            this.foregroundColorButton.setColor(foreground);
         } else {
             this.useForeground.setSelected(false);
         }
@@ -79,7 +79,7 @@ public final class SyntaxStyleView extends JPanel {
         final var background = style.background();
         if (background != null) {
             this.useBackground.setSelected(true);
-            this.backgroundColorPicker.setColor(background);
+            this.backgroundColorButton.setColor(background);
         } else {
             this.useBackground.setSelected(false);
         }
@@ -91,8 +91,8 @@ public final class SyntaxStyleView extends JPanel {
 
     public @NotNull TokenStyle getTokenStyle() {
         return new TokenStyle(
-            this.useForeground.isSelected() ? this.foregroundColorPicker.getColor() : null,
-            this.useBackground.isSelected() ? this.backgroundColorPicker.getColor() : null,
+            this.useForeground.isSelected() ? this.foregroundColorButton.getColor() : null,
+            this.useBackground.isSelected() ? this.backgroundColorButton.getColor() : null,
             this.isBold.isSelected(),
             this.isItalic.isSelected(),
             this.isUnderline.isSelected()
