@@ -2,18 +2,16 @@ package rars.venus.editors.rsyntaxtextarea;
 
 import org.fife.ui.rsyntaxtextarea.Style;
 import org.jetbrains.annotations.NotNull;
-import rars.venus.editors.ColorScheme;
-import rars.venus.editors.ColorSchemeConverter;
+import rars.riscv.lang.lexing.RVTokenType;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
+import java.util.Map;
 
 import static rars.util.Utils.deriveFontFromStyle;
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
-public final class RSTASchemeConverter implements ColorSchemeConverter<RVSyntaxScheme> {
-    public static final RSTASchemeConverter INSTANCE = new RSTASchemeConverter();
-
+public final class RSTASchemeConverter {
     private RSTASchemeConverter() {
     }
 
@@ -28,14 +26,14 @@ public final class RSTASchemeConverter implements ColorSchemeConverter<RVSyntaxS
         return result;
     }
 
-    @Override
-    public @NotNull RVSyntaxScheme convert(final @NotNull ColorScheme colorScheme, final @NotNull Font baseFont) {
+    public static @NotNull RVSyntaxScheme convert(final @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles,
+                                                  final @NotNull Font baseFont) {
         final var result = new RVSyntaxScheme();
-        for (final var entry : colorScheme.getEntries()) {
-            final var newKey = tokenValue(entry.getKey());
-            final var convertedStyle = convertStyle(entry.getValue(), baseFont);
+        tokenStyles.forEach((key, value) -> {
+            final var newKey = tokenValue(key);
+            final var convertedStyle = convertStyle(value, baseFont);
             result.setStyle(newKey, convertedStyle);
-        }
+        });
         return result;
     }
 }

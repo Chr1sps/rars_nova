@@ -4,14 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.notices.SettingsNotice;
 import rars.riscv.hardware.MemoryConfiguration;
-import rars.util.CustomPublisher;
 
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public final class OtherSettings extends CustomPublisher<SettingsNotice> {
+public final class OtherSettings extends ListenableBase<OtherSettings> {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // region Preferences keys
@@ -122,7 +120,7 @@ public final class OtherSettings extends CustomPublisher<SettingsNotice> {
         } catch (final BackingStoreException e) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }
-        submit(SettingsNotice.get());
+        submit();
     }
 
     // region Preference loading methods

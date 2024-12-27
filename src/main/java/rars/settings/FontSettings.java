@@ -3,8 +3,6 @@ package rars.settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import rars.notices.SettingsNotice;
-import rars.util.CustomPublisher;
 import rars.util.FontWeight;
 
 import java.awt.*;
@@ -13,34 +11,33 @@ import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public final class FontSettings extends CustomPublisher<SettingsNotice> {
+import static rars.settings.Settings.SETTINGS_PREFERENCES;
+
+public final class FontSettings extends ListenableBase<FontSettings> {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // region Preferences keys
-
     private static final String FONT_PREFIX = "Font";
-
     private static final String SIZE = "Size";
     private static final String FAMILY = "Family";
     private static final String WEIGHT = "Weight";
     private static final String LIGATURES = "Ligatures";
-    public static @NotNull FontSettings FONT_SETTINGS;
-
     // endregion Preferences keys
 
-    private final @NotNull Preferences preferences;
+    public static @NotNull FontSettings FONT_SETTINGS = new FontSettings(SETTINGS_PREFERENCES);
 
+    private final @NotNull Preferences preferences;
     private int fontSize;
     private @NotNull String fontFamily;
     private @NotNull FontWeight fontWeight;
     private boolean isLigaturized;
 
+    // region Getters and setters
+
     public FontSettings(final @NotNull Preferences preferences) {
         this.preferences = preferences;
         loadSettingsFromPreferences();
     }
-
-    // region Getters and setters
 
     public @NotNull Font getCurrentFont() {
         final var attributes = new HashMap<TextAttribute, Object>();
@@ -97,7 +94,7 @@ public final class FontSettings extends CustomPublisher<SettingsNotice> {
         } catch (final BackingStoreException bse) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }
-        submit(SettingsNotice.get());
+        submit();
     }
 
     private void loadSettingsFromPreferences() {

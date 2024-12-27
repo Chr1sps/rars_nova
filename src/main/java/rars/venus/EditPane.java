@@ -3,11 +3,7 @@ package rars.venus;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.notices.SettingsNotice;
 import rars.settings.BoolSetting;
-import rars.settings.EditorThemeSettings;
-import rars.settings.FontSettings;
-import rars.util.SimpleSubscriber;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
 import rars.venus.editors.TextEditingAreaFactory;
@@ -19,8 +15,9 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.concurrent.Flow;
 
+import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
+import static rars.settings.FontSettings.FONT_SETTINGS;
 import static rars.settings.Settings.BOOL_SETTINGS;
 import static rars.settings.Settings.OTHER_SETTINGS;
 
@@ -63,7 +60,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Bumgarner
  */
-public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice> {
+public class EditPane extends JPanel {
 
     /**
      * Form string with source code line numbers.
@@ -80,13 +77,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
     private final JCheckBox showLineNumbers;
     private final JLabel lineNumbers;
     private final FileStatus fileStatus;
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Update, if source code is visible, when Font setting changes.
-     * This method is specified by the Observer interface.
-     */
-    private Flow.Subscription subscription;
 
     /**
      * Constructor for the EditPane class.
@@ -99,18 +89,29 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
         // user.dir, user's current working directory, is guaranteed to have a second
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
-        EditorThemeSettings.EDITOR_THEME_SETTINGS.subscribe(this);
-        BOOL_SETTINGS.subscribe(this);
-        FontSettings.FONT_SETTINGS.subscribe(this);
-        OTHER_SETTINGS.subscribe(this);
 
         this.fileStatus = new FileStatus();
         this.lineNumbers = new JLabel();
 
-//        this.sourceCode = new JEditBasedTextArea(this, this.lineNumbers);
-        this.sourceCode =
-            TextEditingAreaFactory.createTextEditingArea(EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme.toTheme());
-        this.onNext(null);
+        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.currentTheme.toTheme());
+        this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
+        EDITOR_THEME_SETTINGS.addChangeListener(settings -> {
+            this.sourceCode.setTheme(settings.currentTheme.toTheme());
+        }, true);
+        FONT_SETTINGS.addChangeListener(settings -> {
+            this.sourceCode.setFont(settings.getCurrentFont());
+            this.lineNumbers.setFont(this.getLineNumberFont(this.sourceCode.getFont()));
+            this.lineNumbers.revalidate();
+        }, true);
+        BOOL_SETTINGS.addChangeListener((settings) -> this.sourceCode.setLineHighlightEnabled(
+            settings.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
+        ), true);
+        OTHER_SETTINGS.addChangeListener(settings -> {
+            this.sourceCode.setCaretBlinkRate(settings.getCaretBlinkRate());
+            this.sourceCode.setTabSize(settings.getEditorTabSize());
+//            this.sourceCode.revalidate();
+        }, true);
+
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);
 
@@ -635,34 +636,6 @@ public class EditPane extends JPanel implements SimpleSubscriber<SettingsNotice>
      */
     public int doReplaceAll(final String find, final String replace, final boolean caseSensitive) {
         return this.sourceCode.doReplaceAll(find, replace, caseSensitive);
-    }
-
-    @Override
-    public void onSubscribe(final Flow.Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
-    }
-
-    @Override
-    public void onNext(final SettingsNotice ignored) {
-        this.sourceCode.setFont(FontSettings.FONT_SETTINGS.getCurrentFont());
-        this.sourceCode.setTheme(EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme.toTheme());
-        this.sourceCode.setLineHighlightEnabled(
-            BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
-        this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
-        this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
-        this.sourceCode.revalidate();
-        // We want line numbers to be displayed same size but always PLAIN style.
-        // Easiest way to get same pixel height as source code is to set to same
-        // font family as the source code! It can get a bit complicated otherwise
-        // because different fonts will render the same font size in different
-        // pixel heights. This is a factor because the line numbers as displayed
-        // in the editor form a separate column from the source code and if the
-        // pixel height is not the same then the numbers will not line up with
-        // the source lines.
-        this.lineNumbers.setFont(this.getLineNumberFont(this.sourceCode.getFont()));
-        this.lineNumbers.revalidate();
-        this.subscription.request(1);
     }
 
     /*

@@ -4,9 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
-import rars.notices.SettingsNotice;
 import rars.simulator.Simulator;
-import rars.util.SimpleSubscriber;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -19,7 +17,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 
 import static rars.settings.FontSettings.FONT_SETTINGS;
@@ -57,7 +54,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Team JSpim
  */
-public final class MessagesPane extends JTabbedPane implements SimpleSubscriber<SettingsNotice> {
+public final class MessagesPane extends JTabbedPane {
     public static final int MAXIMUM_SCROLLED_CHARACTERS = Globals.maximumMessageCharacters;
     public static final int NUMBER_OF_CHARACTERS_TO_CUT = Globals.maximumMessageCharacters / 10; // 10%
     final JTextArea assemble;
@@ -70,7 +67,6 @@ public final class MessagesPane extends JTabbedPane implements SimpleSubscriber<
     // must obviously be smaller than the former.
     private final JPanel assembleTab;
     private final JPanel runTab;
-    private Flow.Subscription subscription;
 
     /**
      * Constructor for the class, sets up two fresh tabbed text areas for program
@@ -81,6 +77,10 @@ public final class MessagesPane extends JTabbedPane implements SimpleSubscriber<
         this.setMinimumSize(new Dimension(0, 0));
         this.assemble = new JTextArea();
         this.run = new JTextArea();
+        FONT_SETTINGS.addChangeListener(settings -> {
+            this.assemble.setFont(settings.getCurrentFont());
+            this.run.setFont(settings.getCurrentFont());
+        });
         this.assemble.setEditable(false);
         this.run.setEditable(false);
         // Set both text areas to mono font. For assemble
@@ -400,19 +400,6 @@ public final class MessagesPane extends JTabbedPane implements SimpleSubscriber<
             Globals.memoryAndRegistersLock.lock();
         }
         return out;
-    }
-
-    @Override
-    public void onSubscribe(final Flow.Subscription subscription) {
-        this.subscription = subscription;
-        subscription.request(1);
-    }
-
-    @Override
-    public void onNext(final SettingsNotice item) {
-        this.assemble.setFont(FONT_SETTINGS.getCurrentFont());
-        this.run.setFont(FONT_SETTINGS.getCurrentFont());
-        subscription.request(1);
     }
 
     // Thread class for obtaining user input in the Run I/O window (MessagesPane)

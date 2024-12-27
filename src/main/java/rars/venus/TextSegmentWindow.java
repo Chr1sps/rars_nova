@@ -7,7 +7,10 @@ import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
-import rars.notices.*;
+import rars.notices.AccessNotice;
+import rars.notices.MemoryAccessNotice;
+import rars.notices.Notice;
+import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
@@ -30,6 +33,7 @@ import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.concurrent.Flow;
 
+import static rars.settings.FontSettings.FONT_SETTINGS;
 import static rars.settings.Settings.BOOL_SETTINGS;
 import static rars.settings.Settings.RUNTIME_TABLE_HIGHLIGHTING_SETTINGS;
 import static rars.util.Utils.deriveFontFromStyle;
@@ -110,7 +114,13 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public TextSegmentWindow() {
         super("Text Segment", true, false, true, true);
         Simulator.getInstance().subscribe(this);
-        BOOL_SETTINGS.subscribe(this);
+        BOOL_SETTINGS.addChangeListener(settings -> {
+            this.deleteAsTextSegmentObserver();
+            if (settings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+                this.addAsTextSegmentObserver();
+            }
+        });
+        FONT_SETTINGS.addChangeListener(this::updateRowHeight);
         this.contentPane = this.getContentPane();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
@@ -182,7 +192,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
         this.table = new MyTippedJTable(this.tableModel);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-        this.updateRowHeight();
+        this.updateRowHeight(FONT_SETTINGS);
 
         // prevents cells in row from being highlighted when user clicks on breakpoint
         // checkbox
@@ -347,7 +357,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     @Override
     public void onNext(final Notice notice) {
         switch (notice) {
-            case final SimulatorNotice ignored -> {
+            case final SimulatorNotice simulatorNotice -> {
                 // Simulated MIPS execution starts. Respond to text segment changes only if
                 // self-modifying code
                 // enabled. I commented out conditions that would further limit it to running in
@@ -355,23 +365,18 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 // Seems reasonable for text segment display to be accurate in cases where
                 // existing code is overwritten
                 // even when running at unlimited speed. DPS 10-July-2013
-                this.deleteAsTextSegmentObserver();
-                if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
-                    // (notice.getRunSpeed()
-                    // !=
-                    // RunSpeedPanel.UNLIMITED_SPEED
-                    // ||
-                    // notice.getMaxSteps()==1))
-                    // {
-                    this.addAsTextSegmentObserver();
+                if (simulatorNotice.action() == SimulatorNotice.Action.START) {
+                    this.deleteAsTextSegmentObserver();
+                    if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
+                        // (notice.getRunSpeed()
+                        // !=
+                        // RunSpeedPanel.UNLIMITED_SPEED
+                        // ||
+                        // notice.getMaxSteps()==1))
+                        // {
+                        this.addAsTextSegmentObserver();
+                    }
                 }
-            }
-            case final SettingsNotice ignored -> {
-                this.deleteAsTextSegmentObserver();
-                if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
-                    this.addAsTextSegmentObserver();
-                }
-                this.updateRowHeight();
             }
             case final MemoryAccessNotice m -> {
 
@@ -674,7 +679,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
     }
 
-    /*
+    /**
      * Little convenience method to add this as observer of text segment
      */
     private void addAsTextSegmentObserver() {
@@ -684,7 +689,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
     }
 
-    /*
+    /**
      * Little convenience method to remove this as observer of text segment
      */
     private void deleteAsTextSegmentObserver() {
@@ -712,11 +717,11 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         return addressRow;
     }
 
-    private void updateRowHeight() {
+    private void updateRowHeight(final @NotNull FontSettings settings) {
         if (this.table == null) {
             return;
         }
-        final var font = FontSettings.FONT_SETTINGS.getCurrentFont();
+        final var font = settings.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         this.table.setRowHeight(height);
     }
@@ -880,12 +885,12 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 final var style = RUNTIME_TABLE_HIGHLIGHTING_SETTINGS.getTextSegmentHighlightingStyle();
                 cell.setBackground(style.background());
                 cell.setForeground(style.foreground());
-                cell.setFont(deriveFontFromStyle(FontSettings.FONT_SETTINGS.getCurrentFont(), style));
+                cell.setFont(deriveFontFromStyle(FONT_SETTINGS.getCurrentFont(), style));
             } else {
                 final var theme = EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme;
                 cell.setBackground(theme.backgroundColor);
                 cell.setForeground(theme.foregroundColor);
-                cell.setFont(FontSettings.FONT_SETTINGS.getCurrentFont());
+                cell.setFont(FONT_SETTINGS.getCurrentFont());
             }
             return cell;
         }

@@ -4,8 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.notices.SettingsNotice;
-import rars.util.CustomPublisher;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
@@ -18,30 +16,26 @@ import static rars.settings.Settings.BOOL_SETTINGS;
 import static rars.settings.Settings.SETTINGS_PREFERENCES;
 import static rars.util.Utils.getColorAsHexString;
 
-public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
+public final class EditorThemeSettings extends ListenableBase<EditorThemeSettings> {
     private static final @NotNull Logger LOGGER = LogManager.getLogger();
-    public static @NotNull EditorThemeSettings EDITOR_THEME_SETTINGS = new EditorThemeSettings(SETTINGS_PREFERENCES);
-
-    // region Preferences keys
-
     /**
      * Top level theme settings prefix.
      */
     private static final String THEME_PREFIX = "Theme";
 
+    // region Preferences keys
     private static final String BACKGROUND = "Background";
     private static final String FOREGROUND = "Foreground";
     private static final String LINE_HIGHLIGHT = "LineHighlight";
     private static final String CARET = "Caret";
     private static final String SELECTION = "Selection";
     private static final String STYLES = "Styles";
-
     private static final String BOLD = "Bold";
     private static final String ITALIC = "Italic";
     private static final String UNDERLINE = "Underline";
+    public static @NotNull EditorThemeSettings EDITOR_THEME_SETTINGS = new EditorThemeSettings(SETTINGS_PREFERENCES);
 
     // endregion Preferences keys
-
     private final @NotNull Preferences preferences;
     /**
      * The current theme in memory. You can make changes to this theme and then
@@ -90,7 +84,7 @@ public final class EditorThemeSettings extends CustomPublisher<SettingsNotice> {
         try {
             this.preferences.flush();
             this.backupTheme = this.currentTheme;
-            submit(SettingsNotice.get());
+            submit();
         } catch (final SecurityException se) {
             LOGGER.error("Unable to write to persistent storage for security reasons. Reverting to previous settings.");
             // The reason why we need to write the backup theme to the preferences

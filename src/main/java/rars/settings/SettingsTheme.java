@@ -2,7 +2,6 @@ package rars.settings;
 
 import org.jetbrains.annotations.NotNull;
 import rars.riscv.lang.lexing.RVTokenType;
-import rars.venus.editors.ColorScheme;
 import rars.venus.editors.Theme;
 import rars.venus.editors.TokenStyle;
 
@@ -58,13 +57,14 @@ public final class SettingsTheme {
         return isDarkMode ? DEFAULT_DARK_THEME : DEFAULT_LIGHT_THEME;
     }
 
-    private static @NotNull ColorScheme convertMapToColorScheme(final @NotNull Map<@NotNull TokenSettingKey,
-        @NotNull TokenStyle> tokenStyles) {
+    private static @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> convertSettingsToThemeTokenStyles(
+        final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> tokenStyles
+    ) {
         final var result = new HashMap<@NotNull RVTokenType, @NotNull TokenStyle>();
         tokenStyles.forEach((key, style) ->
             TokenSettingKey.getTokenTypesForSetting(key)
                 .forEach(tokenType -> result.put(tokenType, style)));
-        return new ColorScheme(result);
+        return result;
     }
 
     private static @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> getFilledMap(final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> baseMap) {
@@ -151,7 +151,7 @@ public final class SettingsTheme {
 
     public @NotNull Theme toTheme() {
         return new Theme(
-            convertMapToColorScheme(this.tokenStyles),
+            convertSettingsToThemeTokenStyles(this.tokenStyles),
             this.backgroundColor,
             this.foregroundColor,
             this.lineHighlightColor,

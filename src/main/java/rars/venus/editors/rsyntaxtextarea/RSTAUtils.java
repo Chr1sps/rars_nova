@@ -41,8 +41,4 @@ public final class RSTAUtils {
         }
         return extendedValue(type.ordinal());
     }
-
-    public static int getSyntaxStyleTableSize() {
-        return RVTokenType.values().length + Token.DEFAULT_NUM_TOKEN_TYPES;
-    }
 }

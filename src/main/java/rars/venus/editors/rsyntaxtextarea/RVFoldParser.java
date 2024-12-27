@@ -21,21 +21,22 @@ import java.util.function.Predicate;
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
 public final class RVFoldParser implements FoldParser {
-    private static boolean canBeAChildInList(final @NotNull List<FoldData> folds, final @NotNull FoldData element) {
+    private static boolean canBeAChildInList(final @NotNull List<@NotNull FoldData> folds,
+                                             final @NotNull FoldData element) {
         return folds
-                .stream()
-                .noneMatch(fold -> fold.startLine() >= element.startLine() && fold.endLine() <= element.endLine());
+            .stream()
+            .noneMatch(fold -> fold.startLine() >= element.startLine() && fold.endLine() <= element.endLine());
     }
 
-    private static @NotNull List<Fold> hierarchize(@NotNull final List<Fold> folds) {
+    private static @NotNull List<@NotNull Fold> hierarchize(final @NotNull List<@NotNull Fold> folds) {
         final var foldsData = folds
-                .stream()
-                .map(FoldData::new)
-                .toList();
+            .stream()
+            .map(FoldData::new)
+            .toList();
         final var sortedBySize = foldsData
-                .stream()
-                .sorted(Comparator.comparingInt(FoldData::lineCount))
-                .toList();
+            .stream()
+            .sorted(Comparator.comparingInt(FoldData::lineCount))
+            .toList();
         final var hierarchized = new ArrayList<FoldData>();
 
         for (final var fold : sortedBySize) {
@@ -48,10 +49,10 @@ public final class RVFoldParser implements FoldParser {
 
                 // first, find all the children that are within the current fold, and sort them
                 final var sortedChildren = hierarchized
-                        .stream()
-                        .filter(child -> child.startLine() >= fold.startLine() && child.endLine() <= fold.endLine())
-                        .sorted(Comparator.comparingInt(FoldData::startOffset))
-                        .toList();
+                    .stream()
+                    .filter(child -> child.startLine() >= fold.startLine() && child.endLine() <= fold.endLine())
+                    .sorted(Comparator.comparingInt(FoldData::startOffset))
+                    .toList();
                 // next, remove them from the result list
                 hierarchized.removeAll(sortedChildren);
                 // then, add them to the current fold
@@ -65,12 +66,13 @@ public final class RVFoldParser implements FoldParser {
 
     private static @NotNull List<Fold> generateFoldsFromData(final @NotNull List<FoldData> data) {
         return data.stream()
-                .sorted(Comparator.comparingInt(FoldData::startLine))
-                .map(foldData -> createFoldFromFoldDataRec(foldData.baseFold(), foldData.children()))
-                .toList();
+            .sorted(Comparator.comparingInt(FoldData::startLine))
+            .map(foldData -> createFoldFromFoldDataRec(foldData.baseFold(), foldData.children()))
+            .toList();
     }
 
-    private static @NotNull Fold createFoldFromFoldDataRec(final @NotNull Fold baseFold, final @NotNull List<FoldData> children) {
+    private static @NotNull Fold createFoldFromFoldDataRec(final @NotNull Fold baseFold,
+                                                           final @NotNull List<FoldData> children) {
         children.stream().sorted(Comparator.comparingInt(FoldData::startLine)).forEach(childData -> {
             try {
                 final var childFold = baseFold.createChild(childData.baseFold().getFoldType(), childData.startOffset());
@@ -84,28 +86,33 @@ public final class RVFoldParser implements FoldParser {
     }
 
     private static boolean doFoldsIntersect(final @NotNull Fold first, final @NotNull Fold other) {
-        final var isFirstStartInOtherFold = other.getStartLine() <= first.getStartLine() && first.getStartLine() <= other.getEndLine();
-        final var isFirstEndInOtherFold = other.getStartLine() <= first.getEndLine() && first.getEndLine() <= other.getEndLine();
+        final var isFirstStartInOtherFold =
+            other.getStartLine() <= first.getStartLine() && first.getStartLine() <= other.getEndLine();
+        final var isFirstEndInOtherFold =
+            other.getStartLine() <= first.getEndLine() && first.getEndLine() <= other.getEndLine();
         return isFirstStartInOtherFold != isFirstEndInOtherFold;
     }
 
     @SafeVarargs
-    private static @NotNull List<Fold> join(final List<Fold> @NotNull ... lists) {
+    private static @NotNull List<@NotNull Fold> join(final List<@NotNull Fold> @NotNull ... lists) {
         final var foldMap = new HashMap<Integer, Fold>();
         for (final var list : lists) {
             for (final var fold : list) {
-                foldMap.merge(fold.getStartLine(), fold, (existing, replacement) -> replacement.getEndLine() > existing.getEndLine() ? replacement : existing);
+                foldMap.merge(fold.getStartLine(), fold,
+                    (existing, replacement) -> replacement.getEndLine() > existing.getEndLine() ? replacement :
+                        existing);
             }
         }
         return foldMap.values().stream().toList();
     }
 
-    private static @NotNull List<Fold> mergeWithRegions(final @NotNull List<Fold> folds, final @NotNull List<Fold> regions) {
+    private static @NotNull List<@NotNull Fold> mergeWithRegions(final @NotNull List<Fold> folds,
+                                                                 final @NotNull List<Fold> regions) {
         final var result = new ArrayList<>(folds);
         for (final var region : regions) {
             final var intersectingRegions = result
-                    .stream()
-                    .filter(fold -> doFoldsIntersect(fold, region)).toList();
+                .stream()
+                .filter(fold -> doFoldsIntersect(fold, region)).toList();
             if (intersectingRegions.stream().noneMatch(fold -> fold.getFoldType() != RVFoldType.COMMENT)) {
                 // the remaining conflicting folds are all comments and, thus, have lower priority
                 // we can safely remove them
@@ -117,7 +124,8 @@ public final class RVFoldParser implements FoldParser {
     }
 
     // region getFolds methods
-    private static @NotNull List<Fold> getFoldsBase(final @NotNull RSyntaxTextArea textArea, final @NotNull FoldParserCallback callback) {
+    private static @NotNull List<Fold> getFoldsBase(final @NotNull RSyntaxTextArea textArea,
+                                                    final @NotNull FoldParserCallback callback) {
         final var folds = new ArrayList<Fold>();
         final var foldRef = new RefCell<Fold>(null);
         final var lineCount = textArea.getLineCount();
@@ -273,12 +281,12 @@ public final class RVFoldParser implements FoldParser {
 
     private static boolean isMacroStartLine(final Token tokens) {
         return lineContainsToken(tokens, (token) -> token.getType() == tokenValue(RVTokenType.DIRECTIVE) &&
-                token.getLexeme().equalsIgnoreCase(Directive.MACRO.getName()));
+            token.getLexeme().equalsIgnoreCase(Directive.MACRO.getName()));
     }
 
     private static boolean isMacroEndLine(final Token tokens) {
         return lineContainsToken(tokens, (token) -> token.getType() == tokenValue(RVTokenType.DIRECTIVE) &&
-                token.getLexeme().equalsIgnoreCase(Directive.END_MACRO.getName()));
+            token.getLexeme().equalsIgnoreCase(Directive.END_MACRO.getName()));
     }
 
     private static boolean lineContainsToken(final @NotNull Token tokens, final @NotNull Predicate<Token> predicate) {
@@ -293,7 +301,8 @@ public final class RVFoldParser implements FoldParser {
     }
     // endregion Token line predicates
 
-    private static @Nullable Token findToken(final @NotNull Token startToken, final @NotNull Predicate<Token> predicate) {
+    private static @Nullable Token findToken(final @NotNull Token startToken,
+                                             final @NotNull Predicate<Token> predicate) {
         var currentToken = startToken;
         while (currentToken != null && currentToken.isPaintable()) {
             if (predicate.test(currentToken)) {
@@ -318,7 +327,8 @@ public final class RVFoldParser implements FoldParser {
 
     @FunctionalInterface
     private interface FoldParserCallback {
-        void processLine(final int lineNumber, final @NotNull Token tokens, final @NotNull ArrayList<Fold> folds, final @NotNull RefCell<@Nullable Fold> currentFold) throws BadLocationException;
+        void processLine(final int lineNumber, final @NotNull Token tokens, final @NotNull ArrayList<Fold> folds,
+                         final @NotNull RefCell<@Nullable Fold> currentFold) throws BadLocationException;
     }
 
     private record FoldData(@NotNull Fold baseFold, @NotNull List<FoldData> children) {

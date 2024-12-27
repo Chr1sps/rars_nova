@@ -2,9 +2,13 @@ package rars.venus.registers;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.notices.*;
+import rars.notices.AccessNotice;
+import rars.notices.Notice;
+import rars.notices.RegisterAccessNotice;
+import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.Register;
 import rars.settings.BoolSetting;
+import rars.settings.FontSettings;
 import rars.util.Binary;
 import rars.util.SimpleSubscriber;
 import rars.venus.NumberDisplayBaseChooser;
@@ -80,7 +84,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             new String[]{"Each register has a tool tip describing its usage convention",
                 "Corresponding register number", valueTip}) {
         };
-        this.updateRowHeight();
+        FONT_SETTINGS.addChangeListener(this::updateRowHeight, true);
         final var columnModel = this.table.getColumnModel();
 
         final var nameColumn = columnModel.getColumn(RegisterBlockWindow.NAME_COLUMN);
@@ -192,7 +196,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
                     this.endObserving();
                 }
             }
-            case final SettingsNotice ignored -> this.updateRowHeight();
+//            case final SettingsNotice ignored -> this.updateRowHeight();
             case final RegisterAccessNotice a -> {
                 // NOTE: each register is a separate Observable
                 if (a.getAccessType() == AccessNotice.AccessType.WRITE) {
@@ -208,8 +212,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         this.subscription.request(1);
     }
 
-    private void updateRowHeight() {
-        final var font = FONT_SETTINGS.getCurrentFont();
+    private void updateRowHeight(final @NotNull FontSettings settings) {
+        final var font = settings.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         this.table.setRowHeight(height);
     }
@@ -219,18 +223,20 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * don't want highlighting for a given column, don't use this. Currently we highlight
      * all columns.
      */
-    private static class RegisterCellRenderer extends DefaultTableCellRenderer implements SimpleSubscriber<SettingsNotice> {
+    private static class RegisterCellRenderer extends DefaultTableCellRenderer {
         private final int alignment;
         private final @NotNull JTable table;
         private Font font;
-        private Flow.Subscription subscription;
 
         private RegisterCellRenderer(final int alignment, final @NotNull JTable table) {
             super();
             this.alignment = alignment;
             this.font = FONT_SETTINGS.getCurrentFont();
             this.table = table;
-            FONT_SETTINGS.subscribe(this);
+            FONT_SETTINGS.addChangeListener((settings) -> {
+                this.font = settings.getCurrentFont();
+                this.table.repaint();
+            });
         }
 
         @Override
@@ -242,19 +248,6 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             cell.setFont(this.font);
             cell.setHorizontalAlignment(this.alignment);
             return cell;
-        }
-
-        @Override
-        public void onSubscribe(final Flow.Subscription subscription) {
-            this.subscription = subscription;
-            this.subscription.request(1);
-        }
-
-        @Override
-        public void onNext(final SettingsNotice item) {
-            this.font = FONT_SETTINGS.getCurrentFont();
-            this.table.repaint();
-            this.subscription.request(1);
         }
     }
 

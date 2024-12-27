@@ -2,7 +2,6 @@ package rars.venus.editors;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import java.awt.*;
 
@@ -51,12 +50,6 @@ public interface TextEditingArea {
 
     Document getDocument();
 
-    String getSelectedText();
-
-    int getSelectionEnd();
-
-    int getSelectionStart();
-
     void select(int selectionStart, int selectionEnd);
 
     void selectAll();
@@ -67,35 +60,25 @@ public interface TextEditingArea {
 
     void paste();
 
-    void replaceSelection(String str);
-
     void setEditable(boolean editable);
-    
-    void setFocusable(boolean focusable);
 
     Font getFont();
 
     void setFont(Font f);
 
-    boolean requestFocusInWindow();
-
-    FontMetrics getFontMetrics(Font f);
+    void requestFocusInWindow();
 
     void setForeground(Color c);
-    
-    void setBackground(Color c);
-    
-    void setSelectionColor(Color c);
-    
-    void setCaretColor(Color c);
-    
-    void setLineHighlightColor(Color c);
-    
-    void setEnabled(boolean enabled);
-    
-    void disableFully();
 
-    void grabFocus();
+    void setBackground(Color c);
+
+    void setSelectionColor(Color c);
+
+    void setCaretColor(Color c);
+
+    void setLineHighlightColor(Color c);
+
+    void setEnabled(boolean enabled);
 
     void redo();
 
@@ -108,9 +91,7 @@ public interface TextEditingArea {
     void discardAllUndoableEdits();
 
     void setLineHighlightEnabled(boolean highlight);
-    
-    void setCaret(final @NotNull Caret caret);
-    
+
     void setCaretBlinkRate(int rate);
 
     void setTabSize(int chars);
@@ -121,19 +102,9 @@ public interface TextEditingArea {
 
     boolean canRedo();
 
-    int getCaretPosition();
-
-    void setCaretPosition(int position);
-
-    void requestFocus();
-
-    @NotNull ColorScheme getColorScheme();
-
-    void setColorScheme(final @NotNull ColorScheme colorScheme);
+    @NotNull Theme getTheme();
 
     void setTheme(final @NotNull Theme theme);
-    
-    @NotNull Theme getTheme();
 
     // Used by Find/Replace
     enum FindReplaceResult {

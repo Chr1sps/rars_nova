@@ -8,8 +8,8 @@ import java.awt.*;
 
 public final class HighlightingDefaults {
     private static @NotNull TokenStyle fromBackground(final @NotNull Color color) {
-        final var defaultTheme = Theme.getDefaultLightTheme();
-        return new TokenStyle(defaultTheme.foregroundColor, color, false, false, false);
+        final var defaultForeground = SettingsTheme.DEFAULT_THEME.foregroundColor;
+        return new TokenStyle(defaultForeground, color, false, false, false);
     }
     
     public static final @NotNull TokenStyle DEFAULT_TEXT_SEGMENT_STYLE = fromBackground(new Color(0xFFFF99)),

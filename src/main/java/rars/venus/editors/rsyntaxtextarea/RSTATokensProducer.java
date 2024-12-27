@@ -14,7 +14,7 @@ import javax.swing.text.Segment;
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
 @SuppressWarnings("unused")
-public class RSTATokensProducer extends TokenMakerBase implements TokensProducer<Token> {
+public final class RSTATokensProducer extends TokenMakerBase implements TokensProducer<Token> {
     private static final String[] LINE_COMMENT_START_AND_END = {"#", null};
     private final Lexer<Token, RSTATokensProducer> lexer;
 
@@ -27,7 +27,8 @@ public class RSTATokensProducer extends TokenMakerBase implements TokensProducer
     }
 
     @Override
-    public void addToken(final char[] array, final int start, final int end, @NotNull final RVTokenType tokenType, final int startOffset) {
+    public void addToken(final char[] array, final int start, final int end, @NotNull final RVTokenType tokenType,
+                         final int startOffset) {
         this.addToken(array, start, end, tokenValue(tokenType), startOffset);
     }
 

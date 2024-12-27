@@ -4,8 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.notices.SettingsNotice;
-import rars.util.CustomPublisher;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
@@ -14,7 +12,7 @@ import java.util.prefs.Preferences;
 
 import static rars.util.Utils.getColorAsHexString;
 
-public final class RuntimeTableHighlightingSettings extends CustomPublisher<SettingsNotice> {
+public final class RuntimeTableHighlightingSettings extends ListenableBase<RuntimeTableHighlightingSettings> {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -92,7 +90,7 @@ public final class RuntimeTableHighlightingSettings extends CustomPublisher<Sett
         } catch (final BackingStoreException bse) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }
-        submit(SettingsNotice.get());
+        submit();
     }
 
     // region Preference writing methods
@@ -135,13 +133,13 @@ public final class RuntimeTableHighlightingSettings extends CustomPublisher<Sett
 
     private void loadSettingsFromPreferences() {
         this.textSegmentHighlightingStyle = loadTokenStyleFromPreferences(HighlightingType.TEXT_SEGMENT,
-                HighlightingDefaults.DEFAULT_TEXT_SEGMENT_STYLE);
+            HighlightingDefaults.DEFAULT_TEXT_SEGMENT_STYLE);
         this.delaySlotHighlightingStyle = loadTokenStyleFromPreferences(HighlightingType.DELAY_SLOT,
-                HighlightingDefaults.DEFAULT_DELAY_SLOT_STYLE);
+            HighlightingDefaults.DEFAULT_DELAY_SLOT_STYLE);
         this.dataSegmentHighlightingStyle = loadNullableTokenStyleFromPreferences(HighlightingType.DATA_SEGMENT,
-                HighlightingDefaults.DEFAULT_DATA_SEGMENT_STYLE);
+            HighlightingDefaults.DEFAULT_DATA_SEGMENT_STYLE);
         this.registerHighlightingStyle = loadNullableTokenStyleFromPreferences(HighlightingType.REGISTER,
-                HighlightingDefaults.DEFAULT_REGISTER_STYLE);
+            HighlightingDefaults.DEFAULT_REGISTER_STYLE);
     }
 
     private @Nullable TokenStyle loadNullableTokenStyleFromPreferences(final @NotNull HighlightingType type,

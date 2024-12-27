@@ -2,14 +2,17 @@ package rars.venus;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
-import rars.notices.*;
+import rars.notices.AccessNotice;
+import rars.notices.MemoryAccessNotice;
+import rars.notices.Notice;
+import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
-import rars.settings.EditorThemeSettings;
 import rars.settings.FontSettings;
 import rars.simulator.Simulator;
 import rars.util.Binary;
@@ -31,6 +34,8 @@ import java.awt.event.MouseListener;
 import java.util.Date;
 import java.util.concurrent.Flow;
 
+import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
+import static rars.settings.FontSettings.FONT_SETTINGS;
 import static rars.settings.Settings.BOOL_SETTINGS;
 import static rars.settings.Settings.RUNTIME_TABLE_HIGHLIGHTING_SETTINGS;
 import static rars.util.Utils.deriveFontFromStyle;
@@ -100,7 +105,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private static final int STACK_POINTER_BASE_ADDRESS_INDEX = 4; // 5;
     private static final int MMIO_BASE_ADDRESS_INDEX = 6;
     private static Object[][] dataData;
-    private static JTable dataTable;
+    private static MyTippedJTable dataTable;
     // Must agree with above in number and order...
     final String[] descriptions = {" (.extern)", " (.data)", " (heap)", "current gp",
         "current sp", " (.text)", " (MMIO)"};
@@ -157,10 +162,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
         Simulator.getInstance().subscribe(this);
 
-        BOOL_SETTINGS.subscribe(this);
-        FontSettings.FONT_SETTINGS.subscribe(this);
-        RUNTIME_TABLE_HIGHLIGHTING_SETTINGS.subscribe(this);
-        EditorThemeSettings.EDITOR_THEME_SETTINGS.subscribe(this);
+        FONT_SETTINGS.addChangeListener(this::updateRowHeight);
 
         this.homeAddress = Memory.dataBaseAddress; // address for Home button
         this.firstAddress = this.homeAddress; // first address to display at any given time
@@ -391,10 +393,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // (e.g. in
     // kernel instead of user data segment).
     private @Nullable Point displayCellForAddress(final int address) {
-        //////////////////////////////////////////////////////////
         // This requires a 5-step process. Each step is described
         // just above the statements that implement it.
-        //////////////////////////////////////////////////////////
 
         // STEP 1: Determine which data segment contains this address.
         final int desiredComboBoxIndex = DataSegmentWindow.getBaseAddressIndexForAddress(address);
@@ -468,7 +468,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.defaultBaseAddressIndex = DataSegmentWindow.DATA_BASE_ADDRESS_INDEX;
     }
 
-    /// /////////////////////////////////////////////////////////////////////////////
     // Generates the Address/Data part of the Data Segment window.
     // Returns the JScrollPane for the Address/Data part of the Data Segment window.
     private JScrollPane generateDataPanel() {
@@ -495,7 +494,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             names[i] = DataSegmentWindow.getHeaderStringForColumn(i, addressBase);
         }
         DataSegmentWindow.dataTable = new MyTippedJTable(new DataTableModel(DataSegmentWindow.dataData, names));
-        this.updateRowHeight();
+
+        this.updateRowHeight(FONT_SETTINGS);
         // Do not allow user to re-order columns; column order corresponds to MIPS
         // memory order
         DataSegmentWindow.dataTable.getTableHeader().setReorderingAllowed(false);
@@ -846,9 +846,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
     // This will assure that user cannot view memory locations outside the data
-    //////////////////////////////////////////////////////////////////////////////////// segment
     // for selected mode. For user mode, this means no lower than data segment base,
     // or higher than user memory boundary. For kernel mode, this means no lower
 
@@ -907,7 +905,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     Memory.getInstance().deleteSubscriber(this);
                 }
             }
-            case final SettingsNotice ignored -> this.updateRowHeight();
             case final MemoryAccessNotice m -> {
                 // NOTE: each register is a separate Observable
                 if (m.getAccessType() == AccessNotice.AccessType.WRITE) {
@@ -923,29 +920,26 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.subscription.request(1);
     }
 
-    private void updateRowHeight() {
+    private void updateRowHeight(final @NotNull FontSettings settings) {
         if (DataSegmentWindow.dataTable == null) {
             return;
         }
-        final var font = FontSettings.FONT_SETTINGS.getCurrentFont();
+        final var font = settings.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         DataSegmentWindow.dataTable.setRowHeight(height);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // Class defined to address apparent Javax.swing.JComboBox bug: when selection
-    /////////////////////////////////////////////////////////////////////////////// is
-    // is set programmatically using setSelectedIndex() rather than by
-    /////////////////////////////////////////////////////////////////////////////// user-initiated
-    // event (such as mouse click), the text displayed in the JComboBox is not
-
-    /// //////////////////////////////////////////////////////////////////////////// always
-    // updated correctly. Sometimes it is, sometimes updated to incorrect second.
-    // No pattern that I can detect. Google search yielded many forums addressing
-    // this problem. One suggested solution, a JComboBox superclass overriding
-    // setSelectedIndex to also call selectedItemChanged() did not help. Only this
-    // solution to extend the model class to call the protected
-    // "fireContentsChanged()" method worked. DPS 25-Jan-2009
+    /**
+     * Class defined to address apparent Javax.swing.JComboBox bug: when selection
+     * is set programmatically using setSelectedIndex() rather than by user-initiated
+     * event (such as mouse click), the text displayed in the JComboBox is not
+     * updated correctly. Sometimes it is, sometimes updated to incorrect second.
+     * No pattern that I can detect. Google search yielded many forums addressing
+     * this problem. One suggested solution, a JComboBox superclass overriding
+     * setSelectedIndex to also call selectedItemChanged() did not help. Only this
+     * solution to extend the model class to call the protected
+     * "fireContentsChanged()" method worked. DPS 25-Jan-2009
+     */
     private static class CustomComboBoxModel extends DefaultComboBoxModel<String> {
         public CustomComboBoxModel(final String[] list) {
             super(list);
@@ -956,9 +950,9 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
     }
 
-    /// /////////////////////////////////////////////////////////////////////
-    // Class representing memory data table data
-
+    /**
+     * Class representing memory data table data.
+     */
     class DataTableModel extends AbstractTableModel {
         final String[] columnNames;
         final Object[][] data;
@@ -1003,7 +997,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             return col != DataSegmentWindow.ADDRESS_COLUMN && !DataSegmentWindow.this.asciiDisplay;
         }
 
-        /*
+        /**
          * JTable uses this method to determine the default renderer/
          * editor for each cell.
          */
@@ -1012,7 +1006,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             return this.getValueAt(0, c).getClass();
         }
 
-        /*
+        /**
          * Update cell contents in table model. This method should be called
          * only when user edits cell, so input validation has to be done. If
          * second is valid, MIPS memory is updated.
@@ -1060,32 +1054,19 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             this.fireTableCellUpdated(row, col);
         }
 
-        /*
+        /**
          * Update cell contents in table model. Does not affect MIPS memory.
          */
         private void setDisplayAndModelValueAt(final Object value, final int row, final int col) {
             this.data[row][col] = value;
             this.fireTableCellUpdated(row, col);
         }
-
-        private void printDebugData() {
-            final int numRows = this.getRowCount();
-            final int numCols = this.getColumnCount();
-
-            for (int i = 0; i < numRows; i++) {
-                DataSegmentWindow.LOGGER.debug("    row {}:", i);
-                for (int j = 0; j < numCols; j++) {
-                    DataSegmentWindow.LOGGER.debug("  {}", this.data[i][j]);
-                }
-                DataSegmentWindow.LOGGER.debug("\n");
-            }
-            DataSegmentWindow.LOGGER.debug("--------------------------");
-        }
     }
 
-    // Special renderer capable of highlighting cells by changing background color.
-    // Will set background to highlight color if certain conditions met.
-
+    /**
+     * Special renderer capable of highlighting cells by changing background color.
+     * Will set background to highlight color if certain conditions met.
+     */
     class AddressCellRenderer extends DefaultTableCellRenderer {
 
         @Override
@@ -1098,8 +1079,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
             final int rowFirstAddress =
                 Binary.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
-            final var theme = EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme;
-            final var defaultFont = FontSettings.FONT_SETTINGS.getCurrentFont();
+            final var theme = EDITOR_THEME_SETTINGS.currentTheme;
+            final var defaultFont = FONT_SETTINGS.getCurrentFont();
             if (/*DataSegmentWindow.this.settings.getBoolSettings().getSetting(BoolSetting.DATA_SEGMENT_HIGHLIGHTING)
              &&*/
                 DataSegmentWindow.this.addressHighlighting &&
@@ -1125,12 +1106,11 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
     }
 
-    /// ////////////////////////////////////////////////////////////////
-    //
-    // JTable subclass to provide custom tool tips for each of the
-    // text table column headers. From Sun's JTable tutorial.
-    // http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
-    //
+    /**
+     * JTable subclass to provide custom tool tips for each of the
+     * text table column headers. From
+     * <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html">Sun's JTable tutorial</a>.
+     */
     private class MyTippedJTable extends JTable {
         private final String[] columnToolTips = {
             /* address */ "Base memory address for this row of the table.",
