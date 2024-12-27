@@ -1,7 +1,7 @@
 package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
-import rars.util.EditorFontUtils;
+import rars.util.FontUtilities;
 import rars.util.FontWeight;
 
 import javax.swing.*;
@@ -31,7 +31,7 @@ public final class FontSettingsView extends JPanel {
         gbc.gridy = 0;
         gbc.gridx = 0;
         this.add(FONT_LABEL, gbc);
-        final var fontFamilies = EditorFontUtils.getAllFamilies();
+        final var fontFamilies = FontUtilities.allFontFamilies;
         this.fontSelector = new JComboBox<>(fontFamilies);
         this.fontSelector.setEditable(false);
         this.fontSelector.setMaximumRowCount(20);

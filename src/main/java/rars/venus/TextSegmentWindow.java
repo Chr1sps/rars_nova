@@ -18,7 +18,7 @@ import rars.settings.EditorThemeSettings;
 import rars.settings.FontSettings;
 import rars.simulator.Simulator;
 import rars.util.Binary;
-import rars.util.EditorFontUtils;
+import rars.util.FontUtilities;
 import rars.util.SimpleSubscriber;
 
 import javax.swing.*;
@@ -179,7 +179,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 if (statement.getSourceLine() == lastLine)
                     lineNumber = "          ".substring(0, sourceLineDigits) + "  ";
                 sourceString = lineNumber
-                    + EditorFontUtils.substituteSpacesForTabs(statement.getSource());
+                    + FontUtilities.substituteSpacesForTabs(statement.getSource());
             }
             this.data[i][ColumnData.SOURCE_COLUMN.number] = sourceString;
             lastLine = statement.getSourceLine();
@@ -469,11 +469,10 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      */
     public void resetModifiedSourceCode() {
         if (this.executeMods != null && !this.executeMods.isEmpty()) {
-            for (final Enumeration<ModifiedCode> elements = this.executeMods.elements(); elements.hasMoreElements(); ) {
-                final ModifiedCode mc = elements.nextElement();
-                this.tableModel.setValueAt(mc.code(), mc.row(), ColumnData.INSTRUCTION_CODE_COLUMN.number);
-                this.tableModel.setValueAt(mc.basic(), mc.row(), ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
-                this.tableModel.setValueAt(mc.source(), mc.row(), ColumnData.SOURCE_COLUMN.number);
+            for (final var modifiedCode : this.executeMods.values()) {
+                this.tableModel.setValueAt(modifiedCode.code(), modifiedCode.row(), ColumnData.INSTRUCTION_CODE_COLUMN.number);
+                this.tableModel.setValueAt(modifiedCode.basic(), modifiedCode.row(), ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
+                this.tableModel.setValueAt(modifiedCode.source(), modifiedCode.row(), ColumnData.SOURCE_COLUMN.number);
             }
             this.executeMods.clear();
         }

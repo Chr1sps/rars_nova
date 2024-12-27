@@ -68,17 +68,17 @@ public final class FontSettingsController {
     }
 
     private void loadValuesFromSettings() {
-        this.ligaturesEnabled = FONT_SETTINGS.isLigaturized();
+        this.ligaturesEnabled = FONT_SETTINGS.isLigaturized;
         this.fontFamily = FONT_SETTINGS.getFontFamily();
         this.fontSize = FONT_SETTINGS.getFontSize();
-        this.fontWeight = FONT_SETTINGS.getFontWeight();
+        this.fontWeight = FONT_SETTINGS.fontWeight;
     }
 
     public void applySettings() {
         FONT_SETTINGS.setFontFamily(this.fontFamily);
         FONT_SETTINGS.setFontSize(this.fontSize);
-        FONT_SETTINGS.setLigaturized(this.ligaturesEnabled);
-        FONT_SETTINGS.setFontWeight(this.fontWeight);
+        FONT_SETTINGS.isLigaturized = this.ligaturesEnabled;
+        FONT_SETTINGS.fontWeight = this.fontWeight;
         FONT_SETTINGS.saveSettingsToPreferences();
     }
 }
