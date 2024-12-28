@@ -6,9 +6,14 @@ import io.github.chr1sps.rars.riscv.hardware.Memory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 
 /*
 Copyright (c) 2010-2011,  Pete Sanderson and Kenneth Vollmar
@@ -53,10 +58,10 @@ public class BitmapDisplay extends AbstractTool {
     private static final String heading = "Bitmap Display";
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
+    private final JLabel preSpinnerLabel = new JLabel("0x"), postSpinnerLabel = new JLabel("0000");
     // Major GUI components
-    private JComboBox<String> displayBaseAddressSelector;
     private JSlider pixelSizeSlider, displayHeightSlider, displayWidthSlider;
-
+    private JSpinner baseAddressSpinner;
     //    private JPanel canvas;
     private JLabel pixelSizeLabel, displayHeightLabel, displayWidthLabel;
 
@@ -65,33 +70,17 @@ public class BitmapDisplay extends AbstractTool {
     private int displayAreaWidthInPixels = 512;
     private int displayAreaHeightInPixels = 256;
 
-    // The next four are initialized dynamically in initializeDisplayBaseChoices()
-    private String[] displayBaseAddressChoices;
-    private int[] displayBaseAddresses;
-    private int defaultBaseAddressIndex;
-    private int baseAddress;
+    private int baseAddress = Memory.dataBaseAddress;
 
     private Grid theGrid;
 
     private GridWindow gridWindow;
 
     /**
-     * Simple constructor, likely used to run a stand-alone bitmap display tool.
-     *
-     * @param title   String containing title for title bar
-     * @param heading String containing text for heading shown in upper part of
-     *                window.
+     * Simple constructor.
      */
-    private BitmapDisplay(final String title, final String heading) {
-        super(title, heading);
-    }
-
-    /**
-     * Simple constructor, likely used by the RARS Tools menu mechanism
-     */
-    @SuppressWarnings("unused")
     public BitmapDisplay() {
-        this("Bitmap Display, " + BitmapDisplay.version, BitmapDisplay.heading);
+        super("Bitmap Display, " + BitmapDisplay.version, BitmapDisplay.heading);
     }
 
     /**
@@ -171,7 +160,7 @@ public class BitmapDisplay extends AbstractTool {
      */
     @Override
     protected void initializePreGUI() {
-        this.initializeDisplayBaseChoices();
+//        this.initializeDisplayBaseChoices();
         // NOTE: Can't call "createNewGrid()" here because it uses settings from
         // several combo boxes that have not been created yet. But a default grid
         // needs to be allocated for initial canvas display.
@@ -191,7 +180,9 @@ public class BitmapDisplay extends AbstractTool {
             this.displayHeightSlider.setEnabled(!connected);
             this.displayWidthSlider.setEnabled(!connected);
             this.pixelSizeSlider.setEnabled(!connected);
-            this.displayBaseAddressSelector.setEnabled(!connected);
+            this.baseAddressSpinner.setEnabled(!connected);
+            this.preSpinnerLabel.setEnabled(!connected);
+            this.postSpinnerLabel.setEnabled(!connected);
         });
         this.theGrid = this.createNewGrid();
         this.updateBaseAddress();
@@ -314,11 +305,60 @@ public class BitmapDisplay extends AbstractTool {
                     BitmapDisplay.this.gridWindow.resize();
                     BitmapDisplay.this.gridWindow.pack();
                 });
-        this.displayBaseAddressSelector = new JComboBox<>(this.displayBaseAddressChoices);
-        this.displayBaseAddressSelector.setEditable(false);
-        this.displayBaseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
-        this.displayBaseAddressSelector.setToolTipText("Base address for display area (upper left corner)");
-        this.displayBaseAddressSelector.addActionListener(
+        this.baseAddressSpinner = new JSpinner(new SpinnerNumberModel(this.baseAddress >> 16, 0x0000, 0xFFFF, 1));
+        var editor = (JSpinner.DefaultEditor) baseAddressSpinner.getEditor();
+        var txt = (JFormattedTextField) editor.getTextField();
+        txt.setFormatterFactory(new DefaultFormatterFactory() {
+            @Override
+            public JFormattedTextField.AbstractFormatter getDefaultFormatter() {
+                var formatter = new NumberFormatter() {
+                    @Override
+                    public Object stringToValue(String text) {
+                        try {
+                            var value = Integer.parseInt(text, 16);
+                            value = Math.clamp(value, 0, 0xFFFF);
+                            return value;
+                        } catch (NumberFormatException e) {
+                            return 0;
+                        }
+                    }
+
+                    @Override
+                    public String valueToString(Object value) {
+                        return Integer.toHexString((int) value).toUpperCase();
+                    }
+
+                };
+                formatter.setValueClass(Integer.class);
+                formatter.setFormat(new NumberFormat() {
+                    @Override
+                    public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+                        return new StringBuffer(Integer.toHexString((int) number).toUpperCase());
+                    }
+
+                    @Override
+                    public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+                        return new StringBuffer(Integer.toHexString((int) number).toUpperCase());
+                    }
+
+                    @Override
+                    public Number parse(String source, ParsePosition parsePosition) {
+                        try {
+                            int value = Integer.parseInt(source, 16);
+                            value = Math.clamp(value, 0, 0xFFFF);
+                            parsePosition.setIndex(source.length());
+                            return value;
+                        } catch (NumberFormatException e) {
+                            parsePosition.setErrorIndex(0);
+                            return null;
+                        }
+                    }
+                });
+                return formatter;
+            }
+        });
+        this.baseAddressSpinner.setToolTipText("Base address for display area (upper left corner)");
+        this.baseAddressSpinner.addChangeListener(
                 e -> {
                     // This may also affect what address range we should be registered as an
                     // Observer
@@ -357,10 +397,16 @@ public class BitmapDisplay extends AbstractTool {
         displayHeightRow.add(this.displayHeightLabel, BorderLayout.WEST);
         displayHeightRow.add(this.displayHeightSlider, BorderLayout.EAST);
 
+        final var baseAddressPickerPanel = new JPanel();
+        baseAddressPickerPanel.setLayout(new BoxLayout(baseAddressPickerPanel, BoxLayout.X_AXIS));
+        baseAddressPickerPanel.add(preSpinnerLabel);
+        baseAddressPickerPanel.add(this.baseAddressSpinner);
+        baseAddressPickerPanel.add(postSpinnerLabel);
+
         final JPanel baseAddressRow = this.getPanelWithBorderLayout();
         baseAddressRow.setBorder(this.emptyBorder);
         baseAddressRow.add(new JLabel("Base address for display "), BorderLayout.WEST);
-        baseAddressRow.add(this.displayBaseAddressSelector, BorderLayout.EAST);
+        baseAddressRow.add(baseAddressPickerPanel, BorderLayout.EAST);
 
         // Lay 'em out in the grid...
         organization.add(pixelSizeRow);
@@ -385,25 +431,21 @@ public class BitmapDisplay extends AbstractTool {
     // dataSegmentBaseAddress=0x10000000, globalPointer=0x10008000
     // dataBaseAddress=0x10010000, heapBaseAddress=0x10040000,
     // memoryMapBaseAddress=0xffff0000
-    private void initializeDisplayBaseChoices() {
-        final int[] displayBaseAddressArray = {Memory.dataSegmentBaseAddress, Memory.globalPointer, Memory.dataBaseAddress,
-                Memory.heapBaseAddress, Memory.memoryMapBaseAddress};
-        // Must agree with above in number and order...
-        final String[] descriptions = {" (global data)", " (gp)", " (static data)", " (heap)", " (memory map)"};
-        this.displayBaseAddresses = displayBaseAddressArray;
-        this.displayBaseAddressChoices = new String[displayBaseAddressArray.length];
-        for (int i = 0; i < this.displayBaseAddressChoices.length; i++) {
-            this.displayBaseAddressChoices[i] = io.github.chr1sps.rars.util.Binary.intToHexString(displayBaseAddressArray[i])
-                    + descriptions[i];
-        }
-        this.defaultBaseAddressIndex = 2; // default to 0x10010000 (static data)
-        this.baseAddress = displayBaseAddressArray[this.defaultBaseAddressIndex];
-    }
+//    private void initializeDisplayBaseChoices() {
+    // Must agree with above in number and order...
+//        final String[] descriptions = {" (global data)", " (gp)", " (static data)", " (heap)", " (memory map)"};
+//        this.displayBaseAddresses = displayBaseAddressArray;
+//        this.displayBaseAddressChoices = new String[displayBaseAddressArray.length];
+//        for (int i = 0; i < this.displayBaseAddressChoices.length; i++) {
+//            this.displayBaseAddressChoices[i] = io.github.chr1sps.rars.util.Binary.intToHexString(displayBaseAddressArray[i])
+//                    + descriptions[i];
+//        }
+//    }
 
     // update based on combo box selection (currently not editable but that may
     // change).
     private void updateBaseAddress() {
-        this.baseAddress = this.displayBaseAddresses[this.displayBaseAddressSelector.getSelectedIndex()];
+        this.baseAddress = (int) this.baseAddressSpinner.getValue() << 16;
         /*
          * If you want to extend this app to allow user to edit combo box, you can
          * always
