@@ -8,7 +8,7 @@ import rars.venus.NumberDisplayBaseChooser;
 
 import java.util.Arrays;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 
 public final class RegistersWindow extends RegisterBlockWindow {

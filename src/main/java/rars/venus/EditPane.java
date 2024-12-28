@@ -15,8 +15,8 @@ import java.awt.*;
 
 import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
 import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.Settings.BOOL_SETTINGS;
-import static rars.settings.Settings.OTHER_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar

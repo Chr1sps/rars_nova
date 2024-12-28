@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.ErrorMessage;
 import rars.Globals;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
 
 import java.io.File;
@@ -73,11 +73,11 @@ public final class Tokenizer {
     private static final String escapedCharacters = "'\"\\ntbrf0";
     private static final String[] escapedCharactersValues = {"39", "34", "92", "10", "9", "8", "13", "12", "0"};
     private final @NotNull ErrorList errors;
-    private final @Nullable RISCVprogram program;
+    private final @Nullable RISCVProgram program;
     private final @NotNull HashMap<String, String> equivalents; // DPS 11-July-2012
 
     private Tokenizer(
-            final @Nullable RISCVprogram program,
+            final @Nullable RISCVProgram program,
             final @NotNull ErrorList errorList
     ) {
         this.errors = errorList;
@@ -85,7 +85,7 @@ public final class Tokenizer {
         this.equivalents = new HashMap<>();
     }
 
-    private Tokenizer(final @Nullable RISCVprogram program) {
+    private Tokenizer(final @Nullable RISCVProgram program) {
         this(program, new ErrorList());
     }
 
@@ -128,11 +128,11 @@ public final class Tokenizer {
 
     /// Will tokenize a complete source program.
     ///
-    /// @param program The [RISCVprogram] to be tokenized.
+    /// @param program The [RISCVProgram] to be tokenized.
     /// @return A [List] representing the tokenized program. Each list member is a [TokenList].
     /// that represents a tokenized source statement from the program.
     /// @throws AssemblyException if any.
-    public static @NotNull List<TokenList> tokenize(final @NotNull RISCVprogram program) throws AssemblyException {
+    public static @NotNull List<TokenList> tokenize(final @NotNull RISCVProgram program) throws AssemblyException {
 
         final var tokenizer = new Tokenizer(program);
         final var tokenList = new ArrayList<TokenList>();
@@ -215,7 +215,7 @@ public final class Tokenizer {
      *                         else false
      * @return the generated token list for that line
      */
-    private @NotNull TokenList tokenizeLineImpl(final @Nullable RISCVprogram program, final int lineNum,
+    private @NotNull TokenList tokenizeLineImpl(final @Nullable RISCVProgram program, final int lineNum,
                                                 final @NotNull String theLine, final boolean doEqvSubstitutes) {
         TokenList result = new TokenList();
         if (theLine.isEmpty())
@@ -418,7 +418,7 @@ public final class Tokenizer {
      * includes both direct and indirect.
      * DPS 11-Jan-2013
      */
-    private @NotNull List<SourceLine> processIncludes(final @NotNull RISCVprogram program,
+    private @NotNull List<SourceLine> processIncludes(final @NotNull RISCVProgram program,
                                                       final @NotNull Map<String, String> inclFiles)
             throws AssemblyException {
         final ArrayList<String> source = program.getSourceList();
@@ -447,7 +447,7 @@ public final class Tokenizer {
                         throw new AssemblyException(this.errors);
                     }
                     inclFiles.put(filename, filename);
-                    final RISCVprogram incl = new RISCVprogram();
+                    final RISCVProgram incl = new RISCVProgram();
                     try {
                         incl.readSource(filename);
                     } catch (final AssemblyException p) {
@@ -469,7 +469,7 @@ public final class Tokenizer {
     }
 
 
-    private @NotNull TokenList processEqv(final @Nullable RISCVprogram program, final int lineNum,
+    private @NotNull TokenList processEqv(final @Nullable RISCVProgram program, final int lineNum,
                                           @NotNull String theLine,
                                           final @NotNull TokenList tokens) {
         // See if it is .eqv directive. If so, record it...
@@ -545,7 +545,7 @@ public final class Tokenizer {
     }
 
     /// Given candidate token and its position, will classify and record it.
-    private void processCandidateToken(final char[] token, final @Nullable RISCVprogram program, final int line,
+    private void processCandidateToken(final char[] token, final @Nullable RISCVProgram program, final int line,
                                        final @NotNull String theLine,
                                        final int tokenPos, final int tokenStartPos,
                                        final @NotNull TokenList tokenList) {

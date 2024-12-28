@@ -1,7 +1,6 @@
 package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
-import rars.settings.SettingsTheme;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -26,10 +25,7 @@ public final class PresetsView extends JScrollPane {
     public static class PresetSection extends JPanel {
         public final @NotNull JButton button;
 
-        public PresetSection(
-            final @NotNull String themeName,
-            final @NotNull SettingsTheme theme
-        ) {
+        public PresetSection(final @NotNull String themeName) {
             super();
             this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
             this.button = new JButton("Apply");

@@ -23,7 +23,7 @@ import java.awt.event.MouseEvent;
 import java.util.concurrent.Flow;
 
 import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -112,7 +112,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     }
 
     protected abstract @NotNull String formatRegisterValue(final long value, int base);
-    
+
     /**
      * <p>beginObserving.</p>
      */
@@ -140,8 +140,10 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             tableData[i][RegisterBlockWindow.NAME_COLUMN] = this.registers[i].getName();
             final int temp = this.registers[i].getNumber();
             tableData[i][RegisterBlockWindow.NUMBER_COLUMN] = temp == -1 ? "" : temp;
-            final int base = NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
-            tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegisterValue(this.registers[i].getValue(), base);
+            final int base =
+                NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
+            tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegisterValue(this.registers[i].getValue(),
+                base);
         }
         return tableData;
     }

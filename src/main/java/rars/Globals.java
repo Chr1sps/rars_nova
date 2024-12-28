@@ -83,7 +83,7 @@ public final class Globals {
     private static final String syscallPropertiesFile = "Syscall";
 
     /// The program currently being worked with. Used by GUI only, not command line.
-    public static RISCVprogram program;
+    public static RISCVProgram program;
 
     /// Flag to determine whether to produce internal debugging information.
     public static boolean debug = false;

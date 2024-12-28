@@ -7,7 +7,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 
 /*

@@ -26,14 +26,12 @@ public final class EditorSettingsPanel extends JPanel {
             };
         }
     };
-    public final @NotNull TreePanel treePanel;
     public final @NotNull PanelWithTextAreaView panelWithTextAreaView;
     public final @NotNull BottomRowComponent bottomRowComponent;
 
     public EditorSettingsPanel(final @NotNull TreePanel treePanel,
                                final @NotNull PanelWithTextAreaView panelWithTextAreaView) {
         super(new BorderLayout());
-        this.treePanel = treePanel;
         this.panelWithTextAreaView = panelWithTextAreaView;
         this.bottomRowComponent = new BottomRowComponent();
         this.bottomRowComponent.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));

@@ -2,7 +2,6 @@ package rars.venus;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
@@ -13,7 +12,6 @@ import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
-import rars.settings.FontSettings;
 import rars.simulator.Simulator;
 import rars.util.Binary;
 import rars.util.SimpleSubscriber;
@@ -36,8 +34,8 @@ import java.util.concurrent.Flow;
 
 import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
 import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.Settings.BOOL_SETTINGS;
-import static rars.settings.Settings.RUNTIME_TABLE_HIGHLIGHTING_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.settings.HighlightingSettings.HIGHLIGHTING_SETTINGS;
 import static rars.util.Utils.deriveFontFromStyle;
 
 /*
@@ -1085,7 +1083,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 DataSegmentWindow.this.addressHighlighting &&
                     rowFirstAddress == DataSegmentWindow.this.addressRowFirstAddress &&
                     column == DataSegmentWindow.this.addressColumn) {
-                final var style = RUNTIME_TABLE_HIGHLIGHTING_SETTINGS.getDataSegmentHighlightingStyle();
+                final var style = HIGHLIGHTING_SETTINGS.getDataSegmentHighlightingStyle();
                 if (style != null) {
                     cell.setBackground(style.background());
                     cell.setForeground(style.foreground());

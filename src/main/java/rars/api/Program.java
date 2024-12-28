@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.hardware.*;
@@ -18,9 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
-
-import java.util.List;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 /**
  * <p>
@@ -56,7 +54,7 @@ import java.util.List;
 public final class Program {
 
     private final Options set;
-    private final RISCVprogram code;
+    private final RISCVProgram code;
     private final Memory assembled;
     private final Memory simulation;
     private SystemIO.Data fds;
@@ -70,7 +68,7 @@ public final class Program {
      */
     public Program(final Options set) {
         this.set = set;
-        this.code = new RISCVprogram();
+        this.code = new RISCVProgram();
         this.assembled = new Memory();
         this.simulation = new Memory();
     }
@@ -158,14 +156,14 @@ public final class Program {
      * @throws AssemblyException thrown if any errors are found in the code
      */
     public ErrorList assembleString(final @NotNull String source) throws AssemblyException {
-        final ArrayList<RISCVprogram> programs = new ArrayList<>();
+        final ArrayList<RISCVProgram> programs = new ArrayList<>();
         this.code.fromString(source);
         this.code.tokenize();
         programs.add(this.code);
         return this.assemble(programs);
     }
 
-    private ErrorList assemble(final @NotNull List<RISCVprogram> programs) throws AssemblyException {
+    private ErrorList assemble(final @NotNull List<RISCVProgram> programs) throws AssemblyException {
         final Memory temp = Memory.swapInstance(this.assembled); // Assembling changes memory so we need to swap to 
         // capture that.
         ErrorList warnings = null;
@@ -212,7 +210,7 @@ public final class Program {
             this.stdout = new ByteArrayOutputStream();
             this.stderr = new ByteArrayOutputStream();
             this.fds = new SystemIO.Data(
-                    new ByteArrayInputStream(STDIN.getBytes()), this.stdout, this.stderr);
+                new ByteArrayInputStream(STDIN.getBytes()), this.stdout, this.stderr);
         } else {
             this.fds = new SystemIO.Data(true);
         }
@@ -241,12 +239,12 @@ public final class Program {
         // Swap out global state for local state.
         final boolean selfMod = BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED);
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED,
-                this.set.selfModifyingCode);
+            this.set.selfModifyingCode);
         final SystemIO.Data tmpFiles = SystemIO.swapData(this.fds);
         final Memory tmpMem = Memory.swapInstance(this.simulation);
 
         try {
-            ret = RISCVprogram.simulate(this.set.maxSteps);
+            ret = RISCVProgram.simulate(this.set.maxSteps);
         } catch (final SimulationException se) {
             e = se;
         }

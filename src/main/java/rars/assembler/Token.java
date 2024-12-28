@@ -2,7 +2,7 @@ package rars.assembler;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -43,7 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class Token {
 
     private final @NotNull String value;
-    private final @Nullable RISCVprogram sourceProgram;
+    private final @Nullable RISCVProgram sourceProgram;
     private final int sourceLine;
     private final int sourcePos;
     private @NotNull TokenType type;
@@ -66,7 +66,7 @@ public final class Token {
     public Token(
             final @NotNull TokenType type,
             final @NotNull String value,
-            final @Nullable RISCVprogram sourceProgram,
+            final @Nullable RISCVProgram sourceProgram,
             final int line,
             final int start
     ) {
@@ -145,7 +145,7 @@ public final class Token {
      *
      * @return RISCVprogram object associated with this token.
      */
-    public @Nullable RISCVprogram getSourceProgram() {
+    public @Nullable RISCVProgram getSourceProgram() {
         return this.sourceProgram;
     }
 

@@ -6,7 +6,7 @@ import java.awt.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static rars.settings.Settings.OTHER_SETTINGS;
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar

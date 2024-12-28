@@ -11,7 +11,7 @@ import rars.settings.OtherSettings;
 import java.util.concurrent.Flow;
 import rars.util.SimpleSubscriber;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -58,23 +58,23 @@ public final class RegisterFile {
      */
     public static final int STACK_POINTER_REGISTER = 2;
     private static final RegisterBlock instance = new RegisterBlock('x', new Register[]{
-            new Register("zero", 0, 0), new Register("ra", 1, 0),
-            new Register("sp", RegisterFile.STACK_POINTER_REGISTER, Memory.stackPointer),
-            new Register("gp", RegisterFile.GLOBAL_POINTER_REGISTER, Memory.globalPointer),
-            new Register("tp", 4, 0), new Register("t0", 5, 0),
-            new Register("t1", 6, 0), new Register("t2", 7, 0),
-            new Register("s0", 8, 0), new Register("s1", 9, 0),
-            new Register("a0", 10, 0), new Register("a1", 11, 0),
-            new Register("a2", 12, 0), new Register("a3", 13, 0),
-            new Register("a4", 14, 0), new Register("a5", 15, 0),
-            new Register("a6", 16, 0), new Register("a7", 17, 0),
-            new Register("s2", 18, 0), new Register("s3", 19, 0),
-            new Register("s4", 20, 0), new Register("s5", 21, 0),
-            new Register("s6", 22, 0), new Register("s7", 23, 0),
-            new Register("s8", 24, 0), new Register("s9", 25, 0),
-            new Register("s10", 26, 0), new Register("s11", 27, 0),
-            new Register("t3", 28, 0), new Register("t4", 29, 0),
-            new Register("t5", 30, 0), new Register("t6", 31, 0)
+        new Register("zero", 0, 0), new Register("ra", 1, 0),
+        new Register("sp", RegisterFile.STACK_POINTER_REGISTER, Memory.stackPointer),
+        new Register("gp", RegisterFile.GLOBAL_POINTER_REGISTER, Memory.globalPointer),
+        new Register("tp", 4, 0), new Register("t0", 5, 0),
+        new Register("t1", 6, 0), new Register("t2", 7, 0),
+        new Register("s0", 8, 0), new Register("s1", 9, 0),
+        new Register("a0", 10, 0), new Register("a1", 11, 0),
+        new Register("a2", 12, 0), new Register("a3", 13, 0),
+        new Register("a4", 14, 0), new Register("a5", 15, 0),
+        new Register("a6", 16, 0), new Register("a7", 17, 0),
+        new Register("s2", 18, 0), new Register("s3", 19, 0),
+        new Register("s4", 20, 0), new Register("s5", 21, 0),
+        new Register("s6", 22, 0), new Register("s7", 23, 0),
+        new Register("s8", 24, 0), new Register("s9", 25, 0),
+        new Register("s10", 26, 0), new Register("s11", 27, 0),
+        new Register("t3", 28, 0), new Register("t4", 29, 0),
+        new Register("t5", 30, 0), new Register("t6", 31, 0)
     });
 
     private static final Register programCounter = new Register("pc", -1, Memory.textBaseAddress);
@@ -93,7 +93,7 @@ public final class RegisterFile {
         if (num != 0) {
             if ((OtherSettings.getBackSteppingEnabled())) {
                 Globals.program.getBackStepper().addRegisterFileRestore(num, RegisterFile.instance.updateRegister(num
-                        , val));
+                    , val));
             } else {
                 RegisterFile.instance.updateRegister(num, val);
             }

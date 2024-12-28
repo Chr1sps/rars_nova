@@ -3,15 +3,21 @@ package rars.settings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
-import java.util.function.Consumer;
+import java.util.prefs.Preferences;
+
+import static java.util.prefs.Preferences.userNodeForPackage;
 
 /**
- * A base class for objects that can have listeners attached to them.
+ * A base class for Settings objects.
  */
-public abstract class ListenableBase {
-    private final @NotNull HashSet<Runnable> listeners;
+public abstract class SettingsBase {
+    /**
+     * The Preferences node for all the RARS settings.
+     */
+    protected static final @NotNull Preferences SETTINGS_PREFERENCES = userNodeForPackage(SettingsBase.class);
+    private final @NotNull HashSet<@NotNull Runnable> listeners;
 
-    protected ListenableBase() {
+    protected SettingsBase() {
         listeners = new HashSet<>();
     }
 

@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.Settings.OTHER_SETTINGS;
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 public final class PanelWithTextAreaView extends JPanel {
     public final @NotNull PickerCardView pickerCardView;

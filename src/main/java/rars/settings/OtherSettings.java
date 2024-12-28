@@ -9,7 +9,7 @@ import rars.riscv.hardware.MemoryConfiguration;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public final class OtherSettings extends ListenableBase {
+public final class OtherSettings extends SettingsBase {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // region Preferences keys
@@ -20,6 +20,7 @@ public final class OtherSettings extends ListenableBase {
     private static final String MEMORY_CONFIGURATION = "Memory_configuration";
     private static final String CARET_BLINK_RATE = "Caret_blink_rate";
     private static final String EDITOR_TAB_SIZE = "Editor_tab_size";
+    public static @NotNull OtherSettings OTHER_SETTINGS = new OtherSettings(SETTINGS_PREFERENCES);
     // endregion Preferences keys
 
     private final @NotNull Preferences preferences;

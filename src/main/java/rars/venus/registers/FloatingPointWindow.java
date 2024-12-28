@@ -5,7 +5,7 @@ import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 public final class FloatingPointWindow extends RegisterBlockWindow {
     /**

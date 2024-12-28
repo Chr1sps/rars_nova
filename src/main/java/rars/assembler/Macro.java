@@ -1,7 +1,7 @@
 package rars.assembler;
 
 import rars.ErrorList;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
 
@@ -47,7 +47,7 @@ public final class Macro {
      */
     private final ArrayList<String> args;
     private String name;
-    private RISCVprogram program;
+    private RISCVProgram program;
     /**
      * first and last line number of macro definition. first line starts with
      * .macro directive and last line is .end_macro directive.
@@ -141,18 +141,18 @@ public final class Macro {
     /**
      * <p>Getter for the field <code>program</code>.</p>
      *
-     * @return a {@link RISCVprogram} object
+     * @return a {@link RISCVProgram} object
      */
-    public RISCVprogram getProgram() {
+    public RISCVProgram getProgram() {
         return this.program;
     }
 
     /**
      * <p>Setter for the field <code>program</code>.</p>
      *
-     * @param program a {@link RISCVprogram} object
+     * @param program a {@link RISCVProgram} object
      */
-    public void setProgram(final RISCVprogram program) {
+    public void setProgram(final RISCVProgram program) {
         this.program = program;
     }
 

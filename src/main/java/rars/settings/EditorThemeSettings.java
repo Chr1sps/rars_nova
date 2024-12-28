@@ -12,10 +12,9 @@ import java.util.Map;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import static rars.settings.Settings.SETTINGS_PREFERENCES;
 import static rars.util.Utils.getColorAsHexString;
 
-public final class EditorThemeSettings extends ListenableBase {
+public final class EditorThemeSettings extends SettingsBase {
     private static final @NotNull Logger LOGGER = LogManager.getLogger();
     /**
      * Top level theme settings prefix.

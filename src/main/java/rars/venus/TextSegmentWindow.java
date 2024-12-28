@@ -33,8 +33,8 @@ import java.util.*;
 import java.util.concurrent.Flow;
 
 import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.Settings.BOOL_SETTINGS;
-import static rars.settings.Settings.RUNTIME_TABLE_HIGHLIGHTING_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.settings.HighlightingSettings.HIGHLIGHTING_SETTINGS;
 import static rars.util.Utils.deriveFontFromStyle;
 
 /*
@@ -882,7 +882,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             final boolean highlighting = textSegment.getCodeHighlighting();
 
             if (highlighting && textSegment.getIntCodeAddressAtRow(row) == TextSegmentWindow.this.highlightAddress) {
-                final var style = RUNTIME_TABLE_HIGHLIGHTING_SETTINGS.getTextSegmentHighlightingStyle();
+                final var style = HIGHLIGHTING_SETTINGS.getTextSegmentHighlightingStyle();
                 cell.setBackground(style.background());
                 cell.setForeground(style.foreground());
                 cell.setFont(deriveFontFromStyle(FONT_SETTINGS.getCurrentFont(), style));

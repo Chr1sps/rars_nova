@@ -3,7 +3,7 @@ package rars.venus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import rars.Globals;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import rars.assembler.Symbol;
 import rars.assembler.SymbolTable;
 import rars.riscv.hardware.Memory;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static rars.settings.Settings.OTHER_SETTINGS;
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -177,7 +177,7 @@ public class LabelsWindow extends JInternalFrame {
         this.listOfLabelsForSymbolTable = new ArrayList<>();
         this.listOfLabelsForSymbolTable.add(new LabelsForSymbolTable(null));// global symtab
         final Box allSymtabTables = Box.createVerticalBox();
-        for (final RISCVprogram program : RunAssembleAction.getProgramsToAssemble()) {
+        for (final RISCVProgram program : RunAssembleAction.getProgramsToAssemble()) {
             this.listOfLabelsForSymbolTable.add(new LabelsForSymbolTable(program));
         }
         final ArrayList<Box> tableNames = new ArrayList<>();
@@ -408,7 +408,7 @@ public class LabelsWindow extends JInternalFrame {
 
     // Represents one symbol table for the display.
     private class LabelsForSymbolTable {
-        private final RISCVprogram program;
+        private final RISCVProgram program;
         private final SymbolTable symbolTable;
         private final String tableName;
         private Object[][] labelData;
@@ -416,7 +416,7 @@ public class LabelsWindow extends JInternalFrame {
         private List<Symbol> symbols;
 
         // Associated RISCVprogram object. If null, this represents global symbol table.
-        public LabelsForSymbolTable(final RISCVprogram program) {
+        public LabelsForSymbolTable(final RISCVProgram program) {
             this.program = program;
             this.symbolTable = (program == null)
                 ? Globals.symbolTable

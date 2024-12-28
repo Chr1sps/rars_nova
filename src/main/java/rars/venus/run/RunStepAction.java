@@ -1,7 +1,7 @@
 package rars.venus.run;
 
 import rars.Globals;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.RegisterFile;
@@ -19,7 +19,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.concurrent.Flow;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -122,7 +122,7 @@ public class RunStepAction extends GuiAction {
 //                }
             Simulator.getInstance().subscribe(stopListener);
 
-            RISCVprogram.startSimulation(1, null);
+            RISCVProgram.startSimulation(1, null);
         } else {
             // note: this should never occur since "Step" is only enabled after successful
             // assembly.

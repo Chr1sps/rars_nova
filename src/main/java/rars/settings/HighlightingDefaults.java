@@ -15,7 +15,6 @@ public final class HighlightingDefaults {
     }
 
     private static @NotNull TokenStyle fromBackground(final @NotNull Color color) {
-        final var defaultForeground = SettingsTheme.DEFAULT_THEME.foregroundColor;
-        return new TokenStyle(defaultForeground, color, false, false, false);
+        return new TokenStyle(Color.BLACK, color, false, false, false);
     }
 }

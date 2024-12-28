@@ -13,8 +13,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
-import static rars.settings.Settings.OTHER_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar

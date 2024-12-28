@@ -52,7 +52,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public final class RISCVprogram {
+public final class RISCVProgram {
 
     private String filename;
     private ArrayList<String> sourceList;
@@ -304,7 +304,7 @@ public final class RISCVprogram {
      * @throws AssemblyException Will throw exception if errors occurred while
      *                           reading or tokenizing.
      */
-    public @NotNull List<RISCVprogram> prepareFilesForAssembly(final @NotNull List<String> filenames,
+    public @NotNull List<RISCVProgram> prepareFilesForAssembly(final @NotNull List<String> filenames,
                                                                final @NotNull String leadFilename,
                                                                final @Nullable String exceptionHandler) throws AssemblyException {
         final var programsToAssemble = new ArrayList<RISCVProgram>();
@@ -314,7 +314,7 @@ public final class RISCVprogram {
             leadFilePosition = 1;
         }
         for (final String filename : filenames) {
-            final RISCVprogram preparee = (filename.equals(leadFilename)) ? this : new RISCVprogram();
+            final RISCVProgram preparee = (filename.equals(leadFilename)) ? this : new RISCVProgram();
             preparee.readSource(filename);
             preparee.tokenize();
             // I want "this" RISCVprogram to be the first in the list...except for exception
@@ -350,7 +350,7 @@ public final class RISCVprogram {
      * @throws AssemblyException Will throw exception if errors occurred while
      *                           assembling.
      */
-    public ErrorList assemble(final @NotNull List<RISCVprogram> programsToAssemble,
+    public ErrorList assemble(final @NotNull List<RISCVProgram> programsToAssemble,
                               final boolean extendedAssemblerEnabled,
                               final boolean warningsAreErrors) throws AssemblyException {
         this.backStepper = null;
@@ -362,7 +362,7 @@ public final class RISCVprogram {
 
     /**
      * Instantiates a new {@link MacroPool} and sends reference of this
-     * {@link RISCVprogram} to it
+     * {@link RISCVProgram} to it
      *
      * @return instatiated MacroPool
      * @author M.H.Sekhavat &lt;sekhavat17@gmail.com&gt;

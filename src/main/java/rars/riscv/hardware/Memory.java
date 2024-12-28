@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.Vector;
 import java.util.concurrent.Flow;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
-import static rars.settings.Settings.OTHER_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 
 /*

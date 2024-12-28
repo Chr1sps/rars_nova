@@ -12,9 +12,8 @@ import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import static rars.settings.Settings.SETTINGS_PREFERENCES;
 
-public final class FontSettings extends ListenableBase {
+public final class FontSettings extends SettingsBase {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // region Preferences keys

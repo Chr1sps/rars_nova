@@ -18,7 +18,7 @@ import rars.venus.NumberDisplayBaseChooser;
 
 import java.util.ArrayList;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 
 /*
@@ -61,7 +61,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class ProgramStatement implements Comparable<ProgramStatement> {
     private static final String invalidOperator = "<INVALID>";
-    private final RISCVprogram sourceProgram;
+    private final RISCVProgram sourceProgram;
     private final TokenList originalTokenList;
     private final TokenList strippedTokenList;
     private final BasicStatementList basicStatementList;
@@ -93,7 +93,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *                          is stored.
      * @param sourceLine        a int
      */
-    public ProgramStatement(final RISCVprogram sourceProgram, final String source, final TokenList origTokenList,
+    public ProgramStatement(final RISCVProgram sourceProgram, final String source, final TokenList origTokenList,
                             final TokenList strippedTokenList,
                             final Instruction inst, final int textAddress, final int sourceLine) {
         this.sourceProgram = sourceProgram;
@@ -146,19 +146,19 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             if (format == BasicInstructionFormat.J_FORMAT) {
                 this.operands[0] = ProgramStatement.readBinaryCode(mask, Instruction.operandMask[0], binaryStatement);
                 this.operands[1] = ProgramStatement.fromJumpImmediate(
-                        ProgramStatement.readBinaryCode(mask, Instruction.operandMask[1], binaryStatement));
+                    ProgramStatement.readBinaryCode(mask, Instruction.operandMask[1], binaryStatement));
                 this.numOperands = 2;
             } else if (format == BasicInstructionFormat.B_FORMAT) {
                 this.operands[0] = ProgramStatement.readBinaryCode(mask, Instruction.operandMask[0], binaryStatement);
                 this.operands[1] = ProgramStatement.readBinaryCode(mask, Instruction.operandMask[1], binaryStatement);
                 this.operands[2] = ProgramStatement.fromBranchImmediate(
-                        ProgramStatement.readBinaryCode(mask, Instruction.operandMask[2], binaryStatement));
+                    ProgramStatement.readBinaryCode(mask, Instruction.operandMask[2], binaryStatement));
                 this.numOperands = 3;
             } else { // Everything else is normal
                 for (int i = 0; i < 5; i++) {
                     if (mask.indexOf(Instruction.operandMask[i]) != -1) {
                         this.operands[i] = ProgramStatement.readBinaryCode(mask, Instruction.operandMask[i],
-                                binaryStatement);
+                            binaryStatement);
                         this.numOperands++;
                     }
                 }
@@ -166,25 +166,25 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         }
         this.altered = false;
         this.basicStatementList = ProgramStatement.buildBasicStatementListFromBinaryCode(binaryStatement, instr,
-                this.operands, this.numOperands);
+            this.operands, this.numOperands);
     }
 
     private static int toJumpImmediate(int address) {
         // trying to produce immediate[20:1] where immediate = address[20|10:1|11|19:12]
         address = address >> 1; // Shift it down one byte
         return (address & (1 << 19)) | // keep the top bit in the same place
-                ((address & 0x3FF) << 9) | // move address[10:1] to the right place
-                ((address & (1 << 10)) >> 2) | // move address[11] to the right place
-                ((address & 0x7F800) >> 11); // move address[19:12] to the right place
+            ((address & 0x3FF) << 9) | // move address[10:1] to the right place
+            ((address & (1 << 10)) >> 2) | // move address[11] to the right place
+            ((address & 0x7F800) >> 11); // move address[19:12] to the right place
     }
 
 
     private static int fromJumpImmediate(final int immediate) {
         // trying to produce address[20:0] where immediate = address[20|10:1|11|19:12]
         final int tmp = ((immediate) & (1 << 19)) | // keep the top bit in the same place
-                ((immediate & 0x7FE00) >> 9) | // move address[10:1] to the right place
-                ((immediate & (1 << 8)) << 2) | // move address[11] to the right place
-                ((immediate & 0xFF) << 11); // move address[19:12] to the right place
+            ((immediate & 0x7FE00) >> 9) | // move address[10:1] to the right place
+            ((immediate & (1 << 8)) << 2) | // move address[11] to the right place
+            ((immediate & 0xFF) << 11); // move address[19:12] to the right place
         return (tmp << 12) >> 11; // sign-extend and add extra 0
     }
 
@@ -193,15 +193,15 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         // trying to produce imm[12:1] where immediate = address[12|10:1|11]
         address = address >> 1; // Shift it down one byte
         return (address & (1 << 11)) | // keep the top bit in the same place
-                ((address & 0x3FF) << 1) | // move address[10:1] to the right place
-                ((address & (1 << 10)) >> 10); // move address[11] to the right place
+            ((address & 0x3FF) << 1) | // move address[10:1] to the right place
+            ((address & (1 << 10)) >> 10); // move address[11] to the right place
     }
 
     private static int fromBranchImmediate(final int immediate) {
         // trying to produce address[12:0] where immediate = address[12|10:1|11]
         final int tmp = (immediate & (1 << 11)) | // keep the top bit in the same place
-                ((immediate & 0x7FE) >> 1) | // move address[10:1] to the right place
-                ((immediate & 1) << 10); // move address[11] to the right place
+            ((immediate & 0x7FE) >> 1) | // move address[10:1] to the right place
+            ((immediate & 1) << 10); // move address[11] to the right place
         return (tmp << 20) >> 19; // sign-extend and add extra 0
     }
 
@@ -447,9 +447,9 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 }
                 this.operands[this.numOperands++] = address;
             } else if (tokenType == TokenType.INTEGER_5 || tokenType == TokenType.INTEGER_6
-                    || tokenType == TokenType.INTEGER_12 ||
-                    tokenType == TokenType.INTEGER_12U || tokenType == TokenType.INTEGER_20
-                    || tokenType == TokenType.INTEGER_32) {
+                || tokenType == TokenType.INTEGER_12 ||
+                tokenType == TokenType.INTEGER_12U || tokenType == TokenType.INTEGER_20
+                || tokenType == TokenType.INTEGER_32) {
 
                 final int tempNumeric = Binary.stringToInt(tokenValue);
 
@@ -521,7 +521,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             if ((i < this.strippedTokenList.size() - 1)) {
                 nextTokenType = this.strippedTokenList.get(i + 1).getType();
                 if (tokenType != TokenType.LEFT_PAREN && tokenType != TokenType.RIGHT_PAREN &&
-                        nextTokenType != TokenType.LEFT_PAREN && nextTokenType != TokenType.RIGHT_PAREN) {
+                    nextTokenType != TokenType.LEFT_PAREN && nextTokenType != TokenType.RIGHT_PAREN) {
                     basicStatementElement = ",";
                     basic.append(basicStatementElement);
                     this.basicStatementList.addString(basicStatementElement);
@@ -555,12 +555,12 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         if (format == BasicInstructionFormat.J_FORMAT) {
             this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
             this.insertBinaryCode(ProgramStatement.toJumpImmediate(this.operands[1]), Instruction.operandMask[1],
-                    errors);
+                errors);
         } else if (format == BasicInstructionFormat.B_FORMAT) {
             this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
             this.insertBinaryCode(this.operands[1], Instruction.operandMask[1], errors);
             this.insertBinaryCode(ProgramStatement.toBranchImmediate(this.operands[2]), Instruction.operandMask[2],
-                    errors);
+                errors);
         } else { // Everything else is normal
             for (int i = 0; i < this.numOperands; i++)
                 this.insertBinaryCode(this.operands[i], Instruction.operandMask[i], errors);
@@ -584,7 +584,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             result.append(blanks, 0, 24 - result.length()).append(this.basicAssemblyStatement.substring(firstSpace + 1));
         } else {
             result.append(blanks, 0, 16 - result.length()).append("0x").append(Integer.toString(this.binaryStatement,
-                    16));
+                16));
         }
         result.append(blanks, 0, 40 - result.length()).append(";  "); // this.source;
         if (this.operands != null) {
@@ -605,7 +605,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @return The RISCVprogram object. May be null...
      */
-    public RISCVprogram getSourceProgram() {
+    public RISCVProgram getSourceProgram() {
         return this.sourceProgram;
     }
 
@@ -862,12 +862,12 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         @Override
         public String toString() {
             final int addressBase =
-                    (BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX))
-                            ? NumberDisplayBaseChooser.HEXADECIMAL
-                            : NumberDisplayBaseChooser.DECIMAL;
-            final int valueBase = (BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX))
+                (BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX))
                     ? NumberDisplayBaseChooser.HEXADECIMAL
                     : NumberDisplayBaseChooser.DECIMAL;
+            final int valueBase = (BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX))
+                ? NumberDisplayBaseChooser.HEXADECIMAL
+                : NumberDisplayBaseChooser.DECIMAL;
 
             final StringBuilder result = new StringBuilder();
             for (final ListElement e : this.list) {

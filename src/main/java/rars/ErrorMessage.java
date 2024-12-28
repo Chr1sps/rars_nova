@@ -71,7 +71,7 @@ public final class ErrorMessage {
      * @param message       String containing appropriate error message.
      */
     public ErrorMessage(final boolean isWarning,
-                        final @Nullable RISCVprogram sourceProgram,
+                        final @Nullable RISCVProgram sourceProgram,
                         final int line,
                         final int position,
                         final @NotNull String message
@@ -136,7 +136,7 @@ public final class ErrorMessage {
     }
 
     public static @NotNull ErrorMessage error(
-            final @Nullable RISCVprogram sourceProgram,
+            final @Nullable RISCVProgram sourceProgram,
             final int line,
             final int position,
             final @NotNull String message
@@ -145,7 +145,7 @@ public final class ErrorMessage {
     }
 
     public static @NotNull ErrorMessage warning(
-            final @Nullable RISCVprogram sourceProgram,
+            final @Nullable RISCVProgram sourceProgram,
             final int line,
             final int position,
             final @NotNull String message
@@ -176,7 +176,7 @@ public final class ErrorMessage {
     }
 
     // Added by Mohammad Sekavat Dec 2012
-    private static @NotNull String getExpansionHistory(final RISCVprogram sourceProgram) {
+    private static @NotNull String getExpansionHistory(final RISCVProgram sourceProgram) {
         if (sourceProgram == null || sourceProgram.getLocalMacroPool() == null)
             return "";
         return sourceProgram.getLocalMacroPool().getExpansionHistory();

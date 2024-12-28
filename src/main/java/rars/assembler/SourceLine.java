@@ -1,6 +1,6 @@
 package rars.assembler;
 
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import org.jetbrains.annotations.NotNull;
 
 /*
@@ -39,7 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * line and possibly different program but the migration should not be visible
  * to the user.
  */
-public record SourceLine(@NotNull String source, @NotNull RISCVprogram program, @NotNull String filename,
+public record SourceLine(@NotNull String source, @NotNull RISCVProgram program, @NotNull String filename,
                          int lineNumber) {
     /**
      * SourceLine constructor
@@ -49,7 +49,7 @@ public record SourceLine(@NotNull String source, @NotNull RISCVprogram program, 
      *                   that line
      * @param lineNumber The line number within that program where source appears.
      */
-    public SourceLine(@NotNull final String source, @NotNull final RISCVprogram program, final int lineNumber) {
+    public SourceLine(@NotNull final String source, @NotNull final RISCVProgram program, final int lineNumber) {
         this(source, program, program.getFilename(), lineNumber);
     }
 }

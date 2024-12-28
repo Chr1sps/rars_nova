@@ -9,7 +9,7 @@ import rars.venus.registers.RegistersWindow;
 import javax.swing.*;
 import java.awt.*;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 
 /*

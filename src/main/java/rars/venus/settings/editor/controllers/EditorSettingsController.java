@@ -12,12 +12,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
 
 public final class EditorSettingsController {
-    public final @NotNull EditorSettingsPanel editorSettingsView;
     private final @NotNull FontSettingsController fontSettingsController;
     private final @NotNull BaseStyleSettingsController baseStyleSettingsController;
     private final @NotNull SyntaxStyleSettingsController syntaxStyleSettingsController;
     private final @NotNull OtherSettingsController otherSettingsController;
-    private final @NotNull PresetsController presetsController;
     public @NotNull SettingsTheme settingsTheme;
 
 
@@ -26,7 +24,6 @@ public final class EditorSettingsController {
         final @NotNull EditorSettingsDialog dialog,
         final @NotNull TreePanel treePanel
     ) {
-        this.editorSettingsView = editorSettingsView;
         this.settingsTheme = EDITOR_THEME_SETTINGS.currentTheme.clone();
         final var pickerCardView = editorSettingsView.panelWithTextAreaView.pickerCardView;
         final var textArea = editorSettingsView.panelWithTextAreaView.textArea;
@@ -35,7 +32,7 @@ public final class EditorSettingsController {
             pickerCardView.fontSettingsView,
             textArea
         );
-        this.presetsController = new PresetsController(
+        new PresetsController(
             pickerCardView.presetsView,
             textArea,
             this

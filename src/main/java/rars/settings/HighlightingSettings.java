@@ -12,7 +12,7 @@ import java.util.prefs.Preferences;
 
 import static rars.util.Utils.getColorAsHexString;
 
-public final class RuntimeTableHighlightingSettings extends ListenableBase {
+public final class HighlightingSettings extends SettingsBase {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -25,13 +25,14 @@ public final class RuntimeTableHighlightingSettings extends ListenableBase {
     private static final String ITALIC = "Italic";
     private static final String UNDERLINE = "Underline";
     private static final String ENABLED = "Enabled";
+    public static @NotNull HighlightingSettings HIGHLIGHTING_SETTINGS = new HighlightingSettings(SETTINGS_PREFERENCES);
     // endregion Preferences keys
 
     private final @NotNull Preferences preferences;
     private @NotNull TokenStyle textSegmentHighlightingStyle, delaySlotHighlightingStyle;
     private @Nullable TokenStyle dataSegmentHighlightingStyle, registerHighlightingStyle;
 
-    public RuntimeTableHighlightingSettings(final @NotNull Preferences preferences) {
+    public HighlightingSettings(final @NotNull Preferences preferences) {
         this.preferences = preferences;
         this.loadSettingsFromPreferences();
     }

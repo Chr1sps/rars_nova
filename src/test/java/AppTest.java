@@ -17,7 +17,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 public class AppTest extends RarsTestBase {
     public static void runTestFiles(final String path, final boolean is64Bit) {
@@ -75,22 +75,22 @@ public class AppTest extends RarsTestBase {
             final Simulator.Reason r = program.simulate();
             if (r != Simulator.Reason.NORMAL_TERMINATION) {
                 final var msg = "Ended abnormally while executing `" + path + "`.\n" +
-                        "Reason: " + r + ".\n";
+                    "Reason: " + r + ".\n";
                 fail(msg);
             } else {
                 if (program.getExitCode() != 42) {
                     final var msg = "Final exit code was wrong for `" + path + "`.\n" +
-                            "Expected: 42, but got " + program.getExitCode() + ".";
+                        "Expected: 42, but got " + program.getExitCode() + ".";
                     fail(msg);
                 }
                 if (!program.getSTDOUT().equals(stdout)) {
                     final var msg = "STDOUT was wrong for `" + path + "`.\n" +
-                            "Expected:\n\"" + stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
+                        "Expected:\n\"" + stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
                     fail(msg);
                 }
                 if (!program.getSTDERR().equals(stderr)) {
                     final var msg = "STDERR was wrong for `" + path + "`.\n" +
-                            "Expected:\n\"" + stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
+                        "Expected:\n\"" + stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
                     fail(msg);
                 }
             }
@@ -100,7 +100,7 @@ public class AppTest extends RarsTestBase {
                 builder.append("Failed to assemble `" + path + "` due to following error(s):\n");
                 for (final var error : ae.errors().getErrorMessages()) {
                     builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
-                            "\n");
+                        "\n");
                 }
                 fail(builder.toString());
             }
@@ -117,16 +117,16 @@ public class AppTest extends RarsTestBase {
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
                     builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
-                            "\n");
+                        "\n");
                 }
                 fail(builder.toString());
             }
 
         } catch (final SimulationException se) {
             final var msg = "Crashed while executing `" + path + "`.\n" +
-                    "Reason: " + se.reason + ".\n" +
-                    "Value: " + se.value + ".\n" +
-                    "Message: " + se.errorMessage.getMessage() + ".";
+                "Reason: " + se.reason + ".\n" +
+                "Value: " + se.value + ".\n" +
+                "Message: " + se.errorMessage.getMessage() + ".";
             fail(msg);
         }
     }
@@ -164,7 +164,7 @@ public class AppTest extends RarsTestBase {
                     final ProgramStatement ps = new ProgramStatement(word, 0x400000);
                     assertNotNull(ps.getInstruction(), "Error 1 on: " + program);
                     assertThat("Error 2 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString(
-                            "invalid")));
+                        "invalid")));
 //                    String decompiled = ps.getPrintableBasicAssemblyStatement();
 
                     p.assembleString(program);
@@ -239,14 +239,15 @@ public class AppTest extends RarsTestBase {
                     final ProgramStatement ps = new ProgramStatement(first, 0x400000);
                     assertNotNull(ps.getInstruction(), "Error 11 on: " + program);
                     assertThat("Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(),
-                            not(containsString("invalid")));
+                        not(containsString("invalid")));
                     if (program.contains("t0") || program.contains("t1") || program.contains("t2") || program.contains("f1")) {
                         // TODO: test that each register individually is meaningful and test every
                         // register.
                         // Currently this covers all instructions and is an alert if I made a trivial
                         // mistake.
                         final String register_substitute =
-                                program.replaceAll("t0", "x0").replaceAll("t1", "x0").replaceAll("t2", "x0").replaceAll("f1", "f0");
+                            program.replaceAll("t0", "x0").replaceAll("t1", "x0").replaceAll("t2", "x0").replaceAll(
+                                "f1", "f0");
                         p.assembleString(register_substitute);
                         p.setup(null, "");
                         final int word1 = p.getMemory().getWord(0x400000);

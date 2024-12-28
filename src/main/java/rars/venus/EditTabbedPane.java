@@ -3,7 +3,7 @@ package rars.venus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -627,7 +627,7 @@ public class EditTabbedPane extends JPanel {
             FileStatus.setFile(theFile);
             FileStatus.set(FileStatus.State.OPENING);// DPS 9-Aug-2011
             if (theFile.canRead()) {
-                Globals.program = new RISCVprogram();
+                Globals.program = new RISCVProgram();
                 try {
                     Globals.program.readSource(currentFilePath);
                 } catch (final AssemblyException ignored) {

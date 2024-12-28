@@ -2,7 +2,7 @@ package rars.riscv;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import rars.assembler.Symbol;
 import rars.assembler.TokenList;
 import rars.util.Binary;
@@ -118,11 +118,11 @@ public final class ExtendedInstruction extends Instruction {
      *
      * @param template  a String containing template for basic statement.
      * @param tokenList a TokenList containing tokens from extended instruction.
-     * @param program   a {@link RISCVprogram} object
+     * @param program   a {@link RISCVProgram} object
      * @param PC        a int
      * @return String representing basic assembler statement.
      */
-    public static String makeTemplateSubstitutions(final @NotNull RISCVprogram program, final @NotNull String template, final @NotNull TokenList tokenList, final int PC) {
+    public static String makeTemplateSubstitutions(final @NotNull RISCVProgram program, final @NotNull String template, final @NotNull TokenList tokenList, final int PC) {
         String instruction = template;
         // substitute first operand token for template's RG1 or OP1, second for RG2 or
         // OP2, etc

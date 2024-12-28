@@ -15,38 +15,38 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.fail;
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 import static rars.util.Utils.getStacktraceString;
 
 public abstract class AbstractInstructionTest extends RarsTestBase {
 
     private static @NotNull String getDecoratedCode(@NotNull final String code, @NotNull final String dataPrelude) {
         var header = """
-                # PRELUDE
-                .text
-                main:
-                
-                # TEST CODE
-                """;
+            # PRELUDE
+            .text
+            main:
+            
+            # TEST CODE
+            """;
         if (!dataPrelude.isEmpty()) {
             header = """
-                    # DATA
-                    .data
-                    """ + dataPrelude + "\n" + header;
+                # DATA
+                .data
+                """ + dataPrelude + "\n" + header;
         }
 
         final var passAndFail = """
-                
-                # EPILOGUE
-                pass:
-                    li a0, 42
-                    li a7, 93
-                    ecall
-                fail:
-                    li a0, 0
-                    li a7, 93
-                    ecall
-                """;
+            
+            # EPILOGUE
+            pass:
+                li a0, 42
+                li a7, 93
+                ecall
+            fail:
+                li a0, 0
+                li a7, 93
+                ecall
+            """;
 
         final var finalCode = header + code + passAndFail;
         return finalCode;
@@ -112,22 +112,22 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
             final Simulator.Reason r = program.simulate();
             if (r != Simulator.Reason.NORMAL_TERMINATION) {
                 final var msg = "Ended abnormally while executing `" + getTestName() + "`.\n" +
-                        "Reason: " + r + ".\n";
+                    "Reason: " + r + ".\n";
                 fail(msg);
             } else {
                 if (program.getExitCode() != 42) {
                     final var msg = "Final exit code was wrong for `" + getTestName() + "`.\n" +
-                            "Expected: 42, but got " + program.getExitCode() + ".";
+                        "Expected: 42, but got " + program.getExitCode() + ".";
                     fail(msg);
                 }
                 if (!program.getSTDOUT().equals(testData.stdout)) {
                     final var msg = "STDOUT was wrong for `" + getTestName() + "`.\n" +
-                            "Expected:\n\"" + testData.stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
+                        "Expected:\n\"" + testData.stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
                     fail(msg);
                 }
                 if (!program.getSTDERR().equals(testData.stderr)) {
                     final var msg = "STDERR was wrong for `" + getTestName() + "`.\n" +
-                            "Expected:\n\"" + testData.stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
+                        "Expected:\n\"" + testData.stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
                     fail(msg);
                 }
             }
@@ -137,7 +137,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 builder.append("Failed to assemble `" + getTestName() + "` due to following error(s):\n");
                 for (final var error : ae.errors().getErrorMessages()) {
                     builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
-                            "\n");
+                        "\n");
                 }
                 fail(builder.toString());
             }
@@ -154,44 +154,44 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
                     builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
-                            "\n");
+                        "\n");
                 }
                 fail(builder.toString());
             }
 
         } catch (final SimulationException se) {
             final var msg = "Crashed while executing `" + getTestName() + "`.\n" +
-                    "Reason: " + se.reason + "\n" +
-                    "Value: " + se.value + "\n" +
-                    "Message: " + se.errorMessage.getMessage() + "\n" +
-                    "Stacktrace: " + getStacktraceString(se) + "\n";
+                "Reason: " + se.reason + "\n" +
+                "Value: " + se.value + "\n" +
+                "Message: " + se.errorMessage.getMessage() + "\n" +
+                "Stacktrace: " + getStacktraceString(se) + "\n";
 
             fail(msg);
         }
     }
 
     protected final void runArithmeticTest32(
-            @NotNull final String op,
-            @NotNull final String firstValue,
-            @NotNull final String secondValue,
-            @NotNull final String result) {
+        @NotNull final String op,
+        @NotNull final String firstValue,
+        @NotNull final String secondValue,
+        @NotNull final String result) {
         final var finalCode = "li x1, " + firstValue + "\n" +
-                "li x2, " + secondValue + "\n" +
-                op + " x30, x1, x2\n" +
-                "li x29, " + result + "\n" +
-                "bne x30, x29, fail\n";
+            "li x2, " + secondValue + "\n" +
+            op + " x30, x1, x2\n" +
+            "li x29, " + result + "\n" +
+            "bne x30, x29, fail\n";
         runTest32(finalCode);
     }
 
     protected final void runArithmeticImmediateTest32(
-            @NotNull final String op,
-            @NotNull final String firstValue,
-            @NotNull final String immediate,
-            @NotNull final String result) {
+        @NotNull final String op,
+        @NotNull final String firstValue,
+        @NotNull final String immediate,
+        @NotNull final String result) {
         final var finalCode = "li x1, " + firstValue + "\n" +
-                op + " x30, x1, " + immediate + "\n" +
-                "li x29, " + result + "\n" +
-                "bne x30, x29, fail\n";
+            op + " x30, x1, " + immediate + "\n" +
+            "li x29, " + result + "\n" +
+            "bne x30, x29, fail\n";
         runTest32(finalCode);
     }
 
@@ -214,9 +214,9 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
             if (obj == null || obj.getClass() != this.getClass()) return false;
             final var that = (TestData) obj;
             return Objects.equals(this.stdin, that.stdin) &&
-                    Objects.equals(this.stdout, that.stdout) &&
-                    Objects.equals(this.stderr, that.stderr) &&
-                    Objects.equals(this.errorLines, that.errorLines);
+                Objects.equals(this.stdout, that.stdout) &&
+                Objects.equals(this.stderr, that.stderr) &&
+                Objects.equals(this.errorLines, that.errorLines);
         }
 
         @Override
@@ -227,10 +227,10 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
         @Override
         public String toString() {
             return "TestData[" +
-                    "stdin=" + stdin + ", " +
-                    "stdout=" + stdout + ", " +
-                    "stderr=" + stderr + ", " +
-                    "errorLines=" + errorLines + ']';
+                "stdin=" + stdin + ", " +
+                "stdout=" + stdout + ", " +
+                "stderr=" + stderr + ", " +
+                "errorLines=" + errorLines + ']';
         }
     }
 }

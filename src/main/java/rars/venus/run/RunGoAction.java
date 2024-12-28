@@ -1,7 +1,7 @@
 package rars.venus.run;
 
 import rars.Globals;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.RegisterFile;
@@ -20,7 +20,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.concurrent.Flow;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
@@ -146,7 +146,7 @@ public class RunGoAction extends GuiAction {
                 Simulator.getInstance().subscribe(stopListener);
 
                 final int[] breakPoints = this.executePane.textSegment.getSortedBreakPointsArray();
-                RISCVprogram.startSimulation(RunGoAction.maxSteps, breakPoints);
+                RISCVProgram.startSimulation(RunGoAction.maxSteps, breakPoints);
             } else {
                 // This should never occur because at termination the Go and Step buttons are
                 // disabled.

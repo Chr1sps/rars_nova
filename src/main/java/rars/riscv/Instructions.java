@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 /**
  * This class contains all the defined RISC-V instructions. It is intended
@@ -45,204 +45,204 @@ public final class Instructions {
 
     static {
         INSTRUCTIONS_R32 = List.of(
-                // region Arithmetic
-                ADD.INSTANCE,
-                AND.INSTANCE,
-                DIV.INSTANCE,
-                DIVU.INSTANCE,
-                MUL.INSTANCE,
-                MULH.INSTANCE,
-                MULHSU.INSTANCE,
-                MULHU.INSTANCE,
-                OR.INSTANCE,
-                REM.INSTANCE,
-                REMU.INSTANCE,
-                SLL.INSTANCE,
-                SLT.INSTANCE,
-                SLTU.INSTANCE,
-                SRA.INSTANCE,
-                SRL.INSTANCE,
-                SUB.INSTANCE,
-                XOR.INSTANCE,
-                // endregion branch
+            // region Arithmetic
+            ADD.INSTANCE,
+            AND.INSTANCE,
+            DIV.INSTANCE,
+            DIVU.INSTANCE,
+            MUL.INSTANCE,
+            MULH.INSTANCE,
+            MULHSU.INSTANCE,
+            MULHU.INSTANCE,
+            OR.INSTANCE,
+            REM.INSTANCE,
+            REMU.INSTANCE,
+            SLL.INSTANCE,
+            SLT.INSTANCE,
+            SLTU.INSTANCE,
+            SRA.INSTANCE,
+            SRL.INSTANCE,
+            SUB.INSTANCE,
+            XOR.INSTANCE,
+            // endregion branch
 
-                // region Branch
-                BEQ.INSTANCE,
-                BGE.INSTANCE,
-                BGEU.INSTANCE,
-                BLT.INSTANCE,
-                BLTU.INSTANCE,
-                BNE.INSTANCE,
-                // endregion
+            // region Branch
+            BEQ.INSTANCE,
+            BGE.INSTANCE,
+            BGEU.INSTANCE,
+            BLT.INSTANCE,
+            BLTU.INSTANCE,
+            BNE.INSTANCE,
+            // endregion
 
-                // region Double
-                FADDD.INSTANCE,
-                FDIVD.INSTANCE,
-                FMAXD.INSTANCE,
-                FMIND.INSTANCE,
-                FMULD.INSTANCE,
-                FSUBD.INSTANCE,
-                // endregion Double
+            // region Double
+            FADDD.INSTANCE,
+            FDIVD.INSTANCE,
+            FMAXD.INSTANCE,
+            FMIND.INSTANCE,
+            FMULD.INSTANCE,
+            FSUBD.INSTANCE,
+            // endregion Double
 
-                // region Floating
-                FADDS.INSTANCE,
-                FDIVS.INSTANCE,
-                FMAXS.INSTANCE,
-                FMINS.INSTANCE,
-                FMULS.INSTANCE,
-                FSUBS.INSTANCE,
-                // endregion Floating
+            // region Floating
+            FADDS.INSTANCE,
+            FDIVS.INSTANCE,
+            FMAXS.INSTANCE,
+            FMINS.INSTANCE,
+            FMULS.INSTANCE,
+            FSUBS.INSTANCE,
+            // endregion Floating
 
-                // region FusedDouble
-                FMADDD.INSTANCE,
-                FMSUBD.INSTANCE,
-                FNMADDD.INSTANCE,
-                FNMSUBD.INSTANCE,
-                // endregion FusedDouble
+            // region FusedDouble
+            FMADDD.INSTANCE,
+            FMSUBD.INSTANCE,
+            FNMADDD.INSTANCE,
+            FNMSUBD.INSTANCE,
+            // endregion FusedDouble
 
-                // region FusedFloat
-                FMADDS.INSTANCE,
-                FMSUBS.INSTANCE,
-                FNMADDS.INSTANCE,
-                FNMSUBS.INSTANCE,
-                // endregion FusedFloat
+            // region FusedFloat
+            FMADDS.INSTANCE,
+            FMSUBS.INSTANCE,
+            FNMADDS.INSTANCE,
+            FNMSUBS.INSTANCE,
+            // endregion FusedFloat
 
-                // region ImmediateInstruction
-                ADDI.INSTANCE,
-                ANDI.INSTANCE,
-                ORI.INSTANCE,
-                SLTI.INSTANCE,
-                SLTIU.INSTANCE,
-                XORI.INSTANCE,
-                // endregion ImmediateInstruction
+            // region ImmediateInstruction
+            ADDI.INSTANCE,
+            ANDI.INSTANCE,
+            ORI.INSTANCE,
+            SLTI.INSTANCE,
+            SLTIU.INSTANCE,
+            XORI.INSTANCE,
+            // endregion ImmediateInstruction
 
-                // region Load
-                LB.INSTANCE,
-                LBU.INSTANCE,
-                LH.INSTANCE,
-                LHU.INSTANCE,
-                LW.INSTANCE,
-                // endregion Load
+            // region Load
+            LB.INSTANCE,
+            LBU.INSTANCE,
+            LH.INSTANCE,
+            LHU.INSTANCE,
+            LW.INSTANCE,
+            // endregion Load
 
-                // region Store
-                SB.INSTANCE,
-                SH.INSTANCE,
-                SW.INSTANCE,
-                // endregion Store
+            // region Store
+            SB.INSTANCE,
+            SH.INSTANCE,
+            SW.INSTANCE,
+            // endregion Store
 
-                // region Other
-                AUIPC.INSTANCE,
-                CSRRC.INSTANCE,
-                CSRRCI.INSTANCE,
-                CSRRS.INSTANCE,
-                CSRRSI.INSTANCE,
-                CSRRW.INSTANCE,
-                CSRRWI.INSTANCE,
-                EBREAK.INSTANCE,
-                ECALL.INSTANCE,
-                FCLASSD.INSTANCE,
-                FCLASSS.INSTANCE,
-                FCVTDS.INSTANCE,
-                FCVTDW.INSTANCE,
-                FCVTDWU.INSTANCE,
-                FCVTSD.INSTANCE,
-                FCVTSW.INSTANCE,
-                FCVTSWU.INSTANCE,
-                FCVTWD.INSTANCE,
-                FCVTWS.INSTANCE,
-                FCVTWUD.INSTANCE,
-                FCVTWUS.INSTANCE,
-                FENCE.INSTANCE,
-                FENCEI.INSTANCE,
-                FEQD.INSTANCE,
-                FEQS.INSTANCE,
-                FLD.INSTANCE,
-                FLED.INSTANCE,
-                FLES.INSTANCE,
-                FLTD.INSTANCE,
-                FLTS.INSTANCE,
-                FLW.INSTANCE,
-                FMVSX.INSTANCE,
-                FMVXS.INSTANCE,
-                FSD.INSTANCE,
-                FSGNJD.INSTANCE,
-                FSGNJND.INSTANCE,
-                FSGNJNS.INSTANCE,
-                FSGNJS.INSTANCE,
-                FSGNJXD.INSTANCE,
-                FSGNJXS.INSTANCE,
-                FSQRTD.INSTANCE,
-                FSQRTS.INSTANCE,
-                FSW.INSTANCE,
-                JAL.INSTANCE,
-                JALR.INSTANCE,
-                LUI.INSTANCE,
-                SLLI.INSTANCE,
-                SRAI.INSTANCE,
-                SRLI.INSTANCE,
-                URET.INSTANCE,
-                WFI.INSTANCE
-                // endregion Other
+            // region Other
+            AUIPC.INSTANCE,
+            CSRRC.INSTANCE,
+            CSRRCI.INSTANCE,
+            CSRRS.INSTANCE,
+            CSRRSI.INSTANCE,
+            CSRRW.INSTANCE,
+            CSRRWI.INSTANCE,
+            EBREAK.INSTANCE,
+            ECALL.INSTANCE,
+            FCLASSD.INSTANCE,
+            FCLASSS.INSTANCE,
+            FCVTDS.INSTANCE,
+            FCVTDW.INSTANCE,
+            FCVTDWU.INSTANCE,
+            FCVTSD.INSTANCE,
+            FCVTSW.INSTANCE,
+            FCVTSWU.INSTANCE,
+            FCVTWD.INSTANCE,
+            FCVTWS.INSTANCE,
+            FCVTWUD.INSTANCE,
+            FCVTWUS.INSTANCE,
+            FENCE.INSTANCE,
+            FENCEI.INSTANCE,
+            FEQD.INSTANCE,
+            FEQS.INSTANCE,
+            FLD.INSTANCE,
+            FLED.INSTANCE,
+            FLES.INSTANCE,
+            FLTD.INSTANCE,
+            FLTS.INSTANCE,
+            FLW.INSTANCE,
+            FMVSX.INSTANCE,
+            FMVXS.INSTANCE,
+            FSD.INSTANCE,
+            FSGNJD.INSTANCE,
+            FSGNJND.INSTANCE,
+            FSGNJNS.INSTANCE,
+            FSGNJS.INSTANCE,
+            FSGNJXD.INSTANCE,
+            FSGNJXS.INSTANCE,
+            FSQRTD.INSTANCE,
+            FSQRTS.INSTANCE,
+            FSW.INSTANCE,
+            JAL.INSTANCE,
+            JALR.INSTANCE,
+            LUI.INSTANCE,
+            SLLI.INSTANCE,
+            SRAI.INSTANCE,
+            SRLI.INSTANCE,
+            URET.INSTANCE,
+            WFI.INSTANCE
+            // endregion Other
 
         );
         INSTRUCTIONS_R64 = List.of(
-                // region ArithmeticW
-                ADDW.INSTANCE,
-                DIVUW.INSTANCE,
-                DIVW.INSTANCE,
-                MULW.INSTANCE,
-                REMUW.INSTANCE,
-                REMW.INSTANCE,
-                SLLW.INSTANCE,
-                SRAW.INSTANCE,
-                SRLW.INSTANCE,
-                SUBW.INSTANCE,
-                // endregion ArithmeticW
+            // region ArithmeticW
+            ADDW.INSTANCE,
+            DIVUW.INSTANCE,
+            DIVW.INSTANCE,
+            MULW.INSTANCE,
+            REMUW.INSTANCE,
+            REMW.INSTANCE,
+            SLLW.INSTANCE,
+            SRAW.INSTANCE,
+            SRLW.INSTANCE,
+            SUBW.INSTANCE,
+            // endregion ArithmeticW
 
-                // ImmediateInstruction
-                ADDIW.INSTANCE,
+            // ImmediateInstruction
+            ADDIW.INSTANCE,
 
-                // Load
-                LD.INSTANCE,
-                LWU.INSTANCE,
+            // Load
+            LD.INSTANCE,
+            LWU.INSTANCE,
 
-                // Store
-                SD.INSTANCE,
+            // Store
+            SD.INSTANCE,
 
-                // region Other
-                FCVTDL.INSTANCE,
-                FCVTDLU.INSTANCE,
-                FCVTLD.INSTANCE,
-                FCVTLS.INSTANCE,
-                FCVTLUD.INSTANCE,
-                FCVTLUS.INSTANCE,
-                FCVTSL.INSTANCE,
-                FCVTSLU.INSTANCE,
-                FMVDX.INSTANCE,
-                FMVXD.INSTANCE,
-                SLLIW.INSTANCE,
-                SRAIW.INSTANCE,
-                SRLIW.INSTANCE
-                // endregion Other
+            // region Other
+            FCVTDL.INSTANCE,
+            FCVTDLU.INSTANCE,
+            FCVTLD.INSTANCE,
+            FCVTLS.INSTANCE,
+            FCVTLUD.INSTANCE,
+            FCVTLUS.INSTANCE,
+            FCVTSL.INSTANCE,
+            FCVTSLU.INSTANCE,
+            FMVDX.INSTANCE,
+            FMVXD.INSTANCE,
+            SLLIW.INSTANCE,
+            SRAIW.INSTANCE,
+            SRLIW.INSTANCE
+            // endregion Other
         );
         INSTRUCTIONS_R32_EXTENDED = loadPseudoInstructions("/PseudoOps.txt");
         INSTRUCTIONS_R64_EXTENDED = loadPseudoInstructions("/PseudoOps-64.txt");
 
         INSTRUCTIONS_ALL_R32_ONLY = Stream
-                .concat(INSTRUCTIONS_R32.stream(), INSTRUCTIONS_R32_EXTENDED.stream())
-                .collect(Collectors.toList());
+            .concat(INSTRUCTIONS_R32.stream(), INSTRUCTIONS_R32_EXTENDED.stream())
+            .collect(Collectors.toList());
 
         INSTRUCTIONS_ALL_R64_ONLY = Stream
-                .concat(INSTRUCTIONS_R64.stream(), INSTRUCTIONS_R64_EXTENDED.stream())
-                .collect(Collectors.toList());
+            .concat(INSTRUCTIONS_R64.stream(), INSTRUCTIONS_R64_EXTENDED.stream())
+            .collect(Collectors.toList());
 
         INSTRUCTIONS_ALL = Stream.of(
-                        INSTRUCTIONS_R32,
-                        INSTRUCTIONS_R64,
-                        INSTRUCTIONS_R32_EXTENDED,
-                        INSTRUCTIONS_R64_EXTENDED
-                ).flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                INSTRUCTIONS_R32,
+                INSTRUCTIONS_R64,
+                INSTRUCTIONS_R32_EXTENDED,
+                INSTRUCTIONS_R64_EXTENDED
+            ).flatMap(Collection::stream)
+            .collect(Collectors.toList());
 
         RV64 = BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED);
 
@@ -277,20 +277,20 @@ public final class Instructions {
         final var matchingInstructions = new ArrayList<Instruction>();
         if (initialized) {
             INSTRUCTIONS_ALL_R32_ONLY.stream()
-                    .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
-                    .forEach(matchingInstructions::add);
+                .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
+                .forEach(matchingInstructions::add);
             if (RV64)
                 INSTRUCTIONS_ALL_R64_ONLY.stream()
-                        .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
-                        .forEach(matchingInstructions::add);
-        } else {
-            INSTRUCTIONS_R32.stream()
                     .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
                     .forEach(matchingInstructions::add);
+        } else {
+            INSTRUCTIONS_R32.stream()
+                .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
+                .forEach(matchingInstructions::add);
             if (RV64)
                 INSTRUCTIONS_R64.stream()
-                        .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
-                        .forEach(matchingInstructions::add);
+                    .filter(instruction -> instruction.getName().equalsIgnoreCase(operator))
+                    .forEach(matchingInstructions::add);
         }
         return matchingInstructions;
     }
@@ -298,26 +298,26 @@ public final class Instructions {
     public static @NotNull List<Instruction> matchOperatorByPrefix(final @NotNull String operator) {
         final var matchingInstructions = new ArrayList<Instruction>();
         INSTRUCTIONS_ALL_R32_ONLY.stream()
-                .filter(instruction -> instruction.getName().toLowerCase().startsWith(operator.toLowerCase()))
-                .forEach(matchingInstructions::add);
+            .filter(instruction -> instruction.getName().toLowerCase().startsWith(operator.toLowerCase()))
+            .forEach(matchingInstructions::add);
         if (RV64)
             INSTRUCTIONS_ALL_R64_ONLY.stream()
-                    .filter(instruction -> instruction.getName().toLowerCase().startsWith(operator.toLowerCase()))
-                    .forEach(matchingInstructions::add);
+                .filter(instruction -> instruction.getName().toLowerCase().startsWith(operator.toLowerCase()))
+                .forEach(matchingInstructions::add);
         return matchingInstructions;
     }
 
     private static @NotNull List<ExtendedInstruction> loadPseudoInstructions(final @NotNull String filename) {
         final var instructionList = new ArrayList<ExtendedInstruction>();
         try (
-                final InputStream stream = Instructions.class.getResourceAsStream(filename);
-                final var reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)))
+            final InputStream stream = Instructions.class.getResourceAsStream(filename);
+            final var reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)))
         ) {
             String line;
             while ((line = reader.readLine()) != null) {
                 // skip over: comment lines, empty lines, lines starting with blank.
                 if (!line.startsWith("#") && !line.startsWith(" ")
-                        && !line.isEmpty()) {
+                    && !line.isEmpty()) {
                     var description = "";
                     final var tokenizer = new StringTokenizer(line, ";");
                     final String pseudoOp = tokenizer.nextToken();
@@ -370,7 +370,7 @@ public final class Instructions {
                 result.put(instruction, tokenList);
             } catch (final AssemblyException e) {
                 Instructions.LOGGER.error("CONFIGURATION ERROR: Instruction example \"{}\" contains invalid token(s)" +
-                        ".", exampleFormat);
+                    ".", exampleFormat);
             }
         }
         return result;

@@ -2,7 +2,7 @@ package rars.assembler;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 
 import java.util.ArrayList;
 
@@ -39,7 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * reaches <code>.end_macro</code> directive. then calls
  * {@link MacroPool#commitMacro(Token)} and the macro information stored in a
  * {@link Macro} instance will be added to {@link #macroList}. <br>
- * Each {@link RISCVprogram} will have one {@link MacroPool}<br>
+ * Each {@link RISCVProgram} will have one {@link MacroPool}<br>
  * NOTE: Forward referencing macros (macro expansion before its definition in
  * source code) and Nested macro definition (defining a macro inside other macro
  * definition) are not supported.
@@ -47,7 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author M.H.Sekhavat sekhavat17@gmail.com
  */
 public final class MacroPool {
-    private final @NotNull RISCVprogram program;
+    private final @NotNull RISCVProgram program;
     /**
      * List of macros defined by now
      */
@@ -68,7 +68,7 @@ public final class MacroPool {
      *
      * @param program associated program
      */
-    public MacroPool(final @NotNull RISCVprogram program) {
+    public MacroPool(final @NotNull RISCVProgram program) {
         this.program = program;
         this.macroList = new ArrayList<>();
         this.callStack = new ArrayList<>();

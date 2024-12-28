@@ -3,7 +3,7 @@ package rars.venus.run;
 import rars.ErrorList;
 import rars.ErrorMessage;
 import rars.Globals;
-import rars.RISCVprogram;
+import rars.RISCVProgram;
 import org.jetbrains.annotations.NotNull;
 import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.*;
@@ -16,11 +16,10 @@ import rars.venus.registers.RegistersPane;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
-import static rars.settings.Settings.OTHER_SETTINGS;
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -57,7 +56,7 @@ public class RunAssembleAction extends GuiAction {
 
     // Threshold for adding filename to printed message of files being assembled.
     private static final int LINE_LENGTH_LIMIT = 60;
-    private static List<RISCVprogram> programsToAssemble;
+    private static List<RISCVProgram> programsToAssemble;
     private static boolean extendedAssemblerEnabled;
     private static boolean warningsAreErrors;
     private final VenusUI mainUI;
@@ -86,7 +85,7 @@ public class RunAssembleAction extends GuiAction {
      *
      * @return a {@link java.util.ArrayList} object
      */
-    public static List<RISCVprogram> getProgramsToAssemble() {
+    public static List<RISCVProgram> getProgramsToAssemble() {
         return RunAssembleAction.programsToAssemble;
     }
 
@@ -101,7 +100,7 @@ public class RunAssembleAction extends GuiAction {
     // Handy little utility for building comma-separated list of filenames
     // while not letting line length get out of hand.
     private static @NotNull String buildFileNameList(final @NotNull String preamble,
-                                                     final @NotNull List<RISCVprogram> programList) {
+                                                     final @NotNull List<RISCVProgram> programList) {
         final StringBuilder result = new StringBuilder(preamble);
         int lineLength = result.length();
         for (int i = 0; i < programList.size(); i++) {
@@ -134,7 +133,7 @@ public class RunAssembleAction extends GuiAction {
                 this.mainUI.editor.save();
             }
             try {
-                Globals.program = new RISCVprogram();
+                Globals.program = new RISCVProgram();
                 final List<String> filesToAssemble;
                 if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls 
                     // for multiple

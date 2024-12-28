@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.Settings.OTHER_SETTINGS;
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -170,7 +170,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
                 this.addressDisplay[i] = textField;
             }
             FONT_SETTINGS.addChangeListener(() -> {
-                for (final var textField: this.addressDisplay) {
+                for (final var textField : this.addressDisplay) {
                     textField.setFont(FONT_SETTINGS.getCurrentFont());
                 }
             });

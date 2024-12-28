@@ -2,7 +2,7 @@ package rars.riscv.hardware;
 
 import org.jetbrains.annotations.NotNull;
 
-import static rars.settings.Settings.OTHER_SETTINGS;
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 public final class CurrentMemoryConfiguration {
     public static @NotNull MemoryConfiguration currentConfiguration;
