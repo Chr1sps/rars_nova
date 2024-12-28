@@ -296,20 +296,15 @@ public class InstructionCounter extends AbstractTool {
             if (stmt != null) {
                 final BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
                 final BasicInstructionFormat format = instr.getInstructionFormat();
-                if (format == BasicInstructionFormat.R_FORMAT)
-                    this.counterR++;
-                else if (format == BasicInstructionFormat.R4_FORMAT)
-                    this.counterR4++;
-                else if (format == BasicInstructionFormat.I_FORMAT)
-                    this.counterI++;
-                else if (format == BasicInstructionFormat.S_FORMAT)
-                    this.counterS++;
-                else if (format == BasicInstructionFormat.B_FORMAT)
-                    this.counterB++;
-                else if (format == BasicInstructionFormat.U_FORMAT)
-                    this.counterU++;
-                else if (format == BasicInstructionFormat.J_FORMAT)
-                    this.counterJ++;
+                switch (format) {
+                    case R_FORMAT -> this.counterR++;
+                    case R4_FORMAT -> this.counterR4++;
+                    case I_FORMAT -> this.counterI++;
+                    case S_FORMAT -> this.counterS++;
+                    case B_FORMAT -> this.counterB++;
+                    case U_FORMAT -> this.counterU++;
+                    case J_FORMAT -> this.counterJ++;
+                }
             }
         } catch (final AddressErrorException e) {
             // TODO Auto-generated catch block

@@ -2,6 +2,7 @@ package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -45,7 +46,7 @@ public class FDIVS extends Floating {
      * {@inheritDoc}
      */
     @Override
-    public Float32 compute(final Float32 f1, final Float32 f2, final Environment e) {
+    public Float32 compute(final @NotNull Float32 f1, final Float32 f2, final Environment e) {
         return io.github.chr1sps.jsoftfloat.operations.Arithmetic.division(f1, f2, e);
     }
 }

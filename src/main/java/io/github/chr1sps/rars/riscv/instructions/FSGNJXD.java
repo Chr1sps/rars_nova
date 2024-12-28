@@ -4,10 +4,10 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FSGNJXD class.</p>
- *
  */
 public class FSGNJXD extends BasicInstruction {
     /**
@@ -22,7 +22,7 @@ public class FSGNJXD extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         int[] operands = statement.getOperands();
         long f2 = FloatingPointRegisterFile.getValueLong(operands[1]),
                 f3 = FloatingPointRegisterFile.getValueLong(operands[2]);

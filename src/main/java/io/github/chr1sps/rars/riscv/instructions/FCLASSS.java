@@ -6,6 +6,7 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -36,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>FCLASSS class.</p>
- *
  */
 public class FCLASSS extends BasicInstruction {
     /**
@@ -62,22 +62,13 @@ public class FCLASSS extends BasicInstruction {
      */
 
     /**
-     * {@inheritDoc}
-     */
-    public void simulate(ProgramStatement statement) {
-        int[] operands = statement.getOperands();
-        Float32 in = new Float32(FloatingPointRegisterFile.getValue(operands[1]));
-        fclass(in, operands[0]);
-    }
-
-    /**
      * <p>fclass.</p>
      *
      * @param in  a T object
      * @param out a int
      * @param <T> a T class
      */
-    public static <T extends io.github.chr1sps.jsoftfloat.types.Floating<T>> void fclass(T in, int out) {
+    public static <T extends io.github.chr1sps.jsoftfloat.types.Floating<T>> void fclass(@NotNull T in, int out) {
         if (in.isNaN()) {
             RegisterFile.updateRegister(out, in.isSignalling() ? 0x100 : 0x200);
         } else {
@@ -92,5 +83,14 @@ public class FCLASSS extends BasicInstruction {
                 RegisterFile.updateRegister(out, negative ? 0x002 : 0x040);
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void simulate(@NotNull ProgramStatement statement) {
+        int[] operands = statement.getOperands();
+        Float32 in = new Float32(FloatingPointRegisterFile.getValue(operands[1]));
+        fclass(in, operands[0]);
     }
 }

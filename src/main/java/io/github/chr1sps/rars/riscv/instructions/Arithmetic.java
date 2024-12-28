@@ -5,6 +5,7 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.InstructionSet;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -49,7 +50,7 @@ public abstract class Arithmetic extends BasicInstruction {
      * @param funct7      a {@link java.lang.String} object
      * @param funct3      a {@link java.lang.String} object
      */
-    public Arithmetic(String usage, String description, String funct7, String funct3) {
+    public Arithmetic(@NotNull String usage, String description, String funct7, String funct3) {
         super(usage, description, BasicInstructionFormat.R_FORMAT,
                 funct7 + " ttttt sssss " + funct3 + " fffff 0110011");
     }
@@ -63,7 +64,7 @@ public abstract class Arithmetic extends BasicInstruction {
      * @param funct3      a {@link java.lang.String} object
      * @param rv64        a boolean
      */
-    public Arithmetic(String usage, String description, String funct7, String funct3, boolean rv64) {
+    public Arithmetic(@NotNull String usage, String description, String funct7, String funct3, boolean rv64) {
         super(usage, description, BasicInstructionFormat.R_FORMAT,
                 funct7 + " ttttt sssss " + funct3 + " fffff 0111011", rv64);
     }
@@ -71,7 +72,7 @@ public abstract class Arithmetic extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         int[] operands = statement.getOperands();
         if (InstructionSet.rv64) {
             RegisterFile.updateRegister(operands[0],

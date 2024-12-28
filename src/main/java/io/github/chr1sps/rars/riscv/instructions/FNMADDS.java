@@ -2,10 +2,10 @@ package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FNMADDS class.</p>
- *
  */
 public class FNMADDS extends FusedFloat {
     /**
@@ -18,7 +18,7 @@ public class FNMADDS extends FusedFloat {
     /**
      * {@inheritDoc}
      */
-    public Float32 compute(Float32 f1, Float32 f2, Float32 f3, Environment e) {
+    public Float32 compute(@NotNull Float32 f1, Float32 f2, Float32 f3, @NotNull Environment e) {
         // TODO: test if this is the right behaviour
         flipRounding(e);
         return io.github.chr1sps.jsoftfloat.operations.Arithmetic.fusedMultiplyAdd(f1, f2, f3, e).negate();

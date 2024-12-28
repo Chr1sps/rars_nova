@@ -4,6 +4,7 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.InstructionSet;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -49,7 +50,7 @@ public abstract class Branch extends BasicInstruction {
      * @param description a {@link java.lang.String} object
      * @param funct       a {@link java.lang.String} object
      */
-    public Branch(String usage, String description, String funct) {
+    public Branch(@NotNull String usage, String description, String funct) {
         super(usage, description, BasicInstructionFormat.B_FORMAT,
                 "ttttttt sssss fffff " + funct + " ttttt 1100011 ");
     }
@@ -57,7 +58,7 @@ public abstract class Branch extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         if (willBranch(statement)) {
             InstructionSet.processBranch(statement.getOperands()[2]);
         }

@@ -2,10 +2,10 @@ package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.types.Float32;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FMINS class.</p>
- *
  */
 public class FMINS extends Floating {
     /**
@@ -19,7 +19,7 @@ public class FMINS extends Floating {
      * {@inheritDoc}
      */
     @Override
-    public Float32 compute(Float32 f1, Float32 f2, Environment env) {
+    public @NotNull Float32 compute(Float32 f1, Float32 f2, Environment env) {
         return io.github.chr1sps.jsoftfloat.operations.Comparisons.minimumNumber(f1, f2, env);
     }
 }

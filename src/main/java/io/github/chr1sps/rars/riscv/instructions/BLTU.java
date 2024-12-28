@@ -2,6 +2,7 @@ package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -32,7 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * <p>BLTU class.</p>
- *
  */
 public class BLTU extends Branch {
     /**
@@ -47,7 +47,7 @@ public class BLTU extends Branch {
     /**
      * {@inheritDoc}
      */
-    public boolean willBranch(ProgramStatement statement) {
+    public boolean willBranch(@NotNull ProgramStatement statement) {
         int[] operands = statement.getOperands();
         return Long.compareUnsigned(RegisterFile.getValueLong(operands[0]), RegisterFile.getValueLong(operands[1])) < 0;
     }

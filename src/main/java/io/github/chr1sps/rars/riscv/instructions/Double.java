@@ -7,10 +7,10 @@ import io.github.chr1sps.rars.exceptions.SimulationException;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>Abstract Double class.</p>
- *
  */
 public abstract class Double extends BasicInstruction {
     /**
@@ -39,9 +39,19 @@ public abstract class Double extends BasicInstruction {
     }
 
     /**
+     * <p>getDouble.</p>
+     *
+     * @param num a int
+     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
+     */
+    public static @NotNull Float64 getDouble(int num) {
+        return new Float64(FloatingPointRegisterFile.getValueLong(num));
+    }
+
+    /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull ProgramStatement statement) throws SimulationException {
         int[] operands = statement.getOperands();
         Environment e = new Environment();
         e.mode = Floating.getRoundingMode(operands[3], statement);
@@ -60,14 +70,4 @@ public abstract class Double extends BasicInstruction {
      * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
      */
     public abstract Float64 compute(Float64 f1, Float64 f2, Environment e);
-
-    /**
-     * <p>getDouble.</p>
-     *
-     * @param num a int
-     * @return a {@link io.github.chr1sps.jsoftfloat.types.Float64} object
-     */
-    public static Float64 getDouble(int num) {
-        return new Float64(FloatingPointRegisterFile.getValueLong(num));
-    }
 }

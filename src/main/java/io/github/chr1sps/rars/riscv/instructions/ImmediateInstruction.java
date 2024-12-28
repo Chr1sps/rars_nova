@@ -5,6 +5,7 @@ import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.InstructionSet;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -47,7 +48,7 @@ public abstract class ImmediateInstruction extends BasicInstruction {
      * @param description a {@link java.lang.String} object
      * @param funct       a {@link java.lang.String} object
      */
-    public ImmediateInstruction(String usage, String description, String funct) {
+    public ImmediateInstruction(@NotNull String usage, String description, String funct) {
         super(usage, description, BasicInstructionFormat.I_FORMAT,
                 "tttttttttttt sssss " + funct + " fffff 0010011");
     }
@@ -60,7 +61,7 @@ public abstract class ImmediateInstruction extends BasicInstruction {
      * @param funct       a {@link java.lang.String} object
      * @param rv64        a boolean
      */
-    public ImmediateInstruction(String usage, String description, String funct, boolean rv64) {
+    public ImmediateInstruction(@NotNull String usage, String description, String funct, boolean rv64) {
         super(usage, description, BasicInstructionFormat.I_FORMAT,
                 "tttttttttttt sssss " + funct + " fffff 0011011", rv64);
     }
@@ -68,7 +69,7 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         int[] operands = statement.getOperands();
         if (InstructionSet.rv64) {
             RegisterFile.updateRegister(operands[0], compute(RegisterFile.getValueLong(operands[1]),

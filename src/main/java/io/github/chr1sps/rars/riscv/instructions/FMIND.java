@@ -2,10 +2,10 @@ package io.github.chr1sps.rars.riscv.instructions;
 
 import io.github.chr1sps.jsoftfloat.Environment;
 import io.github.chr1sps.jsoftfloat.types.Float64;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FMIND class.</p>
- *
  */
 public class FMIND extends Double {
     /**
@@ -18,7 +18,7 @@ public class FMIND extends Double {
     /**
      * {@inheritDoc}
      */
-    public Float64 compute(Float64 f1, Float64 f2, Environment env) {
+    public @NotNull Float64 compute(Float64 f1, Float64 f2, Environment env) {
         return io.github.chr1sps.jsoftfloat.operations.Comparisons.minimumNumber(f1, f2, env);
     }
 }

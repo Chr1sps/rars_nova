@@ -4,10 +4,10 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.riscv.BasicInstruction;
 import io.github.chr1sps.rars.riscv.BasicInstructionFormat;
 import io.github.chr1sps.rars.riscv.hardware.FloatingPointRegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>FSGNJND class.</p>
- *
  */
 public class FSGNJND extends BasicInstruction {
     /**
@@ -22,7 +22,7 @@ public class FSGNJND extends BasicInstruction {
     /**
      * {@inheritDoc}
      */
-    public void simulate(ProgramStatement statement) {
+    public void simulate(@NotNull ProgramStatement statement) {
         int[] operands = statement.getOperands();
         long result = (FloatingPointRegisterFile.getValueLong(operands[1]) & 0x7FFFFFFF_FFFFFFFFL) |
                 ((~FloatingPointRegisterFile.getValueLong(operands[2])) & 0x80000000_00000000L);

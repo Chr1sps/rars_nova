@@ -5,6 +5,7 @@ import io.github.chr1sps.rars.ProgramStatement;
 import io.github.chr1sps.rars.exceptions.AddressErrorException;
 import io.github.chr1sps.rars.exceptions.ExitingException;
 import io.github.chr1sps.rars.riscv.hardware.RegisterFile;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class NullString {
      * @return a {@link java.lang.String} object
      * @throws ExitingException if any.
      */
-    public static String get(final ProgramStatement statement) throws ExitingException {
+    public static @NotNull String get(final ProgramStatement statement) throws ExitingException {
         return NullString.get(statement, "a0");
     }
 
@@ -63,7 +64,7 @@ public class NullString {
      * @return the string read from memory
      * @throws ExitingException if it hits a #AddressErrorException
      */
-    public static String get(final ProgramStatement statement, final String reg) throws ExitingException {
+    public static @NotNull String get(final ProgramStatement statement, final String reg) throws ExitingException {
         int byteAddress = RegisterFile.getValue(reg);
         final ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
         try {

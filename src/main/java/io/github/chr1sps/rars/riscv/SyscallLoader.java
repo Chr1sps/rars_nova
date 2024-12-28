@@ -1,12 +1,13 @@
 package io.github.chr1sps.rars.riscv;
 
 import io.github.chr1sps.rars.Globals;
-import io.github.chr1sps.rars.util.FilenameFinder;
+import io.github.chr1sps.rars.riscv.syscalls.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -48,10 +49,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public class SyscallLoader {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static final String CLASS_PREFIX = "io.github.chr1sps.rars.riscv.syscalls.";
-    private static final String SYSCALLS_DIRECTORY_PATH = "io/github/chr1sps/rars/riscv/syscalls";
-    private static final String CLASS_EXTENSION = "class";
-
     private static ArrayList<AbstractSyscall> syscallList;
 
     /*
@@ -62,41 +59,54 @@ public class SyscallLoader {
      */
     static {
         SyscallLoader.syscallList = new ArrayList<>();
-        // grab all class files in the same directory as Syscall
-        final ArrayList<String> candidates = FilenameFinder.getFilenameList(SyscallLoader.class.getClassLoader(),
-                SyscallLoader.SYSCALLS_DIRECTORY_PATH, SyscallLoader.CLASS_EXTENSION);
-        final HashSet<String> syscalls = new HashSet<>();
-        for (final String file : candidates) {
-            // Do not add class if already encountered (happens if run in MARS development
-            // directory)
-            if (syscalls.contains(file)) {
-                continue;
-            } else {
-                syscalls.add(file);
-            }
-            try {
-                // grab the class, make sure it implements Syscall, instantiate, add to list
-                final String syscallClassName = SyscallLoader.CLASS_PREFIX + file.substring(0, file.indexOf(SyscallLoader.CLASS_EXTENSION) - 1);
-                final Class<?> clas = Class.forName(syscallClassName);
-                if (!AbstractSyscall.class.isAssignableFrom(clas)) {
-                    continue;
-                }
-                final AbstractSyscall syscall = (AbstractSyscall) clas.getDeclaredConstructor().newInstance();
-                if (syscall.getNumber() == -1) {
-                    SyscallLoader.syscallList.add(syscall);
-                } else {
-                    throw new Exception("Syscalls must assign -1 for number");
-                }
-            } catch (final Exception e) {
-                SyscallLoader.LOGGER.fatal("Error instantiating Syscall from file {}: {}", file, e);
-                System.exit(0);
-            }
-        }
+        // Replaced dynamic loading with static loading to avoid any funny loading errors.
+        syscallList.add(new SyscallClose());
+        syscallList.add(new SyscallConfirmDialog());
+        syscallList.add(new SyscallExit());
+        syscallList.add(new SyscallExit2());
+        syscallList.add(new SyscallGetCWD());
+        syscallList.add(new SyscallInputDialogDouble());
+        syscallList.add(new SyscallInputDialogFloat());
+        syscallList.add(new SyscallInputDialogInt());
+        syscallList.add(new SyscallInputDialogString());
+        syscallList.add(new SyscallLSeek());
+        syscallList.add(new SyscallMessageDialog());
+        syscallList.add(new SyscallMessageDialogDouble());
+        syscallList.add(new SyscallMessageDialogFloat());
+        syscallList.add(new SyscallMessageDialogInt());
+        syscallList.add(new SyscallMessageDialogString());
+        syscallList.add(new SyscallMidiOut());
+        syscallList.add(new SyscallMidiOutSync());
+        syscallList.add(new SyscallOpen());
+        syscallList.add(new SyscallPrintChar());
+        syscallList.add(new SyscallPrintDouble());
+        syscallList.add(new SyscallPrintFloat());
+        syscallList.add(new SyscallPrintInt());
+        syscallList.add(new SyscallPrintIntBinary());
+        syscallList.add(new SyscallPrintIntHex());
+        syscallList.add(new SyscallPrintIntUnsigned());
+        syscallList.add(new SyscallPrintString());
+        syscallList.add(new SyscallRandDouble());
+        syscallList.add(new SyscallRandFloat());
+        syscallList.add(new SyscallRandInt());
+        syscallList.add(new SyscallRandIntRange());
+        syscallList.add(new SyscallRandSeed());
+        syscallList.add(new SyscallRead());
+        syscallList.add(new SyscallReadChar());
+        syscallList.add(new SyscallReadDouble());
+        syscallList.add(new SyscallReadFloat());
+        syscallList.add(new SyscallReadInt());
+        syscallList.add(new SyscallReadString());
+        syscallList.add(new SyscallSbrk());
+        syscallList.add(new SyscallSleep());
+        syscallList.add(new SyscallTime());
+        syscallList.add(new SyscallWrite());
+
         SyscallLoader.syscallList = SyscallLoader.processSyscallNumberOverrides(SyscallLoader.syscallList);
     }
 
     // Loads system call numbers from Syscall.properties
-    private static ArrayList<AbstractSyscall> processSyscallNumberOverrides(final ArrayList<AbstractSyscall> syscallList) {
+    private static @NotNull ArrayList<AbstractSyscall> processSyscallNumberOverrides(final @NotNull ArrayList<AbstractSyscall> syscallList) {
         final ArrayList<SyscallNumberOverride> overrides = new Globals().getSyscallOverrides();
         if (syscallList.size() != overrides.size()) {
             SyscallLoader.LOGGER.fatal(
@@ -110,7 +120,9 @@ public class SyscallLoader {
             boolean match = false;
             for (final AbstractSyscall syscall : syscallList) {
                 if (syscall.getNumber() == override.getNumber()) {
-                    SyscallLoader.LOGGER.fatal("Duplicate service number: {} already registered to {}", syscall.getNumber(), SyscallLoader.findSyscall(syscall.getNumber()).getName());
+                    @SuppressWarnings("DataFlowIssue")
+                    var syscallName = SyscallLoader.findSyscall(syscall.getNumber()).getName();
+                    SyscallLoader.LOGGER.fatal("Duplicate service number: {} already registered to {}", syscall.getNumber(), syscallName);
                     System.exit(0);
                 }
                 if (override.getName().equals(syscall.getName())) {
@@ -146,14 +158,8 @@ public class SyscallLoader {
      * @param number a int
      * @return a {@link io.github.chr1sps.rars.riscv.AbstractSyscall} object
      */
-    public static AbstractSyscall findSyscall(final int number) {
-        // linear search is OK since number of syscalls is small.
-        for (final AbstractSyscall service : SyscallLoader.syscallList) {
-            if (service.getNumber() == number) {
-                return service;
-            }
-        }
-        return null;
+    public static @Nullable AbstractSyscall findSyscall(final int number) {
+        return syscallList.stream().filter(syscall -> syscall.getNumber() == number).findFirst().orElse(null);
     }
 
     /**
@@ -161,7 +167,7 @@ public class SyscallLoader {
      *
      * @return a {@link java.util.ArrayList} object
      */
-    public static ArrayList<AbstractSyscall> getSyscallList() {
+    public static @NotNull ArrayList<AbstractSyscall> getSyscallList() {
         return SyscallLoader.syscallList;
     }
 }

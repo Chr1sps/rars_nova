@@ -2,6 +2,7 @@ package io.github.chr1sps.rars.riscv.syscalls;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.sound.midi.*;
 import java.util.concurrent.Executor;
@@ -38,7 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
 //
 //  The ToneGenerator and Tone classes were developed by Otterbein College
 //  student Tony Brock in July 2007.  They simulate MIDI output through the
@@ -55,7 +55,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //  (3) simplify the interface by removing all the unused versions
 //       that provided default values for various parameters
 /////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
 /*
  * Creates a Tone object and passes it to a thread to "play" it using MIDI.
@@ -138,7 +137,6 @@ class ToneGenerator {
  * and will be played using MIDI.
  */
 class Tone implements Runnable {
-    private static final Logger LOGGER = LogManager.getLogger();
     /**
      * Tempo of the tone is in milliseconds: 1000 beats per second.
      */
@@ -148,7 +146,8 @@ class Tone implements Runnable {
      * The default MIDI channel of the tone: 0 (channel 1).
      */
     public final static int DEFAULT_CHANNEL = 0;
-
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Lock openLock = new ReentrantLock();
     private final byte pitch;
     private final int duration;
     private final byte instrument;
@@ -179,14 +178,6 @@ class Tone implements Runnable {
         this.volume = volume;
     }
 
-    /**
-     * Plays the tone.
-     */
-    @Override
-    public void run() {
-        this.playTone();
-    }
-
     /*
      * The following lock and the code which locks and unlocks it
      * around the opening of the Sequencer were added 2009-10-19 by
@@ -205,7 +196,13 @@ class Tone implements Runnable {
      * double covered.
      */
 
-    private static final Lock openLock = new ReentrantLock();
+    /**
+     * Plays the tone.
+     */
+    @Override
+    public void run() {
+        this.playTone();
+    }
 
     private void playTone() {
 
@@ -276,7 +273,7 @@ class EndOfTrackListener implements javax.sound.midi.MetaEventListener {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void meta(final javax.sound.midi.MetaMessage m) {
+    public synchronized void meta(final javax.sound.midi.@NotNull MetaMessage m) {
         if (m.getType() == 47) {
             this.endedYet = true;
             this.notifyAll();
