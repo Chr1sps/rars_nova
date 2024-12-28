@@ -13,6 +13,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.concurrent.Flow;
 
 /*
@@ -63,27 +64,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public abstract class AbstractTool extends JFrame implements SimpleSubscriber<AccessNotice> {
-    private JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.
-    protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
-
-    // Major GUI components
-    private JLabel headingLabel;
     private final String title; // descriptive title for title bar provided to constructor.
     private final String heading; // Text to be displayed in the top portion of the main window.
-
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
-
     private final int lowMemoryAddress = Memory.dataSegmentBaseAddress;
     private final int highMemoryAddress = Memory.stackBaseAddress;
+    protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
+    protected ConnectButton connectButton;
+    protected Flow.Subscription subscription;
+    private JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.
+    // Major GUI components
+    private JLabel headingLabel;
     // For Tool, is set true when "Connect" clicked, false when "Disconnect"
     // clicked.
     // For app, is set true when "Assemble and Run" clicked, false when program
     // terminates.
     private volatile boolean observing = false;
 
-
-    protected ConnectButton connectButton;
+    //////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////// ABSTRACT METHODS ///////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Simple constructor
@@ -96,10 +97,6 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         this.heading = heading;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////// ABSTRACT METHODS ///////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Required Tool method to return Tool name. Must be defined by subclass.
      *
@@ -107,6 +104,11 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
      */
     @Override
     public abstract String getName();
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////// METHODS WITH DEFAULT IMPLEMENTATIONS
+    ////////////////////////////////////////////////////////////////////////////////////// //////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Abstract method that must be instantiated by subclass to build the main
@@ -117,11 +119,6 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
      * @return a {@link javax.swing.JComponent} object
      */
     protected abstract JComponent buildMainDisplayArea();
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////// METHODS WITH DEFAULT IMPLEMENTATIONS
-    ////////////////////////////////////////////////////////////////////////////////////// //////////////////
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Required Tool method to carry out Tool functions. It is invoked when the
@@ -219,6 +216,10 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         return headingPanel;
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Rest of the methods.
+    //////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * The Tool default set of controls has one row of 3 buttons. It includes a
      * dual-purpose button to
@@ -269,10 +270,6 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         buttonArea.add(closeButton);
         return buttonArea;
     }
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    // Rest of the methods.
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * This method is called when tool/app is exited either through the close/exit
@@ -406,6 +403,10 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     protected void processRISCVUpdate(final AccessNotice notice) {
     }
 
+    //////////////////////////////////////////////////////////////////////////////////
+    //////////////////// PRIVATE HELPER METHODS //////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////
+
     /**
      * Override this method to provide a JComponent (probably a JButton) of your
      * choice
@@ -419,8 +420,11 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         return null;
     }
 
+
     //////////////////////////////////////////////////////////////////////////////////
-    //////////////////// PRIVATE HELPER METHODS //////////////////////////////////
+    //////////////////// PRIVATE HELPER CLASSES //////////////////////////////////
+    // Specialized inner classes. Either used by stand-alone (JFrame-based) only //
+    // or used by Tool (JDialog-based) only. //
     //////////////////////////////////////////////////////////////////////////////////
 
     // Closing duties for Tool only.
@@ -433,50 +437,19 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         this.dialog.dispose();
     }
 
+    @Override
+    public void onSubscribe(@NotNull final Flow.Subscription subscription) {
+        this.subscription = subscription;
+        this.subscription.request(1);
+    }
 
-    //////////////////////////////////////////////////////////////////////////////////
-    //////////////////// PRIVATE HELPER CLASSES //////////////////////////////////
-    // Specialized inner classes. Either used by stand-alone (JFrame-based) only //
-    // or used by Tool (JDialog-based) only. //
-    //////////////////////////////////////////////////////////////////////////////////
-
-    //////////////////////////////////////////////////////////////////////
-    // Little class for this dual-purpose button. It is used only by the Tool
-    // (not by the stand-alone app).
-    protected class ConnectButton extends JButton {
-        private static final String connectText = "Connect to Program";
-        private static final String disconnectText = "Disconnect from Program";
-
-        public ConnectButton() {
-            super();
-            this.disconnect();
+    @Override
+    public void onNext(final AccessNotice notice) {
+        if (notice.accessIsFromRISCV()) {
+            this.processRISCVUpdate(notice);
+            this.updateDisplay();
         }
-
-        public void connect() {
-            AbstractTool.this.observing = true;
-            Globals.memoryAndRegistersLock.lock();
-            try {
-                AbstractTool.this.addAsObserver();
-            } finally {
-                Globals.memoryAndRegistersLock.unlock();
-            }
-            this.setText(ConnectButton.disconnectText);
-        }
-
-        public void disconnect() {
-            Globals.memoryAndRegistersLock.lock();
-            try {
-                AbstractTool.this.deleteAsSubscriber();
-            } finally {
-                Globals.memoryAndRegistersLock.unlock();
-            }
-            AbstractTool.this.observing = false;
-            this.setText(ConnectButton.connectText);
-        }
-
-        public boolean isConnected() {
-            return AbstractTool.this.observing;
-        }
+        this.subscription.request(1);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -506,21 +479,59 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         }
     }
 
+    //////////////////////////////////////////////////////////////////////
+    // Little class for this dual-purpose button. It is used only by the Tool
+    // (not by the stand-alone app).
+    protected class ConnectButton extends JButton {
+        private static final String connectText = "Connect to Program";
+        private static final String disconnectText = "Disconnect from Program";
+        private final ArrayList<Callback> connectionListeners = new ArrayList<>();
 
-    protected Flow.Subscription subscription;
-
-    @Override
-    public void onSubscribe(@NotNull final Flow.Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
-    }
-
-    @Override
-    public void onNext(final AccessNotice notice) {
-        if (notice.accessIsFromRISCV()) {
-            this.processRISCVUpdate(notice);
-            this.updateDisplay();
+        public ConnectButton() {
+            super();
+            this.disconnect();
         }
-        this.subscription.request(1);
+
+        public void connect() {
+            AbstractTool.this.observing = true;
+            Globals.memoryAndRegistersLock.lock();
+            try {
+                AbstractTool.this.addAsObserver();
+            } finally {
+                Globals.memoryAndRegistersLock.unlock();
+            }
+            this.setText(ConnectButton.disconnectText);
+            this.notifyConnectionListeners();
+        }
+
+        public void disconnect() {
+            Globals.memoryAndRegistersLock.lock();
+            try {
+                AbstractTool.this.deleteAsSubscriber();
+            } finally {
+                Globals.memoryAndRegistersLock.unlock();
+            }
+            AbstractTool.this.observing = false;
+            this.setText(ConnectButton.connectText);
+            this.notifyConnectionListeners();
+        }
+
+        private void notifyConnectionListeners() {
+            for (final var listener : this.connectionListeners) {
+                listener.run(AbstractTool.this.observing);
+            }
+        }
+
+        public boolean isConnected() {
+            return AbstractTool.this.observing;
+        }
+
+        public void addConnectListener(final Callback callback) {
+            this.connectionListeners.add(callback);
+        }
+
+        public interface Callback {
+            void run(boolean isConnected);
+        }
     }
 }

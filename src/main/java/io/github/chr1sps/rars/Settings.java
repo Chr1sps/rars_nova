@@ -7,6 +7,7 @@ import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxStyle;
 import io.github.chr1sps.rars.venus.editors.jeditsyntax.SyntaxUtilities;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -195,6 +196,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         }
     }
 
+    // region String settings
     // STRING SETTINGS. Each array position has associated name.
     /**
      * Current specified exception handler file (a RISCV assembly source file)
@@ -226,6 +228,7 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
      */
     public static final int EDITOR_POPUP_PREFIX_LENGTH = 6;
     // Match the above by position.
+    // endregion String settings
     private static final String[] stringSettingsKeys = {"ExceptionHandler", "TextColumnOrder", "LabelSortState",
             "MemoryConfiguration", "CaretBlinkRate", "EditorTabSize", "EditorPopupPrefixLength"};
 
@@ -378,9 +381,9 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
         SYSTEM("SYS"),
         CUSTOM(null);
 
-        public final String modeKey;
+        public final @Nullable String modeKey;
 
-        ColorMode(final String modeKey) {
+        ColorMode(final @Nullable String modeKey) {
             this.modeKey = modeKey;
         }
     }
@@ -545,9 +548,9 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
             this.preferences.putBoolean(Settings.syntaxStyleItalicSettingsKeys[index], this.syntaxStyleItalicSettingsValues[index]);
             this.preferences.flush();
         } catch (final SecurityException se) {
-            // cannot write to persistent storage for security reasons
+            LOGGER.error("Unable to write to persistent storage for security reasons");
         } catch (final BackingStoreException bse) {
-            // unable to communicate with persistent storage (strange days)
+            LOGGER.error("Unable to communicate with persistent storage.");
         }
     }
 
@@ -1324,22 +1327,23 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
             this.preferences.putBoolean(name, value);
             this.preferences.flush();
         } catch (final SecurityException se) {
-            // cannot write to persistent storage for security reasons
+            LOGGER.error("Unable to write the boolean setting {} to persistent storage for security reasons.", name);
         } catch (final BackingStoreException bse) {
-            // unable to communicate with persistent storage (strange days)
+            LOGGER.error("Unable to communicate with persistent storage when trying to write the \"{}\" bool setting.", name);
         }
     }
 
     // Save the key-value pair in the Properties object and assure it is written to
     // persisent storage.
     private void saveStringSetting(final int index) {
+        var name = Settings.stringSettingsKeys[index];
         try {
-            this.preferences.put(Settings.stringSettingsKeys[index], this.stringSettingsValues[index]);
+            this.preferences.put(name, this.stringSettingsValues[index]);
             this.preferences.flush();
         } catch (final SecurityException se) {
-            // cannot write to persistent storage for security reasons
+            LOGGER.error("Unable to write the {} string setting to persistent storage for security reasons.", name);
         } catch (final BackingStoreException bse) {
-            // unable to communicate with persistent storage (strange days)
+            LOGGER.error("Unable to communicate with persistent storage when trying to write the \"{}\" string setting.", name);
         }
     }
 
@@ -1350,9 +1354,9 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
             this.preferences.put(settingsKeys[index], settingsValues[index]);
             this.preferences.flush();
         } catch (final SecurityException se) {
-            // cannot write to persistent storage for security reasons
+            LOGGER.error("Unable to write the font settings to persistent storage for security reasons.");
         } catch (final BackingStoreException bse) {
-            // unable to communicate with persistent storage (strange days)
+            LOGGER.error("Unable to communicate with persistent storage when trying to write the font settings.");
         }
     }
 
@@ -1363,9 +1367,9 @@ public class Settings extends SubmissionPublisher<SettingsNotice> {
             this.preferences.put(Settings.colorSettingsKeys[index], this.colorSettingsValues[index]);
             this.preferences.flush();
         } catch (final SecurityException se) {
-            // cannot write to persistent storage for security reasons
+            LOGGER.error("Unable to write the color settings to persistent storage for security reasons.");
         } catch (final BackingStoreException bse) {
-            // unable to communicate with persistent storage (strange days)
+            LOGGER.error("Unable to communicate with persistent storage when trying to write the color settings.");
         }
     }
 
