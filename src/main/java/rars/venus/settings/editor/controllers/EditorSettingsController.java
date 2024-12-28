@@ -17,7 +17,8 @@ public final class EditorSettingsController {
     private final @NotNull BaseStyleSettingsController baseStyleSettingsController;
     private final @NotNull SyntaxStyleSettingsController syntaxStyleSettingsController;
     private final @NotNull OtherSettingsController otherSettingsController;
-    private @NotNull SettingsTheme settingsTheme;
+    private final @NotNull PresetsController presetsController;
+    public @NotNull SettingsTheme settingsTheme;
 
 
     public EditorSettingsController(
@@ -34,14 +35,19 @@ public final class EditorSettingsController {
             pickerCardView.fontSettingsView,
             textArea
         );
-        this.baseStyleSettingsController = new BaseStyleSettingsController(
-            pickerCardView.baseStylePicker,
+        this.presetsController = new PresetsController(
+            pickerCardView.presetsView,
             textArea,
-            this.settingsTheme
+            this
+        );
+        this.baseStyleSettingsController = new BaseStyleSettingsController(
+            pickerCardView.baseStyleView,
+            textArea,
+            this
         );
         this.syntaxStyleSettingsController = new SyntaxStyleSettingsController(
-            pickerCardView.syntaxStylePicker,
-            this.settingsTheme,
+            pickerCardView.syntaxStyleView,
+            this,
             textArea
         );
         this.otherSettingsController = new OtherSettingsController(
@@ -69,18 +75,17 @@ public final class EditorSettingsController {
                 switch (selectedNode.getUserObject()) {
                     case final TreeNode.Syntax node -> {
                         syntaxStyleSettingsController.setCurrentKey(node.type);
-                        pickerCardView.showSyntaxStylePicker();
+                        pickerCardView.showSyntaxStyleView();
                     }
                     case final TreeNode node -> {
                         if (node == treePanel.fontSettingsNode) {
-                            pickerCardView.showFontPicker();
+                            pickerCardView.showFontView();
                         } else if (node == treePanel.generalSchemeSettingsNode) {
-                            pickerCardView.showBasePicker();
+                            pickerCardView.showBaseStyleView();
                         } else if (node == treePanel.otherSettingsNode) {
                             pickerCardView.showOtherSettings();
                         } else if (node == treePanel.presetsNode) {
-                            // TODO: Implement presets
-                            pickerCardView.showEmpty();
+                            pickerCardView.showPresets();
                         } else {
                             pickerCardView.showEmpty();
                         }
@@ -97,6 +102,11 @@ public final class EditorSettingsController {
         this.fontSettingsController.resetButtonValues();
         this.baseStyleSettingsController.resetButtonValues();
         this.syntaxStyleSettingsController.resetButtonValues();
+    }
+
+    public void updateThemeControllers() {
+        this.fontSettingsController.resetButtonValues();
+        this.baseStyleSettingsController.resetButtonValues();
     }
 
     private void applySettings() {

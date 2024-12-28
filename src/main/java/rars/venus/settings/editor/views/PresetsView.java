@@ -15,11 +15,12 @@ public final class PresetsView extends JScrollPane {
         this.sections = new ArrayList<>();
         this.mainPanel = new JPanel();
         this.mainPanel.setLayout(new BoxLayout(this.mainPanel, BoxLayout.Y_AXIS));
+        this.setViewportView(this.mainPanel);
     }
 
     public void addSection(final @NotNull PresetSection section) {
         this.sections.add(section);
-        this.add(section);
+        this.mainPanel.add(section);
     }
 
     public static class PresetSection extends JPanel {
@@ -32,9 +33,9 @@ public final class PresetsView extends JScrollPane {
             super();
             this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
             this.button = new JButton("Apply");
-            this.add(new JLabel());
-            this.add(Box.createHorizontalGlue());
             this.add(new JLabel(themeName));
+            this.add(Box.createHorizontalGlue());
+            this.add(this.button);
         }
     }
 }

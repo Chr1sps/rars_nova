@@ -1,7 +1,6 @@
 package rars.venus.settings.editor.controllers;
 
 import org.jetbrains.annotations.NotNull;
-import rars.settings.SettingsTheme;
 import rars.settings.TokenSettingKey;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TokenStyle;
@@ -12,17 +11,17 @@ import java.util.List;
 
 public final class SyntaxStyleSettingsController {
     private final @NotNull SyntaxStyleView view;
-    private final @NotNull SettingsTheme settingsTheme;
+    private final @NotNull EditorSettingsController parentController;
     private final @NotNull TextEditingArea textArea;
     private @NotNull TokenSettingKey currentKey;
 
     public SyntaxStyleSettingsController(
         final @NotNull SyntaxStyleView view,
-        final @NotNull SettingsTheme settingsTheme,
+        final @NotNull EditorSettingsController parentController,
         final @NotNull TextEditingArea textArea
     ) {
         this.view = view;
-        this.settingsTheme = settingsTheme;
+        this.parentController = parentController;
         this.textArea = textArea;
         this.currentKey = TokenSettingKey.COMMENT; // dummy value
         initializeView();
@@ -31,7 +30,7 @@ public final class SyntaxStyleSettingsController {
     private void initializeView() {
         final ChangeListener tokenStyleChangeListener = e -> {
             final var tokenStyle = getTokenStyleFromView();
-            this.settingsTheme.tokenStyles.put(this.currentKey, tokenStyle);
+            this.parentController.settingsTheme.tokenStyles.put(this.currentKey, tokenStyle);
             TokenSettingKey
                 .getTokenTypesForSetting(this.currentKey)
                 .forEach(key -> this.textArea
@@ -68,14 +67,15 @@ public final class SyntaxStyleSettingsController {
     }
 
     private void setView(final @NotNull TokenSettingKey key) {
-        final var tokenStyle = this.settingsTheme.tokenStyles.get(key);
+        final var settingsTheme = this.parentController.settingsTheme;
+        final var tokenStyle = settingsTheme.tokenStyles.get(key);
         final var foreground = tokenStyle.foreground();
         if (foreground != null) {
             this.view.useForeground.setSelected(true);
             this.view.foregroundColorButton.setColor(foreground);
         } else {
             this.view.useForeground.setSelected(false);
-            this.view.foregroundColorButton.setColor(this.settingsTheme.foregroundColor);
+            this.view.foregroundColorButton.setColor(settingsTheme.foregroundColor);
         }
         final var background = tokenStyle.background();
         if (background != null) {
@@ -83,7 +83,7 @@ public final class SyntaxStyleSettingsController {
             this.view.backgroundColorButton.setColor(background);
         } else {
             this.view.useBackground.setSelected(false);
-            this.view.backgroundColorButton.setColor(this.settingsTheme.backgroundColor);
+            this.view.backgroundColorButton.setColor(settingsTheme.backgroundColor);
         }
         this.view.isBold.setSelected(tokenStyle.isBold());
         this.view.isItalic.setSelected(tokenStyle.isItalic());

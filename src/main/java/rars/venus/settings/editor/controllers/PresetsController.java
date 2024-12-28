@@ -6,20 +6,19 @@ import rars.venus.editors.TextEditingArea;
 import rars.venus.settings.editor.views.PresetsView;
 
 public final class PresetsController {
-    private final @NotNull PresetsView view;
-
     public PresetsController(
         final @NotNull PresetsView view,
-        final @NotNull TextEditingArea textEditingArea) {
-        this.view = view;
+        final @NotNull TextEditingArea textArea,
+        final @NotNull EditorSettingsController parentController
+    ) {
         SettingsThemePresets.THEMES.forEach(themeEntry -> {
-            final var themeName = themeEntry.name();
-            final var settingsTheme = themeEntry.theme();
-            final var section = new PresetsView.PresetSection(themeName, settingsTheme);
+            final var section = new PresetsView.PresetSection(themeEntry.name(), themeEntry.theme());
             section.button.addActionListener(e -> {
-                final var theme = settingsTheme.toEditorTheme();
-                textEditingArea.setTheme(theme);
-                // TODO: sync with base style and syntax style settings
+                parentController.settingsTheme = themeEntry.theme().clone();
+                textArea.setTheme(parentController.settingsTheme.toEditorTheme());
+                // We need to update the info regarding the theme in all the theme
+                // related controllers.
+                parentController.updateThemeControllers();
             });
             view.addSection(section);
         });

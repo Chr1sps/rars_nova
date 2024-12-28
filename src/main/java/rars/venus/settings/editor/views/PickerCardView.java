@@ -1,15 +1,25 @@
 package rars.venus.settings.editor.views;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.*;
 import java.awt.*;
 
 public final class PickerCardView extends JPanel {
-    public final BaseStyleView baseStylePicker;
-    public final SyntaxStyleView syntaxStylePicker;
-    public final FontSettingsView fontSettingsView;
-    public final OtherSettingsView otherSettingsView;
-    private final JPanel upperPanel;
-    private final CardLayout upperLayout;
+    public final @NotNull BaseStyleView baseStyleView;
+    public final @NotNull PresetsView presetsView;
+    public final @NotNull SyntaxStyleView syntaxStyleView;
+    public final @NotNull FontSettingsView fontSettingsView;
+    public final @NotNull OtherSettingsView otherSettingsView;
+    private final @NotNull JPanel upperPanel;
+    private final @NotNull CardLayout upperLayout;
+    
+    private static final @NotNull  String EMPTY = "empty",
+            FONT = "font",
+            PRESETS = "presets",
+            BASE = "base",
+            SYNTAX = "syntax",
+            OTHER = "other";
 
     public PickerCardView() {
         super();
@@ -21,29 +31,31 @@ public final class PickerCardView extends JPanel {
         setMinimumSize(new Dimension(50, 50));
 
         final var emptyPanel = new JPanel();
-        baseStylePicker = new BaseStyleView();
-        syntaxStylePicker = new SyntaxStyleView();
+        baseStyleView = new BaseStyleView();
+        presetsView = new PresetsView();
+        syntaxStyleView = new SyntaxStyleView();
         fontSettingsView = new FontSettingsView();
         otherSettingsView = new OtherSettingsView();
 
-        upperPanel.add(emptyPanel, "empty");
-        upperPanel.add(fontSettingsView, "font");
-        upperPanel.add(baseStylePicker, "base");
-        upperPanel.add(syntaxStylePicker, "syntax");
-        upperPanel.add(otherSettingsView, "other");
+        upperPanel.add(emptyPanel, EMPTY);
+        upperPanel.add(fontSettingsView, FONT);
+        upperPanel.add(presetsView, PRESETS);
+        upperPanel.add(baseStyleView, BASE);
+        upperPanel.add(syntaxStyleView, SYNTAX);
+        upperPanel.add(otherSettingsView, OTHER);
 
         this.add(upperPanel, BorderLayout.NORTH);
     }
 
-    public void showBasePicker() {
+    public void showBaseStyleView() {
         upperLayout.show(upperPanel, "base");
     }
 
-    public void showFontPicker() {
+    public void showFontView() {
         upperLayout.show(upperPanel, "font");
     }
 
-    public void showSyntaxStylePicker() {
+    public void showSyntaxStyleView() {
         upperLayout.show(upperPanel, "syntax");
     }
 
@@ -53,5 +65,9 @@ public final class PickerCardView extends JPanel {
 
     public void showOtherSettings() {
         upperLayout.show(upperPanel, "other");
+    }
+    
+    public void showPresets() {
+        upperLayout.show(upperPanel, "presets");
     }
 }
