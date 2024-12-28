@@ -13,8 +13,8 @@ import org.fife.ui.rtextarea.SearchEngine;
 import org.jetbrains.annotations.NotNull;
 import rars.riscv.lang.lexing.RVTokenType;
 import rars.util.Pair;
+import rars.venus.editors.EditorTheme;
 import rars.venus.editors.TextEditingArea;
-import rars.venus.editors.Theme;
 import rars.venus.editors.TokenStyle;
 
 import javax.swing.*;
@@ -28,8 +28,8 @@ import java.util.Map;
 import static rars.settings.FontSettings.FONT_SETTINGS;
 
 public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
-    private static final @NotNull Logger LOGGER = LogManager.getLogger();
     public static final @NotNull String SYNTAX_STYLE_RISCV = "text/riscv";
+    private static final @NotNull Logger LOGGER = LogManager.getLogger();
     private static final Map<TextAttribute, Object> textAttributes = Map.of(
         TextAttribute.KERNING, TextAttribute.KERNING_ON
     );
@@ -43,9 +43,9 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private final RSyntaxTextArea textArea;
     private final RTextScrollPane scrollPane;
     private final Gutter gutter;
-    private @NotNull Theme theme;
+    private @NotNull EditorTheme theme;
 
-    public RSyntaxTextAreaBasedEditor(final @NotNull Theme theme) {
+    public RSyntaxTextAreaBasedEditor(final @NotNull EditorTheme theme) {
         textArea = new RSyntaxTextArea();
         scrollPane = new RTextScrollPane(textArea);
         gutter = scrollPane.getGutter();
@@ -119,8 +119,15 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public void selectAll() {
-        textArea.selectAll();
+    public void selectLine(final int lineNumber) {
+        try {
+            final var start = textArea.getLineStartOffset(lineNumber);
+            final int end = textArea.getLineEndOffset(lineNumber);
+            textArea.select(start, end);
+            textArea.grabFocus();
+        } catch (final BadLocationException e) {
+            LOGGER.warn("Failed to select line", e);
+        }
     }
 
     @Override
@@ -201,11 +208,6 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public void revalidate() {
-        textArea.revalidate();
-    }
-
-    @Override
     public void setSourceCode(final String code, final boolean editable) {
         textArea.setText(code);
         textArea.setEditable(editable);
@@ -256,12 +258,12 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public @NotNull Theme getTheme() {
+    public @NotNull EditorTheme getTheme() {
         return theme;
     }
 
     @Override
-    public void setTheme(final @NotNull Theme theme) {
+    public void setTheme(final @NotNull EditorTheme theme) {
         this.theme = theme;
         this.textArea.setBackground(theme.backgroundColor);
         this.textArea.setForeground(theme.foregroundColor);
@@ -274,6 +276,12 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         this.gutter.setFoldIndicatorArmedForeground(theme.foregroundColor);
         this.gutter.setLineNumberColor(theme.foregroundColor);
         UIManager.put("ToolTip.background", theme.backgroundColor);
+        this.applyColorScheme(theme.tokenStyles);
+    }
+
+    @Override
+    public void setTokenStyle(@NotNull final RVTokenType type, @NotNull final TokenStyle style) {
+        this.theme.tokenStyles.put(type, style);
         this.applyColorScheme(theme.tokenStyles);
     }
 

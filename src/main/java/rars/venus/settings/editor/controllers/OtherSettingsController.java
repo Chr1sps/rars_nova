@@ -1,21 +1,22 @@
 package rars.venus.settings.editor.controllers;
 
 import org.jetbrains.annotations.NotNull;
+import rars.venus.editors.TextEditingArea;
 import rars.venus.settings.editor.views.OtherSettingsView;
 
 import static rars.settings.Settings.OTHER_SETTINGS;
 
 public final class OtherSettingsController {
     private final @NotNull OtherSettingsView view;
-    private final @NotNull EditorSettingsController parentController;
+    private final @NotNull TextEditingArea textArea;
     private int caretBlinkRate, editorTabSize;
 
     public OtherSettingsController(
         final @NotNull OtherSettingsView view,
-        final @NotNull EditorSettingsController parentController
+        final @NotNull TextEditingArea textArea
     ) {
         this.view = view;
-        this.parentController = parentController;
+        this.textArea = textArea;
         loadValuesFromSettings();
         initializeBlinkRateSpinner();
         initializeTabSizeSpinner();
@@ -30,7 +31,7 @@ public final class OtherSettingsController {
         this.view.blinkRateSpinner.setValue(this.caretBlinkRate);
         this.view.blinkRateSpinner.addChangeListener(e -> {
             this.caretBlinkRate = (int) this.view.blinkRateSpinner.getValue();
-            this.parentController.editorSettingsView.panelWithTextAreaView.setCaretBlinkRate(this.caretBlinkRate);
+            this.textArea.setCaretBlinkRate(this.caretBlinkRate);
         });
     }
 
@@ -38,7 +39,7 @@ public final class OtherSettingsController {
         this.view.tabSizeSpinner.setValue(this.editorTabSize);
         this.view.tabSizeSpinner.addChangeListener(e -> {
             this.editorTabSize = (int) this.view.tabSizeSpinner.getValue();
-            this.parentController.editorSettingsView.panelWithTextAreaView.setTextAreaTabSize(this.editorTabSize);
+            this.textArea.setTabSize(this.editorTabSize);
         });
     }
 

@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson
  * @version August 2005
  */
-public class RegistersPane extends JTabbedPane {
+public final class RegistersPane extends JTabbedPane {
     private final RegistersWindow regsTab;
     private final FloatingPointWindow fpTab;
     private final ControlAndStatusWindow csrTab;

@@ -8,10 +8,7 @@ import rars.venus.NumberDisplayBaseChooser;
 import static rars.settings.Settings.BOOL_SETTINGS;
 
 
-/**
- * <p>ControlAndStatusWindow class.</p>
- */
-public class ControlAndStatusWindow extends RegisterBlockWindow {
+public final class ControlAndStatusWindow extends RegisterBlockWindow {
     /**
      * The tips to show when hovering over the names of the registers
      */

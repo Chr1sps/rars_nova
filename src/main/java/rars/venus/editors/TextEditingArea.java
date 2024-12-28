@@ -1,6 +1,7 @@
 package rars.venus.editors;
 
 import org.jetbrains.annotations.NotNull;
+import rars.riscv.lang.lexing.RVTokenType;
 import rars.util.Pair;
 
 import javax.swing.text.Caret;
@@ -54,7 +55,7 @@ public interface TextEditingArea {
 
     void select(int selectionStart, int selectionEnd);
 
-    void selectAll();
+    void selectLine(int lineNumber);
 
     String getText();
 
@@ -81,12 +82,10 @@ public interface TextEditingArea {
     void setLineHighlightColor(Color c);
 
     @NotNull Caret getCaret();
-    
+
     void setEnabled(boolean enabled);
 
     void redo();
-
-    void revalidate();
 
     void setSourceCode(String code, boolean editable);
 
@@ -101,16 +100,18 @@ public interface TextEditingArea {
     void setTabSize(int chars);
 
     @NotNull Pair<Integer, Integer> getCaretPosition();
-    
+
     Component getOuterComponent();
 
     boolean canUndo();
 
     boolean canRedo();
 
-    @NotNull Theme getTheme();
+    @NotNull EditorTheme getTheme();
 
-    void setTheme(final @NotNull Theme theme);
+    void setTokenStyle(final @NotNull RVTokenType type, final @NotNull TokenStyle style);
+    
+    void setTheme(final @NotNull EditorTheme theme);
 
     // Used by Find/Replace
     enum FindReplaceResult {

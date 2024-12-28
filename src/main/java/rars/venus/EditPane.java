@@ -12,9 +12,6 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
 
 import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
 import static rars.settings.FontSettings.FONT_SETTINGS;
@@ -60,28 +57,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Bumgarner
  */
-public class EditPane extends JPanel {
+public final class EditPane extends JPanel {
 
-    /**
-     * Form string with source code line numbers.
-     * Resulting string is HTML, for which JLabel will happily honor <br>
-     * to do
-     * multiline label (it ignores '\n'). The line number list is a JLabel with
-     * one line number per line.
-     */
-    private static final String spaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-    private static final char newline = '\n';
-    private final TextEditingArea sourceCode;
-    private final VenusUI mainUI;
-    private final JLabel caretPositionLabel;
-    private final FileStatus fileStatus;
+    private final @NotNull TextEditingArea sourceCode;
+    private final @NotNull VenusUI mainUI;
+    private final @NotNull JLabel caretPositionLabel;
+    private final @NotNull FileStatus fileStatus;
 
     /**
      * Constructor for the EditPane class.
      *
      * @param appFrame a {@link VenusUI} object
      */
-    public EditPane(final VenusUI appFrame) {
+    public EditPane(final @NotNull VenusUI appFrame) {
         super(new BorderLayout());
         this.mainUI = appFrame;
         // user.dir, user's current working directory, is guaranteed to have a second
@@ -90,9 +78,10 @@ public class EditPane extends JPanel {
 
         this.fileStatus = new FileStatus();
 
-        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.currentTheme.toTheme());
+        this.sourceCode =
+            TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme());
         this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-        EDITOR_THEME_SETTINGS.addChangeListener(() -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toTheme()), true);
+        EDITOR_THEME_SETTINGS.addChangeListener(() -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme()), true);
         FONT_SETTINGS.addChangeListener(() -> this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont()), true);
         BOOL_SETTINGS.addChangeListener(() -> this.sourceCode.setLineHighlightEnabled(
             BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
@@ -184,29 +173,6 @@ public class EditPane extends JPanel {
     }
 
     /**
-     * <p>getLineNumbersList.</p>
-     *
-     * @param doc a {@link javax.swing.text.Document} object
-     * @return a {@link java.lang.String} object
-     */
-    public static String getLineNumbersList(final javax.swing.text.Document doc) {
-        final StringBuilder lineNumberList = new StringBuilder("<html>");
-        final int lineCount = doc.getDefaultRootElement().getElementCount(); // this.getSourceLineCount();
-        final int digits = Integer.toString(lineCount).length();
-        for (int i = 1; i <= lineCount; i++) {
-            final String lineStr = Integer.toString(i);
-            final int leadingSpaces = digits - lineStr.length();
-            if (leadingSpaces == 0) {
-                lineNumberList.append(lineStr).append("&nbsp;<br>");
-            } else {
-                lineNumberList.append(EditPane.spaces, 0, leadingSpaces * 6).append(lineStr).append("&nbsp;<br>");
-            }
-        }
-        lineNumberList.append("<br></html>");
-        return lineNumberList.toString();
-    }
-
-    /**
      * For initalizing the source code when opening an ASM file
      *
      * @param s        String containing text
@@ -226,33 +192,6 @@ public class EditPane extends JPanel {
      */
     public void discardAllUndoableEdits() {
         this.sourceCode.discardAllUndoableEdits();
-    }
-
-    /**
-     * Calculate and return number of lines in source code text.
-     * Do this by counting newline characters then adding one if last line does
-     * not end with newline character.
-     *
-     * @return a int
-     */
-
-    /*
-     * IMPLEMENTATION NOTE:
-     * Tried repeatedly to use StringTokenizer to count lines but got bad results
-     * on empty lines (consecutive delimiters) even when returning delimiter as
-     * token.
-     * BufferedReader on StringReader seems to work better.
-     */
-    public int getSourceLineCount() {
-        final BufferedReader bufStringReader = new BufferedReader(new StringReader(this.sourceCode.getText()));
-        int lineNums = 0;
-        try {
-            while (bufStringReader.readLine() != null) {
-                lineNums++;
-            }
-        } catch (final IOException ignored) {
-        }
-        return lineNums;
     }
 
     /**
@@ -399,94 +338,16 @@ public class EditPane extends JPanel {
     }
 
     /**
-     * Given byte stream position in text being edited, calculate its column and
-     * line
-     * number coordinates.
-     *
-     * @param position position of character
-     * @return position Its column and line number coordinate as a Point.
-     */
-    public Point convertStreamPositionToLineColumn(final int position) {
-        final String textStream = this.sourceCode.getText();
-        int line = 1;
-        int column = 1;
-        for (int i = 0; i < position; i++) {
-            if (textStream.charAt(i) == EditPane.newline) {
-                line++;
-                column = 1;
-            } else {
-                column++;
-            }
-        }
-        return new Point(column, line);
-    }
-
-    /**
-     * Given line and column (position in the line) numbers, calculate
-     * its byte stream position in text being edited.
-     *
-     * @param line   Line number in file (starts with 1)
-     * @param column Position within that line (starts with 1)
-     * @return corresponding stream position. Returns -1 if there is no
-     * corresponding position.
-     */
-    public int convertLineColumnToStreamPosition(final int line, final int column) {
-        final String textStream = this.sourceCode.getText();
-        final int textLength = textStream.length();
-        int textLine = 1;
-        int textColumn = 1;
-        for (int i = 0; i < textLength; i++) {
-            if (textLine == line && textColumn == column) {
-                return i;
-            }
-            if (textStream.charAt(i) == EditPane.newline) {
-                textLine++;
-                textColumn = 1;
-            } else {
-                textColumn++;
-            }
-        }
-        return -1;
-    }
-
-    /**
      * Select the specified editor text line. Lines are numbered starting with 1,
      * consistent
      * with line numbers displayed by the editor.
      *
-     * @param line The desired line number of this TextPane's text. Numbering starts
-     *             at 1, and
+     * @param line The desired line number of this TextPane's text. Numbering
+     *             starts at 1, and
      *             nothing will happen if the parameter second is less than 1
      */
     public void selectLine(final int line) {
-        if (line > 0) {
-            final int lineStartPosition = this.convertLineColumnToStreamPosition(line, 1);
-            int lineEndPosition = this.convertLineColumnToStreamPosition(line + 1, 1) - 1;
-            if (lineEndPosition < 0) { // DPS 19 Sept 2012. Happens if "line" is last line of file.
-
-                lineEndPosition = this.sourceCode.getText().length() - 1;
-            }
-            if (lineStartPosition >= 0) {
-                this.sourceCode.select(lineStartPosition, lineEndPosition);
-            }
-        }
-    }
-
-    /**
-     * Select the specified editor text line. Lines are numbered starting with 1,
-     * consistent
-     * with line numbers displayed by the editor.
-     *
-     * @param line   The desired line number of this TextPane's text. Numbering
-     *               starts at 1, and
-     *               nothing will happen if the parameter second is less than 1
-     * @param column Desired column at which to place the cursor.
-     */
-    public void selectLine(final int line, final int column) {
-        this.selectLine(line);
-        // Made one attempt at setting cursor; didn't work but here's the attempt
-        // (imagine using it in the one-parameter overloaded method above)
-        // sourceCode.setCaretPosition(lineStartPosition+column-1);
+        this.sourceCode.selectLine(line - 1);
     }
 
     /**
@@ -498,7 +359,7 @@ public class EditPane extends JPanel {
      * @param caseSensitive true if search is to be case-sensitive, false otherwise
      * @return TEXT_FOUND or TEXT_NOT_FOUND, depending on the result.
      */
-    public FindReplaceResult doFindText(final String find, final boolean caseSensitive) {
+    public @NotNull FindReplaceResult doFindText(final String find, final boolean caseSensitive) {
         return this.sourceCode.doFindText(find, caseSensitive);
     }
 
@@ -523,7 +384,7 @@ public class EditPane extends JPanel {
      * reaplacement is
      * successful and there is at least one additional match.
      */
-    public FindReplaceResult doReplace(final String find, final String replace, final boolean caseSensitive) {
+    public @NotNull FindReplaceResult doReplace(final String find, final String replace, final boolean caseSensitive) {
         return this.sourceCode.doReplace(find, replace, caseSensitive);
     }
 

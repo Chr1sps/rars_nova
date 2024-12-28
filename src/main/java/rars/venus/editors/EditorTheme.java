@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class Theme {
+public final class EditorTheme {
     public @NotNull HashMap<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles;
     public @NotNull Color backgroundColor;
     public @NotNull Color foregroundColor;
@@ -16,7 +16,7 @@ public final class Theme {
     public @NotNull Color caretColor;
     public @NotNull Color selectionColor;
 
-    public Theme(
+    public EditorTheme(
         final @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles,
         final @NotNull Color backgroundColor,
         final @NotNull Color foregroundColor,

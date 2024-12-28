@@ -17,7 +17,7 @@ public final class PresetsController {
             final var settingsTheme = themeEntry.theme();
             final var section = new PresetsView.PresetSection(themeName, settingsTheme);
             section.button.addActionListener(e -> {
-                final var theme = settingsTheme.toTheme();
+                final var theme = settingsTheme.toEditorTheme();
                 textEditingArea.setTheme(theme);
                 // TODO: sync with base style and syntax style settings
             });

@@ -19,9 +19,9 @@ public final class EditorSettingsDialog extends JDialog {
         super(owner, title, modality);
         final var pickerCardView = new PickerCardView();
         final var panelWithTextAreaView = new PanelWithTextAreaView(pickerCardView);
-        final var treePanel = new TreePanel(pickerCardView);
+        final var treePanel = new TreePanel();
         final var mainPanel = new EditorSettingsPanel(treePanel, panelWithTextAreaView);
-        final var topLevelController = new EditorSettingsController(mainPanel, this);
+        new EditorSettingsController(mainPanel, this, treePanel);
         this.setContentPane(mainPanel);
         this.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         this.pack();

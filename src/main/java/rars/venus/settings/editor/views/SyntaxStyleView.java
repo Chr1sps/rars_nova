@@ -1,7 +1,6 @@
 package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
-import rars.venus.editors.TokenStyle;
 import rars.venus.settings.editor.ColorPickerButton;
 import rars.venus.settings.editor.OptionSection;
 
@@ -65,37 +64,5 @@ public final class SyntaxStyleView extends JPanel {
             panel.add(Box.createHorizontalGlue());
         }
         return panel;
-    }
-
-    public void setFromTokenStyle(final @NotNull TokenStyle style) {
-        final var foreground = style.foreground();
-        if (foreground != null) {
-            this.useForeground.setSelected(true);
-            this.foregroundColorButton.setColor(foreground);
-        } else {
-            this.useForeground.setSelected(false);
-        }
-
-        final var background = style.background();
-        if (background != null) {
-            this.useBackground.setSelected(true);
-            this.backgroundColorButton.setColor(background);
-        } else {
-            this.useBackground.setSelected(false);
-        }
-
-        this.isBold.setSelected(style.isBold());
-        this.isItalic.setSelected(style.isItalic());
-        this.isUnderline.setSelected(style.isUnderline());
-    }
-
-    public @NotNull TokenStyle getTokenStyle() {
-        return new TokenStyle(
-            this.useForeground.isSelected() ? this.foregroundColorButton.getColor() : null,
-            this.useBackground.isSelected() ? this.backgroundColorButton.getColor() : null,
-            this.isBold.isSelected(),
-            this.isItalic.isSelected(),
-            this.isUnderline.isSelected()
-        );
     }
 }

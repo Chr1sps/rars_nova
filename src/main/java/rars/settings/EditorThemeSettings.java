@@ -47,7 +47,8 @@ public final class EditorThemeSettings extends ListenableBase {
 
     private EditorThemeSettings(final @NotNull Preferences preferences) {
         this.preferences = preferences;
-        this.currentTheme = this.backupTheme = loadThemeFromPreferences();
+        this.currentTheme = loadThemeFromPreferences();
+        this.backupTheme = this.currentTheme.clone();
     }
 
     // region Preferences prefix methods
@@ -154,7 +155,9 @@ public final class EditorThemeSettings extends ListenableBase {
         return new SettingsTheme(background, foreground, lineHighlight, caret, selection, tokenStyles);
     }
 
-    private @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> loadTokenStylesFromPreferences(final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> defaultColorScheme) {
+    private @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> loadTokenStylesFromPreferences(
+        final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> defaultColorScheme
+    ) {
         final var styleMap = new HashMap<@NotNull TokenSettingKey, @NotNull TokenStyle>();
         for (final var type : TokenSettingKey.values()) {
             styleMap.put(type, loadTokenStyleFromPreferences(type, defaultColorScheme.get(type)));

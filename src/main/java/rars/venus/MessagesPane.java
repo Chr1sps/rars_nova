@@ -156,7 +156,7 @@ public final class MessagesPane extends JTabbedPane {
                                 fileName = text.substring(fileNameStart, fileNameEnd).trim();
                             }
                             if (!fileName.isEmpty()) {
-                                MessagesPane.selectEditorTextLine(fileName, line, column);
+                                MessagesPane.selectEditorTextLine(fileName, line);
                                 MessagesPane.this.selectErrorMessage(fileName, line, column);
                             }
                         }
@@ -203,9 +203,8 @@ public final class MessagesPane extends JTabbedPane {
      *
      * @param fileName A String containing the file path name.
      * @param line     Line number for error message
-     * @param column   Column number for error message
      */
-    public static void selectEditorTextLine(final String fileName, final int line, final int column) {
+    public static void selectEditorTextLine(final String fileName, final int line) {
         final EditTabbedPane editTabbedPane = Globals.gui.mainPane.editTabbedPane;
         final EditPane editPane;
         EditPane currentPane = null;
@@ -224,7 +223,7 @@ public final class MessagesPane extends JTabbedPane {
         // does not properly with the JEditTextArea editor in this situation (it works
         // fine for the original generic editor). So we just won't do it. DPS 9-Aug-2010
         if (editPane != null) {
-            currentPane.selectLine(line, column);
+            currentPane.selectLine(line);
         }
     }
 

@@ -7,11 +7,8 @@ import rars.venus.NumberDisplayBaseChooser;
 
 import static rars.settings.Settings.BOOL_SETTINGS;
 
-/**
- * <p>FloatingPointWindow class.</p>
- */
-public class FloatingPointWindow extends RegisterBlockWindow {
-    /*
+public final class FloatingPointWindow extends RegisterBlockWindow {
+    /**
      * The tips to show when hovering over the names of the registers
      */
     private static final String[] regToolTips = {

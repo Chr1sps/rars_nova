@@ -222,8 +222,8 @@ public class RunAssembleAction extends GuiAction {
                         // test.
                         // DPS 9-Aug-2010
                         if (e != null) {
-                            MessagesPane.selectEditorTextLine(em.getFilename(), em.getLine(),
-                                em.getPosition());
+                            MessagesPane.selectEditorTextLine(em.getFilename(), em.getLine()
+                            );
                         }
                         break;
                     }

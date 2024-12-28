@@ -2,7 +2,7 @@ package rars.settings;
 
 import org.jetbrains.annotations.NotNull;
 import rars.riscv.lang.lexing.RVTokenType;
-import rars.venus.editors.Theme;
+import rars.venus.editors.EditorTheme;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
@@ -12,14 +12,14 @@ import java.util.Map;
 
 import static rars.settings.SettingsThemePresets.LIGHT_THEME;
 
-public final class SettingsTheme {
+public final class SettingsTheme implements Cloneable {
     public static @NotNull SettingsTheme DEFAULT_THEME = LIGHT_THEME;
     public @NotNull Color foregroundColor;
     public @NotNull Color backgroundColor;
     public @NotNull Color lineHighlightColor;
     public @NotNull Color selectionColor;
     public @NotNull Color caretColor;
-    public @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> tokenStyles;
+    public @NotNull HashMap<@NotNull TokenSettingKey, @NotNull TokenStyle> tokenStyles;
 
     public SettingsTheme(
         final @NotNull Color backgroundColor,
@@ -47,14 +47,14 @@ public final class SettingsTheme {
         return result;
     }
 
-    private static @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> getFilledMap(final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> baseMap) {
+    private static @NotNull HashMap<@NotNull TokenSettingKey, @NotNull TokenStyle> getFilledMap(final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> baseMap) {
         final var result = new HashMap<>(baseMap);
         Arrays.stream(TokenSettingKey.values()).forEach(key -> result.putIfAbsent(key, TokenStyle.DEFAULT));
         return result;
     }
 
-    public @NotNull Theme toTheme() {
-        return new Theme(
+    public @NotNull EditorTheme toEditorTheme() {
+        return new EditorTheme(
             convertSettingsToThemeTokenStyles(this.tokenStyles),
             this.backgroundColor,
             this.foregroundColor,
@@ -62,5 +62,25 @@ public final class SettingsTheme {
             this.caretColor,
             this.selectionColor
         );
+    }
+
+    @Override
+    public @NotNull SettingsTheme clone() {
+        final SettingsTheme clone;
+        try {
+            clone = (SettingsTheme) super.clone();
+        } catch (final CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+
+        clone.backgroundColor = new Color(this.backgroundColor.getRGB(), false);
+        clone.foregroundColor = new Color(this.foregroundColor.getRGB(), false);
+        clone.lineHighlightColor = new Color(this.lineHighlightColor.getRGB(), false);
+        clone.caretColor = new Color(this.caretColor.getRGB(), false);
+        clone.selectionColor = new Color(this.selectionColor.getRGB(), false);
+
+        clone.tokenStyles = new HashMap<>(this.tokenStyles);
+
+        return clone;
     }
 }

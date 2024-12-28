@@ -3,7 +3,6 @@ package rars.venus.settings.editor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import rars.settings.TokenSettingKey;
-import rars.venus.settings.editor.views.PickerCardView;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -13,55 +12,28 @@ import java.awt.*;
 import java.util.Arrays;
 
 public final class TreePanel extends JScrollPane {
-    private final TreeNode fontSettingsNode, generalSchemeSettingsNode, otherSettingsNode, presetsNode;
+    public final @NotNull TreeNode fontSettingsNode, generalSchemeSettingsNode, otherSettingsNode, presetsNode;
 
-    public TreePanel(final @NotNull PickerCardView pickerCardView) {
+    public final @NotNull JTree tree;
+
+    public TreePanel() {
         super();
         this.fontSettingsNode = new TreeNode("Font");
         this.generalSchemeSettingsNode = new TreeNode("General");
         this.otherSettingsNode = new TreeNode("Other settings");
         this.presetsNode = new TreeNode("Presets");
-        final var tree = buildTree(fontSettingsNode, presetsNode, generalSchemeSettingsNode, otherSettingsNode);
-        this.setViewportView(tree);
+        this.tree = buildTree(fontSettingsNode, presetsNode, generalSchemeSettingsNode, otherSettingsNode);
+        this.setViewportView(this.tree);
 
-        final var renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
+        final var renderer = (DefaultTreeCellRenderer) this.tree.getCellRenderer();
         renderer.setLeafIcon(null); // Remove icons for leaf nodes
         renderer.setClosedIcon(null);
         renderer.setOpenIcon(null);
 
-        tree.addTreeSelectionListener(event -> {
-            final var selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-            if (selectedNode == null) {
-                return;
-            }
-            switch (selectedNode.getUserObject()) {
-                case final TreeNode.Syntax node -> {
-                    final var syntaxStylePicker = pickerCardView.syntaxStylePicker;
-//                    pickerCardView.getSyntaxStylePicker().setFromTokenStyle();
-                    pickerCardView.showSyntaxStylePicker();
-                }
-                case final TreeNode node -> {
-                    if (node == fontSettingsNode) {
-                        pickerCardView.showFontPicker();
-                    } else if (node == generalSchemeSettingsNode) {
-                        pickerCardView.showBasePicker();
-                    } else if (node == otherSettingsNode) {
-                        pickerCardView.showOtherSettings();
-                    } else if (node == presetsNode) {
-                        // TODO: Implement presets
-                    } else {
-                        pickerCardView.showEmpty();
-                    }
-                }
-                default -> {
-                }
-            }
-        });
-
         this.setPreferredSize(new Dimension(200, 400));
     }
 
-    private static JTree buildTree(
+    private static @NotNull JTree buildTree(
         final @NotNull TreeNode fontSettingsNode,
         final @NotNull TreeNode presetsNode,
         final @NotNull TreeNode generalSchemeSettingsNode,
