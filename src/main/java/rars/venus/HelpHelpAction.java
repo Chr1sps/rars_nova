@@ -1,5 +1,6 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.assembler.Directive;
 import rars.riscv.*;
@@ -52,25 +53,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action for the Help -> Help menu item
  */
-public class HelpHelpAction extends GuiAction {
+public final class HelpHelpAction extends GuiAction {
     /**
      * Separates Instruction name descriptor from detailed (operation) description
      * in help string.
      */
-    private final VenusUI mainUI;
+    private final @NotNull VenusUI mainUI;
 
-    /**
-     * <p>Constructor for HelpHelpAction.</p>
-     *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
-     * @param gui      a {@link VenusUI} object
-     */
     public HelpHelpAction(final String name, final Icon icon, final String descrip,
-                          final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+                          final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainUI = gui;
     }
@@ -85,37 +76,42 @@ public class HelpHelpAction extends GuiAction {
         final String blanks = "            "; // 12 blanks
         for (final Directive direct : Directive.getDirectiveList()) {
             exampleList.add(direct.toString()
-                    + blanks.substring(0, Math.max(0, blanks.length() - direct.toString().length()))
-                    + direct.getDescription());
+                + blanks.substring(0, Math.max(0, blanks.length() - direct.toString().length()))
+                + direct.getDescription());
         }
         Collections.sort(exampleList);
         final JList<String> examples = new JList<>(exampleList);
         final JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         examples.setFont(FONT_SETTINGS.getCurrentFont());
         FONT_SETTINGS.addChangeListener(() -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
         return scrollPane;
     }
 
-    private static JScrollPane createInstructionHelpPane(final Class<? extends Instruction> instructionClass) {
+    private static @NotNull JScrollPane createInstructionHelpPane(final Class<? extends Instruction> instructionClass) {
+        final var exampleList = createExampleList(instructionClass);
+        Collections.sort(exampleList);
+        final JList<String> examples = new JList<>(exampleList);
+        final JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        examples.setFont(FONT_SETTINGS.getCurrentFont());
+        FONT_SETTINGS.addChangeListener(() -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
+        examples.setCellRenderer(new MyCellRenderer());
+        return scrollPane;
+    }
+
+    private static @NotNull Vector<String> createExampleList(final Class<? extends Instruction> instructionClass) {
         final var instructionList = Instructions.INSTRUCTIONS_ALL;
         final Vector<String> exampleList = new Vector<>(instructionList.size());
         final String blanks = "                        "; // 24 blanks
         for (final Instruction instr : instructionList) {
             if (instructionClass.isInstance(instr)) {
                 exampleList.add(instr.getExampleFormat()
-                        + blanks.substring(0, Math.max(0, blanks.length() - instr.getExampleFormat().length()))
-                        + instr.getDescription());
+                    + blanks.substring(0, Math.max(0, blanks.length() - instr.getExampleFormat().length()))
+                    + instr.getDescription());
             }
         }
-        Collections.sort(exampleList);
-        final JList<String> examples = new JList<>(exampleList);
-        final JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        examples.setFont(FONT_SETTINGS.getCurrentFont());
-        FONT_SETTINGS.addChangeListener(() -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
-        examples.setCellRenderer(new MyCellRenderer());
-        return scrollPane;
+        return exampleList;
     }
 
     private static StringBuilder convertToHTMLTable(final String[][] data, final String[] headers) {
@@ -154,20 +150,20 @@ public class HelpHelpAction extends GuiAction {
         final JDialog dialog = new JDialog(this.mainUI, "RARS " + Globals.version + " Help");
         // assure the dialog goes away if user clicks the X
         dialog.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent e) {
-                        dialog.setVisible(false);
-                        dialog.dispose();
-                    }
-                });
+            new WindowAdapter() {
+                @Override
+                public void windowClosing(final WindowEvent e) {
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                }
+            });
         // Add a "close" button to the non-modal help dialog.
         final JButton closeButton = new JButton("Close");
         closeButton.addActionListener(
-                e1 -> {
-                    dialog.setVisible(false);
-                    dialog.dispose();
-                });
+            e1 -> {
+                dialog.setVisible(false);
+                dialog.dispose();
+            });
         final JPanel closePanel = new JPanel();
         closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
         closePanel.add(Box.createHorizontalGlue());
@@ -199,17 +195,17 @@ public class HelpHelpAction extends GuiAction {
             helpDisplay.setEditable(false);
             helpDisplay.setCaretPosition(0); // assure top of document displayed
             helpScrollPane = new JScrollPane(helpDisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             helpDisplay.addHyperlinkListener(new HelpHyperlinkListener());
         } catch (final Exception ie) {
             helpScrollPane = new JScrollPane(
-                    new JLabel("Error (" + ie + "): " + filename + " contents could not be loaded."));
+                new JLabel("Error (" + ie + "): " + filename + " contents could not be loaded."));
         }
         helpPanel.add(helpScrollPane);
         return helpPanel;
     }
 
-    /////////////// Methods to construct MIPS help tabs from internal MARS objects
+    /// //////////// Methods to construct MIPS help tabs from internal MARS objects
 
     // Set up the copyright notice for display.
     private JPanel createCopyrightInfoPanel() {
@@ -222,10 +218,10 @@ public class HelpHelpAction extends GuiAction {
             copyrightDisplay.setEditable(false);
             copyrightDisplay.setCaretPosition(0); // assure top of document displayed
             copyrightScrollPane = new JScrollPane(copyrightDisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         } catch (final Exception ioe) {
             copyrightScrollPane = new JScrollPane(
-                    new JLabel("Error: license contents could not be loaded."));
+                new JLabel("Error: license contents could not be loaded."));
         }
         copyrightInfo.add(copyrightScrollPane);
         return copyrightInfo;
@@ -252,81 +248,87 @@ public class HelpHelpAction extends GuiAction {
         final String helpRemarksColor = "CCFF99";
         // Introductory remarks go at the top as a label
         // TODO: update this to consider 12 and 20 bit numbers rather than 16
-        final String helpRemarks = "<html><center><table bgcolor=\"#" + helpRemarksColor + "\" border=0 cellpadding=0>" + // width="+this.getSize().getWidth()+">"+
-                "<tr>" +
-                "<th colspan=2><b><i><font size=+1>&nbsp;&nbsp;Operand Key for Example Instructions&nbsp;&nbsp;</font></i></b></th>"
-                +
-                "</tr>" +
-                "<tr>" +
-                "<td><tt>label, target</tt></td><td>any textual label</td>" +
-                "</tr><tr>" +
-                "<td><tt>t1, t2, t3</tt></td><td>any integer register</td>" +
-                "</tr><tr>" +
-                "<td><tt>f2, f4, f6</tt></td><td><i>even-numbered</i> floating point register</td>" +
-                "</tr><tr>" +
-                "<td><tt>f0, f1, f3</tt></td><td><i>any</i> floating point register</td>" +
-                "</tr><tr>" +
-                "<td><tt>10</tt></td><td>unsigned 5-bit integer (0 to 31)</td>" +
-                "</tr><tr>" +
-                "<td><tt>-100</tt></td><td>signed 16-bit integer (-32768 to 32767)</td>" +
-                "</tr><tr>" +
-                "<td><tt>100</tt></td><td>unsigned 16-bit integer (0 to 65535)</td>" +
-                "</tr><tr>" +
-                "<td><tt>100000</tt></td><td>signed 32-bit integer (-2147483648 to 2147483647)</td>" +
-                "</tr><tr>" +
-                "</tr><tr>" +
-                "<td colspan=2><b><i><font size=+1>Load & Store addressing mode, basic instructions</font></i></b></td>"
-                +
-                "</tr><tr>" +
-                "<td><tt>-100(t2)</tt></td><td>sign-extended 16-bit integer added to contents of t2</td>" +
-                "</tr><tr>" +
-                "</tr><tr>" +
-                "<td colspan=2><b><i><font size=+1>Load & Store addressing modes, pseudo instructions</font></i></b></td>"
-                +
-                "</tr><tr>" +
-                "<td><tt>(t2)</tt></td><td>contents of t2</td>" +
-                "</tr><tr>" +
-                "<td><tt>-100</tt></td><td>signed 16-bit integer</td>" +
-                "</tr><tr>" +
-                "<td><tt>100</tt></td><td>unsigned 16-bit integer</td>" +
-                "</tr><tr>" +
-                "<td><tt>100000</tt></td><td>signed 32-bit integer</td>" +
-                "</tr><tr>" +
-                "<td><tt>100(t2)</tt></td><td>zero-extended unsigned 16-bit integer added to contents of t2</td>" +
-                "</tr><tr>" +
-                "<td><tt>100000(t2)</tt></td><td>signed 32-bit integer added to contents of t2</td>" +
-                "</tr><tr>" +
-                "<td><tt>label</tt></td><td>32-bit address of label</td>" +
-                "</tr><tr>" +
-                "<td><tt>label(t2)</tt></td><td>32-bit address of label added to contents of t2</td>" +
-                "</tr><tr>" +
-                "<td><tt>label+100000</tt></td><td>32-bit integer added to label's address</td>" +
-                "</tr><tr>" +
-                "<td><tt>label+100000(t2)&nbsp;&nbsp;&nbsp;</tt></td><td>sum of 32-bit integer, label's address, and contents of t2</td>"
-                +
-                "</tr>" +
-                "</table></center></html>";
+        final String helpRemarks = "<html><center><table bgcolor=\"#" + helpRemarksColor + "\" border=0 " +
+            "cellpadding=0>" + // width="+this.getSize().getWidth()+">"+
+            "<tr>" +
+            "<th colspan=2><b><i><font size=+1>&nbsp;&nbsp;Operand Key for Example Instructions&nbsp;&nbsp;" +
+            "</font></i></b></th>"
+            +
+            "</tr>" +
+            "<tr>" +
+            "<td><tt>label, target</tt></td><td>any textual label</td>" +
+            "</tr><tr>" +
+            "<td><tt>t1, t2, t3</tt></td><td>any integer register</td>" +
+            "</tr><tr>" +
+            "<td><tt>f2, f4, f6</tt></td><td><i>even-numbered</i> floating point register</td>" +
+            "</tr><tr>" +
+            "<td><tt>f0, f1, f3</tt></td><td><i>any</i> floating point register</td>" +
+            "</tr><tr>" +
+            "<td><tt>10</tt></td><td>unsigned 5-bit integer (0 to 31)</td>" +
+            "</tr><tr>" +
+            "<td><tt>-100</tt></td><td>signed 16-bit integer (-32768 to 32767)</td>" +
+            "</tr><tr>" +
+            "<td><tt>100</tt></td><td>unsigned 16-bit integer (0 to 65535)</td>" +
+            "</tr><tr>" +
+            "<td><tt>100000</tt></td><td>signed 32-bit integer (-2147483648 to 2147483647)</td>" +
+            "</tr><tr>" +
+            "</tr><tr>" +
+            "<td colspan=2><b><i><font size=+1>Load & Store addressing mode, basic instructions</font></i></b></td>"
+            +
+            "</tr><tr>" +
+            "<td><tt>-100(t2)</tt></td><td>sign-extended 16-bit integer added to contents of t2</td>" +
+            "</tr><tr>" +
+            "</tr><tr>" +
+            "<td colspan=2><b><i><font size=+1>Load & Store addressing modes, pseudo instructions</font></i></b></td>"
+            +
+            "</tr><tr>" +
+            "<td><tt>(t2)</tt></td><td>contents of t2</td>" +
+            "</tr><tr>" +
+            "<td><tt>-100</tt></td><td>signed 16-bit integer</td>" +
+            "</tr><tr>" +
+            "<td><tt>100</tt></td><td>unsigned 16-bit integer</td>" +
+            "</tr><tr>" +
+            "<td><tt>100000</tt></td><td>signed 32-bit integer</td>" +
+            "</tr><tr>" +
+            "<td><tt>100(t2)</tt></td><td>zero-extended unsigned 16-bit integer added to contents of t2</td>" +
+            "</tr><tr>" +
+            "<td><tt>100000(t2)</tt></td><td>signed 32-bit integer added to contents of t2</td>" +
+            "</tr><tr>" +
+            "<td><tt>label</tt></td><td>32-bit address of label</td>" +
+            "</tr><tr>" +
+            "<td><tt>label(t2)</tt></td><td>32-bit address of label added to contents of t2</td>" +
+            "</tr><tr>" +
+            "<td><tt>label+100000</tt></td><td>32-bit integer added to label's address</td>" +
+            "</tr><tr>" +
+            "<td><tt>label+100000(t2)&nbsp;&nbsp;&nbsp;</tt></td><td>sum of 32-bit integer, label's address, and " +
+            "contents of t2</td>"
+            +
+            "</tr>" +
+            "</table></center></html>";
         // Original code: mipsHelpInfo.add(new JLabel(helpRemarks, JLabel.CENTER),
         // BorderLayout.NORTH);
         final JLabel helpRemarksLabel = new JLabel(helpRemarks, JLabel.CENTER);
         helpRemarksLabel.setOpaque(true);
         helpRemarksLabel.setBackground(Color.decode("0x" + helpRemarksColor));
         final JScrollPane operandsScrollPane = new JScrollPane(helpRemarksLabel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+            JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         helpInfo.add(operandsScrollPane, BorderLayout.NORTH);
         // Below the label is a tabbed pane with categories of MIPS help
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Basic Instructions", HelpHelpAction.createInstructionHelpPane(BasicInstruction.class));
-        tabbedPane.addTab("Extended (pseudo) Instructions", HelpHelpAction.createInstructionHelpPane(ExtendedInstruction.class));
+        tabbedPane.addTab("Extended (pseudo) Instructions",
+            HelpHelpAction.createInstructionHelpPane(ExtendedInstruction.class));
         tabbedPane.addTab("Directives", HelpHelpAction.createDirectivesHelpPane());
         tabbedPane.addTab("Syscalls", this.createSyscallsHelpPane());
         tabbedPane.addTab("Exceptions", this.createHTMLHelpPanel("ExceptionsHelp.html"));
         tabbedPane.addTab("Macros", this.createHTMLHelpPanel("MacrosHelp.html"));
         operandsScrollPane.setPreferredSize(
-                new Dimension((int) HelpHelpAction.getSize().getWidth(), (int) (HelpHelpAction.getSize().getHeight() * .2)));
+            new Dimension((int) HelpHelpAction.getSize().getWidth(),
+                (int) (HelpHelpAction.getSize().getHeight() * .2)));
         operandsScrollPane.getVerticalScrollBar().setUnitIncrement(10);
         tabbedPane.setPreferredSize(
-                new Dimension((int) HelpHelpAction.getSize().getWidth(), (int) (HelpHelpAction.getSize().getHeight() * .6)));
+            new Dimension((int) HelpHelpAction.getSize().getWidth(),
+                (int) (HelpHelpAction.getSize().getHeight() * .6)));
         final JSplitPane splitsville = new JSplitPane(JSplitPane.VERTICAL_SPLIT, operandsScrollPane, tabbedPane);
         splitsville.setOneTouchExpandable(true);
         splitsville.resetToPreferredSizes();
@@ -356,14 +358,14 @@ public class HelpHelpAction extends GuiAction {
         }
 
         final JEditorPane html = new JEditorPane("text/html",
-                this.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpPrelude.html") +
-                        HelpHelpAction.convertToHTMLTable(data, columnNames).toString()
-                        + this.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpConclusion.html"));
+            this.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpPrelude.html") +
+                HelpHelpAction.convertToHTMLTable(data, columnNames).toString()
+                + this.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpConclusion.html"));
 
         html.setCaretPosition(0); // this affects scroll position
         html.setEditable(false);
         return new JScrollPane(html, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     }
 
     private StringBuilder loadFiletoStringBuilder(final String path) {
@@ -388,11 +390,11 @@ public class HelpHelpAction extends GuiAction {
         // We just reconfigure the JLabel each time we're called.
         @Override
         public Component getListCellRendererComponent(
-                final JList<? extends String> list, // the list
-                final String s, // second to display
-                final int index, // cell index
-                final boolean isSelected, // is the cell selected
-                final boolean cellHasFocus) // does the cell have focus
+            final JList<? extends String> list, // the list
+            final String s, // second to display
+            final int index, // cell index
+            final boolean isSelected, // is the cell selected
+            final boolean cellHasFocus) // does the cell have focus
         {
             this.setText(s);
             if (isSelected) {
@@ -417,7 +419,8 @@ public class HelpHelpAction extends GuiAction {
      * provide a Close button.
      */
     private class HelpHyperlinkListener implements HyperlinkListener {
-        private static final String cannotDisplayMessage = "<html><title></title><body><strong>Unable to display requested document.</strong></body></html>";
+        private static final String cannotDisplayMessage = "<html><title></title><body><strong>Unable to display " +
+            "requested document.</strong></body></html>";
         JDialog webpageDisplay;
         JTextField webpageURL;
 
@@ -431,7 +434,8 @@ public class HelpHelpAction extends GuiAction {
                 } else {
                     this.webpageDisplay = new JDialog(HelpHelpAction.this.mainUI, "Primitive HTML Viewer");
                     this.webpageDisplay.setLayout(new BorderLayout());
-                    this.webpageDisplay.setLocation(HelpHelpAction.this.mainUI.getSize().width / 6, HelpHelpAction.this.mainUI.getSize().height / 6);
+                    this.webpageDisplay.setLocation(HelpHelpAction.this.mainUI.getSize().width / 6,
+                        HelpHelpAction.this.mainUI.getSize().height / 6);
                     JEditorPane webpagePane;
                     try {
                         webpagePane = new JEditorPane(e.getURL());
@@ -439,29 +443,30 @@ public class HelpHelpAction extends GuiAction {
                         webpagePane = new JEditorPane("text/html", HelpHyperlinkListener.cannotDisplayMessage);
                     }
                     webpagePane.addHyperlinkListener(
-                            e12 -> {
-                                if (e12.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                                    final JEditorPane pane1 = (JEditorPane) e12.getSource();
-                                    if (e12 instanceof final HTMLFrameHyperlinkEvent evt) {
-                                        final HTMLDocument doc = (HTMLDocument) pane1.getDocument();
-                                        doc.processHTMLFrameHyperlinkEvent(evt);
-                                    } else {
-                                        try {
-                                            pane1.setPage(e12.getURL());
-                                        } catch (final Throwable t) {
-                                            pane1.setText(HelpHyperlinkListener.cannotDisplayMessage);
-                                        }
-                                        HelpHyperlinkListener.this.webpageURL.setText(e12.getURL().toString());
+                        e12 -> {
+                            if (e12.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                                final JEditorPane pane1 = (JEditorPane) e12.getSource();
+                                if (e12 instanceof final HTMLFrameHyperlinkEvent evt) {
+                                    final HTMLDocument doc = (HTMLDocument) pane1.getDocument();
+                                    doc.processHTMLFrameHyperlinkEvent(evt);
+                                } else {
+                                    try {
+                                        pane1.setPage(e12.getURL());
+                                    } catch (final Throwable t) {
+                                        pane1.setText(HelpHyperlinkListener.cannotDisplayMessage);
                                     }
+                                    HelpHyperlinkListener.this.webpageURL.setText(e12.getURL().toString());
                                 }
-                            });
+                            }
+                        });
                     webpagePane.setPreferredSize(
-                            new Dimension(HelpHelpAction.this.mainUI.getSize().width * 2 / 3, HelpHelpAction.this.mainUI.getSize().height * 2 / 3));
+                        new Dimension(HelpHelpAction.this.mainUI.getSize().width * 2 / 3,
+                            HelpHelpAction.this.mainUI.getSize().height * 2 / 3));
                     webpagePane.setEditable(false);
                     webpagePane.setCaretPosition(0);
                     final JScrollPane webpageScrollPane = new JScrollPane(webpagePane,
-                            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                        JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
                     this.webpageURL = new JTextField(e.getURL().toString(), 50);
                     this.webpageURL.setEditable(false);
                     this.webpageURL.setBackground(Color.WHITE);
@@ -472,10 +477,10 @@ public class HelpHelpAction extends GuiAction {
                     this.webpageDisplay.add(webpageScrollPane);
                     final JButton closeButton = new JButton("Close");
                     closeButton.addActionListener(
-                            e1 -> {
-                                HelpHyperlinkListener.this.webpageDisplay.setVisible(false);
-                                HelpHyperlinkListener.this.webpageDisplay.dispose();
-                            });
+                        e1 -> {
+                            HelpHyperlinkListener.this.webpageDisplay.setVisible(false);
+                            HelpHyperlinkListener.this.webpageDisplay.dispose();
+                        });
                     final JPanel closePanel = new JPanel();
                     closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
                     closePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 5));

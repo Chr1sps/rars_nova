@@ -8,6 +8,7 @@ import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
+import rars.util.Pair;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -128,7 +129,6 @@ public class EditTabbedPane extends JPanel {
     public void newFile() {
         final EditPane editPane = new EditPane(this.mainUI);
         editPane.setSourceCode("", true);
-        editPane.setShowLineNumbersEnabled(true);
         editPane.setFileStatus(FileStatus.State.NEW_NOT_EDITED);
         final String name = this.editor.getNextDefaultFilename();
         editPane.setPathname(name);
@@ -142,7 +142,7 @@ public class EditTabbedPane extends JPanel {
         this.mainUI.isMemoryReset = true;
         this.mainPane.executeTab.clearPane();
         this.mainPane.setSelectedComponent(this);
-        editPane.displayCaretPosition(new Point(1, 1));
+        editPane.displayCaretPosition(Pair.of(1, 1));
         tabbedPane.setSelectedComponent(editPane);
         this.updateTitlesAndMenuState(editPane);
         editPane.tellEditingComponentToRequestFocusInWindow();
@@ -649,7 +649,6 @@ public class EditTabbedPane extends JPanel {
                 // text area contents, that should not be seen as undoable by the Undo
                 // action. Let's get rid of it.
                 editPane.discardAllUndoableEdits();
-                editPane.setShowLineNumbersEnabled(true);
                 editPane.setFileStatus(FileStatus.State.NOT_EDITED);
 
                 tabbedPane.addTab(editPane.getFilename(), editPane);

@@ -1,9 +1,9 @@
 package rars.venus;
 
-import javax.swing.*;
-
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /*
@@ -36,23 +36,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Action for the Help -> About menu item
- *
  */
-public class HelpAboutAction extends GuiAction {
-    private final VenusUI mainUI;
+public final class HelpAboutAction extends GuiAction {
+    private final @NotNull VenusUI mainUI;
 
-    /**
-     * <p>Constructor for HelpAboutAction.</p>
-     *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
-     * @param gui      a {@link VenusUI} object
-     */
     public HelpAboutAction(final String name, final Icon icon, final String descrip,
-                           final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+                           final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         mainUI = gui;
     }
@@ -62,17 +51,20 @@ public class HelpAboutAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
+        final var message = """
+            RARS %s    Copyright %s
+            RARS is the RISC-V Assembler and Runtime Simulator.
+            
+            Toolbar and menu icons are from:
+              *  Tango Desktop Project (tango.freedesktop.org),
+              *  glyFX (www.glyfx.com) Common Toolbar Set,
+              *  KDE-Look (www.kde-look.org) crystalline-blue-0.1,
+              *  Icon-King (www.icon-king.com) Nuvola 1.0.
+            """.formatted(Globals.version, Globals.copyrightYears);
         JOptionPane.showMessageDialog(mainUI,
-                "RARS " + Globals.version + "    Copyright " + Globals.copyrightYears + "\n" +
-                        Globals.copyrightHolders + "\n" +
-                        "RARS is the RISC-V Assembler and Runtime Simulator.\n\n" + "Toolbar and menu icons are from:\n"
-                        +
-                        "  *  Tango Desktop Project (tango.freedesktop.org),\n" +
-                        "  *  glyFX (www.glyfx.com) Common Toolbar Set,\n" +
-                        "  *  KDE-Look (www.kde-look.org) crystalline-blue-0.1,\n" +
-                        "  *  Icon-King (www.icon-king.com) Nuvola 1.0.",
-                "About Rars",
-                JOptionPane.INFORMATION_MESSAGE,
-                new ImageIcon("images/RISC-V.png"));
+            message,
+            "About Rars",
+            JOptionPane.INFORMATION_MESSAGE,
+            new ImageIcon("images/RISC-V.png"));
     }
 }

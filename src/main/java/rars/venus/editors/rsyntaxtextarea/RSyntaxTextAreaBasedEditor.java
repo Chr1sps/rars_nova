@@ -1,5 +1,7 @@
 package rars.venus.editors.rsyntaxtextarea;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
@@ -10,11 +12,14 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.jetbrains.annotations.NotNull;
 import rars.riscv.lang.lexing.RVTokenType;
+import rars.util.Pair;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.Theme;
 import rars.venus.editors.TokenStyle;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.font.TextAttribute;
@@ -23,6 +28,7 @@ import java.util.Map;
 import static rars.settings.FontSettings.FONT_SETTINGS;
 
 public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
+    private static final @NotNull Logger LOGGER = LogManager.getLogger();
     public static final @NotNull String SYNTAX_STYLE_RISCV = "text/riscv";
     private static final Map<TextAttribute, Object> textAttributes = Map.of(
         TextAttribute.KERNING, TextAttribute.KERNING_ON
@@ -48,6 +54,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         textArea.setSyntaxEditingStyle(SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);
         textArea.setMarkOccurrencesDelay(1);
+//        textArea.getPosi
     }
 
     @Override
@@ -179,6 +186,11 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
+    public @NotNull Caret getCaret() {
+        return textArea.getCaret();
+    }
+
+    @Override
     public void setEnabled(final boolean enabled) {
         textArea.setEnabled(enabled);
     }
@@ -263,6 +275,19 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         this.gutter.setLineNumberColor(theme.foregroundColor);
         UIManager.put("ToolTip.background", theme.backgroundColor);
         this.applyColorScheme(theme.tokenStyles);
+    }
+
+    @Override
+    public @NotNull Pair<Integer, Integer> getCaretPosition() {
+        final var offset = textArea.getCaretPosition();
+        try {
+            final var line = textArea.getLineOfOffset(offset);
+            final var column = offset - textArea.getLineStartOffset(line);
+            return Pair.of(line, column);
+        } catch (final BadLocationException e) {
+            LOGGER.error("Failed to get caret position", e);
+            return Pair.of(0, 0);
+        }
     }
 
     private void applyColorScheme(final @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles) {

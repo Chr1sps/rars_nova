@@ -1,9 +1,9 @@
 package rars.venus;
 
-import org.fife.ui.rtextarea.RTextScrollPane;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.settings.BoolSetting;
+import rars.util.Pair;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
 import rars.venus.editors.TextEditingAreaFactory;
@@ -74,8 +74,6 @@ public class EditPane extends JPanel {
     private final TextEditingArea sourceCode;
     private final VenusUI mainUI;
     private final JLabel caretPositionLabel;
-    private final JCheckBox showLineNumbers;
-    private final JLabel lineNumbers;
     private final FileStatus fileStatus;
 
     /**
@@ -91,18 +89,11 @@ public class EditPane extends JPanel {
         // We want to be notified of editor font changes! See update() below.
 
         this.fileStatus = new FileStatus();
-        this.lineNumbers = new JLabel();
 
         this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.currentTheme.toTheme());
         this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-        EDITOR_THEME_SETTINGS.addChangeListener(() -> {
-            this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toTheme());
-        }, true);
-        FONT_SETTINGS.addChangeListener(() -> {
-            this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-            this.lineNumbers.setFont(this.getLineNumberFont(this.sourceCode.getFont()));
-            this.lineNumbers.revalidate();
-        }, true);
+        EDITOR_THEME_SETTINGS.addChangeListener(() -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toTheme()), true);
+        FONT_SETTINGS.addChangeListener(() -> this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont()), true);
         BOOL_SETTINGS.addChangeListener(() -> this.sourceCode.setLineHighlightEnabled(
             BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
         ), true);
@@ -127,9 +118,6 @@ public class EditPane extends JPanel {
                     if (FileStatus.get() == FileStatus.State.OPENING) {
                         EditPane.this.setFileStatus(FileStatus.State.NOT_EDITED);
                         FileStatus.set(FileStatus.State.NOT_EDITED);
-                        if (EditPane.this.showingLineNumbers()) {
-                            EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
-                        }
                         return;
                     }
                     // End of 9-Aug-2011 modification.
@@ -160,9 +148,6 @@ public class EditPane extends JPanel {
 
                     Globals.gui.mainPane.executeTab.clearPane(); // DPS 9-Aug-2011
 
-                    if (EditPane.this.showingLineNumbers()) {
-                        EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
-                    }
                 }
 
                 @Override
@@ -185,43 +170,16 @@ public class EditPane extends JPanel {
                 }
             });
 
-        this.showLineNumbers = new JCheckBox("Show Line Numbers");
-        this.showLineNumbers.setToolTipText("If checked, will display line number for each line of text.");
-        this.showLineNumbers.setEnabled(false);
-        // Show line numbers by default.
-        this.showLineNumbers
-            .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED));
-
         this.setSourceCode("", false);
-
-        this.lineNumbers.setFont(this.getLineNumberFont(this.sourceCode.getFont()));
-        this.lineNumbers.setVerticalAlignment(JLabel.TOP);
-        this.lineNumbers.setText("");
-        this.lineNumbers.setVisible(true);
-
-        // Listener fires when "Show Line Numbers" check box is clicked.
-        this.showLineNumbers.addItemListener(
-            e -> {
-                if (EditPane.this.showLineNumbers.isSelected()) {
-                    EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));
-                    EditPane.this.lineNumbers.setVisible(true);
-                } else {
-                    EditPane.this.lineNumbers.setText("");
-                    EditPane.this.lineNumbers.setVisible(false);
-                }
-                EditPane.this.sourceCode.revalidate(); // added 16 Jan 2012 to assure label redrawn.
-                BOOL_SETTINGS.setSettingAndSave(BoolSetting.EDITOR_LINE_NUMBERS_DISPLAYED,
-                    EditPane.this.showLineNumbers.isSelected());
-                // needed because caret disappears when checkbox clicked
-                EditPane.this.sourceCode.requestFocusInWindow();
-            });
-
         final JPanel editInfo = new JPanel(new BorderLayout());
         this.caretPositionLabel = new JLabel();
         this.caretPositionLabel.setToolTipText("Tracks the current position of the text editing cursor.");
-        this.displayCaretPosition(new Point());
+        this.displayCaretPosition(Pair.of(0, 0));
+        this.sourceCode.getCaret().addChangeListener(e -> {
+            final var position = this.sourceCode.getCaretPosition();
+            this.displayCaretPosition(Pair.of(position.first() + 1, position.second() + 1));
+        });
         editInfo.add(this.caretPositionLabel, BorderLayout.WEST);
-        editInfo.add(this.showLineNumbers, BorderLayout.CENTER);
         this.add(editInfo, BorderLayout.SOUTH);
     }
 
@@ -418,13 +376,6 @@ public class EditPane extends JPanel {
     }
 
     /**
-     * select all text
-     */
-    public void selectAllText() {
-        this.sourceCode.selectAll();
-    }
-
-    /**
      * Undo previous edit
      */
     public void undo() {
@@ -439,49 +390,12 @@ public class EditPane extends JPanel {
     }
 
     /**
-     * Update state of Edit menu's Undo and Redo menu items.
-     */
-    public void updateUndoAndRedoState() {
-        this.mainUI.updateUndoAndRedoState();
-    }
-
-    /**
-     * get editor's line number display status
-     *
-     * @return true if editor is current displaying line numbers, false otherwise.
-     */
-    public boolean showingLineNumbers() {
-        return this.showLineNumbers.isSelected();
-    }
-
-    /**
-     * enable or disable checkbox that controls display of line numbers
-     *
-     * @param enabled True to enable box, false to disable.
-     */
-    public void setShowLineNumbersEnabled(final boolean enabled) {
-        this.showLineNumbers.setEnabled(enabled);
-        // showLineNumbers.setSelected(false); // set off, whether closing or opening
-    }
-
-    /**
-     * Update the caret position label on the editor's border to
-     * display the current line and column. The position is given
-     * as text stream offset and will be converted into line and column.
-     *
-     * @param pos Offset into the text stream of caret.
-     */
-    public void displayCaretPosition(final int pos) {
-        this.displayCaretPosition(this.convertStreamPositionToLineColumn(pos));
-    }
-
-    /**
      * Display cursor coordinates
      *
      * @param p Point object with x-y (column, line number) coordinates of cursor
      */
-    public void displayCaretPosition(final Point p) {
-        this.caretPositionLabel.setText("Line: " + p.y + " Column: " + p.x);
+    public void displayCaretPosition(final @NotNull Pair<Integer, Integer> p) {
+        this.caretPositionLabel.setText("Line: " + p.first() + " Column: " + p.second());
     }
 
     /**
@@ -636,23 +550,5 @@ public class EditPane extends JPanel {
      */
     public int doReplaceAll(final String find, final String replace, final boolean caseSensitive) {
         return this.sourceCode.doReplaceAll(find, replace, caseSensitive);
-    }
-
-    /*
-     * Private helper method.
-     * Determine font to use for editor line number display, given current
-     * font for source code.
-     */
-    private Font getLineNumberFont(final Font sourceFont) {
-        return (this.sourceCode.getFont().getStyle() == Font.PLAIN)
-            ? sourceFont
-            : new Font(sourceFont.getFamily(), Font.PLAIN, sourceFont.getSize());
-    }
-
-    public void updateRTextAreaUI() {
-        final var outer = (RTextScrollPane) this.sourceCode.getOuterComponent();
-        final var textAreaProper = outer.getTextArea();
-//        textAreaProper.setUI();
-//        textAreaProper.set
     }
 }

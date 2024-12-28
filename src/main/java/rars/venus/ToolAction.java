@@ -42,8 +42,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  */
-public class ToolAction extends AbstractAction {
-    private final AbstractTool tool; // Tool tool;
+public final class ToolAction extends AbstractAction {
+    private final @NotNull AbstractTool tool; // Tool tool;
 
     /**
      * Simple constructor.
@@ -63,9 +63,7 @@ public class ToolAction extends AbstractAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         try {
-            // I am not sure if a new instance needs to be made each time
-            // It may be possible to reduce this to tool.action()
-            this.tool.getClass().getDeclaredConstructor().newInstance().action();
+            this.tool.action();
         } catch (final Exception ignored) {
         }
     }

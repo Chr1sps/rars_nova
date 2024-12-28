@@ -55,18 +55,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Team JSpim
  */
 public final class MessagesPane extends JTabbedPane {
-    public static final int MAXIMUM_SCROLLED_CHARACTERS = Globals.maximumMessageCharacters;
-    public static final int NUMBER_OF_CHARACTERS_TO_CUT = Globals.maximumMessageCharacters / 10; // 10%
-    final JTextArea assemble;
-    final JTextArea run;
     // These constants are designed to keep scrolled contents of the
     // two message areas from becoming overwhelmingly large (which
     // seems to slow things down as new text is appended). Once it
     // reaches MAXIMUM_SCROLLED_CHARACTERS in length then cut off
     // the first NUMBER_OF_CHARACTERS_TO_CUT characters. The latter
     // must obviously be smaller than the former.
-    private final JPanel assembleTab;
-    private final JPanel runTab;
+    public static final int MAXIMUM_SCROLLED_CHARACTERS = Globals.maximumMessageCharacters;
+    public static final int NUMBER_OF_CHARACTERS_TO_CUT = Globals.maximumMessageCharacters / 10; // 10%
+    
+    private final @NotNull JTextArea assembleTextArea, runTextArea;
+    private final @NotNull JPanel assembleTab, runTab;
 
     /**
      * Constructor for the class, sets up two fresh tabbed text areas for program
@@ -75,30 +74,30 @@ public final class MessagesPane extends JTabbedPane {
     public MessagesPane() {
         super();
         this.setMinimumSize(new Dimension(0, 0));
-        this.assemble = new JTextArea();
-        this.run = new JTextArea();
+        this.assembleTextArea = new JTextArea();
+        this.runTextArea = new JTextArea();
         FONT_SETTINGS.addChangeListener(() -> {
-            this.assemble.setFont(FONT_SETTINGS.getCurrentFont());
-            this.run.setFont(FONT_SETTINGS.getCurrentFont());
+            this.assembleTextArea.setFont(FONT_SETTINGS.getCurrentFont());
+            this.runTextArea.setFont(FONT_SETTINGS.getCurrentFont());
         });
-        this.assemble.setEditable(false);
-        this.run.setEditable(false);
+        this.assembleTextArea.setEditable(false);
+        this.runTextArea.setEditable(false);
         // Set both text areas to mono font. For assemble
         // pane, will make messages more readable. For run
         // pane, will allow properly aligned "text graphics"
         // DPS 15 Dec 2008
-        this.assemble.setFont(FONT_SETTINGS.getCurrentFont());
-        this.run.setFont(FONT_SETTINGS.getCurrentFont());
+        this.assembleTextArea.setFont(FONT_SETTINGS.getCurrentFont());
+        this.runTextArea.setFont(FONT_SETTINGS.getCurrentFont());
 
         final JButton assembleTabClearButton = new JButton("Clear");
         assembleTabClearButton.setToolTipText("Clear the Messages area");
         assembleTabClearButton.addActionListener(
-            e -> this.assemble.setText(""));
+            e -> this.assembleTextArea.setText(""));
         this.assembleTab = new JPanel(new BorderLayout());
         this.assembleTab.add(MessagesPane.createBoxForButton(assembleTabClearButton), BorderLayout.WEST);
-        this.assembleTab.add(new JScrollPane(this.assemble, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+        this.assembleTab.add(new JScrollPane(this.assembleTextArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-        this.assemble.addMouseListener(
+        this.assembleTextArea.addMouseListener(
             new MouseAdapter() {
                 @Override
                 public void mouseClicked(final MouseEvent e) {
@@ -107,10 +106,10 @@ public final class MessagesPane extends JTabbedPane {
                     int lineEnd = 0;
                     try {
                         final int line =
-                            MessagesPane.this.assemble.getLineOfOffset(MessagesPane.this.assemble.viewToModel2D(e.getPoint()));
-                        lineStart = MessagesPane.this.assemble.getLineStartOffset(line);
-                        lineEnd = MessagesPane.this.assemble.getLineEndOffset(line);
-                        text = MessagesPane.this.assemble.getText(lineStart, lineEnd - lineStart);
+                            MessagesPane.this.assembleTextArea.getLineOfOffset(MessagesPane.this.assembleTextArea.viewToModel2D(e.getPoint()));
+                        lineStart = MessagesPane.this.assembleTextArea.getLineStartOffset(line);
+                        lineEnd = MessagesPane.this.assembleTextArea.getLineEndOffset(line);
+                        text = MessagesPane.this.assembleTextArea.getText(lineStart, lineEnd - lineStart);
                     } catch (final BadLocationException ble) {
                         text = "";
                     }
@@ -118,10 +117,10 @@ public final class MessagesPane extends JTabbedPane {
                         // If error or warning, parse out the line and column number.
                         if (text.startsWith(ErrorList.ERROR_MESSAGE_PREFIX)
                             || text.startsWith(ErrorList.WARNING_MESSAGE_PREFIX)) {
-                            MessagesPane.this.assemble.select(lineStart, lineEnd);
-                            MessagesPane.this.assemble.setSelectionColor(Color.YELLOW);
-                            MessagesPane.this.assemble.setSelectedTextColor(Color.BLACK);
-                            MessagesPane.this.assemble.repaint();
+                            MessagesPane.this.assembleTextArea.select(lineStart, lineEnd);
+                            MessagesPane.this.assembleTextArea.setSelectionColor(Color.YELLOW);
+                            MessagesPane.this.assembleTextArea.setSelectedTextColor(Color.BLACK);
+                            MessagesPane.this.assembleTextArea.repaint();
                             final int separatorPosition = text.indexOf(ErrorList.MESSAGE_SEPARATOR);
                             if (separatorPosition >= 0) {
                                 text = text.substring(0, separatorPosition);
@@ -168,10 +167,10 @@ public final class MessagesPane extends JTabbedPane {
         final JButton runTabClearButton = new JButton("Clear");
         runTabClearButton.setToolTipText("Clear the Run I/O area");
         runTabClearButton.addActionListener(
-            e -> MessagesPane.this.run.setText(""));
+            e -> MessagesPane.this.runTextArea.setText(""));
         this.runTab = new JPanel(new BorderLayout());
         this.runTab.add(MessagesPane.createBoxForButton(runTabClearButton), BorderLayout.WEST);
-        this.runTab.add(new JScrollPane(this.run, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+        this.runTab.add(new JScrollPane(this.runTextArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
 
         this.addTab("Messages", this.assembleTab);
@@ -184,7 +183,7 @@ public final class MessagesPane extends JTabbedPane {
 
     // Center given button in a box, centered vertically and 6 pixels on left and
     // right
-    private static Box createBoxForButton(final JButton button) {
+    private static @NotNull Box createBoxForButton(final JButton button) {
         final Box buttonRow = Box.createHorizontalBox();
         buttonRow.add(Box.createHorizontalStrut(6));
         buttonRow.add(button);
@@ -242,42 +241,24 @@ public final class MessagesPane extends JTabbedPane {
     public void selectErrorMessage(final String fileName, final int line, final int column) {
         final String errorReportSubstring = new java.io.File(fileName).getName() + ErrorList.LINE_PREFIX + line
             + ErrorList.POSITION_PREFIX + column;
-        final int textPosition = this.assemble.getText().lastIndexOf(errorReportSubstring);
+        final int textPosition = this.assembleTextArea.getText().lastIndexOf(errorReportSubstring);
         if (textPosition >= 0) {
             final int textLine;
             final int lineStart;
             final int lineEnd;
             try {
-                textLine = this.assemble.getLineOfOffset(textPosition);
-                lineStart = this.assemble.getLineStartOffset(textLine);
-                lineEnd = this.assemble.getLineEndOffset(textLine);
-                this.assemble.setSelectionColor(Color.YELLOW);
-                this.assemble.setSelectedTextColor(Color.BLACK);
-                this.assemble.select(lineStart, lineEnd);
-                this.assemble.getCaret().setSelectionVisible(true);
-                this.assemble.repaint();
+                textLine = this.assembleTextArea.getLineOfOffset(textPosition);
+                lineStart = this.assembleTextArea.getLineStartOffset(textLine);
+                lineEnd = this.assembleTextArea.getLineEndOffset(textLine);
+                this.assembleTextArea.setSelectionColor(Color.YELLOW);
+                this.assembleTextArea.setSelectedTextColor(Color.BLACK);
+                this.assembleTextArea.select(lineStart, lineEnd);
+                this.assembleTextArea.getCaret().setSelectionVisible(true);
+                this.assembleTextArea.repaint();
             } catch (final BadLocationException ble) {
                 // If there is a problem, simply skip the selection
             }
         }
-    }
-
-    /**
-     * Returns component used to display assembler messages
-     *
-     * @return assembler message text component
-     */
-    public JTextArea getAssembleTextArea() {
-        return this.assemble;
-    }
-
-    /**
-     * Returns component used to display runtime messages
-     *
-     * @return runtime message text component
-     */
-    public JTextArea getRunTextArea() {
-        return this.run;
     }
 
     /**
@@ -286,18 +267,18 @@ public final class MessagesPane extends JTabbedPane {
      * @param message String to append to assembler display text
      */
     public void postMessage(final String message) {
-        this.assemble.append(message);
+        this.assembleTextArea.append(message);
         // can do some crude cutting here. If the document gets "very large",
         // let's cut off the oldest text. This will limit scrolling but the limit
         // can be set reasonably high.
-        if (this.assemble.getDocument().getLength() > MessagesPane.MAXIMUM_SCROLLED_CHARACTERS) {
+        if (this.assembleTextArea.getDocument().getLength() > MessagesPane.MAXIMUM_SCROLLED_CHARACTERS) {
             try {
-                this.assemble.getDocument().remove(0, MessagesPane.NUMBER_OF_CHARACTERS_TO_CUT);
+                this.assembleTextArea.getDocument().remove(0, MessagesPane.NUMBER_OF_CHARACTERS_TO_CUT);
             } catch (final BadLocationException ble) {
                 // only if NUMBER_OF_CHARACTERS_TO_CUT > MAXIMUM_SCROLLED_CHARACTERS
             }
         }
-        this.assemble.setCaretPosition(this.assemble.getDocument().getLength());
+        this.assembleTextArea.setCaretPosition(this.assembleTextArea.getDocument().getLength());
         this.setSelectedComponent(this.assembleTab);
     }
 
@@ -316,13 +297,13 @@ public final class MessagesPane extends JTabbedPane {
         SwingUtilities.invokeLater(
             () -> {
                 this.setSelectedComponent(this.runTab);
-                this.run.append(message);
+                this.runTextArea.append(message);
                 // can do some crude cutting here. If the document gets "very large",
                 // let's cut off the oldest text. This will limit scrolling but the limit
                 // can be set reasonably high.
-                if (this.run.getDocument().getLength() > MessagesPane.MAXIMUM_SCROLLED_CHARACTERS) {
+                if (this.runTextArea.getDocument().getLength() > MessagesPane.MAXIMUM_SCROLLED_CHARACTERS) {
                     try {
-                        this.run.getDocument().remove(0, MessagesPane.NUMBER_OF_CHARACTERS_TO_CUT);
+                        this.runTextArea.getDocument().remove(0, MessagesPane.NUMBER_OF_CHARACTERS_TO_CUT);
                     } catch (final BadLocationException ble) {
                         // only if NUMBER_OF_CHARACTERS_TO_CUT > MAXIMUM_SCROLLED_CHARACTERS
                     }
@@ -450,7 +431,7 @@ public final class MessagesPane extends JTabbedPane {
                             if ((e.getDocument().getLength() < Asker.this.initialPos || e.getOffset() < Asker.this.initialPos)
                                 && e instanceof UndoableEdit) {
                                 ((UndoableEdit) e).undo();
-                                MessagesPane.this.run.setCaretPosition(e.getOffset() + e.getLength());
+                                MessagesPane.this.runTextArea.setCaretPosition(e.getOffset() + e.getLength());
                             }
                         });
                 }
@@ -463,7 +444,7 @@ public final class MessagesPane extends JTabbedPane {
                 @Override
                 public void moveDot(final FilterBypass fb, int dot, final Bias bias) {
                     if (dot < Asker.this.initialPos) {
-                        dot = Math.min(Asker.this.initialPos, MessagesPane.this.run.getDocument().getLength());
+                        dot = Math.min(Asker.this.initialPos, MessagesPane.this.runTextArea.getDocument().getLength());
                     }
                     fb.moveDot(dot, bias);
                 }
@@ -471,7 +452,7 @@ public final class MessagesPane extends JTabbedPane {
                 @Override
                 public void setDot(final FilterBypass fb, int dot, final Bias bias) {
                     if (dot < Asker.this.initialPos) {
-                        dot = Math.min(Asker.this.initialPos, MessagesPane.this.run.getDocument().getLength());
+                        dot = Math.min(Asker.this.initialPos, MessagesPane.this.runTextArea.getDocument().getLength());
                     }
                     fb.setDot(dot, bias);
                 }
@@ -482,32 +463,32 @@ public final class MessagesPane extends JTabbedPane {
 
         private void run() { // must be invoked from the GUI thread
             MessagesPane.this.selectRunMessageTab();
-            MessagesPane.this.run.setEditable(true);
-            MessagesPane.this.run.requestFocusInWindow();
-            MessagesPane.this.run.setCaretPosition(MessagesPane.this.run.getDocument().getLength());
-            this.initialPos = MessagesPane.this.run.getCaretPosition();
-            MessagesPane.this.run.setNavigationFilter(this.navigationFilter);
-            MessagesPane.this.run.getDocument().addDocumentListener(this.listener);
+            MessagesPane.this.runTextArea.setEditable(true);
+            MessagesPane.this.runTextArea.requestFocusInWindow();
+            MessagesPane.this.runTextArea.setCaretPosition(MessagesPane.this.runTextArea.getDocument().getLength());
+            this.initialPos = MessagesPane.this.runTextArea.getCaretPosition();
+            MessagesPane.this.runTextArea.setNavigationFilter(this.navigationFilter);
+            MessagesPane.this.runTextArea.getDocument().addDocumentListener(this.listener);
             Simulator.getInstance().addStopListener(this.stopListener);
         }
 
         private void cleanup() { // not required to be called from the GUI thread
             EventQueue.invokeLater(
                 () -> {
-                    MessagesPane.this.run.getDocument().removeDocumentListener(Asker.this.listener);
-                    MessagesPane.this.run.setEditable(false);
-                    MessagesPane.this.run.setNavigationFilter(null);
-                    MessagesPane.this.run.setCaretPosition(MessagesPane.this.run.getDocument().getLength());
+                    MessagesPane.this.runTextArea.getDocument().removeDocumentListener(Asker.this.listener);
+                    MessagesPane.this.runTextArea.setEditable(false);
+                    MessagesPane.this.runTextArea.setNavigationFilter(null);
+                    MessagesPane.this.runTextArea.setCaretPosition(MessagesPane.this.runTextArea.getDocument().getLength());
                     Simulator.getInstance().removeStopListener(Asker.this.stopListener);
                 });
         }
 
         private void returnResponse() {
             try {
-                final int p = Math.min(this.initialPos, MessagesPane.this.run.getDocument().getLength());
-                final int l = Math.min(MessagesPane.this.run.getDocument().getLength() - p, this.maxLen >= 0 ?
+                final int p = Math.min(this.initialPos, MessagesPane.this.runTextArea.getDocument().getLength());
+                final int l = Math.min(MessagesPane.this.runTextArea.getDocument().getLength() - p, this.maxLen >= 0 ?
                     this.maxLen : Integer.MAX_VALUE);
-                this.resultQueue.offer(MessagesPane.this.run.getText(p, l));
+                this.resultQueue.offer(MessagesPane.this.runTextArea.getText(p, l));
             } catch (final BadLocationException ex) {
                 // this cannot happen
                 this.resultQueue.offer("");

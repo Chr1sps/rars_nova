@@ -1,6 +1,7 @@
 package rars.venus;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.List;
@@ -39,31 +40,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class Editor {
 
-    /**
-     * Constant <code>MIN_TAB_SIZE=1</code>
-     */
     public static final int MIN_TAB_SIZE = 1;
-    /**
-     * Constant <code>MAX_TAB_SIZE=32</code>
-     */
     public static final int MAX_TAB_SIZE = 32;
-    /**
-     * Constant <code>MIN_BLINK_RATE=0</code>
-     */
     public static final int MIN_BLINK_RATE = 0; // no flashing
-    /**
-     * Constant <code>MAX_BLINK_RATE=1000</code>
-     */
     public static final int MAX_BLINK_RATE = 1000; // once per second
 
-    private final VenusUI mainUI;
-    private final String mainUIbaseTitle;
+    private final @NotNull VenusUI mainUI;
+    private final @NotNull String mainUIbaseTitle;
     // Current Directory for Open operation, same for Save operation
     // Values will mainly be set by the EditTabbedPane as Open/Save operations
     // occur.
-    private final String defaultOpenDirectory;
-    private final String defaultSaveDirectory;
-    private EditTabbedPane editTabbedPane;
+    private final @NotNull String defaultOpenDirectory;
+    private final @NotNull String defaultSaveDirectory;
+    private @Nullable EditTabbedPane editTabbedPane;
     /*
      * number of times File->New has been selected. Used to generate
      * default filename until first Save or Save As.

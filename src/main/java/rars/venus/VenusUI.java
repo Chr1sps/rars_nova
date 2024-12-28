@@ -79,15 +79,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * are both
  * here primarily so both can share the Action objects.
  */
-public class VenusUI extends JFrame {
+public final class VenusUI extends JFrame {
     private static final Logger LOGGER = LogManager.getLogger(VenusUI.class);
     public final @NotNull JMenuBar menu;
     public final @NotNull MainPane mainPane;
     public final @NotNull RegistersPane registersPane;
     public final @NotNull RegistersWindow registersTab;
+    public final @NotNull FloatingPointWindow floatingPointTab;
     public final @NotNull ControlAndStatusWindow csrTab;
     public final @NotNull MessagesPane messagesPane;
     public final @NotNull Editor editor;
+    public final @NotNull RunSpeedPanel runSpeedPanel;
     // PLEASE PUT THESE TWO (& THEIR METHODS) SOMEWHERE THEY BELONG, NOT HERE
     /// registers/memory reset for execution
     public boolean isMemoryReset = true;
@@ -171,12 +173,12 @@ public class VenusUI extends JFrame {
         // not visible here.
 
         this.registersTab = new RegistersWindow();
-        final FloatingPointWindow fpTab = new FloatingPointWindow();
+        this.floatingPointTab = new FloatingPointWindow();
         this.csrTab = new ControlAndStatusWindow();
-        this.registersPane = new RegistersPane(this.registersTab, fpTab, this.csrTab);
+        this.registersPane = new RegistersPane(this.registersTab, this.floatingPointTab, this.csrTab);
         this.registersPane.setPreferredSize(registersPanePreferredSize);
 
-        this.mainPane = new MainPane(this, this.editor, this.registersTab, fpTab, this.csrTab);
+        this.mainPane = new MainPane(this, this.editor, this.registersTab, this.floatingPointTab, this.csrTab);
 
         this.mainPane.setPreferredSize(mainPanePreferredSize);
         this.messagesPane = new MessagesPane();
@@ -197,7 +199,8 @@ public class VenusUI extends JFrame {
 
         final JPanel jp = new JPanel(new FlowLayout(FlowLayout.LEFT));
         jp.add(toolbar);
-        jp.add(RunSpeedPanel.getInstance());
+        this.runSpeedPanel = new RunSpeedPanel();
+        jp.add(this.runSpeedPanel);
         final JPanel center = new JPanel(new BorderLayout());
         center.add(jp, BorderLayout.NORTH);
         center.add(horizontalLayout);
@@ -536,6 +539,7 @@ public class VenusUI extends JFrame {
                 BoolSetting.RV64_ENABLED, (isRV64) -> {
                 Instructions.RV64 = isRV64;
                 VenusUI.this.registersTab.updateRegisters();
+                VenusUI.this.floatingPointTab.updateRegisters();
                 VenusUI.this.csrTab.updateRegisters();
             });
             this.settingsDeriveCurrentWorkingDirectoryAction = new SettingsAction("Derive current working directory",

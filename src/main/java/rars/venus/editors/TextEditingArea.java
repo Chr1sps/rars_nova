@@ -1,7 +1,9 @@
 package rars.venus.editors;
 
 import org.jetbrains.annotations.NotNull;
+import rars.util.Pair;
 
+import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import java.awt.*;
 
@@ -78,6 +80,8 @@ public interface TextEditingArea {
 
     void setLineHighlightColor(Color c);
 
+    @NotNull Caret getCaret();
+    
     void setEnabled(boolean enabled);
 
     void redo();
@@ -96,6 +100,8 @@ public interface TextEditingArea {
 
     void setTabSize(int chars);
 
+    @NotNull Pair<Integer, Integer> getCaretPosition();
+    
     Component getOuterComponent();
 
     boolean canUndo();

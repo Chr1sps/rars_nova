@@ -45,10 +45,6 @@ public enum BoolSetting {
      */
     EXCEPTION_HANDLER_ENABLED("LoadExceptionHandler", false),
     /**
-     * Flag to determine whether the editor will display line numbers.
-     */
-    EDITOR_LINE_NUMBERS_DISPLAYED("EditorLineNumbersDisplayed", true),
-    /**
      * Flag to determine whether assembler warnings are considered errors.
      */
     WARNINGS_ARE_ERRORS("WarningsAreErrors", false),
