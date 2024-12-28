@@ -46,9 +46,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Bumgarner
  */
-public class MainPane extends JTabbedPane {
-    final ExecutePane executeTab;
-    final EditTabbedPane editTabbedPane;
+public final class MainPane extends JTabbedPane {
+    public final ExecutePane executeTab;
+    public final EditTabbedPane editTabbedPane;
 
     /**
      * Constructor for the MainPane class.
@@ -67,11 +67,14 @@ public class MainPane extends JTabbedPane {
         this.editTabbedPane = new EditTabbedPane(appFrame, editor, this);
         this.executeTab = new ExecutePane(appFrame, regs, cop1Regs, cop0Regs);
         final String editTabTitle = "Edit";
-        final String executeTabTitle = "Execute"; // "<html><center>&nbsp;<br>E<br>x<br>e<br>c<br>u<br>t<br>e<br>&nbsp;</center></html>";
+        final String executeTabTitle = "Execute"; // "<html><center>&nbsp;<br>E<br>x<br>e<br>c<br>u<br>t<br>e<br
+        // >&nbsp;</center></html>";
         // final Icon editTabIcon = null;// new
-        // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Edit_tab.jpg")));
+        // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Edit_tab
+        // .jpg")));
         // final Icon executeTabIcon = null;// new
-        // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Execute_tab.jpg")));
+        // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Execute_tab
+        // .jpg")));
 
         this.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         this.addTab(editTabTitle, null, this.editTabbedPane);
@@ -80,7 +83,7 @@ public class MainPane extends JTabbedPane {
 
         this.setToolTipTextAt(0, "Text editor for composing RISCV programs.");
         this.setToolTipTextAt(1,
-                "View and control assembly language program execution.  Enabled upon successful assemble.");
+            "View and control assembly language program execution.  Enabled upon successful assemble.");
 
         /*
          * Listener has one specific purpose: when Execute tab is selected for the
@@ -90,19 +93,19 @@ public class MainPane extends JTabbedPane {
          * See ExecutePane.setWindowsBounds documentation for more details.
          */
         this.addChangeListener(
-                new ChangeListener() {
-                    @Override
-                    public void stateChanged(final ChangeEvent ce) {
-                        final JTabbedPane tabbedPane = (JTabbedPane) ce.getSource();
-                        final int index = tabbedPane.getSelectedIndex();
-                        final Component c = tabbedPane.getComponentAt(index);
-                        final ExecutePane executePane = Globals.getGui().getMainPane().getExecutePane();
-                        if (c == executePane) {
-                            executePane.setWindowBounds();
-                            Globals.getGui().getMainPane().removeChangeListener(this);
-                        }
+            new ChangeListener() {
+                @Override
+                public void stateChanged(final ChangeEvent ce) {
+                    final JTabbedPane tabbedPane = (JTabbedPane) ce.getSource();
+                    final int index = tabbedPane.getSelectedIndex();
+                    final Component c = tabbedPane.getComponentAt(index);
+                    final ExecutePane executePane = Globals.gui.mainPane.executeTab;
+                    if (c == executePane) {
+                        executePane.setWindowBounds();
+                        Globals.gui.mainPane.removeChangeListener(this);
                     }
-                });
+                }
+            });
 
         this.putClientProperty(TABBED_PANE_TAB_CLOSABLE, false);
     }
@@ -115,23 +118,5 @@ public class MainPane extends JTabbedPane {
      */
     public EditPane getEditPane() {
         return this.editTabbedPane.getCurrentEditTab();
-    }
-
-    /**
-     * Returns component containing editor display
-     *
-     * @return the editor tabbed pane
-     */
-    public JComponent getEditTabbedPane() {
-        return this.editTabbedPane;
-    }
-
-    /**
-     * returns component containing execution-time display
-     *
-     * @return the execute pane
-     */
-    public ExecutePane getExecutePane() {
-        return this.executeTab;
     }
 }

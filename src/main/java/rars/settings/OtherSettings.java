@@ -9,7 +9,7 @@ import rars.riscv.hardware.MemoryConfiguration;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public final class OtherSettings extends ListenableBase<OtherSettings> {
+public final class OtherSettings extends ListenableBase {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // region Preferences keys

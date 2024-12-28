@@ -471,8 +471,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // Returns the JScrollPane for the Address/Data part of the Data Segment window.
     private JScrollPane generateDataPanel() {
         DataSegmentWindow.dataData = new Object[DataSegmentWindow.NUMBER_OF_ROWS][DataSegmentWindow.NUMBER_OF_COLUMNS];
-        final int valueBase = Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase();
-        final int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
+        final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
+        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
         int address = this.homeAddress;
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             DataSegmentWindow.dataData[row][DataSegmentWindow.ADDRESS_COLUMN] =
@@ -494,7 +494,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
         DataSegmentWindow.dataTable = new MyTippedJTable(new DataTableModel(DataSegmentWindow.dataData, names));
 
-        this.updateRowHeight(FONT_SETTINGS);
+        this.updateRowHeight();
         // Do not allow user to re-order columns; column order corresponds to MIPS
         // memory order
         DataSegmentWindow.dataTable.getTableHeader().setReorderingAllowed(false);
@@ -553,8 +553,11 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     }
 
     private int getValueDisplayFormat() {
-        return (this.asciiDisplay) ? NumberDisplayBaseChooser.ASCII
-            : Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase();
+        if (this.asciiDisplay) {
+            return NumberDisplayBaseChooser.ASCII;
+        } else {
+            return Globals.gui.mainPane.executeTab.getValueDisplayBase();
+        }
     }
 
     /**
@@ -569,7 +572,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         if (this.tablePanel.getComponentCount() == 0)
             return; // ignore if no content to change
         final int valueBase = this.getValueDisplayFormat();
-        final int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
+        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
         int address = firstAddr;
         final TableModel dataModel = DataSegmentWindow.dataTable.getModel();
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
@@ -640,7 +643,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final int row = offset / DataSegmentWindow.BYTES_PER_ROW;
         final int column = (offset % DataSegmentWindow.BYTES_PER_ROW) / DataSegmentWindow.BYTES_PER_VALUE + 1; // 
         // column 0 reserved for address
-        final int valueBase = Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase();
+        final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
         ((DataTableModel) DataSegmentWindow.dataTable.getModel()).setDisplayAndModelValueAt(
             NumberDisplayBaseChooser.formatNumber(value, valueBase),
             row, column);
@@ -654,7 +657,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public void updateDataAddresses() {
         if (this.tablePanel.getComponentCount() == 0)
             return; // ignore if no content to change
-        final int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
+        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
         int address = this.firstAddress;
         String formattedAddress;
         for (int i = 0; i < DataSegmentWindow.NUMBER_OF_ROWS; i++) {
@@ -688,7 +691,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * Reset all data display values to 0
      */
     public void resetValues() {
-        final int valueBase = Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase();
+        final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
         final TableModel dataModel = DataSegmentWindow.dataTable.getModel();
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
@@ -916,11 +919,11 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.subscription.request(1);
     }
 
-    private void updateRowHeight(final @NotNull FontSettings settings) {
+    private void updateRowHeight() {
         if (DataSegmentWindow.dataTable == null) {
             return;
         }
-        final var font = settings.getCurrentFont();
+        final var font = FONT_SETTINGS.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         DataSegmentWindow.dataTable.setRowHeight(height);
     }
@@ -1045,7 +1048,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             } finally {
                 Globals.memoryAndRegistersLock.unlock();
             } // end synchronized block
-            final int valueBase = Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase();
+            final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
             this.data[row][col] = NumberDisplayBaseChooser.formatNumber(val, valueBase);
             this.fireTableCellUpdated(row, col);
         }

@@ -64,7 +64,7 @@ public class SettingsEditorAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final var editorDialog = new EditorSettingsDialog(Objects.requireNonNull(Globals.getGui()), "Editor Settings", true);
+        final var editorDialog = new EditorSettingsDialog(Objects.requireNonNull(Globals.gui), "Editor Settings", true);
         editorDialog.setVisible(true);
     }
 

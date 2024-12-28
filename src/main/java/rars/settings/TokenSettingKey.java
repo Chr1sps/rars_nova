@@ -13,25 +13,27 @@ import java.util.List;
  * single color setting. This enum helps with that.
  */
 public enum TokenSettingKey {
-    ERROR,
+    ERROR("Errors"),
 
-    COMMENT,
-    DIRECTIVE,
+    COMMENT("Comments"),
+    DIRECTIVE("Directives"),
 
-    REGISTER_NAME,
+    REGISTER_NAME("Registers"),
 
-    IDENTIFIER,
+    IDENTIFIER("Identifiers"),
 
-    NUMBER,
-    STRING,
+    NUMBER("Numbers"),
+    STRING("Strings"),
 
-    LABEL,
-    INSTRUCTION,
+    LABEL("Labels"),
+    INSTRUCTION("Instructions"),
 
-    PUNCTUATION,
-    ROUNDING_MODE,
-    MACRO_PARAMETER,
-    HILO;
+    PUNCTUATION("Punctuation"),
+    ROUNDING_MODE("Rounding modes"),
+    MACRO_PARAMETER("Macro parameters"),
+    HILO("%hi/%lo offsets");
+    
+    public final @NotNull String description;
 
     private static final @NotNull List<@NotNull Pair<@NotNull TokenSettingKey, @NotNull RVTokenType>> settingMappings = List.of(
         new Pair<>(ERROR, RVTokenType.UNFINISHED_STRING),
@@ -58,6 +60,10 @@ public enum TokenSettingKey {
         new Pair<>(HILO, RVTokenType.HI),
         new Pair<>(HILO, RVTokenType.LO)
     );
+
+    TokenSettingKey(@NotNull String description) {
+        this.description = description;
+    }
 
     public static @Nullable TokenSettingKey fromRVTokenType(final @NotNull RVTokenType type) {
         return settingMappings.stream()

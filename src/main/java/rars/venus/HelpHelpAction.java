@@ -15,10 +15,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Vector;
+
+import static rars.settings.FontSettings.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -56,9 +57,6 @@ public class HelpHelpAction extends GuiAction {
      * Separates Instruction name descriptor from detailed (operation) description
      * in help string.
      */
-    public static final String descriptionDetailSeparator = ":";
-    // Light gray background color for alternating lines of the instruction lists
-    static final Color altBackgroundColor = new Color(0xEE, 0xEE, 0xEE);
     private final VenusUI mainUI;
 
     /**
@@ -94,7 +92,8 @@ public class HelpHelpAction extends GuiAction {
         final JList<String> examples = new JList<>(exampleList);
         final JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        examples.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        examples.setFont(FONT_SETTINGS.getCurrentFont());
+        FONT_SETTINGS.addChangeListener(() -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
         return scrollPane;
     }
 
@@ -113,7 +112,8 @@ public class HelpHelpAction extends GuiAction {
         final JList<String> examples = new JList<>(exampleList);
         final JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        examples.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        examples.setFont(FONT_SETTINGS.getCurrentFont());
+        FONT_SETTINGS.addChangeListener(() -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
         examples.setCellRenderer(new MyCellRenderer());
         return scrollPane;
     }
@@ -367,15 +367,15 @@ public class HelpHelpAction extends GuiAction {
     }
 
     private StringBuilder loadFiletoStringBuilder(final String path) {
-        final InputStream is = this.getClass().getResourceAsStream(path);
-        final BufferedReader in = new BufferedReader(new InputStreamReader(is));
+        final var stream = this.getClass().getResourceAsStream(path);
+        final var reader = new BufferedReader(new InputStreamReader(stream));
         String line;
         final StringBuilder out = new StringBuilder();
         try {
-            while ((line = in.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 out.append(line).append("\n");
             }
-            in.close();
+            reader.close();
         } catch (final IOException io) {
             return new StringBuilder(path + " could not be loaded.");
         }

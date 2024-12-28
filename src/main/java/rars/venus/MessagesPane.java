@@ -77,9 +77,9 @@ public final class MessagesPane extends JTabbedPane {
         this.setMinimumSize(new Dimension(0, 0));
         this.assemble = new JTextArea();
         this.run = new JTextArea();
-        FONT_SETTINGS.addChangeListener(settings -> {
-            this.assemble.setFont(settings.getCurrentFont());
-            this.run.setFont(settings.getCurrentFont());
+        FONT_SETTINGS.addChangeListener(() -> {
+            this.assemble.setFont(FONT_SETTINGS.getCurrentFont());
+            this.run.setFont(FONT_SETTINGS.getCurrentFont());
         });
         this.assemble.setEditable(false);
         this.run.setEditable(false);
@@ -207,7 +207,7 @@ public final class MessagesPane extends JTabbedPane {
      * @param column   Column number for error message
      */
     public static void selectEditorTextLine(final String fileName, final int line, final int column) {
-        final EditTabbedPane editTabbedPane = (EditTabbedPane) Globals.getGui().getMainPane().getEditTabbedPane();
+        final EditTabbedPane editTabbedPane = Globals.gui.mainPane.editTabbedPane;
         final EditPane editPane;
         EditPane currentPane = null;
         editPane = editTabbedPane.getEditPaneForFile(new java.io.File(fileName).getPath());
@@ -365,7 +365,7 @@ public final class MessagesPane extends JTabbedPane {
         }
         final JOptionPane pane = new JOptionPane(prompt, JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION);
         pane.setWantsInput(true);
-        final JDialog dialog = pane.createDialog(Globals.getGui(), "Keyboard Input");
+        final JDialog dialog = pane.createDialog(Globals.gui, "Keyboard Input");
         dialog.setVisible(true);
         input = (String) pane.getInputValue();
         this.postRunMessage(Globals.userInputAlert + input + "\n");

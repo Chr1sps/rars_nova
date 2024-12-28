@@ -3,7 +3,7 @@ package rars.venus;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.dump.DumpFormat;
-import rars.riscv.dump.DumpFormatLoader;
+import rars.riscv.dump.DumpFormats;
 import rars.riscv.hardware.Memory;
 import rars.util.Binary;
 import rars.util.MemoryDump;
@@ -90,23 +90,23 @@ public class FileDumpMemoryAction extends GuiAction {
     private void dumpMemory() {
         this.dumpDialog = this.createDumpDialog();
         this.dumpDialog.pack();
-        this.dumpDialog.setLocationRelativeTo(Globals.getGui());
+        this.dumpDialog.setLocationRelativeTo(Globals.gui);
         this.dumpDialog.setVisible(true);
     }
 
     // The dump dialog that appears when menu item is selected.
     private JDialog createDumpDialog() {
-        final JDialog dumpDialog = new JDialog(Globals.getGui(), FileDumpMemoryAction.title, true);
+        final JDialog dumpDialog = new JDialog(Globals.gui, FileDumpMemoryAction.title, true);
         dumpDialog.setContentPane(this.buildDialogPanel());
         dumpDialog.setDefaultCloseOperation(
-                JDialog.DO_NOTHING_ON_CLOSE);
+            JDialog.DO_NOTHING_ON_CLOSE);
         dumpDialog.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent we) {
-                        FileDumpMemoryAction.this.closeDialog();
-                    }
-                });
+            new WindowAdapter() {
+                @Override
+                public void windowClosing(final WindowEvent we) {
+                    FileDumpMemoryAction.this.closeDialog();
+                }
+            });
         return dumpDialog;
     }
 
@@ -147,8 +147,8 @@ public class FileDumpMemoryAction extends GuiAction {
         for (int i = 0; i < segmentArray.length; i++) {
             try {
                 highAddressArray[i] = Memory.getInstance().getAddressOfFirstNull(baseAddressArray[i],
-                        limitAddressArray[i])
-                        - Memory.WORD_LENGTH_BYTES;
+                    limitAddressArray[i])
+                    - Memory.WORD_LENGTH_BYTES;
 
             } // Exception will not happen since the Memory base and limit addresses are on
             // word boundaries!
@@ -159,7 +159,7 @@ public class FileDumpMemoryAction extends GuiAction {
                 this.segmentListBaseArray[segmentCount] = baseAddressArray[i];
                 this.segmentListHighArray[segmentCount] = highAddressArray[i];
                 segmentListArray[segmentCount] = segmentArray[i] + " (" + Binary.intToHexString(baseAddressArray[i]) +
-                        " - " + Binary.intToHexString(highAddressArray[i]) + ")";
+                    " - " + Binary.intToHexString(highAddressArray[i]) + ")";
                 segmentCount++;
             }
         }
@@ -172,7 +172,7 @@ public class FileDumpMemoryAction extends GuiAction {
             contents.add(new Label("There is nothing to dump!"), BorderLayout.NORTH);
             final JButton OKButton = new JButton("OK");
             OKButton.addActionListener(
-                    e -> this.closeDialog());
+                e -> this.closeDialog());
             contents.add(OKButton, BorderLayout.SOUTH);
             return contents;
         }
@@ -193,7 +193,7 @@ public class FileDumpMemoryAction extends GuiAction {
         contents.add(segmentPanel, BorderLayout.WEST);
 
         // Next, create list of all available dump formats.
-        final List<DumpFormat> dumpFormats = DumpFormatLoader.getDumpFormats();
+        final List<DumpFormat> dumpFormats = DumpFormats.DUMP_FORMATS;
         this.formatListSelector = new JComboBox<>(dumpFormats.toArray(new DumpFormat[0]));
         this.formatListSelector.setRenderer(new DumpFormatComboBoxRenderer<>(this.formatListSelector));
         this.formatListSelector.setSelectedIndex(0);
@@ -206,16 +206,16 @@ public class FileDumpMemoryAction extends GuiAction {
         final Box controlPanel = Box.createHorizontalBox();
         final JButton dumpButton = new JButton("Dump To File...");
         dumpButton.addActionListener(
-                e -> {
-                    if (this.performDump(this.segmentListBaseArray[this.segmentListSelector.getSelectedIndex()],
-                            this.segmentListHighArray[this.segmentListSelector.getSelectedIndex()],
-                            (DumpFormat) this.formatListSelector.getSelectedItem())) {
-                        this.closeDialog();
-                    }
-                });
+            e -> {
+                if (this.performDump(this.segmentListBaseArray[this.segmentListSelector.getSelectedIndex()],
+                    this.segmentListHighArray[this.segmentListSelector.getSelectedIndex()],
+                    (DumpFormat) this.formatListSelector.getSelectedItem())) {
+                    this.closeDialog();
+                }
+            });
         final JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(
-                e -> this.closeDialog());
+            e -> this.closeDialog());
         controlPanel.add(Box.createHorizontalGlue());
         controlPanel.add(dumpButton);
         controlPanel.add(Box.createHorizontalGlue());
@@ -232,7 +232,7 @@ public class FileDumpMemoryAction extends GuiAction {
         final JFileChooser saveDialog;
         boolean operationOK = false;
 
-        saveDialog = new JFileChooser(this.mainUI.getEditor().getCurrentSaveDirectory());
+        saveDialog = new JFileChooser(this.mainUI.editor.getCurrentSaveDirectory());
         saveDialog.setDialogTitle(FileDumpMemoryAction.title);
         while (!operationOK) {
             final int decision = saveDialog.showSaveDialog(this.mainUI);
@@ -243,9 +243,9 @@ public class FileDumpMemoryAction extends GuiAction {
             operationOK = true;
             if (theFile.exists()) {
                 final int overwrite = JOptionPane.showConfirmDialog(this.mainUI,
-                        "File " + theFile.getName() + " already exists.  Do you wish to overwrite it?",
-                        "Overwrite existing file?",
-                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                    "File " + theFile.getName() + " already exists.  Do you wish to overwrite it?",
+                    "Overwrite existing file?",
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 switch (overwrite) {
                     case JOptionPane.YES_OPTION:
                         break;

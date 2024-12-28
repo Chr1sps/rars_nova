@@ -71,37 +71,25 @@ public class RegistersWindow extends RegisterBlockWindow {
         return out;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected String formatRegister(final Register value, final int base) {
+    protected @NotNull String formatRegisterValue(final long value, final int base) {
         if (BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)) {
-            return NumberDisplayBaseChooser.formatNumber(value.getValue(), base);
+            return NumberDisplayBaseChooser.formatNumber(value, base);
         } else {
-            return NumberDisplayBaseChooser.formatNumber((int) value.getValue(), base);
+            return NumberDisplayBaseChooser.formatNumber((int) value, base);
         }
     }
 
-    /**
-     * <p>beginObserving.</p>
-     */
     @Override
     protected void beginObserving() {
         RegisterFile.addRegistersObserver(this);
     }
 
-    /**
-     * <p>endObserving.</p>
-     */
     @Override
     protected void endObserving() {
         RegisterFile.deleteRegistersObserver(this);
     }
 
-    /**
-     * <p>resetRegisters.</p>
-     */
     @Override
     protected void resetRegisters() {
         RegisterFile.resetRegisters();

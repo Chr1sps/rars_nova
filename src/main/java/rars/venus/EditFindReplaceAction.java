@@ -59,7 +59,7 @@ public class EditFindReplaceAction extends GuiAction {
     public EditFindReplaceAction(final String name, final Icon icon, final String descrip,
                                  final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
-        this.mainPane = gui.getMainPane();
+        this.mainPane = gui.mainPane;
     }
 
     /**
@@ -67,7 +67,8 @@ public class EditFindReplaceAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final JDialog findReplaceDialog = new FindReplaceDialog(Globals.getGui(), EditFindReplaceAction.DIALOG_TITLE, false);
+        final JDialog findReplaceDialog = new FindReplaceDialog(Globals.gui, EditFindReplaceAction.DIALOG_TITLE,
+            false);
         findReplaceDialog.setVisible(true);
     }
 
@@ -94,14 +95,14 @@ public class EditFindReplaceAction extends GuiAction {
             super(owner, title, modality);
             this.setContentPane(this.buildDialogPanel());
             this.setDefaultCloseOperation(
-                    JDialog.DO_NOTHING_ON_CLOSE);
+                JDialog.DO_NOTHING_ON_CLOSE);
             this.addWindowListener(
-                    new WindowAdapter() {
-                        @Override
-                        public void windowClosing(final WindowEvent we) {
-                            FindReplaceDialog.this.performClose();
-                        }
-                    });
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(final WindowEvent we) {
+                        FindReplaceDialog.this.performClose();
+                    }
+                });
             this.pack();
             this.setLocationRelativeTo(owner);
         }
@@ -168,19 +169,19 @@ public class EditFindReplaceAction extends GuiAction {
             this.findButton = new JButton("Find");
             this.findButton.setToolTipText(FindReplaceDialog.FIND_TOOL_TIP_TEXT);
             this.findButton.addActionListener(
-                    e -> this.performFind());
+                e -> this.performFind());
             this.replaceButton = new JButton("Replace then Find");
             this.replaceButton.setToolTipText(FindReplaceDialog.REPLACE_TOOL_TIP_TEXT);
             this.replaceButton.addActionListener(
-                    e -> this.performReplace());
+                e -> this.performReplace());
             this.replaceAllButton = new JButton("Replace all");
             this.replaceAllButton.setToolTipText(FindReplaceDialog.REPLACE_ALL_TOOL_TIP_TEXT);
             this.replaceAllButton.addActionListener(
-                    e -> this.performReplaceAll());
+                e -> this.performReplaceAll());
             this.closeButton = new JButton("Close");
             this.closeButton.setToolTipText(FindReplaceDialog.CLOSE_TOOL_TIP_TEXT);
             this.closeButton.addActionListener(
-                    e -> this.performClose());
+                e -> this.performClose());
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(this.findButton);
             controlPanel.add(Box.createHorizontalGlue());
@@ -207,7 +208,8 @@ public class EditFindReplaceAction extends GuiAction {
                 final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final var posn = editPane.doFindText(EditFindReplaceAction.searchString, this.caseSensitiveCheckBox.isSelected());
+                    final var posn = editPane.doFindText(EditFindReplaceAction.searchString,
+                        this.caseSensitiveCheckBox.isSelected());
                     if (posn == TextEditingArea.FindReplaceResult.TEXT_NOT_FOUND) {
                         this.resultsLabel.setText(this.findButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {
@@ -236,8 +238,9 @@ public class EditFindReplaceAction extends GuiAction {
                 final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final var posn = editPane.doReplace(EditFindReplaceAction.searchString, this.replaceInputField.getText(),
-                            this.caseSensitiveCheckBox.isSelected());
+                    final var posn = editPane.doReplace(EditFindReplaceAction.searchString,
+                        this.replaceInputField.getText(),
+                        this.caseSensitiveCheckBox.isSelected());
                     String result = this.replaceButton.getText() + ": ";
                     switch (posn) {
                         case TextEditingArea.FindReplaceResult.TEXT_NOT_FOUND:
@@ -271,13 +274,14 @@ public class EditFindReplaceAction extends GuiAction {
                 final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final int replaceCount = editPane.doReplaceAll(EditFindReplaceAction.searchString, this.replaceInputField.getText(),
-                            this.caseSensitiveCheckBox.isSelected());
+                    final int replaceCount = editPane.doReplaceAll(EditFindReplaceAction.searchString,
+                        this.replaceInputField.getText(),
+                        this.caseSensitiveCheckBox.isSelected());
                     if (replaceCount == 0) {
                         this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {
                         this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_REPLACED_ALL + " "
-                                + replaceCount + " occurrence" + (replaceCount == 1 ? "" : "s"));
+                            + replaceCount + " occurrence" + (replaceCount == 1 ? "" : "s"));
                     }
                 }
             } else {

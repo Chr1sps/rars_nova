@@ -12,11 +12,10 @@ import java.util.Map;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import static rars.settings.Settings.BOOL_SETTINGS;
 import static rars.settings.Settings.SETTINGS_PREFERENCES;
 import static rars.util.Utils.getColorAsHexString;
 
-public final class EditorThemeSettings extends ListenableBase<EditorThemeSettings> {
+public final class EditorThemeSettings extends ListenableBase {
     private static final @NotNull Logger LOGGER = LogManager.getLogger();
     /**
      * Top level theme settings prefix.
@@ -144,7 +143,7 @@ public final class EditorThemeSettings extends ListenableBase<EditorThemeSetting
     // region Preference loading methods
 
     private @NotNull SettingsTheme loadThemeFromPreferences() {
-        final var defaultTheme = SettingsTheme.getDefaultTheme(BOOL_SETTINGS.getSetting(BoolSetting.DARK_MODE));
+        final var defaultTheme = SettingsTheme.DEFAULT_THEME;
         final var background = loadColorFromPreferences(THEME_PREFIX + BACKGROUND, defaultTheme.backgroundColor);
         final var foreground = loadColorFromPreferences(THEME_PREFIX + FOREGROUND, defaultTheme.foregroundColor);
         final var lineHighlight = loadColorFromPreferences(THEME_PREFIX + LINE_HIGHLIGHT,

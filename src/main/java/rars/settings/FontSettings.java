@@ -14,7 +14,7 @@ import java.util.prefs.Preferences;
 
 import static rars.settings.Settings.SETTINGS_PREFERENCES;
 
-public final class FontSettings extends ListenableBase<FontSettings> {
+public final class FontSettings extends ListenableBase {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // region Preferences keys

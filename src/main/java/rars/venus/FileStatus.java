@@ -92,7 +92,7 @@ public final class FileStatus {
      */
     public static void set(final @NotNull FileStatus.State newStatus) {
         systemStatus = newStatus;
-        Globals.getGui().setMenuState(systemStatus);
+        Globals.gui.setMenuState(systemStatus);
     }
 
     /**

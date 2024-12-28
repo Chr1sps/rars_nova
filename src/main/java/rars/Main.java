@@ -10,14 +10,11 @@ import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.Instructions;
 import rars.riscv.dump.DumpFormat;
-import rars.riscv.dump.DumpFormatLoader;
+import rars.riscv.dump.DumpFormats;
 import rars.riscv.hardware.*;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
-import rars.util.Binary;
-import rars.util.FilenameFinder;
-import rars.util.MemoryDump;
-import rars.util.Pair;
+import rars.util.*;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -114,7 +111,8 @@ public final class Main {
 
         if (this.gui) {
             this.launchIDE();
-        } else { // running from command line.
+        } else {
+            // running from command line.
             // assure command mode works in headless environment (generates exception if
             // not)
             System.setProperty("java.awt.headless", "true");
@@ -124,11 +122,6 @@ public final class Main {
         }
     }
 
-    /**
-     * <p>main.</p>
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
     public static void main(final String[] args) {
         new Main(args);
     }
@@ -136,7 +129,7 @@ public final class Main {
     private static String[] checkMemoryAddressRange(final String arg) throws NumberFormatException {
         String[] memoryRange = null;
         if (arg.indexOf(Main.rangeSeparator) > 0 &&
-                arg.indexOf(Main.rangeSeparator) < arg.length() - 1) {
+            arg.indexOf(Main.rangeSeparator) < arg.length() - 1) {
             // assume correct format, two numbers separated by -, no embedded spaces.
             // If that doesn't work it is invalid.
             memoryRange = new String[2];
@@ -145,8 +138,8 @@ public final class Main {
             // NOTE: I will use homegrown decoder, because Integer.decode will throw
             // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
             if (Binary.stringToInt(memoryRange[0]) > Binary.stringToInt(memoryRange[1]) ||
-                    !Memory.wordAligned(Binary.stringToInt(memoryRange[0])) ||
-                    !Memory.wordAligned(Binary.stringToInt(memoryRange[1]))) {
+                !Memory.wordAligned(Binary.stringToInt(memoryRange[0])) ||
+                !Memory.wordAligned(Binary.stringToInt(memoryRange[1]))) {
                 throw new NumberFormatException();
             }
         }
@@ -181,17 +174,17 @@ public final class Main {
             }
             if (segInfo == null) {
                 this.out.println("Error while attempting to save dump, segment/address-range " + triple[0] + " is " +
-                        "invalid!");
+                    "invalid!");
                 continue;
             }
-            final DumpFormat format = DumpFormatLoader.findDumpFormatGivenCommandDescriptor(triple[1]);
+            final DumpFormat format = DumpFormats.findDumpFormatGivenCommandDescriptor(triple[1]);
             if (format == null) {
                 this.out.println("Error while attempting to save dump, format " + triple[1] + " was not found!");
                 continue;
             }
             try {
                 final int highAddress = program.getMemory().getAddressOfFirstNull(segInfo.first(), segInfo.second())
-                        - Memory.WORD_LENGTH_BYTES;
+                    - Memory.WORD_LENGTH_BYTES;
                 if (highAddress < segInfo.first()) {
                     this.out.println("This segment has not been written to, there is nothing to dump.");
                     continue;
@@ -201,7 +194,7 @@ public final class Main {
                 this.out.println("Error while attempting to save dump, file " + file + " was not found!");
             } catch (final AddressErrorException e) {
                 this.out.println("Error while attempting to save dump, file " + file + "!  Could not access address: "
-                        + e.address + "!");
+                    + e.address + "!");
             } catch (final IOException e) {
                 this.out.println("Error while attempting to save dump, file " + file + "!  Disk IO failed!");
             }
@@ -226,11 +219,11 @@ public final class Main {
             System.setProperty("apple.awt.application.appearance", "system");
         }
         SwingUtilities.invokeLater(
-                () -> {
-                    // Turn off metal's use of bold fonts
-                    // UIManager.put("swing.boldMetal", Boolean.FALSE);
-                    new VenusUI("RARS " + Globals.version, this.filenameList);
-                });
+            () -> {
+                // Turn off metal's use of bold fonts
+                // UIManager.put("swing.boldMetal", Boolean.FALSE);
+                new VenusUI("RARS " + Globals.version, this.filenameList);
+            });
     }
 
     // Carry out the rars command: assemble then optionally run
@@ -330,7 +323,7 @@ public final class Main {
                 continue;
             }
             if (args[i].equalsIgnoreCase("ad") ||
-                    args[i].equalsIgnoreCase("da")) {
+                args[i].equalsIgnoreCase("da")) {
                 Globals.debug = true;
                 this.simulate = false;
                 continue;
@@ -391,7 +384,7 @@ public final class Main {
 
             if (args[i].indexOf("x") == 0) {
                 if (RegisterFile.getRegister(args[i]) == null &&
-                        FloatingPointRegisterFile.getRegister(args[i]) == null) {
+                    FloatingPointRegisterFile.getRegister(args[i]) == null) {
                     this.out.println("Invalid Register Name: " + args[i]);
                 } else {
                     this.registerDisplayList.add(args[i]);
@@ -400,8 +393,8 @@ public final class Main {
             }
             // check for register name w/o $. added 14-July-2008 DPS
             if (RegisterFile.getRegister(args[i]) != null ||
-                    FloatingPointRegisterFile.getRegister(args[i]) != null ||
-                    ControlAndStatusRegisterFile.getRegister(args[i]) != null) {
+                FloatingPointRegisterFile.getRegister(args[i]) != null ||
+                ControlAndStatusRegisterFile.getRegister(args[i]) != null) {
                 this.registerDisplayList.add(args[i]);
                 continue;
             }
@@ -450,7 +443,7 @@ public final class Main {
                 // Add the additional files, avoiding duplicates.
                 this.filenameList.removeFirst(); // first one has already been processed
                 final var moreFilesToAssemble = FilenameFinder.getFilenameList(this.filenameList,
-                        FilenameFinder.MATCH_ALL_EXTENSIONS);
+                    FilenameFinder.MATCH_ALL_EXTENSIONS);
                 // Remove any duplicates then merge the two lists.
                 for (int index2 = 0; index2 < moreFilesToAssemble.size(); index2++) {
                     for (final String s : filesToAssemble) {
@@ -492,7 +485,7 @@ public final class Main {
                     final Simulator.Reason done = program.simulate();
                     if (done == Simulator.Reason.MAX_STEPS) {
                         this.out.println("\nProgram terminated when maximum step limit " + this.options.maxSteps + " " +
-                                "reached.");
+                            "reached.");
                         break;
                     } else if (done == Simulator.Reason.CLIFF_TERMINATION) {
                         this.out.println("\nProgram terminated by dropping off the bottom.");
@@ -502,7 +495,7 @@ public final class Main {
                         break;
                     }
                     assert done == Simulator.Reason.BREAKPOINT
-                            : "Internal error: All cases other than breakpoints should be handled already";
+                        : "Internal error: All cases other than breakpoints should be handled already";
                     this.displayAllPostMortem(program); // print registers if we hit a breakpoint, then continue
                 }
 
@@ -632,7 +625,7 @@ public final class Main {
             }
         }
         this.out.println("RARS " + Globals.version + "  Copyright " + Globals.copyrightYears + " " + Globals.copyrightHolders
-                + "\n");
+            + "\n");
     }
 
     // Display command line help text
@@ -645,7 +638,7 @@ public final class Main {
                 segments.append(", ");
             }
         }
-        final List<DumpFormat> dumpFormats = DumpFormatLoader.getDumpFormats();
+        final List<DumpFormat> dumpFormats = DumpFormats.DUMP_FORMATS;
         final StringBuilder formats = new StringBuilder();
         for (int i = 0; i < dumpFormats.size(); i++) {
             formats.append(dumpFormats.get(i).getCommandDescriptor());

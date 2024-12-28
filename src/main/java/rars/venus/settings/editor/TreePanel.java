@@ -10,16 +10,18 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.MutableTreeNode;
 import java.awt.*;
+import java.util.Arrays;
 
 public final class TreePanel extends JScrollPane {
-    private final TreeNode fontSettingsNode, generalSchemeSettingsNode, otherSettingsNode;
+    private final TreeNode fontSettingsNode, generalSchemeSettingsNode, otherSettingsNode, presetsNode;
 
     public TreePanel(final @NotNull PickerCardView pickerCardView) {
         super();
         this.fontSettingsNode = new TreeNode("Font");
         this.generalSchemeSettingsNode = new TreeNode("General");
         this.otherSettingsNode = new TreeNode("Other settings");
-        final var tree = buildTree(fontSettingsNode, generalSchemeSettingsNode, otherSettingsNode);
+        this.presetsNode = new TreeNode("Presets");
+        final var tree = buildTree(fontSettingsNode, presetsNode, generalSchemeSettingsNode, otherSettingsNode);
         this.setViewportView(tree);
 
         final var renderer = (DefaultTreeCellRenderer) tree.getCellRenderer();
@@ -28,7 +30,6 @@ public final class TreePanel extends JScrollPane {
         renderer.setOpenIcon(null);
 
         tree.addTreeSelectionListener(event -> {
-//            event.getOldLeadSelectionPath().getLastPathComponent();
             final var selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
             if (selectedNode == null) {
                 return;
@@ -46,6 +47,8 @@ public final class TreePanel extends JScrollPane {
                         pickerCardView.showBasePicker();
                     } else if (node == otherSettingsNode) {
                         pickerCardView.showOtherSettings();
+                    } else if (node == presetsNode) {
+                        // TODO: Implement presets
                     } else {
                         pickerCardView.showEmpty();
                     }
@@ -60,27 +63,19 @@ public final class TreePanel extends JScrollPane {
 
     private static JTree buildTree(
         final @NotNull TreeNode fontSettingsNode,
+        final @NotNull TreeNode presetsNode,
         final @NotNull TreeNode generalSchemeSettingsNode,
         final @NotNull TreeNode otherSettingsNode
     ) {
         final var newRoot = root(
             presetNode(fontSettingsNode),
             normalNode("Color scheme").children(
+                presetNode(presetsNode),
                 presetNode(generalSchemeSettingsNode),
                 normalNode("RISC-V Syntax").children(
-                    syntaxNode(TokenSettingKey.ERROR, "Errors"),
-                    syntaxNode(TokenSettingKey.COMMENT, "Comments"),
-                    syntaxNode(TokenSettingKey.DIRECTIVE, "Directives"),
-                    syntaxNode(TokenSettingKey.REGISTER_NAME, "Registers"),
-                    syntaxNode(TokenSettingKey.IDENTIFIER, "Identifiers"),
-                    syntaxNode(TokenSettingKey.NUMBER, "Numbers"),
-                    syntaxNode(TokenSettingKey.STRING, "Strings"),
-                    syntaxNode(TokenSettingKey.LABEL, "Labels"),
-                    syntaxNode(TokenSettingKey.INSTRUCTION, "Instructions"),
-                    syntaxNode(TokenSettingKey.PUNCTUATION, "Punctuation"),
-                    syntaxNode(TokenSettingKey.ROUNDING_MODE, "Rounding modes"),
-                    syntaxNode(TokenSettingKey.MACRO_PARAMETER, "Macro parameters"),
-                    syntaxNode(TokenSettingKey.HILO, "%hi/%lo offsets")
+                    Arrays.stream(TokenSettingKey.values())
+                        .map(key -> syntaxNode(key, key.description))
+                        .toArray(NodeBuilder[]::new)
                 )
             ),
             presetNode(otherSettingsNode)

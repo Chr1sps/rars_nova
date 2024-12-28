@@ -69,46 +69,27 @@ public class NumberDisplayBaseChooser extends JCheckBox {
         super(text, displayInHex);
         this.base = NumberDisplayBaseChooser.getBase(displayInHex);
         this.addItemListener(
-                ie -> {
-                    final NumberDisplayBaseChooser choose = (NumberDisplayBaseChooser) ie.getItem();
-                    if (ie.getStateChange() == ItemEvent.SELECTED) {
-                        choose.setBase(NumberDisplayBaseChooser.HEXADECIMAL);
-                    } else {
-                        choose.setBase(NumberDisplayBaseChooser.DECIMAL);
+            ie -> {
+                final NumberDisplayBaseChooser choose = (NumberDisplayBaseChooser) ie.getItem();
+                if (ie.getStateChange() == ItemEvent.SELECTED) {
+                    choose.setBase(NumberDisplayBaseChooser.HEXADECIMAL);
+                } else {
+                    choose.setBase(NumberDisplayBaseChooser.DECIMAL);
+                }
+                // Better to use notify, but I am tired...
+                if (NumberDisplayBaseChooser.this.settingMenuItem != null) {
+                    NumberDisplayBaseChooser.this.settingMenuItem.setSelected(choose.isSelected());
+                    final ActionListener[] listeners =
+                        NumberDisplayBaseChooser.this.settingMenuItem.getActionListeners();
+                    final ActionEvent event = new ActionEvent(NumberDisplayBaseChooser.this.settingMenuItem, 0,
+                        "chooser");
+                    for (final ActionListener listener : listeners) {
+                        listener.actionPerformed(event);
                     }
-                    // Better to use notify, but I am tired...
-                    if (NumberDisplayBaseChooser.this.settingMenuItem != null) {
-                        NumberDisplayBaseChooser.this.settingMenuItem.setSelected(choose.isSelected());
-                        final ActionListener[] listeners = NumberDisplayBaseChooser.this.settingMenuItem.getActionListeners();
-                        final ActionEvent event = new ActionEvent(NumberDisplayBaseChooser.this.settingMenuItem, 0, "chooser");
-                        for (final ActionListener listener : listeners) {
-                            listener.actionPerformed(event);
-                        }
-                    }
-                    // Better to use notify, but I am tired...
-                    Globals.getGui().getMainPane().getExecutePane().numberDisplayBaseChanged(choose);
-                });
-    }
-
-    /**
-     * Retrieve the current number base.
-     *
-     * @return current number base, currently DECIMAL or HEXADECIMAL
-     */
-    public int getBase() {
-        return this.base;
-    }
-
-    /**
-     * Set the current number base.
-     *
-     * @param newBase The new number base. Currently, if it is
-     *                neither DECIMAL nor HEXADECIMAL, the base will not be changed.
-     */
-    public void setBase(final int newBase) {
-        if (newBase == NumberDisplayBaseChooser.DECIMAL || newBase == NumberDisplayBaseChooser.HEXADECIMAL) {
-            this.base = newBase;
-        }
+                }
+                // Better to use notify, but I am tired...
+                Globals.gui.mainPane.executeTab.numberDisplayBaseChanged(choose);
+            });
     }
 
     /**
@@ -143,8 +124,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      */
     public static String formatNumber(final int value, final int base) {
         return switch (base) {
-            case NumberDisplayBaseChooser.HEXADECIMAL ->
-                    Binary.intToHexString(value);
+            case NumberDisplayBaseChooser.HEXADECIMAL -> Binary.intToHexString(value);
             case NumberDisplayBaseChooser.ASCII -> Binary.intToAscii(value);
             default -> Integer.toString(value);
         };
@@ -203,38 +183,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
             final long lguy = Double.doubleToLongBits(value);
             return Binary.intToHexString(Binary.highOrderLongToInt(lguy)) +
-                    Binary.intToHexString(Binary.lowOrderLongToInt(lguy)).substring(2);
+                Binary.intToHexString(Binary.lowOrderLongToInt(lguy)).substring(2);
         } else {
             return Double.toString(value);
         }
-    }
-
-    /**
-     * Produces a string form of a number given the second. There
-     * is also an class (static method) that uses a specified
-     * base.
-     *
-     * @param value the number to be converted
-     * @return a String equivalent of the second rendered appropriately.
-     */
-    public String formatNumber(final int value) {
-        if (this.base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return Binary.intToHexString(value);
-        } else {
-            return Integer.valueOf(value).toString();
-        }
-    }
-
-    /**
-     * Produces a string form of an unsigned integer given the second. There
-     * is also an class (static method) that uses a specified base.
-     * If the current base is 16, this produces the same result as formatNumber().
-     *
-     * @param value the number to be converted
-     * @return a String equivalent of the second rendered appropriately.
-     */
-    public String formatUnsignedInteger(final int value) {
-        return NumberDisplayBaseChooser.formatUnsignedInteger(value, this.base);
     }
 
     /**
@@ -292,6 +244,65 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     }
 
     /**
+     * Return the number base corresponding to the specified setting.
+     *
+     * @param setting a boolean
+     * @return HEXADECIMAL if setting is true, DECIMAL otherwise.
+     */
+    public static int getBase(final boolean setting) {
+        return (setting) ? NumberDisplayBaseChooser.HEXADECIMAL : NumberDisplayBaseChooser.DECIMAL;
+    }
+
+    /**
+     * Retrieve the current number base.
+     *
+     * @return current number base, currently DECIMAL or HEXADECIMAL
+     */
+    public int getBase() {
+        return this.base;
+    }
+
+    /**
+     * Set the current number base.
+     *
+     * @param newBase The new number base. Currently, if it is
+     *                neither DECIMAL nor HEXADECIMAL, the base will not be changed.
+     */
+    public void setBase(final int newBase) {
+        if (newBase == NumberDisplayBaseChooser.DECIMAL || newBase == NumberDisplayBaseChooser.HEXADECIMAL) {
+            this.base = newBase;
+        }
+    }
+
+    /**
+     * Produces a string form of a number given the second. There
+     * is also an class (static method) that uses a specified
+     * base.
+     *
+     * @param value the number to be converted
+     * @return a String equivalent of the second rendered appropriately.
+     */
+    public String formatNumber(final int value) {
+        if (this.base == NumberDisplayBaseChooser.HEXADECIMAL) {
+            return Binary.intToHexString(value);
+        } else {
+            return Integer.valueOf(value).toString();
+        }
+    }
+
+    /**
+     * Produces a string form of an unsigned integer given the second. There
+     * is also an class (static method) that uses a specified base.
+     * If the current base is 16, this produces the same result as formatNumber().
+     *
+     * @param value the number to be converted
+     * @return a String equivalent of the second rendered appropriately.
+     */
+    public String formatUnsignedInteger(final int value) {
+        return NumberDisplayBaseChooser.formatUnsignedInteger(value, this.base);
+    }
+
+    /**
      * Set the menu item from Settings menu that corresponds to this chooser.
      * It is the responsibility of that item to register here, because this
      * one is created first (before the menu item). They need to communicate
@@ -302,15 +313,5 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      */
     public void setSettingsMenuItem(final JCheckBoxMenuItem setter) {
         this.settingMenuItem = setter;
-    }
-
-    /**
-     * Return the number base corresponding to the specified setting.
-     *
-     * @param setting a boolean
-     * @return HEXADECIMAL if setting is true, DECIMAL otherwise.
-     */
-    public static int getBase(final boolean setting) {
-        return (setting) ? NumberDisplayBaseChooser.HEXADECIMAL : NumberDisplayBaseChooser.DECIMAL;
     }
 }

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 
 public final class BottomRowComponent extends JPanel {
-    public @NotNull JButton applyButton, applyAndCloseButton, cancelButton;
+    public final @NotNull JButton applyButton, applyAndCloseButton, cancelButton;
 
     public BottomRowComponent() {
         super();

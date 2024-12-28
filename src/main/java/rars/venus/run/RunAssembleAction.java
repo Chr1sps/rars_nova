@@ -122,16 +122,16 @@ public class RunAssembleAction extends GuiAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         final String name = this.getValue(Action.NAME).toString();
-        final MessagesPane messagesPane = this.mainUI.getMessagesPane();
-        final ExecutePane executePane = this.mainUI.getMainPane().getExecutePane();
-        final RegistersPane registersPane = this.mainUI.getRegistersPane();
+        final MessagesPane messagesPane = this.mainUI.messagesPane;
+        final ExecutePane executePane = this.mainUI.mainPane.executeTab;
+        final RegistersPane registersPane = this.mainUI.registersPane;
         RunAssembleAction.extendedAssemblerEnabled =
-                BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
+            BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
         RunAssembleAction.warningsAreErrors =
-                BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
+            BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
         if (FileStatus.getFile() != null) {
             if (FileStatus.get() == FileStatus.State.EDITED) {
-                this.mainUI.getEditor().save();
+                this.mainUI.editor.save();
             }
             try {
                 Globals.program = new RISCVprogram();
@@ -140,13 +140,13 @@ public class RunAssembleAction extends GuiAction {
                     // for multiple
                     // file assembly
                     filesToAssemble = FilenameFinder.getFilenameList(
-                            new File(FileStatus.getName()).getParent(), Globals.fileExtensions);
+                        new File(FileStatus.getName()).getParent(), Globals.fileExtensions);
                 } else {
                     filesToAssemble = List.of(FileStatus.getName());
                 }
                 if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
-                    this.mainUI.getEditor().saveAll();
-                    final String[] paths = this.mainUI.getEditor().getOpenFilePaths();
+                    this.mainUI.editor.saveAll();
+                    final String[] paths = this.mainUI.editor.getOpenFilePaths();
                     for (final String path : paths) {
                         if (!filesToAssemble.contains(path)) {
                             filesToAssemble.add(path);
@@ -160,18 +160,18 @@ public class RunAssembleAction extends GuiAction {
                     }
                 }
                 RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(filesToAssemble,
-                        FileStatus.getFile().getPath(), exceptionHandler);
+                    FileStatus.getFile().getPath(), exceptionHandler);
                 messagesPane.postMessage(RunAssembleAction.buildFileNameList(name + ": assembling ",
-                        RunAssembleAction.programsToAssemble));
+                    RunAssembleAction.programsToAssemble));
                 // added logic to receive any warnings and output them.... DPS 11/28/06
                 final ErrorList warnings = Globals.program.assemble(RunAssembleAction.programsToAssemble,
-                        RunAssembleAction.extendedAssemblerEnabled,
-                        RunAssembleAction.warningsAreErrors);
+                    RunAssembleAction.extendedAssemblerEnabled,
+                    RunAssembleAction.warningsAreErrors);
                 if (warnings.warningsOccurred()) {
                     messagesPane.postMessage(warnings.generateWarningReport());
                 }
                 messagesPane.postMessage(
-                        name + ": operation completed successfully.\n\n");
+                    name + ": operation completed successfully.\n\n");
                 FileStatus.setAssembled(true);
                 FileStatus.set(FileStatus.State.RUNNABLE);
 
@@ -180,19 +180,19 @@ public class RunAssembleAction extends GuiAction {
                 ControlAndStatusRegisterFile.resetRegisters();
                 InterruptController.reset();
 
-                executePane.getTextSegmentWindow().setupTable();
-                executePane.getDataSegmentWindow().setupTable();
-                executePane.getDataSegmentWindow().highlightCellForAddress(Memory.dataBaseAddress);
-                executePane.getDataSegmentWindow().clearHighlighting();
-                executePane.getLabelsWindow().setupTable();
-                executePane.getTextSegmentWindow().setCodeHighlighting(true);
-                executePane.getTextSegmentWindow().highlightStepAtPC();
+                executePane.textSegment.setupTable();
+                executePane.dataSegment.setupTable();
+                executePane.dataSegment.highlightCellForAddress(Memory.dataBaseAddress);
+                executePane.dataSegment.clearHighlighting();
+                executePane.labelValues.setupTable();
+                executePane.textSegment.setCodeHighlighting(true);
+                executePane.textSegment.highlightStepAtPC();
                 registersPane.getRegistersWindow().clearWindow();
                 registersPane.getFloatingPointWindow().clearWindow();
                 registersPane.getControlAndStatusWindow().clearWindow();
-                this.mainUI.setReset(true);
-                this.mainUI.setStarted(false);
-                this.mainUI.getMainPane().setSelectedComponent(executePane);
+                this.mainUI.isMemoryReset = true;
+                this.mainUI.isExecutionStarted = false;
+                this.mainUI.mainPane.setSelectedComponent(executePane);
 
                 // Aug. 24, 2005 Ken Vollmar
                 SystemIO.resetFiles(); // Ensure that I/O "file descriptors" are initialized for a new program run
@@ -201,7 +201,7 @@ public class RunAssembleAction extends GuiAction {
                 final String errorReport = pe.errors().generateErrorAndWarningReport();
                 messagesPane.postMessage(errorReport);
                 messagesPane.postMessage(
-                        name + ": operation completed with errors.\n\n");
+                    name + ": operation completed with errors.\n\n");
                 // Select editor line containing first error, and corresponding error message.
                 final var errorMessages = pe.errors().getErrorMessages();
                 for (final ErrorMessage em : errorMessages) {
@@ -211,8 +211,8 @@ public class RunAssembleAction extends GuiAction {
                         continue;
                     }
                     if (!em.isWarning() || RunAssembleAction.warningsAreErrors) {
-                        Globals.getGui().getMessagesPane().selectErrorMessage(em.getFilename(), em.getLine(),
-                                em.getPosition());
+                        Globals.gui.messagesPane.selectErrorMessage(em.getFilename(), em.getLine(),
+                            em.getPosition());
                         // Bug workaround: Line selection does not work correctly for the JEditTextArea
                         // editor
                         // when the file is opened then automatically assembled (assemble-on-open
@@ -223,7 +223,7 @@ public class RunAssembleAction extends GuiAction {
                         // DPS 9-Aug-2010
                         if (e != null) {
                             MessagesPane.selectEditorTextLine(em.getFilename(), em.getLine(),
-                                    em.getPosition());
+                                em.getPosition());
                         }
                         break;
                     }

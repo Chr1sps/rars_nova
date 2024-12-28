@@ -73,6 +73,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import static rars.settings.FontSettings.FONT_SETTINGS;
+
 /**
  * Instruction/memory dump tool. Dumps every instruction run and every memory
  * access to a file.
@@ -132,7 +134,8 @@ public class InstructionMemoryDump extends AbstractTool {
         panel.add(this.dumpLogFilename);
 
         this.logSuccess = new JLabel("");
-        this.logSuccess.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        this.logSuccess.setFont(FONT_SETTINGS.getCurrentFont());
+        FONT_SETTINGS.addChangeListener(() -> this.logSuccess.setFont(FONT_SETTINGS.getCurrentFont()));
         this.logSuccess.setFocusable(false);
         this.logSuccess.setBackground(panel.getBackground());
         panel.add(this.logSuccess);

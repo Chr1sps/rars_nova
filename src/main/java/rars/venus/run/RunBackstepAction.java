@@ -73,30 +73,30 @@ public class RunBackstepAction extends GuiAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         final String name = this.getValue(Action.NAME).toString();
-        final ExecutePane executePane = this.mainUI.getMainPane().getExecutePane();
+        final ExecutePane executePane = this.mainUI.mainPane.executeTab;
         if (!FileStatus.isAssembled()) {
             // note: this should never occur since backstepping is only enabled after
             // successful assembly.
             JOptionPane.showMessageDialog(this.mainUI, "The program must be assembled before it can be run.");
             return;
         }
-        this.mainUI.setStarted(true);
-        this.mainUI.getMessagesPane().selectRunMessageTab();
-        executePane.getTextSegmentWindow().setCodeHighlighting(true);
+        this.mainUI.isExecutionStarted = true;
+        this.mainUI.messagesPane.selectRunMessageTab();
+        executePane.textSegment.setCodeHighlighting(true);
 
         if (OtherSettings.getBackSteppingEnabled()) {
-            Memory.getInstance().subscribe(executePane.getDataSegmentWindow());
-            RegisterFile.addRegistersObserver(executePane.getRegistersWindow());
-            ControlAndStatusRegisterFile.addRegistersObserver(executePane.getControlAndStatusWindow());
-            FloatingPointRegisterFile.addRegistersSubscriber(executePane.getFloatingPointWindow());
+            Memory.getInstance().subscribe(executePane.dataSegment);
+            RegisterFile.addRegistersObserver(executePane.registerValues);
+            ControlAndStatusRegisterFile.addRegistersObserver(executePane.csrValues);
+            FloatingPointRegisterFile.addRegistersSubscriber(executePane.fpRegValues);
             Globals.program.getBackStepper().backStep();
-            Memory.getInstance().deleteSubscriber(executePane.getDataSegmentWindow());
-            RegisterFile.deleteRegistersObserver(executePane.getRegistersWindow());
-            executePane.getRegistersWindow().updateRegisters();
-            executePane.getFloatingPointWindow().updateRegisters();
-            executePane.getControlAndStatusWindow().updateRegisters();
-            executePane.getDataSegmentWindow().updateValues();
-            executePane.getTextSegmentWindow().highlightStepAtPC(); // Argument aded 25 June 2007
+            Memory.getInstance().deleteSubscriber(executePane.dataSegment);
+            RegisterFile.deleteRegistersObserver(executePane.registerValues);
+            executePane.registerValues.updateRegisters();
+            executePane.fpRegValues.updateRegisters();
+            executePane.csrValues.updateRegisters();
+            executePane.dataSegment.updateValues();
+            executePane.textSegment.highlightStepAtPC(); // Argument aded 25 June 2007
             FileStatus.set(FileStatus.State.RUNNABLE);
             // if we've backed all the way, disable the button
             // if (Globals.program.getBackStepper().empty()) {
@@ -118,7 +118,7 @@ public class RunBackstepAction extends GuiAction {
              * getProgramCounter()-4);
              * }
              */
-            this.mainUI.setReset(false);
+            this.mainUI.isMemoryReset = false;
         }
     }
 }

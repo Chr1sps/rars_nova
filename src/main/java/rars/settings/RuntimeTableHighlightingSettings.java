@@ -12,7 +12,7 @@ import java.util.prefs.Preferences;
 
 import static rars.util.Utils.getColorAsHexString;
 
-public final class RuntimeTableHighlightingSettings extends ListenableBase<RuntimeTableHighlightingSettings> {
+public final class RuntimeTableHighlightingSettings extends ListenableBase {
 
     private static final Logger LOGGER = LogManager.getLogger();
 

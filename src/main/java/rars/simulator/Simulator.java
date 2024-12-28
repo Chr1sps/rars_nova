@@ -64,20 +64,9 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
 
     private Simulator() {
         this.simulatorThread = null;
-        if (Globals.getGui() != null) {
+        if (Globals.gui != null) {
             Simulator.interactiveGUIUpdater = this::updateUi;
         }
-    }
-    private void updateUi() {
-        if (Globals.getGui().getRegistersPane().getSelectedComponent() == Globals.getGui().getMainPane()
-            .getExecutePane().getRegistersWindow()) {
-            Globals.getGui().getMainPane().getExecutePane().getRegistersWindow().updateRegisters();
-        } else {
-            Globals.getGui().getMainPane().getExecutePane().getFloatingPointWindow().updateRegisters();
-        }
-        Globals.getGui().getMainPane().getExecutePane().getDataSegmentWindow().updateValues();
-        Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow().setCodeHighlighting(true);
-        Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow().highlightStepAtPC();       
     }
 
     /**
@@ -95,6 +84,17 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             Simulator.simulator = new Simulator();
         }
         return Simulator.simulator;
+    }
+
+    private void updateUi() {
+        if (Globals.gui.registersPane.getSelectedComponent() == Globals.gui.mainPane.executeTab.registerValues) {
+            Globals.gui.mainPane.executeTab.registerValues.updateRegisters();
+        } else {
+            Globals.gui.mainPane.executeTab.fpRegValues.updateRegisters();
+        }
+        Globals.gui.mainPane.executeTab.dataSegment.updateValues();
+        Globals.gui.mainPane.executeTab.textSegment.setCodeHighlighting(true);
+        Globals.gui.mainPane.executeTab.textSegment.highlightStepAtPC();
     }
 
     /**
@@ -261,7 +261,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
         private void startExecution() {
             Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.START,
                 this.maxSteps,
-                (Globals.getGui() != null || RunSpeedPanel.exists())
+                (Globals.gui != null || RunSpeedPanel.exists())
                     ? RunSpeedPanel.getInstance().getRunSpeed()
                     : RunSpeedPanel.UNLIMITED_SPEED,
                 this.pc, null, this.pe, this.done));
@@ -275,7 +275,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                 SystemIO.resetFiles(); // close any files opened in the process of simulating
             Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.STOP,
                 this.maxSteps,
-                (Globals.getGui() != null || RunSpeedPanel.exists())
+                (Globals.gui != null || RunSpeedPanel.exists())
                     ? RunSpeedPanel.getInstance().getRunSpeed()
                     : RunSpeedPanel.UNLIMITED_SPEED,
                 this.pc, reason, this.pe, done));
@@ -613,7 +613,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                     RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                     SwingUtilities.invokeLater(Simulator.interactiveGUIUpdater);
                 }
-                if (Globals.getGui() != null || RunSpeedPanel.exists()) { // OR added by DPS 24 July 2008 to enable
+                if (Globals.gui != null || RunSpeedPanel.exists()) { // OR added by DPS 24 July 2008 to enable
                     // speed control by stand-alone tool
                     if (this.maxSteps != 1 &&
                         RunSpeedPanel.getInstance().getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {

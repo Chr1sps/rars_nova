@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static rars.settings.FontSettings.FONT_SETTINGS;
 import static rars.settings.Settings.OTHER_SETTINGS;
 
 /*
@@ -55,22 +56,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class SettingsMemoryConfigurationAction extends GuiAction {
     private static final String[] configurationItemNames = {
-            ".text base address",
-            "data segment base address",
-            ".extern base address",
-            "global pointer (gp)",
-            ".data base address",
-            "heap base address",
-            "stack pointer (sp)",
-            "stack base address",
-            "user space high address",
-            "kernel space base address",
-            "MMIO base address",
-            "kernel space high address",
-            "data segment limit address",
-            "text limit address",
-            "stack limit address",
-            "memory map limit address"
+        ".text base address",
+        "data segment base address",
+        ".extern base address",
+        "global pointer (gp)",
+        ".data base address",
+        "heap base address",
+        "stack pointer (sp)",
+        "stack base address",
+        "user space high address",
+        "kernel space base address",
+        "MMIO base address",
+        "kernel space high address",
+        "data segment limit address",
+        "text limit address",
+        "stack limit address",
+        "memory map limit address"
     };
 
     /**
@@ -95,7 +96,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final JDialog configDialog = new MemoryConfigurationDialog(Globals.getGui(), "Memory Configuration", true);
+        final JDialog configDialog = new MemoryConfigurationDialog(Globals.gui, "Memory Configuration", true);
         configDialog.setVisible(true);
     }
 
@@ -109,14 +110,14 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             super(owner, title, modality);
             this.setContentPane(this.buildDialogPanel());
             this.setDefaultCloseOperation(
-                    JDialog.DO_NOTHING_ON_CLOSE);
+                JDialog.DO_NOTHING_ON_CLOSE);
             this.addWindowListener(
-                    new WindowAdapter() {
-                        @Override
-                        public void windowClosing(final WindowEvent we) {
-                            MemoryConfigurationDialog.this.performClose();
-                        }
-                    });
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(final WindowEvent we) {
+                        MemoryConfigurationDialog.this.performClose();
+                    }
+                });
             this.pack();
             this.setLocationRelativeTo(owner);
         }
@@ -147,7 +148,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
                 chooserPanel.add(button);
             }
             chooserPanel.setBorder(
-                    BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Configuration"));
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Configuration"));
             return chooserPanel;
         }
 
@@ -158,17 +159,21 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             final int numItems = configurationItemNames.length;
             final JPanel namesPanel = new JPanel(new GridLayout(numItems, 1));
             final JPanel valuesPanel = new JPanel(new GridLayout(numItems, 1));
-            final Font monospaced = new Font("Monospaced", Font.PLAIN, 12);
             this.nameDisplay = new JLabel[numItems];
             this.addressDisplay = new JTextField[numItems];
             for (int i = 0; i < numItems; i++) {
                 this.nameDisplay[i] = new JLabel();
                 final var textField = new JTextField();
                 textField.setEditable(false);
-                textField.setFont(monospaced);
+                textField.setFont(FONT_SETTINGS.getCurrentFont());
                 textField.setFocusable(false);
                 this.addressDisplay[i] = textField;
             }
+            FONT_SETTINGS.addChangeListener(() -> {
+                for (final var textField: this.addressDisplay) {
+                    textField.setFont(FONT_SETTINGS.getCurrentFont());
+                }
+            });
             // Display vertically from high to low memory addresses so
             // add the components in reverse order.
             for (int i = this.addressDisplay.length - 1; i >= 0; i--) {
@@ -198,22 +203,22 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             final JButton okButton = new JButton("Apply and Close");
             okButton.setToolTipText(CLOSE_TOOL_TIP_TEXT);
             okButton.addActionListener(
-                    e -> {
-                        this.performApply();
-                        this.performClose();
-                    });
+                e -> {
+                    this.performApply();
+                    this.performClose();
+                });
             final JButton applyButton = new JButton("Apply");
             applyButton.setToolTipText(APPLY_TOOL_TIP_TEXT);
             applyButton.addActionListener(
-                    e -> this.performApply());
+                e -> this.performApply());
             final JButton cancelButton = new JButton("Cancel");
             cancelButton.setToolTipText(CANCEL_TOOL_TIP_TEXT);
             cancelButton.addActionListener(
-                    e -> this.performClose());
+                e -> this.performClose());
             final JButton resetButton = new JButton("Reset");
             resetButton.setToolTipText(RESET_TOOL_TIP_TEXT);
             resetButton.addActionListener(
-                    e -> this.performReset());
+                e -> this.performReset());
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(okButton);
             controlPanel.add(Box.createHorizontalGlue());
@@ -229,20 +234,20 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         private void performApply() {
             if (CurrentMemoryConfiguration.set(this.selectedConfigurationButton.getConfiguration())) {
                 OTHER_SETTINGS.setMemoryConfigurationAndSave(
-                        this.selectedConfigurationButton.getConfiguration());
-                Globals.getGui().getRegistersPane().getRegistersWindow().clearHighlighting();
-                Globals.getGui().getRegistersPane().getRegistersWindow().updateRegisters();
-                Globals.getGui().getMainPane().getExecutePane().getDataSegmentWindow().updateBaseAddressComboBox();
+                    this.selectedConfigurationButton.getConfiguration());
+                Globals.gui.registersPane.getRegistersWindow().clearHighlighting();
+                Globals.gui.registersPane.getRegistersWindow().updateRegisters();
+                Globals.gui.mainPane.executeTab.dataSegment.updateBaseAddressComboBox();
                 // 21 July 2009 Re-assemble if the situation demands it to maintain consistency.
                 if (FileStatus.get() == FileStatus.State.RUNNABLE ||
-                        FileStatus.get() == FileStatus.State.RUNNING ||
-                        FileStatus.get() == FileStatus.State.TERMINATED) {
+                    FileStatus.get() == FileStatus.State.RUNNING ||
+                    FileStatus.get() == FileStatus.State.TERMINATED) {
                     // Stop execution if executing -- should NEVER happen because this
                     // Action's widget is disabled during MIPS execution.
                     if (FileStatus.get() == FileStatus.State.RUNNING) {
                         Simulator.getInstance().stopExecution();
                     }
-                    Globals.getGui().getRunAssembleAction().actionPerformed(null);
+                    Globals.gui.getRunAssembleAction().actionPerformed(null);
                 }
             }
         }
@@ -261,22 +266,22 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         // Set name values in JLabels and address values in the JTextFields
         private void setConfigDisplay(final @NotNull MemoryConfiguration config) {
             final int[] configurationItemValues = {
-                    config.textBaseAddress,
-                    config.dataSegmentBaseAddress,
-                    config.externBaseAddress,
-                    config.globalPointerAddress,
-                    config.dataBaseAddress,
-                    config.heapBaseAddress,
-                    config.stackPointerAddress,
-                    config.stackBaseAddress,
-                    config.userHighAddress,
-                    config.kernelBaseAddress,
-                    config.memoryMapBaseAddress,
-                    config.kernelHighAddress,
-                    config.dataSegmentLimitAddress,
-                    config.textLimitAddress,
-                    config.stackLimitAddress,
-                    config.memoryMapLimitAddress
+                config.textBaseAddress,
+                config.dataSegmentBaseAddress,
+                config.externBaseAddress,
+                config.globalPointerAddress,
+                config.dataBaseAddress,
+                config.heapBaseAddress,
+                config.stackPointerAddress,
+                config.stackBaseAddress,
+                config.userHighAddress,
+                config.kernelBaseAddress,
+                config.memoryMapBaseAddress,
+                config.kernelHighAddress,
+                config.dataSegmentLimitAddress,
+                config.textLimitAddress,
+                config.stackLimitAddress,
+                config.memoryMapLimitAddress
             };
             // Will use TreeMap to extract list of address-name pairs sorted by
             // hex-stringified address. This will correctly handle kernel addresses,
@@ -287,7 +292,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             final TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
             for (int i = 0; i < configurationItemValues.length; i++) {
                 treeSortedByAddress.put(Binary.intToHexString(configurationItemValues[i]) + configurationItemNames[i],
-                        configurationItemNames[i]);
+                    configurationItemNames[i]);
             }
             final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();
             Map.Entry<String, String> pair;

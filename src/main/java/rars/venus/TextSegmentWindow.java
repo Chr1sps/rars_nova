@@ -15,7 +15,6 @@ import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.settings.EditorThemeSettings;
-import rars.settings.FontSettings;
 import rars.simulator.Simulator;
 import rars.util.Binary;
 import rars.util.FontUtilities;
@@ -114,9 +113,9 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public TextSegmentWindow() {
         super("Text Segment", true, false, true, true);
         Simulator.getInstance().subscribe(this);
-        BOOL_SETTINGS.addChangeListener(settings -> {
+        BOOL_SETTINGS.addChangeListener(() -> {
             this.deleteAsTextSegmentObserver();
-            if (settings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+            if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 this.addAsTextSegmentObserver();
             }
         });
@@ -137,7 +136,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * Should convert the lines of code over to the table rows and columns.
      */
     public void setupTable() {
-        final int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
+        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
         final var sourceStatementList = Globals.program.getMachineList();
@@ -192,7 +191,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
         this.table = new MyTippedJTable(this.tableModel);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-        this.updateRowHeight(FONT_SETTINGS);
+        this.updateRowHeight();
 
         // prevents cells in row from being highlighted when user clicks on breakpoint
         // checkbox
@@ -301,7 +300,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public void updateCodeAddresses() {
         if (this.contentPane.getComponentCount() == 0)
             return; // ignore if no content to change
-        final int addressBase = Globals.getGui().getMainPane().getExecutePane().getAddressDisplayBase();
+        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
         for (int i = 0; i < this.intAddresses.length; i++) {
             final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(this.intAddresses[i],
                 addressBase);
@@ -449,7 +448,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     // for that. So we'll pretend to be Memory observable and send it a fake memory
                     // write update.
                     try {
-                        Globals.getGui().getMainPane().getExecutePane().getDataSegmentWindow()
+                        Globals.gui.mainPane.executeTab.dataSegment
                             .onNext(new MemoryAccessNotice(AccessNotice.AccessType.WRITE, address, value));
                     } catch (final Exception e) {
                         // Not sure if anything bad can happen in this sequence, but if anything does we
@@ -470,8 +469,10 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public void resetModifiedSourceCode() {
         if (this.executeMods != null && !this.executeMods.isEmpty()) {
             for (final var modifiedCode : this.executeMods.values()) {
-                this.tableModel.setValueAt(modifiedCode.code(), modifiedCode.row(), ColumnData.INSTRUCTION_CODE_COLUMN.number);
-                this.tableModel.setValueAt(modifiedCode.basic(), modifiedCode.row(), ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
+                this.tableModel.setValueAt(modifiedCode.code(), modifiedCode.row(),
+                    ColumnData.INSTRUCTION_CODE_COLUMN.number);
+                this.tableModel.setValueAt(modifiedCode.basic(), modifiedCode.row(),
+                    ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
                 this.tableModel.setValueAt(modifiedCode.source(), modifiedCode.row(), ColumnData.SOURCE_COLUMN.number);
             }
             this.executeMods.clear();
@@ -716,11 +717,11 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         return addressRow;
     }
 
-    private void updateRowHeight(final @NotNull FontSettings settings) {
+    private void updateRowHeight() {
         if (this.table == null) {
             return;
         }
-        final var font = settings.getCurrentFont();
+        final var font = FONT_SETTINGS.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         this.table.setRowHeight(height);
     }
@@ -877,7 +878,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 isSelected, hasFocus, row, column);
             // cell.setFont(tableCellFont);
             final TextSegmentWindow textSegment =
-                Globals.getGui().getMainPane().getExecutePane().getTextSegmentWindow();
+                Globals.gui.mainPane.executeTab.textSegment;
             final boolean highlighting = textSegment.getCodeHighlighting();
 
             if (highlighting && textSegment.getIntCodeAddressAtRow(row) == TextSegmentWindow.this.highlightAddress) {

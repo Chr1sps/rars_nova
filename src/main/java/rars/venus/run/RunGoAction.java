@@ -99,20 +99,21 @@ public class RunGoAction extends GuiAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         this.name = this.getValue(Action.NAME).toString();
-        this.executePane = this.mainUI.getMainPane().getExecutePane();
+        this.executePane = this.mainUI.mainPane.executeTab;
         if (FileStatus.isAssembled()) {
-            if (!this.mainUI.getStarted()) {
+            if (!this.mainUI.isExecutionStarted) {
                 this.processProgramArgumentsIfAny(); // DPS 17-July-2008
             }
-            if (this.mainUI.getReset() || this.mainUI.getStarted()) {
+            if (this.mainUI.isMemoryReset || this.mainUI.isExecutionStarted) {
 
-                this.mainUI.setStarted(true); // added 8/27/05
+                // added 8/27/05
+                this.mainUI.isExecutionStarted = true;
 
-                this.mainUI.getMessagesPane().postMessage(
-                        this.name + ": running " + FileStatus.getFile().getName() + "\n\n");
-                this.mainUI.getMessagesPane().selectRunMessageTab();
-                this.executePane.getTextSegmentWindow().setCodeHighlighting(false);
-                this.executePane.getTextSegmentWindow().unhighlightAllSteps();
+                this.mainUI.messagesPane.postMessage(
+                    this.name + ": running " + FileStatus.getFile().getName() + "\n\n");
+                this.mainUI.messagesPane.selectRunMessageTab();
+                this.executePane.textSegment.setCodeHighlighting(false);
+                this.executePane.textSegment.unhighlightAllSteps();
                 // FileStatus.set(FileStatus.RUNNING);
                 this.mainUI.setMenuState(FileStatus.State.RUNNING);
 
@@ -135,7 +136,7 @@ public class RunGoAction extends GuiAction {
                         final Simulator.Reason reason = notice.reason();
                         if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
                             EventQueue.invokeLater(() -> RunGoAction.this.paused(notice.done(), reason,
-                                    notice.exception()));
+                                notice.exception()));
                         } else {
                             EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.exception(), reason));
                         }
@@ -144,13 +145,13 @@ public class RunGoAction extends GuiAction {
                 };
                 Simulator.getInstance().subscribe(stopListener);
 
-                final int[] breakPoints = this.executePane.getTextSegmentWindow().getSortedBreakPointsArray();
+                final int[] breakPoints = this.executePane.textSegment.getSortedBreakPointsArray();
                 RISCVprogram.startSimulation(RunGoAction.maxSteps, breakPoints);
             } else {
                 // This should never occur because at termination the Go and Step buttons are
                 // disabled.
                 JOptionPane.showMessageDialog(this.mainUI,
-                        "reset " + this.mainUI.getReset() + " started " + this.mainUI.getStarted());// "You
+                    "reset " + this.mainUI.isMemoryReset + " started " + this.mainUI.isExecutionStarted);// "You
                 // must
                 // reset
                 // before
@@ -189,21 +190,21 @@ public class RunGoAction extends GuiAction {
             return;
         }
         if (pauseReason == Simulator.Reason.BREAKPOINT) {
-            this.mainUI.getMessagesPane().postMessage(
-                    this.name + ": execution paused at breakpoint: " + FileStatus.getFile().getName() + "\n\n");
+            this.mainUI.messagesPane.postMessage(
+                this.name + ": execution paused at breakpoint: " + FileStatus.getFile().getName() + "\n\n");
         } else {
-            this.mainUI.getMessagesPane().postMessage(
-                    this.name + ": execution paused by user: " + FileStatus.getFile().getName() + "\n\n");
+            this.mainUI.messagesPane.postMessage(
+                this.name + ": execution paused by user: " + FileStatus.getFile().getName() + "\n\n");
         }
-        this.mainUI.getMessagesPane().selectMessageTab();
-        this.executePane.getTextSegmentWindow().setCodeHighlighting(true);
-        this.executePane.getTextSegmentWindow().highlightStepAtPC();
-        this.executePane.getRegistersWindow().updateRegisters();
-        this.executePane.getFloatingPointWindow().updateRegisters();
-        this.executePane.getControlAndStatusWindow().updateRegisters();
-        this.executePane.getDataSegmentWindow().updateValues();
+        this.mainUI.messagesPane.selectMessageTab();
+        this.executePane.textSegment.setCodeHighlighting(true);
+        this.executePane.textSegment.highlightStepAtPC();
+        this.executePane.registerValues.updateRegisters();
+        this.executePane.fpRegValues.updateRegisters();
+        this.executePane.csrValues.updateRegisters();
+        this.executePane.dataSegment.updateValues();
         FileStatus.set(FileStatus.State.RUNNABLE);
-        this.mainUI.setReset(false);
+        this.mainUI.isMemoryReset = false;
     }
 
     /**
@@ -220,55 +221,55 @@ public class RunGoAction extends GuiAction {
      */
     public void stopped(final SimulationException pe, final Simulator.Reason reason) {
         // show final register and data segment values.
-        this.executePane.getRegistersWindow().updateRegisters();
-        this.executePane.getFloatingPointWindow().updateRegisters();
-        this.executePane.getControlAndStatusWindow().updateRegisters();
-        this.executePane.getDataSegmentWindow().updateValues();
+        this.executePane.registerValues.updateRegisters();
+        this.executePane.fpRegValues.updateRegisters();
+        this.executePane.csrValues.updateRegisters();
+        this.executePane.dataSegment.updateValues();
         FileStatus.set(FileStatus.State.TERMINATED);
         SystemIO.resetFiles(); // close any files opened in MIPS program
         // Bring CSRs to the front if terminated due to exception.
         if (pe != null) {
-            this.mainUI.getRegistersPane().setSelectedComponent(this.executePane.getControlAndStatusWindow());
-            this.executePane.getTextSegmentWindow().setCodeHighlighting(true);
-            this.executePane.getTextSegmentWindow().unhighlightAllSteps();
-            this.executePane.getTextSegmentWindow().highlightStepAtAddress(RegisterFile.getProgramCounter() - 4);
+            this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues);
+            this.executePane.textSegment.setCodeHighlighting(true);
+            this.executePane.textSegment.unhighlightAllSteps();
+            this.executePane.textSegment.highlightStepAtAddress(RegisterFile.getProgramCounter() - 4);
         }
         switch (reason) {
             case NORMAL_TERMINATION:
-                this.mainUI.getMessagesPane().postMessage(
-                        "\n" + this.name + ": execution completed successfully.\n\n");
-                this.mainUI.getMessagesPane().postRunMessage(
-                        "\n-- program is finished running (" + Globals.exitCode + ") --\n\n");
-                this.mainUI.getMessagesPane().selectRunMessageTab();
+                this.mainUI.messagesPane.postMessage(
+                    "\n" + this.name + ": execution completed successfully.\n\n");
+                this.mainUI.messagesPane.postRunMessage(
+                    "\n-- program is finished running (" + Globals.exitCode + ") --\n\n");
+                this.mainUI.messagesPane.selectRunMessageTab();
                 break;
             case CLIFF_TERMINATION:
-                this.mainUI.getMessagesPane().postMessage(
-                        "\n" + this.name + ": execution terminated by null instruction.\n\n");
-                this.mainUI.getMessagesPane().postRunMessage(
-                        "\n-- program is finished running (dropped off bottom) --\n\n");
-                this.mainUI.getMessagesPane().selectRunMessageTab();
+                this.mainUI.messagesPane.postMessage(
+                    "\n" + this.name + ": execution terminated by null instruction.\n\n");
+                this.mainUI.messagesPane.postRunMessage(
+                    "\n-- program is finished running (dropped off bottom) --\n\n");
+                this.mainUI.messagesPane.selectRunMessageTab();
                 break;
             case EXCEPTION:
-                this.mainUI.getMessagesPane().postMessage(
-                        pe.errorMessage.generateReport());
-                this.mainUI.getMessagesPane().postMessage(
-                        "\n" + this.name + ": execution terminated with errors.\n\n");
+                this.mainUI.messagesPane.postMessage(
+                    pe.errorMessage.generateReport());
+                this.mainUI.messagesPane.postMessage(
+                    "\n" + this.name + ": execution terminated with errors.\n\n");
                 break;
             case STOP:
-                this.mainUI.getMessagesPane().postMessage(
-                        "\n" + this.name + ": execution terminated by user.\n\n");
-                this.mainUI.getMessagesPane().selectMessageTab();
+                this.mainUI.messagesPane.postMessage(
+                    "\n" + this.name + ": execution terminated by user.\n\n");
+                this.mainUI.messagesPane.selectMessageTab();
                 break;
             case MAX_STEPS:
-                this.mainUI.getMessagesPane().postMessage(
-                        "\n" + this.name + ": execution step limit of " + RunGoAction.maxSteps + " exceeded.\n\n");
-                this.mainUI.getMessagesPane().selectMessageTab();
+                this.mainUI.messagesPane.postMessage(
+                    "\n" + this.name + ": execution step limit of " + RunGoAction.maxSteps + " exceeded.\n\n");
+                this.mainUI.messagesPane.selectMessageTab();
                 break;
             default:
                 // should never get here, because the other two cases are covered by paused()
         }
         RunGoAction.resetMaxSteps();
-        this.mainUI.setReset(false);
+        this.mainUI.isMemoryReset = false;
     }
 
     // Method to store any program arguments into MIPS memory and registers before
@@ -279,9 +280,9 @@ public class RunGoAction extends GuiAction {
 
     /// ///////////////////////////////////////////////////////////////////////////////// (argv).
     private void processProgramArgumentsIfAny() {
-        final String programArguments = this.executePane.getTextSegmentWindow().getProgramArguments();
+        final String programArguments = this.executePane.textSegment.getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||
-                !BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
+            !BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             return;
         }
         new ProgramArgumentList(programArguments).storeProgramArguments();

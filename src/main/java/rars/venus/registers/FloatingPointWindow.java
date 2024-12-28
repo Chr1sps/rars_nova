@@ -1,7 +1,7 @@
 package rars.venus.registers;
 
+import org.jetbrains.annotations.NotNull;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.Register;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 
@@ -49,45 +49,29 @@ public class FloatingPointWindow extends RegisterBlockWindow {
         /* ft11 */ "floating point temporary"
     };
 
-    /**
-     * <p>Constructor for FloatingPointWindow.</p>
-     */
     public FloatingPointWindow() {
         super(FloatingPointRegisterFile.getRegisters(), regToolTips, "32-bit single precision IEEE 754 floating point");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected String formatRegister(final Register value, final int base) {
-        final long val = value.getValue();
+    protected @NotNull String formatRegisterValue(final long value, final int base) {
         if (BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)) {
-            return NumberDisplayBaseChooser.formatFloatNumber((int) val, base);
+            return NumberDisplayBaseChooser.formatFloatNumber((int) value, base);
         } else {
-            return NumberDisplayBaseChooser.formatDoubleNumber(val, base);
+            return NumberDisplayBaseChooser.formatDoubleNumber(value, base);
         }
     }
 
-    /**
-     * <p>beginObserving.</p>
-     */
     @Override
     protected void beginObserving() {
         FloatingPointRegisterFile.addRegistersSubscriber(this);
     }
 
-    /**
-     * <p>endObserving.</p>
-     */
     @Override
     protected void endObserving() {
         FloatingPointRegisterFile.deleteRegistersObserver(this);
     }
 
-    /**
-     * <p>resetRegisters.</p>
-     */
     @Override
     protected void resetRegisters() {
         FloatingPointRegisterFile.resetRegisters();

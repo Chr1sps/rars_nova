@@ -92,21 +92,13 @@ public final class Globals {
     public static int exitCode = 0;
 
     /// The GUI being used (if any) with this simulator.
-    private static @Nullable VenusUI gui = null;
+    public static @Nullable VenusUI gui = null;
 
     static {
         Memory.getInstance().clear(); // will establish memory configuration from setting
     }
 
     private Globals() {
-    }
-
-    public static @Nullable VenusUI getGui() {
-        return Globals.gui;
-    }
-
-    public static void setGui(final @Nullable VenusUI g) {
-        Globals.gui = g;
     }
 
     /**

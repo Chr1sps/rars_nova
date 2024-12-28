@@ -8,7 +8,6 @@ import rars.notices.RegisterAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.Register;
 import rars.settings.BoolSetting;
-import rars.settings.FontSettings;
 import rars.util.Binary;
 import rars.util.SimpleSubscriber;
 import rars.venus.NumberDisplayBaseChooser;
@@ -112,8 +111,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         ));
     }
 
-    protected abstract String formatRegister(Register value, int base);
-
+    protected abstract @NotNull String formatRegisterValue(final long value, int base);
+    
     /**
      * <p>beginObserving.</p>
      */
@@ -141,8 +140,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             tableData[i][RegisterBlockWindow.NAME_COLUMN] = this.registers[i].getName();
             final int temp = this.registers[i].getNumber();
             tableData[i][RegisterBlockWindow.NUMBER_COLUMN] = temp == -1 ? "" : temp;
-            tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegister(this.registers[i],
-                NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)));
+            final int base = NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
+            tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegisterValue(this.registers[i].getValue(), base);
         }
         return tableData;
     }
@@ -168,9 +167,11 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      */
     public void updateRegisters() {
         for (int i = 0; i < this.registers.length; i++) {
-            ((RegTableModel) this.table.getModel()).setDisplayAndModelValueAt(this.formatRegister(this.registers[i],
-                    Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase()), i,
-                RegisterBlockWindow.VALUE_COLUMN);
+            final var model = (RegTableModel) this.table.getModel();
+            final int base = Globals.gui.mainPane.executeTab
+                .getValueDisplayBase();
+            final var formattedValue = this.formatRegisterValue(this.registers[i].getValue(), base);
+            model.setDisplayAndModelValueAt(formattedValue, i, RegisterBlockWindow.VALUE_COLUMN);
         }
     }
 
@@ -196,14 +197,13 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
                     this.endObserving();
                 }
             }
-//            case final SettingsNotice ignored -> this.updateRowHeight();
             case final RegisterAccessNotice a -> {
                 // NOTE: each register is a separate Observable
                 if (a.getAccessType() == AccessNotice.AccessType.WRITE) {
                     // Uses the same highlighting technique as for Text Segment -- see
                     // AddressCellRenderer class in DataSegmentWindow.java.
                     //                  TODO:  this.highlightCellForRegister((Register) observable);
-                    Globals.getGui().getRegistersPane().setSelectedComponent(this);
+                    Globals.gui.registersPane.setSelectedComponent(this);
                 }
             }
             default -> {
@@ -212,8 +212,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         this.subscription.request(1);
     }
 
-    private void updateRowHeight(final @NotNull FontSettings settings) {
-        final var font = settings.getCurrentFont();
+    private void updateRowHeight() {
+        final var font = FONT_SETTINGS.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         this.table.setRowHeight(height);
     }
@@ -233,8 +233,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             this.alignment = alignment;
             this.font = FONT_SETTINGS.getCurrentFont();
             this.table = table;
-            FONT_SETTINGS.addChangeListener((settings) -> {
-                this.font = settings.getCurrentFont();
+            FONT_SETTINGS.addChangeListener(() -> {
+                this.font = FONT_SETTINGS.getCurrentFont();
                 this.table.repaint();
             });
         }
@@ -309,24 +309,28 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
          */
         @Override
         public void setValueAt(final Object value, final int row, final int col) {
-            final int val;
+            final long newValue;
             try {
-                val = Binary.stringToInt((String) value);
+                if (BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)) {
+                    newValue = Binary.stringToLong((String) value);
+                } else {
+                    newValue = Binary.stringToInt((String) value);
+                }
             } catch (final NumberFormatException nfe) {
-                this.data[row][col] = "INVALID";
-                this.fireTableCellUpdated(row, col);
+                // If the user enters an invalid value, don't do anything.
                 return;
             }
             // Assures that if changed during program execution, the update will
             // occur only between instructions.
             Globals.memoryAndRegistersLock.lock();
             try {
-                RegisterBlockWindow.this.registers[row].setValue(val);
+                RegisterBlockWindow.this.registers[row].setValue(newValue);
             } finally {
                 Globals.memoryAndRegistersLock.unlock();
             }
-            final int valueBase = Globals.getGui().getMainPane().getExecutePane().getValueDisplayBase();
-            this.data[row][col] = NumberDisplayBaseChooser.formatNumber(val, valueBase);
+            final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
+            final var formattedValue = RegisterBlockWindow.this.formatRegisterValue(newValue, valueBase);
+            this.data[row][col] = formattedValue;
             this.fireTableCellUpdated(row, col);
         }
 

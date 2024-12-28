@@ -45,9 +45,9 @@ public class RegistersPane extends JTabbedPane {
     /**
      * Constructor for the RegistersPane class.
      *
-     * @param regs     a {@link RegistersWindow} object
-     * @param cop1     a {@link FloatingPointWindow} object
-     * @param cop0     a {@link ControlAndStatusWindow} object
+     * @param regs a {@link RegistersWindow} object
+     * @param cop1 a {@link FloatingPointWindow} object
+     * @param cop0 a {@link ControlAndStatusWindow} object
      */
     public RegistersPane(final RegistersWindow regs, final FloatingPointWindow cop1,
                          final ControlAndStatusWindow cop0) {
@@ -67,6 +67,7 @@ public class RegistersPane extends JTabbedPane {
         this.setToolTipTextAt(0, "CPU registers");
         this.setToolTipTextAt(1, "Floating point unit registers");
         this.setToolTipTextAt(2, "Control and Status registers");
+
     }
 
     /**
@@ -104,6 +105,6 @@ public class RegistersPane extends JTabbedPane {
             final var component = getComponentAt(i);
             preferredWidth = Math.max(preferredWidth, component.getPreferredSize().width);
         }
-        return new Dimension(preferredWidth, size.height);
+        return new Dimension(preferredWidth + 1, size.height);
     }
 }

@@ -89,7 +89,7 @@ public class EditTabbedPane extends JPanel {
                         EditTabbedPane.this.updateTitles(editPane);
                     } else {
                         EditTabbedPane.this.updateTitlesAndMenuState(editPane);
-                        EditTabbedPane.this.mainPane.getExecutePane().clearPane();
+                        this.mainPane.executeTab.clearPane();
                     }
                     editPane.tellEditingComponentToRequestFocusInWindow();
                 }
@@ -139,8 +139,8 @@ public class EditTabbedPane extends JPanel {
         FileStatus.set(FileStatus.State.NEW_NOT_EDITED);
 
         RegisterFile.resetRegisters();
-        this.mainUI.setReset(true);
-        this.mainPane.getExecutePane().clearPane();
+        this.mainUI.isMemoryReset = true;
+        this.mainPane.executeTab.clearPane();
         this.mainPane.setSelectedComponent(this);
         editPane.displayCaretPosition(new Point(1, 1));
         tabbedPane.setSelectedComponent(editPane);
@@ -183,7 +183,7 @@ public class EditTabbedPane extends JPanel {
         if (editPane != null) {
             if (this.editsSavedOrAbandoned()) {
                 this.remove(editPane);
-                this.mainPane.getExecutePane().clearPane();
+                this.mainPane.executeTab.clearPane();
                 this.mainPane.setSelectedComponent(this);
             } else {
                 return false;
@@ -196,7 +196,7 @@ public class EditTabbedPane extends JPanel {
         final EditPane editPane = (EditPane) tabbedPane.getComponentAt(index);
         if (this.editsSavedOrAbandoned()) {
             this.remove(editPane);
-            this.mainPane.getExecutePane().clearPane();
+            this.mainPane.executeTab.clearPane();
             this.mainPane.setSelectedComponent(this);
         }
     }
@@ -212,7 +212,7 @@ public class EditTabbedPane extends JPanel {
         boolean unsavedChanges = false;
         final int tabCount = tabbedPane.getTabCount();
         if (tabCount > 0) {
-            this.mainPane.getExecutePane().clearPane();
+            this.mainPane.executeTab.clearPane();
             this.mainPane.setSelectedComponent(this);
             final EditPane[] tabs = new EditPane[tabCount];
             for (int i = 0; i < tabCount; i++) {
@@ -452,7 +452,7 @@ public class EditTabbedPane extends JPanel {
         if (editPane == null) {
             FileStatus.set(FileStatus.State.NO_FILE);
             this.editor.setTitle("", "", FileStatus.State.NO_FILE);
-            Globals.getGui().setMenuState(FileStatus.State.NO_FILE);
+            Globals.gui.setMenuState(FileStatus.State.NO_FILE);
         } else {
             FileStatus.set(editPane.getFileStatus());
             this.updateTitlesAndMenuState(editPane);
@@ -469,7 +469,7 @@ public class EditTabbedPane extends JPanel {
     private void updateTitlesAndMenuState(final EditPane editPane) {
         this.editor.setTitle(editPane.getPathname(), editPane.getFilename(), editPane.getFileStatus());
         editPane.updateStaticFileStatus(); // for legacy code that depends on the static FileStatus (pre 4.0)
-        Globals.getGui().setMenuState(editPane.getFileStatus());
+        Globals.gui.setMenuState(editPane.getFileStatus());
     }
 
     // Handy little utility to update the title on the current tab and the frame
@@ -665,7 +665,7 @@ public class EditTabbedPane extends JPanel {
                     EditTabbedPane.this.updateTitles(editPane);
                 } else {// this was the original code...
                     EditTabbedPane.this.updateTitlesAndMenuState(editPane);
-                    EditTabbedPane.this.mainPane.getExecutePane().clearPane();
+                    EditTabbedPane.this.mainPane.executeTab.clearPane();
                 }
 
                 EditTabbedPane.this.mainPane.setSelectedComponent(EditTabbedPane.this);

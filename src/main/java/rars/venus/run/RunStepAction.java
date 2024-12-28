@@ -82,14 +82,14 @@ public class RunStepAction extends GuiAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         this.name = this.getValue(Action.NAME).toString();
-        this.executePane = this.mainUI.getMainPane().getExecutePane();
+        this.executePane = this.mainUI.mainPane.executeTab;
         if (FileStatus.isAssembled()) {
-            if (!this.mainUI.getStarted()) { // DPS 17-July-2008
+            if (!this.mainUI.isExecutionStarted) { // DPS 17-July-2008
                 this.processProgramArgumentsIfAny();
             }
-            this.mainUI.setStarted(true);
-            this.mainUI.getMessagesPane().selectRunMessageTab();
-            this.executePane.getTextSegmentWindow().setCodeHighlighting(true);
+            this.mainUI.isExecutionStarted = true;
+            this.mainUI.messagesPane.selectRunMessageTab();
+            this.executePane.textSegment.setCodeHighlighting(true);
 
             final var stopListener = new SimpleSubscriber<SimulatorNotice>() {
                 private Flow.Subscription subscription;
@@ -107,7 +107,7 @@ public class RunStepAction extends GuiAction {
                         return;
                     }
                     EventQueue.invokeLater(() -> RunStepAction.this.stepped(item.done(), item.reason(),
-                            item.exception()));
+                        item.exception()));
                     this.subscription.cancel();
                 }
             };
@@ -142,45 +142,45 @@ public class RunStepAction extends GuiAction {
      * @param pe     a {@link SimulationException} object
      */
     public void stepped(final boolean done, final Simulator.Reason reason, final SimulationException pe) {
-        this.executePane.getRegistersWindow().updateRegisters();
-        this.executePane.getFloatingPointWindow().updateRegisters();
-        this.executePane.getControlAndStatusWindow().updateRegisters();
-        this.executePane.getDataSegmentWindow().updateValues();
+        this.executePane.registerValues.updateRegisters();
+        this.executePane.fpRegValues.updateRegisters();
+        this.executePane.csrValues.updateRegisters();
+        this.executePane.dataSegment.updateValues();
         if (!done) {
-            this.executePane.getTextSegmentWindow().highlightStepAtPC();
+            this.executePane.textSegment.highlightStepAtPC();
             FileStatus.set(FileStatus.State.RUNNABLE);
         }
         if (done) {
             RunGoAction.resetMaxSteps();
-            this.executePane.getTextSegmentWindow().unhighlightAllSteps();
+            this.executePane.textSegment.unhighlightAllSteps();
             FileStatus.set(FileStatus.State.TERMINATED);
         }
         if (done && pe == null) {
-            this.mainUI.getMessagesPane().postMessage(
-                    "\n" + this.name + ": execution " +
-                            ((reason == Simulator.Reason.CLIFF_TERMINATION) ? "terminated due to null instruction."
-                                    : "completed successfully.")
-                            + "\n\n");
-            this.mainUI.getMessagesPane().postRunMessage(
-                    "\n-- program is finished running" +
-                            ((reason == Simulator.Reason.CLIFF_TERMINATION) ? "(dropped off bottom)"
-                                    : " (" + Globals.exitCode + ")")
-                            + " --\n\n");
-            this.mainUI.getMessagesPane().selectRunMessageTab();
+            this.mainUI.messagesPane.postMessage(
+                "\n" + this.name + ": execution " +
+                    ((reason == Simulator.Reason.CLIFF_TERMINATION) ? "terminated due to null instruction."
+                        : "completed successfully.")
+                    + "\n\n");
+            this.mainUI.messagesPane.postRunMessage(
+                "\n-- program is finished running" +
+                    ((reason == Simulator.Reason.CLIFF_TERMINATION) ? "(dropped off bottom)"
+                        : " (" + Globals.exitCode + ")")
+                    + " --\n\n");
+            this.mainUI.messagesPane.selectRunMessageTab();
         }
         if (pe != null) {
             RunGoAction.resetMaxSteps();
-            this.mainUI.getMessagesPane().postMessage(
-                    pe.errorMessage.generateReport());
-            this.mainUI.getMessagesPane().postMessage(
-                    "\n" + this.name + ": execution terminated with errors.\n\n");
-            this.mainUI.getRegistersPane().setSelectedComponent(this.executePane.getControlAndStatusWindow());
+            this.mainUI.messagesPane.postMessage(
+                pe.errorMessage.generateReport());
+            this.mainUI.messagesPane.postMessage(
+                "\n" + this.name + ": execution terminated with errors.\n\n");
+            this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues);
             FileStatus.set(FileStatus.State.TERMINATED); // should be redundant.
-            this.executePane.getTextSegmentWindow().setCodeHighlighting(true);
-            this.executePane.getTextSegmentWindow().unhighlightAllSteps();
-            this.executePane.getTextSegmentWindow().highlightStepAtAddress(RegisterFile.getProgramCounter() - 4);
+            this.executePane.textSegment.setCodeHighlighting(true);
+            this.executePane.textSegment.unhighlightAllSteps();
+            this.executePane.textSegment.highlightStepAtAddress(RegisterFile.getProgramCounter() - 4);
         }
-        this.mainUI.setReset(false);
+        this.mainUI.isMemoryReset = false;
     }
 
     // Method to store any program arguments into MIPS memory and registers before
@@ -191,9 +191,9 @@ public class RunStepAction extends GuiAction {
 
     /// ///////////////////////////////////////////////////////////////////////////////// (argv).
     private void processProgramArgumentsIfAny() {
-        final String programArguments = this.executePane.getTextSegmentWindow().getProgramArguments();
+        final String programArguments = this.executePane.textSegment.getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||
-                !BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
+            !BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             return;
         }
         new ProgramArgumentList(programArguments).storeProgramArguments();

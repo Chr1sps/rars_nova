@@ -9,7 +9,7 @@ import static rars.settings.Settings.OTHER_SETTINGS;
 import static rars.venus.settings.editor.views.SyntaxStyleView.buildRow;
 
 public final class OtherSettingsView extends JPanel {
-    public @NotNull JSpinner blinkRateSpinner, tabSizeSpinner;
+    public final @NotNull JSpinner blinkRateSpinner, tabSizeSpinner;
 
     public OtherSettingsView() {
         super();

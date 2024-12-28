@@ -95,20 +95,20 @@ public class EditPane extends JPanel {
 
         this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.currentTheme.toTheme());
         this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-        EDITOR_THEME_SETTINGS.addChangeListener(settings -> {
-            this.sourceCode.setTheme(settings.currentTheme.toTheme());
+        EDITOR_THEME_SETTINGS.addChangeListener(() -> {
+            this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toTheme());
         }, true);
-        FONT_SETTINGS.addChangeListener(settings -> {
-            this.sourceCode.setFont(settings.getCurrentFont());
+        FONT_SETTINGS.addChangeListener(() -> {
+            this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
             this.lineNumbers.setFont(this.getLineNumberFont(this.sourceCode.getFont()));
             this.lineNumbers.revalidate();
         }, true);
-        BOOL_SETTINGS.addChangeListener((settings) -> this.sourceCode.setLineHighlightEnabled(
-            settings.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
+        BOOL_SETTINGS.addChangeListener(() -> this.sourceCode.setLineHighlightEnabled(
+            BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
         ), true);
-        OTHER_SETTINGS.addChangeListener(settings -> {
-            this.sourceCode.setCaretBlinkRate(settings.getCaretBlinkRate());
-            this.sourceCode.setTabSize(settings.getEditorTabSize());
+        OTHER_SETTINGS.addChangeListener(() -> {
+            this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
+            this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
 //            this.sourceCode.revalidate();
         }, true);
 
@@ -140,10 +140,10 @@ public class EditPane extends JPanel {
                         EditPane.this.setFileStatus(FileStatus.State.EDITED);
                     }
                     if (EditPane.this.getFileStatus() == FileStatus.State.NEW_EDITED) {
-                        EditPane.this.mainUI.getEditor().setTitle("", EditPane.this.getFilename(),
+                        EditPane.this.mainUI.editor.setTitle("", EditPane.this.getFilename(),
                             EditPane.this.getFileStatus());
                     } else {
-                        EditPane.this.mainUI.getEditor().setTitle(EditPane.this.getPathname(),
+                        EditPane.this.mainUI.editor.setTitle(EditPane.this.getPathname(),
                             EditPane.this.getFilename(), EditPane.this.getFileStatus());
                     }
 
@@ -158,7 +158,7 @@ public class EditPane extends JPanel {
                             FileStatus.set(FileStatus.State.EDITED);
                     }
 
-                    Globals.getGui().getMainPane().getExecutePane().clearPane(); // DPS 9-Aug-2011
+                    Globals.gui.mainPane.executeTab.clearPane(); // DPS 9-Aug-2011
 
                     if (EditPane.this.showingLineNumbers()) {
                         EditPane.this.lineNumbers.setText(EditPane.getLineNumbersList(EditPane.this.sourceCode.getDocument()));

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public final class BoolSettings extends ListenableBase<BoolSettings> {
+public final class BoolSettings extends ListenableBase {
     private static final Logger LOGGER = LogManager.getLogger();
     private final @NotNull Preferences preferences;
     private final @NotNull HashMap<BoolSetting, Boolean> currentSettings;

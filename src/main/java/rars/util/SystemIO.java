@@ -94,14 +94,14 @@ public final class SystemIO {
      */
     public static int readInteger(final int serviceNumber) {
         final String input = SystemIO.readStringInternal("0", "Enter an integer second (syscall " + serviceNumber +
-                ")", -1);
+            ")", -1);
         // Client is responsible for catching NumberFormatException
         return Integer.parseInt(input.trim());
     }
 
     private static String readStringInternal(final String init, final String prompt, final int maxlength) {
         String input = init;
-        if (Globals.getGui() == null) {
+        if (Globals.gui == null) {
             try {
                 input = SystemIO.getInputReader().readLine();
                 if (input == null)
@@ -110,9 +110,9 @@ public final class SystemIO {
             }
         } else {
             if (BOOL_SETTINGS.getSetting(BoolSetting.POPUP_SYSCALL_INPUT)) {
-                input = Globals.getGui().getMessagesPane().getInputString(prompt);
+                input = Globals.gui.messagesPane.getInputString(prompt);
             } else {
-                input = Globals.getGui().getMessagesPane().getInputString(maxlength);
+                input = Globals.gui.messagesPane.getInputString(maxlength);
             }
         }
         return input;
@@ -128,7 +128,7 @@ public final class SystemIO {
      */
     public static float readFloat(final int serviceNumber) {
         final String input = SystemIO.readStringInternal("0", "Enter a float second (syscall " + serviceNumber + ")",
-                -1);
+            -1);
         return Float.parseFloat(input.trim());
     }
 
@@ -142,7 +142,7 @@ public final class SystemIO {
      */
     public static double readDouble(final int serviceNumber) {
         final String input = SystemIO.readStringInternal("0", "Enter a Double second (syscall " + serviceNumber + ")"
-                , -1);
+            , -1);
         return Double.parseDouble(input.trim());
     }
 
@@ -152,7 +152,7 @@ public final class SystemIO {
      * @param string a {@link java.lang.String} object
      */
     public static void printString(final String string) {
-        if (Globals.getGui() == null) {
+        if (Globals.gui == null) {
             try {
                 SystemIO.getOutputWriter().write(string);
                 SystemIO.getOutputWriter().flush();
@@ -172,7 +172,7 @@ public final class SystemIO {
      */
     public static String readString(final int serviceNumber, final int maxLength) {
         String input = SystemIO.readStringInternal("", "Enter a string of maximum length " + maxLength
-                + " (syscall " + serviceNumber + ")", maxLength);
+            + " (syscall " + serviceNumber + ")", maxLength);
         if (input.endsWith("\n")) {
             input = input.substring(0, input.length() - 1);
         }
@@ -194,7 +194,7 @@ public final class SystemIO {
         final int returnValue;
 
         final String input = SystemIO.readStringInternal("0", "Enter a character second (syscall " + serviceNumber +
-                ")", 1);
+            ")", 1);
         // The whole try-catch is not really necessary in this case since I'm
         // just propagating the runtime exception (the default behavior), but
         // I want to make it explicit. The client needs to catch it.
@@ -216,10 +216,13 @@ public final class SystemIO {
         /////////////// DPS 8-Jan-2013
         /// Write to STDOUT or STDERR file descriptor while using IDE - write to
         /////////////// Messages pane.
-        if ((fd == SystemIO.STDOUT || fd == SystemIO.STDERR) && Globals.getGui() != null) {
-            final String data = new String(myBuffer, StandardCharsets.UTF_8); // decode the bytes using UTF-8 charset
-            SystemIO.print2Gui(data);
-            return myBuffer.length; // data.length would not count multi-byte characters
+        if ((fd == SystemIO.STDOUT || fd == SystemIO.STDERR)) {
+            if (Globals.gui != null) {
+                final String data = new String(myBuffer, StandardCharsets.UTF_8); // decode the bytes using UTF-8 
+                // charset
+                SystemIO.print2Gui(data);
+                return myBuffer.length; // data.length would not count multi-byte characters
+            }
         }
         //// When running in command mode, code below works for either regular file or
         /////////////////////////////////////////////////////////////////////////////////// STDOUT/STDERR
@@ -277,14 +280,16 @@ public final class SystemIO {
         /////////////// DPS 8-Jan-2013
         /// Read from STDIN file descriptor while using IDE - get input from Messages
         /////////////// pane.
-        if (fd == SystemIO.STDIN && Globals.getGui() != null) {
-            final String input = Globals.getGui().getMessagesPane().getInputString(lengthRequested);
-            final byte[] bytesRead = input.getBytes();
+        if (fd == SystemIO.STDIN) {
+            if (Globals.gui != null) {
+                final String input = Globals.gui.messagesPane.getInputString(lengthRequested);
+                final byte[] bytesRead = input.getBytes();
 
-            for (int i = 0; i < myBuffer.length; i++) {
-                myBuffer[i] = (i < bytesRead.length) ? bytesRead[i] : 0;
+                for (int i = 0; i < myBuffer.length; i++) {
+                    myBuffer[i] = (i < bytesRead.length) ? bytesRead[i] : 0;
+                }
+                return Math.min(myBuffer.length, bytesRead.length);
             }
-            return Math.min(myBuffer.length, bytesRead.length);
         }
         //// When running in command mode, code below works for either regular file or
         //////////////////////////////////////////////////////////////////////////////////// STDIN
@@ -470,7 +475,7 @@ public final class SystemIO {
     private static void print2Gui(final String output) {
         final long time = System.currentTimeMillis();
         if (time > SystemIO.lasttime) {
-            Globals.getGui().getMessagesPane().postRunMessage(SystemIO.buffer + output);
+            Globals.gui.messagesPane.postRunMessage(SystemIO.buffer + output);
             SystemIO.buffer = "";
             SystemIO.lasttime = time + 100;
         } else {
@@ -488,7 +493,7 @@ public final class SystemIO {
     public static void flush(final boolean force) {
         final long time = System.currentTimeMillis();
         if (!SystemIO.buffer.isEmpty() && (force || time > SystemIO.lasttime)) {
-            Globals.getGui().getMessagesPane().postRunMessage(SystemIO.buffer);
+            Globals.gui.messagesPane.postRunMessage(SystemIO.buffer);
             SystemIO.buffer = "";
             SystemIO.lasttime = time + 100;
         }
@@ -624,7 +629,7 @@ public final class SystemIO {
         private static boolean filenameInUse(final String requestedFilename) {
             for (int i = 0; i < SystemIO.SYSCALL_MAXFILES; i++) {
                 if (FileIOData.fileNames[i] != null
-                        && FileIOData.fileNames[i].equals(requestedFilename)) {
+                    && FileIOData.fileNames[i].equals(requestedFilename)) {
                     return true;
                 }
             }
@@ -701,7 +706,7 @@ public final class SystemIO {
             if (i >= SystemIO.SYSCALL_MAXFILES) // no available file descriptors
             {
                 SystemIO.fileErrorString =
-                        "File name " + filename + " exceeds maximum open file limit of " + SystemIO.SYSCALL_MAXFILES;
+                    "File name " + filename + " exceeds maximum open file limit of " + SystemIO.SYSCALL_MAXFILES;
                 return -1;
             }
 

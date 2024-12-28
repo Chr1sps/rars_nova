@@ -138,15 +138,15 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
      * to contain application-specific displays of parameters and results.
      */
     public void action() {
-        this.dialog = new JDialog(Globals.getGui(), this.title);
+        this.dialog = new JDialog(Globals.gui, this.title);
         // assure the dialog goes away if user clicks the X
         this.dialog.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent e) {
-                        AbstractTool.this.performToolClosingDuties();
-                    }
-                });
+            new WindowAdapter() {
+                @Override
+                public void windowClosing(final WindowEvent e) {
+                    AbstractTool.this.performToolClosingDuties();
+                }
+            });
         this.theWindow = this.dialog;
         this.initializePreGUI();
         final JPanel contentPane = new JPanel(new BorderLayout(5, 5));
@@ -158,7 +158,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         this.initializePostGUI();
         this.dialog.setContentPane(contentPane);
         this.dialog.pack();
-        this.dialog.setLocationRelativeTo(Globals.getGui());
+        this.dialog.setLocationRelativeTo(Globals.gui);
         this.dialog.setVisible(true);
     }
 
@@ -230,25 +230,25 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         this.connectButton = new ConnectButton();
         this.connectButton.setToolTipText("Control whether tool will respond to running program");
         this.connectButton.addActionListener(
-                e -> {
-                    if (this.connectButton.isConnected()) {
-                        this.connectButton.disconnect();
-                    } else {
-                        this.connectButton.connect();
-                    }
-                });
+            e -> {
+                if (this.connectButton.isConnected()) {
+                    this.connectButton.disconnect();
+                } else {
+                    this.connectButton.connect();
+                }
+            });
         this.connectButton.addKeyListener(new EnterKeyListener(this.connectButton));
 
         final JButton resetButton = new JButton("Reset");
         resetButton.setToolTipText("Reset all counters and other structures");
         resetButton.addActionListener(
-                e -> this.reset());
+            e -> this.reset());
         resetButton.addKeyListener(new EnterKeyListener(resetButton));
 
         final JButton closeButton = new JButton("Close");
         closeButton.setToolTipText("Close (exit) this tool");
         closeButton.addActionListener(
-                e -> this.performToolClosingDuties());
+            e -> this.performToolClosingDuties());
         closeButton.addKeyListener(new EnterKeyListener(closeButton));
 
         // Add all the buttons...
@@ -413,7 +413,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     }
 
 
-    //////////////////// PRIVATE HELPER CLASSES //////////////////////////////////
+    /// ///////////////// PRIVATE HELPER CLASSES //////////////////////////////////
     // Specialized inner classes. Either used by stand-alone (JFrame-based) only //
     // or used by Tool (JDialog-based) only. //
 
@@ -462,7 +462,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
                 e.consume();
                 try {
                     this.myButton.getActionListeners()[0].actionPerformed(new ActionEvent(this.myButton, 0,
-                            this.myButton.getText()));
+                        this.myButton.getText()));
                 } catch (final ArrayIndexOutOfBoundsException oob) {
                     // do nothing, since there is no action listener.
                 }
