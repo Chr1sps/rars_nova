@@ -9,6 +9,8 @@ import rars.assembler.Tokenizer;
 import rars.exceptions.AssemblyException;
 import rars.riscv.instructions.*;
 import rars.settings.BoolSetting;
+import rars.riscv.instructions.compressed.CEBREAK;
+import rars.riscv.instructions.compressed.CJ;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +18,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static rars.util.Utils.concatStreams;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
@@ -41,6 +44,9 @@ public final class Instructions {
     private final static List<MatchMap> R64_MATCH_MAPS;
     private static final boolean initialized;
     private final static Map<Instruction, TokenList> tokenListMap;
+
+    private final static List<CompressedInstruction> INSTRUCTIONS_R32_COMPRESSED, INSTRUCTIONS_R64_COMPRESSED;
+
     public static boolean RV64;
 
     static {
@@ -228,21 +234,35 @@ public final class Instructions {
         INSTRUCTIONS_R32_EXTENDED = loadPseudoInstructions("/PseudoOps.txt");
         INSTRUCTIONS_R64_EXTENDED = loadPseudoInstructions("/PseudoOps-64.txt");
 
-        INSTRUCTIONS_ALL_R32_ONLY = Stream
-            .concat(INSTRUCTIONS_R32.stream(), INSTRUCTIONS_R32_EXTENDED.stream())
-            .collect(Collectors.toList());
+        INSTRUCTIONS_R32_COMPRESSED = List.of(
+                CEBREAK.INSTANCE,
+                CJ.INSTANCE
+        );
+        INSTRUCTIONS_R64_COMPRESSED = List.of();
 
-        INSTRUCTIONS_ALL_R64_ONLY = Stream
-            .concat(INSTRUCTIONS_R64.stream(), INSTRUCTIONS_R64_EXTENDED.stream())
-            .collect(Collectors.toList());
 
-        INSTRUCTIONS_ALL = Stream.of(
-                INSTRUCTIONS_R32,
-                INSTRUCTIONS_R64,
-                INSTRUCTIONS_R32_EXTENDED,
-                INSTRUCTIONS_R64_EXTENDED
-            ).flatMap(Collection::stream)
-            .collect(Collectors.toList());
+        INSTRUCTIONS_ALL_R32_ONLY = concatStreams(
+                INSTRUCTIONS_R32.stream(),
+                INSTRUCTIONS_R32_EXTENDED.stream(),
+                INSTRUCTIONS_R32_COMPRESSED.stream()
+        )
+                .collect(Collectors.toList());
+
+        INSTRUCTIONS_ALL_R64_ONLY = concatStreams(
+                INSTRUCTIONS_R64.stream(),
+                INSTRUCTIONS_R64_EXTENDED.stream(),
+                INSTRUCTIONS_R64_COMPRESSED.stream()
+        )
+                .collect(Collectors.toList());
+
+        INSTRUCTIONS_ALL = concatStreams(
+                INSTRUCTIONS_R32.stream(),
+                INSTRUCTIONS_R64.stream(),
+                INSTRUCTIONS_R32_EXTENDED.stream(),
+                INSTRUCTIONS_R64_EXTENDED.stream(),
+                INSTRUCTIONS_R32_COMPRESSED.stream(),
+                INSTRUCTIONS_R64_COMPRESSED.stream()
+        ).collect(Collectors.toList());
 
         RV64 = BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED);
 
@@ -357,8 +377,7 @@ public final class Instructions {
             }
             matchMap.put(match, instruction);
         }
-        Collections.sort(matchMaps);
-        return matchMaps;
+        return matchMaps.stream().sorted().toList();
     }
 
     private static @NotNull Map<Instruction, TokenList> createTokenListMap() {

@@ -8,6 +8,8 @@ import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 
 public final class CEBREAK extends CompressedInstruction {
+    public static final @NotNull CEBREAK INSTANCE = new CEBREAK();
+    
     private CEBREAK() {
         super("c.ebreak", "Pause execution", CompressedInstructionFormat.CB_FORMAT, "100 1 00000 00000 10");
     }

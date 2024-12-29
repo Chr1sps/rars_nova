@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
+import rars.ProgramStatement;
 import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
@@ -156,10 +157,9 @@ public final class Program {
      * @throws AssemblyException thrown if any errors are found in the code
      */
     public ErrorList assembleString(final @NotNull String source) throws AssemblyException {
-        final ArrayList<RISCVProgram> programs = new ArrayList<>();
         this.code.fromString(source);
         this.code.tokenize();
-        programs.add(this.code);
+        final var programs = List.of(this.code);
         return this.assemble(programs);
     }
 
@@ -298,5 +298,13 @@ public final class Program {
      */
     public Memory getMemory() {
         return this.simulation;
+    }
+    
+    public List<ProgramStatement> getParsedList() {
+        return this.code.getParsedList();
+    }
+    
+    public List<ProgramStatement> getMachineList() {
+        return this.code.getMachineList();
     }
 }

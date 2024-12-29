@@ -1,6 +1,5 @@
 package rars.util;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
@@ -122,9 +121,15 @@ public final class Utils {
         }).takeWhile(Objects::nonNull);
     }
 
-    @Contract(value = "_ -> param1", pure = true)
-    public static <T> T id(final T t) {
-        return t;
+    @SafeVarargs
+    public static <T> Stream<T> concatStreams(final @NotNull Stream<? extends T> first,
+                                              final Stream<? extends T> @NotNull ... others) {
+        var result = first;
+        for (final var other : others) {
+            result = Stream.concat(result, other);
+        }
+        //noinspection unchecked
+        return (Stream<T>) result;
     }
 
     /**

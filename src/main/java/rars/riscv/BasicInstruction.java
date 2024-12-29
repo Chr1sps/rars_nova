@@ -63,8 +63,12 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * correct
      * instruction simulator -- it needs to match all and only the 0's and 1's.
      */
-    protected BasicInstruction(final @NotNull String example, final String description, final BasicInstructionFormat instrFormat,
-                               final @NotNull String operMask) {
+    protected BasicInstruction(
+            final @NotNull String example,
+            final String description,
+            final BasicInstructionFormat instrFormat,
+            final @NotNull String operMask
+    ) {
         super(example, description);
         this.instructionFormat = instrFormat;
         this.operationMask = operMask.replaceAll(" ", ""); // squeeze out any/all spaces

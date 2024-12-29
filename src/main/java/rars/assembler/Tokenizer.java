@@ -421,10 +421,10 @@ public final class Tokenizer {
     private @NotNull List<SourceLine> processIncludes(final @NotNull RISCVProgram program,
                                                       final @NotNull Map<String, String> inclFiles)
             throws AssemblyException {
-        final ArrayList<String> source = program.getSourceList();
-        final ArrayList<SourceLine> result = new ArrayList<>(source.size());
-        for (int i = 0; i < source.size(); i++) {
-            final String line = source.get(i);
+        final var sourceList = program.getSourceList();
+        final ArrayList<SourceLine> result = new ArrayList<>(sourceList.size());
+        for (int i = 0; i < sourceList.size(); i++) {
+            final String line = sourceList.get(i);
             final TokenList tokenizedLine = this.tokenizeLineImpl(program, i + 1, line, false);
             boolean hasInclude = false;
             for (int ii = 0; ii < tokenizedLine.size(); ii++) {

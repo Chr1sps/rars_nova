@@ -55,7 +55,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class RISCVProgram {
 
     private String filename;
-    private ArrayList<String> sourceList;
+    private List<String> sourceList;
     private List<TokenList> tokenList;
     private ArrayList<ProgramStatement> parsedList;
     private List<ProgramStatement> machineList;
@@ -102,7 +102,7 @@ public final class RISCVProgram {
      *
      * @return ArrayList of String. Each String is one line of RISCV source code.
      */
-    public ArrayList<String> getSourceList() {
+    public List<String> getSourceList() {
         return this.sourceList;
     }
 
@@ -125,10 +125,7 @@ public final class RISCVProgram {
      */
     public void setSourceLineList(final @NotNull List<SourceLine> sourceLineList) {
         this.sourceLineList = sourceLineList;
-        this.sourceList = new ArrayList<>();
-        for (final SourceLine sl : sourceLineList) {
-            this.sourceList.add(sl.source());
-        }
+        this.sourceList = sourceLineList.stream().map(SourceLine::source).toList();
     }
 
     /**
@@ -170,7 +167,7 @@ public final class RISCVProgram {
      * parsed RISCV statement.
      * @see ProgramStatement
      */
-    public ArrayList<ProgramStatement> getParsedList() {
+    public List<ProgramStatement> getParsedList() {
         return this.parsedList;
     }
 
@@ -235,9 +232,9 @@ public final class RISCVProgram {
      *
      * @param source String containing the RISCV source code.
      */
-    public void fromString(final String source) {
+    public void fromString(final @NotNull String source) {
         this.filename = source;
-        this.sourceList = new ArrayList<>(Arrays.asList(source.split("\n")));
+        this.sourceList = Arrays.asList(source.split("\n"));
     }
 
     /**
@@ -251,7 +248,7 @@ public final class RISCVProgram {
      */
     public void readSource(final @NotNull String file) throws AssemblyException {
         this.filename = file;
-        this.sourceList = new ArrayList<>();
+        final var sourceList = new ArrayList<String>();
         final ErrorList errors;
         final BufferedReader inputFile;
         String line;
@@ -259,9 +256,10 @@ public final class RISCVProgram {
             inputFile = new BufferedReader(new FileReader(file));
             line = inputFile.readLine();
             while (line != null) {
-                this.sourceList.add(line);
+                sourceList.add(line);
                 line = inputFile.readLine();
             }
+            this.sourceList = sourceList;
         } catch (final Exception e) {
             errors = new ErrorList();
             errors.add(ErrorMessage.error(null, 0, 0, e.toString()));

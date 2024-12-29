@@ -1,13 +1,11 @@
 package rars;
 
+import org.jetbrains.annotations.NotNull;
 import rars.assembler.SymbolTable;
 import rars.assembler.Token;
 import rars.assembler.TokenList;
 import rars.assembler.TokenType;
-import rars.riscv.BasicInstruction;
-import rars.riscv.BasicInstructionFormat;
-import rars.riscv.Instruction;
-import rars.riscv.Instructions;
+import rars.riscv.*;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.Register;
@@ -68,7 +66,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     private final int[] operands;
     private final Instruction instruction;
     private final int textAddress;
-    private final boolean altered;
     private String source, basicAssemblyStatement, machineStatement;
     private int numOperands;
     private int sourceLine;
@@ -109,7 +106,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         this.basicStatementList = new BasicStatementList();
         this.machineStatement = null;
         this.binaryStatement = 0; // nop, or sll $0, $0, 0 (32 bits of 0's)
-        this.altered = false;
     }
 
 
@@ -164,7 +160,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 }
             }
         }
-        this.altered = false;
         this.basicStatementList = ProgramStatement.buildBasicStatementListFromBinaryCode(binaryStatement, instr,
             this.operands, this.numOperands);
     }
@@ -538,34 +533,62 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * @param errors The list of assembly errors encountered so far. May add to it
      *               here.
      */
-    public void buildMachineStatementFromBasicStatement(final ErrorList errors) {
-        if (!(this.instruction instanceof BasicInstruction)) {
-            // This means the pseudo-instruction expansion generated another
-            // pseudo-instruction (expansion must be to all basic instructions).
-            // This is an error on the part of the pseudo-instruction author.
-            errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
-                    "INTERNAL ERROR: pseudo-instruction expansion contained a pseudo-instruction"));
-            return;
-        }
+    public void buildMachineStatementFromBasicStatement(final @NotNull ErrorList errors) {
+        switch (this.instruction) {
+            case final ExtendedInstruction ignored -> {
+                // This means the pseudo-instruction expansion generated another
+                // pseudo-instruction (expansion must be to all basic instructions).
+                // This is an error on the part of the pseudo-instruction author.
+                errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
+                        "INTERNAL ERROR: pseudo-instruction expansion contained a pseudo-instruction"));
+                return;
+            }
+            case final BasicInstruction basic -> {
+                // mask indicates bit positions for 'f'irst, 's'econd, 't'hird operand
+                this.machineStatement = basic.getOperationMask();
+                final BasicInstructionFormat format = basic.getInstructionFormat();
 
-        // mask indicates bit positions for 'f'irst, 's'econd, 't'hird operand
-        this.machineStatement = ((BasicInstruction) this.instruction).getOperationMask();
-        final BasicInstructionFormat format = ((BasicInstruction) this.instruction).getInstructionFormat();
+                if (format == BasicInstructionFormat.J_FORMAT) {
+                    this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
+                    this.insertBinaryCode(ProgramStatement.toJumpImmediate(this.operands[1]),
+                            Instruction.operandMask[1],
+                            errors);
+                } else if (format == BasicInstructionFormat.B_FORMAT) {
+                    this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
+                    this.insertBinaryCode(this.operands[1], Instruction.operandMask[1], errors);
+                    this.insertBinaryCode(ProgramStatement.toBranchImmediate(this.operands[2]),
+                            Instruction.operandMask[2],
+                            errors);
+                } else { // Everything else is normal
+                    for (int i = 0; i < this.numOperands; i++)
+                        this.insertBinaryCode(this.operands[i], Instruction.operandMask[i], errors);
+                }
+                this.binaryStatement = Binary.binaryStringToInt(this.machineStatement);
+            }
+            case final CompressedInstruction compressed -> {
+                // TODO
+                // mask indicates bit positions for 'f'irst, 's'econd, 't'hird operand
+//                this.machineStatement = compressed.getOperationMask();
+//                final var format = compressed.getInstructionFormat();
 
-        if (format == BasicInstructionFormat.J_FORMAT) {
-            this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
-            this.insertBinaryCode(ProgramStatement.toJumpImmediate(this.operands[1]), Instruction.operandMask[1],
-                errors);
-        } else if (format == BasicInstructionFormat.B_FORMAT) {
-            this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
-            this.insertBinaryCode(this.operands[1], Instruction.operandMask[1], errors);
-            this.insertBinaryCode(ProgramStatement.toBranchImmediate(this.operands[2]), Instruction.operandMask[2],
-                errors);
-        } else { // Everything else is normal
-            for (int i = 0; i < this.numOperands; i++)
-                this.insertBinaryCode(this.operands[i], Instruction.operandMask[i], errors);
+//                if (format == BasicInstructionFormat.J_FORMAT) {
+//                    this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
+//                    this.insertBinaryCode(ProgramStatement.toJumpImmediate(this.operands[1]),
+//                            Instruction.operandMask[1],
+//                            errors);
+//                } else if (format == BasicInstructionFormat.B_FORMAT) {
+//                    this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
+//                    this.insertBinaryCode(this.operands[1], Instruction.operandMask[1], errors);
+//                    this.insertBinaryCode(ProgramStatement.toBranchImmediate(this.operands[2]),
+//                            Instruction.operandMask[2],
+//                            errors);
+//                } else { // Everything else is normal
+//                    for (int i = 0; i < this.numOperands; i++)
+//                        this.insertBinaryCode(this.operands[i], Instruction.operandMask[i], errors);
+//                }
+//                this.binaryStatement = Binary.binaryStringToInt(this.machineStatement);
+            }
         }
-        this.binaryStatement = Binary.binaryStringToInt(this.machineStatement);
     }
 
     /**
