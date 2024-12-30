@@ -2,11 +2,14 @@ package rars.simulator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 /*
@@ -42,13 +45,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * program at runtime. Equivalent to C's main(int argc, char **argv) or
  * Java's main(String[] args).
  *
+ * @param programArgumentList list of strings, each element containing one argument
  * @author Pete Sanderson
  * @version July 2008
  */
-public class ProgramArgumentList {
+public record ProgramArgumentList(@NotNull @Unmodifiable List<@NotNull String> programArgumentList) {
     private static final Logger LOGGER = LogManager.getLogger();
-
-    private final ArrayList<String> programArgumentList;
 
     /**
      * Constructor that parses string to produce list. Delimiters
@@ -57,59 +59,32 @@ public class ProgramArgumentList {
      *
      * @param args String containing delimiter-separated arguments
      */
-    public ProgramArgumentList(final String args) {
+    public ProgramArgumentList(final @NotNull String args) {
+        this(buildArgsFromString(args));
+    }
+
+    private static @NotNull List<@NotNull String> buildArgsFromString(final @NotNull String args) {
         final StringTokenizer st = new StringTokenizer(args);
-        this.programArgumentList = new ArrayList<>(st.countTokens());
+        final var resultList = new ArrayList<@NotNull String>(st.countTokens());
         while (st.hasMoreTokens()) {
-            this.programArgumentList.add(st.nextToken());
+            resultList.add(st.nextToken());
         }
+        return resultList;
     }
 
-    /**
-     * Constructor that gets list from ArrayList of String, one argument per
-     * element.
-     *
-     * @param list ArrayList of String, each element containing one argument
-     */
-    public ProgramArgumentList(final ArrayList<String> list) {
-        this(list, 0);
-    }
 
     /**
-     * Constructor that gets list from section of String ArrayList, one
-     * argument per element.
-     *
-     * @param list          ArrayList of String, each element containing one
-     *                      argument
-     * @param startPosition Index of array element containing the first argument;
-     *                      all remaining
-     *                      elements are assumed to contain an argument.
-     */
-    public ProgramArgumentList(final ArrayList<String> list, final int startPosition) {
-        if (list == null || list.size() < startPosition) {
-            this.programArgumentList = new ArrayList<>(0);
-        } else {
-            this.programArgumentList = new ArrayList<>(list.size() - startPosition);
-            for (int i = startPosition; i < list.size(); i++) {
-                this.programArgumentList.add(list.get(i));
-            }
-        }
-    }
-
-    // Place any program arguments into memory and registers
-    // Arguments are stored starting at highest word of non-kernel
-    // memory and working back toward runtime stack (there is a 4096
-    // byte gap in between). The argument count (argc) and pointers
-    // to the arguments are stored on the runtime stack. The stack
-    // pointer register $sp is adjusted accordingly and $a0 is set
-    // to the argument count (argc), and $a1 is set to the stack
-    // address holding the first argument pointer (argv).
-
-    /**
-     * <p>storeProgramArguments.</p>
+     * Place any program arguments into memory and registers
+     * Arguments are stored starting at highest word of non-kernel
+     * memory and working back toward runtime stack (there is a 4096
+     * byte gap in between). The argument count (argc) and pointers
+     * to the arguments are stored on the runtime stack. The stack
+     * pointer register $sp is adjusted accordingly and $a0 is set
+     * to the argument count (argc), and $a1 is set to the stack
+     * address holding the first argument pointer (argv).
      */
     public void storeProgramArguments() {
-        if (this.programArgumentList == null || this.programArgumentList.isEmpty()) {
+        if (this.programArgumentList.isEmpty()) {
             return;
         }
         // Runtime stack initialization from stack top-down (each is 4 bytes) :
@@ -133,11 +108,10 @@ public class ProgramArgumentList {
         // Follow this pattern for all remaining arguments.
 
         int highAddress = Memory.stackBaseAddress; // highest non-kernel address, sits "under" stack
-        String programArgument;
         final int[] argStartAddress = new int[this.programArgumentList.size()];
         try { // needed for all memory writes
             for (int i = 0; i < this.programArgumentList.size(); i++) {
-                programArgument = this.programArgumentList.get(i);
+                final var programArgument = this.programArgumentList.get(i);
                 Memory.getInstance().set(highAddress, 0, 1); // trailing null byte for each argument
                 highAddress--;
                 for (int j = programArgument.length() - 1; j >= 0; j--) {
@@ -173,9 +147,8 @@ public class ProgramArgumentList {
             RegisterFile.getRegister("a1").setValue(stackAddress + Memory.WORD_LENGTH_BYTES + Memory.WORD_LENGTH_BYTES); // argv
         } catch (final AddressErrorException aee) {
             ProgramArgumentList.LOGGER.fatal("Internal Error: Memory write error occurred while storing program " +
-                    "arguments!", aee);
+                "arguments!", aee);
             System.exit(0);
         }
     }
-
 }

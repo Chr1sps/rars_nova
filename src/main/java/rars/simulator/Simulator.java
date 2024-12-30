@@ -12,7 +12,7 @@ import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.OtherSettings;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.util.CustomPublisher;
 import rars.util.SystemIO;
 import rars.venus.run.RunSpeedPanel;
@@ -532,7 +532,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                         if (instruction == null) {
                             // TODO: Proper error handling here
                             throw new SimulationException(statement,
-                                "undefined instruction (" + Binary.intToHexString(statement.getBinaryStatement())
+                                "undefined instruction (" + BinaryUtils.intToHexString(statement.getBinaryStatement())
                                     + ")",
                                 ExceptionReason.ILLEGAL_INSTRUCTION);
                         }

@@ -18,9 +18,10 @@ import rars.util.Utils;
  */
 public final class CJ extends CompressedInstruction {
     public static final CompressedInstruction INSTANCE = new CJ();
-    
+
     private CJ() {
-        super("c.j target", "Compressed jump: Jump to statement at target address", CompressedInstructionFormat.CJ_FORMAT, "101 fffffffffff 00");
+        super("c.j target", "Compressed jump: Jump to statement at target address", CompressedInstructionFormat.CJ, 
+            "101 fffffffffff 00");
     }
 
     @Override

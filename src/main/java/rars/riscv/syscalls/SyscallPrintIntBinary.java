@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.util.SystemIO;
 
 /*
@@ -44,7 +44,7 @@ public final class SyscallPrintIntBinary extends AbstractSyscall {
      */
     public SyscallPrintIntBinary() {
         super("PrintIntBinary", "Prints an integer (in binary format left-padded with zeroes) ",
-                "a0 = integer to print", "N/A");
+            "a0 = integer to print", "N/A");
     }
 
     /**
@@ -52,6 +52,6 @@ public final class SyscallPrintIntBinary extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        SystemIO.printString(Binary.intToBinaryString(RegisterFile.getValue("a0")));
+        SystemIO.printString(BinaryUtils.intToBinaryString(RegisterFile.getValue("a0")));
     }
 }

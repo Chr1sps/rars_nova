@@ -77,8 +77,8 @@ public final class Tokenizer {
     private final @NotNull HashMap<String, String> equivalents; // DPS 11-July-2012
 
     private Tokenizer(
-            final @Nullable RISCVProgram program,
-            final @NotNull ErrorList errorList
+        final @Nullable RISCVProgram program,
+        final @NotNull ErrorList errorList
     ) {
         this.errors = errorList;
         this.program = program;
@@ -153,7 +153,7 @@ public final class Tokenizer {
             // Not needed by assembler, but looks better in the Text Segment Display.
             if (!sourceLine.isEmpty() && !sourceLine.equals(currentLineTokens.getProcessedLine())) {
                 source.set(i, new SourceLine(currentLineTokens.getProcessedLine(), source.get(i).program(),
-                        source.get(i).lineNumber()));
+                    source.get(i).lineNumber()));
             }
         }
         if (tokenizer.errors.errorsOccurred()) {
@@ -167,9 +167,9 @@ public final class Tokenizer {
     ///
     /// @param example The example RISCV instruction to be tokenized.
     /// @return A [TokenList] object representing the tokenized instruction.
-    /// @throws AssemblyException This occurs only if the instruction specification itself contains one or more
-    ///                                                                                                         
-    /// lexical (i.e. token) errors.
+    /// @throws AssemblyException This occurs only if the instruction
+    ///                                                     specification itself contains one or more
+    ///                                                     lexical (i.e. token) errors.
     public static @NotNull TokenList tokenizeExampleInstruction(final @NotNull String example) throws AssemblyException {
         final var tokenizer = new Tokenizer();
         final var result = tokenizer.tokenizeLineImpl(null, 0, example, false);
@@ -245,7 +245,7 @@ public final class Tokenizer {
                     case '#': // # denotes comment that takes remainder of line
                         if (tokenPos > 0) {
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
-                                    result);
+                                result);
                         }
                         tokenStartPos = linePos + 1;
                         tokenPos = line.length - linePos;
@@ -259,7 +259,7 @@ public final class Tokenizer {
                     case ',': // space, tab or comma is delimiter
                         if (tokenPos > 0) {
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
-                                    result);
+                                result);
                             tokenPos = 0;
                         }
                         break;
@@ -275,31 +275,31 @@ public final class Tokenizer {
                         // point!
                         // (e.g. 1.2e-5) Add the + or - to the token and keep going. DPS 17 Aug 2005
                         if (tokenPos > 0 && line.length >= linePos + 2 && Character.isDigit(line[linePos + 1]) &&
-                                (line[linePos - 1] == 'e' || line[linePos - 1] == 'E')) {
+                            (line[linePos - 1] == 'e' || line[linePos - 1] == 'E')) {
                             token[tokenPos++] = c;
                             break;
                         }
                         // End of REAL hack.
                         if (tokenPos > 0) {
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
-                                    result);
+                                result);
                             tokenPos = 0;
                         }
 
                         tokenStartPos = linePos + 1;
                         token[tokenPos++] = c;
                         if (line.length > linePos + 3 && line[linePos + 1] == 'I' && line[linePos + 2] == 'n'
-                                && line[linePos + 3] == 'f') {
+                            && line[linePos + 3] == 'f') {
                             result.add(new Token(TokenType.REAL_NUMBER, "-Inf", program, lineNum, tokenStartPos));
                             linePos += 3;
                             tokenPos = 0;
                             break;
                         }
                         if (!((result.isEmpty() || result.get(result.size() - 1).getType() != TokenType.IDENTIFIER) &&
-                                (line.length >= linePos + 2 && Character.isDigit(line[linePos + 1])))) {
+                            (line.length >= linePos + 2 && Character.isDigit(line[linePos + 1])))) {
                             // treat it as binary.....
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
-                                    result);
+                                result);
                             tokenPos = 0;
                         }
                         break;
@@ -309,7 +309,7 @@ public final class Tokenizer {
                     case ')':
                         if (tokenPos > 0) {
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
-                                    result);
+                                result);
                             tokenPos = 0;
                         }
                         tokenStartPos = linePos + 1;
@@ -320,7 +320,7 @@ public final class Tokenizer {
                     case '"': // we're not inside a quoted string, so start a new token...
                         if (tokenPos > 0) {
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
-                                    result);
+                                result);
                             tokenPos = 0;
                         }
                         tokenStartPos = linePos + 1;
@@ -330,7 +330,7 @@ public final class Tokenizer {
                     case '\'': // start of character constant (single quote).
                         if (tokenPos > 0) {
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
-                                    result);
+                                result);
                             tokenPos = 0;
                         }
                         // Our strategy is to process the whole thing right now...
@@ -349,7 +349,7 @@ public final class Tokenizer {
                         // Process if we've either reached second, non-escaped, quote or end of line.
                         if (c == '\'' && token[1] != '\\' || lookaheadChars == 2) {
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
-                                    result);
+                                result);
                             tokenPos = 0;
                             tokenStartPos = linePos + 1;
                             break;
@@ -362,7 +362,7 @@ public final class Tokenizer {
                         // Process, if this is ending quote for escaped character or if at end of line
                         if (c == '\'' || lookaheadChars == 3) {
                             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos,
-                                    result);
+                                result);
                             tokenPos = 0;
                             tokenStartPos = linePos + 1;
                             break;
@@ -396,7 +396,7 @@ public final class Tokenizer {
         if (tokenPos > 0) {
             if (insideQuotedString) {
                 this.errors.add(ErrorMessage.error(program, lineNum, tokenStartPos,
-                        "String is not terminated."));
+                    "String is not terminated."));
             }
             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result);
         }
@@ -420,7 +420,7 @@ public final class Tokenizer {
      */
     private @NotNull List<SourceLine> processIncludes(final @NotNull RISCVProgram program,
                                                       final @NotNull Map<String, String> inclFiles)
-            throws AssemblyException {
+        throws AssemblyException {
         final var sourceList = program.getSourceList();
         final ArrayList<SourceLine> result = new ArrayList<>(sourceList.size());
         for (int i = 0; i < sourceList.size(); i++) {
@@ -428,13 +428,13 @@ public final class Tokenizer {
             final TokenList tokenizedLine = this.tokenizeLineImpl(program, i + 1, line, false);
             boolean hasInclude = false;
             for (int ii = 0; ii < tokenizedLine.size(); ii++) {
-                if (tokenizedLine.get(ii).getValue().equalsIgnoreCase(Directive.INCLUDE.getName())
-                        && (tokenizedLine.size() > ii + 1)
-                        && tokenizedLine.get(ii + 1).getType() == TokenType.QUOTED_STRING) {
+                if (tokenizedLine.get(ii).getText().equalsIgnoreCase(Directive.INCLUDE.getName())
+                    && (tokenizedLine.size() > ii + 1)
+                    && tokenizedLine.get(ii + 1).getType() == TokenType.QUOTED_STRING) {
                     String filename = tokenizedLine
-                            .get(ii + 1)
-                            .getValue()
-                            .transform((s) -> s.substring(1, s.length() - 1));
+                        .get(ii + 1)
+                        .getText()
+                        .transform((s) -> s.substring(1, s.length() - 1));
                     // Handle either absolute or relative pathname for .include file
                     if (!new File(filename).isAbsolute()) {
                         filename = new File(program.getFilename()).getParent() + File.separator + filename;
@@ -443,7 +443,7 @@ public final class Tokenizer {
                         // This is a recursive include. Generate error message and return immediately.
                         final Token t = tokenizedLine.get(ii + 1);
                         this.errors.add(ErrorMessage.error(program, t.getSourceLine(), t.getStartPos(),
-                                "Recursive include of file " + filename));
+                            "Recursive include of file " + filename));
                         throw new AssemblyException(this.errors);
                     }
                     inclFiles.put(filename, filename);
@@ -477,35 +477,35 @@ public final class Tokenizer {
         // assembler).
 
         if (tokens.size() > 2 && (tokens.get(0).getType() == TokenType.DIRECTIVE
-                || tokens.get(2).getType() == TokenType.DIRECTIVE)) {
+            || tokens.get(2).getType() == TokenType.DIRECTIVE)) {
             // There should not be a label but if there is, the directive is in token
             // position 2 (ident, colon, directive).
             final int dirPos = (tokens.get(0).getType() == TokenType.DIRECTIVE) ? 0 : 2;
-            if (Directive.matchDirective(tokens.get(dirPos).getValue()) == Directive.EQV) {
+            if (Directive.matchDirective(tokens.get(dirPos).getText()) == Directive.EQV) {
                 // Get position in token list of last non-comment token
                 final int tokenPosLastOperand = tokens.size()
-                        - ((tokens.get(tokens.size() - 1).getType() == TokenType.COMMENT) ? 2 : 1);
+                    - ((tokens.get(tokens.size() - 1).getType() == TokenType.COMMENT) ? 2 : 1);
                 // There have to be at least two non-comment tokens beyond the directive
                 if (tokenPosLastOperand < dirPos + 2) {
                     this.errors.add(ErrorMessage.error(program, lineNum, tokens.get(dirPos).getStartPos(),
-                            "Too few operands for " + Directive.EQV.getName() + " directive"));
+                        "Too few operands for " + Directive.EQV.getName() + " directive"));
                     return tokens;
                 }
                 // Token following the directive has to be IDENTIFIER
                 if (tokens.get(dirPos + 1).getType() != TokenType.IDENTIFIER) {
                     this.errors.add(ErrorMessage.error(program, lineNum, tokens.get(dirPos).getStartPos(),
-                            "Malformed " + Directive.EQV.getName() + " directive"));
+                        "Malformed " + Directive.EQV.getName() + " directive"));
                     return tokens;
                 }
-                final String symbol = tokens.get(dirPos + 1).getValue();
+                final String symbol = tokens.get(dirPos + 1).getText();
                 // Make sure the symbol is not contained in the expression. Not likely to occur
                 // but if left
                 // undetected it will result in infinite recursion. e.g. .eqv ONE, (ONE)
                 for (int i = dirPos + 2; i < tokens.size(); i++) {
-                    if (tokens.get(i).getValue().equals(symbol)) {
+                    if (tokens.get(i).getText().equals(symbol)) {
                         this.errors.add(ErrorMessage.error(program, lineNum, tokens.get(dirPos).getStartPos(),
-                                "Cannot substitute " + symbol + " for itself in " + Directive.EQV.getName()
-                                        + " directive"));
+                            "Cannot substitute " + symbol + " for itself in " + Directive.EQV.getName()
+                                + " directive"));
                         return tokens;
                     }
                 }
@@ -516,7 +516,7 @@ public final class Tokenizer {
                 // COMMENT or to the end.
                 final int startExpression = tokens.get(dirPos + 2).getStartPos();
                 final int endExpression = tokens.get(tokenPosLastOperand).getStartPos()
-                        + tokens.get(tokenPosLastOperand).getValue().length();
+                    + tokens.get(tokenPosLastOperand).getText().length();
                 final String expression = theLine.substring(startExpression - 1, endExpression - 1);
                 // Removed equivalents checking - this is a tokenizer, not a semantic checker
                 this.equivalents.put(symbol, expression);
@@ -528,12 +528,12 @@ public final class Tokenizer {
         for (int i = 0; i < tokens.size(); i++) {
             final Token token = tokens.get(i);
             if (token.getType() == TokenType.IDENTIFIER
-                    && this.equivalents.containsKey(token.getValue())) {
+                && this.equivalents.containsKey(token.getText())) {
                 // do the substitution
-                final String sub = this.equivalents.get(token.getValue());
+                final String sub = this.equivalents.get(token.getText());
                 final int startPos = token.getStartPos();
                 theLine = theLine.substring(0, startPos - 1) + sub
-                        + theLine.substring(startPos + token.getValue().length() - 1);
+                    + theLine.substring(startPos + token.getText().length() - 1);
                 substitutionMade = true; // one substitution per call. If there are multiple, will catch next one on the
                 // recursion
                 break;
@@ -555,7 +555,7 @@ public final class Tokenizer {
         final TokenType type = TokenType.matchTokenType(value);
         if (type == TokenType.ERROR) {
             this.errors.add(ErrorMessage.error(program, line, tokenStartPos,
-                    theLine + "\nInvalid language element: " + value));
+                theLine + "\nInvalid language element: " + value));
         }
         final Token toke = new Token(type, value, program, line, tokenStartPos);
         tokenList.add(toke);

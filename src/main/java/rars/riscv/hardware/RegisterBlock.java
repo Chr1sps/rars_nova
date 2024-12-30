@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.notices.RegisterAccessNotice;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.util.SimpleSubscriber;
 
 import java.util.concurrent.Flow;
@@ -170,7 +170,7 @@ public class RegisterBlock {
                 return this.getRegister(0);
             }
 
-            final Integer num = Binary.stringToIntFast(name.substring(1));
+            final Integer num = BinaryUtils.stringToIntFast(name.substring(1));
             if (num == null)
                 return null;
             return this.getRegister(num);

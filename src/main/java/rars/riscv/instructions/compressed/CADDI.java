@@ -6,22 +6,20 @@ import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 
-import static rars.exceptions.BreakpointException.BREAKPOINT_EXCEPTION;
+public final class CADDI extends CompressedInstruction {
+    public static final @NotNull CADDI INSTANCE = new CADDI();
 
-public final class CEBREAK extends CompressedInstruction {
-    public static final @NotNull CEBREAK INSTANCE = new CEBREAK();
-
-    private CEBREAK() {
+    private CADDI() {
         super(
-            "c.ebreak",
-            "Pause execution",
-            CompressedInstructionFormat.CB,
-            "100 1 00000 00000 10"
+            "c.addi t1, 100",
+            "Add immediate to register",
+            CompressedInstructionFormat.CI,
+            "000 s fffff sssss 01"
         );
     }
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        throw BREAKPOINT_EXCEPTION;
+        // TODO: implement
     }
 }

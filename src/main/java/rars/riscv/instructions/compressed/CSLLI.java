@@ -6,22 +6,20 @@ import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 
-import static rars.exceptions.BreakpointException.BREAKPOINT_EXCEPTION;
+public final class CSLLI extends CompressedInstruction {
+    public static final @NotNull CSLLI INSTANCE = new CSLLI();
 
-public final class CEBREAK extends CompressedInstruction {
-    public static final @NotNull CEBREAK INSTANCE = new CEBREAK();
-
-    private CEBREAK() {
+    private CSLLI() {
         super(
-            "c.ebreak",
-            "Pause execution",
-            CompressedInstructionFormat.CB,
-            "100 1 00000 00000 10"
+            "c.slli t1, 100",
+            "",
+            CompressedInstructionFormat.CI,
+            "000  10"
         );
     }
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        throw BREAKPOINT_EXCEPTION;
+        // TODO: implement
     }
 }

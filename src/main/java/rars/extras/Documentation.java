@@ -2,12 +2,11 @@ package rars.extras;
 
 import org.jetbrains.annotations.NotNull;
 import rars.assembler.Directive;
-import rars.riscv.AbstractSyscall;
 import rars.riscv.Instruction;
 import rars.riscv.Instructions;
 import rars.riscv.SyscallLoader;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -24,68 +23,56 @@ public final class Documentation {
     private Documentation() {
     }
 
-    /**
-     * <p>main.</p>
-     *
-     * @param args an array of {@link java.lang.String} objects
-     */
     public static void main(final String[] args) {
         System.out.println(Documentation.createDirectiveMarkdown());
         System.out.println(Documentation.createSyscallMarkdown());
-        System.out.println(Documentation.createInstructionMarkdownNew(false, false));
-        System.out.println(Documentation.createInstructionMarkdownNew(true, false));
-        System.out.println(Documentation.createInstructionMarkdownNew(false, true));
-        System.out.println(Documentation.createInstructionMarkdownNew(true, true));
+        System.out.println(Documentation.createInstructionMarkdown(false, false));
+        System.out.println(Documentation.createInstructionMarkdown(true, false));
+        System.out.println(Documentation.createInstructionMarkdown(false, true));
+        System.out.println(Documentation.createInstructionMarkdown(true, true));
     }
 
-    /**
-     * <p>createDirectiveMarkdown.</p>
-     *
-     * @return a {@link java.lang.String} object
-     */
     public static @NotNull String createDirectiveMarkdown() {
-        final var directives = Directive.getDirectiveList();
-        directives.sort(Comparator.comparing(Directive::getName));
-        final StringBuilder output = new StringBuilder("| Name | Description|\n|------|------------|");
-        for (final var direct : directives) {
-            output.append("\n|");
-            output.append(direct.getName());
-            output.append('|');
-            output.append(direct.getDescription());
-            output.append('|');
+        final var sortedDirectives = Arrays
+            .stream(Directive.values())
+            .sorted(Comparator.comparing(
+                Directive::getName
+            )).toList();
+        final var builder = new StringBuilder("| Name | Description|\n|------|------------|");
+        for (final var directive : sortedDirectives) {
+            builder.append("\n|");
+            builder.append(directive.getName());
+            builder.append('|');
+            builder.append(directive.getDescription());
+            builder.append('|');
         }
-        return output.toString();
+        return builder.toString();
     }
 
-    /**
-     * <p>createSyscallMarkdown.</p>
-     *
-     * @return a {@link java.lang.String} object
-     */
     public static @NotNull String createSyscallMarkdown() {
         final var list = SyscallLoader.getSyscallList();
         final var sorted = list.stream().sorted().toList();
-        final StringBuilder output = new StringBuilder(
-                "| Name | Call Number (a7) | Description | Inputs | Outputs |\n|------|------------------|-------------|--------|---------|");
-        for (final AbstractSyscall syscall : sorted) {
-            output.append("\n|");
-            output.append(syscall.getName());
-            output.append('|');
-            output.append(syscall.getNumber());
-            output.append('|');
-            output.append(syscall.getDescription());
-            output.append('|');
-            output.append(syscall.getInputs());
-            output.append('|');
-            output.append(syscall.getOutputs());
-            output.append('|');
+        final var builder = new StringBuilder(
+            "| Name | Call Number (a7) | Description | Inputs | Outputs " +
+                "|\n|------|------------------|-------------|--------|---------|");
+        for (final var syscall : sorted) {
+            builder.append("\n|");
+            builder.append(syscall.getName());
+            builder.append('|');
+            builder.append(syscall.getNumber());
+            builder.append('|');
+            builder.append(syscall.getDescription());
+            builder.append('|');
+            builder.append(syscall.getInputs());
+            builder.append('|');
+            builder.append(syscall.getOutputs());
+            builder.append('|');
         }
 
-        return output.toString();
+        return builder.toString();
     }
 
-
-    public static @NotNull String createInstructionMarkdownNew(final boolean is64, final boolean isExtended) {
+    public static @NotNull String createInstructionMarkdown(final boolean is64, final boolean isExtended) {
         final List<? extends Instruction> instructionList;
         if (is64) {
             if (isExtended)
@@ -99,10 +86,11 @@ public final class Documentation {
                 instructionList = Instructions.INSTRUCTIONS_R32;
         }
         final var sorted = instructionList
-                .stream()
-                .sorted(Comparator.comparing(Instruction::getExampleFormat))
-                .toList();
-        final StringBuilder output = new StringBuilder("| Example Usage | Description |\n|---------------|-------------|");
+            .stream()
+            .sorted(Comparator.comparing(Instruction::getExampleFormat))
+            .toList();
+        final StringBuilder output = new StringBuilder("| Example Usage | Description " +
+            "|\n|---------------|-------------|");
         for (final var instr : sorted) {
             output.append("\n|");
             output.append(instr.getExampleFormat());

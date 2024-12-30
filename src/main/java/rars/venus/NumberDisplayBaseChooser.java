@@ -1,7 +1,7 @@
 package rars.venus;
 
 import rars.Globals;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -106,9 +106,9 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      */
     public static String formatUnsignedInteger(final int value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return Binary.intToHexString(value);
+            return BinaryUtils.intToHexString(value);
         } else {
-            return Binary.unsignedIntToIntString(value);
+            return BinaryUtils.unsignedIntToIntString(value);
         }
     }
 
@@ -124,8 +124,8 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      */
     public static String formatNumber(final int value, final int base) {
         return switch (base) {
-            case NumberDisplayBaseChooser.HEXADECIMAL -> Binary.intToHexString(value);
-            case NumberDisplayBaseChooser.ASCII -> Binary.intToAscii(value);
+            case NumberDisplayBaseChooser.HEXADECIMAL -> BinaryUtils.intToHexString(value);
+            case NumberDisplayBaseChooser.ASCII -> BinaryUtils.intToAscii(value);
             default -> Integer.toString(value);
         };
         // if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
@@ -145,7 +145,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      */
     public static String formatNumber(final long value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return Binary.longToHexString(value);
+            return BinaryUtils.longToHexString(value);
         } else {
             return Long.toString(value);
         }
@@ -163,7 +163,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      */
     public static String formatNumber(final float value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return Binary.intToHexString(Float.floatToIntBits(value));
+            return BinaryUtils.intToHexString(Float.floatToIntBits(value));
         } else {
             return Float.toString(value);
         }
@@ -182,8 +182,8 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     public static String formatNumber(final double value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
             final long lguy = Double.doubleToLongBits(value);
-            return Binary.intToHexString(Binary.highOrderLongToInt(lguy)) +
-                Binary.intToHexString(Binary.lowOrderLongToInt(lguy)).substring(2);
+            return BinaryUtils.intToHexString(BinaryUtils.highOrderLongToInt(lguy)) +
+                BinaryUtils.intToHexString(BinaryUtils.lowOrderLongToInt(lguy)).substring(2);
         } else {
             return Double.toString(value);
         }
@@ -210,7 +210,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      */
     public static String formatFloatNumber(final int value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return Binary.intToHexString(value);
+            return BinaryUtils.intToHexString(value);
         } else {
             return Float.toString(Float.intBitsToFloat(value));
         }
@@ -237,7 +237,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      */
     public static String formatDoubleNumber(final long value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return Binary.longToHexString(value);
+            return BinaryUtils.longToHexString(value);
         } else {
             return Double.toString(Double.longBitsToDouble(value));
         }
@@ -284,7 +284,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      */
     public String formatNumber(final int value) {
         if (this.base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return Binary.intToHexString(value);
+            return BinaryUtils.intToHexString(value);
         } else {
             return Integer.valueOf(value).toString();
         }

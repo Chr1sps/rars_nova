@@ -8,9 +8,10 @@ import rars.assembler.TokenList;
 import rars.assembler.Tokenizer;
 import rars.exceptions.AssemblyException;
 import rars.riscv.instructions.*;
-import rars.settings.BoolSetting;
+import rars.riscv.instructions.compressed.CADDI4SPN;
 import rars.riscv.instructions.compressed.CEBREAK;
 import rars.riscv.instructions.compressed.CJ;
+import rars.settings.BoolSetting;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,9 +20,8 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static rars.util.Utils.concatStreams;
-
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.util.Utils.concatStreams;
 
 /**
  * This class contains all the defined RISC-V instructions. It is intended
@@ -36,7 +36,6 @@ public final class Instructions {
     public final static List<ExtendedInstruction> INSTRUCTIONS_R32_EXTENDED;
     public final static List<ExtendedInstruction> INSTRUCTIONS_R64_EXTENDED;
     public final static List<Instruction> INSTRUCTIONS_ALL;
-
     private final static Logger LOGGER = LogManager.getLogger();
     private final static List<Instruction> INSTRUCTIONS_ALL_R32_ONLY;
     private final static List<Instruction> INSTRUCTIONS_ALL_R64_ONLY;
@@ -44,9 +43,7 @@ public final class Instructions {
     private final static List<MatchMap> R64_MATCH_MAPS;
     private static final boolean initialized;
     private final static Map<Instruction, TokenList> tokenListMap;
-
     private final static List<CompressedInstruction> INSTRUCTIONS_R32_COMPRESSED, INSTRUCTIONS_R64_COMPRESSED;
-
     public static boolean RV64;
 
     static {
@@ -235,33 +232,34 @@ public final class Instructions {
         INSTRUCTIONS_R64_EXTENDED = loadPseudoInstructions("/PseudoOps-64.txt");
 
         INSTRUCTIONS_R32_COMPRESSED = List.of(
-                CEBREAK.INSTANCE,
-                CJ.INSTANCE
+            CADDI4SPN.INSTANCE,
+            CEBREAK.INSTANCE,
+            CJ.INSTANCE
         );
         INSTRUCTIONS_R64_COMPRESSED = List.of();
 
 
         INSTRUCTIONS_ALL_R32_ONLY = concatStreams(
-                INSTRUCTIONS_R32.stream(),
-                INSTRUCTIONS_R32_EXTENDED.stream(),
-                INSTRUCTIONS_R32_COMPRESSED.stream()
+            INSTRUCTIONS_R32.stream(),
+            INSTRUCTIONS_R32_EXTENDED.stream(),
+            INSTRUCTIONS_R32_COMPRESSED.stream()
         )
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
 
         INSTRUCTIONS_ALL_R64_ONLY = concatStreams(
-                INSTRUCTIONS_R64.stream(),
-                INSTRUCTIONS_R64_EXTENDED.stream(),
-                INSTRUCTIONS_R64_COMPRESSED.stream()
+            INSTRUCTIONS_R64.stream(),
+            INSTRUCTIONS_R64_EXTENDED.stream(),
+            INSTRUCTIONS_R64_COMPRESSED.stream()
         )
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
 
         INSTRUCTIONS_ALL = concatStreams(
-                INSTRUCTIONS_R32.stream(),
-                INSTRUCTIONS_R64.stream(),
-                INSTRUCTIONS_R32_EXTENDED.stream(),
-                INSTRUCTIONS_R64_EXTENDED.stream(),
-                INSTRUCTIONS_R32_COMPRESSED.stream(),
-                INSTRUCTIONS_R64_COMPRESSED.stream()
+            INSTRUCTIONS_R32.stream(),
+            INSTRUCTIONS_R64.stream(),
+            INSTRUCTIONS_R32_EXTENDED.stream(),
+            INSTRUCTIONS_R64_EXTENDED.stream(),
+            INSTRUCTIONS_R32_COMPRESSED.stream(),
+            INSTRUCTIONS_R64_COMPRESSED.stream()
         ).collect(Collectors.toList());
 
         RV64 = BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED);
@@ -397,6 +395,14 @@ public final class Instructions {
 
     public static @NotNull TokenList getTokenList(final @NotNull Instruction instruction) {
         return tokenListMap.get(instruction);
+    }
+
+    private record SingleInstructionTypeSet<T>(
+        @NotNull List<T> shared,
+        @NotNull List<T> r32Only,
+        @NotNull List<T> r64Only
+    ) {
+
     }
 
     private static class MatchMap implements Comparable<MatchMap> {

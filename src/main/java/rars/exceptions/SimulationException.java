@@ -4,7 +4,7 @@ import rars.ErrorMessage;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.RegisterFile;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 
 /**
  * For exceptions thrown during runtime
@@ -40,8 +40,8 @@ public class SimulationException extends Exception {
      */
     public SimulationException(final ProgramStatement ps, final String m, final ExceptionReason reason) {
         this(reason, new ErrorMessage(ps, "Runtime exception at " +
-                Binary.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
-                ": " + m), 0);
+            BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
+            ": " + m), 0);
     }
 
     /**
@@ -52,7 +52,7 @@ public class SimulationException extends Exception {
      */
     public SimulationException(final ProgramStatement ps, final String m) {
         this(ps, m, ExceptionReason.OTHER);
-        // Stopped using ps.getAddress() because of pseudo-instructions. All
+        // Stopped using ps.getAddress() because of usePseudoInstructions-instructions. All
         // instructions in
         // the macro expansion point to the same ProgramStatement, and thus all will
         // return the
@@ -71,8 +71,8 @@ public class SimulationException extends Exception {
      */
     public SimulationException(final ProgramStatement ps, final AddressErrorException aee) {
         this(aee.reason, new ErrorMessage(ps, "Runtime exception at " +
-                Binary.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
-                ": " + aee.getMessage()), aee.address);
+            BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
+            ": " + aee.getMessage()), aee.address);
     }
 
     /**

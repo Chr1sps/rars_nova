@@ -86,10 +86,10 @@ public final class Macro {
     // question to answer.
     // DPS 12-feb-2013
     private static String replaceToken(final String source, final Token tokenToBeReplaced, final String substitute) {
-        final String stringToBeReplaced = tokenToBeReplaced.getValue();
+        final String stringToBeReplaced = tokenToBeReplaced.getText();
         final int pos = source.indexOf(stringToBeReplaced);
         return (pos < 0) ? source
-                : source.substring(0, pos) + substitute + source.substring(pos + stringToBeReplaced.length());
+            : source.substring(0, pos) + substitute + source.substring(pos + stringToBeReplaced.length());
     }
 
     /**
@@ -111,8 +111,8 @@ public final class Macro {
             // Expanded the condition.
             // DPS 7-July-2014.
             if (!tokenValue.isEmpty() && tokenValue.charAt(0) == '$' &&
-                    RegisterFile.getRegister(tokenValue) == null &&
-                    FloatingPointRegisterFile.getRegister(tokenValue) == null) // added 7-July-2014
+                RegisterFile.getRegister(tokenValue) == null &&
+                FloatingPointRegisterFile.getRegister(tokenValue) == null) // added 7-July-2014
             {
                 return true;
             }
@@ -267,23 +267,23 @@ public final class Macro {
 
         for (int i = tokens.size() - 1; i >= 0; i--) {
             final Token token = tokens.get(i);
-            if (Macro.tokenIsMacroParameter(token.getValue(), true)) {
+            if (Macro.tokenIsMacroParameter(token.getText(), true)) {
                 int repl = -1;
                 for (int j = 0; j < this.args.size(); j++) {
-                    if (this.args.get(j).equals(token.getValue())) {
+                    if (this.args.get(j).equals(token.getText())) {
                         repl = j;
                         break;
                     }
                 }
-                String substitute = token.getValue();
+                String substitute = token.getText();
                 if (repl != -1)
                     substitute = args.get(repl + 1).toString();
                 else {
                     errors.addTokenError(token, "Unknown macro parameter");
                 }
                 sourceLine = Macro.replaceToken(sourceLine, token, substitute);
-            } else if (this.tokenIsMacroLabel(token.getValue())) {
-                final String substitute = token.getValue() + "_M" + counter;
+            } else if (this.tokenIsMacroLabel(token.getText())) {
+                final String substitute = token.getText() + "_M" + counter;
                 sourceLine = Macro.replaceToken(sourceLine, token, substitute);
             }
         }
@@ -321,6 +321,6 @@ public final class Macro {
     @Override
     public int hashCode() {
         return Objects.hash(this.name, this.program, this.labels, this.fromLine, this.toLine, this.origFromLine,
-                this.origToLine, this.args);
+            this.origToLine, this.args);
     }
 }

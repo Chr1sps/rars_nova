@@ -11,6 +11,7 @@ import utils.RarsTestBase;
 
 import java.io.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -71,7 +72,7 @@ public class AppTest extends RarsTestBase {
             if (!errorLines.isEmpty()) {
                 fail("Expected assembly error, but successfully assembled `" + path + "`.\n");
             }
-            program.setup(null, stdin);
+            program.setup(List.of(), stdin);
             final Simulator.Reason r = program.simulate();
             if (r != Simulator.Reason.NORMAL_TERMINATION) {
                 final var msg = "Ended abnormally while executing `" + path + "`.\n" +
@@ -97,14 +98,13 @@ public class AppTest extends RarsTestBase {
         } catch (final AssemblyException ae) {
             if (errorLines.isEmpty()) {
                 final var builder = new StringBuilder();
-                builder.append("Failed to assemble `" + path + "` due to following error(s):\n");
-                for (final var error : ae.errors().getErrorMessages()) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
-                        "\n");
+                builder.append("Failed to assemble `%s` due to following error(s):\n".formatted(path));
+                for (final var error : ae.errors.getErrorMessages()) {
+                    builder.append("[%d, %d] %s\n".formatted(error.getLine(), error.getPosition(), error.getMessage()));
                 }
                 fail(builder.toString());
             }
-            final var errors = ae.errors().getErrorMessages();
+            final var errors = ae.errors.getErrorMessages();
             final var foundErrorLines = new HashSet<Integer>();
             for (final var error : errors) {
                 if (error.isWarning()) continue;
@@ -112,12 +112,11 @@ public class AppTest extends RarsTestBase {
             }
             if (!errorLines.equals(foundErrorLines)) {
                 final var builder = new StringBuilder();
-                builder.append("Expected and actual error lines are not equal for `" + path + "`.\n");
-                builder.append("Expected lines: " + errorLines + "\n");
+                builder.append("Expected and actual error lines are not equal for `%s`.\n".formatted(path));
+                builder.append("Expected lines: %s\n".formatted(errorLines));
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
-                        "\n");
+                    builder.append("[%d,%d] %s\n".formatted(error.getLine(), error.getPosition(), error.getMessage()));
                 }
                 fail(builder.toString());
             }
@@ -147,7 +146,7 @@ public class AppTest extends RarsTestBase {
         opt.startAtMain = true;
         opt.maxSteps = 500;
         opt.selfModifyingCode = true;
-        final Program p = new Program(opt);
+        final Program program = new Program(opt);
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
 
         for (final Instruction inst : Instructions.INSTRUCTIONS_ALL) {
@@ -155,23 +154,23 @@ public class AppTest extends RarsTestBase {
                 if (binst.getInstructionFormat() == BasicInstructionFormat.B_FORMAT || binst.getInstructionFormat() == BasicInstructionFormat.J_FORMAT)
                     continue;
 
-                final String program = inst.getExampleFormat();
+                final String format = inst.getExampleFormat();
                 try {
-                    p.assembleString(program);
-                    p.setup(null, "");
-                    final int word = p.getMemory().getWord(0x400000);
+                    program.assembleString(format);
+                    program.setup(List.of(), "");
+                    final int word = program.getMemory().getWord(0x400000);
 //                    ProgramStatement assembled = p.getMemory().getStatement(0x400000);
                     final ProgramStatement ps = new ProgramStatement(word, 0x400000);
-                    assertNotNull(ps.getInstruction(), "Error 1 on: " + program);
-                    assertThat("Error 2 on: " + program, ps.getPrintableBasicAssemblyStatement(), not(containsString(
+                    assertNotNull(ps.getInstruction(), "Error 1 on: " + format);
+                    assertThat("Error 2 on: " + format, ps.getPrintableBasicAssemblyStatement(), not(containsString(
                         "invalid")));
 //                    String decompiled = ps.getPrintableBasicAssemblyStatement();
 
-                    p.assembleString(program);
-                    p.setup(null, "");
-                    final int word2 = p.getMemory().getWord(0x400000);
-                    assertEquals(word, word2, "Error 3 on: " + program);
-                    assertEquals(binst, ps.getInstruction(), "Error 4 on: " + program);
+                    program.assembleString(format);
+                    program.setup(List.of(), "");
+                    final int word2 = program.getMemory().getWord(0x400000);
+                    assertEquals(word, word2, "Error 3 on: " + format);
+                    assertEquals(binst, ps.getInstruction(), "Error 4 on: " + format);
                     /*
                      * if (assembled.getInstruction() == null) {
                      * System.out.println("Error 5 on: " + program);
@@ -212,7 +211,7 @@ public class AppTest extends RarsTestBase {
                      * }
                      */
                 } catch (final Exception e) {
-                    throw new RuntimeException("Error 5 on " + program + ": " + e);
+                    throw new RuntimeException("Error 5 on " + format + ": " + e);
                 }
             }
         }
@@ -233,7 +232,7 @@ public class AppTest extends RarsTestBase {
                 final String program = "label:" + inst.getExampleFormat();
                 try {
                     p.assembleString(program);
-                    p.setup(null, "");
+                    p.setup(List.of(), "");
                     final int first = p.getMemory().getWord(0x400000);
                     final int second = p.getMemory().getWord(0x400004);
                     final ProgramStatement ps = new ProgramStatement(first, 0x400000);
@@ -249,7 +248,7 @@ public class AppTest extends RarsTestBase {
                             program.replaceAll("t0", "x0").replaceAll("t1", "x0").replaceAll("t2", "x0").replaceAll(
                                 "f1", "f0");
                         p.assembleString(register_substitute);
-                        p.setup(null, "");
+                        p.setup(List.of(), "");
                         final int word1 = p.getMemory().getWord(0x400000);
                         final int word2 = p.getMemory().getWord(0x400004);
                         assertFalse(word1 == first && word2 == second, "Error 13 on: " + program);

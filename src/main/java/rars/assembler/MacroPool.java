@@ -89,7 +89,7 @@ public final class MacroPool {
      */
     public void beginMacro(final @NotNull Token nameToken) {
         this.current = new Macro();
-        this.current.setName(nameToken.getValue());
+        this.current.setName(nameToken.getText());
         this.current.setFromLine(nameToken.getSourceLine());
         this.current.setOriginalFromLine(nameToken.getOriginalSourceLine());
         this.current.setProgram(this.program);
@@ -125,11 +125,11 @@ public final class MacroPool {
         Macro ret = null;
         final Token firstToken = tokens.get(0);
         for (final Macro macro : this.macroList) {
-            if (macro.getName().equals(firstToken.getValue())
-                    && macro.getArgs().size() + 1 == tokens.size()
-                    // && macro.getToLine() < callerLine // condition removed; doesn't work nicely
-                    // in conjunction with .include, and does not seem necessary. DPS 8-MAR-2013
-                    && (ret == null || ret.getFromLine() < macro.getFromLine()))
+            if (macro.getName().equals(firstToken.getText())
+                && macro.getArgs().size() + 1 == tokens.size()
+                // && macro.getToLine() < callerLine // condition removed; doesn't work nicely
+                // in conjunction with .include, and does not seem necessary. DPS 8-MAR-2013
+                && (ret == null || ret.getFromLine() < macro.getFromLine()))
                 ret = macro;
         }
         return ret;

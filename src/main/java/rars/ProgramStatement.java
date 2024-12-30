@@ -2,16 +2,14 @@ package rars;
 
 import org.jetbrains.annotations.NotNull;
 import rars.assembler.SymbolTable;
-import rars.assembler.Token;
 import rars.assembler.TokenList;
 import rars.assembler.TokenType;
 import rars.riscv.*;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.venus.NumberDisplayBaseChooser;
 
 import java.util.ArrayList;
@@ -90,9 +88,15 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *                          is stored.
      * @param sourceLine        a int
      */
-    public ProgramStatement(final RISCVProgram sourceProgram, final String source, final TokenList origTokenList,
-                            final TokenList strippedTokenList,
-                            final Instruction inst, final int textAddress, final int sourceLine) {
+    public ProgramStatement(
+        final RISCVProgram sourceProgram,
+        final String source,
+        final TokenList origTokenList,
+        final TokenList strippedTokenList,
+        final Instruction inst,
+        final int textAddress,
+        final int sourceLine
+    ) {
         this.sourceProgram = sourceProgram;
         this.source = source;
         this.originalTokenList = origTokenList;
@@ -160,7 +164,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 }
             }
         }
-        this.basicStatementList = ProgramStatement.buildBasicStatementListFromBinaryCode(binaryStatement, instr,
+        this.basicStatementList = ProgramStatement.buildBasicStatementListFromBinaryCode(instr,
             this.operands, this.numOperands);
     }
 
@@ -227,7 +231,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         return out;
     }
 
-    /*
+    /**
      * Given a model BasicInstruction and the assembled (not source) operand array
      * for a statement,
      * this method will construct the corresponding basic instruction list. This
@@ -236,10 +240,9 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * It is not
      * intended to be used when source code is available. DPS 11-July-2013
      */
-    private static BasicStatementList buildBasicStatementListFromBinaryCode(final int binary,
-                                                                            final BasicInstruction instr,
-                                                                            final int[] operands,
-                                                                            final int numOperands) {
+    private static @NotNull BasicStatementList buildBasicStatementListFromBinaryCode(final BasicInstruction instr,
+                                                                                     final int[] operands,
+                                                                                     final int numOperands) {
         final BasicStatementList statementList = new BasicStatementList();
         int tokenListCounter = 1; // index 0 is operator; operands start at index 1
         if (instr == null) {
@@ -260,51 +263,47 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             }
             boolean notOperand = true;
             while (notOperand && tokenListCounter < tokenList.size()) {
-                final TokenType tokenType = tokenList.get(tokenListCounter).getType();
-                if (tokenType.equals(TokenType.LEFT_PAREN)) {
-                    statementList.addString("(");
-                } else if (tokenType.equals(TokenType.RIGHT_PAREN)) {
-                    statementList.addString(")");
-                } else if (tokenType.toString().contains("REGISTER")) {
-                    final String marker = (tokenType.toString().contains("FP_REGISTER")) ? "f" : "x";
-                    statementList.addString(marker + operands[i]);
-                    notOperand = false;
-                } else if (tokenType.equals(TokenType.INTEGER_12)) {
-                    statementList.addValue((operands[i] << 20) >> 20);
-                    notOperand = false;
-                } else if (tokenType.equals(TokenType.ROUNDING_MODE)) {
-                    final String[] modes = new String[]{"rne", "rtz", "rdn", "rup", "rmm", "invalid", "invalid", "dyn"};
-                    String value = "invalid";
-                    if (operands[i] >= 0 && operands[i] < 8) {
-                        value = modes[operands[i]];
+                final var tokenType = tokenList.get(tokenListCounter).getType();
+                switch (tokenType) {
+                    case LEFT_PAREN -> statementList.addString("(");
+                    case RIGHT_PAREN -> statementList.addString(")");
+                    case REGISTER_NAME, REGISTER_NUMBER, FP_REGISTER_NAME -> {
+                        final var marker = (tokenType == TokenType.FP_REGISTER_NAME) ? "f" : "x";
+                        statementList.addString(marker + operands[i]);
+                        notOperand = false;
                     }
-                    statementList.addString(value);
-                    notOperand = false;
-                } else {
-                    statementList.addValue(operands[i]);
-                    notOperand = false;
+                    case INTEGER_12 -> {
+                        statementList.addValue((operands[i] << 20) >> 20);
+                        notOperand = false;
+                    }
+                    case ROUNDING_MODE -> {
+                        final var modes = new String[]{"rne", "rtz", "rdn", "rup", "rmm", "invalid", "invalid", "dyn"};
+                        String value = "invalid";
+                        if (operands[i] >= 0 && operands[i] < 8) {
+                            value = modes[operands[i]];
+                        }
+                        statementList.addString(value);
+                        notOperand = false;
+                    }
+                    default -> {
+                        statementList.addValue(operands[i]);
+                        notOperand = false;
+                    }
                 }
                 tokenListCounter++;
             }
         }
         while (tokenListCounter < tokenList.size()) {
             final TokenType tokenType = tokenList.get(tokenListCounter).getType();
-            if (tokenType.equals(TokenType.LEFT_PAREN)) {
-                statementList.addString("(");
-            } else if (tokenType.equals(TokenType.RIGHT_PAREN)) {
-                statementList.addString(")");
+            switch (tokenType) {
+                case LEFT_PAREN -> statementList.addString("(");
+                case RIGHT_PAREN -> statementList.addString(")");
             }
             tokenListCounter++;
         }
         return statementList;
     } // buildBasicStatementListFromBinaryCode()
 
-    /**
-     * <p>compareTo.</p>
-     *
-     * @param obj1 a {@link ProgramStatement} object
-     * @return a int
-     */
     @Override
     public int compareTo(final ProgramStatement obj1) {
         final int addr1 = this.getAddress();
@@ -321,209 +320,206 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *               here.
      */
     public void buildBasicStatementFromBasicInstruction(final ErrorList errors) {
-        Token token = this.strippedTokenList.get(0);
-        String basicStatementElement = token.getValue() + " ";
-
-        final StringBuilder basic = new StringBuilder(basicStatementElement);
-        this.basicStatementList.addString(basicStatementElement); // the operator
-        TokenType tokenType, nextTokenType;
-        String tokenValue;
-        int registerNumber;
+        final var firstToken = this.strippedTokenList.get(0);
+        final var firstElement = firstToken.getText() + " ";
+        final var basicInstructionBuilder = new StringBuilder(firstElement);
+        this.basicStatementList.addString(firstElement); // the operator
         this.numOperands = 0;
         for (int i = 1; i < this.strippedTokenList.size(); i++) {
-            token = this.strippedTokenList.get(i);
-            tokenType = token.getType();
-            tokenValue = token.getValue();
-            if (tokenType == TokenType.REGISTER_NUMBER) {
-                basicStatementElement = tokenValue;
-                basic.append(basicStatementElement);
-                this.basicStatementList.addString(basicStatementElement);
-                try {
+            final var token = this.strippedTokenList.get(i);
+            final var tokenType = token.getType();
+            final var tokenValue = token.getText();
+            final String basicStatementElement;
+            final int registerNumber;
+            switch (tokenType) {
+                case REGISTER_NUMBER -> {
+                    basicStatementElement = tokenValue;
+                    basicInstructionBuilder.append(basicStatementElement);
+                    this.basicStatementList.addString(basicStatementElement);
+                    try {
+                        registerNumber = RegisterFile.getRegister(tokenValue).getNumber();
+                    } catch (final Exception e) {
+                        // should never happen; should be caught before now...
+                        errors.addTokenError(token, "invalid register name");
+                        return;
+                    }
+                    this.operands[this.numOperands++] = registerNumber;
+                }
+                case REGISTER_NAME -> {
                     registerNumber = RegisterFile.getRegister(tokenValue).getNumber();
-                } catch (final Exception e) {
-                    // should never happen; should be caught before now...
-                    errors.addTokenError(token, "invalid register name");
-                    return;
-                }
-                this.operands[this.numOperands++] = registerNumber;
-            } else if (tokenType == TokenType.REGISTER_NAME) {
-                registerNumber = RegisterFile.getRegister(tokenValue).getNumber();
-                basicStatementElement = "x" + registerNumber;
-                basic.append(basicStatementElement);
-                this.basicStatementList.addString(basicStatementElement);
-                if (registerNumber < 0) {
-                    // should never happen; should be caught before now...
-                    errors.addTokenError(token, "invalid register name");
-                    return;
-                }
-                this.operands[this.numOperands++] = registerNumber;
-            } else if (tokenType == TokenType.CSR_NAME) {
-                // Little bit of a hack because CSRFile doesn't supoprt getRegister(strinug)
-                final Register[] regs = ControlAndStatusRegisterFile.getRegisters();
-                registerNumber = -1;
-                for (final Register r : regs) {
-                    if (r.getName().equals(tokenValue)) {
-                        registerNumber = r.getNumber();
-                        break;
+                    basicStatementElement = "x" + registerNumber;
+                    basicInstructionBuilder.append(basicStatementElement);
+                    this.basicStatementList.addString(basicStatementElement);
+                    if (registerNumber < 0) {
+                        // should never happen; should be caught before now...
+                        errors.addTokenError(token, "invalid register name");
+                        return;
                     }
+                    this.operands[this.numOperands++] = registerNumber;
                 }
-                if (registerNumber < 0) {
-                    // should never happen; should be caught before now...
-                    errors.addTokenError(token, "invalid CSR name");
-                    return;
+                case CSR_NAME -> {
+                    registerNumber = ControlAndStatusRegisterFile.getRegister(tokenValue).getNumber();
+                    if (registerNumber < 0) {
+                        // should never happen; should be caught before now...
+                        errors.addTokenError(token, "invalid CSR name");
+                        return;
+                    }
+                    basicInstructionBuilder.append(registerNumber);
+                    this.basicStatementList.addString("" + registerNumber);
+                    this.operands[this.numOperands++] = registerNumber;
                 }
-                basic.append(registerNumber);
-                this.basicStatementList.addString("" + registerNumber);
-                this.operands[this.numOperands++] = registerNumber;
-            } else if (tokenType == TokenType.FP_REGISTER_NAME) {
-                registerNumber = FloatingPointRegisterFile.getRegister(tokenValue).getNumber();
-                basicStatementElement = "f" + registerNumber;
-                basic.append(basicStatementElement);
-                this.basicStatementList.addString(basicStatementElement);
-                if (registerNumber < 0) {
-                    // should never happen; should be caught before now...
-                    errors.addTokenError(token, "invalid FPU register name");
-                    return;
+                case FP_REGISTER_NAME -> {
+                    registerNumber = FloatingPointRegisterFile.getRegister(tokenValue).getNumber();
+                    basicStatementElement = "f" + registerNumber;
+                    basicInstructionBuilder.append(basicStatementElement);
+                    this.basicStatementList.addString(basicStatementElement);
+                    if (registerNumber < 0) {
+                        // should never happen; should be caught before now...
+                        errors.addTokenError(token, "invalid FPU register name");
+                        return;
+                    }
+                    this.operands[this.numOperands++] = registerNumber;
                 }
-                this.operands[this.numOperands++] = registerNumber;
-            } else if (tokenType == TokenType.ROUNDING_MODE) {
-                final int rounding_mode = switch (tokenValue) {
-                    case "rne" -> 0;
-                    case "rtz" -> 1;
-                    case "rdn" -> 2;
-                    case "rup" -> 3;
-                    case "rmm" -> 4;
-                    case "dyn" -> 7;
-                    default -> -1;
-                };
-                if (rounding_mode == -1) {
-                    errors.addTokenError(token, "invalid rounding mode");
-                    return;
+                case ROUNDING_MODE -> {
+                    final int rounding_mode = switch (tokenValue) {
+                        case "rne" -> 0;
+                        case "rtz" -> 1;
+                        case "rdn" -> 2;
+                        case "rup" -> 3;
+                        case "rmm" -> 4;
+                        case "dyn" -> 7;
+                        default -> -1;
+                    };
+                    if (rounding_mode == -1) {
+                        errors.addTokenError(token, "invalid rounding mode");
+                        return;
+                    }
+                    basicInstructionBuilder.append(tokenValue);
+                    this.basicStatementList.addString(tokenValue);
+                    this.operands[this.numOperands++] = rounding_mode;
                 }
-                basic.append(tokenValue);
-                this.basicStatementList.addString(tokenValue);
-                this.operands[this.numOperands++] = rounding_mode;
-            } else if (tokenType == TokenType.IDENTIFIER) {
+                case IDENTIFIER -> {
 
-                int address = this.sourceProgram.getLocalSymbolTable().getAddressLocalOrGlobal(tokenValue);
-                if (address == SymbolTable.NOT_FOUND) { // symbol used without being defined
-                    errors.addTokenError(token, "Symbol \"%s\" not found in symbol table.".formatted(tokenValue));
-                    return;
-                }
-                boolean absoluteAddress = true; // (used below)
+                    int address = this.sourceProgram.getLocalSymbolTable().getAddressLocalOrGlobal(tokenValue);
+                    if (address == SymbolTable.NOT_FOUND) { // symbol used without being defined
+                        errors.addTokenError(token, "Symbol \"%s\" not found in symbol table.".formatted(tokenValue));
+                        return;
+                    }
+                    boolean absoluteAddress = true; // (used below)
 
-                if (this.instruction instanceof BasicInstruction) {
-                    final BasicInstructionFormat format = ((BasicInstruction) this.instruction).getInstructionFormat();
-                    if (format == BasicInstructionFormat.B_FORMAT) {
-                        address -= this.textAddress;
-                        if (address >= (1 << 12) || address < -(1 << 12)) {
-                            // SPIM flags as warning, I'll flag as error b/c RARS text segment not long
-                            // enough for it to be OK.
-                            errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
+
+                    if (this.instruction instanceof BasicInstruction) {
+                        final BasicInstructionFormat format =
+                            ((BasicInstruction) this.instruction).getInstructionFormat();
+                        if (format == BasicInstructionFormat.B_FORMAT) {
+                            address -= this.textAddress;
+                            if (address >= (1 << 12) || address < -(1 << 12)) {
+                                // SPIM flags as warning, I'll flag as error b/c RARS text segment not long
+                                // enough for it to be OK.
+                                errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
                                     "Branch target word address beyond 12-bit range"));
-                            return;
-                        }
-                        absoluteAddress = false;
-                    } else if (format == BasicInstructionFormat.J_FORMAT) {
-                        address -= this.textAddress;
-                        if (address >= (1 << 20) || address < -(1 << 20)) {
-                            errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
+                                return;
+                            }
+                            absoluteAddress = false;
+                        } else if (format == BasicInstructionFormat.J_FORMAT) {
+                            address -= this.textAddress;
+                            if (address >= (1 << 20) || address < -(1 << 20)) {
+                                errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
                                     "Jump target word address beyond 20-bit range"));
-                            return;
+                                return;
+                            }
+                            absoluteAddress = false;
                         }
-                        absoluteAddress = false;
                     }
+                    basicInstructionBuilder.append(address);
+                    if (absoluteAddress) { // record as address if absolute, second if relative
+                        this.basicStatementList.addAddress(address);
+                    } else {
+                        this.basicStatementList.addValue(address);
+                    }
+                    this.operands[this.numOperands++] = address;
                 }
-                basic.append(address);
-                if (absoluteAddress) { // record as address if absolute, second if relative
-                    this.basicStatementList.addAddress(address);
-                } else {
-                    this.basicStatementList.addValue(address);
+                case INTEGER_5, INTEGER_6, INTEGER_12, INTEGER_12U, INTEGER_20, INTEGER_32 -> {
+
+                    final int tempNumeric = BinaryUtils.stringToInt(tokenValue);
+
+                    /* **************************************************************************
+                     * MODIFICATION AND COMMENT, DPS 3-July-2008
+                     *
+                     * The modifications of January 2005 documented below are being rescinded.
+                     * All hexadecimal immediate values are considered 32 bits in length and
+                     * their classification as INTEGER_5, INTEGER_16, INTEGER_16U (new)
+                     * or INTEGER_32 depends on their 32 bit second. So 0xFFFF will be
+                     * equivalent to 0x0000FFFF instead of 0xFFFFFFFF. This change, along with
+                     * the introduction of INTEGER_16U (adopted from Greg Gibeling of Berkeley),
+                     * required extensive changes to instruction templates especially for
+                     * usePseudoInstructions-instructions.
+                     *
+                     * This modification also appears inbuildBasicStatementFromBasicInstruction()
+                     * in rars.ProgramStatement.
+                     *
+                     * ///// Begin modification 1/4/05 KENV
+                     * ///////////////////////////////////////////
+                     * // We have decided to interpret non-signed (no + or -) 16-bit hexadecimal
+                     * immediate
+                     * // operands as signed values in the range -32768 to 32767. So 0xffff will
+                     * represent
+                     * // -1, not 65535 (bit 15 as sign bit), 0x8000 will represent -32768 not
+                     * 32768.
+                     * // NOTE: 32-bit hexadecimal immediate operands whose values fall into this
+                     * range
+                     * // will be likewise affected, but they are used only in usePseudoInstructions-instructions.
+                     * The
+                     * // code in ExtendedInstruction.java to split this number into upper 16 bits
+                     * for "lui"
+                     * // and lower 16 bits for "ori" works with the original source code token, so
+                     * it is
+                     * // not affected by this tweak. 32-bit immediates in data segment directives
+                     * // are also processed elsewhere so are not affected either.
+                     * ////////////////////////////////////////////////////////////////////////////////
+                     *
+                     * if (tokenType != TokenTypes.INTEGER_16U) { // part of the Berkeley mod...
+                     * if ( Binary.isHex(tokenValue) &&
+                     * (tempNumeric >= 32768) &&
+                     * (tempNumeric <= 65535) ) // Range 0x8000 ... 0xffff
+                     * {
+                     * // Subtract the 0xffff bias, because strings in the
+                     * // range "0x8000" ... "0xffff" are used to represent
+                     * // 16-bit negative numbers, not positive numbers.
+                     * tempNumeric = tempNumeric - 65536;
+                     * // Note: no action needed for range 0xffff8000 ... 0xffffffff
+                     * }
+                     * }
+                     ************************** END DPS 3-July-2008 COMMENTS
+                     *******************************/
+
+                    basicInstructionBuilder.append(tempNumeric);
+                    if (tokenType == TokenType.INTEGER_5) {
+                        this.basicStatementList.addShortValue(tempNumeric);
+                    } else {
+                        this.basicStatementList.addValue(tempNumeric);
+                    }
+                    this.operands[this.numOperands++] = tempNumeric;
                 }
-                this.operands[this.numOperands++] = address;
-            } else if (tokenType == TokenType.INTEGER_5 || tokenType == TokenType.INTEGER_6
-                || tokenType == TokenType.INTEGER_12 ||
-                tokenType == TokenType.INTEGER_12U || tokenType == TokenType.INTEGER_20
-                || tokenType == TokenType.INTEGER_32) {
-
-                final int tempNumeric = Binary.stringToInt(tokenValue);
-
-                /* **************************************************************************
-                 * MODIFICATION AND COMMENT, DPS 3-July-2008
-                 *
-                 * The modifications of January 2005 documented below are being rescinded.
-                 * All hexadecimal immediate values are considered 32 bits in length and
-                 * their classification as INTEGER_5, INTEGER_16, INTEGER_16U (new)
-                 * or INTEGER_32 depends on their 32 bit second. So 0xFFFF will be
-                 * equivalent to 0x0000FFFF instead of 0xFFFFFFFF. This change, along with
-                 * the introduction of INTEGER_16U (adopted from Greg Gibeling of Berkeley),
-                 * required extensive changes to instruction templates especially for
-                 * pseudo-instructions.
-                 *
-                 * This modification also appears inbuildBasicStatementFromBasicInstruction()
-                 * in rars.ProgramStatement.
-                 *
-                 * ///// Begin modification 1/4/05 KENV
-                 * ///////////////////////////////////////////
-                 * // We have decided to interpret non-signed (no + or -) 16-bit hexadecimal
-                 * immediate
-                 * // operands as signed values in the range -32768 to 32767. So 0xffff will
-                 * represent
-                 * // -1, not 65535 (bit 15 as sign bit), 0x8000 will represent -32768 not
-                 * 32768.
-                 * // NOTE: 32-bit hexadecimal immediate operands whose values fall into this
-                 * range
-                 * // will be likewise affected, but they are used only in pseudo-instructions.
-                 * The
-                 * // code in ExtendedInstruction.java to split this number into upper 16 bits
-                 * for "lui"
-                 * // and lower 16 bits for "ori" works with the original source code token, so
-                 * it is
-                 * // not affected by this tweak. 32-bit immediates in data segment directives
-                 * // are also processed elsewhere so are not affected either.
-                 * ////////////////////////////////////////////////////////////////////////////////
-                 *
-                 * if (tokenType != TokenTypes.INTEGER_16U) { // part of the Berkeley mod...
-                 * if ( Binary.isHex(tokenValue) &&
-                 * (tempNumeric >= 32768) &&
-                 * (tempNumeric <= 65535) ) // Range 0x8000 ... 0xffff
-                 * {
-                 * // Subtract the 0xffff bias, because strings in the
-                 * // range "0x8000" ... "0xffff" are used to represent
-                 * // 16-bit negative numbers, not positive numbers.
-                 * tempNumeric = tempNumeric - 65536;
-                 * // Note: no action needed for range 0xffff8000 ... 0xffffffff
-                 * }
-                 * }
-                 ************************** END DPS 3-July-2008 COMMENTS
-                 *******************************/
-
-                basic.append(tempNumeric);
-                if (tokenType == TokenType.INTEGER_5) {
-                    this.basicStatementList.addShortValue(tempNumeric);
-                } else {
-                    this.basicStatementList.addValue(tempNumeric);
-                }
-                this.operands[this.numOperands++] = tempNumeric;
                 ///// End modification 1/7/05 KENV ///////////////////////////////////////////
-            } else {
-                basicStatementElement = tokenValue;
-                basic.append(basicStatementElement);
-                this.basicStatementList.addString(basicStatementElement);
+                default -> {
+                    basicStatementElement = tokenValue;
+                    basicInstructionBuilder.append(basicStatementElement);
+                    this.basicStatementList.addString(basicStatementElement);
+                }
             }
             // add separator if not at end of token list AND neither current nor
             // next token is a parenthesis
             if ((i < this.strippedTokenList.size() - 1)) {
-                nextTokenType = this.strippedTokenList.get(i + 1).getType();
+                final var nextTokenType = this.strippedTokenList.get(i + 1).getType();
                 if (tokenType != TokenType.LEFT_PAREN && tokenType != TokenType.RIGHT_PAREN &&
                     nextTokenType != TokenType.LEFT_PAREN && nextTokenType != TokenType.RIGHT_PAREN) {
-                    basicStatementElement = ",";
-                    basic.append(basicStatementElement);
-                    this.basicStatementList.addString(basicStatementElement);
+                    basicInstructionBuilder.append(",");
+                    this.basicStatementList.addString(",");
                 }
             }
         }
-        this.basicAssemblyStatement = basic.toString();
+        this.basicAssemblyStatement = basicInstructionBuilder.toString();
     } // buildBasicStatementFromBasicInstruction()
 
     /**
@@ -536,12 +532,12 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     public void buildMachineStatementFromBasicStatement(final @NotNull ErrorList errors) {
         switch (this.instruction) {
             case final ExtendedInstruction ignored -> {
-                // This means the pseudo-instruction expansion generated another
-                // pseudo-instruction (expansion must be to all basic instructions).
-                // This is an error on the part of the pseudo-instruction author.
+                // This means the usePseudoInstructions-instruction expansion generated another
+                // usePseudoInstructions-instruction (expansion must be to all basic instructions).
+                // This is an error on the part of the usePseudoInstructions-instruction author.
                 errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
-                        "INTERNAL ERROR: pseudo-instruction expansion contained a pseudo-instruction"));
-                return;
+                    "INTERNAL ERROR: usePseudoInstructions-instruction expansion contained a " +
+                        "usePseudoInstructions-instruction"));
             }
             case final BasicInstruction basic -> {
                 // mask indicates bit positions for 'f'irst, 's'econd, 't'hird operand
@@ -551,19 +547,19 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 if (format == BasicInstructionFormat.J_FORMAT) {
                     this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
                     this.insertBinaryCode(ProgramStatement.toJumpImmediate(this.operands[1]),
-                            Instruction.operandMask[1],
-                            errors);
+                        Instruction.operandMask[1],
+                        errors);
                 } else if (format == BasicInstructionFormat.B_FORMAT) {
                     this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
                     this.insertBinaryCode(this.operands[1], Instruction.operandMask[1], errors);
                     this.insertBinaryCode(ProgramStatement.toBranchImmediate(this.operands[2]),
-                            Instruction.operandMask[2],
-                            errors);
+                        Instruction.operandMask[2],
+                        errors);
                 } else { // Everything else is normal
                     for (int i = 0; i < this.numOperands; i++)
                         this.insertBinaryCode(this.operands[i], Instruction.operandMask[i], errors);
                 }
-                this.binaryStatement = Binary.binaryStringToInt(this.machineStatement);
+                this.binaryStatement = BinaryUtils.binaryStringToInt(this.machineStatement);
             }
             case final CompressedInstruction compressed -> {
                 // TODO
@@ -616,7 +612,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 result.append(Integer.toString(this.operands[i], 16)).append(" ");
         }
         if (this.machineStatement != null) {
-            result.append("[").append(Binary.binaryStringToHexString(this.machineStatement)).append("]");
+            result.append("[").append(BinaryUtils.binaryStringToHexString(this.machineStatement)).append("]");
             result.append("  ").append(this.machineStatement, 0, 6).append("|").append(this.machineStatement, 6, 11).append("|").append(this.machineStatement, 11, 16).append("|").append(this.machineStatement, 16, 21).append("|").append(this.machineStatement, 21, 26).append("|").append(this.machineStatement, 26, 32);
         }
         return result.toString();
@@ -680,16 +676,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     }
 
     /**
-     * Assigns given String to be Basic Assembly statement equivalent to this source
-     * line.
-     *
-     * @param statement A String containing equivalent Basic Assembly statement.
-     */
-    public void setBasicAssemblyStatement(final String statement) {
-        this.basicAssemblyStatement = statement;
-    }
-
-    /**
      * Produces printable Basic Assembly statement for this RISCV source
      * statement. This is generated dynamically and any addresses and
      * values will be rendered in hex or decimal depending on the current
@@ -702,27 +688,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     }
 
     /**
-     * Produces binary machine statement as 32 character string, all '0' and '1'
-     * chars.
-     *
-     * @return The String version of 32-bit binary machine code.
-     */
-    public String getMachineStatement() {
-        return this.machineStatement;
-    }
-
-    /**
-     * Assigns given String to be binary machine code (32 characters, all of them 0
-     * or 1)
-     * equivalent to this source line.
-     *
-     * @param statement A String containing equivalent machine code.
-     */
-    public void setMachineStatement(final String statement) {
-        this.machineStatement = statement;
-    }
-
-    /**
      * Produces 32-bit binary machine statement as int.
      *
      * @return The int version of 32-bit binary machine code.
@@ -732,32 +697,12 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     }
 
     /**
-     * Assigns given int to be binary machine code equivalent to this source line.
-     *
-     * @param binaryCode An int containing equivalent binary machine code.
-     */
-    public void setBinaryStatement(final int binaryCode) {
-        this.binaryStatement = binaryCode;
-    }
-
-    /**
      * Produces token list generated from original source statement.
      *
      * @return The TokenList of Token objects generated from original source.
      */
     public TokenList getOriginalTokenList() {
         return this.originalTokenList;
-    }
-
-    /**
-     * Produces token list stripped of all but operator and operand tokens.
-     *
-     * @return The TokenList of Token objects generated by stripping original list
-     * of all
-     * except operator and operand tokens.
-     */
-    public TokenList getStrippedTokenList() {
-        return this.strippedTokenList;
     }
 
     /**
@@ -814,14 +759,14 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *               errors
      */
     private void insertBinaryCode(final int value, final char mask, final ErrorList errors) {
-        final StringBuilder state = new StringBuilder(this.machineStatement);
+        final var stateBuilder = new StringBuilder(this.machineStatement);
 
         // Just counts the number of occurrences of the mask in machineStatement.
         // This could be done with a method from StringUtils, but I didn't think
         // bringing in another dependency was worth it.
         int length = 0;
-        for (int i = 0; i < state.length(); i++) {
-            if (state.charAt(i) == mask)
+        for (int i = 0; i < stateBuilder.length(); i++) {
+            if (stateBuilder.charAt(i) == mask)
                 length++;
         }
 
@@ -829,36 +774,37 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         // if it does, then one of the BasicInstructions is malformed
         if (length == 0) {
             errors.add(ErrorMessage.error(this.sourceProgram, this.sourceLine, 0,
-                    "INTERNAL ERROR: mismatch in number of operands in statement vs mask"));
+                "INTERNAL ERROR: mismatch in number of operands in statement vs mask"));
             return;
         }
 
         // Replace the mask bit for bit with the binary version of the second
         // The old version of this function assumed that the mask was continuous
-        final String bitString = Binary.intToBinaryString(value, length);
+        final String bitString = BinaryUtils.intToBinaryString(value, length);
         int valueIndex = 0;
-        for (int i = 0; i < state.length(); i++) {
-            if (state.charAt(i) == mask) {
-                state.setCharAt(i, bitString.charAt(valueIndex));
+        for (int i = 0; i < stateBuilder.length(); i++) {
+            if (stateBuilder.charAt(i) == mask) {
+                stateBuilder.setCharAt(i, bitString.charAt(valueIndex));
                 valueIndex++;
             }
         }
 
-        this.machineStatement = state.toString();
+        this.machineStatement = stateBuilder.toString();
     }
 
-    // Little class to represent basic statement as list
-    // of elements. Each element is either a string, an
-    // address or a second. The toString() method will
-    // return a string representation of the basic statement
-    // in which any addresses or values are rendered in the
-    // current number format (e.g. decimal or hex).
-    // NOTE: Address operands on Branch instructions are
-    // considered values instead of addresses because they
-    // are relative to the PC.
-    // DPS 29-July-2010
-
-    private static class BasicStatementList {
+    /**
+     * Little class to represent basic statement as list
+     * of elements. Each element is either a string, an
+     * address or a second. The toString() method will
+     * return a string representation of the basic statement
+     * in which any addresses or values are rendered in the
+     * current number format (e.g. decimal or hex).
+     * NOTE: Address operands on Branch instructions are
+     * considered values instead of addresses because they
+     * are relative to the PC.
+     * DPS 29-July-2010
+     */
+    private static final class BasicStatementList {
 
         private final ArrayList<ListElement> list;
 
@@ -903,7 +849,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         break;
                     case 2:
                         if (valueBase == NumberDisplayBaseChooser.HEXADECIMAL) {
-                            result.append(Binary.intToHexString(e.iValue)); // 13-July-2011,
+                            result.append(BinaryUtils.intToHexString(e.iValue)); // 13-July-2011,
                             // was:
                             // intToHalfHexString()
                         } else {

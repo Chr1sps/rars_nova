@@ -1,10 +1,10 @@
 package rars.venus.run;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ErrorList;
 import rars.ErrorMessage;
 import rars.Globals;
 import rars.RISCVProgram;
-import org.jetbrains.annotations.NotNull;
 import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.*;
 import rars.settings.BoolSetting;
@@ -197,12 +197,12 @@ public class RunAssembleAction extends GuiAction {
                 SystemIO.resetFiles(); // Ensure that I/O "file descriptors" are initialized for a new program run
 
             } catch (final AssemblyException pe) {
-                final String errorReport = pe.errors().generateErrorAndWarningReport();
+                final String errorReport = pe.errors.generateErrorAndWarningReport();
                 messagesPane.postMessage(errorReport);
                 messagesPane.postMessage(
                     name + ": operation completed with errors.\n\n");
                 // Select editor line containing first error, and corresponding error message.
-                final var errorMessages = pe.errors().getErrorMessages();
+                final var errorMessages = pe.errors.getErrorMessages();
                 for (final ErrorMessage em : errorMessages) {
                     // No line or position may mean File Not Found (e.g. exception file). Don't try
                     // to open. DPS 3-Oct-2010

@@ -64,11 +64,11 @@ public final class Token {
      * @see TokenType
      */
     public Token(
-            final @NotNull TokenType type,
-            final @NotNull String value,
-            final @Nullable RISCVProgram sourceProgram,
-            final int line,
-            final int start
+        final @NotNull TokenType type,
+        final @NotNull String value,
+        final @Nullable RISCVProgram sourceProgram,
+        final int line,
+        final int start
     ) {
         this.type = type;
         this.value = value;
@@ -125,7 +125,7 @@ public final class Token {
      *
      * @return String containing source code of this token.
      */
-    public @NotNull String getValue() {
+    public @NotNull String getText() {
         return this.value;
     }
 

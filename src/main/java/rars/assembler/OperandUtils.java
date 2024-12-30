@@ -43,8 +43,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public final class OperandFormat {
-    private OperandFormat() {
+public final class OperandUtils {
+    private OperandUtils() {
     }
 
     /**
@@ -61,7 +61,8 @@ public final class OperandFormat {
 
     static boolean checkIfTokensMatchOperand(final TokenList candidateList, final Instruction inst,
                                              final ErrorList errors) {
-        return OperandFormat.numOperandsCheck(candidateList, inst, errors) && OperandFormat.operandTypeCheck(candidateList, inst, errors);
+        return OperandUtils.numOperandsCheck(candidateList, inst, errors) &&
+            OperandUtils.operandTypeCheck(candidateList, inst, errors);
     }
 
     /**
@@ -75,7 +76,7 @@ public final class OperandFormat {
         if (instrMatches.size() == 1)
             return instrMatches.getFirst();
         for (final Instruction potentialMatch : instrMatches) {
-            if (OperandFormat.checkIfTokensMatchOperand(tokenList, potentialMatch, new ErrorList()))
+            if (OperandUtils.checkIfTokensMatchOperand(tokenList, potentialMatch, new ErrorList()))
                 return potentialMatch;
         }
         return instrMatches.getFirst();
@@ -93,10 +94,10 @@ public final class OperandFormat {
         } else if (numOperands < reqNumOperands) {
 
             final String mess = "Too few or incorrectly formatted operands. Expected: " + spec.getExampleFormat();
-            OperandFormat.generateMessage(operator, mess, errors);
+            OperandUtils.generateMessage(operator, mess, errors);
         } else {
             final String mess = "Too many or incorrectly formatted operands. Expected: " + spec.getExampleFormat();
-            OperandFormat.generateMessage(operator, mess, errors);
+            OperandUtils.generateMessage(operator, mess, errors);
         }
         return false;
     }
@@ -106,13 +107,11 @@ public final class OperandFormat {
     private static boolean operandTypeCheck(final TokenList cand, final Instruction spec, final ErrorList errors) {
         final var tokenList = Instructions.getTokenList(spec);
 
-        Token candToken, specToken;
-        TokenType candType, specType;
         for (int i = 1; i < tokenList.size(); i++) {
-            candToken = cand.get(i);
-            specToken = tokenList.get(i);
-            candType = candToken.getType();
-            specType = specToken.getType();
+            final var candToken = cand.get(i);
+            final var specToken = tokenList.get(i);
+            final var candType = candToken.getType();
+            final var specType = specToken.getType();
             // Type mismatch is error EXCEPT when (1) spec calls for register name and
             // candidate is
             // register number, (2) spec calls for register number, candidate is register
@@ -129,63 +128,67 @@ public final class OperandFormat {
             // operator names can be used as labels.
             // TODO: maybe add more cases in here
             if (specType == TokenType.IDENTIFIER && candType == TokenType.OPERATOR) {
-                final Token replacement = new Token(TokenType.IDENTIFIER, candToken.getValue(),
-                        candToken.getSourceProgram(),
-                        candToken.getSourceLine(), candToken.getStartPos());
+                final Token replacement = new Token(
+                    TokenType.IDENTIFIER,
+                    candToken.getText(),
+                    candToken.getSourceProgram(),
+                    candToken.getSourceLine(),
+                    candToken.getStartPos()
+                );
                 cand.set(i, replacement);
                 continue;
             }
             // end 2-July-2010 addition
 
             if ((specType == TokenType.REGISTER_NAME || specType == TokenType.REGISTER_NUMBER) &&
-                    candType == TokenType.REGISTER_NAME) {
+                candType == TokenType.REGISTER_NAME) {
                 continue;
             }
             if (specType == TokenType.REGISTER_NAME &&
-                    candType == TokenType.REGISTER_NUMBER)
+                candType == TokenType.REGISTER_NUMBER)
                 continue;
             if (specType == TokenType.CSR_NAME &&
-                    (candType == TokenType.INTEGER_5 || candType == TokenType.INTEGER_6
-                            || candType == TokenType.INTEGER_12
-                            || candType == TokenType.INTEGER_12U || candType == TokenType.CSR_NAME))
+                (candType == TokenType.INTEGER_5 || candType == TokenType.INTEGER_6
+                    || candType == TokenType.INTEGER_12
+                    || candType == TokenType.INTEGER_12U || candType == TokenType.CSR_NAME))
                 continue;
             if ((specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_5) ||
-                    (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_5) ||
-                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_5) ||
-                    (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_6) ||
-                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_6) ||
-                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_12) ||
-                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_12U) ||
-                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_5) ||
-                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_6) ||
-                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_12) ||
-                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_12U) ||
-                    (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_20))
+                (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_5) ||
+                (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_5) ||
+                (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_6) ||
+                (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_6) ||
+                (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_12) ||
+                (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_12U) ||
+                (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_5) ||
+                (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_6) ||
+                (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_12) ||
+                (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_12U) ||
+                (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_20))
                 continue;
             if (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_12U) {
-                OperandFormat.generateMessage(candToken, "Unsigned second is too large to fit into a sign-extended " +
-                        "immediate", errors);
+                OperandUtils.generateMessage(candToken, "Unsigned second is too large to fit into a sign-extended " +
+                    "immediate", errors);
                 return false;
             }
             if ((specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_6) ||
-                    (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_12) ||
-                    (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_12U) ||
-                    (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_20) ||
-                    (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_32) ||
-                    (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_12) ||
-                    (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_12U) ||
-                    (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_20) ||
-                    (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_32) ||
-                    (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_20) ||
-                    (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_32) ||
-                    (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_32)) {
-                OperandFormat.generateMessage(candToken, "operand is out of range", errors);
+                (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_12) ||
+                (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_12U) ||
+                (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_20) ||
+                (specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_32) ||
+                (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_12) ||
+                (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_12U) ||
+                (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_20) ||
+                (specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_32) ||
+                (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_20) ||
+                (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_32) ||
+                (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_32)) {
+                OperandUtils.generateMessage(candToken, "operand is out of range", errors);
                 return false;
             }
             if (candType != specType) {
                 final var messageString =
-                        "Operand is of incorrect type. Excepted: %s, but got: %s."
-                                .formatted(specType.name(), candType.name());
+                    "Operand is of incorrect type. Excepted: %s, but got: %s."
+                        .formatted(specType.name(), candType.name());
                 generateMessage(candToken, messageString, errors);
                 return false;
             }
@@ -198,10 +201,10 @@ public final class OperandFormat {
     private static void generateMessage(final @NotNull Token token, final @NotNull String mess,
                                         final @NotNull ErrorList errors) {
         errors.add(ErrorMessage.error(
-                token.getSourceProgram(),
-                token.getSourceLine(),
-                token.getStartPos(),
-                "\"" + token.getValue() + "\": " + mess));
+            token.getSourceProgram(),
+            token.getSourceLine(),
+            token.getStartPos(),
+            "\"" + token.getText() + "\": " + mess));
     }
 
 }

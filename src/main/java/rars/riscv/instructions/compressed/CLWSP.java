@@ -18,17 +18,21 @@ import rars.riscv.hardware.RegisterFile;
  * </p>
  */
 public final class CLWSP extends CompressedInstruction {
+    public static final @NotNull CLWSP INSTANCE = new CLWSP();
+
     private CLWSP() {
         super("c.lwsp t, offset",
-                "Load word from a given offset from the stack pointer",
-                CompressedInstructionFormat.CI_FORMAT, "010 s fffff ssss 10");
+            "Load word from a given offset from the stack pointer",
+            CompressedInstructionFormat.CI,
+            "010 s fffff ssss 10"
+        );
     }
 
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
         final var destinationRegister = statement.getOperand(0);
         assert isRVCRegister(destinationRegister) : "Destination register must be one of the ones supported by the C " +
-                "extension (x8-x15)";
+            "extension (x8-x15)";
         final var currentStackPointer = RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER);
         final var offset = statement.getOperand(1) << 2;
         final var address = currentStackPointer + offset;

@@ -5,7 +5,7 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 import rars.settings.BoolSetting;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,15 +68,15 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
             try {
                 for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
                     if (offset % 8 == 0) {
-                        string = new StringBuilder(((hexAddresses) ? Binary.intToHexString(address)
-                            : Binary.unsignedIntToIntString(address)) + "    ");
+                        string = new StringBuilder(((hexAddresses) ? BinaryUtils.intToHexString(address)
+                            : BinaryUtils.unsignedIntToIntString(address)) + "    ");
                     }
                     offset++;
                     final Integer temp = memory.getRawWordOrNull(address);
                     if (temp == null)
                         break;
                     string.append((hexValues)
-                        ? Binary.intToHexString(temp)
+                        ? BinaryUtils.intToHexString(temp)
                         : ("           " + temp).substring(temp.toString().length())).append(" ");
                     if (offset % 8 == 0) {
                         out.println(string);
@@ -99,12 +99,13 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
         String string;
         try {
             for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
-                string = ((hexAddresses) ? Binary.intToHexString(address) : Binary.unsignedIntToIntString(address))
+                string = ((hexAddresses) ? BinaryUtils.intToHexString(address) :
+                    BinaryUtils.unsignedIntToIntString(address))
                     + "  ";
                 final Integer temp = memory.getRawWordOrNull(address);
                 if (temp == null)
                     break;
-                string += Binary.intToHexString(temp) + "  ";
+                string += BinaryUtils.intToHexString(temp) + "  ";
                 try {
                     final ProgramStatement ps = memory.getStatement(address);
                     string += (ps.getPrintableBasicAssemblyStatement() + "                             ").substring(0,

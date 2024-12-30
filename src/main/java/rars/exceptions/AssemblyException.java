@@ -27,8 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import org.jetbrains.annotations.NotNull;
 import rars.ErrorList;
-import rars.ErrorMessage;
 
 /**
  * Exception wrapping ErrorList, used mainly in Tokenizer and Assembler;
@@ -38,25 +38,9 @@ import rars.ErrorMessage;
  * @version July 2017
  */
 public final class AssemblyException extends Exception {
-    private final ErrorList errs;
+    public final @NotNull ErrorList errors;
 
-    /**
-     * <p>Constructor for AssemblyException.</p>
-     *
-     * @param errs a {@link ErrorList} object
-     */
-    public AssemblyException(final ErrorList errs) {
-        this.errs = errs;
-    }
-
-    /**
-     * Produce the list of error messages.
-     *
-     * @return Returns ErrorList of error messages.
-     * @see ErrorList
-     * @see ErrorMessage
-     */
-    public ErrorList errors() {
-        return errs;
+    public AssemblyException(final @NotNull ErrorList errors) {
+        this.errors = errors;
     }
 }

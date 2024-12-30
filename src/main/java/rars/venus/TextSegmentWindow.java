@@ -16,7 +16,7 @@ import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.settings.EditorThemeSettings;
 import rars.simulator.Simulator;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.util.FontUtilities;
 import rars.util.SimpleSubscriber;
 
@@ -330,10 +330,10 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             } else {
                 try {
                     final ProgramStatement statement = new ProgramStatement(
-                        Binary
+                        BinaryUtils
                             .stringToInt((String) this.table.getModel().getValueAt(i,
                                 ColumnData.INSTRUCTION_CODE_COLUMN.number)),
-                        Binary
+                        BinaryUtils
                             .stringToInt((String) this.table.getModel().getValueAt(i,
                                 ColumnData.INSTRUCTION_ADDRESS_COLUMN.number)));
                     this.table.getModel().setValueAt(statement.getPrintableBasicAssemblyStatement(), i,
@@ -386,7 +386,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 if (m.getAccessType() == AccessNotice.AccessType.WRITE) {
                     final int address = m.getAddress();
                     final int value = m.getValue();
-                    final String strValue = Binary.intToHexString(m.getValue());
+                    final String strValue = BinaryUtils.intToHexString(m.getValue());
                     final String strBasic;
                     String strSource = TextSegmentWindow.modifiedCodeMarker;
                     // Translate the address into table model row and modify the values in that row
@@ -826,7 +826,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             if (value.equals(this.data[row][col]))
                 return;
             try {
-                val = Binary.stringToInt((String) value);
+                val = BinaryUtils.stringToInt((String) value);
             } catch (final NumberFormatException nfe) {
                 LOGGER.error("NumberFormatException when decoding value from table model.", nfe);
                 this.data[row][col] = "INVALID";
@@ -835,7 +835,8 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             }
             // calculate address from row and column
             try {
-                address = Binary.stringToInt((String) this.data[row][ColumnData.INSTRUCTION_ADDRESS_COLUMN.number]);
+                address =
+                    BinaryUtils.stringToInt((String) this.data[row][ColumnData.INSTRUCTION_ADDRESS_COLUMN.number]);
             } catch (final NumberFormatException nfe) {
                 // can't really happen since memory addresses are completely under
                 // the control of my software.

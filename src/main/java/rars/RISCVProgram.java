@@ -205,15 +205,6 @@ public final class RISCVProgram {
     }
 
     /**
-     * Returns status of BackStepper associated with this program.
-     *
-     * @return true if enabled, false if disabled or non-existant.
-     */
-    public boolean backSteppingEnabled() {
-        return (this.backStepper != null && this.backStepper.enabled());
-    }
-
-    /**
      * Produces specified line of RISCV source program.
      *
      * @param i Line number of RISCV source program to get. Line 1 is first line.
@@ -334,7 +325,7 @@ public final class RISCVProgram {
      * @param programsToAssemble       ArrayList of RISCVprogram objects, each
      *                                 representing a tokenized source file.
      * @param extendedAssemblerEnabled A boolean second - true means extended
-     *                                 (pseudo) instructions
+     *                                 (usePseudoInstructions) instructions
      *                                 are permitted in source code and false means
      *                                 they are to be flagged as errors
      * @param warningsAreErrors        A boolean second - true means assembler

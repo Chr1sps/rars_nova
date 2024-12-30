@@ -11,7 +11,6 @@ import rars.riscv.hardware.RegisterFile;
 import javax.swing.text.Segment;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Set;
 
 /** @noinspection All */
 @SuppressWarnings({"fallthrough", "UnnecessaryUnicodeEscape", "SameParameterValue", "UnusedAssignment", "CStyleArrayDeclaration", "FieldCanBeLocal", "unused"})
@@ -73,14 +72,15 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
   private static final String ZZ_CMAP_BLOCKS_PACKED_0 =
     "\11\0\1\1\1\2\1\3\1\4\1\3\22\0\1\1"+
     "\1\0\1\5\1\6\1\7\1\10\1\0\1\11\1\12"+
-    "\1\13\2\0\1\14\1\15\1\16\1\0\12\17\1\20"+
-    "\6\0\3\7\1\21\1\22\2\7\1\23\1\24\2\7"+
-    "\1\25\1\26\1\27\1\30\1\31\1\7\1\32\1\7"+
-    "\1\33\1\34\3\7\1\35\1\36\4\0\1\7\1\0"+
-    "\3\7\1\21\1\22\2\7\1\23\1\24\2\7\1\25"+
-    "\1\26\1\27\1\30\1\31\1\7\1\32\1\7\1\33"+
-    "\1\34\3\7\1\35\1\36\12\0\1\3\252\0\2\37"+
-    "\u01f6\0\2\3\326\0\u0100\3";
+    "\1\13\2\0\1\14\1\15\1\16\1\0\1\17\11\20"+
+    "\1\21\6\0\3\22\1\23\1\24\1\22\1\7\1\25"+
+    "\1\26\2\7\1\27\1\30\1\31\1\32\1\33\1\7"+
+    "\1\34\1\7\1\35\1\36\2\7\1\37\1\40\1\41"+
+    "\4\0\1\7\1\0\3\22\1\23\1\24\1\22\1\7"+
+    "\1\25\1\26\2\7\1\27\1\30\1\31\1\32\1\33"+
+    "\1\7\1\34\1\7\1\35\1\36\2\7\1\37\1\40"+
+    "\1\41\12\0\1\3\252\0\2\42\u01f6\0\2\3\326\0"+
+    "\u0100\3";
 
   private static int [] zzUnpackcmap_blocks() {
     int [] result = new int[1280];
@@ -108,12 +108,12 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
 
   private static final String ZZ_ACTION_PACKED_0 =
     "\1\0\1\1\1\2\1\3\1\4\1\5\1\6\1\1"+
-    "\1\7\1\10\1\11\1\12\1\1\1\6\1\13\2\6"+
-    "\1\14\1\15\3\16\1\17\1\13\1\20\5\6\2\21"+
-    "\1\22\1\0\1\23\1\24";
+    "\1\7\1\10\1\11\1\12\1\1\1\6\2\13\2\6"+
+    "\1\14\1\15\3\16\1\17\2\13\1\20\1\0\5\6"+
+    "\2\21\1\22\1\0\1\13\1\23\1\24";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[36];
+    int [] result = new int[40];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -138,14 +138,14 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
   private static final int [] ZZ_ROWMAP = zzUnpackRowMap();
 
   private static final String ZZ_ROWMAP_PACKED_0 =
-    "\0\0\0\40\0\100\0\40\0\140\0\200\0\240\0\300"+
-    "\0\340\0\40\0\40\0\40\0\u0100\0\u0120\0\u0140\0\u0160"+
-    "\0\u0180\0\40\0\40\0\u01a0\0\u01c0\0\u01e0\0\40\0\u0200"+
-    "\0\u0220\0\u0240\0\u0260\0\u0280\0\u02a0\0\u02c0\0\u01a0\0\40"+
-    "\0\u01a0\0\u02e0\0\240\0\u02e0";
+    "\0\0\0\43\0\106\0\43\0\151\0\214\0\257\0\322"+
+    "\0\365\0\43\0\43\0\43\0\u0118\0\u013b\0\u015e\0\u0181"+
+    "\0\u01a4\0\u01c7\0\43\0\43\0\u01ea\0\u020d\0\u0230\0\43"+
+    "\0\u0253\0\u0276\0\u0299\0\u02bc\0\u02df\0\u0302\0\u0325\0\u0348"+
+    "\0\u036b\0\u01ea\0\43\0\u01ea\0\u038e\0\u02bc\0\257\0\u038e";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[36];
+    int [] result = new int[40];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -170,27 +170,29 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
   private static final String ZZ_TRANS_PACKED_0 =
     "\1\2\1\3\1\4\1\0\1\3\1\5\1\6\1\7"+
     "\1\10\1\11\1\12\1\13\1\14\1\15\1\16\1\17"+
-    "\1\2\1\20\10\7\1\21\4\7\1\2\41\0\1\3"+
-    "\2\0\1\3\33\0\5\5\1\22\32\5\2\6\3\0"+
-    "\33\6\7\0\1\7\6\0\2\7\1\23\16\7\10\0"+
-    "\1\24\6\0\1\24\2\0\2\24\1\25\1\24\1\26"+
-    "\11\24\1\0\11\11\1\27\26\11\17\0\1\30\27\0"+
-    "\1\31\6\0\1\31\1\7\1\23\16\31\20\0\1\17"+
-    "\27\0\1\7\6\0\2\7\1\23\14\7\1\32\1\7"+
-    "\10\0\1\7\6\0\2\7\1\23\1\32\4\7\1\33"+
-    "\1\34\3\7\1\35\1\36\2\7\10\0\1\24\6\0"+
-    "\2\24\1\0\16\24\10\0\1\24\6\0\2\24\1\0"+
-    "\3\24\1\37\12\24\1\40\7\0\1\24\6\0\2\24"+
-    "\1\0\7\24\1\41\6\24\17\0\1\42\1\30\27\0"+
-    "\1\31\6\0\2\31\1\23\16\31\10\0\1\7\6\0"+
-    "\2\7\1\23\6\7\1\43\7\7\10\0\1\7\6\0"+
-    "\2\7\1\23\5\7\1\43\10\7\10\0\1\7\6\0"+
-    "\2\7\1\23\1\7\1\43\14\7\10\0\1\7\6\0"+
-    "\2\7\1\23\15\7\1\43\10\0\1\7\6\0\2\7"+
-    "\1\23\10\7\1\43\5\7\20\0\1\44\20\0";
+    "\1\20\1\2\1\7\1\21\10\7\1\22\5\7\1\2"+
+    "\44\0\1\3\2\0\1\3\36\0\5\5\1\23\35\5"+
+    "\2\6\3\0\36\6\7\0\1\7\6\0\3\7\1\24"+
+    "\20\7\10\0\1\25\6\0\1\25\3\0\3\25\1\26"+
+    "\1\25\1\27\12\25\1\0\11\11\1\30\31\11\17\0"+
+    "\1\31\1\32\31\0\1\33\6\0\1\33\2\7\1\24"+
+    "\20\33\20\0\2\20\16\0\1\34\22\0\2\20\31\0"+
+    "\1\7\6\0\3\7\1\24\16\7\1\35\1\7\10\0"+
+    "\1\7\6\0\3\7\1\24\1\7\1\35\4\7\1\36"+
+    "\1\37\3\7\1\40\1\41\3\7\10\0\1\25\6\0"+
+    "\3\25\1\0\20\25\10\0\1\25\6\0\3\25\1\0"+
+    "\4\25\1\42\13\25\1\43\7\0\1\25\6\0\3\25"+
+    "\1\0\10\25\1\44\7\25\17\0\1\45\2\32\16\0"+
+    "\1\34\21\0\1\45\2\32\31\0\1\33\6\0\3\33"+
+    "\1\24\20\33\20\0\2\46\1\0\3\46\25\0\1\7"+
+    "\6\0\3\7\1\24\7\7\1\47\10\7\10\0\1\7"+
+    "\6\0\3\7\1\24\6\7\1\47\11\7\10\0\1\7"+
+    "\6\0\3\7\1\24\2\7\1\47\15\7\10\0\1\7"+
+    "\6\0\3\7\1\24\17\7\1\47\10\0\1\7\6\0"+
+    "\3\7\1\24\11\7\1\47\6\7\20\0\2\50\22\0";
 
   private static int [] zzUnpacktrans() {
-    int [] result = new int[768];
+    int [] result = new int[945];
     int offset = 0;
     offset = zzUnpacktrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -233,11 +235,12 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
   private static final int [] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
-    "\1\0\1\11\1\1\1\11\5\1\3\11\5\1\2\11"+
-    "\3\1\1\11\10\1\1\11\1\1\1\0\2\1";
+    "\1\0\1\11\1\1\1\11\5\1\3\11\6\1\2\11"+
+    "\3\1\1\11\3\1\1\0\6\1\1\11\1\1\1\0"+
+    "\3\1";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[36];
+    int [] result = new int[40];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -716,7 +719,7 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
             case YYINITIAL: {
               addNullToken(); return getResult();
             }  // fall though
-            case 37: break;
+            case 41: break;
             default:
         return null;
         }

@@ -498,8 +498,9 @@ public final class VenusUI extends JFrame {
             this.settingsAddressDisplayBaseAction = new SettingsAction("Addresses displayed in hexadecimal",
                 "Toggle between hexadecimal and decimal display of memory addresses",
                 BoolSetting.DISPLAY_ADDRESSES_IN_HEX, this.mainPane.executeTab.addressDisplayBase::setSelected);
-            this.settingsExtendedAction = new SettingsAction("Permit extended (pseudo) instructions and formats",
-                "If set, extended (pseudo) instructions are formats are permitted.",
+            this.settingsExtendedAction = new SettingsAction("Permit extended (usePseudoInstructions) instructions " +
+                "and formats",
+                "If set, extended (usePseudoInstructions) instructions are formats are permitted.",
                 BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
             this.settingsAssembleOnOpenAction = new SettingsAction("Assemble file upon opening",
                 "If set, a file will be automatically assembled as soon as it is opened.  File Open dialog will " +

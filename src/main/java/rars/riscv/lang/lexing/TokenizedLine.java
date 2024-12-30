@@ -1,6 +1,8 @@
 package rars.riscv.lang.lexing;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
-public record TokenizedLine(List<RVToken> tokens, int lineNumber) {
+public record TokenizedLine(@NotNull List<@NotNull RVToken> tokens, int lineNumber) {
 }

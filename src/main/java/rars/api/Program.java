@@ -1,7 +1,6 @@
 package rars.api;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
 import rars.ProgramStatement;
@@ -16,7 +15,6 @@ import rars.util.SystemIO;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
@@ -96,28 +94,6 @@ public final class Program {
     }
 
     /**
-     * Sets the second of a normal, floating-point or control and status register.
-     *
-     * @param name  Either the common usage (t0, a0, ft0), explicit numbering (x2,
-     *              x3, f0), or CSR name (ustatus)
-     * @param value The second of the register as an int (floats are encoded as
-     *              IEEE-754)
-     * @throws java.lang.NullPointerException if name is invalid; only needs to be checked if
-     *                                        code accesses arbitrary names
-     */
-    public static void setRegisterValue(final String name, final int value) {
-        Register r = RegisterFile.getRegister(name);
-        if (r == null) {
-            r = FloatingPointRegisterFile.getRegister(name);
-        }
-        if (r == null) {
-            ControlAndStatusRegisterFile.updateRegister(name, value);
-        } else {
-            r.setValue(value);
-        }
-    }
-
-    /**
      * Assembles from a list of files
      *
      * @param files    A list of files to assemble
@@ -127,7 +103,7 @@ public final class Program {
      * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
-    public ErrorList assembleFiles(final @NotNull List<String> files, final @NotNull String mainFile) throws AssemblyException {
+    public ErrorList assembleFiles(final @NotNull List<@NotNull String> files, final @NotNull String mainFile) throws AssemblyException {
         final var programs = this.code.prepareFilesForAssembly(files, mainFile, null);
         return this.assemble(programs);
     }
@@ -140,11 +116,9 @@ public final class Program {
      * this will be empty
      * @throws AssemblyException thrown if any errors are found in the code
      */
+    @SuppressWarnings("UnusedReturnValue")
     public ErrorList assembleFile(final @NotNull String file) throws AssemblyException {
-        // TODO: potentially inline prepareForAssembly
-        final ArrayList<String> files = new ArrayList<>();
-        files.add(file);
-        final var programs = this.code.prepareFilesForAssembly(files, file, null);
+        final var programs = this.code.prepareFilesForAssembly(List.of(file), file, null);
         return this.assemble(programs);
     }
 
@@ -169,7 +143,7 @@ public final class Program {
         ErrorList warnings = null;
         AssemblyException e = null;
         try {
-            warnings = this.code.assemble(programs, this.set.pseudo, this.set.warningsAreErrors);
+            warnings = this.code.assemble(programs, this.set.usePseudoInstructions, this.set.warningsAreErrors);
         } catch (final AssemblyException ae) {
             e = ae;
         }
@@ -191,7 +165,7 @@ public final class Program {
      * @param STDIN A string that can be read in the program like its stdin or null
      *              to allow IO passthrough
      */
-    public void setup(final @Nullable ArrayList<String> args, final String STDIN) {
+    public void setup(final @NotNull List<String> args, final String STDIN) {
         RegisterFile.resetRegisters();
         FloatingPointRegisterFile.resetRegisters();
         ControlAndStatusRegisterFile.resetRegisters();
@@ -299,11 +273,11 @@ public final class Program {
     public Memory getMemory() {
         return this.simulation;
     }
-    
+
     public List<ProgramStatement> getParsedList() {
         return this.code.getParsedList();
     }
-    
+
     public List<ProgramStatement> getMachineList() {
         return this.code.getMachineList();
     }

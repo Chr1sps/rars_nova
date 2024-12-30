@@ -11,6 +11,7 @@ import rars.simulator.Simulator;
 import utils.RarsTestBase;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -32,7 +33,8 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
             header = """
                 # DATA
                 .data
-                """ + dataPrelude + "\n" + header;
+                %s
+                %s""".formatted(dataPrelude, header);
         }
 
         final var passAndFail = """
@@ -48,8 +50,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 ecall
             """;
 
-        final var finalCode = header + code + passAndFail;
-        return finalCode;
+        return header + code + passAndFail;
     }
 
     protected final void runTest32(@NotNull final String code) {
@@ -108,7 +109,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
             if (!testData.errorLines.isEmpty()) {
                 fail("Expected assembly error, but successfully assembled `" + getTestName() + "`.");
             }
-            program.setup(null, testData.stdin);
+            program.setup(List.of(), testData.stdin);
             final Simulator.Reason r = program.simulate();
             if (r != Simulator.Reason.NORMAL_TERMINATION) {
                 final var msg = "Ended abnormally while executing `" + getTestName() + "`.\n" +
@@ -134,14 +135,13 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
         } catch (final AssemblyException ae) {
             if (testData.errorLines.isEmpty()) {
                 final var builder = new StringBuilder();
-                builder.append("Failed to assemble `" + getTestName() + "` due to following error(s):\n");
-                for (final var error : ae.errors().getErrorMessages()) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
-                        "\n");
+                builder.append("Failed to assemble `%s` due to following error(s):\n".formatted(getTestName()));
+                for (final var error : ae.errors.getErrorMessages()) {
+                    builder.append("[%d,%d] %s\n".formatted(error.getLine(), error.getPosition(), error.getMessage()));
                 }
                 fail(builder.toString());
             }
-            final var errors = ae.errors().getErrorMessages();
+            final var errors = ae.errors.getErrorMessages();
             final var foundErrorLines = new HashSet<Integer>();
             for (final var error : errors) {
                 if (error.isWarning()) continue;
@@ -149,12 +149,11 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
             }
             if (!testData.errorLines.equals(foundErrorLines)) {
                 final var builder = new StringBuilder();
-                builder.append("Expected and actual error lines are not equal for `" + getTestName() + "`.\n");
-                builder.append("Expected lines: " + testData.errorLines + "\n");
+                builder.append("Expected and actual error lines are not equal for `%s`.\n".formatted(getTestName()));
+                builder.append("Expected lines: %s\n".formatted(testData.errorLines));
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
-                    builder.append("[" + error.getLine() + "," + error.getPosition() + "] " + error.getMessage() +
-                        "\n");
+                    builder.append("[%d,%d] %s\n".formatted(error.getLine(), error.getPosition(), error.getMessage()));
                 }
                 fail(builder.toString());
             }

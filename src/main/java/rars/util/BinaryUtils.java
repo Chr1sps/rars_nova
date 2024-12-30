@@ -1,5 +1,6 @@
 package rars.util;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,16 +40,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson, Ken Vollmar, and Jason Bumgarner
  * @version July 2005
  */
-public final class Binary {
+public final class BinaryUtils {
 
     // Using int second 0-15 as index, yields equivalent hex digit as char.
-    private static final char[] chars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
-            'f'};
+    private static final char[] chars = {
+        '0', '1', '2', '3',
+        '4', '5', '6', '7',
+        '8', '9', 'a', 'b',
+        'c', 'd', 'e', 'f'
+    };
     // Use this to produce String equivalent of unsigned int second (add it to int
     // second, result is long)
-    private static final long UNSIGNED_BASE = (long) 0x7FFFFFFF + (long) 0x7FFFFFFF + (long) 2; // 0xFFFFFFFF+1
+    private static final long UNSIGNED_BASE = 0x1_0000_0000L;
 
-    private Binary() {
+    private BinaryUtils() {
     }
 
     /**
@@ -60,11 +65,11 @@ public final class Binary {
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
-    public static String intToBinaryString(final int value, final int length) {
+    public static @NotNull String intToBinaryString(final int value, final int length) {
         final char[] result = new char[length];
         int index = length - 1;
         for (int i = 0; i < length; i++) {
-            result[index] = (Binary.bitValue(value, i) == 1) ? '1' : '0';
+            result[index] = (BinaryUtils.bitValue(value, i) == 1) ? '1' : '0';
             index--;
         }
         return new String(result);
@@ -79,8 +84,9 @@ public final class Binary {
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
-    public static String intToBinaryString(final int value) {
-        return Binary.intToBinaryString(value, 32);
+    @Contract("_ -> new")
+    public static @NotNull String intToBinaryString(final int value) {
+        return BinaryUtils.intToBinaryString(value, 32);
     }
 
     /**
@@ -96,7 +102,7 @@ public final class Binary {
         final char[] result = new char[length];
         int index = length - 1;
         for (int i = 0; i < length; i++) {
-            result[index] = (Binary.bitValue(value, i) == 1) ? '1' : '0';
+            result[index] = (BinaryUtils.bitValue(value, i) == 1) ? '1' : '0';
             index--;
         }
         return new String(result);
@@ -112,7 +118,7 @@ public final class Binary {
      * requested binary sequence.
      */
     public static String longToBinaryString(final long value) {
-        return Binary.longToBinaryString(value, 64);
+        return BinaryUtils.longToBinaryString(value, 64);
     }
 
     /**
@@ -182,7 +188,7 @@ public final class Binary {
                 position--;
                 rep++;
             }
-            hexChars[digits - digs + 1] = Binary.chars[result];
+            hexChars[digits - digs + 1] = BinaryUtils.chars[result];
         }
         return new String(hexChars);
     }
@@ -278,7 +284,7 @@ public final class Binary {
      * String.
      * If string length > 4, returns '0'.
      */
-    public static char binaryStringToHexDigit(final String value) {
+    public static char binaryStringToHexDigit(final @NotNull String value) {
         if (value.length() > 4)
             return '0';
         int result = 0;
@@ -288,7 +294,7 @@ public final class Binary {
                 result = result + pow;
             pow *= 2;
         }
-        return Binary.chars[result];
+        return BinaryUtils.chars[result];
     }
 
     /**
@@ -349,7 +355,7 @@ public final class Binary {
      * of long.
      */
     public static String longToHexString(final long value) {
-        return Binary.binaryStringToHexString(Binary.longToBinaryString(value));
+        return BinaryUtils.binaryStringToHexString(BinaryUtils.longToBinaryString(value));
     }
 
     /**
@@ -360,8 +366,8 @@ public final class Binary {
      * @param d The int second to interpret.
      * @return String which forms unsigned 32 bit equivalent of int.
      */
-    public static String unsignedIntToIntString(final int d) {
-        return (d >= 0) ? Integer.toString(d) : Long.toString(Binary.UNSIGNED_BASE + d);
+    public static @NotNull String unsignedIntToIntString(final int d) {
+        return (d >= 0) ? Integer.toString(d) : Long.toString(BinaryUtils.UNSIGNED_BASE + d);
     }
 
     /**
@@ -378,7 +384,7 @@ public final class Binary {
     public static String intToAscii(final int d) {
         final StringBuilder result = new StringBuilder(8);
         for (int i = 3; i >= 0; i--) {
-            final int byteValue = Binary.getByte(d, i);
+            final int byteValue = BinaryUtils.getByte(d, i);
             result.append(getByteString((byte) byteValue, false));
         }
         return result.toString();
@@ -431,10 +437,10 @@ public final class Binary {
     public static int stringToInt(final String s) throws NumberFormatException {
         // Profiling showed that the old method here using Integer.decode was slow
         // stringToIntFast should be input by input compatible
-        final Integer res2 = Binary.stringToIntFast(s);
+        final Integer res2 = BinaryUtils.stringToIntFast(s);
         if (res2 == null) {
             // TODO: maybe speed this up
-            final long res3 = Binary.stringToLong(s);
+            final long res3 = BinaryUtils.stringToLong(s);
             if (res3 <= Integer.MAX_VALUE && res3 >= Integer.MIN_VALUE) {
                 return (int) res3;
             }
@@ -532,7 +538,6 @@ public final class Binary {
      * @throws java.lang.NumberFormatException if string cannot be translated into a long
      */
     public static long stringToLong(final String s) throws NumberFormatException {
-        String work = s;
         long result;
         // First, use Long.decode(). This will validate most, but it flags
         // valid hex two's complement values as exceptions. We'll catch those and
@@ -544,19 +549,19 @@ public final class Binary {
             // (1) exactly 18 characters long,
             // (2) starts with Ox or 0X,
             // (3) last 16 characters are valid hex digits.
-            work = work.toLowerCase();
+            final var work = s.toLowerCase();
             if (work.length() == 18 && work.startsWith("0x")) {
                 final StringBuilder bitString = new StringBuilder();
                 int index;
                 // while testing characters, build bit string to set up for binaryStringToInt
                 for (int i = 2; i < 18; i++) {
-                    index = Arrays.binarySearch(Binary.chars, work.charAt(i));
+                    index = Arrays.binarySearch(BinaryUtils.chars, work.charAt(i));
                     if (index < 0) {
                         throw new NumberFormatException();
                     }
-                    bitString.append(Binary.intToBinaryString(index, 4));
+                    bitString.append(BinaryUtils.intToBinaryString(index, 4));
                 }
-                result = Binary.binaryStringToLong(bitString.toString());
+                result = BinaryUtils.binaryStringToLong(bitString.toString());
             } else {
                 throw new NumberFormatException();
             }
@@ -587,18 +592,6 @@ public final class Binary {
     }
 
     /**
-     * Returns long (64 bit integer) combining the bit values of two given 32 bit
-     * integer values.
-     *
-     * @param highOrder Integer to form the high-order 32 bits of result.
-     * @param lowOrder  Integer to form the high-order 32 bits of result.
-     * @return long containing concatenated 32 bit int values.
-     */
-    public static long twoIntsToLong(final int highOrder, final int lowOrder) {
-        return (((long) highOrder) << 32) | (((long) lowOrder) & 0xFFFFFFFFL);
-    }
-
-    /**
      * Returns the bit second of the given bit position of the given int second.
      *
      * @param value The second to read the bit from.
@@ -617,46 +610,10 @@ public final class Binary {
      * @return 0 if the bit position contains 0, and 1 otherwise.
      */
     public static int bitValue(final long value, final int bit) {
-
         return (int) (1L & (value >> bit));
     }
 
-    /**
-     * Sets the specified bit of the specified second to 1, and returns the result.
-     *
-     * @param value The second in which the bit is to be set.
-     * @param bit   bit position in range 0 (least significant) to 31 (most)
-     * @return second possibly modified with given bit set to 1.
-     */
-    public static int setBit(final int value, final int bit) {
-        return value | (1 << bit);
-    }
-
-    /**
-     * Sets the specified bit of the specified second to 0, and returns the result.
-     *
-     * @param value The second in which the bit is to be set.
-     * @param bit   bit position in range 0 (least significant) to 31 (most)
-     * @return second possibly modified with given bit set to 0.
-     */
-    public static int clearBit(final int value, final int bit) {
-        return value & ~(1 << bit);
-    }
-
     // setByte and getByte added by DPS on 12 July 2006
-
-    /**
-     * Sets the specified byte of the specified second to the low order 8 bits of
-     * specified replacement second, and returns the result.
-     *
-     * @param value   The second in which the byte is to be set.
-     * @param bite    byte position in range 0 (least significant) to 3 (most)
-     * @param replace second to place into that byte position - use low order 8 bits
-     * @return second modified second.
-     */
-    public static int setByte(final int value, final int bite, final int replace) {
-        return value & ~(0xFF << (bite << 3)) | ((replace & 0xFF) << (bite << 3));
-    }
 
     /**
      * Gets the specified byte of the specified second.
@@ -688,22 +645,22 @@ public final class Binary {
             // don't care about return second, just whether it threw exception.
             // If second is EITHER a valid int OR a valid long, continue.
             try {
-                Binary.stringToInt(v);
+                BinaryUtils.stringToInt(v);
             } catch (final NumberFormatException nfe) {
                 try {
-                    Binary.stringToLong(v);
+                    BinaryUtils.stringToLong(v);
                 } catch (final NumberFormatException e) {
                     return false; // both failed; it is neither valid int nor long
                 }
             }
 
             if ((v.charAt(0) == '-') && // sign is optional but if present can only be -
-                    (v.charAt(1) == '0') &&
-                    (Character.toUpperCase(v.charAt(1)) == 'X'))
+                (v.charAt(1) == '0') &&
+                (Character.toUpperCase(v.charAt(1)) == 'X'))
                 return true; // Form is Sign 0x.... and the entire string is parseable as a number
 
             else if ((v.charAt(0) == '0') &&
-                    (Character.toUpperCase(v.charAt(1)) == 'X'))
+                (Character.toUpperCase(v.charAt(1)) == 'X'))
                 return true; // Form is 0x.... and the entire string is parseable as a number
 
         } catch (final StringIndexOutOfBoundsException e) {
@@ -712,8 +669,6 @@ public final class Binary {
 
         return false; // default
     }
-
-    // KENV 1/4/05
 
     /**
      * Parsing method to see if a string represents an octal number.
@@ -731,17 +686,17 @@ public final class Binary {
         try {
             // we don't care what second Binary.stringToInt(v) returns, just whether it threw
             // exception
-            final int dontCare = Binary.stringToInt(v);
+            BinaryUtils.stringToInt(v);
 
-            if (Binary.isHex(v))
+            if (BinaryUtils.isHex(v))
                 return false; // String starts with "0" but continues "0x", so not octal
 
             if ((v.charAt(0) == '-') && // sign is optional but if present can only be -
-                    (v.charAt(1) == '0')) // Has to have more digits than the leading zero
+                (v.charAt(1) == '0')) // Has to have more digits than the leading zero
                 return true; // Form is Sign 0.... and the entire string is parseable as a number
 
             else if ((v.charAt(0) == '0') &&
-                    (v.length() > 1)) // Has to have more digits than the leading zero
+                (v.length() > 1)) // Has to have more digits than the leading zero
                 return true; // Form is 0.... and the entire string is parseable as a number
 
         } catch (final StringIndexOutOfBoundsException |

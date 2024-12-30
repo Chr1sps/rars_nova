@@ -1,11 +1,12 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.dump.DumpFormat;
 import rars.riscv.dump.DumpFormats;
 import rars.riscv.hardware.Memory;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.util.MemoryDump;
 
 import javax.swing.*;
@@ -17,6 +18,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -55,9 +57,7 @@ public class FileDumpMemoryAction extends GuiAction {
     private static final String title = "Dump Memory To File";
     private final VenusUI mainUI;
     private JDialog dumpDialog;
-    private int[] segmentListBaseArray;
-    private int[] segmentListHighArray;
-    private JComboBox<String> segmentListSelector;
+    private JComboBox<AugmentedSegmentInfo> segmentListSelector;
     private JComboBox<DumpFormat> formatListSelector;
 
     /**
@@ -115,52 +115,26 @@ public class FileDumpMemoryAction extends GuiAction {
         final JPanel contents = new JPanel(new BorderLayout(20, 20));
         contents.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // A series of parallel arrays representing the memory segments that can be
-        // dumped.
-        final String[] segmentArray = MemoryDump.getSegmentNames();
-        final int[] baseAddressArray = MemoryDump.getBaseAddresses(segmentArray);
-        final int[] limitAddressArray = MemoryDump.getLimitAddresses(segmentArray);
-        final int[] highAddressArray = new int[segmentArray.length];
+        final var segments = MemoryDump.SEGMENTS;
 
-        // These three are allocated and filled by buildDialogPanel() and used by action
-        // listeners.
-        String[] segmentListArray = new String[segmentArray.length];
-        this.segmentListBaseArray = new int[segmentArray.length];
-        this.segmentListHighArray = new int[segmentArray.length];
-
-        // Calculate the actual highest address to be dumped. For text segment, this
-        // depends on the
-        // program length (number of machine code instructions). For data segment, this
-        // depends on
-        // how many MARS 4K word blocks have been referenced during assembly and/or
-        // execution.
-        // Then generate label from concatentation of segmentArray[i],
-        // baseAddressArray[i]
-        // and highAddressArray[i]. This lets user know exactly what range will be
-        // dumped. Initially not
-        // editable but maybe add this later.
-        // If there is nothing to dump (e.g. address of first null == base address),
-        // then
+        // Calculate the actual highest address to be dumped. For text segment, this depends on the
+        // program length (number of machine code instructions). For data segment, this depends on
+        // how many MARS 4K word blocks have been referenced during assembly and/or execution.
+        // This lets user know exactly what range will be dumped.
+        // Initially not editable but maybe add this later.
+        // If there is nothing to dump (e.g. address of first null == base address), then
         // the segment will not be listed.
-        int segmentCount = 0;
-
-        for (int i = 0; i < segmentArray.length; i++) {
+        final var actualSegments = new ArrayList<AugmentedSegmentInfo>();
+        for (final var segment : segments) {
+            int highAddress;
             try {
-                highAddressArray[i] = Memory.getInstance().getAddressOfFirstNull(baseAddressArray[i],
-                    limitAddressArray[i])
-                    - Memory.WORD_LENGTH_BYTES;
-
-            } // Exception will not happen since the Memory base and limit addresses are on
-            // word boundaries!
-            catch (final AddressErrorException aee) {
-                highAddressArray[i] = baseAddressArray[i] - Memory.WORD_LENGTH_BYTES;
+                highAddress = Memory.getInstance().getAddressOfFirstNull(segment.baseAddress(),
+                    segment.limitAddress()) - Memory.WORD_LENGTH_BYTES;
+            } catch (final AddressErrorException e) {
+                highAddress = segment.baseAddress() - Memory.WORD_LENGTH_BYTES;
             }
-            if (highAddressArray[i] >= baseAddressArray[i]) {
-                this.segmentListBaseArray[segmentCount] = baseAddressArray[i];
-                this.segmentListHighArray[segmentCount] = highAddressArray[i];
-                segmentListArray[segmentCount] = segmentArray[i] + " (" + Binary.intToHexString(baseAddressArray[i]) +
-                    " - " + Binary.intToHexString(highAddressArray[i]) + ")";
-                segmentCount++;
+            if (highAddress >= segment.baseAddress()) {
+                actualSegments.add(new AugmentedSegmentInfo(segment, highAddress));
             }
         }
 
@@ -168,7 +142,7 @@ public class FileDumpMemoryAction extends GuiAction {
         // there will always be at least one instruction (.text segment has one
         // non-null).
         // But just in case...
-        if (segmentCount == 0) {
+        if (segments.isEmpty()) {
             contents.add(new Label("There is nothing to dump!"), BorderLayout.NORTH);
             final JButton OKButton = new JButton("OK");
             OKButton.addActionListener(
@@ -177,15 +151,8 @@ public class FileDumpMemoryAction extends GuiAction {
             return contents;
         }
 
-        // This is needed to assure no null array elements in ComboBox list.
-        if (segmentCount < segmentListArray.length) {
-            final String[] tempArray = new String[segmentCount];
-            System.arraycopy(segmentListArray, 0, tempArray, 0, segmentCount);
-            segmentListArray = tempArray;
-        }
-
         // Create segment selector. First element selected by default.
-        this.segmentListSelector = new JComboBox<>(segmentListArray);
+        this.segmentListSelector = new JComboBox<>(actualSegments.toArray(AugmentedSegmentInfo[]::new));
         this.segmentListSelector.setSelectedIndex(0);
         final JPanel segmentPanel = new JPanel(new BorderLayout());
         segmentPanel.add(new Label("Memory Segment"), BorderLayout.NORTH);
@@ -204,15 +171,7 @@ public class FileDumpMemoryAction extends GuiAction {
 
         // Bottom row - the control buttons for Dump and Cancel
         final Box controlPanel = Box.createHorizontalBox();
-        final JButton dumpButton = new JButton("Dump To File...");
-        dumpButton.addActionListener(
-            e -> {
-                if (this.performDump(this.segmentListBaseArray[this.segmentListSelector.getSelectedIndex()],
-                    this.segmentListHighArray[this.segmentListSelector.getSelectedIndex()],
-                    (DumpFormat) this.formatListSelector.getSelectedItem())) {
-                    this.closeDialog();
-                }
-            });
+        final JButton dumpButton = createDumpButton();
         final JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(
             e -> this.closeDialog());
@@ -223,6 +182,24 @@ public class FileDumpMemoryAction extends GuiAction {
         controlPanel.add(Box.createHorizontalGlue());
         contents.add(controlPanel, BorderLayout.SOUTH);
         return contents;
+    }
+
+    private @NotNull JButton createDumpButton() {
+        final var dumpButton = new JButton("Dump To File...");
+        dumpButton.addActionListener(
+            e -> {
+                final var selectedSegment = (AugmentedSegmentInfo) this.segmentListSelector.getSelectedItem();
+                if (selectedSegment == null) return;
+                final var wasDumped = this.performDump(
+                    selectedSegment.segmentInfo.baseAddress(),
+                    selectedSegment.actualHighAddress,
+                    (DumpFormat) this.formatListSelector.getSelectedItem()
+                );
+                if (wasDumped) {
+                    this.closeDialog();
+                }
+            });
+        return dumpButton;
     }
 
     // User has clicked "Dump" button, so launch a file chooser then get
@@ -299,4 +276,14 @@ public class FileDumpMemoryAction extends GuiAction {
         }
     }
 
+    private record AugmentedSegmentInfo(@NotNull MemoryDump.SegmentInfo segmentInfo, int actualHighAddress) {
+        @Override
+        public String toString() {
+            return "%s (%s - %s)".formatted(
+                segmentInfo.name(),
+                BinaryUtils.intToHexString(segmentInfo.baseAddress()),
+                BinaryUtils.intToHexString(actualHighAddress)
+            );
+        }
+    }
 }

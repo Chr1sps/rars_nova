@@ -8,7 +8,7 @@ import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.Memory;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -231,9 +231,9 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         KeyboardAndDisplaySimulator.TRANSMITTER_DATA = Memory.memoryMapBaseAddress + 12; // 0xffff000c; // display 
         // character in low-order byte
         KeyboardAndDisplaySimulator.displayPanelTitle =
-            "DISPLAY: Store to Transmitter Data " + Binary.intToHexString(KeyboardAndDisplaySimulator.TRANSMITTER_DATA);
+            "DISPLAY: Store to Transmitter Data " + BinaryUtils.intToHexString(KeyboardAndDisplaySimulator.TRANSMITTER_DATA);
         KeyboardAndDisplaySimulator.keyboardPanelTitle = "KEYBOARD: Characters typed here are stored to Receiver Data "
-            + Binary.intToHexString(KeyboardAndDisplaySimulator.RECEIVER_DATA);
+            + BinaryUtils.intToHexString(KeyboardAndDisplaySimulator.RECEIVER_DATA);
     }
 
     /**
@@ -545,18 +545,19 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
             " ASCII "
             +
             "code to be placed in the Receiver Data register (low-order byte of memory word "
-            + Binary.intToHexString(KeyboardAndDisplaySimulator.RECEIVER_DATA) + "), and the " +
+            + BinaryUtils.intToHexString(KeyboardAndDisplaySimulator.RECEIVER_DATA) + "), and the " +
             "Ready bit to be set to 1 in the Receiver Control register (low-order bit of "
-            + Binary.intToHexString(KeyboardAndDisplaySimulator.RECEIVER_CONTROL) + ").  The Ready " +
+            + BinaryUtils.intToHexString(KeyboardAndDisplaySimulator.RECEIVER_CONTROL) + ").  The Ready " +
             "bit is automatically reset to 0 when the program reads the Receiver Data using an 'lw' instruction.\n"
             +
             "\n" +
             "A program may write to the display area by detecting the Ready bit set (1) in the Transmitter Control "
             +
-            "register (low-order bit of memory word " + Binary.intToHexString(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL)
+            "register (low-order bit of memory word " + BinaryUtils.intToHexString(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL)
             + "), then storing the ASCII code of the character to be " +
             "displayed in the Transmitter Data register (low-order byte of "
-            + Binary.intToHexString(KeyboardAndDisplaySimulator.TRANSMITTER_DATA) + ") using a 'sw' instruction. " +
+            + BinaryUtils.intToHexString(KeyboardAndDisplaySimulator.TRANSMITTER_DATA) + ") using a 'sw' instruction." +
+            " " +
             " This " +
             "triggers the simulated display to clear the Ready bit to 0, delay awhile to simulate processing the " +
             "data, "

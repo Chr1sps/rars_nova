@@ -8,7 +8,7 @@ import rars.notices.RegisterAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.Register;
 import rars.settings.BoolSetting;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.util.SimpleSubscriber;
 import rars.venus.NumberDisplayBaseChooser;
 import rars.venus.run.RunSpeedPanel;
@@ -314,9 +314,9 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             final long newValue;
             try {
                 if (BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)) {
-                    newValue = Binary.stringToLong((String) value);
+                    newValue = BinaryUtils.stringToLong((String) value);
                 } else {
-                    newValue = Binary.stringToInt((String) value);
+                    newValue = BinaryUtils.stringToInt((String) value);
                 }
             } catch (final NumberFormatException nfe) {
                 // If the user enters an invalid value, don't do anything.

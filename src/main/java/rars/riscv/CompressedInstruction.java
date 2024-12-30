@@ -1,32 +1,12 @@
 package rars.riscv;
 
 import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
-import rars.exceptions.SimulationException;
 
-public abstract non-sealed class CompressedInstruction extends Instruction {
+public abstract non-sealed class CompressedInstruction extends Instruction implements SimulationCallback {
     protected static final int COMPRESSED_INSTRUCTION_LENGTH = 2;
 
     private final CompressedInstructionFormat instructionFormat;
-
-    public int getOpcodeMatch() {
-        return opcodeMatch;
-    }
-
-    public int getOpcodeMask() {
-        return opcodeMask;
-    }
-
-    public @NotNull String getOperationMask() {
-        return operationMask;
-    }
-
-    public CompressedInstructionFormat getInstructionFormat() {
-        return instructionFormat;
-    }
-
     private final @NotNull String operationMask;
-
     private final int opcodeMask; // integer with 1's where constants required (0/1 become 1, f/s/t become 0)
     private final int opcodeMatch; // integer matching constants required (0/1 become 0/1, f/s/t become 0)
 
@@ -47,10 +27,24 @@ public abstract non-sealed class CompressedInstruction extends Instruction {
         return register >= 8 && register <= 15;
     }
 
+    public int getOpcodeMatch() {
+        return opcodeMatch;
+    }
+
+    public int getOpcodeMask() {
+        return opcodeMask;
+    }
+
+    public @NotNull String getOperationMask() {
+        return operationMask;
+    }
+
+    public CompressedInstructionFormat getInstructionFormat() {
+        return instructionFormat;
+    }
+
     @Override
     public int getInstructionLength() {
         return COMPRESSED_INSTRUCTION_LENGTH;
     }
-
-    public abstract void simulate(final @NotNull ProgramStatement statement) throws SimulationException;
 }

@@ -7,7 +7,6 @@ import rars.riscv.hardware.RegisterFile;
 import javax.swing.text.Segment;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Set;
 
 /** @noinspection All */
 @SuppressWarnings({"fallthrough", "UnnecessaryUnicodeEscape", "SameParameterValue", "UnusedAssignment", "CStyleArrayDeclaration", "FieldCanBeLocal", "unused"})
@@ -158,11 +157,14 @@ import java.util.Set;
             
 %}
 
-Letter                  = ([a-zA-Z])
-Digit                   = ([0-9])
-FirstDigit              = ([1-9])
+Letter                   = ([a-zA-Z])
+Digit                    = ([0-9])
+FirstDigit               = ([1-9])
 Integer                  = ({Digit}+)
 Float = ([-]{Integer}"."{Integer})
+
+HexDigit                 = ([0-9a-fA-F])
+HexInteger               = ([0][xX]{HexDigit}+)
 
 IntegerNew               = ({FirstDigit}{Digit}*|{Digit})
 
@@ -246,6 +248,7 @@ RightParen = (")")
     {RightParen}                { addToken(RVTokenType.RIGHT_PAREN); }
       
     [\-]?{Integer}                    { addToken(RVTokenType.INTEGER); }
+    [\-]?{HexInteger}                 { addToken(RVTokenType.INTEGER); }
     {Float}                     { addToken(RVTokenType.FLOATING); }
       
     {MacroArg}                  { addToken(RVTokenType.MACRO_PARAMETER); }

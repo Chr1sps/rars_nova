@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import rars.RISCVProgram;
 import rars.assembler.Symbol;
 import rars.assembler.TokenList;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -39,7 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**
- * ExtendedInstruction represents a RISCV extended (a.k.a pseudo) instruction.
+ * ExtendedInstruction represents a RISCV extended (a.k.a usePseudoInstructions) instruction.
  * This
  * assembly language instruction does not have a corresponding machine
  * instruction. Instead
@@ -64,7 +64,8 @@ public final class ExtendedInstruction extends Instruction {
      *                    of one or more MIPS basic instructions.
      * @param description a helpful description to be included on help requests
      */
-    public ExtendedInstruction(final @NotNull String example, final @NotNull String translation, final @NotNull String description) {
+    public ExtendedInstruction(final @NotNull String example, final @NotNull String translation,
+                               final @NotNull String description) {
         super(example, description);
         this.translationStrings = ExtendedInstruction.buildTranslationList(translation);
     }
@@ -122,21 +123,23 @@ public final class ExtendedInstruction extends Instruction {
      * @param PC        a int
      * @return String representing basic assembler statement.
      */
-    public static String makeTemplateSubstitutions(final @NotNull RISCVProgram program, final @NotNull String template, final @NotNull TokenList tokenList, final int PC) {
+    public static String makeTemplateSubstitutions(final @NotNull RISCVProgram program,
+                                                   final @NotNull String template, final @NotNull TokenList tokenList
+        , final int PC) {
         String instruction = template;
         // substitute first operand token for template's RG1 or OP1, second for RG2 or
         // OP2, etc
         for (int op = 1; op < tokenList.size(); op++) {
-            instruction = instruction.replace("RG" + op, tokenList.get(op).getValue());
+            instruction = instruction.replace("RG" + op, tokenList.get(op).getText());
 
-            final String strValue = tokenList.get(op).getValue();
+            final String strValue = tokenList.get(op).getText();
             int val;
             try {
-                val = Binary.stringToInt(strValue); // KENV 1/6/05
+                val = BinaryUtils.stringToInt(strValue); // KENV 1/6/05
             } catch (final NumberFormatException e) {
                 final long lval;
                 try {
-                    lval = Binary.stringToLong(strValue);
+                    lval = BinaryUtils.stringToLong(strValue);
                 } catch (final NumberFormatException nfe) {
                     continue;
                 }
@@ -144,7 +147,7 @@ public final class ExtendedInstruction extends Instruction {
                 final int vall = (int) lval;
                 // this shouldn't happen if is is for LL .. VH
                 if (instruction.contains("LIA" + op)) {
-                    final int extra = Binary.bitValue(val, 11); // add extra to compesate for sign extension
+                    final int extra = BinaryUtils.bitValue(val, 11); // add extra to compesate for sign extension
                     instruction = instruction.replace("LIA" + op, String.valueOf((val >> 12) + extra));
                 } else if (instruction.contains("LIB" + op))
                     instruction = instruction.replace("LIB" + op, String.valueOf(val << 20 >> 20));
@@ -159,7 +162,7 @@ public final class ExtendedInstruction extends Instruction {
 
             final int relative = val - PC;
             if (instruction.contains("PCH" + op)) {
-                final int extra = Binary.bitValue(relative, 11);// add extra to compesate for sign extension
+                final int extra = BinaryUtils.bitValue(relative, 11);// add extra to compesate for sign extension
                 instruction = instruction.replace("PCH" + op, String.valueOf((relative >> 12) + extra));
             }
             if (instruction.contains("PCL" + op)) {
@@ -167,8 +170,9 @@ public final class ExtendedInstruction extends Instruction {
             }
 
             if (instruction.contains("LH" + op)) {
-                final int extra = Binary.bitValue(val, 11);// add extra to compesate for sign extension
-//                instruction = ExtendedInstruction.substitute(instruction, "LH" + op, String.valueOf((val >> 12) + extra));
+                final int extra = BinaryUtils.bitValue(val, 11);// add extra to compesate for sign extension
+//                instruction = ExtendedInstruction.substitute(instruction, "LH" + op, String.valueOf((val >> 12) + 
+//                extra));
                 instruction = instruction.replace("LH" + op, String.valueOf((val >> 12) + extra));
             }
             if (instruction.contains("LL" + op)) {
@@ -176,7 +180,7 @@ public final class ExtendedInstruction extends Instruction {
             }
 
             if (instruction.contains("VH" + op)) {
-                final int extra = Binary.bitValue(val, 11); // add extra to compesate for sign extension
+                final int extra = BinaryUtils.bitValue(val, 11); // add extra to compesate for sign extension
                 instruction = instruction.replace("VH" + op, String.valueOf((val >> 12) + extra));
             }
             if (instruction.contains("VL" + op)) {
@@ -188,7 +192,7 @@ public final class ExtendedInstruction extends Instruction {
             // label has to be last token. It has already been translated to address
             // by symtab lookup, so I need to get the text label back so parseLine() won't
             // puke.
-            final String label = tokenList.get(tokenList.size() - 1).getValue();
+            final String label = tokenList.get(tokenList.size() - 1).getText();
             final Symbol sym = program.getLocalSymbolTable().getSymbolGivenAddressLocalOrGlobal(label);
             if (sym != null) {
                 // should never be null, since there would not be an address if label were not
@@ -203,7 +207,7 @@ public final class ExtendedInstruction extends Instruction {
                 // because
                 // it will keep matching the substituted string!
 //                instruction = ExtendedInstruction.substituteFirst(instruction, "LAB", sym.name);
-                instruction = instruction.replace("LAB", sym.name);
+                instruction = instruction.replace("LAB", sym.name());
             }
         }
         return instruction;

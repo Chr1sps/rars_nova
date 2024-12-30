@@ -74,10 +74,10 @@ public final class HelpHelpAction extends GuiAction {
     private static JScrollPane createDirectivesHelpPane() {
         final Vector<String> exampleList = new Vector<>();
         final String blanks = "            "; // 12 blanks
-        for (final Directive direct : Directive.getDirectiveList()) {
-            exampleList.add(direct.toString()
-                + blanks.substring(0, Math.max(0, blanks.length() - direct.toString().length()))
-                + direct.getDescription());
+        for (final var directive : Directive.values()) {
+            exampleList.add(directive.toString()
+                + blanks.substring(0, Math.max(0, blanks.length() - directive.toString().length()))
+                + directive.getDescription());
         }
         Collections.sort(exampleList);
         final JList<String> examples = new JList<>(exampleList);
@@ -279,7 +279,8 @@ public final class HelpHelpAction extends GuiAction {
             "<td><tt>-100(t2)</tt></td><td>sign-extended 16-bit integer added to contents of t2</td>" +
             "</tr><tr>" +
             "</tr><tr>" +
-            "<td colspan=2><b><i><font size=+1>Load & Store addressing modes, pseudo instructions</font></i></b></td>"
+            "<td colspan=2><b><i><font size=+1>Load & Store addressing modes, usePseudoInstructions " +
+            "instructions</font></i></b></td>"
             +
             "</tr><tr>" +
             "<td><tt>(t2)</tt></td><td>contents of t2</td>" +
@@ -310,13 +311,14 @@ public final class HelpHelpAction extends GuiAction {
         final JLabel helpRemarksLabel = new JLabel(helpRemarks, JLabel.CENTER);
         helpRemarksLabel.setOpaque(true);
         helpRemarksLabel.setBackground(Color.decode("0x" + helpRemarksColor));
+        helpRemarksLabel.setForeground(Color.BLACK);
         final JScrollPane operandsScrollPane = new JScrollPane(helpRemarksLabel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
             JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         helpInfo.add(operandsScrollPane, BorderLayout.NORTH);
         // Below the label is a tabbed pane with categories of MIPS help
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Basic Instructions", HelpHelpAction.createInstructionHelpPane(BasicInstruction.class));
-        tabbedPane.addTab("Extended (pseudo) Instructions",
+        tabbedPane.addTab("Extended (usePseudoInstructions) Instructions",
             HelpHelpAction.createInstructionHelpPane(ExtendedInstruction.class));
         tabbedPane.addTab("Directives", HelpHelpAction.createDirectivesHelpPane());
         tabbedPane.addTab("Syscalls", this.createSyscallsHelpPane());

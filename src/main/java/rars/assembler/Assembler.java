@@ -13,7 +13,7 @@ import rars.riscv.Instruction;
 import rars.riscv.Instructions;
 import rars.riscv.hardware.Memory;
 import rars.settings.BoolSetting;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.util.SystemIO;
 import rars.venus.NumberDisplayBaseChooser;
 
@@ -89,30 +89,30 @@ public final class Assembler {
             final ProgramStatement ps2 = instructions.get(i + 1);
             if (ps1.getAddress() == ps2.getAddress()) {
                 final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(
-                            ps2.getAddress(),
-                        (BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)) ?
-                            16 : 10);
-                        final var directiveText = (Memory.inTextSegment(ps2.getAddress()))
-                        ? ".text"
-                        : ".ktext";
+                    ps2.getAddress(),
+                    (BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)) ?
+                        16 : 10);
+                final var directiveText = (Memory.inTextSegment(ps2.getAddress()))
+                    ? ".text"
+                    : ".ktext";
                 final var message = ("Duplicate text segment address: %s already occupied by %s line %d (caused by " +
-                        "use of %s operand)").formatted(
-                        formattedAddress,
-                        ps1.getSourceFile(),
-                        ps1.getSourceLine(),
-                        directiveText);
+                    "use of %s operand)").formatted(
+                    formattedAddress,
+                    ps1.getSourceFile(),
+                    ps1.getSourceLine(),
+                    directiveText);
                 errors.add(ErrorMessage.error(ps2.getSourceProgram(),
-                        ps2.getSourceLine(),
-                        0,
-                        message
-                        ));
+                    ps2.getSourceLine(),
+                    0,
+                    message
+                ));
             }
         }
     }
 
     private static void detectLabels(final @NotNull TokenList tokens, final @NotNull Macro current) {
         if (Assembler.tokenListBeginsWithLabel(tokens))
-            current.addLabel(tokens.get(0).getValue());
+            current.addLabel(tokens.get(0).getText());
     }
 
     // Pre-process the token list for a statement by stripping off any comment.
@@ -156,7 +156,7 @@ public final class Assembler {
      *                                 different source code file, representing the
      *                                 program source.
      * @param extendedAssemblerEnabled A boolean second that if true permits use of
-     *                                 extended (pseudo)
+     *                                 extended (usePseudoInstructions)
      *                                 instructions in the source code. If false,
      *                                 these are flagged
      *                                 as errors.
@@ -293,7 +293,7 @@ public final class Assembler {
                     throw new AssemblyException(this.errors);
                 }
                 if (statement.getInstruction() instanceof final ExtendedInstruction inst) {// It is a 
-                    // pseudo-instruction:
+                    // usePseudoInstructions-instruction:
                     // 1. Fetch its basic instruction template list
                     // 2. For each template in the list,
                     // 2a. substitute operands from source statement
@@ -311,14 +311,14 @@ public final class Assembler {
                     // substituting. The next method call will perform this
                     // translation on the original
                     // source statement. Despite the fact that the original
-                    // statement is a pseudo
+                    // statement is a usePseudoInstructions
                     // instruction, this method performs the necessary
                     // translation correctly.
                     // TODO: consider making this recursive
                     final String basicAssembly = statement.getBasicAssemblyStatement();
                     final int sourceLine = statement.getSourceLine();
                     final var tokenList = Tokenizer.tokenizeLine(sourceLine,
-                            basicAssembly, this.errors, false);
+                        basicAssembly, this.errors, false);
 
                     // ////////////////////////////////////////////////////////////////////////////
                     // If we are using compact memory config and there is a compact expansion, use
@@ -334,8 +334,8 @@ public final class Assembler {
                     // relative stuff
                     for (int instrNumber = 0; instrNumber < templateList.size(); instrNumber++) {
                         final String instruction = ExtendedInstruction.makeTemplateSubstitutions(
-                                this.fileCurrentlyBeingAssembled,
-                                templateList.get(instrNumber), tokenList, PC);
+                            this.fileCurrentlyBeingAssembled,
+                            templateList.get(instrNumber), tokenList, PC);
 
                         // All substitutions have been made so we have generated
                         // a valid basic instruction!
@@ -344,15 +344,15 @@ public final class Assembler {
                         // For generated instruction: tokenize, build program
                         // statement, add to list.
                         final TokenList newTokenList = Tokenizer.tokenizeLine(sourceLine,
-                                instruction, this.errors, false);
+                            instruction, this.errors, false);
                         final var instrMatches = this.matchInstruction(newTokenList.get(0));
-                        final Instruction instr = OperandFormat.bestOperandMatch(newTokenList,
-                                instrMatches);
+                        final Instruction instr = OperandUtils.bestOperandMatch(newTokenList,
+                            instrMatches);
                         // Only first generated instruction is linked to original source
                         final ProgramStatement ps = new ProgramStatement(
-                                this.fileCurrentlyBeingAssembled,
-                                (instrNumber == 0) ? statement.getSource() : "", newTokenList,
-                                newTokenList, instr, this.textAddress, statement.getSourceLine());
+                            this.fileCurrentlyBeingAssembled,
+                            (instrNumber == 0) ? statement.getSource() : "", newTokenList,
+                            newTokenList, instr, this.textAddress, statement.getSourceLine());
                         this.textAddress += (BasicInstruction.BASIC_INSTRUCTION_LENGTH);
                         ps.buildBasicStatementFromBasicInstruction(this.errors);
                         machineList.add(ps);
@@ -408,15 +408,15 @@ public final class Assembler {
         final var tokens = program.getTokenList();
         for (final var line : tokens) {
             if (line.size() > 2 && (line.get(0).getType() == TokenType.DIRECTIVE ||
-                    line.get(2).getType() == TokenType.DIRECTIVE)) {
+                line.get(2).getType() == TokenType.DIRECTIVE)) {
                 final int dirPos = (line.get(0).getType() == TokenType.DIRECTIVE) ? 0 : 2;
-                if (Directive.matchDirective(line.get(dirPos).getValue()) == Directive.EQV) {
-                    final String symbol = line.get(dirPos + 1).getValue();
+                if (Directive.matchDirective(line.get(dirPos).getText()) == Directive.EQV) {
+                    final String symbol = line.get(dirPos + 1).getText();
                     // Symbol cannot be redefined - the only reason for this is to act like the Gnu
                     // .eqv
                     if (symbols.contains(symbol)) {
                         this.errors.addTokenError(line.get(dirPos + 1),
-                                "Symbol %s already defined in this file".formatted(symbol));
+                            "Symbol %s already defined in this file".formatted(symbol));
                     } else {
                         symbols.add(symbol);
                     }
@@ -535,9 +535,9 @@ public final class Assembler {
         // so this will catch anything, including a misspelling of a valid directive
         // (which is
         // a nice thing to do).
-        if (tokenType == TokenType.IDENTIFIER && token.getValue().charAt(0) == '.') {
+        if (tokenType == TokenType.IDENTIFIER && token.getText().charAt(0) == '.') {
             errors.addWarning(token,
-                "RARS does not recognize the %s directive. Ignored.".formatted(token.getValue()));
+                "RARS does not recognize the %s directive. Ignored.".formatted(token.getText()));
             return null;
         }
 
@@ -571,15 +571,15 @@ public final class Assembler {
             if (instrMatches == null)
                 return result;
             // OK, we've got an operator match, let's check the operands.
-            final Instruction instruction = OperandFormat.bestOperandMatch(tokens, instrMatches);
-            // Here's the place to flag use of extended (pseudo) instructions
+            final Instruction instruction = OperandUtils.bestOperandMatch(tokens, instrMatches);
+            // Here's the place to flag use of extended (usePseudoInstructions) instructions
             // when setting disabled.
             if (instruction instanceof ExtendedInstruction && !extendedAssemblerEnabled) {
                 this.errors.addTokenError(token,
-                    "Extended (pseudo) instruction or format not permitted.  See Settings" +
+                    "Extended (usePseudoInstructions) instruction or format not permitted.  See Settings" +
                         ".");
             }
-            if (OperandFormat.checkIfTokensMatchOperand(tokens, instruction, this.errors)) {
+            if (OperandUtils.checkIfTokensMatchOperand(tokens, instruction, this.errors)) {
                 final var programStatement = new ProgramStatement(this.fileCurrentlyBeingAssembled, source,
                     tokenList, tokens, instruction, this.textAddress, sourceLineNumber);
                 // instruction length is 4 for all basic instruction, varies for extended
@@ -635,103 +635,101 @@ public final class Assembler {
     /// This source code line is a directive, not a instruction. Let's carry it out.
     private void executeDirective(final @NotNull TokenList tokens) {
         final Token token = tokens.get(0);
-        final Directive direct = Directive.matchDirective(token.getValue());
+        final Directive direct = Directive.matchDirective(token.getText());
         if (Globals.debug)
             Assembler.LOGGER.debug("line {} is directive {}", token.getSourceLine(), direct);
         switch (direct) {
-            case null -> {
-                this.errors.addTokenError(token, "Unrecognized directive: %s".formatted(token.getValue()));
-                    }
+            case null -> this.errors.addTokenError(token, "Unrecognized directive: %s".formatted(token.getText()));
             case EQV -> {
                 // Do nothing. This was vetted and processed during tokenizing.
             }
             case MACRO -> {
                 if (tokens.size() < 2) {
-                    final var message = "\"%s\" directive requires at least one argument.".formatted(token.getValue());
+                    final var message = "\"%s\" directive requires at least one argument.".formatted(token.getText());
                     this.errors.addTokenError(token, message);
                     return;
                 }
                 final var nextToken = tokens.get(1);
                 if (nextToken.getType() != TokenType.IDENTIFIER) {
-                    this.errors.addTokenError(nextToken, "Invalid Macro name \"%s\"".formatted(nextToken.getValue()));
+                    this.errors.addTokenError(nextToken, "Invalid Macro name \"%s\"".formatted(nextToken.getText()));
                     return;
                 }
                 if (this.inMacroSegment) {
                     this.errors.addTokenError(token, "Nested macros are not allowed");
-                return;
-            }
-            this.inMacroSegment = true;
-            final MacroPool pool = this.fileCurrentlyBeingAssembled.getLocalMacroPool();
-            pool.beginMacro(tokens.get(1));
-            for (int i = 2; i < tokens.size(); i++) {
-                final Token arg = tokens.get(i);
-                if (arg.getType() == TokenType.RIGHT_PAREN
-                    || arg.getType() == TokenType.LEFT_PAREN)
-                    continue;
-                if (!Macro.tokenIsMacroParameter(arg.getValue(), true)) {
-                    this.errors.addTokenError(
-                        arg, "Invalid macro argument '%s'".formatted(arg.getValue()));
+                    return;
+                }
+                this.inMacroSegment = true;
+                final MacroPool pool = this.fileCurrentlyBeingAssembled.getLocalMacroPool();
+                pool.beginMacro(tokens.get(1));
+                for (int i = 2; i < tokens.size(); i++) {
+                    final Token arg = tokens.get(i);
+                    if (arg.getType() == TokenType.RIGHT_PAREN
+                        || arg.getType() == TokenType.LEFT_PAREN)
+                        continue;
+                    if (!Macro.tokenIsMacroParameter(arg.getText(), true)) {
+                        this.errors.addTokenError(
+                            arg, "Invalid macro argument '%s'".formatted(arg.getText()));
                         return;
                     }
-                    pool.getCurrent().addArg(arg.getValue());
+                    pool.getCurrent().addArg(arg.getText());
                 }
             }
             case END_MACRO -> {
                 if (tokens.size() > 1) {
                     this.errors.addTokenError(
-                    token, "invalid text after .END_MACRO");
+                        token, "invalid text after .END_MACRO");
                     return;
                 }
                 if (!this.inMacroSegment) {
                     this.errors.addTokenError(
-                    token, ".END_MACRO without .MACRO");
+                        token, ".END_MACRO without .MACRO");
                     return;
                 }
                 this.inMacroSegment = false;
                 this.fileCurrentlyBeingAssembled.getLocalMacroPool().commitMacro(token);
             }
-            case Directive ignored when this.inMacroSegment -> {
+            case final Directive ignored when this.inMacroSegment -> {
                 // should not parse lines even directives in macro segment
             }
             case DATA -> {
                 this.inDataSegment = true;
                 this.autoAlign = true;
                 if (tokens.size() > 1 && TokenType.isIntegerTokenType(tokens.get(1).getType())) {
-                    this.dataAddress = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
+                    this.dataAddress = BinaryUtils.stringToInt(tokens.get(1).getText()); // KENV 1/6/05
                 }
             }
             case TEXT -> {
                 this.inDataSegment = false;
                 if (tokens.size() > 1 && TokenType.isIntegerTokenType(tokens.get(1).getType())) {
-                    this.textAddress = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
+                    this.textAddress = BinaryUtils.stringToInt(tokens.get(1).getText()); // KENV 1/6/05
                 }
             }
             case SECTION -> {
                 if (tokens.size() >= 2) {
                     final Token section = tokens.get(1);
                     if (section.getType() == TokenType.QUOTED_STRING || section.getType() == TokenType.IDENTIFIER) {
-                        final String str = section.getValue();
+                        final String str = section.getText();
                         if (str.startsWith(".data") || str.startsWith(".rodata") || str.startsWith(".sdata")) {
                             this.inDataSegment = true;
                         } else if (str.startsWith(".text")) {
                             this.inDataSegment = false;
                         } else {
                             final var message =
-                            "section name \"%s\" is ignored".formatted(str);
+                                "section name \"%s\" is ignored".formatted(str);
                             errors.addWarning(token, message);
                         }
                     } else {
                         this.errors.addTokenError(token,
-                        ".section must be followed by a section name .");
+                            ".section must be followed by a section name .");
                     }
                 } else {
                     errors.addWarning(
-                    token,
-                    ".section without arguments is ignored");
+                        token,
+                        ".section without arguments is ignored");
                 }
             }
-            case WORD,HALF
-            , BYTE,FLOAT
+            case WORD, HALF
+            , BYTE, FLOAT
             , DOUBLE, DWORD -> {
                 this.dataDirective = direct;
                 if (this.passesDataSegmentCheck(token) && tokens.size() > 1) { // DPS
@@ -747,23 +745,23 @@ public final class Assembler {
             }
             case ALIGN -> {
                 if (tokens.size() != 2) {
-                    this.errors.addTokenError(token, "\"%s\" requires one operand".formatted(token.getValue()));
-                return;
-            }
-            if (!TokenType.isIntegerTokenType(tokens.get(1).getType())
-                || Binary.stringToInt(tokens.get(1).getValue()) < 0) {
-                this.errors.addTokenError(token,
-                     "\"%s\" requires a non-negative integer".formatted(token.getValue()));
-                return;
-            }
-            final int value = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
-            if (value < 2 && !this.inDataSegment) {
-                this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(),
-                    token.getStartPos(),
-                    "Alignments less than 4 bytes are not supported in the text section. The alignment has " +
-                                    "been " +
-                        "rounded up to 4 bytes."));
-                this.dataAddress= this.alignToBoundary(this.dataAddress, 4);
+                    this.errors.addTokenError(token, "\"%s\" requires one operand".formatted(token.getText()));
+                    return;
+                }
+                if (!TokenType.isIntegerTokenType(tokens.get(1).getType())
+                    || BinaryUtils.stringToInt(tokens.get(1).getText()) < 0) {
+                    this.errors.addTokenError(token,
+                        "\"%s\" requires a non-negative integer".formatted(token.getText()));
+                    return;
+                }
+                final int value = BinaryUtils.stringToInt(tokens.get(1).getText()); // KENV 1/6/05
+                if (value < 2 && !this.inDataSegment) {
+                    this.errors.add(new ErrorMessage(true, token.getSourceProgram(), token.getSourceLine(),
+                        token.getStartPos(),
+                        "Alignments less than 4 bytes are not supported in the text section. The alignment has " +
+                            "been " +
+                            "rounded up to 4 bytes."));
+                    this.dataAddress = this.alignToBoundary(this.dataAddress, 4);
                 } else if (value == 0) {
                     this.autoAlign = false;
                 } else {
@@ -775,42 +773,43 @@ public final class Assembler {
                 // .space 90, 1 should fill memory with 90 bytes with the values 1
                 if (this.passesDataSegmentCheck(token)) {
                     if (tokens.size() != 2) {
-                        this.errors.addTokenError(token, "\"%s\" requires one operand".formatted(token.getValue()));
-                    return;
-                }
-                if (!TokenType.isIntegerTokenType(tokens.get(1).getType())
-                    || Binary.stringToInt(tokens.get(1).getValue()) < 0) {
-                    this.errors.addTokenError(token,
-                        "\"%s\" requires a non-negative integer".formatted(token.getValue()));
+                        this.errors.addTokenError(token, "\"%s\" requires one operand".formatted(token.getText()));
                         return;
                     }
-                    final int value = Binary.stringToInt(tokens.get(1).getValue()); // KENV 1/6/05
+                    if (!TokenType.isIntegerTokenType(tokens.get(1).getType())
+                        || BinaryUtils.stringToInt(tokens.get(1).getText()) < 0) {
+                        this.errors.addTokenError(token,
+                            "\"%s\" requires a non-negative integer".formatted(token.getText()));
+                        return;
+                    }
+                    final int value = BinaryUtils.stringToInt(tokens.get(1).getText()); // KENV 1/6/05
                     this.dataAddress += value;
                 }
             }
             case EXTERN -> {
                 if (tokens.size() != 3) {
                     this.errors.addTokenError(token, "\"%s\" directive requires two operands (label and size)."
-                            .formatted(token.getValue()));
-                return;
-            }
-            if (!TokenType.isIntegerTokenType(tokens.get(2).getType())
-                || Binary.stringToInt(tokens.get(2).getValue()) < 0) {
-                this.errors.addTokenError(token,
-                     "\"%s\" requires a non-negative integer size".formatted(token.getValue()));
-                return;
-            }
-            final int size = Binary.stringToInt(tokens.get(2).getValue());
-            // If label already in global symtab, do nothing. If not, add it right now.
-            if (Globals.symbolTable.getAddress(tokens.get(1).getValue()) == SymbolTable.NOT_FOUND) {
-                Globals.symbolTable.addSymbol(tokens.get(1), this.externAddress,
-                    true, this.errors);
-                this.externAddress += size;}
+                        .formatted(token.getText()));
+                    return;
+                }
+                if (!TokenType.isIntegerTokenType(tokens.get(2).getType())
+                    || BinaryUtils.stringToInt(tokens.get(2).getText()) < 0) {
+                    this.errors.addTokenError(token,
+                        "\"%s\" requires a non-negative integer size".formatted(token.getText()));
+                    return;
+                }
+                final int size = BinaryUtils.stringToInt(tokens.get(2).getText());
+                // If label already in global symtab, do nothing. If not, add it right now.
+                if (Globals.symbolTable.getAddress(tokens.get(1).getText()) == SymbolTable.NOT_FOUND) {
+                    Globals.symbolTable.addSymbol(tokens.get(1), this.externAddress,
+                        true, this.errors);
+                    this.externAddress += size;
+                }
             }
             case GLOBL, GLOBAL -> {
                 if (tokens.size() < 2) {
                     this.errors.addTokenError(token,
-                    "\"%s\" directive requires at least one argument.".formatted(token.getValue()));
+                        "\"%s\" directive requires at least one argument.".formatted(token.getText()));
                     return;
                 }
                 // SPIM limits .globl list to one label, why not extend it to a list?
@@ -821,16 +820,17 @@ public final class Assembler {
                     final Token label = tokens.get(i);
                     if (label.getType() != TokenType.IDENTIFIER) {
                         this.errors.addTokenError(token,
-                        "\"%s\" directive argument must be label.".formatted(token.getValue()));
+                            "\"%s\" directive argument must be label.".formatted(token.getText()));
                         return;
                     }
                     this.globalDeclarationList.add(label);
                 }
             }
-            default -> {
-                this.errors.addTokenError(token,
-                "Directive \"%s\" recognized but not yet implemented.".formatted(token.getValue()));
-            }
+            default -> this.errors.addTokenError(
+                token,
+                "Directive \"%s\" recognized but not yet implemented.".formatted(
+                    token.getText()
+                ));
         }
     } // executeDirective()
 
@@ -841,21 +841,21 @@ public final class Assembler {
         for (int i = 0; i < this.globalDeclarationList.size(); i++) {
             final Token label = this.globalDeclarationList.get(i);
             final Symbol symtabEntry = this.fileCurrentlyBeingAssembled.getLocalSymbolTable().getSymbol(
-                label.getValue());
+                label.getText());
             if (symtabEntry == null) {
                 this.errors.addTokenError(label,
-                     "Label \"%s\" declared global but not defined.".formatted(label.getValue()));
+                    "Label \"%s\" declared global but not defined.".formatted(label.getText()));
                 // TODO: allow this case, but check later to see if all requested globals are
                 // actually implemented in other files
                 // GCC outputs assembly that uses this
             } else {
-                if (Globals.symbolTable.getAddress(label.getValue()) != SymbolTable.NOT_FOUND) {
+                if (Globals.symbolTable.getAddress(label.getText()) != SymbolTable.NOT_FOUND) {
                     this.errors.addTokenError(label, "Label \"%s\" already defined as global in a different file."
-                            .formatted(label.getValue()));
+                        .formatted(label.getText()));
                 } else {
                     this.fileCurrentlyBeingAssembled.getLocalSymbolTable().removeSymbol(label);
-                    Globals.symbolTable.addSymbol(label, symtabEntry.address,
-                        symtabEntry.isData, this.errors);
+                    Globals.symbolTable.addSymbol(label, symtabEntry.address(),
+                        symtabEntry.isData(), this.errors);
                 }
             }
         }
@@ -882,18 +882,18 @@ public final class Assembler {
     private @Nullable List<Instruction> matchInstruction(final @NotNull Token token) {
         if (token.getType() != TokenType.OPERATOR) {
             if (token.getSourceProgram().getLocalMacroPool()
-                .matchesAnyMacroName(token.getValue()))
+                .matchesAnyMacroName(token.getText()))
                 this.errors.addTokenError(token,
-                    "forward reference or invalid parameters for macro \"%s\"".formatted(token.getValue()));
+                    "forward reference or invalid parameters for macro \"%s\"".formatted(token.getText()));
             else
-                this.errors.addTokenError(token, "Expected operator, found \"%s\"".formatted( token.getValue()
-                        ));
+                this.errors.addTokenError(token, "Expected operator, found \"%s\"".formatted(token.getText()
+                ));
             return null;
         }
-        final List<Instruction> instructions = Instructions.matchOperator(token.getValue());
+        final List<Instruction> instructions = Instructions.matchOperator(token.getText());
         if (instructions.isEmpty()) { // This should NEVER happen...
             this.errors.addTokenError(token, ("Internal Assembler error: \"%s\" tokenized OPERATOR then not " +
-                    "recognized").formatted(token.getValue()));
+                "recognized").formatted(token.getText()));
             return null;
         }
         return instructions;
@@ -934,9 +934,9 @@ public final class Assembler {
                     "malformed expression");
                 return;
             }
-            final int repetitions = Binary.stringToInt(repetitionsToken.getValue()); // KENV 1/6/05
+            final int repetitions = BinaryUtils.stringToInt(repetitionsToken.getText()); // KENV 1/6/05
             if (repetitions <= 0) {
-                errors.addTokenError( repetitionsToken
+                errors.addTokenError(repetitionsToken
                     ,
                     "repetition factor must be positive");
                 return;
@@ -979,18 +979,18 @@ public final class Assembler {
             int value;
             final long longvalue;
             if (TokenType.INTEGER_64 == token.getType()) {
-                longvalue = Binary.stringToLong(token.getValue());
+                longvalue = BinaryUtils.stringToLong(token.getText());
                 value = (int) longvalue;
                 if (directive != Directive.DWORD) {
                     final var message = "second %s is out-of-range and truncated to %s"
-                            .formatted(
-                                    Binary.longToHexString(longvalue),
-                                    Binary.intToHexString(value)
-                            );
+                        .formatted(
+                            BinaryUtils.longToHexString(longvalue),
+                            BinaryUtils.intToHexString(value)
+                        );
                     errors.addTokenError(token, message);
                 }
             } else {
-                value = Binary.stringToInt(token.getValue());
+                value = BinaryUtils.stringToInt(token.getText());
                 longvalue = value;
             }
 
@@ -1014,9 +1014,9 @@ public final class Assembler {
             if (DataTypes.outOfRange(directive, fullvalue)) {
                 errors.addWarning(
                     token,
-                     "second %s is out-of-range and truncated to %s"
-                                .formatted(Binary.intToHexString(fullvalue),
-                                        Binary.intToHexString(value)));
+                    "second %s is out-of-range and truncated to %s"
+                        .formatted(BinaryUtils.intToHexString(fullvalue),
+                            BinaryUtils.intToHexString(value)));
             }
             if (this.inDataSegment) {
                 this.writeToDataSegment(value, lengthInBytes, token, errors);
@@ -1046,7 +1046,7 @@ public final class Assembler {
         else if (token.getType() == TokenType.IDENTIFIER) {
             if (this.inDataSegment) {
                 final int value = this.fileCurrentlyBeingAssembled.getLocalSymbolTable()
-                    .getAddressLocalOrGlobal(token.getValue());
+                    .getAddressLocalOrGlobal(token.getText());
                 if (value == SymbolTable.NOT_FOUND) {
                     // Record second 0 for now, then set up backpatch entry
                     final int dataAddress = this.writeToDataSegment(0, lengthInBytes, token, errors);
@@ -1058,11 +1058,11 @@ public final class Assembler {
             // See 11/20/06 note above.
             else {
                 errors.addTokenError(token, "\"%s\" label as directive operand not permitted in text segment"
-                        .formatted(token.getValue()));
+                    .formatted(token.getText()));
             }
         } // end of "if label"
         else {
-            errors.addTokenError(token, "\"%s\" is not a valid integer constant or label".formatted(token.getValue()));
+            errors.addTokenError(token, "\"%s\" is not a valid integer constant or label".formatted(token.getText()));
         }
     }// storeInteger
 
@@ -1073,26 +1073,26 @@ public final class Assembler {
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
         final double value;
 
-        if (token.getValue().equals("Inf")) {
+        if (token.getText().equals("Inf")) {
             value = Float.POSITIVE_INFINITY;
-        } else if (token.getValue().equals("-Inf")) {
+        } else if (token.getText().equals("-Inf")) {
             value = Float.NEGATIVE_INFINITY;
         } else if (TokenType.isIntegerTokenType(token.getType())
             || TokenType.isFloatingTokenType(token.getType())) {
 
             try {
-                value = Double.parseDouble(token.getValue());
+                value = Double.parseDouble(token.getText());
             } catch (final NumberFormatException nfe) {
                 errors.addTokenError(token,
-                    "\"%s\" is not a valid floating point constant".formatted(token.getValue()));
+                    "\"%s\" is not a valid floating point constant".formatted(token.getText()));
                 return;
             }
             if (DataTypes.outOfRange(directive, value)) {
-                errors.addTokenError(token, "\"%s\" is an out-of-range second".formatted(token.getValue()));
+                errors.addTokenError(token, "\"%s\" is an out-of-range second".formatted(token.getText()));
                 return;
             }
         } else {
-            final var message = "\"%s\" is not a valid floating point constant".formatted(token.getValue());
+            final var message = "\"%s\" is not a valid floating point constant".formatted(token.getText());
             errors.addTokenError(token, message);
             return;
         }
@@ -1103,7 +1103,7 @@ public final class Assembler {
             this.writeToDataSegment(Float.floatToIntBits((float) value), lengthInBytes, token, errors);
         }
         if (directive == Directive.DOUBLE) {
-            this.writeDoubleToDataSegment(value, token, errors);
+            this.writeDoubleToDataSegment(value, token);
         }
 
     } // storeRealNumber
@@ -1122,9 +1122,9 @@ public final class Assembler {
             token = tokens.get(i);
             if (token.getType() != TokenType.QUOTED_STRING) {
                 errors.addTokenError(token, "\"%s\" is not a valid character string"
-                        .formatted(token.getValue()));
+                    .formatted(token.getText()));
             } else {
-                final String quote = token.getValue();
+                final String quote = token.getText();
                 char theChar;
                 for (int j = 1; j < quote.length() - 1; j++) {
                     theChar = quote.charAt(j);
@@ -1165,11 +1165,11 @@ public final class Assembler {
                                     final var message = (
                                         "unicode escape \"\\u%s\" is incomplete." +
                                             " Only escapes with 4 digits are valid.")
-                                            .formatted(invalidCodePoint);
+                                        .formatted(invalidCodePoint);
                                     errors.addTokenError(token, message);
                                 } catch (final NumberFormatException e) {
                                     errors.addTokenError(token,
-                                        
+
                                         "illegal unicode escape: \"\\u%s\"".formatted(codePoint));
                                 }
                                 j = j + 4; // skip past the codepoint for next iteration
@@ -1210,7 +1210,7 @@ public final class Assembler {
     // Simply check to see if we are in data segment. Generate error if not.
     private boolean passesDataSegmentCheck(final Token token) {
         if (!this.inDataSegment) {
-            final var message = "\"%s\" directive cannot appear in text segment".formatted(token.getValue());
+            final var message = "\"%s\" directive cannot appear in text segment".formatted(token.getText());
             this.errors.addTokenError(token, message);
             return false;
         } else {
@@ -1245,7 +1245,7 @@ public final class Assembler {
      * point values -- Memory class doesn't have method for writing 8 bytes, so
      * use setWord twice.
      */
-    private void writeDoubleToDataSegment(final double value, final Token token, final ErrorList errors) {
+    private void writeDoubleToDataSegment(final double value, final @NotNull Token token) {
         final int lengthInBytes = DataTypes.DOUBLE_SIZE;
         if (this.autoAlign) {
             this.dataAddress = (this.alignToBoundary(this.dataAddress, lengthInBytes));
@@ -1337,7 +1337,7 @@ public final class Assembler {
             DataSegmentForwardReference entry;
             for (int i = 0; i < this.forwardReferenceList.size(); i++) {
                 entry = this.forwardReferenceList.get(i);
-                labelAddress = localSymtab.getAddressLocalOrGlobal(entry.token.getValue());
+                labelAddress = localSymtab.getAddressLocalOrGlobal(entry.token.getText());
                 if (labelAddress != SymbolTable.NOT_FOUND) {
                     // patch address has to be valid b/c we already stored there...
                     try {
@@ -1355,7 +1355,7 @@ public final class Assembler {
         private void generateErrorMessages(final ErrorList errors) {
             for (final DataSegmentForwardReference entry : this.forwardReferenceList) {
                 final var message = "Symbol \"%s\" not found in symbol table."
-                        .formatted(entry.token().getValue());
+                    .formatted(entry.token().getText());
                 errors.addTokenError(entry.token(), message);
             }
         }

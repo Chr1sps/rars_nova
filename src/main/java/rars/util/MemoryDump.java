@@ -2,7 +2,10 @@ package rars.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import rars.riscv.hardware.Memory;
+
+import java.util.List;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -37,9 +40,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * <p>MemoryDump class.</p>
  */
 public final class MemoryDump {
-    private static final String[] segmentNames = {".text", ".data"};
-    private static final int[] baseAddresses = new int[2];
-    private static final int[] limitAddresses = new int[2];
+    public static @NotNull
+    @Unmodifiable List<@NotNull SegmentInfo> SEGMENTS = List.of(
+        new SegmentInfo(".text", Memory.textBaseAddress, Memory.textLimitAddress),
+        new SegmentInfo(".data", Memory.dataBaseAddress, Memory.dataSegmentLimitAddress)
+    );
 
     private MemoryDump() {
     }
@@ -53,48 +58,14 @@ public final class MemoryDump {
      * name does not match a known segment name.
      */
     public static @Nullable Pair<Integer, Integer> getSegmentBounds(final @NotNull String segment) {
-        for (int i = 0; i < segmentNames.length; i++) {
-            if (segmentNames[i].equals(segment)) {
-                return new Pair<>(getBaseAddresses(segmentNames)[i], getLimitAddresses(segmentNames)[i]);
-            }
-        }
-        return null;
+        return SEGMENTS.stream()
+            .filter(s -> s.name().equals(segment))
+            .findFirst()
+            .map(s -> new Pair<>(s.baseAddress(), s.limitAddress()))
+            .orElse(null);
     }
 
-    /**
-     * Get the names of segments available for memory dump.
-     *
-     * @return array of Strings, each string is segment name (e.g. ".text", ".data")
-     */
-    public static String[] getSegmentNames() {
-        return segmentNames;
+    public record SegmentInfo(@NotNull String name, int baseAddress, int limitAddress) {
     }
 
-    /**
-     * Get the base address(es) of the specified segment name(s).
-     * If invalid segment name is provided, will throw NullPointerException, so
-     * I recommend getting segment names from getSegmentNames().
-     *
-     * @param segments Array of Strings containing segment names (".text", ".data")
-     * @return Array of int containing corresponding base addresses.
-     */
-    public static int[] getBaseAddresses(final String[] segments) {
-        baseAddresses[0] = Memory.textBaseAddress;
-        baseAddresses[1] = Memory.dataBaseAddress;
-        return baseAddresses;
-    }
-
-    /**
-     * Get the limit address(es) of the specified segment name(s).
-     * If invalid segment name is provided, will throw NullPointerException, so
-     * I recommend getting segment names from getSegmentNames().
-     *
-     * @param segments Array of Strings containing segment names (".text", ".data")
-     * @return Array of int containing corresponding limit addresses.
-     */
-    public static int[] getLimitAddresses(final String[] segments) {
-        limitAddresses[0] = Memory.textLimitAddress;
-        limitAddresses[1] = Memory.dataSegmentLimitAddress;
-        return limitAddresses;
-    }
 }

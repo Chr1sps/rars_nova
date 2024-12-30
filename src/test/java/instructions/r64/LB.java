@@ -209,18 +209,18 @@ public class LB extends AbstractInstructionTest {
         runLbTest("tdat", "0(x1)", "0xffffffffffffffff");
     }
 
-    private void runLbTest(String first, String second, String result) {
+    private void runLbTest(final String first, final String second, final String result) {
         final var data = """
-                tdat:
-                tdat1: .byte 0xff
-                tdat2: .byte 0x00
-                tdat3: .byte 0xf0
-                tdat4: .byte 0x0f
-                """;
+            tdat:
+            tdat1: .byte 0xff
+            tdat2: .byte 0x00
+            tdat3: .byte 0xf0
+            tdat4: .byte 0x0f
+            """;
         final var code = "la x1, " + first + "\n" +
-                "lb x14, " + second + "\n" +
-                "li x7, " + result + "\n" +
-                "bne x14, x7, fail\n";
+            "lb x14, " + second + "\n" +
+            "li x7, " + result + "\n" +
+            "bne x14, x7, fail\n";
         runTest64(code, data);
     }
 }

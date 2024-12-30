@@ -22,7 +22,7 @@ public final class CJAL extends CompressedInstruction {
 
     private CJAL() {
         super("c.jal offset", "Compressed jump and link: Set t1 to Program Counter (return address) then jump to " +
-                "statement at target address", CompressedInstructionFormat.CJ_FORMAT, "001 fffffffffff 01");
+            "statement at target address", CompressedInstructionFormat.CJ, "001 fffffffffff 01");
     }
 
     @Override

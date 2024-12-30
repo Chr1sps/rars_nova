@@ -1,6 +1,9 @@
 package rars.riscv.lang.lexing;
 
 import org.jetbrains.annotations.NotNull;
+import rars.ErrorList;
+import rars.ErrorMessage;
+import rars.RISCVProgram;
 import rars.riscv.lang.Position;
 
 import javax.swing.text.Segment;
@@ -9,15 +12,27 @@ import java.util.List;
 
 public class RVTokensProducer implements TokensProducer<TokenizedLine> {
     private final Lexer<TokenizedLine, RVTokensProducer> lexer;
-    private ArrayList<RVToken> result;
+    private final @NotNull RISCVProgram program;
+    private final @NotNull ErrorList errorList;
+    private @NotNull ArrayList<@NotNull RVToken> result;
     private int lineNum;
 
-    public RVTokensProducer(Lexer<TokenizedLine, RVTokensProducer> lexer) {
+    public RVTokensProducer(
+        final @NotNull Lexer<TokenizedLine, RVTokensProducer> lexer,
+        final @NotNull RISCVProgram program,
+        final @NotNull ErrorList errorList
+    ) {
         this.lexer = lexer;
+        this.program = program;
+        this.errorList = errorList;
+        this.result = new ArrayList<>();
     }
 
-    public RVTokensProducer() {
-        this(new RVLexer<>());
+    public RVTokensProducer(
+        final @NotNull RISCVProgram program,
+        final @NotNull ErrorList errorList
+    ) {
+        this(new RVLexer<>(), program, errorList);
     }
 
     @Override
@@ -26,18 +41,26 @@ public class RVTokensProducer implements TokensProducer<TokenizedLine> {
     }
 
     @Override
-    public TokenizedLine getTokenList(Segment text, int initialTokenType, int lineOffset, int lineNum) {
+    public TokenizedLine getTokenList(final Segment text, final int initialTokenType, final int lineOffset,
+                                      final int lineNum) {
         this.result = new ArrayList<>();
         this.lineNum = lineNum;
         return lexer.getTokensList(text, initialTokenType, lineOffset, this);
     }
 
     @Override
-    public void addToken(char @NotNull [] array, int start, int end, RVTokenType tokenType, int startOffset) {
+    public void addToken(final char @NotNull [] array, final int start, final int end, final RVTokenType tokenType,
+                         final int startOffset) {
         final var position = new Position(this.lineNum, start, startOffset);
         final var substring = new String(array, start, end - start);
         final var newToken = new RVToken(position, tokenType, substring);
         result.add(newToken);
+    }
+
+    @Override
+    public void addErrorToken(final char[] array, final int segmentPos, final int offset, final String notice) {
+        this.errorList.add(ErrorMessage.error(this.program, this.lineNum, offset, notice));
+        TokensProducer.super.addErrorToken(array, segmentPos, offset, notice);
     }
 
     @Override

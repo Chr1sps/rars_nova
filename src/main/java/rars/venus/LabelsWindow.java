@@ -7,7 +7,7 @@ import rars.RISCVProgram;
 import rars.assembler.Symbol;
 import rars.assembler.SymbolTable;
 import rars.riscv.hardware.Memory;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.venus.run.RunAssembleAction;
 
 import javax.swing.*;
@@ -262,7 +262,7 @@ public class LabelsWindow extends JInternalFrame {
             }
             int address = 0;
             try {
-                address = Binary.stringToInt((String) data);
+                address = BinaryUtils.stringToInt((String) data);
             } catch (final NumberFormatException nfe) {
                 // Cannot happen because address is generated internally.
             } catch (final ClassCastException cce) {
@@ -356,7 +356,7 @@ public class LabelsWindow extends JInternalFrame {
     private static class LabelNameAscendingComparator implements Comparator<Symbol> {
         @Override
         public int compare(final Symbol a, final Symbol b) {
-            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+            return a.name().toLowerCase().compareTo(b.name().toLowerCase());
         }
     }
     ////////////////////// end of LabelsForOneSymbolTable class //////////////////
@@ -374,8 +374,8 @@ public class LabelsWindow extends JInternalFrame {
     private static class LabelAddressAscendingComparator implements Comparator<Symbol> {
         @Override
         public int compare(final Symbol a, final Symbol b) {
-            final int addrA = a.address;
-            final int addrB = b.address;
+            final int addrA = a.address();
+            final int addrB = b.address();
             return (addrA >= 0 && addrB >= 0 || addrA < 0 && addrB < 0) ? addrA - addrB : addrB;
         }
     }
@@ -455,8 +455,8 @@ public class LabelsWindow extends JInternalFrame {
 
             for (int i = 0; i < this.symbols.size(); i++) {// sets up the label table
                 final Symbol s = this.symbols.get(i);
-                this.labelData[i][LabelsWindow.LABEL_COLUMN] = s.name;
-                this.labelData[i][LabelsWindow.ADDRESS_COLUMN] = NumberDisplayBaseChooser.formatNumber(s.address,
+                this.labelData[i][LabelsWindow.LABEL_COLUMN] = s.name();
+                this.labelData[i][LabelsWindow.ADDRESS_COLUMN] = NumberDisplayBaseChooser.formatNumber(s.address(),
                     addressBase);
             }
             final LabelTableModel m = new LabelTableModel(this.labelData, LabelsWindow.columnNames);
@@ -477,7 +477,7 @@ public class LabelsWindow extends JInternalFrame {
             String formattedAddress;
             final int numSymbols = (this.labelData == null) ? 0 : this.labelData.length;
             for (int i = 0; i < numSymbols; i++) {
-                address = this.symbols.get(i).address;
+                address = this.symbols.get(i).address();
                 formattedAddress = NumberDisplayBaseChooser.formatNumber(address, addressBase);
                 this.labelTable.getModel().setValueAt(formattedAddress, i, LabelsWindow.ADDRESS_COLUMN);
             }

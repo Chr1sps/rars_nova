@@ -33,14 +33,11 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Represents a program identifier to be stored in the symbol table.
  *
+ * @param isData boolean true if data symbol false if text symbol.
  * @author Jason Bumgarner, Jason Shrewsbury
  * @version June 2003
  */
-public final class Symbol {
-    public final @NotNull String name;
-    public final boolean isData; // boolean true if data symbol false if text symbol.
-    public int address;
-
+public record Symbol(@NotNull String name, int address, boolean isData) {
     /**
      * Basic constructor, creates a symbol object.
      *
@@ -48,9 +45,6 @@ public final class Symbol {
      * @param address The memroy address that the Symbol refers to.
      * @param isData  true if it represents data, false if code.
      */
-    public Symbol(@NotNull final String name, final int address, final boolean isData) {
-        this.name = name;
-        this.address = address;
-        this.isData = isData;
+    public Symbol {
     }
 }

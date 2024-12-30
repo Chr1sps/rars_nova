@@ -32,10 +32,13 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      *                          display in file save dialog or to be used as tool
      *                          tip.
      */
-    public AbstractDumpFormat(final String name, final String commandDescriptor,
-                              final String description) {
+    public AbstractDumpFormat(
+        final @NotNull String name,
+        final @NotNull String commandDescriptor,
+        final @NotNull String description
+    ) {
         this.name = name;
-        this.commandDescriptor = (commandDescriptor == null) ? null : commandDescriptor.replaceAll(" ", "");
+        this.commandDescriptor = commandDescriptor.replaceAll(" ", "");
         this.description = description;
     }
 
@@ -60,7 +63,8 @@ public abstract class AbstractDumpFormat implements DumpFormat {
     }
 
     @Override
-    public abstract void dumpMemoryRange(@NotNull File file, int firstAddress, int lastAddress, @NotNull Memory memory)
-            throws AddressErrorException, IOException;
+    public abstract void dumpMemoryRange(final @NotNull File file, int firstAddress, int lastAddress,
+                                         @NotNull Memory memory)
+        throws AddressErrorException, IOException;
 
 }

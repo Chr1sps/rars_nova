@@ -16,11 +16,11 @@ import static rars.settings.BoolSettings.BOOL_SETTINGS;
 public abstract class AbstractCompressedInstructionTest {
 
     protected void doTest(
-            final @NotNull String code,
-            final boolean isRV64,
-            final boolean hasErrors
+        final @NotNull String code,
+        final boolean isRV64,
+        final boolean hasErrors
     ) {
-        
+
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64);
         Instructions.RV64 = isRV64;
 
@@ -46,7 +46,7 @@ public abstract class AbstractCompressedInstructionTest {
             System.out.println();
 
         } catch (final AssemblyException e) {
-            errorList = e.errors();
+            errorList = e.errors;
         }
 
         final var report = errorList.generateErrorAndWarningReport();
@@ -79,8 +79,8 @@ public abstract class AbstractCompressedInstructionTest {
     }
 
     private void assertErrors(
-            final @NotNull List<ErrorEntry> expectedErrors,
-            final @NotNull ErrorList errorList
+        final @NotNull List<ErrorEntry> expectedErrors,
+        final @NotNull ErrorList errorList
     ) {
         final var errors = errorList.getErrorMessages();
         if (errors.size() != expectedErrors.size()) {
@@ -92,7 +92,7 @@ public abstract class AbstractCompressedInstructionTest {
             final var actual = errors.get(i);
             if (expected.line() != actual.getLine() || expected.position() != actual.getPosition()) {
                 fail("Expected error at line " + expected.line() + " position " + expected.position() +
-                        ", but got error at line " + actual.getLine() + " position " + actual.getPosition());
+                    ", but got error at line " + actual.getLine() + " position " + actual.getPosition());
             }
         }
     }

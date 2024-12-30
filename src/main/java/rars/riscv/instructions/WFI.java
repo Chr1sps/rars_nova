@@ -5,6 +5,8 @@ import rars.exceptions.WaitException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
+import static rars.exceptions.WaitException.WAIT_EXCEPTION;
+
 /*
 Copyright (c) 2017,  Benjamin Landers
 
@@ -43,7 +45,7 @@ public final class WFI extends BasicInstruction {
      */
     private WFI() {
         super("wfi", "Wait for Interrupt",
-                BasicInstructionFormat.I_FORMAT, "000100000101 00000 000 00000 1110011");
+            BasicInstructionFormat.I_FORMAT, "000100000101 00000 000 00000 1110011");
     }
 
     /**
@@ -51,6 +53,6 @@ public final class WFI extends BasicInstruction {
      */
     @Override
     public void simulate(final ProgramStatement statement) throws WaitException {
-        throw WaitException.INSTANCE;
+        throw WAIT_EXCEPTION;
     }
 }

@@ -1,7 +1,7 @@
 package rars.exceptions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -40,7 +40,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class AddressErrorException extends Exception {
     public final int address;
-    public final @NotNull ExceptionReason reason; // SimulationException.(STORE|LOAD|INSTRUCTION)_(ADDRESS_MISALIGNED|ACCESS_FAULT)
+    public final @NotNull ExceptionReason reason; // SimulationException.(STORE|LOAD|INSTRUCTION)_
+    // (ADDRESS_MISALIGNED|ACCESS_FAULT)
 
     /**
      * Constructor for the AddressErrorException class
@@ -49,8 +50,9 @@ public final class AddressErrorException extends Exception {
      * @param message    a {@link java.lang.String} object
      * @param exceptType a int
      */
-    public AddressErrorException(final @NotNull String message, final @NotNull ExceptionReason exceptType, final int addr) {
-        super(message + Binary.intToHexString(addr));
+    public AddressErrorException(final @NotNull String message, final @NotNull ExceptionReason exceptType,
+                                 final int addr) {
+        super(message + BinaryUtils.intToHexString(addr));
         address = addr;
         switch (exceptType) {
             case INSTRUCTION_ACCESS_FAULT, INSTRUCTION_ADDR_MISALIGNED, LOAD_ACCESS_FAULT, LOAD_ADDRESS_MISALIGNED,

@@ -11,9 +11,7 @@ import rars.util.PropertiesFile;
 import rars.venus.VenusUI;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.locks.ReentrantLock;
 
 /*
@@ -106,16 +104,15 @@ public final class Globals {
      *
      * @return ArrayList of SyscallNumberOverride objects
      */
-    public static @NotNull List<SyscallNumberOverride> getSyscallOverrides() {
-        final ArrayList<SyscallNumberOverride> overrides = new ArrayList<>();
-        final Properties properties = PropertiesFile.loadPropertiesFromFile(Globals.syscallPropertiesFile);
-        final Enumeration<Object> keys = properties.keys();
-        while (keys.hasMoreElements()) {
-            final String key = (String) keys.nextElement();
-            final String property = properties.getProperty(key).trim();
+    public static @NotNull List<@NotNull SyscallNumberOverride> getSyscallOverrides() {
+        final var overrides = new ArrayList<SyscallNumberOverride>();
+        final var properties = PropertiesFile.loadPropertiesFromFile(Globals.syscallPropertiesFile);
+        for (final var key : properties.keySet()) {
+            final String stringKey = (String) key;
+            final String property = properties.getProperty(stringKey).trim();
             try {
                 final int value = Integer.parseInt(property);
-                overrides.add(new SyscallNumberOverride(key, value));
+                overrides.add(new SyscallNumberOverride(stringKey, value));
             } catch (final NumberFormatException e) {
                 LOGGER.fatal("Error processing Syscall number override: '{}' is not a valid integer", property);
                 System.exit(0);

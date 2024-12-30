@@ -7,10 +7,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -41,23 +42,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
- * Creats a table of Symbol objects.
+ * Represents a table of Symbol objects.
  *
  * @author Jason Bumgarner, Jason Shrewsbury
  * @version June 2003
  */
 public final class SymbolTable {
-    /**
-     * Constant <code>NOT_FOUND=-1</code>
-     */
-    public static final int NOT_FOUND = -1;
-    private static final @NotNull Logger LOGGER = LogManager.getLogger();
-    private static final @NotNull String startLabel = "main";
-    private final @NotNull String filename;
     // Note -1 is legal 32-bit address (0xFFFFFFFF) but it is the high address in
     // kernel address space so highly unlikely that any symbol will have this as
     // its associated address!
-    private @NotNull ArrayList<Symbol> table;
+    public static final int NOT_FOUND = -1;
+    private static final @NotNull Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull String START_LABEL = "main";
+    private final @NotNull String filename;
+    private @NotNull ArrayList<@NotNull Symbol> table;
 
     /**
      * Create a new empty symbol table for given file
@@ -79,7 +77,7 @@ public final class SymbolTable {
      * address for program execution.
      */
     public static @NotNull String getStartLabel() {
-        return SymbolTable.startLabel;
+        return SymbolTable.START_LABEL;
     }
 
     /**
@@ -87,19 +85,23 @@ public final class SymbolTable {
      *
      * @param token   The token representing the Symbol.
      * @param address The address of the Symbol.
-     * @param b       The type of Symbol, true for data, false for text.
+     * @param isData  The type of Symbol, true for data, false for text.
      * @param errors  List to which to add any processing errors that occur.
      */
-    public void addSymbol(final @NotNull Token token, final int address, final boolean b,
-                          final @NotNull ErrorList errors) {
-        final String label = token.getValue();
+    public void addSymbol(
+        final @NotNull Token token,
+        final int address,
+        final boolean isData,
+        final @NotNull ErrorList errors
+    ) {
+        final var label = token.getText();
         if (this.getSymbol(label) != null) {
             errors.addTokenError(token, "label \"%s\" already defined".formatted(label));
         } else {
-            this.table.add(new Symbol(label, address, b));
+            this.table.add(new Symbol(label, address, isData));
             if (Globals.debug)
                 SymbolTable.LOGGER.debug("The symbol {} with address {} has been added to the {} symbol table.",
-                        label, address, this.filename);
+                    label, address, this.filename);
         }
     }
 
@@ -111,32 +113,29 @@ public final class SymbolTable {
      * @param token The token representing the Symbol.
      */
     public void removeSymbol(final @NotNull Token token) {
-        final String label = token.getValue();
-        for (int i = 0; i < this.table.size(); i++) {
-            if (this.table.get(i).name.equals(label)) {
-                this.table.remove(i);
-                if (Globals.debug)
-                    SymbolTable.LOGGER.debug("The symbol {} has been removed from the {} symbol table.", label,
-                            this.filename);
-                break;
-            }
+        final var label = token.getText();
+        final var removed = this.table.removeIf(symbol ->
+            symbol.name().equals(label)
+        );
+        if (removed && Globals.debug) {
+            SymbolTable.LOGGER.debug("The symbol {} has been removed from the {} symbol table.", label, this.filename);
         }
     }
 
     /**
      * Method to return the address associated with the given label.
      *
-     * @param s The label.
+     * @param label The label.
      * @return The memory address of the label given, or NOT_FOUND if not found in
      * symbol table.
      */
-    public int getAddress(final @NotNull String s) {
-        for (final Symbol sym : this.table) {
-            if (sym.name.equals(s)) {
-                return sym.address;
-            }
-        }
-        return SymbolTable.NOT_FOUND;
+    public int getAddress(final @NotNull String label) {
+        return this.table
+            .stream()
+            .filter(symbol -> symbol.name().equals(label))
+            .findAny()
+            .map(Symbol::address)
+            .orElse(SymbolTable.NOT_FOUND);
     }
 
     /**
@@ -144,13 +143,15 @@ public final class SymbolTable {
      * in this (local) symbol table then in symbol table of labels declared
      * global (.globl directive).
      *
-     * @param s The label.
+     * @param label The label.
      * @return The memory address of the label given, or NOT_FOUND if not found in
      * symbol table.
      */
-    public int getAddressLocalOrGlobal(final @NotNull String s) {
-        final int address = this.getAddress(s);
-        return (address == SymbolTable.NOT_FOUND) ? Globals.symbolTable.getAddress(s) : address;
+    public int getAddressLocalOrGlobal(final @NotNull String label) {
+        final int address = this.getAddress(label);
+        return (address == SymbolTable.NOT_FOUND)
+            ? Globals.symbolTable.getAddress(label)
+            : address;
     }
 
     /**
@@ -161,32 +162,30 @@ public final class SymbolTable {
      * table.
      */
     public @Nullable Symbol getSymbol(final @NotNull String s) {
-        for (final Symbol sym : this.table) {
-            if (sym.name.equals(s)) {
-                return sym;
-            }
-        }
-        return null;
+        return this.table.stream()
+            .filter(symbol -> symbol.name().equals(s))
+            .findAny()
+            .orElse(null);
     }
 
     /**
      * Produce Symbol object from symbol table that has the given address.
      *
-     * @param s String representing address
+     * @param addressString String representing address
      * @return Symbol object having requested address, null if address not found in
      * symbol table.
      */
-    public @Nullable Symbol getSymbolGivenAddress(final @NotNull String s) {
+    public @Nullable Symbol getSymbolGivenAddress(final @NotNull String addressString) {
         final int address;
         try {
-            address = Binary.stringToInt(s);// DPS 2-Aug-2010: was Integer.parseInt(s) but
+            address = BinaryUtils.stringToInt(addressString);// DPS 2-Aug-2010: was Integer.parseInt(s) but
             // croaked
             // on hex
         } catch (final NumberFormatException e) {
             return null;
         }
         for (final Symbol sym : this.table) {
-            if (sym.address == address) {
+            if (sym.address() == address) {
                 return sym;
             }
         }
@@ -211,8 +210,8 @@ public final class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      */
-    public @NotNull List<Symbol> getDataSymbols() {
-        return table.stream().filter(symbol -> symbol.isData).toList();
+    public @NotNull List<@NotNull Symbol> getDataSymbols() {
+        return table.stream().filter(Symbol::isData).toList();
     }
 
     /**
@@ -220,8 +219,8 @@ public final class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      */
-    public @NotNull List<Symbol> getTextSymbols() {
-        return table.stream().filter(symbol -> !symbol.isData).toList();
+    public @NotNull List<@NotNull Symbol> getTextSymbols() {
+        return table.stream().filter(Predicate.not(Symbol::isData)).toList();
     }
 
     /**
@@ -263,11 +262,11 @@ public final class SymbolTable {
      *                           do.
      */
     public void fixSymbolTableAddress(final int originalAddress, final int replacementAddress) {
-        // TODO: make it not work through reference
-        var label = this.getSymbolGivenAddress(Integer.toString(originalAddress));
-        while (label != null) {
-            label.address = replacementAddress;
-            label = this.getSymbolGivenAddress(Integer.toString(originalAddress));
-        }
+        this.table.replaceAll(symbol -> {
+            if (symbol.address() == originalAddress) {
+                return new Symbol(symbol.name(), replacementAddress, symbol.isData());
+            }
+            return symbol;
+        });
     }
 }

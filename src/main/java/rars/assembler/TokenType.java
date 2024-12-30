@@ -4,9 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import rars.riscv.Instructions;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -132,21 +131,17 @@ public enum TokenType {
             return TokenType.MACRO_PARAMETER;
 
         // See if it is a register
-        Register reg = RegisterFile.getRegister(value);
-        if (reg != null)
+        if (RegisterFile.getRegister(value) != null)
             if (value.startsWith("x"))
                 return TokenType.REGISTER_NUMBER;
             else
                 return TokenType.REGISTER_NAME;
         // See if it is a floating point register
 
-        reg = FloatingPointRegisterFile.getRegister(value);
-        if (reg != null)
+        if (FloatingPointRegisterFile.getRegister(value) != null)
             return TokenType.FP_REGISTER_NAME;
 
-        // Little bit of a hack because CSRFile doesn't supoprt getRegister(strinug)
-        reg = ControlAndStatusRegisterFile.getRegister(value);
-        if (reg != null)
+        if (ControlAndStatusRegisterFile.getRegister(value) != null)
             return TokenType.CSR_NAME;
         // See if it is an immediate (constant) integer second
         // Classify based on # bits needed to represent in binary
@@ -155,7 +150,7 @@ public enum TokenType {
 
         try {
 
-            final int i = Binary.stringToInt(value); // KENV 1/6/05
+            final int i = BinaryUtils.stringToInt(value); // KENV 1/6/05
 
             // Comments from 2008 and 2005 were removed - Benjamin Landers 2019
 
@@ -181,7 +176,7 @@ public enum TokenType {
         }
 
         try {
-            Binary.stringToLong(value);
+            BinaryUtils.stringToLong(value);
             return TokenType.INTEGER_64;
         } catch (final NumberFormatException e) {
             // NO ACTION -- exception suppressed
@@ -234,8 +229,8 @@ public enum TokenType {
      */
     public static boolean isIntegerTokenType(final TokenType type) {
         return type == TokenType.INTEGER_5 || type == TokenType.INTEGER_6 || type == TokenType.INTEGER_12 ||
-                type == TokenType.INTEGER_12U || type == TokenType.INTEGER_20 || type == TokenType.INTEGER_32 ||
-                type == TokenType.INTEGER_64;
+            type == TokenType.INTEGER_12U || type == TokenType.INTEGER_20 || type == TokenType.INTEGER_32 ||
+            type == TokenType.INTEGER_64;
     }
 
     /**
@@ -256,11 +251,11 @@ public enum TokenType {
      */
     public static boolean isValidIdentifier(final String value) {
         boolean result = (Character.isLetter(value.charAt(0)) || value.charAt(0) == '_' || value.charAt(0) == '.'
-                || value.charAt(0) == '$');
+            || value.charAt(0) == '$');
         int index = 1;
         while (result && index < value.length()) {
             if (!(Character.isLetterOrDigit(value.charAt(index)) || value.charAt(index) == '_'
-                    || value.charAt(index) == '.' || value.charAt(index) == '$'))
+                || value.charAt(index) == '.' || value.charAt(index) == '$'))
                 result = false;
             index++;
         }

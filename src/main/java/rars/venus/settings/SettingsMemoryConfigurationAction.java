@@ -5,7 +5,7 @@ import rars.Globals;
 import rars.riscv.hardware.CurrentMemoryConfiguration;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.simulator.Simulator;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
 
@@ -291,12 +291,12 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             // extraction.
             final TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
             for (int i = 0; i < configurationItemValues.length; i++) {
-                treeSortedByAddress.put(Binary.intToHexString(configurationItemValues[i]) + configurationItemNames[i],
+                treeSortedByAddress.put(BinaryUtils.intToHexString(configurationItemValues[i]) + configurationItemNames[i],
                     configurationItemNames[i]);
             }
             final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();
             Map.Entry<String, String> pair;
-            final int addressStringLength = Binary.intToHexString(configurationItemValues[0]).length();
+            final int addressStringLength = BinaryUtils.intToHexString(configurationItemValues[0]).length();
             for (int i = 0; i < configurationItemValues.length; i++) {
                 pair = setSortedByAddress.next();
                 this.nameDisplay[i].setText(pair.getValue());

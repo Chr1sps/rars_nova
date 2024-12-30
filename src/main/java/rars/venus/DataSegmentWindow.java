@@ -13,7 +13,7 @@ import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
-import rars.util.Binary;
+import rars.util.BinaryUtils;
 import rars.util.SimpleSubscriber;
 import rars.venus.run.RunSpeedPanel;
 import rars.venus.util.RepeatButton;
@@ -231,7 +231,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final String[] baseAddressChoices = new String[baseAddressArray.length];
         for (int i = 0; i < baseAddressChoices.length; i++) {
             baseAddressChoices[i] = ((baseAddressArray[i] != -1)
-                ? Binary.intToHexString(baseAddressArray[i])
+                ? BinaryUtils.intToHexString(baseAddressArray[i])
                 : "")
                 + descriptions[i];
         }
@@ -357,7 +357,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
         final int addressRow = rowColumn.x;
         this.addressColumn = rowColumn.y;
-        this.addressRowFirstAddress = Binary
+        this.addressRowFirstAddress = BinaryUtils
             .stringToInt(DataSegmentWindow.dataTable.getValueAt(addressRow, DataSegmentWindow.ADDRESS_COLUMN).toString());
         // System.out.println("Address "+Binary.intToHexString(address)+" becomes row "+
         // addressRow + " column "+addressColumn+
@@ -745,17 +745,17 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.globButton.setToolTipText("View range around global pointer");
         this.stakButton.setToolTipText("View range around stack pointer");
         this.heapButton.setToolTipText("View range around heap base address " +
-            Binary.intToHexString(Memory.heapBaseAddress));
+            BinaryUtils.intToHexString(Memory.heapBaseAddress));
         this.extnButton.setToolTipText("View range around static global base address " +
-            Binary.intToHexString(Memory.externBaseAddress));
+            BinaryUtils.intToHexString(Memory.externBaseAddress));
         this.mmioButton.setToolTipText("View range around MMIO base address " +
-            Binary.intToHexString(Memory.memoryMapBaseAddress));
+            BinaryUtils.intToHexString(Memory.memoryMapBaseAddress));
         this.textButton.setToolTipText("View range around program code " +
-            Binary.intToHexString(Memory.textBaseAddress));
+            BinaryUtils.intToHexString(Memory.textBaseAddress));
         this.prevButton.setToolTipText("View next lower address range; hold down for rapid fire");
         this.nextButton.setToolTipText("View next higher address range; hold down for rapid fire");
         this.dataButton.setToolTipText("View range around static data segment base address " +
-            Binary.intToHexString(Memory.dataBaseAddress));
+            BinaryUtils.intToHexString(Memory.dataBaseAddress));
 
         // add the action listeners to maintain button state and table contents
         // Currently there is no memory upper bound so next button always enabled.
@@ -1013,7 +1013,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             final int val;
             int address = 0;
             try {
-                val = Binary.stringToInt((String) value);
+                val = BinaryUtils.stringToInt((String) value);
             } catch (final NumberFormatException nfe) {
                 this.data[row][col] = "INVALID";
                 this.fireTableCellUpdated(row, col);
@@ -1023,7 +1023,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             // calculate address from row and column
             try {
                 address =
-                    Binary.stringToInt((String) this.data[row][DataSegmentWindow.ADDRESS_COLUMN]) + (col - 1) * DataSegmentWindow.BYTES_PER_VALUE; // KENV
+                    BinaryUtils.stringToInt((String) this.data[row][DataSegmentWindow.ADDRESS_COLUMN]) + (col - 1) * DataSegmentWindow.BYTES_PER_VALUE; // KENV
                 // 1/6/05
             } catch (final NumberFormatException nfe) {
                 // can't really happen since memory addresses are completely under
@@ -1075,7 +1075,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
 
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
             final int rowFirstAddress =
-                Binary.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
+                BinaryUtils.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
             final var theme = EDITOR_THEME_SETTINGS.currentTheme;
             final var defaultFont = FONT_SETTINGS.getCurrentFont();
             if (/*DataSegmentWindow.this.settings.getBoolSettings().getSetting(BoolSetting.DATA_SEGMENT_HIGHLIGHTING)
