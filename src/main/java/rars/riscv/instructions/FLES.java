@@ -36,31 +36,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>FLES class.</p>
- */
 public final class FLES extends BasicInstruction {
     public static final FLES INSTANCE = new FLES();
 
-    /**
-     * <p>Constructor for FLES.</p>
-     */
     private FLES() {
-        super("fle.s t1, f1, f2", "Floating Less than or Equals: if f1 <= f2, set t1 to 1, else set t1 to 0",
-                BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 000 fffff 1010011");
+        super(
+            "fle.s t1, f1, f2", "Floating Less than or Equals: if f1 <= f2, set t1 to 1, else set t1 to 0",
+            BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 000 fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        final Float32 f1 = Floating.getFloat(operands[1]);
-        final Float32 f2 = Floating.getFloat(operands[2]);
+
+        final Float32 f1 = Floating.getFloat(statement.getOperand(1));
+        final Float32 f2 = Floating.getFloat(statement.getOperand(2));
         final Environment e = new Environment();
         final boolean result = Comparisons.compareSignalingLessThanEqual(f1, f2, e);
         Floating.setfflags(e);
-        RegisterFile.updateRegister(operands[0], result ? 1 : 0);
+        RegisterFile.updateRegister(statement.getOperand(0), result ? 1 : 0);
     }
 }

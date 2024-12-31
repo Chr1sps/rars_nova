@@ -1,18 +1,44 @@
 package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
-import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 import rars.riscv.SimulationCallback;
 import rars.util.BinaryUtils;
 
 public final class CompressedStackBasedStore extends CompressedInstruction {
-    //    public static final @NotNull CompressedStackBasedStore CSWSP = new CompressedStackBasedStore(
-//
-//    );
-    private final @NotNull SimulationCallback callback;
+    public static final @NotNull CompressedStackBasedStore CFSDSP = new CompressedStackBasedStore(
+        "c.fsdsp f1, -100(sp)",
+        "Store a floating point double from f1 to memory at address relative to the stack pointer",
+        0b101,
+        statement -> {
+            // TODO: implement
+        }
+    );
+    public static final @NotNull CompressedStackBasedStore CSWSP = new CompressedStackBasedStore(
+        "c.swsp t1, -100(sp)",
+        "Store word from t1 to memory at address relative to the stack pointer",
+        0b110,
+        statement -> {
+            // TODO: implement
+        }
+    );
+    public static final @NotNull CompressedStackBasedStore CSDSP = new CompressedStackBasedStore(
+        "c.sdsp t1, -100(sp)",
+        "Store a double word from t1 to memory at address relative to the stack pointer",
+        0b111,
+        statement -> {
+            // TODO: implement
+        }
+    );
+    public static final @NotNull CompressedStackBasedStore CFSWSP = new CompressedStackBasedStore(
+        "c.fswsp f1, -100(sp)",
+        "Store a floating point word from f1 to memory at address relative to the stack pointer",
+        0b111,
+        statement -> {
+            // TODO: implement
+        }
+    );
 
     private CompressedStackBasedStore(
         final @NotNull String example,
@@ -24,16 +50,11 @@ public final class CompressedStackBasedStore extends CompressedInstruction {
             example,
             description,
             CompressedInstructionFormat.CL,
-            BinaryUtils.intToBinaryString(opcode, 3) + " sss ttt ss fff 00"
+            BinaryUtils.intToBinaryString(opcode, 3) + "ssssss fffff 10",
+            callback
         );
-        this.callback = callback;
         if (opcode < 0 || opcode > 0b111) {
             throw new IllegalArgumentException("Invalid opcode");
         }
-    }
-
-    @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        callback.simulate(statement);
     }
 }

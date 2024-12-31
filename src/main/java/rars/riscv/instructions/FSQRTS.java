@@ -37,31 +37,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>FSQRTS class.</p>
- */
 public final class FSQRTS extends BasicInstruction {
     public static final FSQRTS INSTANCE = new FSQRTS();
 
-    /**
-     * <p>Constructor for FSQRTS.</p>
-     */
     private FSQRTS() {
-        super("fsqrt.s f1, f2, dyn", "Floating SQuare RooT: Assigns f1 to the square root of f2",
-                BasicInstructionFormat.I_FORMAT, "0101100 00000 sssss ttt fffff 1010011");
+        super(
+            "fsqrt.s f1, f2, dyn", "Floating SQuare RooT: Assigns f1 to the square root of f2",
+            BasicInstructionFormat.I_FORMAT, "0101100 00000 sssss ttt fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[2], statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float32 result = Arithmetic
-                .squareRoot(new Float32(FloatingPointRegisterFile.getValue(operands[1])), e);
+            .squareRoot(new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1))), e);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(operands[0], result.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
     }
 }

@@ -10,32 +10,33 @@ import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 
-/**
- * <p>FCVTSD class.</p>
- */
 public final class FCVTSD extends BasicInstruction {
     public static final FCVTSD INSTANCE = new FCVTSD();
 
-    /**
-     * <p>Constructor for FCVTSD.</p>
-     */
     private FCVTSD() {
-        super("fcvt.s.d f1, f2, dyn", "Convert a double to a float: Assigned the second of f2 to f1",
-                BasicInstructionFormat.R4_FORMAT, "0100000 00001 sssss ttt fffff 1010011");
+        super(
+            "fcvt.s.d f1, f2, dyn", "Convert a double to a float: Assigned the second of f2 to f1",
+            BasicInstructionFormat.R4_FORMAT, "0100000 00001 sssss ttt fffff 1010011"
+        );
     }
 
     /**
      * <p>convert.</p>
      *
-     * @param toconvert   a D object
-     * @param constructor a S object
-     * @param e           a {@link Environment} object
-     * @param <S>         a S class
-     * @param <D>         a D class
+     * @param toconvert
+     *     a D object
+     * @param constructor
+     *     a S object
+     * @param e
+     *     a {@link Environment} object
+     * @param <S>
+     *     a S class
+     * @param <D>
+     *     a D class
      * @return a S object
      */
     public static <S extends rars.jsoftfloat.types.Floating<S>, D extends rars.jsoftfloat.types.Floating<D>> S convert(
-            @NotNull final D toconvert, @NotNull final S constructor, final Environment e) {
+        @NotNull final D toconvert, @NotNull final S constructor, final Environment e) {
         if (toconvert.isInfinite()) {
             return toconvert.isSignMinus() ? constructor.NegativeInfinity() : constructor.Infinity();
         }
@@ -51,18 +52,15 @@ public final class FCVTSD extends BasicInstruction {
     // Kindof a long type, but removes duplicate code and would make it easy for
     // quads to be implemented.
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
+
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[2], statement);
-        final Float64 in = new Float64(FloatingPointRegisterFile.getValueLong(operands[1]));
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        final Float64 in = new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(1)));
         Float32 out = new Float32(0);
         out = convert(in, out, e);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(operands[0], out.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), out.bits);
     }
 }

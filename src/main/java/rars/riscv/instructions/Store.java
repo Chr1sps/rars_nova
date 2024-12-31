@@ -42,29 +42,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public abstract class Store extends BasicInstruction {
-    /**
-     * <p>Constructor for Store.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct       a {@link java.lang.String} object
-     */
     public Store(@NotNull final String usage, final String description, final String funct) {
-        super(usage, description, BasicInstructionFormat.S_FORMAT,
-                "sssssss fffff ttttt " + funct + " sssss 0100011");
+        super(
+            usage,
+            description,
+            BasicInstructionFormat.S_FORMAT,
+            "sssssss fffff ttttt " + funct + " sssss 0100011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
-        operands[1] = (operands[1] << 20) >> 20;
+        final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            store(RegisterFile.getValue(operands[2]) + operands[1], RegisterFile.getValueLong(operands[0]));
+            store(
+                RegisterFile.getValue(statement.getOperand(2)) + upperImmediate,
+                RegisterFile.getValueLong(statement.getOperand(0))
+            );
         } catch (final AddressErrorException e) {
-            throw new SimulationException(statement, e);
+            throw new SimulationException(
+                statement,
+                e
+            );
         }
     }
 

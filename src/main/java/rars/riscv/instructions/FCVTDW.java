@@ -13,32 +13,25 @@ import rars.riscv.hardware.RegisterFile;
 
 import java.math.BigInteger;
 
-/**
- * <p>FCVTDW class.</p>
- */
 public final class FCVTDW extends BasicInstruction {
     public static final FCVTDW INSTANCE = new FCVTDW();
 
-    /**
-     * <p>Constructor for FCVTDW.</p>
-     */
     private FCVTDW() {
-        super("fcvt.d.w f1, t1, dyn", "Convert double from integer: Assigns the second of t1 to f1",
-                BasicInstructionFormat.I_FORMAT, "1101001 00000 sssss ttt fffff 1010011");
+        super(
+            "fcvt.d.w f1, t1, dyn", "Convert double from integer: Assigns the second of t1 to f1",
+            BasicInstructionFormat.I_FORMAT, "1101001 00000 sssss ttt fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
+
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[2], statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float64 tmp = new Float64(0);
         final Float64 converted = Conversions
-                .convertFromInt(BigInteger.valueOf(RegisterFile.getValue(operands[1])), e, tmp);
+            .convertFromInt(BigInteger.valueOf(RegisterFile.getValue(statement.getOperand(1))), e, tmp);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterLong(operands[0], converted.bits);
+        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), converted.bits);
     }
 }

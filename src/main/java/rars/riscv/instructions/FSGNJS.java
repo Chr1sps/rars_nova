@@ -33,29 +33,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>FSGNJS class.</p>
- */
 public final class FSGNJS extends BasicInstruction {
     public static final FSGNJS INSTANCE = new FSGNJS();
 
-    /**
-     * <p>Constructor for FSGNJS.</p>
-     */
     private FSGNJS() {
-        super("fsgnj.s f1, f2, f3",
-                "Floating point sign injection: replace the sign bit of f2 with the sign bit of f3 and assign it to f1",
-                BasicInstructionFormat.R_FORMAT, "0010000 ttttt sssss 000 fffff 1010011");
+        super(
+            "fsgnj.s f1, f2, f3",
+            "Floating point sign injection: replace the sign bit of f2 with the sign bit of f3 and assign it to f1",
+            BasicInstructionFormat.R_FORMAT, "0010000 ttttt sssss 000 fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        final int result = (FloatingPointRegisterFile.getValue(operands[1]) & 0x7FFFFFFF)
-                | (FloatingPointRegisterFile.getValue(operands[2]) & 0x80000000);
-        FloatingPointRegisterFile.updateRegister(operands[0], result);
+        final int result = (FloatingPointRegisterFile.getValue(statement.getOperand(1)) & 0x7FFFFFFF)
+            | (FloatingPointRegisterFile.getValue(statement.getOperand(2)) & 0x80000000);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result);
     }
 }

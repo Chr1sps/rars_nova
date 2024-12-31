@@ -1,8 +1,6 @@
 package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
-import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 
@@ -14,12 +12,10 @@ public final class CSLLI extends CompressedInstruction {
             "c.slli t1, 100",
             "",
             CompressedInstructionFormat.CI,
-            "000  10"
+            "000 s fffff ssss 10",
+            operands -> {
+                // TODO: Implement
+            }
         );
-    }
-
-    @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        // TODO: implement
     }
 }

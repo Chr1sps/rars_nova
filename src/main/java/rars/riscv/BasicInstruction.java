@@ -20,14 +20,10 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * instruction sizes defined in the specification are nor supported.
      */
     public static final int BASIC_INSTRUCTION_LENGTH = 4;
-
-    /**
-     * Constant <code>INSTRUCTION_LENGTH_BITS=32</code>
-     */
     public static final int BASIC_INSTRUCTION_LENGTH_BITS = 32;
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private final BasicInstructionFormat instructionFormat;
+    private final @NotNull BasicInstructionFormat instructionFormat;
     private final @NotNull String operationMask;
 
     private final int opcodeMask; // integer with 1's where constants required (0/1 become 1, f/s/t become 0)
@@ -36,13 +32,17 @@ public abstract non-sealed class BasicInstruction extends Instruction {
     /**
      * BasicInstruction constructor.
      *
-     * @param example     An example usage of the instruction, as a String.
-     * @param instrFormat The format is R, I, I-branch or J.
-     * @param operMask    The opcode mask is a 32 character string that contains the
-     *                    opcode in binary in the appropriate bit positions and
-     *                    codes for operand positions ('f', 's', 't') in the
-     *                    remainding positions.
-     * @param description a {@link java.lang.String} object
+     * @param example
+     *     An example usage of the instruction, as a String.
+     * @param instrFormat
+     *     The format is R, I, I-branch or J.
+     * @param operMask
+     *     The opcode mask is a 32 character string that contains the
+     *     opcode in binary in the appropriate bit positions and
+     *     codes for operand positions ('f', 's', 't') in the
+     *     remainding positions.
+     * @param description
+     *     a {@link java.lang.String} object
      */
     /*
      * codes for operand positions are:
@@ -64,10 +64,10 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * instruction simulator -- it needs to match all and only the 0's and 1's.
      */
     protected BasicInstruction(
-            final @NotNull String example,
-            final String description,
-            final BasicInstructionFormat instrFormat,
-            final @NotNull String operMask
+        final @NotNull String example,
+        final String description,
+        final @NotNull BasicInstructionFormat instrFormat,
+        final @NotNull String operMask
     ) {
         super(example, description);
         this.instructionFormat = instrFormat;
@@ -104,7 +104,7 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      *
      * @return The machine instruction format, R, I, J or I-branch.
      */
-    public BasicInstructionFormat getInstructionFormat() {
+    public @NotNull BasicInstructionFormat getInstructionFormat() {
         return this.instructionFormat;
     }
 
@@ -134,10 +134,12 @@ public abstract non-sealed class BasicInstruction extends Instruction {
     /**
      * Method to simulate the execution of a specific MIPS basic instruction.
      *
-     * @param statement A ProgramStatement representing the MIPS instruction to
-     *                  simulate.
-     * @throws SimulationException This is a run-time exception generated during
-     *                             simulation.
+     * @param statement
+     *     A ProgramStatement representing the MIPS instruction to
+     *     simulate.
+     * @throws SimulationException
+     *     This is a run-time exception generated during
+     *     simulation.
      */
     public abstract void simulate(ProgramStatement statement) throws SimulationException;
 }

@@ -13,32 +13,25 @@ import rars.riscv.hardware.RegisterFile;
 
 import java.math.BigInteger;
 
-/**
- * <p>FCVTSL class.</p>
- */
 public final class FCVTSL extends BasicInstruction {
     public static final FCVTSL INSTANCE = new FCVTSL();
 
-    /**
-     * <p>Constructor for FCVTSL.</p>
-     */
     private FCVTSL() {
-        super("fcvt.s.l f1, t1, dyn", "Convert float from long: Assigns the second of t1 to f1",
-                BasicInstructionFormat.I_FORMAT, "1101000 00010 sssss ttt fffff 1010011");
+        super(
+            "fcvt.s.l f1, t1, dyn", "Convert float from long: Assigns the second of t1 to f1",
+            BasicInstructionFormat.I_FORMAT, "1101000 00010 sssss ttt fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
+
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[2], statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float32 tmp = new Float32(0);
         final Float32 converted = Conversions
-                .convertFromInt(BigInteger.valueOf(RegisterFile.getValueLong(operands[1])), e, tmp);
+            .convertFromInt(BigInteger.valueOf(RegisterFile.getValueLong(statement.getOperand(1))), e, tmp);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(operands[0], converted.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), converted.bits);
     }
 }

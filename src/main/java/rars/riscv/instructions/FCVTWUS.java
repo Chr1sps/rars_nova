@@ -38,31 +38,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>FCVTWUS class.</p>
- */
 public final class FCVTWUS extends BasicInstruction {
     public static final FCVTWUS INSTANCE = new FCVTWUS();
 
-    /**
-     * <p>Constructor for FCVTWUS.</p>
-     */
     private FCVTWUS() {
-        super("fcvt.wu.s t1, f1, dyn", "Convert unsinged integer from float: Assigns the second of f1 (rounded) to t1",
-                BasicInstructionFormat.I_FORMAT, "1100000 00001 sssss ttt fffff 1010011");
+        super(
+            "fcvt.wu.s t1, f1, dyn", "Convert unsinged integer from float: Assigns the second of f1 (rounded) to t1",
+            BasicInstructionFormat.I_FORMAT, "1100000 00001 sssss ttt fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
+
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[2], statement);
-        final Float32 in = new Float32(FloatingPointRegisterFile.getValue(operands[1]));
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        final Float32 in = new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1)));
         final int out = Conversions.convertToUnsignedInt(in, e, false);
         Floating.setfflags(e);
-        RegisterFile.updateRegister(operands[0], out);
+        RegisterFile.updateRegister(statement.getOperand(0), out);
     }
 }

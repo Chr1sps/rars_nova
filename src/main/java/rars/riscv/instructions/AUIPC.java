@@ -33,27 +33,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>AUIPC class.</p>
- */
 public final class AUIPC extends BasicInstruction {
     public static final AUIPC INSTANCE = new AUIPC();
 
-    /**
-     * <p>Constructor for AUIPC.</p>
-     */
     private AUIPC() {
-        super("auipc t1,100000", "Add upper immediate to pc: set t1 to (pc plus an upper 20-bit immediate)",
-                BasicInstructionFormat.U_FORMAT, "ssssssssssssssssssss fffff 0010111");
+        super(
+            "auipc t1,100000", "Add upper immediate to pc: set t1 to (pc plus an upper 20-bit immediate)",
+            BasicInstructionFormat.U_FORMAT, "ssssssssssssssssssss fffff 0010111"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        RegisterFile.updateRegister(operands[0],
-                RegisterFile.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + ((long) operands[1] << 12));
+        RegisterFile.updateRegister(
+            statement.getOperand(0),
+            RegisterFile.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + ((long) statement.getOperand(1) << 12)
+        );
     }
 }

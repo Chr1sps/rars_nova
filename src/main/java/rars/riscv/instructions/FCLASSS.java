@@ -36,21 +36,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>FCLASSS class.</p>
- */
 public final class FCLASSS extends BasicInstruction {
     public static final FCLASSS INSTANCE = new FCLASSS();
 
-    /**
-     * <p>Constructor for FCLASSS.</p>
-     */
     private FCLASSS() {
-        super("fclass.s t1, f1", "Classify a floating point number",
-                BasicInstructionFormat.I_FORMAT, "1110000 00000 sssss 001 fffff 1010011");
+        super(
+            "fclass.s t1, f1", "Classify a floating point number",
+            BasicInstructionFormat.I_FORMAT, "1110000 00000 sssss 001 fffff 1010011"
+        );
     }
 
-    /*
+    /**
      * Sets the one bit in t1 for every number
      * 0 t1 is −infinity.
      * 1 t1 is a negative normal number.
@@ -62,14 +58,6 @@ public final class FCLASSS extends BasicInstruction {
      * 7 t1 is +infinity.
      * 8 t1 is a signaling NaN (Not implemented due to Java).
      * 9 t1 is a quiet NaN.
-     */
-
-    /**
-     * <p>fclass.</p>
-     *
-     * @param in  a T object
-     * @param out a int
-     * @param <T> a T class
      */
     public static <T extends Floating<T>> void fclass(@NotNull final T in, final int out) {
         if (in.isNaN()) {
@@ -88,13 +76,9 @@ public final class FCLASSS extends BasicInstruction {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        final Float32 in = new Float32(FloatingPointRegisterFile.getValue(operands[1]));
-        fclass(in, operands[0]);
+        final Float32 in = new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1)));
+        fclass(in, statement.getOperand(0));
     }
 }

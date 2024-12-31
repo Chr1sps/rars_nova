@@ -10,32 +10,24 @@ import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 
-/**
- * <p>FCVTDS class.</p>
- */
 public final class FCVTDS extends BasicInstruction {
     public static final FCVTDS INSTANCE = new FCVTDS();
 
-    /**
-     * <p>Constructor for FCVTDS.</p>
-     */
     private FCVTDS() {
-        super("fcvt.d.s f1, f2, dyn", "Convert a float to a double: Assigned the second of f2 to f1",
-                BasicInstructionFormat.R4_FORMAT, "0100001 00000 sssss ttt fffff 1010011");
+        super(
+            "fcvt.d.s f1, f2, dyn", "Convert a float to a double: Assigned the second of f2 to f1",
+            BasicInstructionFormat.R4_FORMAT, "0100001 00000 sssss ttt fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[2], statement);
-        final Float32 in = new Float32(FloatingPointRegisterFile.getValue(operands[1]));
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        final Float32 in = new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1)));
         Float64 out = new Float64(0);
         out = FCVTSD.convert(in, out, e);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterLong(operands[0], out.bits);
+        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), out.bits);
     }
 }

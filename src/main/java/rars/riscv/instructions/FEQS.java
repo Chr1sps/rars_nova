@@ -36,31 +36,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>FEQS class.</p>
- */
 public final class FEQS extends BasicInstruction {
     public static final FEQS INSTANCE = new FEQS();
 
-    /**
-     * <p>Constructor for FEQS.</p>
-     */
     private FEQS() {
-        super("feq.s t1, f1, f2", "Floating EQuals: if f1 = f2, set t1 to 1, else set t1 to 0",
-                BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 010 fffff 1010011");
+        super(
+            "feq.s t1, f1, f2", "Floating EQuals: if f1 = f2, set t1 to 1, else set t1 to 0",
+            BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 010 fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        final Float32 f1 = Floating.getFloat(operands[1]);
-        final Float32 f2 = Floating.getFloat(operands[2]);
+
+        final Float32 f1 = Floating.getFloat(statement.getOperand(1));
+        final Float32 f2 = Floating.getFloat(statement.getOperand(2));
         final Environment e = new Environment();
         final boolean result = Comparisons.compareQuietEqual(f1, f2, e);
         Floating.setfflags(e);
-        RegisterFile.updateRegister(operands[0], result ? 1 : 0);
+        RegisterFile.updateRegister(statement.getOperand(0), result ? 1 : 0);
     }
 }

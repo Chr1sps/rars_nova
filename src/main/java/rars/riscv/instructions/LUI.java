@@ -33,26 +33,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>LUI class.</p>
- */
 public final class LUI extends BasicInstruction {
     public static final LUI INSTANCE = new LUI();
 
-    /**
-     * <p>Constructor for LUI.</p>
-     */
     private LUI() {
-        super("lui t1,100000", "Load upper immediate: set t1 to 20-bit followed by 12 0s",
-                BasicInstructionFormat.U_FORMAT, "ssssssssssssssssssss fffff 0110111");
+        super(
+            "lui t1,100000",
+            "Load upper immediate: set t1 to 20-bit followed by 12 0s",
+            BasicInstructionFormat.U_FORMAT,
+            "ssssssssssssssssssss fffff 0110111"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        RegisterFile.updateRegister(operands[0], (long) operands[1] << 12);
+        RegisterFile.updateRegister(statement.getOperand(0), (long) statement.getOperand(1) << 12);
     }
 }

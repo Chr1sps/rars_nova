@@ -31,27 +31,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>BGE class.</p>
- */
 public final class BGE extends Branch {
     public static final BGE INSTANCE = new BGE();
 
-    /**
-     * <p>Constructor for BGE.</p>
-     */
     private BGE() {
-        super("bge t1,t2,label",
-                "Branch if greater than or equal: Branch to statement at label's address if t1 is greater than or equal to t2",
-                "101");
+        super(
+            "bge t1,t2,label",
+            "Branch if greater than or equal: Branch to statement at label's address if t1 is greater than or equal " +
+                "to t2",
+            "101"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean willBranch(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        return RegisterFile.getValueLong(operands[0]) >= RegisterFile.getValueLong(operands[1]);
+        return RegisterFile.getValueLong(statement.getOperand(0)) >= RegisterFile.getValueLong(statement.getOperand(1));
     }
 }

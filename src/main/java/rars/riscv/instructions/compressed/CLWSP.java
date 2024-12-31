@@ -1,7 +1,6 @@
 package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
@@ -21,26 +20,26 @@ public final class CLWSP extends CompressedInstruction {
     public static final @NotNull CLWSP INSTANCE = new CLWSP();
 
     private CLWSP() {
-        super("c.lwsp t, offset",
+        super(
+            "c.lwsp t, offset",
             "Load word from a given offset from the stack pointer",
             CompressedInstructionFormat.CI,
-            "010 s fffff ssss 10"
+            "010 s fffff ssss 10",
+            statement -> {
+                final var destinationRegister = statement.getOperand(0);
+                assert isRVCRegister(destinationRegister) : "Destination register must be one of the ones supported " +
+                    "by the C " +
+                    "extension (x8-x15)";
+                final var currentStackPointer = RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER);
+                final var offset = statement.getOperand(1) << 2;
+                final var address = currentStackPointer + offset;
+                try {
+                    final var data = Memory.getInstance().getWord(address);
+                    RegisterFile.updateRegister(destinationRegister, data);
+                } catch (final AddressErrorException e) {
+                    throw new SimulationException(statement, e);
+                }
+            }
         );
-    }
-
-    @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final var destinationRegister = statement.getOperand(0);
-        assert isRVCRegister(destinationRegister) : "Destination register must be one of the ones supported by the C " +
-            "extension (x8-x15)";
-        final var currentStackPointer = RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER);
-        final var offset = statement.getOperand(1) << 2;
-        final var address = currentStackPointer + offset;
-        try {
-            final var data = Memory.getInstance().getWord(address);
-            RegisterFile.updateRegister(destinationRegister, data);
-        } catch (final AddressErrorException e) {
-            throw new SimulationException(statement, e);
-        }
     }
 }

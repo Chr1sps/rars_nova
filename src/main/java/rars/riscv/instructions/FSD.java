@@ -14,17 +14,21 @@ public final class FSD extends BasicInstruction {
     public static final FSD INSTANCE = new FSD();
 
     private FSD() {
-        super("fsd f1, -100(t1)", "Store a double to memory",
-            BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 011 sssss 0100111");
+        super(
+            "fsd f1, -100(t1)", "Store a double to memory",
+            BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 011 sssss 0100111"
+        );
     }
 
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
-        operands[1] = (operands[1] << 20) >> 20;
+
+        final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            Memory.getInstance().setDoubleWord(RegisterFile.getValue(operands[2]) + operands[1],
-                FloatingPointRegisterFile.getValueLong(operands[0]));
+            Memory.getInstance().setDoubleWord(
+                RegisterFile.getValue(statement.getOperand(2)) + upperImmediate,
+                FloatingPointRegisterFile.getValueLong(statement.getOperand(0))
+            );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);
         }

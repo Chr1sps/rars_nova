@@ -42,31 +42,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public abstract class Arithmetic extends BasicInstruction {
 
-    /**
-     * <p>Constructor for Arithmetic.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct7      a {@link java.lang.String} object
-     * @param funct3      a {@link java.lang.String} object
-     */
-    protected Arithmetic(@NotNull final String usage, final String description, final String funct7, final String funct3) {
-        super(usage, description, BasicInstructionFormat.R_FORMAT,
-                funct7 + " ttttt sssss " + funct3 + " fffff 0110011");
+    protected Arithmetic(@NotNull final String usage, final String description, final String funct7,
+                         final String funct3) {
+        super(
+            usage, description, BasicInstructionFormat.R_FORMAT,
+            funct7 + " ttttt sssss " + funct3 + " fffff 0110011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
         if (Instructions.RV64) {
-            RegisterFile.updateRegister(operands[0],
-                    compute(RegisterFile.getValueLong(operands[1]), RegisterFile.getValueLong(operands[2])));
+            RegisterFile.updateRegister(
+                statement.getOperand(0),
+                compute(
+                    RegisterFile.getValueLong(statement.getOperand(1)),
+                    RegisterFile.getValueLong(statement.getOperand(2))
+                )
+            );
         } else {
-            RegisterFile.updateRegister(operands[0],
-                    computeW(RegisterFile.getValue(operands[1]), RegisterFile.getValue(operands[2])));
+            RegisterFile.updateRegister(
+                statement.getOperand(0),
+                computeW(
+                    RegisterFile.getValue(statement.getOperand(1)),
+                    RegisterFile.getValue(statement.getOperand(2))
+                )
+            );
         }
     }
 

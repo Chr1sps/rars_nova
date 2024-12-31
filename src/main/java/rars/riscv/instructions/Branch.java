@@ -43,25 +43,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public abstract class Branch extends BasicInstruction {
-    /**
-     * <p>Constructor for Branch.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct       a {@link java.lang.String} object
-     */
     public Branch(@NotNull final String usage, final String description, final String funct) {
         super(usage, description, BasicInstructionFormat.B_FORMAT,
-                "ttttttt sssss fffff " + funct + " ttttt 1100011 ");
+            "ttttttt sssss fffff " + funct + " ttttt 1100011 ");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
         if (willBranch(statement)) {
-            Utils.processBranch(statement.getOperands()[2]);
+            Utils.processBranch(statement.getOperand(2));
         }
     }
 

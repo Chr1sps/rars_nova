@@ -23,7 +23,8 @@ public final class FNMADDD extends FusedDouble {
      * {@inheritDoc}
      */
     @Override
-    public Float64 compute(@NotNull final Float64 f1, final Float64 f2, final Float64 f3, @NotNull final Environment e) {
+    public @NotNull Float64 compute(@NotNull final Float64 f1, final Float64 f2, final Float64 f3,
+                                    @NotNull final Environment e) {
         // TODO: test if this is the right behaviour
         Utils.flipRounding(e);
         return Arithmetic.fusedMultiplyAdd(f1, f2, f3, e).negate();

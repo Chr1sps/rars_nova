@@ -11,31 +11,24 @@ import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
 
-/**
- * <p>FCVTWD class.</p>
- */
 public final class FCVTWD extends BasicInstruction {
     public static final FCVTWD INSTANCE = new FCVTWD();
 
-    /**
-     * <p>Constructor for FCVTWD.</p>
-     */
     private FCVTWD() {
-        super("fcvt.w.d t1, f1, dyn", "Convert integer from double: Assigns the second of f1 (rounded) to t1",
-                BasicInstructionFormat.I_FORMAT, "1100001 00000 sssss ttt fffff 1010011");
+        super(
+            "fcvt.w.d t1, f1, dyn", "Convert integer from double: Assigns the second of f1 (rounded) to t1",
+            BasicInstructionFormat.I_FORMAT, "1100001 00000 sssss ttt fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
+
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[2], statement);
-        final Float64 in = new Float64(FloatingPointRegisterFile.getValueLong(operands[1]));
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        final Float64 in = new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(1)));
         final int out = Conversions.convertToInt(in, e, false);
         Floating.setfflags(e);
-        RegisterFile.updateRegister(operands[0], out);
+        RegisterFile.updateRegister(statement.getOperand(0), out);
     }
 }

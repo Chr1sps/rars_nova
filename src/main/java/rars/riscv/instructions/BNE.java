@@ -31,26 +31,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>BNE class.</p>
- */
 public final class BNE extends Branch {
     public static final BNE INSTANCE = new BNE();
 
-    /**
-     * <p>Constructor for BNE.</p>
-     */
     private BNE() {
-        super("bne t1,t2,label",
-                "Branch if not equal : Branch to statement at label's address if t1 and t2 are not equal", "001");
+        super(
+            "bne t1,t2,label",
+            "Branch if not equal : Branch to statement at label's address if t1 and t2 are not equal",
+            "001"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean willBranch(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        return RegisterFile.getValueLong(operands[0]) != RegisterFile.getValueLong(operands[1]);
+        return RegisterFile.getValueLong(statement.getOperand(0)) != RegisterFile.getValueLong(statement.getOperand(1));
     }
 }

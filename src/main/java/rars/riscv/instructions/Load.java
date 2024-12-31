@@ -42,27 +42,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public abstract class Load extends BasicInstruction {
-    /**
-     * <p>Constructor for Load.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct       a {@link java.lang.String} object
-     */
     protected Load(@NotNull final String usage, final String description, final String funct) {
-        super(usage, description, BasicInstructionFormat.I_FORMAT,
-                "ssssssssssss ttttt " + funct + " fffff 0000011");
+        super(
+            usage,
+            description,
+            BasicInstructionFormat.I_FORMAT,
+            "ssssssssssss ttttt " + funct + " fffff 0000011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
-        operands[1] = (operands[1] << 20) >> 20;
+        final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            RegisterFile.updateRegister(operands[0], load(RegisterFile.getValue(operands[2]) + operands[1]));
+            RegisterFile.updateRegister(
+                statement.getOperand(0),
+                load(RegisterFile.getValue(statement.getOperand(2)) + upperImmediate)
+            );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);
         }

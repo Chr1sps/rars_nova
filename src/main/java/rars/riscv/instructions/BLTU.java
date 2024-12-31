@@ -31,27 +31,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>BLTU class.</p>
- */
 public final class BLTU extends Branch {
     public static final BLTU INSTANCE = new BLTU();
 
-    /**
-     * <p>Constructor for BLTU.</p>
-     */
     private BLTU() {
-        super("bltu t1,t2,label",
-                "Branch if less than (unsigned): Branch to statement at label's address if t1 is less than t2 (with an unsigned interpretation)",
-                "110");
+        super(
+            "bltu t1,t2,label",
+            "Branch if less than (unsigned): Branch to statement at label's address if t1 is less than t2 (with an " +
+                "unsigned interpretation)",
+            "110"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean willBranch(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        return Long.compareUnsigned(RegisterFile.getValueLong(operands[0]), RegisterFile.getValueLong(operands[1])) < 0;
+        return Long.compareUnsigned(
+            RegisterFile.getValueLong(statement.getOperand(0)),
+            RegisterFile.getValueLong(statement.getOperand(1))
+        ) < 0;
     }
 }

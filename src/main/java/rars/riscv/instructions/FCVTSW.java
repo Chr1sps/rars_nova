@@ -40,32 +40,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>FCVTSW class.</p>
- */
 public final class FCVTSW extends BasicInstruction {
     public static final FCVTSW INSTANCE = new FCVTSW();
 
-    /**
-     * <p>Constructor for FCVTSW.</p>
-     */
     private FCVTSW() {
-        super("fcvt.s.w f1, t1, dyn", "Convert float from integer: Assigns the second of t1 to f1",
-                BasicInstructionFormat.I_FORMAT, "1101000 00000 sssss ttt fffff 1010011");
+        super(
+            "fcvt.s.w f1, t1, dyn", "Convert float from integer: Assigns the second of t1 to f1",
+            BasicInstructionFormat.I_FORMAT, "1101000 00000 sssss ttt fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
+
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[2], statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float32 tmp = new Float32(0);
         final Float32 converted = Conversions
-                .convertFromInt(BigInteger.valueOf(RegisterFile.getValue(operands[1])), e, tmp);
+            .convertFromInt(BigInteger.valueOf(RegisterFile.getValue(statement.getOperand(1))), e, tmp);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(operands[0], converted.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), converted.bits);
     }
 }

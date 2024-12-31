@@ -33,29 +33,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>FSGNJNS class.</p>
- */
 public final class FSGNJNS extends BasicInstruction {
     public static final FSGNJNS INSTANCE = new FSGNJNS();
 
-    /**
-     * <p>Constructor for FSGNJNS.</p>
-     */
     private FSGNJNS() {
-        super("fsgnjn.s f1, f2, f3",
-                "Floating point sign injection (inverted):  replace the sign bit of f2 with the opposite of sign bit of f3 and assign it to f1",
-                BasicInstructionFormat.R_FORMAT, "0010000 ttttt sssss 001 fffff 1010011");
+        super(
+            "fsgnjn.s f1, f2, f3",
+            "Floating point sign injection (inverted):  replace the sign bit of f2 with the opposite of sign bit of " +
+                "f3 and assign it to f1",
+            BasicInstructionFormat.R_FORMAT,
+            "0010000 ttttt sssss 001 fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        final int result = (FloatingPointRegisterFile.getValue(operands[1]) & 0x7FFFFFFF)
-                | ((~FloatingPointRegisterFile.getValue(operands[2])) & 0x80000000);
-        FloatingPointRegisterFile.updateRegister(operands[0], result);
+        final int result = (FloatingPointRegisterFile.getValue(statement.getOperand(1)) & 0x7FFFFFFF)
+            | ((~FloatingPointRegisterFile.getValue(statement.getOperand(2))) & 0x80000000);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result);
     }
 }

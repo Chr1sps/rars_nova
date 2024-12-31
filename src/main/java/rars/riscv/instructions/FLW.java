@@ -37,30 +37,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>FLW class.</p>
- */
 public final class FLW extends BasicInstruction {
     public static final FLW INSTANCE = new FLW();
 
-    /**
-     * <p>Constructor for FLW.</p>
-     */
     private FLW() {
-        super("flw f1, -100(t1)", "Load a float from memory",
-                BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 0000111");
+        super(
+            "flw f1, -100(t1)", "Load a float from memory",
+            BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 0000111"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
-        operands[1] = (operands[1] << 20) >> 20;
+
+        final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            FloatingPointRegisterFile.updateRegister(operands[0],
-                    Memory.getInstance().getWord(RegisterFile.getValue(operands[2]) + operands[1]));
+            FloatingPointRegisterFile.updateRegister(
+                statement.getOperand(0),
+                Memory.getInstance().getWord(RegisterFile.getValue(statement.getOperand(2)) + upperImmediate)
+            );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);
         }

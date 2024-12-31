@@ -10,7 +10,7 @@ import rars.exceptions.AssemblyException;
 import rars.riscv.instructions.*;
 import rars.riscv.instructions.compressed.CADDI4SPN;
 import rars.riscv.instructions.compressed.CEBREAK;
-import rars.riscv.instructions.compressed.CJ;
+import rars.riscv.instructions.compressed.CompressedJump;
 import rars.settings.BoolSetting;
 
 import java.io.BufferedReader;
@@ -233,8 +233,8 @@ public final class Instructions {
 
         INSTRUCTIONS_R32_COMPRESSED = List.of(
             CADDI4SPN.INSTANCE,
-            CEBREAK.INSTANCE,
-            CJ.INSTANCE
+            CEBREAK.CEBREAK,
+            CompressedJump.CJ
         );
         INSTRUCTIONS_R64_COMPRESSED = List.of();
 

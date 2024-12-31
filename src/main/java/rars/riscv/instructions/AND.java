@@ -27,23 +27,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>AND class.</p>
- */
 public final class AND extends Arithmetic {
     public static final AND INSTANCE = new AND();
 
-    /**
-     * <p>Constructor for AND.</p>
-     */
     private AND() {
         super("and t1,t2,t3", "Bitwise AND : Set t1 to bitwise AND of t2 and t3",
-                "0000000", "111");
+            "0000000", "111");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long value2) {
         return value & value2;

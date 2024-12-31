@@ -31,26 +31,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>BLT class.</p>
- */
 public final class BLT extends Branch {
     public static final BLT INSTANCE = new BLT();
 
-    /**
-     * <p>Constructor for BLT.</p>
-     */
+
     private BLT() {
-        super("blt t1,t2,label", "Branch if less than: Branch to statement at label's address if t1 is less than t2",
-                "100");
+        super(
+            "blt t1,t2,label",
+            "Branch if less than: Branch to statement at label's address if t1 is less than t2",
+            "100"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean willBranch(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        return RegisterFile.getValueLong(operands[0]) < RegisterFile.getValueLong(operands[1]);
+        return RegisterFile.getValueLong(statement.getOperand(0)) < RegisterFile.getValueLong(statement.getOperand(1));
     }
 }

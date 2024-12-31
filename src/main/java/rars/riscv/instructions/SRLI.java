@@ -34,31 +34,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SRLI class.</p>
- */
 public final class SRLI extends BasicInstruction {
     public static final SRLI INSTANCE = new SRLI();
 
-    /**
-     * <p>Constructor for SRLI.</p>
-     */
     private SRLI() {
         super("srli t1,t2,10",
-                "Shift right logical : Set t1 to result of shifting t2 right by number of bits specified by immediate",
-                BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 101 fffff 0010011");
+            "Shift right logical : Set t1 to result of shifting t2 right by number of bits specified by immediate",
+            BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 101 fffff 0010011");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        if (Instructions.RV64)
-            RegisterFile.updateRegister(operands[0], RegisterFile.getValueLong(operands[1]) >>> operands[2]);
-        else
+        if (Instructions.RV64) {
+            RegisterFile.updateRegister(
+                statement.getOperand(0),
+                RegisterFile.getValueLong(
+                    statement.getOperand(1)
+                ) >>> statement.getOperand(2)
+            );
+        } else {
             // Uses >>> because 0 fill
-            RegisterFile.updateRegister(operands[0], RegisterFile.getValue(operands[1]) >>> operands[2]);
+            RegisterFile.updateRegister(
+                statement.getOperand(0),
+                RegisterFile.getValue(
+                    statement.getOperand(1)
+                ) >>> statement.getOperand(2)
+            );
+        }
     }
 }

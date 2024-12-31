@@ -36,45 +36,51 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * Helper class for 4 argument floating point instructions
- */
 public abstract class FusedFloat extends BasicInstruction {
     /**
      * <p>Constructor for FusedFloat.</p>
      *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param op          a {@link java.lang.String} object
+     * @param usage
+     *     a {@link java.lang.String} object
+     * @param description
+     *     a {@link java.lang.String} object
+     * @param op
+     *     a {@link java.lang.String} object
      */
     protected FusedFloat(final String usage, final String description, final String op) {
-        super(usage + ", dyn", description, BasicInstructionFormat.R4_FORMAT,
-                "qqqqq 00 ttttt sssss " + "ppp" + " fffff 100" + op + "11");
+        super(
+            usage + ", dyn", description, BasicInstructionFormat.R4_FORMAT,
+            "qqqqq 00 ttttt sssss " + "ppp" + " fffff 100" + op + "11"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
+
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[4], statement);
-        final Float32 result = compute(new Float32(FloatingPointRegisterFile.getValue(operands[1])),
-                new Float32(FloatingPointRegisterFile.getValue(operands[2])),
-                new Float32(FloatingPointRegisterFile.getValue(operands[3])), e);
+        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement);
+        final Float32 result = compute(
+            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1))),
+            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(2))),
+            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(3))), e
+        );
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(operands[0], result.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
     }
 
     /**
      * <p>compute.</p>
      *
-     * @param r1 The first register
-     * @param r2 The second register
-     * @param r3 The third register
-     * @param e  a {@link Environment} object
+     * @param r1
+     *     The first register
+     * @param r2
+     *     The second register
+     * @param r3
+     *     The third register
+     * @param e
+     *     a {@link Environment} object
      * @return The second to store to the destination
      */
-    protected abstract @NotNull Float32 compute(@NotNull Float32 r1, @NotNull Float32 r2, @NotNull Float32 r3, @NotNull Environment e);
+    protected abstract @NotNull Float32 compute(@NotNull Float32 r1, @NotNull Float32 r2, @NotNull Float32 r3,
+                                                @NotNull Environment e);
 }

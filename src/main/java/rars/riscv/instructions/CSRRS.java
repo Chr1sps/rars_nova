@@ -36,38 +36,37 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>CSRRS class.</p>
- */
 public final class CSRRS extends BasicInstruction {
     public static final CSRRS INSTANCE = new CSRRS();
 
-    /**
-     * <p>Constructor for CSRRS.</p>
-     */
     private CSRRS() {
-        super("csrrs t0, fcsr, t1", "Atomic Read/Set CSR: read from the CSR into t0 and logical or t1 into the CSR",
-                BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 1110011");
+        super(
+            "csrrs t0, fcsr, t1", "Atomic Read/Set CSR: read from the CSR into t0 and logical or t1 into the CSR",
+            BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 1110011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
         try {
-            final long csr = ControlAndStatusRegisterFile.getValueLong(operands[1]);
-            if (operands[2] != 0) {
-                if (ControlAndStatusRegisterFile.orRegister(operands[1], RegisterFile.getValueLong(operands[2]))) {
-                    throw new SimulationException(statement, "Attempt to write to read-only CSR",
-                            ExceptionReason.ILLEGAL_INSTRUCTION);
+            final long csr = ControlAndStatusRegisterFile.getValueLong(statement.getOperand(1));
+            if (statement.getOperand(2) != 0) {
+                if (ControlAndStatusRegisterFile.orRegister(
+                    statement.getOperand(1),
+                    RegisterFile.getValueLong(statement.getOperand(2))
+                )) {
+                    throw new SimulationException(
+                        statement, "Attempt to write to read-only CSR",
+                        ExceptionReason.ILLEGAL_INSTRUCTION
+                    );
                 }
             }
-            RegisterFile.updateRegister(operands[0], csr);
+            RegisterFile.updateRegister(statement.getOperand(0), csr);
         } catch (final NullPointerException e) {
-            throw new SimulationException(statement, "Attempt to access unavailable CSR",
-                    ExceptionReason.ILLEGAL_INSTRUCTION);
+            throw new SimulationException(
+                statement, "Attempt to access unavailable CSR",
+                ExceptionReason.ILLEGAL_INSTRUCTION
+            );
         }
     }
 }

@@ -2,8 +2,6 @@ package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import rars.ProgramStatement;
-import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 import rars.riscv.SimulationCallback;
@@ -53,8 +51,6 @@ public final class CompressedLoad extends CompressedInstruction {
         CFLD
     );
 
-    private final @NotNull SimulationCallback callback;
-
     private CompressedLoad(
         final @NotNull String example,
         final @NotNull String description,
@@ -65,16 +61,11 @@ public final class CompressedLoad extends CompressedInstruction {
             example,
             description,
             CompressedInstructionFormat.CL,
-            BinaryUtils.intToBinaryString(opcode, 3) + " sss ttt ss fff 00"
+            BinaryUtils.intToBinaryString(opcode, 3) + " sss ttt ss fff 00",
+            callback
         );
-        this.callback = callback;
         if (opcode < 0 || opcode > 0b111) {
             throw new IllegalArgumentException("Invalid opcode");
         }
-    }
-
-    @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        callback.simulate(statement);
     }
 }

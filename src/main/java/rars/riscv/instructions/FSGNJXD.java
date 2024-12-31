@@ -6,30 +6,24 @@ import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 
-/**
- * <p>FSGNJXD class.</p>
- */
 public final class FSGNJXD extends BasicInstruction {
     public static final FSGNJXD INSTANCE = new FSGNJXD();
 
-    /**
-     * <p>Constructor for FSGNJXD.</p>
-     */
     private FSGNJXD() {
-        super("fsgnjx.d f1, f2, f3",
-                "Floating point sign injection (xor 64 bit):  xor the sign bit of f2 with the sign bit of f3 and assign it to f1",
-                BasicInstructionFormat.R_FORMAT, "0010001 ttttt sssss 010 fffff 1010011");
+        super(
+            "fsgnjx.d f1, f2, f3",
+            "Floating point sign injection (xor 64 bit):  xor the sign bit of f2 with the sign bit of f3 and assign " +
+                "it to f1",
+            BasicInstructionFormat.R_FORMAT,
+            "0010001 ttttt sssss 010 fffff 1010011"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        final long f2 = FloatingPointRegisterFile.getValueLong(operands[1]);
-        final long f3 = FloatingPointRegisterFile.getValueLong(operands[2]);
+        final long f2 = FloatingPointRegisterFile.getValueLong(statement.getOperand(1));
+        final long f3 = FloatingPointRegisterFile.getValueLong(statement.getOperand(2));
         final long result = (f2 & 0x7FFFFFFF_FFFFFFFFL) | ((f2 ^ f3) & 0x80000000_00000000L);
-        FloatingPointRegisterFile.updateRegisterLong(operands[0], result);
+        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), result);
     }
 }

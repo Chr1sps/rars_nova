@@ -31,28 +31,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>BGEU class.</p>
- */
 public final class BGEU extends Branch {
     public static final BGEU INSTANCE = new BGEU();
 
-    /**
-     * <p>Constructor for BGEU.</p>
-     */
     private BGEU() {
-        super("bgeu t1,t2,label",
-                "Branch if greater than or equal to (unsigned): Branch to statement at label's address if t1 is greater than or equal to t2 (with an unsigned interpretation)",
-                "111");
+        super(
+            "bgeu t1,t2,label",
+            "Branch if greater than or equal to (unsigned): Branch to statement at label's address if t1 is greater " +
+                "than or equal to t2 (with an unsigned interpretation)",
+            "111"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean willBranch(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        return Long.compareUnsigned(RegisterFile.getValueLong(operands[0]),
-                RegisterFile.getValueLong(operands[1])) >= 0;
+        return Long.compareUnsigned(
+            RegisterFile.getValueLong(statement.getOperand(0)),
+            RegisterFile.getValueLong(statement.getOperand(1))
+        ) >= 0;
     }
 }

@@ -41,28 +41,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public abstract class ImmediateInstruction extends BasicInstruction {
-    /**
-     * <p>Constructor for ImmediateInstruction.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct       a {@link java.lang.String} object
-     */
     public ImmediateInstruction(@NotNull final String usage, final @NotNull String description,
                                 final @NotNull String funct) {
         super(usage, description, BasicInstructionFormat.I_FORMAT, "tttttttttttt sssss " + funct + " fffff 0010011");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
         if (Instructions.RV64) {
-            RegisterFile.updateRegister(operands[0], compute(RegisterFile.getValueLong(operands[1]), ((long) operands[2] << 20) >> 20)); // make sure the immediate is sign-extended
+            RegisterFile.updateRegister(
+                statement.getOperand(0),
+                compute(
+                    RegisterFile.getValueLong(statement.getOperand(1)),
+                    ((long) statement.getOperand(2) << 20) >> 20
+                )
+            ); // make sure the immediate is sign-extended
         } else {
-            RegisterFile.updateRegister(operands[0], computeW(RegisterFile.getValue(operands[1]), (operands[2] << 20) >> 20)); // make sure the immediate is sign-extended
+            RegisterFile.updateRegister(
+                statement.getOperand(0),
+                computeW(RegisterFile.getValue(statement.getOperand(1)), (statement.getOperand(2) << 20) >> 20)
+            ); // 
+            // make sure the immediate is sign-extended
         }
     }
 

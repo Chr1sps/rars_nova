@@ -34,30 +34,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>JALR class.</p>
- */
 public final class JALR extends BasicInstruction {
     public static final JALR INSTANCE = new JALR();
 
-    /**
-     * <p>Constructor for JALR.</p>
-     */
     private JALR() {
-        super("jalr t1, t2, -100",
-                "Jump and link register: Set t1 to Program Counter (return address) then jump to statement at t2 + immediate",
-                BasicInstructionFormat.I_FORMAT, "tttttttttttt sssss 000 fffff 1100111");
+        super(
+            "jalr t1, t2, -100",
+            "Jump and link register: Set t1 to Program Counter (return address) then jump to statement at t2 + " +
+                "immediate",
+            BasicInstructionFormat.I_FORMAT,
+            "tttttttttttt sssss 000 fffff 1100111"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(@NotNull final ProgramStatement statement) {
-        final int[] operands = statement.getOperands();
-        final int target = RegisterFile.getValue(operands[1]);
-        Utils.processReturnAddress(operands[0]);
+        final int target = RegisterFile.getValue(statement.getOperand(1));
+        Utils.processReturnAddress(statement.getOperand(0));
         // Set PC = $t2 + immediate with the last bit set to 0
-        Utils.processJump((target + ((operands[2] << 20) >> 20)) & 0xFFFFFFFE);
+        Utils.processJump((target + ((statement.getOperand(2) << 20) >> 20)) & 0xFFFFFFFE);
     }
 }

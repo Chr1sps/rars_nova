@@ -45,105 +45,80 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public abstract class Floating extends BasicInstruction {
-    /**
-     * <p>Constructor for Floating.</p>
-     *
-     * @param name        a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct       a {@link java.lang.String} object
-     */
     protected Floating(final String name, final String description, final String funct) {
-        super(name + " f1, f2, f3, dyn", description, BasicInstructionFormat.R_FORMAT,
-                funct + "ttttt sssss qqq fffff 1010011");
+        super(
+            name + " f1, f2, f3, dyn", description, BasicInstructionFormat.R_FORMAT,
+            funct + "ttttt sssss qqq fffff 1010011"
+        );
     }
 
-    /**
-     * <p>Constructor for Floating.</p>
-     *
-     * @param name        a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct       a {@link java.lang.String} object
-     * @param rm          a {@link java.lang.String} object
-     */
     protected Floating(final String name, final String description, final String funct, final String rm) {
-        super(name + " f1, f2, f3", description, BasicInstructionFormat.R_FORMAT,
-                funct + "ttttt sssss " + rm + " fffff 1010011");
+        super(
+            name + " f1, f2, f3", description, BasicInstructionFormat.R_FORMAT,
+            funct + "ttttt sssss " + rm + " fffff 1010011"
+        );
     }
 
-    /**
-     * <p>setfflags.</p>
-     *
-     * @param e a {@link Environment} object
-     */
     public static void setfflags(final @NotNull Environment e) {
         final int fflags = (e.inexact ? 1 : 0) +
-                (e.underflow ? 2 : 0) +
-                (e.overflow ? 4 : 0) +
-                (e.divByZero ? 8 : 0) +
-                (e.invalid ? 16 : 0);
-        if (fflags != 0)
+            (e.underflow ? 2 : 0) +
+            (e.overflow ? 4 : 0) +
+            (e.divByZero ? 8 : 0) +
+            (e.invalid ? 16 : 0);
+        if (fflags != 0) {
             ControlAndStatusRegisterFile.orRegister("fflags", fflags);
+        }
     }
 
-    /**
-     * <p>getRoundingMode.</p>
-     *
-     * @param RM        a int
-     * @param statement a {@link ProgramStatement} object
-     * @return a {@link RoundingMode} object
-     * @throws SimulationException if any.
-     */
     public static @NotNull RoundingMode getRoundingMode(final int RM, final ProgramStatement statement) throws SimulationException {
         int rm = RM;
         final int frm = ControlAndStatusRegisterFile.getValue("frm");
-        if (rm == 7)
+        if (rm == 7) {
             rm = frm;
+        }
         return switch (rm) {
             case 0 -> // RNE
-                    RoundingMode.EVEN;
+                RoundingMode.EVEN;
             case 1 -> // RTZ
-                    RoundingMode.ZERO;
+                RoundingMode.ZERO;
             case 2 -> // RDN
-                    RoundingMode.MIN;
+                RoundingMode.MIN;
             case 3 -> // RUP
-                    RoundingMode.MAX;
+                RoundingMode.MAX;
             case 4 -> // RMM
-                    RoundingMode.AWAY;
-            default ->
-                    throw new SimulationException(statement, "Invalid rounding mode. RM = " + RM + " and frm = " + frm);
+                RoundingMode.AWAY;
+            default -> throw new SimulationException(
+                statement,
+                "Invalid rounding mode. RM = " + RM + " and frm = " + frm
+            );
         };
     }
 
-    /**
-     * <p>getFloat.</p>
-     *
-     * @param num a int
-     * @return a {@link Float32} object
-     */
     public static @NotNull Float32 getFloat(final int num) {
         return new Float32(FloatingPointRegisterFile.getValue(num));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        final int[] operands = statement.getOperands();
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(operands[3], statement);
-        final Float32 result = this.compute(new Float32(FloatingPointRegisterFile.getValue(operands[1])),
-                new Float32(FloatingPointRegisterFile.getValue(operands[2])), e);
+        e.mode = Floating.getRoundingMode(statement.getOperand(3), statement);
+        final Float32 result = this.compute(
+            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1))),
+            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(2))), e
+        );
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(operands[0], result.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
     }
 
     /**
      * <p>compute.</p>
      *
-     * @param f1 a {@link Float32} object
-     * @param f2 a {@link Float32} object
-     * @param e  a {@link Environment} object
+     * @param f1
+     *     a {@link Float32} object
+     * @param f2
+     *     a {@link Float32} object
+     * @param e
+     *     a {@link Environment} object
      * @return a {@link Float32} object
      */
     public abstract Float32 compute(Float32 f1, Float32 f2, Environment e);
