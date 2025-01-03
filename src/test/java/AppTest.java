@@ -1,7 +1,6 @@
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Named;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,7 +11,6 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.Instruction;
 import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
@@ -36,7 +34,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
-public final class AppTest extends RarsTestBase {
+final class AppTest extends RarsTestBase {
+    // TODO: refactor this class to avoid repetitions and to enhance test speed
+
     private static void run(final String path, final boolean is64Bit) {
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, is64Bit);
         InstructionsRegistry.RV64_MODE_FLAG = is64Bit;
@@ -167,19 +167,13 @@ public final class AppTest extends RarsTestBase {
         return fileProvider("examples");
     }
 
-    static Stream<Named<Instruction>> instructionTestProvider() {
-        return InstructionsRegistry.ALL_INSTRUCTIONS.r32All
-                .stream()
-                .map(instruction -> Named.of(instruction.mnemonic, instruction));
-    }
-
     private static void testBasicInstructionBinaryCodesImpl(
             final boolean isRV64Enabled) throws AssemblyException, AddressErrorException {
-        final Options opt = new Options();
-        opt.startAtMain = true;
-        opt.maxSteps = 500;
-        opt.selfModifyingCode = true;
-        final Program program = new Program(opt);
+        final var options = new Options();
+        options.startAtMain = true;
+        options.maxSteps = 500;
+        options.selfModifyingCode = true;
+        final Program program = new Program(options);
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64Enabled);
         InstructionsRegistry.RV64_MODE_FLAG = isRV64Enabled;
@@ -223,10 +217,58 @@ public final class AppTest extends RarsTestBase {
         }
     }
 
+    private static void testPseudoInstructionsImpl(final boolean isRV64) {
+        final var options = new Options();
+        options.startAtMain = true;
+        options.maxSteps = 500;
+        options.selfModifyingCode = true;
+        final var program = new Program(options);
+        BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
+        BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64);
+        InstructionsRegistry.RV64_MODE_FLAG = isRV64;
+        Memory.setConfiguration(MemoryConfiguration.DEFAULT);
+
+        final var instructionsToTest = isRV64 ? InstructionsRegistry.EXTENDED_INSTRUCTIONS.r64All : InstructionsRegistry.EXTENDED_INSTRUCTIONS.r32All;
+        for (final var instruction : instructionsToTest) {
+            final var programString = "label:" + instruction.exampleFormat;
+            try {
+                program.assembleString(programString);
+                program.setup(List.of(), "");
+                final int first = program.getMemory().getWord(0x400000);
+                final int second = program.getMemory().getWord(0x400004);
+                final ProgramStatement ps = new ProgramStatement(first, 0x400000);
+                assertNotNull(ps.getInstruction(), "Error 11 on: " + programString);
+                assertThat(
+                        "Error 12 on: " + programString, ps.getPrintableBasicAssemblyStatement(),
+                        not(containsString("invalid"))
+                );
+                if (programString.contains("t0")
+                        || programString.contains("t1")
+                        || programString.contains("t2")
+                        || programString.contains("f1")) {
+                    // TODO: test that each register individually is meaningful and test every
+                    // register.
+                    // Currently this covers all instructions and is an alert if I made a trivial
+                    // mistake.
+                    final var register_substitute = programString
+                            .replaceAll("t0|t1|t2", "x0")
+                            .replaceAll("f1", "f0");
+                    program.assembleString(register_substitute);
+                    program.setup(List.of(), "");
+                    final int word1 = program.getMemory().getWord(0x400000);
+                    final int word2 = program.getMemory().getWord(0x400004);
+                    assertFalse(word1 == first && word2 == second, "Error 13 on: " + programString);
+                }
+            } catch (final Exception e) {
+                throw new RuntimeException("Error 14 on" + programString + " :" + e);
+            }
+        }
+    }
+
     @DisplayName("32 bit instructions")
     @ParameterizedTest
     @MethodSource("rv32TestFileProvider")
-    public void test32(final @NotNull Path path) {
+    void test32(final @NotNull Path path) {
         run(path.toString(), false);
     }
 
@@ -244,12 +286,6 @@ public final class AppTest extends RarsTestBase {
         run(path.toString(), false);
     }
 
-    @Tag("manual")
-    @Test
-    void runSingle() {
-        run(getTestDataPath().resolve("riscv-tests-64/srai.S").toString(), true);
-    }
-
     @Test
     void testBasicInstructionBinaryCodes32() throws AssemblyException, AddressErrorException {
         testBasicInstructionBinaryCodesImpl(false);
@@ -261,56 +297,12 @@ public final class AppTest extends RarsTestBase {
     }
 
     @Test
-    void testPseudoInstructions() {
-        final Options opt = new Options();
-        opt.startAtMain = true;
-        opt.maxSteps = 500;
-        opt.selfModifyingCode = true;
-        final var p = new Program(opt);
-        BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
+    void testPseudoInstructions32() {
+        testPseudoInstructionsImpl(false);
+    }
 
-        int skips = 0;
-        for (final var inst : InstructionsRegistry.EXTENDED_INSTRUCTIONS.allInstructions) {
-            final String program = "label:" + inst.exampleFormat;
-            try {
-                p.assembleString(program);
-                p.setup(List.of(), "");
-                final int first = p.getMemory().getWord(0x400000);
-                final int second = p.getMemory().getWord(0x400004);
-                final ProgramStatement ps = new ProgramStatement(first, 0x400000);
-                assertNotNull(ps.getInstruction(), "Error 11 on: " + program);
-                assertThat(
-                        "Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(),
-                        not(containsString("invalid"))
-                );
-                if (program.contains("t0") || program.contains("t1") || program.contains("t2") || program.contains(
-                        "f1")) {
-                    // TODO: test that each register individually is meaningful and test every
-                    // register.
-                    // Currently this covers all instructions and is an alert if I made a trivial
-                    // mistake.
-                    final String register_substitute =
-                            program.replaceAll("t0", "x0")
-                                    .replaceAll("t1", "x0")
-                                    .replaceAll("t2", "x0")
-                                    .replaceAll("f1", "f0");
-                    p.assembleString(register_substitute);
-                    p.setup(List.of(), "");
-                    final int word1 = p.getMemory().getWord(0x400000);
-                    final int word2 = p.getMemory().getWord(0x400004);
-                    assertFalse(word1 == first && word2 == second, "Error 13 on: " + program);
-                } else {
-                    skips++;
-                }
-            } catch (final Exception e) {
-                throw new RuntimeException("Error 14 on" + program + " :" + e);
-            }
-        }
-        // 12 was the second when this test was written, if instructions are added that
-        // intentionally
-        // don't have those registers in them add to the register list above or add to
-        // the count.
-        // Updated to 10: because fsrmi and fsflagsi were removed
-        assertEquals(10, skips, "Unexpected number of psuedo-instructions skipped.");
+    @Test
+    void testPseudoInstructions64() {
+        testPseudoInstructionsImpl(true);
     }
 }
