@@ -1,5 +1,6 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
@@ -41,16 +42,20 @@ public final class FENCE extends BasicInstruction {
      * <p>Constructor for FENCE.</p>
      */
     private FENCE() {
-        super("fence 1, 1",
-                "Ensure that IO and memory accesses before the fence happen before the following IO and memory accesses as viewed by a different thread",
-                BasicInstructionFormat.I_FORMAT, "0000 ffff ssss 00000 000 00000 0001111");
+        super(
+            "fence 1, 1",
+            "Ensure that IO and memory accesses before the fence happen before the following IO and memory accesses " +
+                "as viewed by a different thread",
+            BasicInstructionFormat.I_FORMAT,
+            "0000 ffff ssss 00000 000 00000 0001111"
+        );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         // Do nothing, currently there are no other threads so local consitency is
         // enough
     }

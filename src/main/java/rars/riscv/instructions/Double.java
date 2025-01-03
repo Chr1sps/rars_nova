@@ -29,16 +29,19 @@ public abstract class Double extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(3), statement);
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+        final var environment = new Environment();
+        final var hasRoundingMode = statement.hasOperand(3);
+        if (hasRoundingMode) {
+            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement);
+        }
         final Float64 result = compute(
             new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(1))),
-            new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(2))), e
+            new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(2))), environment
         );
-        Floating.setfflags(e);
+        Floating.setfflags(environment);
         FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), result.bits);
     }
 
-    public abstract Float64 compute(Float64 f1, Float64 f2, Environment e);
+    public abstract @NotNull Float64 compute(@NotNull Float64 f1, @NotNull Float64 f2, @NotNull Environment e);
 }

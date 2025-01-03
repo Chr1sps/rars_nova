@@ -21,15 +21,18 @@ public final class FLD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
 
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            final long low = Memory.getInstance()
-                .getWord(RegisterFile.getValue(statement.getOperand(2)) + upperImmediate);
-            final long high = Memory.getInstance()
-                .getWord(RegisterFile.getValue(statement.getOperand(2)) + upperImmediate + 4);
-            FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), (high << 32) | (low & 0xFFFFFFFFL));
+            final var value = Memory.getInstance().getDoubleWord(
+                RegisterFile.getValue(statement.getOperand(2))
+                    + upperImmediate
+            );
+            FloatingPointRegisterFile.updateRegisterLong(
+                statement.getOperand(0),
+                value
+            );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);
         }

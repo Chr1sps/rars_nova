@@ -4,7 +4,7 @@
 
 package rars.riscv.lang.lexing;
 
-import rars.riscv.Instructions;
+import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
@@ -752,19 +752,19 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
           // fall through
           case 25: break;
           case 6:
-            { final var foundOps = Instructions.matchOperator(yytext());
-                        if (foundOps.isEmpty()) {
-                            final var foundRegister = RegisterFile.getRegister(yytext());
-                            final var foundFPRegister = FloatingPointRegisterFile.getRegister(yytext());
-                            final var foundCASRegister = ControlAndStatusRegisterFile.getRegister(yytext());
-                            if (foundRegister != null || foundFPRegister != null || foundCASRegister != null) {
-                                addToken(RVTokenType.REGISTER_NAME);
+            { final var foundOps = InstructionsRegistry.matchOperator(yytext());
+                            if (foundOps.isEmpty()) {
+                                final var foundRegister = RegisterFile.getRegister(yytext());
+                                final var foundFPRegister = FloatingPointRegisterFile.getRegister(yytext());
+                                final var foundCASRegister = ControlAndStatusRegisterFile.getRegister(yytext());
+                                if (foundRegister != null || foundFPRegister != null || foundCASRegister != null) {
+                                    addToken(RVTokenType.REGISTER_NAME);
+                                } else {
+                                    addToken(RVTokenType.IDENTIFIER);
+                                }
                             } else {
-                                addToken(RVTokenType.IDENTIFIER);
+                                addToken(RVTokenType.INSTRUCTION);
                             }
-                        } else {
-                            addToken(RVTokenType.INSTRUCTION);
-                        }
             }
           // fall through
           case 26: break;

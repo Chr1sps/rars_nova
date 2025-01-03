@@ -47,16 +47,16 @@ public abstract sealed class Instruction permits BasicInstruction, CompressedIns
     /**
      * The instruction name.
      **/
-    protected final @NotNull String mnemonic;
+    public final @NotNull String mnemonic;
     /**
      * Example usage of this instruction. Is provided as subclass constructor
      * argument.
      **/
-    protected final @NotNull String exampleFormat;
+    public final @NotNull String exampleFormat;
     /**
      * Description of instruction for display to user
      **/
-    protected final @NotNull String description;
+    public final @NotNull String description;
 
     protected Instruction(final @NotNull String example, final @NotNull String description) {
         this.mnemonic = extractOperator(example);
@@ -74,18 +74,6 @@ public abstract sealed class Instruction permits BasicInstruction, CompressedIns
     protected static String extractOperator(final @NotNull String example) {
         final StringTokenizer st = new StringTokenizer(example, " ,\t");
         return st.nextToken();
-    }
-
-    public String getName() {
-        return this.mnemonic;
-    }
-
-    public @NotNull String getExampleFormat() {
-        return this.exampleFormat;
-    }
-
-    public @NotNull String getDescription() {
-        return this.description;
     }
 
     public abstract int getInstructionLength();

@@ -42,29 +42,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public final class ErrorList {
-    /**
-     * Constant <code>ERROR_MESSAGE_PREFIX="Error"</code>
-     */
     public static final @NotNull String ERROR_MESSAGE_PREFIX = "Error";
-    /**
-     * Constant <code>WARNING_MESSAGE_PREFIX="Warning"</code>
-     */
     public static final @NotNull String WARNING_MESSAGE_PREFIX = "Warning";
-    /**
-     * Constant <code>FILENAME_PREFIX=" in "</code>
-     */
     public static final @NotNull String FILENAME_PREFIX = " in ";
-    /**
-     * Constant <code>LINE_PREFIX=" line "</code>
-     */
     public static final @NotNull String LINE_PREFIX = " line ";
-    /**
-     * Constant <code>POSITION_PREFIX=" column "</code>
-     */
     public static final @NotNull String POSITION_PREFIX = " column ";
-    /**
-     * Constant <code>MESSAGE_SEPARATOR=": "</code>
-     */
     public static final @NotNull String MESSAGE_SEPARATOR = ": ";
     private final @NotNull ArrayList<@NotNull ErrorMessage> messages;
     private int errorCount;
@@ -121,7 +103,8 @@ public final class ErrorList {
     /**
      * Add new error message to end of list.
      *
-     * @param mess ErrorMessage object to be added to end of error list.
+     * @param mess
+     *     ErrorMessage object to be added to end of error list.
      */
     public void add(final @NotNull ErrorMessage mess) {
         if (this.errorCount > ErrorList.getErrorLimit()) {
@@ -129,11 +112,11 @@ public final class ErrorList {
         }
         if (this.errorCount == ErrorList.getErrorLimit()) {
             this.messages.add(ErrorMessage.error(
-                    null,
-                    mess.getLine(),
-                    mess.getPosition(),
-                    "Error Limit of %d exceeded."
-                            .formatted(ErrorList.getErrorLimit())
+                null,
+                mess.getLine(),
+                mess.getPosition(),
+                "Error Limit of %d exceeded."
+                    .formatted(ErrorList.getErrorLimit())
             ));
             this.errorCount++; // subsequent errors will not be added; see if statement above
             return;
@@ -148,19 +131,21 @@ public final class ErrorList {
 
     public void addTokenError(final @NotNull Token token, final @NotNull String message) {
         final var errorMessage = ErrorMessage.error(
-                token.getSourceProgram(),
-                token.getSourceLine(),
-                token.getStartPos(),
-                message);
+            token.getSourceProgram(),
+            token.getSourceLine(),
+            token.getStartPos(),
+            message
+        );
         this.add(errorMessage);
     }
 
     public void addWarning(final @NotNull Token token, final @NotNull String message) {
         final var errorMessage = ErrorMessage.warning(
-                token.getSourceProgram(),
-                token.getSourceLine(),
-                token.getStartPos(),
-                message);
+            token.getSourceProgram(),
+            token.getSourceLine(),
+            token.getStartPos(),
+            message
+        );
         this.add(errorMessage);
     }
 

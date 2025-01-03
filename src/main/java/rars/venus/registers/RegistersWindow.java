@@ -10,7 +10,6 @@ import java.util.Arrays;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
-
 public final class RegistersWindow extends RegisterBlockWindow {
     /**
      * The tips to show when hovering over the names of the registers
@@ -64,7 +63,7 @@ public final class RegistersWindow extends RegisterBlockWindow {
     private static Register @NotNull [] getRegisters() {
         final Register[] base = RegisterFile.getRegisters();
         final Register[] out = Arrays.copyOf(base, base.length + 1);
-        out[base.length] = RegisterFile.getProgramCounterRegister();
+        out[base.length] = RegisterFile.PC_REGISTER;
         return out;
     }
 

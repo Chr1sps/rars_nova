@@ -46,7 +46,7 @@ public final class FSGNJXS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final int f2 = FloatingPointRegisterFile.getValue(statement.getOperand(1));
         final int f3 = FloatingPointRegisterFile.getValue(statement.getOperand(2));
         final int result = (f2 & 0x7FFFFFFF) | ((f2 ^ f3) & 0x80000000);

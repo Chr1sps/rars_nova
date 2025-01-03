@@ -44,12 +44,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public abstract class Branch extends BasicInstruction {
     public Branch(@NotNull final String usage, final String description, final String funct) {
-        super(usage, description, BasicInstructionFormat.B_FORMAT,
-            "ttttttt sssss fffff " + funct + " ttttt 1100011 ");
+        super(
+            usage, description, BasicInstructionFormat.B_FORMAT,
+            "ttttttt sssss fffff " + funct + " ttttt 1100011 "
+        );
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         if (willBranch(statement)) {
             Utils.processBranch(statement.getOperand(2));
         }
@@ -58,9 +60,10 @@ public abstract class Branch extends BasicInstruction {
     /**
      * <p>willBranch.</p>
      *
-     * @param statement the program statement that carries the operands for this
-     *                  instruction
+     * @param statement
+     *     the program statement that carries the operands for this
+     *     instruction
      * @return true if the Branch instruction will branch
      */
-    public abstract boolean willBranch(ProgramStatement statement);
+    public abstract boolean willBranch(@NotNull ProgramStatement statement);
 }

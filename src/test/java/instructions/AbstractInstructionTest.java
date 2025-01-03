@@ -5,7 +5,7 @@ import rars.api.Options;
 import rars.api.Program;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
-import rars.riscv.Instructions;
+import rars.riscv.InstructionsRegistry;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import utils.RarsTestBase;
@@ -64,7 +64,8 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
     /**
      * Runs a test with the given code for RV64 with no standard input/output and no errors.
      *
-     * @param code A {@link String} containing the code to run.
+     * @param code
+     *     A {@link String} containing the code to run.
      */
     protected final void runTest64(@NotNull final String code) {
         runTest(code, "", true, new TestData());
@@ -81,14 +82,17 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
     /**
      * Runs a test with the given code and test data.
      *
-     * @param code     A {@link String} containing the code to run.
-     * @param is64     A boolean indicating whether the test is for RV64.
-     * @param testData A {@link TestData} object containing the test data (STD{IN,OUT,ERR}, error lines).
+     * @param code
+     *     A {@link String} containing the code to run.
+     * @param is64
+     *     A boolean indicating whether the test is for RV64.
+     * @param testData
+     *     A {@link TestData} object containing the test data (STD{IN,OUT,ERR}, error lines).
      */
     private void runTest(@NotNull final String code, @NotNull final String dataPrelude, final boolean is64,
                          final TestData testData) {
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, is64);
-        Instructions.RV64 = is64;
+        InstructionsRegistry.RV64_MODE_FLAG = is64;
 
         final var opt = new Options();
         opt.startAtMain = true;

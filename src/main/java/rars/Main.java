@@ -8,7 +8,7 @@ import rars.api.Program;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
-import rars.riscv.Instructions;
+import rars.riscv.InstructionsRegistry;
 import rars.riscv.dump.DumpFormat;
 import rars.riscv.dump.DumpFormats;
 import rars.riscv.hardware.*;
@@ -76,6 +76,7 @@ public final class Main {
     private final ArrayList<String> registerDisplayList;
     private final ArrayList<String> memoryDisplayList;
     private final ArrayList<String> filenameList;
+    private @NotNull MemoryConfiguration currentConfiguration;
     private boolean gui;
     private boolean simulate;
     private boolean rv64;
@@ -102,12 +103,16 @@ public final class Main {
         this.registerDisplayList = new ArrayList<>();
         this.memoryDisplayList = new ArrayList<>();
         this.filenameList = new ArrayList<>();
-        CurrentMemoryConfiguration.set(MemoryConfiguration.DEFAULT);
         this.out = System.out;
+        this.currentConfiguration = MemoryConfiguration.DEFAULT;
 
         if (!this.parseCommandArgs(args)) {
             System.exit(Globals.exitCode);
         }
+
+        Memory.setConfiguration(this.currentConfiguration);
+        Memory.getInstance().initialize();
+        RegisterFile.setValuesFromConfiguration(this.currentConfiguration);
 
         if (this.gui) {
             this.launchIDE();
@@ -166,7 +171,8 @@ public final class Main {
                 dumpFormats
                     .stream()
                     .map(DumpFormat::getCommandDescriptor),
-                ", ")
+                ", "
+            )
             .forEach(formatsBuilder::append);
         return """
             Usage:  Rars  [options] filename [additional filenames]
@@ -232,27 +238,29 @@ public final class Main {
     /**
      * Perform any specified dump operations. See "dump" option.
      */
-    private void dumpSegments(final Program program) {
+    private void dumpSegments(final @Nullable Program program) {
         if (this.dumpTriples == null || program == null) {
             return;
         }
 
         for (final String[] triple : this.dumpTriples) {
             final File file = new File(triple[2]);
-            Pair<Integer, Integer> segInfo = MemoryDump.getSegmentBounds(triple[0]);
+            var segmentBounds = MemoryDump.getSegmentBounds(triple[0]);
             // If not segment name, see if it is address range instead. DPS 14-July-2008
-            if (segInfo == null) {
+            if (segmentBounds == null) {
                 try {
                     final String[] memoryRange = Main.checkMemoryAddressRange(triple[0]);
-                    segInfo = new Pair<>(BinaryUtils.stringToInt(memoryRange[0]),
-                        BinaryUtils.stringToInt(memoryRange[1]));
+                    segmentBounds = new Pair<>(
+                        BinaryUtils.stringToInt(memoryRange[0]),
+                        BinaryUtils.stringToInt(memoryRange[1])
+                    );
                 } catch (final NumberFormatException |
                                NullPointerException ignored) {
                 }
             }
-            if (segInfo == null) {
+            if (segmentBounds == null) {
                 this.out.println("Error while attempting to save dump, segment/address-range " + triple[0] + " is " +
-                    "invalid!");
+                                     "invalid!");
                 continue;
             }
             final DumpFormat format = DumpFormats.findDumpFormatGivenCommandDescriptor(triple[1]);
@@ -261,18 +269,21 @@ public final class Main {
                 continue;
             }
             try {
-                final int highAddress = program.getMemory().getAddressOfFirstNull(segInfo.first(), segInfo.second())
+                final int highAddress = program.getMemory().getAddressOfFirstNull(
+                    segmentBounds.first(),
+                    segmentBounds.second()
+                )
                     - Memory.WORD_LENGTH_BYTES;
-                if (highAddress < segInfo.first()) {
+                if (highAddress < segmentBounds.first()) {
                     this.out.println("This segment has not been written to, there is nothing to dump.");
                     continue;
                 }
-                format.dumpMemoryRange(file, segInfo.first(), highAddress, program.getMemory());
+                format.dumpMemoryRange(file, segmentBounds.first(), highAddress, program.getMemory());
             } catch (final FileNotFoundException e) {
                 this.out.println("Error while attempting to save dump, file " + file + " was not found!");
             } catch (final AddressErrorException e) {
                 this.out.println("Error while attempting to save dump, file " + file + "!  Could not access address: "
-                    + e.address + "!");
+                                     + e.address + "!");
             } catch (final IOException e) {
                 this.out.println("Error while attempting to save dump, file " + file + "!  Disk IO failed!");
             }
@@ -331,11 +342,11 @@ public final class Main {
         // Decide whether copyright should be displayed, and display
         // if so.
         final var doDisplayCopyrightNotice = Arrays.stream(args).noneMatch(arg ->
-            arg.equalsIgnoreCase(noCopyrightSwitch)
+                                                                               arg.equalsIgnoreCase(noCopyrightSwitch)
         );
         if (doDisplayCopyrightNotice) {
             this.out.println("RARS " + Globals.version + "  Copyright " + Globals.copyrightYears + " " + Globals.copyrightHolders
-                + "\n");
+                                 + "\n");
         }
 
         if (args.length == 1 && args[0].equals("h")) {
@@ -387,7 +398,7 @@ public final class Main {
                     this.out.println("Invalid memory configuration: " + configName);
                     argsOK = false;
                 } else {
-                    CurrentMemoryConfiguration.set(config);
+                    this.currentConfiguration = config;
                 }
                 continue;
             }
@@ -529,7 +540,7 @@ public final class Main {
         }
 
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, this.rv64);
-        Instructions.RV64 = this.rv64;
+        InstructionsRegistry.RV64_MODE_FLAG = this.rv64;
 
         final File mainFile = new File(this.filenameList.getFirst()).getAbsoluteFile();// First file is "main" file
         final List<String> filesToAssemble;
@@ -539,8 +550,10 @@ public final class Main {
                 // Using "p" project option PLUS listing more than one filename on command line.
                 // Add the additional files, avoiding duplicates.
                 this.filenameList.removeFirst(); // first one has already been processed
-                final var moreFilesToAssemble = FilenameFinder.getFilenameList(this.filenameList,
-                    FilenameFinder.MATCH_ALL_EXTENSIONS);
+                final var moreFilesToAssemble = FilenameFinder.getFilenameList(
+                    this.filenameList,
+                    FilenameFinder.MATCH_ALL_EXTENSIONS
+                );
                 // Remove any duplicates then merge the two lists.
                 for (int index2 = 0; index2 < moreFilesToAssemble.size(); index2++) {
                     for (final String s : filesToAssemble) {
@@ -582,8 +595,8 @@ public final class Main {
                     final Simulator.Reason done = program.simulate();
                     if (done == Simulator.Reason.MAX_STEPS) {
                         this.out.println("\nProgram terminated when maximum step limit " + this.options.maxSteps +
-                            " " +
-                            "reached.");
+                                             " " +
+                                             "reached.");
                         break;
                     } else if (done == Simulator.Reason.CLIFF_TERMINATION) {
                         this.out.println("\nProgram terminated by dropping off the bottom.");
@@ -646,7 +659,8 @@ public final class Main {
                 }
             } else if (ControlAndStatusRegisterFile.getRegister(reg) != null) {
                 this.out.print(reg + "\t");
-                this.out.println(this.formatIntForDisplay((int) ControlAndStatusRegisterFile.getRegister(reg).getValue()));
+                this.out.println(this.formatIntForDisplay((int) ControlAndStatusRegisterFile.getRegister(reg)
+                    .getValue()));
             } else if (this.verbose) {
                 this.out.print(reg + "\t");
                 this.out.println(this.formatIntForDisplay((int) RegisterFile.getRegister(reg).getValue()));

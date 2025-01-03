@@ -1,5 +1,6 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 
@@ -30,24 +31,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>LBU class.</p>
- */
 public final class LBU extends Load {
-    public static final LBU INSTANCE = new LBU();
+    public static final @NotNull LBU INSTANCE = new LBU();
 
-    /**
-     * <p>Constructor for LBU.</p>
-     */
     private LBU() {
         super("lbu t1, -100(t2)", "Set t1 to zero-extended 8-bit second from effective memory byte address", "100");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long load(final int address) throws AddressErrorException {
-        return Memory.getInstance().getByte(address) & 0x000000FF;
+        return Byte.toUnsignedLong(Memory.getInstance().getByte(address));
     }
 }

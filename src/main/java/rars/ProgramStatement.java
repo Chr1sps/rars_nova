@@ -63,7 +63,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     private final @Nullable TokenList originalTokenList, strippedTokenList;
     private final @NotNull BasicStatementList basicStatementList;
     private final @NotNull ArrayList<@NotNull Integer> operands;
-    private final Instruction instruction;
+    private final @Nullable Instruction instruction;
     private final int textAddress;
     private final @NotNull String source;
     private final int sourceLine;
@@ -71,31 +71,37 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     private String machineStatement;
     private int binaryStatement;
 
-
     /**
      * Constructor for ProgramStatement when there are links back to all source and
      * token
      * information. These can be used by a debugger later on.
      *
-     * @param sourceProgram     The RISCVprogram object that contains this statement
-     * @param source            The corresponding RISCV source statement.
-     * @param origTokenList     Complete list of Token objects (includes labels,
-     *                          comments, parentheses, etc)
-     * @param strippedTokenList List of Token objects with all but operators and
-     *                          operands removed.
-     * @param inst              The Instruction object for this statement's
-     *                          operator.
-     * @param textAddress       The Text Segment address in memory where the binary
-     *                          machine code for this statement
-     *                          is stored.
-     * @param sourceLine        a int
+     * @param sourceProgram
+     *     The RISCVprogram object that contains this statement
+     * @param source
+     *     The corresponding RISCV source statement.
+     * @param origTokenList
+     *     Complete list of Token objects (includes labels,
+     *     comments, parentheses, etc)
+     * @param strippedTokenList
+     *     List of Token objects with all but operators and
+     *     operands removed.
+     * @param instruction
+     *     The Instruction object for this statement's
+     *     operator.
+     * @param textAddress
+     *     The Text Segment address in memory where the binary
+     *     machine code for this statement
+     *     is stored.
+     * @param sourceLine
+     *     a int
      */
     public ProgramStatement(
         final @Nullable RISCVProgram sourceProgram,
         final @NotNull String source,
         final @Nullable TokenList origTokenList,
         final @Nullable TokenList strippedTokenList,
-        final Instruction inst,
+        final @NotNull Instruction instruction,
         final int textAddress,
         final int sourceLine
     ) {
@@ -104,7 +110,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         this.originalTokenList = origTokenList;
         this.strippedTokenList = strippedTokenList;
         this.operands = new ArrayList<>(5);
-        this.instruction = inst;
+        this.instruction = instruction;
         this.textAddress = textAddress;
         this.sourceLine = sourceLine;
         this.basicAssemblyStatement = null;
@@ -113,7 +119,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         this.binaryStatement = 0; // nop, or sll $0, $0, 0 (32 bits of 0's)
     }
 
-
     /**
      * Constructor for ProgramStatement used only for writing a binary machine
      * instruction with no source code to refer back to. Originally supported
@@ -121,10 +126,12 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * all basic instructions. This was required for the self-modifying code
      * feature.
      *
-     * @param binaryStatement The 32-bit machine code.
-     * @param textAddress     The Text Segment address in memory where the binary
-     *                        machine code for this statement
-     *                        is stored.
+     * @param binaryStatement
+     *     The 32-bit machine code.
+     * @param textAddress
+     *     The Text Segment address in memory where the binary
+     *     machine code for this statement
+     *     is stored.
      */
     public ProgramStatement(final int binaryStatement, final int textAddress) {
         this.sourceProgram = null;
@@ -134,7 +141,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         this.source = "";
         this.sourceLine = -1;
         this.machineStatement = this.basicAssemblyStatement = null;
-        final var instr = Instructions.findBasicInstructionByBinaryCode(binaryStatement);
+        final var instr = InstructionsRegistry.findBasicInstructionByBinaryCode(binaryStatement);
         this.operands = new ArrayList<>(5);
         if (instr == null) {
             this.instruction = null;
@@ -200,7 +207,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             ((address & 0x7F800) >> 11); // move address[19:12] to the right place
     }
 
-
     private static int fromJumpImmediate(final int immediate) {
         // trying to produce address[20:0] where immediate = address[20|10:1|11|19:12]
         final int tmp = ((immediate) & (1 << 19)) | // keep the top bit in the same place
@@ -209,7 +215,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             ((immediate & 0xFF) << 11); // move address[19:12] to the right place
         return (tmp << 12) >> 11; // sign-extend and add extra 0
     }
-
 
     private static int toBranchImmediate(int address) {
         // trying to produce imm[12:1] where immediate = address[12|10:1|11]
@@ -237,10 +242,13 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *         0b0101000001000001000010010011101001)
      * </pre>
      *
-     * @param format          the format of the full binary statement (all operands
-     *                        present)
-     * @param mask            the second (f,s, or t) to mask out
-     * @param binaryStatement the binary statement to read from
+     * @param format
+     *     the format of the full binary statement (all operands
+     *     present)
+     * @param mask
+     *     the second (f,s, or t) to mask out
+     * @param binaryStatement
+     *     the binary statement to read from
      * @return the bits read pushed to the right
      */
     private static int readBinaryCode(final String format, final char mask, final int binaryStatement) {
@@ -273,9 +281,9 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             statementList.addString(invalidOperator);
             return statementList;
         } else {
-            statementList.addString(instr.getName() + " ");
+            statementList.addString(instr.mnemonic + " ");
         }
-        final var tokenList = Instructions.getTokenList(instr);
+        final var tokenList = InstructionsRegistry.getTokenList(instr);
         for (final var operand : operands) {
             // add separator if not at end of token list AND neither current nor
             // next token is a parenthesis
@@ -340,8 +348,9 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * corresponding assembly statement in basic assembly format (e.g. substituting
      * register numbers for register names, replacing labels by values).
      *
-     * @param errors The list of assembly errors encountered so far. May add to it
-     *               here.
+     * @param errors
+     *     The list of assembly errors encountered so far. May add to it
+     *     here.
      */
     public void buildBasicStatementFromBasicInstruction(final ErrorList errors) {
         final var firstToken = Objects.requireNonNull(this.strippedTokenList).get(0);
@@ -580,21 +589,22 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * Given the current statement in Basic Assembly format (see above), build the
      * 32-bit binary machine code statement.
      *
-     * @param errors The list of assembly errors encountered so far. May add to it
-     *               here.
+     * @param errors
+     *     The list of assembly errors encountered so far. May add to it
+     *     here.
      */
     public void buildMachineStatementFromBasicStatement(final @NotNull ErrorList errors) {
         switch (this.instruction) {
             case final ExtendedInstruction ignored -> {
-                // This means the usePseudoInstructions-instruction expansion generated another
-                // usePseudoInstructions-instruction (expansion must be to all basic instructions).
-                // This is an error on the part of the usePseudoInstructions-instruction author.
+                // This means the pseudo-instruction expansion generated another
+                // pseudo-instruction (expansion must be to all basic instructions).
+                // This is an error on the part of the pseudo-instruction author.
                 errors.add(ErrorMessage.error(
                     this.sourceProgram,
                     this.sourceLine,
                     0,
                     "INTERNAL ERROR: usePseudoInstructions-instruction expansion contained a " +
-                        "usePseudoInstructions-instruction"
+                        "pseudo-instruction"
                 ));
             }
             case final BasicInstruction basic -> {
@@ -663,6 +673,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
 //                }
 //                this.binaryStatement = Binary.binaryStringToInt(this.machineStatement);
             }
+            case null -> throw new IllegalStateException("Instruction is null");
         }
     }
 
@@ -672,79 +683,30 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * @return A String representing the ProgramStatement.
      */
     @Override
-    public String toString() {
-        // a crude attempt at string formatting. Where's C when you need it?
-        final String blanks = "                               ";
-        final StringBuilder result = new StringBuilder("[" + this.textAddress + "]");
+    public @NotNull String toString() {
+        final var builder = new StringBuilder();
+        final var textAddressString = "[%s]".formatted(BinaryUtils.intToHexString(this.textAddress));
+        builder.append(textAddressString);
         if (this.basicAssemblyStatement != null) {
-            final int firstSpace = this.basicAssemblyStatement.indexOf(" ");
-            result.append(
-                blanks,
-                0,
-                16 - result.length()
-            ).append(
-                this.basicAssemblyStatement,
-                0,
-                firstSpace
-            );
-            result.append(
-                blanks,
-                0,
-                24 - result.length()
-            ).append(this.basicAssemblyStatement.substring(firstSpace + 1));
+            final var firstSpaceIndex = this.basicAssemblyStatement.indexOf(" ");
+            final var instruction = this.basicAssemblyStatement.substring(0, firstSpaceIndex);
+            final var operands = this.basicAssemblyStatement.substring(firstSpaceIndex + 1);
+            builder.append(" %-7s %-21s".formatted(instruction, operands));
         } else {
-            result.append(
-                blanks,
-                0,
-                16 - result.length()
-            ).append("0x").append(Integer.toString(
-                this.binaryStatement,
-                16
-            ));
+            final var binaryStatementString = " 0x%s".formatted(Integer.toString(this.binaryStatement, 16));
+            builder.append(binaryStatementString);
         }
-        result.append(
-            blanks,
-            0,
-            40 - result.length()
-        ).append(";  "); // this.source;
-        for (final var operand : this.operands) {
-            result
-                .append(Integer.toString(
-                    operand,
-                    16
-                ))
-                .append(" ");
-        }
-
         if (this.machineStatement != null) {
-            result.append("[").append(BinaryUtils.binaryStringToHexString(this.machineStatement)).append("]");
-            result.append("  ").append(
-                this.machineStatement,
-                0,
-                6
-            ).append("|").append(
-                this.machineStatement,
-                6,
-                11
-            ).append("|").append(
-                this.machineStatement,
-                11,
-                16
-            ).append("|").append(
-                this.machineStatement,
-                16,
-                21
-            ).append("|").append(
-                this.machineStatement,
-                21,
-                26
-            ).append("|").append(
-                this.machineStatement,
-                26,
-                32
+            final var machineStatementString = "| %s | %s|%s|%s|%s".formatted(
+                BinaryUtils.binaryStringToHexString(this.machineStatement),
+                this.machineStatement.substring(0, 8),
+                this.machineStatement.substring(8, 16),
+                this.machineStatement.substring(16, 24),
+                this.machineStatement.substring(24, 32)
             );
+            builder.append(machineStatementString);
         }
-        return result.toString();
+        return builder.toString();
     } // toString()
 
     /**
@@ -829,7 +791,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @return The Instruction that matches the operator used in this statement.
      */
-    public Instruction getInstruction() {
+    public @Nullable Instruction getInstruction() {
         return this.instruction;
     }
 
@@ -842,13 +804,20 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         return this.textAddress;
     }
 
+    /** Returns true if the statement contains an operand of the given index. */
+    public boolean hasOperand(final int index) {
+        return index > 0 && index < this.operands.size();
+    }
+
     /**
      * Produces operand second from given array position (first operand is position
      * 0).
      *
-     * @param i Operand position in array (first operand is position 0).
+     * @param i
+     *     Operand position in array (first operand is position 0).
      * @return Operand second at given operand array position.
-     * @throws IndexOutOfBoundsException if illegal operand position.
+     * @throws IndexOutOfBoundsException
+     *     if illegal operand position.
      */
     public int getOperand(final int i) throws IndexOutOfBoundsException {
         return this.operands.get(i);
@@ -858,10 +827,13 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * Given operand (register or integer) and mask character ('f', 's', or 't'),
      * generate the correct sequence of bits and replace the mask with them.
      *
-     * @param value  the second to be masked in (will be converted to binary)
-     * @param mask   the second (f,s, or t) to mask out
-     * @param errors error list to append errors to in the event of unrecoverable
-     *               errors
+     * @param value
+     *     the second to be masked in (will be converted to binary)
+     * @param mask
+     *     the second (f,s, or t) to mask out
+     * @param errors
+     *     error list to append errors to in the event of unrecoverable
+     *     errors
      */
     private void insertBinaryCode(final int value, final char mask, final ErrorList errors) {
         final var stateBuilder = new StringBuilder(this.machineStatement);
@@ -906,6 +878,17 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         }
 
         this.machineStatement = stateBuilder.toString();
+    }
+
+    /**
+     * Structure for getting the dimensions to be used when
+     * generating the string representation of the statement.
+     */
+    private record StringDimensions(
+        int textAddressesWidth,
+        int instructionsWidth,
+        int operandsWidth
+    ) {
     }
 
     /**

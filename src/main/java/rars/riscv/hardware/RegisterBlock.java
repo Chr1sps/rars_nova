@@ -47,9 +47,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Benjamin Landers
  * @version June 2017
  */
-public class RegisterBlock {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private final Register[] regFile;
+public final class RegisterBlock {
+    private static final @NotNull Logger LOGGER = LogManager.getLogger();
+    private final @NotNull Register @NotNull[] regFile;
     private final char prefix;
 
     /**
@@ -58,7 +58,7 @@ public class RegisterBlock {
      * @param prefix    a char
      * @param registers an array of {@link Register} objects
      */
-    protected RegisterBlock(final char prefix, final Register[] registers) {
+    public RegisterBlock(final char prefix, final @NotNull Register @NotNull[] registers) {
         this.prefix = prefix;
         this.regFile = registers;
     }
@@ -70,22 +70,10 @@ public class RegisterBlock {
      * @param val The desired second for the register.
      * @return a long
      */
-    public static long updateRegister(final Register r, final long val) {
+    private static @Nullable Long updateRegister(final @Nullable Register r, final long val) {
         if (r == null)
-            return 0;
+            return null;
         return r.setValue(val);
-    }
-
-    /**
-     * Method for displaying the register values for debugging.
-     */
-    public void showRegisters() {
-        for (final Register r : this.regFile) {
-            RegisterBlock.LOGGER.debug("Name: {}", r.getName());
-            RegisterBlock.LOGGER.debug("Number: {}", r.getNumber());
-            RegisterBlock.LOGGER.debug("Value: {}", r.getValue());
-            RegisterBlock.LOGGER.debug('\n');
-        }
     }
 
     /**

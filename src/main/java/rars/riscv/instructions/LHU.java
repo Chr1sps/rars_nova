@@ -30,25 +30,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>LHU class.</p>
- */
 public final class LHU extends Load {
     public static final LHU INSTANCE = new LHU();
 
-    /**
-     * <p>Constructor for LHU.</p>
-     */
     private LHU() {
-        super("lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit second from effective memory halfword address", 
-                "101");
+        super(
+            "lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit second from effective memory halfword address",
+            "101"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long load(final int address) throws AddressErrorException {
-        return Memory.getInstance().getHalf(address) & 0x0000FFFF;
+        final var value = Memory.getInstance().getHalf(address);
+        return Short.toUnsignedLong(value);
     }
 }

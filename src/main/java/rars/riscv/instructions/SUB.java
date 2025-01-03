@@ -27,23 +27,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SUB class.</p>
- */
 public final class SUB extends Arithmetic {
     public static final SUB INSTANCE = new SUB();
 
-    /**
-     * <p>Constructor for SUB.</p>
-     */
     private SUB() {
-        super("sub t1,t2,t3", "Subtraction: set t1 to (t2 minus t3)",
-                "0100000", "000");
+        super(
+            "sub t1,t2,t3", "Subtraction: set t1 to (t2 minus t3)",
+            "0100000", "000"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long value2) {
         return value - value2;

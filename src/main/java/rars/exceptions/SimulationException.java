@@ -17,7 +17,6 @@ public class SimulationException extends Exception {
     public final int value;
     public final ErrorMessage errorMessage;
 
-
     private SimulationException(final ExceptionReason reason, final ErrorMessage msg, final int value) {
         this.reason = reason;
         this.value = value;
@@ -34,25 +33,34 @@ public class SimulationException extends Exception {
     /**
      * <p>Constructor for SimulationException.</p>
      *
-     * @param ps     a {@link ProgramStatement} object
-     * @param m      a {@link java.lang.String} object
-     * @param reason a int
+     * @param ps
+     *     a {@link ProgramStatement} object
+     * @param m
+     *     a {@link java.lang.String} object
+     * @param reason
+     *     a int
      */
     public SimulationException(final ProgramStatement ps, final String m, final ExceptionReason reason) {
-        this(reason, new ErrorMessage(ps, "Runtime exception at " +
-            BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
-            ": " + m), 0);
+        this(
+            reason, new ErrorMessage(
+                ps, "Runtime exception at " +
+                BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
+                ": " + m
+            ), 0
+        );
     }
 
     /**
      * Constructor for ProcessingException to handle runtime exceptions
      *
-     * @param ps a ProgramStatement of statement causing runtime exception
-     * @param m  a String containing specialized error message
+     * @param ps
+     *     a ProgramStatement of statement causing runtime exception
+     * @param m
+     *     a String containing specialized error message
      */
     public SimulationException(final ProgramStatement ps, final String m) {
         this(ps, m, ExceptionReason.OTHER);
-        // Stopped using ps.getAddress() because of usePseudoInstructions-instructions. All
+        // Stopped using ps.getAddress() because of pseudo-instructions. All
         // instructions in
         // the macro expansion point to the same ProgramStatement, and thus all will
         // return the
@@ -66,19 +74,26 @@ public class SimulationException extends Exception {
     /**
      * <p>Constructor for SimulationException.</p>
      *
-     * @param ps  a {@link ProgramStatement} object
-     * @param aee a {@link AddressErrorException} object
+     * @param ps
+     *     a {@link ProgramStatement} object
+     * @param aee
+     *     a {@link AddressErrorException} object
      */
     public SimulationException(final ProgramStatement ps, final AddressErrorException aee) {
-        this(aee.reason, new ErrorMessage(ps, "Runtime exception at " +
-            BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
-            ": " + aee.getMessage()), aee.address);
+        this(
+            aee.reason, new ErrorMessage(
+                ps, "Runtime exception at " +
+                BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
+                ": " + aee.getMessage()
+            ), aee.address
+        );
     }
 
     /**
      * <p>Constructor for SimulationException.</p>
      *
-     * @param m a {@link java.lang.String} object
+     * @param m
+     *     a {@link java.lang.String} object
      */
     public SimulationException(final String m) {
         this(m, ExceptionReason.OTHER);
@@ -87,8 +102,10 @@ public class SimulationException extends Exception {
     /**
      * <p>Constructor for SimulationException.</p>
      *
-     * @param m      a {@link java.lang.String} object
-     * @param reason a int
+     * @param m
+     *     a {@link java.lang.String} object
+     * @param reason
+     *     a int
      */
     public SimulationException(final String m, final ExceptionReason reason) {
         this.errorMessage = ErrorMessage.error(null, 0, 0, m);

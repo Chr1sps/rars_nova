@@ -52,7 +52,7 @@ public abstract class Load extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             RegisterFile.updateRegister(
@@ -67,9 +67,11 @@ public abstract class Load extends BasicInstruction {
     /**
      * <p>load.</p>
      *
-     * @param address the address to load from
+     * @param address
+     *     the address to load from
      * @return The second to store to the register
-     * @throws AddressErrorException if any.
+     * @throws AddressErrorException
+     *     if any.
      */
     protected abstract long load(int address) throws AddressErrorException;
 }

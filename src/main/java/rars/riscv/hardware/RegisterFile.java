@@ -7,8 +7,7 @@ import rars.notices.RegisterAccessNotice;
 import rars.riscv.BasicInstruction;
 import rars.settings.BoolSetting;
 import rars.settings.OtherSettings;
-
-import java.util.concurrent.Flow;
+import rars.util.ConversionUtils;
 import rars.util.SimpleSubscriber;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
@@ -49,18 +48,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class RegisterFile {
 
-    /**
-     * Constant <code>GLOBAL_POINTER_REGISTER=3</code>
-     */
-    public static final int GLOBAL_POINTER_REGISTER = 3;
-    /**
-     * Constant <code>STACK_POINTER_REGISTER=2</code>
-     */
-    public static final int STACK_POINTER_REGISTER = 2;
-    private static final RegisterBlock instance = new RegisterBlock('x', new Register[]{
+    public static final int GLOBAL_POINTER_REGISTER_INDEX = 3;
+    public static final int STACK_POINTER_REGISTER_INDEX = 2;
+    public static final @NotNull Register
+        SP_REGISTER = new Register("sp", STACK_POINTER_REGISTER_INDEX, Memory.stackPointer),
+        GP_REGISTER = new Register("gp", GLOBAL_POINTER_REGISTER_INDEX, Memory.globalPointer);
+    private static final @NotNull RegisterBlock REGISTER_BLOCK = new RegisterBlock(
+        'x', new Register[]{
         new Register("zero", 0, 0), new Register("ra", 1, 0),
-        new Register("sp", RegisterFile.STACK_POINTER_REGISTER, Memory.stackPointer),
-        new Register("gp", RegisterFile.GLOBAL_POINTER_REGISTER, Memory.globalPointer),
+        SP_REGISTER,
+        GP_REGISTER,
         new Register("tp", 4, 0), new Register("t0", 5, 0),
         new Register("t1", 6, 0), new Register("t2", 7, 0),
         new Register("s0", 8, 0), new Register("s1", 9, 0),
@@ -75,9 +72,9 @@ public final class RegisterFile {
         new Register("s10", 26, 0), new Register("s11", 27, 0),
         new Register("t3", 28, 0), new Register("t4", 29, 0),
         new Register("t5", 30, 0), new Register("t6", 31, 0)
-    });
-
-    private static final Register programCounter = new Register("pc", -1, Memory.textBaseAddress);
+    }
+    );
+    public static final @NotNull Register PC_REGISTER = new Register("pc", -1, Memory.textBaseAddress);
 
     private RegisterFile() {
     }
@@ -86,16 +83,22 @@ public final class RegisterFile {
      * This method updates the register second who's number is num. Also handles the
      * lo and hi registers
      *
-     * @param num Register to set the second of.
-     * @param val The desired second for the register.
+     * @param num
+     *     Register to set the second of.
+     * @param val
+     *     The desired second for the register.
      */
     public static void updateRegister(final int num, final long val) {
         if (num != 0) {
             if ((OtherSettings.getBackSteppingEnabled())) {
-                Globals.program.getBackStepper().addRegisterFileRestore(num, RegisterFile.instance.updateRegister(num
-                    , val));
+                Globals.program.getBackStepper().addRegisterFileRestore(
+                    num, RegisterFile.REGISTER_BLOCK.updateRegister(
+                        num
+                        , val
+                    )
+                );
             } else {
-                RegisterFile.instance.updateRegister(num, val);
+                RegisterFile.REGISTER_BLOCK.updateRegister(num, val);
             }
         }
     }
@@ -103,43 +106,48 @@ public final class RegisterFile {
     /**
      * Sets the second of the register given to the second given.
      *
-     * @param name Name of register to set the second of.
-     * @param val  The desired second for the register.
+     * @param name
+     *     Name of register to set the second of.
+     * @param val
+     *     The desired second for the register.
      */
     public static void updateRegister(final String name, final long val) {
-        RegisterFile.updateRegister(RegisterFile.instance.getRegister(name).getNumber(), val);
+        RegisterFile.updateRegister(RegisterFile.REGISTER_BLOCK.getRegister(name).getNumber(), val);
     }
 
     /**
      * Returns the second of the register.
      *
-     * @param num The register number.
+     * @param num
+     *     The register number.
      * @return The second of the given register.
      */
     public static int getValue(final int num) {
-        return (int) RegisterFile.instance.getValue(num);
+        return ConversionUtils.longLowerHalfToInt(RegisterFile.REGISTER_BLOCK.getValue(num));
 
     }
 
     /**
      * Returns the second of the register.
      *
-     * @param num The register number.
+     * @param num
+     *     The register number.
      * @return The second of the given register.
      */
     public static long getValueLong(final int num) {
-        return RegisterFile.instance.getValue(num);
+        return RegisterFile.REGISTER_BLOCK.getValue(num);
 
     }
 
     /**
      * Returns the second of the register.
      *
-     * @param name The register's name.
+     * @param name
+     *     The register's name.
      * @return The second of the given register.
      */
     public static int getValue(final String name) {
-        return (int) RegisterFile.instance.getValue(name);
+        return ConversionUtils.longLowerHalfToInt(RegisterFile.REGISTER_BLOCK.getValue(name));
     }
 
     /**
@@ -148,20 +156,21 @@ public final class RegisterFile {
      * @return The set of registers.
      */
     public static Register[] getRegisters() {
-        return RegisterFile.instance.getRegisters();
+        return RegisterFile.REGISTER_BLOCK.getRegisters();
     }
 
     /**
      * Get register object corresponding to given name. If no match, return null.
      *
-     * @param name The register name, either in $0 or $zero format.
+     * @param name
+     *     The register name, either in $0 or $zero format.
      * @return The register object,or null if not found.
      */
     public static Register getRegister(final String name) {
         if (name.equals("fp")) {
-            return RegisterFile.instance.getRegister("s0");
+            return RegisterFile.REGISTER_BLOCK.getRegister("s0");
         }
-        return RegisterFile.instance.getRegister(name);
+        return RegisterFile.REGISTER_BLOCK.getRegister(name);
     }
 
     /**
@@ -169,10 +178,11 @@ public final class RegisterFile {
      * branches, as it will NOT record a backstep entry with the restore second.
      * If you need backstepping capability, use setProgramCounter instead.
      *
-     * @param value The second to set the Program Counter to.
+     * @param value
+     *     The second to set the Program Counter to.
      */
     public static void initializeProgramCounter(final int value) {
-        RegisterFile.programCounter.setValue(value);
+        RegisterFile.PC_REGISTER.setValue(value);
     }
 
     /**
@@ -182,18 +192,19 @@ public final class RegisterFile {
      * segment label
      * and the global setting is set.
      *
-     * @param startAtMain If true, will set program counter to address of statement
-     *                    labeled
-     *                    'main' (or other defined start label) if defined. If not
-     *                    defined, or if parameter false,
-     *                    will set program counter to default reset second.
+     * @param startAtMain
+     *     If true, will set program counter to address of statement
+     *     labeled
+     *     'main' (or other defined start label) if defined. If not
+     *     defined, or if parameter false,
+     *     will set program counter to default reset second.
      */
     public static void initializeProgramCounter(final boolean startAtMain) {
         final int mainAddr = Globals.symbolTable.getAddress(SymbolTable.getStartLabel());
         if (startAtMain && mainAddr != SymbolTable.NOT_FOUND && Memory.inTextSegment(mainAddr)) {
             RegisterFile.initializeProgramCounter(mainAddr);
         } else {
-            RegisterFile.initializeProgramCounter((int) RegisterFile.programCounter.getResetValue());
+            RegisterFile.initializeProgramCounter((int) RegisterFile.PC_REGISTER.getResetValue());
         }
     }
 
@@ -203,7 +214,7 @@ public final class RegisterFile {
      * @return The program counters second as an int.
      */
     public static int getProgramCounter() {
-        return (int) RegisterFile.programCounter.getValue();
+        return (int) RegisterFile.PC_REGISTER.getValue();
     }
 
     /**
@@ -211,32 +222,15 @@ public final class RegisterFile {
      * using
      * incrementPC() method. Use this only when processing jumps and branches.
      *
-     * @param value The second to set the Program Counter to.
+     * @param value
+     *     The second to set the Program Counter to.
      */
     public static void setProgramCounter(final int value) {
-        final int old = (int) RegisterFile.programCounter.getValue();
-        RegisterFile.programCounter.setValue(value);
+        final int old = (int) RegisterFile.PC_REGISTER.getValue();
+        RegisterFile.PC_REGISTER.setValue(value);
         if (OtherSettings.getBackSteppingEnabled()) {
             Globals.program.getBackStepper().addPCRestore(old);
         }
-    }
-
-    /**
-     * Returns Register object for program counter. Use with caution.
-     *
-     * @return program counter's Register object.
-     */
-    public static Register getProgramCounterRegister() {
-        return RegisterFile.programCounter;
-    }
-
-    /**
-     * For returning the program counter's initial (reset) second.
-     *
-     * @return The program counter's initial second
-     */
-    public static int getInitialProgramCounter() {
-        return (int) RegisterFile.programCounter.getResetValue();
     }
 
     /**
@@ -245,14 +239,11 @@ public final class RegisterFile {
      * this method uses global settings from the registry. Command-mode must operate
      * using only the command switches, not registry settings. It can be called
      * from tools running stand-alone, and this is done in
-     * <code>AbstractToolAndApplication</code>.
+     * {@code AbstractToolAndApplication}.
      */
     public static void resetRegisters() {
-        RegisterFile.instance.resetRegisters();
+        RegisterFile.REGISTER_BLOCK.resetRegisters();
         RegisterFile.initializeProgramCounter(BOOL_SETTINGS.getSetting(BoolSetting.START_AT_MAIN));//
-        // replaces
-        // "programCounter.resetValue()",
-        // DPS 3/3/09
     }
 
     /**
@@ -260,7 +251,7 @@ public final class RegisterFile {
      * branch).
      */
     public static void incrementPC() {
-        RegisterFile.programCounter.setValue(RegisterFile.programCounter.getValue() + BasicInstruction.BASIC_INSTRUCTION_LENGTH);
+        RegisterFile.PC_REGISTER.setValue(RegisterFile.PC_REGISTER.getValue() + BasicInstruction.BASIC_INSTRUCTION_LENGTH);
     }
 
     /**
@@ -269,10 +260,11 @@ public final class RegisterFile {
      * will add the given Observer to each one. Currently does not apply to Program
      * Counter.
      *
-     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
+     * @param observer
+     *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public static void addRegistersObserver(final @NotNull SimpleSubscriber<? super RegisterAccessNotice> observer) {
-        RegisterFile.instance.addRegistersObserver(observer);
+        RegisterFile.REGISTER_BLOCK.addRegistersObserver(observer);
     }
 
     /**
@@ -282,9 +274,18 @@ public final class RegisterFile {
      * Program
      * Counter.
      *
-     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
+     * @param observer
+     *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public static void deleteRegistersObserver(final @NotNull SimpleSubscriber<? super RegisterAccessNotice> observer) {
-        RegisterFile.instance.deleteRegistersSubscriber(observer);
+        RegisterFile.REGISTER_BLOCK.deleteRegistersSubscriber(observer);
+    }
+
+    public static void setValuesFromConfiguration(final @NotNull MemoryConfiguration configuration) {
+        RegisterFile.GP_REGISTER.changeResetValue(configuration.globalPointerAddress);
+        RegisterFile.SP_REGISTER.changeResetValue(configuration.stackPointerAddress);
+        RegisterFile.PC_REGISTER.changeResetValue(configuration.textBaseAddress);
+        RegisterFile.PC_REGISTER.setValue(configuration.textBaseAddress);
+        RegisterFile.resetRegisters();
     }
 }

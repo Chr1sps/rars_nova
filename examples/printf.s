@@ -1,3 +1,5 @@
+.eqv printStr 4
+.eqv printHex 34
 .globl printf
 .text
 # input: a0 = template string, a1-a7=arguments in order for that template

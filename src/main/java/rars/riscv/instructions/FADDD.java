@@ -22,7 +22,8 @@ public final class FADDD extends Double {
      * {@inheritDoc}
      */
     @Override
-    public Float64 compute(@NotNull final Float64 f1, final Float64 f2, final Environment e) {
+    public @NotNull Float64 compute(final @NotNull Float64 f1, final @NotNull Float64 f2,
+                                    final @NotNull Environment e) {
         return Arithmetic.add(f1, f2, e);
     }
 }

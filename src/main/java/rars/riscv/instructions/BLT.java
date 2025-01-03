@@ -34,7 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class BLT extends Branch {
     public static final BLT INSTANCE = new BLT();
 
-
     private BLT() {
         super(
             "blt t1,t2,label",
@@ -44,7 +43,7 @@ public final class BLT extends Branch {
     }
 
     @Override
-    public boolean willBranch(@NotNull final ProgramStatement statement) {
+    public boolean willBranch(final @NotNull ProgramStatement statement) {
         return RegisterFile.getValueLong(statement.getOperand(0)) < RegisterFile.getValueLong(statement.getOperand(1));
     }
 }

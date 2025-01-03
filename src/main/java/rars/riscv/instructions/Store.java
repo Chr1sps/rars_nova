@@ -52,7 +52,7 @@ public abstract class Store extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             store(
@@ -70,9 +70,12 @@ public abstract class Store extends BasicInstruction {
     /**
      * <p>store.</p>
      *
-     * @param address the address to store to
-     * @param value   the second to store
-     * @throws AddressErrorException if any.
+     * @param address
+     *     the address to store to
+     * @param value
+     *     the second to store
+     * @throws AddressErrorException
+     *     if any.
      */
     protected abstract void store(int address, long value) throws AddressErrorException;
 }

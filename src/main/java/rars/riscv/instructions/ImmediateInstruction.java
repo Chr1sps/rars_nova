@@ -4,8 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.Instructions;
+import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.RegisterFile;
+import rars.util.ConversionUtils;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -48,28 +49,29 @@ public abstract class ImmediateInstruction extends BasicInstruction {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        if (Instructions.RV64) {
+        if (InstructionsRegistry.RV64_MODE_FLAG) {
             RegisterFile.updateRegister(
                 statement.getOperand(0),
                 compute(
                     RegisterFile.getValueLong(statement.getOperand(1)),
                     ((long) statement.getOperand(2) << 20) >> 20
                 )
-            ); // make sure the immediate is sign-extended
+            );
         } else {
             RegisterFile.updateRegister(
                 statement.getOperand(0),
                 computeW(RegisterFile.getValue(statement.getOperand(1)), (statement.getOperand(2) << 20) >> 20)
-            ); // 
-            // make sure the immediate is sign-extended
+            );
         }
     }
 
     /**
      * <p>compute.</p>
      *
-     * @param value     the second from the register
-     * @param immediate the second from the immediate
+     * @param value
+     *     the second from the register
+     * @param immediate
+     *     the second from the immediate
      * @return the result to be stored from the instruction
      */
     protected abstract long compute(long value, long immediate);
@@ -77,11 +79,13 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     /**
      * <p>computeW.</p>
      *
-     * @param value     the truncated second from the register
-     * @param immediate the second from the immediate
+     * @param value
+     *     the truncated second from the register
+     * @param immediate
+     *     the second from the immediate
      * @return the result to be stored from the instruction
      */
     protected int computeW(final int value, final int immediate) {
-        return (int) compute(value, immediate);
+        return ConversionUtils.longLowerHalfToInt(compute(value, immediate));
     }
 }

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
+
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
 
@@ -93,7 +95,8 @@ public final class Globals {
     public static @Nullable VenusUI gui = null;
 
     static {
-        Memory.getInstance().clear(); // will establish memory configuration from setting
+        Memory.setConfiguration(OTHER_SETTINGS.getMemoryConfiguration());
+        Memory.getInstance().initialize(); // will establish memory configuration from setting
     }
 
     private Globals() {

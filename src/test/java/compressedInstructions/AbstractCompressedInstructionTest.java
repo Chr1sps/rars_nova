@@ -5,7 +5,7 @@ import rars.ErrorList;
 import rars.api.Options;
 import rars.api.Program;
 import rars.exceptions.AssemblyException;
-import rars.riscv.Instructions;
+import rars.riscv.InstructionsRegistry;
 import rars.settings.BoolSetting;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public abstract class AbstractCompressedInstructionTest {
     ) {
 
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64);
-        Instructions.RV64 = isRV64;
+        InstructionsRegistry.RV64_MODE_FLAG = isRV64;
 
 
         System.out.println("═══════SOURCE═CODE═══════");
@@ -92,7 +92,7 @@ public abstract class AbstractCompressedInstructionTest {
             final var actual = errors.get(i);
             if (expected.line() != actual.getLine() || expected.position() != actual.getPosition()) {
                 fail("Expected error at line " + expected.line() + " position " + expected.position() +
-                    ", but got error at line " + actual.getLine() + " position " + actual.getPosition());
+                         ", but got error at line " + actual.getLine() + " position " + actual.getPosition());
             }
         }
     }

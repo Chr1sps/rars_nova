@@ -100,13 +100,16 @@ public abstract class Floating extends BasicInstruction {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(3), statement);
+        final var environment = new Environment();
+        final var hasRoundingMode = statement.hasOperand(3);
+        if (hasRoundingMode) {
+            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement);
+        }
         final Float32 result = this.compute(
             new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1))),
-            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(2))), e
+            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(2))), environment
         );
-        Floating.setfflags(e);
+        Floating.setfflags(environment);
         FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
     }
 

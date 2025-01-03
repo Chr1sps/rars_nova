@@ -45,7 +45,7 @@ public final class FSGNJS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final int result = (FloatingPointRegisterFile.getValue(statement.getOperand(1)) & 0x7FFFFFFF)
             | (FloatingPointRegisterFile.getValue(statement.getOperand(2)) & 0x80000000);
         FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result);

@@ -54,13 +54,18 @@ public final class Token {
     /**
      * Constructor for Token class.
      *
-     * @param type          The token type that this token has. (e.g. REGISTER_NAME)
-     * @param value         The source second for this token (e.g. $t3)
-     * @param sourceProgram The RISCVprogram object containing this token
-     * @param line          The line number in source program in which this token
-     *                      appears.
-     * @param start         The starting position in that line number of this
-     *                      token's source second.
+     * @param type
+     *     The token type that this token has. (e.g. REGISTER_NAME)
+     * @param value
+     *     The source second for this token (e.g. $t3)
+     * @param sourceProgram
+     *     The RISCVprogram object containing this token
+     * @param line
+     *     The line number in source program in which this token
+     *     appears.
+     * @param start
+     *     The starting position in that line number of this
+     *     token's source second.
      * @see TokenType
      */
     public Token(
@@ -84,7 +89,8 @@ public final class Token {
      * of the ".include" directive, and we need to keep the original
      * for later reference (error messages, text segment display).
      *
-     * @param origSourceLine Line within that program of this token.
+     * @param origSourceLine
+     *     Line within that program of this token.
      */
     public void setOriginal(final int origSourceLine) {
         this.originalSourceLine = origSourceLine;
@@ -114,9 +120,14 @@ public final class Token {
      * an identifier that matches an instruction name is
      * actually being used as a label.
      *
-     * @param type new TokenTypes for this token.
+     * @param type
+     *     new TokenTypes for this token.
      */
     public void setType(final @NotNull TokenType type) {
+        // TODO: remove this method
+        // It is *highly* preferable to make this class immutable and, thus,
+        // make any token manipulation more predictable by avoiding side effects
+        // created via mutation and references.
         this.type = type;
     }
 

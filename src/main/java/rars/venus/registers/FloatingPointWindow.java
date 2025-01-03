@@ -53,9 +53,9 @@ public final class FloatingPointWindow extends RegisterBlockWindow {
     @Override
     protected @NotNull String formatRegisterValue(final long value, final int base) {
         if (BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)) {
-            return NumberDisplayBaseChooser.formatFloatNumber((int) value, base);
-        } else {
             return NumberDisplayBaseChooser.formatDoubleNumber(value, base);
+        } else {
+            return NumberDisplayBaseChooser.formatFloatNumber((int) value, base);
         }
     }
 

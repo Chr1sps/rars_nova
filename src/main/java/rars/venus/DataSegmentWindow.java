@@ -32,9 +32,9 @@ import java.awt.event.MouseListener;
 import java.util.Date;
 import java.util.concurrent.Flow;
 
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
 import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
 import static rars.settings.HighlightingSettings.HIGHLIGHTING_SETTINGS;
 import static rars.util.Utils.deriveFontFromStyle;
 
@@ -151,8 +151,9 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     /**
      * Constructor for the Data Segment window.
      *
-     * @param choosers an array of objects used by user to select number display
-     *                 base (10 or 16)
+     * @param choosers
+     *     an array of objects used by user to select number display
+     *     base (10 or 16)
      */
     public DataSegmentWindow(final NumberDisplayBaseChooser[] choosers) {
         super("Data Segment", true, false, true, true);
@@ -175,7 +176,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Previous22.png"))));// "Back16
             // .gif"))));//"Down16.gif"))));
             this.nextButton = new NextButton(new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Next22" +
-                ".png"))));// "Forward16.gif"))));
+                                                                                          ".png"))));// "Forward16
+            // .gif"))));
             // //"Up16.gif"))));
             // This group of buttons was replaced by a combo box. Keep the JButton objects
             // for their action listeners.
@@ -261,7 +263,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             desiredComboBoxIndex = DataSegmentWindow.EXTERN_BASE_ADDRESS_INDEX;
         }
         // Check distance from global pointer; can be either side of it...
-        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER)); // distance from
+        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER_INDEX)); // 
+        // distance from
         // global
         // pointer
         if (thisDistance < shortDistance) {
@@ -281,7 +284,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             desiredComboBoxIndex = DataSegmentWindow.HEAP_BASE_ADDRESS_INDEX;
         }
         // Check distance from stack pointer. Can be on either side of it...
-        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER));
+        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX));
         if (thisDistance < shortDistance) {
             desiredComboBoxIndex = DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX;
         }
@@ -306,8 +309,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.displayBaseAddressArray[DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX] = -1; /* Memory.stackPointer */
         this.displayBaseAddressArray[DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX] = Memory.memoryMapBaseAddress;
         this.displayBaseAddressArray[DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX] = Memory.textBaseAddress;
-        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(this.displayBaseAddressArray,
-            this.descriptions);
+        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(
+            this.displayBaseAddressArray,
+            this.descriptions
+        );
         this.baseAddressSelector.setModel(new CustomComboBoxModel(this.displayBaseAddressChoices));
         this.displayBaseAddresses = this.displayBaseAddressArray;
         this.baseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
@@ -322,7 +327,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * its background color to a highlighting color. Thus one cell can be
      * highlighted while a different cell is selected at the same time.
      *
-     * @param address data segment address of word to be selected.
+     * @param address
+     *     data segment address of word to be selected.
      */
     void selectCellForAddress(final int address) {
         final Point rowColumn = this.displayCellForAddress(address);
@@ -333,10 +339,12 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // Select the memory address cell by generating a fake Mouse Pressed event
         // within its
         // extent and explicitly invoking the table's mouse listener.
-        final MouseEvent fakeMouseEvent = new MouseEvent(DataSegmentWindow.dataTable, MouseEvent.MOUSE_PRESSED,
+        final MouseEvent fakeMouseEvent = new MouseEvent(
+            DataSegmentWindow.dataTable, MouseEvent.MOUSE_PRESSED,
             new Date().getTime(), MouseEvent.BUTTON1_DOWN_MASK,
             (int) addressCell.getX() + 1,
-            (int) addressCell.getY() + 1, 1, false);
+            (int) addressCell.getY() + 1, 1, false
+        );
         final MouseListener[] mouseListeners = DataSegmentWindow.dataTable.getMouseListeners();
         for (final MouseListener mouseListener : mouseListeners) {
             mouseListener.mousePressed(fakeMouseEvent);
@@ -348,7 +356,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * is visible, vertically centered if possible, and highlighted (but not
      * selected).
      *
-     * @param address data segment address of word to be selected.
+     * @param address
+     *     data segment address of word to be selected.
      */
     public void highlightCellForAddress(final int address) {
         final Point rowColumn = this.displayCellForAddress(address);
@@ -358,7 +367,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final int addressRow = rowColumn.x;
         this.addressColumn = rowColumn.y;
         this.addressRowFirstAddress = BinaryUtils
-            .stringToInt(DataSegmentWindow.dataTable.getValueAt(addressRow, DataSegmentWindow.ADDRESS_COLUMN).toString());
+            .stringToInt(DataSegmentWindow.dataTable.getValueAt(addressRow, DataSegmentWindow.ADDRESS_COLUMN)
+                             .toString());
         // System.out.println("Address "+Binary.intToHexString(address)+" becomes row "+
         // addressRow + " column "+addressColumn+
         // " starting addr "+dataTable.getValueAt(this.addressRow,ADDRESS_COLUMN));
@@ -369,8 +379,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // renderer
         // with highlight background color and all others get renderer with default
         // background.
-        DataSegmentWindow.dataTable.tableChanged(new TableModelEvent(DataSegmentWindow.dataTable.getModel(), 0,
-            DataSegmentWindow.dataData.length - 1));
+        DataSegmentWindow.dataTable.tableChanged(new TableModelEvent(
+            DataSegmentWindow.dataTable.getModel(), 0,
+            DataSegmentWindow.dataData.length - 1
+        ));
     }
 
     // Given address, will compute table cell location, adjusting table if necessary
@@ -409,11 +421,11 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         int baseAddress = this.displayBaseAddressArray[desiredComboBoxIndex];
         if (baseAddress == -1) {
             if (desiredComboBoxIndex == DataSegmentWindow.GLOBAL_POINTER_ADDRESS_INDEX) {
-                baseAddress = RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER)
-                    - (RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER) % DataSegmentWindow.BYTES_PER_ROW);
+                baseAddress = RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER_INDEX)
+                    - (RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER_INDEX) % DataSegmentWindow.BYTES_PER_ROW);
             } else if (desiredComboBoxIndex == DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX) {
-                baseAddress = RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER)
-                    - (RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER) % DataSegmentWindow.BYTES_PER_ROW);
+                baseAddress = RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX)
+                    - (RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX) % DataSegmentWindow.BYTES_PER_ROW);
             } else {
                 return null;// shouldn't happen since these are the only two
             }
@@ -460,8 +472,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.baseAddressButtons[DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX] = this.mmioButton;
         this.baseAddressButtons[DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX] = this.textButton;
         this.displayBaseAddresses = this.displayBaseAddressArray;
-        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(this.displayBaseAddressArray,
-            this.descriptions);
+        this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(
+            this.displayBaseAddressArray,
+            this.descriptions
+        );
         this.defaultBaseAddressIndex = DataSegmentWindow.DATA_BASE_ADDRESS_INDEX;
     }
 
@@ -478,8 +492,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 try {
                     DataSegmentWindow.dataData[row][column] =
-                        NumberDisplayBaseChooser.formatNumber(Memory.getInstance().getRawWord(address),
-                            valueBase);
+                        NumberDisplayBaseChooser.formatNumber(
+                            Memory.getInstance().getRawWord(address),
+                            valueBase
+                        );
                 } catch (final AddressErrorException aee) {
                     DataSegmentWindow.dataData[row][column] = NumberDisplayBaseChooser.formatNumber(0, valueBase);
                 }
@@ -500,7 +516,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // Addresses are column 0, render right-justified in mono font
         final MonoRightCellRenderer monoRightCellRenderer = new MonoRightCellRenderer();
         DataSegmentWindow.dataTable.getColumnModel().getColumn(DataSegmentWindow.ADDRESS_COLUMN).setPreferredWidth(60);
-        DataSegmentWindow.dataTable.getColumnModel().getColumn(DataSegmentWindow.ADDRESS_COLUMN).setCellRenderer(monoRightCellRenderer);
+        DataSegmentWindow.dataTable.getColumnModel().getColumn(DataSegmentWindow.ADDRESS_COLUMN).setCellRenderer(
+            monoRightCellRenderer);
         // Data cells are columns 1 onward, render right-justitifed in mono font but
         // highlightable.
         final AddressCellRenderer addressCellRenderer = new AddressCellRenderer();
@@ -508,9 +525,11 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             DataSegmentWindow.dataTable.getColumnModel().getColumn(i).setPreferredWidth(60);
             DataSegmentWindow.dataTable.getColumnModel().getColumn(i).setCellRenderer(addressCellRenderer);
         }
-        this.dataTableScroller = new JScrollPane(DataSegmentWindow.dataTable,
+        this.dataTableScroller = new JScrollPane(
+            DataSegmentWindow.dataTable,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS
+        );
         return this.dataTableScroller;
     }
 
@@ -537,8 +556,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
      */
     public void clearHighlighting() {
         this.addressHighlighting = false;
-        DataSegmentWindow.dataTable.tableChanged(new TableModelEvent(DataSegmentWindow.dataTable.getModel(), 0,
-            DataSegmentWindow.dataData.length - 1));
+        DataSegmentWindow.dataTable.tableChanged(new TableModelEvent(
+            DataSegmentWindow.dataTable.getModel(), 0,
+            DataSegmentWindow.dataData.length - 1
+        ));
         // The below addresses situation in which addressRow and addressColum hold their
         // values across assemble operations. Whereupon at the first step of the next
         // run the last cells from the previous run are highlighted! This method is
@@ -563,12 +584,14 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * megabytes of
      * data segment space so we only plug a "chunk" at a time into the table.
      *
-     * @param firstAddr the first address in the memory range to be placed in the
-     *                  model.
+     * @param firstAddr
+     *     the first address in the memory range to be placed in the
+     *     model.
      */
     public void updateModelForMemoryRange(final int firstAddr) {
-        if (this.tablePanel.getComponentCount() == 0)
+        if (this.tablePanel.getComponentCount() == 0) {
             return; // ignore if no content to change
+        }
         final int valueBase = this.getValueDisplayFormat();
         final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
         int address = firstAddr;
@@ -576,13 +599,17 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             ((DataTableModel) dataModel).setDisplayAndModelValueAt(
                 NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase), row,
-                DataSegmentWindow.ADDRESS_COLUMN);
+                DataSegmentWindow.ADDRESS_COLUMN
+            );
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 try {
                     ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                        NumberDisplayBaseChooser.formatNumber(Memory.getInstance().getWordNoNotify(address),
-                            valueBase),
-                        row, column);
+                        NumberDisplayBaseChooser.formatNumber(
+                            Memory.getInstance().getWordNoNotify(address),
+                            valueBase
+                        ),
+                        row, column
+                    );
                 } catch (final AddressErrorException aee) {
                     // Bit of a hack here. Memory will throw an exception if you try to read
                     // directly from text segment when the
@@ -630,8 +657,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     /**
      * Update data display to show this second (I'm not sure it is being called).
      *
-     * @param address a int
-     * @param value   a int
+     * @param address
+     *     a int
+     * @param value
+     *     a int
      */
     public void updateCell(final int address, final int value) {
         final int offset = address - this.firstAddress;
@@ -644,7 +673,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
         ((DataTableModel) DataSegmentWindow.dataTable.getModel()).setDisplayAndModelValueAt(
             NumberDisplayBaseChooser.formatNumber(value, valueBase),
-            row, column);
+            row, column
+        );
     }
 
     /**
@@ -653,8 +683,9 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * modified (e.g. between base 16, hex, and base 10, dec).
      */
     public void updateDataAddresses() {
-        if (this.tablePanel.getComponentCount() == 0)
+        if (this.tablePanel.getComponentCount() == 0) {
             return; // ignore if no content to change
+        }
         final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
         int address = this.firstAddress;
         String formattedAddress;
@@ -665,7 +696,9 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
         // column headers include address offsets, so translate them too
         for (int i = 1; i < DataSegmentWindow.NUMBER_OF_COLUMNS; i++) {
-            DataSegmentWindow.dataTable.getColumnModel().getColumn(i).setHeaderValue(DataSegmentWindow.getHeaderStringForColumn(i, addressBase));
+            DataSegmentWindow.dataTable.getColumnModel()
+                .getColumn(i)
+                .setHeaderValue(DataSegmentWindow.getHeaderStringForColumn(i, addressBase));
         }
         DataSegmentWindow.dataTable.getTableHeader().repaint();
     }
@@ -745,17 +778,17 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         this.globButton.setToolTipText("View range around global pointer");
         this.stakButton.setToolTipText("View range around stack pointer");
         this.heapButton.setToolTipText("View range around heap base address " +
-            BinaryUtils.intToHexString(Memory.heapBaseAddress));
+                                           BinaryUtils.intToHexString(Memory.heapBaseAddress));
         this.extnButton.setToolTipText("View range around static global base address " +
-            BinaryUtils.intToHexString(Memory.externBaseAddress));
+                                           BinaryUtils.intToHexString(Memory.externBaseAddress));
         this.mmioButton.setToolTipText("View range around MMIO base address " +
-            BinaryUtils.intToHexString(Memory.memoryMapBaseAddress));
+                                           BinaryUtils.intToHexString(Memory.memoryMapBaseAddress));
         this.textButton.setToolTipText("View range around program code " +
-            BinaryUtils.intToHexString(Memory.textBaseAddress));
+                                           BinaryUtils.intToHexString(Memory.textBaseAddress));
         this.prevButton.setToolTipText("View next lower address range; hold down for rapid fire");
         this.nextButton.setToolTipText("View next higher address range; hold down for rapid fire");
         this.dataButton.setToolTipText("View range around static data segment base address " +
-            BinaryUtils.intToHexString(Memory.dataBaseAddress));
+                                           BinaryUtils.intToHexString(Memory.dataBaseAddress));
 
         // add the action listeners to maintain button state and table contents
         // Currently there is no memory upper bound so next button always enabled.
@@ -764,8 +797,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             ae -> {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                 // get $gp global pointer, but guard against it having second below data segment
-                DataSegmentWindow.this.firstAddress = Math.max(Memory.dataSegmentBaseAddress,
-                    RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER));
+                DataSegmentWindow.this.firstAddress = Math.max(
+                    Memory.dataSegmentBaseAddress,
+                    RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER_INDEX)
+                );
                 // updateModelForMemoryRange requires argument to be multiple of 4
                 // but for cleaner display we'll make it multiple of 32 (last nibble is 0).
                 // This makes it easier to mentally calculate address from row address + column
@@ -782,8 +817,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             ae -> {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                 // get $sp stack pointer, but guard against it having second below data segment
-                DataSegmentWindow.this.firstAddress = Math.max(Memory.dataSegmentBaseAddress,
-                    RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER));
+                DataSegmentWindow.this.firstAddress = Math.max(
+                    Memory.dataSegmentBaseAddress,
+                    RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX)
+                );
                 // See comment above for gloButton...
                 DataSegmentWindow.this.firstAddress =
                     DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
@@ -858,9 +895,13 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     // PrevButton and NextButton are enabled/disabled appropriately.
     private int setFirstAddressAndPrevNextButtonEnableStatus(int lowAddress) {
         final int lowLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE) ?
-            Math.min(Math.min(Memory.textBaseAddress,
-                    Memory.dataSegmentBaseAddress),
-                Memory.dataBaseAddress)
+            Math.min(
+                Math.min(
+                    Memory.textBaseAddress,
+                    Memory.dataSegmentBaseAddress
+                ),
+                Memory.dataBaseAddress
+            )
             : Memory.memoryMapBaseAddress;
         final int highLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE) ? Memory.userHighAddress
             : Memory.kernelHighAddress;
@@ -1070,8 +1111,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         public Component getTableCellRendererComponent(final JTable table, final Object value,
                                                        final boolean isSelected, final boolean hasFocus,
                                                        final int row, final int column) {
-            final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
-                isSelected, hasFocus, row, column);
+            final JLabel cell = (JLabel) super.getTableCellRendererComponent(
+                table, value,
+                isSelected, hasFocus, row, column
+            );
 
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
             final int rowFirstAddress =

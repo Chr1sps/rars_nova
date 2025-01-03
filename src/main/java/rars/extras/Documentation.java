@@ -3,12 +3,14 @@ package rars.extras;
 import org.jetbrains.annotations.NotNull;
 import rars.assembler.Directive;
 import rars.riscv.Instruction;
-import rars.riscv.Instructions;
 import rars.riscv.SyscallLoader;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+
+import static rars.riscv.InstructionsRegistry.BASIC_INSTRUCTIONS;
+import static rars.riscv.InstructionsRegistry.EXTENDED_INSTRUCTIONS;
 
 /**
  * Small class for automatically generating documentation.
@@ -24,12 +26,12 @@ public final class Documentation {
     }
 
     public static void main(final String[] args) {
-        System.out.println(Documentation.createDirectiveMarkdown());
-        System.out.println(Documentation.createSyscallMarkdown());
-        System.out.println(Documentation.createInstructionMarkdown(false, false));
-        System.out.println(Documentation.createInstructionMarkdown(true, false));
-        System.out.println(Documentation.createInstructionMarkdown(false, true));
-        System.out.println(Documentation.createInstructionMarkdown(true, true));
+        System.out.println(createDirectiveMarkdown());
+        System.out.println(createSyscallMarkdown());
+        System.out.println(createInstructionMarkdown(BASIC_INSTRUCTIONS.r32All));
+        System.out.println(createInstructionMarkdown(BASIC_INSTRUCTIONS.r64Only));
+        System.out.println(createInstructionMarkdown(EXTENDED_INSTRUCTIONS.r32All));
+        System.out.println(createInstructionMarkdown(EXTENDED_INSTRUCTIONS.r64Only));
     }
 
     public static @NotNull String createDirectiveMarkdown() {
@@ -72,30 +74,18 @@ public final class Documentation {
         return builder.toString();
     }
 
-    public static @NotNull String createInstructionMarkdown(final boolean is64, final boolean isExtended) {
-        final List<? extends Instruction> instructionList;
-        if (is64) {
-            if (isExtended)
-                instructionList = Instructions.INSTRUCTIONS_R64_EXTENDED;
-            else
-                instructionList = Instructions.INSTRUCTIONS_R64;
-        } else {
-            if (isExtended)
-                instructionList = Instructions.INSTRUCTIONS_R32_EXTENDED;
-            else
-                instructionList = Instructions.INSTRUCTIONS_R32;
-        }
+    public static @NotNull String createInstructionMarkdown(final @NotNull List<? extends Instruction> instructionList) {
         final var sorted = instructionList
             .stream()
-            .sorted(Comparator.comparing(Instruction::getExampleFormat))
+            .sorted(Comparator.comparing(instruction -> instruction.exampleFormat))
             .toList();
         final StringBuilder output = new StringBuilder("| Example Usage | Description " +
-            "|\n|---------------|-------------|");
+                                                           "|\n|---------------|-------------|");
         for (final var instr : sorted) {
             output.append("\n|");
-            output.append(instr.getExampleFormat());
+            output.append(instr.exampleFormat);
             output.append('|');
-            output.append(instr.getDescription());
+            output.append(instr.description);
             output.append('|');
 
         }

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.Instructions;
+import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.RegisterFile;
 
 /*
@@ -51,8 +51,8 @@ public abstract class Arithmetic extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
-        if (Instructions.RV64) {
+    public void simulate(final @NotNull ProgramStatement statement) {
+        if (InstructionsRegistry.RV64_MODE_FLAG) {
             RegisterFile.updateRegister(
                 statement.getOperand(0),
                 compute(
@@ -74,8 +74,10 @@ public abstract class Arithmetic extends BasicInstruction {
     /**
      * <p>compute.</p>
      *
-     * @param value  the second from the first register
-     * @param value2 the second from the second register
+     * @param value
+     *     the second from the first register
+     * @param value2
+     *     the second from the second register
      * @return the result to be stored from the instruction
      */
     protected abstract long compute(long value, long value2);
@@ -84,8 +86,10 @@ public abstract class Arithmetic extends BasicInstruction {
      * A version for rv32 / W instructions in rv64, override if the default
      * behaviour is not correct
      *
-     * @param value  the second from the first register truncated to 32 bits
-     * @param value2 the second from the second register truncated to 32 bits
+     * @param value
+     *     the second from the first register truncated to 32 bits
+     * @param value2
+     *     the second from the second register truncated to 32 bits
      * @return the result to be stored from the instruction
      */
     protected int computeW(final int value, final int value2) {

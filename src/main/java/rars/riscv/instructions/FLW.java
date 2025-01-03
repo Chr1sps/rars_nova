@@ -48,7 +48,7 @@ public final class FLW extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
 
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {

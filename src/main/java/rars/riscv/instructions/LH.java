@@ -1,5 +1,6 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 
@@ -30,24 +31,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>LH class.</p>
- */
 public final class LH extends Load {
-    public static final LH INSTANCE = new LH();
+    public static final @NotNull LH INSTANCE = new LH();
 
-    /**
-     * <p>Constructor for LH.</p>
-     */
     private LH() {
         super("lh t1, -100(t2)", "Set t1 to sign-extended 16-bit second from effective memory halfword address", "001");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long load(final int address) throws AddressErrorException {
-        return ((long) Memory.getInstance().getHalf(address) << 16) >> 16; // Shifting sign extends
+        final var halfValue = Memory.getInstance().getHalf(address);
+        return Short.valueOf(halfValue).longValue();
     }
 }

@@ -48,7 +48,7 @@ public final class CSRRWI extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         try {
             final long csr = ControlAndStatusRegisterFile.getValueLong(statement.getOperand(1));
             if (ControlAndStatusRegisterFile.updateRegister(statement.getOperand(1), statement.getOperand(2))) {

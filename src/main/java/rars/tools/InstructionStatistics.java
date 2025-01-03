@@ -141,7 +141,8 @@ public class InstructionStatistics extends AbstractTool {
      * The instruction is decoded by checking the java instance of the instruction.
      * Only the most relevant instructions are decoded and categorized.
      *
-     * @param instruction the instruction to decode
+     * @param instruction
+     *     the instruction to decode
      * @return the category of the instruction
      * @author Giancarlo Pernudi Segura
      * @see InstructionStatistics#CATEGORY_ALU
@@ -151,27 +152,36 @@ public class InstructionStatistics extends AbstractTool {
      * @see InstructionStatistics#CATEGORY_OTHER
      */
     protected static int getInstructionCategory(final Instruction instruction) {
-        if (instruction instanceof Arithmetic)
+        if (instruction instanceof Arithmetic) {
             return InstructionStatistics.CATEGORY_ALU; // add, addw, sub, subw, and, or, xor, slt, sltu, m extension
+        }
         if (instruction instanceof ADDI || instruction instanceof ADDIW || instruction instanceof ANDI
-                || instruction instanceof ORI || instruction instanceof XORI
-                || instruction instanceof SLTI || instruction instanceof SLTIU
-                || instruction instanceof LUI || instruction instanceof AUIPC)
+            || instruction instanceof ORI || instruction instanceof XORI
+            || instruction instanceof SLTI || instruction instanceof SLTIU
+            || instruction instanceof LUI || instruction instanceof AUIPC) {
             return InstructionStatistics.CATEGORY_ALU; // addi, addiw, andi, ori, xori, slti, sltiu, lui, auipc
-        if (instruction instanceof SLLI || instruction instanceof SLLIW)
+        }
+        if (instruction instanceof SLLI32 || instruction instanceof SLLIW) {
             return InstructionStatistics.CATEGORY_ALU; // slli, slliw
-        if (instruction instanceof SRLI || instruction instanceof SRLIW)
+        }
+        if (instruction instanceof SRLI32 || instruction instanceof SRLIW) {
             return InstructionStatistics.CATEGORY_ALU; // srli, srliw
-        if (instruction instanceof SRAI || instruction instanceof SRAIW)
+        }
+        if (instruction instanceof SRAI32 || instruction instanceof SRAIW) {
             return InstructionStatistics.CATEGORY_ALU; // srai, sraiw
-        if (instruction instanceof JAL || instruction instanceof JALR)
+        }
+        if (instruction instanceof JAL || instruction instanceof JALR) {
             return InstructionStatistics.CATEGORY_JUMP; // jal, jalr
-        if (instruction instanceof Branch)
+        }
+        if (instruction instanceof Branch) {
             return InstructionStatistics.CATEGORY_BRANCH; // beq, bge, bgeu, blt, bltu, bne
-        if (instruction instanceof Load)
+        }
+        if (instruction instanceof Load) {
             return InstructionStatistics.CATEGORY_MEM; // lb, lh, lwl, lw, lbu, lhu, lwr
-        if (instruction instanceof Store)
+        }
+        if (instruction instanceof Store) {
             return InstructionStatistics.CATEGORY_MEM; // sb, sh, swl, sw, swr
+        }
 
         return InstructionStatistics.CATEGORY_OTHER;
     }
@@ -259,8 +269,9 @@ public class InstructionStatistics extends AbstractTool {
     @Override
     protected void processRISCVUpdate(final AccessNotice notice) {
 
-        if (!notice.accessIsFromRISCV())
+        if (!notice.accessIsFromRISCV()) {
             return;
+        }
 
         // check for a read access in the text segment
         if (notice.getAccessType() == AccessNotice.AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
@@ -270,8 +281,9 @@ public class InstructionStatistics extends AbstractTool {
             // The next three statments are from Felipe Lessa's instruction counter.
             // Prevents double-counting.
             final int a = memAccNotice.getAddress();
-            if (a == this.lastAddress)
+            if (a == this.lastAddress) {
                 return;
+            }
             this.lastAddress = a;
 
             try {

@@ -27,22 +27,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>ADDI class.</p>
- */
-public final class ADDI extends ImmediateInstruction {
-    public static final ImmediateInstruction INSTANCE = new ADDI();
+import org.jetbrains.annotations.NotNull;
 
-    /**
-     * <p>Constructor for ADDI.</p>
-     */
+public final class ADDI extends ImmediateInstruction {
+    public static final @NotNull ADDI INSTANCE = new ADDI();
+
     private ADDI() {
         super("addi t1,t2,-100", "Addition immediate: set t1 to (t2 plus signed 12-bit immediate)", "000");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long immediate) {
         return value + immediate;

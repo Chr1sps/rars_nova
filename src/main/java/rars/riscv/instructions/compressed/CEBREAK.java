@@ -7,7 +7,7 @@ import rars.riscv.CompressedInstructionFormat;
 import static rars.exceptions.BreakpointException.BREAKPOINT_EXCEPTION;
 
 public final class CEBREAK extends CompressedInstruction {
-    public static final @NotNull CEBREAK CEBREAK = new CEBREAK();
+    public static final @NotNull CEBREAK INSTANCE = new CEBREAK();
 
     private CEBREAK() {
         super(

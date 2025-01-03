@@ -1,7 +1,6 @@
 package utils;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URI;
@@ -9,13 +8,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
-public class ProjectPaths {
-    private static final ProjectPaths INSTANCE = new ProjectPaths();
+public final class ProjectPaths {
 
     private ProjectPaths() {
     }
@@ -25,10 +21,6 @@ public class ProjectPaths {
     }
 
     public static @NotNull Path getProjectRoot() {
-        return Objects.requireNonNull(INSTANCE._getProjectRoot());
-    }
-
-    private @Nullable Path _getProjectRoot() {
         var directory = getProjectRootByClass();
         while (directory != null) {
             try {
@@ -42,14 +34,14 @@ public class ProjectPaths {
             }
             directory = directory.getParent();
         }
-        return null;
+        throw new RuntimeException("Could not find project root");
     }
 
-    private @Nullable Path getProjectRootByClass() {
-        final var replacedName = this.getClass().getName().replace(".", "/");
-        final var url = getClass().getResource("/" + replacedName + ".class");
+    private static @NotNull Path getProjectRootByClass() {
+        final var replacedName = ProjectPaths.class.getName().replace(".", "/");
+        final var url = ProjectPaths.class.getResource("/" + replacedName + ".class");
         if (url == null) {
-            return null;
+            throw new RuntimeException("Could not find class file");
         }
         try {
             return switch (url.getProtocol()) {
@@ -57,12 +49,12 @@ public class ProjectPaths {
                 case "jar" -> {
                     final var pathElements = Paths.get(new URI(url.getFile())).toString().split("!");
                     if (pathElements.length == 0) {
-                        yield null;
+                        throw new RuntimeException("Could not find jar file");
                     } else {
                         yield Paths.get(pathElements[0]);
                     }
                 }
-                default -> null;
+                default -> throw new RuntimeException("Unsupported protocol");
             };
         } catch (final URISyntaxException e) {
             throw new RuntimeException(e);

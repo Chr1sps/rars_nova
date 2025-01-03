@@ -30,7 +30,7 @@ public final class CLWSP extends CompressedInstruction {
                 assert isRVCRegister(destinationRegister) : "Destination register must be one of the ones supported " +
                     "by the C " +
                     "extension (x8-x15)";
-                final var currentStackPointer = RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER);
+                final var currentStackPointer = RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX);
                 final var offset = statement.getOperand(1) << 2;
                 final var address = currentStackPointer + offset;
                 try {

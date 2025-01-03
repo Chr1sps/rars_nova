@@ -14,7 +14,8 @@ public final class CompressedJump extends CompressedInstruction {
         "c.j target",
         "Compressed jump: Jump to statement at target address",
         0b101,
-        statement -> Utils.processJump(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(0))
+        statement -> Utils.processJump(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(
+            0))
     );
 
     public static final @NotNull CompressedJump CJAL = new CompressedJump(
@@ -24,8 +25,10 @@ public final class CompressedJump extends CompressedInstruction {
         0b001,
         statement -> {
             Utils.processReturnAddress(1); // x1 is the link register
-            Utils.processJump(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(0));
-        });
+            Utils.processJump(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(
+                0));
+        }
+    );
 
     private CompressedJump(
         final @NotNull String example,
@@ -37,8 +40,7 @@ public final class CompressedJump extends CompressedInstruction {
             example,
             description,
             CompressedInstructionFormat.CJ,
-//            operMask,
-            "%s ffffffffffff 01".formatted(
+            "%s fffffffffff 01".formatted(
                 BinaryUtils.intToBinaryString(funct3, 3)
             ),
             callback

@@ -77,7 +77,7 @@ public final class FCLASSS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final Float32 in = new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1)));
         fclass(in, statement.getOperand(0));
     }

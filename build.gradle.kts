@@ -1,3 +1,11 @@
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+
 plugins {
     java
     application
@@ -23,6 +31,7 @@ dependencies {
     implementation("de.jflex:jflex:1.9.1")
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
     graphDoclet("nl.talsmasoftware:umldoclet:2.2.0")
 }
@@ -31,8 +40,6 @@ dependencies {
 group = "io.github.chr1sps"
 version = "0.0.1"
 description = "RARS Nova"
-java.sourceCompatibility = JavaVersion.VERSION_21
-java.targetCompatibility = JavaVersion.VERSION_21
 
 
 tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
@@ -83,27 +90,8 @@ sourceSets.main {
 }
 
 // region JFlex
-val lexerClassName = "RVLexer"
-val lexerFlexDir = "src/main/resources"
-val lexerOutputDir = "src/generated/java/rars/riscv/lang/lexing"
-val flexFileName = "$lexerFlexDir/$lexerClassName.flex"
-val lexerOutputName = "$lexerOutputDir/$lexerClassName.java"
 
-val runJFlex = tasks.register<JavaExec>("runJFlex") {
-    description = "Generates a lexer"
-    mainClass = "jflex.Main"
-    classpath = sourceSets["main"].compileClasspath
-    inputs.file(flexFileName)
-    outputs.file(lexerOutputName)
-    args = listOf(
-        "-d", lexerOutputDir,
-        flexFileName
-    )
-    doLast {
-        println("Generated lexer")
-    }
-}
-
+// region Utils
 fun String.findMethod(header: String, vararg requiredContents: String): IntRange? {
     // First, find the method header index
     val headerIndex = indexOf(header).takeIf { it != -1 } ?: return null
@@ -146,12 +134,47 @@ fun String.findZZRefill(): IntRange? = findMethod("private boolean zzRefill() th
 
 fun String.findYYReset(): IntRange? =
     findMethod("public final void yyreset(java.io.Reader reader)", "zzBuffer = new char[initBufferSize];")
+// endregion Utils
+
+// region Paths
+val buildPath = layout.buildDirectory.asFile.get().absolutePath
+
+val lexerClassName = "RVLexer"
+val lexerFlexDir = "src/main/resources"
+val lexerOutputDir = "src/generated/java/rars/riscv/lang/lexing"
+val flexFileName = "$lexerFlexDir/$lexerClassName.flex"
+val customScriptsOutputDir = "$buildPath/customScripts"
+val flexCacheFileName = "$customScriptsOutputDir/$lexerClassName.cache.flex"
+val lexerOutputName = "$lexerOutputDir/$lexerClassName.java"
+// endregion Paths
+
+val cacheJFlexFile by tasks.register<CacheFileTask>("cacheJFlexFile") {
+    inputFile.set(file(flexFileName))
+    outputFile.set(file(flexCacheFileName))
+}
+
+val runJFlex = tasks.register<JavaExec>("runJFlex") {
+    withCache(cacheJFlexFile)
+    description = "Generates a lexer"
+    mainClass = "jflex.Main"
+    classpath = sourceSets["main"].compileClasspath
+    inputs.file(flexCacheFileName)
+    outputs.file(lexerOutputName)
+    args = listOf(
+        "-d", lexerOutputDir,
+        flexFileName
+    )
+    doLast {
+        println("Generated lexer")
+    }
+}
 
 val removeDuplicateLexerMethods = tasks.register("removeDuplicateLexerMethods") {
     group = "build"
     description = "Modifies the generated lexer to remove specific methods."
 
     dependsOn(runJFlex)
+    withCache(cacheJFlexFile)
 
     inputs.file(lexerOutputName)
     outputs.file(lexerOutputName)
@@ -208,6 +231,7 @@ val createLexer = tasks.register("createLexer") {
     group = "build"
     description = "Generates the lexer and removes specific methods."
     dependsOn(removeDuplicateLexerMethods)
+    withCache(cacheJFlexFile)
     doLast {
         val backupFile = file("$lexerOutputDir/$lexerClassName.java~")
         if (backupFile.exists()) {
@@ -220,3 +244,42 @@ tasks.named("compileJava") {
     dependsOn(createLexer)
 }
 // endregion JFlex
+abstract class CacheFileTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val inputFile: RegularFileProperty
+
+    @get:OutputFile
+    abstract val outputFile: RegularFileProperty
+
+    @get:Internal
+    abstract val didUpdate: Property<Boolean>
+
+    init {
+        didUpdate.convention(false)
+    }
+
+    @TaskAction
+    fun updateAndCache() {
+        val inputContent = inputFile.get().asFile.readText()
+        val cachedFile = outputFile.get().asFile
+
+        didUpdate = if (!cachedFile.exists() || cachedFile.readText() != inputContent) {
+            logger.lifecycle("Updating cached file: $cachedFile")
+            cachedFile.parentFile.mkdirs()
+            cachedFile.writeText(inputContent)
+            true
+        } else {
+            logger.lifecycle("Cached file is up-to-date: $cachedFile")
+            false
+        }
+    }
+}
+
+fun <T : Task> T.withCache(cacheTask: CacheFileTask): T {
+    dependsOn(cacheTask)
+    onlyIf {
+        cacheTask.didUpdate.get()
+    }
+    return this
+}

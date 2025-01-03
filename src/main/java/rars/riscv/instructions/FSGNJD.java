@@ -20,7 +20,7 @@ public final class FSGNJD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final long result = (FloatingPointRegisterFile.getValueLong(statement.getOperand(1)) & 0x7FFFFFFF_FFFFFFFFL) |
             (FloatingPointRegisterFile.getValueLong(statement.getOperand(2)) & 0x80000000_00000000L);
         FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), result);

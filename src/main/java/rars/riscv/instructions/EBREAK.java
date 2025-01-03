@@ -1,5 +1,6 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -44,15 +45,17 @@ public final class EBREAK extends BasicInstruction {
      * <p>Constructor for EBREAK.</p>
      */
     private EBREAK() {
-        super("ebreak", "Pause execution",
-            BasicInstructionFormat.I_FORMAT, "000000000001 00000 000 00000 1110011");
+        super(
+            "ebreak", "Pause execution",
+            BasicInstructionFormat.I_FORMAT, "000000000001 00000 000 00000 1110011"
+        );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         throw BREAKPOINT_EXCEPTION;
     }
 }

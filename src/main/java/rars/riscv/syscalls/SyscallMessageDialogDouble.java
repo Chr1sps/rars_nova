@@ -47,8 +47,10 @@ public final class SyscallMessageDialogDouble extends AbstractSyscall {
      * Build an instance of the syscall with its default service number and name.
      */
     public SyscallMessageDialogDouble() {
-        super("MessageDialogDouble", "Service to display message followed by a double",
-                "a0 = address of null-terminated string that is the message to user <br> fa0 = the double", "N/A");
+        super(
+            "MessageDialogDouble", "Service to display message followed by a double",
+            "a0 = address of null-terminated string that is the message to user <br> fa0 = the double", "N/A"
+        );
     }
 
     /**
@@ -75,9 +77,11 @@ public final class SyscallMessageDialogDouble extends AbstractSyscall {
             throw new ExitingException(statement, e);
         }
 
-        JOptionPane.showMessageDialog(null,
-                message + Double.longBitsToDouble(FloatingPointRegisterFile.getValueLong(10)),
-                null,
-                JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(
+            null,
+            message + Double.longBitsToDouble(FloatingPointRegisterFile.getValueLong(10)),
+            null,
+            JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }

@@ -27,23 +27,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>ADD class.</p>
- */
 public final class ADD extends Arithmetic {
     public static final ADD INSTANCE = new ADD();
 
-    /**
-     * <p>Constructor for ADD.</p>
-     */
     private ADD() {
         super("add t1,t2,t3", "Addition: set t1 to (t2 plus t3)",
                 "0000000", "000");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long value2) {
         return value + value2;

@@ -27,24 +27,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SLTI class.</p>
- */
 public final class SLTI extends ImmediateInstruction {
     public static final ImmediateInstruction INSTANCE = new SLTI();
 
-    /**
-     * <p>Constructor for SLTI.</p>
-     */
     private SLTI() {
         super("slti t1,t2,-100",
                 "Set less than immediate : If t2 is less than sign-extended 12-bit immediate, then set t1 to 1 else set t1 to 0",
                 "010");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long immediate) {
         return (value < immediate) ? 1 : 0;

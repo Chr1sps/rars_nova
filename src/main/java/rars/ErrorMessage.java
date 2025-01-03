@@ -59,16 +59,21 @@ public final class ErrorMessage {
      * if there were, it will adjust filename and line number so message reflects
      * original file and line number.
      *
-     * @param isWarning     set to WARNING if message is a warning not error, else
-     *                      set to ERROR or omit.
-     * @param sourceProgram RISCVprogram object of source file in which this error
-     *                      appears.
-     * @param line          Line number in source program being processed when error
-     *                      occurred.
-     * @param position      Position within line being processed when error
-     *                      occurred. Normally is starting
-     *                      position of source token.
-     * @param message       String containing appropriate error message.
+     * @param isWarning
+     *     set to WARNING if message is a warning not error, else
+     *     set to ERROR or omit.
+     * @param sourceProgram
+     *     RISCVprogram object of source file in which this error
+     *     appears.
+     * @param line
+     *     Line number in source program being processed when error
+     *     occurred.
+     * @param position
+     *     Position within line being processed when error
+     *     occurred. Normally is starting
+     *     position of source token.
+     * @param message
+     *     String containing appropriate error message.
      */
     public ErrorMessage(final boolean isWarning,
                         final @Nullable RISCVProgram sourceProgram,
@@ -86,7 +91,7 @@ public final class ErrorMessage {
                 this.line = line;
             } else {
                 final SourceLine sourceLine = sourceProgram.getSourceLineList()
-                        .get(line - 1);
+                    .get(line - 1);
                 this.filename = sourceLine.filename();
                 this.line = sourceLine.lineNumber();
             }
@@ -99,9 +104,11 @@ public final class ErrorMessage {
     /**
      * Constructor for ErrorMessage, to be used for runtime exceptions.
      *
-     * @param statement The ProgramStatement object for the instruction causing the
-     *                  runtime error
-     * @param message   String containing appropriate error message.
+     * @param statement
+     *     The ProgramStatement object for the instruction causing the
+     *     runtime error
+     * @param message
+     *     String containing appropriate error message.
      */
     // Added January 2013
     public ErrorMessage(final @NotNull ProgramStatement statement,
@@ -109,8 +116,8 @@ public final class ErrorMessage {
     ) {
         this.isWarning = false;
         this.filename = (statement.getSourceProgram() == null)
-                ? ""
-                : statement.getSourceProgram().getFilename();
+            ? ""
+            : statement.getSourceProgram().getFilename();
         this.position = 0;
         this.message = message;
         // Somewhere along the way we lose the macro history, but can
@@ -136,19 +143,19 @@ public final class ErrorMessage {
     }
 
     public static @NotNull ErrorMessage error(
-            final @Nullable RISCVProgram sourceProgram,
-            final int line,
-            final int position,
-            final @NotNull String message
+        final @Nullable RISCVProgram sourceProgram,
+        final int line,
+        final int position,
+        final @NotNull String message
     ) {
         return new ErrorMessage(false, sourceProgram, line, position, message);
     }
 
     public static @NotNull ErrorMessage warning(
-            final @Nullable RISCVProgram sourceProgram,
-            final int line,
-            final int position,
-            final @NotNull String message
+        final @Nullable RISCVProgram sourceProgram,
+        final int line,
+        final int position,
+        final @NotNull String message
     ) {
         return new ErrorMessage(true, sourceProgram, line, position, message);
     }
@@ -177,8 +184,9 @@ public final class ErrorMessage {
 
     // Added by Mohammad Sekavat Dec 2012
     private static @NotNull String getExpansionHistory(final RISCVProgram sourceProgram) {
-        if (sourceProgram == null || sourceProgram.getLocalMacroPool() == null)
+        if (sourceProgram == null || sourceProgram.getLocalMacroPool() == null) {
             return "";
+        }
         return sourceProgram.getLocalMacroPool().getExpansionHistory();
     }
 
@@ -229,30 +237,25 @@ public final class ErrorMessage {
         return this.isWarning;
     }
 
-    /**
-     * <p>generateReport.</p>
-     *
-     * @return a {@link java.lang.String} object
-     */
     public @NotNull String generateReport() {
         final var builder = new StringBuilder();
-        builder.append((this.isWarning ? ErrorList.WARNING_MESSAGE_PREFIX : ErrorList.ERROR_MESSAGE_PREFIX))
-                .append(ErrorList.FILENAME_PREFIX);
+        builder.append((this.isWarning ? "Warning" : "Error"))
+            .append(" in ");
         if (!this.getFilename().isEmpty()) {
             builder.append(new File(this.getFilename()).getPath());
         }
         if (this.getLine() > 0) {
-            builder.append(ErrorList.LINE_PREFIX)
-                    .append(this.getMacroExpansionHistory())
-                    .append(this.getLine());
+            builder.append(" line ")
+                .append(this.getMacroExpansionHistory())
+                .append(this.getLine());
         }
         if (this.getPosition() > 0) {
-            builder.append(ErrorList.POSITION_PREFIX)
-                    .append(this.getPosition());
+            builder.append(" column ")
+                .append(this.getPosition());
         }
-        builder.append(ErrorList.MESSAGE_SEPARATOR)
-                .append(this.getMessage())
-                .append("\n");
+        builder.append(": ")
+            .append(this.getMessage())
+            .append("\n");
         return builder.toString();
     }
 
@@ -264,8 +267,9 @@ public final class ErrorMessage {
     // Method added by Mohammad Sekavat Dec 2012
     @Contract(pure = true)
     public @NotNull String getMacroExpansionHistory() {
-        if (this.macroExpansionHistory.isEmpty())
+        if (this.macroExpansionHistory.isEmpty()) {
             return "";
+        }
         return this.macroExpansionHistory + "->";
     }
 

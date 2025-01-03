@@ -46,7 +46,18 @@ public final class LUI extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
-        RegisterFile.updateRegister(statement.getOperand(0), (long) statement.getOperand(1) << 12);
+    public void simulate(final @NotNull ProgramStatement statement) {
+
+        final var shiftedValue = statement.getOperand(1) << 12;
+        // It's important to use a widening conversion here so that in 64-bit
+        // mode the value is sign-extended.
+        final var convertedValue = Integer.valueOf(
+            shiftedValue
+        ).longValue();
+
+        RegisterFile.updateRegister(
+            statement.getOperand(0),
+            convertedValue
+        );
     }
 }

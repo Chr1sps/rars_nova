@@ -22,8 +22,8 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.Flow;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.settings.FontSettings.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -73,15 +73,20 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * Constructor which sets up a fresh window with a table that contains the
      * register values.
      *
-     * @param registers            an array of {@link Register} objects
-     * @param registerDescriptions an array of {@link java.lang.String} objects
-     * @param valueTip             a {@link java.lang.String} object
+     * @param registers
+     *     an array of {@link Register} objects
+     * @param registerDescriptions
+     *     an array of {@link java.lang.String} objects
+     * @param valueTip
+     *     a {@link java.lang.String} object
      */
     RegisterBlockWindow(final Register[] registers, final String[] registerDescriptions, final String valueTip) {
         this.registers = registers;
-        this.table = new MyTippedJTable(new RegTableModel(this.setupWindow()), registerDescriptions,
+        this.table = new MyTippedJTable(
+            new RegTableModel(this.setupWindow()), registerDescriptions,
             new String[]{"Each register has a tool tip describing its usage convention",
-                "Corresponding register number", valueTip}) {
+                "Corresponding register number", valueTip}
+        ) {
         };
         FONT_SETTINGS.addChangeListener(this::updateRowHeight, true);
         final var columnModel = this.table.getColumnModel();
@@ -102,7 +107,10 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         valueColumn.setMaxWidth(RegisterBlockWindow.VALUE_SIZE);
         valueColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT, table));
 
-        this.table.setPreferredScrollableViewportSize(new Dimension(RegisterBlockWindow.NAME_SIZE + RegisterBlockWindow.NUMBER_SIZE + RegisterBlockWindow.VALUE_SIZE, 700));
+        this.table.setPreferredScrollableViewportSize(new Dimension(
+            RegisterBlockWindow.NAME_SIZE + RegisterBlockWindow.NUMBER_SIZE + RegisterBlockWindow.VALUE_SIZE,
+            700
+        ));
         this.setLayout(new BorderLayout()); // table display will occupy entire width if widened
         this.add(new JScrollPane(
             this.table,
@@ -142,8 +150,10 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             tableData[i][RegisterBlockWindow.NUMBER_COLUMN] = temp == -1 ? "" : temp;
             final int base =
                 NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
-            tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegisterValue(this.registers[i].getValue(),
-                base);
+            tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegisterValue(
+                this.registers[i].getValue(),
+                base
+            );
         }
         return tableData;
     }
@@ -245,8 +255,10 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         public @NotNull Component getTableCellRendererComponent(final JTable table, final Object value,
                                                                 final boolean isSelected, final boolean hasFocus,
                                                                 final int row, final int column) {
-            final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
-                isSelected, hasFocus, row, column);
+            final JLabel cell = (JLabel) super.getTableCellRendererComponent(
+                table, value,
+                isSelected, hasFocus, row, column
+            );
             cell.setFont(this.font);
             cell.setHorizontalAlignment(this.alignment);
             return cell;

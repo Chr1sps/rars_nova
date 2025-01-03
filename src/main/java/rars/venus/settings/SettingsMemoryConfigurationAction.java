@@ -2,8 +2,9 @@ package rars.venus.settings;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.riscv.hardware.CurrentMemoryConfiguration;
+import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
+import rars.riscv.hardware.RegisterFile;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.venus.FileStatus;
@@ -77,11 +78,16 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param icon
+     *     a {@link javax.swing.Icon} object
+     * @param descrip
+     *     a {@link java.lang.String} object
+     * @param mnemonic
+     *     a {@link java.lang.Integer} object
+     * @param accel
+     *     a {@link javax.swing.KeyStroke} object
      */
     public SettingsMemoryConfigurationAction(final String name, final Icon icon, final String descrip,
                                              final Integer mnemonic, final KeyStroke accel) {
@@ -152,10 +158,9 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             return chooserPanel;
         }
 
-
         private Component buildConfigDisplay() {
             final JPanel displayPanel = new JPanel();
-            final var config = CurrentMemoryConfiguration.get();
+            final var config = OTHER_SETTINGS.getMemoryConfiguration();
             final int numItems = configurationItemNames.length;
             final JPanel namesPanel = new JPanel(new GridLayout(numItems, 1));
             final JPanel valuesPanel = new JPanel(new GridLayout(numItems, 1));
@@ -192,7 +197,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         // Carry out action for the radio buttons.
         @Override
         public void actionPerformed(final ActionEvent e) {
-            final var config = ((ConfigurationButton) e.getSource()).getConfiguration();
+            final var config = ((ConfigurationButton) e.getSource()).configuration;
             this.setConfigDisplay(config);
             this.selectedConfigurationButton = (ConfigurationButton) e.getSource();
         }
@@ -232,9 +237,13 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         }
 
         private void performApply() {
-            if (CurrentMemoryConfiguration.set(this.selectedConfigurationButton.getConfiguration())) {
-                OTHER_SETTINGS.setMemoryConfigurationAndSave(
-                    this.selectedConfigurationButton.getConfiguration());
+            final var currentConfiguration = OTHER_SETTINGS.getMemoryConfiguration();
+            final var newConfiguration = this.selectedConfigurationButton.configuration;
+            if (newConfiguration != currentConfiguration) {
+                OTHER_SETTINGS.setMemoryConfigurationAndSave(newConfiguration);
+                Memory.setConfiguration(newConfiguration);
+                Memory.getInstance().initialize();
+                RegisterFile.setValuesFromConfiguration(newConfiguration);
                 Globals.gui.registersPane.getRegistersWindow().clearHighlighting();
                 Globals.gui.registersPane.getRegistersWindow().updateRegisters();
                 Globals.gui.mainPane.executeTab.dataSegment.updateBaseAddressComboBox();
@@ -260,7 +269,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         private void performReset() {
             this.selectedConfigurationButton = this.initialConfigurationButton;
             this.selectedConfigurationButton.setSelected(true);
-            this.setConfigDisplay(this.selectedConfigurationButton.getConfiguration());
+            this.setConfigDisplay(this.selectedConfigurationButton.configuration);
         }
 
         // Set name values in JLabels and address values in the JTextFields
@@ -291,8 +300,10 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             // extraction.
             final TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
             for (int i = 0; i < configurationItemValues.length; i++) {
-                treeSortedByAddress.put(BinaryUtils.intToHexString(configurationItemValues[i]) + configurationItemNames[i],
-                    configurationItemNames[i]);
+                treeSortedByAddress.put(
+                    BinaryUtils.intToHexString(configurationItemValues[i]) + configurationItemNames[i],
+                    configurationItemNames[i]
+                );
             }
             final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();
             Map.Entry<String, String> pair;
@@ -308,17 +319,12 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
 
     // Handy class to connect button to its configuration...
     private static class ConfigurationButton extends JRadioButton {
-        private final @NotNull MemoryConfiguration configuration;
+        public final @NotNull MemoryConfiguration configuration;
 
         public ConfigurationButton(final @NotNull MemoryConfiguration config) {
-            super(config.description, config == CurrentMemoryConfiguration.get());
+            super(config.description, config == OTHER_SETTINGS.getMemoryConfiguration());
             this.configuration = config;
         }
-
-        public @NotNull MemoryConfiguration getConfiguration() {
-            return this.configuration;
-        }
-
     }
 
 }

@@ -45,7 +45,7 @@ public final class FMVSX extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
 
         FloatingPointRegisterFile.updateRegister(
             statement.getOperand(0),

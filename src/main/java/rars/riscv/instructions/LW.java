@@ -1,5 +1,6 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 
@@ -30,22 +31,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>LW class.</p>
- */
 public final class LW extends Load {
-    public static final LW INSTANCE = new LW();
+    public static final @NotNull LW INSTANCE = new LW();
 
-    /**
-     * <p>Constructor for LW.</p>
-     */
     private LW() {
         super("lw t1, -100(t2)", "Set t1 to contents of effective memory word address", "010");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long load(final int address) throws AddressErrorException {
         return Memory.getInstance().getWord(address);

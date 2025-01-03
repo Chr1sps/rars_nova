@@ -20,7 +20,7 @@ public final class FLTD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
 
         final Float64 f1 = Double.getDouble(statement.getOperand(1));
         final Float64 f2 = Double.getDouble(statement.getOperand(2));

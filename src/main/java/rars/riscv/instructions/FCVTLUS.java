@@ -23,7 +23,7 @@ public final class FCVTLUS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
 
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);

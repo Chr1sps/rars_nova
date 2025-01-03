@@ -1,5 +1,6 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.WaitException;
 import rars.riscv.BasicInstruction;
@@ -44,15 +45,17 @@ public final class WFI extends BasicInstruction {
      * <p>Constructor for WFI.</p>
      */
     private WFI() {
-        super("wfi", "Wait for Interrupt",
-            BasicInstructionFormat.I_FORMAT, "000100000101 00000 000 00000 1110011");
+        super(
+            "wfi", "Wait for Interrupt",
+            BasicInstructionFormat.I_FORMAT, "000100000101 00000 000 00000 1110011"
+        );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) throws WaitException {
+    public void simulate(final @NotNull ProgramStatement statement) throws WaitException {
         throw WAIT_EXCEPTION;
     }
 }

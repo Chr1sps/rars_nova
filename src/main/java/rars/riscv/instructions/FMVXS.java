@@ -45,7 +45,7 @@ public final class FMVXS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
 
         RegisterFile.updateRegister(
             statement.getOperand(0),

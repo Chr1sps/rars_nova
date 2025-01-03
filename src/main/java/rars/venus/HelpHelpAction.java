@@ -1,5 +1,6 @@
 package rars.venus;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.assembler.Directive;
@@ -8,8 +9,6 @@ import rars.riscv.*;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -18,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Vector;
 
 import static rars.settings.FontSettings.FONT_SETTINGS;
@@ -54,6 +54,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Action for the Help -> Help menu item
  */
 public final class HelpHelpAction extends GuiAction {
+    // ideally read or computed from config file...
+    private static final @NotNull Dimension WINDOW_SIZE = new Dimension(800, 600);
     /**
      * Separates Instruction name descriptor from detailed (operation) description
      * in help string.
@@ -66,23 +68,25 @@ public final class HelpHelpAction extends GuiAction {
         this.mainUI = gui;
     }
 
-    // ideally read or computed from config file...
-    private static Dimension getSize() {
-        return new Dimension(800, 600);
-    }
-
-    private static JScrollPane createDirectivesHelpPane() {
+    private static @NotNull JScrollPane createDirectivesHelpPane() {
         final Vector<String> exampleList = new Vector<>();
         final String blanks = "            "; // 12 blanks
         for (final var directive : Directive.values()) {
-            exampleList.add(directive.toString()
-                + blanks.substring(0, Math.max(0, blanks.length() - directive.toString().length()))
-                + directive.getDescription());
+            exampleList.add("%s%s%s".formatted(
+                directive.toString(),
+                blanks.substring(
+                    0,
+                    Math.max(0, blanks.length() - directive.toString().length())
+                ),
+                directive.getDescription()
+            ));
         }
         Collections.sort(exampleList);
         final JList<String> examples = new JList<>(exampleList);
-        final JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        final JScrollPane scrollPane = new JScrollPane(
+            examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
         examples.setFont(FONT_SETTINGS.getCurrentFont());
         FONT_SETTINGS.addChangeListener(() -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
         return scrollPane;
@@ -92,8 +96,10 @@ public final class HelpHelpAction extends GuiAction {
         final var exampleList = createExampleList(instructionClass);
         Collections.sort(exampleList);
         final JList<String> examples = new JList<>(exampleList);
-        final JScrollPane scrollPane = new JScrollPane(examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        final JScrollPane scrollPane = new JScrollPane(
+            examples, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
         examples.setFont(FONT_SETTINGS.getCurrentFont());
         FONT_SETTINGS.addChangeListener(() -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
         examples.setCellRenderer(new MyCellRenderer());
@@ -101,20 +107,23 @@ public final class HelpHelpAction extends GuiAction {
     }
 
     private static @NotNull Vector<String> createExampleList(final Class<? extends Instruction> instructionClass) {
-        final var instructionList = Instructions.INSTRUCTIONS_ALL;
+        final var instructionList = InstructionsRegistry.ALL_INSTRUCTIONS.allInstructions;
         final Vector<String> exampleList = new Vector<>(instructionList.size());
         final String blanks = "                        "; // 24 blanks
         for (final Instruction instr : instructionList) {
             if (instructionClass.isInstance(instr)) {
-                exampleList.add(instr.getExampleFormat()
-                    + blanks.substring(0, Math.max(0, blanks.length() - instr.getExampleFormat().length()))
-                    + instr.getDescription());
+                exampleList.add(instr.exampleFormat
+                                    + blanks.substring(
+                    0,
+                    Math.max(0, blanks.length() - instr.exampleFormat.length())
+                )
+                                    + instr.description);
             }
         }
         return exampleList;
     }
 
-    private static StringBuilder convertToHTMLTable(final String[][] data, final String[] headers) {
+    private static @NotNull StringBuilder convertToHTMLTable(final String[][] data, final String @NotNull [] headers) {
         final StringBuilder sb = new StringBuilder("<table border=1>");
         sb.append("<tr>");
         for (final String elem : headers) {
@@ -132,6 +141,83 @@ public final class HelpHelpAction extends GuiAction {
         return sb;
     }
 
+    /// Set up the copyright notice for display.
+    private static @NotNull JPanel createCopyrightInfoPanel() {
+        final JPanel copyrightInfo = new JPanel(new BorderLayout());
+        JScrollPane copyrightScrollPane;
+        final JEditorPane copyrightDisplay;
+        try {
+            final StringBuilder text = HelpHelpAction.loadFiletoStringBuilder("/License.txt").append("</pre>");
+            copyrightDisplay = new JEditorPane("text/html", "<pre>" + text);
+            copyrightDisplay.setEditable(false);
+            copyrightDisplay.setCaretPosition(0); // assure top of document displayed
+            copyrightScrollPane = new JScrollPane(
+                copyrightDisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+            );
+        } catch (final Exception ioe) {
+            copyrightScrollPane = new JScrollPane(
+                new JLabel("Error: license contents could not be loaded."));
+        }
+        copyrightInfo.add(copyrightScrollPane);
+        return copyrightInfo;
+    }
+
+    /**
+     * Ideally, this would not use HTML to make the table, but the other methods
+     * tried were far uglier / not useful.
+     */
+    @Contract(" -> new")
+    private static @NotNull JScrollPane createSyscallsHelpPane() {
+        final var list = SyscallLoader.getSyscallList();
+        final String[] columnNames = {"Name", "Number", "Description", "Inputs", "Ouputs"};
+        final String[][] data = new String[list.size()][5];
+        final var sortedList = list.stream().sorted().toList();
+
+        int i = 0;
+        for (final var syscall : sortedList) {
+            data[i][0] = syscall.getName();
+            data[i][1] = Integer.toString(syscall.getNumber());
+            data[i][2] = syscall.getDescription();
+            data[i][3] = syscall.getInputs();
+            data[i][4] = syscall.getOutputs();
+            i++;
+        }
+
+        final JEditorPane html = new JEditorPane(
+            "text/html",
+            HelpHelpAction.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpPrelude.html") +
+                HelpHelpAction.convertToHTMLTable(data, columnNames).toString()
+                + HelpHelpAction.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpConclusion.html")
+        );
+
+        html.setCaretPosition(0); // this affects scroll position
+        html.setEditable(false);
+        return new JScrollPane(
+            html, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
+    }
+
+    // Methods to construct MIPS help tabs from internal MARS objects
+
+    private static @NotNull StringBuilder loadFiletoStringBuilder(final String path) {
+        final var stream = HelpHelpAction.class.getResourceAsStream(path);
+        final var reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));
+        final StringBuilder out = new StringBuilder();
+        try {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out.append(line).append("\n");
+            }
+            reader.close();
+        } catch (final IOException io) {
+            return new StringBuilder(path + " could not be loaded.");
+        }
+        return out;
+
+    }
+
     /**
      * {@inheritDoc}
      * <p>
@@ -142,7 +228,7 @@ public final class HelpHelpAction extends GuiAction {
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("RISCV", this.createHelpInfoPanel());
         tabbedPane.addTab("RARS", this.createRarsHelpInfoPanel());
-        tabbedPane.addTab("License", this.createCopyrightInfoPanel());
+        tabbedPane.addTab("License", HelpHelpAction.createCopyrightInfoPanel());
         tabbedPane.addTab("Bugs/Comments", this.createHTMLHelpPanel("BugReportingHelp.html"));
         tabbedPane.addTab("Acknowledgements", this.createHTMLHelpPanel("Acknowledgements.html"));
         // Create non-modal dialog. Based on java.sun.com "How to Make Dialogs",
@@ -178,25 +264,27 @@ public final class HelpHelpAction extends GuiAction {
         contentPane.setOpaque(true);
         dialog.setContentPane(contentPane);
         // Show it.
-        dialog.setSize(HelpHelpAction.getSize());
+        dialog.setSize(HelpHelpAction.WINDOW_SIZE);
         dialog.setLocationRelativeTo(this.mainUI);
         dialog.setVisible(true);
 
     }
 
-    // Create panel containing Help Info read from html document.
-    private JPanel createHTMLHelpPanel(final String filename) {
+    /// Create panel containing Help Info read from html document.
+    private @NotNull JPanel createHTMLHelpPanel(final String filename) {
         final JPanel helpPanel = new JPanel(new BorderLayout());
         JScrollPane helpScrollPane;
         final JEditorPane helpDisplay;
         try {
-            final StringBuilder text = this.loadFiletoStringBuilder(Globals.helpPath + filename);
+            final StringBuilder text = HelpHelpAction.loadFiletoStringBuilder(Globals.helpPath + filename);
             helpDisplay = new JEditorPane("text/html", text.toString());
             helpDisplay.setEditable(false);
             helpDisplay.setCaretPosition(0); // assure top of document displayed
-            helpScrollPane = new JScrollPane(helpDisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            helpDisplay.addHyperlinkListener(new HelpHyperlinkListener());
+            helpScrollPane = new JScrollPane(
+                helpDisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+            );
+            helpDisplay.addHyperlinkListener(new HelpHyperlinkListener(helpPanel));
         } catch (final Exception ie) {
             helpScrollPane = new JScrollPane(
                 new JLabel("Error (" + ie + "): " + filename + " contents could not be loaded."));
@@ -205,30 +293,8 @@ public final class HelpHelpAction extends GuiAction {
         return helpPanel;
     }
 
-    /// //////////// Methods to construct MIPS help tabs from internal MARS objects
-
-    // Set up the copyright notice for display.
-    private JPanel createCopyrightInfoPanel() {
-        final JPanel copyrightInfo = new JPanel(new BorderLayout());
-        JScrollPane copyrightScrollPane;
-        final JEditorPane copyrightDisplay;
-        try {
-            final StringBuilder text = this.loadFiletoStringBuilder("/License.txt").append("</pre>");
-            copyrightDisplay = new JEditorPane("text/html", "<pre>" + text);
-            copyrightDisplay.setEditable(false);
-            copyrightDisplay.setCaretPosition(0); // assure top of document displayed
-            copyrightScrollPane = new JScrollPane(copyrightDisplay, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        } catch (final Exception ioe) {
-            copyrightScrollPane = new JScrollPane(
-                new JLabel("Error: license contents could not be loaded."));
-        }
-        copyrightInfo.add(copyrightScrollPane);
-        return copyrightInfo;
-    }
-
-    // Set up MARS help tab. Subtabs get their contents from HTML files.
-    private JPanel createRarsHelpInfoPanel() {
+    /// Set up MARS help tab. Subtabs get their contents from HTML files.
+    private @NotNull JPanel createRarsHelpInfoPanel() {
         final JPanel helpInfo = new JPanel(new BorderLayout());
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Intro", this.createHTMLHelpPanel("Intro.html"));
@@ -243,7 +309,7 @@ public final class HelpHelpAction extends GuiAction {
     }
 
     // Set up MIPS help tab. Most contents are generated from instruction set info.
-    private JPanel createHelpInfoPanel() {
+    private @NotNull JPanel createHelpInfoPanel() {
         final JPanel helpInfo = new JPanel(new BorderLayout());
         final String helpRemarksColor = "CCFF99";
         // Introductory remarks go at the top as a label
@@ -312,79 +378,39 @@ public final class HelpHelpAction extends GuiAction {
         helpRemarksLabel.setOpaque(true);
         helpRemarksLabel.setBackground(Color.decode("0x" + helpRemarksColor));
         helpRemarksLabel.setForeground(Color.BLACK);
-        final JScrollPane operandsScrollPane = new JScrollPane(helpRemarksLabel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-            JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        final JScrollPane operandsScrollPane = new JScrollPane(
+            helpRemarksLabel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS
+        );
         helpInfo.add(operandsScrollPane, BorderLayout.NORTH);
         // Below the label is a tabbed pane with categories of MIPS help
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Basic Instructions", HelpHelpAction.createInstructionHelpPane(BasicInstruction.class));
-        tabbedPane.addTab("Extended (usePseudoInstructions) Instructions",
-            HelpHelpAction.createInstructionHelpPane(ExtendedInstruction.class));
+        tabbedPane.addTab(
+            "Extended (pseudo) Instructions",
+            HelpHelpAction.createInstructionHelpPane(ExtendedInstruction.class)
+        );
         tabbedPane.addTab("Directives", HelpHelpAction.createDirectivesHelpPane());
-        tabbedPane.addTab("Syscalls", this.createSyscallsHelpPane());
+        tabbedPane.addTab("Syscalls", HelpHelpAction.createSyscallsHelpPane());
         tabbedPane.addTab("Exceptions", this.createHTMLHelpPanel("ExceptionsHelp.html"));
         tabbedPane.addTab("Macros", this.createHTMLHelpPanel("MacrosHelp.html"));
         operandsScrollPane.setPreferredSize(
-            new Dimension((int) HelpHelpAction.getSize().getWidth(),
-                (int) (HelpHelpAction.getSize().getHeight() * .2)));
+            new Dimension(
+                (int) HelpHelpAction.WINDOW_SIZE.getWidth(),
+                (int) (HelpHelpAction.WINDOW_SIZE.getHeight() * .2)
+            ));
         operandsScrollPane.getVerticalScrollBar().setUnitIncrement(10);
         tabbedPane.setPreferredSize(
-            new Dimension((int) HelpHelpAction.getSize().getWidth(),
-                (int) (HelpHelpAction.getSize().getHeight() * .6)));
+            new Dimension(
+                (int) HelpHelpAction.WINDOW_SIZE.getWidth(),
+                (int) (HelpHelpAction.WINDOW_SIZE.getHeight() * .6)
+            ));
         final JSplitPane splitsville = new JSplitPane(JSplitPane.VERTICAL_SPLIT, operandsScrollPane, tabbedPane);
         splitsville.setOneTouchExpandable(true);
         splitsville.resetToPreferredSizes();
         helpInfo.add(splitsville);
         // mipsHelpInfo.add(tabbedPane);
         return helpInfo;
-    }
-
-    /*
-     * Ideally, this would not use HTML to make the table, but the other methods
-     * tried were far uglier / not useful.
-     */
-    private JScrollPane createSyscallsHelpPane() {
-        final var list = SyscallLoader.getSyscallList();
-        final String[] columnNames = {"Name", "Number", "Description", "Inputs", "Ouputs"};
-        final String[][] data = new String[list.size()][5];
-        final var sortedList = list.stream().sorted().toList();
-
-        int i = 0;
-        for (final var syscall : sortedList) {
-            data[i][0] = syscall.getName();
-            data[i][1] = Integer.toString(syscall.getNumber());
-            data[i][2] = syscall.getDescription();
-            data[i][3] = syscall.getInputs();
-            data[i][4] = syscall.getOutputs();
-            i++;
-        }
-
-        final JEditorPane html = new JEditorPane("text/html",
-            this.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpPrelude.html") +
-                HelpHelpAction.convertToHTMLTable(data, columnNames).toString()
-                + this.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpConclusion.html"));
-
-        html.setCaretPosition(0); // this affects scroll position
-        html.setEditable(false);
-        return new JScrollPane(html, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    }
-
-    private StringBuilder loadFiletoStringBuilder(final String path) {
-        final var stream = this.getClass().getResourceAsStream(path);
-        final var reader = new BufferedReader(new InputStreamReader(stream));
-        String line;
-        final StringBuilder out = new StringBuilder();
-        try {
-            while ((line = reader.readLine()) != null) {
-                out.append(line).append("\n");
-            }
-            reader.close();
-        } catch (final IOException io) {
-            return new StringBuilder(path + " could not be loaded.");
-        }
-        return out;
-
     }
 
     private static class MyCellRenderer extends JLabel implements ListCellRenderer<String> {
@@ -414,86 +440,33 @@ public final class HelpHelpAction extends GuiAction {
         }
     }
 
-    /*
+    /**
      * Determines MARS response when user click on hyperlink in displayed help page.
      * The response will be to pop up a simple dialog with the page contents. It
      * will not display URL, no navigation, nothing. Just display the page and
      * provide a Close button.
      */
-    private class HelpHyperlinkListener implements HyperlinkListener {
-        private static final String cannotDisplayMessage = "<html><title></title><body><strong>Unable to display " +
+    private record HelpHyperlinkListener(@NotNull JPanel parent) implements HyperlinkListener {
+        private static final @NotNull String cannotDisplayMessage = "<html><title></title><body><strong>Unable to " +
+            "display " +
             "requested document.</strong></body></html>";
-        JDialog webpageDisplay;
-        JTextField webpageURL;
 
         @Override
-        public void hyperlinkUpdate(final HyperlinkEvent e) {
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                final JEditorPane pane = (JEditorPane) e.getSource();
-                if (e instanceof final HTMLFrameHyperlinkEvent evt) {
-                    final HTMLDocument doc = (HTMLDocument) pane.getDocument();
-                    doc.processHTMLFrameHyperlinkEvent(evt);
-                } else {
-                    this.webpageDisplay = new JDialog(HelpHelpAction.this.mainUI, "Primitive HTML Viewer");
-                    this.webpageDisplay.setLayout(new BorderLayout());
-                    this.webpageDisplay.setLocation(HelpHelpAction.this.mainUI.getSize().width / 6,
-                        HelpHelpAction.this.mainUI.getSize().height / 6);
-                    JEditorPane webpagePane;
+        public void hyperlinkUpdate(final @NotNull HyperlinkEvent event) {
+            if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                if (Desktop.isDesktopSupported()) {
+                    final var desktop = Desktop.getDesktop();
                     try {
-                        webpagePane = new JEditorPane(e.getURL());
-                    } catch (final Throwable t) {
-                        webpagePane = new JEditorPane("text/html", HelpHyperlinkListener.cannotDisplayMessage);
+                        desktop.browse(event.getURL().toURI());
+                    } catch (final Exception e) {
+                        JOptionPane.showMessageDialog(
+                            this.parent,
+                            "Unable to open browser to display requested document."
+                        );
                     }
-                    webpagePane.addHyperlinkListener(
-                        e12 -> {
-                            if (e12.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                                final JEditorPane pane1 = (JEditorPane) e12.getSource();
-                                if (e12 instanceof final HTMLFrameHyperlinkEvent evt) {
-                                    final HTMLDocument doc = (HTMLDocument) pane1.getDocument();
-                                    doc.processHTMLFrameHyperlinkEvent(evt);
-                                } else {
-                                    try {
-                                        pane1.setPage(e12.getURL());
-                                    } catch (final Throwable t) {
-                                        pane1.setText(HelpHyperlinkListener.cannotDisplayMessage);
-                                    }
-                                    HelpHyperlinkListener.this.webpageURL.setText(e12.getURL().toString());
-                                }
-                            }
-                        });
-                    webpagePane.setPreferredSize(
-                        new Dimension(HelpHelpAction.this.mainUI.getSize().width * 2 / 3,
-                            HelpHelpAction.this.mainUI.getSize().height * 2 / 3));
-                    webpagePane.setEditable(false);
-                    webpagePane.setCaretPosition(0);
-                    final JScrollPane webpageScrollPane = new JScrollPane(webpagePane,
-                        JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-                    this.webpageURL = new JTextField(e.getURL().toString(), 50);
-                    this.webpageURL.setEditable(false);
-                    this.webpageURL.setBackground(Color.WHITE);
-                    final JPanel URLPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 4));
-                    URLPanel.add(new JLabel("URL: "));
-                    URLPanel.add(this.webpageURL);
-                    this.webpageDisplay.add(URLPanel, BorderLayout.NORTH);
-                    this.webpageDisplay.add(webpageScrollPane);
-                    final JButton closeButton = new JButton("Close");
-                    closeButton.addActionListener(
-                        e1 -> {
-                            HelpHyperlinkListener.this.webpageDisplay.setVisible(false);
-                            HelpHyperlinkListener.this.webpageDisplay.dispose();
-                        });
-                    final JPanel closePanel = new JPanel();
-                    closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
-                    closePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 5));
-                    closePanel.add(Box.createHorizontalGlue());
-                    closePanel.add(closeButton);
-                    closePanel.add(Box.createHorizontalGlue());
-                    this.webpageDisplay.add(closePanel, BorderLayout.SOUTH);
-                    this.webpageDisplay.pack();
-                    this.webpageDisplay.setVisible(true);
                 }
             }
         }
     }
 }
+

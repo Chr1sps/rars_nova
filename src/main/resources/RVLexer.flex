@@ -1,6 +1,6 @@
 package rars.riscv.lang.lexing;
 
-import rars.riscv.Instructions;
+import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
@@ -229,20 +229,20 @@ RightParen = (")")
     {Comma}                     { addToken(RVTokenType.COMMA); }
     {Directive}					{ addToken(RVTokenType.DIRECTIVE); }
     {Identifier}                {
-                        final var foundOps = Instructions.matchOperator(yytext());
-                        if (foundOps.isEmpty()) {
-                            final var foundRegister = RegisterFile.getRegister(yytext());
-                            final var foundFPRegister = FloatingPointRegisterFile.getRegister(yytext());
-                            final var foundCASRegister = ControlAndStatusRegisterFile.getRegister(yytext());
-                            if (foundRegister != null || foundFPRegister != null || foundCASRegister != null) {
-                                addToken(RVTokenType.REGISTER_NAME);
+                            final var foundOps = InstructionsRegistry.matchOperator(yytext());
+                            if (foundOps.isEmpty()) {
+                                final var foundRegister = RegisterFile.getRegister(yytext());
+                                final var foundFPRegister = FloatingPointRegisterFile.getRegister(yytext());
+                                final var foundCASRegister = ControlAndStatusRegisterFile.getRegister(yytext());
+                                if (foundRegister != null || foundFPRegister != null || foundCASRegister != null) {
+                                    addToken(RVTokenType.REGISTER_NAME);
+                                } else {
+                                    addToken(RVTokenType.IDENTIFIER);
+                                }
                             } else {
-                                addToken(RVTokenType.IDENTIFIER);
+                                addToken(RVTokenType.INSTRUCTION);
                             }
-                        } else {
-                            addToken(RVTokenType.INSTRUCTION);
                         }
-                    }
 
     {LeftParen}                 { addToken(RVTokenType.LEFT_PAREN); }
     {RightParen}                { addToken(RVTokenType.RIGHT_PAREN); }

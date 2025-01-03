@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.Instructions;
 import rars.riscv.hardware.RegisterFile;
 
 /*
@@ -34,28 +33,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-public final class SRAI extends BasicInstruction {
-    public static final SRAI INSTANCE = new SRAI();
+public final class SRAI32 extends BasicInstruction {
+    public static final @NotNull SRAI32 INSTANCE = new SRAI32();
 
-    private SRAI() {
+    private SRAI32() {
         super(
             "srai t1,t2,10",
             "Shift right arithmetic : Set t1 to result of sign-extended shifting t2 right by number of bits specified" +
                 " by immediate",
-            BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0010011");
+            BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0010011"
+        );
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
-        if (Instructions.RV64) {
-            RegisterFile.updateRegister(
-                statement.getOperand(0),
-                RegisterFile.getValueLong(statement.getOperand(1)) >> statement.getOperand(2));
-        } else {
-            // Uses >> because sign fill
-            RegisterFile.updateRegister(
-                statement.getOperand(0),
-                RegisterFile.getValue(statement.getOperand(1)) >> statement.getOperand(2));
-        }
+    public void simulate(final @NotNull ProgramStatement statement) {
+        // Uses >> because sign fill
+        RegisterFile.updateRegister(
+            statement.getOperand(0),
+            RegisterFile.getValue(statement.getOperand(1)) >> statement.getOperand(2)
+        );
+
     }
 }

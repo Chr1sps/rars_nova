@@ -50,9 +50,11 @@ public final class NullString {
      * Just a wrapper around #String get(ProgramStatement, String) which passes in
      * the default "a0"
      *
-     * @param statement a {@link ProgramStatement} object
+     * @param statement
+     *     a {@link ProgramStatement} object
      * @return a {@link java.lang.String} object
-     * @throws ExitingException if any.
+     * @throws ExitingException
+     *     if any.
      */
     public static @NotNull String get(final ProgramStatement statement) throws ExitingException {
         return NullString.get(statement, "a0");
@@ -61,21 +63,24 @@ public final class NullString {
     /**
      * Reads a NULL terminated string from memory starting at the address in reg
      *
-     * @param statement the program statement this was called from (used for error
-     *                  handling)
-     * @param reg       The name of the register for the address of the string
+     * @param statement
+     *     the program statement this was called from (used for error
+     *     handling)
+     * @param reg
+     *     The name of the register for the address of the string
      * @return the string read from memory
-     * @throws ExitingException if it hits a #AddressErrorException
+     * @throws ExitingException
+     *     if it hits a #AddressErrorException
      */
     public static @NotNull String get(final ProgramStatement statement, final String reg) throws ExitingException {
         int byteAddress = RegisterFile.getValue(reg);
         final ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
         try {
-            utf8BytesList.add((byte) Memory.getInstance().getByte(byteAddress));
+            utf8BytesList.add(Memory.getInstance().getByte(byteAddress));
             while (utf8BytesList.getLast() != 0) // until null terminator
             {
                 byteAddress++;
-                utf8BytesList.add((byte) Memory.getInstance().getByte(byteAddress));
+                utf8BytesList.add(Memory.getInstance().getByte(byteAddress));
             }
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);

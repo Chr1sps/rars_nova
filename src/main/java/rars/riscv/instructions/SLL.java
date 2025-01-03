@@ -27,34 +27,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SLL class.</p>
- */
-public final class SLL extends Arithmetic {
-    public static final SLL INSTANCE = new SLL();
+import org.jetbrains.annotations.NotNull;
 
-    /**
-     * <p>Constructor for SLL.</p>
-     */
+public final class SLL extends Arithmetic {
+    public static final @NotNull SLL INSTANCE = new SLL();
+
     private SLL() {
-        super("sll t1,t2,t3",
-                "Shift left logical: Set t1 to result of shifting t2 left by number of bits specified by second in low-order 5 bits of t3",
-                "0000000", "001");
+        super(
+            "sll t1,t2,t3",
+            "Shift left logical: Set t1 to result of shifting t2 left by number of bits specified by second in " +
+                "low-order 5 bits of t3",
+            "0000000",
+            "001"
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long value2) {
-        return value << (value2 & 0x0000003F); // Use the bottom 6 bits
+        return value << (value2 & 0b0011_1111); // Use the bottom 6 bits
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int computeW(final int value, final int value2) {
-        return value << (value2 & 0x0000001F); // Only use the bottom 5 bits
+        return value << (value2 & 0b0001_1111); // Only use the bottom 5 bits
     }
 }

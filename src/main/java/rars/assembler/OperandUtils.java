@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.ErrorMessage;
 import rars.riscv.Instruction;
-import rars.riscv.Instructions;
+import rars.riscv.InstructionsRegistry;
 
 import java.util.List;
 
@@ -50,11 +50,14 @@ public final class OperandUtils {
     /**
      * Syntax test for correct match in both numbers and types of operands.
      *
-     * @param candidateList List of tokens generated from programmer's MIPS
-     *                      statement.
-     * @param inst          The (presumably best matched) RISCV instruction.
-     * @param errors        ErrorList into which any error messages generated here
-     *                      will be added.
+     * @param candidateList
+     *     List of tokens generated from programmer's MIPS
+     *     statement.
+     * @param inst
+     *     The (presumably best matched) RISCV instruction.
+     * @param errors
+     *     ErrorList into which any error messages generated here
+     *     will be added.
      * @return Returns <tt>true</tt> if the programmer's statement matches the MIPS
      * specification, else returns <tt>false</tt>.
      */
@@ -73,11 +76,13 @@ public final class OperandUtils {
      */
     static @Nullable Instruction bestOperandMatch(final TokenList tokenList,
                                                   final @NotNull List<Instruction> instrMatches) {
-        if (instrMatches.size() == 1)
+        if (instrMatches.size() == 1) {
             return instrMatches.getFirst();
+        }
         for (final Instruction potentialMatch : instrMatches) {
-            if (OperandUtils.checkIfTokensMatchOperand(tokenList, potentialMatch, new ErrorList()))
+            if (OperandUtils.checkIfTokensMatchOperand(tokenList, potentialMatch, new ErrorList())) {
                 return potentialMatch;
+            }
         }
         return instrMatches.getFirst();
     }
@@ -87,16 +92,16 @@ public final class OperandUtils {
     private static boolean numOperandsCheck(final @NotNull TokenList cand, final @NotNull Instruction spec,
                                             final @NotNull ErrorList errors) {
         final int numOperands = cand.size() - 1;
-        final int reqNumOperands = Instructions.getTokenList(spec).size() - 1;
+        final int reqNumOperands = InstructionsRegistry.getTokenList(spec).size() - 1;
         final Token operator = cand.get(0);
         if (numOperands == reqNumOperands) {
             return true;
         } else if (numOperands < reqNumOperands) {
 
-            final String mess = "Too few or incorrectly formatted operands. Expected: " + spec.getExampleFormat();
+            final String mess = "Too few or incorrectly formatted operands. Expected: " + spec.exampleFormat;
             OperandUtils.generateMessage(operator, mess, errors);
         } else {
-            final String mess = "Too many or incorrectly formatted operands. Expected: " + spec.getExampleFormat();
+            final String mess = "Too many or incorrectly formatted operands. Expected: " + spec.exampleFormat;
             OperandUtils.generateMessage(operator, mess, errors);
         }
         return false;
@@ -105,7 +110,7 @@ public final class OperandUtils {
     // Generate error message if operand is not of correct type for this operation &
     // operand position
     private static boolean operandTypeCheck(final TokenList cand, final Instruction spec, final ErrorList errors) {
-        final var tokenList = Instructions.getTokenList(spec);
+        final var tokenList = InstructionsRegistry.getTokenList(spec);
 
         for (int i = 1; i < tokenList.size(); i++) {
             final var candToken = cand.get(i);
@@ -145,13 +150,15 @@ public final class OperandUtils {
                 continue;
             }
             if (specType == TokenType.REGISTER_NAME &&
-                candType == TokenType.REGISTER_NUMBER)
+                candType == TokenType.REGISTER_NUMBER) {
                 continue;
+            }
             if (specType == TokenType.CSR_NAME &&
                 (candType == TokenType.INTEGER_5 || candType == TokenType.INTEGER_6
                     || candType == TokenType.INTEGER_12
-                    || candType == TokenType.INTEGER_12U || candType == TokenType.CSR_NAME))
+                    || candType == TokenType.INTEGER_12U || candType == TokenType.CSR_NAME)) {
                 continue;
+            }
             if ((specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_5) ||
                 (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_5) ||
                 (specType == TokenType.INTEGER_20 && candType == TokenType.INTEGER_5) ||
@@ -163,11 +170,14 @@ public final class OperandUtils {
                 (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_6) ||
                 (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_12) ||
                 (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_12U) ||
-                (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_20))
+                (specType == TokenType.INTEGER_32 && candType == TokenType.INTEGER_20)) {
                 continue;
+            }
             if (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_12U) {
-                OperandUtils.generateMessage(candToken, "Unsigned second is too large to fit into a sign-extended " +
-                    "immediate", errors);
+                OperandUtils.generateMessage(
+                    candToken, "Unsigned second is too large to fit into a sign-extended " +
+                        "immediate", errors
+                );
                 return false;
             }
             if ((specType == TokenType.INTEGER_5 && candType == TokenType.INTEGER_6) ||
@@ -204,7 +214,8 @@ public final class OperandUtils {
             token.getSourceProgram(),
             token.getSourceLine(),
             token.getStartPos(),
-            "\"" + token.getText() + "\": " + mess));
+            "\"" + token.getText() + "\": " + mess
+        ));
     }
 
 }

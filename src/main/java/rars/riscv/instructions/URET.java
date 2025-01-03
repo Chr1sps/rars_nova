@@ -1,5 +1,6 @@
 package rars.riscv.instructions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
@@ -43,15 +44,17 @@ public final class URET extends BasicInstruction {
      * <p>Constructor for URET.</p>
      */
     private URET() {
-        super("uret", "Return from handling an interrupt or exception (to uepc)",
-                BasicInstructionFormat.I_FORMAT, "000000000010 00000 000 00000 1110011");
+        super(
+            "uret", "Return from handling an interrupt or exception (to uepc)",
+            BasicInstructionFormat.I_FORMAT, "000000000010 00000 000 00000 1110011"
+        );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         final boolean upie = (ControlAndStatusRegisterFile.getValue("ustatus") & 0x10) == 0x10;
         ControlAndStatusRegisterFile.clearRegister("ustatus", 0x10); // Clear UPIE
         if (upie) { // Set UIE to UPIE

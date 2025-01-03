@@ -14,13 +14,16 @@ public final class SLLIW extends BasicInstruction {
             "slliw t1,t2,10",
             "Shift left logical (32 bit): Set t1 to result of shifting t2 left by number of bits specified by " +
                 "immediate",
-            BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 001 fffff 0011011");
+            BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 001 fffff 0011011"
+        );
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) {
         // Copy from SLLI
-        RegisterFile.updateRegister(statement.getOperand(0),
-            (long) RegisterFile.getValue(statement.getOperand(1)) << statement.getOperand(2));
+        RegisterFile.updateRegister(
+            statement.getOperand(0),
+            (long) RegisterFile.getValue(statement.getOperand(1)) << statement.getOperand(2)
+        );
     }
 }
