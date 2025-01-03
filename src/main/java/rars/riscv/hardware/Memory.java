@@ -242,24 +242,12 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // segment
     // somewhat in that the block entries do not contain int's, but instead contain
     // references to ProgramStatement objects.
-    /**
-     * Constant <code>dataSegmentLimitAddress=dataSegmentBaseAddress +
-     * BLOCK_LENGTH_WORDS * BLOCK_TABLE_LENGTH * WORD_LENGTH_BYTES</code>
-     */
     public static int dataSegmentLimitAddress = Memory.dataSegmentBaseAddress +
-        Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES;
-    /**
-     * Constant <code>textLimitAddress=textBaseAddress +
-     * TEXT_BLOCK_LENGTH_WORDS * TEXT_BLOCK_TABLE_LENGTH * WORD_LENGTH_BYTES</code>
-     */
+            Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES;
     public static int textLimitAddress = Memory.textBaseAddress +
-        Memory.TEXT_BLOCK_LENGTH_WORDS * Memory.TEXT_BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES;
-    /**
-     * Constant <code>stackLimitAddress=stackBaseAddress -
-     * BLOCK_LENGTH_WORDS * BLOCK_TABLE_LENGTH * WORD_LENGTH_BYTES</code>
-     */
+            Memory.TEXT_BLOCK_LENGTH_WORDS * Memory.TEXT_BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES;
     public static int stackLimitAddress = Memory.stackBaseAddress -
-        Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES;
+            Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES;
 
     // Set "top" address boundary to go with each "base" address. This determines
     // permissable
@@ -267,13 +255,15 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // bytes based
     // on the table structures described above (except memory mapped IO, limited to
     // 64KB by range).
-    /**
-     * Constant <code>memoryMapLimitAddress=memoryMapBaseAddress +
-     * BLOCK_LENGTH_WORDS * MMIO_TABLE_LENGTH * WORD_LENGTH_BYTES</code>
-     */
     public static int memoryMapLimitAddress = Memory.memoryMapBaseAddress +
-        Memory.BLOCK_LENGTH_WORDS * Memory.MMIO_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES;
+            Memory.BLOCK_LENGTH_WORDS * Memory.MMIO_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES;
     private static Memory uniqueMemoryInstance = new Memory();
+
+    static {
+        Memory.setConfiguration(OTHER_SETTINGS.getMemoryConfiguration());
+        Memory.getInstance().initialize(); // will establish memory configuration from setting
+    }
+
     private final Collection<MemoryObservable> observables = Memory.getNewMemoryObserversCollection();
     private int[][] dataBlockTable;
     // This will be a Singleton class, only one instance is ever created. Since I
@@ -284,7 +274,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // getInstance()
     // always returns this instance.
     private int[][] stackBlockTable;
-
     /*
      * Private constructor for Memory. Separate data structures for text and data
      * segments.
@@ -292,9 +281,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     private int[][] memoryMapBlockTable;
     private ProgramStatement[][] textBlockTable;
 
-    /**
-     * <p>Constructor for Memory.</p>
-     */
     public Memory() {
         this.initialize();
     }
@@ -302,8 +288,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * <p>swapInstance.</p>
      *
-     * @param mem
-     *     a {@link Memory} object
+     * @param mem a {@link Memory} object
      * @return a {@link Memory} object
      */
     public static Memory swapInstance(final Memory mem) {
@@ -346,27 +331,27 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         // 0xffff0000;
         Memory.kernelHighAddress = newConfiguration.kernelHighAddress; // 0xffffffff;
         Memory.dataSegmentLimitAddress =
-            Math.min(
-                newConfiguration.dataSegmentLimitAddress,
-                Memory.dataSegmentBaseAddress +
-                    Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES
-            );
+                Math.min(
+                        newConfiguration.dataSegmentLimitAddress,
+                        Memory.dataSegmentBaseAddress +
+                                Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES
+                );
         Memory.textLimitAddress = Math.min(
-            newConfiguration.textLimitAddress,
-            Memory.textBaseAddress +
-                Memory.TEXT_BLOCK_LENGTH_WORDS * Memory.TEXT_BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES
+                newConfiguration.textLimitAddress,
+                Memory.textBaseAddress +
+                        Memory.TEXT_BLOCK_LENGTH_WORDS * Memory.TEXT_BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES
         );
         Memory.stackLimitAddress = Math.max(
-            newConfiguration.stackLimitAddress,
-            Memory.stackBaseAddress -
-                Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES
+                newConfiguration.stackLimitAddress,
+                Memory.stackBaseAddress -
+                        Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES
         );
         Memory.memoryMapLimitAddress =
-            Math.min(
-                newConfiguration.memoryMapLimitAddress,
-                Memory.memoryMapBaseAddress +
-                    Memory.BLOCK_LENGTH_WORDS * Memory.MMIO_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES
-            );
+                Math.min(
+                        newConfiguration.memoryMapLimitAddress,
+                        Memory.memoryMapBaseAddress +
+                                Memory.BLOCK_LENGTH_WORDS * Memory.MMIO_TABLE_LENGTH * Memory.WORD_LENGTH_BYTES
+                );
     }
 
     /**
@@ -375,13 +360,11 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * no heap management! There is however nearly 4MB of heap space available in
      * Rars.
      *
-     * @param numBytes
-     *     Number of bytes requested. Should be multiple of 4, otherwise
-     *     next higher multiple of 4 allocated.
+     * @param numBytes Number of bytes requested. Should be multiple of 4, otherwise
+     *                 next higher multiple of 4 allocated.
      * @return address of allocated heap storage.
-     * @throws java.lang.IllegalArgumentException
-     *     if number of requested bytes is negative or
-     *     exceeds available heap storage
+     * @throws java.lang.IllegalArgumentException if number of requested bytes is negative or
+     *                                            exceeds available heap storage
      */
     public static int allocateBytesFromHeap(final int numBytes) throws IllegalArgumentException {
         final int result = Memory.heapAddress;
@@ -404,8 +387,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * Utility to determine if given address is word-aligned.
      *
-     * @param address
-     *     the address to check
+     * @param address the address to check
      * @return true if address is word-aligned, false otherwise
      */
     public static boolean wordAligned(final int address) {
@@ -419,8 +401,8 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     private static void checkLoadWordAligned(final int address) throws AddressErrorException {
         if (!Memory.wordAligned(address)) {
             throw new AddressErrorException(
-                "Load address not aligned to word boundary ",
-                ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
+                    "Load address not aligned to word boundary ",
+                    ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
             );
         }
     }
@@ -428,8 +410,8 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     private static void checkStoreWordAligned(final int address) throws AddressErrorException {
         if (!Memory.wordAligned(address)) {
             throw new AddressErrorException(
-                "Store address not aligned to word boundary ",
-                ExceptionReason.STORE_ADDRESS_MISALIGNED, address
+                    "Store address not aligned to word boundary ",
+                    ExceptionReason.STORE_ADDRESS_MISALIGNED, address
             );
         }
     }
@@ -437,8 +419,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * Utility to determine if given address is doubleword-aligned.
      *
-     * @param address
-     *     the address to check
+     * @param address the address to check
      * @return true if address is doubleword-aligned, false otherwise
      */
     public static boolean doublewordAligned(final int address) {
@@ -452,8 +433,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * but it does implement enough for hundreds of thousands of lines
      * of code.
      *
-     * @param address
-     *     integer memory address
+     * @param address integer memory address
      * @return true if that address is within RARS-defined text segment,
      * false otherwise.
      */
@@ -465,8 +445,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * Handy little utility to find out if given address is in RARS data
      * segment (starts at Memory.dataSegmentBaseAddress).
      *
-     * @param address
-     *     integer memory address
+     * @param address integer memory address
      * @return true if that address is within RARS-defined data segment,
      * false otherwise.
      */
@@ -478,8 +457,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * Handy little utility to find out if given address is in the Memory Map area
      * starts at Memory.memoryMapBaseAddress, range 0xffff0000 to 0xffffffff.
      *
-     * @param address
-     *     integer memory address
+     * @param address integer memory address
      * @return true if that address is within RARS-defined memory map (MMIO) area,
      * false otherwise.
      */
@@ -497,13 +475,13 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     private static int replaceByte(final int sourceValue, final int bytePosInSource, final int destValue,
                                    final int bytePosInDest) {
         return
-            // Set source byte second into destination byte position; set other 24 bits to
-            // 0's...
-            ((sourceValue >> (24 - (bytePosInSource << 3)) & 0xFF) << (24 - (bytePosInDest << 3)))
-                // and bitwise-OR it with...
-                |
-                // Set 8 bits in destination byte position to 0's, other 24 bits are unchanged.
-                (destValue & ~(0xFF << (24 - (bytePosInDest << 3))));
+                // Set source byte second into destination byte position; set other 24 bits to
+                // 0's...
+                ((sourceValue >> (24 - (bytePosInSource << 3)) & 0xFF) << (24 - (bytePosInDest << 3)))
+                        // and bitwise-OR it with...
+                        |
+                        // Set 8 bits in destination byte position to 0's, other 24 bits are unchanged.
+                        (destValue & ~(0xFF << (24 - (bytePosInDest << 3))));
     }
 
     /* *******************************
@@ -528,15 +506,14 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * <p>copyFrom.</p>
      *
-     * @param other
-     *     a {@link Memory} object
+     * @param other a {@link Memory} object
      * @return a boolean
      */
     public boolean copyFrom(final Memory other) {
         if (this.textBlockTable.length != other.textBlockTable.length ||
-            this.dataBlockTable.length != other.dataBlockTable.length ||
-            this.stackBlockTable.length != other.stackBlockTable.length ||
-            this.memoryMapBlockTable.length != other.memoryMapBlockTable.length) {
+                this.dataBlockTable.length != other.dataBlockTable.length ||
+                this.stackBlockTable.length != other.stackBlockTable.length ||
+                this.memoryMapBlockTable.length != other.memoryMapBlockTable.length) {
             // The memory configurations don't match up
             return false;
         }
@@ -573,14 +550,6 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         return true;
     }
 
-    /**
-     * Explicitly clear the contents of memory. Typically done at start of assembly.
-     */
-    public void clear() {
-        Memory.setConfiguration(OTHER_SETTINGS.getMemoryConfiguration());
-        this.initialize();
-    }
-
     public void initialize() {
         Memory.heapAddress = Memory.heapBaseAddress;
         this.textBlockTable = new ProgramStatement[Memory.TEXT_BLOCK_TABLE_LENGTH][];
@@ -597,15 +566,11 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * If length == 1, takes second from low order byte. If 2, takes from low order
      * half-word.
      *
-     * @param address
-     *     Starting address of Memory address to be set.
-     * @param value
-     *     Value to be stored starting at that address.
-     * @param length
-     *     Number of bytes to be written.
+     * @param address Starting address of Memory address to be set.
+     * @param value   Value to be stored starting at that address.
+     * @param length  Number of bytes to be written.
      * @return old second that was replaced by the set operation
-     * @throws AddressErrorException
-     *     if any.
+     * @throws AddressErrorException if any.
      */
 
     // Allocates blocks if necessary.
@@ -632,8 +597,8 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
-                        "Load address crosses word boundary",
-                        ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
+                            "Load address crosses word boundary",
+                            ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
                     );
                 }
                 final ProgramStatement oldStatement = this.getStatementNoNotify((address / 4) * 4);
@@ -652,8 +617,8 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 this.setStatement((address / 4) * 4, new ProgramStatement(value, (address / 4) * 4));
             } else {
                 throw new AddressErrorException(
-                    "Cannot write directly to text segment!",
-                    ExceptionReason.STORE_ACCESS_FAULT, address
+                        "Cannot write directly to text segment!",
+                        ExceptionReason.STORE_ACCESS_FAULT, address
                 );
             }
         } else if (address >= Memory.memoryMapBaseAddress && address < Memory.memoryMapLimitAddress) {
@@ -663,8 +628,8 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         } else {
             // falls outside addressing range
             throw new AddressErrorException(
-                "address out of range ",
-                ExceptionReason.STORE_ACCESS_FAULT, address
+                    "address out of range ",
+                    ExceptionReason.STORE_ACCESS_FAULT, address
             );
         }
         this.notifyAnyObservers(AccessNotice.AccessType.WRITE, address, length, value);
@@ -678,13 +643,10 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * endian).
      * Address must be word-aligned.
      *
-     * @param address
-     *     Starting address of Memory address to be set.
-     * @param value
-     *     Value to be stored starting at that address.
+     * @param address Starting address of Memory address to be set.
+     * @param value   Value to be stored starting at that address.
      * @return old second that was replaced by the set operation.
-     * @throws AddressErrorException
-     *     If address is not on word boundary.
+     * @throws AddressErrorException If address is not on word boundary.
      */
     public int setRawWord(final int address, final int value) throws AddressErrorException {
         final int relative;
@@ -710,8 +672,8 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 this.setStatement(address, new ProgramStatement(value, address));
             } else {
                 throw new AddressErrorException(
-                    "Cannot write directly to text segment!",
-                    ExceptionReason.STORE_ACCESS_FAULT, address
+                        "Cannot write directly to text segment!",
+                        ExceptionReason.STORE_ACCESS_FAULT, address
                 );
             }
         } else if (address >= Memory.memoryMapBaseAddress && address < Memory.memoryMapLimitAddress) {
@@ -721,8 +683,8 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         } else {
             // falls outside addressing range
             throw new AddressErrorException(
-                "store address out of range ",
-                ExceptionReason.STORE_ACCESS_FAULT, address
+                    "store address out of range ",
+                    ExceptionReason.STORE_ACCESS_FAULT, address
             );
         }
         this.notifyAnyObservers(AccessNotice.AccessType.WRITE, address, Memory.WORD_LENGTH_BYTES, value);
@@ -737,24 +699,21 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * word).
      * The address must be word-aligned.
      *
-     * @param address
-     *     Starting address of Memory address to be set.
-     * @param value
-     *     Value to be stored starting at that address.
+     * @param address Starting address of Memory address to be set.
+     * @param value   Value to be stored starting at that address.
      * @return old second that was replaced by setWord operation.
-     * @throws AddressErrorException
-     *     If address is not on word boundary.
+     * @throws AddressErrorException If address is not on word boundary.
      */
     public int setWord(final int address, final int value) throws AddressErrorException {
         Memory.checkStoreWordAligned(address);
         return (OtherSettings.getBackSteppingEnabled())
-            ? Globals.program.getBackStepper().addMemoryRestoreWord(
-            address, this.set(
-                address, value,
-                Memory.WORD_LENGTH_BYTES
-            )
+                ? Globals.program.getBackStepper().addMemoryRestoreWord(
+                address, this.set(
+                        address, value,
+                        Memory.WORD_LENGTH_BYTES
+                )
         )
-            : this.set(address, value, Memory.WORD_LENGTH_BYTES);
+                : this.set(address, value, Memory.WORD_LENGTH_BYTES);
     }
 
     /**
@@ -762,43 +721,37 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * second
      * into 2 bytes (a halfword).
      *
-     * @param address
-     *     Starting address of Memory address to be set.
-     * @param value
-     *     Value to be stored starting at that address. Only low order 16
-     *     bits used.
+     * @param address Starting address of Memory address to be set.
+     * @param value   Value to be stored starting at that address. Only low order 16
+     *                bits used.
      * @return old second that was replaced by setHalf operation.
-     * @throws AddressErrorException
-     *     If address is not on halfword boundary.
+     * @throws AddressErrorException If address is not on halfword boundary.
      */
     public int setHalf(final int address, final int value) throws AddressErrorException {
         if (address % 2 != 0) {
             throw new AddressErrorException(
-                "store address not aligned on halfword boundary ",
-                ExceptionReason.STORE_ADDRESS_MISALIGNED, address
+                    "store address not aligned on halfword boundary ",
+                    ExceptionReason.STORE_ADDRESS_MISALIGNED, address
             );
         }
         return (OtherSettings.getBackSteppingEnabled())
-            ? Globals.program.getBackStepper().addMemoryRestoreHalf(address, this.set(address, value, 2))
-            : this.set(address, value, 2);
+                ? Globals.program.getBackStepper().addMemoryRestoreHalf(address, this.set(address, value, 2))
+                : this.set(address, value, 2);
     }
 
     /**
      * Writes low order 8 bits of given second into specified Memory byte.
      *
-     * @param address
-     *     Address of Memory byte to be set.
-     * @param value
-     *     Value to be stored at that address. Only low order 8 bits
-     *     used.
+     * @param address Address of Memory byte to be set.
+     * @param value   Value to be stored at that address. Only low order 8 bits
+     *                used.
      * @return old second that was replaced by setByte operation.
-     * @throws AddressErrorException
-     *     if any.
+     * @throws AddressErrorException if any.
      */
     public int setByte(final int address, final int value) throws AddressErrorException {
         return (OtherSettings.getBackSteppingEnabled())
-            ? Globals.program.getBackStepper().addMemoryRestoreByte(address, this.set(address, value, 1))
-            : this.set(address, value, 1);
+                ? Globals.program.getBackStepper().addMemoryRestoreByte(address, this.set(address, value, 1))
+                : this.set(address, value, 1);
     }
 
     /**
@@ -807,13 +760,10 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * high-order 32 bits are stored in higher (second) memory word regardless
      * of "endianness".
      *
-     * @param address
-     *     Starting address of Memory address to be set.
-     * @param value
-     *     Value to be stored at that address.
+     * @param address Starting address of Memory address to be set.
+     * @param value   Value to be stored at that address.
      * @return old second that was replaced by setDouble operation.
-     * @throws AddressErrorException
-     *     if any.
+     * @throws AddressErrorException if any.
      */
     public long setDoubleWord(final int address, final long value) throws AddressErrorException {
         final int oldHighOrder;
@@ -822,8 +772,8 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         oldLowOrder = this.set(address, (int) value, 4);
         final long old = ((long) oldHighOrder << 32) | (oldLowOrder & 0xFFFFFFFFL);
         return (OtherSettings.getBackSteppingEnabled())
-            ? Globals.program.getBackStepper().addMemoryRestoreDoubleWord(address, old)
-            : old;
+                ? Globals.program.getBackStepper().addMemoryRestoreDoubleWord(address, old)
+                : old;
     }
 
     /**
@@ -831,13 +781,10 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * high-order 32 bits are stored in higher (second) memory word regardless
      * of "endianness".
      *
-     * @param address
-     *     Starting address of Memory address to be set.
-     * @param value
-     *     Value to be stored at that address.
+     * @param address Starting address of Memory address to be set.
+     * @param value   Value to be stored at that address.
      * @return old second that was replaced by setDouble operation.
-     * @throws AddressErrorException
-     *     if any.
+     * @throws AddressErrorException if any.
      */
     public double setDouble(final int address, final double value) throws AddressErrorException {
         final long longValue = Double.doubleToLongBits(value);
@@ -847,25 +794,22 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * Stores ProgramStatement in Text Segment.
      *
-     * @param address
-     *     Starting address of Memory address to be set. Must be word
-     *     boundary.
-     * @param statement
-     *     Machine code to be stored starting at that address -- for
-     *     simulation
-     *     purposes, actually stores reference to ProgramStatement
-     *     instead of 32-bit machine code.
-     * @throws AddressErrorException
-     *     If address is not on word boundary or is
-     *     outside Text Segment.
+     * @param address   Starting address of Memory address to be set. Must be word
+     *                  boundary.
+     * @param statement Machine code to be stored starting at that address -- for
+     *                  simulation
+     *                  purposes, actually stores reference to ProgramStatement
+     *                  instead of 32-bit machine code.
+     * @throws AddressErrorException If address is not on word boundary or is
+     *                               outside Text Segment.
      * @see ProgramStatement
      */
     public void setStatement(final int address, final ProgramStatement statement) throws AddressErrorException {
         Memory.checkStoreWordAligned(address);
         if (!Memory.inTextSegment(address)) {
             throw new AddressErrorException(
-                "Store address to text segment out of range",
-                ExceptionReason.STORE_ACCESS_FAULT, address
+                    "Store address to text segment out of range",
+                    ExceptionReason.STORE_ACCESS_FAULT, address
             );
         }
         if (Globals.debug) {
@@ -880,13 +824,10 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * If length == 1, puts second in low order byte. If 2, puts into low order
      * half-word.
      *
-     * @param address
-     *     Starting address of Memory address to be read.
-     * @param length
-     *     Number of bytes to be read.
+     * @param address Starting address of Memory address to be read.
+     * @param length  Number of bytes to be read.
      * @return Value stored starting at that address.
-     * @throws AddressErrorException
-     *     if any.
+     * @throws AddressErrorException if any.
      */
     public int get(final int address, final int length) throws AddressErrorException {
         return this.get(address, length, true);
@@ -922,27 +863,27 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     throw new AddressErrorException(
-                        "Load address not aligned to word boundary ",
-                        ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
+                            "Load address not aligned to word boundary ",
+                            ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
                     );
                 }
                 final ProgramStatement stmt = this.getStatementNoNotify((address / 4) * 4);
                 // TODO: maybe find a way to make the bit manipulation more clear
                 // It just selects the right bytes from the word loaded
                 value = stmt == null ? 0
-                    : length == 4 ? stmt.getBinaryStatement()
-                    : stmt.getBinaryStatement() >> (8 * (address % 4)) & ((1 << length * 8) - 1);
+                        : length == 4 ? stmt.getBinaryStatement()
+                        : stmt.getBinaryStatement() >> (8 * (address % 4)) & ((1 << length * 8) - 1);
             } else {
                 throw new AddressErrorException(
-                    "Cannot read directly from text segment!",
-                    ExceptionReason.LOAD_ACCESS_FAULT, address
+                        "Cannot read directly from text segment!",
+                        ExceptionReason.LOAD_ACCESS_FAULT, address
                 );
             }
         } else {
             // falls outside addressing range
             throw new AddressErrorException(
-                "address out of range ",
-                ExceptionReason.LOAD_ACCESS_FAULT, address
+                    "address out of range ",
+                    ExceptionReason.LOAD_ACCESS_FAULT, address
             );
         }
         if (notify) {
@@ -956,11 +897,9 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * It transfers the 32 bit second "raw" as stored in memory, and does not adjust
      * for byte order (big or little endian). Address must be word-aligned.
      *
-     * @param address
-     *     Starting address of word to be read.
+     * @param address Starting address of word to be read.
      * @return Word (4-byte second) stored starting at that address.
-     * @throws AddressErrorException
-     *     If address is not on word boundary.
+     * @throws AddressErrorException If address is not on word boundary.
      */
 
     // Note: the logic here is repeated in getRawWordOrNull() below. Logic is
@@ -993,15 +932,15 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 value = stmt == null ? 0 : stmt.getBinaryStatement();
             } else {
                 throw new AddressErrorException(
-                    "Cannot read directly from text segment!",
-                    ExceptionReason.LOAD_ACCESS_FAULT, address
+                        "Cannot read directly from text segment!",
+                        ExceptionReason.LOAD_ACCESS_FAULT, address
                 );
             }
         } else {
             // falls outside addressing range
             throw new AddressErrorException(
-                "address out of range ",
-                ExceptionReason.LOAD_ACCESS_FAULT, address
+                    "address out of range ",
+                    ExceptionReason.LOAD_ACCESS_FAULT, address
             );
         }
         this.notifyAnyObservers(AccessNotice.AccessType.READ, address, Memory.WORD_LENGTH_BYTES, value);
@@ -1023,13 +962,11 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * memory
      * dump feature that he implemented in Fall 2007.
      *
-     * @param address
-     *     Starting address of word to be read.
+     * @param address Starting address of word to be read.
      * @return Word (4-byte second) stored starting at that address as an Integer.
      * Conditions
      * that cause return second null are described above.
-     * @throws AddressErrorException
-     *     If address is not on word boundary.
+     * @throws AddressErrorException If address is not on word boundary.
      */
 
     // See note above, with getRawWord(), concerning duplicated logic.
@@ -1046,7 +983,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         } else if (Memory.inTextSegment(address)) {
             try {
                 return (this.getStatementNoNotify(address) == null) ? null
-                    : this.getStatementNoNotify(address).getBinaryStatement();
+                        : this.getStatementNoNotify(address).getBinaryStatement();
             } catch (final AddressErrorException aee) {
                 return null;
             }
@@ -1068,14 +1005,11 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * currently 4K words) that has not been referenced by an assembled/executing
      * program.
      *
-     * @param baseAddress
-     *     lowest address to be searched; the starting point
-     * @param limitAddress
-     *     highest address to be searched
+     * @param baseAddress  lowest address to be searched; the starting point
+     * @param limitAddress highest address to be searched
      * @return lowest address within specified range that contains "null" second as
      * described above.
-     * @throws AddressErrorException
-     *     if the base address is not on a word boundary
+     * @throws AddressErrorException if the base address is not on a word boundary
      */
     public int getAddressOfFirstNull(final int baseAddress, final int limitAddress) throws AddressErrorException {
         int address = baseAddress;
@@ -1090,11 +1024,9 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * Reads 64 bit doubleword second starting at specified Memory address.
      *
-     * @param address
-     *     Starting address of Memory address to be read
+     * @param address Starting address of Memory address to be read
      * @return Double Word (8-byte second) stored starting at that address.
-     * @throws AddressErrorException
-     *     If address is not on word boundary.
+     * @throws AddressErrorException If address is not on word boundary.
      */
     public long getDoubleWord(final int address) throws AddressErrorException {
         Memory.checkLoadWordAligned(address);
@@ -1108,11 +1040,9 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * Does not use "get()"; we can do it faster here knowing we're working only
      * with full words.
      *
-     * @param address
-     *     Starting address of word to be read.
+     * @param address Starting address of word to be read.
      * @return Word (4-byte second) stored starting at that address.
-     * @throws AddressErrorException
-     *     If address is not on word boundary.
+     * @throws AddressErrorException If address is not on word boundary.
      */
     public int getWord(final int address) throws AddressErrorException {
         Memory.checkLoadWordAligned(address);
@@ -1124,11 +1054,9 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * Does not use "get()"; we can do it faster here knowing we're working only
      * with full words. Observers are NOT notified.
      *
-     * @param address
-     *     Starting address of word to be read.
+     * @param address Starting address of word to be read.
      * @return Word (4-byte second) stored starting at that address.
-     * @throws AddressErrorException
-     *     If address is not on word boundary.
+     * @throws AddressErrorException If address is not on word boundary.
      */
     public int getWordNoNotify(final int address) throws AddressErrorException {
         Memory.checkLoadWordAligned(address);
@@ -1141,34 +1069,29 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     // OF AN OBSERVER WITH AN ADDRESS RANGE.
 
     /**
-     * Starting at the given word address, read a 2 byte word into lower 16 bits of
-     * int.
+     * Starting at the given word address, read a 2 byte word as a short value.
      *
-     * @param address
-     *     Starting address of word to be read.
+     * @param address Starting address of word to be read.
      * @return Halfword (2-byte second) stored starting at that address, stored in
      * lower 16 bits.
-     * @throws AddressErrorException
-     *     If address is not on halfword boundary.
+     * @throws AddressErrorException If address is not on halfword boundary.
      */
     public short getHalf(final int address) throws AddressErrorException {
         if (address % 2 != 0) {
             throw new AddressErrorException(
-                "Load address not aligned on halfword boundary ",
-                ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
+                    "Load address not aligned on halfword boundary ",
+                    ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
             );
         }
         return (short) (this.get(address, 2) & 0xFFFF);
     }
 
     /**
-     * Reads specified Memory byte into low order 8 bits of int.
+     * Reads specified Memory byte as a byte value.
      *
-     * @param address
-     *     Address of Memory byte to be read.
+     * @param address Address of Memory byte to be read.
      * @return Byte value stored at that address.
-     * @throws AddressErrorException
-     *     if any.
+     * @throws AddressErrorException if any.
      */
     public byte getByte(final int address) throws AddressErrorException {
         final var value = this.get(address, 1);
@@ -1178,14 +1101,12 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * Gets ProgramStatement from Text Segment.
      *
-     * @param address
-     *     Starting address of Memory address to be read. Must be word
-     *     boundary.
+     * @param address Starting address of Memory address to be read. Must be word
+     *                boundary.
      * @return reference to ProgramStatement object associated with that address, or
      * null if none.
-     * @throws AddressErrorException
-     *     If address is not on word boundary or is
-     *     outside Text Segment.
+     * @throws AddressErrorException If address is not on word boundary or is
+     *                               outside Text Segment.
      * @see ProgramStatement
      */
     public ProgramStatement getStatement(final int address) throws AddressErrorException {
@@ -1195,14 +1116,12 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     /**
      * Gets ProgramStatement from Text Segment without notifying observers.
      *
-     * @param address
-     *     Starting address of Memory address to be read. Must be word
-     *     boundary.
+     * @param address Starting address of Memory address to be read. Must be word
+     *                boundary.
      * @return reference to ProgramStatement object associated with that address, or
      * null if none.
-     * @throws AddressErrorException
-     *     If address is not on word boundary or is
-     *     outside Text Segment.
+     * @throws AddressErrorException If address is not on word boundary or is
+     *                               outside Text Segment.
      * @see ProgramStatement
      */
     public ProgramStatement getStatementNoNotify(final int address) throws AddressErrorException {
@@ -1212,10 +1131,10 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
     private ProgramStatement getStatement(final int address, final boolean notify) throws AddressErrorException {
         Memory.checkLoadWordAligned(address);
         if (!BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
-            && !Memory.inTextSegment(address)) {
+                && !Memory.inTextSegment(address)) {
             throw new AddressErrorException(
-                "fetch address for text segment out of range ",
-                ExceptionReason.LOAD_ACCESS_FAULT, address
+                    "fetch address for text segment out of range ",
+                    ExceptionReason.LOAD_ACCESS_FAULT, address
             );
         }
         if (Memory.inTextSegment(address)) {
@@ -1250,12 +1169,9 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * delegates Observable operations
      * so notices will come from the delegate, not the memory object.
      *
-     * @param obs
-     *     the observer
-     * @param addr
-     *     the memory address which must be on word boundary
-     * @throws AddressErrorException
-     *     if any.
+     * @param obs  the observer
+     * @param addr the memory address which must be on word boundary
+     * @throws AddressErrorException if any.
      */
     public void subscribe(final Flow.Subscriber<? super MemoryAccessNotice> obs, final int addr) throws AddressErrorException {
         this.subscribe(obs, addr, addr);
@@ -1269,16 +1185,12 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * operations
      * so notices will come from the delegate, not the memory object.
      *
-     * @param obs
-     *     the observer
-     * @param startAddr
-     *     the low end of memory address range, must be on word
-     *     boundary
-     * @param endAddr
-     *     the high end of memory address range, must be on word
-     *     boundary
-     * @throws AddressErrorException
-     *     if any.
+     * @param obs       the observer
+     * @param startAddr the low end of memory address range, must be on word
+     *                  boundary
+     * @param endAddr   the high end of memory address range, must be on word
+     *                  boundary
+     * @throws AddressErrorException if any.
      */
     public void subscribe(final Flow.Subscriber<? super MemoryAccessNotice> obs, final int startAddr,
                           final int endAddr) throws AddressErrorException {
@@ -1288,14 +1200,14 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         // negative.
         if (startAddr >= 0 && endAddr < 0) {
             throw new AddressErrorException(
-                "range cannot cross 0x8000000; please split it up",
-                ExceptionReason.LOAD_ACCESS_FAULT, startAddr
+                    "range cannot cross 0x8000000; please split it up",
+                    ExceptionReason.LOAD_ACCESS_FAULT, startAddr
             );
         }
         if (endAddr < startAddr) {
             throw new AddressErrorException(
-                "end address of range < start address of range ",
-                ExceptionReason.LOAD_ACCESS_FAULT, startAddr
+                    "end address of range < start address of range ",
+                    ExceptionReason.LOAD_ACCESS_FAULT, startAddr
             );
         }
         this.observables.add(new MemoryObservable(obs, startAddr, endAddr));
@@ -1325,9 +1237,9 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                                     final int value) {
         if ((Globals.program != null || Globals.gui == null)) {
             this.observables.stream()
-                .filter((mo) -> mo.match(address))
-                .forEach((mo) -> mo.submit(new MemoryAccessNotice(type, address, length, value))
-                );
+                    .filter((mo) -> mo.match(address))
+                    .forEach((mo) -> mo.submit(new MemoryAccessNotice(type, address, length, value))
+                    );
         }
     }
 
@@ -1397,17 +1309,17 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
             }
             if (op == Memory.STORE) {
                 oldValue = Memory.replaceByte(
-                    blockTable[block][offset], bytePositionInMemory,
-                    oldValue, bytePositionInValue
+                        blockTable[block][offset], bytePositionInMemory,
+                        oldValue, bytePositionInValue
                 );
                 blockTable[block][offset] = Memory.replaceByte(
-                    value, bytePositionInValue,
-                    blockTable[block][offset], bytePositionInMemory
+                        value, bytePositionInValue,
+                        blockTable[block][offset], bytePositionInMemory
                 );
             } else {// op == FETCH
                 value = Memory.replaceByte(
-                    blockTable[block][offset], bytePositionInMemory,
-                    value, bytePositionInValue
+                        blockTable[block][offset], bytePositionInMemory,
+                        value, bytePositionInValue
                 );
             }
             relativeByteAddress++;
@@ -1466,14 +1378,10 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
      * verified
      * as valid.
      *
-     * @param address
-     *     the address to read from
-     * @param baseAddress
-     *     the base address for the section being read from (.text)
-     * @param blockTable
-     *     the internal table of program statements
-     * @param notify
-     *     whether or not it notifies observers
+     * @param address     the address to read from
+     * @param baseAddress the base address for the section being read from (.text)
+     * @param blockTable  the internal table of program statements
+     * @param notify      whether or not it notifies observers
      * @return associated ProgramStatement or null if none.
      */
     private @Nullable ProgramStatement readProgramStatement(final int address, final int baseAddress,
@@ -1487,17 +1395,17 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
                 // No instructions are stored in this block or offset.
                 if (notify) {
                     this.notifyAnyObservers(
-                        AccessNotice.AccessType.READ, address,
-                        BasicInstruction.BASIC_INSTRUCTION_LENGTH, 0
+                            AccessNotice.AccessType.READ, address,
+                            BasicInstruction.BASIC_INSTRUCTION_LENGTH, 0
                     );
                 }
                 return null;
             } else {
                 if (notify) {
                     this.notifyAnyObservers(
-                        AccessNotice.AccessType.READ, address,
-                        BasicInstruction.BASIC_INSTRUCTION_LENGTH,
-                        blockTable[block][offset].getBinaryStatement()
+                            AccessNotice.AccessType.READ, address,
+                            BasicInstruction.BASIC_INSTRUCTION_LENGTH,
+                            blockTable[block][offset].getBinaryStatement()
                     );
                 }
                 return blockTable[block][offset];
@@ -1505,8 +1413,8 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         }
         if (notify) {
             this.notifyAnyObservers(
-                AccessNotice.AccessType.READ, address, BasicInstruction.BASIC_INSTRUCTION_LENGTH,
-                0
+                    AccessNotice.AccessType.READ, address, BasicInstruction.BASIC_INSTRUCTION_LENGTH,
+                    0
             );
         }
         return null;
@@ -1535,7 +1443,7 @@ public class Memory extends CustomPublisher<MemoryAccessNotice> {
         @Override
         public int compareTo(final MemoryObservable mo) {
             if (this.lowAddress < mo.lowAddress
-                || this.lowAddress == mo.lowAddress && this.highAddress < mo.highAddress) {
+                    || this.lowAddress == mo.lowAddress && this.highAddress < mo.highAddress) {
                 return -1;
             }
             if (this.lowAddress > mo.lowAddress || this.highAddress > mo.highAddress) {

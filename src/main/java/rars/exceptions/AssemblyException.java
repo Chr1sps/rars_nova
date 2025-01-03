@@ -41,6 +41,7 @@ public final class AssemblyException extends Exception {
     public final @NotNull ErrorList errors;
 
     public AssemblyException(final @NotNull ErrorList errors) {
+        super(errors.generateErrorAndWarningReport());
         this.errors = errors;
     }
 }

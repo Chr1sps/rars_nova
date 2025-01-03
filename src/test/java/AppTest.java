@@ -14,6 +14,7 @@ import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.Instruction;
 import rars.riscv.InstructionsRegistry;
+import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
@@ -84,22 +85,22 @@ public final class AppTest extends RarsTestBase {
             final Simulator.Reason r = program.simulate();
             if (r != Simulator.Reason.NORMAL_TERMINATION) {
                 final var msg = "Ended abnormally while executing `" + path + "`.\n" +
-                    "Reason: " + r + ".\n";
+                        "Reason: " + r + ".\n";
                 fail(msg);
             } else {
                 if (program.getExitCode() != 42) {
                     final var msg = "Final exit code was wrong for `" + path + "`.\n" +
-                        "Expected: 42, but got " + program.getExitCode() + ".";
+                            "Expected: 42, but got " + program.getExitCode() + ".";
                     fail(msg);
                 }
                 if (!program.getSTDOUT().equals(stdout)) {
                     final var msg = "STDOUT was wrong for `" + path + "`.\n" +
-                        "Expected:\n\"" + stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
+                            "Expected:\n\"" + stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
                     fail(msg);
                 }
                 if (!program.getSTDERR().equals(stderr)) {
                     final var msg = "STDERR was wrong for `" + path + "`.\n" +
-                        "Expected:\n\"" + stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
+                            "Expected:\n\"" + stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
                     fail(msg);
                 }
             }
@@ -131,14 +132,14 @@ public final class AppTest extends RarsTestBase {
 
         } catch (final SimulationException se) {
             final var msg = """
-                Crashed while executing `%s`.
-                Reason: %s.
-                Value: %d.
-                Message: %s.""".formatted(
-                path,
-                se.reason,
-                se.value,
-                se.errorMessage.getMessage()
+                    Crashed while executing `%s`.
+                    Reason: %s.
+                    Value: %d.
+                    Message: %s.""".formatted(
+                    path,
+                    se.reason,
+                    se.value,
+                    se.errorMessage.getMessage()
             );
             fail(msg);
         }
@@ -148,10 +149,10 @@ public final class AppTest extends RarsTestBase {
         final var path = getTestDataPath().resolve(directory);
         //noinspection resource
         return Files.walk(path).filter(p -> Files.isRegularFile(p) && p.getFileName()
-                .toString()
-                .toLowerCase()
-                .endsWith(".s"))
-            .map(p -> Named.of(p.getFileName().toString(), p));
+                        .toString()
+                        .toLowerCase()
+                        .endsWith(".s"))
+                .map(p -> Named.of(p.getFileName().toString(), p));
     }
 
     static Stream<Named<Path>> rv32TestFileProvider() throws IOException {
@@ -168,8 +169,58 @@ public final class AppTest extends RarsTestBase {
 
     static Stream<Named<Instruction>> instructionTestProvider() {
         return InstructionsRegistry.ALL_INSTRUCTIONS.r32All
-            .stream()
-            .map(instruction -> Named.of(instruction.mnemonic, instruction));
+                .stream()
+                .map(instruction -> Named.of(instruction.mnemonic, instruction));
+    }
+
+    private static void testBasicInstructionBinaryCodesImpl(
+            final boolean isRV64Enabled) throws AssemblyException, AddressErrorException {
+        final Options opt = new Options();
+        opt.startAtMain = true;
+        opt.maxSteps = 500;
+        opt.selfModifyingCode = true;
+        final Program program = new Program(opt);
+        BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
+        BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64Enabled);
+        InstructionsRegistry.RV64_MODE_FLAG = isRV64Enabled;
+        Memory.setConfiguration(MemoryConfiguration.DEFAULT);
+
+        final var instructionsToTest = isRV64Enabled ? InstructionsRegistry.BASIC_INSTRUCTIONS.r64All : InstructionsRegistry.BASIC_INSTRUCTIONS.r32All;
+        for (final var instruction : instructionsToTest) {
+            System.out.printf("Testing: %s%n", instruction.mnemonic);
+            if (instruction.getInstructionFormat() == BasicInstructionFormat.B_FORMAT || instruction.getInstructionFormat() == BasicInstructionFormat.J_FORMAT) {
+                continue;
+            }
+
+            final String format = instruction.exampleFormat;
+
+            program.assembleString(format);
+            program.setup(List.of(), "");
+            final var instructionAddress = MemoryConfiguration.DEFAULT.textBaseAddress;
+            final int word = program.getMemory().getWord(instructionAddress);
+
+            final var baseStatement = program.getMachineList().getFirst();
+            final var statementFromMemory = new ProgramStatement(word, instructionAddress);
+
+            final var message = """
+                    Expected:  %s
+                    Actual:    %s
+                    """.formatted(baseStatement, statementFromMemory);
+            System.out.println(message);
+            assertNotNull(statementFromMemory.getInstruction(), "Error 1 on: " + format);
+            assertThat(
+                    "Error 2 on: " + format,
+                    statementFromMemory.getPrintableBasicAssemblyStatement(),
+                    not(containsString(
+                            "invalid"))
+            );
+
+            program.assembleString(format);
+            program.setup(List.of(), "");
+            final int word2 = program.getMemory().getWord(instructionAddress);
+            assertEquals(word, word2, "Error 3 on: " + format);
+            assertEquals(instruction, statementFromMemory.getInstruction(), "Error 4 on: " + format);
+        }
     }
 
     @DisplayName("32 bit instructions")
@@ -196,87 +247,17 @@ public final class AppTest extends RarsTestBase {
     @Tag("manual")
     @Test
     void runSingle() {
-        run(getTestDataPath().resolve("riscv-tests-64/lui.S").toString(), true);
+        run(getTestDataPath().resolve("riscv-tests-64/srai.S").toString(), true);
     }
 
     @Test
-    void testInstructions() {
-        final Options opt = new Options();
-        opt.startAtMain = true;
-        opt.maxSteps = 500;
-        opt.selfModifyingCode = true;
-        final Program program = new Program(opt);
-        BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
+    void testBasicInstructionBinaryCodes32() throws AssemblyException, AddressErrorException {
+        testBasicInstructionBinaryCodesImpl(false);
+    }
 
-        for (final var binst : InstructionsRegistry.BASIC_INSTRUCTIONS.allInstructions) {
-            if (binst.getInstructionFormat() == BasicInstructionFormat.B_FORMAT || binst.getInstructionFormat() == BasicInstructionFormat.J_FORMAT) {
-                continue;
-            }
-
-            final String format = binst.exampleFormat;
-            try {
-                program.assembleString(format);
-                program.setup(List.of(), "");
-                final var instructionAddress = MemoryConfiguration.DEFAULT.textBaseAddress;
-                final int word = program.getMemory().getWord(instructionAddress);
-                final var programStatement = new ProgramStatement(word, instructionAddress);
-                assertNotNull(programStatement.getInstruction(), "Error 1 on: " + format);
-                assertThat(
-                    "Error 2 on: " + format,
-                    programStatement.getPrintableBasicAssemblyStatement(),
-                    not(containsString(
-                        "invalid"))
-                );
-
-                program.assembleString(format);
-                program.setup(List.of(), "");
-                final int word2 = program.getMemory().getWord(instructionAddress);
-                assertEquals(word, word2, "Error 3 on: " + format);
-                assertEquals(binst, programStatement.getInstruction(), "Error 4 on: " + format);
-                /*
-                 * if (assembled.getInstruction() == null) {
-                 * System.out.println("Error 5 on: " + program);
-                 * continue;
-                 * }
-                 * if (assembled.getOperands().length != ps.getOperands().length){
-                 * System.out.println("Error 6 on: " + program);
-                 * continue;
-                 * }
-                 * for (int i = 0; i < assembled.getOperands().length; i++){
-                 * if(assembled.getOperand(i) != ps.getOperand(i)){
-                 * System.out.println("Error 7 on: " + program);
-                 * }
-                 * }
-                 */
-
-                /*
-                 * // Not currently used
-                 * // Do a bit of trial and error to test out variations
-                 * decompiled =
-                 * decompiled.replaceAll("x6","t1").replaceAll("x7","t2").replaceAll("x28","t3")
-                 * .trim();
-                 * String spaced_out = decompiled.replaceAll(",",", ");
-                 * if(!program.equals(decompiled) && !program.equals(spaced_out)){
-                 * Globals.getSettings().setBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX,
-                 * false);
-                 * decompiled = ps.getPrintableBasicAssemblyStatement();
-                 * String decompiled2 =
-                 * decompiled.replaceAll("x6","t1").replaceAll("x7","t2").replaceAll("x28","t3")
-                 * .trim();
-                 * String spaced_out2 = decompiled2.replaceAll(",",", ");
-                 * if(!program.equals(decompiled2) && !program.equals(spaced_out2)) {
-                 * System.out.println("Error 5 on: " + program;
-                 * }
-                 *
-                 * Globals.getSettings().setBooleanSetting(Settings.Bool.DISPLAY_VALUES_IN_HEX,
-                 * true);
-                 * }
-                 */
-            } catch (final AssemblyException | AddressErrorException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
+    @Test
+    void testBasicInstructionBinaryCodes64() throws AssemblyException, AddressErrorException {
+        testBasicInstructionBinaryCodesImpl(true);
     }
 
     @Test
@@ -299,20 +280,20 @@ public final class AppTest extends RarsTestBase {
                 final ProgramStatement ps = new ProgramStatement(first, 0x400000);
                 assertNotNull(ps.getInstruction(), "Error 11 on: " + program);
                 assertThat(
-                    "Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(),
-                    not(containsString("invalid"))
+                        "Error 12 on: " + program, ps.getPrintableBasicAssemblyStatement(),
+                        not(containsString("invalid"))
                 );
                 if (program.contains("t0") || program.contains("t1") || program.contains("t2") || program.contains(
-                    "f1")) {
+                        "f1")) {
                     // TODO: test that each register individually is meaningful and test every
                     // register.
                     // Currently this covers all instructions and is an alert if I made a trivial
                     // mistake.
                     final String register_substitute =
-                        program.replaceAll("t0", "x0")
-                            .replaceAll("t1", "x0")
-                            .replaceAll("t2", "x0")
-                            .replaceAll("f1", "f0");
+                            program.replaceAll("t0", "x0")
+                                    .replaceAll("t1", "x0")
+                                    .replaceAll("t2", "x0")
+                                    .replaceAll("f1", "f0");
                     p.assembleString(register_substitute);
                     p.setup(List.of(), "");
                     final int word1 = p.getMemory().getWord(0x400000);

@@ -38,26 +38,21 @@ public final class LUI extends BasicInstruction {
 
     private LUI() {
         super(
-            "lui t1,100000",
-            "Load upper immediate: set t1 to 20-bit followed by 12 0s",
-            BasicInstructionFormat.U_FORMAT,
-            "ssssssssssssssssssss fffff 0110111"
+                "lui t1,100000",
+                "Load upper immediate: set t1 to 20-bit followed by 12 0s",
+                BasicInstructionFormat.U_FORMAT,
+                "ssssssssssssssssssss fffff 0110111"
         );
     }
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
 
-        final var shiftedValue = statement.getOperand(1) << 12;
-        // It's important to use a widening conversion here so that in 64-bit
-        // mode the value is sign-extended.
-        final var convertedValue = Integer.valueOf(
-            shiftedValue
-        ).longValue();
+        final var shiftedValue = Integer.valueOf(statement.getOperand(1) << 12).longValue();
 
         RegisterFile.updateRegister(
-            statement.getOperand(0),
-            convertedValue
+                statement.getOperand(0),
+                shiftedValue
         );
     }
 }

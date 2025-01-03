@@ -6,15 +6,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.SymbolTable;
 import rars.riscv.SyscallNumberOverride;
-import rars.riscv.hardware.Memory;
 import rars.util.PropertiesFile;
 import rars.venus.VenusUI;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -93,11 +90,6 @@ public final class Globals {
 
     /// The GUI being used (if any) with this simulator.
     public static @Nullable VenusUI gui = null;
-
-    static {
-        Memory.setConfiguration(OTHER_SETTINGS.getMemoryConfiguration());
-        Memory.getInstance().initialize(); // will establish memory configuration from setting
-    }
 
     private Globals() {
     }

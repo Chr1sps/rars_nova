@@ -1,32 +1,37 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
+import rars.riscv.BasicInstruction;
+import rars.riscv.BasicInstructionFormat;
+import rars.riscv.hardware.RegisterFile;
+import rars.util.ConversionUtils;
 
-/**
- * <p>Abstract ArithmeticW class.</p>
- */
-public abstract class ArithmeticW extends Arithmetic {
-    private final Arithmetic base;
+public abstract class ArithmeticW extends BasicInstruction {
+    private final @NotNull Arithmetic base;
 
-    /**
-     * <p>Constructor for ArithmeticW.</p>
-     *
-     * @param usage       a {@link java.lang.String} object
-     * @param description a {@link java.lang.String} object
-     * @param funct7      a {@link java.lang.String} object
-     * @param funct3      a {@link java.lang.String} object
-     * @param base        a {@link Arithmetic} object
-     */
-    public ArithmeticW(@NotNull final String usage, final String description, final String funct7, final String funct3, final Arithmetic base) {
-        super(usage, description, funct7, funct3);
+    public ArithmeticW(
+            final @NotNull String usage,
+            final @NotNull String description,
+            final @NotNull String funct7,
+            final @NotNull String funct3,
+            final @NotNull Arithmetic base) {
+        super(
+                usage, description, BasicInstructionFormat.R_FORMAT,
+                funct7 + " ttttt sssss " + funct3 + " fffff 0111011"
+        );
         this.base = base;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected long compute(final long value, final long value2) {
-        return base.computeW((int) value, (int) value2);
+    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
+        RegisterFile.updateRegister(
+                statement.getOperand(0),
+                base.computeW(
+                        ConversionUtils.longLowerHalfToInt(RegisterFile.getValueLong(statement.getOperand(1))),
+                        ConversionUtils.longLowerHalfToInt(RegisterFile.getValueLong(statement.getOperand(2)))
+                )
+        );
     }
 }

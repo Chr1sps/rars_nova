@@ -27,24 +27,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SLTIU class.</p>
- */
-public final class SLTIU extends ImmediateInstruction {
-    public static final ImmediateInstruction INSTANCE = new SLTIU();
+import org.jetbrains.annotations.NotNull;
 
-    /**
-     * <p>Constructor for SLTIU.</p>
-     */
+public final class SLTIU extends ImmediateInstruction {
+    public static final @NotNull SLTIU INSTANCE = new SLTIU();
+
     private SLTIU() {
         super("sltiu t1,t2,-100",
                 "Set less than immediate unsigned : If t2 is less than  sign-extended 16-bit immediate using unsigned comparison, then set t1 to 1 else set t1 to 0",
                 "011");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long immediate) {
         return (Long.compareUnsigned(value, immediate) < 0) ? 1 : 0;

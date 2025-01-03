@@ -33,9 +33,13 @@ public final class SRA extends Arithmetic {
     public static final @NotNull SRA INSTANCE = new SRA();
 
     private SRA() {
-        super("sra t1,t2,t3",
-                "Shift right arithmetic: Set t1 to result of sign-extended shifting t2 right by number of bits specified by second in low-order 5 bits of t3",
-                "0100000", "101");
+        super(
+            "sra t1,t2,t3",
+            "Shift right arithmetic: Set t1 to result of sign-extended shifting t2 right by number of bits specified " +
+                "by second in low-order 5 bits of t3",
+            "0100000",
+            "101"
+        );
     }
 
     @Override
@@ -45,7 +49,7 @@ public final class SRA extends Arithmetic {
 
     @Override
     public int computeW(final int value, final int value2) {
-        /// Use >> to sign-fill
+        // Use >> to sign-fill
         return value >> (value2 & 0b0001_1111); // Only use the bottom 5 bits
     }
 }

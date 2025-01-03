@@ -152,7 +152,7 @@ public class InstructionStatistics extends AbstractTool {
      * @see InstructionStatistics#CATEGORY_OTHER
      */
     protected static int getInstructionCategory(final Instruction instruction) {
-        if (instruction instanceof Arithmetic) {
+        if (instruction instanceof Arithmetic || instruction instanceof ArithmeticW) {
             return InstructionStatistics.CATEGORY_ALU; // add, addw, sub, subw, and, or, xor, slt, sltu, m extension
         }
         if (instruction instanceof ADDI || instruction instanceof ADDIW || instruction instanceof ANDI
