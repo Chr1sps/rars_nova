@@ -44,10 +44,12 @@ public final class SyscallMessageDialogInt extends AbstractSyscall {
      * <p>Constructor for SyscallMessageDialogInt.</p>
      */
     public SyscallMessageDialogInt() {
-        super("MessageDialogInt", "Service to display a message followed by a int to user",
-                "a0 = address of null-terminated string that is the message to user <br>" +
-                        "a1 = the int to display",
-                "N/A");
+        super(
+            "MessageDialogInt", "Service to display a message followed by a int to user",
+            "a0 = address of null-terminated string that is the message to user <br>" +
+                "a1 = the int to display",
+            "N/A"
+        );
     }
 
     /**
@@ -58,9 +60,11 @@ public final class SyscallMessageDialogInt extends AbstractSyscall {
         final String message = NullString.get(statement);
 
         // Display the dialog.
-        JOptionPane.showMessageDialog(null,
-                message + RegisterFile.getValue("a1"),
-                null,
-                JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(
+            null,
+            message + RegisterFile.getValue("a1"),
+            null,
+            JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }

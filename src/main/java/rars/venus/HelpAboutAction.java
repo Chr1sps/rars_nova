@@ -40,8 +40,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class HelpAboutAction extends GuiAction {
     private final @NotNull VenusUI mainUI;
 
-    public HelpAboutAction(final String name, final Icon icon, final String descrip,
-                           final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui) {
+    public HelpAboutAction(
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
+    ) {
         super(name, icon, descrip, mnemonic, accel);
         mainUI = gui;
     }
@@ -61,10 +63,12 @@ public final class HelpAboutAction extends GuiAction {
               *  KDE-Look (www.kde-look.org) crystalline-blue-0.1,
               *  Icon-King (www.icon-king.com) Nuvola 1.0.
             """.formatted(Globals.version, Globals.copyrightYears);
-        JOptionPane.showMessageDialog(mainUI,
+        JOptionPane.showMessageDialog(
+            mainUI,
             message,
             "About Rars",
             JOptionPane.INFORMATION_MESSAGE,
-            new ImageIcon("images/RISC-V.png"));
+            new ImageIcon("images/RISC-V.png")
+        );
     }
 }

@@ -21,8 +21,7 @@ public enum ExceptionReason {
 
     public boolean isInterrupt() {
         return switch (this) {
-            case SOFTWARE_INTERRUPT, TIMER_INTERRUPT, EXTERNAL_INTERRUPT ->
-                    true;
+            case SOFTWARE_INTERRUPT, TIMER_INTERRUPT, EXTERNAL_INTERRUPT -> true;
             default -> false;
         };
     }

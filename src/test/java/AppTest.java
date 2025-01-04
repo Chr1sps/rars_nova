@@ -79,22 +79,22 @@ final class AppTest extends RarsTestBase {
             final Simulator.Reason r = program.simulate();
             if (r != Simulator.Reason.NORMAL_TERMINATION) {
                 final var msg = "Ended abnormally while executing `" + path + "`.\n" +
-                        "Reason: " + r + ".\n";
+                    "Reason: " + r + ".\n";
                 fail(msg);
             } else {
                 if (program.getExitCode() != 42) {
                     final var msg = "Final exit code was wrong for `" + path + "`.\n" +
-                            "Expected: 42, but got " + program.getExitCode() + ".";
+                        "Expected: 42, but got " + program.getExitCode() + ".";
                     fail(msg);
                 }
                 if (!program.getSTDOUT().equals(stdout)) {
                     final var msg = "STDOUT was wrong for `" + path + "`.\n" +
-                            "Expected:\n\"" + stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
+                        "Expected:\n\"" + stdout + "\",\nbut got \"" + program.getSTDOUT() + "\".";
                     fail(msg);
                 }
                 if (!program.getSTDERR().equals(stderr)) {
                     final var msg = "STDERR was wrong for `" + path + "`.\n" +
-                            "Expected:\n\"" + stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
+                        "Expected:\n\"" + stderr + "\",\nbut got \"" + program.getSTDERR() + "\".";
                     fail(msg);
                 }
             }
@@ -126,14 +126,14 @@ final class AppTest extends RarsTestBase {
 
         } catch (final SimulationException se) {
             final var msg = """
-                    Crashed while executing `%s`.
-                    Reason: %s.
-                    Value: %d.
-                    Message: %s.""".formatted(
-                    path,
-                    se.reason,
-                    se.value,
-                    se.errorMessage.getMessage()
+                Crashed while executing `%s`.
+                Reason: %s.
+                Value: %d.
+                Message: %s.""".formatted(
+                path,
+                se.reason,
+                se.value,
+                se.errorMessage.getMessage()
             );
             fail(msg);
         }
@@ -141,12 +141,12 @@ final class AppTest extends RarsTestBase {
 
     private static Stream<Named<Path>> fileProvider(final @NotNull String directory) throws IOException {
         final var path = getTestDataPath().resolve(directory);
-        //noinspection resource
+        // noinspection resource
         return Files.walk(path).filter(p -> Files.isRegularFile(p) && p.getFileName()
-                        .toString()
-                        .toLowerCase()
-                        .endsWith(".s"))
-                .map(p -> Named.of(p.getFileName().toString(), p));
+                .toString()
+                .toLowerCase()
+                .endsWith(".s"))
+            .map(p -> Named.of(p.getFileName().toString(), p));
     }
 
     static Stream<Named<Path>> rv32TestFileProvider() throws IOException {
@@ -162,7 +162,8 @@ final class AppTest extends RarsTestBase {
     }
 
     private static void testBasicInstructionBinaryCodesImpl(
-            final boolean isRV64Enabled) throws AssemblyException, AddressErrorException {
+        final boolean isRV64Enabled
+    ) throws AssemblyException, AddressErrorException {
         final var options = new Options();
         options.startAtMain = true;
         options.maxSteps = 500;
@@ -172,7 +173,9 @@ final class AppTest extends RarsTestBase {
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64Enabled);
         InstructionsRegistry.RV64_MODE_FLAG = isRV64Enabled;
 
-        final var instructionsToTest = isRV64Enabled ? InstructionsRegistry.BASIC_INSTRUCTIONS.r64All : InstructionsRegistry.BASIC_INSTRUCTIONS.r32All;
+        final var instructionsToTest = isRV64Enabled
+            ? InstructionsRegistry.BASIC_INSTRUCTIONS.r64All
+            : InstructionsRegistry.BASIC_INSTRUCTIONS.r32All;
         for (final var instruction : instructionsToTest) {
             System.out.printf("Testing: %s%n", instruction.mnemonic);
             if (instruction.getInstructionFormat() == BasicInstructionFormat.B_FORMAT || instruction.getInstructionFormat() == BasicInstructionFormat.J_FORMAT) {
@@ -190,16 +193,16 @@ final class AppTest extends RarsTestBase {
             final var statementFromMemory = new ProgramStatement(word, instructionAddress);
 
             final var message = """
-                    Expected:  %s
-                    Actual:    %s
-                    """.formatted(baseStatement, statementFromMemory);
+                Expected:  %s
+                Actual:    %s
+                """.formatted(baseStatement, statementFromMemory);
             System.out.println(message);
             assertNotNull(statementFromMemory.getInstruction(), "Error 1 on: " + format);
             assertThat(
-                    "Error 2 on: " + format,
-                    statementFromMemory.getPrintableBasicAssemblyStatement(),
-                    not(containsString(
-                            "invalid"))
+                "Error 2 on: " + format,
+                statementFromMemory.getPrintableBasicAssemblyStatement(),
+                not(containsString(
+                    "invalid"))
             );
 
             program.assembleString(format);
@@ -220,7 +223,9 @@ final class AppTest extends RarsTestBase {
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64);
         InstructionsRegistry.RV64_MODE_FLAG = isRV64;
 
-        final var instructionsToTest = isRV64 ? InstructionsRegistry.EXTENDED_INSTRUCTIONS.r64All : InstructionsRegistry.EXTENDED_INSTRUCTIONS.r32All;
+        final var instructionsToTest = isRV64
+            ? InstructionsRegistry.EXTENDED_INSTRUCTIONS.r64All
+            : InstructionsRegistry.EXTENDED_INSTRUCTIONS.r32All;
         for (final var instruction : instructionsToTest) {
             final var programString = "label:" + instruction.exampleFormat;
             try {
@@ -231,20 +236,20 @@ final class AppTest extends RarsTestBase {
                 final ProgramStatement ps = new ProgramStatement(first, 0x400000);
                 assertNotNull(ps.getInstruction(), "Error 11 on: " + programString);
                 assertThat(
-                        "Error 12 on: " + programString, ps.getPrintableBasicAssemblyStatement(),
-                        not(containsString("invalid"))
+                    "Error 12 on: " + programString, ps.getPrintableBasicAssemblyStatement(),
+                    not(containsString("invalid"))
                 );
                 if (programString.contains("t0")
-                        || programString.contains("t1")
-                        || programString.contains("t2")
-                        || programString.contains("f1")) {
+                    || programString.contains("t1")
+                    || programString.contains("t2")
+                    || programString.contains("f1")) {
                     // TODO: test that each register individually is meaningful and test every
                     // register.
                     // Currently this covers all instructions and is an alert if I made a trivial
                     // mistake.
                     final var register_substitute = programString
-                            .replaceAll("t0|t1|t2", "x0")
-                            .replaceAll("f1", "f0");
+                        .replaceAll("t0|t1|t2", "x0")
+                        .replaceAll("f1", "f0");
                     program.assembleString(register_substitute);
                     program.setup(List.of(), "");
                     final int word1 = program.getMemory().getWord(0x400000);

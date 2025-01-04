@@ -37,8 +37,10 @@ public final class ANDI extends ImmediateInstruction {
      * <p>Constructor for ANDI.</p>
      */
     private ANDI() {
-        super("andi t1,t2,-100",
-                "Bitwise AND immediate : Set t1 to bitwise AND of t2 and sign-extended 12-bit immediate", "111");
+        super(
+            "andi t1,t2,-100",
+            "Bitwise AND immediate : Set t1 to bitwise AND of t2 and sign-extended 12-bit immediate", "111"
+        );
     }
 
     /**

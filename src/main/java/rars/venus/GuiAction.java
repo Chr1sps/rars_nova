@@ -50,24 +50,32 @@ public class GuiAction extends AbstractAction {
     private static final String FOREGROUND_TOOL_TIP_TEXT = "Click, to select text color";
     private static final String FONT_TOOL_TIP_TEXT = "Click, to select text font";
     private static final String DEFAULT_TOOL_TIP_TEXT = "Check, to select default color (disables color select " +
-            "buttons)";
+        "buttons)";
     // Tool tips for the data and register highlighting enable/disable controls
     private static final String DATA_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting in " +
-            "Data Segment window";
+        "Data Segment window";
     private static final String REGISTER_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting " +
-            "in Register windows";
+        "in Register windows";
     private static final String fontButtonText = "font";
+
     /**
      * <p>Constructor for GuiAction.</p>
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param icon
+     *     a {@link javax.swing.Icon} object
+     * @param descrip
+     *     a {@link java.lang.String} object
+     * @param mnemonic
+     *     a {@link java.lang.Integer} object
+     * @param accel
+     *     a {@link javax.swing.KeyStroke} object
      */
-    protected GuiAction(final String name, final Icon icon, final String descrip,
-                        final Integer mnemonic, final KeyStroke accel) {
+    protected GuiAction(
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel
+    ) {
         super(name, icon);
         putValue(SHORT_DESCRIPTION, descrip);
         putValue(MNEMONIC_KEY, mnemonic);

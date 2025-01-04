@@ -46,22 +46,28 @@ public class SettingsAction extends GuiAction {
     /**
      * <p>Constructor for SettingsAction.</p>
      *
-     * @param name    a {@link java.lang.String} object
-     * @param descrip a {@link java.lang.String} object
-     * @param setting a {@link BoolSetting} object
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param descrip
+     *     a {@link java.lang.String} object
+     * @param setting
+     *     a {@link BoolSetting} object
      */
-    public SettingsAction(final String name, final String descrip, final @NotNull BoolSetting setting,
-                          final @NotNull Handler handler) {
+    public SettingsAction(
+        final String name, final String descrip, final @NotNull BoolSetting setting,
+        final @NotNull Handler handler
+    ) {
         super(name, null, descrip, null, null);
         this.setting = setting;
         this.handler = handler;
     }
 
     public SettingsAction(final String name, final String descrip, final @NotNull BoolSetting setting) {
-        this(name, descrip, setting, (ignored) -> {
-        });
+        this(
+            name, descrip, setting, (ignored) -> {
+            }
+        );
     }
-
 
     /**
      * {@inheritDoc}

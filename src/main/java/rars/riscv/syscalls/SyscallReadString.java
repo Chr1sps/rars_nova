@@ -54,8 +54,10 @@ public class SyscallReadString extends AbstractSyscall {
      * <p>Constructor for SyscallReadString.</p>
      */
     public SyscallReadString() {
-        super("ReadString", "Reads a string from the console",
-                "a0 = address of input buffer<br>a1 = maximum number of characters to read", "N/A");
+        super(
+            "ReadString", "Reads a string from the console",
+            "a0 = address of input buffer<br>a1 = maximum number of characters to read", "N/A"
+        );
     }
 
     /**
@@ -79,15 +81,18 @@ public class SyscallReadString extends AbstractSyscall {
         int stringLength = Math.min(maxLength, utf8BytesList.length);
         try {
             for (int index = 0; index < stringLength; index++) {
-                Globals.MEMORY_INSTANCE.setByte(buf + index,
-                        utf8BytesList[index]);
+                Globals.MEMORY_INSTANCE.setByte(
+                    buf + index,
+                    utf8BytesList[index]
+                );
             }
             if (stringLength < maxLength) {
                 Globals.MEMORY_INSTANCE.setByte(buf + stringLength, '\n');
                 stringLength++;
             }
-            if (addNullByte)
+            if (addNullByte) {
                 Globals.MEMORY_INSTANCE.setByte(buf + stringLength, 0);
+            }
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }

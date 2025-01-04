@@ -32,17 +32,19 @@ public class IntelHexDumpFormat extends AbstractDumpFormat {
      */
     @Override
     public void dumpMemoryRange(
-            @NotNull final File file,
-            final int firstAddress,
-            final int lastAddress,
-            @NotNull final Memory memory)
-            throws AddressErrorException, IOException {
+        @NotNull final File file,
+        final int firstAddress,
+        final int lastAddress,
+        @NotNull final Memory memory
+    )
+        throws AddressErrorException, IOException {
         try (final PrintStream out = new PrintStream(new FileOutputStream(file))) {
             StringBuilder string;
             for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                 final Integer temp = memory.getRawWordOrNull(address);
-                if (temp == null)
+                if (temp == null) {
                     break;
+                }
                 string = new StringBuilder(Integer.toHexString(temp));
                 while (string.length() < 8) {
                     string.insert(0, '0');
@@ -63,8 +65,9 @@ public class IntelHexDumpFormat extends AbstractDumpFormat {
                 tmp_chksum = tmp_chksum % 256;
                 tmp_chksum = ~tmp_chksum + 1;
                 chksum = Integer.toHexString(0xFF & tmp_chksum);
-                if (chksum.length() == 1)
+                if (chksum.length() == 1) {
                     chksum = '0' + chksum;
+                }
                 final String finalstr = ":04" + addr + "00" + string + chksum;
                 out.println(finalstr.toUpperCase());
             }

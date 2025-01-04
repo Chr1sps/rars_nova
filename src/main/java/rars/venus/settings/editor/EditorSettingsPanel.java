@@ -29,8 +29,10 @@ public final class EditorSettingsPanel extends JPanel {
     public final @NotNull PanelWithTextAreaView panelWithTextAreaView;
     public final @NotNull BottomRowComponent bottomRowComponent;
 
-    public EditorSettingsPanel(final @NotNull TreePanel treePanel,
-                               final @NotNull PanelWithTextAreaView panelWithTextAreaView) {
+    public EditorSettingsPanel(
+        final @NotNull TreePanel treePanel,
+        final @NotNull PanelWithTextAreaView panelWithTextAreaView
+    ) {
         super(new BorderLayout());
         this.panelWithTextAreaView = panelWithTextAreaView;
         this.bottomRowComponent = new BottomRowComponent();
@@ -41,8 +43,10 @@ public final class EditorSettingsPanel extends JPanel {
 
     }
 
-    private static @NotNull JSplitPane buildMainPart(final @NotNull TreePanel treePanel,
-                                                     final @NotNull PanelWithTextAreaView panelWithTextAreaView) {
+    private static @NotNull JSplitPane buildMainPart(
+        final @NotNull TreePanel treePanel,
+        final @NotNull PanelWithTextAreaView panelWithTextAreaView
+    ) {
         final var result = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, panelWithTextAreaView);
         result.setDividerLocation(0.5);
         result.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));

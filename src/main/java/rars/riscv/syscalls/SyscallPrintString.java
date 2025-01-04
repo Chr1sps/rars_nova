@@ -42,8 +42,10 @@ public class SyscallPrintString extends AbstractSyscall {
      * <p>Constructor for SyscallPrintString.</p>
      */
     public SyscallPrintString() {
-        super("PrintString", "Prints a null-terminated string to the console",
-                "a0 = the address of the string", "N/A");
+        super(
+            "PrintString", "Prints a null-terminated string to the console",
+            "a0 = the address of the string", "N/A"
+        );
     }
 
     /**

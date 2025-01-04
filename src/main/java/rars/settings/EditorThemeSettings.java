@@ -146,8 +146,10 @@ public final class EditorThemeSettings extends SettingsBase {
         final var defaultTheme = SettingsTheme.DEFAULT_THEME;
         final var background = loadColorFromPreferences(THEME_PREFIX + BACKGROUND, defaultTheme.backgroundColor);
         final var foreground = loadColorFromPreferences(THEME_PREFIX + FOREGROUND, defaultTheme.foregroundColor);
-        final var lineHighlight = loadColorFromPreferences(THEME_PREFIX + LINE_HIGHLIGHT,
-            defaultTheme.lineHighlightColor);
+        final var lineHighlight = loadColorFromPreferences(
+            THEME_PREFIX + LINE_HIGHLIGHT,
+            defaultTheme.lineHighlightColor
+        );
         final var caret = loadColorFromPreferences(THEME_PREFIX + CARET, defaultTheme.caretColor);
         final var selection = loadColorFromPreferences(THEME_PREFIX + SELECTION, defaultTheme.selectionColor);
         final var tokenStyles = loadTokenStylesFromPreferences(defaultTheme.tokenStyles);
@@ -164,8 +166,10 @@ public final class EditorThemeSettings extends SettingsBase {
         return styleMap;
     }
 
-    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull TokenSettingKey key,
-                                                              final @NotNull TokenStyle defaultStyle) {
+    private @NotNull TokenStyle loadTokenStyleFromPreferences(
+        final @NotNull TokenSettingKey key,
+        final @NotNull TokenStyle defaultStyle
+    ) {
         final var foreground = loadNullableColorFromPreferences(foregroundPrefix(key), defaultStyle.foreground());
         final var background = loadNullableColorFromPreferences(backgroundPrefix(key), defaultStyle.background());
         final var isBold = this.preferences.getBoolean(boldPrefix(key), defaultStyle.isBold());
@@ -187,8 +191,10 @@ public final class EditorThemeSettings extends SettingsBase {
         }
     }
 
-    private @Nullable Color loadNullableColorFromPreferences(final @NotNull String key,
-                                                             final @Nullable Color defaultValue) {
+    private @Nullable Color loadNullableColorFromPreferences(
+        final @NotNull String key,
+        final @Nullable Color defaultValue
+    ) {
         final var value = this.preferences.get(key, null);
         if (value == null) {
             return defaultValue;

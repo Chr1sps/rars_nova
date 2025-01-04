@@ -62,8 +62,10 @@ public final class OperandUtils {
      * specification, else returns <tt>false</tt>.
      */
 
-    static boolean checkIfTokensMatchOperand(final TokenList candidateList, final Instruction inst,
-                                             final ErrorList errors) {
+    static boolean checkIfTokensMatchOperand(
+        final TokenList candidateList, final Instruction inst,
+        final ErrorList errors
+    ) {
         return OperandUtils.numOperandsCheck(candidateList, inst, errors) &&
             OperandUtils.operandTypeCheck(candidateList, inst, errors);
     }
@@ -74,8 +76,10 @@ public final class OperandUtils {
      * first such Instruction that has an exact operand match. If none match,
      * return the first Instruction and let client deal with operand mismatches.
      */
-    static @Nullable Instruction bestOperandMatch(final TokenList tokenList,
-                                                  final @NotNull List<Instruction> instrMatches) {
+    static @Nullable Instruction bestOperandMatch(
+        final TokenList tokenList,
+        final @NotNull List<Instruction> instrMatches
+    ) {
         if (instrMatches.size() == 1) {
             return instrMatches.getFirst();
         }
@@ -89,8 +93,10 @@ public final class OperandUtils {
 
     // Simply check to see if numbers of operands are correct and generate error
     // message if not.
-    private static boolean numOperandsCheck(final @NotNull TokenList cand, final @NotNull Instruction spec,
-                                            final @NotNull ErrorList errors) {
+    private static boolean numOperandsCheck(
+        final @NotNull TokenList cand, final @NotNull Instruction spec,
+        final @NotNull ErrorList errors
+    ) {
         final int numOperands = cand.size() - 1;
         final int reqNumOperands = InstructionsRegistry.getTokenList(spec).size() - 1;
         final Token operator = cand.get(0);
@@ -154,9 +160,11 @@ public final class OperandUtils {
                 continue;
             }
             if (specType == TokenType.CSR_NAME &&
-                (candType == TokenType.INTEGER_5 || candType == TokenType.INTEGER_6
-                    || candType == TokenType.INTEGER_12
-                    || candType == TokenType.INTEGER_12U || candType == TokenType.CSR_NAME)) {
+                (
+                    candType == TokenType.INTEGER_5 || candType == TokenType.INTEGER_6
+                        || candType == TokenType.INTEGER_12
+                        || candType == TokenType.INTEGER_12U || candType == TokenType.CSR_NAME
+                )) {
                 continue;
             }
             if ((specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_5) ||
@@ -208,8 +216,10 @@ public final class OperandUtils {
     }
 
     // Handy utility for all parse errors...
-    private static void generateMessage(final @NotNull Token token, final @NotNull String mess,
-                                        final @NotNull ErrorList errors) {
+    private static void generateMessage(
+        final @NotNull Token token, final @NotNull String mess,
+        final @NotNull ErrorList errors
+    ) {
         errors.add(ErrorMessage.error(
             token.getSourceProgram(),
             token.getSourceLine(),

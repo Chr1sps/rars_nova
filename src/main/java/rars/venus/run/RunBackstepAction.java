@@ -52,21 +52,22 @@ public class RunBackstepAction extends GuiAction {
      * <p>Constructor for RunBackstepAction.</p>
      *
      * @param name
-     *         a {@link java.lang.String} object
+     *     a {@link java.lang.String} object
      * @param icon
-     *         a {@link javax.swing.Icon} object
+     *     a {@link javax.swing.Icon} object
      * @param descrip
-     *         a {@link java.lang.String} object
+     *     a {@link java.lang.String} object
      * @param mnemonic
-     *         a {@link java.lang.Integer} object
+     *     a {@link java.lang.Integer} object
      * @param accel
-     *         a {@link javax.swing.KeyStroke} object
+     *     a {@link javax.swing.KeyStroke} object
      * @param gui
-     *         a {@link VenusUI} object
+     *     a {@link VenusUI} object
      */
     public RunBackstepAction(
-            final String name, final Icon icon, final String descrip,
-            final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel, final VenusUI gui
+    ) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainUI = gui;
     }

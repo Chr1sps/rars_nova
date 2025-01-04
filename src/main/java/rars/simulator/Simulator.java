@@ -101,17 +101,17 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
      * already been assembled.
      *
      * @param pc
-     *         address of first instruction to simulate; this goes into
-     *         program counter
+     *     address of first instruction to simulate; this goes into
+     *     program counter
      * @param maxSteps
-     *         maximum number of steps to perform before returning false
-     *         (0 or less means no max)
+     *     maximum number of steps to perform before returning false
+     *     (0 or less means no max)
      * @param breakPoints
-     *         array of breakpoint program counter values, use null if
-     *         none
+     *     array of breakpoint program counter values, use null if
+     *     none
      * @return a {@link Reason} object that indicates how the simulation ended/was stopped
      * @throws SimulationException
-     *         Throws exception if run-time exception occurs.
+     *     Throws exception if run-time exception occurs.
      */
     public Reason simulate(final int pc, final int maxSteps, final int[] breakPoints) throws SimulationException {
         this.simulatorThread = new SimThread(pc, maxSteps, breakPoints);
@@ -119,8 +119,9 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
         final SimulationException pe = this.simulatorThread.pe;
         final boolean done = this.simulatorThread.done;
         final Reason out = this.simulatorThread.constructReturnReason;
-        if (done)
+        if (done) {
             SystemIO.resetFiles(); // close any files opened in the process of simulating
+        }
         this.simulatorThread = null;
         if (pe != null) {
             throw pe;
@@ -133,14 +134,14 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
      * have already been assembled.
      *
      * @param pc
-     *         address of first instruction to simulate; this goes into
-     *         program counter
+     *     address of first instruction to simulate; this goes into
+     *     program counter
      * @param maxSteps
-     *         maximum number of steps to perform before returning false
-     *         (0 or less means no max)
+     *     maximum number of steps to perform before returning false
+     *     (0 or less means no max)
      * @param breakPoints
-     *         array of breakpoint program counter values, use null if
-     *         none
+     *     array of breakpoint program counter values, use null if
+     *     none
      */
     public void startSimulation(final int pc, final int maxSteps, final int[] breakPoints) {
         this.simulatorThread = new SimThread(pc, maxSteps, breakPoints);
@@ -199,8 +200,9 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
      * <p>interrupt.</p>
      */
     public void interrupt() {
-        if (this.simulatorThread == null)
+        if (this.simulatorThread == null) {
             return;
+        }
         this.simulatorThread.interrupt();
     }
 
@@ -238,13 +240,13 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
          * execution.
          *
          * @param pc
-         *         address in text segment of first instruction to simulate
+         *     address in text segment of first instruction to simulate
          * @param maxSteps
-         *         maximum number of instruction steps to simulate. Default
-         *         of -1 means no maximum
+         *     maximum number of instruction steps to simulate. Default
+         *     of -1 means no maximum
          * @param breakPoints
-         *         array of breakpoints (instruction addresses) specified by
-         *         user
+         *     array of breakpoints (instruction addresses) specified by
+         *     user
          */
         SimThread(final int pc, final int maxSteps, final int[] breakPoints) {
             this.pc = pc;
@@ -260,7 +262,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
          * will yield "true" and "construct" will return.
          *
          * @param reason
-         *         the Reason for stopping (PAUSE or STOP)
+         *     the Reason for stopping (PAUSE or STOP)
          */
         public synchronized void setStop(final Reason reason) {
             this.stop = true;
@@ -269,26 +271,31 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
         }
 
         private void startExecution() {
-            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.START,
-                    this.maxSteps,
-                    Globals.gui != null
-                            ? Globals.gui.runSpeedPanel.getRunSpeed()
-                            : RunSpeedPanel.UNLIMITED_SPEED,
-                    this.pc, null, this.pe, this.done));
+            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(
+                SimulatorNotice.Action.START,
+                this.maxSteps,
+                Globals.gui != null
+                    ? Globals.gui.runSpeedPanel.getRunSpeed()
+                    : RunSpeedPanel.UNLIMITED_SPEED,
+                this.pc, null, this.pe, this.done
+            ));
         }
 
         private void stopExecution(final boolean done, final Reason reason) {
             this.done = done;
             this.constructReturnReason = reason;
             SystemIO.flush(true);
-            if (done)
+            if (done) {
                 SystemIO.resetFiles(); // close any files opened in the process of simulating
-            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(SimulatorNotice.Action.STOP,
-                    this.maxSteps,
-                    Globals.gui != null
-                            ? Globals.gui.runSpeedPanel.getRunSpeed()
-                            : RunSpeedPanel.UNLIMITED_SPEED,
-                    this.pc, reason, this.pe, done));
+            }
+            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(
+                SimulatorNotice.Action.STOP,
+                this.maxSteps,
+                Globals.gui != null
+                    ? Globals.gui.runSpeedPanel.getRunSpeed()
+                    : RunSpeedPanel.UNLIMITED_SPEED,
+                this.pc, reason, this.pe, done
+            ));
         }
 
         private synchronized void interrupt() {
@@ -338,9 +345,11 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             final int code = cause & 0x7FFFFFFF;
 
             // Don't handle cases where that interrupt isn't enabled
-            assert ((ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) != 0
-                    && (ControlAndStatusRegisterFile.getValue("uie") & (1 << code)) != 0)
-                    : "The interrupt handler must be enabled";
+            assert (
+                (ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) != 0
+                    && (ControlAndStatusRegisterFile.getValue("uie") & (1 << code)) != 0
+            )
+                : "The interrupt handler must be enabled";
 
             // set the relevant CSRs
             ControlAndStatusRegisterFile.updateRegister("ucause", cause);
@@ -449,8 +458,10 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                     // Handle pending interupts and traps first
                     long uip = ControlAndStatusRegisterFile.getValueNoNotify("uip");
                     final long uie = ControlAndStatusRegisterFile.getValueNoNotify("uie");
-                    final boolean IE = (ControlAndStatusRegisterFile.getValueNoNotify("ustatus")
-                            & ControlAndStatusRegisterFile.INTERRUPT_ENABLE) != 0;
+                    final boolean IE = (
+                        ControlAndStatusRegisterFile.getValueNoNotify("ustatus")
+                            & ControlAndStatusRegisterFile.INTERRUPT_ENABLE
+                    ) != 0;
                     // make sure no interrupts sneak in while we are processing them
                     this.pc = RegisterFile.getProgramCounter();
                     synchronized (InterruptController.lock) {
@@ -459,8 +470,10 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                         final boolean pendingTrap = InterruptController.trapPending();
                         // This is the explicit (in the spec) order that interrupts should be serviced
                         if (IE && pendingExternal && (uie & ControlAndStatusRegisterFile.EXTERNAL_INTERRUPT) != 0) {
-                            if (this.handleInterrupt(InterruptController.claimExternal(),
-                                    ExceptionReason.EXTERNAL_INTERRUPT.value, this.pc)) {
+                            if (this.handleInterrupt(
+                                InterruptController.claimExternal(),
+                                ExceptionReason.EXTERNAL_INTERRUPT.value, this.pc
+                            )) {
                                 pendingExternal = false;
                                 uip &= ~0x100;
                             } else {
@@ -468,7 +481,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                                 // thats an error
                             }
                         } else if (IE && (uip & 0x1) != 0
-                                && (uie & ControlAndStatusRegisterFile.SOFTWARE_INTERRUPT) != 0) {
+                            && (uie & ControlAndStatusRegisterFile.SOFTWARE_INTERRUPT) != 0) {
                             if (this.handleInterrupt(0, ExceptionReason.SOFTWARE_INTERRUPT.value, this.pc)) {
                                 uip &= ~0x1;
                             } else {
@@ -476,9 +489,11 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                                 // thats an error
                             }
                         } else if (IE && pendingTimer && (uie & ControlAndStatusRegisterFile.TIMER_INTERRUPT) != 0) {
-                            if (this.handleInterrupt(InterruptController.claimTimer(),
-                                    ExceptionReason.TIMER_INTERRUPT.value,
-                                    this.pc)) {
+                            if (this.handleInterrupt(
+                                InterruptController.claimTimer(),
+                                ExceptionReason.TIMER_INTERRUPT.value,
+                                this.pc
+                            )) {
                                 pendingTimer = false;
                                 uip &= ~0x10;
                             } else {
@@ -487,13 +502,15 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                             }
                         } else if (pendingTrap) { // if we have a pending trap and aren't handling an interrupt it must
                             // be handled
-                            if (!this.handleTrap(InterruptController.claimTrap(),
-                                    this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH)) {
+                            if (!this.handleTrap(
+                                InterruptController.claimTrap(),
+                                this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH
+                            )) {
                                 return;
                             }
                         }
                         uip |= (pendingExternal ? ControlAndStatusRegisterFile.EXTERNAL_INTERRUPT : 0)
-                                | (pendingTimer ? ControlAndStatusRegisterFile.TIMER_INTERRUPT : 0);
+                            | (pendingTimer ? ControlAndStatusRegisterFile.TIMER_INTERRUPT : 0);
                     }
                     if (uip != ControlAndStatusRegisterFile.getValueNoNotify("uip")) {
                         ControlAndStatusRegisterFile.updateRegister("uip", uip);
@@ -517,11 +534,15 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                     } catch (final AddressErrorException e) {
                         final SimulationException tmp;
                         if (e.reason == ExceptionReason.LOAD_ACCESS_FAULT) {
-                            tmp = new SimulationException("Instruction load access error",
-                                    ExceptionReason.INSTRUCTION_ACCESS_FAULT);
+                            tmp = new SimulationException(
+                                "Instruction load access error",
+                                ExceptionReason.INSTRUCTION_ACCESS_FAULT
+                            );
                         } else {
-                            tmp = new SimulationException("Instruction load alignment error",
-                                    ExceptionReason.INSTRUCTION_ADDR_MISALIGNED);
+                            tmp = new SimulationException(
+                                "Instruction load alignment error",
+                                ExceptionReason.INSTRUCTION_ADDR_MISALIGNED
+                            );
                         }
                         if (!InterruptController.registerSynchronousTrap(tmp, this.pc)) {
                             this.pe = tmp;
@@ -541,10 +562,12 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                         final BasicInstruction instruction = (BasicInstruction) statement.getInstruction();
                         if (instruction == null) {
                             // TODO: Proper error handling here
-                            throw new SimulationException(statement,
-                                    "undefined instruction (" + BinaryUtils.intToHexString(statement.getBinaryStatement())
-                                            + ")",
-                                    ExceptionReason.ILLEGAL_INSTRUCTION);
+                            throw new SimulationException(
+                                statement,
+                                "undefined instruction (" + BinaryUtils.intToHexString(statement.getBinaryStatement())
+                                    + ")",
+                                ExceptionReason.ILLEGAL_INSTRUCTION
+                            );
                         }
                         // THIS IS WHERE THE INSTRUCTION EXECUTION IS ACTUALLY SIMULATED!
                         instruction.simulate(statement);
@@ -597,7 +620,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
 
                 // Return if we've reached a breakpoint.
                 if (ebreak || (this.breakPoints != null) &&
-                        (Arrays.binarySearch(this.breakPoints, RegisterFile.getProgramCounter()) >= 0)) {
+                    (Arrays.binarySearch(this.breakPoints, RegisterFile.getProgramCounter()) >= 0)) {
                     this.stopExecution(false, Reason.BREAKPOINT);
                     return;
                 }
@@ -620,14 +643,14 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                 // using Run, not Step (maxSteps != 1) AND
                 // running slowly enough for GUI to keep up
                 if (Simulator.interactiveGUIUpdater != null && this.maxSteps != 1 &&
-                        Globals.gui.runSpeedPanel.getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
+                    Globals.gui.runSpeedPanel.getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                     SwingUtilities.invokeLater(Simulator.interactiveGUIUpdater);
                 }
                 if (Globals.gui != null) { // OR added by DPS 24 July 2008 to enable
                     // speed control by stand-alone tool
                     final var runSpeedPanel = Globals.gui.runSpeedPanel;
                     if (this.maxSteps != 1 &&
-                            runSpeedPanel.getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
+                        runSpeedPanel.getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                         try {
                             this.wait((int) (1000 / runSpeedPanel.getRunSpeed()));
                         } catch (final InterruptedException ignored) {

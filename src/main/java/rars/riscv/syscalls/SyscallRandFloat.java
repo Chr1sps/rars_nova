@@ -43,8 +43,10 @@ public class SyscallRandFloat extends AbstractSyscall {
      * <p>Constructor for SyscallRandFloat.</p>
      */
     public SyscallRandFloat() {
-        super("RandFloat", "Get a random float", "a0 = index of pseudorandom number generator",
-                "fa0 = uniformly randomly selected from from [0,1]");
+        super(
+            "RandFloat", "Get a random float", "a0 = index of pseudorandom number generator",
+            "fa0 = uniformly randomly selected from from [0,1]"
+        );
     }
 
     /**

@@ -46,7 +46,7 @@ public class DigitalLabSim extends AbstractTool {
     private static boolean CounterInterruptOnOff = false;
     // Used to be static final variables now they are regenerated per instance
     private final int IN_ADRESS_DISPLAY_1, IN_ADRESS_DISPLAY_2, IN_ADRESS_HEXA_KEYBOARD, IN_ADRESS_COUNTER,
-            OUT_ADRESS_HEXA_KEYBOARD;
+        OUT_ADRESS_HEXA_KEYBOARD;
     // Seven Segment display
     private SevenSegmentPanel sevenSegPanel;
     private HexaKeyboard hexaKeyPanel;
@@ -55,9 +55,9 @@ public class DigitalLabSim extends AbstractTool {
      * <p>Constructor for DigitalLabSim.</p>
      *
      * @param title
-     *         a {@link java.lang.String} object
+     *     a {@link java.lang.String} object
      * @param heading
-     *         a {@link java.lang.String} object
+     *     a {@link java.lang.String} object
      */
     public DigitalLabSim(final String title, final String heading) {
         super(title, heading);
@@ -105,21 +105,23 @@ public class DigitalLabSim extends AbstractTool {
         final var memNotice = (MemoryAccessNotice) notice;
         final int address = memNotice.getAddress();
         final char value = (char) memNotice.getValue();
-        if (address == this.IN_ADRESS_DISPLAY_1)
+        if (address == this.IN_ADRESS_DISPLAY_1) {
             this.updateSevenSegment(1, value);
-        else if (address == this.IN_ADRESS_DISPLAY_2)
+        } else if (address == this.IN_ADRESS_DISPLAY_2) {
             this.updateSevenSegment(0, value);
-        else if (address == this.IN_ADRESS_HEXA_KEYBOARD)
+        } else if (address == this.IN_ADRESS_HEXA_KEYBOARD) {
             this.updateHexaKeyboard(value);
-        else if (address == this.IN_ADRESS_COUNTER)
+        } else if (address == this.IN_ADRESS_COUNTER) {
             DigitalLabSim.updateOneSecondCounter(value);
-        if (DigitalLabSim.CounterInterruptOnOff)
+        }
+        if (DigitalLabSim.CounterInterruptOnOff) {
             if (DigitalLabSim.CounterValue > 0) {
                 DigitalLabSim.CounterValue--;
             } else {
                 DigitalLabSim.CounterValue = DigitalLabSim.CounterValueMax;
                 InterruptController.registerTimerInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_TIMER);
             }
+        }
         this.subscription.request(1);
     }
 
@@ -183,51 +185,53 @@ public class DigitalLabSim extends AbstractTool {
     @Override
     protected JComponent getHelpComponent() {
         final String helpContent = " This tool is composed of 3 parts : two seven-segment displays, an hexadecimal " +
-                "keyboard and counter \n"
-                +
-                "Seven segment display\n" +
-                " Byte second at address " + BinaryUtils.intToHexString(this.IN_ADRESS_DISPLAY_1)
-                + " : command right seven segment display \n " +
-                " Byte second at address " + BinaryUtils.intToHexString(this.IN_ADRESS_DISPLAY_2)
-                + " : command left seven segment display \n " +
-                " Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 " +
-                "for point \n \n"
-                +
-                "Hexadecimal keyboard\n" +
-                " Byte second at address " + BinaryUtils.intToHexString(this.IN_ADRESS_HEXA_KEYBOARD)
-                + " : command row number of hexadecimal keyboard (bit 0 to 3) and enable keyboard interrupt (bit 7) \n"
-                +
-                " Byte second at address " + BinaryUtils.intToHexString(this.OUT_ADRESS_HEXA_KEYBOARD)
-                + " : receive row and column of the first pressed, 0 if not first pressed \n" +
-                " The program has to scan, one by one, each row (send 1,2,4,8...)" +
-                " and then observe if a first is pressed (that mean byte second at adresse 0xFFFF0014 is different " +
-                "from zero). "
-                +
-                " This byte second is composed of row number (4 left bits) and column number (4 right bits)" +
-                " Here you'll find the code for each first : 0x11,0x21,0x41,0x81,0x12,0x22,0x42,0x82,0x14,0x24,0x44," +
-                "0x84,0x18,0x28,0x48,0x88. \n"
-                +
-                " For exemple first number 2 return 0x41, that mean the first is on column 3 and row 1. \n" +
-                " If keyboard interruption is enable, an external interrupt is started with second 0x00000200\n \n" +
-                "Counter\n" +
-                " Byte second at address " + BinaryUtils.intToHexString(this.IN_ADRESS_COUNTER)
-                + " : If one bit of this byte is set, the counter interruption is enabled.\n" +
-                " If counter interruption is enable, every 30 instructions, a timer interrupt is started with second " +
-                "0x00000100.\n"
-                +
-                "   (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)";
+            "keyboard and counter \n"
+            +
+            "Seven segment display\n" +
+            " Byte second at address " + BinaryUtils.intToHexString(this.IN_ADRESS_DISPLAY_1)
+            + " : command right seven segment display \n " +
+            " Byte second at address " + BinaryUtils.intToHexString(this.IN_ADRESS_DISPLAY_2)
+            + " : command left seven segment display \n " +
+            " Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 " +
+            "for point \n \n"
+            +
+            "Hexadecimal keyboard\n" +
+            " Byte second at address " + BinaryUtils.intToHexString(this.IN_ADRESS_HEXA_KEYBOARD)
+            + " : command row number of hexadecimal keyboard (bit 0 to 3) and enable keyboard interrupt (bit 7) \n"
+            +
+            " Byte second at address " + BinaryUtils.intToHexString(this.OUT_ADRESS_HEXA_KEYBOARD)
+            + " : receive row and column of the first pressed, 0 if not first pressed \n" +
+            " The program has to scan, one by one, each row (send 1,2,4,8...)" +
+            " and then observe if a first is pressed (that mean byte second at adresse 0xFFFF0014 is different " +
+            "from zero). "
+            +
+            " This byte second is composed of row number (4 left bits) and column number (4 right bits)" +
+            " Here you'll find the code for each first : 0x11,0x21,0x41,0x81,0x12,0x22,0x42,0x82,0x14,0x24,0x44," +
+            "0x84,0x18,0x28,0x48,0x88. \n"
+            +
+            " For exemple first number 2 return 0x41, that mean the first is on column 3 and row 1. \n" +
+            " If keyboard interruption is enable, an external interrupt is started with second 0x00000200\n \n" +
+            "Counter\n" +
+            " Byte second at address " + BinaryUtils.intToHexString(this.IN_ADRESS_COUNTER)
+            + " : If one bit of this byte is set, the counter interruption is enabled.\n" +
+            " If counter interruption is enable, every 30 instructions, a timer interrupt is started with second " +
+            "0x00000100.\n"
+            +
+            "   (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)";
         final JButton help = new JButton("Help");
         help.addActionListener(
-                e -> {
-                    final JTextArea ja = new JTextArea(helpContent);
-                    ja.setRows(20);
-                    ja.setColumns(60);
-                    ja.setLineWrap(true);
-                    ja.setWrapStyleWord(true);
-                    JOptionPane.showMessageDialog(DigitalLabSim.this.theWindow, new JScrollPane(ja),
-                            "Simulating the Hexa Keyboard and Seven segment display",
-                            JOptionPane.INFORMATION_MESSAGE);
-                });
+            e -> {
+                final JTextArea ja = new JTextArea(helpContent);
+                ja.setRows(20);
+                ja.setColumns(60);
+                ja.setLineWrap(true);
+                ja.setWrapStyleWord(true);
+                JOptionPane.showMessageDialog(
+                    DigitalLabSim.this.theWindow, new JScrollPane(ja),
+                    "Simulating the Hexa Keyboard and Seven segment display",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            });
         return help;
     }/*
      * ....................Seven Segment display start
@@ -238,9 +242,9 @@ public class DigitalLabSim extends AbstractTool {
      * <p>updateSevenSegment.</p>
      *
      * @param number
-     *         a int
+     *     a int
      * @param value
-     *         a char
+     *     a char
      */
     public void updateSevenSegment(final int number, final char value) {
         this.sevenSegPanel.display[number].modifyDisplay(value);
@@ -259,13 +263,15 @@ public class DigitalLabSim extends AbstractTool {
      * <p>updateHexaKeyboard.</p>
      *
      * @param row
-     *         a char
+     *     a char
      */
     public void updateHexaKeyboard(final char row) {
         final int key = DigitalLabSim.KeyBoardValueButtonClick;
         if ((key != -1) && ((1 << (key / 4)) == (row & 0xF))) {
-            this.updateMMIOControlAndData(this.OUT_ADRESS_HEXA_KEYBOARD,
-                    (char) (1 << (key / 4)) | (1 << (4 + (key % 4))));
+            this.updateMMIOControlAndData(
+                this.OUT_ADRESS_HEXA_KEYBOARD,
+                (char) (1 << (key / 4)) | (1 << (4 + (key % 4)))
+            );
         } else {
             this.updateMMIOControlAndData(this.OUT_ADRESS_HEXA_KEYBOARD, 0);
         }
@@ -353,10 +359,11 @@ public class DigitalLabSim extends AbstractTool {
         public void paint(final Graphics g) {
             char c = 'a';
             while (c <= 'h') {
-                if ((this.aff & 0x1) == 1)
+                if ((this.aff & 0x1) == 1) {
                     g.setColor(Color.RED);
-                else
+                } else {
                     g.setColor(Color.LIGHT_GRAY);
+                }
                 SevenSegmentDisplay.SwitchSegment(g, c);
                 this.aff = (char) (this.aff >>> 1);
                 c++;
@@ -390,8 +397,9 @@ public class DigitalLabSim extends AbstractTool {
 
         public void resetSevenSegment() {
             int i;
-            for (i = 0; i < 2; i++)
+            for (i = 0; i < 2; i++) {
                 this.modifyDisplay(i, (char) 0);
+            }
         }
     }
 
@@ -449,8 +457,9 @@ public class DigitalLabSim extends AbstractTool {
                 if (DigitalLabSim.KeyBoardValueButtonClick != -1) {// Button already pressed -> now realease
                     DigitalLabSim.KeyBoardValueButtonClick = -1;
                     DigitalLabSim.this.updateMMIOControlAndData(DigitalLabSim.this.OUT_ADRESS_HEXA_KEYBOARD, 0);
-                    for (i = 0; i < 16; i++)
+                    for (i = 0; i < 16; i++) {
                         HexaKeyboard.this.button[i].setBackground(Color.WHITE);
+                    }
                 } else { // new button pressed
                     DigitalLabSim.KeyBoardValueButtonClick = this.buttonValue;
                     HexaKeyboard.this.button[DigitalLabSim.KeyBoardValueButtonClick].setBackground(Color.GREEN);

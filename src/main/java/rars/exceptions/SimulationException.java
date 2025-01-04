@@ -28,21 +28,24 @@ public class SimulationException extends Exception {
     public SimulationException(final String m, final ExceptionReason reason) {
         this(reason, ErrorMessage.error(null, 0, 0, m), 0);
     }
-    
+
     public SimulationException() {
         this(ExceptionReason.OTHER, null, 0);
     }
 
     public SimulationException(final ProgramStatement ps, final String m, final ExceptionReason reason) {
-        this(reason, new ErrorMessage(
+        this(
+            reason, new ErrorMessage(
                 ps,
                 "Runtime exception at %s: %s"
-                        .formatted(
-                                BinaryUtils.intToHexString(
-                                        RegisterFile.getProgramCounter()
-                                                - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
-                                m
-                        )), 0);
+                    .formatted(
+                        BinaryUtils.intToHexString(
+                            RegisterFile.getProgramCounter()
+                                - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
+                        m
+                    )
+            ), 0
+        );
     }
 
     public SimulationException(final ProgramStatement ps, final String m) {
@@ -51,11 +54,11 @@ public class SimulationException extends Exception {
 
     public SimulationException(final @NotNull ProgramStatement ps, final @NotNull AddressErrorException aee) {
         this(
-                aee.reason, new ErrorMessage(
-                        ps, "Runtime exception at " +
-                        BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
-                        ": " + aee.getMessage()
-                ), aee.address
+            aee.reason, new ErrorMessage(
+                ps, "Runtime exception at " +
+                BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
+                ": " + aee.getMessage()
+            ), aee.address
         );
     }
 
@@ -63,7 +66,10 @@ public class SimulationException extends Exception {
         this(m, ExceptionReason.OTHER);
     }
 
-    public static @NotNull SimulationException fromAddressErrorException(final ProgramStatement ps, final AddressErrorException aee) {
+    public static @NotNull SimulationException fromAddressErrorException(
+        final ProgramStatement ps,
+        final AddressErrorException aee
+    ) {
         return new SimulationException(ps, aee);
     }
 }

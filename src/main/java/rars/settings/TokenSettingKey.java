@@ -32,7 +32,7 @@ public enum TokenSettingKey {
     ROUNDING_MODE("Rounding modes"),
     MACRO_PARAMETER("Macro parameters"),
     HILO("%hi/%lo offsets");
-    
+
     public final @NotNull String description;
 
     private static final @NotNull List<@NotNull Pair<@NotNull TokenSettingKey, @NotNull RVTokenType>> settingMappings = List.of(

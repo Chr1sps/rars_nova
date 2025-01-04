@@ -61,22 +61,32 @@ public final class ExecutePane extends JDesktopPane {
     /**
      * initialize the Execute pane with major components
      *
-     * @param mainUI  the parent GUI
-     * @param regs    window containing integer register set
-     * @param fpRegs  window containing floating point register set
-     * @param csrRegs window containing the CSR set
+     * @param mainUI
+     *     the parent GUI
+     * @param regs
+     *     window containing integer register set
+     * @param fpRegs
+     *     window containing floating point register set
+     * @param csrRegs
+     *     window containing the CSR set
      */
-    public ExecutePane(final @NotNull VenusUI mainUI, final @NotNull RegistersWindow regs,
-                       final @NotNull FloatingPointWindow fpRegs,
-                       final @NotNull ControlAndStatusWindow csrRegs) {
+    public ExecutePane(
+        final @NotNull VenusUI mainUI, final @NotNull RegistersWindow regs,
+        final @NotNull FloatingPointWindow fpRegs,
+        final @NotNull ControlAndStatusWindow csrRegs
+    ) {
         this.mainUI = mainUI;
         // Although these are displayed in Data Segment, they apply to all three
         // internal
         // windows within the Execute pane. So they will be housed here.
-        this.addressDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Addresses",
-            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX));
-        this.valueDisplayBase = new NumberDisplayBaseChooser("Hexadecimal Values",
-            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));// VenusUI
+        this.addressDisplayBase = new NumberDisplayBaseChooser(
+            "Hexadecimal Addresses",
+            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)
+        );
+        this.valueDisplayBase = new NumberDisplayBaseChooser(
+            "Hexadecimal Values",
+            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)
+        );// VenusUI
         // .DEFAULT_NUMBER_BASE);
         this.addressDisplayBase
             .setToolTipText("If checked, displays all memory addresses in hexadecimal.  Otherwise, decimal.");
@@ -139,7 +149,8 @@ public final class ExecutePane extends JDesktopPane {
      * Show or hide the label window (symbol table). If visible, it is displayed
      * to the right of the text segment and the latter is shrunk accordingly.
      *
-     * @param visibility set to true or false
+     * @param visibility
+     *     set to true or false
      */
     public void setLabelWindowVisibility(final boolean visibility) {
         if (!visibility && this.labelWindowVisible) {
@@ -198,7 +209,8 @@ public final class ExecutePane extends JDesktopPane {
      * Update display of columns based on state of given chooser. Normally
      * called only by the chooser's ItemListener.
      *
-     * @param chooser the GUI object manipulated by the user to change number base
+     * @param chooser
+     *     the GUI object manipulated by the user to change number base
      */
     public void numberDisplayBaseChanged(final NumberDisplayBaseChooser chooser) {
         if (chooser == this.valueDisplayBase) {

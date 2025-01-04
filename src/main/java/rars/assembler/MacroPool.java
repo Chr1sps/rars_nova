@@ -66,7 +66,8 @@ public final class MacroPool {
     /**
      * Create an empty MacroPool for given program
      *
-     * @param program associated program
+     * @param program
+     *     associated program
      */
     public MacroPool(final @NotNull RISCVProgram program) {
         this.program = program;
@@ -84,8 +85,9 @@ public final class MacroPool {
      * . {@link #current} will be added to {@link #macroList} by
      * {@link #commitMacro(Token)}
      *
-     * @param nameToken Token containing name of macro after <code>.macro</code>
-     *                  directive
+     * @param nameToken
+     *     Token containing name of macro after <code>.macro</code>
+     *     directive
      */
     public void beginMacro(final @NotNull Token nameToken) {
         this.current = new Macro();
@@ -100,8 +102,9 @@ public final class MacroPool {
      * directive. <br>
      * Adds/Replaces {@link #current} macro into the {@link #macroList}.
      *
-     * @param endToken Token containing <code>.end_macro</code> directive in source
-     *                 code
+     * @param endToken
+     *     Token containing <code>.end_macro</code> directive in source
+     *     code
      */
     public void commitMacro(final @NotNull Token endToken) {
         assert this.current != null : "commitMacro called without beginMacro";
@@ -115,13 +118,15 @@ public final class MacroPool {
     /**
      * Will be called by parser when reaches a macro expansion call
      *
-     * @param tokens tokens passed to macro expansion call
+     * @param tokens
+     *     tokens passed to macro expansion call
      * @return {@link Macro} object matching the name and argument count of
      * tokens passed
      */
     public @Nullable Macro getMatchingMacro(final @NotNull TokenList tokens) {
-        if (tokens.isEmpty())
+        if (tokens.isEmpty()) {
             return null;
+        }
         Macro ret = null;
         final Token firstToken = tokens.get(0);
         for (final Macro macro : this.macroList) {
@@ -129,8 +134,9 @@ public final class MacroPool {
                 && macro.getArgs().size() + 1 == tokens.size()
                 // && macro.getToLine() < callerLine // condition removed; doesn't work nicely
                 // in conjunction with .include, and does not seem necessary. DPS 8-MAR-2013
-                && (ret == null || ret.getFromLine() < macro.getFromLine()))
+                && (ret == null || ret.getFromLine() < macro.getFromLine())) {
                 ret = macro;
+            }
         }
         return ret;
     }
@@ -138,14 +144,17 @@ public final class MacroPool {
     /**
      * <p>matchesAnyMacroName.</p>
      *
-     * @param value a {@link java.lang.String} object
+     * @param value
+     *     a {@link java.lang.String} object
      * @return true if any macros have been defined with name <code>second</code>
      * by now, not concerning arguments count.
      */
     public boolean matchesAnyMacroName(final @NotNull String value) {
-        for (final Macro macro : this.macroList)
-            if (macro.getName().equals(value))
+        for (final Macro macro : this.macroList) {
+            if (macro.getName().equals(value)) {
                 return true;
+            }
+        }
         return false;
     }
 
@@ -172,14 +181,16 @@ public final class MacroPool {
     /**
      * <p>pushOnCallStack.</p>
      *
-     * @param token a {@link Token} object
+     * @param token
+     *     a {@link Token} object
      * @return a boolean
      */
     public boolean pushOnCallStack(final @NotNull Token token) { // returns true if detected expansion loop
         final int sourceLine = token.getSourceLine();
         final int origSourceLine = token.getOriginalSourceLine();
-        if (this.callStack.contains(sourceLine))
+        if (this.callStack.contains(sourceLine)) {
             return true;
+        }
         this.callStack.add(sourceLine);
         this.callStackOrigLines.add(origSourceLine);
         return false;
@@ -201,8 +212,9 @@ public final class MacroPool {
     public @NotNull String getExpansionHistory() {
         final StringBuilder ret = new StringBuilder();
         for (int i = 0; i < this.callStackOrigLines.size(); i++) {
-            if (i > 0)
+            if (i > 0) {
                 ret.append("->");
+            }
             ret.append(this.callStackOrigLines.get(i).toString());
         }
         return ret.toString();

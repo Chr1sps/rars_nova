@@ -22,8 +22,10 @@ public final class FSUBD extends Double {
      * {@inheritDoc}
      */
     @Override
-    public @NotNull Float64 compute(final @NotNull Float64 f1, final @NotNull Float64 f2,
-                                    final @NotNull Environment e) {
+    public @NotNull Float64 compute(
+        final @NotNull Float64 f1, final @NotNull Float64 f2,
+        final @NotNull Environment e
+    ) {
         return Arithmetic.subtraction(f1, f2, e);
     }
 }

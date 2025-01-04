@@ -41,16 +41,20 @@ public class RVTokensProducer implements TokensProducer<TokenizedLine> {
     }
 
     @Override
-    public TokenizedLine getTokenList(final Segment text, final int initialTokenType, final int lineOffset,
-                                      final int lineNum) {
+    public TokenizedLine getTokenList(
+        final Segment text, final int initialTokenType, final int lineOffset,
+        final int lineNum
+    ) {
         this.result = new ArrayList<>();
         this.lineNum = lineNum;
         return lexer.getTokensList(text, initialTokenType, lineOffset, this);
     }
 
     @Override
-    public void addToken(final char @NotNull [] array, final int start, final int end, final RVTokenType tokenType,
-                         final int startOffset) {
+    public void addToken(
+        final char @NotNull [] array, final int start, final int end, final RVTokenType tokenType,
+        final int startOffset
+    ) {
         final var position = new Position(this.lineNum, start, startOffset);
         final var substring = new String(array, start, end - start);
         final var newToken = new RVToken(position, tokenType, substring);

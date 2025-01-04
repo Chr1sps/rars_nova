@@ -44,9 +44,11 @@ public class SyscallRandIntRange extends AbstractSyscall {
      * <p>Constructor for SyscallRandIntRange.</p>
      */
     public SyscallRandIntRange() {
-        super("RandIntRange", "Get a random bounded integer",
-                "a0 = index of pseudorandom number generator<br>a1 = upper bound for random number",
-                "a0 = uniformly selectect from [0,bound]");
+        super(
+            "RandIntRange", "Get a random bounded integer",
+            "a0 = index of pseudorandom number generator<br>a1 = upper bound for random number",
+            "a0 = uniformly selectect from [0,bound]"
+        );
     }
 
     /**
@@ -58,8 +60,10 @@ public class SyscallRandIntRange extends AbstractSyscall {
         try {
             RegisterFile.updateRegister("a0", stream.nextInt(RegisterFile.getValue("a1")));
         } catch (final IllegalArgumentException iae) {
-            throw new ExitingException(statement,
-                    "Upper bound of range cannot be negative (syscall " + this.getNumber() + ")");
+            throw new ExitingException(
+                statement,
+                "Upper bound of range cannot be negative (syscall " + this.getNumber() + ")"
+            );
         }
     }
 }

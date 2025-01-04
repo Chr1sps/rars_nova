@@ -45,12 +45,17 @@ public final class RegistersPane extends JTabbedPane {
     /**
      * Constructor for the RegistersPane class.
      *
-     * @param regs a {@link RegistersWindow} object
-     * @param cop1 a {@link FloatingPointWindow} object
-     * @param cop0 a {@link ControlAndStatusWindow} object
+     * @param regs
+     *     a {@link RegistersWindow} object
+     * @param cop1
+     *     a {@link FloatingPointWindow} object
+     * @param cop0
+     *     a {@link ControlAndStatusWindow} object
      */
-    public RegistersPane(final RegistersWindow regs, final FloatingPointWindow cop1,
-                         final ControlAndStatusWindow cop0) {
+    public RegistersPane(
+        final RegistersWindow regs, final FloatingPointWindow cop1,
+        final ControlAndStatusWindow cop0
+    ) {
         super();
 
         this.regsTab = regs;

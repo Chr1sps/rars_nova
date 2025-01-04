@@ -13,13 +13,13 @@ public final class PickerCardView extends JPanel {
     public final @NotNull OtherSettingsView otherSettingsView;
     private final @NotNull JPanel upperPanel;
     private final @NotNull CardLayout upperLayout;
-    
-    private static final @NotNull  String EMPTY = "empty",
-            FONT = "font",
-            PRESETS = "presets",
-            BASE = "base",
-            SYNTAX = "syntax",
-            OTHER = "other";
+
+    private static final @NotNull String EMPTY = "empty",
+        FONT = "font",
+        PRESETS = "presets",
+        BASE = "base",
+        SYNTAX = "syntax",
+        OTHER = "other";
 
     public PickerCardView() {
         super();
@@ -66,7 +66,7 @@ public final class PickerCardView extends JPanel {
     public void showOtherSettings() {
         upperLayout.show(upperPanel, "other");
     }
-    
+
     public void showPresets() {
         upperLayout.show(upperPanel, "presets");
     }

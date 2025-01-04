@@ -21,8 +21,10 @@ import java.util.function.Predicate;
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
 public final class RVFoldParser implements FoldParser {
-    private static boolean canBeAChildInList(final @NotNull List<@NotNull FoldData> folds,
-                                             final @NotNull FoldData element) {
+    private static boolean canBeAChildInList(
+        final @NotNull List<@NotNull FoldData> folds,
+        final @NotNull FoldData element
+    ) {
         return folds
             .stream()
             .noneMatch(fold -> fold.startLine() >= element.startLine() && fold.endLine() <= element.endLine());
@@ -71,8 +73,10 @@ public final class RVFoldParser implements FoldParser {
             .toList();
     }
 
-    private static @NotNull Fold createFoldFromFoldDataRec(final @NotNull Fold baseFold,
-                                                           final @NotNull List<FoldData> children) {
+    private static @NotNull Fold createFoldFromFoldDataRec(
+        final @NotNull Fold baseFold,
+        final @NotNull List<FoldData> children
+    ) {
         children.stream().sorted(Comparator.comparingInt(FoldData::startLine)).forEach(childData -> {
             try {
                 final var childFold = baseFold.createChild(childData.baseFold().getFoldType(), childData.startOffset());
@@ -98,16 +102,20 @@ public final class RVFoldParser implements FoldParser {
         final var foldMap = new HashMap<Integer, Fold>();
         for (final var list : lists) {
             for (final var fold : list) {
-                foldMap.merge(fold.getStartLine(), fold,
+                foldMap.merge(
+                    fold.getStartLine(), fold,
                     (existing, replacement) -> replacement.getEndLine() > existing.getEndLine() ? replacement :
-                        existing);
+                        existing
+                );
             }
         }
         return foldMap.values().stream().toList();
     }
 
-    private static @NotNull List<@NotNull Fold> mergeWithRegions(final @NotNull List<Fold> folds,
-                                                                 final @NotNull List<Fold> regions) {
+    private static @NotNull List<@NotNull Fold> mergeWithRegions(
+        final @NotNull List<Fold> folds,
+        final @NotNull List<Fold> regions
+    ) {
         final var result = new ArrayList<>(folds);
         for (final var region : regions) {
             final var intersectingRegions = result
@@ -124,8 +132,10 @@ public final class RVFoldParser implements FoldParser {
     }
 
     // region getFolds methods
-    private static @NotNull List<Fold> getFoldsBase(final @NotNull RSyntaxTextArea textArea,
-                                                    final @NotNull FoldParserCallback callback) {
+    private static @NotNull List<Fold> getFoldsBase(
+        final @NotNull RSyntaxTextArea textArea,
+        final @NotNull FoldParserCallback callback
+    ) {
         final var folds = new ArrayList<Fold>();
         final var foldRef = new RefCell<Fold>(null);
         final var lineCount = textArea.getLineCount();
@@ -141,105 +151,120 @@ public final class RVFoldParser implements FoldParser {
     }
 
     private static @NotNull List<Fold> getFoldsForLabels(final @NotNull RSyntaxTextArea textArea) {
-        return getFoldsBase(textArea, (lineNumber, tokens, folds, fold) -> {
-            if (hasALabel(tokens)) {
-                if (fold.value != null && fold.value.isOnSingleLine()) {
-                    folds.remove(fold.value);
-                }
-                fold.value = new Fold(RVFoldType.LABEL, textArea, tokens.getOffset());
-                fold.value.setEndOffset(tokens.getOffset());
-                folds.add(fold.value);
-            } else if (isMacroStartLine(tokens) || isMacroEndLine(tokens)) {
-                if (fold.value != null) {
-                    fold.value.setEndOffset(tokens.getOffset() - 1);
-                    if (fold.value.isOnSingleLine()) {
+        return getFoldsBase(
+            textArea, (lineNumber, tokens, folds, fold) -> {
+                if (hasALabel(tokens)) {
+                    if (fold.value != null && fold.value.isOnSingleLine()) {
                         folds.remove(fold.value);
                     }
-                    fold.value = null;
+                    fold.value = new Fold(RVFoldType.LABEL, textArea, tokens.getOffset());
+                    fold.value.setEndOffset(tokens.getOffset());
+                    folds.add(fold.value);
+                } else if (isMacroStartLine(tokens) || isMacroEndLine(tokens)) {
+                    if (fold.value != null) {
+                        fold.value.setEndOffset(tokens.getOffset() - 1);
+                        if (fold.value.isOnSingleLine()) {
+                            folds.remove(fold.value);
+                        }
+                        fold.value = null;
+                    }
+                } else if (fold.value != null && !TokenUtils.isBlankOrAllWhiteSpace(tokens)) {
+                    fold.value.setEndOffset(tokens.getOffset());
                 }
-            } else if (fold.value != null && !TokenUtils.isBlankOrAllWhiteSpace(tokens)) {
-                fold.value.setEndOffset(tokens.getOffset());
             }
-        });
+        );
     }
 
     private static @NotNull List<Fold> getCommentFolds(final @NotNull RSyntaxTextArea textArea) {
-        return getFoldsBase(textArea, (lineNumber, tokens, folds, fold) -> {
-            if (isCommentLine(tokens)) {
-                if (fold.value == null) {
-                    fold.value = new Fold(RVFoldType.COMMENT, textArea, tokens.getOffset());
-                    folds.add(fold.value);
+        return getFoldsBase(
+            textArea, (lineNumber, tokens, folds, fold) -> {
+                if (isCommentLine(tokens)) {
+                    if (fold.value == null) {
+                        fold.value = new Fold(RVFoldType.COMMENT, textArea, tokens.getOffset());
+                        folds.add(fold.value);
+                    }
+                } else if (fold.value != null) {
+                    fold.value.setEndOffset(textArea.getLineStartOffset(lineNumber) - 1);
+                    if (fold.value.isOnSingleLine()) {
+                        folds.removeLast();
+                    }
+                    fold.value = null;
                 }
-            } else if (fold.value != null) {
-                fold.value.setEndOffset(textArea.getLineStartOffset(lineNumber) - 1);
-                if (fold.value.isOnSingleLine()) {
-                    folds.removeLast();
-                }
-                fold.value = null;
             }
-        });
+        );
     }
 
     private static @NotNull List<Fold> getFoldsForInstructionBlocks(final @NotNull RSyntaxTextArea textArea) {
-        return getFoldsBase(textArea, (lineNumber, tokens, folds, fold) -> {
-            if (isInstructionLine(tokens)) {
-                if (fold.value == null) {
-                    fold.value = new Fold(RVFoldType.INSTRUCTION_BLOCK, textArea, tokens.getOffset());
-                    folds.add(fold.value);
+        return getFoldsBase(
+            textArea, (lineNumber, tokens, folds, fold) -> {
+                if (isInstructionLine(tokens)) {
+                    if (fold.value == null) {
+                        fold.value = new Fold(RVFoldType.INSTRUCTION_BLOCK, textArea, tokens.getOffset());
+                        folds.add(fold.value);
+                    }
+                } else if (fold.value != null) {
+                    fold.value.setEndOffset(textArea.getLineStartOffset(lineNumber) - 1);
+                    if (fold.value.isOnSingleLine()) {
+                        folds.removeLast();
+                    }
+                    fold.value = null;
                 }
-            } else if (fold.value != null) {
-                fold.value.setEndOffset(textArea.getLineStartOffset(lineNumber) - 1);
-                if (fold.value.isOnSingleLine()) {
-                    folds.removeLast();
-                }
-                fold.value = null;
-            }
 
-        });
+            }
+        );
     }
 
     private static @NotNull List<Fold> getRegionFolds(final @NotNull RSyntaxTextArea textArea) {
         final var regionStack = new ArrayList<Fold>();
-        return getFoldsBase(textArea, ((lineNumber, tokens, folds, currentFold) -> {
-            if (isCommentLine(tokens)) {
-                final var commentText = findToken(tokens, token -> token.getType() == tokenValue(RVTokenType.COMMENT));
-                if (commentText != null) {
-                    final var comment = commentText.getLexeme();
-                    // strip the leading '#' and any whitespaces after it
-                    final var commentTextStripped = comment.substring(1).strip().toLowerCase();
-                    // check if the comment begins with the `region` keyword
-                    if (commentTextStripped.startsWith("region")) {
-                        final var regionFold = new Fold(RVFoldType.REGION, textArea, tokens.getOffset());
-                        regionStack.add(regionFold);
-                        folds.add(regionFold);
-                    } else if (commentTextStripped.startsWith("endregion")) {
-                        if (!regionStack.isEmpty()) {
-                            final var regionFold = regionStack.removeLast();
-                            regionFold.setEndOffset(tokens.getOffset());
-                            folds.add(regionFold);
+        return getFoldsBase(
+            textArea, (
+                (lineNumber, tokens, folds, currentFold) -> {
+                    if (isCommentLine(tokens)) {
+                        final var commentText = findToken(
+                            tokens,
+                            token -> token.getType() == tokenValue(RVTokenType.COMMENT)
+                        );
+                        if (commentText != null) {
+                            final var comment = commentText.getLexeme();
+                            // strip the leading '#' and any whitespaces after it
+                            final var commentTextStripped = comment.substring(1).strip().toLowerCase();
+                            // check if the comment begins with the `region` keyword
+                            if (commentTextStripped.startsWith("region")) {
+                                final var regionFold = new Fold(RVFoldType.REGION, textArea, tokens.getOffset());
+                                regionStack.add(regionFold);
+                                folds.add(regionFold);
+                            } else if (commentTextStripped.startsWith("endregion")) {
+                                if (!regionStack.isEmpty()) {
+                                    final var regionFold = regionStack.removeLast();
+                                    regionFold.setEndOffset(tokens.getOffset());
+                                    folds.add(regionFold);
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }));
+            )
+        );
     }
 
     private static @NotNull List<Fold> getMacroFolds(final @NotNull RSyntaxTextArea textArea) {
-        return getFoldsBase(textArea, (lineNumber, tokens, folds, fold) -> {
-            if (isMacroStartLine(tokens)) {
-                if (fold.value == null) {
-                    fold.value = new Fold(RVFoldType.MACRO, textArea, tokens.getOffset());
-                }
-            } else if (isMacroEndLine(tokens)) {
-                if (fold.value != null) {
-                    fold.value.setEndOffset(tokens.getOffset());
-                    if (!fold.value.isOnSingleLine()) {
-                        folds.add(fold.value);
+        return getFoldsBase(
+            textArea, (lineNumber, tokens, folds, fold) -> {
+                if (isMacroStartLine(tokens)) {
+                    if (fold.value == null) {
+                        fold.value = new Fold(RVFoldType.MACRO, textArea, tokens.getOffset());
                     }
-                    fold.value = null;
+                } else if (isMacroEndLine(tokens)) {
+                    if (fold.value != null) {
+                        fold.value.setEndOffset(tokens.getOffset());
+                        if (!fold.value.isOnSingleLine()) {
+                            folds.add(fold.value);
+                        }
+                        fold.value = null;
+                    }
                 }
             }
-        });
+        );
     }
     // endregion getFolds methods
 
@@ -280,13 +305,17 @@ public final class RVFoldParser implements FoldParser {
     }
 
     private static boolean isMacroStartLine(final Token tokens) {
-        return lineContainsToken(tokens, (token) -> token.getType() == tokenValue(RVTokenType.DIRECTIVE) &&
-            token.getLexeme().equalsIgnoreCase(Directive.MACRO.getName()));
+        return lineContainsToken(
+            tokens, (token) -> token.getType() == tokenValue(RVTokenType.DIRECTIVE) &&
+                token.getLexeme().equalsIgnoreCase(Directive.MACRO.getName())
+        );
     }
 
     private static boolean isMacroEndLine(final Token tokens) {
-        return lineContainsToken(tokens, (token) -> token.getType() == tokenValue(RVTokenType.DIRECTIVE) &&
-            token.getLexeme().equalsIgnoreCase(Directive.END_MACRO.getName()));
+        return lineContainsToken(
+            tokens, (token) -> token.getType() == tokenValue(RVTokenType.DIRECTIVE) &&
+                token.getLexeme().equalsIgnoreCase(Directive.END_MACRO.getName())
+        );
     }
 
     private static boolean lineContainsToken(final @NotNull Token tokens, final @NotNull Predicate<Token> predicate) {
@@ -301,8 +330,10 @@ public final class RVFoldParser implements FoldParser {
     }
     // endregion Token line predicates
 
-    private static @Nullable Token findToken(final @NotNull Token startToken,
-                                             final @NotNull Predicate<Token> predicate) {
+    private static @Nullable Token findToken(
+        final @NotNull Token startToken,
+        final @NotNull Predicate<Token> predicate
+    ) {
         var currentToken = startToken;
         while (currentToken != null && currentToken.isPaintable()) {
             if (predicate.test(currentToken)) {
@@ -327,8 +358,10 @@ public final class RVFoldParser implements FoldParser {
 
     @FunctionalInterface
     private interface FoldParserCallback {
-        void processLine(final int lineNumber, final @NotNull Token tokens, final @NotNull ArrayList<Fold> folds,
-                         final @NotNull RefCell<@Nullable Fold> currentFold) throws BadLocationException;
+        void processLine(
+            final int lineNumber, final @NotNull Token tokens, final @NotNull ArrayList<Fold> folds,
+            final @NotNull RefCell<@Nullable Fold> currentFold
+        ) throws BadLocationException;
     }
 
     private record FoldData(@NotNull Fold baseFold, @NotNull List<FoldData> children) {

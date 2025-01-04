@@ -38,7 +38,8 @@ public class Float32 implements Floating<Float32> {
     /**
      * <p>Constructor for Float32.</p>
      *
-     * @param bits a int
+     * @param bits
+     *     a int
      */
     public Float32(final int bits) {
         this.bits = bits;
@@ -47,9 +48,12 @@ public class Float32 implements Floating<Float32> {
     /**
      * <p>Constructor for Float32.</p>
      *
-     * @param sign        a boolean
-     * @param exponent    a int
-     * @param significand a int
+     * @param sign
+     *     a boolean
+     * @param exponent
+     *     a int
+     * @param significand
+     *     a int
      */
     public Float32(final boolean sign, final int exponent, final int significand) {
         this(((sign) ? 0x80000000 : 0) | (((exponent + 127) & 0xFF) << 23) | (significand & 0x007FFFFF));
@@ -58,12 +62,14 @@ public class Float32 implements Floating<Float32> {
     /**
      * <p>fromInteger.</p>
      *
-     * @param num An integer to be converted to
+     * @param num
+     *     An integer to be converted to
      * @return a {@link Float32} object
      */
     public static Float32 fromInteger(int num) {
-        if (num == 0)
+        if (num == 0) {
             return Float32.Zero;
+        }
         final boolean sign = num < 0;
         num = sign ? -num : num;
         int exponent = 0, significand = 0;
@@ -81,8 +87,10 @@ public class Float32 implements Floating<Float32> {
     /**
      * <p>fromExact.</p>
      *
-     * @param ef a {@link ExactFloat} object
-     * @param e  a {@link Environment} object
+     * @param ef
+     *     a {@link ExactFloat} object
+     * @param e
+     *     a {@link Environment} object
      * @return a {@link Float32} object
      */
     public static Float32 fromExact(final @NotNull ExactFloat ef, final @NotNull Environment e) {
@@ -120,7 +128,8 @@ public class Float32 implements Floating<Float32> {
     /**
      * <p>copySign.</p>
      *
-     * @param signToTake a {@link Float32} object
+     * @param signToTake
+     *     a {@link Float32} object
      * @return a {@link Float32} object
      */
     public @NotNull Float32 copySign(final @NotNull Float32 signToTake) {
@@ -186,8 +195,9 @@ public class Float32 implements Floating<Float32> {
      */
     @Override
     public boolean isSignalling() {
-        if (!this.isNaN())
+        if (!this.isNaN()) {
             return false;
+        }
         return (this.bits & 0x400000) == 0;
     }
 
@@ -263,8 +273,10 @@ public class Float32 implements Floating<Float32> {
 
             if (ef.exponent > Float32.minexp - Float32.sigbits) {
                 assert ef.significand.bitLength() <= Float32.sigbits : "Its actually normal";
-                return new Float32(ef.sign, Float32.minexp,
-                        ef.significand.shiftLeft(-(Float32.minexp - Float32.sigbits + 1) + ef.exponent).intValueExact());
+                return new Float32(
+                    ef.sign, Float32.minexp,
+                    ef.significand.shiftLeft(-(Float32.minexp - Float32.sigbits + 1) + ef.exponent).intValueExact()
+                );
             }
 
             env.inexact = true;
@@ -307,8 +319,11 @@ public class Float32 implements Floating<Float32> {
                 final var bitCount = ef.exponent + ef.significand.bitLength() - 1;
                 assert bitCount > Float32.minexp : "Its actually subnormal";
 
-                return new Float32(ef.sign, bitCount,
-                        ef.significand.shiftLeft((Float32.sigbits + 1) - ef.significand.bitLength()).intValueExact() & Float32.sigmask);
+                return new Float32(
+                    ef.sign, bitCount,
+                    ef.significand.shiftLeft((Float32.sigbits + 1) - ef.significand.bitLength())
+                        .intValueExact() & Float32.sigmask
+                );
             }
             env.inexact = true;
             bitsToRound = ef.significand.bitLength() - (Float32.sigbits + 1);
@@ -317,13 +332,21 @@ public class Float32 implements Floating<Float32> {
 
             final BigInteger upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1));
 
-            towardsZero = new Float32(ef.sign, ef.exponent + Float32.sigbits + bitsToRound,
-                    ef.significand.shiftRight(bitsToRound).intValueExact() & Float32.sigmask);
+            towardsZero = new Float32(
+                ef.sign, ef.exponent + Float32.sigbits + bitsToRound,
+                ef.significand.shiftRight(bitsToRound).intValueExact() & Float32.sigmask
+            );
             if (upBits.testBit(0) || upBits.bitLength() <= Float32.sigbits + 1) {
-                awayZero = new Float32(ef.sign, ef.exponent + Float32.sigbits + bitsToRound, upBits.intValueExact() & Float32.sigmask);
+                awayZero = new Float32(
+                    ef.sign,
+                    ef.exponent + Float32.sigbits + bitsToRound,
+                    upBits.intValueExact() & Float32.sigmask
+                );
             } else {
-                awayZero = new Float32(ef.sign, ef.exponent + (Float32.sigbits + 1) + bitsToRound,
-                        upBits.shiftRight(1).intValueExact() & Float32.sigmask);
+                awayZero = new Float32(
+                    ef.sign, ef.exponent + (Float32.sigbits + 1) + bitsToRound,
+                    upBits.shiftRight(1).intValueExact() & Float32.sigmask
+                );
             }
 
         }
@@ -396,9 +419,8 @@ public class Float32 implements Floating<Float32> {
     }
 
     private static final int sigbits = 23, expbits = 8,
-            maxexp = 1 << (Float32.expbits - 1),
-            minexp = -(1 << (Float32.expbits - 1)) + 1,
-            sigmask = (1 << Float32.sigbits) - 1;
-
+        maxexp = 1 << (Float32.expbits - 1),
+        minexp = -(1 << (Float32.expbits - 1)) + 1,
+        sigmask = (1 << Float32.sigbits) - 1;
 
 }

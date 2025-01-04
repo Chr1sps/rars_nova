@@ -18,7 +18,6 @@ public final class EditorSettingsController {
     private final @NotNull OtherSettingsController otherSettingsController;
     public @NotNull SettingsTheme settingsTheme;
 
-
     public EditorSettingsController(
         final @NotNull EditorSettingsPanel editorSettingsView,
         final @NotNull EditorSettingsDialog dialog,

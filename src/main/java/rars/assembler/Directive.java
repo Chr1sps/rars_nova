@@ -44,47 +44,81 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public enum Directive {
 
-    DATA(".data",
-        "Subsequent items stored in Data segment at next available address"),
-    TEXT(".text",
-        "Subsequent items (instructions) stored in Text segment at next available address"),
-    WORD(".word",
-        "Store the listed second(s) as 32 bit words on word boundary"),
-    DWORD(".dword",
-        "Store the listed second(s) as 64 bit double-word on word boundary"),
-    ASCII(".ascii",
-        "Store the string in the Data segment but do not add null terminator"),
-    ASCIZ(".asciz",
-        "Store the string in the Data segment and add null terminator"),
+    DATA(
+        ".data",
+        "Subsequent items stored in Data segment at next available address"
+    ),
+    TEXT(
+        ".text",
+        "Subsequent items (instructions) stored in Text segment at next available address"
+    ),
+    WORD(
+        ".word",
+        "Store the listed second(s) as 32 bit words on word boundary"
+    ),
+    DWORD(
+        ".dword",
+        "Store the listed second(s) as 64 bit double-word on word boundary"
+    ),
+    ASCII(
+        ".ascii",
+        "Store the string in the Data segment but do not add null terminator"
+    ),
+    ASCIZ(
+        ".asciz",
+        "Store the string in the Data segment and add null terminator"
+    ),
     STRING(".string", "Alias for .asciz"),
     BYTE(".byte", "Store the listed second(s) as 8 bit bytes"),
-    ALIGN(".align",
-        "Align next data item on specified byte boundary (0=byte, 1=half, 2=word, 3=double)"),
-    HALF(".half",
-        "Store the listed second(s) as 16 bit halfwords on halfword boundary"),
-    SPACE(".space",
-        "Reserve the next specified number of bytes in Data segment"),
-    DOUBLE(".double",
-        "Store the listed second(s) as double precision floating point"),
-    FLOAT(".float",
-        "Store the listed second(s) as single precision floating point"),
-    EXTERN(".extern",
-        "Declare the listed label and byte length to be a global data field"),
-    GLOBL(".globl",
-        "Declare the listed label(s) as global to enable referencing from other files"),
-    GLOBAL(".global",
-        "Declare the listed label(s) as global to enable referencing from other files"),
+    ALIGN(
+        ".align",
+        "Align next data item on specified byte boundary (0=byte, 1=half, 2=word, 3=double)"
+    ),
+    HALF(
+        ".half",
+        "Store the listed second(s) as 16 bit halfwords on halfword boundary"
+    ),
+    SPACE(
+        ".space",
+        "Reserve the next specified number of bytes in Data segment"
+    ),
+    DOUBLE(
+        ".double",
+        "Store the listed second(s) as double precision floating point"
+    ),
+    FLOAT(
+        ".float",
+        "Store the listed second(s) as single precision floating point"
+    ),
+    EXTERN(
+        ".extern",
+        "Declare the listed label and byte length to be a global data field"
+    ),
+    GLOBL(
+        ".globl",
+        "Declare the listed label(s) as global to enable referencing from other files"
+    ),
+    GLOBAL(
+        ".global",
+        "Declare the listed label(s) as global to enable referencing from other files"
+    ),
     /* EQV added by DPS 11 July 2012 */
-    EQV(".eqv",
-        "Substitute second operand for first. First operand is symbol, second operand is expression (like #define)"),
+    EQV(
+        ".eqv",
+        "Substitute second operand for first. First operand is symbol, second operand is expression (like #define)"
+    ),
     /* MACRO and END_MACRO added by Mohammad Sekhavat Oct 2012 */
     MACRO(".macro", "Begin macro definition.  See .end_macro"),
     END_MACRO(".end_macro", "End macro definition.  See .macro"),
     /* INCLUDE added by DPS 11 Jan 2013 */
-    INCLUDE(".include",
-        "Insert the contents of the specified file.  Put filename in quotes."),
-    SECTION(".section",
-        "Allows specifying sections without .text or .data directives. Included for gcc comparability");
+    INCLUDE(
+        ".include",
+        "Insert the contents of the specified file.  Put filename in quotes."
+    ),
+    SECTION(
+        ".section",
+        "Allows specifying sections without .text or .data directives. Included for gcc comparability"
+    );
 
     private final @NotNull String name;
     private final @NotNull String description; // help text
@@ -97,7 +131,8 @@ public enum Directive {
     /**
      * Find Directive object, if any, which matches the given String.
      *
-     * @param str A String containing candidate directive name (e.g. ".ascii")
+     * @param str
+     *     A String containing candidate directive name (e.g. ".ascii")
      * @return If match is found, returns matching Directives object, else returns
      * <code>null</code>.
      */
@@ -113,7 +148,8 @@ public enum Directive {
      * For example,
      * ".a" will match ".ascii", ".asciiz" and ".align"
      *
-     * @param str A String
+     * @param str
+     *     A String
      * @return If match is found, returns ArrayList of matching Directives objects,
      * else returns <code>null</code>.
      */

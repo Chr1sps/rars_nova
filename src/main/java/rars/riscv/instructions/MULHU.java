@@ -39,8 +39,10 @@ public final class MULHU extends Arithmetic {
      * <p>Constructor for MULHU.</p>
      */
     private MULHU() {
-        super("mulhu t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using unsigned multiplication",
-                "0000001", "011");
+        super(
+            "mulhu t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using unsigned multiplication",
+            "0000001", "011"
+        );
     }
 
     /**

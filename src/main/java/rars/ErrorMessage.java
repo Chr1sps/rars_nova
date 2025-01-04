@@ -75,11 +75,12 @@ public final class ErrorMessage {
      * @param message
      *     String containing appropriate error message.
      */
-    public ErrorMessage(final boolean isWarning,
-                        final @Nullable RISCVProgram sourceProgram,
-                        final int line,
-                        final int position,
-                        final @NotNull String message
+    public ErrorMessage(
+        final boolean isWarning,
+        final @Nullable RISCVProgram sourceProgram,
+        final int line,
+        final int position,
+        final @NotNull String message
     ) {
         this.isWarning = isWarning;
         if (sourceProgram == null) {
@@ -111,8 +112,9 @@ public final class ErrorMessage {
      *     String containing appropriate error message.
      */
     // Added January 2013
-    public ErrorMessage(final @NotNull ProgramStatement statement,
-                        final @NotNull String message
+    public ErrorMessage(
+        final @NotNull ProgramStatement statement,
+        final @NotNull String message
     ) {
         this.isWarning = false;
         this.filename = (statement.getSourceProgram() == null)

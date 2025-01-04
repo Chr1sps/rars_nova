@@ -52,7 +52,6 @@ public final class DumpFormats {
     private DumpFormats() {
     }
 
-
     public static @Nullable DumpFormat findDumpFormatGivenCommandDescriptor(final String formatCommandDescriptor) {
         return DUMP_FORMATS.stream()
             .filter(format -> format.getCommandDescriptor().equals(formatCommandDescriptor))

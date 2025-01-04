@@ -60,9 +60,10 @@ public final class SymbolTable {
     /**
      * Create a new empty symbol table for given file
      *
-     * @param filename name of file this symbol table is associated with. Will be
-     *                 used only for output/display so it can be any descriptive
-     *                 string.
+     * @param filename
+     *     name of file this symbol table is associated with. Will be
+     *     used only for output/display so it can be any descriptive
+     *     string.
      */
     public SymbolTable(final @NotNull String filename) {
         this.filename = filename;
@@ -83,10 +84,14 @@ public final class SymbolTable {
     /**
      * Adds a Symbol object into the array of Symbols.
      *
-     * @param token   The token representing the Symbol.
-     * @param address The address of the Symbol.
-     * @param isData  The type of Symbol, true for data, false for text.
-     * @param errors  List to which to add any processing errors that occur.
+     * @param token
+     *     The token representing the Symbol.
+     * @param address
+     *     The address of the Symbol.
+     * @param isData
+     *     The type of Symbol, true for data, false for text.
+     * @param errors
+     *     List to which to add any processing errors that occur.
      */
     public void addSymbol(
         final @NotNull Token token,
@@ -99,9 +104,12 @@ public final class SymbolTable {
             errors.addTokenError(token, "label \"%s\" already defined".formatted(label));
         } else {
             this.table.add(new Symbol(label, address, isData));
-            if (Globals.debug)
-                SymbolTable.LOGGER.debug("The symbol {} with address {} has been added to the {} symbol table.",
-                    label, address, this.filename);
+            if (Globals.debug) {
+                SymbolTable.LOGGER.debug(
+                    "The symbol {} with address {} has been added to the {} symbol table.",
+                    label, address, this.filename
+                );
+            }
         }
     }
 
@@ -110,7 +118,8 @@ public final class SymbolTable {
      * This will rarely happen (only when variable is declared .globl after already
      * being defined in the local symbol table).
      *
-     * @param token The token representing the Symbol.
+     * @param token
+     *     The token representing the Symbol.
      */
     public void removeSymbol(final @NotNull Token token) {
         final var label = token.getText();
@@ -125,7 +134,8 @@ public final class SymbolTable {
     /**
      * Method to return the address associated with the given label.
      *
-     * @param label The label.
+     * @param label
+     *     The label.
      * @return The memory address of the label given, or NOT_FOUND if not found in
      * symbol table.
      */
@@ -143,7 +153,8 @@ public final class SymbolTable {
      * in this (local) symbol table then in symbol table of labels declared
      * global (.globl directive).
      *
-     * @param label The label.
+     * @param label
+     *     The label.
      * @return The memory address of the label given, or NOT_FOUND if not found in
      * symbol table.
      */
@@ -157,7 +168,8 @@ public final class SymbolTable {
     /**
      * Produce Symbol object from symbol table that corresponds to given String.
      *
-     * @param s target String
+     * @param s
+     *     target String
      * @return Symbol object for requested target, null if not found in symbol
      * table.
      */
@@ -171,7 +183,8 @@ public final class SymbolTable {
     /**
      * Produce Symbol object from symbol table that has the given address.
      *
-     * @param addressString String representing address
+     * @param addressString
+     *     String representing address
      * @return Symbol object having requested address, null if address not found in
      * symbol table.
      */
@@ -196,7 +209,8 @@ public final class SymbolTable {
      * Produce Symbol object from either local or global symbol table that has the
      * given address.
      *
-     * @param s String representing address
+     * @param s
+     *     String representing address
      * @return Symbol object having requested address, null if address not found in
      * symbol table.
      */
@@ -256,10 +270,12 @@ public final class SymbolTable {
      * effect,
      * if none of the addresses matches.
      *
-     * @param originalAddress    Address associated with 0 or more symtab entries.
-     * @param replacementAddress Any entry that has originalAddress will have its
-     *                           address updated to this second. Does nothing if none
-     *                           do.
+     * @param originalAddress
+     *     Address associated with 0 or more symtab entries.
+     * @param replacementAddress
+     *     Any entry that has originalAddress will have its
+     *     address updated to this second. Does nothing if none
+     *     do.
      */
     public void fixSymbolTableAddress(final int originalAddress, final int replacementAddress) {
         this.table.replaceAll(symbol -> {

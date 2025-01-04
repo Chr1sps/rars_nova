@@ -39,11 +39,11 @@ public class Environment {
      */
     public boolean invalid = false;
 
-
     /**
      * <p>Constructor for Environment.</p>
      *
-     * @param mode a {@link RoundingMode} object
+     * @param mode
+     *     a {@link RoundingMode} object
      */
     public Environment(final @NotNull RoundingMode mode) {
         this.mode = mode;

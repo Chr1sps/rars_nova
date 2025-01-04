@@ -81,8 +81,10 @@ public class BHTEntry {
      * The size of the history can only be set via the constructor and cannot be
      * changed afterwards.
      *
-     * @param historySize number of past branch outcomes to remember
-     * @param initVal     the initial second of the entry (take or do not take)
+     * @param historySize
+     *     number of past branch outcomes to remember
+     * @param initVal
+     *     the initial second of the entry (take or do not take)
      */
     public BHTEntry(final int historySize, final boolean initVal) {
         this.m_prediction = initVal;
@@ -109,7 +111,8 @@ public class BHTEntry {
      * The history and the statistics are updated accordingly.
      * Based on the updated history a new prediction is calculated
      *
-     * @param branchTaken signals if the branch was taken (true) or not (false)
+     * @param branchTaken
+     *     signals if the branch was taken (true) or not (false)
      */
     public void updatePrediction(final boolean branchTaken) {
 
@@ -135,8 +138,9 @@ public class BHTEntry {
                 }
             }
 
-            if (changePrediction)
+            if (changePrediction) {
                 this.m_prediction = !this.m_prediction;
+            }
 
         }
     }
@@ -180,8 +184,9 @@ public class BHTEntry {
         final StringBuilder result = new StringBuilder();
 
         for (int i = 0; i < this.m_history.length; i++) {
-            if (i > 0)
+            if (i > 0) {
                 result.append(", ");
+            }
             result.append(this.m_history[i] ? "T" : "NT");
         }
         return result.toString();

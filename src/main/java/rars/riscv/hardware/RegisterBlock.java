@@ -49,16 +49,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class RegisterBlock {
     private static final @NotNull Logger LOGGER = LogManager.getLogger();
-    private final @NotNull Register @NotNull[] regFile;
+    private final @NotNull Register @NotNull [] regFile;
     private final char prefix;
 
     /**
      * <p>Constructor for RegisterBlock.</p>
      *
-     * @param prefix    a char
-     * @param registers an array of {@link Register} objects
+     * @param prefix
+     *     a char
+     * @param registers
+     *     an array of {@link Register} objects
      */
-    public RegisterBlock(final char prefix, final @NotNull Register @NotNull[] registers) {
+    public RegisterBlock(final char prefix, final @NotNull Register @NotNull [] registers) {
         this.prefix = prefix;
         this.regFile = registers;
     }
@@ -66,21 +68,26 @@ public final class RegisterBlock {
     /**
      * This method updates the register second to val
      *
-     * @param r   Register to set the second of.
-     * @param val The desired second for the register.
+     * @param r
+     *     Register to set the second of.
+     * @param val
+     *     The desired second for the register.
      * @return a long
      */
     private static @Nullable Long updateRegister(final @Nullable Register r, final long val) {
-        if (r == null)
+        if (r == null) {
             return null;
+        }
         return r.setValue(val);
     }
 
     /**
      * <p>updateRegister.</p>
      *
-     * @param num a int
-     * @param val a long
+     * @param num
+     *     a int
+     * @param val
+     *     a long
      * @return a long
      */
     public long updateRegister(final int num, final long val) {
@@ -90,8 +97,10 @@ public final class RegisterBlock {
     /**
      * <p>updateRegister.</p>
      *
-     * @param name a {@link java.lang.String} object
-     * @param val  a long
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param val
+     *     a long
      * @return a long
      */
     public long updateRegister(final String name, final long val) {
@@ -101,7 +110,8 @@ public final class RegisterBlock {
     /**
      * Returns the second of the register.
      *
-     * @param num The register's number.
+     * @param num
+     *     The register's number.
      * @return The second of the given register.
      */
     public long getValue(final int num) {
@@ -111,7 +121,8 @@ public final class RegisterBlock {
     /**
      * Returns the second of the register.
      *
-     * @param name The register's name.
+     * @param name
+     *     The register's name.
      * @return The second of the given register.
      */
     public long getValue(final String name) {
@@ -121,7 +132,8 @@ public final class RegisterBlock {
     /**
      * Get a register from a number
      *
-     * @param num the number to search for
+     * @param num
+     *     the number to search for
      * @return the register for num or null if none exists
      */
     public @Nullable Register getRegister(final int num) {
@@ -136,13 +148,15 @@ public final class RegisterBlock {
     /**
      * Get register object corresponding to given name. If no match, return null.
      *
-     * @param name The register name, either in (prefix)(number) format or a direct
-     *             name.
+     * @param name
+     *     The register name, either in (prefix)(number) format or a direct
+     *     name.
      * @return The register object,or null if not found.
      */
     public @Nullable Register getRegister(final @NotNull String name) {
-        if (name.length() < 2)
+        if (name.length() < 2) {
             return null;
+        }
 
         // Handle a direct name
         for (final Register r : this.regFile) {
@@ -153,14 +167,16 @@ public final class RegisterBlock {
         // Handle prefix case
         if (name.charAt(0) == this.prefix) {
             if (name.charAt(1) == 0) { // Ensure that it is a normal decimal number
-                if (name.length() > 2)
+                if (name.length() > 2) {
                     return null;
+                }
                 return this.getRegister(0);
             }
 
             final Integer num = BinaryUtils.stringToIntFast(name.substring(1));
-            if (num == null)
+            if (num == null) {
                 return null;
+            }
             return this.getRegister(num);
         }
         return null;
@@ -190,7 +206,8 @@ public final class RegisterBlock {
      * will add the given Observer to each one. Currently does not apply to Program
      * Counter.
      *
-     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
+     * @param observer
+     *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public void addRegistersObserver(final SimpleSubscriber<? super RegisterAccessNotice> observer) {
         for (final Register r : this.regFile) {
@@ -205,7 +222,8 @@ public final class RegisterBlock {
      * Program
      * Counter.
      *
-     * @param subscriber a {@link java.util.concurrent.Flow.Subscriber} object
+     * @param subscriber
+     *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public void deleteRegistersSubscriber(final Flow.Subscriber<? super RegisterAccessNotice> subscriber) {
         for (final Register r : this.regFile) {

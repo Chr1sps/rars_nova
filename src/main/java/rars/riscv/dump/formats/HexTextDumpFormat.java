@@ -36,14 +36,16 @@ public class HexTextDumpFormat extends AbstractDumpFormat {
      */
     @Override
     public void dumpMemoryRange(
-            @NotNull final File file, final int firstAddress, final int lastAddress,
-            @NotNull final Memory memory)
-            throws AddressErrorException, IOException {
+        @NotNull final File file, final int firstAddress, final int lastAddress,
+        @NotNull final Memory memory
+    )
+        throws AddressErrorException, IOException {
         try (final PrintStream out = new PrintStream(new FileOutputStream(file))) {
             for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                 final Integer temp = memory.getRawWordOrNull(address);
-                if (temp == null)
+                if (temp == null) {
                     break;
+                }
                 final var hexString = Integer.toHexString(temp);
                 for (int i = hexString.length(); i < 8; i++) {
                     out.print('0');

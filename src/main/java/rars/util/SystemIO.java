@@ -89,12 +89,15 @@ public final class SystemIO {
      * Implements syscall to read an integer second.
      * Client is responsible for catching NumberFormatException.
      *
-     * @param serviceNumber the number assigned to Read Int syscall (default 5)
+     * @param serviceNumber
+     *     the number assigned to Read Int syscall (default 5)
      * @return int second corresponding to user input
      */
     public static int readInteger(final int serviceNumber) {
-        final String input = SystemIO.readStringInternal("0", "Enter an integer second (syscall " + serviceNumber +
-            ")", -1);
+        final String input = SystemIO.readStringInternal(
+            "0", "Enter an integer second (syscall " + serviceNumber +
+                ")", -1
+        );
         // Client is responsible for catching NumberFormatException
         return Integer.parseInt(input.trim());
     }
@@ -104,8 +107,9 @@ public final class SystemIO {
         if (Globals.gui == null) {
             try {
                 input = SystemIO.getInputReader().readLine();
-                if (input == null)
+                if (input == null) {
                     input = "";
+                }
             } catch (final IOException ignored) {
             }
         } else {
@@ -122,13 +126,16 @@ public final class SystemIO {
      * Implements syscall to read a float second.
      * Client is responsible for catching NumberFormatException.
      *
-     * @param serviceNumber the number assigned to Read Float syscall (default 6)
+     * @param serviceNumber
+     *     the number assigned to Read Float syscall (default 6)
      * @return float second corresponding to user input
      * Feb 14 2005 Ken Vollmar
      */
     public static float readFloat(final int serviceNumber) {
-        final String input = SystemIO.readStringInternal("0", "Enter a float second (syscall " + serviceNumber + ")",
-            -1);
+        final String input = SystemIO.readStringInternal(
+            "0", "Enter a float second (syscall " + serviceNumber + ")",
+            -1
+        );
         return Float.parseFloat(input.trim());
     }
 
@@ -136,20 +143,24 @@ public final class SystemIO {
      * Implements syscall to read a double second.
      * Client is responsible for catching NumberFormatException.
      *
-     * @param serviceNumber the number assigned to Read Duoble syscall (default 7)
+     * @param serviceNumber
+     *     the number assigned to Read Duoble syscall (default 7)
      * @return double second corresponding to user input
      * Feb 14 2005 Ken Vollmar
      */
     public static double readDouble(final int serviceNumber) {
-        final String input = SystemIO.readStringInternal("0", "Enter a Double second (syscall " + serviceNumber + ")"
-            , -1);
+        final String input = SystemIO.readStringInternal(
+            "0", "Enter a Double second (syscall " + serviceNumber + ")"
+            , -1
+        );
         return Double.parseDouble(input.trim());
     }
 
     /**
      * Implements syscall having 4 in $v0, to print a string.
      *
-     * @param string a {@link java.lang.String} object
+     * @param string
+     *     a {@link java.lang.String} object
      */
     public static void printString(final String string) {
         if (Globals.gui == null) {
@@ -166,13 +177,17 @@ public final class SystemIO {
     /**
      * Implements syscall to read a string.
      *
-     * @param serviceNumber the number assigned to Read String syscall (default 8)
-     * @param maxLength     the maximum string length
+     * @param serviceNumber
+     *     the number assigned to Read String syscall (default 8)
+     * @param maxLength
+     *     the maximum string length
      * @return the entered string, truncated to maximum length if necessary
      */
     public static String readString(final int serviceNumber, final int maxLength) {
-        String input = SystemIO.readStringInternal("", "Enter a string of maximum length " + maxLength
-            + " (syscall " + serviceNumber + ")", maxLength);
+        String input = SystemIO.readStringInternal(
+            "", "Enter a string of maximum length " + maxLength
+                + " (syscall " + serviceNumber + ")", maxLength
+        );
         if (input.endsWith("\n")) {
             input = input.substring(0, input.length() - 1);
         }
@@ -187,14 +202,17 @@ public final class SystemIO {
     /**
      * Implements syscall having 12 in $v0, to read a char second.
      *
-     * @param serviceNumber the number assigned to Read Char syscall (default 12)
+     * @param serviceNumber
+     *     the number assigned to Read Char syscall (default 12)
      * @return int second with lowest byte corresponding to user input
      */
     public static int readChar(final int serviceNumber) {
         final int returnValue;
 
-        final String input = SystemIO.readStringInternal("0", "Enter a character second (syscall " + serviceNumber +
-            ")", 1);
+        final String input = SystemIO.readStringInternal(
+            "0", "Enter a character second (syscall " + serviceNumber +
+                ")", 1
+        );
         // The whole try-catch is not really necessary in this case since I'm
         // just propagating the runtime exception (the default behavior), but
         // I want to make it explicit. The client needs to catch it.
@@ -207,9 +225,12 @@ public final class SystemIO {
     /**
      * Write bytes to file.
      *
-     * @param fd              file descriptor
-     * @param myBuffer        byte array containing characters to write
-     * @param lengthRequested number of bytes to write
+     * @param fd
+     *     file descriptor
+     * @param myBuffer
+     *     byte array containing characters to write
+     * @param lengthRequested
+     *     number of bytes to write
      * @return number of bytes written, or -1 on error
      */
     public static int writeToFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
@@ -270,9 +291,12 @@ public final class SystemIO {
     /**
      * Read bytes from file.
      *
-     * @param fd              file descriptor
-     * @param myBuffer        byte array to contain bytes read
-     * @param lengthRequested number of bytes to read
+     * @param fd
+     *     file descriptor
+     * @param myBuffer
+     *     byte array to contain bytes read
+     * @param lengthRequested
+     *     number of bytes to read
      * @return number of bytes read, 0 on EOF, or -1 on error
      */
     public static int readFromFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
@@ -324,10 +348,13 @@ public final class SystemIO {
     /**
      * Read bytes from file.
      *
-     * @param fd     file descriptor
-     * @param offset where in the file to seek to
-     * @param base   the point to reference 0 for start of file, 1 for current
-     *               position, 2 for end of the file
+     * @param fd
+     *     file descriptor
+     * @param offset
+     *     where in the file to seek to
+     * @param base
+     *     the point to reference 0 for start of file, 1 for current
+     *     position, 2 for end of the file
      * @return -1 on error
      */
     public static int seek(final int fd, int offset, final int base) {
@@ -336,11 +363,13 @@ public final class SystemIO {
             SystemIO.fileErrorString = "File descriptor " + fd + " is not open for reading";
             return -1;
         }
-        if (fd < 0 || fd >= SystemIO.SYSCALL_MAXFILES)
+        if (fd < 0 || fd >= SystemIO.SYSCALL_MAXFILES) {
             return -1;
+        }
         final Object stream = FileIOData.getStreamInUse(fd);
-        if (stream == null)
+        if (stream == null) {
             return -1;
+        }
         final FileChannel channel;
         try {
             if (stream instanceof FileInputStream) {
@@ -350,7 +379,6 @@ public final class SystemIO {
             } else {
                 return -1;
             }
-
 
             switch (base) {
                 case SystemIO.SEEK_CUR -> offset += (int) channel.position();
@@ -375,8 +403,10 @@ public final class SystemIO {
      * Open a file for either reading or writing. Note that read/write flag is NOT
      * IMPLEMENTED. Also note that file permission modes are also NOT IMPLEMENTED.
      *
-     * @param filename string containing filename
-     * @param flags    0 for read, 1 for write
+     * @param filename
+     *     string containing filename
+     * @param flags
+     *     0 for read, 1 for write
      * @return file descriptor in the range 0 to SYSCALL_MAXFILES-1, or -1 if error
      * @author Ken Vollmar
      */
@@ -432,7 +462,8 @@ public final class SystemIO {
     /**
      * Close the file with specified file descriptor
      *
-     * @param fd the file descriptor of an open file
+     * @param fd
+     *     the file descriptor of an open file
      */
     public static void closeFile(final int fd) {
         FileIOData.close(fd);
@@ -488,7 +519,8 @@ public final class SystemIO {
      * Makes sure that messages don't get stuck in the print2Gui buffer for too
      * long.
      *
-     * @param force a boolean
+     * @param force
+     *     a boolean
      */
     public static void flush(final boolean force) {
         final long time = System.currentTimeMillis();
@@ -502,7 +534,8 @@ public final class SystemIO {
     /**
      * <p>swapData.</p>
      *
-     * @param in a {@link SystemIO.Data} object
+     * @param in
+     *     a {@link SystemIO.Data} object
      * @return a {@link SystemIO.Data} object
      */
     public static Data swapData(final Data in) {
@@ -647,8 +680,9 @@ public final class SystemIO {
                 if (FileIOData.fileNames[fd] != null && FileIOData.fileFlags[fd] == 0 && flag == 0) { // O_RDONLY 
                     // read-only
                     return true;
-                } else
+                } else {
                     return FileIOData.fileNames[fd] != null && ((FileIOData.fileFlags[fd] & flag & SystemIO.O_WRONLY) == SystemIO.O_WRONLY);
+                }
 
         }
 
@@ -657,8 +691,9 @@ public final class SystemIO {
         // made an error in the call, it will come back to him.
         private static void close(final int fd) {
             // Can't close STDIN, STDOUT, STDERR, or invalid fd
-            if (fd <= SystemIO.STDERR || fd >= SystemIO.SYSCALL_MAXFILES)
+            if (fd <= SystemIO.STDERR || fd >= SystemIO.SYSCALL_MAXFILES) {
                 return;
+            }
 
             FileIOData.fileNames[fd] = null;
             // All this code will be executed only if the descriptor is open.
@@ -668,10 +703,11 @@ public final class SystemIO {
                 FileIOData.fileFlags[fd] = -1;
                 FileIOData.streams[fd] = null;
                 try {
-                    if (keepFlag == SystemIO.O_RDONLY)
+                    if (keepFlag == SystemIO.O_RDONLY) {
                         ((FileInputStream) keepStream).close();
-                    else
+                    } else {
                         ((FileOutputStream) keepStream).close();
+                    }
                 } catch (final IOException ioe) {
                     // not concerned with this exception
                 }

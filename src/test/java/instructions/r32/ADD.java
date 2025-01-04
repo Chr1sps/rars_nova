@@ -87,38 +87,37 @@ public class ADD extends AbstractInstructionTest {
     @Test
     public void destinationTest1() {
         final var code = """
-                li x1, 13
-                li x2, 11
-                add x1, x1, x2
-                li x29, 24
-                bne x1, x29, fail
-                """;
+            li x1, 13
+            li x2, 11
+            add x1, x1, x2
+            li x29, 24
+            bne x1, x29, fail
+            """;
         runTest32(code);
     }
 
     @Test
     public void destinationTest2() {
         final var code = """
-                li x1, 14
-                li x2, 11
-                add x2, x1, x2
-                li x29, 25
-                bne x2, x29, fail
-                """;
+            li x1, 14
+            li x2, 11
+            add x2, x1, x2
+            li x29, 25
+            bne x2, x29, fail
+            """;
         runTest32(code);
     }
 
     @Test
     public void destinationTest3() {
         final var code = """
-                li x1, 13
-                add x1, x1, x1
-                li x29, 26
-                bne x1, x29, fail
-                """;
+            li x1, 13
+            add x1, x1, x1
+            li x29, 26
+            bne x1, x29, fail
+            """;
         runTest32(code);
     }
-
 
     private void runAddTest(final String first, final String second, final String result) {
         runArithmeticTest32("add", first, second, result);

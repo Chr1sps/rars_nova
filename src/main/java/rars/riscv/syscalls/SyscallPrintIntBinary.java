@@ -43,8 +43,10 @@ public final class SyscallPrintIntBinary extends AbstractSyscall {
      * <p>Constructor for SyscallPrintIntBinary.</p>
      */
     public SyscallPrintIntBinary() {
-        super("PrintIntBinary", "Prints an integer (in binary format left-padded with zeroes) ",
-            "a0 = integer to print", "N/A");
+        super(
+            "PrintIntBinary", "Prints an integer (in binary format left-padded with zeroes) ",
+            "a0 = integer to print", "N/A"
+        );
     }
 
     /**

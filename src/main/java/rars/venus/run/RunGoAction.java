@@ -70,15 +70,23 @@ public class RunGoAction extends GuiAction {
     /**
      * <p>Constructor for RunGoAction.</p>
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
-     * @param gui      a {@link VenusUI} object
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param icon
+     *     a {@link javax.swing.Icon} object
+     * @param descrip
+     *     a {@link java.lang.String} object
+     * @param mnemonic
+     *     a {@link java.lang.Integer} object
+     * @param accel
+     *     a {@link javax.swing.KeyStroke} object
+     * @param gui
+     *     a {@link VenusUI} object
      */
-    public RunGoAction(final String name, final Icon icon, final String descrip,
-                       final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+    public RunGoAction(
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel, final VenusUI gui
+    ) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainUI = gui;
     }
@@ -135,8 +143,10 @@ public class RunGoAction extends GuiAction {
                         }
                         final Simulator.Reason reason = notice.reason();
                         if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
-                            EventQueue.invokeLater(() -> RunGoAction.this.paused(notice.done(), reason,
-                                notice.exception()));
+                            EventQueue.invokeLater(() -> RunGoAction.this.paused(
+                                notice.done(), reason,
+                                notice.exception()
+                            ));
                         } else {
                             EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.exception(), reason));
                         }
@@ -150,8 +160,10 @@ public class RunGoAction extends GuiAction {
             } else {
                 // This should never occur because at termination the Go and Step buttons are
                 // disabled.
-                JOptionPane.showMessageDialog(this.mainUI,
-                    "reset " + this.mainUI.isMemoryReset + " started " + this.mainUI.isExecutionStarted);// "You
+                JOptionPane.showMessageDialog(
+                    this.mainUI,
+                    "reset " + this.mainUI.isMemoryReset + " started " + this.mainUI.isExecutionStarted
+                );// "You
                 // must
                 // reset
                 // before
@@ -178,9 +190,12 @@ public class RunGoAction extends GuiAction {
      * executing
      * step by step.
      *
-     * @param done        a boolean
-     * @param pauseReason a {@link Simulator.Reason} object
-     * @param pe          a {@link SimulationException} object
+     * @param done
+     *     a boolean
+     * @param pauseReason
+     *     a {@link Simulator.Reason} object
+     * @param pe
+     *     a {@link SimulationException} object
      */
     public void paused(final boolean done, final Simulator.Reason pauseReason, final SimulationException pe) {
         // I doubt this can happen (pause when execution finished), but if so treat it
@@ -216,8 +231,10 @@ public class RunGoAction extends GuiAction {
      * execution
      * terminated due to completion or exception.
      *
-     * @param pe     a {@link SimulationException} object
-     * @param reason a {@link Simulator.Reason} object
+     * @param pe
+     *     a {@link SimulationException} object
+     * @param reason
+     *     a {@link Simulator.Reason} object
      */
     public void stopped(final SimulationException pe, final Simulator.Reason reason) {
         // show final register and data segment values.

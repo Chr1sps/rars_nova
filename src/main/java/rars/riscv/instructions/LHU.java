@@ -35,8 +35,8 @@ public final class LHU extends Load {
 
     private LHU() {
         super(
-                "lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit second from effective memory halfword address",
-                "101"
+            "lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit second from effective memory halfword address",
+            "101"
         );
     }
 

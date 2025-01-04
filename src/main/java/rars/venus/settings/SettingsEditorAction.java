@@ -41,18 +41,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class SettingsEditorAction extends GuiAction {
 
-
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param icon
+     *     a {@link javax.swing.Icon} object
+     * @param descrip
+     *     a {@link java.lang.String} object
+     * @param mnemonic
+     *     a {@link java.lang.Integer} object
+     * @param accel
+     *     a {@link javax.swing.KeyStroke} object
      */
-    public SettingsEditorAction(final String name, final Icon icon, final String descrip,
-                                final Integer mnemonic, final KeyStroke accel) {
+    public SettingsEditorAction(
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel
+    ) {
         super(name, icon, descrip, mnemonic, accel);
     }
 

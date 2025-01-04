@@ -6,9 +6,9 @@ public class CJ extends AbstractCompressedInstructionTest {
     @Test
     void validCall() {
         assertCompiles("""
-                some_label:
-                c.j, some_label
-                """);
+            some_label:
+            c.j, some_label
+            """);
     }
 
     @Test
@@ -24,8 +24,8 @@ public class CJ extends AbstractCompressedInstructionTest {
     @Test
     void invalid_twoArgs() {
         assertFails("""
-                some:
-                label:
-                c.j, some, label""");
+            some:
+            label:
+            c.j, some, label""");
     }
 }

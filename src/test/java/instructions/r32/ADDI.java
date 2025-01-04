@@ -82,32 +82,32 @@ public final class ADDI extends AbstractInstructionTest {
     @Test
     public void destinationTest1() {
         final String code = """
-                li x1, 13
-                addi x1, x1, 11
-                li x29, 24
-                bne x1, x29, fail
-                """;
+            li x1, 13
+            addi x1, x1, 11
+            li x29, 24
+            bne x1, x29, fail
+            """;
         runTest32(code);
     }
 
     @Test
     public void destinationTest2() {
         final String code = """
-                addi x1, x0, 32
-                li x29, 32
-                bne x1, x29, fail
-                """;
+            addi x1, x0, 32
+            li x29, 32
+            bne x1, x29, fail
+            """;
         runTest32(code);
     }
 
     @Test
     public void destinationTest3() {
         final String code = """
-                li x1, 33
-                addi x0, x1, 50
-                li x29, 0
-                bne x0, x29, fail
-                """;
+            li x1, 33
+            addi x0, x1, 50
+            li x29, 0
+            bne x0, x29, fail
+            """;
         runTest32(code);
     }
 

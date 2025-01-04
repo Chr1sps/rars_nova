@@ -44,9 +44,11 @@ public final class OtherSettings extends SettingsBase {
      * @return true if backstepping is permitted, false otherwise.
      */
     public static boolean getBackSteppingEnabled() {
-        return (Globals.program != null &&
-            Globals.program.getBackStepper() != null &&
-            Globals.program.getBackStepper().enabled());
+        return (
+            Globals.program != null &&
+                Globals.program.getBackStepper() != null &&
+                Globals.program.getBackStepper().enabled()
+        );
     }
 
     public void setMemoryConfigurationAndSave(final @NotNull MemoryConfiguration memoryConfiguration) {
@@ -134,9 +136,11 @@ public final class OtherSettings extends SettingsBase {
     }
 
     private @NotNull MemoryConfiguration loadMemoryConfiguration() {
-        final var memoryConfigurationName = preferences.get(OTHER_PREFIX + MEMORY_CONFIGURATION,
-            MemoryConfiguration.DEFAULT.identifier);
-        //noinspection DataFlowIssue
+        final var memoryConfigurationName = preferences.get(
+            OTHER_PREFIX + MEMORY_CONFIGURATION,
+            MemoryConfiguration.DEFAULT.identifier
+        );
+        // noinspection DataFlowIssue
         return MemoryConfiguration.fromIdString(memoryConfigurationName);
     }
     // endregion Preference loading methods

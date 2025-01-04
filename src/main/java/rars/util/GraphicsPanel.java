@@ -6,7 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 
 // Class that represents the panel for visualizing and animating memory
-///////////////////////////////////////////////////////////////////////////// reference
+
+/// ////////////////////////////////////////////////////////////////////////// reference
 // patterns.
 public final class GraphicsPanel extends JPanel {
     private final Grid grid;

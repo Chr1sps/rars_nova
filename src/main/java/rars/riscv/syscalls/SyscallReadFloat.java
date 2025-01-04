@@ -55,8 +55,10 @@ public class SyscallReadFloat extends AbstractSyscall {
         try {
             floatValue = SystemIO.readFloat(this.getNumber());
         } catch (final NumberFormatException e) {
-            throw new ExitingException(statement,
-                    "invalid float input (syscall " + this.getNumber() + ")");
+            throw new ExitingException(
+                statement,
+                "invalid float input (syscall " + this.getNumber() + ")"
+            );
         }
         FloatingPointRegisterFile.updateRegister(10, Float.floatToRawIntBits(floatValue)); // TODO: update to string fa0
     }

@@ -80,7 +80,7 @@ public final class Documentation {
             .sorted(Comparator.comparing(instruction -> instruction.exampleFormat))
             .toList();
         final StringBuilder output = new StringBuilder("| Example Usage | Description " +
-                                                           "|\n|---------------|-------------|");
+            "|\n|---------------|-------------|");
         for (final var instr : sorted) {
             output.append("\n|");
             output.append(instr.exampleFormat);

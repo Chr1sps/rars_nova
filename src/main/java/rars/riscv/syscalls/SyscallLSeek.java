@@ -41,10 +41,12 @@ public final class SyscallLSeek extends AbstractSyscall {
      * <p>Constructor for SyscallLSeek.</p>
      */
     public SyscallLSeek() {
-        super("LSeek", "Seek to a position in a file",
-                "a0 = the file descriptor <br> a1 = the offset for the base <br>a2 is the begining of the file (0)," +
-                        " the current position (1), or the end of the file (2)}",
-                "a0 = the selected position from the beginning of the file or -1 is an error occurred");
+        super(
+            "LSeek", "Seek to a position in a file",
+            "a0 = the file descriptor <br> a1 = the offset for the base <br>a2 is the begining of the file (0)," +
+                " the current position (1), or the end of the file (2)}",
+            "a0 = the selected position from the beginning of the file or -1 is an error occurred"
+        );
     }
 
     /**
@@ -52,9 +54,11 @@ public final class SyscallLSeek extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final int result = SystemIO.seek(RegisterFile.getValue("a0"),
-                RegisterFile.getValue("a1"),
-                RegisterFile.getValue("a2"));
+        final int result = SystemIO.seek(
+            RegisterFile.getValue("a0"),
+            RegisterFile.getValue("a1"),
+            RegisterFile.getValue("a2")
+        );
         RegisterFile.updateRegister("a0", result);
     }
 }

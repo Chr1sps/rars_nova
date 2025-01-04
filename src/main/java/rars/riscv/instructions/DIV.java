@@ -37,8 +37,10 @@ public final class DIV extends Arithmetic {
      * <p>Constructor for DIV.</p>
      */
     private DIV() {
-        super("div t1,t2,t3", "Division: set t1 to the result of t2/t3",
-                "0000001", "100");
+        super(
+            "div t1,t2,t3", "Division: set t1 to the result of t2/t3",
+            "0000001", "100"
+        );
     }
 
     /**

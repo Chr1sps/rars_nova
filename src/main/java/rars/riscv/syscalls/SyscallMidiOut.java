@@ -46,8 +46,10 @@ public final class SyscallMidiOut extends AbstractSyscall {
      * <p>Constructor for SyscallMidiOut.</p>
      */
     public SyscallMidiOut() {
-        super("MidiOut", "Outputs simulated MIDI tone to sound card (does not wait for sound to end).",
-                "See MIDI note below", "N/A");
+        super(
+            "MidiOut", "Outputs simulated MIDI tone to sound card (does not wait for sound to end).",
+            "See MIDI note below", "N/A"
+        );
     }
 
     /**
@@ -77,14 +79,18 @@ public final class SyscallMidiOut extends AbstractSyscall {
         int duration = RegisterFile.getValue("a1");
         int instrument = RegisterFile.getValue("a2");
         int volume = RegisterFile.getValue("a3");
-        if (pitch < rangeLowEnd || pitch > rangeHighEnd)
+        if (pitch < rangeLowEnd || pitch > rangeHighEnd) {
             pitch = ToneGenerator.DEFAULT_PITCH;
-        if (duration < 0)
+        }
+        if (duration < 0) {
             duration = ToneGenerator.DEFAULT_DURATION;
-        if (instrument < rangeLowEnd || instrument > rangeHighEnd)
+        }
+        if (instrument < rangeLowEnd || instrument > rangeHighEnd) {
             instrument = ToneGenerator.DEFAULT_INSTRUMENT;
-        if (volume < rangeLowEnd || volume > rangeHighEnd)
+        }
+        if (volume < rangeLowEnd || volume > rangeHighEnd) {
             volume = ToneGenerator.DEFAULT_VOLUME;
+        }
         ToneGenerator.generateTone((byte) pitch, duration, (byte) instrument, (byte) volume);
     }
 

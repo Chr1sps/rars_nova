@@ -70,7 +70,8 @@ public abstract class Floating extends BasicInstruction {
         }
     }
 
-    public static @NotNull RoundingMode getRoundingMode(final int RM, final ProgramStatement statement) throws SimulationException {
+    public static @NotNull RoundingMode getRoundingMode(final int RM, final ProgramStatement statement) throws
+        SimulationException {
         int rm = RM;
         final int frm = ControlAndStatusRegisterFile.getValue("frm");
         if (rm == 7) {

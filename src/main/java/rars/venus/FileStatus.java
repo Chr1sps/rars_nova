@@ -73,8 +73,10 @@ public final class FileStatus {
     /**
      * Create a FileStatus object with given status and file pathname.
      *
-     * @param status   Initial file status. See FileStatus static constants.
-     * @param pathname Full file pathname. See setPathname(String newPath) below.
+     * @param status
+     *     Initial file status. See FileStatus static constants.
+     * @param pathname
+     *     Full file pathname. See setPathname(String newPath) below.
      */
     public FileStatus(final @NotNull FileStatus.State status, final @Nullable String pathname) {
         this.status = status;
@@ -88,7 +90,8 @@ public final class FileStatus {
     /**
      * Set file status. Also updates menu state accordingly.
      *
-     * @param newStatus New status: EDITED, RUNNABLE, etc, see list above.
+     * @param newStatus
+     *     New status: EDITED, RUNNABLE, etc, see list above.
      */
     public static void set(final @NotNull FileStatus.State newStatus) {
         systemStatus = newStatus;
@@ -116,7 +119,8 @@ public final class FileStatus {
     /**
      * Sets the file to the ASM file passed.
      *
-     * @param f file object variable that stores the ASM file.
+     * @param f
+     *     file object variable that stores the ASM file.
      */
     public static void setFile(final File f) {
         systemFile = f;
@@ -134,7 +138,8 @@ public final class FileStatus {
     /**
      * Changes the second of name to the parameter given.
      *
-     * @param s string variable tells what to set the name of the file to .
+     * @param s
+     *     string variable tells what to set the name of the file to .
      */
     public static void setName(final String s) {
         systemName = s;
@@ -152,7 +157,8 @@ public final class FileStatus {
     /**
      * Changes the second of assenbked to the parameter given.
      *
-     * @param b boolean variable that tells what to set assembled to.
+     * @param b
+     *     boolean variable that tells what to set assembled to.
      */
     public static void setAssembled(final boolean b) {
         systemAssembled = b;
@@ -170,7 +176,8 @@ public final class FileStatus {
     /**
      * Changes the second of saved to the parameter given.
      *
-     * @param b boolean variable that tells what to set saved to .
+     * @param b
+     *     boolean variable that tells what to set saved to .
      */
     public static void setSaved(final boolean b) {
         systemSaved = b;
@@ -193,7 +200,8 @@ public final class FileStatus {
     /**
      * Changes the second of edited to the parameter given.
      *
-     * @param b boolean variable that tells what to set edited to.
+     * @param b
+     *     boolean variable that tells what to set edited to.
      */
     public static void setEdited(final boolean b) {
         systemEdited = b;
@@ -223,7 +231,8 @@ public final class FileStatus {
     /**
      * Set editing status of this file. See FileStatus static constants.
      *
-     * @param newStatus the new status
+     * @param newStatus
+     *     the new status
      */
     public void setFileStatus(final @NotNull FileStatus.State newStatus) {
         this.status = newStatus;
@@ -271,8 +280,9 @@ public final class FileStatus {
      * Set full file pathname. See java.io.File(String pathname) for parameter
      * specs.
      *
-     * @param newPath the new pathname. If no directory path, getParent() will
-     *                return null.
+     * @param newPath
+     *     the new pathname. If no directory path, getParent() will
+     *     return null.
      */
     public void setPathname(final String newPath) {
         this.file = new File(newPath);

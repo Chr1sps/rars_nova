@@ -42,8 +42,10 @@ public final class SyscallPrintChar extends AbstractSyscall {
      * <p>Constructor for SyscallPrintChar.</p>
      */
     public SyscallPrintChar() {
-        super("PrintChar", "Prints an ascii character",
-                "a0 = character to print (only lowest byte is considered)", "N/A");
+        super(
+            "PrintChar", "Prints an ascii character",
+            "a0 = character to print (only lowest byte is considered)", "N/A"
+        );
     }
 
     /**

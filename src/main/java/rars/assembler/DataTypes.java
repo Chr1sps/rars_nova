@@ -119,7 +119,8 @@ public final class DataTypes {
     /**
      * Get length in bytes for numeric RISCV directives.
      *
-     * @param direct Directive to be measured.
+     * @param direct
+     *     Directive to be measured.
      * @return Returns length in bytes for values of that type. If type is not
      * numeric
      * (or not implemented yet), returns 0.
@@ -141,8 +142,10 @@ public final class DataTypes {
      * Determines whether given integer second falls within second range for given
      * directive.
      *
-     * @param direct Directive that controls storage allocation for second.
-     * @param value  The second to be stored.
+     * @param direct
+     *     Directive that controls storage allocation for second.
+     * @param value
+     *     The second to be stored.
      * @return Returns <code>true</code> if second can be stored in the number of bytes
      * allowed
      * by the given directive (.word, .half, .byte), <code>false</code>
@@ -152,7 +155,7 @@ public final class DataTypes {
         // Hex values used here rather than constants because there aren't constants for
         // unsigned max
         return (direct == Directive.HALF && (value < MIN_HALF_VALUE || value > 0xFFFF)) ||
-                (direct == Directive.BYTE && (value < MIN_BYTE_VALUE || value > 0xFF));
+            (direct == Directive.BYTE && (value < MIN_BYTE_VALUE || value > 0xFF));
     }
 
     /**
@@ -165,8 +168,10 @@ public final class DataTypes {
      * stored in a float because the exponent 500 is too large (float allows 8 bits
      * for exponent).
      *
-     * @param direct Directive that controls storage allocation for second.
-     * @param value  The second to be stored.
+     * @param direct
+     *     Directive that controls storage allocation for second.
+     * @param value
+     *     The second to be stored.
      * @return Returns <code>true</code> if second is within range of
      * the given directive (.float, .double), <code>false</code> otherwise.
      */

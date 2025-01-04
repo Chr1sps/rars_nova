@@ -58,7 +58,11 @@ public final class Comparisons {
         }
     }
 
-    private static <T extends Floating<T>> @Nullable T handleNaN(@NotNull final T a, @NotNull final T b, final @NotNull Environment env) {
+    private static <T extends Floating<T>> @Nullable T handleNaN(
+        @NotNull final T a,
+        @NotNull final T b,
+        final @NotNull Environment env
+    ) {
         // Section 5.3.1
         if (a.isNaN()) {
             if (b.isNaN()) {
@@ -73,7 +77,11 @@ public final class Comparisons {
         return null;
     }
 
-    private static <T extends Floating<T>> @Nullable T handleNaNNumber(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    private static <T extends Floating<T>> @Nullable T handleNaNNumber(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isSignalling() || b.isSignalling()) {
             env.invalid = true;
         }
@@ -86,32 +94,50 @@ public final class Comparisons {
     /**
      * <p>minimum.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T minimum(@NotNull final T a, @NotNull final T b, final Environment env) {
+    public static <T extends Floating<T>> @NotNull T minimum(
+        @NotNull final T a,
+        @NotNull final T b,
+        final Environment env
+    ) {
         final T tmp = Comparisons.handleNaN(a, b, env);
-        if (tmp != null)
+        if (tmp != null) {
             return tmp;
+        }
         return Comparisons.nonNaNmin(a, b);
     }
 
     /**
      * <p>maximum.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T maximum(@NotNull final T a, @NotNull final T b, final Environment env) {
+    public static <T extends Floating<T>> @NotNull T maximum(
+        @NotNull final T a,
+        @NotNull final T b,
+        final Environment env
+    ) {
         T tmp = Comparisons.handleNaN(a, b, env);
-        if (tmp != null)
+        if (tmp != null) {
             return tmp;
+        }
         tmp = Comparisons.nonNaNmin(a, b);
         return (a == tmp) ? b : a; // flip for max rather than min
     }
@@ -121,32 +147,50 @@ public final class Comparisons {
     /**
      * <p>minimumNumber.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T minimumNumber(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> @NotNull T minimumNumber(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         final T tmp = Comparisons.handleNaNNumber(a, b, env);
-        if (tmp != null)
+        if (tmp != null) {
             return tmp;
+        }
         return Comparisons.nonNaNmin(a, b);
     }
 
     /**
      * <p>maximumNumber.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T maximumNumber(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> @NotNull T maximumNumber(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         T tmp = Comparisons.handleNaNNumber(a, b, env);
-        if (tmp != null)
+        if (tmp != null) {
             return tmp;
+        }
         tmp = Comparisons.nonNaNmin(a, b);
         return (a == tmp) ? b : a; // flip for max rather than min
     }
@@ -159,40 +203,58 @@ public final class Comparisons {
     /**
      * <p>minNum.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T minNum(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> @NotNull T minNum(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isSignalling() || b.isSignalling()) {
             env.invalid = true;
             return a.NaN();
         }
         final T tmp = Comparisons.handleNaN(a, b, env);
-        if (tmp != null)
+        if (tmp != null) {
             return tmp;
+        }
         return Comparisons.nonNaNmin(a, b);
     }
 
     /**
      * <p>maxNum.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T maxNum(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> @NotNull T maxNum(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isSignalling() || b.isSignalling()) {
             env.invalid = true;
             return a.NaN();
         }
         T tmp = Comparisons.handleNaN(a, b, env);
-        if (tmp != null)
+        if (tmp != null) {
             return tmp;
+        }
         tmp = Comparisons.nonNaNmin(a, b);
         return (a == tmp) ? b : a; // flip for max rather than min
     }
@@ -202,13 +264,21 @@ public final class Comparisons {
     /**
      * <p>compareQuietEqual.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareQuietEqual(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareQuietEqual(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isSignalling() || b.isSignalling()) {
             env.invalid = true;
         }
@@ -221,13 +291,21 @@ public final class Comparisons {
     /**
      * <p>equalSignaling.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean equalSignaling(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean equalSignaling(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isNaN() || b.isNaN()) {
             env.invalid = true;
         }
@@ -237,13 +315,21 @@ public final class Comparisons {
     /**
      * <p>compareQuietLessThan.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareQuietLessThan(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareQuietLessThan(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isSignalling() || b.isSignalling()) {
             env.invalid = true;
         }
@@ -256,13 +342,21 @@ public final class Comparisons {
     /**
      * <p>compareSignalingLessThan.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareSignalingLessThan(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareSignalingLessThan(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isNaN() || b.isNaN()) {
             env.invalid = true;
         }
@@ -272,13 +366,21 @@ public final class Comparisons {
     /**
      * <p>compareQuietLessThanEqual.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareQuietLessThanEqual(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareQuietLessThanEqual(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isSignalling() || b.isSignalling()) {
             env.invalid = true;
         }
@@ -291,13 +393,21 @@ public final class Comparisons {
     /**
      * <p>compareSignalingLessThanEqual.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareSignalingLessThanEqual(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareSignalingLessThanEqual(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isNaN() || b.isNaN()) {
             env.invalid = true;
         }
@@ -307,13 +417,21 @@ public final class Comparisons {
     /**
      * <p>compareQuietGreaterThan.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareQuietGreaterThan(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareQuietGreaterThan(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isSignalling() || b.isSignalling()) {
             env.invalid = true;
         }
@@ -326,13 +444,21 @@ public final class Comparisons {
     /**
      * <p>compareSignalingGreaterThan.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareSignalingGreaterThan(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareSignalingGreaterThan(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isNaN() || b.isNaN()) {
             env.invalid = true;
         }
@@ -342,13 +468,21 @@ public final class Comparisons {
     /**
      * <p>compareQuietGreaterThanEqual.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareQuietGreaterThanEqual(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareQuietGreaterThanEqual(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isSignalling() || b.isSignalling()) {
             env.invalid = true;
         }
@@ -361,13 +495,21 @@ public final class Comparisons {
     /**
      * <p>compareSignalingGreaterThanEqual.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareSignalingGreaterThanEqual(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareSignalingGreaterThanEqual(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isNaN() || b.isNaN()) {
             env.invalid = true;
         }
@@ -377,13 +519,21 @@ public final class Comparisons {
     /**
      * <p>compareQuietUnordered.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a boolean
      */
-    public static <T extends Floating<T>> boolean compareQuietUnordered(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> boolean compareQuietUnordered(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         if (a.isSignalling() || b.isSignalling()) {
             env.invalid = true;
         }

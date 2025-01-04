@@ -22,8 +22,10 @@ public class FMADDS extends FusedFloat {
      * {@inheritDoc}
      */
     @Override
-    public @NotNull Float32 compute(@NotNull final Float32 f1, final @NotNull Float32 f2, final @NotNull Float32 f3,
-                                    final @NotNull Environment e) {
+    public @NotNull Float32 compute(
+        @NotNull final Float32 f1, final @NotNull Float32 f2, final @NotNull Float32 f3,
+        final @NotNull Environment e
+    ) {
         return Arithmetic.fusedMultiplyAdd(f1, f2, f3, e);
     }
 }

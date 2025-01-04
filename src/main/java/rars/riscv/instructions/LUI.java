@@ -38,10 +38,10 @@ public final class LUI extends BasicInstruction {
 
     private LUI() {
         super(
-                "lui t1,100000",
-                "Load upper immediate: set t1 to 20-bit followed by 12 0s",
-                BasicInstructionFormat.U_FORMAT,
-                "ssssssssssssssssssss fffff 0110111"
+            "lui t1,100000",
+            "Load upper immediate: set t1 to 20-bit followed by 12 0s",
+            BasicInstructionFormat.U_FORMAT,
+            "ssssssssssssssssssss fffff 0110111"
         );
     }
 
@@ -51,8 +51,8 @@ public final class LUI extends BasicInstruction {
         final var shiftedValue = Integer.valueOf(statement.getOperand(1) << 12).longValue();
 
         RegisterFile.updateRegister(
-                statement.getOperand(0),
-                shiftedValue
+            statement.getOperand(0),
+            shiftedValue
         );
     }
 }

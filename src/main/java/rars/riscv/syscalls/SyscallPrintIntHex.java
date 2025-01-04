@@ -43,8 +43,10 @@ public final class SyscallPrintIntHex extends AbstractSyscall {
      * <p>Constructor for SyscallPrintIntHex.</p>
      */
     public SyscallPrintIntHex() {
-        super("PrintIntHex", "Prints an integer (in hexdecimal format left-padded with zeroes)",
-            "a0 = integer to print", "N/A");
+        super(
+            "PrintIntHex", "Prints an integer (in hexdecimal format left-padded with zeroes)",
+            "a0 = integer to print", "N/A"
+        );
     }
 
     /**

@@ -90,7 +90,7 @@ public class InstructionMemoryDump extends AbstractTool {
     private static final String name = "Instruction/Memory Dump";
     private static final String version = "Version 1.0 (John Owens)";
     private static final String heading = "Dumps every executed instruction and data memory access to a file";
-    
+
     /** Instructions and memory accesses get logged here */
     private final StringBuffer log = new StringBuffer();
     private final int lowDataSegmentAddress;
@@ -125,7 +125,7 @@ public class InstructionMemoryDump extends AbstractTool {
         final JButton dumpLogButton = new JButton("Dump Log");
         dumpLogButton.setToolTipText("Dumps the log to a file");
         dumpLogButton.addActionListener(
-                e -> InstructionMemoryDump.this.dumpLog());
+            e -> InstructionMemoryDump.this.dumpLog());
         dumpLogButton.addKeyListener(new EnterKeyListener(dumpLogButton));
 
         this.dumpLogFilename = new JTextField("dumplog.txt", 20);
@@ -159,18 +159,21 @@ public class InstructionMemoryDump extends AbstractTool {
     @Override
     protected void processRISCVUpdate(final AccessNotice notice) {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        if (!notice.accessIsFromRISCV())
+        if (!notice.accessIsFromRISCV()) {
             return;
+        }
         // we've got two kinds of access here: instructions and data
         final MemoryAccessNotice m = (MemoryAccessNotice) notice;
         final int a = m.getAddress();
 
         // is a in the text segment (program)?
         if ((a >= memoryConfiguration.textBaseAddress) && (a < memoryConfiguration.textLimitAddress)) {
-            if (notice.getAccessType() != AccessNotice.AccessType.READ)
+            if (notice.getAccessType() != AccessNotice.AccessType.READ) {
                 return;
-            if (a == this.lastAddress)
+            }
+            if (a == this.lastAddress) {
                 return;
+            }
             this.lastAddress = a;
             try {
                 final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatement(a);
@@ -181,8 +184,10 @@ public class InstructionMemoryDump extends AbstractTool {
                     // First dump the instruction address, prefixed by "I:"
                     this.log.append("I: 0x").append(Integer.toUnsignedString(a, 16)).append("\n");
                     // Then dump the instruction, prefixed by "i:"
-                    this.log.append("i: 0x").append(Integer.toUnsignedString(stmt.getBinaryStatement(),
-                            16)).append("\n");
+                    this.log.append("i: 0x").append(Integer.toUnsignedString(
+                        stmt.getBinaryStatement(),
+                        16
+                    )).append("\n");
                 }
             } catch (final AddressErrorException e) {
                 // TODO Auto-generated catch block
@@ -192,10 +197,12 @@ public class InstructionMemoryDump extends AbstractTool {
 
         // is a in the data segment?
         if ((a >= this.lowDataSegmentAddress) && (a < this.highDataSegmentAddress)) {
-            if (notice.getAccessType() == AccessNotice.AccessType.READ)
+            if (notice.getAccessType() == AccessNotice.AccessType.READ) {
                 this.log.append("L: 0x");
-            if (notice.getAccessType() == AccessNotice.AccessType.WRITE)
+            }
+            if (notice.getAccessType() == AccessNotice.AccessType.WRITE) {
                 this.log.append("S: 0x");
+            }
             this.log.append(Integer.toUnsignedString(a, 16)).append("\n");
         }
 
@@ -236,7 +243,6 @@ public class InstructionMemoryDump extends AbstractTool {
         this.updateDisplay();
     }
 
-
     /**
      * <p>getHelpComponent.</p>
      *
@@ -245,23 +251,25 @@ public class InstructionMemoryDump extends AbstractTool {
     @Override
     protected JComponent getHelpComponent() {
         final String helpContent = """
-                 Generates a trace, to be stored in a file specified by the user, with one line per datum. The four kinds of data in the trace are:\s
-                  - I: The address of an access into instruction memory\s
-                  - i: A 32-bit RISC-V instruction (the trace first dumps the address then the instruction)
-                  - L: The address of a memory load into data memory
-                  - S: The address of a memory store into data memory (the contents of the memory load/store aren’t in the trace)
-                """;
+             Generates a trace, to be stored in a file specified by the user, with one line per datum. The four kinds of data in the trace are:\s
+              - I: The address of an access into instruction memory\s
+              - i: A 32-bit RISC-V instruction (the trace first dumps the address then the instruction)
+              - L: The address of a memory load into data memory
+              - S: The address of a memory store into data memory (the contents of the memory load/store aren’t in the trace)
+            """;
         final JButton help = new JButton("Help");
         help.addActionListener(
-                e -> {
-                    final JTextArea ja = new JTextArea(helpContent);
-                    ja.setRows(20);
-                    ja.setColumns(60);
-                    ja.setLineWrap(true);
-                    ja.setWrapStyleWord(true);
-                    JOptionPane.showMessageDialog(InstructionMemoryDump.this.theWindow, new JScrollPane(ja),
-                            "Log format", JOptionPane.INFORMATION_MESSAGE);
-                });
+            e -> {
+                final JTextArea ja = new JTextArea(helpContent);
+                ja.setRows(20);
+                ja.setColumns(60);
+                ja.setLineWrap(true);
+                ja.setWrapStyleWord(true);
+                JOptionPane.showMessageDialog(
+                    InstructionMemoryDump.this.theWindow, new JScrollPane(ja),
+                    "Log format", JOptionPane.INFORMATION_MESSAGE
+                );
+            });
         return help;
     }
 }

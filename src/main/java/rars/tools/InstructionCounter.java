@@ -254,14 +254,17 @@ public class InstructionCounter extends AbstractTool {
 
     @Override
     protected void processRISCVUpdate(final AccessNotice notice) {
-        if (!notice.accessIsFromRISCV())
+        if (!notice.accessIsFromRISCV()) {
             return;
-        if (notice.getAccessType() != AccessNotice.AccessType.READ)
+        }
+        if (notice.getAccessType() != AccessNotice.AccessType.READ) {
             return;
+        }
         final MemoryAccessNotice m = (MemoryAccessNotice) notice;
         final int a = m.getAddress();
-        if (a == this.lastAddress)
+        if (a == this.lastAddress) {
             return;
+        }
         this.lastAddress = a;
         this.counter++;
         try {

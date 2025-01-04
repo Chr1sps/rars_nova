@@ -37,8 +37,10 @@ public final class XOR extends Arithmetic {
      * <p>Constructor for XOR.</p>
      */
     private XOR() {
-        super("xor t1,t2,t3", "Bitwise XOR : Set t1 to bitwise XOR of t2 and t3",
-                "0000000", "100");
+        super(
+            "xor t1,t2,t3", "Bitwise XOR : Set t1 to bitwise XOR of t2 and t3",
+            "0000000", "100"
+        );
     }
 
     /**

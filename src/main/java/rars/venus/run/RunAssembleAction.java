@@ -65,21 +65,22 @@ public class RunAssembleAction extends GuiAction {
      * <p>Constructor for RunAssembleAction.</p>
      *
      * @param name
-     *         a {@link java.lang.String} object
+     *     a {@link java.lang.String} object
      * @param icon
-     *         a {@link javax.swing.Icon} object
+     *     a {@link javax.swing.Icon} object
      * @param descrip
-     *         a {@link java.lang.String} object
+     *     a {@link java.lang.String} object
      * @param mnemonic
-     *         a {@link java.lang.Integer} object
+     *     a {@link java.lang.Integer} object
      * @param accel
-     *         a {@link javax.swing.KeyStroke} object
+     *     a {@link javax.swing.KeyStroke} object
      * @param gui
-     *         a {@link VenusUI} object
+     *     a {@link VenusUI} object
      */
     public RunAssembleAction(
-            final String name, final Icon icon, final String descrip,
-            final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel, final VenusUI gui
+    ) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainUI = gui;
     }
@@ -107,8 +108,9 @@ public class RunAssembleAction extends GuiAction {
     // Handy little utility for building comma-separated list of filenames
     // while not letting line length get out of hand.
     private static @NotNull String buildFileNameList(
-            final @NotNull String preamble,
-            final @NotNull List<RISCVProgram> programList) {
+        final @NotNull String preamble,
+        final @NotNull List<RISCVProgram> programList
+    ) {
         final StringBuilder result = new StringBuilder(preamble);
         int lineLength = result.length();
         for (int i = 0; i < programList.size(); i++) {
@@ -133,9 +135,9 @@ public class RunAssembleAction extends GuiAction {
         final ExecutePane executePane = this.mainUI.mainPane.executeTab;
         final RegistersPane registersPane = this.mainUI.registersPane;
         RunAssembleAction.extendedAssemblerEnabled =
-                BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
+            BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
         RunAssembleAction.warningsAreErrors =
-                BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
+            BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
         if (FileStatus.getFile() != null) {
             if (FileStatus.get() == FileStatus.State.EDITED) {
                 this.mainUI.editor.save();
@@ -147,7 +149,7 @@ public class RunAssembleAction extends GuiAction {
                     // for multiple
                     // file assembly
                     filesToAssemble = FilenameFinder.getFilenameList(
-                            new File(FileStatus.getName()).getParent(), Globals.fileExtensions);
+                        new File(FileStatus.getName()).getParent(), Globals.fileExtensions);
                 } else {
                     filesToAssemble = List.of(FileStatus.getName());
                 }
@@ -166,19 +168,25 @@ public class RunAssembleAction extends GuiAction {
                         exceptionHandler = OTHER_SETTINGS.getExceptionHandler();
                     }
                 }
-                RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(filesToAssemble,
-                        FileStatus.getFile().getPath(), exceptionHandler);
-                messagesPane.postMessage(RunAssembleAction.buildFileNameList(name + ": assembling ",
-                        RunAssembleAction.programsToAssemble));
+                RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(
+                    filesToAssemble,
+                    FileStatus.getFile().getPath(), exceptionHandler
+                );
+                messagesPane.postMessage(RunAssembleAction.buildFileNameList(
+                    name + ": assembling ",
+                    RunAssembleAction.programsToAssemble
+                ));
                 // added logic to receive any warnings and output them.... DPS 11/28/06
-                final ErrorList warnings = Globals.program.assemble(RunAssembleAction.programsToAssemble,
-                        RunAssembleAction.extendedAssemblerEnabled,
-                        RunAssembleAction.warningsAreErrors);
+                final ErrorList warnings = Globals.program.assemble(
+                    RunAssembleAction.programsToAssemble,
+                    RunAssembleAction.extendedAssemblerEnabled,
+                    RunAssembleAction.warningsAreErrors
+                );
                 if (warnings.warningsOccurred()) {
                     messagesPane.postMessage(warnings.generateWarningReport());
                 }
                 messagesPane.postMessage(
-                        name + ": operation completed successfully.\n\n");
+                    name + ": operation completed successfully.\n\n");
                 FileStatus.setAssembled(true);
                 FileStatus.set(FileStatus.State.RUNNABLE);
 
@@ -208,7 +216,7 @@ public class RunAssembleAction extends GuiAction {
                 final String errorReport = pe.errors.generateErrorAndWarningReport();
                 messagesPane.postMessage(errorReport);
                 messagesPane.postMessage(
-                        name + ": operation completed with errors.\n\n");
+                    name + ": operation completed with errors.\n\n");
                 // Select editor line containing first error, and corresponding error message.
                 final var errorMessages = pe.errors.getErrorMessages();
                 for (final ErrorMessage em : errorMessages) {
@@ -218,8 +226,10 @@ public class RunAssembleAction extends GuiAction {
                         continue;
                     }
                     if (!em.isWarning() || RunAssembleAction.warningsAreErrors) {
-                        Globals.gui.messagesPane.selectErrorMessage(em.getFilename(), em.getLine(),
-                                em.getPosition());
+                        Globals.gui.messagesPane.selectErrorMessage(
+                            em.getFilename(), em.getLine(),
+                            em.getPosition()
+                        );
                         // Bug workaround: Line selection does not work correctly for the JEditTextArea
                         // editor
                         // when the file is opened then automatically assembled (assemble-on-open

@@ -44,9 +44,11 @@ public final class SyscallConfirmDialog extends AbstractSyscall {
      * <p>Constructor for SyscallConfirmDialog.</p>
      */
     public SyscallConfirmDialog() {
-        super("ConfirmDialog", "Service to display a message to user",
-                "a0 = address of null-terminated string that is the message to user",
-                "a0 = Yes (0), No (1), or Cancel(2)");
+        super(
+            "ConfirmDialog", "Service to display a message to user",
+            "a0 = address of null-terminated string that is the message to user",
+            "a0 = Yes (0), No (1), or Cancel(2)"
+        );
     }
 
     /**

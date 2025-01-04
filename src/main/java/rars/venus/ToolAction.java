@@ -48,7 +48,8 @@ public final class ToolAction extends AbstractAction {
     /**
      * Simple constructor.
      *
-     * @param tool an {@link AbstractTool} object
+     * @param tool
+     *     an {@link AbstractTool} object
      */
     public ToolAction(final @NotNull AbstractTool tool) {
         super(tool.getName(), null);

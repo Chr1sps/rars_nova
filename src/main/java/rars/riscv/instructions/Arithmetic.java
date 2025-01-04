@@ -42,8 +42,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public abstract class Arithmetic extends BasicInstruction {
 
-    protected Arithmetic(@NotNull final String usage, final String description, final String funct7,
-                         final String funct3) {
+    protected Arithmetic(
+        @NotNull final String usage, final String description, final String funct7,
+        final String funct3
+    ) {
         super(
             usage, description, BasicInstructionFormat.R_FORMAT,
             funct7 + " ttttt sssss " + funct3 + " fffff 0110011"

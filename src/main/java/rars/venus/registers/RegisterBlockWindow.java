@@ -84,8 +84,10 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         this.registers = registers;
         this.table = new MyTippedJTable(
             new RegTableModel(this.setupWindow()), registerDescriptions,
-            new String[]{"Each register has a tool tip describing its usage convention",
-                "Corresponding register number", valueTip}
+            new String[]{
+                "Each register has a tool tip describing its usage convention",
+                "Corresponding register number", valueTip
+            }
         ) {
         };
         FONT_SETTINGS.addChangeListener(this::updateRowHeight, true);
@@ -252,9 +254,11 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         }
 
         @Override
-        public @NotNull Component getTableCellRendererComponent(final JTable table, final Object value,
-                                                                final boolean isSelected, final boolean hasFocus,
-                                                                final int row, final int column) {
+        public @NotNull Component getTableCellRendererComponent(
+            final JTable table, final Object value,
+            final boolean isSelected, final boolean hasFocus,
+            final int row, final int column
+        ) {
             final JLabel cell = (JLabel) super.getTableCellRendererComponent(
                 table, value,
                 isSelected, hasFocus, row, column

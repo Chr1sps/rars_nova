@@ -37,8 +37,10 @@ public final class XORI extends ImmediateInstruction {
      * <p>Constructor for XORI.</p>
      */
     private XORI() {
-        super("xori t1,t2,-100",
-                "Bitwise XOR immediate : Set t1 to bitwise XOR of t2 and sign-extended 12-bit immediate", "100");
+        super(
+            "xori t1,t2,-100",
+            "Bitwise XOR immediate : Set t1 to bitwise XOR of t2 and sign-extended 12-bit immediate", "100"
+        );
     }
 
     /**

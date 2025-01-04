@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 
-
 public final class CADDI4SPN extends CompressedInstruction {
     public static final @NotNull CADDI4SPN INSTANCE = new CADDI4SPN();
 

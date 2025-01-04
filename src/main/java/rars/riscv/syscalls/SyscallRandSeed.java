@@ -43,8 +43,10 @@ public class SyscallRandSeed extends AbstractSyscall {
      * <p>Constructor for SyscallRandSeed.</p>
      */
     public SyscallRandSeed() {
-        super("RandSeed", "Set seed for the underlying Java pseudorandom number generator",
-                "a0 = index of pseudorandom number generator<br>a1 = the seed", "N/A");
+        super(
+            "RandSeed", "Set seed for the underlying Java pseudorandom number generator",
+            "a0 = index of pseudorandom number generator<br>a1 = the seed", "N/A"
+        );
     }
 
     /**

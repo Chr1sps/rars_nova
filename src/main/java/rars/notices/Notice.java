@@ -1,4 +1,4 @@
 package rars.notices;
 
-public sealed interface Notice permits AccessNotice,  SimulatorNotice {
+public sealed interface Notice permits AccessNotice, SimulatorNotice {
 }

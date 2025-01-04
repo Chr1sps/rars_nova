@@ -47,7 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Java's main(String[] args).
  *
  * @param programArgumentList
- *         list of strings, each element containing one argument
+ *     list of strings, each element containing one argument
  * @author Pete Sanderson
  * @version July 2008
  */
@@ -60,7 +60,7 @@ public record ProgramArgumentList(@NotNull @Unmodifiable List<@NotNull String> p
      * newline, return, formfeed)
      *
      * @param args
-     *         String containing delimiter-separated arguments
+     *     String containing delimiter-separated arguments
      */
     public ProgramArgumentList(final @NotNull String args) {
         this(buildArgsFromString(args));
@@ -74,7 +74,6 @@ public record ProgramArgumentList(@NotNull @Unmodifiable List<@NotNull String> p
         }
         return resultList;
     }
-
 
     /**
      * Place any program arguments into memory and registers
@@ -150,8 +149,10 @@ public record ProgramArgumentList(@NotNull @Unmodifiable List<@NotNull String> p
             RegisterFile.getRegister("a0").setValue(argStartAddress.length); // argc
             RegisterFile.getRegister("a1").setValue(stackAddress + DataTypes.WORD_SIZE + DataTypes.WORD_SIZE); // argv
         } catch (final AddressErrorException aee) {
-            ProgramArgumentList.LOGGER.fatal("Internal Error: Memory write error occurred while storing program " +
-                    "arguments!", aee);
+            ProgramArgumentList.LOGGER.fatal(
+                "Internal Error: Memory write error occurred while storing program " +
+                    "arguments!", aee
+            );
             System.exit(0);
         }
     }

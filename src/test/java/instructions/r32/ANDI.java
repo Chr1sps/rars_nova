@@ -90,32 +90,32 @@ public final class ANDI extends AbstractInstructionTest {
     @Test
     public void destSrcTest1() {
         final var code = """
-                li x1, 0xff00ff00
-                andi x1, x1, 0x0f0
-                li x29, 0x00000000
-                bne x1, x29, fail
-                """;
+            li x1, 0xff00ff00
+            andi x1, x1, 0x0f0
+            li x29, 0x00000000
+            bne x1, x29, fail
+            """;
         runTest32(code);
     }
 
     @Test
     public void destSrcTest2() {
         final var code = """
-                andi x1, x0, 0x0f0
-                li x29, 0
-                bne x1, x29, fail
-                """;
+            andi x1, x0, 0x0f0
+            li x29, 0
+            bne x1, x29, fail
+            """;
         runTest32(code);
     }
 
     @Test
     public void destSrcTest3() {
         final var code = """
-                li x1, 0x00ff00ff
-                andi x0, x1, 0x70f
-                li x29, 0
-                bne x0, x29, fail
-                """;
+            li x1, 0x00ff00ff
+            andi x0, x1, 0x70f
+            li x29, 0
+            bne x0, x29, fail
+            """;
         runTest32(code);
     }
 

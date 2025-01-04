@@ -45,9 +45,11 @@ public class SyscallRead extends AbstractSyscall {
      * <p>Constructor for SyscallRead.</p>
      */
     public SyscallRead() {
-        super("Read", "Read from a file descriptor into a buffer",
-                "a0 = the file descriptor <br>a1 = address of the buffer <br>a2 = maximum length to read",
-                "a0 = the length read or -1 if error");
+        super(
+            "Read", "Read from a file descriptor into a buffer",
+            "a0 = the file descriptor <br>a1 = address of the buffer <br>a2 = maximum length to read",
+            "a0 = the length read or -1 if error"
+        );
     }
 
     /**
@@ -61,16 +63,19 @@ public class SyscallRead extends AbstractSyscall {
         final byte[] myBuffer = new byte[length]; // specified length
         // Call to SystemIO.xxxx.read(xxx,xxx,xxx) returns actual length
         final int retLength = SystemIO.readFromFile(
-                RegisterFile.getValue("a0"), // fd
-                myBuffer, // buffer
-                length); // length
+            RegisterFile.getValue("a0"), // fd
+            myBuffer, // buffer
+            length
+        ); // length
         RegisterFile.updateRegister("a0", retLength); // set returned second in register
 
         // copy bytes from returned buffer into memory
         try {
             while (index < retLength) {
-                Globals.MEMORY_INSTANCE.setByte(byteAddress++,
-                        myBuffer[index++]);
+                Globals.MEMORY_INSTANCE.setByte(
+                    byteAddress++,
+                    myBuffer[index++]
+                );
             }
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);

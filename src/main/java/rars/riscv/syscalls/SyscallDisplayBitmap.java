@@ -18,11 +18,13 @@ public final class SyscallDisplayBitmap extends AbstractSyscall implements Simpl
     private Flow.Subscription subscription;
 
     public SyscallDisplayBitmap() {
-        super("DisplayBitmap", "Bitmap displaying memory contents", """
+        super(
+            "DisplayBitmap", "Bitmap displaying memory contents", """
                 a0 = address of the bitmap to display
                 a1 = width of the bitmap
                 a2 = height of the bitmap
-                """, "N/A");
+                """, "N/A"
+        );
         this.display = null;
         Simulator.getInstance().subscribe(this);
     }
@@ -60,8 +62,9 @@ public final class SyscallDisplayBitmap extends AbstractSyscall implements Simpl
     @Override
     public void onNext(final @NotNull SimulatorNotice item) {
         if (item.action() == SimulatorNotice.Action.START) {
-            if (this.display != null)
+            if (this.display != null) {
                 this.display.dispose();
+            }
             this.display = null;
         }
         this.subscription.request(1);

@@ -25,7 +25,6 @@ public abstract class AbstractCompressedInstructionTest {
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64);
         InstructionsRegistry.RV64_MODE_FLAG = isRV64;
 
-
         System.out.println("═══════SOURCE═CODE═══════");
         System.out.println("```");
         System.out.println(code);
@@ -33,7 +32,7 @@ public abstract class AbstractCompressedInstructionTest {
         System.out.println();
 
         final var opt = new Options();
-        final var program = new Program(MemoryConfiguration.DEFAULT,opt);
+        final var program = new Program(MemoryConfiguration.DEFAULT, opt);
         ErrorList errorList;
         try {
             errorList = program.assembleString(code);
@@ -93,7 +92,7 @@ public abstract class AbstractCompressedInstructionTest {
             final var actual = errors.get(i);
             if (expected.line() != actual.getLine() || expected.position() != actual.getPosition()) {
                 fail("Expected error at line " + expected.line() + " position " + expected.position() +
-                         ", but got error at line " + actual.getLine() + " position " + actual.getPosition());
+                    ", but got error at line " + actual.getLine() + " position " + actual.getPosition());
             }
         }
     }

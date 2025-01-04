@@ -37,8 +37,10 @@ public final class REM extends Arithmetic {
      * <p>Constructor for REM.</p>
      */
     private REM() {
-        super("rem t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3",
-                "0000001", "110");
+        super(
+            "rem t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3",
+            "0000001", "110"
+        );
     }
 
     /**

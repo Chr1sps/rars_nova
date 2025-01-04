@@ -68,23 +68,23 @@ public final class ControlAndStatusRegisterFile {
         // linked to by *h
         // Remember to update the window tooltips when adding a CSR
         final Register[] tmp = {
-                new MaskedRegister("ustatus", 0x000, 0, ~0x11),
-                null, // fflags
-                null, // frm
-                new MaskedRegister("fcsr", 0x003, 0, ~0xFF),
-                new Register("uie", 0x004, 0),
-                new Register("utvec", 0x005, 0),
-                new Register("uscratch", 0x040, 0),
-                new Register("uepc", 0x041, 0),
-                new Register("ucause", 0x042, 0),
-                new Register("utval", 0x043, 0),
-                new Register("uip", 0x044, 0),
-                new ReadOnlyRegister("cycle", 0xC00, 0),
-                new ReadOnlyRegister("time", 0xC01, 0),
-                new ReadOnlyRegister("instret", 0xC02, 0),
-                null, // cycleh
-                null, // timeh
-                null, // instreth
+            new MaskedRegister("ustatus", 0x000, 0, ~0x11),
+            null, // fflags
+            null, // frm
+            new MaskedRegister("fcsr", 0x003, 0, ~0xFF),
+            new Register("uie", 0x004, 0),
+            new Register("utvec", 0x005, 0),
+            new Register("uscratch", 0x040, 0),
+            new Register("uepc", 0x041, 0),
+            new Register("ucause", 0x042, 0),
+            new Register("utval", 0x043, 0),
+            new Register("uip", 0x044, 0),
+            new ReadOnlyRegister("cycle", 0xC00, 0),
+            new ReadOnlyRegister("time", 0xC01, 0),
+            new ReadOnlyRegister("instret", 0xC02, 0),
+            null, // cycleh
+            null, // timeh
+            null, // instreth
         };
         tmp[1] = new LinkedRegister("fflags", 0x001, tmp[3], 0x1F);
         tmp[2] = new LinkedRegister("frm", 0x002, tmp[3], 0xE0);
@@ -101,8 +101,10 @@ public final class ControlAndStatusRegisterFile {
     /**
      * This method updates the register second
      *
-     * @param num Number of register to set the second of.
-     * @param val The desired second for the register.
+     * @param num
+     *     Number of register to set the second of.
+     * @param val
+     *     The desired second for the register.
      * @return old second in register prior to update
      */
     public static boolean updateRegister(final int num, final long val) {
@@ -114,8 +116,10 @@ public final class ControlAndStatusRegisterFile {
             return true;
         }
         if ((OtherSettings.getBackSteppingEnabled())) {
-            Globals.program.getBackStepper().addControlAndStatusRestore(num,
-                    ControlAndStatusRegisterFile.instance.updateRegister(num, val));
+            Globals.program.getBackStepper().addControlAndStatusRestore(
+                num,
+                ControlAndStatusRegisterFile.instance.updateRegister(num, val)
+            );
         } else {
             ControlAndStatusRegisterFile.instance.updateRegister(num, val);
         }
@@ -125,23 +129,32 @@ public final class ControlAndStatusRegisterFile {
     /**
      * This method updates the register second
      *
-     * @param name Name of register to set the second of.
-     * @param val  The desired second for the register.
+     * @param name
+     *     Name of register to set the second of.
+     * @param val
+     *     The desired second for the register.
      */
     public static void updateRegister(final String name, final long val) {
-        ControlAndStatusRegisterFile.updateRegister(ControlAndStatusRegisterFile.instance.getRegister(name).getNumber(), val);
+        ControlAndStatusRegisterFile.updateRegister(
+            ControlAndStatusRegisterFile.instance.getRegister(name).getNumber(),
+            val
+        );
     }
 
     /**
      * This method updates the register second silently and bypasses read only
      *
-     * @param num Number of register to set the second of.
-     * @param val The desired second for the register.
+     * @param num
+     *     Number of register to set the second of.
+     * @param val
+     *     The desired second for the register.
      */
     public static void updateRegisterBackdoor(final int num, final long val) {
         if ((OtherSettings.getBackSteppingEnabled())) {
-            Globals.program.getBackStepper().addControlAndStatusBackdoor(num,
-                    ControlAndStatusRegisterFile.instance.getRegister(num).setValueBackdoor(val));
+            Globals.program.getBackStepper().addControlAndStatusBackdoor(
+                num,
+                ControlAndStatusRegisterFile.instance.getRegister(num).setValueBackdoor(val)
+            );
         } else {
             ControlAndStatusRegisterFile.instance.getRegister(num).setValueBackdoor(val);
         }
@@ -150,30 +163,41 @@ public final class ControlAndStatusRegisterFile {
     /**
      * This method updates the register second silently and bypasses read only
      *
-     * @param name Name of register to set the second of.
-     * @param val  The desired second for the register.
+     * @param name
+     *     Name of register to set the second of.
+     * @param val
+     *     The desired second for the register.
      */
     public static void updateRegisterBackdoor(final String name, final long val) {
-        ControlAndStatusRegisterFile.updateRegisterBackdoor(ControlAndStatusRegisterFile.instance.getRegister(name).getNumber(), val);
+        ControlAndStatusRegisterFile.updateRegisterBackdoor(
+            ControlAndStatusRegisterFile.instance.getRegister(name)
+                .getNumber(), val
+        );
     }
 
     /**
      * ORs a register with a second
      *
-     * @param num Number of register to change
-     * @param val The second to OR with
+     * @param num
+     *     Number of register to change
+     * @param val
+     *     The second to OR with
      * @return a boolean
      */
     public static boolean orRegister(final int num, final long val) {
-        return ControlAndStatusRegisterFile.updateRegister(num,
-                ControlAndStatusRegisterFile.instance.getValue(num) | val);
+        return ControlAndStatusRegisterFile.updateRegister(
+            num,
+            ControlAndStatusRegisterFile.instance.getValue(num) | val
+        );
     }
 
     /**
      * ORs a register with a second
      *
-     * @param name Name of register to change
-     * @param val  The second to OR with
+     * @param name
+     *     Name of register to change
+     * @param val
+     *     The second to OR with
      */
     public static void orRegister(final String name, final long val) {
         ControlAndStatusRegisterFile.updateRegister(name, ControlAndStatusRegisterFile.instance.getValue(name) | val);
@@ -182,20 +206,26 @@ public final class ControlAndStatusRegisterFile {
     /**
      * Clears bits from a register according to a second
      *
-     * @param num Number of register to change
-     * @param val The second to clear by
+     * @param num
+     *     Number of register to change
+     * @param val
+     *     The second to clear by
      * @return a boolean
      */
     public static boolean clearRegister(final int num, final long val) {
-        return ControlAndStatusRegisterFile.updateRegister(num,
-                ControlAndStatusRegisterFile.instance.getValue(num) & ~val);
+        return ControlAndStatusRegisterFile.updateRegister(
+            num,
+            ControlAndStatusRegisterFile.instance.getValue(num) & ~val
+        );
     }
 
     /**
      * Clears bits from a register according to a second
      *
-     * @param name Name of register to change
-     * @param val  The second to clear by
+     * @param name
+     *     Name of register to change
+     * @param val
+     *     The second to clear by
      */
     public static void clearRegister(final String name, final long val) {
         ControlAndStatusRegisterFile.updateRegister(name, ControlAndStatusRegisterFile.instance.getValue(name) & ~val);
@@ -204,7 +234,8 @@ public final class ControlAndStatusRegisterFile {
     /**
      * Returns the second of the register
      *
-     * @param num The register number.
+     * @param num
+     *     The register number.
      * @return The second of the given register. 0 for non-implemented registers
      */
     public static int getValue(final int num) {
@@ -214,7 +245,8 @@ public final class ControlAndStatusRegisterFile {
     /**
      * Returns the full second of the register
      *
-     * @param num The register number.
+     * @param num
+     *     The register number.
      * @return The second of the given register. 0 for non-implemented registers
      */
     public static long getValueLong(final int num) {
@@ -224,7 +256,8 @@ public final class ControlAndStatusRegisterFile {
     /**
      * Returns the second of the register
      *
-     * @param name The register's name
+     * @param name
+     *     The register's name
      * @return The second of the given register. 0 for non-implemented registers
      */
     public static int getValue(final String name) {
@@ -234,7 +267,8 @@ public final class ControlAndStatusRegisterFile {
     /**
      * Returns the second of the register without notifying observers
      *
-     * @param name The register's name
+     * @param name
+     *     The register's name
      * @return The second of the given register. 0 for non-implemented registers
      */
     public static long getValueNoNotify(final String name) {
@@ -254,7 +288,8 @@ public final class ControlAndStatusRegisterFile {
      * ControlAndStatusRegisterFile implements a wide range of register numbers that
      * don't math the position in the underlying array
      *
-     * @param r the CSR
+     * @param r
+     *     the CSR
      * @return the list position of given register, -1 if not found.
      */
     public static int getRegisterPosition(final Register r) {
@@ -270,7 +305,8 @@ public final class ControlAndStatusRegisterFile {
     /**
      * <p>getRegister.</p>
      *
-     * @param name a {@link java.lang.String} object
+     * @param name
+     *     a {@link java.lang.String} object
      * @return a {@link Register} object
      */
     public static Register getRegister(final String name) {
@@ -289,7 +325,8 @@ public final class ControlAndStatusRegisterFile {
      * method
      * will add the given Observer to each one.
      *
-     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
+     * @param observer
+     *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public static void addRegistersObserver(final SimpleSubscriber<? super RegisterAccessNotice> observer) {
         ControlAndStatusRegisterFile.instance.addRegistersObserver(observer);
@@ -300,7 +337,8 @@ public final class ControlAndStatusRegisterFile {
      * method
      * will delete the given Observer from each one.
      *
-     * @param observer a {@link java.util.concurrent.Flow.Subscriber} object
+     * @param observer
+     *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public static void deleteRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
         ControlAndStatusRegisterFile.instance.deleteRegistersSubscriber(observer);

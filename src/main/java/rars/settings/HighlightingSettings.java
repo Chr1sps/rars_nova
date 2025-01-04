@@ -96,8 +96,10 @@ public final class HighlightingSettings extends SettingsBase {
 
     // region Preference writing methods
 
-    private void writeNullableTokenStyleToPreferences(final @NotNull HighlightingType type,
-                                                      final @Nullable TokenStyle style) {
+    private void writeNullableTokenStyleToPreferences(
+        final @NotNull HighlightingType type,
+        final @Nullable TokenStyle style
+    ) {
         if (style == null) {
             this.preferences.putBoolean(enabledPrefix(type), false);
         } else {
@@ -133,18 +135,28 @@ public final class HighlightingSettings extends SettingsBase {
     // region Preference loading methods
 
     private void loadSettingsFromPreferences() {
-        this.textSegmentHighlightingStyle = loadTokenStyleFromPreferences(HighlightingType.TEXT_SEGMENT,
-            HighlightingDefaults.DEFAULT_TEXT_SEGMENT_STYLE);
-        this.delaySlotHighlightingStyle = loadTokenStyleFromPreferences(HighlightingType.DELAY_SLOT,
-            HighlightingDefaults.DEFAULT_DELAY_SLOT_STYLE);
-        this.dataSegmentHighlightingStyle = loadNullableTokenStyleFromPreferences(HighlightingType.DATA_SEGMENT,
-            HighlightingDefaults.DEFAULT_DATA_SEGMENT_STYLE);
-        this.registerHighlightingStyle = loadNullableTokenStyleFromPreferences(HighlightingType.REGISTER,
-            HighlightingDefaults.DEFAULT_REGISTER_STYLE);
+        this.textSegmentHighlightingStyle = loadTokenStyleFromPreferences(
+            HighlightingType.TEXT_SEGMENT,
+            HighlightingDefaults.DEFAULT_TEXT_SEGMENT_STYLE
+        );
+        this.delaySlotHighlightingStyle = loadTokenStyleFromPreferences(
+            HighlightingType.DELAY_SLOT,
+            HighlightingDefaults.DEFAULT_DELAY_SLOT_STYLE
+        );
+        this.dataSegmentHighlightingStyle = loadNullableTokenStyleFromPreferences(
+            HighlightingType.DATA_SEGMENT,
+            HighlightingDefaults.DEFAULT_DATA_SEGMENT_STYLE
+        );
+        this.registerHighlightingStyle = loadNullableTokenStyleFromPreferences(
+            HighlightingType.REGISTER,
+            HighlightingDefaults.DEFAULT_REGISTER_STYLE
+        );
     }
 
-    private @Nullable TokenStyle loadNullableTokenStyleFromPreferences(final @NotNull HighlightingType type,
-                                                                       final @NotNull TokenStyle defaultStyle) {
+    private @Nullable TokenStyle loadNullableTokenStyleFromPreferences(
+        final @NotNull HighlightingType type,
+        final @NotNull TokenStyle defaultStyle
+    ) {
         final var enabled = this.preferences.getBoolean(enabledPrefix(type), true);
         if (!enabled) {
             return null;
@@ -152,8 +164,10 @@ public final class HighlightingSettings extends SettingsBase {
         return loadTokenStyleFromPreferences(type, defaultStyle);
     }
 
-    private @NotNull TokenStyle loadTokenStyleFromPreferences(final @NotNull HighlightingType type,
-                                                              final @NotNull TokenStyle defaultStyle) {
+    private @NotNull TokenStyle loadTokenStyleFromPreferences(
+        final @NotNull HighlightingType type,
+        final @NotNull TokenStyle defaultStyle
+    ) {
         final var foreground = loadNullableColorFromPreferences(foregroundPrefix(type), defaultStyle.foreground());
         final var background = loadNullableColorFromPreferences(backgroundPrefix(type), defaultStyle.background());
         final var isBold = this.preferences.getBoolean(boldPrefix(type), defaultStyle.isBold());
@@ -162,8 +176,10 @@ public final class HighlightingSettings extends SettingsBase {
         return new TokenStyle(foreground, background, isBold, isItalic, isUnderline);
     }
 
-    private @Nullable Color loadNullableColorFromPreferences(final @NotNull String key,
-                                                             final @Nullable Color defaultValue) {
+    private @Nullable Color loadNullableColorFromPreferences(
+        final @NotNull String key,
+        final @Nullable Color defaultValue
+    ) {
         final var value = this.preferences.get(key, null);
         if (value == null) {
             return defaultValue;

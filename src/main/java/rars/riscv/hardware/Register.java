@@ -52,9 +52,12 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
     /**
      * Creates a new register with specified name, number, and second.
      *
-     * @param n   The name of the register.
-     * @param num The number of the register.
-     * @param val The inital (and reset) second of the register.
+     * @param n
+     *     The name of the register.
+     * @param num
+     *     The number of the register.
+     * @param val
+     *     The inital (and reset) second of the register.
      */
     public Register(final String n, final int num, final long val) {
         this.name = n;
@@ -115,7 +118,8 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
      * Sets the second of the register to the val passed to it.
      * Observers are notified of the WRITE operation.
      *
-     * @param val Value to set the Register to.
+     * @param val
+     *     Value to set the Register to.
      * @return previous second of register
      */
     public synchronized long setValue(final long val) {
@@ -129,7 +133,8 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
      * Sets the second of the register to the val passed to it. This should only
      * be used to update registers not related to the current instruction.
      *
-     * @param val Value to set the Register to.
+     * @param val
+     *     Value to set the Register to.
      * @return previous second of register
      */
     public synchronized long setValueBackdoor(final long val) {
@@ -150,7 +155,8 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
      * Change the register's reset second; the second to which it will be
      * set when <code>resetValue()</code> is called.
      *
-     * @param reset a long
+     * @param reset
+     *     a long
      */
     public synchronized void changeResetValue(final long reset) {
         this.resetValue = reset;

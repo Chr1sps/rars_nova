@@ -24,13 +24,14 @@ public record SimulatorNotice(Action action, int maxSteps, double runSpeed, int 
     @Override
     public @NotNull String toString() {
         return ((this.action == Action.START) ? "START " : "STOP  ") +
-                "Max Steps " + this.maxSteps + " " +
-                "Speed "
-                + ((this.runSpeed == RunSpeedPanel.UNLIMITED_SPEED) ? "unlimited " : this.runSpeed + " inst/sec") +
-                "Prog Ctr " + this.programCounter;
+            "Max Steps " + this.maxSteps + " " +
+            "Speed "
+            + ((this.runSpeed == RunSpeedPanel.UNLIMITED_SPEED) ? "unlimited " : this.runSpeed + " inst/sec") +
+            "Prog Ctr " + this.programCounter;
     }
 
     public enum Action {
-        START, STOP
+        START,
+        STOP
     }
 }

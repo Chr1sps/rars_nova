@@ -38,10 +38,14 @@ public class LinkedRegister extends Register {
     /**
      * <p>Constructor for LinkedRegister.</p>
      *
-     * @param name the name to assign
-     * @param num  the number to assign
-     * @param base the register to alias
-     * @param mask the bits to use
+     * @param name
+     *     the name to assign
+     * @param num
+     *     the number to assign
+     * @param base
+     *     the register to alias
+     * @param mask
+     *     the bits to use
      */
     public LinkedRegister(final String name, final int num, final Register base, long mask) {
         super(name, num, 0); // reset second does not matter

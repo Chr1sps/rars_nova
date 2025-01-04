@@ -44,8 +44,10 @@ public class SyscallRandDouble extends AbstractSyscall {
      * Build an instance of the syscall with its default service number and name.
      */
     public SyscallRandDouble() {
-        super("RandDouble", "Get a random double from the range 0.0-1.0",
-                "a0 = index of pseudorandom number generator", "fa0 = the next pseudorandom");
+        super(
+            "RandDouble", "Get a random double from the range 0.0-1.0",
+            "a0 = index of pseudorandom number generator", "fa0 = the next pseudorandom"
+        );
     }
 
     /**

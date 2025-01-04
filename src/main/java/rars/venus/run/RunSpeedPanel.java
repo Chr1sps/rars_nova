@@ -79,8 +79,10 @@ public final class RunSpeedPanel extends JPanel {
     }
 
     private @NotNull JSlider createSlider() {
-        final JSlider runSpeedSlider = new JSlider(JSlider.HORIZONTAL, RunSpeedPanel.SPEED_INDEX_MIN,
-            RunSpeedPanel.SPEED_INDEX_MAX, RunSpeedPanel.SPEED_INDEX_INIT);
+        final JSlider runSpeedSlider = new JSlider(
+            JSlider.HORIZONTAL, RunSpeedPanel.SPEED_INDEX_MIN,
+            RunSpeedPanel.SPEED_INDEX_MAX, RunSpeedPanel.SPEED_INDEX_INIT
+        );
         runSpeedSlider.setSize(new Dimension(100, (int) runSpeedSlider.getSize().getHeight()));
         runSpeedSlider.setMaximumSize(runSpeedSlider.getSize());
         runSpeedSlider.setMajorTickSpacing(5);

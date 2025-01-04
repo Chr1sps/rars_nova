@@ -45,9 +45,11 @@ public final class SyscallGetCWD extends AbstractSyscall {
      * <p>Constructor for SyscallGetCWD.</p>
      */
     public SyscallGetCWD() {
-        super("GetCWD", "Writes the path of the current working directory into a buffer",
-                "a0 = the buffer to write into <br>a1 = the length of the buffer",
-                "a0 = -1 if the path is longer than the buffer");
+        super(
+            "GetCWD", "Writes the path of the current working directory into a buffer",
+            "a0 = the buffer to write into <br>a1 = the length of the buffer",
+            "a0 = -1 if the path is longer than the buffer"
+        );
     }
 
     /**
@@ -69,8 +71,10 @@ public final class SyscallGetCWD extends AbstractSyscall {
         }
         try {
             for (int index = 0; index < utf8BytesList.length; index++) {
-                Globals.MEMORY_INSTANCE.setByte(buf + index,
-                        utf8BytesList[index]);
+                Globals.MEMORY_INSTANCE.setByte(
+                    buf + index,
+                    utf8BytesList[index]
+                );
             }
             Globals.MEMORY_INSTANCE.setByte(buf + utf8BytesList.length, 0);
         } catch (final AddressErrorException e) {

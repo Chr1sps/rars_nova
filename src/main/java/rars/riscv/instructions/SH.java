@@ -40,8 +40,10 @@ public final class SH extends Store {
      * <p>Constructor for SH.</p>
      */
     private SH() {
-        super("sh t1, -100(t2)",
-                "Store halfword : Store the low-order 16 bits of t1 into the effective memory halfword address", "001");
+        super(
+            "sh t1, -100(t2)",
+            "Store halfword : Store the low-order 16 bits of t1 into the effective memory halfword address", "001"
+        );
     }
 
     /**

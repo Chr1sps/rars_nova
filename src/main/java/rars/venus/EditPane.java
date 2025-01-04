@@ -67,7 +67,8 @@ public final class EditPane extends JPanel {
     /**
      * Constructor for the EditPane class.
      *
-     * @param appFrame a {@link VenusUI} object
+     * @param appFrame
+     *     a {@link VenusUI} object
      */
     public EditPane(final @NotNull VenusUI appFrame) {
         super(new BorderLayout());
@@ -81,16 +82,23 @@ public final class EditPane extends JPanel {
         this.sourceCode =
             TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme());
         this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-        EDITOR_THEME_SETTINGS.addChangeListener(() -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme()), true);
+        EDITOR_THEME_SETTINGS.addChangeListener(
+            () -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme()),
+            true
+        );
         FONT_SETTINGS.addChangeListener(() -> this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont()), true);
-        BOOL_SETTINGS.addChangeListener(() -> this.sourceCode.setLineHighlightEnabled(
-            BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
-        ), true);
-        OTHER_SETTINGS.addChangeListener(() -> {
-            this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
-            this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
+        BOOL_SETTINGS.addChangeListener(
+            () -> this.sourceCode.setLineHighlightEnabled(
+                BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
+            ), true
+        );
+        OTHER_SETTINGS.addChangeListener(
+            () -> {
+                this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
+                this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
 //            this.sourceCode.revalidate();
-        }, true);
+            }, true
+        );
 
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);
@@ -117,11 +125,15 @@ public final class EditPane extends JPanel {
                         EditPane.this.setFileStatus(FileStatus.State.EDITED);
                     }
                     if (EditPane.this.getFileStatus() == FileStatus.State.NEW_EDITED) {
-                        EditPane.this.mainUI.editor.setTitle("", EditPane.this.getFilename(),
-                            EditPane.this.getFileStatus());
+                        EditPane.this.mainUI.editor.setTitle(
+                            "", EditPane.this.getFilename(),
+                            EditPane.this.getFileStatus()
+                        );
                     } else {
-                        EditPane.this.mainUI.editor.setTitle(EditPane.this.getPathname(),
-                            EditPane.this.getFilename(), EditPane.this.getFileStatus());
+                        EditPane.this.mainUI.editor.setTitle(
+                            EditPane.this.getPathname(),
+                            EditPane.this.getFilename(), EditPane.this.getFileStatus()
+                        );
                     }
 
                     FileStatus.setEdited(true);
@@ -175,8 +187,10 @@ public final class EditPane extends JPanel {
     /**
      * For initalizing the source code when opening an ASM file
      *
-     * @param s        String containing text
-     * @param editable set true if code is editable else false
+     * @param s
+     *     String containing text
+     * @param editable
+     *     set true if code is editable else false
      */
     public void setSourceCode(final String s, final boolean editable) {
         this.sourceCode.setSourceCode(s, editable);
@@ -217,7 +231,8 @@ public final class EditPane extends JPanel {
      * Set the editing status for this EditPane's associated document.
      * For the argument, use one of the constants from class FileStatus.
      *
-     * @param fileStatus the status constant from class FileStatus
+     * @param fileStatus
+     *     the status constant from class FileStatus
      */
     public void setFileStatus(final @NotNull FileStatus.State fileStatus) {
         this.fileStatus.setFileStatus(fileStatus);
@@ -244,7 +259,8 @@ public final class EditPane extends JPanel {
     /**
      * Delegates to corresponding FileStatus method
      *
-     * @param pathname a {@link java.lang.String} object
+     * @param pathname
+     *     a {@link java.lang.String} object
      */
     public void setPathname(final String pathname) {
         this.fileStatus.setPathname(pathname);
@@ -331,7 +347,8 @@ public final class EditPane extends JPanel {
     /**
      * Display cursor coordinates
      *
-     * @param p Point object with x-y (column, line number) coordinates of cursor
+     * @param p
+     *     Point object with x-y (column, line number) coordinates of cursor
      */
     public void displayCaretPosition(final @NotNull Pair<Integer, Integer> p) {
         this.caretPositionLabel.setText("Line: " + p.first() + " Column: " + p.second());
@@ -342,9 +359,10 @@ public final class EditPane extends JPanel {
      * consistent
      * with line numbers displayed by the editor.
      *
-     * @param line The desired line number of this TextPane's text. Numbering
-     *             starts at 1, and
-     *             nothing will happen if the parameter second is less than 1
+     * @param line
+     *     The desired line number of this TextPane's text. Numbering
+     *     starts at 1, and
+     *     nothing will happen if the parameter second is less than 1
      */
     public void selectLine(final int line) {
         this.sourceCode.selectLine(line - 1);
@@ -355,8 +373,10 @@ public final class EditPane extends JPanel {
      * at the current cursor location, and wraps around when the end of the string
      * is reached.
      *
-     * @param find          the text to locate in the string
-     * @param caseSensitive true if search is to be case-sensitive, false otherwise
+     * @param find
+     *     the text to locate in the string
+     * @param caseSensitive
+     *     true if search is to be case-sensitive, false otherwise
      * @return TEXT_FOUND or TEXT_NOT_FOUND, depending on the result.
      */
     public @NotNull FindReplaceResult doFindText(final String find, final boolean caseSensitive) {
@@ -370,10 +390,13 @@ public final class EditPane extends JPanel {
      * next occurrence if any. Otherwise it performs a find operation. The replace
      * can be undone with one undo operation.
      *
-     * @param find          the text to locate in the string
-     * @param replace       the text to replace the find text with - if the find
-     *                      text exists
-     * @param caseSensitive true for case sensitive. false to ignore case
+     * @param find
+     *     the text to locate in the string
+     * @param replace
+     *     the text to replace the find text with - if the find
+     *     text exists
+     * @param caseSensitive
+     *     true for case sensitive. false to ignore case
      * @return Returns TEXT_FOUND if not initially at end of selected match and
      * matching
      * occurrence is found. Returns TEXT_NOT_FOUND if the text is not
@@ -403,10 +426,13 @@ public final class EditPane extends JPanel {
      * will
      * undo all of them.
      *
-     * @param find          the text to locate in the string
-     * @param replace       the text to replace the find text with - if the find
-     *                      text exists
-     * @param caseSensitive true for case sensitive. false to ignore case
+     * @param find
+     *     the text to locate in the string
+     * @param replace
+     *     the text to replace the find text with - if the find
+     *     text exists
+     * @param caseSensitive
+     *     true for case sensitive. false to ignore case
      * @return the number of occurrences that were matched and replaced.
      */
     public int doReplaceAll(final String find, final String replace, final boolean caseSensitive) {

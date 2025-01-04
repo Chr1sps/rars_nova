@@ -45,11 +45,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class MonoRightCellRenderer extends DefaultTableCellRenderer {
     @Override
-    public @NotNull Component getTableCellRendererComponent(final JTable table, final Object value,
-                                                            final boolean isSelected, final boolean hasFocus, final int row,
-                                                            final int column) {
-        final JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value,
-            isSelected, hasFocus, row, column);
+    public @NotNull Component getTableCellRendererComponent(
+        final JTable table, final Object value,
+        final boolean isSelected, final boolean hasFocus, final int row,
+        final int column
+    ) {
+        final JLabel cell = (JLabel) super.getTableCellRendererComponent(
+            table, value,
+            isSelected, hasFocus, row, column
+        );
         cell.setFont(FONT_SETTINGS.getCurrentFont());
         cell.setHorizontalAlignment(SwingConstants.RIGHT);
         final var theme = EDITOR_THEME_SETTINGS.currentTheme;

@@ -213,8 +213,9 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         textArea.setEditable(editable);
         setEnabled(editable);
         textArea.setCaretPosition(0);
-        if (editable)
+        if (editable) {
             textArea.requestFocusInWindow();
+        }
     }
 
     @Override

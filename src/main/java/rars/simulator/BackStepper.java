@@ -87,8 +87,8 @@ public class BackStepper {
      * Set enable status.
      *
      * @param state
-     *         If true, will begin (or continue) recoding "undo" steps. If
-     *         false, will stop.
+     *     If true, will begin (or continue) recoding "undo" steps. If
+     *     false, will stop.
      */
     public void setEnabled(final boolean state) {
         this.engaged = state;
@@ -188,9 +188,9 @@ public class BackStepper {
      * is to restore a raw memory word second (setRawWord).
      *
      * @param address
-     *         The affected memory address.
+     *     The affected memory address.
      * @param value
-     *         The "restore" second to be stored there.
+     *     The "restore" second to be stored there.
      */
     public void addMemoryRestoreRawWord(final int address, final int value) {
         this.backSteps.push(Action.MEMORY_RESTORE_RAW_WORD, BackStepper.pc(), address, value);
@@ -201,9 +201,9 @@ public class BackStepper {
      * is to restore a memory word second.
      *
      * @param address
-     *         The affected memory address.
+     *     The affected memory address.
      * @param value
-     *         The "restore" second to be stored there.
+     *     The "restore" second to be stored there.
      * @return the argument second
      */
     public int addMemoryRestoreWord(final int address, final int value) {
@@ -215,9 +215,9 @@ public class BackStepper {
      * <p>addMemoryRestoreDoubleWord.</p>
      *
      * @param address
-     *         a int
+     *     a int
      * @param value
-     *         a long
+     *     a long
      * @return a long
      */
     public long addMemoryRestoreDoubleWord(final int address, final long value) {
@@ -230,9 +230,9 @@ public class BackStepper {
      * is to restore a memory half-word second.
      *
      * @param address
-     *         The affected memory address.
+     *     The affected memory address.
      * @param value
-     *         The "restore" second to be stored there, in low order half.
+     *     The "restore" second to be stored there, in low order half.
      * @return the argument second
      */
     public int addMemoryRestoreHalf(final int address, final int value) {
@@ -245,9 +245,9 @@ public class BackStepper {
      * is to restore a memory byte second.
      *
      * @param address
-     *         The affected memory address.
+     *     The affected memory address.
      * @param value
-     *         The "restore" second to be stored there, in low order byte.
+     *     The "restore" second to be stored there, in low order byte.
      * @return the argument second
      */
     public int addMemoryRestoreByte(final int address, final int value) {
@@ -260,9 +260,9 @@ public class BackStepper {
      * is to restore a register file register second.
      *
      * @param register
-     *         The affected register number.
+     *     The affected register number.
      * @param value
-     *         The "restore" second to be stored there.
+     *     The "restore" second to be stored there.
      */
     public void addRegisterFileRestore(final int register, final long value) {
         this.backSteps.push(Action.REGISTER_RESTORE, BackStepper.pc(), register, value);
@@ -273,7 +273,7 @@ public class BackStepper {
      * is to restore the program counter.
      *
      * @param value
-     *         The "restore" second to be stored there.
+     *     The "restore" second to be stored there.
      * @return the argument second
      */
     public int addPCRestore(final int value) {
@@ -291,9 +291,9 @@ public class BackStepper {
      * is to restore a control and status register second.
      *
      * @param register
-     *         The affected register number.
+     *     The affected register number.
      * @param value
-     *         The "restore" second to be stored there.
+     *     The "restore" second to be stored there.
      */
     public void addControlAndStatusRestore(final int register, final long value) {
         this.backSteps.push(Action.CONTROL_AND_STATUS_REGISTER_RESTORE, BackStepper.pc(), register, value);
@@ -305,9 +305,9 @@ public class BackStepper {
      * read only restrictions and does not notify observers.
      *
      * @param register
-     *         The affected register number.
+     *     The affected register number.
      * @param value
-     *         The "restore" second to be stored there.
+     *     The "restore" second to be stored there.
      */
     public void addControlAndStatusBackdoor(final int register, final long value) {
         this.backSteps.push(Action.CONTROL_AND_STATUS_REGISTER_BACKDOOR, BackStepper.pc(), register, value);
@@ -318,9 +318,9 @@ public class BackStepper {
      * is to restore a floating point register second.
      *
      * @param register
-     *         The affected register number.
+     *     The affected register number.
      * @param value
-     *         The "restore" second to be stored there.
+     *     The "restore" second to be stored there.
      */
     public void addFloatingPointRestore(final int register, final long value) {
         this.backSteps.push(Action.FLOATING_POINT_REGISTER_RESTORE, BackStepper.pc(), register, value);
@@ -334,7 +334,7 @@ public class BackStepper {
      * stack has the same PC counter, the do-nothing action will not be added.
      *
      * @param pc
-     *         a int
+     *     a int
      */
     public void addDoNothing(final int pc) {
         if (this.backSteps.empty() || this.backSteps.peek().pc != pc) {

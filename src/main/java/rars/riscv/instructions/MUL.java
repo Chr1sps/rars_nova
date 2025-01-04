@@ -37,8 +37,10 @@ public final class MUL extends Arithmetic {
      * <p>Constructor for MUL.</p>
      */
     private MUL() {
-        super("mul t1,t2,t3", "Multiplication: set t1 to the lower 32 bits of t2*t3",
-                "0000001", "000");
+        super(
+            "mul t1,t2,t3", "Multiplication: set t1 to the lower 32 bits of t2*t3",
+            "0000001", "000"
+        );
     }
 
     /**

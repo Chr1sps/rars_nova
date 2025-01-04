@@ -139,7 +139,7 @@ public final class Main {
     private static String[] checkMemoryAddressRange(final @NotNull String arg) throws NumberFormatException {
         String[] memoryRange = null;
         if (arg.indexOf(Main.rangeSeparator) > 0 &&
-                arg.indexOf(Main.rangeSeparator) < arg.length() - 1) {
+            arg.indexOf(Main.rangeSeparator) < arg.length() - 1) {
             // assume correct format, two numbers separated by -, no embedded spaces.
             // If that doesn't work it is invalid.
             memoryRange = new String[2];
@@ -148,8 +148,8 @@ public final class Main {
             // NOTE: I will use homegrown decoder, because Integer.decode will throw
             // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
             if (BinaryUtils.stringToInt(memoryRange[0]) > BinaryUtils.stringToInt(memoryRange[1]) ||
-                    !MemoryUtils.wordAligned(BinaryUtils.stringToInt(memoryRange[0])) ||
-                    !MemoryUtils.wordAligned(BinaryUtils.stringToInt(memoryRange[1]))) {
+                !MemoryUtils.wordAligned(BinaryUtils.stringToInt(memoryRange[0])) ||
+                !MemoryUtils.wordAligned(BinaryUtils.stringToInt(memoryRange[1]))) {
                 throw new NumberFormatException();
             }
         }
@@ -159,74 +159,74 @@ public final class Main {
     /// Get command line help text
     private static @NotNull String getHelpMessage() {
         final var segmentNames = MemoryDump.SEGMENTS
-                .stream()
-                .map(MemoryDump.SegmentInfo::name)
-                .toList();
+            .stream()
+            .map(MemoryDump.SegmentInfo::name)
+            .toList();
         final var segmentsBuilder = new StringBuilder();
         Utils.intersperseStream(segmentNames.stream(), ", ")
-                .forEach(segmentsBuilder::append);
+            .forEach(segmentsBuilder::append);
         final var dumpFormats = DumpFormats.DUMP_FORMATS;
         final var formatsBuilder = new StringBuilder();
         Utils.intersperseStream(
-                        dumpFormats
-                                .stream()
-                                .map(DumpFormat::getCommandDescriptor),
-                        ", "
-                )
-                .forEach(formatsBuilder::append);
+                dumpFormats
+                    .stream()
+                    .map(DumpFormat::getCommandDescriptor),
+                ", "
+            )
+            .forEach(formatsBuilder::append);
         return """
-                Usage:  Rars  [options] filename [additional filenames]
-                
-                Valid options (not case sensitive, separate by spaces) are:
-                           a  -- assemble only, do not simulate
-                       ae<n>  -- terminate RARS with integer exit code <n> if an assemble error occurs.
-                       ascii  -- display memory or register contents interpreted as ASCII codes.
-                           b  -- brief - do not display register/memory address along with contents
-                           d  -- display RARS debugging statements
-                         dec  -- display memory or register contents in decimal.
-                dump <segment> <format> <file> -- memory dump of specified memory segment
-                                 in specified format to specified file.  Option may be repeated.
-                                 Dump occurs at the end of simulation unless 'a' option is used.
-                                 Segment and format are case-sensitive and possible values are:
-                                 <segment> = %s, or a range like 0x400000-0x10000000
-                                 <format> = %s
-                           g  -- force GUI mode
-                           h  -- display this help.  Use by itself with no filename.
-                         hex  -- display memory or register contents in hexadecimal (default)
-                          ic  -- display count of basic instructions 'executed'
-                wmc <config>  -- set memory configuration.  Argument <config> is
-                                 case-sensitive and possible values are: Default for the default
-                                 32-bit address space, CompactDataAtZero for a 32KB memory with
-                                 data segment at address 0, or CompactTextAtZero for a 32KB
-                                 memory with text segment at address 0.
-                          me  -- display RARS messages to standard err instead of standard out.
-                                 Can separate messages from program output using redirection
-                          nc  -- do not display copyright notice (for cleaner redirected/piped output).
-                          np  -- use of pseudo instructions and formats not permitted
-                           p  -- Project mode - assemble all files in the same directory as given file.
-                       se<n>  -- terminate RARS with integer exit code <n> if a simulation (run) error occurs.
-                          sm  -- start execution at statement with global label main, if defined
-                         smc  -- Self Modifying Code - Program can write and branch to either text or data segment
-                        rv64  -- Enables 64 bit assembly and executables (Not fully compatible with rv32)
-                         <n>  -- where <n> is an integer maximum count of steps to simulate.
-                                 If 0, negative or not specified, there is no maximum.
-                      x<reg>  -- where <reg> is number or name (e.g. 5, t3, f10) of register whose
-                                 content to display at end of run. Option may be repeated.
-                  <reg_name>  -- where <reg_name> is name (e.g. t3, f10) of register whose
-                                 content to display at end of run. Option may be repeated.
-                     <m>-<n>  -- memory address range from <m> to <n> whose contents to
-                                 display at end of run. <m> and <n> may be hex or decimal,
-                                 must be on word boundary, <m> <= <n>.  Option may be repeated.
-                          pa  -- Program Arguments follow in a space-separated list.  This
-                                 option must be placed AFTER ALL FILE NAMES, because everything
-                                 that follows it is interpreted as a program argument to be
-                                 made available to the program at runtime.
-                
-                If more than one filename is listed, the first is assumed to be the main
-                unless the global statement label 'main' is defined in one of the files.
-                Exception handler not automatically assembled.  Add it to the file list.
-                Options used here do not affect RARS Settings menu values and vice versa.
-                """.formatted(segmentsBuilder.toString(), formatsBuilder.toString());
+            Usage:  Rars  [options] filename [additional filenames]
+            
+            Valid options (not case sensitive, separate by spaces) are:
+                       a  -- assemble only, do not simulate
+                   ae<n>  -- terminate RARS with integer exit code <n> if an assemble error occurs.
+                   ascii  -- display memory or register contents interpreted as ASCII codes.
+                       b  -- brief - do not display register/memory address along with contents
+                       d  -- display RARS debugging statements
+                     dec  -- display memory or register contents in decimal.
+            dump <segment> <format> <file> -- memory dump of specified memory segment
+                             in specified format to specified file.  Option may be repeated.
+                             Dump occurs at the end of simulation unless 'a' option is used.
+                             Segment and format are case-sensitive and possible values are:
+                             <segment> = %s, or a range like 0x400000-0x10000000
+                             <format> = %s
+                       g  -- force GUI mode
+                       h  -- display this help.  Use by itself with no filename.
+                     hex  -- display memory or register contents in hexadecimal (default)
+                      ic  -- display count of basic instructions 'executed'
+            wmc <config>  -- set memory configuration.  Argument <config> is
+                             case-sensitive and possible values are: Default for the default
+                             32-bit address space, CompactDataAtZero for a 32KB memory with
+                             data segment at address 0, or CompactTextAtZero for a 32KB
+                             memory with text segment at address 0.
+                      me  -- display RARS messages to standard err instead of standard out.
+                             Can separate messages from program output using redirection
+                      nc  -- do not display copyright notice (for cleaner redirected/piped output).
+                      np  -- use of pseudo instructions and formats not permitted
+                       p  -- Project mode - assemble all files in the same directory as given file.
+                   se<n>  -- terminate RARS with integer exit code <n> if a simulation (run) error occurs.
+                      sm  -- start execution at statement with global label main, if defined
+                     smc  -- Self Modifying Code - Program can write and branch to either text or data segment
+                    rv64  -- Enables 64 bit assembly and executables (Not fully compatible with rv32)
+                     <n>  -- where <n> is an integer maximum count of steps to simulate.
+                             If 0, negative or not specified, there is no maximum.
+                  x<reg>  -- where <reg> is number or name (e.g. 5, t3, f10) of register whose
+                             content to display at end of run. Option may be repeated.
+              <reg_name>  -- where <reg_name> is name (e.g. t3, f10) of register whose
+                             content to display at end of run. Option may be repeated.
+                 <m>-<n>  -- memory address range from <m> to <n> whose contents to
+                             display at end of run. <m> and <n> may be hex or decimal,
+                             must be on word boundary, <m> <= <n>.  Option may be repeated.
+                      pa  -- Program Arguments follow in a space-separated list.  This
+                             option must be placed AFTER ALL FILE NAMES, because everything
+                             that follows it is interpreted as a program argument to be
+                             made available to the program at runtime.
+            
+            If more than one filename is listed, the first is assumed to be the main
+            unless the global statement label 'main' is defined in one of the files.
+            Exception handler not automatically assembled.  Add it to the file list.
+            Options used here do not affect RARS Settings menu values and vice versa.
+            """.formatted(segmentsBuilder.toString(), formatsBuilder.toString());
     }
 
     private void displayAllPostMortem(final @NotNull Program program) {
@@ -251,16 +251,16 @@ public final class Main {
                 try {
                     final String[] memoryRange = Main.checkMemoryAddressRange(triple[0]);
                     segmentBounds = new Pair<>(
-                            BinaryUtils.stringToInt(memoryRange[0]),
-                            BinaryUtils.stringToInt(memoryRange[1])
+                        BinaryUtils.stringToInt(memoryRange[0]),
+                        BinaryUtils.stringToInt(memoryRange[1])
                     );
                 } catch (final NumberFormatException |
-                               NullPointerException ignored) {
+                    NullPointerException ignored) {
                 }
             }
             if (segmentBounds == null) {
                 this.out.println("Error while attempting to save dump, segment/address-range " + triple[0] + " is " +
-                        "invalid!");
+                    "invalid!");
                 continue;
             }
             final DumpFormat format = DumpFormats.findDumpFormatGivenCommandDescriptor(triple[1]);
@@ -270,10 +270,10 @@ public final class Main {
             }
             try {
                 final int highAddress = program.getMemory().getAddressOfFirstNull(
-                        segmentBounds.first(),
-                        segmentBounds.second()
+                    segmentBounds.first(),
+                    segmentBounds.second()
                 )
-                        - DataTypes.WORD_SIZE;
+                    - DataTypes.WORD_SIZE;
                 if (highAddress < segmentBounds.first()) {
                     this.out.println("This segment has not been written to, there is nothing to dump.");
                     continue;
@@ -283,7 +283,7 @@ public final class Main {
                 this.out.println("Error while attempting to save dump, file " + file + " was not found!");
             } catch (final AddressErrorException e) {
                 this.out.println("Error while attempting to save dump, file " + file + "!  Could not access address: "
-                        + e.address + "!");
+                    + e.address + "!");
             } catch (final IOException e) {
                 this.out.println("Error while attempting to save dump, file " + file + "!  Disk IO failed!");
             }
@@ -307,11 +307,11 @@ public final class Main {
             System.setProperty("apple.awt.application.appearance", "system");
         }
         SwingUtilities.invokeLater(
-                () -> {
-                    // Turn off metal's use of bold fonts
-                    // UIManager.put("swing.boldMetal", Boolean.FALSE);
-                    new VenusUI("RARS " + Globals.version, this.filenameList);
-                });
+            () -> {
+                // Turn off metal's use of bold fonts
+                // UIManager.put("swing.boldMetal", Boolean.FALSE);
+                new VenusUI("RARS " + Globals.version, this.filenameList);
+            });
     }
 
     /**
@@ -342,11 +342,11 @@ public final class Main {
         // Decide whether copyright should be displayed, and display
         // if so.
         final var doDisplayCopyrightNotice = Arrays.stream(args).noneMatch(arg ->
-                arg.equalsIgnoreCase(noCopyrightSwitch)
+            arg.equalsIgnoreCase(noCopyrightSwitch)
         );
         if (doDisplayCopyrightNotice) {
             this.out.println("RARS " + Globals.version + "  Copyright " + Globals.copyrightYears + " " + Globals.copyrightHolders
-                    + "\n");
+                + "\n");
         }
 
         if (args.length == 1 && args[0].equals("h")) {
@@ -431,7 +431,7 @@ public final class Main {
                 continue;
             }
             if (args[i].equalsIgnoreCase("ad") ||
-                    args[i].equalsIgnoreCase("da")) {
+                args[i].equalsIgnoreCase("da")) {
                 Globals.debug = true;
                 this.simulate = false;
                 continue;
@@ -492,7 +492,7 @@ public final class Main {
 
             if (args[i].indexOf("x") == 0) {
                 if (RegisterFile.getRegister(args[i]) == null &&
-                        FloatingPointRegisterFile.getRegister(args[i]) == null) {
+                    FloatingPointRegisterFile.getRegister(args[i]) == null) {
                     this.out.println("Invalid Register Name: " + args[i]);
                 } else {
                     this.registerDisplayList.add(args[i]);
@@ -501,8 +501,8 @@ public final class Main {
             }
             // check for register name w/o $. added 14-July-2008 DPS
             if (RegisterFile.getRegister(args[i]) != null ||
-                    FloatingPointRegisterFile.getRegister(args[i]) != null ||
-                    ControlAndStatusRegisterFile.getRegister(args[i]) != null) {
+                FloatingPointRegisterFile.getRegister(args[i]) != null ||
+                ControlAndStatusRegisterFile.getRegister(args[i]) != null) {
                 this.registerDisplayList.add(args[i]);
                 continue;
             }
@@ -551,8 +551,8 @@ public final class Main {
                 // Add the additional files, avoiding duplicates.
                 this.filenameList.removeFirst(); // first one has already been processed
                 final var moreFilesToAssemble = FilenameFinder.getFilenameList(
-                        this.filenameList,
-                        FilenameFinder.MATCH_ALL_EXTENSIONS
+                    this.filenameList,
+                    FilenameFinder.MATCH_ALL_EXTENSIONS
                 );
                 // Remove any duplicates then merge the two lists.
                 for (int index2 = 0; index2 < moreFilesToAssemble.size(); index2++) {
@@ -595,8 +595,8 @@ public final class Main {
                     final Simulator.Reason done = program.simulate();
                     if (done == Simulator.Reason.MAX_STEPS) {
                         this.out.println("\nProgram terminated when maximum step limit " + this.options.maxSteps +
-                                " " +
-                                "reached.");
+                            " " +
+                            "reached.");
                         break;
                     } else if (done == Simulator.Reason.CLIFF_TERMINATION) {
                         this.out.println("\nProgram terminated by dropping off the bottom.");
@@ -606,7 +606,7 @@ public final class Main {
                         break;
                     }
                     assert done == Simulator.Reason.BREAKPOINT
-                            : "Internal error: All cases other than breakpoints should be handled already";
+                        : "Internal error: All cases other than breakpoints should be handled already";
                     this.displayAllPostMortem(program); // print registers if we hit a breakpoint, then continue
                 }
 
@@ -660,7 +660,7 @@ public final class Main {
             } else if (ControlAndStatusRegisterFile.getRegister(reg) != null) {
                 this.out.print(reg + "\t");
                 this.out.println(this.formatIntForDisplay((int) ControlAndStatusRegisterFile.getRegister(reg)
-                        .getValue()));
+                    .getValue()));
             } else if (this.verbose) {
                 this.out.print(reg + "\t");
                 this.out.println(this.formatIntForDisplay((int) RegisterFile.getRegister(reg).getValue()));

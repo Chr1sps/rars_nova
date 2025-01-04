@@ -30,13 +30,15 @@ public final class Utils {
         return writer.toString();
     }
 
-
     /**
      * <p>findAndSimulateSyscall.</p>
      *
-     * @param number    a int
-     * @param statement a {@link ProgramStatement} object
-     * @throws SimulationException if any.
+     * @param number
+     *     a int
+     * @param statement
+     *     a {@link ProgramStatement} object
+     * @throws SimulationException
+     *     if any.
      */
     public static void findAndSimulateSyscall(final int number, final ProgramStatement statement)
         throws SimulationException {
@@ -59,16 +61,19 @@ public final class Utils {
             service.simulate(statement);
             return;
         }
-        throw new SimulationException(statement,
+        throw new SimulationException(
+            statement,
             "invalid or unimplemented syscall service: " +
                 number + " ",
-            ExceptionReason.ENVIRONMENT_CALL);
+            ExceptionReason.ENVIRONMENT_CALL
+        );
     }
 
     /**
      * <p>processBranch.</p>
      *
-     * @param displacement a int
+     * @param displacement
+     *     a int
      */
     public static void processBranch(final int displacement) {
         // Decrement needed because PC has already been incremented
@@ -79,7 +84,8 @@ public final class Utils {
     /**
      * <p>processJump.</p>
      *
-     * @param targetAddress a int
+     * @param targetAddress
+     *     a int
      */
     public static void processJump(final int targetAddress) {
         RegisterFile.setProgramCounter(targetAddress);
@@ -98,7 +104,8 @@ public final class Utils {
     /**
      * <p>flipRounding.</p>
      *
-     * @param e a {@link Environment} object
+     * @param e
+     *     a {@link Environment} object
      */
     public static void flipRounding(@NotNull final Environment e) {
         if (e.mode == RoundingMode.MAX) {
@@ -115,27 +122,31 @@ public final class Utils {
             if (firstIterator.hasNext() && secondIterator.hasNext()) {
                 return new Pair<>(firstIterator.next(), secondIterator.next());
             }
-            //noinspection ReturnOfNull
+            // noinspection ReturnOfNull
             return null;
         }).takeWhile(Objects::nonNull);
     }
 
     @SafeVarargs
-    public static <T> Stream<T> concatStreams(final @NotNull Stream<? extends T> first,
-                                              final Stream<? extends T> @NotNull ... others) {
+    public static <T> Stream<T> concatStreams(
+        final @NotNull Stream<? extends T> first,
+        final Stream<? extends T> @NotNull ... others
+    ) {
         var result = first;
         for (final var other : others) {
             result = Stream.concat(result, other);
         }
-        //noinspection unchecked
+        // noinspection unchecked
         return (Stream<T>) result;
     }
 
     /**
      * Intersperses a separator between each element of the stream.
      *
-     * @param stream    The stream to intersperse
-     * @param separator The separator element to insert between each element of the stream
+     * @param stream
+     *     The stream to intersperse
+     * @param separator
+     *     The separator element to insert between each element of the stream
      * @return A new stream with the separator interspersed between each element of the original stream
      */
     public static <T> @NotNull Stream<T> intersperseStream(final @NotNull Stream<T> stream, final T separator) {
@@ -165,7 +176,7 @@ public final class Utils {
         var fontStyle = 0;
         if (style.isBold()) fontStyle |= Font.BOLD;
         if (style.isItalic()) fontStyle |= Font.ITALIC;
-        //noinspection MagicConstant
+        // noinspection MagicConstant
         return baseFont.deriveFont(fontStyle);
     }
 }

@@ -27,8 +27,10 @@ public final class RSTATokensProducer extends TokenMakerBase implements TokensPr
     }
 
     @Override
-    public void addToken(final char[] array, final int start, final int end, @NotNull final RVTokenType tokenType,
-                         final int startOffset) {
+    public void addToken(
+        final char[] array, final int start, final int end, @NotNull final RVTokenType tokenType,
+        final int startOffset
+    ) {
         this.addToken(array, start, end, tokenValue(tokenType), startOffset);
     }
 

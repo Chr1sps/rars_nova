@@ -47,8 +47,9 @@ public final class RunResetAction extends GuiAction {
     private final VenusUI mainUI;
 
     public RunResetAction(
-            final String name, final Icon icon, final String descrip,
-            final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel, final VenusUI gui
+    ) {
         super(name, icon, descrip, mnemonic, accel);
         mainUI = gui;
     }
@@ -72,14 +73,16 @@ public final class RunResetAction extends GuiAction {
         // I am choosing the second approach although it will slow down the reset
         // operation. The first approach requires additional Memory class methods.
         try {
-            Globals.program.assemble(RunAssembleAction.getProgramsToAssemble(),
-                    RunAssembleAction.getExtendedAssemblerEnabled(),
-                    RunAssembleAction.getWarningsAreErrors());
+            Globals.program.assemble(
+                RunAssembleAction.getProgramsToAssemble(),
+                RunAssembleAction.getExtendedAssemblerEnabled(),
+                RunAssembleAction.getWarningsAreErrors()
+            );
         } catch (final AssemblyException pe) {
             // Should not be possible
             mainUI.messagesPane.postMessage(
-                    // pe.errors().generateErrorReport());
-                    "Unable to reset.  Please close file then re-open and re-assemble.\n");
+                // pe.errors().generateErrorReport());
+                "Unable to reset.  Please close file then re-open and re-assemble.\n");
             return;
         }
 
@@ -108,6 +111,6 @@ public final class RunResetAction extends GuiAction {
         SystemIO.resetFiles(); // Ensure that I/O "file descriptors" are initialized for a new program run
 
         mainUI.messagesPane.postRunMessage(
-                "\n" + name + ": reset completed.\n\n");
+            "\n" + name + ": reset completed.\n\n");
     }
 }

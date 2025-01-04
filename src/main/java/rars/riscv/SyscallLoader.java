@@ -55,48 +55,48 @@ public final class SyscallLoader {
     static {
         // Replaced dynamic loading with static loading to avoid any funny loading errors.
         final var baseSyscallList = List.of(
-                new SyscallClose(),
-                new SyscallConfirmDialog(),
-                new SyscallExit(),
-                new SyscallExit2(),
-                new SyscallGetCWD(),
-                new SyscallInputDialogDouble(),
-                new SyscallInputDialogFloat(),
-                new SyscallInputDialogInt(),
-                new SyscallInputDialogString(),
-                new SyscallLSeek(),
-                new SyscallMessageDialog(),
-                new SyscallMessageDialogDouble(),
-                new SyscallMessageDialogFloat(),
-                new SyscallMessageDialogInt(),
-                new SyscallMessageDialogString(),
-                new SyscallMidiOut(),
-                new SyscallMidiOutSync(),
-                new SyscallOpen(),
-                new SyscallPrintChar(),
-                new SyscallPrintDouble(),
-                new SyscallPrintFloat(),
-                new SyscallPrintInt(),
-                new SyscallPrintIntBinary(),
-                new SyscallPrintIntHex(),
-                new SyscallPrintIntUnsigned(),
-                new SyscallPrintString(),
-                new SyscallRandDouble(),
-                new SyscallRandFloat(),
-                new SyscallRandInt(),
-                new SyscallRandIntRange(),
-                new SyscallRandSeed(),
-                new SyscallRead(),
-                new SyscallReadChar(),
-                new SyscallReadDouble(),
-                new SyscallReadFloat(),
-                new SyscallReadInt(),
-                new SyscallReadString(),
-                new SyscallSbrk(),
-                new SyscallSleep(),
-                new SyscallTime(),
-                new SyscallWrite(),
-                new SyscallDisplayBitmap()
+            new SyscallClose(),
+            new SyscallConfirmDialog(),
+            new SyscallExit(),
+            new SyscallExit2(),
+            new SyscallGetCWD(),
+            new SyscallInputDialogDouble(),
+            new SyscallInputDialogFloat(),
+            new SyscallInputDialogInt(),
+            new SyscallInputDialogString(),
+            new SyscallLSeek(),
+            new SyscallMessageDialog(),
+            new SyscallMessageDialogDouble(),
+            new SyscallMessageDialogFloat(),
+            new SyscallMessageDialogInt(),
+            new SyscallMessageDialogString(),
+            new SyscallMidiOut(),
+            new SyscallMidiOutSync(),
+            new SyscallOpen(),
+            new SyscallPrintChar(),
+            new SyscallPrintDouble(),
+            new SyscallPrintFloat(),
+            new SyscallPrintInt(),
+            new SyscallPrintIntBinary(),
+            new SyscallPrintIntHex(),
+            new SyscallPrintIntUnsigned(),
+            new SyscallPrintString(),
+            new SyscallRandDouble(),
+            new SyscallRandFloat(),
+            new SyscallRandInt(),
+            new SyscallRandIntRange(),
+            new SyscallRandSeed(),
+            new SyscallRead(),
+            new SyscallReadChar(),
+            new SyscallReadDouble(),
+            new SyscallReadFloat(),
+            new SyscallReadInt(),
+            new SyscallReadString(),
+            new SyscallSbrk(),
+            new SyscallSleep(),
+            new SyscallTime(),
+            new SyscallWrite(),
+            new SyscallDisplayBitmap()
         );
 
         SyscallLoader.syscallList = SyscallLoader.processSyscallNumberOverrides(baseSyscallList);
@@ -110,9 +110,9 @@ public final class SyscallLoader {
         final var overrides = Globals.getSyscallOverrides();
         if (baseList.size() != overrides.size()) {
             SyscallLoader.LOGGER.fatal(
-                    "Error: the number of entries in the config file does not match the number of syscalls loaded");
+                "Error: the number of entries in the config file does not match the number of syscalls loaded");
             SyscallLoader.LOGGER.fatal(
-                    "Ensure there is a Syscall.properties file in the directory you are executing if you are a developer");
+                "Ensure there is a Syscall.properties file in the directory you are executing if you are a developer");
             SyscallLoader.LOGGER.fatal("syscall list: {}, overrides: {}", baseList.size(), overrides.size());
             System.exit(0);
         }
@@ -121,12 +121,19 @@ public final class SyscallLoader {
             for (final AbstractSyscall syscall : baseList) {
                 if (syscall.getNumber() == override.number()) {
                     final var syscallName = syscall.getName();
-                    SyscallLoader.LOGGER.fatal("Duplicate service number: {} already registered to {}", syscall.getNumber(), syscallName);
+                    SyscallLoader.LOGGER.fatal(
+                        "Duplicate service number: {} already registered to {}",
+                        syscall.getNumber(),
+                        syscallName
+                    );
                     System.exit(0);
                 }
                 if (override.name().equals(syscall.getName())) {
                     if (syscall.getNumber() != -1) {
-                        SyscallLoader.LOGGER.fatal("Error: {} was assigned a numebr twice in the config file", syscall.getName());
+                        SyscallLoader.LOGGER.fatal(
+                            "Error: {} was assigned a numebr twice in the config file",
+                            syscall.getName()
+                        );
                         System.exit(0);
                     }
                     if (override.number() < 0) {
@@ -139,7 +146,10 @@ public final class SyscallLoader {
                 }
             }
             if (!match) {
-                SyscallLoader.LOGGER.fatal("Error: syscall name '{}' in config file does not match any name in syscall list", override.name());
+                SyscallLoader.LOGGER.fatal(
+                    "Error: syscall name '{}' in config file does not match any name in syscall list",
+                    override.name()
+                );
                 System.exit(0);
             }
         }
@@ -150,7 +160,8 @@ public final class SyscallLoader {
      * Method to find Syscall object associated with given service number.
      * Returns null if no associated object found.
      *
-     * @param number a int
+     * @param number
+     *     a int
      * @return a {@link AbstractSyscall} object
      */
     public static @Nullable AbstractSyscall findSyscall(final @Range(from = 0, to = Integer.MAX_VALUE) int number) {

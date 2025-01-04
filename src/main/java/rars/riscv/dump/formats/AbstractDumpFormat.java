@@ -23,14 +23,17 @@ public abstract class AbstractDumpFormat implements DumpFormat {
      * Typical constructor. Note you cannot creates objects from this
      * class but subclass constructor can call this one.
      *
-     * @param name              Brief descriptive name to be displayed in selection
-     *                          list.
-     * @param commandDescriptor One-word descriptive name to be used by RARS command
-     *                          mode parser and user.
-     *                          Any spaces in this string will be removed.
-     * @param description       Description to go with standard file extension for
-     *                          display in file save dialog or to be used as tool
-     *                          tip.
+     * @param name
+     *     Brief descriptive name to be displayed in selection
+     *     list.
+     * @param commandDescriptor
+     *     One-word descriptive name to be used by RARS command
+     *     mode parser and user.
+     *     Any spaces in this string will be removed.
+     * @param description
+     *     Description to go with standard file extension for
+     *     display in file save dialog or to be used as tool
+     *     tip.
      */
     public AbstractDumpFormat(
         final @NotNull String name,
@@ -63,8 +66,10 @@ public abstract class AbstractDumpFormat implements DumpFormat {
     }
 
     @Override
-    public abstract void dumpMemoryRange(final @NotNull File file, int firstAddress, int lastAddress,
-                                         @NotNull Memory memory)
+    public abstract void dumpMemoryRange(
+        final @NotNull File file, int firstAddress, int lastAddress,
+        @NotNull Memory memory
+    )
         throws AddressErrorException, IOException;
 
 }

@@ -39,9 +39,11 @@ public final class MULHSU extends Arithmetic {
      * <p>Constructor for MULHSU.</p>
      */
     private MULHSU() {
-        super("mulhsu t1,t2,t3",
-                "Multiplication: set t1 to the upper 32 bits of t2*t3 where t2 is signed and t3 is unsigned",
-                "0000001", "010");
+        super(
+            "mulhsu t1,t2,t3",
+            "Multiplication: set t1 to the upper 32 bits of t2*t3 where t2 is signed and t3 is unsigned",
+            "0000001", "010"
+        );
     }
 
     /**

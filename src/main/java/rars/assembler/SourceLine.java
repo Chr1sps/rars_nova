@@ -44,10 +44,13 @@ public record SourceLine(@NotNull String source, @NotNull RISCVProgram program, 
     /**
      * SourceLine constructor
      *
-     * @param source     The source code itself
-     * @param program    The program (object representing source file) containing
-     *                   that line
-     * @param lineNumber The line number within that program where source appears.
+     * @param source
+     *     The source code itself
+     * @param program
+     *     The program (object representing source file) containing
+     *     that line
+     * @param lineNumber
+     *     The line number within that program where source appears.
      */
     public SourceLine(@NotNull final String source, @NotNull final RISCVProgram program, final int lineNumber) {
         this(source, program, program.getFilename(), lineNumber);

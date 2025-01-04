@@ -71,10 +71,12 @@ public final class RISCVProgram {
      * stopped,
      * paused, maximum steps exceeded, or exception occurs.
      *
-     * @param maxSteps the maximum maximum number of steps to simulate.
+     * @param maxSteps
+     *     the maximum maximum number of steps to simulate.
      * @return reason for the interruption of the program
-     * @throws SimulationException Will throw exception if errors occurred while
-     *                             simulating.
+     * @throws SimulationException
+     *     Will throw exception if errors occurred while
+     *     simulating.
      */
     public static Simulator.Reason simulate(final int maxSteps) throws SimulationException {
         final Simulator sim = Simulator.getInstance();
@@ -88,9 +90,11 @@ public final class RISCVProgram {
      * stopped,
      * paused, maximum steps exceeded, or exception occurs.
      *
-     * @param maxSteps    maximum number of instruction executions. Default -1 means
-     *                    no maximum.
-     * @param breakPoints int array of breakpoints (PC addresses). Can be null.
+     * @param maxSteps
+     *     maximum number of instruction executions. Default -1 means
+     *     no maximum.
+     * @param breakPoints
+     *     int array of breakpoints (PC addresses). Can be null.
      */
     public static void startSimulation(final int maxSteps, final int[] breakPoints) {
         final Simulator sim = Simulator.getInstance();
@@ -119,9 +123,10 @@ public final class RISCVProgram {
     /**
      * Set list of source statements that comprise the program.
      *
-     * @param sourceLineList ArrayList of SourceLine.
-     *                       Each SourceLine represents one line of RISCV source
-     *                       code.
+     * @param sourceLineList
+     *     ArrayList of SourceLine.
+     *     Each SourceLine represents one line of RISCV source
+     *     code.
      */
     public void setSourceLineList(final @NotNull List<SourceLine> sourceLineList) {
         this.sourceLineList = sourceLineList;
@@ -207,21 +212,24 @@ public final class RISCVProgram {
     /**
      * Produces specified line of RISCV source program.
      *
-     * @param i Line number of RISCV source program to get. Line 1 is first line.
+     * @param i
+     *     Line number of RISCV source program to get. Line 1 is first line.
      * @return Returns specified line of RISCV source. If outside the line range,
      * it returns null. Line 1 is first line.
      */
     public @Nullable String getSourceLine(final int i) {
-        if ((i >= 1) && (i <= this.sourceList.size()))
+        if ((i >= 1) && (i <= this.sourceList.size())) {
             return this.sourceList.get(i - 1);
-        else
+        } else {
             return null;
+        }
     }
 
     /**
      * Reads RISCV source code from a string into structure.
      *
-     * @param source String containing the RISCV source code.
+     * @param source
+     *     String containing the RISCV source code.
      */
     public void fromString(final @NotNull String source) {
         this.filename = source;
@@ -233,9 +241,11 @@ public final class RISCVProgram {
      * It is GUI responsibility to assure that source edits are written to file
      * when user selects compile or run/step options.
      *
-     * @param file String containing name of RISCV source code file.
-     * @throws AssemblyException Will throw exception if there is any problem
-     *                           reading the file.
+     * @param file
+     *     String containing name of RISCV source code file.
+     * @throws AssemblyException
+     *     Will throw exception if there is any problem
+     *     reading the file.
      */
     public void readSource(final @NotNull String file) throws AssemblyException {
         this.filename = file;
@@ -262,8 +272,9 @@ public final class RISCVProgram {
      * Tokenizes the RISCV source program. Program must have already been read from
      * file.
      *
-     * @throws AssemblyException Will throw exception if errors occurred while
-     *                           tokenizing.
+     * @throws AssemblyException
+     *     Will throw exception if errors occurred while
+     *     tokenizing.
      */
     public void tokenize() throws AssemblyException {
         this.tokenList = Tokenizer.tokenize(this);
@@ -274,28 +285,34 @@ public final class RISCVProgram {
      * Prepares the given list of files for assembly. This involves
      * reading and tokenizing all the source files. There may be only one.
      *
-     * @param filenames        ArrayList containing the source file name(s) in no
-     *                         particular order
-     * @param leadFilename     String containing name of source file that needs to
-     *                         go first and
-     *                         will be represented by "this" RISCVprogram object.
-     * @param exceptionHandler String containing name of source file containing
-     *                         exception
-     *                         handler. This will be assembled first, even ahead of
-     *                         leadFilename, to allow it to
-     *                         include "startup" instructions loaded beginning at
-     *                         0x00400000. Specify null or
-     *                         empty String to indicate there is no such designated
-     *                         exception handler.
+     * @param filenames
+     *     ArrayList containing the source file name(s) in no
+     *     particular order
+     * @param leadFilename
+     *     String containing name of source file that needs to
+     *     go first and
+     *     will be represented by "this" RISCVprogram object.
+     * @param exceptionHandler
+     *     String containing name of source file containing
+     *     exception
+     *     handler. This will be assembled first, even ahead of
+     *     leadFilename, to allow it to
+     *     include "startup" instructions loaded beginning at
+     *     0x00400000. Specify null or
+     *     empty String to indicate there is no such designated
+     *     exception handler.
      * @return ArrayList containing one RISCVprogram object for each file to
      * assemble.
      * objects for any additional files (send ArrayList to assembler)
-     * @throws AssemblyException Will throw exception if errors occurred while
-     *                           reading or tokenizing.
+     * @throws AssemblyException
+     *     Will throw exception if errors occurred while
+     *     reading or tokenizing.
      */
-    public @NotNull List<RISCVProgram> prepareFilesForAssembly(final @NotNull List<String> filenames,
-                                                               final @NotNull String leadFilename,
-                                                               final @Nullable String exceptionHandler) throws AssemblyException {
+    public @NotNull List<RISCVProgram> prepareFilesForAssembly(
+        final @NotNull List<String> filenames,
+        final @NotNull String leadFilename,
+        final @Nullable String exceptionHandler
+    ) throws AssemblyException {
         final var programsToAssemble = new ArrayList<RISCVProgram>();
         int leadFilePosition = 0;
         if (exceptionHandler != null && !exceptionHandler.isEmpty()) {
@@ -322,26 +339,32 @@ public final class RISCVProgram {
      * have
      * already been tokenized.
      *
-     * @param programsToAssemble       ArrayList of RISCVprogram objects, each
-     *                                 representing a tokenized source file.
-     * @param extendedAssemblerEnabled A boolean second - true means extended
-     *                                 (usePseudoInstructions) instructions
-     *                                 are permitted in source code and false means
-     *                                 they are to be flagged as errors
-     * @param warningsAreErrors        A boolean second - true means assembler
-     *                                 warnings will be considered errors and
-     *                                 terminate
-     *                                 the assemble; false means the assembler will
-     *                                 produce warning message but otherwise ignore
-     *                                 warnings.
+     * @param programsToAssemble
+     *     ArrayList of RISCVprogram objects, each
+     *     representing a tokenized source file.
+     * @param extendedAssemblerEnabled
+     *     A boolean second - true means extended
+     *     (usePseudoInstructions) instructions
+     *     are permitted in source code and false means
+     *     they are to be flagged as errors
+     * @param warningsAreErrors
+     *     A boolean second - true means assembler
+     *     warnings will be considered errors and
+     *     terminate
+     *     the assemble; false means the assembler will
+     *     produce warning message but otherwise ignore
+     *     warnings.
      * @return ErrorList containing nothing or only warnings (otherwise would have
      * thrown exception).
-     * @throws AssemblyException Will throw exception if errors occurred while
-     *                           assembling.
+     * @throws AssemblyException
+     *     Will throw exception if errors occurred while
+     *     assembling.
      */
-    public ErrorList assemble(final @NotNull List<RISCVProgram> programsToAssemble,
-                              final boolean extendedAssemblerEnabled,
-                              final boolean warningsAreErrors) throws AssemblyException {
+    public ErrorList assemble(
+        final @NotNull List<RISCVProgram> programsToAssemble,
+        final boolean extendedAssemblerEnabled,
+        final boolean warningsAreErrors
+    ) throws AssemblyException {
         this.backStepper = null;
         final var assembler = new Assembler();
         this.machineList = assembler.assemble(programsToAssemble, extendedAssemblerEnabled, warningsAreErrors);
@@ -374,7 +397,8 @@ public final class RISCVProgram {
     /**
      * Sets local macro pool {@link MacroPool} for this program
      *
-     * @param macroPool reference to MacroPool
+     * @param macroPool
+     *     reference to MacroPool
      * @author M.H.Sekhavat &lt;sekhavat17@gmail.com&gt;
      */
     public void setLocalMacroPool(final MacroPool macroPool) {

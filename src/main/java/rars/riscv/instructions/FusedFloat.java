@@ -81,6 +81,8 @@ public abstract class FusedFloat extends BasicInstruction {
      *     a {@link Environment} object
      * @return The second to store to the destination
      */
-    protected abstract @NotNull Float32 compute(@NotNull Float32 r1, @NotNull Float32 r2, @NotNull Float32 r3,
-                                                @NotNull Environment e);
+    protected abstract @NotNull Float32 compute(
+        @NotNull Float32 r1, @NotNull Float32 r2, @NotNull Float32 r3,
+        @NotNull Environment e
+    );
 }

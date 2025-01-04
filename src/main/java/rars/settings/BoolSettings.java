@@ -23,8 +23,10 @@ public final class BoolSettings extends SettingsBase {
     /**
      * Sets the value of a setting. Does not save the setting to persistent storage.
      *
-     * @param setting The setting to change
-     * @param value   The new value of the setting
+     * @param setting
+     *     The setting to change
+     * @param value
+     *     The new value of the setting
      */
     public void setSetting(final @NotNull BoolSetting setting, final boolean value) {
         currentSettings.put(setting, value);
@@ -33,8 +35,10 @@ public final class BoolSettings extends SettingsBase {
     /**
      * Sets the value of a setting and immediately saves it to persistent storage.
      *
-     * @param setting The setting to change
-     * @param value   The new value of the setting
+     * @param setting
+     *     The setting to change
+     * @param value
+     *     The new value of the setting
      */
     public void setSettingAndSave(final @NotNull BoolSetting setting, final boolean value) {
         currentSettings.put(setting, value);
@@ -52,7 +56,8 @@ public final class BoolSettings extends SettingsBase {
     /**
      * Gets the value of a setting.
      *
-     * @param setting The setting to get
+     * @param setting
+     *     The setting to get
      * @return The value of the setting
      */
     public boolean getSetting(final @NotNull BoolSetting setting) {

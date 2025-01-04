@@ -65,7 +65,7 @@ public final class RegisterAccessNotice extends AccessNotice {
      */
     public String toString() {
         return ((this.getAccessType() == AccessType.READ) ? "R " : "W ") +
-                "Reg " + registerName;
+            "Reg " + registerName;
     }
 
 }

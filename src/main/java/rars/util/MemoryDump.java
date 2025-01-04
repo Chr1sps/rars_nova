@@ -43,10 +43,12 @@ public final class MemoryDump {
     static {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         SEGMENTS = List.of(
-                new SegmentInfo(".text", memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress),
-                new SegmentInfo(".data",
-                        memoryConfiguration.dataBaseAddress,
-                        memoryConfiguration.dataSegmentLimitAddress)
+            new SegmentInfo(".text", memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress),
+            new SegmentInfo(
+                ".data",
+                memoryConfiguration.dataBaseAddress,
+                memoryConfiguration.dataSegmentLimitAddress
+            )
         );
     }
 
@@ -57,17 +59,17 @@ public final class MemoryDump {
      * Return array with segment address bounds for specified segment.
      *
      * @param segment
-     *         String with segment name (initially ".text" and ".data")
+     *     String with segment name (initially ".text" and ".data")
      * @return array of two Integer, the base and limit address for that segment.
      * Null if parameter
      * name does not match a known segment name.
      */
     public static @Nullable Pair<Integer, Integer> getSegmentBounds(final @NotNull String segment) {
         return SEGMENTS.stream()
-                .filter(s -> s.name().equals(segment))
-                .findFirst()
-                .map(s -> new Pair<>(s.baseAddress(), s.limitAddress()))
-                .orElse(null);
+            .filter(s -> s.name().equals(segment))
+            .findFirst()
+            .map(s -> new Pair<>(s.baseAddress(), s.limitAddress()))
+            .orElse(null);
     }
 
     public record SegmentInfo(@NotNull String name, int baseAddress, int limitAddress) {

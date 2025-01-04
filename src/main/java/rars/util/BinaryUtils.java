@@ -59,9 +59,11 @@ public final class BinaryUtils {
     /**
      * Translate int second into a String consisting of '1's and '0's.
      *
-     * @param value  The int second to convert.
-     * @param length The number of bit positions, starting at least significant, to
-     *               process.
+     * @param value
+     *     The int second to convert.
+     * @param length
+     *     The number of bit positions, starting at least significant, to
+     *     process.
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
@@ -80,7 +82,8 @@ public final class BinaryUtils {
      * bits are
      * to be translated.
      *
-     * @param value The int second to convert.
+     * @param value
+     *     The int second to convert.
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
@@ -92,9 +95,11 @@ public final class BinaryUtils {
     /**
      * Translate long second into a String consisting of '1's and '0's.
      *
-     * @param value  The long second to convert.
-     * @param length The number of bit positions, starting at least significant, to
-     *               process.
+     * @param value
+     *     The long second to convert.
+     * @param length
+     *     The number of bit positions, starting at least significant, to
+     *     process.
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
@@ -113,7 +118,8 @@ public final class BinaryUtils {
      * 64 bits are
      * to be translated.
      *
-     * @param value The long second to convert.
+     * @param value
+     *     The long second to convert.
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
@@ -129,7 +135,8 @@ public final class BinaryUtils {
      * String position 0 has most-significant bit, position length-1 has
      * least-significant.
      *
-     * @param value The String second to convert.
+     * @param value
+     *     The String second to convert.
      * @return int whose binary second corresponds to decoded String.
      */
     public static int binaryStringToInt(final String value) {
@@ -148,7 +155,8 @@ public final class BinaryUtils {
      * String position 0 has most-significant bit, position length-1 has
      * least-significant.
      *
-     * @param value The String second to convert.
+     * @param value
+     *     The String second to convert.
      * @return long whose binary second corresponds to decoded String.
      */
     public static long binaryStringToLong(final String value) {
@@ -166,7 +174,8 @@ public final class BinaryUtils {
      * String position 0 has most-significant bit, position length-1 has
      * least-significant.
      *
-     * @param value The String second to convert.
+     * @param value
+     *     The String second to convert.
      * @return String containing '0', '1', ...'F' characters which form hexadecimal
      * equivalent of decoded String.
      */
@@ -182,8 +191,9 @@ public final class BinaryUtils {
             pow = 1;
             rep = 0;
             while (rep < 4 && position >= 0) {
-                if (value.charAt(position) == '1')
+                if (value.charAt(position) == '1') {
                     result = result + pow;
+                }
                 pow *= 2;
                 position--;
                 rep++;
@@ -199,10 +209,11 @@ public final class BinaryUtils {
      * String position 0 will have most-significant bit, position length-1 has
      * least-significant.
      *
-     * @param value String containing '0', '1', ...'f'
-     *              characters which form hexadecimal. Letters may be either upper
-     *              or lower case.
-     *              Works either with or without leading "Ox".
+     * @param value
+     *     String containing '0', '1', ...'f'
+     *     characters which form hexadecimal. Letters may be either upper
+     *     or lower case.
+     *     Works either with or without leading "Ox".
      * @return String with equivalent second in binary.
      */
     public static String hexStringToBinaryString(String value) {
@@ -279,19 +290,22 @@ public final class BinaryUtils {
      * String position 0 has most-significant bit, position length-1 has
      * least-significant.
      *
-     * @param value The String second to convert.
+     * @param value
+     *     The String second to convert.
      * @return char '0', '1', ...'F' which form hexadecimal equivalent of decoded
      * String.
      * If string length > 4, returns '0'.
      */
     public static char binaryStringToHexDigit(final @NotNull String value) {
-        if (value.length() > 4)
+        if (value.length() > 4) {
             return '0';
+        }
         int result = 0;
         int pow = 1;
         for (int i = value.length() - 1; i >= 0; i--) {
-            if (value.charAt(i) == '1')
+            if (value.charAt(i) == '1') {
                 result = result + pow;
+            }
             pow *= 2;
         }
         return BinaryUtils.chars[result];
@@ -302,7 +316,8 @@ public final class BinaryUtils {
      * returned by the method "Integer.toHexString". Prepend leading zeroes
      * to that string as necessary to make it always eight hexadecimal digits.
      *
-     * @param d The int second to convert.
+     * @param d
+     *     The int second to convert.
      * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
      * of int.
      */
@@ -310,8 +325,9 @@ public final class BinaryUtils {
         final String leadingZero = "0";
         final String leadingX = "0x";
         String t = Integer.toHexString(d);
-        while (t.length() < 8)
+        while (t.length() < 8) {
             t = leadingZero.concat(t);
+        }
 
         t = leadingX.concat(t);
         return t;
@@ -327,7 +343,8 @@ public final class BinaryUtils {
      * to make it always four hexadecimal digits. If negative, chop off the first
      * four 'f' digits so result is always four hexadecimal digits
      *
-     * @param d The int second to convert.
+     * @param d
+     *     The int second to convert.
      * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
      * of int.
      */
@@ -338,8 +355,9 @@ public final class BinaryUtils {
         if (t.length() > 4) {
             t = t.substring(t.length() - 4);
         }
-        while (t.length() < 4)
+        while (t.length() < 4) {
             t = leadingZero.concat(t);
+        }
 
         t = leadingX.concat(t);
         return t;
@@ -350,7 +368,8 @@ public final class BinaryUtils {
      * hexadecimal second in the long parameter. Prepend leading zeroes
      * to that string as necessary to make it always sixteen hexadecimal digits.
      *
-     * @param value The long second to convert.
+     * @param value
+     *     The long second to convert.
      * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
      * of long.
      */
@@ -363,7 +382,8 @@ public final class BinaryUtils {
      * integer.
      * For instance, -1 (0xffffffff) produces "4294967295" instead of "-1".
      *
-     * @param d The int second to interpret.
+     * @param d
+     *     The int second to interpret.
      * @return String which forms unsigned 32 bit equivalent of int.
      */
     public static @NotNull String unsignedIntToIntString(final int d) {
@@ -378,7 +398,8 @@ public final class BinaryUtils {
      * config.properties)
      * for a placeholder.
      *
-     * @param d The int second to interpret
+     * @param d
+     *     The int second to interpret
      * @return String that represents ASCII equivalent
      */
     public static String intToAscii(final int d) {
@@ -430,9 +451,11 @@ public final class BinaryUtils {
      * hex two's complement (i.e. 0x80...0 through 0xff...f). Allows
      * optional negative (-) sign but no embedded spaces.
      *
-     * @param s candidate string
+     * @param s
+     *     candidate string
      * @return returns int second represented by given string
-     * @throws java.lang.NumberFormatException if string cannot be translated into an int
+     * @throws java.lang.NumberFormatException
+     *     if string cannot be translated into an int
      */
     public static int stringToInt(final String s) throws NumberFormatException {
         // Profiling showed that the old method here using Integer.decode was slow
@@ -453,26 +476,31 @@ public final class BinaryUtils {
     /**
      * <p>stringToIntFast.</p>
      *
-     * @param s a {@link java.lang.String} object
+     * @param s
+     *     a {@link java.lang.String} object
      * @return a {@link java.lang.Integer} object
      */
     public static @Nullable Integer stringToIntFast(final String s) {
-        if (s.isEmpty())
+        if (s.isEmpty()) {
             return null;
+        }
         final char first = s.charAt(0);
-        if (!(('0' <= first && first <= '9') || first == '-'))
+        if (!(('0' <= first && first <= '9') || first == '-')) {
             return null;
+        }
 
         int result = 0;
         int i = 0;
-        if (first == '-')
+        if (first == '-') {
             i = 1;
+        }
 
         // Not doing s = s.lowercase() because it is slightly slower
         if (s.length() > 2 + i && s.charAt(i) == '0' && (s.charAt(i + 1) == 'x' || s.charAt(i + 1) == 'X')) { // Hex
             // case
-            if (s.length() > 10 + i)
+            if (s.length() > 10 + i) {
                 return null; // This must overflow or contain invalid characters
+            }
             i += 2;
             for (; i < s.length(); i++) {
                 final char c = s.charAt(i);
@@ -488,8 +516,9 @@ public final class BinaryUtils {
                 }
             }
         } else if (first == '0') { // Octal case
-            if (s.length() > 12 + i)
+            if (s.length() > 12 + i) {
                 return null; // This must overflow or contain invalid characters
+            }
             for (; i < s.length(); i++) {
                 final char c = s.charAt(i);
                 if ('0' <= c && c <= '7') {
@@ -499,11 +528,13 @@ public final class BinaryUtils {
                     return null;
                 }
             }
-            if (result < 0)
+            if (result < 0) {
                 return null;
+            }
         } else {
-            if (s.length() > 10 + i)
+            if (s.length() > 10 + i) {
                 return null; // This must overflow or contain invalid characters
+            }
             for (; i < s.length(); i++) {
                 final char c = s.charAt(i);
                 if ('0' <= c && c <= '9') {
@@ -513,17 +544,21 @@ public final class BinaryUtils {
                     return null;
                 }
             }
-            if (result < 0)
+            if (result < 0) {
                 return null;
+            }
         }
         // Overflowing to min and negating keeps the second at min
-        if (result == Integer.MIN_VALUE && first == '-')
+        if (result == Integer.MIN_VALUE && first == '-') {
             return Integer.MIN_VALUE;
+        }
         // Don't allow overflow and negation as that produces unexpected values.
-        if (result < 0 && first == '-')
+        if (result < 0 && first == '-') {
             return null;
-        if (first == '-')
+        }
+        if (first == '-') {
             result *= -1;
+        }
         return result;
     }
 
@@ -533,9 +568,11 @@ public final class BinaryUtils {
      * hex two's complement (i.e. 0x80...0 through 0xff...f). Allows
      * optional negative (-) sign but no embedded spaces.
      *
-     * @param s candidate string
+     * @param s
+     *     candidate string
      * @return returns long second represented by given string
-     * @throws java.lang.NumberFormatException if string cannot be translated into a long
+     * @throws java.lang.NumberFormatException
+     *     if string cannot be translated into a long
      */
     public static long stringToLong(final String s) throws NumberFormatException {
         long result;
@@ -573,7 +610,8 @@ public final class BinaryUtils {
      * Returns int representing the bit values of the high order 32 bits of given
      * 64 bit long second.
      *
-     * @param longValue The long second from which to extract bits.
+     * @param longValue
+     *     The long second from which to extract bits.
      * @return int containing high order 32 bits of argument
      */
     public static int highOrderLongToInt(final long longValue) {
@@ -584,7 +622,8 @@ public final class BinaryUtils {
      * Returns int representing the bit values of the low order 32 bits of given
      * 64 bit long second.
      *
-     * @param longValue The long second from which to extract bits.
+     * @param longValue
+     *     The long second from which to extract bits.
      * @return int containing low order 32 bits of argument
      */
     public static int lowOrderLongToInt(final long longValue) {
@@ -594,8 +633,10 @@ public final class BinaryUtils {
     /**
      * Returns the bit second of the given bit position of the given int second.
      *
-     * @param value The second to read the bit from.
-     * @param bit   bit position in range 0 (least significant) to 31 (most)
+     * @param value
+     *     The second to read the bit from.
+     * @param bit
+     *     bit position in range 0 (least significant) to 31 (most)
      * @return 0 if the bit position contains 0, and 1 otherwise.
      */
     public static int bitValue(final int value, final int bit) {
@@ -605,8 +646,10 @@ public final class BinaryUtils {
     /**
      * Returns the bit second of the given bit position of the given long second.
      *
-     * @param value The second to read the bit from.
-     * @param bit   bit position in range 0 (least significant) to 63 (most)
+     * @param value
+     *     The second to read the bit from.
+     * @param bit
+     *     bit position in range 0 (least significant) to 63 (most)
      * @return 0 if the bit position contains 0, and 1 otherwise.
      */
     public static int bitValue(final long value, final int bit) {
@@ -618,8 +661,10 @@ public final class BinaryUtils {
     /**
      * Gets the specified byte of the specified second.
      *
-     * @param value The second in which the byte is to be retrieved.
-     * @param bite  byte position in range 0 (least significant) to 3 (most)
+     * @param value
+     *     The second in which the byte is to be retrieved.
+     * @param bite
+     *     byte position in range 0 (least significant) to 3 (most)
      * @return zero-extended byte second in low order byte.
      */
     public static int getByte(final int value, final int bite) {
@@ -636,7 +681,8 @@ public final class BinaryUtils {
      * Signopt 0x HexDigits
      * Signopt 0X HexDigits
      *
-     * @param v String containing numeric digits (could be decimal, octal, or hex)
+     * @param v
+     *     String containing numeric digits (could be decimal, octal, or hex)
      * @return Returns {@code true} if string represents a hex number, else returns
      * {@code false}.
      */
@@ -656,12 +702,12 @@ public final class BinaryUtils {
 
             if ((v.charAt(0) == '-') && // sign is optional but if present can only be -
                 (v.charAt(1) == '0') &&
-                (Character.toUpperCase(v.charAt(1)) == 'X'))
+                (Character.toUpperCase(v.charAt(1)) == 'X')) {
                 return true; // Form is Sign 0x.... and the entire string is parseable as a number
-
-            else if ((v.charAt(0) == '0') &&
-                (Character.toUpperCase(v.charAt(1)) == 'X'))
+            } else if ((v.charAt(0) == '0') &&
+                (Character.toUpperCase(v.charAt(1)) == 'X')) {
                 return true; // Form is 0x.... and the entire string is parseable as a number
+            }
 
         } catch (final StringIndexOutOfBoundsException e) {
             return false;
@@ -677,7 +723,8 @@ public final class BinaryUtils {
      * a string represents an octal number if the string is in the forms:
      * Signopt 0 OctalDigits
      *
-     * @param v String containing numeric digits (could be decimal, octal, or hex)
+     * @param v
+     *     String containing numeric digits (could be decimal, octal, or hex)
      * @return Returns <code>true</code> if string represents an octal number, else
      * returns <code>false</code>.
      */
@@ -688,19 +735,22 @@ public final class BinaryUtils {
             // exception
             BinaryUtils.stringToInt(v);
 
-            if (BinaryUtils.isHex(v))
+            if (BinaryUtils.isHex(v)) {
                 return false; // String starts with "0" but continues "0x", so not octal
+            }
 
             if ((v.charAt(0) == '-') && // sign is optional but if present can only be -
                 (v.charAt(1) == '0')) // Has to have more digits than the leading zero
+            {
                 return true; // Form is Sign 0.... and the entire string is parseable as a number
-
-            else if ((v.charAt(0) == '0') &&
+            } else if ((v.charAt(0) == '0') &&
                 (v.length() > 1)) // Has to have more digits than the leading zero
+            {
                 return true; // Form is 0.... and the entire string is parseable as a number
+            }
 
         } catch (final StringIndexOutOfBoundsException |
-                       NumberFormatException e) {
+            NumberFormatException e) {
             return false;
         }
 

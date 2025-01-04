@@ -59,8 +59,10 @@ public class SyscallReadDouble extends AbstractSyscall {
         try {
             doubleValue = SystemIO.readDouble(this.getNumber());
         } catch (final NumberFormatException e) {
-            throw new ExitingException(statement,
-                    "invalid double input (syscall " + this.getNumber() + ")");
+            throw new ExitingException(
+                statement,
+                "invalid double input (syscall " + this.getNumber() + ")"
+            );
         }
 
         FloatingPointRegisterFile.updateRegisterLong(10, Double.doubleToRawLongBits(doubleValue));

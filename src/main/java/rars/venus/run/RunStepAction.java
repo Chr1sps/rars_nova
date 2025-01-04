@@ -61,15 +61,23 @@ public class RunStepAction extends GuiAction {
     /**
      * <p>Constructor for RunStepAction.</p>
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
-     * @param gui      a {@link VenusUI} object
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param icon
+     *     a {@link javax.swing.Icon} object
+     * @param descrip
+     *     a {@link java.lang.String} object
+     * @param mnemonic
+     *     a {@link java.lang.Integer} object
+     * @param accel
+     *     a {@link javax.swing.KeyStroke} object
+     * @param gui
+     *     a {@link VenusUI} object
      */
-    public RunStepAction(final String name, final Icon icon, final String descrip,
-                         final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+    public RunStepAction(
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel, final VenusUI gui
+    ) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainUI = gui;
     }
@@ -106,8 +114,10 @@ public class RunStepAction extends GuiAction {
                         this.subscription.request(1);
                         return;
                     }
-                    EventQueue.invokeLater(() -> RunStepAction.this.stepped(item.done(), item.reason(),
-                        item.exception()));
+                    EventQueue.invokeLater(() -> RunStepAction.this.stepped(
+                        item.done(), item.reason(),
+                        item.exception()
+                    ));
                     this.subscription.cancel();
                 }
             };
@@ -137,9 +147,12 @@ public class RunStepAction extends GuiAction {
     /**
      * <p>stepped.</p>
      *
-     * @param done   a boolean
-     * @param reason a {@link Simulator.Reason} object
-     * @param pe     a {@link SimulationException} object
+     * @param done
+     *     a boolean
+     * @param reason
+     *     a {@link Simulator.Reason} object
+     * @param pe
+     *     a {@link SimulationException} object
      */
     public void stepped(final boolean done, final Simulator.Reason reason, final SimulationException pe) {
         this.executePane.registerValues.updateRegisters();
@@ -158,13 +171,17 @@ public class RunStepAction extends GuiAction {
         if (done && pe == null) {
             this.mainUI.messagesPane.postMessage(
                 "\n" + this.name + ": execution " +
-                    ((reason == Simulator.Reason.CLIFF_TERMINATION) ? "terminated due to null instruction."
-                        : "completed successfully.")
+                    (
+                        (reason == Simulator.Reason.CLIFF_TERMINATION) ? "terminated due to null instruction."
+                            : "completed successfully."
+                    )
                     + "\n\n");
             this.mainUI.messagesPane.postRunMessage(
                 "\n-- program is finished running" +
-                    ((reason == Simulator.Reason.CLIFF_TERMINATION) ? "(dropped off bottom)"
-                        : " (" + Globals.exitCode + ")")
+                    (
+                        (reason == Simulator.Reason.CLIFF_TERMINATION) ? "(dropped off bottom)"
+                            : " (" + Globals.exitCode + ")"
+                    )
                     + " --\n\n");
             this.mainUI.messagesPane.selectRunMessageTab();
         }

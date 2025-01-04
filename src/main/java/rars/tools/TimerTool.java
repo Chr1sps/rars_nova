@@ -135,14 +135,14 @@ public class TimerTool extends AbstractTool {
         final JButton playButton = new JButton("Play");
         playButton.setToolTipText("Starts the counter");
         playButton.addActionListener(
-                e -> TimerTool.play());
+            e -> TimerTool.play());
         playButton.addKeyListener(new EnterKeyListener(playButton));
 
         // Adds a pause button to pause time
         final JButton pauseButton = new JButton("Pause");
         pauseButton.setToolTipText("Pauses the counter");
         pauseButton.addActionListener(
-                e -> TimerTool.pause());
+            e -> TimerTool.pause());
         pauseButton.addKeyListener(new EnterKeyListener(pauseButton));
 
         this.timePanel.add(playButton);
@@ -221,37 +221,39 @@ public class TimerTool extends AbstractTool {
     @Override
     protected JComponent getHelpComponent() {
         final String helpContent = """
-                Use this tool to simulate the Memory Mapped IO (MMIO) for a timing device allowing the program to utalize timer interupts. \
-                While this tool is connected to the program it runs a clock (starting from time 0), storing the time in milliseconds. \
-                The time is stored as a 64 bit integer and can be accessed (using a lw instruction) at 0xFFFF0018 for the lower 32 bits and 0xFFFF001B for the upper 32 bits.
-                Three things must be done before an interrupt can be set:
-                 The address of your interrupt handler must be stored in the utvec CSR
-                 The fourth bit of the uie CSR must be set to 1 (ie. ori uie, uie, 0x10)
-                 The zeroth bit of the ustatus CSR must be set to 1 (ie. ori ustatus, ustatus, 0x1)
-                To set the timer you must write the time that you want the timer to go off (called timecmp) as a 64 bit integer at the address of 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. \
-                An interrupt will occur when the time is greater than or equal to timecmp which is a 64 bit integer (interpreted as milliseconds) stored at 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. \
-                To set the timer you must set timecmp (using a sw instruction) to be the time that you want the timer to go off at.
-                Note: the timer will only go off once after the time is reached and is not rearmed until timecmp is writen to again. \
-                So if you are writing 64 bit values (opposed to on 32) then to avoid spuriously triggering a timer interrupt timecmp should be written to as such
-                    # a0: lower 32 bits of time
-                    # a1: upper 32 bits of time
-                    li  t0, -1
-                    la t1, timecmp
-                    sw t0, 0(t1)
-                    sw a1, 4(t1)
-                    sw a0, 0(t0)
-                (contributed by Zachary Selk, zrselk@gmail.com)""";
+            Use this tool to simulate the Memory Mapped IO (MMIO) for a timing device allowing the program to utalize timer interupts. \
+            While this tool is connected to the program it runs a clock (starting from time 0), storing the time in milliseconds. \
+            The time is stored as a 64 bit integer and can be accessed (using a lw instruction) at 0xFFFF0018 for the lower 32 bits and 0xFFFF001B for the upper 32 bits.
+            Three things must be done before an interrupt can be set:
+             The address of your interrupt handler must be stored in the utvec CSR
+             The fourth bit of the uie CSR must be set to 1 (ie. ori uie, uie, 0x10)
+             The zeroth bit of the ustatus CSR must be set to 1 (ie. ori ustatus, ustatus, 0x1)
+            To set the timer you must write the time that you want the timer to go off (called timecmp) as a 64 bit integer at the address of 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. \
+            An interrupt will occur when the time is greater than or equal to timecmp which is a 64 bit integer (interpreted as milliseconds) stored at 0xFFFF0020 for the lower 32 bits and 0xFFFF0024 for the upper 32 bits. \
+            To set the timer you must set timecmp (using a sw instruction) to be the time that you want the timer to go off at.
+            Note: the timer will only go off once after the time is reached and is not rearmed until timecmp is writen to again. \
+            So if you are writing 64 bit values (opposed to on 32) then to avoid spuriously triggering a timer interrupt timecmp should be written to as such
+                # a0: lower 32 bits of time
+                # a1: upper 32 bits of time
+                li  t0, -1
+                la t1, timecmp
+                sw t0, 0(t1)
+                sw a1, 4(t1)
+                sw a0, 0(t0)
+            (contributed by Zachary Selk, zrselk@gmail.com)""";
         final JButton help = new JButton("Help");
         help.addActionListener(
-                e -> {
-                    final JTextArea ja = new JTextArea(helpContent);
-                    ja.setRows(20);
-                    ja.setColumns(60);
-                    ja.setLineWrap(true);
-                    ja.setWrapStyleWord(true);
-                    JOptionPane.showMessageDialog(this.theWindow, new JScrollPane(ja),
-                            "Simulating a timing device", JOptionPane.INFORMATION_MESSAGE);
-                });
+            e -> {
+                final JTextArea ja = new JTextArea(helpContent);
+                ja.setRows(20);
+                ja.setColumns(60);
+                ja.setLineWrap(true);
+                ja.setWrapStyleWord(true);
+                JOptionPane.showMessageDialog(
+                    this.theWindow, new JScrollPane(ja),
+                    "Simulating a timing device", JOptionPane.INFORMATION_MESSAGE
+                );
+            });
         return help;
     }
 
@@ -269,9 +271,11 @@ public class TimerTool extends AbstractTool {
 
         public void addAsObserver() {
             try {
-                Globals.MEMORY_INSTANCE.subscribe(this,
-                        TimerTool.getTimeCmpAddress(),
-                        TimerTool.getTimeCmpAddress() + 8);
+                Globals.MEMORY_INSTANCE.subscribe(
+                    this,
+                    TimerTool.getTimeCmpAddress(),
+                    TimerTool.getTimeCmpAddress() + 8
+                );
             } catch (final AddressErrorException aee) {
                 SimpleSubscriber.LOGGER.fatal("Error while adding observer in Timer Tool");
                 System.exit(0);
@@ -331,8 +335,10 @@ public class TimerTool extends AbstractTool {
 
                     // Write the lower and upper words of the time MMIO respectivly
                     TimerTool.this.updateMMIOControlAndData(TimerTool.getTimeAddress(), (int) (TimerTool.time));
-                    TimerTool.this.updateMMIOControlAndData(TimerTool.getTimeAddress() + 4,
-                            (int) (TimerTool.time >> 32));
+                    TimerTool.this.updateMMIOControlAndData(
+                        TimerTool.getTimeAddress() + 4,
+                        (int) (TimerTool.time >> 32)
+                    );
 
                     // The logic for if a timer interrupt should be raised
                     // Note: if either the UTIP bit in the uie CSR or the UIE bit in the ustatus CSR
@@ -375,8 +381,10 @@ public class TimerTool extends AbstractTool {
         }
 
         public void updateTime() {
-            this.currentTime.setText(String.format("%02d:%02d.%02d", TimerTool.time / 60000,
-                    (TimerTool.time / 1000) % 60, TimerTool.time % 100));
+            this.currentTime.setText(String.format(
+                "%02d:%02d.%02d", TimerTool.time / 60000,
+                (TimerTool.time / 1000) % 60, TimerTool.time % 100
+            ));
         }
     }
 }

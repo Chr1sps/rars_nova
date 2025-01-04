@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-
 public final class FontSettings extends SettingsBase {
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -44,8 +43,9 @@ public final class FontSettings extends SettingsBase {
         attributes.put(TextAttribute.FAMILY, fontFamily);
         attributes.put(TextAttribute.SIZE, fontSize);
         attributes.put(TextAttribute.WEIGHT, fontWeight.weight);
-        if (isLigaturized)
+        if (isLigaturized) {
             attributes.put(TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON);
+        }
         return new Font(attributes);
     }
 
@@ -68,7 +68,8 @@ public final class FontSettings extends SettingsBase {
                 "Font size must be between %d and %d. Provided: %d".formatted(
                     FontUtilities.MIN_SIZE,
                     FontUtilities.MAX_SIZE,
-                    fontSize));
+                    fontSize
+                ));
         }
         this.fontSize = fontSize;
     }

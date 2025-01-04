@@ -42,13 +42,15 @@ public final class InterruptController {
     /**
      * <p>registerExternalInterrupt.</p>
      *
-     * @param value a int
+     * @param value
+     *     a int
      * @return a boolean
      */
     public static boolean registerExternalInterrupt(final int value) {
         synchronized (lock) {
-            if (externalPending)
+            if (externalPending) {
                 return false;
+            }
             externalValue = value;
             externalPending = true;
             Simulator.getInstance().interrupt();
@@ -59,13 +61,15 @@ public final class InterruptController {
     /**
      * <p>registerTimerInterrupt.</p>
      *
-     * @param value a int
+     * @param value
+     *     a int
      * @return a boolean
      */
     public static boolean registerTimerInterrupt(final int value) {
         synchronized (lock) {
-            if (timerPending)
+            if (timerPending) {
                 return false;
+            }
             timerValue = value;
             timerPending = true;
             Simulator.getInstance().interrupt();
@@ -76,14 +80,17 @@ public final class InterruptController {
     /**
      * <p>registerSynchronousTrap.</p>
      *
-     * @param se a {@link SimulationException} object
-     * @param pc a int
+     * @param se
+     *     a {@link SimulationException} object
+     * @param pc
+     *     a int
      * @return a boolean
      */
     public static boolean registerSynchronousTrap(final SimulationException se, final int pc) {
         synchronized (lock) {
-            if (trapPending)
+            if (trapPending) {
                 return false;
+            }
             trapSE = se;
             trapPC = pc;
             trapPending = true;
@@ -159,7 +166,7 @@ public final class InterruptController {
         synchronized (lock) {
             assert trapPending : "Cannot claim, no trap pending";
             assert trapPC == RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH
-                    : "trapPC doesn't match current pc";
+                : "trapPC doesn't match current pc";
             trapPending = false;
             return trapSE;
         }

@@ -19,15 +19,18 @@ public final class RSTASchemeConverter {
         final var result = new Style();
         result.foreground = style.foreground();
         result.background = style.background();
-        if (result.font == null)
+        if (result.font == null) {
             result.font = baseFont;
+        }
         result.font = deriveFontFromStyle(result.font, style);
         result.underline = style.isUnderline();
         return result;
     }
 
-    public static @NotNull RVSyntaxScheme convert(final @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles,
-                                                  final @NotNull Font baseFont) {
+    public static @NotNull RVSyntaxScheme convert(
+        final @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles,
+        final @NotNull Font baseFont
+    ) {
         final var result = new RVSyntaxScheme();
         tokenStyles.forEach((key, value) -> {
             final var newKey = tokenValue(key);

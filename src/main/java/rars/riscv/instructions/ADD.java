@@ -31,8 +31,10 @@ public final class ADD extends Arithmetic {
     public static final ADD INSTANCE = new ADD();
 
     private ADD() {
-        super("add t1,t2,t3", "Addition: set t1 to (t2 plus t3)",
-                "0000000", "000");
+        super(
+            "add t1,t2,t3", "Addition: set t1 to (t2 plus t3)",
+            "0000000", "000"
+        );
     }
 
     @Override

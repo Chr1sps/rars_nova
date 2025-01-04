@@ -16,20 +16,30 @@ public final class Arithmetic {
     /**
      * <p>add.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T add(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> @NotNull T add(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         // TODO: handle signalling correctly
 
         // Section 6.2
-        if (a.isNaN())
+        if (a.isNaN()) {
             return a;
-        if (b.isNaN())
+        }
+        if (b.isNaN()) {
             return b;
+        }
 
         // Section 6.1 and 7.2
         if (a.isInfinite()) {
@@ -70,20 +80,30 @@ public final class Arithmetic {
     /**
      * <p>subtraction.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T subtraction(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> @NotNull T subtraction(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         // TODO: handle signalling correctly
 
         // Section 6.2
-        if (a.isNaN())
+        if (a.isNaN()) {
             return a;
-        if (b.isNaN())
+        }
+        if (b.isNaN()) {
             return b;
+        }
 
         // After this it is equivalent to adding a negative
         return Arithmetic.add(a, b.negate(), env);
@@ -92,20 +112,30 @@ public final class Arithmetic {
     /**
      * <p>multiplication.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T multiplication(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> @NotNull T multiplication(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         // TODO: handle signalling correctly
 
         // Section 6.2
-        if (a.isNaN())
+        if (a.isNaN()) {
             return a;
-        if (b.isNaN())
+        }
+        if (b.isNaN()) {
             return b;
+        }
 
         // Section 7.2
         if ((a.isZero() && b.isInfinite()) || (b.isZero() && a.isInfinite())) {
@@ -128,17 +158,21 @@ public final class Arithmetic {
     /**
      * <p>squareRoot.</p>
      *
-     * @param a   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
     public static <T extends Floating<T>> @NotNull T squareRoot(@NotNull final T a, @NotNull final Environment env) {
         // TODO: handle signalling correctly
 
         // Section 6.2
-        if (a.isNaN())
+        if (a.isNaN()) {
             return a;
+        }
 
         // Section 6.3 or Section 5.4.1
         if (a.isZero()) {
@@ -162,24 +196,37 @@ public final class Arithmetic {
     /**
      * <p>fusedMultiplyAdd.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param c   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param c
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T fusedMultiplyAdd(@NotNull final T a, @NotNull final T b, @NotNull final T c, @NotNull final Environment env) {
+    public static <T extends Floating<T>> @NotNull T fusedMultiplyAdd(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final T c,
+        @NotNull final Environment env
+    ) {
         // TODO: handle signalling correctly
 
         // Section 6.2
-        if (a.isNaN())
+        if (a.isNaN()) {
             return a;
-        if (b.isNaN())
+        }
+        if (b.isNaN()) {
             return b;
+        }
         // This behaviour is implementation defined - Section 7.2
-        if (c.isNaN())
+        if (c.isNaN()) {
             return c;
+        }
 
         // Section 7.2
         if ((a.isZero() && b.isInfinite()) || (b.isZero() && a.isInfinite())) {
@@ -204,20 +251,30 @@ public final class Arithmetic {
     /**
      * <p>division.</p>
      *
-     * @param a   a T object
-     * @param b   a T object
-     * @param env a {@link Environment} object
-     * @param <T> a T class
+     * @param a
+     *     a T object
+     * @param b
+     *     a T object
+     * @param env
+     *     a {@link Environment} object
+     * @param <T>
+     *     a T class
      * @return a T object
      */
-    public static <T extends Floating<T>> @NotNull T division(@NotNull final T a, @NotNull final T b, @NotNull final Environment env) {
+    public static <T extends Floating<T>> @NotNull T division(
+        @NotNull final T a,
+        @NotNull final T b,
+        @NotNull final Environment env
+    ) {
         // TODO: handle signalling correctly
 
         // Section 6.2
-        if (a.isNaN())
+        if (a.isNaN()) {
             return a;
-        if (b.isNaN())
+        }
+        if (b.isNaN()) {
             return b;
+        }
 
         // Section 7.2
         if ((a.isZero() && b.isZero()) || (a.isInfinite() && b.isInfinite())) {

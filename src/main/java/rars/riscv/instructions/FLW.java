@@ -42,8 +42,8 @@ public final class FLW extends BasicInstruction {
 
     private FLW() {
         super(
-                "flw f1, -100(t1)", "Load a float from memory",
-                BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 0000111"
+            "flw f1, -100(t1)", "Load a float from memory",
+            BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 0000111"
         );
     }
 
@@ -53,8 +53,8 @@ public final class FLW extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             FloatingPointRegisterFile.updateRegister(
-                    statement.getOperand(0),
-                    Globals.MEMORY_INSTANCE.getWord(RegisterFile.getValue(statement.getOperand(2)) + upperImmediate)
+                statement.getOperand(0),
+                Globals.MEMORY_INSTANCE.getWord(RegisterFile.getValue(statement.getOperand(2)) + upperImmediate)
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

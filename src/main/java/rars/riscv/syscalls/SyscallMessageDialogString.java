@@ -43,10 +43,12 @@ public final class SyscallMessageDialogString extends AbstractSyscall {
      * <p>Constructor for SyscallMessageDialogString.</p>
      */
     public SyscallMessageDialogString() {
-        super("MessageDialogString", "Service to display a message followed by a string to user",
-                "a0 = address of null-terminated string that is the message to user <br>" +
-                        "a1 = address of the second string to display",
-                "N/A");
+        super(
+            "MessageDialogString", "Service to display a message followed by a string to user",
+            "a0 = address of null-terminated string that is the message to user <br>" +
+                "a1 = address of the second string to display",
+            "N/A"
+        );
     }
 
     /**
@@ -55,9 +57,11 @@ public final class SyscallMessageDialogString extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         // Display the dialog.
-        JOptionPane.showMessageDialog(null,
-                NullString.get(statement) + NullString.get(statement, "a1"),
-                null,
-                JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(
+            null,
+            NullString.get(statement) + NullString.get(statement, "a1"),
+            null,
+            JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }

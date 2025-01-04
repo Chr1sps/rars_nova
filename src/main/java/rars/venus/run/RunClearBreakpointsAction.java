@@ -55,14 +55,21 @@ public class RunClearBreakpointsAction extends GuiAction implements TableModelLi
      * happens with
      * each successful assembly).
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param icon
+     *     a {@link javax.swing.Icon} object
+     * @param descrip
+     *     a {@link java.lang.String} object
+     * @param mnemonic
+     *     a {@link java.lang.Integer} object
+     * @param accel
+     *     a {@link javax.swing.KeyStroke} object
      */
-    public RunClearBreakpointsAction(final String name, final Icon icon, final String descrip,
-                                     final Integer mnemonic, final KeyStroke accel) {
+    public RunClearBreakpointsAction(
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel
+    ) {
         super(name, icon, descrip, mnemonic, accel);
         Globals.gui.mainPane.executeTab.textSegment.registerTableModelListener(this);
     }

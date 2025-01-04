@@ -55,8 +55,10 @@ public class SyscallReadChar extends AbstractSyscall {
             RegisterFile.updateRegister("a0", SystemIO.readChar(this.getNumber()));
         } catch (final IndexOutOfBoundsException e) // means null input
         {
-            throw new ExitingException(statement,
-                    "invalid char input (syscall " + this.getNumber() + ")");
+            throw new ExitingException(
+                statement,
+                "invalid char input (syscall " + this.getNumber() + ")"
+            );
         }
     }
 

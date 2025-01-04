@@ -64,7 +64,8 @@ public class Editor {
     /**
      * Create editor.
      *
-     * @param ui the GUI that owns this editor
+     * @param ui
+     *     the GUI that owns this editor
      */
     public Editor(final VenusUI ui) {
         this.mainUI = ui;
@@ -92,7 +93,8 @@ public class Editor {
     /**
      * Set associated EditTabbedPane. This is container for any/all open files.
      *
-     * @param editTabbedPane an existing editTabbedPane object
+     * @param editTabbedPane
+     *     an existing editTabbedPane object
      */
     public void setEditTabbedPane(final EditTabbedPane editTabbedPane) {
         this.editTabbedPane = editTabbedPane;
@@ -115,10 +117,11 @@ public class Editor {
      * directory will
      * be displayed when Open dialog is launched.
      *
-     * @param currentOpenDirectory String containing pathname for current Open
-     *                             directory. If
-     *                             it does not exist or is not a directory, the
-     *                             default (MARS launch directory) will be used.
+     * @param currentOpenDirectory
+     *     String containing pathname for current Open
+     *     directory. If
+     *     it does not exist or is not a directory, the
+     *     default (MARS launch directory) will be used.
      */
 
     void setCurrentOpenDirectory(final String currentOpenDirectory) {
@@ -147,10 +150,11 @@ public class Editor {
      * directory will
      * be displayed when Save dialog is launched.
      *
-     * @param currentSaveDirectory String containing pathname for current Save
-     *                             directory. If
-     *                             it does not exist or is not a directory, the
-     *                             default (MARS launch directory) will be used.
+     * @param currentSaveDirectory
+     *     String containing pathname for current Save
+     *     directory. If
+     *     it does not exist or is not a directory, the
+     *     default (MARS launch directory) will be used.
      */
 
     void setCurrentSaveDirectory(final String currentSaveDirectory) {
@@ -182,16 +186,23 @@ public class Editor {
      * yet been saved, the title bar will show (temporary) file name
      * but not path.
      *
-     * @param path   Full pathname for file
-     * @param name   Name of file (last component of path)
-     * @param status Edit status of file. See FileStatus static constants.
+     * @param path
+     *     Full pathname for file
+     * @param name
+     *     Name of file (last component of path)
+     * @param status
+     *     Edit status of file. See FileStatus static constants.
      */
     public void setTitle(final String path, final String name, final @NotNull FileStatus.State status) {
         if (status == FileStatus.State.NO_FILE || name == null || name.isEmpty()) {
             this.mainUI.setTitle(this.mainUIbaseTitle);
         } else {
-            final String edited = (status == FileStatus.State.NEW_EDITED || status == FileStatus.State.EDITED) ? "*" : " ";
-            final String titleName = (status == FileStatus.State.NEW_EDITED || status == FileStatus.State.NEW_NOT_EDITED) ? name : path;
+            final String edited = (status == FileStatus.State.NEW_EDITED || status == FileStatus.State.EDITED)
+                ? "*"
+                : " ";
+            final String titleName = (status == FileStatus.State.NEW_EDITED || status == FileStatus.State.NEW_NOT_EDITED)
+                ? name
+                : path;
             this.mainUI.setTitle(titleName + edited + " - " + this.mainUIbaseTitle);
             final var tabbedPane = this.editTabbedPane.getTabbedPane();
             tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(), name + edited);
@@ -262,7 +273,8 @@ public class Editor {
     /**
      * Open files in new tabs.
      *
-     * @param paths File paths to open
+     * @param paths
+     *     File paths to open
      * @return true if succeeded, else false.
      */
     public boolean open(final @NotNull List<String> paths) {

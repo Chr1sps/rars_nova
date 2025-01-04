@@ -39,8 +39,10 @@ public final class MULH extends Arithmetic {
      * <p>Constructor for MULH.</p>
      */
     private MULH() {
-        super("mulh t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using signed multiplication",
-                "0000001", "001");
+        super(
+            "mulh t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using signed multiplication",
+            "0000001", "001"
+        );
     }
 
     /**

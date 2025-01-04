@@ -31,8 +31,10 @@ public final class AND extends Arithmetic {
     public static final AND INSTANCE = new AND();
 
     private AND() {
-        super("and t1,t2,t3", "Bitwise AND : Set t1 to bitwise AND of t2 and t3",
-            "0000000", "111");
+        super(
+            "and t1,t2,t3", "Bitwise AND : Set t1 to bitwise AND of t2 and t3",
+            "0000000", "111"
+        );
     }
 
     @Override

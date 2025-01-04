@@ -53,14 +53,21 @@ public final class MainPane extends JTabbedPane {
     /**
      * Constructor for the MainPane class.
      *
-     * @param appFrame a {@link VenusUI} object
-     * @param editor   a {@link Editor} object
-     * @param regs     a {@link RegistersWindow} object
-     * @param cop1Regs a {@link FloatingPointWindow} object
-     * @param cop0Regs a {@link ControlAndStatusWindow} object
+     * @param appFrame
+     *     a {@link VenusUI} object
+     * @param editor
+     *     a {@link Editor} object
+     * @param regs
+     *     a {@link RegistersWindow} object
+     * @param cop1Regs
+     *     a {@link FloatingPointWindow} object
+     * @param cop0Regs
+     *     a {@link ControlAndStatusWindow} object
      */
-    public MainPane(final VenusUI appFrame, final Editor editor, final RegistersWindow regs,
-                    final FloatingPointWindow cop1Regs, final ControlAndStatusWindow cop0Regs) {
+    public MainPane(
+        final VenusUI appFrame, final Editor editor, final RegistersWindow regs,
+        final FloatingPointWindow cop1Regs, final ControlAndStatusWindow cop0Regs
+    ) {
         super();
 
         this.setTabPlacement(JTabbedPane.TOP); // LEFT);
@@ -82,8 +89,10 @@ public final class MainPane extends JTabbedPane {
         this.addTab(executeTabTitle, null, this.executeTab);
 
         this.setToolTipTextAt(0, "Text editor for composing RISCV programs.");
-        this.setToolTipTextAt(1,
-            "View and control assembly language program execution.  Enabled upon successful assemble.");
+        this.setToolTipTextAt(
+            1,
+            "View and control assembly language program execution.  Enabled upon successful assemble."
+        );
 
         /*
          * Listener has one specific purpose: when Execute tab is selected for the

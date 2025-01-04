@@ -46,7 +46,8 @@ public final class FontSettingsView extends JPanel {
             12,
             1,
             100,
-            1);
+            1
+        );
         this.fontSizeSpinner = new JSpinner(fontSizeModel);
         this.fontSizeSpinner.setToolTipText("Current font size in points.");
         gbc.gridx = 1;
@@ -61,7 +62,6 @@ public final class FontSettingsView extends JPanel {
         this.fontWeightSelector.setMaximumRowCount(FontWeight.values().length);
         gbc.gridx = 1;
         this.add(fontWeightSelector, gbc);
-
 
         // ligatures
         gbc.gridy = 3;

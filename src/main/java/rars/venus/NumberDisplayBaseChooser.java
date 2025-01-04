@@ -62,8 +62,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * constructor. It assumes the text will be worded
      * so that a checked box means hexadecimal!
      *
-     * @param text         Text to accompany the check box.
-     * @param displayInHex Currently either DECIMAL or HEXADECIMAL
+     * @param text
+     *     Text to accompany the check box.
+     * @param displayInHex
+     *     Currently either DECIMAL or HEXADECIMAL
      */
     public NumberDisplayBaseChooser(final String text, final boolean displayInHex) {
         super(text, displayInHex);
@@ -81,8 +83,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
                     NumberDisplayBaseChooser.this.settingMenuItem.setSelected(choose.isSelected());
                     final ActionListener[] listeners =
                         NumberDisplayBaseChooser.this.settingMenuItem.getActionListeners();
-                    final ActionEvent event = new ActionEvent(NumberDisplayBaseChooser.this.settingMenuItem, 0,
-                        "chooser");
+                    final ActionEvent event = new ActionEvent(
+                        NumberDisplayBaseChooser.this.settingMenuItem, 0,
+                        "chooser"
+                    );
                     for (final ActionListener listener : listeners) {
                         listener.actionPerformed(event);
                     }
@@ -100,8 +104,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * string version of unsigned second. E.g. 0xffffffff will produce
      * "4294967295" instead of "-1".
      *
-     * @param value the number to be converted
-     * @param base  the numerical base to use (currently 10 or 16)
+     * @param value
+     *     the number to be converted
+     * @param base
+     *     the numerical base to use (currently 10 or 16)
      * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatUnsignedInteger(final int value, final int base) {
@@ -118,8 +124,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * method that uses the internally stored base. This class
      * method can be used by anyone anytime.
      *
-     * @param value the number to be converted
-     * @param base  the numerical base to use (currently 10 or 16)
+     * @param value
+     *     the number to be converted
+     * @param base
+     *     the numerical base to use (currently 10 or 16)
      * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatNumber(final int value, final int base) {
@@ -139,8 +147,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     /**
      * <p>formatNumber.</p>
      *
-     * @param value a long
-     * @param base  a int
+     * @param value
+     *     a long
+     * @param base
+     *     a int
      * @return a {@link java.lang.String} object
      */
     public static String formatNumber(final long value, final int base) {
@@ -157,8 +167,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * method that uses the internally stored base. This class
      * method can be used by anyone anytime.
      *
-     * @param value the number to be converted
-     * @param base  the numerical base to use (currently 10 or 16)
+     * @param value
+     *     the number to be converted
+     * @param base
+     *     the numerical base to use (currently 10 or 16)
      * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatNumber(final float value, final int base) {
@@ -175,8 +187,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * method that uses the internally stored base. This class
      * method can be used by anyone anytime.
      *
-     * @param value the number to be converted
-     * @param base  the numerical base to use (currently 10 or 16)
+     * @param value
+     *     the number to be converted
+     * @param base
+     *     the numerical base to use (currently 10 or 16)
      * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatNumber(final double value, final int base) {
@@ -204,8 +218,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * Not an issue if display base is 10 since result string will be NaN
      * no matter what the internal NaN second is.
      *
-     * @param value the int bits to be converted to string of corresponding float.
-     * @param base  the numerical base to use (currently 10 or 16)
+     * @param value
+     *     the int bits to be converted to string of corresponding float.
+     * @param base
+     *     the numerical base to use (currently 10 or 16)
      * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatFloatNumber(final int value, final int base) {
@@ -231,8 +247,10 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * Not an issue if display base is 10 since result string will be NaN
      * no matter what the internal NaN second is.
      *
-     * @param value the long bits to be converted to string of corresponding double.
-     * @param base  the numerical base to use (currently 10 or 16)
+     * @param value
+     *     the long bits to be converted to string of corresponding double.
+     * @param base
+     *     the numerical base to use (currently 10 or 16)
      * @return a String equivalent of the second rendered appropriately.
      */
     public static String formatDoubleNumber(final long value, final int base) {
@@ -246,7 +264,8 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     /**
      * Return the number base corresponding to the specified setting.
      *
-     * @param setting a boolean
+     * @param setting
+     *     a boolean
      * @return HEXADECIMAL if setting is true, DECIMAL otherwise.
      */
     public static int getBase(final boolean setting) {
@@ -265,8 +284,9 @@ public class NumberDisplayBaseChooser extends JCheckBox {
     /**
      * Set the current number base.
      *
-     * @param newBase The new number base. Currently, if it is
-     *                neither DECIMAL nor HEXADECIMAL, the base will not be changed.
+     * @param newBase
+     *     The new number base. Currently, if it is
+     *     neither DECIMAL nor HEXADECIMAL, the base will not be changed.
      */
     public void setBase(final int newBase) {
         if (newBase == NumberDisplayBaseChooser.DECIMAL || newBase == NumberDisplayBaseChooser.HEXADECIMAL) {
@@ -279,7 +299,8 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * is also an class (static method) that uses a specified
      * base.
      *
-     * @param value the number to be converted
+     * @param value
+     *     the number to be converted
      * @return a String equivalent of the second rendered appropriately.
      */
     public String formatNumber(final int value) {
@@ -295,7 +316,8 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * is also an class (static method) that uses a specified base.
      * If the current base is 16, this produces the same result as formatNumber().
      *
-     * @param value the number to be converted
+     * @param value
+     *     the number to be converted
      * @return a String equivalent of the second rendered appropriately.
      */
     public String formatUnsignedInteger(final int value) {
@@ -309,7 +331,8 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * with each other so that whenever one changes, so does the other. They
      * cannot be the same object (one is JCheckBox, the other is JCheckBoxMenuItem).
      *
-     * @param setter a {@link javax.swing.JCheckBoxMenuItem} object
+     * @param setter
+     *     a {@link javax.swing.JCheckBoxMenuItem} object
      */
     public void setSettingsMenuItem(final JCheckBoxMenuItem setter) {
         this.settingMenuItem = setter;

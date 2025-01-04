@@ -37,8 +37,10 @@ public final class REMU extends Arithmetic {
      * <p>Constructor for REMU.</p>
      */
     private REMU() {
-        super("remu t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3 using unsigned division",
-                "0000001", "111");
+        super(
+            "remu t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3 using unsigned division",
+            "0000001", "111"
+        );
     }
 
     /**

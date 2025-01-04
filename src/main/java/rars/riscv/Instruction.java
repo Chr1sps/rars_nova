@@ -68,7 +68,8 @@ public abstract sealed class Instruction permits BasicInstruction, CompressedIns
      * Used by subclass constructors to extract operator mnemonic from the
      * instruction example.
      *
-     * @param example a {@link java.lang.String} object
+     * @param example
+     *     a {@link java.lang.String} object
      * @return a {@link java.lang.String} object
      */
     protected static String extractOperator(final @NotNull String example) {

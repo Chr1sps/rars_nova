@@ -168,18 +168,26 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
 
     public Memory(final @NotNull MemoryConfiguration configuration) {
         this.currentConfiguration = configuration;
-        this.actualDataSegmentLimitAddress = Math.min(this.currentConfiguration.dataSegmentLimitAddress,
+        this.actualDataSegmentLimitAddress = Math.min(
+            this.currentConfiguration.dataSegmentLimitAddress,
             this.currentConfiguration.dataSegmentBaseAddress
-                + Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE);
-        this.actualTextLimitAddress = Math.min(this.currentConfiguration.textLimitAddress,
+                + Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE
+        );
+        this.actualTextLimitAddress = Math.min(
+            this.currentConfiguration.textLimitAddress,
             this.currentConfiguration.textBaseAddress
-                + Memory.TEXT_BLOCK_LENGTH_WORDS * Memory.TEXT_BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE);
-        this.actualStackLimitAddress = Math.max(this.currentConfiguration.stackLimitAddress,
+                + Memory.TEXT_BLOCK_LENGTH_WORDS * Memory.TEXT_BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE
+        );
+        this.actualStackLimitAddress = Math.max(
+            this.currentConfiguration.stackLimitAddress,
             this.currentConfiguration.stackBaseAddress
-                - Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE);
-        this.actualMemoryMapLimitAddress = Math.min(this.currentConfiguration.memoryMapLimitAddress,
+                - Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE
+        );
+        this.actualMemoryMapLimitAddress = Math.min(
+            this.currentConfiguration.memoryMapLimitAddress,
             this.currentConfiguration.memoryMapBaseAddress
-                + Memory.BLOCK_LENGTH_WORDS * Memory.MMIO_TABLE_LENGTH * DataTypes.WORD_SIZE);
+                + Memory.BLOCK_LENGTH_WORDS * Memory.MMIO_TABLE_LENGTH * DataTypes.WORD_SIZE
+        );
         this.currentHeapAddress = configuration.heapBaseAddress;
         this.textBlockTable = new ProgramStatement[Memory.TEXT_BLOCK_TABLE_LENGTH][];
         this.dataBlockTable = new int[Memory.BLOCK_TABLE_LENGTH][]; // array of null int[] references
@@ -207,7 +215,8 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
         final int sourceValue,
         final int bytePosInSource,
         final int destValue,
-        final int bytePosInDest) {
+        final int bytePosInDest
+    ) {
         // Set source byte value into destination byte position; set other 24 bits to
         // zeros, and bitwise-OR it with. Set 8 bits in destination byte position to 0's,
         return ((sourceValue >> (24 - (bytePosInSource << 3)) & 0xFF) << (24 - (bytePosInDest << 3))) | (
@@ -225,7 +234,8 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
         final int address,
         final ProgramStatement statement,
         final int baseAddress,
-        final ProgramStatement[][] blockTable) {
+        final ProgramStatement[][] blockTable
+    ) {
         final int relative = (address - baseAddress) >> 2; // convert byte address to words
         final int block = relative / Memory.BLOCK_LENGTH_WORDS;
         final int offset = relative % Memory.BLOCK_LENGTH_WORDS;
@@ -408,9 +418,11 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
             if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
-                    throw new AddressErrorException("Load address crosses word boundary",
+                    throw new AddressErrorException(
+                        "Load address crosses word boundary",
                         ExceptionReason.LOAD_ADDRESS_MISALIGNED,
-                        address);
+                        address
+                    );
                 }
                 final ProgramStatement oldStatement = this.getStatementNoNotify((address / 4) * 4);
                 if (oldStatement != null) {
@@ -427,9 +439,11 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
                 oldValue = (oldValue & mask) >> (address % 4);
                 this.setStatement((address / 4) * 4, new ProgramStatement(value, (address / 4) * 4));
             } else {
-                throw new AddressErrorException("Cannot write directly to text segment!",
+                throw new AddressErrorException(
+                    "Cannot write directly to text segment!",
                     ExceptionReason.STORE_ACCESS_FAULT,
-                    address);
+                    address
+                );
             }
         } else if (address >= this.currentConfiguration.memoryMapBaseAddress
             && address < this.actualMemoryMapLimitAddress) {
@@ -483,9 +497,11 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
                 }
                 this.setStatement(address, new ProgramStatement(value, address));
             } else {
-                throw new AddressErrorException("Cannot write directly to text segment!",
+                throw new AddressErrorException(
+                    "Cannot write directly to text segment!",
                     ExceptionReason.STORE_ACCESS_FAULT,
-                    address);
+                    address
+                );
             }
         } else if (address >= this.currentConfiguration.memoryMapBaseAddress
             && address < this.actualMemoryMapLimitAddress) {
@@ -518,8 +534,10 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      */
     public int setWord(final int address, final int value) throws AddressErrorException {
         MemoryUtils.checkStoreWordAligned(address);
-        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreWord(address,
-            this.set(address, value, DataTypes.WORD_SIZE)) : this.set(address, value, DataTypes.WORD_SIZE);
+        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreWord(
+            address,
+            this.set(address, value, DataTypes.WORD_SIZE)
+        ) : this.set(address, value, DataTypes.WORD_SIZE);
     }
 
     /**
@@ -538,12 +556,16 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      */
     public int setHalf(final int address, final int value) throws AddressErrorException {
         if (address % 2 != 0) {
-            throw new AddressErrorException("store address not aligned on halfword boundary ",
+            throw new AddressErrorException(
+                "store address not aligned on halfword boundary ",
                 ExceptionReason.STORE_ADDRESS_MISALIGNED,
-                address);
+                address
+            );
         }
-        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreHalf(address,
-            this.set(address, value, 2)) : this.set(address, value, 2);
+        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreHalf(
+            address,
+            this.set(address, value, 2)
+        ) : this.set(address, value, 2);
     }
 
     /**
@@ -559,8 +581,10 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      *     if any.
      */
     public int setByte(final int address, final int value) throws AddressErrorException {
-        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreByte(address,
-            this.set(address, value, 1)) : this.set(address, value, 1);
+        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreByte(
+            address,
+            this.set(address, value, 1)
+        ) : this.set(address, value, 1);
     }
 
     /**
@@ -585,7 +609,8 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
         final long old = ((long) oldHighOrder << 32) | (oldLowOrder & 0xFFFFFFFFL);
         return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreDoubleWord(
             address,
-            old) : old;
+            old
+        ) : old;
     }
 
     /**
@@ -625,17 +650,21 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
     public void setStatement(final int address, final ProgramStatement statement) throws AddressErrorException {
         MemoryUtils.checkStoreWordAligned(address);
         if (!this.isAddressInTextSegment(address)) {
-            throw new AddressErrorException("Store address to text segment out of range",
+            throw new AddressErrorException(
+                "Store address to text segment out of range",
                 ExceptionReason.STORE_ACCESS_FAULT,
-                address);
+                address
+            );
         }
         if (Globals.debug) {
             Memory.LOGGER.debug("memory[{}] set to {}", address, statement.getBinaryStatement());
         }
-        Memory.storeProgramStatement(address,
+        Memory.storeProgramStatement(
+            address,
             statement,
             this.currentConfiguration.textBaseAddress,
-            this.textBlockTable);
+            this.textBlockTable
+        );
     }
 
     /**
@@ -681,9 +710,11 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
             if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 if (address % 4 + length > 4) {
                     // TODO: add checks for halfword load not aligned to halfword boundary
-                    throw new AddressErrorException("Load address not aligned to word boundary ",
+                    throw new AddressErrorException(
+                        "Load address not aligned to word boundary ",
                         ExceptionReason.LOAD_ADDRESS_MISALIGNED,
-                        address);
+                        address
+                    );
                 }
                 final ProgramStatement stmt = this.getStatementNoNotify((address / 4) * 4);
                 // TODO: maybe find a way to make the bit manipulation more clear
@@ -695,9 +726,11 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
                     )
                 ) & ((1 << length * 8) - 1);
             } else {
-                throw new AddressErrorException("Cannot read directly from text segment!",
+                throw new AddressErrorException(
+                    "Cannot read directly from text segment!",
                     ExceptionReason.LOAD_ACCESS_FAULT,
-                    address);
+                    address
+                );
             }
         } else {
             // falls outside addressing range
@@ -751,9 +784,11 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
                 final ProgramStatement stmt = this.getStatementNoNotify(address);
                 value = stmt == null ? 0 : stmt.getBinaryStatement();
             } else {
-                throw new AddressErrorException("Cannot read directly from text segment!",
+                throw new AddressErrorException(
+                    "Cannot read directly from text segment!",
                     ExceptionReason.LOAD_ACCESS_FAULT,
-                    address);
+                    address
+                );
             }
         } else {
             // falls outside addressing range
@@ -910,9 +945,11 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      */
     public short getHalf(final int address) throws AddressErrorException {
         if (address % 2 != 0) {
-            throw new AddressErrorException("Load address not aligned on halfword boundary ",
+            throw new AddressErrorException(
+                "Load address not aligned on halfword boundary ",
                 ExceptionReason.LOAD_ADDRESS_MISALIGNED,
-                address);
+                address
+            );
         }
         return (short) (this.get(address, 2) & 0xFFFF);
     }
@@ -969,15 +1006,19 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
         MemoryUtils.checkLoadWordAligned(address);
         if (!BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
             && !this.isAddressInTextSegment(address)) {
-            throw new AddressErrorException("fetch address for text segment out of range ",
+            throw new AddressErrorException(
+                "fetch address for text segment out of range ",
                 ExceptionReason.LOAD_ACCESS_FAULT,
-                address);
+                address
+            );
         }
         if (this.isAddressInTextSegment(address)) {
-            return this.readProgramStatement(address,
+            return this.readProgramStatement(
+                address,
                 this.currentConfiguration.textBaseAddress,
                 this.textBlockTable,
-                notify);
+                notify
+            );
         } else {
             return new ProgramStatement(this.get(address, DataTypes.WORD_SIZE), address);
         }
@@ -1013,7 +1054,8 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      */
     public void subscribe(
         final Flow.Subscriber<? super MemoryAccessNotice> obs,
-        final int addr) throws AddressErrorException {
+        final int addr
+    ) throws AddressErrorException {
         this.subscribe(obs, addr, addr);
     }
 
@@ -1039,20 +1081,25 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
     public void subscribe(
         final Flow.Subscriber<? super MemoryAccessNotice> obs,
         final int startAddr,
-        final int endAddr) throws AddressErrorException {
+        final int endAddr
+    ) throws AddressErrorException {
         MemoryUtils.checkLoadWordAligned(startAddr);
         MemoryUtils.checkLoadWordAligned(endAddr);
         // upper half of address space (above 0x7fffffff) has sign bit 1 thus is seen as
         // negative.
         if (startAddr >= 0 && endAddr < 0) {
-            throw new AddressErrorException("range cannot cross 0x8000000; please split it up",
+            throw new AddressErrorException(
+                "range cannot cross 0x8000000; please split it up",
                 ExceptionReason.LOAD_ACCESS_FAULT,
-                startAddr);
+                startAddr
+            );
         }
         if (endAddr < startAddr) {
-            throw new AddressErrorException("end address of range < start address of range ",
+            throw new AddressErrorException(
+                "end address of range < start address of range ",
                 ExceptionReason.LOAD_ACCESS_FAULT,
-                startAddr);
+                startAddr
+            );
         }
         this.observables.add(new MemoryObservable(obs, startAddr, endAddr));
     }
@@ -1075,13 +1122,17 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
         final @NotNull AccessNotice.AccessType type,
         final int address,
         final int length,
-        final int value) {
+        final int value
+    ) {
         if ((Globals.program != null || Globals.gui == null)) {
-            this.observables.stream().filter((mo) -> mo.match(address)).forEach((mo) -> mo.submit(new MemoryAccessNotice(
-                type,
-                address,
-                length,
-                value)));
+            this.observables.stream()
+                .filter((mo) -> mo.match(address))
+                .forEach((mo) -> mo.submit(new MemoryAccessNotice(
+                    type,
+                    address,
+                    length,
+                    value
+                )));
         }
     }
 
@@ -1096,7 +1147,8 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
         final int[][] blockTable,
         final int relativeByteAddress,
         final int length,
-        final int value) {
+        final int value
+    ) {
         int relativeByteAddress1 = relativeByteAddress;
         int value1 = value;
         // IF added DPS 22-Dec-2008. NOTE: has NOT been tested with Big-Endian.
@@ -1122,14 +1174,18 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
                     blockTable[block] = new int[Memory.BLOCK_LENGTH_WORDS];
                 }
                 final var bytePositionInMemory = 3 - relativeByteAddress1 % 4;
-                oldValue = Memory.replaceByte(blockTable[block][offset],
+                oldValue = Memory.replaceByte(
+                    blockTable[block][offset],
                     bytePositionInMemory,
                     oldValue,
-                    bytePositionInValue);
-                blockTable[block][offset] = Memory.replaceByte(value1,
+                    bytePositionInValue
+                );
+                blockTable[block][offset] = Memory.replaceByte(
+                    value1,
                     bytePositionInValue,
                     blockTable[block][offset],
-                    bytePositionInMemory);
+                    bytePositionInMemory
+                );
                 relativeByteAddress1++;
             }
             return oldValue;
@@ -1145,7 +1201,8 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
     private int fetchBytesFromTable(
         final int @NotNull [] @Nullable [] blockTable,
         final int relativeByteAddress,
-        final int length) {
+        final int length
+    ) {
         int relativeByteAddress1 = relativeByteAddress;
         int result = 0;
         // IF added DPS 22-Dec-2008. NOTE: has NOT been tested with Big-Endian.
@@ -1172,10 +1229,12 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
                     return 0;
                 }
                 // noinspection DataFlowIssue
-                result = Memory.replaceByte(blockTable[blockIndex][offset],
+                result = Memory.replaceByte(
+                    blockTable[blockIndex][offset],
                     bytePositionInMemory,
                     result,
-                    bytePositionInValue);
+                    bytePositionInValue
+                );
                 relativeByteAddress1++;
             }
             return result;
@@ -1192,7 +1251,8 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
     private synchronized int storeWordInTable(
         final int @NotNull [] @Nullable [] blockTable,
         final int relative,
-        final int value) {
+        final int value
+    ) {
         final var blockIndex = relative / Memory.BLOCK_LENGTH_WORDS;
         final var offset = relative % Memory.BLOCK_LENGTH_WORDS;
         if (blockTable[blockIndex] == null) {
@@ -1221,7 +1281,8 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
     @Contract(pure = true)
     private synchronized @Nullable Integer fetchWordOrNullFromTable(
         final int @NotNull [] @Nullable [] blockTable,
-        final int relative) {
+        final int relative
+    ) {
         // Developed by Greg Gibeling of UC Berkeley, fall 2007.
         final var block = relative / Memory.BLOCK_LENGTH_WORDS;
         final var offset = relative % Memory.BLOCK_LENGTH_WORDS;
@@ -1253,7 +1314,8 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
         final int address,
         final int baseAddress,
         final ProgramStatement[][] blockTable,
-        final boolean notify) {
+        final boolean notify
+    ) {
         final int relative = (address - baseAddress) >> 2; // convert byte address to words
         final int block = relative / Memory.TEXT_BLOCK_LENGTH_WORDS;
         final int offset = relative % Memory.TEXT_BLOCK_LENGTH_WORDS;
@@ -1261,45 +1323,59 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
             if (blockTable[block] == null || blockTable[block][offset] == null) {
                 // No instructions are stored in this block or offset.
                 if (notify) {
-                    this.notifyAnyObservers(AccessNotice.AccessType.READ,
+                    this.notifyAnyObservers(
+                        AccessNotice.AccessType.READ,
                         address,
                         BasicInstruction.BASIC_INSTRUCTION_LENGTH,
-                        0);
+                        0
+                    );
                 }
                 return null;
             } else {
                 if (notify) {
-                    this.notifyAnyObservers(AccessNotice.AccessType.READ,
+                    this.notifyAnyObservers(
+                        AccessNotice.AccessType.READ,
                         address,
                         BasicInstruction.BASIC_INSTRUCTION_LENGTH,
-                        blockTable[block][offset].getBinaryStatement());
+                        blockTable[block][offset].getBinaryStatement()
+                    );
                 }
                 return blockTable[block][offset];
             }
         }
         if (notify) {
-            this.notifyAnyObservers(AccessNotice.AccessType.READ,
+            this.notifyAnyObservers(
+                AccessNotice.AccessType.READ,
                 address,
                 BasicInstruction.BASIC_INSTRUCTION_LENGTH,
-                0);
+                0
+            );
         }
         return null;
     }
 
     public void setMemoryConfigurationAndReset(final @NotNull MemoryConfiguration newConfiguration) {
         this.currentConfiguration = newConfiguration;
-        this.actualDataSegmentLimitAddress = Math.min(this.currentConfiguration.dataSegmentLimitAddress,
+        this.actualDataSegmentLimitAddress = Math.min(
+            this.currentConfiguration.dataSegmentLimitAddress,
             this.currentConfiguration.dataSegmentBaseAddress
-                + Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE);
-        this.actualTextLimitAddress = Math.min(this.currentConfiguration.textLimitAddress,
+                + Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE
+        );
+        this.actualTextLimitAddress = Math.min(
+            this.currentConfiguration.textLimitAddress,
             this.currentConfiguration.textBaseAddress
-                + Memory.TEXT_BLOCK_LENGTH_WORDS * Memory.TEXT_BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE);
-        this.actualStackLimitAddress = Math.max(this.currentConfiguration.stackLimitAddress,
+                + Memory.TEXT_BLOCK_LENGTH_WORDS * Memory.TEXT_BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE
+        );
+        this.actualStackLimitAddress = Math.max(
+            this.currentConfiguration.stackLimitAddress,
             this.currentConfiguration.stackBaseAddress
-                - Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE);
-        this.actualMemoryMapLimitAddress = Math.min(this.currentConfiguration.memoryMapLimitAddress,
+                - Memory.BLOCK_LENGTH_WORDS * Memory.BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE
+        );
+        this.actualMemoryMapLimitAddress = Math.min(
+            this.currentConfiguration.memoryMapLimitAddress,
             this.currentConfiguration.memoryMapBaseAddress
-                + Memory.BLOCK_LENGTH_WORDS * Memory.MMIO_TABLE_LENGTH * DataTypes.WORD_SIZE);
+                + Memory.BLOCK_LENGTH_WORDS * Memory.MMIO_TABLE_LENGTH * DataTypes.WORD_SIZE
+        );
         this.reset();
     }
 
@@ -1311,14 +1387,16 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      * Private class whose objects will represent an observable-observer pair
      * for a given memory address or range.
      */
-    private static class MemoryObservable extends CustomPublisher<MemoryAccessNotice> implements Comparable<MemoryObservable> {
+    private static class MemoryObservable extends CustomPublisher<MemoryAccessNotice>
+        implements Comparable<MemoryObservable> {
         private final int lowAddress;
         private final int highAddress;
 
         public MemoryObservable(
             final Flow.Subscriber<? super MemoryAccessNotice> subscriber,
             final int startAddr,
-            final int endAddr) {
+            final int endAddr
+        ) {
             this.lowAddress = startAddr;
             this.highAddress = endAddr;
             this.subscribe(subscriber);

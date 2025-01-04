@@ -47,9 +47,9 @@ public class SyscallWrite extends AbstractSyscall {
      */
     public SyscallWrite() {
         super(
-                "Write", "Write to a filedescriptor from a buffer",
-                "a0 = the file descriptor<br>a1 = the buffer address<br>a2 = the length to write",
-                "a0 = the number of charcters written"
+            "Write", "Write to a filedescriptor from a buffer",
+            "a0 = the file descriptor<br>a1 = the buffer address<br>a2 = the length to write",
+            "a0 = the number of charcters written"
         );
     }
 
@@ -78,9 +78,9 @@ public class SyscallWrite extends AbstractSyscall {
             throw new ExitingException(statement, e);
         }
         final int retValue = SystemIO.writeToFile(
-                RegisterFile.getValue("a0"), // fd
-                myBuffer, // buffer
-                RegisterFile.getValue("a2")
+            RegisterFile.getValue("a0"), // fd
+            myBuffer, // buffer
+            RegisterFile.getValue("a2")
         ); // length
         RegisterFile.updateRegister("a0", retValue); // set returned second in register
     }

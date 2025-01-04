@@ -43,18 +43,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public abstract class ImmediateInstruction extends BasicInstruction {
     protected ImmediateInstruction(
-            final @NotNull String usage,
-            final @NotNull String description,
-            final @NotNull String funct,
-            final boolean isRV64) {
-        super(usage, description, BasicInstructionFormat.I_FORMAT,
-                "tttttttttttt sssss %s fffff 001%s011".formatted(funct, isRV64 ? 1 : 0));
+        final @NotNull String usage,
+        final @NotNull String description,
+        final @NotNull String funct,
+        final boolean isRV64
+    ) {
+        super(
+            usage, description, BasicInstructionFormat.I_FORMAT,
+            "tttttttttttt sssss %s fffff 001%s011".formatted(funct, isRV64 ? 1 : 0)
+        );
     }
 
     protected ImmediateInstruction(
-            final @NotNull String usage,
-            final @NotNull String description,
-            final @NotNull String funct) {
+        final @NotNull String usage,
+        final @NotNull String description,
+        final @NotNull String funct
+    ) {
         this(usage, description, funct, false);
     }
 
@@ -63,19 +67,19 @@ public abstract class ImmediateInstruction extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(2) << 20) >> 20;
         if (InstructionsRegistry.RV64_MODE_FLAG) {
             RegisterFile.updateRegister(
-                    statement.getOperand(0),
-                    compute(
-                            RegisterFile.getValueLong(statement.getOperand(1)),
-                            Integer.valueOf(upperImmediate).longValue()
-                    )
+                statement.getOperand(0),
+                compute(
+                    RegisterFile.getValueLong(statement.getOperand(1)),
+                    Integer.valueOf(upperImmediate).longValue()
+                )
             );
         } else {
             RegisterFile.updateRegister(
-                    statement.getOperand(0),
-                    computeW(
-                            RegisterFile.getValue(statement.getOperand(1)),
-                            upperImmediate
-                    )
+                statement.getOperand(0),
+                computeW(
+                    RegisterFile.getValue(statement.getOperand(1)),
+                    upperImmediate
+                )
             );
         }
     }
@@ -83,8 +87,10 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     /**
      * <p>compute.</p>
      *
-     * @param value     the second from the register
-     * @param immediate the second from the immediate
+     * @param value
+     *     the second from the register
+     * @param immediate
+     *     the second from the immediate
      * @return the result to be stored from the instruction
      */
     protected abstract long compute(long value, long immediate);
@@ -92,8 +98,10 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     /**
      * <p>computeW.</p>
      *
-     * @param value     the truncated second from the register
-     * @param immediate the second from the immediate
+     * @param value
+     *     the truncated second from the register
+     * @param immediate
+     *     the second from the immediate
      * @return the result to be stored from the instruction
      */
     protected int computeW(final int value, final int immediate) {

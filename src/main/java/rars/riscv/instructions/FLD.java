@@ -15,8 +15,8 @@ public final class FLD extends BasicInstruction {
 
     private FLD() {
         super(
-                "fld f1, -100(t1)", "Load a double from memory",
-                BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 011 fffff 0000111"
+            "fld f1, -100(t1)", "Load a double from memory",
+            BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 011 fffff 0000111"
         );
     }
 
@@ -26,12 +26,12 @@ public final class FLD extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             final var value = Globals.MEMORY_INSTANCE.getDoubleWord(
-                    RegisterFile.getValue(statement.getOperand(2))
-                            + upperImmediate
+                RegisterFile.getValue(statement.getOperand(2))
+                    + upperImmediate
             );
             FloatingPointRegisterFile.updateRegisterLong(
-                    statement.getOperand(0),
-                    value
+                statement.getOperand(0),
+                value
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

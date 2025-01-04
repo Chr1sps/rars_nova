@@ -33,9 +33,11 @@ public final class SLTIU extends ImmediateInstruction {
     public static final @NotNull SLTIU INSTANCE = new SLTIU();
 
     private SLTIU() {
-        super("sltiu t1,t2,-100",
-                "Set less than immediate unsigned : If t2 is less than  sign-extended 16-bit immediate using unsigned comparison, then set t1 to 1 else set t1 to 0",
-                "011");
+        super(
+            "sltiu t1,t2,-100",
+            "Set less than immediate unsigned : If t2 is less than  sign-extended 16-bit immediate using unsigned comparison, then set t1 to 1 else set t1 to 0",
+            "011"
+        );
     }
 
     @Override

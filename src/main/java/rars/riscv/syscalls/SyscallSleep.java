@@ -41,8 +41,10 @@ public class SyscallSleep extends AbstractSyscall {
      * <p>Constructor for SyscallSleep.</p>
      */
     public SyscallSleep() {
-        super("Sleep", "Set the current thread to sleep for a time (not precise)", "a0 = time to sleep in milliseconds",
-                "N/A");
+        super(
+            "Sleep", "Set the current thread to sleep for a time (not precise)", "a0 = time to sleep in milliseconds",
+            "N/A"
+        );
     }
 
     /**

@@ -1,6 +1,6 @@
 package rars.venus;
 
-//import com.formdev.flatlaf.extras.FlatSVGIcon;
+// import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
@@ -154,7 +154,6 @@ public final class VenusUI extends JFrame {
             (int) (screenHeight * registersHeightPct)
         );
 
-
         // image courtesy of NASA/JPL.
         final URL im = this.getClass().getResource(Globals.imagesPath + "RISC-V.png");
         if (im == null) {
@@ -218,7 +217,6 @@ public final class VenusUI extends JFrame {
         FileStatus.reset();
         // The following has side effect of establishing menu state
         FileStatus.set(FileStatus.State.NO_FILE);
-
 
         this.addWindowListener(
             new WindowAdapter() {

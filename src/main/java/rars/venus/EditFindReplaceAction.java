@@ -49,15 +49,23 @@ public class EditFindReplaceAction extends GuiAction {
     /**
      * <p>Constructor for EditFindReplaceAction.</p>
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
-     * @param gui      a {@link VenusUI} object
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param icon
+     *     a {@link javax.swing.Icon} object
+     * @param descrip
+     *     a {@link java.lang.String} object
+     * @param mnemonic
+     *     a {@link java.lang.Integer} object
+     * @param accel
+     *     a {@link javax.swing.KeyStroke} object
+     * @param gui
+     *     a {@link VenusUI} object
      */
-    public EditFindReplaceAction(final String name, final Icon icon, final String descrip,
-                                 final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+    public EditFindReplaceAction(
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel, final VenusUI gui
+    ) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainPane = gui.mainPane;
     }
@@ -67,8 +75,10 @@ public class EditFindReplaceAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final JDialog findReplaceDialog = new FindReplaceDialog(Globals.gui, EditFindReplaceAction.DIALOG_TITLE,
-            false);
+        final JDialog findReplaceDialog = new FindReplaceDialog(
+            Globals.gui, EditFindReplaceAction.DIALOG_TITLE,
+            false
+        );
         findReplaceDialog.setVisible(true);
     }
 
@@ -208,8 +218,10 @@ public class EditFindReplaceAction extends GuiAction {
                 final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final var posn = editPane.doFindText(EditFindReplaceAction.searchString,
-                        this.caseSensitiveCheckBox.isSelected());
+                    final var posn = editPane.doFindText(
+                        EditFindReplaceAction.searchString,
+                        this.caseSensitiveCheckBox.isSelected()
+                    );
                     if (posn == TextEditingArea.FindReplaceResult.TEXT_NOT_FOUND) {
                         this.resultsLabel.setText(this.findButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {
@@ -238,9 +250,11 @@ public class EditFindReplaceAction extends GuiAction {
                 final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final var posn = editPane.doReplace(EditFindReplaceAction.searchString,
+                    final var posn = editPane.doReplace(
+                        EditFindReplaceAction.searchString,
                         this.replaceInputField.getText(),
-                        this.caseSensitiveCheckBox.isSelected());
+                        this.caseSensitiveCheckBox.isSelected()
+                    );
                     String result = this.replaceButton.getText() + ": ";
                     switch (posn) {
                         case TextEditingArea.FindReplaceResult.TEXT_NOT_FOUND:
@@ -274,9 +288,11 @@ public class EditFindReplaceAction extends GuiAction {
                 final EditPane editPane = EditFindReplaceAction.this.mainPane.getEditPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final int replaceCount = editPane.doReplaceAll(EditFindReplaceAction.searchString,
+                    final int replaceCount = editPane.doReplaceAll(
+                        EditFindReplaceAction.searchString,
                         this.replaceInputField.getText(),
-                        this.caseSensitiveCheckBox.isSelected());
+                        this.caseSensitiveCheckBox.isSelected()
+                    );
                     if (replaceCount == 0) {
                         this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {

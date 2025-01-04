@@ -61,17 +61,23 @@ public class SettingsExceptionHandlerAction extends GuiAction {
     /**
      * <p>Constructor for SettingsExceptionHandlerAction.</p>
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
+     * @param name
+     *     a {@link java.lang.String} object
+     * @param icon
+     *     a {@link javax.swing.Icon} object
+     * @param descrip
+     *     a {@link java.lang.String} object
+     * @param mnemonic
+     *     a {@link java.lang.Integer} object
+     * @param accel
+     *     a {@link javax.swing.KeyStroke} object
      */
-    public SettingsExceptionHandlerAction(final String name, final Icon icon, final String descrip,
-                                          final Integer mnemonic, final KeyStroke accel) {
+    public SettingsExceptionHandlerAction(
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel
+    ) {
         super(name, icon, descrip, mnemonic, accel);
     }
-
 
     /**
      * {@inheritDoc}
@@ -147,8 +153,10 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         if (this.initialSelected != finalSelected
             || this.initialPathname == null && finalPathname != null
             || this.initialPathname != null && !this.initialPathname.equals(finalPathname)) {
-            BOOL_SETTINGS.setSettingAndSave(BoolSetting.EXCEPTION_HANDLER_ENABLED,
-                finalSelected);
+            BOOL_SETTINGS.setSettingAndSave(
+                BoolSetting.EXCEPTION_HANDLER_ENABLED,
+                finalSelected
+            );
             if (finalSelected) {
                 OTHER_SETTINGS.setExceptionHandlerAndSave(finalPathname);
             }
@@ -178,8 +186,9 @@ public class SettingsExceptionHandlerAction extends GuiAction {
             final JFileChooser chooser = new JFileChooser();
             String pathname = OTHER_SETTINGS.getExceptionHandler();
             final File file = new File(pathname);
-            if (file.exists())
+            if (file.exists()) {
                 chooser.setSelectedFile(file);
+            }
             final int result = chooser.showOpenDialog(Globals.gui);
             if (result == JFileChooser.APPROVE_OPTION) {
                 pathname = chooser.getSelectedFile().getPath();// .replaceAll("\\\\","/");

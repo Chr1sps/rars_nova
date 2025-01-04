@@ -13,8 +13,10 @@ public final class FMAXD extends Double {
     }
 
     @Override
-    public @NotNull Float64 compute(final @NotNull Float64 f1, final @NotNull Float64 f2,
-                                    final @NotNull Environment env) {
+    public @NotNull Float64 compute(
+        final @NotNull Float64 f1, final @NotNull Float64 f2,
+        final @NotNull Environment env
+    ) {
         return Comparisons.maximumNumber(f1, f2, env);
     }
 }

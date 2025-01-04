@@ -58,9 +58,12 @@ public final class MemoryAccessNotice extends AccessNotice {
      * Constructor will be called only within this package, so assume
      * address is in valid range.
      *
-     * @param type    a int
-     * @param address a int
-     * @param value   a int
+     * @param type
+     *     a int
+     * @param address
+     *     a int
+     * @param value
+     *     a int
      */
     public MemoryAccessNotice(final @NotNull AccessType type, final int address, final int value) {
         super(type);
@@ -103,6 +106,6 @@ public final class MemoryAccessNotice extends AccessNotice {
      */
     public String toString() {
         return ((this.getAccessType() == AccessType.READ) ? "R " : "W ") +
-                "Mem " + address + " " + length + "B = " + value;
+            "Mem " + address + " " + length + "B = " + value;
     }
 }

@@ -34,15 +34,16 @@ public class Float64 implements Floating<Float64> {
     public static final Float64 NegativeInfinity = new Float64(0xFFF00000_00000000L);
     // Some constants that allow fromExactFloat to be mostly copied
     private static final int sigbits = 52, expbits = 11,
-            maxexp = 1 << (Float64.expbits - 1),
-            minexp = -(1 << (Float64.expbits - 1)) + 1;
+        maxexp = 1 << (Float64.expbits - 1),
+        minexp = -(1 << (Float64.expbits - 1)) + 1;
     private static final long sigmask = (1L << Float64.sigbits) - 1;
     public final long bits;
 
     /**
      * <p>Constructor for Float64.</p>
      *
-     * @param bits a long
+     * @param bits
+     *     a long
      */
     public Float64(final long bits) {
         this.bits = bits;
@@ -51,12 +52,19 @@ public class Float64 implements Floating<Float64> {
     /**
      * <p>Constructor for Float64.</p>
      *
-     * @param sign        a boolean
-     * @param exponent    a int
-     * @param significand a long
+     * @param sign
+     *     a boolean
+     * @param exponent
+     *     a int
+     * @param significand
+     *     a long
      */
     public Float64(final boolean sign, final int exponent, final long significand) {
-        this(((sign) ? 0x80000000_00000000L : 0) | (((exponent + 1023) & 0x7FFL) << Float64.sigbits) | (significand & Float64.sigmask));
+        this((
+            (sign)
+                ? 0x80000000_00000000L
+                : 0
+        ) | (((exponent + 1023) & 0x7FFL) << Float64.sigbits) | (significand & Float64.sigmask));
     }
 
 //    /**
@@ -124,7 +132,8 @@ public class Float64 implements Floating<Float64> {
     /**
      * <p>copySign.</p>
      *
-     * @param signToTake a {@link Float64} object
+     * @param signToTake
+     *     a {@link Float64} object
      * @return a {@link Float64} object
      */
     public @NotNull Float64 copySign(@NotNull final Float64 signToTake) {
@@ -188,8 +197,9 @@ public class Float64 implements Floating<Float64> {
      */
     @Override
     public boolean isSignalling() {
-        if (!this.isNaN())
+        if (!this.isNaN()) {
             return false;
+        }
         return (this.bits & 0x80000_00000000L) == 0;
     }
 
@@ -265,8 +275,10 @@ public class Float64 implements Floating<Float64> {
 
             if (ef.exponent > Float64.minexp - Float64.sigbits) {
                 assert ef.significand.bitLength() <= Float64.sigbits : "Its actually normal";
-                return new Float64(ef.sign, Float64.minexp,
-                        ef.significand.shiftLeft(-(Float64.minexp - Float64.sigbits + 1) + ef.exponent).longValueExact());
+                return new Float64(
+                    ef.sign, Float64.minexp,
+                    ef.significand.shiftLeft(-(Float64.minexp - Float64.sigbits + 1) + ef.exponent).longValueExact()
+                );
             }
 
             env.inexact = true;
@@ -309,9 +321,11 @@ public class Float64 implements Floating<Float64> {
                 final int tmp = ef.exponent + ef.significand.bitLength() - 1;
                 assert tmp > Float64.minexp : "Its actually subnormal";
 
-                return new Float64(ef.sign, tmp,
-                        ef.significand.shiftLeft((Float64.sigbits + 1) - ef.significand.bitLength()).longValueExact()
-                                & Float64.sigmask);
+                return new Float64(
+                    ef.sign, tmp,
+                    ef.significand.shiftLeft((Float64.sigbits + 1) - ef.significand.bitLength()).longValueExact()
+                        & Float64.sigmask
+                );
             }
             env.inexact = true;
             bitsToRound = ef.significand.bitLength() - (Float64.sigbits + 1);
@@ -320,13 +334,21 @@ public class Float64 implements Floating<Float64> {
 
             final BigInteger upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1));
 
-            towardsZero = new Float64(ef.sign, ef.exponent + Float64.sigbits + bitsToRound,
-                    ef.significand.shiftRight(bitsToRound).longValueExact() & Float64.sigmask);
+            towardsZero = new Float64(
+                ef.sign, ef.exponent + Float64.sigbits + bitsToRound,
+                ef.significand.shiftRight(bitsToRound).longValueExact() & Float64.sigmask
+            );
             if (upBits.testBit(0) || upBits.bitLength() <= Float64.sigbits + 1) {
-                awayZero = new Float64(ef.sign, ef.exponent + Float64.sigbits + bitsToRound, upBits.longValueExact() & Float64.sigmask);
+                awayZero = new Float64(
+                    ef.sign,
+                    ef.exponent + Float64.sigbits + bitsToRound,
+                    upBits.longValueExact() & Float64.sigmask
+                );
             } else {
-                awayZero = new Float64(ef.sign, ef.exponent + (Float64.sigbits + 1) + bitsToRound,
-                        upBits.shiftRight(1).longValueExact() & Float64.sigmask);
+                awayZero = new Float64(
+                    ef.sign, ef.exponent + (Float64.sigbits + 1) + bitsToRound,
+                    upBits.shiftRight(1).longValueExact() & Float64.sigmask
+                );
             }
 
         }

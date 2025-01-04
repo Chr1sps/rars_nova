@@ -53,7 +53,8 @@ public final class RandomStreams {
     /**
      * Just a little helper method to initialize streams on stream being empty
      *
-     * @param reg The name of the register that holds the stream index
+     * @param reg
+     *     The name of the register that holds the stream index
      * @return the stream a that index
      */
     static @NotNull Random get(final String reg) {

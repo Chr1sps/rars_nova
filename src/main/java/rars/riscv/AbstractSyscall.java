@@ -25,8 +25,9 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     /**
      * Constructor is provided so subclass may initialize instance variables.
      *
-     * @param name service name which may be used for reference independent of
-     *             number
+     * @param name
+     *     service name which may be used for reference independent of
+     *     number
      */
     protected AbstractSyscall(final String name) {
         this(name, "N/A");
@@ -35,9 +36,11 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     /**
      * <p>Constructor for AbstractSyscall.</p>
      *
-     * @param name  service name which may be used for reference independent of
-     *              number
-     * @param descr a hort description of what the system calll does
+     * @param name
+     *     service name which may be used for reference independent of
+     *     number
+     * @param descr
+     *     a hort description of what the system calll does
      */
     protected AbstractSyscall(final String name, final String descr) {
         this(name, descr, "N/A", "N/A");
@@ -46,12 +49,16 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     /**
      * <p>Constructor for AbstractSyscall.</p>
      *
-     * @param name  service name which may be used for reference independent of
-     *              number
-     * @param descr a short description of what the system call does
-     * @param in    a description of what registers should be set to before the
-     *              system call
-     * @param out   a description of what registers are set to after the system call
+     * @param name
+     *     service name which may be used for reference independent of
+     *     number
+     * @param descr
+     *     a short description of what the system call does
+     * @param in
+     *     a description of what registers should be set to before the
+     *     system call
+     * @param out
+     *     a description of what registers are set to after the system call
      */
     protected AbstractSyscall(final String name, final String descr, final String in, final String out) {
         serviceNumber = -1;
@@ -115,7 +122,8 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      * Set the service number. This is provided to allow MARS implementer or user
      * to override the default service number.
      *
-     * @param num specified service number to override the default.
+     * @param num
+     *     specified service number to override the default.
      */
     public void setNumber(final int num) {
         serviceNumber = num;
@@ -125,21 +133,24 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      * Performs syscall function. It will be invoked when the service is invoked
      * at simulation time. Service is identified by second stored in a7.
      *
-     * @throws ExitingException if any.
+     * @throws ExitingException
+     *     if any.
      */
     public abstract void simulate(@NotNull ProgramStatement statement)
-            throws ExitingException;
+        throws ExitingException;
 
     /**
      * <p>compareTo.</p>
      *
-     * @param other a {@link AbstractSyscall} object
+     * @param other
+     *     a {@link AbstractSyscall} object
      * @return a int
      */
     @Override
     public int compareTo(@NotNull final AbstractSyscall other) {
-        if (this == other)
+        if (this == other) {
             return 0;
+        }
         assert getNumber() != other.getNumber() : "Different syscalls have to have different numbers";
         return getNumber() > other.getNumber() ? 1 : -1;
     }

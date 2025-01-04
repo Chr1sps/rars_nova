@@ -38,7 +38,7 @@ import java.awt.event.MouseListener;
  * realistically, it probably doesn't matter.
  */
 public class RepeatButton extends JButton
-        implements ActionListener, MouseListener {
+    implements ActionListener, MouseListener {
     private static final Logger LOGGER = LogManager.getLogger();
     /**
      * Testing flag. Set in main method.
@@ -79,7 +79,8 @@ public class RepeatButton extends JButton
     /**
      * Creates a button with an icon.
      *
-     * @param icon the button icon
+     * @param icon
+     *     the button icon
      */
     public RepeatButton(final Icon icon) {
         super(icon);
@@ -89,7 +90,8 @@ public class RepeatButton extends JButton
     /**
      * Creates a button with text.
      *
-     * @param text the button text
+     * @param text
+     *     the button text
      */
     public RepeatButton(final String text) {
         super(text);
@@ -99,7 +101,8 @@ public class RepeatButton extends JButton
     /**
      * Main method, for testing. Creates a frame with both styles of menu.
      *
-     * @param args the command-line arguments
+     * @param args
+     *     the command-line arguments
      */
     public static void main(final String[] args) {
         RepeatButton.testing = true;
@@ -138,7 +141,8 @@ public class RepeatButton extends JButton
     /**
      * Set the delay for the timer of this button.
      *
-     * @param d the delay
+     * @param d
+     *     the delay
      */
     public void setDelay(final int d) {
         this.delay = d;
@@ -156,7 +160,8 @@ public class RepeatButton extends JButton
     /**
      * Sets the initial delay for the timer of this button.
      *
-     * @param d the initial delay
+     * @param d
+     *     the initial delay
      */
     public void setInitialDelay(final int d) {
         this.initialDelay = d;
@@ -179,7 +184,8 @@ public class RepeatButton extends JButton
      * when this feature might wish to be disabled. If false, it will
      * also stop the timer if it's running.
      *
-     * @param en if true, the button should fire events when held
+     * @param en
+     *     if true, the button should fire events when held
      */
     public void setRepeatEnabled(final boolean en) {
         if (!en) {
@@ -218,8 +224,9 @@ public class RepeatButton extends JButton
         // process events only from this components
         if (ae.getSource() == this.timer) {
             final ActionEvent event = new ActionEvent(
-                    this, ActionEvent.ACTION_PERFORMED,
-                    super.getActionCommand(), this.modifiers);
+                this, ActionEvent.ACTION_PERFORMED,
+                super.getActionCommand(), this.modifiers
+            );
             super.fireActionPerformed(event);
         }
         // testing code...

@@ -57,15 +57,20 @@ public final class ExtendedInstruction extends Instruction {
     /**
      * Constructor for ExtendedInstruction. No compact translation is provided.
      *
-     * @param example     A String containing example use of the MIPS extended
-     *                    instruction.
-     * @param translation Specifications for translating this instruction into a
-     *                    sequence
-     *                    of one or more MIPS basic instructions.
-     * @param description a helpful description to be included on help requests
+     * @param example
+     *     A String containing example use of the MIPS extended
+     *     instruction.
+     * @param translation
+     *     Specifications for translating this instruction into a
+     *     sequence
+     *     of one or more MIPS basic instructions.
+     * @param description
+     *     a helpful description to be included on help requests
      */
-    public ExtendedInstruction(final @NotNull String example, final @NotNull String translation,
-                               final @NotNull String description) {
+    public ExtendedInstruction(
+        final @NotNull String example, final @NotNull String translation,
+        final @NotNull String description
+    ) {
         super(example, description);
         this.translationStrings = ExtendedInstruction.buildTranslationList(translation);
     }
@@ -74,11 +79,13 @@ public final class ExtendedInstruction extends Instruction {
      * Constructor for ExtendedInstruction, where no instruction description or
      * compact translation is provided.
      *
-     * @param example     A String containing example use of the MIPS extended
-     *                    instruction.
-     * @param translation Specifications for translating this instruction into a
-     *                    sequence
-     *                    of one or more MIPS basic instructions.
+     * @param example
+     *     A String containing example use of the MIPS extended
+     *     instruction.
+     * @param translation
+     *     Specifications for translating this instruction into a
+     *     sequence
+     *     of one or more MIPS basic instructions.
      */
     public ExtendedInstruction(final String example, final String translation) {
         this(example, translation, "");
@@ -117,17 +124,21 @@ public final class ExtendedInstruction extends Instruction {
      * Used for various branches.
      * </UL>
      *
-     * @param template  a String containing template for basic statement.
-     * @param tokenList a TokenList containing tokens from extended instruction.
-     * @param program   a {@link RISCVProgram} object
-     * @param PC        a int
+     * @param template
+     *     a String containing template for basic statement.
+     * @param tokenList
+     *     a TokenList containing tokens from extended instruction.
+     * @param program
+     *     a {@link RISCVProgram} object
+     * @param PC
+     *     a int
      * @return String representing basic assembler statement.
      */
     public static String makeTemplateSubstitutions(
-            final @NotNull RISCVProgram program,
-            final @NotNull String template,
-            final @NotNull TokenList tokenList,
-            final int PC
+        final @NotNull RISCVProgram program,
+        final @NotNull String template,
+        final @NotNull TokenList tokenList,
+        final int PC
     ) {
         String instruction = template;
         // substitute first operand token for template's RG1 or OP1, second for RG2 or
@@ -152,14 +163,15 @@ public final class ExtendedInstruction extends Instruction {
                 if (instruction.contains("LIA" + op)) {
                     final int extra = BinaryUtils.bitValue(val, 11); // add extra to compesate for sign extension
                     instruction = instruction.replace("LIA" + op, String.valueOf((val >> 12) + extra));
-                } else if (instruction.contains("LIB" + op))
+                } else if (instruction.contains("LIB" + op)) {
                     instruction = instruction.replace("LIB" + op, String.valueOf(val << 20 >> 20));
-                else if (instruction.contains("LIC" + op))
+                } else if (instruction.contains("LIC" + op)) {
                     instruction = instruction.replace("LIC" + op, String.valueOf((vall >> 21) & 0x7FF));
-                else if (instruction.contains("LID" + op))
+                } else if (instruction.contains("LID" + op)) {
                     instruction = instruction.replace("LID" + op, String.valueOf((vall >> 10) & 0x7FF));
-                else if (instruction.contains("LIE" + op))
+                } else if (instruction.contains("LIE" + op)) {
                     instruction = instruction.replace("LIE" + op, String.valueOf(vall & 0x3FF));
+                }
                 continue;
             }
 

@@ -12,7 +12,6 @@ import rars.util.Utils;
 public class FNMADDS extends FusedFloat {
     public static final FNMADDS INSTANCE = new FNMADDS();
 
-
     /**
      * <p>Constructor for FNMADDS.</p>
      */
@@ -24,8 +23,10 @@ public class FNMADDS extends FusedFloat {
      * {@inheritDoc}
      */
     @Override
-    public @NotNull Float32 compute(@NotNull final Float32 f1, final @NotNull Float32 f2, final @NotNull Float32 f3,
-                                    @NotNull final Environment e) {
+    public @NotNull Float32 compute(
+        @NotNull final Float32 f1, final @NotNull Float32 f2, final @NotNull Float32 f3,
+        @NotNull final Environment e
+    ) {
         // TODO: test if this is the right behaviour
         Utils.flipRounding(e);
         return Arithmetic.fusedMultiplyAdd(f1, f2, f3, e).negate();

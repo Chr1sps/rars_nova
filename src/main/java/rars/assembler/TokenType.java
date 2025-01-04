@@ -42,7 +42,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public enum TokenType {
-    COMMENT, DIRECTIVE, OPERATOR,
+    COMMENT,
+    DIRECTIVE,
+    OPERATOR,
     /**
      * note: REGISTER_NAME is token of form zero whereas REGISTER_NUMBER is token
      * of form x0. The former is part of extended assembler, and latter is part
@@ -266,12 +268,16 @@ public enum TokenType {
      * @return a boolean
      */
     public static boolean isValidIdentifier(final String value) {
-        boolean result = (Character.isLetter(value.charAt(0)) || value.charAt(0) == '_' || value.charAt(0) == '.'
-            || value.charAt(0) == '$');
+        boolean result = (
+            Character.isLetter(value.charAt(0)) || value.charAt(0) == '_' || value.charAt(0) == '.'
+                || value.charAt(0) == '$'
+        );
         int index = 1;
         while (result && index < value.length()) {
-            if (!(Character.isLetterOrDigit(value.charAt(index)) || value.charAt(index) == '_'
-                || value.charAt(index) == '.' || value.charAt(index) == '$')) {
+            if (!(
+                Character.isLetterOrDigit(value.charAt(index)) || value.charAt(index) == '_'
+                    || value.charAt(index) == '.' || value.charAt(index) == '$'
+            )) {
                 result = false;
             }
             index++;

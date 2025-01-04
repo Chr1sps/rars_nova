@@ -95,9 +95,11 @@ public final class Macro {
     /**
      * returns whether <code>tokenValue</code> is macro parameter or not
      *
-     * @param tokenValue                a {@link java.lang.String} object
-     * @param acceptSpimStyleParameters accepts SPIM-style parameters which begin
-     *                                  with '$' if true
+     * @param tokenValue
+     *     a {@link java.lang.String} object
+     * @param acceptSpimStyleParameters
+     *     accepts SPIM-style parameters which begin
+     *     with '$' if true
      * @return a boolean
      */
     public static boolean tokenIsMacroParameter(final String tokenValue, final boolean acceptSpimStyleParameters) {
@@ -132,7 +134,8 @@ public final class Macro {
     /**
      * <p>Setter for the field <code>name</code>.</p>
      *
-     * @param name a {@link java.lang.String} object
+     * @param name
+     *     a {@link java.lang.String} object
      */
     public void setName(final String name) {
         this.name = name;
@@ -150,7 +153,8 @@ public final class Macro {
     /**
      * <p>Setter for the field <code>program</code>.</p>
      *
-     * @param program a {@link RISCVProgram} object
+     * @param program
+     *     a {@link RISCVProgram} object
      */
     public void setProgram(final RISCVProgram program) {
         this.program = program;
@@ -168,7 +172,8 @@ public final class Macro {
     /**
      * <p>Setter for the field <code>fromLine</code>.</p>
      *
-     * @param fromLine a int
+     * @param fromLine
+     *     a int
      */
     public void setFromLine(final int fromLine) {
         this.fromLine = fromLine;
@@ -186,7 +191,8 @@ public final class Macro {
     /**
      * <p>setOriginalFromLine.</p>
      *
-     * @param origFromLine a int
+     * @param origFromLine
+     *     a int
      */
     public void setOriginalFromLine(final int origFromLine) {
         this.origFromLine = origFromLine;
@@ -204,7 +210,8 @@ public final class Macro {
     /**
      * <p>Setter for the field <code>toLine</code>.</p>
      *
-     * @param toLine a int
+     * @param toLine
+     *     a int
      */
     public void setToLine(final int toLine) {
         this.toLine = toLine;
@@ -213,7 +220,8 @@ public final class Macro {
     /**
      * <p>setOriginalToLine.</p>
      *
-     * @param origToLine a int
+     * @param origToLine
+     *     a int
      */
     public void setOriginalToLine(final int origToLine) {
         this.origToLine = origToLine;
@@ -242,7 +250,8 @@ public final class Macro {
     /**
      * <p>addArg.</p>
      *
-     * @param value a {@link java.lang.String} object
+     * @param value
+     *     a {@link java.lang.String} object
      */
     public void addArg(final String value) {
         this.args.add(value);
@@ -254,10 +263,14 @@ public final class Macro {
      * Also appends "_M#" to all labels defined inside macro body where # is second
      * of <code>counter</code>
      *
-     * @param line    source line number in macro definition to be substituted
-     * @param args    a {@link TokenList} object
-     * @param counter unique macro expansion id
-     * @param errors  a {@link ErrorList} object
+     * @param line
+     *     source line number in macro definition to be substituted
+     * @param args
+     *     a {@link TokenList} object
+     * @param counter
+     *     unique macro expansion id
+     * @param errors
+     *     a {@link ErrorList} object
      * @return <code>line</code>-th line of source code, with substituted
      * arguments
      */
@@ -276,9 +289,9 @@ public final class Macro {
                     }
                 }
                 String substitute = token.getText();
-                if (repl != -1)
+                if (repl != -1) {
                     substitute = args.get(repl + 1).toString();
-                else {
+                } else {
                     errors.addTokenError(token, "Unknown macro parameter");
                 }
                 sourceLine = Macro.replaceToken(sourceLine, token, substitute);
@@ -304,7 +317,8 @@ public final class Macro {
     /**
      * <p>addLabel.</p>
      *
-     * @param value a {@link java.lang.String} object
+     * @param value
+     *     a {@link java.lang.String} object
      */
     public void addLabel(final String value) {
         this.labels.add(value);
@@ -320,7 +334,9 @@ public final class Macro {
     @SuppressWarnings("ObjectInstantiationInEqualsHashCode")
     @Override
     public int hashCode() {
-        return Objects.hash(this.name, this.program, this.labels, this.fromLine, this.toLine, this.origFromLine,
-            this.origToLine, this.args);
+        return Objects.hash(
+            this.name, this.program, this.labels, this.fromLine, this.toLine, this.origFromLine,
+            this.origToLine, this.args
+        );
     }
 }

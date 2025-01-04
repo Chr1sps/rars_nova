@@ -46,7 +46,8 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
     /**
      * <p>Constructor for AccessNotice.</p>
      *
-     * @param type a int
+     * @param type
+     *     a int
      */
     protected AccessNotice(final @NotNull AccessType type) {
         this.accessType = type;
@@ -77,7 +78,8 @@ public abstract sealed class AccessNotice implements Notice permits MemoryAccess
     }
 
     public enum AccessType {
-        READ, WRITE
+        READ,
+        WRITE
     }
 
 }

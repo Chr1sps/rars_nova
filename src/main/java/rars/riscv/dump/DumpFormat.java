@@ -49,18 +49,24 @@ public interface DumpFormat {
      * Write memory contents according to the
      * specification for this format.
      *
-     * @param file         File in which to store memory contents.
-     * @param firstAddress first (lowest) memory address to dump. In bytes but
-     *                     must be on word boundary.
-     * @param lastAddress  last (highest) memory address to dump. In bytes but
-     *                     must be on word boundary. Will dump the word that starts
-     *                     at this address.
-     * @param memory       a {@link Memory} object
-     * @throws AddressErrorException if firstAddress is invalid or not on a word
-     *                               boundary.
-     * @throws java.io.IOException   if error occurs during file output.
+     * @param file
+     *     File in which to store memory contents.
+     * @param firstAddress
+     *     first (lowest) memory address to dump. In bytes but
+     *     must be on word boundary.
+     * @param lastAddress
+     *     last (highest) memory address to dump. In bytes but
+     *     must be on word boundary. Will dump the word that starts
+     *     at this address.
+     * @param memory
+     *     a {@link Memory} object
+     * @throws AddressErrorException
+     *     if firstAddress is invalid or not on a word
+     *     boundary.
+     * @throws java.io.IOException
+     *     if error occurs during file output.
      */
     void dumpMemoryRange(@NotNull File file, int firstAddress, int lastAddress, @NotNull Memory memory)
-            throws AddressErrorException, IOException;
+        throws AddressErrorException, IOException;
 
 }

@@ -141,8 +141,10 @@ public interface Floating<T extends Floating<T>> {
     /**
      * <p>fromExactFloat.</p>
      *
-     * @param f   a {@link ExactFloat} object
-     * @param env a {@link Environment} object
+     * @param f
+     *     a {@link ExactFloat} object
+     * @param env
+     *     a {@link Environment} object
      * @return a T object
      */
     @NotNull T fromExactFloat(@NotNull ExactFloat f, @NotNull Environment env);

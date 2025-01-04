@@ -70,7 +70,7 @@ public class CustomPublisher<T> implements Flow.Publisher<T> {
         private final Flow.Subscriber<? super T> subscriber;
         private final AtomicLong requested = new AtomicLong(0);
         private final AtomicBoolean completed = new AtomicBoolean(false),
-                cancelled = new AtomicBoolean(false);
+            cancelled = new AtomicBoolean(false);
         private final ReentrantLock subscriptionLock = new ReentrantLock();
 
         public CustomSubscription(final Flow.Subscriber<? super T> subscriber) {

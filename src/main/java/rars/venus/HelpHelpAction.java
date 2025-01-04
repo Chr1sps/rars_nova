@@ -62,8 +62,10 @@ public final class HelpHelpAction extends GuiAction {
      */
     private final @NotNull VenusUI mainUI;
 
-    public HelpHelpAction(final String name, final Icon icon, final String descrip,
-                          final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui) {
+    public HelpHelpAction(
+        final String name, final Icon icon, final String descrip,
+        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
+    ) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainUI = gui;
     }
@@ -113,11 +115,11 @@ public final class HelpHelpAction extends GuiAction {
         for (final Instruction instr : instructionList) {
             if (instructionClass.isInstance(instr)) {
                 exampleList.add(instr.exampleFormat
-                                    + blanks.substring(
+                    + blanks.substring(
                     0,
                     Math.max(0, blanks.length() - instr.exampleFormat.length())
                 )
-                                    + instr.description);
+                    + instr.description);
             }
         }
         return exampleList;
@@ -422,7 +424,8 @@ public final class HelpHelpAction extends GuiAction {
             final String s, // second to display
             final int index, // cell index
             final boolean isSelected, // is the cell selected
-            final boolean cellHasFocus) // does the cell have focus
+            final boolean cellHasFocus
+        ) // does the cell have focus
         {
             this.setText(s);
             if (isSelected) {

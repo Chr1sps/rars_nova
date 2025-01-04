@@ -88,21 +88,27 @@ public final class ToneGenerator {
      * Produces a Tone with the specified pitch, duration, and instrument,
      * and volume.
      *
-     * @param pitch      the desired pitch in semitones - 0-127 where 60 is
-     *                   middle C.
-     * @param duration   the desired duration in milliseconds.
-     * @param instrument the desired instrument (or patch) represented
-     *                   by a positive byte second (0-127). See the <a href=
-     *                   http://www.midi.org/about-midi/gm/gm1sound.shtml#instrument>general
-     *                   MIDI instrument patch map</a> for more instruments
-     *                   associated with
-     *                   each second.
-     * @param volume     the desired volume of the initial attack of the
-     *                   Tone (MIDI velocity) represented by a positive byte second
-     *                   (0-127).
+     * @param pitch
+     *     the desired pitch in semitones - 0-127 where 60 is
+     *     middle C.
+     * @param duration
+     *     the desired duration in milliseconds.
+     * @param instrument
+     *     the desired instrument (or patch) represented
+     *     by a positive byte second (0-127). See the <a href=
+     *     http://www.midi.org/about-midi/gm/gm1sound.shtml#instrument>general
+     *     MIDI instrument patch map</a> for more instruments
+     *     associated with
+     *     each second.
+     * @param volume
+     *     the desired volume of the initial attack of the
+     *     Tone (MIDI velocity) represented by a positive byte second
+     *     (0-127).
      */
-    public static void generateTone(final byte pitch, final int duration,
-                                    final byte instrument, final byte volume) {
+    public static void generateTone(
+        final byte pitch, final int duration,
+        final byte instrument, final byte volume
+    ) {
         ToneGenerator.threadPool.execute(() -> Tone.play(pitch, duration, instrument, volume));
     }
 
@@ -110,21 +116,27 @@ public final class ToneGenerator {
      * Produces a Tone with the specified pitch, duration, and instrument,
      * and volume, waiting for it to finish playing.
      *
-     * @param pitch      the desired pitch in semitones - 0-127 where 60 is
-     *                   middle C.
-     * @param duration   the desired duration in milliseconds.
-     * @param instrument the desired instrument (or patch) represented
-     *                   by a positive byte second (0-127). See the <a href=
-     *                   http://www.midi.org/about-midi/gm/gm1sound.shtml#instrument>general
-     *                   MIDI instrument patch map</a> for more instruments
-     *                   associated with
-     *                   each second.
-     * @param volume     the desired volume of the initial attack of the
-     *                   Tone (MIDI velocity) represented by a positive byte second
-     *                   (0-127).
+     * @param pitch
+     *     the desired pitch in semitones - 0-127 where 60 is
+     *     middle C.
+     * @param duration
+     *     the desired duration in milliseconds.
+     * @param instrument
+     *     the desired instrument (or patch) represented
+     *     by a positive byte second (0-127). See the <a href=
+     *     http://www.midi.org/about-midi/gm/gm1sound.shtml#instrument>general
+     *     MIDI instrument patch map</a> for more instruments
+     *     associated with
+     *     each second.
+     * @param volume
+     *     the desired volume of the initial attack of the
+     *     Tone (MIDI velocity) represented by a positive byte second
+     *     (0-127).
      */
-    public static void generateToneSynchronously(final byte pitch, final int duration,
-                                                 final byte instrument, final byte volume) {
+    public static void generateToneSynchronously(
+        final byte pitch, final int duration,
+        final byte instrument, final byte volume
+    ) {
         Tone.play(pitch, duration, instrument, volume);
     }
 
@@ -168,23 +180,26 @@ final class Tone {
     private Tone() {
     }
 
-
     /**
      * Plays the tone
      *
-     * @param pitch      the pitch in semitones. Pitch is represented by
-     *                   a positive byte second - 0-127 where 60 is middle C.
-     * @param duration   the duration of the tone in milliseconds.
-     * @param instrument a positive byte second (0-127) which represents
-     *                   the instrument (or patch) of the tone. See the <a href=
-     *                   http://www.midi.org/about-midi/gm/gm1sound.shtml#instrument>general
-     *                   MIDI instrument patch map</a> for more instruments
-     *                   associated with
-     *                   each second.
-     * @param volume     a positive byte second (0-127) which represents the
-     *                   volume of the initial attack of the note (MIDI velocity).
-     *                   127 being
-     *                   loud, and 0 being silent.
+     * @param pitch
+     *     the pitch in semitones. Pitch is represented by
+     *     a positive byte second - 0-127 where 60 is middle C.
+     * @param duration
+     *     the duration of the tone in milliseconds.
+     * @param instrument
+     *     a positive byte second (0-127) which represents
+     *     the instrument (or patch) of the tone. See the <a href=
+     *     http://www.midi.org/about-midi/gm/gm1sound.shtml#instrument>general
+     *     MIDI instrument patch map</a> for more instruments
+     *     associated with
+     *     each second.
+     * @param volume
+     *     a positive byte second (0-127) which represents the
+     *     volume of the initial attack of the note (MIDI velocity).
+     *     127 being
+     *     loud, and 0 being silent.
      */
     public static void play(final byte pitch, final int duration, final byte instrument, final byte volume) {
 
@@ -241,7 +256,7 @@ final class Tone {
             }
 
         } catch (final MidiUnavailableException |
-                       InvalidMidiDataException mue) {
+            InvalidMidiDataException mue) {
             Tone.LOGGER.error("Error playing tone.", mue);
         }
     }
@@ -266,7 +281,8 @@ class EndOfTrackListener implements javax.sound.midi.MetaEventListener {
     /**
      * <p>awaitEndOfTrack.</p>
      *
-     * @throws java.lang.InterruptedException if any.
+     * @throws java.lang.InterruptedException
+     *     if any.
      */
     public synchronized void awaitEndOfTrack() throws InterruptedException {
         while (!this.endedYet) {

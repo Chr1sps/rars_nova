@@ -110,7 +110,7 @@ public interface TextEditingArea {
     @NotNull EditorTheme getTheme();
 
     void setTokenStyle(final @NotNull RVTokenType type, final @NotNull TokenStyle style);
-    
+
     void setTheme(final @NotNull EditorTheme theme);
 
     // Used by Find/Replace

@@ -37,8 +37,10 @@ public final class DIVU extends Arithmetic {
      * <p>Constructor for DIVU.</p>
      */
     private DIVU() {
-        super("divu t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division",
-                "0000001", "101");
+        super(
+            "divu t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division",
+            "0000001", "101"
+        );
     }
 
     /**

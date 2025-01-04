@@ -27,35 +27,35 @@ public final class AND extends AbstractInstructionTest {
     @Test
     public void destinationTest1() {
         final var code = """
-                li x1, 0xff00ff00
-                li x2, 0x0f0f0f0f
-                and x1, x1, x2
-                li x29, 0x0f000f00
-                bne x1, x29, fail
-                """;
+            li x1, 0xff00ff00
+            li x2, 0x0f0f0f0f
+            and x1, x1, x2
+            li x29, 0x0f000f00
+            bne x1, x29, fail
+            """;
         runTest32(code);
     }
 
     @Test
     public void destinationTest2() {
         final var code = """
-                li x1, 0x0ff00ff0
-                li x2, 0xf0f0f0f0
-                and x2, x1, x2
-                li x29, 0x00f000f0
-                bne x2, x29, fail
-                """;
+            li x1, 0x0ff00ff0
+            li x2, 0xf0f0f0f0
+            and x2, x1, x2
+            li x29, 0x00f000f0
+            bne x2, x29, fail
+            """;
         runTest32(code);
     }
 
     @Test
     public void destinationTest3() {
         final var code = """
-                li x1, 0xff00ff00
-                and x1, x1, x1
-                li x29, 0xff00ff00
-                bne x1, x29, fail
-                """;
+            li x1, 0xff00ff00
+            and x1, x1, x1
+            li x29, 0xff00ff00
+            bne x1, x29, fail
+            """;
         runTest32(code);
     }
 

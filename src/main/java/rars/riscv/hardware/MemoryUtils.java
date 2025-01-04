@@ -11,7 +11,7 @@ public enum MemoryUtils {
      * Utility to determine if given address is word-aligned.
      *
      * @param address
-     *         the address to check
+     *     the address to check
      * @return true if address is word-aligned, false otherwise
      */
     public static boolean wordAligned(final int address) {
@@ -21,8 +21,8 @@ public enum MemoryUtils {
     public static void checkLoadWordAligned(final int address) throws AddressErrorException {
         if (!wordAligned(address)) {
             throw new AddressErrorException(
-                    "Load address not aligned to word boundary ",
-                    ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
+                "Load address not aligned to word boundary ",
+                ExceptionReason.LOAD_ADDRESS_MISALIGNED, address
             );
         }
     }
@@ -30,8 +30,8 @@ public enum MemoryUtils {
     public static void checkStoreWordAligned(final int address) throws AddressErrorException {
         if (!wordAligned(address)) {
             throw new AddressErrorException(
-                    "Store address not aligned to word boundary ",
-                    ExceptionReason.STORE_ADDRESS_MISALIGNED, address
+                "Store address not aligned to word boundary ",
+                ExceptionReason.STORE_ADDRESS_MISALIGNED, address
             );
         }
     }

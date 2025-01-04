@@ -92,7 +92,8 @@ public final class TokenList implements Cloneable, Collection<Token> {
      * assembly preprocessing. The modified source will be displayed in
      * the Text Segment Display.
      *
-     * @param line The source line, possibly modified (possibly not)
+     * @param line
+     *     The source line, possibly modified (possibly not)
      */
     // DPS 03-Jan-2013
     public void setProcessedLine(final @NotNull String line) {
@@ -102,7 +103,8 @@ public final class TokenList implements Cloneable, Collection<Token> {
     /**
      * Returns requested token given position number (starting at 0).
      *
-     * @param pos Position in token list.
+     * @param pos
+     *     Position in token list.
      * @return the requested token, or ArrayIndexOutOfBounds exception
      */
     public @NotNull Token get(final int pos) {
@@ -113,8 +115,10 @@ public final class TokenList implements Cloneable, Collection<Token> {
      * Replaces token at position with different one. Will throw
      * ArrayIndexOutOfBounds exception if position does not exist.
      *
-     * @param pos         Position in token list.
-     * @param replacement Replacement token
+     * @param pos
+     *     Position in token list.
+     * @param replacement
+     *     Replacement token
      */
     public void set(final int pos, final Token replacement) {
         this.tokenList.set(pos, replacement);
@@ -133,7 +137,8 @@ public final class TokenList implements Cloneable, Collection<Token> {
     /**
      * Adds a Token object to the end of the list.
      *
-     * @param token Token object to be added.
+     * @param token
+     *     Token object to be added.
      */
     @Override
     public boolean add(final Token token) {
@@ -174,10 +179,12 @@ public final class TokenList implements Cloneable, Collection<Token> {
      * Removes Token object at specified list position. Uses ArrayList remove
      * method.
      *
-     * @param pos Position in token list. Subsequent Tokens are shifted one position
-     *            left.
-     * @throws java.lang.IndexOutOfBoundsException if <code>pos</code> is &lt; 0 or &ge;
-     *                                             <code>size()</code>
+     * @param pos
+     *     Position in token list. Subsequent Tokens are shifted one position
+     *     left.
+     * @throws java.lang.IndexOutOfBoundsException
+     *     if <code>pos</code> is &lt; 0 or &ge;
+     *     <code>size()</code>
      */
     public void remove(final int pos) {
         this.tokenList.remove(pos);

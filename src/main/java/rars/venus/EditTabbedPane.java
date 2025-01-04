@@ -68,9 +68,12 @@ public class EditTabbedPane extends JPanel {
     /**
      * Constructor for the EditTabbedPane class.
      *
-     * @param appFrame a {@link VenusUI} object
-     * @param editor   a {@link Editor} object
-     * @param mainPane a {@link MainPane} object
+     * @param appFrame
+     *     a {@link VenusUI} object
+     * @param editor
+     *     a {@link Editor} object
+     * @param mainPane
+     *     a {@link MainPane} object
      */
     public EditTabbedPane(final VenusUI appFrame, final Editor editor, final MainPane mainPane) {
         super();
@@ -97,8 +100,12 @@ public class EditTabbedPane extends JPanel {
             });
         this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSABLE, true);
         this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "Close current file");
-        this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (pane,
-                                                                                                              index) -> this.closeFile(index));
+        this.tabbedPane.putClientProperty(
+            TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (
+                pane,
+                index
+            ) -> this.closeFile(index)
+        );
         this.setLayout(new BorderLayout());
         this.add(this.tabbedPane, BorderLayout.CENTER);
     }
@@ -116,7 +123,8 @@ public class EditTabbedPane extends JPanel {
     /**
      * Select the specified EditPane to be the current tab.
      *
-     * @param editPane The EditPane tab to become current.
+     * @param editPane
+     *     The EditPane tab to become current.
      */
     public void setCurrentEditTab(final EditPane editPane) {
         tabbedPane.setSelectedComponent(editPane);
@@ -163,7 +171,8 @@ public class EditTabbedPane extends JPanel {
      * Carries out all necessary operations to open the
      * specified file in the editor.
      *
-     * @param file a {@link java.io.File} object
+     * @param file
+     *     a {@link java.io.File} object
      * @return true if file was opened, false otherwise.
      */
     public boolean openFile(final File file) {
@@ -293,8 +302,10 @@ public class EditTabbedPane extends JPanel {
                 outFileStream.write(editPane.getSource(), 0, editPane.getSource().length());
                 outFileStream.close();
             } catch (final java.io.IOException c) {
-                JOptionPane.showMessageDialog(null, "Save operation could not be completed due to an error:\n" + c,
-                    "Save Operation Failed", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                    null, "Save operation could not be completed due to an error:\n" + c,
+                    "Save Operation Failed", JOptionPane.ERROR_MESSAGE
+                );
                 return false;
             }
             return true;
@@ -345,8 +356,9 @@ public class EditTabbedPane extends JPanel {
                     saveDialog = new JFileChooser(f.getParent());
                 }
                 final String paneFile = editPane.getFilename();
-                if (paneFile != null)
+                if (paneFile != null) {
                     saveDialog.setSelectedFile(new File(paneFile));
+                }
                 // end of 13-July-2011 code.
                 saveDialog.setDialogTitle("Save As");
 
@@ -357,10 +369,12 @@ public class EditTabbedPane extends JPanel {
                 theFile = saveDialog.getSelectedFile();
                 operationOK = true;
                 if (theFile.exists()) {
-                    final int overwrite = JOptionPane.showConfirmDialog(this.mainUI,
+                    final int overwrite = JOptionPane.showConfirmDialog(
+                        this.mainUI,
                         "File " + theFile.getName() + " already exists.  Do you wish to overwrite it?",
                         "Overwrite existing file?",
-                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE
+                    );
                     switch (overwrite) {
                         case JOptionPane.YES_OPTION:
                             break;
@@ -381,8 +395,10 @@ public class EditTabbedPane extends JPanel {
                 outFileStream.write(editPane.getSource(), 0, editPane.getSource().length());
                 outFileStream.close();
             } catch (final java.io.IOException c) {
-                JOptionPane.showMessageDialog(null, "Save As operation could not be completed due to an error:\n" + c,
-                    "Save As Operation Failed", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                    null, "Save As operation could not be completed due to an error:\n" + c,
+                    "Save As Operation Failed", JOptionPane.ERROR_MESSAGE
+                );
                 return null;
             }
         }
@@ -444,7 +460,8 @@ public class EditTabbedPane extends JPanel {
     /**
      * Remove the pane and update menu status
      *
-     * @param editPane a {@link EditPane} object
+     * @param editPane
+     *     a {@link EditPane} object
      */
     public void remove(EditPane editPane) {
         tabbedPane.remove(editPane);
@@ -459,8 +476,9 @@ public class EditTabbedPane extends JPanel {
         }
         // When last file is closed, menu is unable to respond to mnemonics
         // and accelerators. Let's have it request focus so it may do so.
-        if (tabbedPane.getTabCount() == 0)
+        if (tabbedPane.getTabCount() == 0) {
             this.mainUI.haveMenuRequestFocus();
+        }
     }
 
     // Handy little utility to update the title on the current tab and the frame
@@ -487,7 +505,8 @@ public class EditTabbedPane extends JPanel {
      * If there is an EditPane for the given file pathname, return it else return
      * null.
      *
-     * @param pathname Pathname for desired file
+     * @param pathname
+     *     Pathname for desired file
      * @return the EditPane for this file if it is open in the editor, or null if
      * not.
      */
@@ -527,10 +546,12 @@ public class EditTabbedPane extends JPanel {
     }
 
     private int confirm(final String name) {
-        return JOptionPane.showConfirmDialog(this.mainUI,
+        return JOptionPane.showConfirmDialog(
+            this.mainUI,
             "Changes to " + name + " will be lost unless you save.  Do you wish to save all changes now?",
             "Save program changes?",
-            JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE
+        );
     }
 
     public @NotNull JTabbedPane getTabbedPane() {

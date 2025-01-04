@@ -46,12 +46,17 @@ public final class AddressErrorException extends Exception {
     /**
      * Constructor for the AddressErrorException class
      *
-     * @param addr       The erroneous memory address.
-     * @param message    a {@link java.lang.String} object
-     * @param exceptType a int
+     * @param addr
+     *     The erroneous memory address.
+     * @param message
+     *     a {@link java.lang.String} object
+     * @param exceptType
+     *     a int
      */
-    public AddressErrorException(final @NotNull String message, final @NotNull ExceptionReason exceptType,
-                                 final int addr) {
+    public AddressErrorException(
+        final @NotNull String message, final @NotNull ExceptionReason exceptType,
+        final int addr
+    ) {
         super(message + BinaryUtils.intToHexString(addr));
         address = addr;
         switch (exceptType) {

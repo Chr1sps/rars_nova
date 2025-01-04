@@ -82,11 +82,11 @@ public final class SLLI extends AbstractInstructionTest {
     @Test
     public void srcDestTest() {
         final var code = """
-                li x1, 0x00000001
-                slli x1, x1, 7
-                li x29, 0x00000080
-                bne x1, x29, fail
-                """;
+            li x1, 0x00000001
+            slli x1, x1, 7
+            li x29, 0x00000080
+            bne x1, x29, fail
+            """;
         runTest32(code);
     }
 

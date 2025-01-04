@@ -66,7 +66,8 @@ public final class FontUtilities {
      * of
      * the tab character and the editor's current tab size setting.
      *
-     * @param string The original string
+     * @param string
+     *     The original string
      * @return New string in which spaces are substituted for tabs
      */
     public static @NotNull String substituteSpacesForTabs(final @NotNull String string) {
