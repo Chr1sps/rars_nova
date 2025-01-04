@@ -3,7 +3,6 @@ package rars.venus.run;
 import rars.Globals;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
@@ -52,15 +51,22 @@ public class RunBackstepAction extends GuiAction {
     /**
      * <p>Constructor for RunBackstepAction.</p>
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
-     * @param gui      a {@link VenusUI} object
+     * @param name
+     *         a {@link java.lang.String} object
+     * @param icon
+     *         a {@link javax.swing.Icon} object
+     * @param descrip
+     *         a {@link java.lang.String} object
+     * @param mnemonic
+     *         a {@link java.lang.Integer} object
+     * @param accel
+     *         a {@link javax.swing.KeyStroke} object
+     * @param gui
+     *         a {@link VenusUI} object
      */
-    public RunBackstepAction(final String name, final Icon icon, final String descrip,
-                             final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+    public RunBackstepAction(
+            final String name, final Icon icon, final String descrip,
+            final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainUI = gui;
     }
@@ -85,12 +91,12 @@ public class RunBackstepAction extends GuiAction {
         executePane.textSegment.setCodeHighlighting(true);
 
         if (OtherSettings.getBackSteppingEnabled()) {
-            Memory.getInstance().subscribe(executePane.dataSegment);
+            Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment);
             RegisterFile.addRegistersObserver(executePane.registerValues);
             ControlAndStatusRegisterFile.addRegistersObserver(executePane.csrValues);
             FloatingPointRegisterFile.addRegistersSubscriber(executePane.fpRegValues);
             Globals.program.getBackStepper().backStep();
-            Memory.getInstance().deleteSubscriber(executePane.dataSegment);
+            Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment);
             RegisterFile.deleteRegistersObserver(executePane.registerValues);
             executePane.registerValues.updateRegisters();
             executePane.fpRegValues.updateRegisters();

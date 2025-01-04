@@ -3,7 +3,7 @@ package rars.util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import rars.riscv.hardware.Memory;
+import rars.Globals;
 
 import java.util.List;
 
@@ -36,15 +36,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 // TODO: refactor this out of existance
 
-/**
- * <p>MemoryDump class.</p>
- */
 public final class MemoryDump {
     public static @NotNull
-    @Unmodifiable List<@NotNull SegmentInfo> SEGMENTS = List.of(
-        new SegmentInfo(".text", Memory.textBaseAddress, Memory.textLimitAddress),
-        new SegmentInfo(".data", Memory.dataBaseAddress, Memory.dataSegmentLimitAddress)
-    );
+    @Unmodifiable List<@NotNull SegmentInfo> SEGMENTS;
+
+    static {
+        final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
+        SEGMENTS = List.of(
+                new SegmentInfo(".text", memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress),
+                new SegmentInfo(".data",
+                        memoryConfiguration.dataBaseAddress,
+                        memoryConfiguration.dataSegmentLimitAddress)
+        );
+    }
 
     private MemoryDump() {
     }
@@ -52,17 +56,18 @@ public final class MemoryDump {
     /**
      * Return array with segment address bounds for specified segment.
      *
-     * @param segment String with segment name (initially ".text" and ".data")
+     * @param segment
+     *         String with segment name (initially ".text" and ".data")
      * @return array of two Integer, the base and limit address for that segment.
      * Null if parameter
      * name does not match a known segment name.
      */
     public static @Nullable Pair<Integer, Integer> getSegmentBounds(final @NotNull String segment) {
         return SEGMENTS.stream()
-            .filter(s -> s.name().equals(segment))
-            .findFirst()
-            .map(s -> new Pair<>(s.baseAddress(), s.limitAddress()))
-            .orElse(null);
+                .filter(s -> s.name().equals(segment))
+                .findFirst()
+                .map(s -> new Pair<>(s.baseAddress(), s.limitAddress()))
+                .orElse(null);
     }
 
     public record SegmentInfo(@NotNull String name, int baseAddress, int limitAddress) {

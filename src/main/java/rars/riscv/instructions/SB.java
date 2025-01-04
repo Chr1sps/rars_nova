@@ -1,7 +1,7 @@
 package rars.riscv.instructions;
 
+import rars.Globals;
 import rars.exceptions.AddressErrorException;
-import rars.riscv.hardware.Memory;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -35,17 +35,17 @@ public final class SB extends Store {
 
     private SB() {
         super(
-            "sb t1, -100(t2)",
-            "Store byte : Store the low-order 8 bits of t1 into the effective memory byte address",
-            "000"
+                "sb t1, -100(t2)",
+                "Store byte : Store the low-order 8 bits of t1 into the effective memory byte address",
+                "000"
         );
     }
 
     @Override
     public void store(final int address, final long data) throws AddressErrorException {
-        Memory.getInstance().setByte(
-            address,
-            (int) data & 0x000000FF
+        Globals.MEMORY_INSTANCE.setByte(
+                address,
+                (int) data & 0x000000FF
         );
     }
 }

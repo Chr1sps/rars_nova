@@ -66,17 +66,29 @@ public enum MemoryConfiguration {
     );
 
     public final @NotNull String identifier, description;
+    /** base address for (user) text segment */
     public final int textBaseAddress;
+    /** base address for (user) data segment */
     public final int dataSegmentBaseAddress;
+    /** base address for .extern directive */
     public final int externBaseAddress;
+    /** base address for storing globals */
     public final int globalPointerAddress;
+    /** base address for storage of non-global static data in data segment */
     public final int dataBaseAddress;
+    /** base address for heap */
     public final int heapBaseAddress;
+    /** starting address for stack */
     public final int stackPointerAddress;
+    /** base address for stack */
     public final int stackBaseAddress;
+    /** highest address accessible in user (not kernel) mode. */
     public final int userHighAddress;
+    /** kernel boundary. Only OS can access this or higher address */
     public final int kernelBaseAddress;
+    /**  starting address for memory mapped I/O */
     public final int memoryMapBaseAddress;
+    /** highest address acessible in kernel mode. */
     public final int kernelHighAddress;
     public final int dataSegmentLimitAddress;
     public final int textLimitAddress;

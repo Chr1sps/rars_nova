@@ -1,11 +1,11 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
@@ -99,14 +99,14 @@ public final class SyscallInputDialogString extends AbstractSyscall {
                 // Copy the input data to buffer as space permits
                 int stringLength = Math.min(maxLength - 1, utf8BytesList.length);
                 for (int index = 0; index < stringLength; index++) {
-                    Memory.getInstance().setByte(byteAddress + index,
+                    Globals.MEMORY_INSTANCE.setByte(byteAddress + index,
                             utf8BytesList[index]);
                 }
                 if (stringLength < maxLength - 1) {
-                    Memory.getInstance().setByte(byteAddress + stringLength, '\n');
+                    Globals.MEMORY_INSTANCE.setByte(byteAddress + stringLength, '\n');
                     stringLength++;
                 }
-                Memory.getInstance().setByte(byteAddress + stringLength, 0);
+                Globals.MEMORY_INSTANCE.setByte(byteAddress + stringLength, 0);
 
                 if (utf8BytesList.length > maxLength - 1) {
                     // length of the input string exceeded the specified maximum

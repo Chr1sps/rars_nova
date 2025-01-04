@@ -12,14 +12,12 @@ import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.InstructionsRegistry;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import utils.RarsTestBase;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,14 +35,13 @@ import static rars.settings.BoolSettings.BOOL_SETTINGS;
 final class AppTest extends RarsTestBase {
     // TODO: refactor this class to avoid repetitions and to enhance test speed
 
-    private static void run(final String path, final boolean is64Bit) {
+    private static void run(final String path, final boolean is64Bit) throws IOException {
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, is64Bit);
         InstructionsRegistry.RV64_MODE_FLAG = is64Bit;
 
         final var opt = new Options();
         opt.startAtMain = true;
         opt.maxSteps = 1000;
-        final var program = new Program(opt);
 
         final var errorLines = new HashSet<Integer>();
         String stdin = "", stdout = "", stderr = "";
@@ -68,11 +65,8 @@ final class AppTest extends RarsTestBase {
                 }
                 line = br.readLine();
             }
-        } catch (final FileNotFoundException fe) {
-            fail("Could not find file: " + path + ".\n");
-        } catch (final IOException io) {
-            fail("Error reading `" + path + "`.\n");
         }
+        final var program = new Program(MemoryConfiguration.DEFAULT, opt);
         try {
             program.assembleFile(path);
             if (!errorLines.isEmpty()) {
@@ -173,11 +167,10 @@ final class AppTest extends RarsTestBase {
         options.startAtMain = true;
         options.maxSteps = 500;
         options.selfModifyingCode = true;
-        final Program program = new Program(options);
+        final var program = new Program(MemoryConfiguration.DEFAULT, options);
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64Enabled);
         InstructionsRegistry.RV64_MODE_FLAG = isRV64Enabled;
-        Memory.setConfiguration(MemoryConfiguration.DEFAULT);
 
         final var instructionsToTest = isRV64Enabled ? InstructionsRegistry.BASIC_INSTRUCTIONS.r64All : InstructionsRegistry.BASIC_INSTRUCTIONS.r32All;
         for (final var instruction : instructionsToTest) {
@@ -222,11 +215,10 @@ final class AppTest extends RarsTestBase {
         options.startAtMain = true;
         options.maxSteps = 500;
         options.selfModifyingCode = true;
-        final var program = new Program(options);
+        final var program = new Program(MemoryConfiguration.DEFAULT, options);
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64);
         InstructionsRegistry.RV64_MODE_FLAG = isRV64;
-        Memory.setConfiguration(MemoryConfiguration.DEFAULT);
 
         final var instructionsToTest = isRV64 ? InstructionsRegistry.EXTENDED_INSTRUCTIONS.r64All : InstructionsRegistry.EXTENDED_INSTRUCTIONS.r32All;
         for (final var instruction : instructionsToTest) {
@@ -268,22 +260,27 @@ final class AppTest extends RarsTestBase {
     @DisplayName("32 bit instructions")
     @ParameterizedTest
     @MethodSource("rv32TestFileProvider")
-    void test32(final @NotNull Path path) {
+    void test32(final @NotNull Path path) throws IOException {
         run(path.toString(), false);
     }
 
     @DisplayName("64 bit instructions")
     @ParameterizedTest
     @MethodSource("rv64TestFileProvider")
-    void test64(final @NotNull Path path) {
+    void test64(final @NotNull Path path) throws IOException {
         run(path.toString(), true);
     }
 
     @DisplayName("Examples")
     @ParameterizedTest
     @MethodSource("examplesTestFileProvider")
-    void testExamples(final @NotNull Path path) {
+    void testExamples(final @NotNull Path path) throws IOException {
         run(path.toString(), false);
+    }
+
+    @Test
+    void runSingle() throws IOException {
+        run(getTestDataPath().resolve("examples/success.s").toString(), false);
     }
 
     @Test

@@ -6,12 +6,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.SymbolTable;
 import rars.riscv.SyscallNumberOverride;
+import rars.riscv.hardware.Memory;
+import rars.riscv.hardware.MemoryConfiguration;
+import rars.riscv.hardware.RegisterFile;
 import rars.util.PropertiesFile;
 import rars.venus.VenusUI;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -90,6 +95,11 @@ public final class Globals {
 
     /// The GUI being used (if any) with this simulator.
     public static @Nullable VenusUI gui = null;
+    public static @NotNull Memory MEMORY_INSTANCE = new Memory(OTHER_SETTINGS.getMemoryConfiguration());
+
+    static {
+        setupGlobalMemoryConfiguration(OTHER_SETTINGS.getMemoryConfiguration());
+    }
 
     private Globals() {
     }
@@ -116,4 +126,14 @@ public final class Globals {
         return overrides;
     }
 
+    public static void setupGlobalMemoryConfiguration(final @NotNull MemoryConfiguration newConfiguration) {
+        MEMORY_INSTANCE.setMemoryConfigurationAndReset(newConfiguration);
+        RegisterFile.setValuesFromConfiguration(newConfiguration);
+    }
+
+    public static @NotNull Memory swapInstance(final @NotNull Memory mem) {
+        final var previous = MEMORY_INSTANCE;
+        MEMORY_INSTANCE = mem;
+        return previous;
+    }
 }

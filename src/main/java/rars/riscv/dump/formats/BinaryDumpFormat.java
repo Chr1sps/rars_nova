@@ -1,6 +1,7 @@
 package rars.riscv.dump.formats;
 
 import org.jetbrains.annotations.NotNull;
+import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 
@@ -33,10 +34,14 @@ public class BinaryDumpFormat extends AbstractDumpFormat {
      * @see AbstractDumpFormat
      */
     @Override
-    public void dumpMemoryRange(@NotNull final File file, final int firstAddress, final int lastAddress, @NotNull final Memory memory)
+    public void dumpMemoryRange(
+            @NotNull final File file,
+            final int firstAddress,
+            final int lastAddress,
+            @NotNull final Memory memory)
             throws AddressErrorException, IOException {
         try (final PrintStream out = new PrintStream(new FileOutputStream(file))) {
-            for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
+            for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                 final Integer temp = memory.getRawWordOrNull(address);
                 if (temp == null)
                     break;

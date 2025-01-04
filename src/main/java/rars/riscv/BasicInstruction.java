@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.assembler.DataTypes;
 import rars.exceptions.SimulationException;
 
 /**
@@ -19,13 +20,13 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * Length in bytes of a machine instruction. Currently just 4 because other
      * instruction sizes defined in the specification are nor supported.
      */
-    public static final int BASIC_INSTRUCTION_LENGTH = 4;
+    public static final int BASIC_INSTRUCTION_LENGTH = DataTypes.WORD_SIZE;
     private static final int BASIC_INSTRUCTION_LENGTH_BITS = 32;
 
     private static final Logger LOGGER = LogManager.getLogger();
     private final @NotNull BasicInstructionFormat instructionFormat;
     private final @NotNull String operationMask;
-    
+
     /**
      * Integer with 1's where constants required (0/1 become 1, f/s/t become 0)
      */
@@ -33,7 +34,7 @@ public abstract non-sealed class BasicInstruction extends Instruction {
     /**
      * Integer matching constants required (0/1 become 0/1, f/s/t become 0)
      */
-    public final int opcodeMatch; 
+    public final int opcodeMatch;
 
     /**
      * BasicInstruction constructor.
@@ -54,6 +55,7 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * It can also be used at runtime to match a binary machine instruction to the
      * correct
      * instruction simulator -- it needs to match all and only the 0's and 1's.
+     *
      * @param example
      *     An example usage of the instruction, as a String.
      * @param instrFormat

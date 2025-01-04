@@ -1,5 +1,7 @@
 package rars.exceptions;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.ErrorMessage;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
@@ -13,103 +15,55 @@ import rars.util.BinaryUtils;
  */
 public class SimulationException extends Exception {
 
-    public final ExceptionReason reason;
+    public final @NotNull ExceptionReason reason;
     public final int value;
-    public final ErrorMessage errorMessage;
+    public final @Nullable ErrorMessage errorMessage;
 
-    private SimulationException(final ExceptionReason reason, final ErrorMessage msg, final int value) {
+    private SimulationException(final ExceptionReason reason, final @Nullable ErrorMessage msg, final int value) {
         this.reason = reason;
         this.value = value;
         this.errorMessage = msg;
     }
 
-    /**
-     * <p>Constructor for SimulationException.</p>
-     */
+    public SimulationException(final String m, final ExceptionReason reason) {
+        this(reason, ErrorMessage.error(null, 0, 0, m), 0);
+    }
+    
     public SimulationException() {
         this(ExceptionReason.OTHER, null, 0);
     }
 
-    /**
-     * <p>Constructor for SimulationException.</p>
-     *
-     * @param ps
-     *     a {@link ProgramStatement} object
-     * @param m
-     *     a {@link java.lang.String} object
-     * @param reason
-     *     a int
-     */
     public SimulationException(final ProgramStatement ps, final String m, final ExceptionReason reason) {
-        this(
-            reason, new ErrorMessage(
-                ps, "Runtime exception at " +
-                BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
-                ": " + m
-            ), 0
-        );
+        this(reason, new ErrorMessage(
+                ps,
+                "Runtime exception at %s: %s"
+                        .formatted(
+                                BinaryUtils.intToHexString(
+                                        RegisterFile.getProgramCounter()
+                                                - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
+                                m
+                        )), 0);
     }
 
-    /**
-     * Constructor for ProcessingException to handle runtime exceptions
-     *
-     * @param ps
-     *     a ProgramStatement of statement causing runtime exception
-     * @param m
-     *     a String containing specialized error message
-     */
     public SimulationException(final ProgramStatement ps, final String m) {
         this(ps, m, ExceptionReason.OTHER);
-        // Stopped using ps.getAddress() because of pseudo-instructions. All
-        // instructions in
-        // the macro expansion point to the same ProgramStatement, and thus all will
-        // return the
-        // same second for getAddress(). But only the first such expanded instruction
-        // will
-        // be stored at that address. So now I use the program counter (which has
-        // already
-        // been incremented).
     }
 
-    /**
-     * <p>Constructor for SimulationException.</p>
-     *
-     * @param ps
-     *     a {@link ProgramStatement} object
-     * @param aee
-     *     a {@link AddressErrorException} object
-     */
-    public SimulationException(final ProgramStatement ps, final AddressErrorException aee) {
+    public SimulationException(final @NotNull ProgramStatement ps, final @NotNull AddressErrorException aee) {
         this(
-            aee.reason, new ErrorMessage(
-                ps, "Runtime exception at " +
-                BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
-                ": " + aee.getMessage()
-            ), aee.address
+                aee.reason, new ErrorMessage(
+                        ps, "Runtime exception at " +
+                        BinaryUtils.intToHexString(RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH) +
+                        ": " + aee.getMessage()
+                ), aee.address
         );
     }
 
-    /**
-     * <p>Constructor for SimulationException.</p>
-     *
-     * @param m
-     *     a {@link java.lang.String} object
-     */
     public SimulationException(final String m) {
         this(m, ExceptionReason.OTHER);
     }
 
-    /**
-     * <p>Constructor for SimulationException.</p>
-     *
-     * @param m
-     *     a {@link java.lang.String} object
-     * @param reason
-     *     a int
-     */
-    public SimulationException(final String m, final ExceptionReason reason) {
-        this.errorMessage = ErrorMessage.error(null, 0, 0, m);
-        this.reason = reason;
-        this.value = 0;
+    public static @NotNull SimulationException fromAddressErrorException(final ProgramStatement ps, final AddressErrorException aee) {
+        return new SimulationException(ps, aee);
     }
 }

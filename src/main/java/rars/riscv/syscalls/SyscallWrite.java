@@ -1,11 +1,11 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
@@ -47,9 +47,9 @@ public class SyscallWrite extends AbstractSyscall {
      */
     public SyscallWrite() {
         super(
-            "Write", "Write to a filedescriptor from a buffer",
-            "a0 = the file descriptor<br>a1 = the buffer address<br>a2 = the length to write",
-            "a0 = the number of charcters written"
+                "Write", "Write to a filedescriptor from a buffer",
+                "a0 = the file descriptor<br>a1 = the buffer address<br>a2 = the length to write",
+                "a0 = the number of charcters written"
         );
     }
 
@@ -67,20 +67,20 @@ public class SyscallWrite extends AbstractSyscall {
         int index = 0;
         final byte[] myBuffer = new byte[reqLength];
         try {
-            var byteValue = Memory.getInstance().getByte(byteAddress);
+            var byteValue = Globals.MEMORY_INSTANCE.getByte(byteAddress);
             while (index < reqLength) // Stop at requested length. Null bytes are included.
             {
                 myBuffer[index++] = byteValue;
                 byteAddress++;
-                byteValue = Memory.getInstance().getByte(byteAddress);
+                byteValue = Globals.MEMORY_INSTANCE.getByte(byteAddress);
             }
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }
         final int retValue = SystemIO.writeToFile(
-            RegisterFile.getValue("a0"), // fd
-            myBuffer, // buffer
-            RegisterFile.getValue("a2")
+                RegisterFile.getValue("a0"), // fd
+                myBuffer, // buffer
+                RegisterFile.getValue("a2")
         ); // length
         RegisterFile.updateRegister("a0", retValue); // set returned second in register
     }

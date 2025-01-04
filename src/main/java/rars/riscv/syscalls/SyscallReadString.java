@@ -1,11 +1,11 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
@@ -79,15 +79,15 @@ public class SyscallReadString extends AbstractSyscall {
         int stringLength = Math.min(maxLength, utf8BytesList.length);
         try {
             for (int index = 0; index < stringLength; index++) {
-                Memory.getInstance().setByte(buf + index,
+                Globals.MEMORY_INSTANCE.setByte(buf + index,
                         utf8BytesList[index]);
             }
             if (stringLength < maxLength) {
-                Memory.getInstance().setByte(buf + stringLength, '\n');
+                Globals.MEMORY_INSTANCE.setByte(buf + stringLength, '\n');
                 stringLength++;
             }
             if (addNullByte)
-                Memory.getInstance().setByte(buf + stringLength, 0);
+                Globals.MEMORY_INSTANCE.setByte(buf + stringLength, 0);
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }

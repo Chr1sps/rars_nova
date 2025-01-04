@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 import org.jetbrains.annotations.NotNull;
-import rars.riscv.hardware.Memory;
+import rars.assembler.DataTypes;
 
 /**
  * Object provided to Observers of runtime access to memory.
@@ -65,7 +65,7 @@ public final class MemoryAccessNotice extends AccessNotice {
     public MemoryAccessNotice(final @NotNull AccessType type, final int address, final int value) {
         super(type);
         this.address = address;
-        this.length = Memory.WORD_LENGTH_BYTES;
+        this.length = DataTypes.WORD_SIZE;
         this.value = value;
     }
 

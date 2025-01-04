@@ -2,10 +2,10 @@ package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.notices.SimulatorNotice;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.simulator.Simulator;
 import rars.util.BitmapDisplay;
@@ -39,7 +39,7 @@ public final class SyscallDisplayBitmap extends AbstractSyscall implements Simpl
         if (this.display == null) {
             this.display = new BitmapDisplay(baseAddress, width, height);
         } else if (this.display.displayWidth != width || this.display.displayHeight != height) {
-            Memory.getInstance().deleteSubscriber(this.display);
+            Globals.MEMORY_INSTANCE.deleteSubscriber(this.display);
             this.display.dispose();
             this.display = new BitmapDisplay(baseAddress, width, height);
         } else if (this.display.baseAddress != baseAddress) {

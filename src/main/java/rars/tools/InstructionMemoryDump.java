@@ -60,6 +60,7 @@ package rars.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
@@ -89,12 +90,11 @@ public class InstructionMemoryDump extends AbstractTool {
     private static final String name = "Instruction/Memory Dump";
     private static final String version = "Version 1.0 (John Owens)";
     private static final String heading = "Dumps every executed instruction and data memory access to a file";
-    /**
-     * Instructions and memory accesses get logged here
-     */
+    
+    /** Instructions and memory accesses get logged here */
     private final StringBuffer log = new StringBuffer();
-    private final int lowDataSegmentAddress = Memory.dataSegmentBaseAddress;
-    private final int highDataSegmentAddress = Memory.stackBaseAddress;
+    private final int lowDataSegmentAddress;
+    private final int highDataSegmentAddress;
     /**
      * The last address we saw. We ignore it because the only way for a
      * program to execute twice the same instruction is to enter an infinite
@@ -112,11 +112,11 @@ public class InstructionMemoryDump extends AbstractTool {
      */
     public InstructionMemoryDump() {
         super(InstructionMemoryDump.name + ", " + InstructionMemoryDump.version, InstructionMemoryDump.heading);
+        final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
+        this.lowDataSegmentAddress = memoryConfiguration.dataSegmentBaseAddress;
+        this.highDataSegmentAddress = memoryConfiguration.stackBaseAddress;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected JComponent buildMainDisplayArea() {
         final JPanel panel = new JPanel(new FlowLayout());
@@ -142,30 +142,23 @@ public class InstructionMemoryDump extends AbstractTool {
         return panel;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return InstructionMemoryDump.name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void addAsObserver() {
         // watch the text segment (the program)
-        this.addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
+        final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
+        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
         // also watch the data segment
         this.addAsObserver(this.lowDataSegmentAddress, this.highDataSegmentAddress);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void processRISCVUpdate(final AccessNotice notice) {
+        final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         if (!notice.accessIsFromRISCV())
             return;
         // we've got two kinds of access here: instructions and data
@@ -173,14 +166,14 @@ public class InstructionMemoryDump extends AbstractTool {
         final int a = m.getAddress();
 
         // is a in the text segment (program)?
-        if ((a >= Memory.textBaseAddress) && (a < Memory.textLimitAddress)) {
+        if ((a >= memoryConfiguration.textBaseAddress) && (a < memoryConfiguration.textLimitAddress)) {
             if (notice.getAccessType() != AccessNotice.AccessType.READ)
                 return;
             if (a == this.lastAddress)
                 return;
             this.lastAddress = a;
             try {
-                final ProgramStatement stmt = Memory.getInstance().getStatement(a);
+                final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatement(a);
 
                 // If the program is finished, getStatement() will return null,
                 // A null statement will cause the simulator to stall.
@@ -188,7 +181,8 @@ public class InstructionMemoryDump extends AbstractTool {
                     // First dump the instruction address, prefixed by "I:"
                     this.log.append("I: 0x").append(Integer.toUnsignedString(a, 16)).append("\n");
                     // Then dump the instruction, prefixed by "i:"
-                    this.log.append("i: 0x").append(Integer.toUnsignedString(stmt.getBinaryStatement(), 16)).append("\n");
+                    this.log.append("i: 0x").append(Integer.toUnsignedString(stmt.getBinaryStatement(),
+                            16)).append("\n");
                 }
             } catch (final AddressErrorException e) {
                 // TODO Auto-generated catch block
@@ -246,7 +240,7 @@ public class InstructionMemoryDump extends AbstractTool {
     /**
      * <p>getHelpComponent.</p>
      *
-     * @return a {@link javax.swing.JComponent} object
+     * @return a {@link JComponent} object
      */
     @Override
     protected JComponent getHelpComponent() {

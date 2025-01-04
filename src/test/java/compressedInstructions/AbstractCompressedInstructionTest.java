@@ -6,6 +6,7 @@ import rars.api.Options;
 import rars.api.Program;
 import rars.exceptions.AssemblyException;
 import rars.riscv.InstructionsRegistry;
+import rars.riscv.hardware.MemoryConfiguration;
 import rars.settings.BoolSetting;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public abstract class AbstractCompressedInstructionTest {
         System.out.println();
 
         final var opt = new Options();
-        final var program = new Program(opt);
+        final var program = new Program(MemoryConfiguration.DEFAULT,opt);
         ErrorList errorList;
         try {
             errorList = program.assembleString(code);

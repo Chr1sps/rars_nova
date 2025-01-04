@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 /*
@@ -42,8 +42,8 @@ public final class FSW extends BasicInstruction {
 
     private FSW() {
         super(
-            "fsw f1, -100(t1)", "Store a float to memory",
-            BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 010 sssss 0100111"
+                "fsw f1, -100(t1)", "Store a float to memory",
+                BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 010 sssss 0100111"
         );
     }
 
@@ -51,9 +51,9 @@ public final class FSW extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            Memory.getInstance().setWord(
-                RegisterFile.getValue(statement.getOperand(2)) + upperImmediate,
-                (int) FloatingPointRegisterFile.getValueLong(statement.getOperand(0))
+            Globals.MEMORY_INSTANCE.setWord(
+                    RegisterFile.getValue(statement.getOperand(2)) + upperImmediate,
+                    (int) FloatingPointRegisterFile.getValueLong(statement.getOperand(0))
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

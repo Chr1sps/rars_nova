@@ -9,29 +9,14 @@ import rars.ProgramStatement;
  * Used for exit syscalls and errors in syscalls
  */
 public final class ExitingException extends SimulationException {
-    /**
-     * <p>Constructor for ExitingException.</p>
-     */
     public ExitingException() {
         super();
     }
 
-    /**
-     * <p>Constructor for ExitingException.</p>
-     *
-     * @param statement a {@link ProgramStatement} object
-     * @param message   a {@link java.lang.String} object
-     */
     public ExitingException(final ProgramStatement statement, final String message) {
         super(statement, message);
     }
 
-    /**
-     * <p>Constructor for ExitingException.</p>
-     *
-     * @param ps  a {@link ProgramStatement} object
-     * @param aee a {@link AddressErrorException} object
-     */
     public ExitingException(final ProgramStatement ps, final AddressErrorException aee) {
         super(ps, aee);
     }

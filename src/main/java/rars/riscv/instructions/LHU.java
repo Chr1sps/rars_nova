@@ -1,7 +1,7 @@
 package rars.riscv.instructions;
 
+import rars.Globals;
 import rars.exceptions.AddressErrorException;
-import rars.riscv.hardware.Memory;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -35,14 +35,14 @@ public final class LHU extends Load {
 
     private LHU() {
         super(
-            "lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit second from effective memory halfword address",
-            "101"
+                "lhu t1, -100(t2)", "Set t1 to zero-extended 16-bit second from effective memory halfword address",
+                "101"
         );
     }
 
     @Override
     public long load(final int address) throws AddressErrorException {
-        final var value = Memory.getInstance().getHalf(address);
+        final var value = Globals.MEMORY_INSTANCE.getHalf(address);
         return Short.toUnsignedLong(value);
     }
 }

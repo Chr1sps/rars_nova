@@ -1,7 +1,7 @@
 package rars.riscv.instructions;
 
+import rars.Globals;
 import rars.exceptions.AddressErrorException;
-import rars.riscv.hardware.Memory;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -39,6 +39,6 @@ public final class SW extends Store {
 
     @Override
     public void store(final int address, final long data) throws AddressErrorException {
-        Memory.getInstance().setWord(address, (int) data);
+        Globals.MEMORY_INSTANCE.setWord(address, (int) data);
     }
 }

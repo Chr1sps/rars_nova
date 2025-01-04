@@ -32,7 +32,6 @@ import rars.exceptions.AddressErrorException;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
-import rars.riscv.hardware.Memory;
 import rars.util.SimpleSubscriber;
 
 import javax.swing.*;
@@ -49,8 +48,6 @@ public class TimerTool extends AbstractTool {
 
     private static final String heading = "Timer Tool";
     private static final String version = "Version 1.0 (Zachary Selk)";
-    private static final int TIME_ADDRESS = Memory.memoryMapBaseAddress + 0x18;
-    private static final int TIME_CMP_ADDRESS = Memory.memoryMapBaseAddress + 0x20;
     // Internal time values
     private static long time = 0L; // The current time of the program (starting from 0)
     private static long startTime = 0L; // Tmp unix time used to keep track of how much time has passed
@@ -71,6 +68,14 @@ public class TimerTool extends AbstractTool {
     public TimerTool() {
         super(TimerTool.heading + ", " + TimerTool.version, TimerTool.heading);
         TimerTool.startTimeCmpDaemon();
+    }
+
+    private static int getTimeAddress() {
+        return Globals.MEMORY_INSTANCE.getMemoryConfiguration().memoryMapBaseAddress + 0x18;
+    }
+
+    private static int getTimeCmpAddress() {
+        return Globals.MEMORY_INSTANCE.getMemoryConfiguration().memoryMapBaseAddress + 0x20;
     }
 
     // A daemon that watches the timecmp MMIO for any changes
@@ -198,7 +203,7 @@ public class TimerTool extends AbstractTool {
         Globals.memoryAndRegistersLock.lock();
         try {
             try {
-                Memory.getInstance().setRawWord(dataAddr, dataValue);
+                Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue);
             } catch (final AddressErrorException aee) {
                 TimerTool.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
                 System.exit(0);
@@ -264,7 +269,9 @@ public class TimerTool extends AbstractTool {
 
         public void addAsObserver() {
             try {
-                Memory.getInstance().subscribe(this, TimerTool.TIME_CMP_ADDRESS, TimerTool.TIME_CMP_ADDRESS + 8);
+                Globals.MEMORY_INSTANCE.subscribe(this,
+                        TimerTool.getTimeCmpAddress(),
+                        TimerTool.getTimeCmpAddress() + 8);
             } catch (final AddressErrorException aee) {
                 SimpleSubscriber.LOGGER.fatal("Error while adding observer in Timer Tool");
                 System.exit(0);
@@ -286,10 +293,10 @@ public class TimerTool extends AbstractTool {
                 final int value = notice.getValue();
 
                 // Check what word was changed, then update the corrisponding information
-                if (address == TimerTool.TIME_CMP_ADDRESS) {
+                if (address == TimerTool.getTimeCmpAddress()) {
                     this.value = ((this.value >> 32) << 32) + value;
                     this.postInterrupt = true; // timecmp was writen to
-                } else if (address == TimerTool.TIME_CMP_ADDRESS + 4) {
+                } else if (address == TimerTool.getTimeCmpAddress() + 4) {
                     this.value = (this.value) + (((long) value) << 32);
                     this.postInterrupt = true; // timecmp was writen to
                 }
@@ -323,8 +330,9 @@ public class TimerTool extends AbstractTool {
                     TimerTool.time = TimerTool.savedTime + System.currentTimeMillis() - TimerTool.startTime;
 
                     // Write the lower and upper words of the time MMIO respectivly
-                    TimerTool.this.updateMMIOControlAndData(TimerTool.TIME_ADDRESS, (int) (TimerTool.time));
-                    TimerTool.this.updateMMIOControlAndData(TimerTool.TIME_ADDRESS + 4, (int) (TimerTool.time >> 32));
+                    TimerTool.this.updateMMIOControlAndData(TimerTool.getTimeAddress(), (int) (TimerTool.time));
+                    TimerTool.this.updateMMIOControlAndData(TimerTool.getTimeAddress() + 4,
+                            (int) (TimerTool.time >> 32));
 
                     // The logic for if a timer interrupt should be raised
                     // Note: if either the UTIP bit in the uie CSR or the UIE bit in the ustatus CSR
@@ -345,8 +353,8 @@ public class TimerTool extends AbstractTool {
 
         // Set time MMIO to zero
         public void reset() {
-            TimerTool.this.updateMMIOControlAndData(TimerTool.TIME_ADDRESS, 0);
-            TimerTool.this.updateMMIOControlAndData(TimerTool.TIME_ADDRESS + 4, 0);
+            TimerTool.this.updateMMIOControlAndData(TimerTool.getTimeAddress(), 0);
+            TimerTool.this.updateMMIOControlAndData(TimerTool.getTimeAddress() + 4, 0);
         }
     }
 

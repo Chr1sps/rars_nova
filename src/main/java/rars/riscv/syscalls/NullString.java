@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 import java.nio.charset.StandardCharsets;
@@ -51,10 +51,10 @@ public final class NullString {
      * the default "a0"
      *
      * @param statement
-     *     a {@link ProgramStatement} object
+     *         a {@link ProgramStatement} object
      * @return a {@link java.lang.String} object
      * @throws ExitingException
-     *     if any.
+     *         if any.
      */
     public static @NotNull String get(final ProgramStatement statement) throws ExitingException {
         return NullString.get(statement, "a0");
@@ -64,23 +64,23 @@ public final class NullString {
      * Reads a NULL terminated string from memory starting at the address in reg
      *
      * @param statement
-     *     the program statement this was called from (used for error
-     *     handling)
+     *         the program statement this was called from (used for error
+     *         handling)
      * @param reg
-     *     The name of the register for the address of the string
+     *         The name of the register for the address of the string
      * @return the string read from memory
      * @throws ExitingException
-     *     if it hits a #AddressErrorException
+     *         if it hits a #AddressErrorException
      */
     public static @NotNull String get(final ProgramStatement statement, final String reg) throws ExitingException {
         int byteAddress = RegisterFile.getValue(reg);
         final ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
         try {
-            utf8BytesList.add(Memory.getInstance().getByte(byteAddress));
+            utf8BytesList.add(Globals.MEMORY_INSTANCE.getByte(byteAddress));
             while (utf8BytesList.getLast() != 0) // until null terminator
             {
                 byteAddress++;
-                utf8BytesList.add(Memory.getInstance().getByte(byteAddress));
+                utf8BytesList.add(Globals.MEMORY_INSTANCE.getByte(byteAddress));
             }
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);

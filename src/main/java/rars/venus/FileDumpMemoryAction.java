@@ -2,10 +2,10 @@ package rars.venus;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
+import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.dump.DumpFormat;
 import rars.riscv.dump.DumpFormats;
-import rars.riscv.hardware.Memory;
 import rars.util.BinaryUtils;
 import rars.util.MemoryDump;
 
@@ -63,15 +63,22 @@ public class FileDumpMemoryAction extends GuiAction {
     /**
      * <p>Constructor for FileDumpMemoryAction.</p>
      *
-     * @param name     a {@link java.lang.String} object
-     * @param icon     a {@link javax.swing.Icon} object
-     * @param descrip  a {@link java.lang.String} object
-     * @param mnemonic a {@link java.lang.Integer} object
-     * @param accel    a {@link javax.swing.KeyStroke} object
-     * @param gui      a {@link VenusUI} object
+     * @param name
+     *         a {@link java.lang.String} object
+     * @param icon
+     *         a {@link javax.swing.Icon} object
+     * @param descrip
+     *         a {@link java.lang.String} object
+     * @param mnemonic
+     *         a {@link java.lang.Integer} object
+     * @param accel
+     *         a {@link javax.swing.KeyStroke} object
+     * @param gui
+     *         a {@link VenusUI} object
      */
-    public FileDumpMemoryAction(final String name, final Icon icon, final String descrip,
-                                final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
+    public FileDumpMemoryAction(
+            final String name, final Icon icon, final String descrip,
+            final Integer mnemonic, final KeyStroke accel, final VenusUI gui) {
         super(name, icon, descrip, mnemonic, accel);
         this.mainUI = gui;
     }
@@ -99,14 +106,14 @@ public class FileDumpMemoryAction extends GuiAction {
         final JDialog dumpDialog = new JDialog(Globals.gui, FileDumpMemoryAction.title, true);
         dumpDialog.setContentPane(this.buildDialogPanel());
         dumpDialog.setDefaultCloseOperation(
-            JDialog.DO_NOTHING_ON_CLOSE);
+                JDialog.DO_NOTHING_ON_CLOSE);
         dumpDialog.addWindowListener(
-            new WindowAdapter() {
-                @Override
-                public void windowClosing(final WindowEvent we) {
-                    FileDumpMemoryAction.this.closeDialog();
-                }
-            });
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(final WindowEvent we) {
+                        FileDumpMemoryAction.this.closeDialog();
+                    }
+                });
         return dumpDialog;
     }
 
@@ -128,10 +135,10 @@ public class FileDumpMemoryAction extends GuiAction {
         for (final var segment : segments) {
             int highAddress;
             try {
-                highAddress = Memory.getInstance().getAddressOfFirstNull(segment.baseAddress(),
-                    segment.limitAddress()) - Memory.WORD_LENGTH_BYTES;
+                highAddress = Globals.MEMORY_INSTANCE.getAddressOfFirstNull(segment.baseAddress(),
+                        segment.limitAddress()) - DataTypes.WORD_SIZE;
             } catch (final AddressErrorException e) {
-                highAddress = segment.baseAddress() - Memory.WORD_LENGTH_BYTES;
+                highAddress = segment.baseAddress() - DataTypes.WORD_SIZE;
             }
             if (highAddress >= segment.baseAddress()) {
                 actualSegments.add(new AugmentedSegmentInfo(segment, highAddress));
@@ -146,7 +153,7 @@ public class FileDumpMemoryAction extends GuiAction {
             contents.add(new Label("There is nothing to dump!"), BorderLayout.NORTH);
             final JButton OKButton = new JButton("OK");
             OKButton.addActionListener(
-                e -> this.closeDialog());
+                    e -> this.closeDialog());
             contents.add(OKButton, BorderLayout.SOUTH);
             return contents;
         }
@@ -174,7 +181,7 @@ public class FileDumpMemoryAction extends GuiAction {
         final JButton dumpButton = createDumpButton();
         final JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(
-            e -> this.closeDialog());
+                e -> this.closeDialog());
         controlPanel.add(Box.createHorizontalGlue());
         controlPanel.add(dumpButton);
         controlPanel.add(Box.createHorizontalGlue());
@@ -187,18 +194,18 @@ public class FileDumpMemoryAction extends GuiAction {
     private @NotNull JButton createDumpButton() {
         final var dumpButton = new JButton("Dump To File...");
         dumpButton.addActionListener(
-            e -> {
-                final var selectedSegment = (AugmentedSegmentInfo) this.segmentListSelector.getSelectedItem();
-                if (selectedSegment == null) return;
-                final var wasDumped = this.performDump(
-                    selectedSegment.segmentInfo.baseAddress(),
-                    selectedSegment.actualHighAddress,
-                    (DumpFormat) this.formatListSelector.getSelectedItem()
-                );
-                if (wasDumped) {
-                    this.closeDialog();
-                }
-            });
+                e -> {
+                    final var selectedSegment = (AugmentedSegmentInfo) this.segmentListSelector.getSelectedItem();
+                    if (selectedSegment == null) return;
+                    final var wasDumped = this.performDump(
+                            selectedSegment.segmentInfo.baseAddress(),
+                            selectedSegment.actualHighAddress,
+                            (DumpFormat) this.formatListSelector.getSelectedItem()
+                    );
+                    if (wasDumped) {
+                        this.closeDialog();
+                    }
+                });
         return dumpButton;
     }
 
@@ -220,9 +227,9 @@ public class FileDumpMemoryAction extends GuiAction {
             operationOK = true;
             if (theFile.exists()) {
                 final int overwrite = JOptionPane.showConfirmDialog(this.mainUI,
-                    "File " + theFile.getName() + " already exists.  Do you wish to overwrite it?",
-                    "Overwrite existing file?",
-                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                        "File " + theFile.getName() + " already exists.  Do you wish to overwrite it?",
+                        "Overwrite existing file?",
+                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 switch (overwrite) {
                     case JOptionPane.YES_OPTION:
                         break;
@@ -237,7 +244,7 @@ public class FileDumpMemoryAction extends GuiAction {
             }
             if (operationOK) {
                 try {
-                    format.dumpMemoryRange(theFile, firstAddress, lastAddress, Memory.getInstance());
+                    format.dumpMemoryRange(theFile, firstAddress, lastAddress, Globals.MEMORY_INSTANCE);
                 } catch (final AddressErrorException | IOException ignored) {
 
                 }
@@ -264,8 +271,9 @@ public class FileDumpMemoryAction extends GuiAction {
         }
 
         @Override
-        public Component getListCellRendererComponent(final JList list, final Object value, final int index,
-                                                      final boolean isSelected, final boolean cellHasFocus) {
+        public Component getListCellRendererComponent(
+                final JList list, final Object value, final int index,
+                final boolean isSelected, final boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             this.setToolTipText(value.toString());
             if (index >= 0) {
@@ -280,9 +288,9 @@ public class FileDumpMemoryAction extends GuiAction {
         @Override
         public String toString() {
             return "%s (%s - %s)".formatted(
-                segmentInfo.name(),
-                BinaryUtils.intToHexString(segmentInfo.baseAddress()),
-                BinaryUtils.intToHexString(actualHighAddress)
+                    segmentInfo.name(),
+                    BinaryUtils.intToHexString(segmentInfo.baseAddress()),
+                    BinaryUtils.intToHexString(actualHighAddress)
             );
         }
     }

@@ -27,12 +27,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package rars.tools;
 
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.Instruction;
-import rars.riscv.hardware.Memory;
 import rars.riscv.instructions.*;
 
 import javax.swing.*;
@@ -142,7 +142,7 @@ public class InstructionStatistics extends AbstractTool {
      * Only the most relevant instructions are decoded and categorized.
      *
      * @param instruction
-     *     the instruction to decode
+     *         the instruction to decode
      * @return the category of the instruction
      * @author Giancarlo Pernudi Segura
      * @see InstructionStatistics#CATEGORY_ALU
@@ -156,9 +156,9 @@ public class InstructionStatistics extends AbstractTool {
             return InstructionStatistics.CATEGORY_ALU; // add, addw, sub, subw, and, or, xor, slt, sltu, m extension
         }
         if (instruction instanceof ADDI || instruction instanceof ADDIW || instruction instanceof ANDI
-            || instruction instanceof ORI || instruction instanceof XORI
-            || instruction instanceof SLTI || instruction instanceof SLTIU
-            || instruction instanceof LUI || instruction instanceof AUIPC) {
+                || instruction instanceof ORI || instruction instanceof XORI
+                || instruction instanceof SLTI || instruction instanceof SLTIU
+                || instruction instanceof LUI || instruction instanceof AUIPC) {
             return InstructionStatistics.CATEGORY_ALU; // addi, addiw, andi, ori, xori, slti, sltiu, lui, auipc
         }
         if (instruction instanceof SLLI32 || instruction instanceof SLLIW) {
@@ -252,7 +252,8 @@ public class InstructionStatistics extends AbstractTool {
      */
     @Override
     protected void addAsObserver() {
-        this.addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
+        final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
+        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
     }
 
     /**
@@ -289,7 +290,7 @@ public class InstructionStatistics extends AbstractTool {
             try {
 
                 // access the statement in the text segment without notifying other tools etc.
-                final ProgramStatement stmt = Memory.getInstance().getStatementNoNotify(memAccNotice.getAddress());
+                final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatementNoNotify(memAccNotice.getAddress());
 
                 // necessary to handle possible null pointers at the end of the program
                 // (e.g., if the simulator tries to execute the next instruction after the last

@@ -1,7 +1,9 @@
 package rars.riscv.dump.formats;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
+import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 import rars.settings.BoolSetting;
@@ -36,7 +38,7 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
 
     public SegmentWindowDumpFormat() {
         super("Text/Data Segment Window", "SegmentWindow",
-            " Text Segment Window or Data Segment Window format to text file");
+                " Text Segment Window or Data Segment Window format to text file");
     }
 
     /**
@@ -50,34 +52,35 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
      * @see AbstractDumpFormat
      */
     @Override
-    public void dumpMemoryRange(@NotNull final File file, final int firstAddress, final int lastAddress,
-                                @NotNull final Memory memory)
-        throws AddressErrorException, IOException {
+    public void dumpMemoryRange(
+            @NotNull final File file, final int firstAddress, final int lastAddress,
+            @NotNull final Memory memory)
+            throws AddressErrorException, IOException {
 
         final PrintStream out = new PrintStream(new FileOutputStream(file));
 
         // TODO: check if these settings work right
         final boolean hexAddresses =
-            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
+                BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
 
         // If address in data segment, print in same format as Data Segment Window
-        if (Memory.inDataSegment(firstAddress)) {
+        if (Globals.MEMORY_INSTANCE.isAddressInDataSegment(firstAddress)) {
             final boolean hexValues = BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX);
             int offset = 0;
             StringBuilder string = new StringBuilder();
             try {
-                for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
+                for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                     if (offset % 8 == 0) {
                         string = new StringBuilder(((hexAddresses) ? BinaryUtils.intToHexString(address)
-                            : BinaryUtils.unsignedIntToIntString(address)) + "    ");
+                                : BinaryUtils.unsignedIntToIntString(address)) + "    ");
                     }
                     offset++;
                     final Integer temp = memory.getRawWordOrNull(address);
                     if (temp == null)
                         break;
                     string.append((hexValues)
-                        ? BinaryUtils.intToHexString(temp)
-                        : ("           " + temp).substring(temp.toString().length())).append(" ");
+                            ? BinaryUtils.intToHexString(temp)
+                            : ("           " + temp).substring(temp.toString().length())).append(" ");
                     if (offset % 8 == 0) {
                         out.println(string);
                         string = new StringBuilder();
@@ -89,7 +92,7 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
             return;
         }
 
-        if (!Memory.inTextSegment(firstAddress)) {
+        if (!Globals.MEMORY_INSTANCE.isAddressInTextSegment(firstAddress)) {
             return;
         }
 
@@ -98,10 +101,10 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
         out.println();
         String string;
         try {
-            for (int address = firstAddress; address <= lastAddress; address += Memory.WORD_LENGTH_BYTES) {
+            for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                 string = ((hexAddresses) ? BinaryUtils.intToHexString(address) :
-                    BinaryUtils.unsignedIntToIntString(address))
-                    + "  ";
+                        BinaryUtils.unsignedIntToIntString(address))
+                        + "  ";
                 final Integer temp = memory.getRawWordOrNull(address);
                 if (temp == null)
                     break;
@@ -109,10 +112,10 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
                 try {
                     final ProgramStatement ps = memory.getStatement(address);
                     string += (ps.getPrintableBasicAssemblyStatement() + "                             ").substring(0,
-                        29);
+                            29);
                     string += (((Objects.equals(ps.getSource(), "")) ? "" : Integer.toString(ps.getSourceLine())) +
-                        "     ")
-                        .substring(0, 5);
+                            "     ")
+                            .substring(0, 5);
                     string += ps.getSource();
                 } catch (final AddressErrorException ignored) {
                 }

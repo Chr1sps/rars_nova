@@ -1,11 +1,11 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
@@ -69,7 +69,7 @@ public class SyscallRead extends AbstractSyscall {
         // copy bytes from returned buffer into memory
         try {
             while (index < retLength) {
-                Memory.getInstance().setByte(byteAddress++,
+                Globals.MEMORY_INSTANCE.setByte(byteAddress++,
                         myBuffer[index++]);
             }
         } catch (final AddressErrorException e) {

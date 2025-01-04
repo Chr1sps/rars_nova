@@ -53,7 +53,6 @@ public final class ToolLoader {
 
     static {
         ToolLoader.tools.add(new BHTSimulator());
-        ToolLoader.tools.add(new BitmapDisplay());
         ToolLoader.tools.add(new CacheSimulator());
         ToolLoader.tools.add(new DigitalLabSim());
         ToolLoader.tools.add(new FloatRepresentation());

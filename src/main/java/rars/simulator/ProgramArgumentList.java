@@ -4,8 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import rars.Globals;
+import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 import java.util.ArrayList;
@@ -45,7 +46,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * program at runtime. Equivalent to C's main(int argc, char **argv) or
  * Java's main(String[] args).
  *
- * @param programArgumentList list of strings, each element containing one argument
+ * @param programArgumentList
+ *         list of strings, each element containing one argument
  * @author Pete Sanderson
  * @version July 2008
  */
@@ -57,7 +59,8 @@ public record ProgramArgumentList(@NotNull @Unmodifiable List<@NotNull String> p
      * are the default Java StringTokenizer delimiters (space, tab,
      * newline, return, formfeed)
      *
-     * @param args String containing delimiter-separated arguments
+     * @param args
+     *         String containing delimiter-separated arguments
      */
     public ProgramArgumentList(final @NotNull String args) {
         this(buildArgsFromString(args));
@@ -107,47 +110,48 @@ public record ProgramArgumentList(@NotNull @Unmodifiable List<@NotNull String> p
         // Etc down to first character of second arg.
         // Follow this pattern for all remaining arguments.
 
-        int highAddress = Memory.stackBaseAddress; // highest non-kernel address, sits "under" stack
+        final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
+        int highAddress = memoryConfiguration.stackBaseAddress; // highest non-kernel address, sits "under" stack
         final int[] argStartAddress = new int[this.programArgumentList.size()];
         try { // needed for all memory writes
             for (int i = 0; i < this.programArgumentList.size(); i++) {
                 final var programArgument = this.programArgumentList.get(i);
-                Memory.getInstance().set(highAddress, 0, 1); // trailing null byte for each argument
+                Globals.MEMORY_INSTANCE.set(highAddress, 0, 1); // trailing null byte for each argument
                 highAddress--;
                 for (int j = programArgument.length() - 1; j >= 0; j--) {
-                    Memory.getInstance().set(highAddress, programArgument.charAt(j), 1);
+                    Globals.MEMORY_INSTANCE.set(highAddress, programArgument.charAt(j), 1);
                     highAddress--;
                 }
                 argStartAddress[i] = highAddress + 1;
             }
             // now place a null word, the arg starting addresses, and arg count onto stack.
-            int stackAddress = Memory.stackPointer; // base address for runtime stack.
-            if (highAddress < Memory.stackPointer) {
+            int stackAddress = memoryConfiguration.stackPointerAddress; // base address for runtime stack.
+            if (highAddress < memoryConfiguration.stackPointerAddress) {
                 // Based on current values for stackBaseAddress and stackPointer, this will
                 // only happen if the combined lengths of program arguments is greater than
                 // 0x7ffffffc - 0x7fffeffc = 0x00001000 = 4096 bytes. In this case, set
                 // stackAddress to next lower word boundary minus 4 for clearance (since every
                 // byte from highAddress+1 is filled).
-                stackAddress = highAddress - (highAddress % Memory.WORD_LENGTH_BYTES) - Memory.WORD_LENGTH_BYTES;
+                stackAddress = highAddress - (highAddress % DataTypes.WORD_SIZE) - DataTypes.WORD_SIZE;
             }
-            Memory.getInstance().set(stackAddress, 0, Memory.WORD_LENGTH_BYTES); // null word for end of argv array
-            stackAddress -= Memory.WORD_LENGTH_BYTES;
+            Globals.MEMORY_INSTANCE.set(stackAddress, 0, DataTypes.WORD_SIZE); // null word for end of argv array
+            stackAddress -= DataTypes.WORD_SIZE;
             for (int i = argStartAddress.length - 1; i >= 0; i--) {
-                Memory.getInstance().set(stackAddress, argStartAddress[i], Memory.WORD_LENGTH_BYTES);
-                stackAddress -= Memory.WORD_LENGTH_BYTES;
+                Globals.MEMORY_INSTANCE.set(stackAddress, argStartAddress[i], DataTypes.WORD_SIZE);
+                stackAddress -= DataTypes.WORD_SIZE;
             }
-            Memory.getInstance().set(stackAddress, argStartAddress.length, Memory.WORD_LENGTH_BYTES); // argc
-            stackAddress -= Memory.WORD_LENGTH_BYTES;
+            Globals.MEMORY_INSTANCE.set(stackAddress, argStartAddress.length, DataTypes.WORD_SIZE); // argc
+            stackAddress -= DataTypes.WORD_SIZE;
 
             // Need to set $sp register to stack address, $a0 to argc, $a1 to argv
             // Need to by-pass the backstepping mechanism so go directly to Register instead
             // of RegisterFile
-            RegisterFile.getRegister("sp").setValue(stackAddress + Memory.WORD_LENGTH_BYTES);
+            RegisterFile.getRegister("sp").setValue(stackAddress + DataTypes.WORD_SIZE);
             RegisterFile.getRegister("a0").setValue(argStartAddress.length); // argc
-            RegisterFile.getRegister("a1").setValue(stackAddress + Memory.WORD_LENGTH_BYTES + Memory.WORD_LENGTH_BYTES); // argv
+            RegisterFile.getRegister("a1").setValue(stackAddress + DataTypes.WORD_SIZE + DataTypes.WORD_SIZE); // argv
         } catch (final AddressErrorException aee) {
             ProgramArgumentList.LOGGER.fatal("Internal Error: Memory write error occurred while storing program " +
-                "arguments!", aee);
+                    "arguments!", aee);
             System.exit(0);
         }
     }

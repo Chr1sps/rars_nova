@@ -1,11 +1,11 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 import java.nio.charset.StandardCharsets;
@@ -69,10 +69,10 @@ public final class SyscallGetCWD extends AbstractSyscall {
         }
         try {
             for (int index = 0; index < utf8BytesList.length; index++) {
-                Memory.getInstance().setByte(buf + index,
+                Globals.MEMORY_INSTANCE.setByte(buf + index,
                         utf8BytesList[index]);
             }
-            Memory.getInstance().setByte(buf + utf8BytesList.length, 0);
+            Globals.MEMORY_INSTANCE.setByte(buf + utf8BytesList.length, 0);
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }

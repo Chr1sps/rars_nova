@@ -28,13 +28,13 @@ package rars.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.Memory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,57 +53,41 @@ public class InstructionCounter extends AbstractTool {
     private static final String version = "Version 1.0 (Felipe Lessa)";
     private static final String heading = "Counting the number of instructions executed";
 
-    /**
-     * Number of instructions executed until now.
-     */
+    /** Number of instructions executed until now. */
     private int counter = 0;
     private JTextField counterField;
 
-    /**
-     * Number of instructions of type R.
-     */
+    /** Number of instructions of type R. */
     private int counterR = 0;
     private JTextField counterRField;
     private JProgressBar progressbarR;
 
-    /**
-     * Number of instructions of type R4.
-     */
+    /** Number of instructions of type R4. */
     private int counterR4 = 0;
     private JTextField counterR4Field;
     private JProgressBar progressbarR4;
 
-    /**
-     * Number of instructions of type I.
-     */
+    /** Number of instructions of type I. */
     private int counterI = 0;
     private JTextField counterIField;
     private JProgressBar progressbarI;
 
-    /**
-     * Number of instructions of type S.
-     */
+    /** Number of instructions of type S. */
     private int counterS = 0;
     private JTextField counterSField;
     private JProgressBar progressbarS;
 
-    /**
-     * Number of instructions of type B.
-     */
+    /** Number of instructions of type B. */
     private int counterB = 0;
     private JTextField counterBField;
     private JProgressBar progressbarB;
 
-    /**
-     * Number of instructions of type U.
-     */
+    /** Number of instructions of type U. */
     private int counterU = 0;
     private JTextField counterUField;
     private JProgressBar progressbarU;
 
-    /**
-     * Number of instructions of type J.
-     */
+    /** Number of instructions of type J. */
     private int counterJ = 0;
     private JTextField counterJField;
     private JProgressBar progressbarJ;
@@ -122,9 +106,6 @@ public class InstructionCounter extends AbstractTool {
         super(InstructionCounter.name + ", " + InstructionCounter.version, InstructionCounter.heading);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return InstructionCounter.name;
@@ -265,17 +246,12 @@ public class InstructionCounter extends AbstractTool {
         return panel;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void addAsObserver() {
-        this.addAsObserver(Memory.textBaseAddress, Memory.textLimitAddress);
+        final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
+        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void processRISCVUpdate(final AccessNotice notice) {
         if (!notice.accessIsFromRISCV())
@@ -289,7 +265,7 @@ public class InstructionCounter extends AbstractTool {
         this.lastAddress = a;
         this.counter++;
         try {
-            final ProgramStatement stmt = Memory.getInstance().getStatement(a);
+            final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatement(a);
 
             // If the program is finished, getStatement() will return null,
             // a null statement will cause the simulator to stall.
@@ -314,18 +290,12 @@ public class InstructionCounter extends AbstractTool {
         this.updateDisplay();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void initializePreGUI() {
         this.counter = this.counterR = this.counterR4 = this.counterI = this.counterS = this.counterB = this.counterU = this.counterJ = 0;
         this.lastAddress = -1;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void reset() {
         this.counter = this.counterR = this.counterR4 = this.counterI = this.counterS = this.counterB = this.counterU = this.counterJ = 0;
@@ -333,9 +303,6 @@ public class InstructionCounter extends AbstractTool {
         this.updateDisplay();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void updateDisplay() {
         this.counterField.setText(String.valueOf(this.counter));

@@ -2,7 +2,6 @@ package rars.venus.settings;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.riscv.hardware.RegisterFile;
 import rars.simulator.Simulator;
@@ -57,40 +56,41 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class SettingsMemoryConfigurationAction extends GuiAction {
     private static final String[] configurationItemNames = {
-        ".text base address",
-        "data segment base address",
-        ".extern base address",
-        "global pointer (gp)",
-        ".data base address",
-        "heap base address",
-        "stack pointer (sp)",
-        "stack base address",
-        "user space high address",
-        "kernel space base address",
-        "MMIO base address",
-        "kernel space high address",
-        "data segment limit address",
-        "text limit address",
-        "stack limit address",
-        "memory map limit address"
+            ".text base address",
+            "data segment base address",
+            ".extern base address",
+            "global pointer (gp)",
+            ".data base address",
+            "heap base address",
+            "stack pointer (sp)",
+            "stack base address",
+            "user space high address",
+            "kernel space base address",
+            "MMIO base address",
+            "kernel space high address",
+            "data segment limit address",
+            "text limit address",
+            "stack limit address",
+            "memory map limit address"
     };
 
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.
      *
      * @param name
-     *     a {@link java.lang.String} object
+     *         a {@link java.lang.String} object
      * @param icon
-     *     a {@link javax.swing.Icon} object
+     *         a {@link javax.swing.Icon} object
      * @param descrip
-     *     a {@link java.lang.String} object
+     *         a {@link java.lang.String} object
      * @param mnemonic
-     *     a {@link java.lang.Integer} object
+     *         a {@link java.lang.Integer} object
      * @param accel
-     *     a {@link javax.swing.KeyStroke} object
+     *         a {@link javax.swing.KeyStroke} object
      */
-    public SettingsMemoryConfigurationAction(final String name, final Icon icon, final String descrip,
-                                             final Integer mnemonic, final KeyStroke accel) {
+    public SettingsMemoryConfigurationAction(
+            final String name, final Icon icon, final String descrip,
+            final Integer mnemonic, final KeyStroke accel) {
         super(name, icon, descrip, mnemonic, accel);
     }
 
@@ -116,14 +116,14 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             super(owner, title, modality);
             this.setContentPane(this.buildDialogPanel());
             this.setDefaultCloseOperation(
-                JDialog.DO_NOTHING_ON_CLOSE);
+                    JDialog.DO_NOTHING_ON_CLOSE);
             this.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent we) {
-                        MemoryConfigurationDialog.this.performClose();
-                    }
-                });
+                    new WindowAdapter() {
+                        @Override
+                        public void windowClosing(final WindowEvent we) {
+                            MemoryConfigurationDialog.this.performClose();
+                        }
+                    });
             this.pack();
             this.setLocationRelativeTo(owner);
         }
@@ -154,7 +154,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
                 chooserPanel.add(button);
             }
             chooserPanel.setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Configuration"));
+                    BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Configuration"));
             return chooserPanel;
         }
 
@@ -208,22 +208,22 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             final JButton okButton = new JButton("Apply and Close");
             okButton.setToolTipText(CLOSE_TOOL_TIP_TEXT);
             okButton.addActionListener(
-                e -> {
-                    this.performApply();
-                    this.performClose();
-                });
+                    e -> {
+                        this.performApply();
+                        this.performClose();
+                    });
             final JButton applyButton = new JButton("Apply");
             applyButton.setToolTipText(APPLY_TOOL_TIP_TEXT);
             applyButton.addActionListener(
-                e -> this.performApply());
+                    e -> this.performApply());
             final JButton cancelButton = new JButton("Cancel");
             cancelButton.setToolTipText(CANCEL_TOOL_TIP_TEXT);
             cancelButton.addActionListener(
-                e -> this.performClose());
+                    e -> this.performClose());
             final JButton resetButton = new JButton("Reset");
             resetButton.setToolTipText(RESET_TOOL_TIP_TEXT);
             resetButton.addActionListener(
-                e -> this.performReset());
+                    e -> this.performReset());
             controlPanel.add(Box.createHorizontalGlue());
             controlPanel.add(okButton);
             controlPanel.add(Box.createHorizontalGlue());
@@ -241,16 +241,14 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             final var newConfiguration = this.selectedConfigurationButton.configuration;
             if (newConfiguration != currentConfiguration) {
                 OTHER_SETTINGS.setMemoryConfigurationAndSave(newConfiguration);
-                Memory.setConfiguration(newConfiguration);
-                Memory.getInstance().initialize();
-                RegisterFile.setValuesFromConfiguration(newConfiguration);
+                Globals.setupGlobalMemoryConfiguration(newConfiguration);
                 Globals.gui.registersPane.getRegistersWindow().clearHighlighting();
                 Globals.gui.registersPane.getRegistersWindow().updateRegisters();
                 Globals.gui.mainPane.executeTab.dataSegment.updateBaseAddressComboBox();
                 // 21 July 2009 Re-assemble if the situation demands it to maintain consistency.
                 if (FileStatus.get() == FileStatus.State.RUNNABLE ||
-                    FileStatus.get() == FileStatus.State.RUNNING ||
-                    FileStatus.get() == FileStatus.State.TERMINATED) {
+                        FileStatus.get() == FileStatus.State.RUNNING ||
+                        FileStatus.get() == FileStatus.State.TERMINATED) {
                     // Stop execution if executing -- should NEVER happen because this
                     // Action's widget is disabled during MIPS execution.
                     if (FileStatus.get() == FileStatus.State.RUNNING) {
@@ -275,22 +273,22 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         // Set name values in JLabels and address values in the JTextFields
         private void setConfigDisplay(final @NotNull MemoryConfiguration config) {
             final int[] configurationItemValues = {
-                config.textBaseAddress,
-                config.dataSegmentBaseAddress,
-                config.externBaseAddress,
-                config.globalPointerAddress,
-                config.dataBaseAddress,
-                config.heapBaseAddress,
-                config.stackPointerAddress,
-                config.stackBaseAddress,
-                config.userHighAddress,
-                config.kernelBaseAddress,
-                config.memoryMapBaseAddress,
-                config.kernelHighAddress,
-                config.dataSegmentLimitAddress,
-                config.textLimitAddress,
-                config.stackLimitAddress,
-                config.memoryMapLimitAddress
+                    config.textBaseAddress,
+                    config.dataSegmentBaseAddress,
+                    config.externBaseAddress,
+                    config.globalPointerAddress,
+                    config.dataBaseAddress,
+                    config.heapBaseAddress,
+                    config.stackPointerAddress,
+                    config.stackBaseAddress,
+                    config.userHighAddress,
+                    config.kernelBaseAddress,
+                    config.memoryMapBaseAddress,
+                    config.kernelHighAddress,
+                    config.dataSegmentLimitAddress,
+                    config.textLimitAddress,
+                    config.stackLimitAddress,
+                    config.memoryMapLimitAddress
             };
             // Will use TreeMap to extract list of address-name pairs sorted by
             // hex-stringified address. This will correctly handle kernel addresses,
@@ -301,8 +299,8 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             final TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
             for (int i = 0; i < configurationItemValues.length; i++) {
                 treeSortedByAddress.put(
-                    BinaryUtils.intToHexString(configurationItemValues[i]) + configurationItemNames[i],
-                    configurationItemNames[i]
+                        BinaryUtils.intToHexString(configurationItemValues[i]) + configurationItemNames[i],
+                        configurationItemNames[i]
                 );
             }
             final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();

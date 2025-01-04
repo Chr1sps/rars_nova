@@ -1,8 +1,9 @@
 package rars.tools;
 
+import rars.Globals;
+import rars.assembler.DataTypes;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.riscv.hardware.Memory;
 import rars.util.BinaryUtils;
 
 import javax.swing.*;
@@ -54,7 +55,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
     private static final String version = "Version 1.0";
     private static final String heading = "Visualizing memory reference patterns";
     private static final String[] wordsPerUnitChoices = {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512",
-        "1024", "2048"};
+            "1024", "2048"};
     private static final int defaultWordsPerUnitIndex = 0;
     private static final String[] visualizationUnitPixelWidthChoices = {"1", "2", "4", "8", "16", "32"};
     private static final int defaultVisualizationUnitPixelWidthIndex = 4;
@@ -76,11 +77,11 @@ public class MemoryReferenceVisualization extends AbstractTool {
     // This array will grow if user adds colors at additional counter points (see
     // below).
     private final CounterColor[] defaultCounterColors = {new CounterColor(0, Color.black),
-        new CounterColor(1, Color.blue),
-        new CounterColor(2, Color.green),
-        new CounterColor(3, Color.yellow),
-        new CounterColor(5, Color.orange),
-        new CounterColor(10, Color.red)
+            new CounterColor(1, Color.blue),
+            new CounterColor(2, Color.green),
+            new CounterColor(3, Color.yellow),
+            new CounterColor(5, Color.orange),
+            new CounterColor(10, Color.red)
     };
     /*
      * Values for reference count color slider. These are all possible counter
@@ -90,31 +91,31 @@ public class MemoryReferenceVisualization extends AbstractTool {
      * a default color.
      */
     private final int[] countTable = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, // 0-10
-        20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, // 11-20
-        2000, 3000, 4000, 5000, 10000, 50000, 100000, 500000, 1000000 // 21-29
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, // 0-10
+            20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, // 11-20
+            2000, 3000, 4000, 5000, 10000, 50000, 100000, 500000, 1000000 // 21-29
     };
 
     // Values for display canvas. Note their initialization uses the identifiers
     // just above.
     // Major GUI components
     private JComboBox<String> wordsPerUnitSelector, visualizationUnitPixelWidthSelector,
-        visualizationUnitPixelHeightSelector,
-        visualizationPixelWidthSelector, visualizationPixelHeightSelector, displayBaseAddressSelector;
+            visualizationUnitPixelHeightSelector,
+            visualizationPixelWidthSelector, visualizationPixelHeightSelector, displayBaseAddressSelector;
     private JCheckBox drawHashMarksSelector;
     private JPanel canvas;
     private int unitPixelWidth = Integer
-        .parseInt(MemoryReferenceVisualization.visualizationUnitPixelWidthChoices[MemoryReferenceVisualization.defaultVisualizationUnitPixelWidthIndex]);
+            .parseInt(MemoryReferenceVisualization.visualizationUnitPixelWidthChoices[MemoryReferenceVisualization.defaultVisualizationUnitPixelWidthIndex]);
     private int unitPixelHeight = Integer
-        .parseInt(MemoryReferenceVisualization.visualizationUnitPixelHeightChoices[MemoryReferenceVisualization.defaultVisualizationUnitPixelHeightIndex]);
+            .parseInt(MemoryReferenceVisualization.visualizationUnitPixelHeightChoices[MemoryReferenceVisualization.defaultVisualizationUnitPixelHeightIndex]);
 
     // `Values for mapping of reference counts to colors for display.
     private int wordsPerUnit =
-        Integer.parseInt(MemoryReferenceVisualization.wordsPerUnitChoices[MemoryReferenceVisualization.defaultWordsPerUnitIndex]);
+            Integer.parseInt(MemoryReferenceVisualization.wordsPerUnitChoices[MemoryReferenceVisualization.defaultWordsPerUnitIndex]);
     private int visualizationAreaWidthInPixels = Integer
-        .parseInt(MemoryReferenceVisualization.displayAreaPixelWidthChoices[MemoryReferenceVisualization.defaultDisplayWidthIndex]);
+            .parseInt(MemoryReferenceVisualization.displayAreaPixelWidthChoices[MemoryReferenceVisualization.defaultDisplayWidthIndex]);
     private int visualizationAreaHeightInPixels = Integer
-        .parseInt(MemoryReferenceVisualization.displayAreaPixelHeightChoices[MemoryReferenceVisualization.defaultDisplayHeightIndex]);
+            .parseInt(MemoryReferenceVisualization.displayAreaPixelHeightChoices[MemoryReferenceVisualization.defaultDisplayHeightIndex]);
     // The next four are initialized dynamically in initializeDisplayBaseChoices()
     private String[] displayBaseAddressChoices;
     private int[] displayBaseAddresses;
@@ -129,7 +130,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
      */
     public MemoryReferenceVisualization() {
         super("Memory Reference Visualization, " + MemoryReferenceVisualization.version,
-            MemoryReferenceVisualization.heading);
+                MemoryReferenceVisualization.heading);
     }
 
     // Will return int equivalent of specified combo box's current selection.
@@ -179,7 +180,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
     @Override
     protected void addAsObserver() {
         int highAddress = this.baseAddress
-            + this.theGrid.getRows() * this.theGrid.getColumns() * Memory.WORD_LENGTH_BYTES * this.wordsPerUnit;
+                + this.theGrid.getRows() * this.theGrid.getColumns() * DataTypes.WORD_SIZE * this.wordsPerUnit;
         // Special case: baseAddress<0 means we're in kernel memory (0x80000000 and up)
         // and most likely
         // in memory map address space (0xffff0000 and up). In this case, we need to
@@ -230,7 +231,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
         // several combo boxes that have not been created yet. But a default grid
         // needs to be allocated for initial canvas display.
         this.theGrid = new Grid(this.visualizationAreaHeightInPixels / this.unitPixelHeight,
-            this.visualizationAreaWidthInPixels / this.unitPixelWidth);
+                this.visualizationAreaWidthInPixels / this.unitPixelWidth);
     }
 
     /**
@@ -273,26 +274,26 @@ public class MemoryReferenceVisualization extends AbstractTool {
     @Override
     protected JComponent getHelpComponent() {
         final String helpContent = """
-            Use this program to visualize dynamic memory reference
-            patterns in assembly programs.  It may be run either
-            from Tools menu or as a stand-alone application.  For
-            the latter, simply write a small driver to instantiate a
-            MemoryReferenceVisualization object and invoke its go() method.
-            You can easily learn to use this small program by playing with
-            it!  For the best animation, set the program to run in
-            timed mode using the Run Speed slider.  Each rectangular unit
-            on the display represents one or more memory words (default 1)
-            and each time a memory word is accessed by the program,
-            its reference count is incremented then rendered in the color
-            assigned to the count second.  You can change the count-color
-            assignments using the count slider and color patch.  Select a
-            counter second then click on the color patch to change the color.
-            This color will apply beginning at the selected count and
-            extending up to the next slider-provided count.
-            """;
+                Use this program to visualize dynamic memory reference
+                patterns in assembly programs.  It may be run either
+                from Tools menu or as a stand-alone application.  For
+                the latter, simply write a small driver to instantiate a
+                MemoryReferenceVisualization object and invoke its go() method.
+                You can easily learn to use this small program by playing with
+                it!  For the best animation, set the program to run in
+                timed mode using the Run Speed slider.  Each rectangular unit
+                on the display represents one or more memory words (default 1)
+                and each time a memory word is accessed by the program,
+                its reference count is incremented then rendered in the color
+                assigned to the count second.  You can change the count-color
+                assignments using the count slider and color patch.  Select a
+                counter second then click on the color patch to change the color.
+                This color will apply beginning at the selected count and
+                extending up to the next slider-provided count.
+                """;
         final JButton help = new JButton("Help");
         help.addActionListener(
-            e -> JOptionPane.showMessageDialog(MemoryReferenceVisualization.this.theWindow, helpContent));
+                e -> JOptionPane.showMessageDialog(MemoryReferenceVisualization.this.theWindow, helpContent));
         return help;
     }
 
@@ -303,105 +304,105 @@ public class MemoryReferenceVisualization extends AbstractTool {
         this.drawHashMarksSelector = new JCheckBox();
         this.drawHashMarksSelector.setSelected(MemoryReferenceVisualization.defaultDrawHashMarks);
         this.drawHashMarksSelector.addActionListener(
-            e -> MemoryReferenceVisualization.this.updateDisplay());
+                e -> MemoryReferenceVisualization.this.updateDisplay());
         this.wordsPerUnitSelector = new JComboBox<>(MemoryReferenceVisualization.wordsPerUnitChoices);
         this.wordsPerUnitSelector.setEditable(false);
         this.wordsPerUnitSelector.setBackground(this.backgroundColor);
         this.wordsPerUnitSelector.setSelectedIndex(MemoryReferenceVisualization.defaultWordsPerUnitIndex);
         this.wordsPerUnitSelector
-            .setToolTipText("Number of memory words represented by one visualization element (rectangle)");
+                .setToolTipText("Number of memory words represented by one visualization element (rectangle)");
         this.wordsPerUnitSelector.addActionListener(
-            e -> {
-                MemoryReferenceVisualization.this.wordsPerUnit =
-                    MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.wordsPerUnitSelector);
-                MemoryReferenceVisualization.this.reset();
-            });
+                e -> {
+                    MemoryReferenceVisualization.this.wordsPerUnit =
+                            MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.wordsPerUnitSelector);
+                    MemoryReferenceVisualization.this.reset();
+                });
         this.visualizationUnitPixelWidthSelector =
-            new JComboBox<>(MemoryReferenceVisualization.visualizationUnitPixelWidthChoices);
+                new JComboBox<>(MemoryReferenceVisualization.visualizationUnitPixelWidthChoices);
         this.visualizationUnitPixelWidthSelector.setEditable(false);
         this.visualizationUnitPixelWidthSelector.setBackground(this.backgroundColor);
         this.visualizationUnitPixelWidthSelector.setSelectedIndex(MemoryReferenceVisualization.defaultVisualizationUnitPixelWidthIndex);
         this.visualizationUnitPixelWidthSelector.setToolTipText("Width in pixels of rectangle representing memory " +
-            "access");
+                "access");
         this.visualizationUnitPixelWidthSelector.addActionListener(
-            e -> {
-                MemoryReferenceVisualization.this.unitPixelWidth =
-                    MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.visualizationUnitPixelWidthSelector);
-                MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
-                MemoryReferenceVisualization.this.updateDisplay();
-            });
+                e -> {
+                    MemoryReferenceVisualization.this.unitPixelWidth =
+                            MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.visualizationUnitPixelWidthSelector);
+                    MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
+                    MemoryReferenceVisualization.this.updateDisplay();
+                });
         this.visualizationUnitPixelHeightSelector =
-            new JComboBox<>(MemoryReferenceVisualization.visualizationUnitPixelHeightChoices);
+                new JComboBox<>(MemoryReferenceVisualization.visualizationUnitPixelHeightChoices);
         this.visualizationUnitPixelHeightSelector.setEditable(false);
         this.visualizationUnitPixelHeightSelector.setBackground(this.backgroundColor);
         this.visualizationUnitPixelHeightSelector.setSelectedIndex(MemoryReferenceVisualization.defaultVisualizationUnitPixelHeightIndex);
         this.visualizationUnitPixelHeightSelector.setToolTipText("Height in pixels of rectangle representing memory " +
-            "access");
+                "access");
         this.visualizationUnitPixelHeightSelector.addActionListener(
-            e -> {
-                MemoryReferenceVisualization.this.unitPixelHeight =
-                    MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.visualizationUnitPixelHeightSelector);
-                MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
-                MemoryReferenceVisualization.this.updateDisplay();
-            });
+                e -> {
+                    MemoryReferenceVisualization.this.unitPixelHeight =
+                            MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.visualizationUnitPixelHeightSelector);
+                    MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
+                    MemoryReferenceVisualization.this.updateDisplay();
+                });
         this.visualizationPixelWidthSelector =
-            new JComboBox<>(MemoryReferenceVisualization.displayAreaPixelWidthChoices);
+                new JComboBox<>(MemoryReferenceVisualization.displayAreaPixelWidthChoices);
         this.visualizationPixelWidthSelector.setEditable(false);
         this.visualizationPixelWidthSelector.setBackground(this.backgroundColor);
         this.visualizationPixelWidthSelector.setSelectedIndex(MemoryReferenceVisualization.defaultDisplayWidthIndex);
         this.visualizationPixelWidthSelector.setToolTipText("Total width in pixels of visualization area");
         this.visualizationPixelWidthSelector.addActionListener(
-            e -> {
-                MemoryReferenceVisualization.this.visualizationAreaWidthInPixels =
-                    MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.visualizationPixelWidthSelector);
-                MemoryReferenceVisualization.this.canvas.setPreferredSize(MemoryReferenceVisualization.this.getDisplayAreaDimension());
-                MemoryReferenceVisualization.this.canvas.setSize(MemoryReferenceVisualization.this.getDisplayAreaDimension());
-                MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
-                MemoryReferenceVisualization.this.canvas.repaint();
-                MemoryReferenceVisualization.this.updateDisplay();
-            });
+                e -> {
+                    MemoryReferenceVisualization.this.visualizationAreaWidthInPixels =
+                            MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.visualizationPixelWidthSelector);
+                    MemoryReferenceVisualization.this.canvas.setPreferredSize(MemoryReferenceVisualization.this.getDisplayAreaDimension());
+                    MemoryReferenceVisualization.this.canvas.setSize(MemoryReferenceVisualization.this.getDisplayAreaDimension());
+                    MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
+                    MemoryReferenceVisualization.this.canvas.repaint();
+                    MemoryReferenceVisualization.this.updateDisplay();
+                });
         this.visualizationPixelHeightSelector =
-            new JComboBox<>(MemoryReferenceVisualization.displayAreaPixelHeightChoices);
+                new JComboBox<>(MemoryReferenceVisualization.displayAreaPixelHeightChoices);
         this.visualizationPixelHeightSelector.setEditable(false);
         this.visualizationPixelHeightSelector.setBackground(this.backgroundColor);
         this.visualizationPixelHeightSelector.setSelectedIndex(MemoryReferenceVisualization.defaultDisplayHeightIndex);
         this.visualizationPixelHeightSelector.setToolTipText("Total height in pixels of visualization area");
         this.visualizationPixelHeightSelector.addActionListener(
-            e -> {
-                MemoryReferenceVisualization.this.visualizationAreaHeightInPixels =
-                    MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.visualizationPixelHeightSelector);
-                MemoryReferenceVisualization.this.canvas.setPreferredSize(MemoryReferenceVisualization.this.getDisplayAreaDimension());
-                MemoryReferenceVisualization.this.canvas.setSize(MemoryReferenceVisualization.this.getDisplayAreaDimension());
-                MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
-                MemoryReferenceVisualization.this.canvas.repaint();
-                MemoryReferenceVisualization.this.updateDisplay();
-            });
+                e -> {
+                    MemoryReferenceVisualization.this.visualizationAreaHeightInPixels =
+                            MemoryReferenceVisualization.getIntComboBoxSelection(MemoryReferenceVisualization.this.visualizationPixelHeightSelector);
+                    MemoryReferenceVisualization.this.canvas.setPreferredSize(MemoryReferenceVisualization.this.getDisplayAreaDimension());
+                    MemoryReferenceVisualization.this.canvas.setSize(MemoryReferenceVisualization.this.getDisplayAreaDimension());
+                    MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
+                    MemoryReferenceVisualization.this.canvas.repaint();
+                    MemoryReferenceVisualization.this.updateDisplay();
+                });
         this.displayBaseAddressSelector = new JComboBox<>(this.displayBaseAddressChoices);
         this.displayBaseAddressSelector.setEditable(false);
         this.displayBaseAddressSelector.setBackground(this.backgroundColor);
         this.displayBaseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
         this.displayBaseAddressSelector.setToolTipText("Base address for visualization area (upper left corner)");
         this.displayBaseAddressSelector.addActionListener(
-            e -> {
-                // This may also affect what address range we should be registered as an
-                // Observer
-                // for. The default (inherited) address range is the MIPS static data segment
-                // starting at 0x10010000. To change this requires override of
-                // AbstractToolAndApplication.addAsObserver(). The no-argument version of
-                // that method is called automatically when "Connect" button is clicked for Tool
-                // and when "Assemble and Run" button is clicked for Rars application.
-                MemoryReferenceVisualization.this.updateBaseAddress();
-                // If display base address is changed while connected to a program (this can
-                // only occur
-                // when being used as a Tool), we have to delete ourselves as an observer and
-                // re-register.
-                if (MemoryReferenceVisualization.this.connectButton != null && MemoryReferenceVisualization.this.connectButton.isConnected()) {
-                    MemoryReferenceVisualization.this.deleteAsSubscriber();
-                    MemoryReferenceVisualization.this.addAsObserver();
-                }
-                MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
-                MemoryReferenceVisualization.this.updateDisplay();
-            });
+                e -> {
+                    // This may also affect what address range we should be registered as an
+                    // Observer
+                    // for. The default (inherited) address range is the MIPS static data segment
+                    // starting at 0x10010000. To change this requires override of
+                    // AbstractToolAndApplication.addAsObserver(). The no-argument version of
+                    // that method is called automatically when "Connect" button is clicked for Tool
+                    // and when "Assemble and Run" button is clicked for Rars application.
+                    MemoryReferenceVisualization.this.updateBaseAddress();
+                    // If display base address is changed while connected to a program (this can
+                    // only occur
+                    // when being used as a Tool), we have to delete ourselves as an observer and
+                    // re-register.
+                    if (MemoryReferenceVisualization.this.connectButton != null && MemoryReferenceVisualization.this.connectButton.isConnected()) {
+                        MemoryReferenceVisualization.this.deleteAsSubscriber();
+                        MemoryReferenceVisualization.this.addAsObserver();
+                    }
+                    MemoryReferenceVisualization.this.theGrid = MemoryReferenceVisualization.this.createNewGrid();
+                    MemoryReferenceVisualization.this.updateDisplay();
+                });
 
         // ALL COMPONENTS FOR "ORGANIZATION" SECTION
 
@@ -472,18 +473,23 @@ public class MemoryReferenceVisualization extends AbstractTool {
     // dataBaseAddress=0x10010000, heapBaseAddress=0x10040000,
     // memoryMapBaseAddress=0xffff0000
     private void initializeDisplayBaseChoices() {
-        final int[] displayBaseAddressArray = {Memory.textBaseAddress, Memory.dataSegmentBaseAddress,
-            Memory.globalPointer,
-            Memory.dataBaseAddress,
-            Memory.heapBaseAddress, Memory.memoryMapBaseAddress};
+        final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
+        final int[] displayBaseAddressArray = {
+                memoryConfiguration.textBaseAddress,
+                memoryConfiguration.dataSegmentBaseAddress,
+                memoryConfiguration.globalPointerAddress,
+                memoryConfiguration.dataBaseAddress,
+                memoryConfiguration.heapBaseAddress,
+                memoryConfiguration.memoryMapBaseAddress
+        };
         // Must agree with above in number and order...
         final String[] descriptions = {" (text)", " (global data)", " (gp)", " (static data)", " (heap)", " (memory " +
-            "map)"};
+                "map)"};
         this.displayBaseAddresses = displayBaseAddressArray;
         this.displayBaseAddressChoices = new String[displayBaseAddressArray.length];
         for (int i = 0; i < this.displayBaseAddressChoices.length; i++) {
             this.displayBaseAddressChoices[i] = BinaryUtils.intToHexString(displayBaseAddressArray[i])
-                + descriptions[i];
+                    + descriptions[i];
         }
         this.defaultBaseAddressIndex = 3; // default to 0x10010000 (static data)
         this.baseAddress = displayBaseAddressArray[this.defaultBaseAddressIndex];
@@ -534,7 +540,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
     // based on all
     // display settings) then nothing happens.
     private void incrementReferenceCountForAddress(final int address) {
-        final int offset = (address - this.baseAddress) / Memory.WORD_LENGTH_BYTES / this.wordsPerUnit;
+        final int offset = (address - this.baseAddress) / DataTypes.WORD_SIZE / this.wordsPerUnit;
         // If you care to do anything with it, the following will return -1 if the
         // address
         // maps outside the dimensions of the grid (e.g. below the base address or
@@ -594,7 +600,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
                 final CounterColor[] newSortedArray = new CounterColor[this.counterColors.length + 1];
                 System.arraycopy(this.counterColors, 0, newSortedArray, 0, insertIndex);
                 System.arraycopy(this.counterColors, insertIndex, newSortedArray, insertIndex + 1,
-                    this.counterColors.length - insertIndex);
+                        this.counterColors.length - insertIndex);
                 newSortedArray[insertIndex] = newColor;
                 this.counterColors = newSortedArray;
             }
@@ -652,7 +658,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
         // Returns second in given grid element; -1 if row or column is out of range.
         private int getElement(final int row, final int column) {
             return (row >= 0 && row <= this.rows && column >= 0 && column <= this.columns) ? this.grid[row][column] :
-                -1;
+                    -1;
         }
 
         // Returns second in given grid element without doing any row/column index
@@ -668,7 +674,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
         // Returns -1 if row or column is out of range.
         private int incrementElement(final int row, final int column) {
             return (row >= 0 && row <= this.rows && column >= 0 && column <= this.columns) ?
-                ++this.grid[row][column] : -1;
+                    ++this.grid[row][column] : -1;
         }
 
         // Just set all grid elements to 0.
@@ -736,7 +742,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
                 for (int j = 0; j < grid.getColumns(); j++) {
                     g.setColor(MemoryReferenceVisualization.this.counterColorScale.getColor(grid.getElementFast(i, j)));
                     g.fillRect(upperLeftX, upperLeftY, MemoryReferenceVisualization.this.unitPixelWidth,
-                        MemoryReferenceVisualization.this.unitPixelHeight);
+                            MemoryReferenceVisualization.this.unitPixelHeight);
                     upperLeftX += MemoryReferenceVisualization.this.unitPixelWidth; // faster than multiplying
                 }
                 // get ready for next row...
@@ -754,41 +760,47 @@ public class MemoryReferenceVisualization extends AbstractTool {
         private volatile int counterIndex;
 
         private ColorChooserControls() {
-            final JSlider colorRangeSlider = new JSlider(JSlider.HORIZONTAL, 0,
-                MemoryReferenceVisualization.this.countTable.length - 1, MemoryReferenceVisualization.COUNT_INDEX_INIT);
+            final JSlider colorRangeSlider = new JSlider(JSlider.HORIZONTAL,
+                    0,
+                    MemoryReferenceVisualization.this.countTable.length - 1,
+                    MemoryReferenceVisualization.COUNT_INDEX_INIT);
             colorRangeSlider.setToolTipText("View or change color associated with each reference count second");
             colorRangeSlider.setPaintTicks(false);
             colorRangeSlider.addChangeListener(new ColorChooserListener());
             this.counterIndex = MemoryReferenceVisualization.COUNT_INDEX_INIT;
             this.sliderLabel =
-                new JLabel(ColorChooserControls.setLabel(MemoryReferenceVisualization.this.countTable[this.counterIndex]));
+                    new JLabel(ColorChooserControls.setLabel(MemoryReferenceVisualization.this.countTable[this.counterIndex]));
             this.sliderLabel.setToolTipText("Reference count values listed on non-linear scale of " +
-                MemoryReferenceVisualization.this.countTable[0] + " to " + MemoryReferenceVisualization.this.countTable[MemoryReferenceVisualization.this.countTable.length - 1]);
+                    MemoryReferenceVisualization.this.countTable[0] + " to " + MemoryReferenceVisualization.this.countTable[MemoryReferenceVisualization.this.countTable.length - 1]);
             this.sliderLabel.setHorizontalAlignment(JLabel.CENTER);
             this.sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             this.currentColorButton = new JButton("   ");
             this.currentColorButton.setToolTipText(
-                "Click here to change color for the reference count subrange based at current second");
-            this.currentColorButton.setBackground(MemoryReferenceVisualization.this.counterColorScale.getColor(MemoryReferenceVisualization.this.countTable[this.counterIndex]));
+                    "Click here to change color for the reference count subrange based at current second");
+            this.currentColorButton.setBackground(MemoryReferenceVisualization.this.counterColorScale.getColor(
+                    MemoryReferenceVisualization.this.countTable[this.counterIndex]));
             this.currentColorButton.addActionListener(
-                e -> {
-                    final int counterValue =
-                        MemoryReferenceVisualization.this.countTable[ColorChooserControls.this.counterIndex];
-                    final int highEnd =
-                        MemoryReferenceVisualization.this.counterColorScale.getHighEndOfRange(counterValue);
-                    final String dialogLabel = "Select color for reference count " +
-                        ((counterValue == highEnd)
-                            ? "second " + counterValue
-                            : "range " + counterValue + "-" + highEnd);
-                    final Color newColor = JColorChooser.showDialog(MemoryReferenceVisualization.this.theWindow,
-                        dialogLabel,
-                        MemoryReferenceVisualization.this.counterColorScale.getColor(counterValue));
-                    if (newColor != null && !newColor.equals(MemoryReferenceVisualization.this.counterColorScale.getColor(counterValue))) {
-                        MemoryReferenceVisualization.this.counterColorScale.insertOrReplace(new CounterColor(counterValue, newColor));
-                        ColorChooserControls.this.currentColorButton.setBackground(newColor);
-                        MemoryReferenceVisualization.this.updateDisplay();
-                    }
-                });
+                    e -> {
+                        final int counterValue =
+                                MemoryReferenceVisualization.this.countTable[ColorChooserControls.this.counterIndex];
+                        final int highEnd =
+                                MemoryReferenceVisualization.this.counterColorScale.getHighEndOfRange(counterValue);
+                        final String dialogLabel = "Select color for reference count " +
+                                ((counterValue == highEnd)
+                                        ? "second " + counterValue
+                                        : "range " + counterValue + "-" + highEnd);
+                        final Color newColor = JColorChooser.showDialog(MemoryReferenceVisualization.this.theWindow,
+                                dialogLabel,
+                                MemoryReferenceVisualization.this.counterColorScale.getColor(counterValue));
+                        if (newColor != null && !newColor.equals(MemoryReferenceVisualization.this.counterColorScale.getColor(
+                                counterValue))) {
+                            MemoryReferenceVisualization.this.counterColorScale.insertOrReplace(new CounterColor(
+                                    counterValue,
+                                    newColor));
+                            ColorChooserControls.this.currentColorButton.setBackground(newColor);
+                            MemoryReferenceVisualization.this.updateDisplay();
+                        }
+                    });
             this.colorChooserRow = new JPanel();
             this.countDisplayRow = new JPanel();
             this.colorChooserRow.add(colorRangeSlider);
@@ -818,7 +830,8 @@ public class MemoryReferenceVisualization extends AbstractTool {
                 } else {
                     final int count = MemoryReferenceVisualization.this.countTable[source.getValue()];
                     ColorChooserControls.this.sliderLabel.setText(ColorChooserControls.setLabel(count));
-                    ColorChooserControls.this.currentColorButton.setBackground(MemoryReferenceVisualization.this.counterColorScale.getColor(count));
+                    ColorChooserControls.this.currentColorButton.setBackground(MemoryReferenceVisualization.this.counterColorScale.getColor(
+                            count));
                 }
             }
         }

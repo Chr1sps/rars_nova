@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.RegisterFile;
 
 /*
@@ -52,7 +52,8 @@ public class SyscallSbrk extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         try {
-            RegisterFile.updateRegister("a0", Memory.allocateBytesFromHeap(RegisterFile.getValue("a0")));
+            RegisterFile.updateRegister("a0",
+                    Globals.MEMORY_INSTANCE.allocateBytesFromHeap(RegisterFile.getValue("a0")));
         } catch (final IllegalArgumentException iae) {
             throw new ExitingException(statement,
                     iae.getMessage() + " (syscall " + this.getNumber() + ")");
