@@ -1,7 +1,10 @@
 package rars.assembler;
 
-import rars.RISCVProgram;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import rars.RISCVProgram;
+
+import java.io.File;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -39,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * line and possibly different program but the migration should not be visible
  * to the user.
  */
-public record SourceLine(@NotNull String source, @NotNull RISCVProgram program, @NotNull String filename,
+public record SourceLine(@NotNull String source, @NotNull RISCVProgram program, @Nullable File file,
                          int lineNumber) {
     /**
      * SourceLine constructor
@@ -52,7 +55,7 @@ public record SourceLine(@NotNull String source, @NotNull RISCVProgram program, 
      * @param lineNumber
      *     The line number within that program where source appears.
      */
-    public SourceLine(@NotNull final String source, @NotNull final RISCVProgram program, final int lineNumber) {
-        this(source, program, program.getFilename(), lineNumber);
+    public SourceLine(@NotNull final String source, final @NotNull RISCVProgram program, final int lineNumber) {
+        this(source, program, program.getFile(), lineNumber);
     }
 }

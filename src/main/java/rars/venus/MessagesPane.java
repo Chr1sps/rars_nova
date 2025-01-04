@@ -16,6 +16,7 @@ import javax.swing.undo.UndoableEdit;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
 
@@ -153,7 +154,7 @@ public final class MessagesPane extends JTabbedPane {
                                 column = Integer.parseInt(columnString);
                             } catch (final NumberFormatException ignored) {
                             }
-                            // everything between FILENAME_PREFIX and LINE_PREFIX is filename.
+                            // everything between FILENAME_PREFIX and LINE_PREFIX is file.
                             final int fileNameStart = text.indexOf(ErrorList.FILENAME_PREFIX)
                                 + ErrorList.FILENAME_PREFIX.length();
                             final int fileNameEnd = text.indexOf(ErrorList.LINE_PREFIX);
@@ -163,8 +164,9 @@ public final class MessagesPane extends JTabbedPane {
                                 fileName = text.substring(fileNameStart, fileNameEnd).trim();
                             }
                             if (!fileName.isEmpty()) {
-                                MessagesPane.selectEditorTextLine(fileName, line);
-                                MessagesPane.this.selectErrorMessage(fileName, line, column);
+                                final var file = new File(fileName);
+                                MessagesPane.selectEditorTextLine(file, line);
+                                MessagesPane.this.selectErrorMessage(file, line, column);
                             }
                         }
                     }
@@ -214,23 +216,23 @@ public final class MessagesPane extends JTabbedPane {
      * it will be opened in a new tab and made current, however the line will
      * not be selected (apparent apparent problem with JEditTextArea).
      *
-     * @param fileName
+     * @param file
      *     A String containing the file path name.
      * @param line
      *     Line number for error message
      */
-    public static void selectEditorTextLine(final String fileName, final int line) {
+    public static void selectEditorTextLine(final @NotNull File file, final int line) {
         final EditTabbedPane editTabbedPane = Globals.gui.mainPane.editTabbedPane;
         final EditPane editPane;
         EditPane currentPane = null;
-        editPane = editTabbedPane.getEditPaneForFile(new java.io.File(fileName).getPath());
+        editPane = editTabbedPane.getEditPaneForFile(file);
         if (editPane != null) {
             if (editPane != editTabbedPane.getCurrentEditTab()) {
                 editTabbedPane.setCurrentEditTab(editPane);
             }
             currentPane = editPane;
         } else { // file is not open. Try to open it.
-            if (editTabbedPane.openFile(new java.io.File(fileName))) {
+            if (editTabbedPane.openFile(file)) {
                 currentPane = editTabbedPane.getCurrentEditTab();
             }
         }
@@ -248,17 +250,17 @@ public final class MessagesPane extends JTabbedPane {
      * a string using the parameter values and searching the text area for the last
      * occurrance of that string.
      *
-     * @param fileName
+     * @param file
      *     A String containing the file path name.
      * @param line
      *     Line number for error message
      * @param column
      *     Column number for error message
      */
-    public void selectErrorMessage(final String fileName, final int line, final int column) {
-        final String errorReportSubstring = new java.io.File(fileName).getName() + ErrorList.LINE_PREFIX + line
+    public void selectErrorMessage(final @NotNull File file, final int line, final int column) {
+        final var errorReportSubstring = file.getName() + ErrorList.LINE_PREFIX + line
             + ErrorList.POSITION_PREFIX + column;
-        final int textPosition = this.assembleTextArea.getText().lastIndexOf(errorReportSubstring);
+        final var textPosition = this.assembleTextArea.getText().lastIndexOf(errorReportSubstring);
         if (textPosition >= 0) {
             final int textLine;
             final int lineStart;

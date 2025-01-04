@@ -15,6 +15,7 @@ import rars.util.SystemIO;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.List;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
@@ -52,19 +53,19 @@ import static rars.settings.BoolSettings.BOOL_SETTINGS;
  */
 public final class Program {
 
-    private final @NotNull Options options;
-    private final RISCVProgram code;
-    private final Memory assembled;
-    private final Memory simulation;
+    private final @NotNull RISCVProgram code;
+    private final @NotNull Memory assembled;
+    private final @NotNull Memory simulation;
+    private final @NotNull ProgramOptions programOptions;
     private SystemIO.Data fds;
     private @NotNull ByteArrayOutputStream stdout, stderr;
     private int startPC, exitCode;
 
-    public Program(final @NotNull MemoryConfiguration memoryConfiguration, final @NotNull Options options) {
-        this.options = options;
+    public Program(final @NotNull ProgramOptions programOptions) {
+        this.programOptions = programOptions;
         this.code = new RISCVProgram();
-        this.assembled = new Memory(memoryConfiguration);
-        this.simulation = new Memory(memoryConfiguration);
+        this.assembled = new Memory(this.programOptions.memoryConfiguration);
+        this.simulation = new Memory(this.programOptions.memoryConfiguration);
     }
 
     /**
@@ -81,8 +82,8 @@ public final class Program {
      *     thrown if any errors are found in the code
      */
     public ErrorList assembleFiles(
-        final @NotNull List<@NotNull String> files,
-        final @NotNull String mainFile
+        final @NotNull List<@NotNull File> files,
+        final @NotNull File mainFile
     ) throws AssemblyException {
         final var programs = this.code.prepareFilesForAssembly(files, mainFile, null);
         return this.assemble(programs);
@@ -99,7 +100,7 @@ public final class Program {
      *     thrown if any errors are found in the code
      */
     @SuppressWarnings("UnusedReturnValue")
-    public ErrorList assembleFile(final @NotNull String file) throws AssemblyException {
+    public ErrorList assembleFile(final @NotNull File file) throws AssemblyException {
         final var programs = this.code.prepareFilesForAssembly(List.of(file), file, null);
         return this.assemble(programs);
     }
@@ -128,7 +129,11 @@ public final class Program {
         ErrorList warnings = null;
         AssemblyException e = null;
         try {
-            warnings = this.code.assemble(programs, this.options.usePseudoInstructions, this.options.warningsAreErrors);
+            warnings = this.code.assemble(
+                programs,
+                this.programOptions.usePseudoInstructions,
+                this.programOptions.warningsAreErrors
+            );
         } catch (final AssemblyException ae) {
             e = ae;
         }
@@ -137,7 +142,7 @@ public final class Program {
             throw e;
         }
 
-        RegisterFile.initializeProgramCounter(this.options.startAtMain);
+        RegisterFile.initializeProgramCounter(this.programOptions.startAtMain);
         this.startPC = RegisterFile.getProgramCounter();
 
         return warnings;
@@ -204,13 +209,13 @@ public final class Program {
         final boolean selfMod = BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED);
         BOOL_SETTINGS.setSetting(
             BoolSetting.SELF_MODIFYING_CODE_ENABLED,
-            this.options.selfModifyingCode
+            this.programOptions.selfModifyingCode
         );
         final SystemIO.Data tmpFiles = SystemIO.swapData(this.fds);
         final Memory tmpMem = Globals.swapInstance(this.simulation);
 
         try {
-            ret = RISCVProgram.simulate(this.options.maxSteps);
+            ret = RISCVProgram.simulate(this.programOptions.maxSteps);
         } catch (final SimulationException se) {
             e = se;
         }

@@ -404,7 +404,7 @@ public final class SystemIO {
      * IMPLEMENTED. Also note that file permission modes are also NOT IMPLEMENTED.
      *
      * @param filename
-     *     string containing filename
+     *     string containing file
      * @param flags
      *     0 for read, 1 for write
      * @return file descriptor in the range 0 to SYSCALL_MAXFILES-1, or -1 if error
@@ -412,7 +412,7 @@ public final class SystemIO {
      */
     public static int openFile(final String filename, final int flags) {
         // Internally, a "file descriptor" is an index into a table
-        // of the filename, flag, and the File???putStream associated with
+        // of the file, flag, and the File???putStream associated with
         // that file descriptor.
 
         int retValue;
@@ -430,7 +430,7 @@ public final class SystemIO {
         File filepath = new File(filename);
         if (!filepath.isAbsolute() && Globals.program != null) {
             if (BOOL_SETTINGS.getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY)) {
-                final String parent = new File(Globals.program.getFilename()).getParent();
+                final var parent = Globals.program.getFile().getParentFile();
                 filepath = new File(parent, filename);
             }
         }
@@ -658,7 +658,7 @@ public final class SystemIO {
 
         }
 
-        // Determine whether a given filename is already in use.
+        // Determine whether a given file is already in use.
         private static boolean filenameInUse(final String requestedFilename) {
             for (int i = 0; i < SystemIO.SYSCALL_MAXFILES; i++) {
                 if (FileIOData.fileNames[i] != null
@@ -718,7 +718,7 @@ public final class SystemIO {
 
         // Attempt to open a new file with the given flag, using the lowest available
         // file descriptor.
-        // Check that filename is not in use, flag is reasonable, and there is an
+        // Check that file is not in use, flag is reasonable, and there is an
         // available file descriptor.
         // Return: file descriptor in 0...(SYSCALL_MAXFILES-1), or -1 if error
         private static int nowOpening(final String filename, final int flag) {
@@ -746,8 +746,8 @@ public final class SystemIO {
                 return -1;
             }
 
-            // Must be OK -- put filename in table
-            FileIOData.fileNames[i] = filename; // our table has its own copy of filename
+            // Must be OK -- put file in table
+            FileIOData.fileNames[i] = filename; // our table has its own copy of file
             FileIOData.fileFlags[i] = flag;
             SystemIO.fileErrorString = "File operation OK";
             return i;

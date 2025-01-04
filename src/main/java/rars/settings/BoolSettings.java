@@ -9,7 +9,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 public final class BoolSettings extends SettingsBase {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(BoolSettings.class);
     public static @NotNull BoolSettings BOOL_SETTINGS = new BoolSettings(SETTINGS_PREFERENCES);
     private final @NotNull Preferences preferences;
     private final @NotNull HashMap<BoolSetting, Boolean> currentSettings;

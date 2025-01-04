@@ -143,4 +143,9 @@ public enum MemoryConfiguration {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return identifier;
+    }
 }

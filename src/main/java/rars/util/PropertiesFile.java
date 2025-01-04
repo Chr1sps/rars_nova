@@ -52,7 +52,7 @@ public final class PropertiesFile {
      * to readPropertiesFile() which uses a different implementation.
      *
      * @param file
-     *     Properties filename. Do NOT include the file extension as
+     *     Properties file. Do NOT include the file extension as
      *     it is assumed to be ".properties" and is added here.
      * @return Properties (Hashtable) of first-second pairs read from the file.
      */
@@ -87,7 +87,7 @@ public final class PropertiesFile {
      * Read and return property file second (if any) for requested property.
      *
      * @param propertiesFile
-     *     name of properties file (do NOT include filename
+     *     name of properties file (do NOT include file
      *     extension,
      *     which is assumed to be ".properties")
      * @param propertyName

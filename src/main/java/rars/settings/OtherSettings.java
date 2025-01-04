@@ -10,7 +10,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 public final class OtherSettings extends SettingsBase {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull Logger LOGGER = LogManager.getLogger(OtherSettings.class);
 
     // region Preferences keys
     private static final String OTHER_PREFIX = "Other";

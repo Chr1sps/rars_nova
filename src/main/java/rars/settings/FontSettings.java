@@ -13,7 +13,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 public final class FontSettings extends SettingsBase {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(FontSettings.class);
 
     // region Preferences keys
     private static final String FONT_PREFIX = "Font";

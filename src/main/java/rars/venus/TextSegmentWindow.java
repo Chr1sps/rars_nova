@@ -70,7 +70,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Team JSpim
  */
 public class TextSegmentWindow extends JInternalFrame implements SimpleSubscriber<Notice> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(TextSegmentWindow.class);
     private static final int PROGRAM_ARGUMENT_TEXTFIELD_COLUMNS = 40;
     // The following is displayed in the Basic and Source columns if existing code
     // is overwritten using self-modifying code feature

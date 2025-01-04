@@ -58,7 +58,8 @@ public final class FileStatus {
     private static boolean systemSaved;
     private static boolean systemEdited;
     private static String systemName;
-    private static File systemFile;
+    private static @Nullable File systemFile;
+
     private @NotNull FileStatus.State status;
     private @Nullable File file;
 
@@ -75,16 +76,12 @@ public final class FileStatus {
      *
      * @param status
      *     Initial file status. See FileStatus static constants.
-     * @param pathname
-     *     Full file pathname. See setPathname(String newPath) below.
+     * @param file
+     *     File object representing the file.
      */
-    public FileStatus(final @NotNull FileStatus.State status, final @Nullable String pathname) {
+    public FileStatus(final @NotNull FileStatus.State status, final @Nullable File file) {
         this.status = status;
-        if (pathname == null) {
-            this.file = null;
-        } else {
-            setPathname(pathname);
-        }
+        this.file = file;
     }
 
     /**
@@ -112,7 +109,7 @@ public final class FileStatus {
      *
      * @return The ASM file.
      */
-    public static File getFile() {
+    public static @Nullable File getSystemFile() {
         return systemFile;
     }
 
@@ -122,7 +119,7 @@ public final class FileStatus {
      * @param f
      *     file object variable that stores the ASM file.
      */
-    public static void setFile(final File f) {
+    public static void setSystemFile(final File f) {
         systemFile = f;
     }
 
@@ -183,11 +180,6 @@ public final class FileStatus {
         systemSaved = b;
     }
 
-    ///////////////////// END OF STATIC PART ///////////////////////
-
-    // Remaining members are of instantiable class that can be used by
-    // every file that is currently open in the editor.
-
     /**
      * Tells whether the file has been edited since it has been saved.
      *
@@ -196,6 +188,10 @@ public final class FileStatus {
     public static boolean isEdited() {
         return systemEdited;
     }
+
+
+    // Remaining members are of instantiable class that can be used by
+    // every file that is currently open in the editor.
 
     /**
      * Changes the second of edited to the parameter given.
@@ -217,6 +213,10 @@ public final class FileStatus {
         systemSaved = false;
         systemEdited = false;
         systemFile = null;
+    }
+
+    public void setFile(final @Nullable File file) {
+        this.file = file;
     }
 
     /**
@@ -268,33 +268,12 @@ public final class FileStatus {
     }
 
     /**
-     * Get full file pathname. See java.io.File.getPath()
-     *
-     * @return full pathname as a String. Null if
-     */
-    public @Nullable String getPathname() {
-        return (this.file == null) ? null : this.file.getPath();
-    }
-
-    /**
-     * Set full file pathname. See java.io.File(String pathname) for parameter
-     * specs.
-     *
-     * @param newPath
-     *     the new pathname. If no directory path, getParent() will
-     *     return null.
-     */
-    public void setPathname(final String newPath) {
-        this.file = new File(newPath);
-    }
-
-    /**
      * Get file name with no path information. See java.io.File.getName()
      *
-     * @return filename as a String
+     * @return file as a String
      */
-    public @Nullable String getFilename() {
-        return (this.file == null) ? null : this.file.getName();
+    public @Nullable File getFile() {
+        return this.file;
     }
 
     /**

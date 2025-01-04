@@ -6,7 +6,10 @@ import rars.ErrorMessage;
 import rars.Globals;
 import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
-import rars.riscv.hardware.*;
+import rars.riscv.hardware.ControlAndStatusRegisterFile;
+import rars.riscv.hardware.FloatingPointRegisterFile;
+import rars.riscv.hardware.InterruptController;
+import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
 import rars.util.SystemIO;
@@ -54,29 +57,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class RunAssembleAction extends GuiAction {
 
-    // Threshold for adding filename to printed message of files being assembled.
+    // Threshold for adding file to printed message of files being assembled.
     private static final int LINE_LENGTH_LIMIT = 60;
     private static List<RISCVProgram> programsToAssemble;
     private static boolean extendedAssemblerEnabled;
     private static boolean warningsAreErrors;
     private final VenusUI mainUI;
 
-    /**
-     * <p>Constructor for RunAssembleAction.</p>
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
-     * @param gui
-     *     a {@link VenusUI} object
-     */
     public RunAssembleAction(
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
@@ -114,9 +101,10 @@ public class RunAssembleAction extends GuiAction {
         final StringBuilder result = new StringBuilder(preamble);
         int lineLength = result.length();
         for (int i = 0; i < programList.size(); i++) {
-            final String filename = programList.get(i).getFilename();
-            result.append(filename).append((i < programList.size() - 1) ? ", " : "");
-            lineLength += filename.length();
+            final var file = programList.get(i).getFile();
+            final var fileName = file.getName();
+            result.append(fileName).append((i < programList.size() - 1) ? ", " : "");
+            lineLength += fileName.length();
             if (lineLength > RunAssembleAction.LINE_LENGTH_LIMIT) {
                 result.append("\n");
                 lineLength = 0;
@@ -138,39 +126,38 @@ public class RunAssembleAction extends GuiAction {
             BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
         RunAssembleAction.warningsAreErrors =
             BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
-        if (FileStatus.getFile() != null) {
+        if (FileStatus.getSystemFile() != null) {
             if (FileStatus.get() == FileStatus.State.EDITED) {
                 this.mainUI.editor.save();
             }
             try {
                 Globals.program = new RISCVProgram();
-                final List<String> filesToAssemble;
+                final @NotNull List<@NotNull File> filesToAssemble;
                 if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls 
                     // for multiple
                     // file assembly
-                    filesToAssemble = FilenameFinder.getFilenameList(
-                        new File(FileStatus.getName()).getParent(), Globals.fileExtensions);
+                    filesToAssemble = FilenameFinder.getFilenameListForDirectory(
+                        new File(FileStatus.getName()).getParentFile(), Globals.fileExtensions);
                 } else {
-                    filesToAssemble = List.of(FileStatus.getName());
+                    filesToAssemble = List.of(new File(FileStatus.getName()));
                 }
                 if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
                     this.mainUI.editor.saveAll();
-                    final String[] paths = this.mainUI.editor.getOpenFilePaths();
-                    for (final String path : paths) {
+                    final var paths = this.mainUI.editor.getOpenFilePaths();
+                    for (final var path : paths) {
                         if (!filesToAssemble.contains(path)) {
                             filesToAssemble.add(path);
                         }
                     }
                 }
-                String exceptionHandler = null;
-                if (BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)) {
-                    if (!OTHER_SETTINGS.getExceptionHandler().isEmpty()) {
-                        exceptionHandler = OTHER_SETTINGS.getExceptionHandler();
-                    }
-                }
+                final var useExceptionHandler = BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED);
+                final var isExceptionHandlerSet = !OTHER_SETTINGS.getExceptionHandler().isEmpty();
+                final var exceptionHandler = useExceptionHandler && isExceptionHandlerSet
+                    ? new File(OTHER_SETTINGS.getExceptionHandler())
+                    : null;
                 RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(
                     filesToAssemble,
-                    FileStatus.getFile().getPath(), exceptionHandler
+                    FileStatus.getSystemFile(), exceptionHandler
                 );
                 messagesPane.postMessage(RunAssembleAction.buildFileNameList(
                     name + ": assembling ",
@@ -227,7 +214,7 @@ public class RunAssembleAction extends GuiAction {
                     }
                     if (!em.isWarning() || RunAssembleAction.warningsAreErrors) {
                         Globals.gui.messagesPane.selectErrorMessage(
-                            em.getFilename(), em.getLine(),
+                            em.getFile(), em.getLine(),
                             em.getPosition()
                         );
                         // Bug workaround: Line selection does not work correctly for the JEditTextArea
@@ -239,7 +226,7 @@ public class RunAssembleAction extends GuiAction {
                         // test.
                         // DPS 9-Aug-2010
                         if (e != null) {
-                            MessagesPane.selectEditorTextLine(em.getFilename(), em.getLine()
+                            MessagesPane.selectEditorTextLine(em.getFile(), em.getLine()
                             );
                         }
                         break;

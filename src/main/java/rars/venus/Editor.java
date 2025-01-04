@@ -55,7 +55,7 @@ public class Editor {
     private @Nullable EditTabbedPane editTabbedPane;
     /*
      * number of times File->New has been selected. Used to generate
-     * default filename until first Save or Save As.
+     * default file until first Save or Save As.
      */
     private int newUsageCount;
     private String currentOpenDirectory;
@@ -79,14 +79,7 @@ public class Editor {
         this.currentSaveDirectory = this.defaultSaveDirectory;
     }
 
-    // TODO: this doesn't really fit here, it doesn't interact with the GUI
-
-    /**
-     * <p>getOpenFilePaths.</p>
-     *
-     * @return an array of {@link java.lang.String} objects
-     */
-    public String[] getOpenFilePaths() {
+    public @NotNull List<@NotNull File> getOpenFilePaths() {
         return this.editTabbedPane.getOpenFilePaths();
     }
 
@@ -179,7 +172,7 @@ public class Editor {
     /**
      * Places name of file currently being edited into its edit tab and
      * the application's title bar. The edit tab will contain only
-     * the filename, the title bar will contain full pathname.
+     * the file, the title bar will contain full pathname.
      * If file has been modified since created, opened or saved, as
      * indicated by second of the status parameter, the name and path
      * will be followed with an '*'. If newly-created file has not
@@ -197,16 +190,22 @@ public class Editor {
         if (status == FileStatus.State.NO_FILE || name == null || name.isEmpty()) {
             this.mainUI.setTitle(this.mainUIbaseTitle);
         } else {
-            final String edited = (status == FileStatus.State.NEW_EDITED || status == FileStatus.State.EDITED)
-                ? "*"
-                : " ";
-            final String titleName = (status == FileStatus.State.NEW_EDITED || status == FileStatus.State.NEW_NOT_EDITED)
-                ? name
-                : path;
-            this.mainUI.setTitle(titleName + edited + " - " + this.mainUIbaseTitle);
+            final var editIndicator = switch (status) {
+                case NEW_EDITED, EDITED -> "•";
+                default -> " ";
+            };
+            final var titleName = switch (status) {
+                case NEW_EDITED, NEW_NOT_EDITED -> name;
+                default -> path;
+            };
+            this.mainUI.setTitle(titleName + editIndicator + " - " + this.mainUIbaseTitle);
             final var tabbedPane = this.editTabbedPane.getTabbedPane();
-            tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(), name + edited);
+            tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(), name + editIndicator);
         }
+    }
+    
+    public void setTitleFromFile(final @NotNull File file, final @NotNull FileStatus.State status) {
+        this.setTitle(file.getPath(), file.getName(), status);
     }
 
     /**
@@ -266,7 +265,7 @@ public class Editor {
      *
      * @return true if succeeded, else false.
      */
-    public boolean open() {
+    public boolean openFile() {
         return this.editTabbedPane.openFile();
     }
 
@@ -277,7 +276,7 @@ public class Editor {
      *     File paths to open
      * @return true if succeeded, else false.
      */
-    public boolean open(final @NotNull List<String> paths) {
+    public boolean openPaths(final @NotNull List<String> paths) {
         for (final String path : paths) {
             final File file = new File(path);
             if (!this.editTabbedPane.openFile(file)) {
@@ -285,6 +284,22 @@ public class Editor {
             }
         }
 
+        return true;
+    }
+
+    /**
+     * Open files in new tabs.
+     *
+     * @param files
+     *     Files to open
+     * @return true if succeeded, else false.
+     */
+    public boolean openFiles(final @NotNull List<@NotNull File> files) {
+        for (final var file : files) {
+            if (!this.editTabbedPane.openFile(file)) {
+                return false;
+            }
+        }
         return true;
     }
 

@@ -29,7 +29,7 @@ import static rars.settings.FontSettings.FONT_SETTINGS;
 
 public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     public static final @NotNull String SYNTAX_STYLE_RISCV = "text/riscv";
-    private static final @NotNull Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull Logger LOGGER = LogManager.getLogger(RSyntaxTextAreaBasedEditor.class);
     private static final Map<TextAttribute, Object> textAttributes = Map.of(
         TextAttribute.KERNING, TextAttribute.KERNING_ON
     );

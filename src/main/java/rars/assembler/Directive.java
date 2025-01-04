@@ -113,7 +113,7 @@ public enum Directive {
     /* INCLUDE added by DPS 11 Jan 2013 */
     INCLUDE(
         ".include",
-        "Insert the contents of the specified file.  Put filename in quotes."
+        "Insert the contents of the specified file.  Put file in quotes."
     ),
     SECTION(
         ".section",

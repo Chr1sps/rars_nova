@@ -39,7 +39,7 @@ import java.awt.event.MouseListener;
  */
 public class RepeatButton extends JButton
     implements ActionListener, MouseListener {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(RepeatButton.class);
     /**
      * Testing flag. Set in main method.
      */

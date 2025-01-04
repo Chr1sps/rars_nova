@@ -29,6 +29,7 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-api:2.23.1")
     implementation("com.fifesoft:rsyntaxtextarea:3.5.2")
     implementation("de.jflex:jflex:1.9.1")
+    implementation("info.picocli:picocli:4.7.6")
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.0")

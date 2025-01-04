@@ -73,7 +73,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson and Bumgarner
  */
 public class DataSegmentWindow extends JInternalFrame implements SimpleSubscriber<Notice> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(DataSegmentWindow.class);
 
     private static final String[] dataSegmentNames = {"Data", "Stack", "Kernel"};
     private static final int VALUES_PER_ROW = 8;

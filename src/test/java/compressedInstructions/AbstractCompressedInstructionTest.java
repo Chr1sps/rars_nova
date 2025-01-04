@@ -2,8 +2,8 @@ package compressedInstructions;
 
 import org.jetbrains.annotations.NotNull;
 import rars.ErrorList;
-import rars.api.Options;
 import rars.api.Program;
+import rars.api.ProgramOptions;
 import rars.exceptions.AssemblyException;
 import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.MemoryConfiguration;
@@ -31,8 +31,9 @@ public abstract class AbstractCompressedInstructionTest {
         System.out.println("```");
         System.out.println();
 
-        final var opt = new Options();
-        final var program = new Program(MemoryConfiguration.DEFAULT, opt);
+        final var programOptions = new ProgramOptions();
+        programOptions.memoryConfiguration = MemoryConfiguration.DEFAULT;
+        final var program = new Program(programOptions);
         ErrorList errorList;
         try {
             errorList = program.assembleString(code);

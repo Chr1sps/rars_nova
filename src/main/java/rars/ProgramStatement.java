@@ -13,6 +13,7 @@ import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
 import rars.venus.NumberDisplayBaseChooser;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -722,8 +723,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @return The file name.
      */
-    public String getSourceFile() {
-        return (this.sourceProgram == null) ? "" : this.sourceProgram.getFilename();
+    public @Nullable File getSourceFile() {
+        return (this.sourceProgram == null) ? null : this.sourceProgram.getFile();
     }
 
     /**

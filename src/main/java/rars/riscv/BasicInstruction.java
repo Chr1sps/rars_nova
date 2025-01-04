@@ -23,7 +23,7 @@ public abstract non-sealed class BasicInstruction extends Instruction {
     public static final int BASIC_INSTRUCTION_LENGTH = DataTypes.WORD_SIZE;
     private static final int BASIC_INSTRUCTION_LENGTH_BITS = 32;
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(BasicInstruction.class);
     private final @NotNull BasicInstructionFormat instructionFormat;
     private final @NotNull String operationMask;
 

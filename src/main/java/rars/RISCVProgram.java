@@ -10,10 +10,12 @@ import rars.simulator.BackStepper;
 import rars.simulator.Simulator;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -54,7 +56,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class RISCVProgram {
 
-    private String filename;
+    private @Nullable File file;
     private List<String> sourceList;
     private List<TokenList> tokenList;
     private ArrayList<ProgramStatement> parsedList;
@@ -133,13 +135,8 @@ public final class RISCVProgram {
         this.sourceList = sourceLineList.stream().map(SourceLine::source).toList();
     }
 
-    /**
-     * Produces name of associated source code file.
-     *
-     * @return File name as String.
-     */
-    public String getFilename() {
-        return this.filename;
+    public @Nullable File getFile() {
+        return this.file;
     }
 
     /**
@@ -232,7 +229,7 @@ public final class RISCVProgram {
      *     String containing the RISCV source code.
      */
     public void fromString(final @NotNull String source) {
-        this.filename = source;
+        this.file = null;
         this.sourceList = Arrays.asList(source.split("\n"));
     }
 
@@ -247,8 +244,8 @@ public final class RISCVProgram {
      *     Will throw exception if there is any problem
      *     reading the file.
      */
-    public void readSource(final @NotNull String file) throws AssemblyException {
-        this.filename = file;
+    public void readSource(final @NotNull File file) throws AssemblyException {
+        this.file = file;
         final var sourceList = new ArrayList<String>();
         final ErrorList errors;
         final BufferedReader inputFile;
@@ -278,17 +275,17 @@ public final class RISCVProgram {
      */
     public void tokenize() throws AssemblyException {
         this.tokenList = Tokenizer.tokenize(this);
-        this.localSymbolTable = new SymbolTable(this.filename); // prepare for assembly
+        this.localSymbolTable = new SymbolTable(this.file); // prepare for assembly
     }
 
     /**
      * Prepares the given list of files for assembly. This involves
      * reading and tokenizing all the source files. There may be only one.
      *
-     * @param filenames
+     * @param files
      *     ArrayList containing the source file name(s) in no
      *     particular order
-     * @param leadFilename
+     * @param leadFile
      *     String containing name of source file that needs to
      *     go first and
      *     will be represented by "this" RISCVprogram object.
@@ -309,26 +306,25 @@ public final class RISCVProgram {
      *     reading or tokenizing.
      */
     public @NotNull List<RISCVProgram> prepareFilesForAssembly(
-        final @NotNull List<String> filenames,
-        final @NotNull String leadFilename,
-        final @Nullable String exceptionHandler
+        final @NotNull List<@NotNull File> files,
+        final @NotNull File leadFile,
+        final @Nullable File exceptionHandler
     ) throws AssemblyException {
         final var programsToAssemble = new ArrayList<RISCVProgram>();
-        int leadFilePosition = 0;
-        if (exceptionHandler != null && !exceptionHandler.isEmpty()) {
-            filenames.addFirst(exceptionHandler);
-            leadFilePosition = 1;
-        }
-        for (final String filename : filenames) {
-            final RISCVProgram preparee = (filename.equals(leadFilename)) ? this : new RISCVProgram();
-            preparee.readSource(filename);
-            preparee.tokenize();
+        final int leadFilePosition = exceptionHandler == null ? 0 : 1;
+        final var actualFilesList = exceptionHandler == null
+            ? files
+            : Stream.concat(Stream.of(exceptionHandler), files.stream()).toList();
+        for (final var file : files) {
+            final var prepareeProgram = (file.equals(leadFile)) ? this : new RISCVProgram();
+            prepareeProgram.readSource(file);
+            prepareeProgram.tokenize();
             // I want "this" RISCVprogram to be the first in the list...except for exception
             // handler
-            if (preparee == this && !programsToAssemble.isEmpty()) {
-                programsToAssemble.add(leadFilePosition, preparee);
+            if (prepareeProgram == this && !programsToAssemble.isEmpty()) {
+                programsToAssemble.add(leadFilePosition, prepareeProgram);
             } else {
-                programsToAssemble.add(preparee);
+                programsToAssemble.add(prepareeProgram);
             }
         }
         return programsToAssemble;

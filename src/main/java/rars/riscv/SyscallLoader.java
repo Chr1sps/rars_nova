@@ -48,7 +48,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * from Bret Barker's GameServer class from the book "Developing Games In Java".
  */
 public final class SyscallLoader {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(SyscallLoader.class);
 
     private static List<AbstractSyscall> syscallList;
 

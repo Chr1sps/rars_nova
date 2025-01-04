@@ -16,7 +16,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -59,7 +58,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson and Team JSpim
  */
 public class LabelsWindow extends JInternalFrame {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(LabelsWindow.class);
     private static final int MAX_DISPLAYED_CHARS = 24;
     private static final int PREFERRED_NAME_COLUMN_WIDTH = 60;
     private static final int PREFERRED_ADDRESS_COLUMN_WIDTH = 60;
@@ -222,7 +221,7 @@ public class LabelsWindow extends JInternalFrame {
         );
         // Set file name label's max width to scrollpane's viewport width, max height to
         // small.
-        // Does it do any good? Addressing problem that occurs when label (filename) is
+        // Does it do any good? Addressing problem that occurs when label (file) is
         // wider than
         // the table beneath it -- the table column widths are stretched to attain the
         // same width and
@@ -426,7 +425,7 @@ public class LabelsWindow extends JInternalFrame {
                 : program.getLocalSymbolTable();
             this.tableName = (program == null)
                 ? "(global)"
-                : new File(program.getFilename()).getName();
+                : program.getFile().getName();
         }
 
         // Returns file name of associated file for local symbol table or "(global)"

@@ -28,8 +28,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -122,10 +122,10 @@ public final class VenusUI extends JFrame {
      *
      * @param name
      *     Name of the window to be created.
-     * @param paths
-     *     File paths to open width
+     * @param files
+     *     Files to open
      */
-    public VenusUI(final String name, final ArrayList<String> paths) {
+    public VenusUI(final String name, final @NotNull List<@NotNull File> files) {
         super(name);
         setDarkModeState(BOOL_SETTINGS.getSetting(BoolSetting.DARK_MODE));
         Globals.gui = this;
@@ -246,8 +246,11 @@ public final class VenusUI extends JFrame {
         this.setVisible(true);
 
         // Open files
-        if (!this.editor.open(paths)) {
-            VenusUI.LOGGER.fatal("Internal Error: could not open files {}", String.join(", ", paths));
+        if (!this.editor.openFiles(files)) {
+            VenusUI.LOGGER.fatal(
+                "Internal Error: could not open files {}",
+                files.stream().map(File::getName).collect(Collectors.joining(", "))
+            );
             System.exit(1);
         }
     }
@@ -343,7 +346,7 @@ public final class VenusUI extends JFrame {
             ) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.editor.open();
+                    VenusUI.this.editor.openFile();
                 }
             };
             this.fileCloseAction = new GuiAction(

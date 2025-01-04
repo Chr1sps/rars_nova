@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import rars.ProgramStatement;
-import rars.api.Options;
 import rars.api.Program;
+import rars.api.ProgramOptions;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
@@ -18,6 +18,7 @@ import rars.simulator.Simulator;
 import utils.RarsTestBase;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,10 +39,6 @@ final class AppTest extends RarsTestBase {
     private static void run(final String path, final boolean is64Bit) throws IOException {
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, is64Bit);
         InstructionsRegistry.RV64_MODE_FLAG = is64Bit;
-
-        final var opt = new Options();
-        opt.startAtMain = true;
-        opt.maxSteps = 1000;
 
         final var errorLines = new HashSet<Integer>();
         String stdin = "", stdout = "", stderr = "";
@@ -66,9 +63,13 @@ final class AppTest extends RarsTestBase {
                 line = br.readLine();
             }
         }
-        final var program = new Program(MemoryConfiguration.DEFAULT, opt);
+        final var programArgs = new ProgramOptions();
+        programArgs.startAtMain = true;
+        programArgs.maxSteps = 1000;
+        programArgs.memoryConfiguration = MemoryConfiguration.DEFAULT;
+        final var program = new Program(programArgs);
         try {
-            program.assembleFile(path);
+            program.assembleFile(new File( path ));
             if (!errorLines.isEmpty()) {
                 fail("Expected assembly error, but successfully assembled `" + path + "`.\n");
             }
@@ -164,11 +165,13 @@ final class AppTest extends RarsTestBase {
     private static void testBasicInstructionBinaryCodesImpl(
         final boolean isRV64Enabled
     ) throws AssemblyException, AddressErrorException {
-        final var options = new Options();
-        options.startAtMain = true;
-        options.maxSteps = 500;
-        options.selfModifyingCode = true;
-        final var program = new Program(MemoryConfiguration.DEFAULT, options);
+        final var programArgs = new ProgramOptions();
+        programArgs.startAtMain = true;
+        programArgs.maxSteps = 500;
+        programArgs.selfModifyingCode = true;
+        programArgs.memoryConfiguration = MemoryConfiguration.DEFAULT;
+        final var program = new Program(programArgs);
+        
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64Enabled);
         InstructionsRegistry.RV64_MODE_FLAG = isRV64Enabled;
@@ -214,11 +217,12 @@ final class AppTest extends RarsTestBase {
     }
 
     private static void testPseudoInstructionsImpl(final boolean isRV64) {
-        final var options = new Options();
-        options.startAtMain = true;
-        options.maxSteps = 500;
-        options.selfModifyingCode = true;
-        final var program = new Program(MemoryConfiguration.DEFAULT, options);
+        final var programArgs = new ProgramOptions();
+        programArgs.startAtMain = true;
+        programArgs.maxSteps = 500;
+        programArgs.selfModifyingCode = true;
+        programArgs.memoryConfiguration = MemoryConfiguration.DEFAULT;
+        final var program = new Program(programArgs);
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64);
         InstructionsRegistry.RV64_MODE_FLAG = isRV64;

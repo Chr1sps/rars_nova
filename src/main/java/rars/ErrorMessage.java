@@ -47,7 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class ErrorMessage {
     private final boolean isWarning; // allow for warnings too (added Nov 2006)
-    private final @NotNull String filename; // name of source file (added Oct 2006)
+    private final @Nullable File file; // name of source file (added Oct 2006)
     private final int line; // line in source code where error detected
     private final int position; // position in source line where error detected
     private final @NotNull String message;
@@ -56,7 +56,7 @@ public final class ErrorMessage {
     /**
      * Constructor for ErrorMessage. Assumes line number is calculated after any
      * .include files expanded, and
-     * if there were, it will adjust filename and line number so message reflects
+     * if there were, it will adjust file and line number so message reflects
      * original file and line number.
      *
      * @param isWarning
@@ -84,16 +84,16 @@ public final class ErrorMessage {
     ) {
         this.isWarning = isWarning;
         if (sourceProgram == null) {
-            this.filename = "";
+            this.file = null;
             this.line = line;
         } else {
             if (sourceProgram.getSourceLineList() == null) {
-                this.filename = sourceProgram.getFilename();
+                this.file = sourceProgram.getFile();
                 this.line = line;
             } else {
                 final SourceLine sourceLine = sourceProgram.getSourceLineList()
                     .get(line - 1);
-                this.filename = sourceLine.filename();
+                this.file = sourceLine.file();
                 this.line = sourceLine.lineNumber();
             }
         }
@@ -117,9 +117,9 @@ public final class ErrorMessage {
         final @NotNull String message
     ) {
         this.isWarning = false;
-        this.filename = (statement.getSourceProgram() == null)
-            ? ""
-            : statement.getSourceProgram().getFilename();
+        this.file = (statement.getSourceProgram() == null)
+            ? null
+            : statement.getSourceProgram().getFile();
         this.position = 0;
         this.message = message;
         // Somewhere along the way we lose the macro history, but can
@@ -198,8 +198,8 @@ public final class ErrorMessage {
      * @return Returns String containing name of source file containing the error.
      */
     // Added October 2006
-    public @NotNull String getFilename() {
-        return this.filename;
+    public @Nullable File getFile() {
+        return this.file;
     }
 
     /**
@@ -243,20 +243,20 @@ public final class ErrorMessage {
         final var builder = new StringBuilder();
         builder.append((this.isWarning ? "Warning" : "Error"))
             .append(" in ");
-        if (!this.getFilename().isEmpty()) {
-            builder.append(new File(this.getFilename()).getPath());
+        if (this.file != null) {
+            builder.append(this.file.getPath());
         }
-        if (this.getLine() > 0) {
+        if (this.line > 0) {
             builder.append(" line ")
                 .append(this.getMacroExpansionHistory())
-                .append(this.getLine());
+                .append(this.line);
         }
-        if (this.getPosition() > 0) {
+        if (this.position > 0) {
             builder.append(" column ")
-                .append(this.getPosition());
+                .append(this.position);
         }
         builder.append(": ")
-            .append(this.getMessage())
+            .append(this.message)
             .append("\n");
         return builder.toString();
     }

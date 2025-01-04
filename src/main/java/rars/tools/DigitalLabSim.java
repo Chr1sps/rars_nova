@@ -32,7 +32,7 @@ public class DigitalLabSim extends AbstractTool {
      * Constant <code>EXTERNAL_INTERRUPT_HEXA_KEYBOARD=0x00000200</code>
      */
     public static final int EXTERNAL_INTERRUPT_HEXA_KEYBOARD = 0x00000200;
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(DigitalLabSim.class);
     private static final String heading = "Digital Lab Sim";
     private static final String version = " Version 1.0 (Didier Teifreto)";
     // Counter

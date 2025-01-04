@@ -52,7 +52,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version July 2008
  */
 public record ProgramArgumentList(@NotNull @Unmodifiable List<@NotNull String> programArgumentList) {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull Logger LOGGER = LogManager.getLogger(ProgramArgumentList.class);
 
     /**
      * Constructor that parses string to produce list. Delimiters

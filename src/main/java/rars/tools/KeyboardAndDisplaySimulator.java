@@ -97,7 +97,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
     public static final Dimension preferredTextAreaDimension = new Dimension(400, 200);
     public static final int EXTERNAL_INTERRUPT_KEYBOARD = 0x00000040;
     public static final int EXTERNAL_INTERRUPT_DISPLAY = 0x00000080;
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(KeyboardAndDisplaySimulator.class);
     private static final String version = "Version 1.4";
     private static final String heading = "Keyboard and Display MMIO Simulator";
     private static final char VT_FILL = ' '; // fill character for virtual terminal (random access mode)

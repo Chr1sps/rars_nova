@@ -1,8 +1,8 @@
 package instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.api.Options;
 import rars.api.Program;
+import rars.api.ProgramOptions;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.InstructionsRegistry;
@@ -97,10 +97,11 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, is64);
         InstructionsRegistry.RV64_MODE_FLAG = is64;
 
-        final var opt = new Options();
-        opt.startAtMain = true;
-        opt.maxSteps = 1000;
-        final var program = new Program(MemoryConfiguration.DEFAULT, opt);
+        final var programArgs = new ProgramOptions();
+        programArgs.startAtMain = true;
+        programArgs.maxSteps = 1000;
+        programArgs.memoryConfiguration = MemoryConfiguration.DEFAULT;
+        final var program = new Program(programArgs);
 
         final var finalCode = getDecoratedCode(code, dataPrelude);
         System.out.println("═══════GENERATED═CODE═══════");

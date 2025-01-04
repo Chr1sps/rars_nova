@@ -15,7 +15,7 @@ import java.util.prefs.Preferences;
 import static rars.util.Utils.getColorAsHexString;
 
 public final class EditorThemeSettings extends SettingsBase {
-    private static final @NotNull Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull Logger LOGGER = LogManager.getLogger(EditorThemeSettings.class);
     /**
      * Top level theme settings prefix.
      */

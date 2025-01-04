@@ -1,6 +1,7 @@
 package rars.venus;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.settings.BoolSetting;
 import rars.util.Pair;
@@ -12,10 +13,11 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.io.File;
 
+import static rars.settings.BoolSettings.BOOL_SETTINGS;
 import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
 import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
 import static rars.settings.OtherSettings.OTHER_SETTINGS;
 
 /*
@@ -126,13 +128,14 @@ public final class EditPane extends JPanel {
                     }
                     if (EditPane.this.getFileStatus() == FileStatus.State.NEW_EDITED) {
                         EditPane.this.mainUI.editor.setTitle(
-                            "", EditPane.this.getFilename(),
+                            "",
+                            EditPane.this.getFile().getName(),
                             EditPane.this.getFileStatus()
                         );
                     } else {
-                        EditPane.this.mainUI.editor.setTitle(
-                            EditPane.this.getPathname(),
-                            EditPane.this.getFilename(), EditPane.this.getFileStatus()
+                        EditPane.this.mainUI.editor.setTitleFromFile(
+                            EditPane.this.getFile(),
+                            EditPane.this.getFileStatus()
                         );
                     }
 
@@ -238,32 +241,14 @@ public final class EditPane extends JPanel {
         this.fileStatus.setFileStatus(fileStatus);
     }
 
-    /**
-     * Delegates to corresponding FileStatus method
-     *
-     * @return a {@link java.lang.String} object
-     */
-    public String getFilename() {
-        return this.fileStatus.getFilename();
+    /** Returns a file associated with this pane. */
+    public @Nullable File getFile() {
+        return this.fileStatus.getFile();
     }
 
-    /**
-     * Delegates to corresponding FileStatus method
-     *
-     * @return a {@link java.lang.String} object
-     */
-    public String getPathname() {
-        return this.fileStatus.getPathname();
-    }
-
-    /**
-     * Delegates to corresponding FileStatus method
-     *
-     * @param pathname
-     *     a {@link java.lang.String} object
-     */
-    public void setPathname(final String pathname) {
-        this.fileStatus.setPathname(pathname);
+    /** Sets the file associated with this pane. */
+    public void setFile(final @NotNull File file) {
+        this.fileStatus.setFile(file);
     }
 
     /**

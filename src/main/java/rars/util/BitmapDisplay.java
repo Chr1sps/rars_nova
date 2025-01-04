@@ -14,7 +14,7 @@ import java.awt.*;
 import java.util.concurrent.Flow;
 
 public final class BitmapDisplay extends JFrame implements SimpleSubscriber<MemoryAccessNotice> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(BitmapDisplay.class);
 
     public final int displayWidth;
     public final int displayHeight;

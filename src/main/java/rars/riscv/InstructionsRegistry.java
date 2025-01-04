@@ -36,7 +36,7 @@ public final class InstructionsRegistry {
     public static final @NotNull SingleInstructionSet<@NotNull ExtendedInstruction> EXTENDED_INSTRUCTIONS;
     public static final @NotNull SingleInstructionSet<@NotNull Instruction> ALL_INSTRUCTIONS;
     private static final @NotNull String PSEUDO_OPS_PATH = "/pseudoOps/";
-    private static final @NotNull Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull Logger LOGGER = LogManager.getLogger(InstructionsRegistry.class);
     private final static @NotNull List<@NotNull MatchMap> R32_MATCH_MAPS;
     private final static @NotNull List<@NotNull MatchMap> R64_MATCH_MAPS;
     private static final boolean initialized;

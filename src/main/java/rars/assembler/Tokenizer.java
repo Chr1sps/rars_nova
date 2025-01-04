@@ -65,7 +65,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public final class Tokenizer {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(Tokenizer.class);
     // The 8 escaped characters are: single quote, double quote, backslash, newline
     // (linefeed),
     // tab, backspace, return, form feed. The characters and their corresponding
@@ -176,8 +176,8 @@ public final class Tokenizer {
     /// @return A [TokenList] object representing the tokenized instruction.
     /// @throws AssemblyException
     ///     This occurs only if the instruction
-    ///                                                             specification itself contains one or more
-    ///                                                             lexical (i.e. token) errors.
+    ///                                                                     specification itself contains one or more
+    ///                                                                     lexical (i.e. token) errors.
     public static @NotNull TokenList tokenizeExampleInstruction(final @NotNull String example) throws
         AssemblyException {
         final var tokenizer = new Tokenizer();
@@ -487,7 +487,7 @@ public final class Tokenizer {
                         .transform((s) -> s.substring(1, s.length() - 1));
                     // Handle either absolute or relative pathname for .include file
                     if (!new File(filename).isAbsolute()) {
-                        filename = new File(program.getFilename()).getParent() + File.separator + filename;
+                        filename = program.getFile().getParent() + File.separator + filename;
                     }
                     if (inclFiles.containsKey(filename)) {
                         // This is a recursive include. Generate error message and return immediately.
@@ -501,7 +501,7 @@ public final class Tokenizer {
                     inclFiles.put(filename, filename);
                     final RISCVProgram incl = new RISCVProgram();
                     try {
-                        incl.readSource(filename);
+                        incl.readSource(new File(filename));
                     } catch (final AssemblyException p) {
                         final Token token = tokenizedLine.get(ii + 1);
                         this.errors.addTokenError(token, "Error reading include file " + filename);

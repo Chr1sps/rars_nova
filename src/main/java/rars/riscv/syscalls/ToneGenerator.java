@@ -157,7 +157,7 @@ final class Tone {
      * The default MIDI channel of the tone: 0 (channel 1).
      */
     public final static int DEFAULT_CHANNEL = 0;
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(Tone.class);
     /**
      * The following lock and the code which locks and unlocks it
      * around the opening of the Sequencer were added 2009-10-19 by

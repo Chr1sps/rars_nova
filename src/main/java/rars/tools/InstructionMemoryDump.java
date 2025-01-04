@@ -32,7 +32,7 @@
  * <p>
  * Open your source file in RARS.
  * Tools menu, Instruction/Memory Dump.
- * Change filename to a filename of your choice.
+ * Change file to a file of your choice.
  * Click button: Connect to Program
  * Run, Assemble.
  * Run, Go.
@@ -65,7 +65,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.riscv.hardware.Memory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -217,7 +216,7 @@ public class InstructionMemoryDump extends AbstractTool {
         try {
             final String filename = this.dumpLogFilename.getText();
             if (filename.isEmpty()) {
-                this.logSuccess.setText("Enter a filename before trying to dump log");
+                this.logSuccess.setText("Enter a file before trying to dump log");
                 return;
             }
             final File file = new File(filename);

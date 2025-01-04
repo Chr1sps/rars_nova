@@ -9,6 +9,7 @@ import rars.ErrorList;
 import rars.Globals;
 import rars.util.BinaryUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -52,22 +53,26 @@ public final class SymbolTable {
     // kernel address space so highly unlikely that any symbol will have this as
     // its associated address!
     public static final int NOT_FOUND = -1;
-    private static final @NotNull Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull Logger LOGGER = LogManager.getLogger(SymbolTable.class);
     private static final @NotNull String START_LABEL = "main";
-    private final @NotNull String filename;
+    private final @Nullable File file;
     private @NotNull ArrayList<@NotNull Symbol> table;
 
     /**
      * Create a new empty symbol table for given file
      *
-     * @param filename
-     *     name of file this symbol table is associated with. Will be
+     * @param file
+     *     file this symbol table is associated with. Will be
      *     used only for output/display so it can be any descriptive
      *     string.
      */
-    public SymbolTable(final @NotNull String filename) {
-        this.filename = filename;
+    public SymbolTable(final @Nullable File file) {
+        this.file = file;
         this.table = new ArrayList<>();
+    }
+
+    public static @NotNull SymbolTable createGlobalSymbolTable() {
+        return new SymbolTable(null);
     }
 
     /**
@@ -107,7 +112,7 @@ public final class SymbolTable {
             if (Globals.debug) {
                 SymbolTable.LOGGER.debug(
                     "The symbol {} with address {} has been added to the {} symbol table.",
-                    label, address, this.filename
+                    label, address, (this.file == null) ? "global" : this.file.getAbsolutePath()
                 );
             }
         }
@@ -127,7 +132,11 @@ public final class SymbolTable {
             symbol.name().equals(label)
         );
         if (removed && Globals.debug) {
-            SymbolTable.LOGGER.debug("The symbol {} has been removed from the {} symbol table.", label, this.filename);
+            SymbolTable.LOGGER.debug(
+                "The symbol {} has been removed from the {} symbol table.",
+                label,
+                (this.file == null) ? "global" : this.file.getAbsolutePath()
+            );
         }
     }
 

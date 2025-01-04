@@ -14,7 +14,7 @@ import static rars.util.Utils.getColorAsHexString;
 
 public final class HighlightingSettings extends SettingsBase {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(HighlightingSettings.class);
 
     // region Preferences keys
     private static final String HIGHLIGHTING_PREFIX = "Highlighting";

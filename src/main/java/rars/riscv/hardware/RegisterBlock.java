@@ -48,7 +48,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2017
  */
 public final class RegisterBlock {
-    private static final @NotNull Logger LOGGER = LogManager.getLogger();
     private final @NotNull Register @NotNull [] regFile;
     private final char prefix;
 

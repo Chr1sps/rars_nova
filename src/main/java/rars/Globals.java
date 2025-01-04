@@ -70,7 +70,7 @@ public final class Globals {
     /// Copyright holders
     public static final @NotNull String copyrightHolders = "Pete Sanderson and Kenneth Vollmar";
     /// Symbol table for file currently being assembled.
-    public static final @NotNull SymbolTable symbolTable = new SymbolTable("global");
+    public static final @NotNull SymbolTable symbolTable = new SymbolTable(null);
     /// List of accepted file extensions for RISCV assembly source files.
     public static final @NotNull List<@NotNull String> fileExtensions = List.of("asm", "s", "S");
     /// Maximum length of scrolled message window (RARS Messages and Run I/O)
@@ -80,7 +80,7 @@ public final class Globals {
     /// Maximum number of back-step operations to buffer
     public static final int maximumBacksteps = 2000;
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final @NotNull Logger LOGGER = LogManager.getLogger(Globals.class);
 
     private static final String syscallPropertiesFile = "Syscall";
 
