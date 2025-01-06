@@ -48,7 +48,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class ErrorMessage {
     private final boolean isWarning; // allow for warnings too (added Nov 2006)
     private final @Nullable File file; // name of source file (added Oct 2006)
-    private final int line; // line in source code where error detected
+    private final int lineNumber; // line in source code where error detected
     private final int position; // position in source line where error detected
     private final @NotNull String message;
     private final @NotNull String macroExpansionHistory;
@@ -65,7 +65,7 @@ public final class ErrorMessage {
      * @param sourceProgram
      *     RISCVprogram object of source file in which this error
      *     appears.
-     * @param line
+     * @param lineNumber
      *     Line number in source program being processed when error
      *     occurred.
      * @param position
@@ -78,23 +78,23 @@ public final class ErrorMessage {
     public ErrorMessage(
         final boolean isWarning,
         final @Nullable RISCVProgram sourceProgram,
-        final int line,
+        final int lineNumber,
         final int position,
         final @NotNull String message
     ) {
         this.isWarning = isWarning;
         if (sourceProgram == null) {
             this.file = null;
-            this.line = line;
+            this.lineNumber = lineNumber;
         } else {
             if (sourceProgram.getSourceLineList() == null) {
                 this.file = sourceProgram.getFile();
-                this.line = line;
+                this.lineNumber = lineNumber;
             } else {
                 final SourceLine sourceLine = sourceProgram.getSourceLineList()
-                    .get(line - 1);
+                    .get(lineNumber - 1);
                 this.file = sourceLine.file();
-                this.line = sourceLine.lineNumber();
+                this.lineNumber = sourceLine.lineNumber();
             }
         }
         this.position = position;
@@ -134,13 +134,13 @@ public final class ErrorMessage {
         // Looks bass-ackwards, but to get the line numbers to display correctly
         // for runtime error occurring in macro expansion (expansion->definition), need
         // to assign to the opposite variables.
-        final var defineLine = ErrorMessage.parseMacroHistory(statement.getSource());
+        final var defineLine = ErrorMessage.parseMacroHistory(statement.sourceLine.source());
         if (defineLine.isEmpty()) {
-            this.line = statement.getSourceLine();
+            this.lineNumber = statement.sourceLine.lineNumber();
             this.macroExpansionHistory = "";
         } else {
-            this.line = defineLine.getFirst();
-            this.macroExpansionHistory = "" + statement.getSourceLine();
+            this.lineNumber = defineLine.getFirst();
+            this.macroExpansionHistory = "" + statement.sourceLine.lineNumber();
         }
     }
 
@@ -207,8 +207,8 @@ public final class ErrorMessage {
      *
      * @return Returns line number in source program where error occurred.
      */
-    public int getLine() {
-        return this.line;
+    public int getLineNumber() {
+        return this.lineNumber;
     }
 
     /**
@@ -246,10 +246,10 @@ public final class ErrorMessage {
         if (this.file != null) {
             builder.append(this.file.getPath());
         }
-        if (this.line > 0) {
+        if (this.lineNumber > 0) {
             builder.append(" line ")
                 .append(this.getMacroExpansionHistory())
-                .append(this.line);
+                .append(this.lineNumber);
         }
         if (this.position > 0) {
             builder.append(" column ")
@@ -268,7 +268,8 @@ public final class ErrorMessage {
      */
     // Method added by Mohammad Sekavat Dec 2012
     @Contract(pure = true)
-    public @NotNull String getMacroExpansionHistory() {
+    @NotNull
+    private String getMacroExpansionHistory() {
         if (this.macroExpansionHistory.isEmpty()) {
             return "";
         }

@@ -134,7 +134,7 @@ public class InstructionMemoryDump extends AbstractTool {
 
         this.logSuccess = new JLabel("");
         this.logSuccess.setFont(FONT_SETTINGS.getCurrentFont());
-        FONT_SETTINGS.addChangeListener(() -> this.logSuccess.setFont(FONT_SETTINGS.getCurrentFont()));
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.logSuccess.setFont(FONT_SETTINGS.getCurrentFont()));
         this.logSuccess.setFocusable(false);
         this.logSuccess.setBackground(panel.getBackground());
         panel.add(this.logSuccess);
@@ -158,16 +158,16 @@ public class InstructionMemoryDump extends AbstractTool {
     @Override
     protected void processRISCVUpdate(final AccessNotice notice) {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        if (!notice.accessIsFromRISCV()) {
+        if (!notice.isAccessFromRISCV) {
             return;
         }
         // we've got two kinds of access here: instructions and data
         final MemoryAccessNotice m = (MemoryAccessNotice) notice;
-        final int a = m.getAddress();
+        final int a = m.address;
 
         // is a in the text segment (program)?
         if ((a >= memoryConfiguration.textBaseAddress) && (a < memoryConfiguration.textLimitAddress)) {
-            if (notice.getAccessType() != AccessNotice.AccessType.READ) {
+            if (notice.accessType != AccessNotice.AccessType.READ) {
                 return;
             }
             if (a == this.lastAddress) {
@@ -196,10 +196,10 @@ public class InstructionMemoryDump extends AbstractTool {
 
         // is a in the data segment?
         if ((a >= this.lowDataSegmentAddress) && (a < this.highDataSegmentAddress)) {
-            if (notice.getAccessType() == AccessNotice.AccessType.READ) {
+            if (notice.accessType == AccessNotice.AccessType.READ) {
                 this.log.append("L: 0x");
             }
-            if (notice.getAccessType() == AccessNotice.AccessType.WRITE) {
+            if (notice.accessType == AccessNotice.AccessType.WRITE) {
                 this.log.append("S: 0x");
             }
             this.log.append(Integer.toUnsignedString(a, 16)).append("\n");

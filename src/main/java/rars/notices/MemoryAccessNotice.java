@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 import org.jetbrains.annotations.NotNull;
-import rars.assembler.DataTypes;
 
 /**
  * Object provided to Observers of runtime access to memory.
@@ -39,9 +38,12 @@ import rars.assembler.DataTypes;
  * @version July 2005
  */
 public final class MemoryAccessNotice extends AccessNotice {
-    private final int address;
-    private final int length;
-    private final int value;
+    /** Address in memory of the access operation. */
+    public final int address;
+    /** Length in bytes of the access operation (4,2,1). */
+    public final int length;
+    /** The value of the access operation (the value read or written). */
+    public final int value;
 
     /**
      * Constructor will be called only within this package, so assume
@@ -55,57 +57,12 @@ public final class MemoryAccessNotice extends AccessNotice {
     }
 
     /**
-     * Constructor will be called only within this package, so assume
-     * address is in valid range.
-     *
-     * @param type
-     *     a int
-     * @param address
-     *     a int
-     * @param value
-     *     a int
-     */
-    public MemoryAccessNotice(final @NotNull AccessType type, final int address, final int value) {
-        super(type);
-        this.address = address;
-        this.length = DataTypes.WORD_SIZE;
-        this.value = value;
-    }
-
-    /**
-     * Fetch the memory address that was accessed.
-     *
-     * @return a int
-     */
-    public int getAddress() {
-        return address;
-    }
-
-    /**
-     * Fetch the length in bytes of the access operation (4,2,1).
-     *
-     * @return a int
-     */
-    public int getLength() {
-        return length;
-    }
-
-    /**
-     * Fetch the second of the access operation (the second read or written).
-     *
-     * @return a int
-     */
-    public int getValue() {
-        return value;
-    }
-
-    /**
      * String representation indicates access type, address and length in bytes
      *
      * @return a {@link java.lang.String} object
      */
     public String toString() {
-        return ((this.getAccessType() == AccessType.READ) ? "R " : "W ") +
+        return ((this.accessType == AccessType.READ) ? "R " : "W ") +
             "Mem " + address + " " + length + "B = " + value;
     }
 }

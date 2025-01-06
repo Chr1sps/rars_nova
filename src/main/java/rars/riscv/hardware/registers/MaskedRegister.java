@@ -1,9 +1,11 @@
-package rars.riscv.hardware;
+package rars.riscv.hardware.registers;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A register which aliases a subset of another register
  */
-public class MaskedRegister extends Register {
+public final class MaskedRegister extends Register {
     private final long mask;
 
     /**
@@ -14,21 +16,18 @@ public class MaskedRegister extends Register {
      * @param num
      *     the number to assign
      * @param val
-     *     the reset second
+     *     the reset value
      * @param mask
      *     the bits to use
      */
-    public MaskedRegister(final String name, final int num, final long val, final long mask) {
-        super(name, num, val); // reset second does not matter
+    public MaskedRegister(final @NotNull String name, final int num, final long val, final long mask) {
+        super(name, num, val); // reset value does not matter
         this.mask = mask;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized long setValue(final long val) {
-        final long current = getValue();
+        final long current = this.getValue();
         super.setValue((current & mask) | (val & ~mask));
         return current;
     }

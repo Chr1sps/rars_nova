@@ -170,7 +170,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         };
         Simulator.getInstance().subscribe(this);
 
-        FONT_SETTINGS.addChangeListener(this::updateRowHeight);
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.updateRowHeight());
 
         this.homeAddress = memoryConfiguration.dataBaseAddress; // address for Home button
         this.firstAddress = this.homeAddress; // first address to display at any given time
@@ -960,10 +960,10 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             }
             case final MemoryAccessNotice m -> {
                 // NOTE: each register is a separate Observable
-                if (m.getAccessType() == AccessNotice.AccessType.WRITE) {
+                if (m.accessType == AccessNotice.AccessType.WRITE) {
                     // Uses the same highlighting technique as for Text Segment -- see
                     // AddressCellRenderer class in DataSegmentWindow.java.
-                    final var address = m.getAddress();
+                    final var address = m.address;
                     this.highlightCellForAddress(address);
                 }
             }

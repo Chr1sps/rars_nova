@@ -24,6 +24,6 @@ public final class FSGNJXD extends BasicInstruction {
         final long f2 = FloatingPointRegisterFile.getValueLong(statement.getOperand(1));
         final long f3 = FloatingPointRegisterFile.getValueLong(statement.getOperand(2));
         final long result = (f2 & 0x7FFFFFFF_FFFFFFFFL) | ((f2 ^ f3) & 0x80000000_00000000L);
-        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), result);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result);
     }
 }

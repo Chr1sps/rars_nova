@@ -127,7 +127,7 @@ public final class VenusUI extends JFrame {
      */
     public VenusUI(final String name, final @NotNull List<@NotNull File> files) {
         super(name);
-        setDarkModeState(BOOL_SETTINGS.getSetting(BoolSetting.DARK_MODE));
+        this.setInitialDarkModeState(BOOL_SETTINGS.getSetting(BoolSetting.DARK_MODE));
         Globals.gui = this;
         this.editor = new Editor(this);
 
@@ -311,11 +311,30 @@ public final class VenusUI extends JFrame {
             Toolkit.getDefaultToolkit().getImage(resource));
     }
 
+    private void setInitialDarkModeState(final boolean isDarkMode) {
+        final var lookAndFeel = isDarkMode ? new FlatMacDarkLaf() : new FlatMacLightLaf();
+        try {
+            UIManager.setLookAndFeel(lookAndFeel);
+            SwingUtilities.updateComponentTreeUI(this);
+        } catch (final UnsupportedLookAndFeelException e) {
+            LOGGER.error("Error when loading look and feel.", e);
+        }
+    }
+
     private void setDarkModeState(final boolean isDarkMode) {
         final var lookAndFeel = isDarkMode ? new FlatMacDarkLaf() : new FlatMacLightLaf();
         try {
             UIManager.setLookAndFeel(lookAndFeel);
             SwingUtilities.updateComponentTreeUI(this);
+
+            // HACK: Because RSyntaxTextArea resets it's settings to defaults upon 
+            // updating the component tree, we need to manually restore the settings.
+            // TODO: consider moving it elsewhere.
+            final var tabs = this.mainPane.editTabbedPane.getTabbedPane().getComponents();
+            for (final var tab : tabs) {
+                ((EditPane) tab).sourceCode.forceSettingsRestore();
+            }
+
         } catch (final UnsupportedLookAndFeelException e) {
             LOGGER.error("Error when loading look and feel.", e);
         }

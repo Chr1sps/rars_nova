@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
@@ -28,11 +29,14 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Objects;
 import java.util.concurrent.Flow;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.settings.FontSettings.FONT_SETTINGS;
 import static rars.settings.HighlightingSettings.HIGHLIGHTING_SETTINGS;
 import static rars.util.Utils.deriveFontFromStyle;
 
@@ -85,6 +89,8 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private final JTextField programArgumentsTextField; // DPS 17-July-2008
     // source.
     private final Container contentPane;
+
+    private final @NotNull VenusUI mainUI;
     private JTable table;
     private JScrollPane tableScroller;
     private Object[][] data;
@@ -109,16 +115,17 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     /**
      * Constructor, sets up a new JInternalFrame.
      */
-    public TextSegmentWindow() {
+    public TextSegmentWindow(final @NotNull VenusUI mainUI) {
         super("Text Segment", true, false, true, true);
+        this.mainUI = mainUI;
         Simulator.getInstance().subscribe(this);
-        BOOL_SETTINGS.addChangeListener(() -> {
+        BOOL_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
             this.deleteAsTextSegmentObserver();
             if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 this.addAsTextSegmentObserver();
             }
         });
-        FONT_SETTINGS.addChangeListener(this::updateRowHeight);
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignore -> this.updateRowHeight());
         this.contentPane = this.getContentPane();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
@@ -148,15 +155,12 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // In multi-file situation, this will not necessarily be the last line b/c
         // sourceStatementList contains
         // source lines from all files. DPS 3-Oct-10
-        int maxSourceLineNumber = 0;
-        for (int i = sourceStatementList.size() - 1; i >= 0; i--) {
-            final ProgramStatement statement = sourceStatementList.get(i);
-            if (statement.getSourceLine() > maxSourceLineNumber) {
-                maxSourceLineNumber = statement.getSourceLine();
-            }
-        }
-        final int sourceLineDigits = ("" + maxSourceLineNumber).length();
-        int leadingSpaces;
+        final var maxSourceLineNumber = sourceStatementList.stream()
+            .mapToInt(statement -> statement.sourceLine.lineNumber())
+            .max()
+            .orElse(0);
+
+        final var sourceLineDigitCount = Integer.toString(maxSourceLineNumber).length();
         int lastLine = -1;
         for (int i = 0; i < sourceStatementList.size(); i++) {
             final ProgramStatement statement = sourceStatementList.get(i);
@@ -171,19 +175,22 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
             this.data[i][ColumnData.INSTRUCTION_CODE_COLUMN.number] =
                 NumberDisplayBaseChooser.formatNumber(statement.getBinaryStatement(), 16);
             this.data[i][ColumnData.BASIC_INSTRUCTIONS_COLUMN.number] = statement.getPrintableBasicAssemblyStatement();
-            String sourceString = "";
-            if (!statement.getSource().isEmpty()) {
-                leadingSpaces = sourceLineDigits - ("" + statement.getSourceLine()).length();
-                String lineNumber = "          ".substring(0, leadingSpaces)
-                    + statement.getSourceLine() + ": ";
-                if (statement.getSourceLine() == lastLine) {
-                    lineNumber = "          ".substring(0, sourceLineDigits) + "  ";
+            final var builder = new StringBuilder();
+            if (statement.sourceLine != null) {
+                final int leadingSpacesCount = sourceLineDigitCount - Integer.toString(statement.sourceLine.lineNumber())
+                    .length();
+                final String lineNumber;
+                if (statement.sourceLine.lineNumber() == lastLine) {
+                    lineNumber = " ".repeat(sourceLineDigitCount) + "  ";
+                } else {
+                    lineNumber = " ".repeat(leadingSpacesCount) + statement.sourceLine.lineNumber() + ": ";
                 }
-                sourceString = lineNumber
-                    + FontUtilities.substituteSpacesForTabs(statement.getSource());
+                builder.append(lineNumber + FontUtilities.substituteSpacesForTabs(statement.sourceLine.source()));
+                lastLine = statement.sourceLine.lineNumber();
+            } else {
+                lastLine = -1;
             }
-            this.data[i][ColumnData.SOURCE_COLUMN.number] = sourceString;
-            lastLine = statement.getSourceLine();
+            this.data[i][ColumnData.SOURCE_COLUMN.number] = builder.toString();
         }
         this.contentPane.removeAll();
         this.tableModel = new TextTableModel(this.data);
@@ -198,6 +205,8 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // prevents cells in row from being highlighted when user clicks on breakpoint
         // checkbox
         this.table.setRowSelectionAllowed(false);
+
+        // region Columns setup
 
         final var columnModel = this.table.getColumnModel();
 
@@ -233,6 +242,8 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         instructionCodeColumn.setMaxWidth(160);
         // to render String right-justified in mono font
         instructionCodeColumn.setCellRenderer(monoRightCellRenderer);
+
+        // endregion Columns setup
 
         this.tableScroller = new JScrollPane(
             this.table, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
@@ -401,10 +412,10 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 // notification duty.
                 // This will occur only if running program has written to text segment
                 // (self-modifying code)
-                if (m.getAccessType() == AccessNotice.AccessType.WRITE) {
-                    final int address = m.getAddress();
-                    final int value = m.getValue();
-                    final String strValue = BinaryUtils.intToHexString(m.getValue());
+                if (m.accessType == AccessNotice.AccessType.WRITE) {
+                    final int address = m.address;
+                    final int value = m.value;
+                    final String strValue = BinaryUtils.intToHexString(m.value);
                     final String strBasic;
                     String strSource = TextSegmentWindow.modifiedCodeMarker;
                     // Translate the address into table model row and modify the values in that row
@@ -471,7 +482,11 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
                     // write update.
                     try {
                         Globals.gui.mainPane.executeTab.dataSegment
-                            .onNext(new MemoryAccessNotice(AccessNotice.AccessType.WRITE, address, value));
+                            .onNext(new MemoryAccessNotice(
+                                AccessNotice.AccessType.WRITE,
+                                address, DataTypes.WORD_SIZE,
+                                value
+                            ));
                     } catch (final Exception e) {
                         // Not sure if anything bad can happen in this sequence, but if anything does we
                         // can let it go.
@@ -960,7 +975,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * Cell renderer for Breakpoint column. We can use this to enable/disable
      * breakpoint checkboxes with
      * a single action. This class was blatantly copied/pasted from
-     * <a href="http://www.javakb.com/Uwe/Forum.aspx/java-gui/1451/Java-TableCellRenderer-for-a-boolean-checkbox-field">here.a>
+     * <a href="http://www.javakb.com/Uwe/Forum.aspx/java-gui/1451/Java-TableCellRenderer-for-a-boolean-checkbox-field">here</a>
      * Slightly customized. DPS 31-Dec-2009
      */
     class CheckBoxTableCellRenderer extends JCheckBox implements TableCellRenderer {

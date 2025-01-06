@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Objects;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
@@ -55,88 +54,73 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
      */
     @Override
     public void dumpMemoryRange(
-        @NotNull final File file, final int firstAddress, final int lastAddress,
-        @NotNull final Memory memory
-    )
-        throws AddressErrorException, IOException {
-
-        final PrintStream out = new PrintStream(new FileOutputStream(file));
+        final @NotNull File file,
+        final int firstAddress,
+        final int lastAddress,
+        final @NotNull Memory memory
+    ) throws AddressErrorException, IOException {
 
         // TODO: check if these settings work right
-        final boolean hexAddresses =
-            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
+        final boolean doDisplayAddressesInHex = BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
 
         // If address in data segment, print in same format as Data Segment Window
         if (Globals.MEMORY_INSTANCE.isAddressInDataSegment(firstAddress)) {
-            final boolean hexValues = BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX);
             int offset = 0;
-            StringBuilder string = new StringBuilder();
-            try {
+            try (final var outStream = new PrintStream(new FileOutputStream(file))) {
+                final var builder = new StringBuilder();
                 for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                     if (offset % 8 == 0) {
-                        string = new StringBuilder((
-                            (hexAddresses) ? BinaryUtils.intToHexString(address)
-                                : BinaryUtils.unsignedIntToIntString(address)
-                        ) + "    ");
+                        final var formattedAddress = (doDisplayAddressesInHex)
+                            ? BinaryUtils.intToHexString(address)
+                            : BinaryUtils.unsignedIntToIntString(address);
+                        builder.append(formattedAddress).append("    ");
                     }
                     offset++;
-                    final Integer temp = memory.getRawWordOrNull(address);
-                    if (temp == null) {
+                    final var optWord = memory.getRawWordOrNull(address);
+                    if (optWord == null) {
                         break;
                     }
-                    string.append((hexValues)
-                        ? BinaryUtils.intToHexString(temp)
-                        : ("           " + temp).substring(temp.toString().length())).append(" ");
+                    builder.append((doDisplayAddressesInHex)
+                        ? BinaryUtils.intToHexString(optWord)
+                        : ("           " + optWord).substring(optWord.toString().length())).append(" ");
                     if (offset % 8 == 0) {
-                        out.println(string);
-                        string = new StringBuilder();
+                        outStream.println(builder);
                     }
                 }
-            } finally {
-                out.close();
             }
-            return;
+        } else if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(firstAddress)) {
+            // If address in text segment, print in same format as Text Segment Window
+            try (final var outStream = new PrintStream(new FileOutputStream(file))) {
+                outStream.println("Address     Code        Basic                        Line Source");
+                outStream.println();
+                for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
+                    final var builder = new StringBuilder();
+                    final var formattedAddress = (doDisplayAddressesInHex)
+                        ? BinaryUtils.intToHexString(address)
+                        : BinaryUtils.unsignedIntToIntString(address);
+                    builder.append(formattedAddress).append("    ");
+                    final var optWord = memory.getRawWordOrNull(address);
+                    if (optWord == null) {
+                        break;
+                    }
+                    builder.append(BinaryUtils.intToHexString(optWord));
+                    builder.append("  ");
+                    try {
+                        final ProgramStatement ps = memory.getStatement(address);
+                        builder.append("%-29s".formatted(ps.getPrintableBasicAssemblyStatement()));
+                        if (ps.sourceLine != null) {
+                            builder.append("%-5s".formatted(ps.sourceLine.lineNumber()));
+                            builder.append(ps.sourceLine.source());
+                            builder.append(("%-5s".formatted(Integer.toString(ps.sourceLine.lineNumber()))));
+                            builder.append(ps.sourceLine.source());
+                        }
+                    } catch (final AddressErrorException ignored) {
+                    }
+                    outStream.println(builder);
+                }
+            }
         }
 
-        if (!Globals.MEMORY_INSTANCE.isAddressInTextSegment(firstAddress)) {
-            return;
-        }
-
-        // If address in text segment, print in same format as Text Segment Window
-        out.println("Address     Code        Basic                        Line Source");
-        out.println();
-        String string;
-        try {
-            for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
-                string = (
-                    (hexAddresses) ? BinaryUtils.intToHexString(address) :
-                        BinaryUtils.unsignedIntToIntString(address)
-                )
-                    + "  ";
-                final Integer temp = memory.getRawWordOrNull(address);
-                if (temp == null) {
-                    break;
-                }
-                string += BinaryUtils.intToHexString(temp) + "  ";
-                try {
-                    final ProgramStatement ps = memory.getStatement(address);
-                    string += (ps.getPrintableBasicAssemblyStatement() + "                             ").substring(
-                        0,
-                        29
-                    );
-                    string += (
-                        ((Objects.equals(ps.getSource(), "")) ? "" : Integer.toString(ps.getSourceLine())) +
-                            "     "
-                    )
-                        .substring(0, 5);
-                    string += ps.getSource();
-                } catch (final AddressErrorException ignored) {
-                }
-                out.println(string);
-            }
-        } finally {
-            out.close();
-        }
     }
 
 }

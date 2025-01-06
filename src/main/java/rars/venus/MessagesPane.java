@@ -77,7 +77,7 @@ public final class MessagesPane extends JTabbedPane {
         this.setMinimumSize(new Dimension(0, 0));
         this.assembleTextArea = new JTextArea();
         this.runTextArea = new JTextArea();
-        FONT_SETTINGS.addChangeListener(() -> {
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
             this.assembleTextArea.setFont(FONT_SETTINGS.getCurrentFont());
             this.runTextArea.setFont(FONT_SETTINGS.getCurrentFont());
         });

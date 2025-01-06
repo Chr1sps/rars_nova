@@ -61,7 +61,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class EditPane extends JPanel {
 
-    private final @NotNull TextEditingArea sourceCode;
+    public final @NotNull TextEditingArea sourceCode;
     private final @NotNull VenusUI mainUI;
     private final @NotNull JLabel caretPositionLabel;
     private final @NotNull FileStatus fileStatus;
@@ -81,26 +81,25 @@ public final class EditPane extends JPanel {
 
         this.fileStatus = new FileStatus();
 
-        this.sourceCode =
-            TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme());
+        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme());
+
+        this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme());
+        EDITOR_THEME_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme()));
+
         this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-        EDITOR_THEME_SETTINGS.addChangeListener(
-            () -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme()),
-            true
-        );
-        FONT_SETTINGS.addChangeListener(() -> this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont()), true);
-        BOOL_SETTINGS.addChangeListener(
-            () -> this.sourceCode.setLineHighlightEnabled(
-                BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
-            ), true
-        );
-        OTHER_SETTINGS.addChangeListener(
-            () -> {
-                this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
-                this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
-//            this.sourceCode.revalidate();
-            }, true
-        );
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont()));
+
+        this.sourceCode.setLineHighlightEnabled(BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
+        BOOL_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.sourceCode.setLineHighlightEnabled(
+            BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
+        ));
+
+        this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
+        this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
+        OTHER_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
+            this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
+            this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
+        });
 
         // sourceCode is responsible for its own scrolling
         this.add(this.sourceCode.getOuterComponent(), BorderLayout.CENTER);

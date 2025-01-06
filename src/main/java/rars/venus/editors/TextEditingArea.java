@@ -113,6 +113,8 @@ public interface TextEditingArea {
 
     void setTheme(final @NotNull EditorTheme theme);
 
+    void forceSettingsRestore();
+    
     // Used by Find/Replace
     enum FindReplaceResult {
         TEXT_NOT_FOUND,

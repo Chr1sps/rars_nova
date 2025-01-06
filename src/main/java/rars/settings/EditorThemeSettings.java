@@ -83,7 +83,7 @@ public final class EditorThemeSettings extends SettingsBase {
         try {
             this.preferences.flush();
             this.backupTheme = this.currentTheme;
-            submit();
+            this.onChangeDispatcher.dispatch(null);
         } catch (final SecurityException se) {
             LOGGER.error("Unable to write to persistent storage for security reasons. Reverting to previous settings.");
             // The reason why we need to write the backup theme to the preferences

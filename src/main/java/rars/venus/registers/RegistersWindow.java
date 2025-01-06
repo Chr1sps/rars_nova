@@ -1,8 +1,8 @@
 package rars.venus.registers;
 
 import org.jetbrains.annotations.NotNull;
-import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
+import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 

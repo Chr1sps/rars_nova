@@ -3,7 +3,6 @@ package rars.venus.settings;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.hardware.MemoryConfiguration;
-import rars.riscv.hardware.RegisterFile;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.venus.FileStatus;
@@ -175,7 +174,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
                 textField.setFocusable(false);
                 this.addressDisplay[i] = textField;
             }
-            FONT_SETTINGS.addChangeListener(() -> {
+            FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
                 for (final var textField : this.addressDisplay) {
                     textField.setFont(FONT_SETTINGS.getCurrentFont());
                 }

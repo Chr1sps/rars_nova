@@ -40,7 +40,7 @@ public abstract class Double extends BasicInstruction {
             new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(2))), environment
         );
         Floating.setfflags(environment);
-        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), result.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
     }
 
     public abstract @NotNull Float64 compute(@NotNull Float64 f1, @NotNull Float64 f2, @NotNull Environment e);

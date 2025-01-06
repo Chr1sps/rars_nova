@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.notices.AccessNotice;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.Register;
+import rars.riscv.hardware.registers.Register;
 import rars.util.BinaryUtils;
 
 import javax.swing.*;
@@ -180,7 +180,7 @@ public class FloatRepresentation extends AbstractTool {
     // Private methods defined to support the above.
     @Override
     public void onNext(final @NotNull AccessNotice notice) {
-        if (notice.getAccessType() == AccessNotice.AccessType.WRITE) {
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
             this.updateDisplays(new FlavorsOfFloat().buildOneFromInt((int) this.attachedRegister.getValue()));
         }
         this.subscription.request(1);
@@ -384,7 +384,7 @@ public class FloatRepresentation extends AbstractTool {
         final String[] registerList = new String[this.fpRegisters.length + 1];
         registerList[0] = "None";
         for (int i = 0; i < this.fpRegisters.length; i++) {
-            registerList[i + 1] = this.fpRegisters[i].getName();
+            registerList[i + 1] = this.fpRegisters[i].name;
         }
         final JComboBox<String> registerSelect = new JComboBox<>(registerList);
         registerSelect.setSelectedIndex(0); // No register attached
@@ -407,7 +407,7 @@ public class FloatRepresentation extends AbstractTool {
                     if (this.isObserving()) {
                         this.addAsObserver();
                     }
-                    this.instructions.setText("The program and register " + this.attachedRegister.getName()
+                    this.instructions.setText("The program and register " + this.attachedRegister.name
                         + " will respond to each other when the program is connected or running.");
                 }
             });

@@ -1,8 +1,8 @@
 package rars.settings;
 
 import org.jetbrains.annotations.NotNull;
+import rars.util.ListenerDispatcher;
 
-import java.util.HashSet;
 import java.util.prefs.Preferences;
 
 import static java.util.prefs.Preferences.userNodeForPackage;
@@ -11,36 +11,15 @@ import static java.util.prefs.Preferences.userNodeForPackage;
  * A base class for Settings objects.
  */
 public abstract class SettingsBase {
-    /**
-     * The Preferences node for all the RARS settings.
-     */
+    /** The Preferences node for all the RARS settings. */
     protected static final @NotNull Preferences SETTINGS_PREFERENCES = userNodeForPackage(SettingsBase.class);
-    private final @NotNull HashSet<@NotNull Runnable> listeners;
+    /** A hook for listeners to be notified when the settings change. */
+    public final @NotNull ListenerDispatcher<Void>.Hook onChangeListenerHook;
+    /** Internal dispatcher for submiting setting change events. */
+    protected final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
 
     protected SettingsBase() {
-        listeners = new HashSet<>();
-    }
-
-    public void addChangeListener(final @NotNull Runnable listener) {
-        this.listeners.add(listener);
-    }
-
-    public void addChangeListener(final @NotNull Runnable listener, final boolean runImmediately) {
-        if (runImmediately) {
-            // noinspection unchecked
-            listener.run();
-        }
-        this.listeners.add(listener);
-    }
-
-    public void removeChangeListener(final @NotNull Runnable listener) {
-        this.listeners.remove(listener);
-    }
-
-    protected void submit() {
-        for (final var listener : listeners) {
-            // noinspection unchecked
-            listener.run();
-        }
+        this.onChangeDispatcher = new ListenerDispatcher<>();
+        this.onChangeListenerHook = this.onChangeDispatcher.getHook();
     }
 }

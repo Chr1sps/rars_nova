@@ -27,6 +27,6 @@ public final class FSQRTD extends BasicInstruction {
         final Float64 result = Arithmetic
             .squareRoot(new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(1))), e);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), result.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
     }
 }

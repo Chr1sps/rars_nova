@@ -220,7 +220,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
      */
     @Override
     protected void processRISCVUpdate(final AccessNotice accessNotice) {
-        this.incrementReferenceCountForAddress(((MemoryAccessNotice) accessNotice).getAddress());
+        this.incrementReferenceCountForAddress(((MemoryAccessNotice) accessNotice).address);
     }
 
     /**

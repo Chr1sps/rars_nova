@@ -1,4 +1,4 @@
-package rars.riscv.hardware;
+package rars.riscv.hardware.registers;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -27,52 +27,38 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A register which aliases a subset of another register
  */
-public class LinkedRegister extends Register {
-    private final Register base;
+public final class LinkedRegister extends Register {
+    private final @NotNull Register base;
     private final long mask;
-    private int shift;
+    private final int shift;
 
-    /**
-     * <p>Constructor for LinkedRegister.</p>
-     *
-     * @param name
-     *     the name to assign
-     * @param num
-     *     the number to assign
-     * @param base
-     *     the register to alias
-     * @param mask
-     *     the bits to use
-     */
-    public LinkedRegister(final String name, final int num, final Register base, long mask) {
+    public LinkedRegister(final @NotNull String name, final int num, final @NotNull Register base, long mask) {
         super(name, num, 0); // reset second does not matter
         this.base = base;
         this.mask = mask;
+        this.shift = calculateShift(mask);
+    }
 
+    private static int calculateShift(long mask) {
         // Find the lowest 1 bit
-        shift = 0;
+        int shift = 0;
         while (mask != 0 && (mask & 1) == 0) {
             shift++;
             mask >>>= 1;
         }
+        return shift;
     }
 
-    /**
-     * <p>getValueNoNotify.</p>
-     *
-     * @return a long
-     */
     @Override
     public synchronized long getValueNoNotify() {
         return (base.getValueNoNotify() & mask) >>> shift;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized long setValue(final long val) {
         final long old = base.getValueNoNotify();
@@ -81,9 +67,6 @@ public class LinkedRegister extends Register {
         return (old & mask) >>> shift;
     }
 
-    /**
-     * <p>resetValue.</p>
-     */
     @Override
     public synchronized void resetValue() {
         base.resetValue(); // not completely correct, but registers are only reset all together, so it

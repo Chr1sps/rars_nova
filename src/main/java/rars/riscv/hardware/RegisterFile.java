@@ -5,6 +5,7 @@ import rars.Globals;
 import rars.assembler.SymbolTable;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.BasicInstruction;
+import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
 import rars.settings.OtherSettings;
 import rars.util.ConversionUtils;
@@ -92,13 +93,13 @@ public final class RegisterFile {
     }
 
     /**
-     * This method updates the register second who's number is num. Also handles the
+     * This method updates the register value who's number is num. Also handles the
      * lo and hi registers
      *
      * @param num
-     *     Register to set the second of.
+     *     Register to set the value of.
      * @param val
-     *     The desired second for the register.
+     *     The desired value for the register.
      */
     public static void updateRegister(final int num, final long val) {
         if (num != 0) {
@@ -114,23 +115,23 @@ public final class RegisterFile {
     }
 
     /**
-     * Sets the second of the register given to the second given.
+     * Sets the value of the register given to the value given.
      *
      * @param name
-     *     Name of register to set the second of.
+     *     Name of register to set the value of.
      * @param val
-     *     The desired second for the register.
+     *     The desired value for the register.
      */
     public static void updateRegister(final String name, final long val) {
-        RegisterFile.updateRegister(RegisterFile.REGISTER_BLOCK.getRegister(name).getNumber(), val);
+        RegisterFile.updateRegister(RegisterFile.REGISTER_BLOCK.getRegister(name).number, val);
     }
 
     /**
-     * Returns the second of the register.
+     * Returns the value of the register.
      *
      * @param num
      *     The register number.
-     * @return The second of the given register.
+     * @return The value of the given register.
      */
     public static int getValue(final int num) {
         return ConversionUtils.longLowerHalfToInt(RegisterFile.REGISTER_BLOCK.getValue(num));
@@ -138,11 +139,11 @@ public final class RegisterFile {
     }
 
     /**
-     * Returns the second of the register.
+     * Returns the value of the register.
      *
      * @param num
      *     The register number.
-     * @return The second of the given register.
+     * @return The value of the given register.
      */
     public static long getValueLong(final int num) {
         return RegisterFile.REGISTER_BLOCK.getValue(num);
@@ -150,11 +151,11 @@ public final class RegisterFile {
     }
 
     /**
-     * Returns the second of the register.
+     * Returns the value of the register.
      *
      * @param name
      *     The register's name.
-     * @return The second of the given register.
+     * @return The value of the given register.
      */
     public static int getValue(final String name) {
         return ConversionUtils.longLowerHalfToInt(RegisterFile.REGISTER_BLOCK.getValue(name));
@@ -185,18 +186,18 @@ public final class RegisterFile {
 
     /**
      * For initializing the Program Counter. Do not use this to implement jumps and
-     * branches, as it will NOT record a backstep entry with the restore second.
+     * branches, as it will NOT record a backstep entry with the restore value.
      * If you need backstepping capability, use setProgramCounter instead.
      *
      * @param value
-     *     The second to set the Program Counter to.
+     *     The value to set the Program Counter to.
      */
     public static void initializeProgramCounter(final int value) {
         RegisterFile.PC_REGISTER.setValue(value);
     }
 
     /**
-     * Will initialize the Program Counter to either the default reset second, or the
+     * Will initialize the Program Counter to either the default reset value, or the
      * address
      * associated with source program global label "main", if it exists as a text
      * segment label
@@ -207,7 +208,7 @@ public final class RegisterFile {
      *     labeled
      *     'main' (or other defined start label) if defined. If not
      *     defined, or if parameter false,
-     *     will set program counter to default reset second.
+     *     will set program counter to default reset value.
      */
     public static void initializeProgramCounter(final boolean startAtMain) {
         final int mainAddr = Globals.symbolTable.getAddress(SymbolTable.getStartLabel());
@@ -219,9 +220,9 @@ public final class RegisterFile {
     }
 
     /**
-     * For returning the program counters second.
+     * For returning the program counters value.
      *
-     * @return The program counters second as an int.
+     * @return The program counters value as an int.
      */
     public static int getProgramCounter() {
         return (int) RegisterFile.PC_REGISTER.getValue();
@@ -233,7 +234,7 @@ public final class RegisterFile {
      * incrementPC() method. Use this only when processing jumps and branches.
      *
      * @param value
-     *     The second to set the Program Counter to.
+     *     The value to set the Program Counter to.
      */
     public static void setProgramCounter(final int value) {
         final int old = (int) RegisterFile.PC_REGISTER.getValue();

@@ -61,6 +61,6 @@ public final class FCVTSD extends BasicInstruction {
         Float32 out = new Float32(0);
         out = convert(in, out, e);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), out.bits);
+        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), out.bits);
     }
 }

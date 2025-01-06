@@ -144,7 +144,11 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 final var builder = new StringBuilder();
                 builder.append("Failed to assemble `%s` due to following error(s):\n".formatted(getTestName()));
                 for (final var error : ae.errors.getErrorMessages()) {
-                    builder.append("[%d,%d] %s\n".formatted(error.getLine(), error.getPosition(), error.getMessage()));
+                    builder.append("[%d,%d] %s\n".formatted(
+                        error.getLineNumber(),
+                        error.getPosition(),
+                        error.getMessage()
+                    ));
                 }
                 fail(builder.toString());
             }
@@ -152,7 +156,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
             final var foundErrorLines = new HashSet<Integer>();
             for (final var error : errors) {
                 if (error.isWarning()) continue;
-                foundErrorLines.add(error.getLine());
+                foundErrorLines.add(error.getLineNumber());
             }
             if (!testData.errorLines.equals(foundErrorLines)) {
                 final var builder = new StringBuilder();
@@ -160,7 +164,11 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 builder.append("Expected lines: %s\n".formatted(testData.errorLines));
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
-                    builder.append("[%d,%d] %s\n".formatted(error.getLine(), error.getPosition(), error.getMessage()));
+                    builder.append("[%d,%d] %s\n".formatted(
+                        error.getLineNumber(),
+                        error.getPosition(),
+                        error.getMessage()
+                    ));
                 }
                 fail(builder.toString());
             }

@@ -322,7 +322,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         // If Ready bit was initially clear, they'll get the old keystroke -- serves 'em
         // right
         // for not checking!
-        if (notice.getAddress() == KeyboardAndDisplaySimulator.RECEIVER_DATA && notice.getAccessType() == AccessNotice.AccessType.READ) {
+        if (notice.address == KeyboardAndDisplaySimulator.RECEIVER_DATA && notice.accessType == AccessNotice.AccessType.READ) {
             this.updateMMIOControl(
                 KeyboardAndDisplaySimulator.RECEIVER_CONTROL,
                 KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.RECEIVER_CONTROL)
@@ -336,13 +336,12 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         // is processing the character.
         // Also start an intruction counter that will simulate the delay of the slower
         // display device processing the character.
-        if (KeyboardAndDisplaySimulator.isReadyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL) && notice.getAddress() == KeyboardAndDisplaySimulator.TRANSMITTER_DATA
-            && notice.getAccessType() == AccessNotice.AccessType.WRITE) {
+        if (KeyboardAndDisplaySimulator.isReadyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL) && notice.address == KeyboardAndDisplaySimulator.TRANSMITTER_DATA && notice.accessType == AccessNotice.AccessType.WRITE) {
             this.updateMMIOControl(
                 KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL,
                 KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL)
             );
-            this.intWithCharacterToDisplay = notice.getValue();
+            this.intWithCharacterToDisplay = notice.value;
             if (!this.displayAfterDelay) {
                 this.displayCharacter(this.intWithCharacterToDisplay);
             }
@@ -356,9 +355,8 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         // can write another character to the transmitter data register. If the
         // Interrupt-Enabled
         // bit had been set by the program, generate an interrupt!
-        if (this.countingInstructions &&
-            notice.getAccessType() == AccessNotice.AccessType.READ && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
-            notice.getAddress())) {
+        if (this.countingInstructions && notice.accessType == AccessNotice.AccessType.READ && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
+            notice.address)) {
             this.instructionCount++;
             if (this.instructionCount >= this.transmitDelayInstructionCountLimit) {
                 if (this.displayAfterDelay) {

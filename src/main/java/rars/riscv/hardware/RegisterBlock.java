@@ -1,10 +1,9 @@
 package rars.riscv.hardware;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.notices.RegisterAccessNotice;
+import rars.riscv.hardware.registers.Register;
 import rars.util.BinaryUtils;
 import rars.util.SimpleSubscriber;
 
@@ -65,12 +64,12 @@ public final class RegisterBlock {
     }
 
     /**
-     * This method updates the register second to val
+     * This method updates the register value to val
      *
      * @param r
-     *     Register to set the second of.
+     *     Register to set the value of.
      * @param val
-     *     The desired second for the register.
+     *     The desired value for the register.
      * @return a long
      */
     private static @Nullable Long updateRegister(final @Nullable Register r, final long val) {
@@ -107,22 +106,22 @@ public final class RegisterBlock {
     }
 
     /**
-     * Returns the second of the register.
+     * Returns the value of the register.
      *
      * @param num
      *     The register's number.
-     * @return The second of the given register.
+     * @return The value of the given register.
      */
     public long getValue(final int num) {
         return this.getRegister(num).getValue();
     }
 
     /**
-     * Returns the second of the register.
+     * Returns the value of the register.
      *
      * @param name
      *     The register's name.
-     * @return The second of the given register.
+     * @return The value of the given register.
      */
     public long getValue(final String name) {
         return this.getRegister(name).getValue();
@@ -137,7 +136,7 @@ public final class RegisterBlock {
      */
     public @Nullable Register getRegister(final int num) {
         for (final Register r : this.regFile) {
-            if (r.getNumber() == num) {
+            if (r.number == num) {
                 return r;
             }
         }
@@ -159,7 +158,7 @@ public final class RegisterBlock {
 
         // Handle a direct name
         for (final Register r : this.regFile) {
-            if (r.getName().equals(name)) {
+            if (r.name.equals(name)) {
                 return r;
             }
         }

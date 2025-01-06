@@ -91,9 +91,9 @@ public final class BitmapDisplay extends JFrame implements SimpleSubscriber<Memo
     }
 
     private void doUpdate(final @NotNull MemoryAccessNotice notice) {
-        if (notice.getAccessType() == AccessNotice.AccessType.WRITE) {
-            final int address = notice.getAddress();
-            final int length = notice.getLength();
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            final int address = notice.address;
+            final int length = notice.length;
             // figure out which pixels were changed
             final int endAddress = address + length;
             if (endAddress < this.baseAddress || address > this.upperAddressBound) {

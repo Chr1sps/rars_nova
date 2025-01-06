@@ -96,7 +96,7 @@ public final class ExecutePane extends JDesktopPane {
         this.registerValues = regs;
         this.fpRegValues = fpRegs;
         this.csrValues = csrRegs;
-        this.textSegment = new TextSegmentWindow();
+        this.textSegment = new TextSegmentWindow(mainUI);
         this.dataSegment = new DataSegmentWindow(choosers);
         this.labelValues = new LabelsWindow();
         this.labelWindowVisible = BOOL_SETTINGS.getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY);

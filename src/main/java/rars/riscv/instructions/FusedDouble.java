@@ -38,7 +38,7 @@ public abstract class FusedDouble extends BasicInstruction {
             new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(3))), e
         );
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), result.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
     }
 
     /**

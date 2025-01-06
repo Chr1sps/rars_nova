@@ -28,6 +28,6 @@ public final class FCVTDS extends BasicInstruction {
         Float64 out = new Float64(0);
         out = FCVTSD.convert(in, out, e);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), out.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), out.bits);
     }
 }

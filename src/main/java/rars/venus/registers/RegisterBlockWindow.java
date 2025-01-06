@@ -6,7 +6,7 @@ import rars.notices.AccessNotice;
 import rars.notices.Notice;
 import rars.notices.RegisterAccessNotice;
 import rars.notices.SimulatorNotice;
-import rars.riscv.hardware.Register;
+import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
 import rars.util.SimpleSubscriber;
@@ -90,7 +90,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             }
         ) {
         };
-        FONT_SETTINGS.addChangeListener(this::updateRowHeight, true);
+        this.updateRowHeight();
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.updateRowHeight());
         final var columnModel = this.table.getColumnModel();
 
         final var nameColumn = columnModel.getColumn(RegisterBlockWindow.NAME_COLUMN);
@@ -123,19 +124,10 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
 
     protected abstract @NotNull String formatRegisterValue(final long value, int base);
 
-    /**
-     * <p>beginObserving.</p>
-     */
     protected abstract void beginObserving();
 
-    /**
-     * <p>endObserving.</p>
-     */
     protected abstract void endObserving();
 
-    /**
-     * <p>resetRegisters.</p>
-     */
     protected abstract void resetRegisters();
 
     /**
@@ -147,8 +139,8 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     private Object @NotNull [] @NotNull [] setupWindow() {
         final Object[][] tableData = new Object[this.registers.length][3];
         for (int i = 0; i < this.registers.length; i++) {
-            tableData[i][RegisterBlockWindow.NAME_COLUMN] = this.registers[i].getName();
-            final int temp = this.registers[i].getNumber();
+            tableData[i][RegisterBlockWindow.NAME_COLUMN] = this.registers[i].name;
+            final int temp = this.registers[i].number;
             tableData[i][RegisterBlockWindow.NUMBER_COLUMN] = temp == -1 ? "" : temp;
             final int base =
                 NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
@@ -213,7 +205,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             }
             case final RegisterAccessNotice a -> {
                 // NOTE: each register is a separate Observable
-                if (a.getAccessType() == AccessNotice.AccessType.WRITE) {
+                if (a.accessType == AccessNotice.AccessType.WRITE) {
                     // Uses the same highlighting technique as for Text Segment -- see
                     // AddressCellRenderer class in DataSegmentWindow.java.
                     //                  TODO:  this.highlightCellForRegister((Register) observable);
@@ -247,7 +239,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             this.alignment = alignment;
             this.font = FONT_SETTINGS.getCurrentFont();
             this.table = table;
-            FONT_SETTINGS.addChangeListener(() -> {
+            FONT_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
                 this.font = FONT_SETTINGS.getCurrentFont();
                 this.table.repaint();
             });

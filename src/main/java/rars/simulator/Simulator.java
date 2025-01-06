@@ -440,12 +440,12 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             // *********************************************************************
 
             RegisterFile.initializeProgramCounter(this.pc);
-            ProgramStatement statement;
             int steps = 0;
-            boolean ebreak = false, waiting = false;
 
             // Volatile variable initialized false but can be set true by the main thread.
             // Used to stop or pause a running program. See stopSimulation() above.
+            boolean ebreak = false;
+            boolean waiting = false;
             while (!this.stop) {
                 SystemIO.flush(false);
                 // Perform the RISCV instruction in synchronized block. If external threads
@@ -512,7 +512,9 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                         uip |= (pendingExternal ? ControlAndStatusRegisterFile.EXTERNAL_INTERRUPT : 0)
                             | (pendingTimer ? ControlAndStatusRegisterFile.TIMER_INTERRUPT : 0);
                     }
-                    if (uip != ControlAndStatusRegisterFile.getValueNoNotify("uip")) {
+                    if (uip != ControlAndStatusRegisterFile.UIP.getValueNoNotify()) {
+                        
+                        // ControlAndStatusRegisterFile.UIP.
                         ControlAndStatusRegisterFile.updateRegister("uip", uip);
                     }
 
@@ -529,6 +531,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                     this.pc = RegisterFile.getProgramCounter();
                     RegisterFile.incrementPC();
                     // Get instuction
+                    ProgramStatement statement;
                     try {
                         statement = Globals.MEMORY_INSTANCE.getStatement(this.pc);
                     } catch (final AddressErrorException e) {

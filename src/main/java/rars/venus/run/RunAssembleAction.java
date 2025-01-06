@@ -209,12 +209,12 @@ public class RunAssembleAction extends GuiAction {
                 for (final ErrorMessage em : errorMessages) {
                     // No line or position may mean File Not Found (e.g. exception file). Don't try
                     // to open. DPS 3-Oct-2010
-                    if (em.getLine() == 0 && em.getPosition() == 0) {
+                    if (em.getLineNumber() == 0 && em.getPosition() == 0) {
                         continue;
                     }
                     if (!em.isWarning() || RunAssembleAction.warningsAreErrors) {
                         Globals.gui.messagesPane.selectErrorMessage(
-                            em.getFile(), em.getLine(),
+                            em.getFile(), em.getLineNumber(),
                             em.getPosition()
                         );
                         // Bug workaround: Line selection does not work correctly for the JEditTextArea
@@ -226,7 +226,7 @@ public class RunAssembleAction extends GuiAction {
                         // test.
                         // DPS 9-Aug-2010
                         if (e != null) {
-                            MessagesPane.selectEditorTextLine(em.getFile(), em.getLine()
+                            MessagesPane.selectEditorTextLine(em.getFile(), em.getLineNumber()
                             );
                         }
                         break;

@@ -65,7 +65,7 @@ public abstract class FusedFloat extends BasicInstruction {
             new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(3))), e
         );
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
+        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), result.bits);
     }
 
     /**

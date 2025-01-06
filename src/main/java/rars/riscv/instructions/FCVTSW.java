@@ -59,6 +59,6 @@ public final class FCVTSW extends BasicInstruction {
         final Float32 converted = Conversions
             .convertFromInt(BigInteger.valueOf(RegisterFile.getValue(statement.getOperand(1))), e, tmp);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), converted.bits);
+        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), converted.bits);
     }
 }

@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 import org.jetbrains.annotations.NotNull;
+import rars.riscv.hardware.registers.Register;
 
 /**
  * Object provided to Observers of runtime access to register.
@@ -38,34 +39,18 @@ import org.jetbrains.annotations.NotNull;
  * @version July 2005
  */
 public final class RegisterAccessNotice extends AccessNotice {
-    private final String registerName;
+    private final @NotNull Register register;
 
     /**
      * Constructor will be called only within this package, so assume
      * register number is in valid range.
      */
-    public RegisterAccessNotice(final @NotNull AccessType type, final String registerName) {
+    public RegisterAccessNotice(final @NotNull AccessType type, final @NotNull Register register) {
         super(type);
-        this.registerName = registerName;
+        this.register = register;
     }
 
-    /**
-     * Fetch the register number of register accessed.
-     *
-     * @return a {@link java.lang.String} object
-     */
-    public String getRegisterName() {
-        return registerName;
+    public @NotNull String toString() {
+        return ((this.accessType == AccessType.READ) ? "R " : "W ") + "Reg " + register.name;
     }
-
-    /**
-     * String representation indicates access type and which register
-     *
-     * @return a {@link java.lang.String} object
-     */
-    public String toString() {
-        return ((this.getAccessType() == AccessType.READ) ? "R " : "W ") +
-            "Reg " + registerName;
-    }
-
 }

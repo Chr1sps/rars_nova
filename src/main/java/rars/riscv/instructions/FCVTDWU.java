@@ -32,6 +32,6 @@ public final class FCVTDWU extends BasicInstruction {
         final Float64 converted = Conversions
             .convertFromInt(BigInteger.valueOf(RegisterFile.getValue(statement.getOperand(1)) & 0xFFFFFFFFL), e, tmp);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), converted.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), converted.bits);
     }
 }

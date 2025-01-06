@@ -153,7 +153,7 @@ public class BackStepper {
                             RegisterFile.updateRegister(step.param1, step.param2);
                             break;
                         case FLOATING_POINT_REGISTER_RESTORE:
-                            FloatingPointRegisterFile.updateRegisterLong(step.param1, step.param2);
+                            FloatingPointRegisterFile.updateRegister(step.param1, step.param2);
                             break;
                         case CONTROL_AND_STATUS_REGISTER_RESTORE:
                             ControlAndStatusRegisterFile.updateRegister(step.param1, step.param2);

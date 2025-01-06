@@ -69,7 +69,7 @@ final class AppTest extends RarsTestBase {
         programArgs.memoryConfiguration = MemoryConfiguration.DEFAULT;
         final var program = new Program(programArgs);
         try {
-            program.assembleFile(new File( path ));
+            program.assembleFile(new File(path));
             if (!errorLines.isEmpty()) {
                 fail("Expected assembly error, but successfully assembled `" + path + "`.\n");
             }
@@ -104,7 +104,11 @@ final class AppTest extends RarsTestBase {
                 final var builder = new StringBuilder();
                 builder.append("Failed to assemble `%s` due to following error(s):\n".formatted(path));
                 for (final var error : ae.errors.getErrorMessages()) {
-                    builder.append("[%d, %d] %s\n".formatted(error.getLine(), error.getPosition(), error.getMessage()));
+                    builder.append("[%d, %d] %s\n".formatted(
+                        error.getLineNumber(),
+                        error.getPosition(),
+                        error.getMessage()
+                    ));
                 }
                 fail(builder.toString());
             }
@@ -112,7 +116,7 @@ final class AppTest extends RarsTestBase {
             final var foundErrorLines = new HashSet<Integer>();
             for (final var error : errors) {
                 if (error.isWarning()) continue;
-                foundErrorLines.add(error.getLine());
+                foundErrorLines.add(error.getLineNumber());
             }
             if (!errorLines.equals(foundErrorLines)) {
                 final var builder = new StringBuilder();
@@ -120,7 +124,11 @@ final class AppTest extends RarsTestBase {
                 builder.append("Expected lines: %s\n".formatted(errorLines));
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
-                    builder.append("[%d,%d] %s\n".formatted(error.getLine(), error.getPosition(), error.getMessage()));
+                    builder.append("[%d,%d] %s\n".formatted(
+                        error.getLineNumber(),
+                        error.getPosition(),
+                        error.getMessage()
+                    ));
                 }
                 fail(builder.toString());
             }
@@ -171,7 +179,7 @@ final class AppTest extends RarsTestBase {
         programArgs.selfModifyingCode = true;
         programArgs.memoryConfiguration = MemoryConfiguration.DEFAULT;
         final var program = new Program(programArgs);
-        
+
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
         BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64Enabled);
         InstructionsRegistry.RV64_MODE_FLAG = isRV64Enabled;

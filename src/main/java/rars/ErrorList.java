@@ -113,7 +113,7 @@ public final class ErrorList {
         if (this.errorCount == ErrorList.getErrorLimit()) {
             this.messages.add(ErrorMessage.error(
                 null,
-                mess.getLine(),
+                mess.getLineNumber(),
                 mess.getPosition(),
                 "Error Limit of %d exceeded."
                     .formatted(ErrorList.getErrorLimit())

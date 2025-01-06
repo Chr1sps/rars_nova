@@ -52,7 +52,7 @@ public final class FLW extends BasicInstruction {
 
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            FloatingPointRegisterFile.updateRegister(
+            FloatingPointRegisterFile.updateRegisterInt(
                 statement.getOperand(0),
                 Globals.MEMORY_INSTANCE.getWord(RegisterFile.getValue(statement.getOperand(2)) + upperImmediate)
             );

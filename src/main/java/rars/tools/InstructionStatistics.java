@@ -270,18 +270,18 @@ public class InstructionStatistics extends AbstractTool {
     @Override
     protected void processRISCVUpdate(final AccessNotice notice) {
 
-        if (!notice.accessIsFromRISCV()) {
+        if (!notice.isAccessFromRISCV) {
             return;
         }
 
         // check for a read access in the text segment
-        if (notice.getAccessType() == AccessNotice.AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
+        if (notice.accessType == AccessNotice.AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
 
             // now it is safe to make a cast of the notice
 
             // The next three statments are from Felipe Lessa's instruction counter.
             // Prevents double-counting.
-            final int a = memAccNotice.getAddress();
+            final int a = memAccNotice.address;
             if (a == this.lastAddress) {
                 return;
             }
@@ -290,7 +290,7 @@ public class InstructionStatistics extends AbstractTool {
             try {
 
                 // access the statement in the text segment without notifying other tools etc.
-                final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatementNoNotify(memAccNotice.getAddress());
+                final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatementNoNotify(memAccNotice.address);
 
                 // necessary to handle possible null pointers at the end of the program
                 // (e.g., if the simulator tries to execute the next instruction after the last

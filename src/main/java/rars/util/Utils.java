@@ -30,16 +30,6 @@ public final class Utils {
         return writer.toString();
     }
 
-    /**
-     * <p>findAndSimulateSyscall.</p>
-     *
-     * @param number
-     *     a int
-     * @param statement
-     *     a {@link ProgramStatement} object
-     * @throws SimulationException
-     *     if any.
-     */
     public static void findAndSimulateSyscall(final int number, final ProgramStatement statement)
         throws SimulationException {
         final AbstractSyscall service = SyscallLoader.findSyscall(number);
@@ -69,24 +59,12 @@ public final class Utils {
         );
     }
 
-    /**
-     * <p>processBranch.</p>
-     *
-     * @param displacement
-     *     a int
-     */
     public static void processBranch(final int displacement) {
         // Decrement needed because PC has already been incremented
         RegisterFile
             .setProgramCounter(RegisterFile.getProgramCounter() + displacement - BasicInstruction.BASIC_INSTRUCTION_LENGTH);
     }
 
-    /**
-     * <p>processJump.</p>
-     *
-     * @param targetAddress
-     *     a int
-     */
     public static void processJump(final int targetAddress) {
         RegisterFile.setProgramCounter(targetAddress);
     }
@@ -101,12 +79,6 @@ public final class Utils {
         RegisterFile.updateRegister(register, RegisterFile.getProgramCounter());
     }
 
-    /**
-     * <p>flipRounding.</p>
-     *
-     * @param e
-     *     a {@link Environment} object
-     */
     public static void flipRounding(@NotNull final Environment e) {
         if (e.mode == RoundingMode.MAX) {
             e.mode = RoundingMode.MIN;
@@ -128,7 +100,7 @@ public final class Utils {
     }
 
     @SafeVarargs
-    public static <T> Stream<T> concatStreams(
+    public static <T> Stream<? extends T> concatStreams(
         final @NotNull Stream<? extends T> first,
         final Stream<? extends T> @NotNull ... others
     ) {
@@ -136,8 +108,7 @@ public final class Utils {
         for (final var other : others) {
             result = Stream.concat(result, other);
         }
-        // noinspection unchecked
-        return (Stream<T>) result;
+        return result;
     }
 
     /**

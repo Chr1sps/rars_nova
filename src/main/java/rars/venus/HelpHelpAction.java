@@ -90,7 +90,7 @@ public final class HelpHelpAction extends GuiAction {
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
         examples.setFont(FONT_SETTINGS.getCurrentFont());
-        FONT_SETTINGS.addChangeListener(() -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
         return scrollPane;
     }
 
@@ -103,7 +103,7 @@ public final class HelpHelpAction extends GuiAction {
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
         examples.setFont(FONT_SETTINGS.getCurrentFont());
-        FONT_SETTINGS.addChangeListener(() -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
         examples.setCellRenderer(new MyCellRenderer());
         return scrollPane;
     }

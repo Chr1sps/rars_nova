@@ -2,6 +2,7 @@ package rars;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.assembler.SourceLine;
 import rars.assembler.SymbolTable;
 import rars.assembler.TokenList;
 import rars.assembler.TokenType;
@@ -13,7 +14,6 @@ import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
 import rars.venus.NumberDisplayBaseChooser;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -60,14 +60,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class ProgramStatement implements Comparable<ProgramStatement> {
     private static final @NotNull String invalidOperator = "<INVALID>";
-    private final @Nullable RISCVProgram sourceProgram;
+    public final @Nullable SourceLine sourceLine;
     private final @Nullable TokenList originalTokenList, strippedTokenList;
     private final @NotNull BasicStatementList basicStatementList;
     private final @NotNull ArrayList<@NotNull Integer> operands;
     private final @Nullable Instruction instruction;
     private final int textAddress;
-    private final @NotNull String source;
-    private final int sourceLine;
     private String basicAssemblyStatement;
     private String machineStatement;
     private int binaryStatement;
@@ -77,10 +75,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * token
      * information. These can be used by a debugger later on.
      *
-     * @param sourceProgram
-     *     The RISCVprogram object that contains this statement
-     * @param source
-     *     The corresponding RISCV source statement.
      * @param origTokenList
      *     Complete list of Token objects (includes labels,
      *     comments, parentheses, etc)
@@ -95,19 +89,17 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *     machine code for this statement
      *     is stored.
      * @param sourceLine
-     *     a int
+     *     A SourceLine object containing the information about
+     *     the program this statement relates to and the statement's
+     *     position in code.
      */
     public ProgramStatement(
-        final @Nullable RISCVProgram sourceProgram,
-        final @NotNull String source,
         final @Nullable TokenList origTokenList,
         final @Nullable TokenList strippedTokenList,
         final @NotNull Instruction instruction,
         final int textAddress,
-        final int sourceLine
+        final @Nullable SourceLine sourceLine
     ) {
-        this.sourceProgram = sourceProgram;
-        this.source = source;
         this.originalTokenList = origTokenList;
         this.strippedTokenList = strippedTokenList;
         this.operands = new ArrayList<>(5);
@@ -134,13 +126,14 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *     machine code for this statement
      *     is stored.
      */
-    public ProgramStatement(final int binaryStatement, final int textAddress) {
-        this.sourceProgram = null;
+    public ProgramStatement(
+        final int binaryStatement,
+        final int textAddress
+    ) {
         this.binaryStatement = binaryStatement;
         this.textAddress = textAddress;
         this.originalTokenList = this.strippedTokenList = null;
-        this.source = "";
-        this.sourceLine = -1;
+        this.sourceLine = null;
         this.machineStatement = this.basicAssemblyStatement = null;
         final var instr = InstructionsRegistry.findBasicInstructionByBinaryCode(binaryStatement);
         this.operands = new ArrayList<>(5);
@@ -198,6 +191,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             this.operands
         );
     }
+
+    // region Statics
 
     private static int toJumpImmediate(int address) {
         // trying to produce immediate[20:1] where immediate = address[20|10:1|11|19:12]
@@ -337,10 +332,12 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         return statementList;
     } // buildBasicStatementListFromBinaryCode()
 
+    // endregion Statics
+
     @Override
     public int compareTo(final ProgramStatement obj1) {
-        final int addr1 = this.getAddress();
-        final int addr2 = obj1.getAddress();
+        final int addr1 = this.textAddress;
+        final int addr2 = obj1.textAddress;
         return (addr1 < 0 && addr2 >= 0 || addr1 >= 0 && addr2 < 0) ? addr2 : addr1 - addr2;
     }
 
@@ -370,7 +367,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     basicInstructionBuilder.append(basicStatementElement);
                     this.basicStatementList.addString(basicStatementElement);
                     try {
-                        registerNumber = RegisterFile.getRegister(tokenValue).getNumber();
+                        registerNumber = RegisterFile.getRegister(tokenValue).number;
                     } catch (final Exception e) {
                         // should never happen; should be caught before now...
                         errors.addTokenError(
@@ -382,7 +379,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     this.operands.add(registerNumber);
                 }
                 case REGISTER_NAME -> {
-                    registerNumber = RegisterFile.getRegister(tokenValue).getNumber();
+                    registerNumber = RegisterFile.getRegister(tokenValue).number;
                     basicStatementElement = "x" + registerNumber;
                     basicInstructionBuilder.append(basicStatementElement);
                     this.basicStatementList.addString(basicStatementElement);
@@ -397,7 +394,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     this.operands.add(registerNumber);
                 }
                 case CSR_NAME -> {
-                    registerNumber = ControlAndStatusRegisterFile.getRegister(tokenValue).getNumber();
+                    registerNumber = ControlAndStatusRegisterFile.getRegister(tokenValue).number;
                     if (registerNumber < 0) {
                         // should never happen; should be caught before now...
                         errors.addTokenError(
@@ -411,7 +408,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     this.operands.add(registerNumber);
                 }
                 case FP_REGISTER_NAME -> {
-                    registerNumber = FloatingPointRegisterFile.getRegister(tokenValue).getNumber();
+                    registerNumber = FloatingPointRegisterFile.getRegister(tokenValue).number;
                     basicStatementElement = "f" + registerNumber;
                     basicInstructionBuilder.append(basicStatementElement);
                     this.basicStatementList.addString(basicStatementElement);
@@ -448,7 +445,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 }
                 case IDENTIFIER -> {
                     int address =
-                        Objects.requireNonNull(this.sourceProgram)
+                        Objects.requireNonNull(this.sourceLine)
+                            .program()
                             .getLocalSymbolTable()
                             .getAddressLocalOrGlobal(tokenValue);
                     if (address == SymbolTable.NOT_FOUND) { // symbol used without being defined
@@ -469,8 +467,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                                 // SPIM flags as warning, I'll flag as error b/c RARS text segment not long
                                 // enough for it to be OK.
                                 errors.add(ErrorMessage.error(
-                                    this.sourceProgram,
-                                    this.sourceLine,
+                                    this.sourceLine.program(),
+                                    this.sourceLine.lineNumber(),
                                     0,
                                     "Branch target word address beyond 12-bit range"
                                 ));
@@ -481,8 +479,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                             address -= this.textAddress;
                             if (address >= (1 << 20) || address < -(1 << 20)) {
                                 errors.add(ErrorMessage.error(
-                                    this.sourceProgram,
-                                    this.sourceLine,
+                                    this.sourceLine.program(),
+                                    this.sourceLine.lineNumber(),
                                     0,
                                     "Jump target word address beyond 20-bit range"
                                 ));
@@ -595,18 +593,16 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      */
     public void buildMachineStatementFromBasicStatement(final @NotNull ErrorList errors) {
         switch (this.instruction) {
-            case final ExtendedInstruction ignored -> {
-                // This means the pseudo-instruction expansion generated another
+            case final ExtendedInstruction ignored -> // This means the pseudo-instruction expansion generated another
                 // pseudo-instruction (expansion must be to all basic instructions).
                 // This is an error on the part of the pseudo-instruction author.
                 errors.add(ErrorMessage.error(
-                    this.sourceProgram,
-                    this.sourceLine,
+                    this.sourceLine.program(),
+                    this.sourceLine.lineNumber(),
                     0,
                     "INTERNAL ERROR: usePseudoInstructions-instruction expansion contained a " +
                         "pseudo-instruction"
                 ));
-            }
             case final BasicInstruction basic -> {
                 // mask indicates bit positions for 'f'irst, 's'econd, 't'hird operand
                 this.machineStatement = basic.getOperationMask();
@@ -715,34 +711,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * @return The RISCVprogram object. May be null...
      */
     public @Nullable RISCVProgram getSourceProgram() {
-        return this.sourceProgram;
-    }
-
-    /**
-     * Produces String name of the source file containing this statement.
-     *
-     * @return The file name.
-     */
-    public @Nullable File getSourceFile() {
-        return (this.sourceProgram == null) ? null : this.sourceProgram.getFile();
-    }
-
-    /**
-     * Produces RISCV source statement.
-     *
-     * @return The RISCV source statement.
-     */
-    public @NotNull String getSource() {
-        return this.source;
-    }
-
-    /**
-     * Produces line number of RISCV source statement.
-     *
-     * @return The RISCV source statement line number.
-     */
-    public int getSourceLine() {
-        return this.sourceLine;
+        return (this.sourceLine == null) ? null : this.sourceLine.program();
     }
 
     /**
@@ -853,8 +822,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         // if it does, then one of the BasicInstructions is malformed
         if (length == 0) {
             errors.add(ErrorMessage.error(
-                this.sourceProgram,
-                this.sourceLine,
+                this.sourceLine.program(),
+                this.sourceLine.lineNumber(),
                 0,
                 "INTERNAL ERROR: mismatch in number of operands in statement vs mask"
             ));
@@ -879,17 +848,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         }
 
         this.machineStatement = stateBuilder.toString();
-    }
-
-    /**
-     * Structure for getting the dimensions to be used when
-     * generating the string representation of the statement.
-     */
-    private record StringDimensions(
-        int textAddressesWidth,
-        int instructionsWidth,
-        int operandsWidth
-    ) {
     }
 
     /**

@@ -60,26 +60,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson
  */
 public class EditTabbedPane extends JPanel {
-    final MainPane mainPane;
-    private final VenusUI mainUI;
-    private final Editor editor;
-    private final FileOpener fileOpener;
-    private final JTabbedPane tabbedPane;
+    private final @NotNull MainPane mainPane;
+    private final @NotNull VenusUI mainUI;
+    private final @NotNull Editor editor;
+    private final @NotNull FileOpener fileOpener;
+    private final @NotNull JTabbedPane tabbedPane;
 
     /**
      * Constructor for the EditTabbedPane class.
      *
-     * @param appFrame
+     * @param mainUI
      *     a {@link VenusUI} object
      * @param editor
      *     a {@link Editor} object
      * @param mainPane
      *     a {@link MainPane} object
      */
-    public EditTabbedPane(final VenusUI appFrame, final Editor editor, final MainPane mainPane) {
+    public EditTabbedPane(final @NotNull VenusUI mainUI, final @NotNull Editor editor, final @NotNull MainPane mainPane) {
         super();
         this.tabbedPane = new JTabbedPane();
-        this.mainUI = appFrame;
+        this.mainUI = mainUI;
         this.editor = editor;
         this.fileOpener = new FileOpener(editor);
         this.mainPane = mainPane;

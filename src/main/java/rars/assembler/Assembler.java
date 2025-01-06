@@ -102,13 +102,13 @@ public final class Assembler {
                         "use of %s operand)"
                 ).formatted(
                     formattedAddress,
-                    ps1.getSourceFile(),
-                    ps1.getSourceLine(),
+                    ps1.sourceLine.program().getFile(),
+                    ps1.sourceLine.lineNumber(),
                     directiveText
                 );
                 errors.add(ErrorMessage.error(
                     ps2.getSourceProgram(),
-                    ps2.getSourceLine(),
+                    ps2.sourceLine.lineNumber(),
                     0,
                     message
                 ));
@@ -342,9 +342,9 @@ public final class Assembler {
                     // translation correctly.
                     // TODO: consider making this recursive
                     final String basicAssembly = statement.getBasicAssemblyStatement();
-                    final int sourceLine = statement.getSourceLine();
+                    final int lineNumber = statement.sourceLine.lineNumber();
                     final var tokenList = Tokenizer.tokenizeLine(
-                        sourceLine,
+                        lineNumber,
                         basicAssembly, this.errors, false
                     );
 
@@ -374,7 +374,7 @@ public final class Assembler {
                         // For generated instruction: tokenize, build program
                         // statement, add to list.
                         final TokenList newTokenList = Tokenizer.tokenizeLine(
-                            sourceLine,
+                            lineNumber,
                             instruction, this.errors, false
                         );
                         final var instrMatches = this.matchInstruction(newTokenList.get(0));
@@ -384,9 +384,13 @@ public final class Assembler {
                         );
                         // Only first generated instruction is linked to original source
                         final ProgramStatement ps = new ProgramStatement(
-                            this.fileCurrentlyBeingAssembled,
-                            (instrNumber == 0) ? statement.getSource() : "", newTokenList,
-                            newTokenList, instr, this.textAddress, statement.getSourceLine()
+                            // this.fileCurrentlyBeingAssembled,
+                            // (instrNumber == 0) ? statement.source : "",
+                            newTokenList,
+                            newTokenList,
+                            instr,
+                            this.textAddress,
+                            statement.sourceLine
                         );
                         this.textAddress += (BasicInstruction.BASIC_INSTRUCTION_LENGTH);
                         ps.buildBasicStatementFromBasicInstruction(this.errors);
@@ -639,9 +643,13 @@ public final class Assembler {
                 );
             }
             if (OperandUtils.checkIfTokensMatchOperand(tokens, instruction, this.errors)) {
+                final var sourceLine = new SourceLine(source, this.fileCurrentlyBeingAssembled, sourceLineNumber);
                 final var programStatement = new ProgramStatement(
-                    this.fileCurrentlyBeingAssembled, source,
-                    tokenList, tokens, instruction, this.textAddress, sourceLineNumber
+                    tokenList,
+                    tokens,
+                    instruction,
+                    this.textAddress,
+                    sourceLine
                 );
                 // instruction length is 4 for all basic instruction, varies for extended
                 // instruction

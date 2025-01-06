@@ -54,6 +54,6 @@ public final class FSQRTS extends BasicInstruction {
         final Float32 result = Arithmetic
             .squareRoot(new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1))), e);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
+        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), result.bits);
     }
 }

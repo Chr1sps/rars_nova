@@ -23,6 +23,6 @@ public final class FSGNJND extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement) {
         final long result = (FloatingPointRegisterFile.getValueLong(statement.getOperand(1)) & 0x7FFFFFFF_FFFFFFFFL) |
             ((~FloatingPointRegisterFile.getValueLong(statement.getOperand(2))) & 0x80000000_00000000L);
-        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), result);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result);
     }
 }

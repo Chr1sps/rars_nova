@@ -29,7 +29,7 @@ public final class FLD extends BasicInstruction {
                 RegisterFile.getValue(statement.getOperand(2))
                     + upperImmediate
             );
-            FloatingPointRegisterFile.updateRegisterLong(
+            FloatingPointRegisterFile.updateRegister(
                 statement.getOperand(0),
                 value
             );

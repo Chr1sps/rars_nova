@@ -103,8 +103,8 @@ public class DigitalLabSim extends AbstractTool {
     @Override
     public void onNext(final @NotNull AccessNotice notice) {
         final var memNotice = (MemoryAccessNotice) notice;
-        final int address = memNotice.getAddress();
-        final char value = (char) memNotice.getValue();
+        final int address = memNotice.address;
+        final char value = (char) memNotice.value;
         if (address == this.IN_ADRESS_DISPLAY_1) {
             this.updateSevenSegment(1, value);
         } else if (address == this.IN_ADRESS_DISPLAY_2) {

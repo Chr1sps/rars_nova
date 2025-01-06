@@ -123,7 +123,7 @@ public final class OtherSettings extends SettingsBase {
         } catch (final BackingStoreException e) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }
-        submit();
+        this.onChangeDispatcher.dispatch(null);
     }
 
     // region Preference loading methods

@@ -40,46 +40,18 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract sealed class AccessNotice implements Notice permits MemoryAccessNotice, RegisterAccessNotice {
 
-    private final AccessType accessType;
-    private final Thread thread;
+    /** Type of access: READ or WRITE. */
+    public final @NotNull AccessType accessType;
+    /** Indicates whether the access is from the Simulator thread. */
+    public final boolean isAccessFromRISCV;
 
-    /**
-     * <p>Constructor for AccessNotice.</p>
-     *
-     * @param type
-     *     a int
-     */
     protected AccessNotice(final @NotNull AccessType type) {
         this.accessType = type;
-        this.thread = Thread.currentThread();
-    }
-
-    /**
-     * Get the access type: READ or WRITE.
-     *
-     * @return Access type, either AccessNotice.READ or AccessNotice.WRITE
-     */
-    public @NotNull AccessType getAccessType() {
-        return this.accessType;
-    }
-
-    /**
-     * Query whether the access originated from executing program
-     *
-     * @return true if this access originated from executing program, false
-     * otherwise
-     */
-    // Thread to execute the MIPS program is instantiated in SwingWorker.java.
-    // There it is given the name "RISCV" to replace the default "Thread-x".
-    // TODO: there should be a better way than this; I think that this is always
-    // true or should be for all usages
-    public boolean accessIsFromRISCV() {
-        return this.thread.getName().startsWith("RISCV");
+        this.isAccessFromRISCV = Thread.currentThread().getName().startsWith("RISCV");
     }
 
     public enum AccessType {
         READ,
         WRITE
     }
-
 }

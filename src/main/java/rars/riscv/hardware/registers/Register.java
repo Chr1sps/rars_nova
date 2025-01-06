@@ -1,5 +1,6 @@
-package rars.riscv.hardware;
+package rars.riscv.hardware.registers;
 
+import org.jetbrains.annotations.NotNull;
 import rars.notices.AccessNotice;
 import rars.notices.RegisterAccessNotice;
 import rars.util.CustomPublisher;
@@ -39,8 +40,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version June 2003
  */
 public class Register extends CustomPublisher<RegisterAccessNotice> {
-    private final String name;
-    private final int number;
+    public final @NotNull String name;
+    public final int number;
     private long resetValue;
     // volatile should be enough to allow safe multi-threaded access
     // w/o the use of synchronized methods. getValue and setValue
@@ -52,27 +53,18 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
     /**
      * Creates a new register with specified name, number, and second.
      *
-     * @param n
+     * @param name
      *     The name of the register.
-     * @param num
+     * @param number
      *     The number of the register.
-     * @param val
+     * @param initialValue
      *     The inital (and reset) second of the register.
      */
-    public Register(final String n, final int num, final long val) {
-        this.name = n;
-        this.number = num;
-        this.value = val;
-        this.resetValue = val;
-    }
-
-    /**
-     * Returns the name of the Register.
-     *
-     * @return name The name of the Register.
-     */
-    public final String getName() {
-        return this.name;
+    public Register(final @NotNull String name, final int number, final long initialValue) {
+        this.name = name;
+        this.number = number;
+        this.value = initialValue;
+        this.resetValue = initialValue;
     }
 
     /**
@@ -82,7 +74,7 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
      * @return second The second of the Register.
      */
     public final synchronized long getValue() {
-        this.submit(new RegisterAccessNotice(AccessNotice.AccessType.READ, this.name));
+        this.submit(new RegisterAccessNotice(AccessNotice.AccessType.READ, this));
         return this.getValueNoNotify();
     }
 
@@ -106,15 +98,6 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
     }
 
     /**
-     * Returns the number of the Register.
-     *
-     * @return number The number of the Register.
-     */
-    public int getNumber() {
-        return this.number;
-    }
-
-    /**
      * Sets the second of the register to the val passed to it.
      * Observers are notified of the WRITE operation.
      *
@@ -125,7 +108,7 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
     public synchronized long setValue(final long val) {
         final long old = this.value;
         this.value = val;
-        this.submit(new RegisterAccessNotice(AccessNotice.AccessType.WRITE, this.name));
+        this.submit(new RegisterAccessNotice(AccessNotice.AccessType.WRITE, this));
         return old;
     }
 

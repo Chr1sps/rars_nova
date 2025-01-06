@@ -111,7 +111,7 @@ public abstract class Floating extends BasicInstruction {
             new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(2))), environment
         );
         Floating.setfflags(environment);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
+        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), result.bits);
     }
 
     /**

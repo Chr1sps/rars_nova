@@ -91,7 +91,7 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
         inputValue = JOptionPane.showInputDialog(message);
 
         try {
-            FloatingPointRegisterFile.updateRegisterLong(0, 0); // set $f0 to zero
+            FloatingPointRegisterFile.updateRegister(0, 0); // set $f0 to zero
             if (inputValue == null) // Cancel was chosen
             {
                 RegisterFile.updateRegister("a1", -2); // set $a1 to -2 flag
@@ -102,7 +102,7 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
                 final double doubleValue = Double.parseDouble(inputValue);
 
                 // Successful parse of valid input data
-                FloatingPointRegisterFile.updateRegisterLong(10, Double.doubleToRawLongBits(doubleValue));
+                FloatingPointRegisterFile.updateRegister(10, Double.doubleToRawLongBits(doubleValue));
                 RegisterFile.updateRegister("a1", 0); // set $a1 to valid flag
 
             }

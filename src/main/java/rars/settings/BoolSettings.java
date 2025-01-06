@@ -50,7 +50,7 @@ public final class BoolSettings extends SettingsBase {
         } catch (final BackingStoreException bse) {
             LOGGER.error("Unable to communicate with persistent storage.");
         }
-        submit();
+        this.onChangeDispatcher.dispatch(null);
     }
 
     /**

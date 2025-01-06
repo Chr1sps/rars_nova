@@ -28,7 +28,7 @@ import java.util.Map;
 import static rars.settings.FontSettings.FONT_SETTINGS;
 
 public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
-    public static final @NotNull String SYNTAX_STYLE_RISCV = "text/riscv";
+    private static final @NotNull String SYNTAX_STYLE_RISCV = "text/riscv";
     private static final @NotNull Logger LOGGER = LogManager.getLogger(RSyntaxTextAreaBasedEditor.class);
     private static final Map<TextAttribute, Object> textAttributes = Map.of(
         TextAttribute.KERNING, TextAttribute.KERNING_ON
@@ -40,21 +40,22 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         factory.putMapping(SYNTAX_STYLE_RISCV, RSTATokensProducer.class.getName());
     }
 
-    private final RSyntaxTextArea textArea;
-    private final RTextScrollPane scrollPane;
-    private final Gutter gutter;
+    private final @NotNull RSyntaxTextArea textArea;
+    private final @NotNull RTextScrollPane scrollPane;
+    private final @NotNull Gutter gutter;
     private @NotNull EditorTheme theme;
+    private @NotNull Font currentFont;
 
     public RSyntaxTextAreaBasedEditor(final @NotNull EditorTheme theme) {
-        textArea = new RSyntaxTextArea();
-        scrollPane = new RTextScrollPane(textArea);
-        gutter = scrollPane.getGutter();
-        this.setFont(FONT_SETTINGS.getCurrentFont());
+        this.textArea = new RSyntaxTextArea();
+        this.scrollPane = new RTextScrollPane(textArea);
+        this.gutter = scrollPane.getGutter();
+        this.currentFont = FONT_SETTINGS.getCurrentFont();
+        this.setFont(this.currentFont);
         this.setTheme(theme);
         textArea.setSyntaxEditingStyle(SYNTAX_STYLE_RISCV);
         textArea.setCodeFoldingEnabled(true);
         textArea.setMarkOccurrencesDelay(1);
-//        textArea.getPosi
     }
 
     @Override
@@ -158,6 +159,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void setFont(final @NotNull Font f) {
         final var derived = f.deriveFont(textAttributes);
+        this.currentFont = derived;
         textArea.setFont(derived);
         gutter.setLineNumberFont(derived);
     }
@@ -297,6 +299,12 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
             LOGGER.error("Failed to get caret position", e);
             return Pair.of(0, 0);
         }
+    }
+
+    @Override
+    public void forceSettingsRestore() {
+        this.setFont(this.currentFont);
+        this.setTheme(this.theme);
     }
 
     private void applyColorScheme(final @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles) {

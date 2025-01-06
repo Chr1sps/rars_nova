@@ -26,7 +26,7 @@ public final class CompressedLoad extends CompressedInstruction {
         "c.flw f1, -100(t1)",
         "Load a float from memory",
         0b001,
-        FloatingPointRegisterFile::updateRegisterLong,
+        FloatingPointRegisterFile::updateRegister,
         address -> Globals.MEMORY_INSTANCE.getWord(address)
     );
     public static final @NotNull CompressedLoad CLD = new CompressedLoad(
@@ -40,7 +40,7 @@ public final class CompressedLoad extends CompressedInstruction {
         "c.fld f1, -100(t1)",
         "Load a double from memory",
         0b001,
-        FloatingPointRegisterFile::updateRegisterLong,
+        FloatingPointRegisterFile::updateRegister,
         address -> Globals.MEMORY_INSTANCE.getDoubleWord(address)
     );
 

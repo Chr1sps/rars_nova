@@ -31,6 +31,6 @@ public final class FCVTDL extends BasicInstruction {
         final Float64 converted = Conversions
             .convertFromInt(BigInteger.valueOf(RegisterFile.getValueLong(statement.getOperand(1))), e, tmp);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterLong(statement.getOperand(0), converted.bits);
+        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), converted.bits);
     }
 }

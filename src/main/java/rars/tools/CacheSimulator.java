@@ -447,7 +447,7 @@ public class CacheSimulator extends AbstractTool {
     protected void processRISCVUpdate(final AccessNotice accessNotice) {
         final MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
         this.memoryAccessCount++;
-        final CacheAccessResult cacheAccessResult = this.theCache.isItAHitThenReadOnMiss(notice.getAddress());
+        final CacheAccessResult cacheAccessResult = this.theCache.isItAHitThenReadOnMiss(notice.address);
         if (cacheAccessResult.isHit()) {
             this.cacheHitCount++;
             this.animations.showHit(cacheAccessResult.getBlock());

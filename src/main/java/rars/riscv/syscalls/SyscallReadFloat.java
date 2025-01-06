@@ -60,6 +60,9 @@ public class SyscallReadFloat extends AbstractSyscall {
                 "invalid float input (syscall " + this.getNumber() + ")"
             );
         }
-        FloatingPointRegisterFile.updateRegister(10, Float.floatToRawIntBits(floatValue)); // TODO: update to string fa0
+        FloatingPointRegisterFile.updateRegisterInt(
+            10,
+            Float.floatToRawIntBits(floatValue)
+        ); // TODO: update to string fa0
     }
 }

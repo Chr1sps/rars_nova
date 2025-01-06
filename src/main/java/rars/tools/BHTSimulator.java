@@ -305,17 +305,17 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     @Override
     protected void processRISCVUpdate(final AccessNotice notice) {
 
-        if (!notice.accessIsFromRISCV()) {
+        if (!notice.isAccessFromRISCV) {
             return;
         }
 
-        if (notice.getAccessType() == AccessNotice.AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
+        if (notice.accessType == AccessNotice.AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
 
             // now it is safe to make a cast of the notice
 
             try {
                 // access the statement in the text segment without notifying other tools etc.
-                final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatementNoNotify(memAccNotice.getAddress());
+                final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatementNoNotify(memAccNotice.address);
 
                 // necessary to handle possible null pointers at the end of the program
                 // (e.g., if the simulator tries to execute the next instruction after the last

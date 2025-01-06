@@ -2,8 +2,8 @@ package rars.util;
 
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.Register;
 import rars.riscv.hardware.RegisterFile;
+import rars.riscv.hardware.registers.Register;
 
 public final class RegisterUtils {
     private RegisterUtils() {

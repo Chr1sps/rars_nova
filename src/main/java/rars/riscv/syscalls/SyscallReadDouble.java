@@ -65,6 +65,6 @@ public class SyscallReadDouble extends AbstractSyscall {
             );
         }
 
-        FloatingPointRegisterFile.updateRegisterLong(10, Double.doubleToRawLongBits(doubleValue));
+        FloatingPointRegisterFile.updateRegister(10, Double.doubleToRawLongBits(doubleValue));
     }
 }

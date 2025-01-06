@@ -32,6 +32,6 @@ public final class FCVTSL extends BasicInstruction {
         final Float32 converted = Conversions
             .convertFromInt(BigInteger.valueOf(RegisterFile.getValueLong(statement.getOperand(1))), e, tmp);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), converted.bits);
+        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), converted.bits);
     }
 }

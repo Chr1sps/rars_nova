@@ -290,11 +290,11 @@ public class TimerTool extends AbstractTool {
 
         @Override
         public void onNext(final MemoryAccessNotice notice) {
-            final var accessType = notice.getAccessType();
+            final var accessType = notice.accessType;
             // If is was a WRITE operation
             if (accessType == MemoryAccessNotice.AccessType.WRITE) {
-                final int address = notice.getAddress();
-                final int value = notice.getValue();
+                final int address = notice.address;
+                final int value = notice.value;
 
                 // Check what word was changed, then update the corrisponding information
                 if (address == TimerTool.getTimeCmpAddress()) {
