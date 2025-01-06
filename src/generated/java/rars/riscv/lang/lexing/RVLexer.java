@@ -754,7 +754,7 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
           case 6:
             { final var foundOps = InstructionsRegistry.matchOperator(yytext());
                             if (foundOps.isEmpty()) {
-                                final var foundRegister = RegisterFile.getRegister(yytext());
+                                final var foundRegister = RegisterFile.INSTANCE.getRegisterByName(yytext());
                                 final var foundFPRegister = FloatingPointRegisterFile.getRegister(yytext());
                                 final var foundCASRegister = ControlAndStatusRegisterFile.getRegister(yytext());
                                 if (foundRegister != null || foundFPRegister != null || foundCASRegister != null) {

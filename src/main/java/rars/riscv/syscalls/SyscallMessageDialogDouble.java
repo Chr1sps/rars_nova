@@ -63,7 +63,7 @@ public final class SyscallMessageDialogDouble extends AbstractSyscall {
         // TODO: maybe refactor this, other null strings are handled in a central place
         // now
         String message = ""; // = "";
-        int byteAddress = RegisterFile.getValue("a0");
+        int byteAddress = RegisterFile.INSTANCE.getIntValue("a0");
         final char[] ch = {' '}; // Need an array to convert to String
         try {
             ch[0] = (char) Globals.MEMORY_INSTANCE.getByte(byteAddress);

@@ -6,8 +6,6 @@ import rars.exceptions.WaitException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
-import static rars.exceptions.WaitException.WAIT_EXCEPTION;
-
 /*
 Copyright (c) 2017,  Benjamin Landers
 
@@ -56,6 +54,6 @@ public final class WFI extends BasicInstruction {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws WaitException {
-        throw WAIT_EXCEPTION;
+        throw WaitException.INSTANCE;
     }
 }

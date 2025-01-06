@@ -91,9 +91,9 @@ public abstract class AbstractCompressedInstructionTest {
         for (int i = 0; i < errors.size(); i++) {
             final var expected = expectedErrors.get(i);
             final var actual = errors.get(i);
-            if (expected.line() != actual.getLineNumber() || expected.position() != actual.getPosition()) {
+            if (expected.line() != actual.lineNumber || expected.position() != actual.position) {
                 fail("Expected error at line " + expected.line() + " position " + expected.position() +
-                    ", but got error at line " + actual.getLineNumber() + " position " + actual.getPosition());
+                    ", but got error at line " + actual.lineNumber + " position " + actual.position);
             }
         }
     }

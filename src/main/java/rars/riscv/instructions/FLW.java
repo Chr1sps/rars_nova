@@ -54,7 +54,7 @@ public final class FLW extends BasicInstruction {
         try {
             FloatingPointRegisterFile.updateRegisterInt(
                 statement.getOperand(0),
-                Globals.MEMORY_INSTANCE.getWord(RegisterFile.getValue(statement.getOperand(2)) + upperImmediate)
+                Globals.MEMORY_INSTANCE.getWord(RegisterFile.INSTANCE.getIntValue(statement.getOperand(2)) + upperImmediate)
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

@@ -50,9 +50,6 @@ public final class LUI extends BasicInstruction {
 
         final var shiftedValue = Integer.valueOf(statement.getOperand(1) << 12).longValue();
 
-        RegisterFile.updateRegister(
-            statement.getOperand(0),
-            shiftedValue
-        );
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), shiftedValue);
     }
 }

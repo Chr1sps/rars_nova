@@ -55,7 +55,7 @@ public class SyscallRandDouble extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final Integer index = RegisterFile.getValue("a0");
+        final Integer index = RegisterFile.INSTANCE.getIntValue("a0");
         Random stream = RandomStreams.randomStreams.get(index);
         if (stream == null) {
             stream = new Random(); // create a non-seeded stream

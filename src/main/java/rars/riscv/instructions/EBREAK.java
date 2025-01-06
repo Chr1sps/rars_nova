@@ -2,11 +2,10 @@ package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.exceptions.BreakpointException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-
-import static rars.exceptions.BreakpointException.BREAKPOINT_EXCEPTION;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -56,6 +55,6 @@ public final class EBREAK extends BasicInstruction {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        throw BREAKPOINT_EXCEPTION;
+        throw BreakpointException.INSTANCE;
     }
 }

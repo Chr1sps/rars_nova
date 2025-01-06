@@ -28,7 +28,7 @@ public final class FCVTDLU extends BasicInstruction {
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float64 tmp = new Float64(0);
-        final long value = RegisterFile.getValueLong(statement.getOperand(1));
+        final long value = RegisterFile.INSTANCE.getLongValue(statement.getOperand(1));
         BigInteger unsigned = BigInteger.valueOf(value);
         if (value < 0) {
             unsigned = unsigned.add(BigInteger.ONE.shiftLeft(64));

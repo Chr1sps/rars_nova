@@ -51,7 +51,7 @@ public final class SyscallExit2 extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
-        Globals.exitCode = RegisterFile.getValue("a0");
+        Globals.exitCode = RegisterFile.INSTANCE.getIntValue("a0");
         throw new ExitingException(); // empty error list
     }
 }

@@ -2,6 +2,7 @@ package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.RoundingMode;
@@ -90,7 +91,8 @@ public abstract class Floating extends BasicInstruction {
                 RoundingMode.AWAY;
             default -> throw new SimulationException(
                 statement,
-                "Invalid rounding mode. RM = " + RM + " and frm = " + frm
+                "Invalid rounding mode. RM = %d and frm = %d".formatted(RM, frm),
+                ExceptionReason.OTHER
             );
         };
     }

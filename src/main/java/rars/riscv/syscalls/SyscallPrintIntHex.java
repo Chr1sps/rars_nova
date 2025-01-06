@@ -54,6 +54,6 @@ public final class SyscallPrintIntHex extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        SystemIO.printString(BinaryUtils.intToHexString(RegisterFile.getValue("a0")));
+        SystemIO.printString(BinaryUtils.intToHexString(RegisterFile.INSTANCE.getIntValue("a0")));
     }
 }

@@ -52,7 +52,7 @@ public class SyscallReadInt extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         try {
-            RegisterFile.updateRegister("a0", SystemIO.readInteger(this.getNumber()));
+            RegisterFile.INSTANCE.updateRegisterByName("a0", SystemIO.readInteger(this.getNumber()));
         } catch (final NumberFormatException e) {
             throw new ExitingException(
                 statement,

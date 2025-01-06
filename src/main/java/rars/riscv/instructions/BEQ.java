@@ -44,6 +44,7 @@ public final class BEQ extends Branch {
 
     @Override
     public boolean willBranch(final @NotNull ProgramStatement statement) {
-        return RegisterFile.getValueLong(statement.getOperand(0)) == RegisterFile.getValueLong(statement.getOperand(1));
+        return RegisterFile.INSTANCE.getLongValue(statement.getOperand(0)) == RegisterFile.INSTANCE.getLongValue(
+            statement.getOperand(1));
     }
 }

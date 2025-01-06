@@ -367,7 +367,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     basicInstructionBuilder.append(basicStatementElement);
                     this.basicStatementList.addString(basicStatementElement);
                     try {
-                        registerNumber = RegisterFile.getRegister(tokenValue).number;
+                        registerNumber = RegisterFile.INSTANCE.getRegisterByName(tokenValue).number;
                     } catch (final Exception e) {
                         // should never happen; should be caught before now...
                         errors.addTokenError(
@@ -379,7 +379,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     this.operands.add(registerNumber);
                 }
                 case REGISTER_NAME -> {
-                    registerNumber = RegisterFile.getRegister(tokenValue).number;
+                    registerNumber = RegisterFile.INSTANCE.getRegisterByName(tokenValue).number;
                     basicStatementElement = "x" + registerNumber;
                     basicInstructionBuilder.append(basicStatementElement);
                     this.basicStatementList.addString(basicStatementElement);

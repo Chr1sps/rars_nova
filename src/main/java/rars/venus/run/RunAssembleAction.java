@@ -177,7 +177,7 @@ public class RunAssembleAction extends GuiAction {
                 FileStatus.setAssembled(true);
                 FileStatus.set(FileStatus.State.RUNNABLE);
 
-                RegisterFile.resetRegisters();
+                RegisterFile.INSTANCE.resetRegisters();
                 FloatingPointRegisterFile.resetRegisters();
                 ControlAndStatusRegisterFile.resetRegisters();
                 InterruptController.reset();
@@ -209,13 +209,13 @@ public class RunAssembleAction extends GuiAction {
                 for (final ErrorMessage em : errorMessages) {
                     // No line or position may mean File Not Found (e.g. exception file). Don't try
                     // to open. DPS 3-Oct-2010
-                    if (em.getLineNumber() == 0 && em.getPosition() == 0) {
+                    if (em.lineNumber == 0 && em.position == 0) {
                         continue;
                     }
-                    if (!em.isWarning() || RunAssembleAction.warningsAreErrors) {
+                    if (!em.isWarning || RunAssembleAction.warningsAreErrors) {
                         Globals.gui.messagesPane.selectErrorMessage(
-                            em.getFile(), em.getLineNumber(),
-                            em.getPosition()
+                            em.file, em.lineNumber,
+                            em.position
                         );
                         // Bug workaround: Line selection does not work correctly for the JEditTextArea
                         // editor
@@ -226,7 +226,7 @@ public class RunAssembleAction extends GuiAction {
                         // test.
                         // DPS 9-Aug-2010
                         if (e != null) {
-                            MessagesPane.selectEditorTextLine(em.getFile(), em.getLineNumber()
+                            MessagesPane.selectEditorTextLine(em.file, em.lineNumber
                             );
                         }
                         break;

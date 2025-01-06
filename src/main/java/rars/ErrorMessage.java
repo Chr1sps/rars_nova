@@ -3,13 +3,8 @@ package rars;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.assembler.SourceLine;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
 
@@ -39,18 +34,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
- * Represents occurrance of an error detected during tokenizing, assembly or
+ * Represents occurrence of an error detected during tokenizing, assembly or
  * simulation.
  *
  * @author Pete Sanderson
  * @version August 2003
  */
 public final class ErrorMessage {
-    private final boolean isWarning; // allow for warnings too (added Nov 2006)
-    private final @Nullable File file; // name of source file (added Oct 2006)
-    private final int lineNumber; // line in source code where error detected
-    private final int position; // position in source line where error detected
-    private final @NotNull String message;
+    public final boolean isWarning; // allow for warnings too (added Nov 2006)
+    public final @Nullable File file; // name of source file (added Oct 2006)
+    public final int lineNumber; // line in source code where error detected
+    public final int position; // position in source line where error detected
+    public final @NotNull String message;
     private final @NotNull String macroExpansionHistory;
 
     /**
@@ -75,7 +70,7 @@ public final class ErrorMessage {
      * @param message
      *     String containing appropriate error message.
      */
-    public ErrorMessage(
+    private ErrorMessage(
         final boolean isWarning,
         final @Nullable RISCVProgram sourceProgram,
         final int lineNumber,
@@ -83,65 +78,19 @@ public final class ErrorMessage {
         final @NotNull String message
     ) {
         this.isWarning = isWarning;
-        if (sourceProgram == null) {
-            this.file = null;
-            this.lineNumber = lineNumber;
-        } else {
-            if (sourceProgram.getSourceLineList() == null) {
-                this.file = sourceProgram.getFile();
-                this.lineNumber = lineNumber;
-            } else {
-                final SourceLine sourceLine = sourceProgram.getSourceLineList()
-                    .get(lineNumber - 1);
-                this.file = sourceLine.file();
-                this.lineNumber = sourceLine.lineNumber();
-            }
-        }
+        this.file = (sourceProgram == null) ? null : (
+            (sourceProgram.getSourceLineList() == null) ? sourceProgram.getFile() : (
+                sourceProgram.getSourceLineList().get(lineNumber - 1).file()
+            )
+        );
+        this.lineNumber = (sourceProgram == null) ? -1 : (
+            (sourceProgram.getSourceLineList() == null) ? lineNumber : (
+                sourceProgram.getSourceLineList().get(lineNumber - 1).lineNumber()
+            )
+        );
         this.position = position;
         this.message = message;
         this.macroExpansionHistory = ErrorMessage.getExpansionHistory(sourceProgram);
-    }
-
-    /**
-     * Constructor for ErrorMessage, to be used for runtime exceptions.
-     *
-     * @param statement
-     *     The ProgramStatement object for the instruction causing the
-     *     runtime error
-     * @param message
-     *     String containing appropriate error message.
-     */
-    // Added January 2013
-    public ErrorMessage(
-        final @NotNull ProgramStatement statement,
-        final @NotNull String message
-    ) {
-        this.isWarning = false;
-        this.file = (statement.getSourceProgram() == null)
-            ? null
-            : statement.getSourceProgram().getFile();
-        this.position = 0;
-        this.message = message;
-        // Somewhere along the way we lose the macro history, but can
-        // normally recreate it here. The line number for macro use (in the
-        // expansion) comes with the ProgramStatement.getSourceLine().
-        // The line number for the macro definition comes embedded in
-        // the source code from ProgramStatement.getSource(), which is
-        // displayed in the Text Segment display. It would previously
-        // have had the macro definition line prepended in brackets,
-        // e.g. "<13> syscall # finished". So I'll extract that
-        // bracketed number here and include it in the error message.
-        // Looks bass-ackwards, but to get the line numbers to display correctly
-        // for runtime error occurring in macro expansion (expansion->definition), need
-        // to assign to the opposite variables.
-        final var defineLine = ErrorMessage.parseMacroHistory(statement.sourceLine.source());
-        if (defineLine.isEmpty()) {
-            this.lineNumber = statement.sourceLine.lineNumber();
-            this.macroExpansionHistory = "";
-        } else {
-            this.lineNumber = defineLine.getFirst();
-            this.macroExpansionHistory = "" + statement.sourceLine.lineNumber();
-        }
     }
 
     public static @NotNull ErrorMessage error(
@@ -162,81 +111,12 @@ public final class ErrorMessage {
         return new ErrorMessage(true, sourceProgram, line, position, message);
     }
 
-    private static @NotNull List<Integer> parseMacroHistory(final String string) {
-        final Pattern pattern = Pattern.compile("<\\d+>");
-        final Matcher matcher = pattern.matcher(string);
-        String verify = string.trim();
-        final var macroHistory = new ArrayList<Integer>();
-        while (matcher.find()) {
-            final String match = matcher.group();
-            if (verify.indexOf(match) == 0) {
-                try {
-                    final int line = Integer.parseInt(match.substring(1, match.length() - 1));
-                    macroHistory.add(line);
-                } catch (final NumberFormatException e) {
-                    break;
-                }
-                verify = verify.substring(match.length()).trim();
-            } else {
-                break;
-            }
-        }
-        return macroHistory;
-    }
-
-    // Added by Mohammad Sekavat Dec 2012
     private static @NotNull String getExpansionHistory(final RISCVProgram sourceProgram) {
+        // Added by Mohammad Sekavat Dec 2012
         if (sourceProgram == null || sourceProgram.getLocalMacroPool() == null) {
             return "";
         }
         return sourceProgram.getLocalMacroPool().getExpansionHistory();
-    }
-
-    /**
-     * Produce name of file containing error.
-     *
-     * @return Returns String containing name of source file containing the error.
-     */
-    // Added October 2006
-    public @Nullable File getFile() {
-        return this.file;
-    }
-
-    /**
-     * Produce line number of error.
-     *
-     * @return Returns line number in source program where error occurred.
-     */
-    public int getLineNumber() {
-        return this.lineNumber;
-    }
-
-    /**
-     * Produce position within erroneous line.
-     *
-     * @return Returns position within line of source program where error occurred.
-     */
-    public int getPosition() {
-        return this.position;
-    }
-
-    /**
-     * Produce error message.
-     *
-     * @return Returns String containing textual error message.
-     */
-    public @NotNull String getMessage() {
-        return this.message;
-    }
-
-    /**
-     * Determine whether this message represents error or warning.
-     *
-     * @return Returns true if this message reflects warning, false if error.
-     */
-    // Method added 28 Nov 2006
-    public boolean isWarning() {
-        return this.isWarning;
     }
 
     public @NotNull String generateReport() {
@@ -244,18 +124,14 @@ public final class ErrorMessage {
         builder.append((this.isWarning ? "Warning" : "Error"))
             .append(" in ");
         if (this.file != null) {
-            builder.append(this.file.getPath());
+            builder.append(this.file.getPath()).append(" ");
         }
-        if (this.lineNumber > 0) {
-            builder.append(" line ")
-                .append(this.getMacroExpansionHistory())
-                .append(this.lineNumber);
-        }
-        if (this.position > 0) {
-            builder.append(" column ")
-                .append(this.position);
-        }
-        builder.append(": ")
+        builder.append("line ")
+            .append(this.getMacroExpansionHistory())
+            .append(this.lineNumber);
+        builder.append(" column ")
+            .append(this.position);
+        builder.append(":\n")
             .append(this.message)
             .append("\n");
         return builder.toString();
@@ -266,10 +142,10 @@ public final class ErrorMessage {
      *
      * @return string describing macro expansion
      */
-    // Method added by Mohammad Sekavat Dec 2012
     @Contract(pure = true)
     @NotNull
     private String getMacroExpansionHistory() {
+        // Method added by Mohammad Sekavat Dec 2012
         if (this.macroExpansionHistory.isEmpty()) {
             return "";
         }

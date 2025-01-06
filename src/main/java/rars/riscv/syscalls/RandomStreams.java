@@ -58,7 +58,7 @@ public final class RandomStreams {
      * @return the stream a that index
      */
     static @NotNull Random get(final String reg) {
-        final int index = RegisterFile.getValue(reg);
+        final int index = RegisterFile.INSTANCE.getIntValue(reg);
         Random stream = randomStreams.get(index);
         if (stream == null) {
             stream = new Random(); // create a non-seeded stream

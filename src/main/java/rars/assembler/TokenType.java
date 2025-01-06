@@ -138,7 +138,7 @@ public enum TokenType {
         }
 
         // See if it is a register
-        if (RegisterFile.getRegister(value) != null) {
+        if (RegisterFile.INSTANCE.getRegisterByName(value) != null) {
             if (value.startsWith("x")) {
                 return TokenType.REGISTER_NUMBER;
             } else {

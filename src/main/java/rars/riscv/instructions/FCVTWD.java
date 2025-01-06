@@ -29,6 +29,6 @@ public final class FCVTWD extends BasicInstruction {
         final Float64 in = new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(1)));
         final int out = Conversions.convertToInt(in, e, false);
         Floating.setfflags(e);
-        RegisterFile.updateRegister(statement.getOperand(0), out);
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), out);
     }
 }

@@ -1,5 +1,6 @@
 package rars.util;
 
+import org.jetbrains.annotations.NotNull;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.RegisterFile;
@@ -20,8 +21,8 @@ public final class RegisterUtils {
      *     if name is invalid; only needs to be checked if
      *     code accesses arbitrary names
      */
-    public static int getRegisterValue(final String name) {
-        Register r = RegisterFile.getRegister(name);
+    public static int getRegisterValue(final @NotNull String name) {
+        Register r = RegisterFile.INSTANCE.getRegisterByName(name);
         if (r == null) {
             r = FloatingPointRegisterFile.getRegister(name);
         }

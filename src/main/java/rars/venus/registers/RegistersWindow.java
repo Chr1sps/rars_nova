@@ -61,9 +61,9 @@ public final class RegistersWindow extends RegisterBlockWindow {
      * A simple wrapper to add pc into the Registers array
      */
     private static Register @NotNull [] getRegisters() {
-        final Register[] base = RegisterFile.getRegisters();
+        final Register[] base = RegisterFile.INSTANCE.getRegisters();
         final Register[] out = Arrays.copyOf(base, base.length + 1);
-        out[base.length] = RegisterFile.PC_REGISTER;
+        out[base.length] = RegisterFile.INSTANCE.sp;
         return out;
     }
 
@@ -78,16 +78,16 @@ public final class RegistersWindow extends RegisterBlockWindow {
 
     @Override
     protected void beginObserving() {
-        RegisterFile.addRegistersObserver(this);
+        RegisterFile.INSTANCE.addRegistersSubscriber(this);
     }
 
     @Override
     protected void endObserving() {
-        RegisterFile.deleteRegistersObserver(this);
+        RegisterFile.INSTANCE.deleteRegistersSubscriber(this);
     }
 
     @Override
     protected void resetRegisters() {
-        RegisterFile.resetRegisters();
+        RegisterFile.INSTANCE.resetRegisters();
     }
 }

@@ -54,7 +54,7 @@ public final class CSRRC extends BasicInstruction {
             if (statement.getOperand(2) != 0) {
                 if (ControlAndStatusRegisterFile.clearRegister(
                     statement.getOperand(1),
-                    RegisterFile.getValueLong(statement.getOperand(2))
+                    RegisterFile.INSTANCE.getLongValue(statement.getOperand(2))
                 )) {
                     throw new SimulationException(
                         statement, "Attempt to write to read-only CSR",
@@ -62,7 +62,7 @@ public final class CSRRC extends BasicInstruction {
                     );
                 }
             }
-            RegisterFile.updateRegister(statement.getOperand(0), csr);
+            RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), csr);
         } catch (final NullPointerException e) {
             throw new SimulationException(
                 statement, "Attempt to access unavailable CSR",

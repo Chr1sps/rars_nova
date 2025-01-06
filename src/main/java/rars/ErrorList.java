@@ -113,8 +113,8 @@ public final class ErrorList {
         if (this.errorCount == ErrorList.getErrorLimit()) {
             this.messages.add(ErrorMessage.error(
                 null,
-                mess.getLineNumber(),
-                mess.getPosition(),
+                mess.lineNumber,
+                mess.position,
                 "Error Limit of %d exceeded."
                     .formatted(ErrorList.getErrorLimit())
             ));
@@ -122,7 +122,7 @@ public final class ErrorList {
             return;
         }
         this.messages.add(this.messages.size(), mess);
-        if (mess.isWarning()) {
+        if (mess.isWarning) {
             this.warningCount++;
         } else {
             this.errorCount++;
@@ -189,7 +189,7 @@ public final class ErrorList {
     private @NotNull String generateReport(final boolean isWarning) {
         final StringBuilder report = new StringBuilder();
         for (final ErrorMessage m : this.messages) {
-            if ((isWarning && m.isWarning()) || (!isWarning && !m.isWarning())) {
+            if ((isWarning && m.isWarning) || (!isWarning && !m.isWarning)) {
                 report.append(m.generateReport());
             }
         }

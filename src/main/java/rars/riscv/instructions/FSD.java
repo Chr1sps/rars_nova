@@ -26,7 +26,7 @@ public final class FSD extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             Globals.MEMORY_INSTANCE.setDoubleWord(
-                RegisterFile.getValue(statement.getOperand(2)) + upperImmediate,
+                RegisterFile.INSTANCE.getIntValue(statement.getOperand(2)) + upperImmediate,
                 FloatingPointRegisterFile.getValueLong(statement.getOperand(0))
             );
         } catch (final AddressErrorException e) {

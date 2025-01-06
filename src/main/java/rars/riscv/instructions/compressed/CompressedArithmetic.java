@@ -54,20 +54,22 @@ public final class CompressedArithmetic extends CompressedInstruction {
             ),
             statement -> {
                 if (InstructionsRegistry.RV64_MODE_FLAG) {
-                    RegisterFile.updateRegister(
+                    final long newValue = callback.computeDoubleWord(
+                        RegisterFile.INSTANCE.getLongValue(statement.getOperand(0)),
+                        RegisterFile.INSTANCE.getLongValue(statement.getOperand(1))
+                    );
+                    RegisterFile.INSTANCE.updateRegisterByNumber(
                         statement.getOperand(statement.getOperand(0)),
-                        callback.computeDoubleWord(
-                            RegisterFile.getValueLong(statement.getOperand(0)),
-                            RegisterFile.getValueLong(statement.getOperand(1))
-                        )
+                        newValue
                     );
                 } else {
-                    RegisterFile.updateRegister(
+                    final long newValue = callback.computeWord(
+                        RegisterFile.INSTANCE.getIntValue(statement.getOperand(0)),
+                        RegisterFile.INSTANCE.getIntValue(statement.getOperand(1))
+                    );
+                    RegisterFile.INSTANCE.updateRegisterByNumber(
                         statement.getOperand(statement.getOperand(0)),
-                        callback.computeWord(
-                            RegisterFile.getValue(statement.getOperand(0)),
-                            RegisterFile.getValue(statement.getOperand(1))
-                        )
+                        newValue
                     );
                 }
             }

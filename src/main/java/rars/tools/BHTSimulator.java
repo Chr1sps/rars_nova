@@ -141,7 +141,7 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     protected void addAsObserver() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
-        this.addAsObserver(RegisterFile.PC_REGISTER);
+        this.addAsObserver(RegisterFile.INSTANCE.pc);
     }
 
     /**

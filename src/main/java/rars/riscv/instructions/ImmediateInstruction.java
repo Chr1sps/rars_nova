@@ -65,23 +65,15 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         final var upperImmediate = (statement.getOperand(2) << 20) >> 20;
-        if (InstructionsRegistry.RV64_MODE_FLAG) {
-            RegisterFile.updateRegister(
-                statement.getOperand(0),
-                compute(
-                    RegisterFile.getValueLong(statement.getOperand(1)),
-                    Integer.valueOf(upperImmediate).longValue()
-                )
-            );
-        } else {
-            RegisterFile.updateRegister(
-                statement.getOperand(0),
-                computeW(
-                    RegisterFile.getValue(statement.getOperand(1)),
-                    upperImmediate
-                )
-            );
-        }
+        final long newValue = (InstructionsRegistry.RV64_MODE_FLAG)
+            ? compute(
+            RegisterFile.INSTANCE.getLongValue(statement.getOperand(1)),
+            Integer.valueOf(upperImmediate).longValue()
+        ) : computeW(
+            RegisterFile.INSTANCE.getIntValue(statement.getOperand(1)),
+            upperImmediate
+        );
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 
     /**

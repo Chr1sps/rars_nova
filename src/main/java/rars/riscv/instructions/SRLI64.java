@@ -47,11 +47,8 @@ public final class SRLI64 extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         // Uses >>> because 0 fill
-        final var value = RegisterFile.getValueLong(statement.getOperand(1));
+        final var value = RegisterFile.INSTANCE.getLongValue(statement.getOperand(1));
         final var shifted = value >>> statement.getOperand(2);
-        RegisterFile.updateRegister(
-            statement.getOperand(0),
-            shifted
-        );
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), shifted);
     }
 }

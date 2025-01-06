@@ -26,7 +26,7 @@ public final class FLD extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             final var value = Globals.MEMORY_INSTANCE.getDoubleWord(
-                RegisterFile.getValue(statement.getOperand(2))
+                RegisterFile.INSTANCE.getIntValue(statement.getOperand(2))
                     + upperImmediate
             );
             FloatingPointRegisterFile.updateRegister(

@@ -57,7 +57,7 @@ public final class FCVTSW extends BasicInstruction {
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float32 tmp = new Float32(0);
         final Float32 converted = Conversions
-            .convertFromInt(BigInteger.valueOf(RegisterFile.getValue(statement.getOperand(1))), e, tmp);
+            .convertFromInt(BigInteger.valueOf(RegisterFile.INSTANCE.getIntValue(statement.getOperand(1))), e, tmp);
         Floating.setfflags(e);
         FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), converted.bits);
     }

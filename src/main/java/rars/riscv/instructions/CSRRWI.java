@@ -57,7 +57,7 @@ public final class CSRRWI extends BasicInstruction {
                     ExceptionReason.ILLEGAL_INSTRUCTION
                 );
             }
-            RegisterFile.updateRegister(statement.getOperand(0), csr);
+            RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), csr);
         } catch (final NullPointerException e) {
             throw new SimulationException(
                 statement, "Attempt to access unavailable CSR",

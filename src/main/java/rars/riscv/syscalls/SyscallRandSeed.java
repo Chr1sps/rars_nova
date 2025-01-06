@@ -54,12 +54,12 @@ public class SyscallRandSeed extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final Integer index = RegisterFile.getValue("a0");
+        final Integer index = RegisterFile.INSTANCE.getIntValue("a0");
         final Random stream = RandomStreams.randomStreams.get(index);
         if (stream == null) {
-            RandomStreams.randomStreams.put(index, new Random(RegisterFile.getValue("a1")));
+            RandomStreams.randomStreams.put(index, new Random(RegisterFile.INSTANCE.getIntValue("a1")));
         } else {
-            stream.setSeed(RegisterFile.getValue("a1"));
+            stream.setSeed(RegisterFile.INSTANCE.getIntValue("a1"));
         }
     }
 }

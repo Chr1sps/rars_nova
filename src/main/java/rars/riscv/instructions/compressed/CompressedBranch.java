@@ -13,13 +13,13 @@ public final class CompressedBranch extends CompressedInstruction {
         "c.beqz t1, label",
         "Branch if equal to zero : Branch to statement at label's address if t1 is equal to zero",
         0b110,
-        statement -> RegisterFile.getValueLong(statement.getOperand(0)) == 0
+        statement -> RegisterFile.INSTANCE.getLongValue(statement.getOperand(0)) == 0
     );
     public static final @NotNull CompressedBranch CBNEZ = new CompressedBranch(
         "c.bnez t1, label",
         "Branch if not equal to zero : Branch to statement at label's address if t1 is not equal to zero",
         0b111,
-        statement -> RegisterFile.getValueLong(statement.getOperand(0)) != 0
+        statement -> RegisterFile.INSTANCE.getLongValue(statement.getOperand(0)) != 0
     );
 
     private CompressedBranch(

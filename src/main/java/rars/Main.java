@@ -317,28 +317,29 @@ public final class Main {
     /// Displays requested register or registers
     private void displayRegistersPostMortem() {
         // Display requested register contents
-        for (final String reg : this.programOptions.registers) {
-            if (FloatingPointRegisterFile.getRegister(reg) != null) {
+        for (final String registerName : this.programOptions.registers) {
+            if (FloatingPointRegisterFile.getRegister(registerName) != null) {
                 // TODO: do something for double vs float
                 // It isn't clear to me what the best behaviour is
                 // floating point register
-                final int ivalue = RegisterUtils.getRegisterValue(reg);
+                final int ivalue = RegisterUtils.getRegisterValue(registerName);
                 final float fvalue = Float.intBitsToFloat(ivalue);
                 if (!this.programOptions.brief) {
-                    this.out.print(reg + "\t");
+                    this.out.print(registerName + "\t");
                 }
                 switch (this.programOptions.displayFormat) {
                     case HEX -> this.out.println(BinaryUtils.intToHexString(ivalue));
                     case DECIMAL -> this.out.println(fvalue);
                     default -> this.out.println(BinaryUtils.intToAscii(ivalue));
                 }
-            } else if (ControlAndStatusRegisterFile.getRegister(reg) != null) {
-                this.out.print(reg + "\t");
-                this.out.println(this.formatIntForDisplay((int) ControlAndStatusRegisterFile.getRegister(reg)
+            } else if (ControlAndStatusRegisterFile.getRegister(registerName) != null) {
+                this.out.print(registerName + "\t");
+                this.out.println(this.formatIntForDisplay((int) ControlAndStatusRegisterFile.getRegister(registerName)
                     .getValue()));
             } else if (this.programOptions.brief) {
-                this.out.print(reg + "\t");
-                this.out.println(this.formatIntForDisplay((int) RegisterFile.getRegister(reg).getValue()));
+                this.out.print(registerName + "\t");
+                this.out.println(this.formatIntForDisplay((int) RegisterFile.INSTANCE.getRegisterByName(registerName)
+                    .getValue()));
             }
         }
     }

@@ -145,9 +145,9 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 builder.append("Failed to assemble `%s` due to following error(s):\n".formatted(getTestName()));
                 for (final var error : ae.errors.getErrorMessages()) {
                     builder.append("[%d,%d] %s\n".formatted(
-                        error.getLineNumber(),
-                        error.getPosition(),
-                        error.getMessage()
+                        error.lineNumber,
+                        error.position,
+                        error.message
                     ));
                 }
                 fail(builder.toString());
@@ -155,8 +155,8 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
             final var errors = ae.errors.getErrorMessages();
             final var foundErrorLines = new HashSet<Integer>();
             for (final var error : errors) {
-                if (error.isWarning()) continue;
-                foundErrorLines.add(error.getLineNumber());
+                if (error.isWarning) continue;
+                foundErrorLines.add(error.lineNumber);
             }
             if (!testData.errorLines.equals(foundErrorLines)) {
                 final var builder = new StringBuilder();
@@ -165,9 +165,9 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
                     builder.append("[%d,%d] %s\n".formatted(
-                        error.getLineNumber(),
-                        error.getPosition(),
-                        error.getMessage()
+                        error.lineNumber,
+                        error.position,
+                        error.message
                     ));
                 }
                 fail(builder.toString());
@@ -177,7 +177,7 @@ public abstract class AbstractInstructionTest extends RarsTestBase {
             final var msg = "Crashed while executing `" + getTestName() + "`.\n" +
                 "Reason: " + se.reason + "\n" +
                 "Value: " + se.value + "\n" +
-                "Message: " + se.errorMessage.getMessage() + "\n" +
+                "Message: " + se.errorMessage.message + "\n" +
                 "Stacktrace: " + getStacktraceString(se) + "\n";
 
             fail(msg);

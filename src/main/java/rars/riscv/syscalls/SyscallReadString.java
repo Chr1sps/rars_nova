@@ -66,8 +66,8 @@ public class SyscallReadString extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String inputString;
-        final int buf = RegisterFile.getValue("a0"); // buf addr
-        int maxLength = RegisterFile.getValue("a1") - 1;
+        final int buf = RegisterFile.INSTANCE.getIntValue("a0"); // buf addr
+        int maxLength = RegisterFile.INSTANCE.getIntValue("a1") - 1;
         boolean addNullByte = true;
         // Guard against negative maxLength. DPS 13-July-2011
         if (maxLength < 0) {

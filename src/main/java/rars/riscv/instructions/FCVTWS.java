@@ -56,6 +56,6 @@ public final class FCVTWS extends BasicInstruction {
         final Float32 in = new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1)));
         final int out = Conversions.convertToInt(in, e, false);
         Floating.setfflags(e);
-        RegisterFile.updateRegister(statement.getOperand(0), out);
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), out);
     }
 }

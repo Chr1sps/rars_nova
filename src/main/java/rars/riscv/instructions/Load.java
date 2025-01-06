@@ -55,10 +55,8 @@ public abstract class Load extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            RegisterFile.updateRegister(
-                statement.getOperand(0),
-                load(RegisterFile.getValue(statement.getOperand(2)) + upperImmediate)
-            );
+            final long newValue = load(RegisterFile.INSTANCE.getIntValue(statement.getOperand(2)) + upperImmediate);
+            RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);
         }

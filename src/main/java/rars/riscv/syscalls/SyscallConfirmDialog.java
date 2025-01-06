@@ -61,6 +61,6 @@ public final class SyscallConfirmDialog extends AbstractSyscall {
         if (result == JOptionPane.CLOSED_OPTION) {
             result = JOptionPane.CANCEL_OPTION;
         }
-        RegisterFile.updateRegister("a0", result);
+        RegisterFile.INSTANCE.updateRegisterByName("a0", result);
     }
 }

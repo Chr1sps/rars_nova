@@ -1,5 +1,6 @@
 package rars.exceptions;
 
+import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 
 /**
@@ -10,14 +11,14 @@ import rars.ProgramStatement;
  */
 public final class ExitingException extends SimulationException {
     public ExitingException() {
-        super();
+        super(ExceptionReason.OTHER, null, 0);
     }
 
-    public ExitingException(final ProgramStatement statement, final String message) {
-        super(statement, message);
+    public ExitingException(final @NotNull ProgramStatement statement, final @NotNull String message) {
+        super(statement, message, ExceptionReason.OTHER);
     }
 
-    public ExitingException(final ProgramStatement ps, final AddressErrorException aee) {
+    public ExitingException(final @NotNull ProgramStatement ps, final @NotNull AddressErrorException aee) {
         super(ps, aee);
     }
 }

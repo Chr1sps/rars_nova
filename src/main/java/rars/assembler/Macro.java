@@ -113,7 +113,7 @@ public final class Macro {
             // Expanded the condition.
             // DPS 7-July-2014.
             if (!tokenValue.isEmpty() && tokenValue.charAt(0) == '$' &&
-                RegisterFile.getRegister(tokenValue) == null &&
+                RegisterFile.INSTANCE.getRegisterByName(tokenValue) == null &&
                 FloatingPointRegisterFile.getRegister(tokenValue) == null) // added 7-July-2014
             {
                 return true;

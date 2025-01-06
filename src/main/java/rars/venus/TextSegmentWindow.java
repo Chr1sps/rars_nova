@@ -610,7 +610,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
      * execution and when reaching breakpoints.
      */
     public void highlightStepAtPC() {
-        this.highlightStepAtAddress(RegisterFile.getProgramCounter());
+        this.highlightStepAtAddress(RegisterFile.INSTANCE.getProgramCounter());
     }
 
     /**

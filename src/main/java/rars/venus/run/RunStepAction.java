@@ -195,7 +195,7 @@ public class RunStepAction extends GuiAction {
             FileStatus.set(FileStatus.State.TERMINATED); // should be redundant.
             this.executePane.textSegment.setCodeHighlighting(true);
             this.executePane.textSegment.unhighlightAllSteps();
-            this.executePane.textSegment.highlightStepAtAddress(RegisterFile.getProgramCounter() - 4);
+            this.executePane.textSegment.highlightStepAtAddress(RegisterFile.INSTANCE.getProgramCounter() - 4);
         }
         this.mainUI.isMemoryReset = false;
     }

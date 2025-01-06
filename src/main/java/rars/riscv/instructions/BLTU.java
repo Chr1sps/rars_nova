@@ -46,8 +46,8 @@ public final class BLTU extends Branch {
     @Override
     public boolean willBranch(final @NotNull ProgramStatement statement) {
         return Long.compareUnsigned(
-            RegisterFile.getValueLong(statement.getOperand(0)),
-            RegisterFile.getValueLong(statement.getOperand(1))
+            RegisterFile.INSTANCE.getLongValue(statement.getOperand(0)),
+            RegisterFile.INSTANCE.getLongValue(statement.getOperand(1))
         ) < 0;
     }
 }

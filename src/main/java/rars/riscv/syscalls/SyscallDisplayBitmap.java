@@ -31,9 +31,9 @@ public final class SyscallDisplayBitmap extends AbstractSyscall implements Simpl
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final int baseAddress = RegisterFile.getValue("a0");
-        final int width = RegisterFile.getValue("a1");
-        final int height = RegisterFile.getValue("a2");
+        final int baseAddress = RegisterFile.INSTANCE.getIntValue("a0");
+        final int width = RegisterFile.INSTANCE.getIntValue("a1");
+        final int height = RegisterFile.INSTANCE.getIntValue("a2");
         this.show(baseAddress, width, height);
     }
 

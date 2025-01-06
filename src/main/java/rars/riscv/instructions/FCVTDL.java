@@ -29,7 +29,7 @@ public final class FCVTDL extends BasicInstruction {
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float64 tmp = new Float64(0);
         final Float64 converted = Conversions
-            .convertFromInt(BigInteger.valueOf(RegisterFile.getValueLong(statement.getOperand(1))), e, tmp);
+            .convertFromInt(BigInteger.valueOf(RegisterFile.INSTANCE.getLongValue(statement.getOperand(1))), e, tmp);
         Floating.setfflags(e);
         FloatingPointRegisterFile.updateRegister(statement.getOperand(0), converted.bits);
     }

@@ -123,7 +123,7 @@ public final class Program {
     }
 
     private ErrorList assemble(final @NotNull List<RISCVProgram> programs) throws AssemblyException {
-        RegisterFile.setValuesFromConfiguration(this.assembled.getMemoryConfiguration());
+        RegisterFile.INSTANCE.setValuesFromConfiguration(this.assembled.getMemoryConfiguration());
         final Memory temp = Globals.swapInstance(this.assembled); // Assembling changes memory so we need to swap to 
         // capture that.
         ErrorList warnings = null;
@@ -142,8 +142,8 @@ public final class Program {
             throw e;
         }
 
-        RegisterFile.initializeProgramCounter(this.programOptions.startAtMain);
-        this.startPC = RegisterFile.getProgramCounter();
+        RegisterFile.INSTANCE.initializeProgramCounter(this.programOptions.startAtMain);
+        this.startPC = RegisterFile.INSTANCE.getProgramCounter();
 
         return warnings;
     }
@@ -163,11 +163,11 @@ public final class Program {
         new ProgramArgumentList(args).storeProgramArguments();
         Globals.swapInstance(tmpMem);
 
-        RegisterFile.resetRegisters();
+        RegisterFile.INSTANCE.resetRegisters();
         FloatingPointRegisterFile.resetRegisters();
         ControlAndStatusRegisterFile.resetRegisters();
         InterruptController.reset();
-        RegisterFile.initializeProgramCounter(this.startPC);
+        RegisterFile.INSTANCE.initializeProgramCounter(this.startPC);
         Globals.exitCode = 0;
 
         // Copy in assembled code and arguments

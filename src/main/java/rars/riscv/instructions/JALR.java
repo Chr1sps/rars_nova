@@ -49,7 +49,7 @@ public final class JALR extends BasicInstruction {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final int target = RegisterFile.getValue(statement.getOperand(1));
+        final int target = RegisterFile.INSTANCE.getIntValue(statement.getOperand(1));
         Utils.processReturnAddress(statement.getOperand(0));
         // Set PC = $t2 + immediate with the last bit set to 0
         Utils.processJump((target + ((statement.getOperand(2) << 20) >> 20)) & 0xFFFFFFFE);

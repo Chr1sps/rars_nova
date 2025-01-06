@@ -128,7 +128,7 @@ public final class Globals {
 
     public static void setupGlobalMemoryConfiguration(final @NotNull MemoryConfiguration newConfiguration) {
         MEMORY_INSTANCE.setMemoryConfigurationAndReset(newConfiguration);
-        RegisterFile.setValuesFromConfiguration(newConfiguration);
+        RegisterFile.INSTANCE.setValuesFromConfiguration(newConfiguration);
     }
 
     public static @NotNull Memory swapInstance(final @NotNull Memory mem) {

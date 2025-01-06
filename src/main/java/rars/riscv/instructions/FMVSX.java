@@ -49,7 +49,7 @@ public final class FMVSX extends BasicInstruction {
 
         FloatingPointRegisterFile.updateRegisterInt(
             statement.getOperand(0),
-            RegisterFile.getValue(statement.getOperand(1))
+            RegisterFile.INSTANCE.getIntValue(statement.getOperand(1))
         );
     }
 }

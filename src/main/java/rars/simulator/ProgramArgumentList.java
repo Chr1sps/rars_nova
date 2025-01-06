@@ -145,9 +145,9 @@ public record ProgramArgumentList(@NotNull @Unmodifiable List<@NotNull String> p
             // Need to set $sp register to stack address, $a0 to argc, $a1 to argv
             // Need to by-pass the backstepping mechanism so go directly to Register instead
             // of RegisterFile
-            RegisterFile.getRegister("sp").setValue(stackAddress + DataTypes.WORD_SIZE);
-            RegisterFile.getRegister("a0").setValue(argStartAddress.length); // argc
-            RegisterFile.getRegister("a1").setValue(stackAddress + DataTypes.WORD_SIZE + DataTypes.WORD_SIZE); // argv
+            RegisterFile.INSTANCE.sp.setValue(stackAddress + DataTypes.WORD_SIZE);
+            RegisterFile.INSTANCE.a0.setValue(argStartAddress.length); // argc
+            RegisterFile.INSTANCE.a1.setValue(stackAddress + DataTypes.WORD_SIZE + DataTypes.WORD_SIZE); // argv
         } catch (final AddressErrorException aee) {
             ProgramArgumentList.LOGGER.fatal(
                 "Internal Error: Memory write error occurred while storing program " +

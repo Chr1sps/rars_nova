@@ -56,6 +56,6 @@ public final class ECALL extends BasicInstruction {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        Utils.findAndSimulateSyscall(RegisterFile.getValue("a7"), statement);
+        Utils.findAndSimulateSyscall(RegisterFile.INSTANCE.getIntValue("a7"), statement);
     }
 }

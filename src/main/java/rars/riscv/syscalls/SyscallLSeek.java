@@ -55,10 +55,10 @@ public final class SyscallLSeek extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         final int result = SystemIO.seek(
-            RegisterFile.getValue("a0"),
-            RegisterFile.getValue("a1"),
-            RegisterFile.getValue("a2")
+            RegisterFile.INSTANCE.getIntValue("a0"),
+            RegisterFile.INSTANCE.getIntValue("a1"),
+            RegisterFile.INSTANCE.getIntValue("a2")
         );
-        RegisterFile.updateRegister("a0", result);
+        RegisterFile.INSTANCE.updateRegisterByName("a0", result);
     }
 }

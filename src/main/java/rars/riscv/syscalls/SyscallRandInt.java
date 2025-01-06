@@ -52,6 +52,6 @@ public class SyscallRandInt extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         final Random stream = RandomStreams.get("a0");
-        RegisterFile.updateRegister("a0", stream.nextInt());
+        RegisterFile.INSTANCE.updateRegisterByName("a0", stream.nextInt());
     }
 }

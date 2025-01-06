@@ -47,9 +47,7 @@ public final class AUIPC extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement) {
         final var shiftedValue = statement.getOperand(1) << 12;
         final var convertedValue = Integer.valueOf(shiftedValue).longValue();
-        RegisterFile.updateRegister(
-            statement.getOperand(0),
-            RegisterFile.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + convertedValue
-        );
+        final long newValue = RegisterFile.INSTANCE.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + convertedValue;
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

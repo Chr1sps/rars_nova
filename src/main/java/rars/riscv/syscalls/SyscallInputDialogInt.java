@@ -72,23 +72,25 @@ public final class SyscallInputDialogInt extends AbstractSyscall {
         inputValue = JOptionPane.showInputDialog(message);
         if (inputValue == null) // Cancel was chosen
         {
-            RegisterFile.updateRegister("a0", 0);
-            RegisterFile.updateRegister("a1", -2);
+            RegisterFile.INSTANCE.updateRegisterByName("a0", 0);
+            RegisterFile.INSTANCE.updateRegisterByName("a1", -2);
         } else if (inputValue.isEmpty()) // OK was chosen but there was no input
         {
-            RegisterFile.updateRegister("a0", 0);
-            RegisterFile.updateRegister("a1", -3);
+            RegisterFile.INSTANCE.updateRegisterByName("a0", 0);
+            RegisterFile.INSTANCE.updateRegisterByName("a1", -3);
         } else {
             try {
                 final int i = Integer.parseInt(inputValue);
 
                 // Successful parse of valid input data
-                RegisterFile.updateRegister("a0", i); // set to the data read
-                RegisterFile.updateRegister("a1", 0); // set to valid flag
+                // set to the data read
+                RegisterFile.INSTANCE.updateRegisterByName("a0", i);
+                // set to valid flag
+                RegisterFile.INSTANCE.updateRegisterByName("a1", 0);
             } catch (final NumberFormatException e) {
                 // Unsuccessful parse of input data
-                RegisterFile.updateRegister("a0", 0);
-                RegisterFile.updateRegister("a1", -1);
+                RegisterFile.INSTANCE.updateRegisterByName("a0", 0);
+                RegisterFile.INSTANCE.updateRegisterByName("a1", -1);
 
             }
 

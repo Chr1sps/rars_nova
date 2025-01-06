@@ -79,8 +79,7 @@ final class AppTest extends RarsTestBase {
             System.out.println();
             final Simulator.Reason r = program.simulate();
             if (r != Simulator.Reason.NORMAL_TERMINATION) {
-                final var msg = "Ended abnormally while executing `" + path + "`.\n" +
-                    "Reason: " + r + ".\n";
+                final var msg = "Ended abnormally while executing `%s`.\nReason: %s.\n".formatted(path, r);
                 fail(msg);
             } else {
                 if (program.getExitCode() != 42) {
@@ -104,19 +103,15 @@ final class AppTest extends RarsTestBase {
                 final var builder = new StringBuilder();
                 builder.append("Failed to assemble `%s` due to following error(s):\n".formatted(path));
                 for (final var error : ae.errors.getErrorMessages()) {
-                    builder.append("[%d, %d] %s\n".formatted(
-                        error.getLineNumber(),
-                        error.getPosition(),
-                        error.getMessage()
-                    ));
+                    builder.append(error.generateReport()).append("\n");
                 }
                 fail(builder.toString());
             }
             final var errors = ae.errors.getErrorMessages();
             final var foundErrorLines = new HashSet<Integer>();
             for (final var error : errors) {
-                if (error.isWarning()) continue;
-                foundErrorLines.add(error.getLineNumber());
+                if (error.isWarning) continue;
+                foundErrorLines.add(error.lineNumber);
             }
             if (!errorLines.equals(foundErrorLines)) {
                 final var builder = new StringBuilder();
@@ -125,9 +120,9 @@ final class AppTest extends RarsTestBase {
                 builder.append("Errors found:\n");
                 for (final var error : errors) {
                     builder.append("[%d,%d] %s\n".formatted(
-                        error.getLineNumber(),
-                        error.getPosition(),
-                        error.getMessage()
+                        error.lineNumber,
+                        error.position,
+                        error.generateReport()
                     ));
                 }
                 fail(builder.toString());
@@ -138,11 +133,14 @@ final class AppTest extends RarsTestBase {
                 Crashed while executing `%s`.
                 Reason: %s.
                 Value: %d.
-                Message: %s.""".formatted(
+                Message:
+                ```
+                %s
+                ```""".formatted(
                 path,
                 se.reason,
                 se.value,
-                se.errorMessage.getMessage()
+                se.errorMessage.generateReport()
             );
             fail(msg);
         }
@@ -269,7 +267,7 @@ final class AppTest extends RarsTestBase {
                     assertFalse(word1 == first && word2 == second, "Error 13 on: " + programString);
                 }
             } catch (final Exception e) {
-                throw new RuntimeException("Error 14 on" + programString + " :" + e);
+                throw new RuntimeException("Error 14 on %s :%s".formatted(programString, e));
             }
         }
     }
@@ -297,7 +295,7 @@ final class AppTest extends RarsTestBase {
 
     @Test
     void runSingle() throws IOException {
-        run(getTestDataPath().resolve("examples/success.s").toString(), false);
+        run(getTestDataPath().resolve("riscv-tests/addi.s").toString(), false);
     }
 
     @Test

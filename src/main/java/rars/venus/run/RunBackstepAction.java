@@ -93,12 +93,12 @@ public class RunBackstepAction extends GuiAction {
 
         if (OtherSettings.getBackSteppingEnabled()) {
             Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment);
-            RegisterFile.addRegistersObserver(executePane.registerValues);
+            RegisterFile.INSTANCE.addRegistersSubscriber(executePane.registerValues);
             ControlAndStatusRegisterFile.addRegistersObserver(executePane.csrValues);
             FloatingPointRegisterFile.addRegistersSubscriber(executePane.fpRegValues);
             Globals.program.getBackStepper().backStep();
             Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment);
-            RegisterFile.deleteRegistersObserver(executePane.registerValues);
+            RegisterFile.INSTANCE.deleteRegistersSubscriber(executePane.registerValues);
             executePane.registerValues.updateRegisters();
             executePane.fpRegValues.updateRegisters();
             executePane.csrValues.updateRegisters();

@@ -69,7 +69,7 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
         // -3: OK was chosen but no data had been input into field
 
         String message = ""; // = "";
-        int byteAddress = RegisterFile.getValue(4);
+        int byteAddress = RegisterFile.INSTANCE.getIntValue(4);
         final char[] ch = {' '}; // Need an array to convert to String
         try {
             ch[0] = (char) Globals.MEMORY_INSTANCE.getByte(byteAddress);
@@ -94,22 +94,26 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
             FloatingPointRegisterFile.updateRegister(0, 0); // set $f0 to zero
             if (inputValue == null) // Cancel was chosen
             {
-                RegisterFile.updateRegister("a1", -2); // set $a1 to -2 flag
+                // set $a1 to -2 flag
+                RegisterFile.INSTANCE.updateRegisterByName("a1", -2);
             } else if (inputValue.isEmpty()) // OK was chosen but there was no input
             {
-                RegisterFile.updateRegister("a1", -3); // set $a1 to -3 flag
+                // set $a1 to -3 flag
+                RegisterFile.INSTANCE.updateRegisterByName("a1", -3);
             } else {
                 final double doubleValue = Double.parseDouble(inputValue);
 
                 // Successful parse of valid input data
                 FloatingPointRegisterFile.updateRegister(10, Double.doubleToRawLongBits(doubleValue));
-                RegisterFile.updateRegister("a1", 0); // set $a1 to valid flag
+                // set $a1 to valid flag
+                RegisterFile.INSTANCE.updateRegisterByName("a1", 0);
 
             }
         } catch (final
         NumberFormatException e) // Unsuccessful parse of input data
         {
-            RegisterFile.updateRegister("a1", -1); // set $a1 to -1 flag
+            // set $a1 to -1 flag
+            RegisterFile.INSTANCE.updateRegisterByName("a1", -1);
         }
     }
 }

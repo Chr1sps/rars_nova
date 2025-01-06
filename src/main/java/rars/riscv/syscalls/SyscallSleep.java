@@ -53,7 +53,7 @@ public class SyscallSleep extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         try {
-            Thread.sleep(RegisterFile.getValue("a0")); // units of milliseconds 1000 millisec = 1 sec.
+            Thread.sleep(RegisterFile.INSTANCE.getIntValue("a0")); // units of milliseconds 1000 millisec = 1 sec.
         } catch (final InterruptedException ignored) {
         }
     }

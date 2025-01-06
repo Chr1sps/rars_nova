@@ -59,8 +59,9 @@ public final class SyscallOpen extends AbstractSyscall {
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final int retValue = SystemIO.openFile(
             NullString.get(statement),
-            RegisterFile.getValue("a1")
+            RegisterFile.INSTANCE.getIntValue("a1")
         );
-        RegisterFile.updateRegister("a0", retValue); // set returned fd second in register
+        // set returned fd second in register
+        RegisterFile.INSTANCE.updateRegisterByName("a0", retValue);
     }
 }

@@ -21,10 +21,7 @@ public final class SRAI64 extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         // Uses >> because sign fill
-        final var shifted = RegisterFile.getValueLong(statement.getOperand(1)) >> statement.getOperand(2);
-        RegisterFile.updateRegister(
-            statement.getOperand(0),
-            shifted
-        );
+        final var shifted = RegisterFile.INSTANCE.getLongValue(statement.getOperand(1)) >> statement.getOperand(2);
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), shifted);
     }
 }

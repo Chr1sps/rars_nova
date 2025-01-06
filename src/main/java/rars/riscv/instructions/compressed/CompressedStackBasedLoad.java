@@ -18,12 +18,10 @@ public final class CompressedStackBasedLoad extends CompressedInstruction {
         statement -> {
             final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
             try {
-                RegisterFile.updateRegister(
-                    statement.getOperand(0),
-                    Globals.MEMORY_INSTANCE.getWord(
-                        RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX) + upperImmediate
-                    )
+                final long newValue = Globals.MEMORY_INSTANCE.getWord(
+                    RegisterFile.INSTANCE.getIntValue(RegisterFile.STACK_POINTER_REGISTER_INDEX) + upperImmediate
                 );
+                RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
             } catch (final AddressErrorException e) {
                 throw new SimulationException(statement, e);
             }

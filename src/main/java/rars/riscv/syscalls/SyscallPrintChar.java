@@ -53,7 +53,7 @@ public final class SyscallPrintChar extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final char t = (char) (RegisterFile.getValue("a0") & 0x000000ff);
+        final char t = (char) (RegisterFile.INSTANCE.getIntValue("a0") & 0x000000ff);
         SystemIO.printString(Character.toString(t));
     }
 

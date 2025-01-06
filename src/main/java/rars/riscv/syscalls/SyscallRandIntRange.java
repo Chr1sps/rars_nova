@@ -58,7 +58,7 @@ public class SyscallRandIntRange extends AbstractSyscall {
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final Random stream = RandomStreams.get("a0");
         try {
-            RegisterFile.updateRegister("a0", stream.nextInt(RegisterFile.getValue("a1")));
+            RegisterFile.INSTANCE.updateRegisterByName("a0", stream.nextInt(RegisterFile.INSTANCE.getIntValue("a1")));
         } catch (final IllegalArgumentException iae) {
             throw new ExitingException(
                 statement,

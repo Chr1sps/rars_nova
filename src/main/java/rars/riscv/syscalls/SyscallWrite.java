@@ -58,10 +58,10 @@ public class SyscallWrite extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
-        int byteAddress = RegisterFile.getValue("a1"); // source of characters to write to file
-        final int reqLength = RegisterFile.getValue("a2"); // user-requested length
+        int byteAddress = RegisterFile.INSTANCE.getIntValue("a1"); // source of characters to write to file
+        final int reqLength = RegisterFile.INSTANCE.getIntValue("a2"); // user-requested length
         if (reqLength < 0) {
-            RegisterFile.updateRegister("a0", -1);
+            RegisterFile.INSTANCE.updateRegisterByName("a0", -1);
             return;
         }
         int index = 0;
@@ -78,10 +78,11 @@ public class SyscallWrite extends AbstractSyscall {
             throw new ExitingException(statement, e);
         }
         final int retValue = SystemIO.writeToFile(
-            RegisterFile.getValue("a0"), // fd
+            RegisterFile.INSTANCE.getIntValue("a0"), // fd
             myBuffer, // buffer
-            RegisterFile.getValue("a2")
+            RegisterFile.INSTANCE.getIntValue("a2")
         ); // length
-        RegisterFile.updateRegister("a0", retValue); // set returned second in register
+        // set returned second in register
+        RegisterFile.INSTANCE.updateRegisterByName("a0", retValue);
     }
 }

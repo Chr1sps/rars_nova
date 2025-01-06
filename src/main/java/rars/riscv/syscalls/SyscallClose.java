@@ -50,6 +50,6 @@ public final class SyscallClose extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        SystemIO.closeFile(RegisterFile.getValue("a0"));
+        SystemIO.closeFile(RegisterFile.INSTANCE.getIntValue("a0"));
     }
 }

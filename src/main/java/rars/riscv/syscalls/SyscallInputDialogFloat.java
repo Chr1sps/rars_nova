@@ -76,10 +76,10 @@ public final class SyscallInputDialogFloat extends AbstractSyscall {
             FloatingPointRegisterFile.setRegisterToFloat(0, (float) 0.0); // set f0 to zero
             if (inputValue == null) // Cancel was chosen
             {
-                RegisterFile.updateRegister("a1", -2);
+                RegisterFile.INSTANCE.updateRegisterByName("a1", -2);
             } else if (inputValue.isEmpty()) // OK was chosen but there was no input
             {
-                RegisterFile.updateRegister("a1", -3);
+                RegisterFile.INSTANCE.updateRegisterByName("a1", -3);
             } else {
 
                 final float floatValue = Float.parseFloat(inputValue);
@@ -88,14 +88,15 @@ public final class SyscallInputDialogFloat extends AbstractSyscall {
 
                 // Successful parse of valid input data
                 FloatingPointRegisterFile.setRegisterToFloat(0, floatValue); // set f0 to input data
-                RegisterFile.updateRegister("a1", 0); // set to valid flag
+                // set to valid flag
+                RegisterFile.INSTANCE.updateRegisterByName("a1", 0);
 
             }
 
         } catch (final
         NumberFormatException e) // Unsuccessful parse of input data
         {
-            RegisterFile.updateRegister("a1", -1);
+            RegisterFile.INSTANCE.updateRegisterByName("a1", -1);
         }
     }
 }

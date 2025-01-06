@@ -54,6 +54,7 @@ public final class FLTS extends BasicInstruction {
         final Environment e = new Environment();
         final boolean result = Comparisons.compareSignalingLessThan(f1, f2, e);
         Floating.setfflags(e);
-        RegisterFile.updateRegister(statement.getOperand(0), result ? 1 : 0);
+        final long newValue = result ? 1 : 0;
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

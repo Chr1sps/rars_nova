@@ -22,7 +22,7 @@ public final class FMVDX extends BasicInstruction {
 
         FloatingPointRegisterFile.updateRegister(
             statement.getOperand(0),
-            RegisterFile.getValueLong(statement.getOperand(1))
+            RegisterFile.INSTANCE.getLongValue(statement.getOperand(1))
         );
     }
 }

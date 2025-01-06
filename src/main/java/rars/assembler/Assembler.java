@@ -834,12 +834,12 @@ public final class Assembler {
                 }
                 final int value = BinaryUtils.stringToInt(tokens.get(1).getText()); // KENV 1/6/05
                 if (value < 2 && !this.inDataSegment) {
-                    this.errors.add(new ErrorMessage(
-                        true, token.getSourceProgram(), token.getSourceLine(),
+                    this.errors.add(ErrorMessage.warning(
+                        token.getSourceProgram(),
+                        token.getSourceLine(),
                         token.getStartPos(),
-                        "Alignments less than 4 bytes are not supported in the text section. The alignment has " +
-                            "been " +
-                            "rounded up to 4 bytes."
+                        "Alignments less than 4 bytes are not supported in the text section."
+                            + " The alignment has been rounded up to 4 bytes."
                     ));
                     this.dataAddress = this.alignToBoundary(this.dataAddress, 4);
                 } else if (value == 0) {

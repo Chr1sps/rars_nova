@@ -62,6 +62,6 @@ public final class URET extends BasicInstruction {
         } else {
             ControlAndStatusRegisterFile.clearRegister("ustatus", 0x1);
         }
-        RegisterFile.setProgramCounter(ControlAndStatusRegisterFile.getValue("uepc"));
+        RegisterFile.INSTANCE.setProgramCounter(ControlAndStatusRegisterFile.getValue("uepc"));
     }
 }

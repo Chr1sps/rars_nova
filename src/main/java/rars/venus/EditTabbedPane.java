@@ -147,7 +147,7 @@ public class EditTabbedPane extends JPanel {
         FileStatus.setName(name);
         FileStatus.set(FileStatus.State.NEW_NOT_EDITED);
 
-        RegisterFile.resetRegisters();
+        RegisterFile.INSTANCE.resetRegisters();
         this.mainUI.isMemoryReset = true;
         this.mainPane.executeTab.clearPane();
         this.mainPane.setSelectedComponent(this);

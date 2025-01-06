@@ -61,17 +61,17 @@ public final class FCLASSS extends BasicInstruction {
      */
     public static <T extends Floating<T>> void fclass(@NotNull final T in, final int out) {
         if (in.isNaN()) {
-            RegisterFile.updateRegister(out, in.isSignalling() ? 0x100 : 0x200);
+            RegisterFile.INSTANCE.updateRegisterByNumber(out, in.isSignalling() ? 0x100 : 0x200);
         } else {
             final boolean negative = in.isSignMinus();
             if (in.isInfinite()) {
-                RegisterFile.updateRegister(out, negative ? 0x001 : 0x080);
+                RegisterFile.INSTANCE.updateRegisterByNumber(out, negative ? 0x001 : 0x080);
             } else if (in.isZero()) {
-                RegisterFile.updateRegister(out, negative ? 0x008 : 0x010);
+                RegisterFile.INSTANCE.updateRegisterByNumber(out, negative ? 0x008 : 0x010);
             } else if (in.isSubnormal()) {
-                RegisterFile.updateRegister(out, negative ? 0x004 : 0x020);
+                RegisterFile.INSTANCE.updateRegisterByNumber(out, negative ? 0x004 : 0x020);
             } else {
-                RegisterFile.updateRegister(out, negative ? 0x002 : 0x040);
+                RegisterFile.INSTANCE.updateRegisterByNumber(out, negative ? 0x002 : 0x040);
             }
         }
     }

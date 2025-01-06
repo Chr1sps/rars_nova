@@ -75,10 +75,10 @@ public final class SyscallMidiOut extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        int pitch = RegisterFile.getValue("a0");
-        int duration = RegisterFile.getValue("a1");
-        int instrument = RegisterFile.getValue("a2");
-        int volume = RegisterFile.getValue("a3");
+        int pitch = RegisterFile.INSTANCE.getIntValue("a0");
+        int duration = RegisterFile.INSTANCE.getIntValue("a1");
+        int instrument = RegisterFile.INSTANCE.getIntValue("a2");
+        int volume = RegisterFile.INSTANCE.getIntValue("a3");
         if (pitch < rangeLowEnd || pitch > rangeHighEnd) {
             pitch = ToneGenerator.DEFAULT_PITCH;
         }

@@ -15,6 +15,7 @@ import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
+import rars.util.ConversionUtils;
 import rars.util.SimpleSubscriber;
 import rars.venus.run.RunSpeedPanel;
 import rars.venus.util.RepeatButton;
@@ -278,7 +279,8 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             desiredComboBoxIndex = DataSegmentWindow.EXTERN_BASE_ADDRESS_INDEX;
         }
         // Check distance from global pointer; can be either side of it...
-        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER_INDEX)); // 
+        final var gpValue = ConversionUtils.longLowerHalfToInt(RegisterFile.INSTANCE.gp.getValue());
+        thisDistance = Math.abs(address - gpValue); // 
         // distance from
         // global
         // pointer
@@ -299,7 +301,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             desiredComboBoxIndex = DataSegmentWindow.HEAP_BASE_ADDRESS_INDEX;
         }
         // Check distance from stack pointer. Can be on either side of it...
-        thisDistance = Math.abs(address - RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX));
+        thisDistance = Math.abs(address - (int) RegisterFile.INSTANCE.gp.getValue());
         if (thisDistance < shortDistance) {
             desiredComboBoxIndex = DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX;
         }
@@ -433,12 +435,11 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         // different than the one just displayed.
         int baseAddress = this.displayBaseAddressArray[desiredComboBoxIndex];
         if (baseAddress == -1) {
+            final var gpValue = (int) RegisterFile.INSTANCE.gp.getValue();
             if (desiredComboBoxIndex == DataSegmentWindow.GLOBAL_POINTER_ADDRESS_INDEX) {
-                baseAddress = RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER_INDEX)
-                    - (RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER_INDEX) % DataSegmentWindow.BYTES_PER_ROW);
+                baseAddress = gpValue - (gpValue % DataSegmentWindow.BYTES_PER_ROW);
             } else if (desiredComboBoxIndex == DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX) {
-                baseAddress = RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX)
-                    - (RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX) % DataSegmentWindow.BYTES_PER_ROW);
+                baseAddress = gpValue - (gpValue % DataSegmentWindow.BYTES_PER_ROW);
             } else {
                 return null;// shouldn't happen since these are the only two
             }
@@ -812,7 +813,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 // get $gp global pointer, but guard against it having second below data segment
                 DataSegmentWindow.this.firstAddress = Math.max(
                     memoryConfiguration.dataSegmentBaseAddress,
-                    RegisterFile.getValue(RegisterFile.GLOBAL_POINTER_REGISTER_INDEX)
+                    (int) RegisterFile.INSTANCE.gp.getValue()
                 );
                 // updateModelForMemoryRange requires argument to be multiple of 4
                 // but for cleaner display we'll make it multiple of 32 (last nibble is 0).
@@ -832,7 +833,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
                 // get $sp stack pointer, but guard against it having second below data segment
                 DataSegmentWindow.this.firstAddress = Math.max(
                     memoryConfiguration.dataSegmentBaseAddress,
-                    RegisterFile.getValue(RegisterFile.STACK_POINTER_REGISTER_INDEX)
+                    (int) RegisterFile.INSTANCE.sp.getValue()
                 );
                 // See comment above for gloButton...
                 DataSegmentWindow.this.firstAddress =

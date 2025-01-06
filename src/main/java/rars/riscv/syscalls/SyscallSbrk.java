@@ -52,9 +52,9 @@ public class SyscallSbrk extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         try {
-            RegisterFile.updateRegister(
+            RegisterFile.INSTANCE.updateRegisterByName(
                 "a0",
-                Globals.MEMORY_INSTANCE.allocateBytesFromHeap(RegisterFile.getValue("a0"))
+                Globals.MEMORY_INSTANCE.allocateBytesFromHeap(RegisterFile.INSTANCE.getIntValue("a0"))
             );
         } catch (final IllegalArgumentException iae) {
             throw new ExitingException(

@@ -61,12 +61,11 @@ public final class Utils {
 
     public static void processBranch(final int displacement) {
         // Decrement needed because PC has already been incremented
-        RegisterFile
-            .setProgramCounter(RegisterFile.getProgramCounter() + displacement - BasicInstruction.BASIC_INSTRUCTION_LENGTH);
+        RegisterFile.INSTANCE.setProgramCounter(RegisterFile.INSTANCE.getProgramCounter() + displacement - BasicInstruction.BASIC_INSTRUCTION_LENGTH);
     }
 
     public static void processJump(final int targetAddress) {
-        RegisterFile.setProgramCounter(targetAddress);
+        RegisterFile.INSTANCE.setProgramCounter(targetAddress);
     }
 
     /**
@@ -76,7 +75,7 @@ public final class Utils {
      * The parameter is register number to receive the return address.
      */
     public static void processReturnAddress(final int register) {
-        RegisterFile.updateRegister(register, RegisterFile.getProgramCounter());
+        RegisterFile.INSTANCE.updateRegisterByNumber(register, RegisterFile.INSTANCE.getProgramCounter());
     }
 
     public static void flipRounding(@NotNull final Environment e) {

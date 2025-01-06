@@ -47,9 +47,7 @@ public final class FMVXS extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
 
-        RegisterFile.updateRegister(
-            statement.getOperand(0),
-            (int) FloatingPointRegisterFile.getValueLong(statement.getOperand(1))
-        );
+        final long newValue = (int) FloatingPointRegisterFile.getValueLong(statement.getOperand(1));
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

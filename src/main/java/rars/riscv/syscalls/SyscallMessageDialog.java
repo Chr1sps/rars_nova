@@ -59,7 +59,7 @@ public final class SyscallMessageDialog extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         // Display the dialog.
-        int msgType = RegisterFile.getValue("a1");
+        int msgType = RegisterFile.INSTANCE.getIntValue("a1");
         if (msgType < 0 || msgType > 3) {
             msgType = -1; // See values in http://java.sun.com/j2se/1.5.0/docs/api/constant-values.html
         }

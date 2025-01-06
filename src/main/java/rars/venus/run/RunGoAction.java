@@ -249,7 +249,7 @@ public class RunGoAction extends GuiAction {
             this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues);
             this.executePane.textSegment.setCodeHighlighting(true);
             this.executePane.textSegment.unhighlightAllSteps();
-            this.executePane.textSegment.highlightStepAtAddress(RegisterFile.getProgramCounter() - 4);
+            this.executePane.textSegment.highlightStepAtAddress(RegisterFile.INSTANCE.getProgramCounter() - 4);
         }
         switch (reason) {
             case NORMAL_TERMINATION:

@@ -20,9 +20,7 @@ public final class FMVXD extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
 
-        RegisterFile.updateRegister(
-            statement.getOperand(0),
-            FloatingPointRegisterFile.getValueLong(statement.getOperand(1))
-        );
+        final long newValue = FloatingPointRegisterFile.getValueLong(statement.getOperand(1));
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

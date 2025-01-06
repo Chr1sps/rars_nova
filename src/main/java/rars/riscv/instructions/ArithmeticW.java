@@ -27,12 +27,10 @@ public abstract class ArithmeticW extends BasicInstruction {
 
     @Override
     public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
-        RegisterFile.updateRegister(
-            statement.getOperand(0),
-            base.computeW(
-                ConversionUtils.longLowerHalfToInt(RegisterFile.getValueLong(statement.getOperand(1))),
-                ConversionUtils.longLowerHalfToInt(RegisterFile.getValueLong(statement.getOperand(2)))
-            )
+        final long newValue = base.computeW(
+            ConversionUtils.longLowerHalfToInt(RegisterFile.INSTANCE.getLongValue(statement.getOperand(1))),
+            ConversionUtils.longLowerHalfToInt(RegisterFile.INSTANCE.getLongValue(statement.getOperand(2)))
         );
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

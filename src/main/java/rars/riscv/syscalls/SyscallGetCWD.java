@@ -58,15 +58,15 @@ public final class SyscallGetCWD extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String path = System.getProperty("user.dir");
-        final int buf = RegisterFile.getValue("a0");
-        final int length = RegisterFile.getValue("a1");
+        final int buf = RegisterFile.INSTANCE.getIntValue("a0");
+        final int length = RegisterFile.INSTANCE.getIntValue("a1");
 
         final byte[] utf8BytesList = path.getBytes(StandardCharsets.UTF_8);
         if (length < utf8BytesList.length + 1) {
             // This should be -34 (ERANGE) for compatibility with spike, but until other
             // syscalls are ready with compatable
             // error codes, lets keep internal consitency.
-            RegisterFile.updateRegister("a0", -1);
+            RegisterFile.INSTANCE.updateRegisterByName("a0", -1);
             return;
         }
         try {

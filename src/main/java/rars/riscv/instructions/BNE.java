@@ -44,8 +44,8 @@ public final class BNE extends Branch {
 
     @Override
     public boolean willBranch(final @NotNull ProgramStatement statement) {
-        final var firstValue = RegisterFile.getValue(statement.getOperand(0));
-        final var secondValue = RegisterFile.getValue(statement.getOperand(1));
+        final var firstValue = (int) RegisterFile.INSTANCE.getIntValue(statement.getOperand(0));
+        final var secondValue = (int) RegisterFile.INSTANCE.getIntValue(statement.getOperand(1));
         return firstValue != secondValue;
     }
 }

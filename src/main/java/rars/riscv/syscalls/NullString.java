@@ -73,7 +73,7 @@ public final class NullString {
      *     if it hits a #AddressErrorException
      */
     public static @NotNull String get(final ProgramStatement statement, final String reg) throws ExitingException {
-        int byteAddress = RegisterFile.getValue(reg);
+        int byteAddress = RegisterFile.INSTANCE.getIntValue(reg);
         final ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
         try {
             utf8BytesList.add(Globals.MEMORY_INSTANCE.getByte(byteAddress));

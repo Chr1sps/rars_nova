@@ -165,7 +165,7 @@ public final class InterruptController {
     public static SimulationException claimTrap() {
         synchronized (lock) {
             assert trapPending : "Cannot claim, no trap pending";
-            assert trapPC == RegisterFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH
+            assert trapPC == RegisterFile.INSTANCE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH
                 : "trapPC doesn't match current pc";
             trapPending = false;
             return trapSE;

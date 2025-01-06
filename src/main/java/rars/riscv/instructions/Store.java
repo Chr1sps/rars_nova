@@ -56,8 +56,8 @@ public abstract class Store extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             store(
-                RegisterFile.getValue(statement.getOperand(2)) + upperImmediate,
-                RegisterFile.getValueLong(statement.getOperand(0))
+                RegisterFile.INSTANCE.getIntValue(statement.getOperand(2)) + upperImmediate,
+                RegisterFile.INSTANCE.getLongValue(statement.getOperand(0))
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(

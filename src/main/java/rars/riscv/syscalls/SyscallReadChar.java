@@ -52,7 +52,7 @@ public class SyscallReadChar extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         try {
-            RegisterFile.updateRegister("a0", SystemIO.readChar(this.getNumber()));
+            RegisterFile.INSTANCE.updateRegisterByName("a0", SystemIO.readChar(this.getNumber()));
         } catch (final IndexOutOfBoundsException e) // means null input
         {
             throw new ExitingException(

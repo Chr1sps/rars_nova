@@ -55,21 +55,17 @@ public abstract class Arithmetic extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         if (InstructionsRegistry.RV64_MODE_FLAG) {
-            RegisterFile.updateRegister(
-                statement.getOperand(0),
-                compute(
-                    RegisterFile.getValueLong(statement.getOperand(1)),
-                    RegisterFile.getValueLong(statement.getOperand(2))
-                )
+            final long newValue = compute(
+                RegisterFile.INSTANCE.getLongValue(statement.getOperand(1)),
+                RegisterFile.INSTANCE.getLongValue(statement.getOperand(2))
             );
+            RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
         } else {
-            RegisterFile.updateRegister(
-                statement.getOperand(0),
-                computeW(
-                    RegisterFile.getValue(statement.getOperand(1)),
-                    RegisterFile.getValue(statement.getOperand(2))
-                )
+            final long newValue = computeW(
+                RegisterFile.INSTANCE.getIntValue(statement.getOperand(1)),
+                RegisterFile.INSTANCE.getIntValue(statement.getOperand(2))
             );
+            RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
         }
     }
 

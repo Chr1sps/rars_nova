@@ -21,9 +21,8 @@ public final class SLLIW extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         // Copy from SLLI
-        RegisterFile.updateRegister(
-            statement.getOperand(0),
-            (long) RegisterFile.getValue(statement.getOperand(1)) << statement.getOperand(2)
-        );
+        final long newValue = (long) (int) RegisterFile.INSTANCE.getIntValue(statement.getOperand(1)) << statement.getOperand(
+            2);
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

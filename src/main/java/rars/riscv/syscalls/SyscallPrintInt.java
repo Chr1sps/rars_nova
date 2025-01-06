@@ -50,6 +50,6 @@ public final class SyscallPrintInt extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        SystemIO.printString(Integer.toString(RegisterFile.getValue("a0")));
+        SystemIO.printString(Integer.toString(RegisterFile.INSTANCE.getIntValue("a0")));
     }
 }

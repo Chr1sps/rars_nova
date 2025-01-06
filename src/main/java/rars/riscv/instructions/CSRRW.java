@@ -52,14 +52,14 @@ public final class CSRRW extends BasicInstruction {
             final long csr = ControlAndStatusRegisterFile.getValueLong(statement.getOperand(1));
             if (ControlAndStatusRegisterFile.updateRegister(
                 statement.getOperand(1),
-                RegisterFile.getValueLong(statement.getOperand(2))
+                RegisterFile.INSTANCE.getLongValue(statement.getOperand(2))
             )) {
                 throw new SimulationException(
                     statement, "Attempt to write to read-only CSR",
                     ExceptionReason.ILLEGAL_INSTRUCTION
                 );
             }
-            RegisterFile.updateRegister(statement.getOperand(0), csr);
+            RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), csr);
         } catch (final NullPointerException e) {
             throw new SimulationException(
                 statement, "Attempt to access unavailable CSR",

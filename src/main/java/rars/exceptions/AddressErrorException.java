@@ -58,14 +58,15 @@ public final class AddressErrorException extends Exception {
         final int addr
     ) {
         super(message + BinaryUtils.intToHexString(addr));
-        address = addr;
-        switch (exceptType) {
-            case INSTRUCTION_ACCESS_FAULT, INSTRUCTION_ADDR_MISALIGNED, LOAD_ACCESS_FAULT, LOAD_ADDRESS_MISALIGNED,
-                 STORE_ACCESS_FAULT, STORE_ADDRESS_MISALIGNED:
-                reason = exceptType;
-                break;
-            default:
-                throw new IllegalArgumentException("This exception reason is not allowed.");
-        }
+        this.address = addr;
+        this.reason = switch (exceptType) {
+            case INSTRUCTION_ACCESS_FAULT,
+                 INSTRUCTION_ADDR_MISALIGNED,
+                 LOAD_ACCESS_FAULT,
+                 LOAD_ADDRESS_MISALIGNED,
+                 STORE_ACCESS_FAULT,
+                 STORE_ADDRESS_MISALIGNED -> exceptType;
+            default -> throw new IllegalArgumentException("This exception reason is not allowed.");
+        };
     }
 }

@@ -48,10 +48,8 @@ public final class SRAI32 extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         // Uses >> because sign fill
-        RegisterFile.updateRegister(
-            statement.getOperand(0),
-            RegisterFile.getValue(statement.getOperand(1)) >> statement.getOperand(2)
-        );
+        final long newValue = RegisterFile.INSTANCE.getIntValue(statement.getOperand(1)) >> statement.getOperand(2);
+        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
 
     }
 }

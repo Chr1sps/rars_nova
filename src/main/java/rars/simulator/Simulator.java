@@ -329,7 +329,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             if (exceptionHandler != null) {
                 ControlAndStatusRegisterFile.orRegister("ustatus", 0x10); // Set UPIE
                 ControlAndStatusRegisterFile.clearRegister("ustatus", 0x1); // Clear UIE
-                RegisterFile.setProgramCounter(base);
+                RegisterFile.INSTANCE.setProgramCounter(base);
                 return true;
             } else {
                 // If we don't have an error handler or exceptions are disabled terminate the
@@ -375,12 +375,12 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             if (exceptionHandler != null) {
                 ControlAndStatusRegisterFile.orRegister("ustatus", 0x10); // Set UPIE
                 ControlAndStatusRegisterFile.clearRegister("ustatus", ControlAndStatusRegisterFile.INTERRUPT_ENABLE);
-                RegisterFile.setProgramCounter(base);
+                RegisterFile.INSTANCE.setProgramCounter(base);
                 return true;
             } else {
                 // If we don't have an error handler or exceptions are disabled terminate the
                 // process
-                this.pe = new SimulationException("Interrupt handler was not supplied, but interrupt enable was high");
+                this.pe = new SimulationException("Interrupt handler was not supplied, but interrupt enable was high", ExceptionReason.OTHER);
                 this.stopExecution(true, Reason.EXCEPTION);
                 return false;
             }
@@ -439,7 +439,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             // This is noticeable in stepped mode.
             // *********************************************************************
 
-            RegisterFile.initializeProgramCounter(this.pc);
+            RegisterFile.INSTANCE.initializeProgramCounter(this.pc);
             int steps = 0;
 
             // Volatile variable initialized false but can be set true by the main thread.
@@ -463,7 +463,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                             & ControlAndStatusRegisterFile.INTERRUPT_ENABLE
                     ) != 0;
                     // make sure no interrupts sneak in while we are processing them
-                    this.pc = RegisterFile.getProgramCounter();
+                    this.pc = RegisterFile.INSTANCE.getProgramCounter();
                     synchronized (InterruptController.lock) {
                         boolean pendingExternal = InterruptController.externalPending();
                         boolean pendingTimer = InterruptController.timerPending();
@@ -528,8 +528,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                         }
                     }
 
-                    this.pc = RegisterFile.getProgramCounter();
-                    RegisterFile.incrementPC();
+                    this.pc = RegisterFile.INSTANCE.getProgramCounter();
                     // Get instuction
                     ProgramStatement statement;
                     try {
@@ -572,6 +571,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                                 ExceptionReason.ILLEGAL_INSTRUCTION
                             );
                         }
+                        RegisterFile.INSTANCE.incrementPC(instruction.getInstructionLength());
                         // THIS IS WHERE THE INSTRUCTION EXECUTION IS ACTUALLY SIMULATED!
                         instruction.simulate(statement);
 
@@ -623,7 +623,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
 
                 // Return if we've reached a breakpoint.
                 if (ebreak || (this.breakPoints != null) &&
-                    (Arrays.binarySearch(this.breakPoints, RegisterFile.getProgramCounter()) >= 0)) {
+                    (Arrays.binarySearch(this.breakPoints, RegisterFile.INSTANCE.getProgramCounter()) >= 0)) {
                     this.stopExecution(false, Reason.BREAKPOINT);
                     return;
                 }

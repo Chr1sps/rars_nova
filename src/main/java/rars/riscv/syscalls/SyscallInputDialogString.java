@@ -85,16 +85,16 @@ public final class SyscallInputDialogString extends AbstractSyscall {
         // means that OK was chosen but no string was input.
         final String inputString;
         inputString = JOptionPane.showInputDialog(message);
-        final int byteAddress = RegisterFile.getValue("a1"); // byteAddress of string is in a1
-        final int maxLength = RegisterFile.getValue("a2"); // input buffer size for input string is in a2
+        final int byteAddress = RegisterFile.INSTANCE.getIntValue("a1"); // byteAddress of string is in a1
+        final int maxLength = RegisterFile.INSTANCE.getIntValue("a2"); // input buffer size for input string is in a2
 
         try {
             if (inputString == null) // Cancel was chosen
             {
-                RegisterFile.updateRegister("a1", -2);
+                RegisterFile.INSTANCE.updateRegisterByName("a1", -2);
             } else if (inputString.isEmpty()) // OK was chosen but there was no input
             {
-                RegisterFile.updateRegister("a1", -3);
+                RegisterFile.INSTANCE.updateRegisterByName("a1", -3);
             } else {
                 final byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
                 // The buffer will contain characters, a '\n' character, and the null character
@@ -114,9 +114,9 @@ public final class SyscallInputDialogString extends AbstractSyscall {
 
                 if (utf8BytesList.length > maxLength - 1) {
                     // length of the input string exceeded the specified maximum
-                    RegisterFile.updateRegister("a1", -4);
+                    RegisterFile.INSTANCE.updateRegisterByName("a1", -4);
                 } else {
-                    RegisterFile.updateRegister("a1", 0);
+                    RegisterFile.INSTANCE.updateRegisterByName("a1", 0);
                 }
             } // end else
 

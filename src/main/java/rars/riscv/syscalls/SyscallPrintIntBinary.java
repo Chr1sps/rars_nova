@@ -54,6 +54,6 @@ public final class SyscallPrintIntBinary extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        SystemIO.printString(BinaryUtils.intToBinaryString(RegisterFile.getValue("a0")));
+        SystemIO.printString(BinaryUtils.intToBinaryString(RegisterFile.INSTANCE.getIntValue("a0")));
     }
 }
