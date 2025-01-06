@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
-public final class RegistersWindow extends RegisterBlockWindow {
+public final class RegistersWindow extends RegisterBlockWindowBase {
     /**
      * The tips to show when hovering over the names of the registers
      */
@@ -78,12 +78,12 @@ public final class RegistersWindow extends RegisterBlockWindow {
 
     @Override
     protected void beginObserving() {
-        RegisterFile.INSTANCE.addRegistersSubscriber(this);
+        RegisterFile.INSTANCE.addRegistersListener(this::processRegisterNotice);
     }
 
     @Override
     protected void endObserving() {
-        RegisterFile.INSTANCE.deleteRegistersSubscriber(this);
+        RegisterFile.INSTANCE.deleteRegistersListener(this::processRegisterNotice);
     }
 
     @Override

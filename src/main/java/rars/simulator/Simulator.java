@@ -12,14 +12,12 @@ import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.OtherSettings;
 import rars.util.BinaryUtils;
-import rars.util.CustomPublisher;
+import rars.util.ListenerDispatcher;
 import rars.util.SystemIO;
 import rars.venus.run.RunSpeedPanel;
 
 import javax.swing.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.function.Consumer;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -55,10 +53,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  */
-public final class Simulator extends CustomPublisher<SimulatorNotice> {
-    private static @Nullable Simulator simulator = null; // Singleton object
+public final class Simulator {
+    public static final @NotNull Simulator INSTANCE = new Simulator(); // Singleton object
     private static @Nullable Runnable interactiveGUIUpdater = null;
-    private final @NotNull ArrayList<Consumer<Simulator>> stopListeners = new ArrayList<>(1);
+    public final @NotNull ListenerDispatcher<@NotNull SimulatorNotice>.Hook simulatorNoticeHook;
+    public final @NotNull ListenerDispatcher<Void>.Hook stopEventHook;
+    private final @NotNull ListenerDispatcher<@NotNull SimulatorNotice> simulatorNoticeDispatcher;
+    private final @NotNull ListenerDispatcher<Void> stopEventDispatcher;
     private @Nullable SimThread simulatorThread;
 
     private Simulator() {
@@ -66,23 +67,10 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
         if (Globals.gui != null) {
             Simulator.interactiveGUIUpdater = Simulator::updateUi;
         }
-    }
-
-    /**
-     * Returns the Simulator object
-     *
-     * @return the Simulator object in use
-     */
-    public static @NotNull Simulator getInstance() {
-        // Do NOT change this to create the Simulator at load time (in declaration
-        // above)!
-        // Its constructor looks for the GUI, which at load time is not created yet,
-        // and incorrectly leaves interactiveGUIUpdater null! This causes runtime
-        // exceptions while running in timed mode.
-        if (Simulator.simulator == null) {
-            Simulator.simulator = new Simulator();
-        }
-        return Simulator.simulator;
+        this.simulatorNoticeDispatcher = new ListenerDispatcher<>();
+        this.simulatorNoticeHook = this.simulatorNoticeDispatcher.getHook();
+        this.stopEventDispatcher = new ListenerDispatcher<>();
+        this.stopEventHook = this.stopEventDispatcher.getHook();
     }
 
     private static void updateUi() {
@@ -158,9 +146,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
     private void interruptExecution(final @NotNull Reason reason) {
         if (this.simulatorThread != null) {
             this.simulatorThread.setStop(reason);
-            for (final var listener : this.stopListeners) {
-                listener.accept(this);
-            }
+            this.stopEventDispatcher.dispatch(null);
             this.simulatorThread = null;
         }
     }
@@ -171,14 +157,6 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
 
     public void pauseExecution() {
         this.interruptExecution(Reason.PAUSE);
-    }
-
-    public void addStopListener(final @NotNull Consumer<Simulator> l) {
-        this.stopListeners.add(l);
-    }
-
-    public void removeStopListener(final @NotNull Consumer<Simulator> l) {
-        this.stopListeners.remove(l);
     }
 
     /**
@@ -193,7 +171,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
     private void notifyObserversOfExecution(final @NotNull SimulatorNotice notice) {
         // TODO: this is not completely threadsafe, if anything using Swing is observing
         // This can be fixed by making a SwingObserver class that is thread-safe
-        this.submit(notice);
+        this.simulatorNoticeDispatcher.dispatch(notice);
     }
 
     /**
@@ -271,7 +249,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
         }
 
         private void startExecution() {
-            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(
+            Simulator.INSTANCE.notifyObserversOfExecution(new SimulatorNotice(
                 SimulatorNotice.Action.START,
                 this.maxSteps,
                 Globals.gui != null
@@ -288,7 +266,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             if (done) {
                 SystemIO.resetFiles(); // close any files opened in the process of simulating
             }
-            Simulator.getInstance().notifyObserversOfExecution(new SimulatorNotice(
+            Simulator.INSTANCE.notifyObserversOfExecution(new SimulatorNotice(
                 SimulatorNotice.Action.STOP,
                 this.maxSteps,
                 Globals.gui != null
@@ -380,7 +358,10 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
             } else {
                 // If we don't have an error handler or exceptions are disabled terminate the
                 // process
-                this.pe = new SimulationException("Interrupt handler was not supplied, but interrupt enable was high", ExceptionReason.OTHER);
+                this.pe = new SimulationException(
+                    "Interrupt handler was not supplied, but interrupt enable was high",
+                    ExceptionReason.OTHER
+                );
                 this.stopExecution(true, Reason.EXCEPTION);
                 return false;
             }
@@ -513,7 +494,7 @@ public final class Simulator extends CustomPublisher<SimulatorNotice> {
                             | (pendingTimer ? ControlAndStatusRegisterFile.TIMER_INTERRUPT : 0);
                     }
                     if (uip != ControlAndStatusRegisterFile.UIP.getValueNoNotify()) {
-                        
+
                         // ControlAndStatusRegisterFile.UIP.
                         ControlAndStatusRegisterFile.updateRegister("uip", uip);
                     }

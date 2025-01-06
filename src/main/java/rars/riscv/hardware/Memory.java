@@ -15,12 +15,11 @@ import rars.notices.MemoryAccessNotice;
 import rars.riscv.BasicInstruction;
 import rars.settings.BoolSetting;
 import rars.settings.OtherSettings;
-import rars.util.CustomPublisher;
-import rars.util.SimpleSubscriber;
+import rars.util.ListenerDispatcher;
 
 import java.util.Collection;
 import java.util.Vector;
-import java.util.concurrent.Flow;
+import java.util.function.Consumer;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
@@ -60,7 +59,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public final class Memory extends CustomPublisher<MemoryAccessNotice> {
+public final class Memory {
     private static final @NotNull Logger LOGGER = LogManager.getLogger(Memory.class);
     private static final int BLOCK_LENGTH_WORDS = 1024; // allocated blocksize 1024 ints == 4K bytes
     private static final int BLOCK_TABLE_LENGTH = 1024; // Each entry of table points to a block.
@@ -1025,16 +1024,12 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
     }
 
     /**
-     * Method to accept registration from observer for any memory address. Overrides
-     * inherited method. Note to observers: this class delegates Observable
-     * operations
-     * so notices will come from the delegate, not the memory object.
+     * Method to accept registration from observer for any memory address.
      */
-    @Override
-    public void subscribe(final Flow.@NotNull Subscriber<? super MemoryAccessNotice> obs) {
+    public void subscribe(final @NotNull Consumer<? super MemoryAccessNotice> listener) {
         try { // split so start address always >= end address
-            this.subscribe(obs, 0, 0x7ffffffc);
-            this.subscribe(obs, 0x80000000, 0xfffffffc);
+            this.subscribe(listener, 0, 0x7ffffffc);
+            this.subscribe(listener, 0x80000000, 0xfffffffc);
         } catch (final AddressErrorException aee) {
             Memory.LOGGER.error("Internal error in Memory.addObserver.", aee);
         }
@@ -1053,7 +1048,7 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      *     if any.
      */
     public void subscribe(
-        final Flow.Subscriber<? super MemoryAccessNotice> obs,
+        final @NotNull Consumer<? super MemoryAccessNotice> obs,
         final int addr
     ) throws AddressErrorException {
         this.subscribe(obs, addr, addr);
@@ -1067,7 +1062,7 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      * operations
      * so notices will come from the delegate, not the memory object.
      *
-     * @param obs
+     * @param listener
      *     the observer
      * @param startAddr
      *     the low end of memory address range, must be on word
@@ -1079,7 +1074,7 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      *     if any.
      */
     public void subscribe(
-        final Flow.Subscriber<? super MemoryAccessNotice> obs,
+        final @NotNull Consumer<? super MemoryAccessNotice> listener,
         final int startAddr,
         final int endAddr
     ) throws AddressErrorException {
@@ -1101,15 +1096,15 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
                 startAddr
             );
         }
-        this.observables.add(new MemoryObservable(obs, startAddr, endAddr));
+        this.observables.add(new MemoryObservable(listener, startAddr, endAddr));
     }
 
     /**
      * Remove specified memory observers
      */
-    public void deleteSubscriber(final @NotNull SimpleSubscriber<? super MemoryAccessNotice> obs) {
-        for (final MemoryObservable o : this.observables) {
-            o.deleteSubscriber(obs);
+    public void deleteSubscriber(final @NotNull Consumer<? super MemoryAccessNotice> listener) {
+        for (final var observable : this.observables) {
+            observable.hook.unsubscribe(listener);
         }
     }
 
@@ -1127,7 +1122,7 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
         if ((Globals.program != null || Globals.gui == null)) {
             this.observables.stream()
                 .filter((mo) -> mo.match(address))
-                .forEach((mo) -> mo.submit(new MemoryAccessNotice(
+                .forEach((mo) -> mo.dispatcher.dispatch(new MemoryAccessNotice(
                     type,
                     address,
                     length,
@@ -1387,19 +1382,22 @@ public final class Memory extends CustomPublisher<MemoryAccessNotice> {
      * Private class whose objects will represent an observable-observer pair
      * for a given memory address or range.
      */
-    private static class MemoryObservable extends CustomPublisher<MemoryAccessNotice>
-        implements Comparable<MemoryObservable> {
+    private static class MemoryObservable implements Comparable<MemoryObservable> {
+        public final @NotNull ListenerDispatcher<@NotNull MemoryAccessNotice> dispatcher;
+        public final @NotNull ListenerDispatcher<@NotNull MemoryAccessNotice>.Hook hook;
         private final int lowAddress;
         private final int highAddress;
 
         public MemoryObservable(
-            final Flow.Subscriber<? super MemoryAccessNotice> subscriber,
+            final @NotNull Consumer<? super MemoryAccessNotice> listener,
             final int startAddr,
             final int endAddr
         ) {
             this.lowAddress = startAddr;
             this.highAddress = endAddr;
-            this.subscribe(subscriber);
+            this.dispatcher = new ListenerDispatcher<>();
+            this.hook = this.dispatcher.getHook();
+            this.hook.subscribe(listener);
         }
 
         public boolean match(final int address) {

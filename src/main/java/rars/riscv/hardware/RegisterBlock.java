@@ -5,9 +5,8 @@ import org.jetbrains.annotations.Nullable;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.hardware.registers.Register;
 import rars.util.BinaryUtils;
-import rars.util.SimpleSubscriber;
 
-import java.util.concurrent.Flow;
+import java.util.function.Consumer;
 
 /*
 Copyright (c) 2003-2017,  Pete Sanderson, Benjamin Landers and Kenneth Vollmar
@@ -203,13 +202,10 @@ public final class RegisterBlock {
      * method
      * will add the given Observer to each one. Currently does not apply to Program
      * Counter.
-     *
-     * @param observer
-     *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public void addRegistersObserver(final SimpleSubscriber<? super RegisterAccessNotice> observer) {
-        for (final Register r : this.regFile) {
-            r.subscribe(observer);
+    public void addRegistersObserver(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
+        for (final var register : this.regFile) {
+            register.registerChangeHook.subscribe(listener);
         }
     }
 
@@ -217,15 +213,11 @@ public final class RegisterBlock {
      * Each individual register is a separate object and Observable. This handy
      * method
      * will delete the given Observer from each one. Currently does not apply to
-     * Program
-     * Counter.
-     *
-     * @param subscriber
-     *     a {@link java.util.concurrent.Flow.Subscriber} object
+     * Program Counter.
      */
-    public void deleteRegistersSubscriber(final Flow.Subscriber<? super RegisterAccessNotice> subscriber) {
-        for (final Register r : this.regFile) {
-            r.deleteSubscriber(subscriber);
+    public void deleteRegistersSubscriber(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
+        for (final var register : this.regFile) {
+            register.registerChangeHook.unsubscribe(listener);
         }
     }
 

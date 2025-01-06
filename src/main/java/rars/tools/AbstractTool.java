@@ -6,7 +6,6 @@ import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.riscv.hardware.registers.Register;
-import rars.util.SimpleSubscriber;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,7 +13,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.concurrent.Flow;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -63,7 +61,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Modified by Chr1sps, 2024.
  */
 
-public abstract class AbstractTool extends JFrame implements SimpleSubscriber<AccessNotice> {
+public abstract class AbstractTool extends JFrame {
     private final String title; // descriptive title for title bar provided to constructor.
     private final String heading; // Text to be displayed in the top portion of the main window.
     // Some GUI settings
@@ -72,7 +70,6 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     private final int highMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().stackBaseAddress;
     protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
     protected ConnectButton connectButton;
-    protected Flow.Subscription subscription;
     protected JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.
     // Major GUI components
     private JLabel headingLabel;
@@ -81,8 +78,6 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     // For app, is set true when "Assemble and Run" clicked, false when program
     // terminates.
     private volatile boolean observing = false;
-
-    ////////////////////////////// ABSTRACT METHODS ///////////////////////////
 
     /**
      * Simple constructor
@@ -315,9 +310,16 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     protected void addAsObserver(final int lowEnd, final int highEnd) {
         final String errorMessage = "Error connecting to memory";
         try {
-            Globals.MEMORY_INSTANCE.subscribe(this, lowEnd, highEnd);
+            Globals.MEMORY_INSTANCE.subscribe(this::processAccessNotice, lowEnd, highEnd);
         } catch (final AddressErrorException aee) {
             this.headingLabel.setText(errorMessage);
+        }
+    }
+
+    protected void processAccessNotice(final @NotNull AccessNotice notice) {
+        if (notice.isAccessFromRISCV) {
+            this.processRISCVUpdate(notice);
+            this.updateDisplay();
         }
     }
 
@@ -329,7 +331,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
      */
     protected void addAsObserver(final Register reg) {
         if (reg != null) {
-            reg.subscribe(this);
+            reg.registerChangeHook.subscribe(this::processAccessNotice);
         }
     }
 
@@ -344,7 +346,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
      * app terminates (e.g. when the button is re-enabled).
      */
     protected void deleteAsSubscriber() {
-        Globals.MEMORY_INSTANCE.deleteSubscriber(this);
+        Globals.MEMORY_INSTANCE.deleteSubscriber(this::processAccessNotice);
     }
 
     /**
@@ -355,7 +357,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
      */
     protected void deleteAsSubscriber(final Register reg) {
         if (reg != null) {
-            reg.deleteSubscriber(this);
+            reg.registerChangeHook.unsubscribe(this::processAccessNotice);
         }
     }
 
@@ -403,7 +405,7 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
     protected void processRISCVUpdate(final AccessNotice notice) {
     }
 
-    //////////////////// PRIVATE HELPER METHODS //////////////////////////////////
+    // PRIVATE HELPER METHODS 
 
     /**
      * Override this method to provide a JComponent (probably a JButton) of your
@@ -418,7 +420,8 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         return null;
     }
 
-    /// ///////////////// PRIVATE HELPER CLASSES //////////////////////////////////
+    // PRIVATE HELPER CLASSES 
+
     // Specialized inner classes. Either used by stand-alone (JFrame-based) only //
     // or used by Tool (JDialog-based) only. //
 
@@ -430,21 +433,6 @@ public abstract class AbstractTool extends JFrame implements SimpleSubscriber<Ac
         }
         this.dialog.setVisible(false);
         this.dialog.dispose();
-    }
-
-    @Override
-    public void onSubscribe(@NotNull final Flow.Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
-    }
-
-    @Override
-    public void onNext(final @NotNull AccessNotice notice) {
-        if (notice.isAccessFromRISCV) {
-            this.processRISCVUpdate(notice);
-            this.updateDisplay();
-        }
-        this.subscription.request(1);
     }
 
     // Every control button will get one of these so when it has focus

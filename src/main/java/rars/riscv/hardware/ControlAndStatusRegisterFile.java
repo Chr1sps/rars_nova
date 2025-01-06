@@ -8,9 +8,8 @@ import rars.riscv.hardware.registers.MaskedRegister;
 import rars.riscv.hardware.registers.ReadOnlyRegister;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.OtherSettings;
-import rars.util.SimpleSubscriber;
 
-import java.util.concurrent.Flow;
+import java.util.function.Consumer;
 
 /*
 Copyright (c) 2017-2019,  Benjamin Landers
@@ -317,7 +316,7 @@ public final class ControlAndStatusRegisterFile {
      * @param observer
      *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void addRegistersObserver(final SimpleSubscriber<? super RegisterAccessNotice> observer) {
+    public static void addRegistersObserver(final @NotNull Consumer<? super RegisterAccessNotice> observer) {
         ControlAndStatusRegisterFile.instance.addRegistersObserver(observer);
     }
 
@@ -329,7 +328,7 @@ public final class ControlAndStatusRegisterFile {
      * @param observer
      *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void deleteRegistersObserver(final Flow.Subscriber<? super RegisterAccessNotice> observer) {
+    public static void deleteRegistersObserver(final @NotNull Consumer<? super RegisterAccessNotice> observer) {
         ControlAndStatusRegisterFile.instance.deleteRegistersSubscriber(observer);
     }
 

@@ -8,7 +8,6 @@ import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
-import rars.util.SimpleSubscriber;
 import rars.util.SystemIO;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
@@ -18,7 +17,7 @@ import rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.concurrent.Flow;
+import java.util.function.Consumer;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
@@ -120,19 +119,10 @@ public class RunGoAction extends GuiAction {
                 this.mainUI.setMenuState(FileStatus.State.RUNNING);
 
                 // Setup cleanup procedures for the simulation
-                final var stopListener = new SimpleSubscriber<SimulatorNotice>() {
-                    private Flow.Subscription subscription;
-
+                final var onSimulatorStopListener = new Consumer<SimulatorNotice>() {
                     @Override
-                    public void onSubscribe(final Flow.Subscription subscription) {
-                        this.subscription = subscription;
-                        this.subscription.request(1);
-                    }
-
-                    @Override
-                    public void onNext(final SimulatorNotice notice) {
+                    public void accept(SimulatorNotice notice) {
                         if (notice.action() != SimulatorNotice.Action.STOP) {
-                            this.subscription.request(1);
                             return;
                         }
                         final Simulator.Reason reason = notice.reason();
@@ -144,10 +134,10 @@ public class RunGoAction extends GuiAction {
                         } else {
                             EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.exception(), reason));
                         }
-                        this.subscription.cancel();
+                        Simulator.INSTANCE.simulatorNoticeHook.unsubscribe(this);
                     }
                 };
-                Simulator.getInstance().subscribe(stopListener);
+                Simulator.INSTANCE.simulatorNoticeHook.subscribe(onSimulatorStopListener);
 
                 final int[] breakPoints = this.executePane.textSegment.getSortedBreakPointsArray();
                 RISCVProgram.startSimulation(RunGoAction.maxSteps, breakPoints);

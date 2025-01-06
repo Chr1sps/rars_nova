@@ -39,7 +39,7 @@ import rars.riscv.hardware.registers.Register;
  * @version July 2005
  */
 public final class RegisterAccessNotice extends AccessNotice {
-    private final @NotNull Register register;
+    public final @NotNull Register register;
 
     /**
      * Constructor will be called only within this package, so assume

@@ -101,7 +101,7 @@ public class DigitalLabSim extends AbstractTool {
     }
 
     @Override
-    public void onNext(final @NotNull AccessNotice notice) {
+    public void processAccessNotice(final @NotNull AccessNotice notice) {
         final var memNotice = (MemoryAccessNotice) notice;
         final int address = memNotice.address;
         final char value = (char) memNotice.value;
@@ -122,7 +122,6 @@ public class DigitalLabSim extends AbstractTool {
                 InterruptController.registerTimerInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_TIMER);
             }
         }
-        this.subscription.request(1);
     }
 
     /**

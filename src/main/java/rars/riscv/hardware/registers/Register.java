@@ -3,7 +3,7 @@ package rars.riscv.hardware.registers;
 import org.jetbrains.annotations.NotNull;
 import rars.notices.AccessNotice;
 import rars.notices.RegisterAccessNotice;
-import rars.util.CustomPublisher;
+import rars.util.ListenerDispatcher;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -39,9 +39,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Jason Bumgarner, Jason Shrewsbury, Ben Sherman
  * @version June 2003
  */
-public class Register extends CustomPublisher<RegisterAccessNotice> {
+public class Register {
     public final @NotNull String name;
     public final int number;
+    public final @NotNull ListenerDispatcher<@NotNull RegisterAccessNotice>.Hook registerChangeHook;
+    private final @NotNull ListenerDispatcher<@NotNull RegisterAccessNotice> registerChangeDispatcher;
     private long resetValue;
     // volatile should be enough to allow safe multi-threaded access
     // w/o the use of synchronized methods. getValue and setValue
@@ -65,6 +67,8 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
         this.number = number;
         this.value = initialValue;
         this.resetValue = initialValue;
+        this.registerChangeDispatcher = new ListenerDispatcher<>();
+        this.registerChangeHook = this.registerChangeDispatcher.getHook();
     }
 
     /**
@@ -74,7 +78,7 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
      * @return second The second of the Register.
      */
     public final synchronized long getValue() {
-        this.submit(new RegisterAccessNotice(AccessNotice.AccessType.READ, this));
+        this.registerChangeDispatcher.dispatch(new RegisterAccessNotice(AccessNotice.AccessType.READ, this));
         return this.getValueNoNotify();
     }
 
@@ -108,7 +112,7 @@ public class Register extends CustomPublisher<RegisterAccessNotice> {
     public synchronized long setValue(final long val) {
         final long old = this.value;
         this.value = val;
-        this.submit(new RegisterAccessNotice(AccessNotice.AccessType.WRITE, this));
+        this.registerChangeDispatcher.dispatch(new RegisterAccessNotice(AccessNotice.AccessType.WRITE, this));
         return old;
     }
 

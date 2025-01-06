@@ -7,7 +7,7 @@ import rars.venus.NumberDisplayBaseChooser;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
-public final class FloatingPointWindow extends RegisterBlockWindow {
+public final class FloatingPointWindow extends RegisterBlockWindowBase {
     /**
      * The tips to show when hovering over the names of the registers
      */
@@ -61,12 +61,12 @@ public final class FloatingPointWindow extends RegisterBlockWindow {
 
     @Override
     protected void beginObserving() {
-        FloatingPointRegisterFile.addRegistersSubscriber(this);
+        FloatingPointRegisterFile.addRegistersSubscriber(this::processRegisterNotice);
     }
 
     @Override
     protected void endObserving() {
-        FloatingPointRegisterFile.deleteRegistersObserver(this);
+        FloatingPointRegisterFile.deleteRegistersObserver(this::processRegisterNotice);
     }
 
     @Override

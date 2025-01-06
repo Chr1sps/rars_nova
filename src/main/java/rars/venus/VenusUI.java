@@ -517,7 +517,7 @@ public final class VenusUI extends JFrame {
             ) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
-                    Simulator.getInstance().pauseExecution();
+                    Simulator.INSTANCE.pauseExecution();
                     // RunGoAction's "paused" method will do the cleanup.
                 }
             };
@@ -527,7 +527,7 @@ public final class VenusUI extends JFrame {
             ) {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
-                    Simulator.getInstance().stopExecution();
+                    Simulator.INSTANCE.stopExecution();
                     // RunGoAction's "stopped" method will take care of the cleanup.
                 }
             };

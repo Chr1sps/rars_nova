@@ -7,7 +7,7 @@ import rars.venus.NumberDisplayBaseChooser;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
-public final class ControlAndStatusWindow extends RegisterBlockWindow {
+public final class ControlAndStatusWindow extends RegisterBlockWindowBase {
     /**
      * The tips to show when hovering over the names of the registers
      */
@@ -47,12 +47,12 @@ public final class ControlAndStatusWindow extends RegisterBlockWindow {
 
     @Override
     protected void beginObserving() {
-        ControlAndStatusRegisterFile.addRegistersObserver(this);
+        ControlAndStatusRegisterFile.addRegistersObserver(this::processRegisterNotice);
     }
 
     @Override
     protected void endObserving() {
-        ControlAndStatusRegisterFile.deleteRegistersObserver(this);
+        ControlAndStatusRegisterFile.deleteRegistersObserver(this::processRegisterNotice);
     }
 
     @Override

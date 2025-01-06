@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 public final class ListenerDispatcher<Data> {
 
-    private final @NotNull HashSet<@NotNull Consumer<? super Data>> listeners;
+    private final @NotNull HashSet<@NotNull ListenerWrapper<? super Data>> listeners;
     private final @NotNull Lock listenersLock;
 
     /**
@@ -30,8 +30,11 @@ public final class ListenerDispatcher<Data> {
         this.listenersLock.lock();
         try {
             for (final var listener : this.listeners) {
-                listener.accept(data);
+                if (!listener.isCancelled) {
+                    listener.innerListener.accept(data);
+                }
             }
+            this.listeners.removeIf(listener -> listener.isCancelled);
         } finally {
             this.listenersLock.unlock();
         }
@@ -47,10 +50,27 @@ public final class ListenerDispatcher<Data> {
     }
 
     /**
+     * To prevent co-modification errors in the inner set, we wrap the listeners in a class that
+     * allows us to mark them as cancelled. The purpose of this is to allow listeners to call
+     * {@link Hook#unsubscribe(Consumer)} in their body to remove themselves from the list of listeners.
+     *
+     * @param <Data>
+     */
+    private static final class ListenerWrapper<Data> {
+        public final @NotNull Consumer<? super Data> innerListener;
+        public boolean isCancelled;
+
+        private ListenerWrapper(final @NotNull Consumer<? super Data> innerListener) {
+            this.innerListener = innerListener;
+            this.isCancelled = false;
+        }
+    }
+
+    /**
      * Inner class that exposes an entry point for listeners to subscribe to.
      * This is done to separate the publisher API from the listeners.
      */
-    public class Hook {
+    public final class Hook {
         private Hook() {
 
         }
@@ -64,7 +84,7 @@ public final class ListenerDispatcher<Data> {
         public void subscribe(final @NotNull Consumer<? super Data> listener) {
             ListenerDispatcher.this.listenersLock.lock();
             try {
-                ListenerDispatcher.this.listeners.add(listener);
+                ListenerDispatcher.this.listeners.add(new ListenerWrapper<>(listener));
             } finally {
                 ListenerDispatcher.this.listenersLock.unlock();
             }
@@ -73,7 +93,12 @@ public final class ListenerDispatcher<Data> {
         public void unsubscribe(final @NotNull Consumer<? super Data> listener) {
             ListenerDispatcher.this.listenersLock.lock();
             try {
-                ListenerDispatcher.this.listeners.remove(listener);
+                for (final var wrapper : ListenerDispatcher.this.listeners) {
+                    if (wrapper.innerListener.equals(listener)) {
+                        wrapper.isCancelled = true;
+                        break;
+                    }
+                }
             } finally {
                 ListenerDispatcher.this.listenersLock.unlock();
             }

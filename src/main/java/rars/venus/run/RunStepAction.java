@@ -1,5 +1,6 @@
 package rars.venus.run;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.RISCVProgram;
 import rars.exceptions.SimulationException;
@@ -8,7 +9,6 @@ import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
-import rars.util.SimpleSubscriber;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
@@ -17,7 +17,7 @@ import rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.concurrent.Flow;
+import java.util.function.Consumer;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
@@ -99,38 +99,22 @@ public class RunStepAction extends GuiAction {
             this.mainUI.messagesPane.selectRunMessageTab();
             this.executePane.textSegment.setCodeHighlighting(true);
 
-            final var stopListener = new SimpleSubscriber<SimulatorNotice>() {
-                private Flow.Subscription subscription;
-
+            // Setup callback for after step finishes
+            final var stopListener = new Consumer<@NotNull SimulatorNotice>() {
                 @Override
-                public void onSubscribe(final Flow.Subscription subscription) {
-                    this.subscription = subscription;
-                    this.subscription.request(1);
-                }
-
-                @Override
-                public void onNext(final SimulatorNotice item) {
+                public void accept(final @NotNull SimulatorNotice item) {
                     if (item.action() != SimulatorNotice.Action.STOP) {
-                        this.subscription.request(1);
                         return;
                     }
                     EventQueue.invokeLater(() -> RunStepAction.this.stepped(
                         item.done(), item.reason(),
                         item.exception()
                     ));
-                    this.subscription.cancel();
+
+                    Simulator.INSTANCE.simulatorNoticeHook.unsubscribe(this);
                 }
             };
-            // Setup callback for after step finishes
-//                public void update(Observable o, Object simulator) {
-//                    SimulatorNotice notice = ((SimulatorNotice) simulator);
-//                    if (notice.getAction() != SimulatorNotice.SIMULATOR_STOP)
-//                        return;
-//                    EventQueue.invokeLater(() -> stepped(notice.getDone(), notice.getReason(), notice.getException
-//                    ()));
-//                    o.deleteObserver(this);
-//                }
-            Simulator.getInstance().subscribe(stopListener);
+            Simulator.INSTANCE.simulatorNoticeHook.subscribe(stopListener);
 
             RISCVProgram.startSimulation(1, null);
         } else {

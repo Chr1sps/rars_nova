@@ -172,18 +172,10 @@ public class FloatRepresentation extends AbstractTool {
     }
 
     @Override
-    public void onSubscribe(final Flow.@NotNull Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
-    }
-
-    // Private methods defined to support the above.
-    @Override
-    public void onNext(final @NotNull AccessNotice notice) {
+    protected void processAccessNotice(@NotNull final AccessNotice notice) {
         if (notice.accessType == AccessNotice.AccessType.WRITE) {
             this.updateDisplays(new FlavorsOfFloat().buildOneFromInt((int) this.attachedRegister.getValue()));
         }
-        this.subscription.request(1);
     }
 
     /**

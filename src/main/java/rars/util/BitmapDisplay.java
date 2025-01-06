@@ -11,21 +11,22 @@ import rars.notices.MemoryAccessNotice;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.Flow;
 
-public final class BitmapDisplay extends JFrame implements SimpleSubscriber<MemoryAccessNotice> {
-    private static final Logger LOGGER = LogManager.getLogger(BitmapDisplay.class);
+public final class BitmapDisplay extends JFrame {
+    private static final @NotNull Logger LOGGER = LogManager.getLogger(BitmapDisplay.class);
 
     public final int displayWidth;
     public final int displayHeight;
-    private final Grid grid;
-    private final GraphicsPanel panel;
+    private final @NotNull Grid grid;
+    private final @NotNull GraphicsPanel panel;
     public int baseAddress;
     private int upperAddressBound;
 
-    private Flow.Subscription subscription;
-
-    public BitmapDisplay(final int baseAddress, final int displayWidth, final int displayHeight) {
+    public BitmapDisplay(
+        final int baseAddress,
+        final int displayWidth,
+        final int displayHeight
+    ) {
         this.baseAddress = baseAddress;
         this.displayWidth = displayWidth;
         this.displayHeight = displayHeight;
@@ -42,21 +43,36 @@ public final class BitmapDisplay extends JFrame implements SimpleSubscriber<Memo
         this.pack();
 
         try {
-            Globals.MEMORY_INSTANCE.subscribe(this, baseAddress, upperAddressBound);
+            Globals.MEMORY_INSTANCE.subscribe(this::processMemoryAccessNotice, baseAddress, upperAddressBound);
         } catch (final AddressErrorException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void changeBaseAddress(final int newBaseAddress) {
-        Globals.MEMORY_INSTANCE.deleteSubscriber(this);
+        Globals.MEMORY_INSTANCE.deleteSubscriber(this::processMemoryAccessNotice);
         this.baseAddress = newBaseAddress;
         this.upperAddressBound = newBaseAddress + (this.displayWidth * this.displayHeight * DataTypes.WORD_SIZE);
         try {
-            Globals.MEMORY_INSTANCE.subscribe(this, this.baseAddress, this.upperAddressBound);
+            Globals.MEMORY_INSTANCE.subscribe(
+                this::processMemoryAccessNotice,
+                this.baseAddress,
+                this.upperAddressBound
+            );
         } catch (final AddressErrorException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void processMemoryAccessNotice(final @NotNull MemoryAccessNotice notice) {
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            this.doUpdate(notice);
+            this.panel.repaint();
+        }
+    }
+
+    public void unsubscribeFromMemory() {
+        Globals.MEMORY_INSTANCE.deleteSubscriber(this::processMemoryAccessNotice);
     }
 
     private void fillGrid() {
@@ -75,19 +91,6 @@ public final class BitmapDisplay extends JFrame implements SimpleSubscriber<Memo
                 currentOffset += DataTypes.WORD_SIZE;
             }
         }
-    }
-
-    @Override
-    public void onSubscribe(final Flow.Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
-    }
-
-    @Override
-    public void onNext(final @NotNull MemoryAccessNotice item) {
-        this.doUpdate(item);
-        this.panel.repaint();
-        this.subscription.request(1);
     }
 
     private void doUpdate(final @NotNull MemoryAccessNotice notice) {

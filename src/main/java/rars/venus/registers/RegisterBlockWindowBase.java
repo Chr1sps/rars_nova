@@ -3,13 +3,13 @@ package rars.venus.registers;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.notices.AccessNotice;
-import rars.notices.Notice;
 import rars.notices.RegisterAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
+import rars.settings.HighlightingSettings;
+import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
-import rars.util.SimpleSubscriber;
 import rars.venus.NumberDisplayBaseChooser;
 import rars.venus.run.RunSpeedPanel;
 
@@ -20,9 +20,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.concurrent.Flow;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
 import static rars.settings.FontSettings.FONT_SETTINGS;
 
 /*
@@ -58,7 +58,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson, Bumgarner
  */
-public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscriber<Notice> {
+public abstract class RegisterBlockWindowBase extends JPanel {
     private static final int NUMBER_COLUMN = 0;
     private static final int NAME_COLUMN = 1;
     private static final int VALUE_COLUMN = 2;
@@ -67,7 +67,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     private static final int VALUE_SIZE = 160;
     private final @NotNull JTable table;
     private final Register[] registers;
-    private Flow.Subscription subscription;
+    private int highlightRow;
 
     /**
      * Constructor which sets up a fresh window with a table that contains the
@@ -80,8 +80,21 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * @param valueTip
      *     a {@link java.lang.String} object
      */
-    RegisterBlockWindow(final Register[] registers, final String[] registerDescriptions, final String valueTip) {
+    RegisterBlockWindowBase(final Register[] registers, final String[] registerDescriptions, final String valueTip) {
+        Simulator.INSTANCE.simulatorNoticeHook.subscribe(notice -> {
+            if (notice.action() == SimulatorNotice.Action.START) {
+                // Simulated MIPS execution starts.  Respond to memory changes if running in timed
+                // or stepped mode.
+                if (notice.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || notice.maxSteps() == 1) {
+                    beginObserving();
+                }
+            } else {
+                // Simulated MIPS execution stops.  Stop responding.
+                endObserving();
+            }
+        });
         this.registers = registers;
+        this.highlightRow = -1;
         this.table = new MyTippedJTable(
             new RegTableModel(this.setupWindow()), registerDescriptions,
             new String[]{
@@ -94,24 +107,24 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.updateRowHeight());
         final var columnModel = this.table.getColumnModel();
 
-        final var nameColumn = columnModel.getColumn(RegisterBlockWindow.NAME_COLUMN);
-        nameColumn.setMinWidth(RegisterBlockWindow.NAME_SIZE);
-        nameColumn.setMaxWidth(RegisterBlockWindow.NAME_SIZE);
+        final var nameColumn = columnModel.getColumn(RegisterBlockWindowBase.NAME_COLUMN);
+        nameColumn.setMinWidth(RegisterBlockWindowBase.NAME_SIZE);
+        nameColumn.setMaxWidth(RegisterBlockWindowBase.NAME_SIZE);
         nameColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.LEFT, table));
 
-        final var numberColumn = columnModel.getColumn(RegisterBlockWindow.NUMBER_COLUMN);
-        numberColumn.setMinWidth(RegisterBlockWindow.NUMBER_SIZE);
-        numberColumn.setMaxWidth(RegisterBlockWindow.NUMBER_SIZE);
+        final var numberColumn = columnModel.getColumn(RegisterBlockWindowBase.NUMBER_COLUMN);
+        numberColumn.setMinWidth(RegisterBlockWindowBase.NUMBER_SIZE);
+        numberColumn.setMaxWidth(RegisterBlockWindowBase.NUMBER_SIZE);
         // Display register values (String-ified) right-justified in mono font
         numberColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT, table));
 
-        final var valueColumn = columnModel.getColumn(RegisterBlockWindow.VALUE_COLUMN);
-        valueColumn.setMinWidth(RegisterBlockWindow.VALUE_SIZE);
-        valueColumn.setMaxWidth(RegisterBlockWindow.VALUE_SIZE);
+        final var valueColumn = columnModel.getColumn(RegisterBlockWindowBase.VALUE_COLUMN);
+        valueColumn.setMinWidth(RegisterBlockWindowBase.VALUE_SIZE);
+        valueColumn.setMaxWidth(RegisterBlockWindowBase.VALUE_SIZE);
         valueColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT, table));
 
         this.table.setPreferredScrollableViewportSize(new Dimension(
-            RegisterBlockWindow.NAME_SIZE + RegisterBlockWindow.NUMBER_SIZE + RegisterBlockWindow.VALUE_SIZE,
+            RegisterBlockWindowBase.NAME_SIZE + RegisterBlockWindowBase.NUMBER_SIZE + RegisterBlockWindowBase.VALUE_SIZE,
             700
         ));
         this.setLayout(new BorderLayout()); // table display will occupy entire width if widened
@@ -139,12 +152,12 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
     private Object @NotNull [] @NotNull [] setupWindow() {
         final Object[][] tableData = new Object[this.registers.length][3];
         for (int i = 0; i < this.registers.length; i++) {
-            tableData[i][RegisterBlockWindow.NAME_COLUMN] = this.registers[i].name;
+            tableData[i][RegisterBlockWindowBase.NAME_COLUMN] = this.registers[i].name;
             final int temp = this.registers[i].number;
-            tableData[i][RegisterBlockWindow.NUMBER_COLUMN] = temp == -1 ? "" : temp;
+            tableData[i][RegisterBlockWindowBase.NUMBER_COLUMN] = temp == -1 ? "" : temp;
             final int base =
                 NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
-            tableData[i][RegisterBlockWindow.VALUE_COLUMN] = this.formatRegisterValue(
+            tableData[i][RegisterBlockWindowBase.VALUE_COLUMN] = this.formatRegisterValue(
                 this.registers[i].getValue(),
                 base
             );
@@ -166,6 +179,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      */
     public void clearHighlighting() {
         this.table.tableChanged(new TableModelEvent(this.table.getModel()));
+        this.highlightRow = -1;
     }
 
     /**
@@ -177,45 +191,34 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             final int base = Globals.gui.mainPane.executeTab
                 .getValueDisplayBase();
             final var formattedValue = this.formatRegisterValue(this.registers[i].getValue(), base);
-            model.setDisplayAndModelValueAt(formattedValue, i, RegisterBlockWindow.VALUE_COLUMN);
+            model.setDisplayAndModelValueAt(formattedValue, i, RegisterBlockWindowBase.VALUE_COLUMN);
         }
     }
 
-    @Override
-    public void onSubscribe(final Flow.Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
+    public final void processRegisterNotice(final @NotNull RegisterAccessNotice notice) {
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            // Uses the same highlighting technique as for Text Segment -- see
+            // AddressCellRenderer class in DataSegmentWindow.java.
+            this.highlightCellForRegister(notice.register);
+            Globals.gui.registersPane.setSelectedComponent(this);
+        }
     }
 
-    @Override
-    public void onNext(final @NotNull Notice notice) {
-        switch (notice) {
-            case final SimulatorNotice s -> {
-                if (s.action() == SimulatorNotice.Action.START) {
-                    // Simulated MIPS execution starts. Respond to memory changes if running in
-                    // timed
-                    // or stepped mode.
-                    if (s.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps() == 1) {
-                        this.beginObserving();
-                    }
-                } else {
-                    // Simulated MIPS execution stops. Stop responding.
-                    this.endObserving();
-                }
-            }
-            case final RegisterAccessNotice a -> {
-                // NOTE: each register is a separate Observable
-                if (a.accessType == AccessNotice.AccessType.WRITE) {
-                    // Uses the same highlighting technique as for Text Segment -- see
-                    // AddressCellRenderer class in DataSegmentWindow.java.
-                    //                  TODO:  this.highlightCellForRegister((Register) observable);
-                    Globals.gui.registersPane.setSelectedComponent(this);
-                }
-            }
-            default -> {
+    /**
+     * Highlight the row corresponding to the given register.
+     *
+     * @param register
+     *     Register object corresponding to row to be selected.
+     */
+    private void highlightCellForRegister(Register register) {
+        for (int i = 0; i < registers.length; i++) {
+            if (registers[i] == register) {
+                this.highlightRow = i;
+                table.tableChanged(new TableModelEvent(table.getModel()));
+                return;
             }
         }
-        this.subscription.request(1);
+        this.highlightRow = -1;
     }
 
     private void updateRowHeight() {
@@ -229,7 +232,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
      * don't want highlighting for a given column, don't use this. Currently we highlight
      * all columns.
      */
-    private static class RegisterCellRenderer extends DefaultTableCellRenderer {
+    private class RegisterCellRenderer extends DefaultTableCellRenderer {
         private final int alignment;
         private final @NotNull JTable table;
         private Font font;
@@ -257,6 +260,15 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             );
             cell.setFont(this.font);
             cell.setHorizontalAlignment(this.alignment);
+            if (BOOL_SETTINGS.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && row == highlightRow) {
+                final var highlightingStyle = HighlightingSettings.HIGHLIGHTING_SETTINGS.getRegisterHighlightingStyle();
+                cell.setForeground(highlightingStyle.foreground());
+                cell.setBackground(highlightingStyle.background());
+            } else {
+                final var theme = EDITOR_THEME_SETTINGS.currentTheme;
+                cell.setForeground(theme.foregroundColor);
+                cell.setBackground(theme.backgroundColor);
+            }
             return cell;
         }
     }
@@ -267,9 +279,9 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
 
         private RegTableModel(final Object[][] d) {
             this.data = d;
-            this.columnNames[RegisterBlockWindow.NUMBER_COLUMN] = "No.";
-            this.columnNames[RegisterBlockWindow.NAME_COLUMN] = "Name";
-            this.columnNames[RegisterBlockWindow.VALUE_COLUMN] = "Value";
+            this.columnNames[RegisterBlockWindowBase.NUMBER_COLUMN] = "No.";
+            this.columnNames[RegisterBlockWindowBase.NAME_COLUMN] = "Name";
+            this.columnNames[RegisterBlockWindowBase.VALUE_COLUMN] = "Value";
         }
 
         @Override
@@ -309,7 +321,7 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
         public boolean isCellEditable(final int row, final int col) {
             // Note that the data/cell address is constant,
             // no matter where the cell appears onscreen.
-            return col == RegisterBlockWindow.VALUE_COLUMN;
+            return col == RegisterBlockWindowBase.VALUE_COLUMN;
         }
 
         /**
@@ -334,12 +346,12 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             // occur only between instructions.
             Globals.memoryAndRegistersLock.lock();
             try {
-                RegisterBlockWindow.this.registers[row].setValue(newValue);
+                RegisterBlockWindowBase.this.registers[row].setValue(newValue);
             } finally {
                 Globals.memoryAndRegistersLock.unlock();
             }
             final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
-            final var formattedValue = RegisterBlockWindow.this.formatRegisterValue(newValue, valueBase);
+            final var formattedValue = RegisterBlockWindowBase.this.formatRegisterValue(newValue, valueBase);
             this.data[row][col] = formattedValue;
             this.fireTableCellUpdated(row, col);
         }
@@ -371,14 +383,14 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             this.setSelectionBackground(Color.GREEN);
         }
 
-        // Implement table cell tool tips.
         @Override
         public String getToolTipText(final MouseEvent e) {
+            // Implement table cell tool tips.
             final java.awt.Point p = e.getPoint();
             final int rowIndex = this.rowAtPoint(p);
             final int colIndex = this.columnAtPoint(p);
             final int realColumnIndex = this.convertColumnIndexToModel(colIndex);
-            if (realColumnIndex == RegisterBlockWindow.NAME_COLUMN) { // Register name column
+            if (realColumnIndex == RegisterBlockWindowBase.NAME_COLUMN) { // Register name column
                 return this.regToolTips[rowIndex];
             } else {
                 // You can omit this part if you know you don't have any
@@ -387,9 +399,9 @@ public abstract class RegisterBlockWindow extends JPanel implements SimpleSubscr
             }
         }
 
-        // Implement table header tool tips.
         @Override
         protected JTableHeader createDefaultTableHeader() {
+            // Implement table header tool tips.
             return new JTableHeader(this.columnModel) {
                 @Override
                 public String getToolTipText(final MouseEvent e) {

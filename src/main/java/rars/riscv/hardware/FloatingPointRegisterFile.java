@@ -5,7 +5,8 @@ import rars.Globals;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.OtherSettings;
-import rars.util.SimpleSubscriber;
+
+import java.util.function.Consumer;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -198,11 +199,11 @@ public final class FloatingPointRegisterFile {
      * method
      * will add the given Observer to each one.
      *
-     * @param subscriber
+     * @param listener
      *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void addRegistersSubscriber(final @NotNull SimpleSubscriber<? super RegisterAccessNotice> subscriber) {
-        FloatingPointRegisterFile.instance.addRegistersObserver(subscriber);
+    public static void addRegistersSubscriber(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
+        FloatingPointRegisterFile.instance.addRegistersObserver(listener);
     }
 
     /**
@@ -210,10 +211,10 @@ public final class FloatingPointRegisterFile {
      * method
      * will delete the given Observer from each one.
      *
-     * @param subscriber
+     * @param listener
      *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
-    public static void deleteRegistersObserver(final @NotNull SimpleSubscriber<? super RegisterAccessNotice> subscriber) {
-        FloatingPointRegisterFile.instance.deleteRegistersSubscriber(subscriber);
+    public static void deleteRegistersObserver(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
+        FloatingPointRegisterFile.instance.deleteRegistersSubscriber(listener);
     }
 }

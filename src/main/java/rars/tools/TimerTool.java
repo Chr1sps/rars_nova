@@ -32,13 +32,11 @@ import rars.exceptions.AddressErrorException;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
-import rars.util.SimpleSubscriber;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Flow;
 
 /**
  * A RARS tool used to implement a timing module and timer inturrpts.
@@ -260,10 +258,9 @@ public class TimerTool extends AbstractTool {
     /***************************** Timer Classes *****************************/
 
     // Watches for changes made to the timecmp MMIO
-    public static class TimeCmpDaemon implements SimpleSubscriber<MemoryAccessNotice> {
+    public final static class TimeCmpDaemon {
         public boolean postInterrupt = false;
         public long value = 0L; // Holds the most recent second of timecmp writen to the MMIO
-        private Flow.Subscription subscription;
 
         public TimeCmpDaemon() {
             this.addAsObserver();
@@ -272,41 +269,33 @@ public class TimerTool extends AbstractTool {
         public void addAsObserver() {
             try {
                 Globals.MEMORY_INSTANCE.subscribe(
-                    this,
+                    notice -> {
+
+                        final var accessType = notice.accessType;
+                        // If is was a WRITE operation
+                        if (accessType == MemoryAccessNotice.AccessType.WRITE) {
+                            final int address = notice.address;
+                            final int value = notice.value;
+
+                            // Check what word was changed, then update the corrisponding information
+                            if (address == TimerTool.getTimeCmpAddress()) {
+                                this.value = ((this.value >> 32) << 32) + value;
+                                this.postInterrupt = true; // timecmp was writen to
+                            } else if (address == TimerTool.getTimeCmpAddress() + 4) {
+                                this.value = (this.value) + (((long) value) << 32);
+                                this.postInterrupt = true; // timecmp was writen to
+                            }
+                        }
+                    },
                     TimerTool.getTimeCmpAddress(),
                     TimerTool.getTimeCmpAddress() + 8
                 );
             } catch (final AddressErrorException aee) {
-                SimpleSubscriber.LOGGER.fatal("Error while adding observer in Timer Tool");
+                TimerTool.LOGGER.fatal("Error while adding observer in Timer Tool");
                 System.exit(0);
             }
         }
 
-        @Override
-        public void onSubscribe(final Flow.Subscription subscription) {
-            this.subscription = subscription;
-            this.subscription.request(1);
-        }
-
-        @Override
-        public void onNext(final MemoryAccessNotice notice) {
-            final var accessType = notice.accessType;
-            // If is was a WRITE operation
-            if (accessType == MemoryAccessNotice.AccessType.WRITE) {
-                final int address = notice.address;
-                final int value = notice.value;
-
-                // Check what word was changed, then update the corrisponding information
-                if (address == TimerTool.getTimeCmpAddress()) {
-                    this.value = ((this.value >> 32) << 32) + value;
-                    this.postInterrupt = true; // timecmp was writen to
-                } else if (address == TimerTool.getTimeCmpAddress() + 4) {
-                    this.value = (this.value) + (((long) value) << 32);
-                    this.postInterrupt = true; // timecmp was writen to
-                }
-            }
-            this.subscription.request(1);
-        }
     }
 
     // Runs every millisecond to decide if a timer inturrupt should be raised

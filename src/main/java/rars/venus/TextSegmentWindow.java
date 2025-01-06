@@ -10,7 +10,6 @@ import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.notices.Notice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
@@ -18,7 +17,6 @@ import rars.settings.EditorThemeSettings;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.util.FontUtilities;
-import rars.util.SimpleSubscriber;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -33,7 +31,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Objects;
-import java.util.concurrent.Flow;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 import static rars.settings.FontSettings.FONT_SETTINGS;
@@ -73,7 +70,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Team JSpim
  */
-public class TextSegmentWindow extends JInternalFrame implements SimpleSubscriber<Notice> {
+public class TextSegmentWindow extends JInternalFrame {
     private static final Logger LOGGER = LogManager.getLogger(TextSegmentWindow.class);
     private static final int PROGRAM_ARGUMENT_TEXTFIELD_COLUMNS = 40;
     // The following is displayed in the Basic and Source columns if existing code
@@ -110,7 +107,6 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private boolean breakpointsEnabled; // Added 31 Dec 2009
     private int highlightAddress;
     private TableModelListener tableModelListener;
-    private Flow.Subscription subscription;
 
     /**
      * Constructor, sets up a new JInternalFrame.
@@ -118,7 +114,20 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
     public TextSegmentWindow(final @NotNull VenusUI mainUI) {
         super("Text Segment", true, false, true, true);
         this.mainUI = mainUI;
-        Simulator.getInstance().subscribe(this);
+        Simulator.INSTANCE.simulatorNoticeHook.subscribe(notice -> {
+            if (notice.action() == SimulatorNotice.Action.START) {
+                this.deleteAsTextSegmentObserver();
+                if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
+                    // (notice.getRunSpeed()
+                    // !=
+                    // RunSpeedPanel.UNLIMITED_SPEED
+                    // ||
+                    // notice.getMaxSteps()==1))
+                    // {
+                    this.addAsTextSegmentObserver();
+                }
+            }
+        });
         BOOL_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
             this.deleteAsTextSegmentObserver();
             if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
@@ -376,129 +385,6 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
     }
 
-    @Override
-    public void onSubscribe(final Flow.Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
-    }
-
-    @Override
-    public void onNext(final Notice notice) {
-        switch (notice) {
-            case final SimulatorNotice simulatorNotice -> {
-                // Simulated MIPS execution starts. Respond to text segment changes only if
-                // self-modifying code
-                // enabled. I commented out conditions that would further limit it to running in
-                // timed or stepped mode.
-                // Seems reasonable for text segment display to be accurate in cases where
-                // existing code is overwritten
-                // even when running at unlimited speed. DPS 10-July-2013
-                if (simulatorNotice.action() == SimulatorNotice.Action.START) {
-                    this.deleteAsTextSegmentObserver();
-                    if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
-                        // (notice.getRunSpeed()
-                        // !=
-                        // RunSpeedPanel.UNLIMITED_SPEED
-                        // ||
-                        // notice.getMaxSteps()==1))
-                        // {
-                        this.addAsTextSegmentObserver();
-                    }
-                }
-            }
-            case final MemoryAccessNotice m -> {
-
-                // NOTE: observable != Memory.getInstance() because Memory class delegates
-                // notification duty.
-                // This will occur only if running program has written to text segment
-                // (self-modifying code)
-                if (m.accessType == AccessNotice.AccessType.WRITE) {
-                    final int address = m.address;
-                    final int value = m.value;
-                    final String strValue = BinaryUtils.intToHexString(m.value);
-                    final String strBasic;
-                    String strSource = TextSegmentWindow.modifiedCodeMarker;
-                    // Translate the address into table model row and modify the values in that row
-                    // accordingly.
-                    final int row;
-                    try {
-                        row = this.findRowForAddress(address);
-                    } catch (final IllegalArgumentException e) {
-                        return; // do nothing if address modified is outside the range of original program.
-                    }
-                    ModifiedCode mc = this.executeMods.get(row);
-                    if (mc == null) { // if not already modified
-                        // Not already modified and new code is same as original --> do nothing.
-                        if (this.tableModel.getValueAt(
-                            row,
-                            ColumnData.INSTRUCTION_CODE_COLUMN.number
-                        ).equals(strValue)) {
-                            return;
-                        }
-                        mc = new ModifiedCode(
-                            row,
-                            this.tableModel.getValueAt(row, ColumnData.INSTRUCTION_CODE_COLUMN.number),
-                            this.tableModel.getValueAt(row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number),
-                            this.tableModel.getValueAt(row, ColumnData.SOURCE_COLUMN.number)
-                        );
-                        this.executeMods.put(row, mc);
-                        // make a ProgramStatement and get basic code to display in BASIC_COLUMN
-                        strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
-                    } else {
-                        // If restored to original value, restore the basic and source
-                        // This will be the case upon backstepping.
-                        if (mc.code().equals(strValue)) {
-                            strBasic = (String) mc.basic();
-                            strSource = (String) mc.source();
-                            // remove from executeMods since we are back to original
-                            this.executeMods.remove(row);
-                        } else {
-                            // make a ProgramStatement and get basic code to display in BASIC_COLUMN
-                            strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
-                        }
-                    }
-                    // For the code column, we don't want to do the following:
-                    // tableModel.setValueAt(strValue, row, CODE_COLUMN)
-                    // because that method will write to memory using Memory.setRawWord() which will
-                    // trigger notification to observers, which brings us back to here!!! Infinite
-                    // indirect recursion results. Neither fun nor productive. So what happens is
-                    // this: (1) change to memory cell causes setValueAt() to be automatically be
-                    // called. (2) it updates the memory cell which in turn notifies us which
-                    // invokes
-                    // the update() method - the method we're in right now. All we need to do here
-                    // is
-                    // update the table model then notify the controller/view to update its display.
-                    this.data[row][ColumnData.INSTRUCTION_CODE_COLUMN.number] = strValue;
-                    this.tableModel.fireTableCellUpdated(row, ColumnData.INSTRUCTION_CODE_COLUMN.number);
-                    // The other columns do not present a problem since they are not editable by
-                    // user.
-                    this.tableModel.setValueAt(strBasic, row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
-                    this.tableModel.setValueAt(strSource, row, ColumnData.SOURCE_COLUMN.number);
-                    // Let's update the value displayed in the DataSegmentWindow too. But it only
-                    // observes memory while
-                    // the MIPS program is running, and even then only in timed or step mode. There
-                    // are good reasons
-                    // for that. So we'll pretend to be Memory observable and send it a fake memory
-                    // write update.
-                    try {
-                        Globals.gui.mainPane.executeTab.dataSegment
-                            .onNext(new MemoryAccessNotice(
-                                AccessNotice.AccessType.WRITE,
-                                address, DataTypes.WORD_SIZE,
-                                value
-                            ));
-                    } catch (final Exception e) {
-                        // Not sure if anything bad can happen in this sequence, but if anything does we
-                        // can let it go.
-                    }
-                }
-            }
-            default -> {
-            }
-        }
-        this.subscription.request(1);
-    }
-
     /**
      * Called by RunResetAction to restore display of any table rows that were
      * overwritten due to self-modifying code feature.
@@ -747,7 +633,7 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         try {
             Globals.MEMORY_INSTANCE.subscribe(
-                this,
+                this::processMemoryAccessNotice,
                 memoryConfiguration.textBaseAddress,
                 memoryConfiguration.dataSegmentBaseAddress
             );
@@ -755,11 +641,97 @@ public class TextSegmentWindow extends JInternalFrame implements SimpleSubscribe
         }
     }
 
+    private void processMemoryAccessNotice(final @NotNull MemoryAccessNotice notice) {
+        // NOTE: observable != Memory.getInstance() because Memory class delegates
+        // notification duty.
+        // This will occur only if running program has written to text segment
+        // (self-modifying code)
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            final int address = notice.address;
+            final int value = notice.value;
+            final String strValue = BinaryUtils.intToHexString(notice.value);
+            final String strBasic;
+            String strSource = TextSegmentWindow.modifiedCodeMarker;
+            // Translate the address into table model row and modify the values in that row
+            // accordingly.
+            final int row;
+            try {
+                row = this.findRowForAddress(address);
+            } catch (final IllegalArgumentException e) {
+                return; // do nothing if address modified is outside the range of original program.
+            }
+            ModifiedCode mc = this.executeMods.get(row);
+            if (mc == null) { // if not already modified
+                // Not already modified and new code is same as original --> do nothing.
+                if (this.tableModel.getValueAt(
+                    row,
+                    ColumnData.INSTRUCTION_CODE_COLUMN.number
+                ).equals(strValue)) {
+                    return;
+                }
+                mc = new ModifiedCode(
+                    row,
+                    this.tableModel.getValueAt(row, ColumnData.INSTRUCTION_CODE_COLUMN.number),
+                    this.tableModel.getValueAt(row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number),
+                    this.tableModel.getValueAt(row, ColumnData.SOURCE_COLUMN.number)
+                );
+                this.executeMods.put(row, mc);
+                // make a ProgramStatement and get basic code to display in BASIC_COLUMN
+                strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
+            } else {
+                // If restored to original value, restore the basic and source
+                // This will be the case upon backstepping.
+                if (mc.code().equals(strValue)) {
+                    strBasic = (String) mc.basic();
+                    strSource = (String) mc.source();
+                    // remove from executeMods since we are back to original
+                    this.executeMods.remove(row);
+                } else {
+                    // make a ProgramStatement and get basic code to display in BASIC_COLUMN
+                    strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
+                }
+            }
+            // For the code column, we don't want to do the following:
+            // tableModel.setValueAt(strValue, row, CODE_COLUMN)
+            // because that method will write to memory using Memory.setRawWord() which will
+            // trigger notification to observers, which brings us back to here!!! Infinite
+            // indirect recursion results. Neither fun nor productive. So what happens is
+            // this: (1) change to memory cell causes setValueAt() to be automatically be
+            // called. (2) it updates the memory cell which in turn notifies us which
+            // invokes
+            // the update() method - the method we're in right now. All we need to do here
+            // is
+            // update the table model then notify the controller/view to update its display.
+            this.data[row][ColumnData.INSTRUCTION_CODE_COLUMN.number] = strValue;
+            this.tableModel.fireTableCellUpdated(row, ColumnData.INSTRUCTION_CODE_COLUMN.number);
+            // The other columns do not present a problem since they are not editable by
+            // user.
+            this.tableModel.setValueAt(strBasic, row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
+            this.tableModel.setValueAt(strSource, row, ColumnData.SOURCE_COLUMN.number);
+            // Let's update the value displayed in the DataSegmentWindow too. But it only
+            // observes memory while
+            // the MIPS program is running, and even then only in timed or step mode. There
+            // are good reasons
+            // for that. So we'll pretend to be Memory observable and send it a fake memory
+            // write update.
+            try {
+                Globals.gui.mainPane.executeTab.dataSegment.processMemoryAccessNotice(new MemoryAccessNotice(
+                    AccessNotice.AccessType.WRITE,
+                    address, DataTypes.WORD_SIZE,
+                    value
+                ));
+            } catch (final Exception e) {
+                // Not sure if anything bad can happen in this sequence, but if anything does we
+                // can let it go.
+            }
+        }
+    }
+
     /**
      * Little convenience method to remove this as observer of text segment
      */
     private void deleteAsTextSegmentObserver() {
-        Globals.MEMORY_INSTANCE.deleteSubscriber(this);
+        Globals.MEMORY_INSTANCE.deleteSubscriber(this::processMemoryAccessNotice);
     }
 
     /*

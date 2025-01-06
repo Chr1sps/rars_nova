@@ -8,7 +8,6 @@ import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.notices.Notice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.riscv.hardware.RegisterFile;
@@ -16,7 +15,6 @@ import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.util.ConversionUtils;
-import rars.util.SimpleSubscriber;
 import rars.venus.run.RunSpeedPanel;
 import rars.venus.util.RepeatButton;
 
@@ -32,7 +30,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Date;
-import java.util.concurrent.Flow;
 
 import static rars.settings.BoolSettings.BOOL_SETTINGS;
 import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
@@ -73,7 +70,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Bumgarner
  */
-public class DataSegmentWindow extends JInternalFrame implements SimpleSubscriber<Notice> {
+public class DataSegmentWindow extends JInternalFrame {
     private static final Logger LOGGER = LogManager.getLogger(DataSegmentWindow.class);
 
     private static final String[] dataSegmentNames = {"Data", "Stack", "Kernel"};
@@ -94,8 +91,7 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private static final boolean USER_MODE = false;
     private static final boolean KERNEL_MODE = true;
     // Initalize arrays used with Base Address combo box chooser.
-    // The combo box replaced the row of buttons when number of buttons expanded to
-    /// ///////////////////////////////////////////////////////////////////// 7!
+    // The combo box replaced the row of buttons when number of buttons expanded to 7.
     private static final int EXTERN_BASE_ADDRESS_INDEX = 0;
     private static final int GLOBAL_POINTER_ADDRESS_INDEX = 3; // 1;
     private static final int TEXT_BASE_ADDRESS_INDEX = 5; // 2;
@@ -135,19 +131,6 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
     private int[] displayBaseAddresses;
     private int defaultBaseAddressIndex;
     private JButton[] baseAddressButtons;
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Required by Observer interface. Called when notified by an Observable that we
-     * are registered with.
-     * Observables include:
-     * The Simulator object, which lets us know when it starts and stops running
-     * A delegate of the Memory object, which lets us know of memory operations
-     * The Simulator keeps us informed of when simulated MIPS execution is active.
-     * This is the only time we care about memory operations.
-     */
-
-    private Flow.Subscription subscription;
 
     /**
      * Constructor for the Data Segment window.
@@ -169,7 +152,21 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
             memoryConfiguration.textBaseAddress,
             memoryConfiguration.memoryMapBaseAddress,
         };
-        Simulator.getInstance().subscribe(this);
+        Simulator.INSTANCE.simulatorNoticeHook.subscribe(s -> {
+
+            if (s.action() == SimulatorNotice.Action.START) {
+                // Simulated MIPS execution starts. Respond to memory changes if running in
+                // timed
+                // or stepped mode.
+                if (s.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps() == 1) {
+                    Globals.MEMORY_INSTANCE.subscribe(this::processMemoryAccessNotice);
+                    this.addressHighlighting = true;
+                }
+            } else {
+                // Simulated MIPS execution stops. Stop responding.
+                Globals.MEMORY_INSTANCE.deleteSubscriber(this::processMemoryAccessNotice);
+            }
+        });
 
         FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.updateRowHeight());
 
@@ -936,42 +933,13 @@ public class DataSegmentWindow extends JInternalFrame implements SimpleSubscribe
         return lowAddress;
     }
 
-    @Override
-    public void onSubscribe(final Flow.Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
-    }
-
-    @Override
-    public void onNext(final Notice notice) {
-        switch (notice) {
-            case final SimulatorNotice s -> {
-                if (s.action() == SimulatorNotice.Action.START) {
-                    // Simulated MIPS execution starts. Respond to memory changes if running in
-                    // timed
-                    // or stepped mode.
-                    if (s.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps() == 1) {
-                        Globals.MEMORY_INSTANCE.subscribe(this);
-                        this.addressHighlighting = true;
-                    }
-                } else {
-                    // Simulated MIPS execution stops. Stop responding.
-                    Globals.MEMORY_INSTANCE.deleteSubscriber(this);
-                }
-            }
-            case final MemoryAccessNotice m -> {
-                // NOTE: each register is a separate Observable
-                if (m.accessType == AccessNotice.AccessType.WRITE) {
-                    // Uses the same highlighting technique as for Text Segment -- see
-                    // AddressCellRenderer class in DataSegmentWindow.java.
-                    final var address = m.address;
-                    this.highlightCellForAddress(address);
-                }
-            }
-            default -> {
-            }
+    public void processMemoryAccessNotice(final @NotNull MemoryAccessNotice notice) {
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            // Uses the same highlighting technique as for Text Segment -- see
+            // AddressCellRenderer class in DataSegmentWindow.java.
+            final var address = notice.address;
+            this.highlightCellForAddress(address);
         }
-        this.subscription.request(1);
     }
 
     private void updateRowHeight() {

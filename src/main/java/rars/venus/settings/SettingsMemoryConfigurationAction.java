@@ -252,7 +252,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
                     // Stop execution if executing -- should NEVER happen because this
                     // Action's widget is disabled during MIPS execution.
                     if (FileStatus.get() == FileStatus.State.RUNNING) {
-                        Simulator.getInstance().stopExecution();
+                        Simulator.INSTANCE.stopExecution();
                     }
                     Globals.gui.getRunAssembleAction().actionPerformed(null);
                 }

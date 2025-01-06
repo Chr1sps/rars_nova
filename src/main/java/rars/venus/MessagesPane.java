@@ -413,7 +413,7 @@ public final class MessagesPane extends JTabbedPane {
         private final int maxLen;
         private final @NotNull DocumentListener listener;
         private final @NotNull NavigationFilter navigationFilter;
-        private final @NotNull Consumer<Simulator> stopListener;
+        private final @NotNull Consumer<Void> stopListener;
         private int initialPos;
 
         public Asker(final int maxLen) {
@@ -496,7 +496,8 @@ public final class MessagesPane extends JTabbedPane {
             this.initialPos = MessagesPane.this.runTextArea.getCaretPosition();
             MessagesPane.this.runTextArea.setNavigationFilter(this.navigationFilter);
             MessagesPane.this.runTextArea.getDocument().addDocumentListener(this.listener);
-            Simulator.getInstance().addStopListener(this.stopListener);
+            Simulator self = Simulator.INSTANCE;
+            self.stopEventHook.subscribe(this.stopListener);
         }
 
         private void cleanup() { // not required to be called from the GUI thread
@@ -507,7 +508,8 @@ public final class MessagesPane extends JTabbedPane {
                     MessagesPane.this.runTextArea.setNavigationFilter(null);
                     MessagesPane.this.runTextArea.setCaretPosition(MessagesPane.this.runTextArea.getDocument()
                         .getLength());
-                    Simulator.getInstance().removeStopListener(Asker.this.stopListener);
+                    Simulator self = Simulator.INSTANCE;
+                    self.stopEventHook.unsubscribe(this.stopListener);
                 });
         }
 

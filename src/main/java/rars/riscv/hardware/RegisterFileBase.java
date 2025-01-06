@@ -5,7 +5,8 @@ import org.jetbrains.annotations.Nullable;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.hardware.registers.Register;
 import rars.util.BinaryUtils;
-import rars.util.SimpleSubscriber;
+
+import java.util.function.Consumer;
 
 public abstract class RegisterFileBase {
 
@@ -121,15 +122,15 @@ public abstract class RegisterFileBase {
         }
     }
 
-    public void addRegistersSubscriber(final SimpleSubscriber<? super RegisterAccessNotice> subscriber) {
+    public void addRegistersListener(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
         for (final var register : this.registers) {
-            register.subscribe(subscriber);
+            register.registerChangeHook.subscribe(listener);
         }
     }
 
-    public void deleteRegistersSubscriber(final SimpleSubscriber<? super RegisterAccessNotice> subscriber) {
+    public void deleteRegistersListener(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
         for (final var register : this.registers) {
-            register.deleteSubscriber(subscriber);
+            register.registerChangeHook.unsubscribe(listener);
         }
     }
 }

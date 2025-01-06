@@ -92,13 +92,13 @@ public class RunBackstepAction extends GuiAction {
         executePane.textSegment.setCodeHighlighting(true);
 
         if (OtherSettings.getBackSteppingEnabled()) {
-            Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment);
-            RegisterFile.INSTANCE.addRegistersSubscriber(executePane.registerValues);
-            ControlAndStatusRegisterFile.addRegistersObserver(executePane.csrValues);
-            FloatingPointRegisterFile.addRegistersSubscriber(executePane.fpRegValues);
+            Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment::processMemoryAccessNotice);
+            RegisterFile.INSTANCE.addRegistersListener(executePane.registerValues::processRegisterNotice);
+            ControlAndStatusRegisterFile.addRegistersObserver(executePane.csrValues::processRegisterNotice);
+            FloatingPointRegisterFile.addRegistersSubscriber(executePane.fpRegValues::processRegisterNotice);
             Globals.program.getBackStepper().backStep();
-            Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment);
-            RegisterFile.INSTANCE.deleteRegistersSubscriber(executePane.registerValues);
+            Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment::processMemoryAccessNotice);
+            RegisterFile.INSTANCE.deleteRegistersListener(executePane.registerValues::processRegisterNotice);
             executePane.registerValues.updateRegisters();
             executePane.fpRegValues.updateRegisters();
             executePane.csrValues.updateRegisters();

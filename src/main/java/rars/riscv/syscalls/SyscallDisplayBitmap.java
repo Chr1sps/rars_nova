@@ -2,20 +2,15 @@ package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.notices.SimulatorNotice;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.RegisterFile;
 import rars.simulator.Simulator;
 import rars.util.BitmapDisplay;
-import rars.util.SimpleSubscriber;
 
-import java.util.concurrent.Flow;
-
-public final class SyscallDisplayBitmap extends AbstractSyscall implements SimpleSubscriber<SimulatorNotice> {
+public final class SyscallDisplayBitmap extends AbstractSyscall {
     private @Nullable BitmapDisplay display;
-    private Flow.Subscription subscription;
 
     public SyscallDisplayBitmap() {
         super(
@@ -26,7 +21,14 @@ public final class SyscallDisplayBitmap extends AbstractSyscall implements Simpl
                 """, "N/A"
         );
         this.display = null;
-        Simulator.getInstance().subscribe(this);
+        Simulator.INSTANCE.simulatorNoticeHook.subscribe(notice -> {
+            if (notice.action() == SimulatorNotice.Action.START) {
+                if (this.display != null) {
+                    this.display.dispose();
+                }
+                this.display = null;
+            }
+        });
     }
 
     @Override
@@ -41,7 +43,7 @@ public final class SyscallDisplayBitmap extends AbstractSyscall implements Simpl
         if (this.display == null) {
             this.display = new BitmapDisplay(baseAddress, width, height);
         } else if (this.display.displayWidth != width || this.display.displayHeight != height) {
-            Globals.MEMORY_INSTANCE.deleteSubscriber(this.display);
+            this.display.unsubscribeFromMemory();
             this.display.dispose();
             this.display = new BitmapDisplay(baseAddress, width, height);
         } else if (this.display.baseAddress != baseAddress) {
@@ -51,22 +53,5 @@ public final class SyscallDisplayBitmap extends AbstractSyscall implements Simpl
         if (!this.display.isVisible()) {
             this.display.setVisible(true);
         }
-    }
-
-    @Override
-    public void onSubscribe(final Flow.Subscription subscription) {
-        this.subscription = subscription;
-        this.subscription.request(1);
-    }
-
-    @Override
-    public void onNext(final @NotNull SimulatorNotice item) {
-        if (item.action() == SimulatorNotice.Action.START) {
-            if (this.display != null) {
-                this.display.dispose();
-            }
-            this.display = null;
-        }
-        this.subscription.request(1);
     }
 }

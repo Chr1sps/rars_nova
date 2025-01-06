@@ -53,7 +53,7 @@ public final class InterruptController {
             }
             externalValue = value;
             externalPending = true;
-            Simulator.getInstance().interrupt();
+            Simulator.INSTANCE.interrupt();
             return true;
         }
     }
@@ -72,7 +72,7 @@ public final class InterruptController {
             }
             timerValue = value;
             timerPending = true;
-            Simulator.getInstance().interrupt();
+            Simulator.INSTANCE.interrupt();
             return true;
         }
     }
