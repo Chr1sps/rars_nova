@@ -54,11 +54,11 @@ public enum Directive {
     ),
     WORD(
         ".word",
-        "Store the listed second(s) as 32 bit words on word boundary"
+        "Store the listed value(s) as 32 bit words on word boundary"
     ),
     DWORD(
         ".dword",
-        "Store the listed second(s) as 64 bit double-word on word boundary"
+        "Store the listed value(s) as 64 bit double-word on word boundary"
     ),
     ASCII(
         ".ascii",
@@ -69,14 +69,14 @@ public enum Directive {
         "Store the string in the Data segment and add null terminator"
     ),
     STRING(".string", "Alias for .asciz"),
-    BYTE(".byte", "Store the listed second(s) as 8 bit bytes"),
+    BYTE(".byte", "Store the listed value(s) as 8 bit bytes"),
     ALIGN(
         ".align",
         "Align next data item on specified byte boundary (0=byte, 1=half, 2=word, 3=double)"
     ),
     HALF(
         ".half",
-        "Store the listed second(s) as 16 bit halfwords on halfword boundary"
+        "Store the listed value(s) as 16 bit halfwords on halfword boundary"
     ),
     SPACE(
         ".space",
@@ -84,11 +84,11 @@ public enum Directive {
     ),
     DOUBLE(
         ".double",
-        "Store the listed second(s) as double precision floating point"
+        "Store the listed value(s) as double precision floating point"
     ),
     FLOAT(
         ".float",
-        "Store the listed second(s) as single precision floating point"
+        "Store the listed value(s) as single precision floating point"
     ),
     EXTERN(
         ".extern",

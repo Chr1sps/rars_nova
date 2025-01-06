@@ -24,9 +24,6 @@ public abstract non-sealed class BasicInstruction extends Instruction {
     private static final int BASIC_INSTRUCTION_LENGTH_BITS = 32;
 
     private static final Logger LOGGER = LogManager.getLogger(BasicInstruction.class);
-    private final @NotNull BasicInstructionFormat instructionFormat;
-    private final @NotNull String operationMask;
-
     /**
      * Integer with 1's where constants required (0/1 become 1, f/s/t become 0)
      */
@@ -35,6 +32,8 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * Integer matching constants required (0/1 become 0/1, f/s/t become 0)
      */
     public final int opcodeMatch;
+    private final @NotNull BasicInstructionFormat instructionFormat;
+    private final @NotNull String operationMask;
 
     /**
      * BasicInstruction constructor.
@@ -89,7 +88,7 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * Gets the 32-character operation mask. Each mask position represents a
      * bit position in the 32-bit machine instruction. Operation codes and
      * unused bits are represented in the mask by 1's and 0's. Operand codes
-     * are represented by 'f', 's', and 't' for bits occupied by first, secon
+     * are represented by 'f', 's', and 't' for bits occupied by first, second
      * and third operand, respectively.
      *
      * @return The 32 bit mask, as a String
@@ -104,7 +103,7 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * is address formed from register base with immediate offset. J-format
      * is for jump destination addresses. I have added one more:
      * I-branch-format, for branch destination addresses. These are a variation
-     * of the I-format in that the computed second is address relative to the
+     * of the I-format in that the computed value is address relative to the
      * Program Counter. All four formats are represented by static objects.
      *
      * @return The machine instruction format, R, I, J or I-branch.

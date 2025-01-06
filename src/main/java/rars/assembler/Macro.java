@@ -260,7 +260,7 @@ public final class Macro {
     /**
      * Substitutes macro arguments in a line of source code inside macro
      * definition to be parsed after macro expansion. <br>
-     * Also appends "_M#" to all labels defined inside macro body where # is second
+     * Also appends "_M#" to all labels defined inside macro body where # is value
      * of <code>counter</code>
      *
      * @param line
@@ -304,7 +304,7 @@ public final class Macro {
     }
 
     /**
-     * returns true if <code>second</code> is name of a label defined in this macro's
+     * returns true if <code>value</code> is name of a label defined in this macro's
      * body.
      *
      * @param value

@@ -86,6 +86,9 @@ public final class SettingsThemePresets {
         new ThemeEntry("Default dark", DARK_THEME)
     );
 
+    private SettingsThemePresets() {
+    }
+
     private static @NotNull SettingsTheme buildTheme(final @NotNull UnaryOperator<SettingsTheme> builderFunction) {
         return builderFunction.apply(new SettingsTheme(
             Color.WHITE,

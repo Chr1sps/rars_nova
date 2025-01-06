@@ -242,7 +242,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *     the format of the full binary statement (all operands
      *     present)
      * @param mask
-     *     the second (f,s, or t) to mask out
+     *     the value (f,s, or t) to mask out
      * @param binaryStatement
      *     the binary statement to read from
      * @return the bits read pushed to the right
@@ -490,7 +490,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         }
                     }
                     basicInstructionBuilder.append(address);
-                    if (absoluteAddress) { // record as address if absolute, second if relative
+                    if (absoluteAddress) { // record as address if absolute, value if relative
                         this.basicStatementList.addAddress(address);
                     } else {
                         this.basicStatementList.addValue(address);
@@ -507,7 +507,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                      * The modifications of January 2005 documented below are being rescinded.
                      * All hexadecimal immediate values are considered 32 bits in length and
                      * their classification as INTEGER_5, INTEGER_16, INTEGER_16U (new)
-                     * or INTEGER_32 depends on their 32 bit second. So 0xFFFF will be
+                     * or INTEGER_32 depends on their 32 bit value. So 0xFFFF will be
                      * equivalent to 0x0000FFFF instead of 0xFFFFFFFF. This change, along with
                      * the introduction of INTEGER_16U (adopted from Greg Gibeling of Berkeley),
                      * required extensive changes to instruction templates especially for
@@ -780,12 +780,12 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     }
 
     /**
-     * Produces operand second from given array position (first operand is position
+     * Produces operand value from given array position (first operand is position
      * 0).
      *
      * @param i
      *     Operand position in array (first operand is position 0).
-     * @return Operand second at given operand array position.
+     * @return Operand value at given operand array position.
      * @throws IndexOutOfBoundsException
      *     if illegal operand position.
      */
@@ -798,9 +798,9 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * generate the correct sequence of bits and replace the mask with them.
      *
      * @param value
-     *     the second to be masked in (will be converted to binary)
+     *     the value to be masked in (will be converted to binary)
      * @param mask
-     *     the second (f,s, or t) to mask out
+     *     the value (f,s, or t) to mask out
      * @param errors
      *     error list to append errors to in the event of unrecoverable
      *     errors
@@ -830,7 +830,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             return;
         }
 
-        // Replace the mask bit for bit with the binary version of the second
+        // Replace the mask bit for bit with the binary version of the value
         // The old version of this function assumed that the mask was continuous
         final String bitString = BinaryUtils.intToBinaryString(
             value,
@@ -853,7 +853,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     /**
      * Little class to represent basic statement as list
      * of elements. Each element is either a string, an
-     * address or a second. The toString() method will
+     * address or a value. The toString() method will
      * return a string representation of the basic statement
      * in which any addresses or values are rendered in the
      * current number format (e.g. decimal or hex).

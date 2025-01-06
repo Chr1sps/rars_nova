@@ -171,17 +171,23 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
 
     @Override
     public void setForeground(final Color c) {
-        textArea.setForeground(c);
+        this.textArea.setForeground(c);
+        this.gutter.setForeground(c);
+        this.gutter.setFoldIndicatorForeground(c);
+        this.gutter.setFoldIndicatorArmedForeground(c);
+        this.gutter.setLineNumberColor(theme.foregroundColor);
     }
 
     @Override
-    public void setBackground(final Color c) {
-        textArea.setBackground(c);
+    public void setBackground(final Color color) {
+        this.textArea.setBackground(color);
+        this.gutter.setBackground(color);
+        UIManager.put("ToolTip.background", color);
     }
 
     @Override
     public void setSelectionColor(final Color c) {
-        textArea.setSelectionColor(c);
+        this.textArea.setSelectionColor(c);
     }
 
     @Override
@@ -268,17 +274,11 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void setTheme(final @NotNull EditorTheme theme) {
         this.theme = theme;
-        this.textArea.setBackground(theme.backgroundColor);
-        this.textArea.setForeground(theme.foregroundColor);
-        this.textArea.setCurrentLineHighlightColor(theme.lineHighlightColor);
-        this.textArea.setCaretColor(theme.caretColor);
-        this.textArea.setSelectionColor(theme.selectionColor);
-        this.gutter.setBackground(theme.backgroundColor);
-        this.gutter.setForeground(theme.foregroundColor);
-        this.gutter.setFoldIndicatorForeground(theme.foregroundColor);
-        this.gutter.setFoldIndicatorArmedForeground(theme.foregroundColor);
-        this.gutter.setLineNumberColor(theme.foregroundColor);
-        UIManager.put("ToolTip.background", theme.backgroundColor);
+        this.setForeground(theme.foregroundColor);
+        this.setBackground(theme.backgroundColor);
+        this.setSelectionColor(theme.selectionColor);
+        this.setCaretColor(theme.caretColor);
+        this.setLineHighlightColor(theme.lineHighlightColor);
         this.applyColorScheme(theme.tokenStyles);
     }
 

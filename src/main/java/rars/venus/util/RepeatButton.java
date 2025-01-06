@@ -22,7 +22,7 @@ import java.awt.event.MouseListener;
 /**
  * <code>RepeatButton</code> is a <code>JButton</code> which contains a timer
  * for firing events while the button is held down. There is a default
- * initial delay of 300ms before the first event is fired and a 60ms delay
+ * initial delay of 300ms before the key event is fired and a 60ms delay
  * between subsequent events. When the user holds the button down and moves
  * the mouse out from over the button, the timer stops, but if the user moves
  * the mouse back over the button without having released the mouse button,
@@ -59,7 +59,7 @@ public class RepeatButton extends JButton
      */
     private Timer timer = null;
     /**
-     * The initial delay for this button. Hold-down time before first
+     * The initial delay for this button. Hold-down time before key
      * timer firing. In milliseconds.
      */
     private int initialDelay = 300;
@@ -71,7 +71,7 @@ public class RepeatButton extends JButton
     /**
      * Holder of the modifiers used when the mouse pressed the button.
      * This is used for subsequently fired action events. This may change
-     * after mouse pressed if the user moves the mouse out, releases a first
+     * after mouse pressed if the user moves the mouse out, releases a key
      * and then moves the mouse back in.
      */
     private int modifiers = 0;

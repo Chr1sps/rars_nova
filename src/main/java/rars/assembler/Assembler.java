@@ -166,13 +166,13 @@ public final class Assembler {
      *     different source code file, representing the
      *     program source.
      * @param extendedAssemblerEnabled
-     *     A boolean second that if true permits use of
+     *     A boolean value that if true permits use of
      *     extended (pseudo)
      *     instructions in the source code. If false,
      *     these are flagged
      *     as errors.
      * @param warningsAreErrors
-     *     A boolean second - true means assembler
+     *     A boolean value - true means assembler
      *     warnings will be
      *     considered errors and terminate the assemble;
      *     false means the
@@ -427,7 +427,7 @@ public final class Assembler {
         // Ensure that I/O "file descriptors" are initialized for a new program run
         SystemIO.resetFiles();
         // DPS 6 Dec 2006:
-        // We will now sort the ArrayList of ProgramStatements by getAddress() second.
+        // We will now sort the ArrayList of ProgramStatements by getAddress() value.
         // This is for display purposes, since they have already been stored to Memory.
         // Use of .ktext and .text with address operands has two implications:
         // (1) the addresses may not be ordered at this point. Requires unsigned int
@@ -1007,11 +1007,13 @@ public final class Assembler {
         return instructions;
     } // matchInstruction()
 
-    // Processes the .word/.half/.byte/.float/.double directive.
-    // Can also handle "directive continuations", e.g. second or subsequent line
-    // of a multiline list, which does not contain the directive token. Just pass
-    // the
-    // current directive as argument.
+    /**
+     * Processes the .word/.half/.byte/.float/.double directive.
+     * Can also handle "directive continuations", e.g. second or subsequent line
+     * of a multiline list, which does not contain the directive token. Just pass
+     * the
+     * current directive as argument.
+     */
     private void storeNumeric(final @NotNull TokenList tokens, final Directive directive, final ErrorList errors) {
         Token token = tokens.get(0);
         // A double-check; should have already been caught...removed ".word" exemption
@@ -1026,16 +1028,16 @@ public final class Assembler {
         // Set byte length in memory of each number (e.g. WORD is 4, BYTE is 1, etc)
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
 
-        // Handle the "second : n" format, which replicates the second "n" times.
+        // Handle the "value : n" format, which replicates the value "n" times.
         if (tokens.size() == 4 && tokens.get(2).getType() == TokenType.COLON) {
             final Token valueToken = tokens.get(1);
             final Token repetitionsToken = tokens.get(3);
             // DPS 15-jul-08, allow ":" for repetition for all numeric
             // directives (originally just .word)
             // Conditions for correctly-formed replication:
-            // (integer directive AND integer second OR floating directive AND
-            // (integer second OR floating second))
-            // AND integer repetition second
+            // (integer directive AND integer value OR floating directive AND
+            // (integer value OR floating value))
+            // AND integer repetition value
             if (!(directive.isIntegerDirective())
                 || !TokenType.isIntegerTokenType(repetitionsToken.getType())) {
                 errors.addTokenError(
@@ -1081,10 +1083,12 @@ public final class Assembler {
         }
     } // storeNumeric()
 
-    // Store integer second given integer (word, half, byte) directive.
-    // Called by storeNumeric()
-    // NOTE: The token itself may be a label, in which case the correct action is
-    // to store the address of that label (into however many bytes specified).
+    /**
+     * Store integer value given integer (word, half, byte) directive.
+     * Called by storeNumeric()
+     * NOTE: The token itself may be a label, in which case the correct action is
+     * to store the address of that label (into however many bytes specified).
+     */
     private void storeInteger(final @NotNull Token token, final Directive directive, final ErrorList errors) {
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
         if (TokenType.isIntegerTokenType(token.getType())) {
@@ -1094,7 +1098,7 @@ public final class Assembler {
                 longvalue = BinaryUtils.stringToLong(token.getText());
                 value = (int) longvalue;
                 if (directive != Directive.DWORD) {
-                    final var message = "second %s is out-of-range and truncated to %s"
+                    final var message = "value %s is out-of-range and truncated to %s"
                         .formatted(
                             BinaryUtils.longToHexString(longvalue),
                             BinaryUtils.intToHexString(value)
@@ -1114,7 +1118,7 @@ public final class Assembler {
 
             final int fullvalue = value;
             // DPS 4-Jan-2013. Overriding 6-Jan-2005 KENV changes.
-            // If second is out of range for the directive, will simply truncate
+            // If value is out of range for the directive, will simply truncate
             // the leading bits (includes sign bits). This is what SPIM does.
             // But will issue a warning (not error) which SPIM does not do.
             if (directive == Directive.BYTE) {
@@ -1126,7 +1130,7 @@ public final class Assembler {
             if (DataTypes.outOfRange(directive, fullvalue)) {
                 errors.addWarning(
                     token,
-                    "second %s is out-of-range and truncated to %s"
+                    "value %s is out-of-range and truncated to %s"
                         .formatted(
                             BinaryUtils.intToHexString(fullvalue),
                             BinaryUtils.intToHexString(value)
@@ -1143,7 +1147,7 @@ public final class Assembler {
              * segment check prior to this point, so this "else" will never be
              * executed. I'm leaving it in just in case MARS in the future adds
              * capability of writing to the text segment (e.g. ability to
-             * de-assemble a binary second into its corresponding MIPS
+             * de-assemble a binary value into its corresponding MIPS
              * instruction)
              */
             else {
@@ -1164,7 +1168,7 @@ public final class Assembler {
                 final int value = this.fileCurrentlyBeingAssembled.getLocalSymbolTable()
                     .getAddressLocalOrGlobal(token.getText());
                 if (value == SymbolTable.NOT_FOUND) {
-                    // Record second 0 for now, then set up backpatch entry
+                    // Record value 0 for now, then set up backpatch entry
                     final int dataAddress = this.writeToDataSegment(0, lengthInBytes, token, errors);
                     this.currentFileDataSegmentForwardReferences.add(dataAddress, lengthInBytes, token);
                 } else { // label already defined, so write its address
@@ -1184,7 +1188,7 @@ public final class Assembler {
         }
     }// storeInteger
 
-    // Store real (fixed or floating point) second given floating (float, double)
+    // Store real (fixed or floating point) value given floating (float, double)
     // directive.
     // Called by storeNumeric()
     private void storeRealNumber(final @NotNull Token token, final Directive directive, final ErrorList errors) {
@@ -1208,7 +1212,7 @@ public final class Assembler {
                 return;
             }
             if (DataTypes.outOfRange(directive, value)) {
-                errors.addTokenError(token, "\"%s\" is an out-of-range second".formatted(token.getText()));
+                errors.addTokenError(token, "\"%s\" is an out-of-range value".formatted(token.getText()));
                 return;
             }
         } else {
@@ -1338,7 +1342,9 @@ public final class Assembler {
         }
     } // storeStrings()
 
-    // Simply check to see if we are in data segment. Generate error if not.
+    /**
+     * Simply check to see if we are in data segment. Generate error if not.
+     */
     private boolean passesDataSegmentCheck(final Token token) {
         if (!this.inDataSegment) {
             final var message = "\"%s\" directive cannot appear in text segment".formatted(token.getText());
@@ -1349,10 +1355,12 @@ public final class Assembler {
         }
     }
 
-    // Writes the given int second into current data segment address. Works for
-    // all the integer types plus float (caller is responsible for doing
-    // floatToIntBits).
-    // Returns address at which the second was stored.
+    /**
+     * Writes the given int value into current data segment address. Works for
+     * all the integer types plus float (caller is responsible for doing
+     * floatToIntBits).
+     * Returns address at which the value was stored.
+     */
     private int writeToDataSegment(
         final int value, final int lengthInBytes, final Token token,
         final ErrorList errors
@@ -1373,7 +1381,7 @@ public final class Assembler {
     }
 
     /**
-     * Writes the given double second into current data segment address. Works
+     * Writes the given double value into current data segment address. Works
      * only for DOUBLE floating
      * point values -- Memory class doesn't have method for writing 8 bytes, so
      * use setWord twice.
@@ -1420,7 +1428,7 @@ public final class Assembler {
      * segment operands. This is needed because the data segment is comletely
      * processed by the end of the first assembly pass, and its directives may
      * contain labels as operands. When this occurs, the label's associated
-     * address becomes the operand second. If it is a forward reference, we will
+     * address becomes the operand value. If it is a forward reference, we will
      * save the necessary information in this object for finding and patching in
      * the correct address at the end of the first pass (for this file or for all
      * files if more than one).
@@ -1455,18 +1463,22 @@ public final class Assembler {
             this.forwardReferenceList.addAll(another.forwardReferenceList);
         }
 
-        // Clear out the list. Allows you to re-use it.
+        /**
+         * Clear out the list. Allows you to re-use it.
+         */
         private void clear() {
             this.forwardReferenceList.clear();
         }
 
-        // Will traverse the list of forward references, attempting to resolve them.
-        // For each entry it will first search the provided local symbol table and
-        // failing that, the global one. If passed the global symbol table, it will
-        // perform a second, redundant, search. If search is successful, the patch
-        // is applied and the forward reference removed. If search is not successful,
-        // the forward reference remains (it is either undefined or a global label
-        // defined in a file not yet parsed).
+        /**
+         * Will traverse the list of forward references, attempting to resolve them.
+         * For each entry it will first search the provided local symbol table and
+         * failing that, the global one. If passed the global symbol table, it will
+         * perform a second, redundant, search. If search is successful, the patch
+         * is applied and the forward reference removed. If search is not successful,
+         * the forward reference remains (it is either undefined or a global label
+         * defined in a file not yet parsed).
+         */
         private void resolve(final SymbolTable localSymtab) {
             int labelAddress;
             DataSegmentForwardReference entry;

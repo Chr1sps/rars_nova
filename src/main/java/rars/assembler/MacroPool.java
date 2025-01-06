@@ -146,7 +146,7 @@ public final class MacroPool {
      *
      * @param value
      *     a {@link java.lang.String} object
-     * @return true if any macros have been defined with name <code>second</code>
+     * @return true if any macros have been defined with name <code>value</code>
      * by now, not concerning arguments count.
      */
     public boolean matchesAnyMacroName(final @NotNull String value) {
@@ -172,7 +172,7 @@ public final class MacroPool {
      * be incremented by each call. parser calls this method once for every
      * expansions. it will be a unique id for each expansion of macro in a file
      *
-     * @return counter second
+     * @return counter value
      */
     public int getNextCounter() {
         return this.counter++;

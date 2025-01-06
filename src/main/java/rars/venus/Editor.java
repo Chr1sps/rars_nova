@@ -43,7 +43,7 @@ public class Editor {
     public static final int MIN_TAB_SIZE = 1;
     public static final int MAX_TAB_SIZE = 32;
     public static final int MIN_BLINK_RATE = 0; // no flashing
-    public static final int MAX_BLINK_RATE = 1000; // once per second
+    public static final int MAX_BLINK_RATE = 1000; // once per value
 
     private final @NotNull VenusUI mainUI;
     private final @NotNull String mainUIbaseTitle;
@@ -72,7 +72,7 @@ public class Editor {
         FileStatus.reset();
         this.mainUIbaseTitle = this.mainUI.getTitle();
         this.newUsageCount = 0;
-        // Directory from which MARS was launched. Guaranteed to have a second.
+        // Directory from which MARS was launched. Guaranteed to have a value.
         this.defaultOpenDirectory = System.getProperty("user.dir");
         this.defaultSaveDirectory = System.getProperty("user.dir");
         this.currentOpenDirectory = this.defaultOpenDirectory;
@@ -174,7 +174,7 @@ public class Editor {
      * the application's title bar. The edit tab will contain only
      * the file, the title bar will contain full pathname.
      * If file has been modified since created, opened or saved, as
-     * indicated by second of the status parameter, the name and path
+     * indicated by value of the status parameter, the name and path
      * will be followed with an '*'. If newly-created file has not
      * yet been saved, the title bar will show (temporary) file name
      * but not path.

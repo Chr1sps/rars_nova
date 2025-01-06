@@ -75,7 +75,7 @@ public final class EditPane extends JPanel {
     public EditPane(final @NotNull VenusUI appFrame) {
         super(new BorderLayout());
         this.mainUI = appFrame;
-        // user.dir, user's current working directory, is guaranteed to have a second
+        // user.dir, user's current working directory, is guaranteed to have a value
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
 
@@ -346,7 +346,7 @@ public final class EditPane extends JPanel {
      * @param line
      *     The desired line number of this TextPane's text. Numbering
      *     starts at 1, and
-     *     nothing will happen if the parameter second is less than 1
+     *     nothing will happen if the parameter value is less than 1
      */
     public void selectLine(final int line) {
         this.sourceCode.selectLine(line - 1);

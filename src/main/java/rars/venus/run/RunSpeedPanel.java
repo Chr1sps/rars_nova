@@ -42,11 +42,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class RunSpeedPanel extends JPanel {
     /**
-     * Constant that represents unlimited run speed. Compare with return second of
+     * Constant that represents unlimited run speed. Compare with return value of
      * getRunSpeed() to determine if set to unlimited. At the unlimited setting, the
      * GUI
      * will not attempt to update register and memory contents as each instruction
-     * is executed. This is the only possible second for command-line use of Mars.
+     * is executed. This is the only possible value for command-line use of Mars.
      */
     public final static double UNLIMITED_SPEED = 40;
 

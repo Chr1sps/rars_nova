@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
- * Service to return a random floating point second.
+ * Service to return a random floating point value.
  */
 public class SyscallRandDouble extends AbstractSyscall {
     /**

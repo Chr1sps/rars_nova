@@ -41,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Use this to render Monospaced and right-aligned data in JTables.
  * I am using it to render integer addresses and values that are stored as
  * Strings containing either the decimal or hexidecimal version
- * of the integer second.
+ * of the integer value.
  */
 public final class MonoRightCellRenderer extends DefaultTableCellRenderer {
     @Override

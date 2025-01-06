@@ -60,7 +60,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class ToneGenerator {
 
     /**
-     * The default pitch second for the tone: 60 / middle C.
+     * The default pitch value for the tone: 60 / middle C.
      */
     public final static byte DEFAULT_PITCH = 60;
 
@@ -95,14 +95,14 @@ public final class ToneGenerator {
      *     the desired duration in milliseconds.
      * @param instrument
      *     the desired instrument (or patch) represented
-     *     by a positive byte second (0-127). See the <a href=
+     *     by a positive byte value (0-127). See the <a href=
      *     http://www.midi.org/about-midi/gm/gm1sound.shtml#instrument>general
      *     MIDI instrument patch map</a> for more instruments
      *     associated with
-     *     each second.
+     *     each value.
      * @param volume
      *     the desired volume of the initial attack of the
-     *     Tone (MIDI velocity) represented by a positive byte second
+     *     Tone (MIDI velocity) represented by a positive byte value
      *     (0-127).
      */
     public static void generateTone(
@@ -123,14 +123,14 @@ public final class ToneGenerator {
      *     the desired duration in milliseconds.
      * @param instrument
      *     the desired instrument (or patch) represented
-     *     by a positive byte second (0-127). See the <a href=
+     *     by a positive byte value (0-127). See the <a href=
      *     http://www.midi.org/about-midi/gm/gm1sound.shtml#instrument>general
      *     MIDI instrument patch map</a> for more instruments
      *     associated with
-     *     each second.
+     *     each value.
      * @param volume
      *     the desired volume of the initial attack of the
-     *     Tone (MIDI velocity) represented by a positive byte second
+     *     Tone (MIDI velocity) represented by a positive byte value
      *     (0-127).
      */
     public static void generateToneSynchronously(
@@ -185,18 +185,18 @@ final class Tone {
      *
      * @param pitch
      *     the pitch in semitones. Pitch is represented by
-     *     a positive byte second - 0-127 where 60 is middle C.
+     *     a positive byte value - 0-127 where 60 is middle C.
      * @param duration
      *     the duration of the tone in milliseconds.
      * @param instrument
-     *     a positive byte second (0-127) which represents
+     *     a positive byte value (0-127) which represents
      *     the instrument (or patch) of the tone. See the <a href=
      *     http://www.midi.org/about-midi/gm/gm1sound.shtml#instrument>general
      *     MIDI instrument patch map</a> for more instruments
      *     associated with
-     *     each second.
+     *     each value.
      * @param volume
-     *     a positive byte second (0-127) which represents the
+     *     a positive byte value (0-127) which represents the
      *     volume of the initial attack of the note (MIDI velocity).
      *     127 being
      *     loud, and 0 being silent.

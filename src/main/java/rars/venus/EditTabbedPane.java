@@ -76,7 +76,11 @@ public class EditTabbedPane extends JPanel {
      * @param mainPane
      *     a {@link MainPane} object
      */
-    public EditTabbedPane(final @NotNull VenusUI mainUI, final @NotNull Editor editor, final @NotNull MainPane mainPane) {
+    public EditTabbedPane(
+        final @NotNull VenusUI mainUI,
+        final @NotNull Editor editor,
+        final @NotNull MainPane mainPane
+    ) {
         super();
         this.tabbedPane = new JTabbedPane();
         this.mainUI = mainUI;
@@ -626,7 +630,7 @@ public class EditTabbedPane extends JPanel {
             try {
                 theFile = theFile.getCanonicalFile();
             } catch (final IOException ioe) {
-                // nothing to do, theFile will keep current second
+                // nothing to do, theFile will keep current value
             }
             // final String currentFilePath = theFile.getPath();
             // If this file is currently already open, then simply select its tab

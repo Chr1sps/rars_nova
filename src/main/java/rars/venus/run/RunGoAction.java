@@ -55,13 +55,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class RunGoAction extends GuiAction {
 
-    /**
-     * Constant <code>defaultMaxSteps=-1</code>
-     */
     public static final int defaultMaxSteps = -1; // "forever", formerly 10000000; // 10 million
-    /**
-     * Constant <code>maxSteps=defaultMaxSteps</code>
-     */
     public static int maxSteps = RunGoAction.defaultMaxSteps;
     private final VenusUI mainUI;
     private String name;
@@ -92,7 +86,7 @@ public class RunGoAction extends GuiAction {
     }
 
     /**
-     * Reset max steps limit to default second at termination of a simulated
+     * Reset max steps limit to default value at termination of a simulated
      * execution.
      */
     public static void resetMaxSteps() {
@@ -289,13 +283,12 @@ public class RunGoAction extends GuiAction {
         this.mainUI.isMemoryReset = false;
     }
 
-    // Method to store any program arguments into MIPS memory and registers before
-    // execution begins. Arguments go into the gap between $sp and kernel memory.
-    // Argument pointers and count go into runtime stack and $sp is adjusted
-    //////////////////////////////////////////////////////////////////////////////////// accordingly.
-    // $a0 gets argument count (argc), $a1 gets stack address of first arg pointer
-
-    /// ///////////////////////////////////////////////////////////////////////////////// (argv).
+    /**
+     * Method to store any program arguments into MIPS memory and registers before
+     * execution begins. Arguments go into the gap between $sp and kernel memory.
+     * Argument pointers and count go into runtime stack and $sp is adjusted accordingly.
+     * $a0 gets argument count (argc), $a1 gets stack address of first arg pointer (argv).
+     */
     private void processProgramArgumentsIfAny() {
         final String programArguments = this.executePane.textSegment.getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||

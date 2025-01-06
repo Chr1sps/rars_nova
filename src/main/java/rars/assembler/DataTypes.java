@@ -38,77 +38,55 @@ import org.jetbrains.annotations.NotNull;
  * @version August 2003
  */
 public final class DataTypes {
-    /**
-     * Number of bytes occupied by double is 8.
-     **/
+    /** Number of bytes occupied by double is 8. */
     public static final int DOUBLE_SIZE = 8;
-    /**
-     * Number of bytes occupied by float is 4.
-     **/
+    /** Number of bytes occupied by float is 4. */
     public static final int FLOAT_SIZE = 4;
-    /**
-     * Number of bytes occupied by word is 4.
-     **/
+    /** Number of bytes occupied by word is 4. */
     public static final int WORD_SIZE = 4;
-    /**
-     * Number of bytes occupied by halfword is 2.
-     **/
+    /** Number of bytes occupied by halfword is 2. */
     public static final int HALF_SIZE = 2;
-    /**
-     * Number of bytes occupied by byte is 1.
-     **/
+    /** Number of bytes occupied by byte is 1. */
     public static final int BYTE_SIZE = 1;
-    /**
-     * Number of bytes occupied by character is 1.
-     **/
+    /** Number of bytes occupied by character is 1. */
     public static final int CHAR_SIZE = 1;
-    /**
-     * Maximum second that can be stored in a word is 2<sup>31</sup>-1
-     **/
+    /** Maximum value that can be stored in a word is 2<sup>31</sup>-1 */
     public static final int MAX_WORD_VALUE = Integer.MAX_VALUE;
-    /**
-     * Lowest second that can be stored in aword is -2<sup>31</sup>
-     **/
+    /** Lowest value that can be stored in aword is -2<sup>31</sup> */
     public static final int MIN_WORD_VALUE = Integer.MIN_VALUE;
-    /**
-     * Maximum second that can be stored in a halfword is 2<sup>15</sup>-1
-     **/
+    /** Maximum value that can be stored in a halfword is 2<sup>15</sup>-1 */
     public static final int MAX_HALF_VALUE = 32767; // (int)Math.pow(2,15) - 1;
-    /**
-     * Lowest second that can be stored in a halfword is -2<sup>15</sup>
-     **/
+    /** Lowest value that can be stored in a halfword is -2<sup>15</sup> */
     public static final int MIN_HALF_VALUE = -32768; // 0 - (int) Math.pow(2,15);
-    /**
-     * Maximum second that can be stored in a 12 bit immediate is 2<sup>11</sup>-1
-     **/
+    /** Maximum value that can be stored in a 12 bit immediate is 2<sup>11</sup>-1 */
     public static final int MAX_IMMEDIATE_VALUE = 0x000007FF;
     /**
-     * Lowest second that can be stored in a 12 bit immediate is -2<sup>11</sup>
+     * Lowest value that can be stored in a 12 bit immediate is -2<sup>11</sup>
      **/
     public static final int MIN_IMMEDIATE_VALUE = 0xFFFFF800;
     /**
-     * Maximum second that can be stored in a 20 bit immediate is 2<sup>19</sup>-1
+     * Maximum value that can be stored in a 20 bit immediate is 2<sup>19</sup>-1
      **/
     public static final int MAX_UPPER_VALUE = 0x000FFFFF;
     /**
-     * Lowest second that can be stored in a 20 bit immediate is -2<sup>19</sup>
+     * Lowest value that can be stored in a 20 bit immediate is -2<sup>19</sup>
      **/
     public static final int MIN_UPPER_VALUE = 0x00000000;
     /**
-     * Maximum second that can be stored in a byte is 2<sup>7</sup>-1
+     * Maximum value that can be stored in a byte is 2<sup>7</sup>-1
      **/
     public static final int MAX_BYTE_VALUE = Byte.MAX_VALUE;
     /**
-     * Lowest second that can be stored in a byte is -2<sup>7</sup>
+     * Lowest value that can be stored in a byte is -2<sup>7</sup>
      **/
     public static final int MIN_BYTE_VALUE = Byte.MIN_VALUE;
     /**
-     * Maximum positive finite second that can be stored in a float is same as Java
+     * Maximum positive finite value that can be stored in a float is same as Java
      * Float
      **/
     public static final double MAX_FLOAT_VALUE = Float.MAX_VALUE;
     /**
-     * Largest magnitude negative second that can be stored in a float (negative of
+     * Largest magnitude negative value that can be stored in a float (negative of
      * the max)
      **/
     public static final double LOW_FLOAT_VALUE = -Float.MAX_VALUE;
@@ -139,14 +117,14 @@ public final class DataTypes {
     }
 
     /**
-     * Determines whether given integer second falls within second range for given
+     * Determines whether given integer value falls within value range for given
      * directive.
      *
      * @param direct
-     *     Directive that controls storage allocation for second.
+     *     Directive that controls storage allocation for value.
      * @param value
-     *     The second to be stored.
-     * @return Returns <code>true</code> if second can be stored in the number of bytes
+     *     The value to be stored.
+     * @return Returns <code>true</code> if value can be stored in the number of bytes
      * allowed
      * by the given directive (.word, .half, .byte), <code>false</code>
      * otherwise.
@@ -159,7 +137,7 @@ public final class DataTypes {
     }
 
     /**
-     * Determines whether given floating point second falls within second range for
+     * Determines whether given floating point value falls within value range for
      * given directive.
      * For float, this refers to range of the data type, not precision. Example:
      * 1.23456789012345
@@ -169,10 +147,10 @@ public final class DataTypes {
      * for exponent).
      *
      * @param direct
-     *     Directive that controls storage allocation for second.
+     *     Directive that controls storage allocation for value.
      * @param value
-     *     The second to be stored.
-     * @return Returns <code>true</code> if second is within range of
+     *     The value to be stored.
+     * @return Returns <code>true</code> if value is within range of
      * the given directive (.float, .double), <code>false</code> otherwise.
      */
     public static boolean outOfRange(final Directive direct, final double value) {

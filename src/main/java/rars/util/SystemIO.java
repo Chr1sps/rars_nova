@@ -86,16 +86,16 @@ public final class SystemIO {
     }
 
     /**
-     * Implements syscall to read an integer second.
+     * Implements syscall to read an integer value.
      * Client is responsible for catching NumberFormatException.
      *
      * @param serviceNumber
      *     the number assigned to Read Int syscall (default 5)
-     * @return int second corresponding to user input
+     * @return int value corresponding to user input
      */
     public static int readInteger(final int serviceNumber) {
         final String input = SystemIO.readStringInternal(
-            "0", "Enter an integer second (syscall " + serviceNumber +
+            "0", "Enter an integer value (syscall " + serviceNumber +
                 ")", -1
         );
         // Client is responsible for catching NumberFormatException
@@ -123,34 +123,34 @@ public final class SystemIO {
     }
 
     /**
-     * Implements syscall to read a float second.
+     * Implements syscall to read a float value.
      * Client is responsible for catching NumberFormatException.
      *
      * @param serviceNumber
      *     the number assigned to Read Float syscall (default 6)
-     * @return float second corresponding to user input
+     * @return float value corresponding to user input
      * Feb 14 2005 Ken Vollmar
      */
     public static float readFloat(final int serviceNumber) {
         final String input = SystemIO.readStringInternal(
-            "0", "Enter a float second (syscall " + serviceNumber + ")",
+            "0", "Enter a float value (syscall " + serviceNumber + ")",
             -1
         );
         return Float.parseFloat(input.trim());
     }
 
     /**
-     * Implements syscall to read a double second.
+     * Implements syscall to read a double value.
      * Client is responsible for catching NumberFormatException.
      *
      * @param serviceNumber
      *     the number assigned to Read Duoble syscall (default 7)
-     * @return double second corresponding to user input
+     * @return double value corresponding to user input
      * Feb 14 2005 Ken Vollmar
      */
     public static double readDouble(final int serviceNumber) {
         final String input = SystemIO.readStringInternal(
-            "0", "Enter a Double second (syscall " + serviceNumber + ")"
+            "0", "Enter a Double value (syscall " + serviceNumber + ")"
             , -1
         );
         return Double.parseDouble(input.trim());
@@ -200,17 +200,17 @@ public final class SystemIO {
     }
 
     /**
-     * Implements syscall having 12 in $v0, to read a char second.
+     * Implements syscall having 12 in $v0, to read a char value.
      *
      * @param serviceNumber
      *     the number assigned to Read Char syscall (default 12)
-     * @return int second with lowest byte corresponding to user input
+     * @return int value with lowest byte corresponding to user input
      */
     public static int readChar(final int serviceNumber) {
         final int returnValue;
 
         final String input = SystemIO.readStringInternal(
-            "0", "Enter a character second (syscall " + serviceNumber +
+            "0", "Enter a character value (syscall " + serviceNumber +
                 ")", 1
         );
         // The whole try-catch is not really necessary in this case since I'm
@@ -262,12 +262,12 @@ public final class SystemIO {
             // words are MIPS integers with values such that many of the bytes are ZEROES.
             // The effect is apparently that the write stops after encountering a
             // zero-valued
-            // byte. (The method write does not return a second and so this can't be verified
-            // by the return second.)
+            // byte. (The method write does not return a value and so this can't be verified
+            // by the return value.)
             // Writes up to lengthRequested bytes of data to this output stream from an
             // array of bytes.
             // outputStream.write(myBuffer, 0, lengthRequested); // write is a void method
-            // -- no verification second returned
+            // -- no verification value returned
 
             // Oct. 9 2005 Ken Vollmar Force the write statement to write exactly
             // the number of bytes requested, even though those bytes include many ZERO
@@ -301,9 +301,9 @@ public final class SystemIO {
      */
     public static int readFromFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
         int retValue;
-        /////////////// DPS 8-Jan-2013
-        /// Read from STDIN file descriptor while using IDE - get input from Messages
-        /////////////// pane.
+        // DPS 8-Jan-2013
+        // Read from STDIN file descriptor while using IDE - get input from Messages
+        // pane.
         if (fd == SystemIO.STDIN) {
             if (Globals.gui != null) {
                 final String input = Globals.gui.messagesPane.getInputString(lengthRequested);
@@ -315,9 +315,7 @@ public final class SystemIO {
                 return Math.min(myBuffer.length, bytesRead.length);
             }
         }
-        //// When running in command mode, code below works for either regular file or
-        //////////////////////////////////////////////////////////////////////////////////// STDIN
-
+        // When running in command mode, code below works for either regular file or STDIN
         if (!FileIOData.fdInUse(fd, 0)) // Check the existence of the "read" fd
         {
             SystemIO.fileErrorString = "File descriptor " + fd + " is not open for reading";
@@ -330,7 +328,7 @@ public final class SystemIO {
             // array of bytes.
             retValue = InputStream.read(myBuffer, 0, lengthRequested);
             // This method will return -1 upon EOF, but our spec says that negative
-            // second represents an error, so we return 0 for EOF. DPS 10-July-2008.
+            // value represents an error, so we return 0 for EOF. DPS 10-July-2008.
             if (retValue == -1) {
                 retValue = 0;
             }
@@ -422,7 +420,7 @@ public final class SystemIO {
 
         // Check internal plausibility of opening this file
         fdToUse = FileIOData.nowOpening(filename, flags);
-        retValue = fdToUse; // return second is the fd
+        retValue = fdToUse; // return value is the fd
         if (fdToUse < 0) {
             return -1;
         } // fileErrorString would have been set

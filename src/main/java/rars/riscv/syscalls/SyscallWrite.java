@@ -82,7 +82,7 @@ public class SyscallWrite extends AbstractSyscall {
             myBuffer, // buffer
             RegisterFile.INSTANCE.getIntValue("a2")
         ); // length
-        // set returned second in register
+        // set returned value in register
         RegisterFile.INSTANCE.updateRegisterByName("a0", retValue);
     }
 }

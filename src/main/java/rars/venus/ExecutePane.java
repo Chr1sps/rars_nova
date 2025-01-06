@@ -214,7 +214,7 @@ public final class ExecutePane extends JDesktopPane {
      */
     public void numberDisplayBaseChanged(final NumberDisplayBaseChooser chooser) {
         if (chooser == this.valueDisplayBase) {
-            // Have all internal windows update their second columns
+            // Have all internal windows update their value columns
             this.registerValues.updateRegisters();
             this.fpRegValues.updateRegisters();
             this.csrValues.updateRegisters();

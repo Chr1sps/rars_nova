@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Represents one token in the input program. Each Token carries, along with its
- * type and second, the position (line, column) in which its source appears in
+ * type and value, the position (line, column) in which its source appears in
  * the program.
  *
  * @author Pete Sanderson
@@ -57,7 +57,7 @@ public final class Token {
      * @param type
      *     The token type that this token has. (e.g. REGISTER_NAME)
      * @param value
-     *     The source second for this token (e.g. $t3)
+     *     The source value for this token (e.g. $t3)
      * @param sourceProgram
      *     The RISCVprogram object containing this token
      * @param line
@@ -65,7 +65,7 @@ public final class Token {
      *     appears.
      * @param start
      *     The starting position in that line number of this
-     *     token's source second.
+     *     token's source value.
      * @see TokenType
      */
     public Token(

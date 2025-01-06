@@ -47,14 +47,14 @@ public final class PropertiesFile {
     }
 
     /**
-     * Produce Properties (a Hashtable) object containing first-second pairs
+     * Produce Properties (a Hashtable) object containing key-value pairs
      * from specified properties file. This may be used as an alternative
      * to readPropertiesFile() which uses a different implementation.
      *
      * @param file
      *     Properties file. Do NOT include the file extension as
      *     it is assumed to be ".properties" and is added here.
-     * @return Properties (Hashtable) of first-second pairs read from the file.
+     * @return Properties (Hashtable) of key-value pairs read from the file.
      */
     public static @NotNull Properties loadPropertiesFromFile(@NotNull final String file) {
         final Properties properties = new Properties();
@@ -65,36 +65,5 @@ public final class PropertiesFile {
         } // If it doesn't work, properties will be empty
 
         return properties;
-    }
-
-    // Read and return integer property second for given file and property name.
-    // Default second is returned if property file or name not found.
-    public static int getIntegerProperty(
-        final @NotNull String propertiesFile,
-        final @NotNull String propertyName,
-        final int defaultValue
-    ) {
-        int limit = defaultValue; // just in case no entry is found
-        final Properties properties = loadPropertiesFromFile(propertiesFile);
-        try {
-            limit = Integer.parseInt(properties.getProperty(propertyName, Integer.toString(defaultValue)));
-        } catch (final NumberFormatException ignored) {
-        } // do nothing, I already have a default
-        return limit;
-    }
-
-    /**
-     * Read and return property file second (if any) for requested property.
-     *
-     * @param propertiesFile
-     *     name of properties file (do NOT include file
-     *     extension,
-     *     which is assumed to be ".properties")
-     * @param propertyName
-     *     String containing desired property name
-     * @return String containing associated second; null if property not found
-     */
-    public static String getPropertyEntry(final @NotNull String propertiesFile, final @NotNull String propertyName) {
-        return loadPropertiesFromFile(propertiesFile).getProperty(propertyName);
     }
 }

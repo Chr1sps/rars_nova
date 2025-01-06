@@ -183,7 +183,7 @@ public final class OperandUtils {
             }
             if (specType == TokenType.INTEGER_12 && candType == TokenType.INTEGER_12U) {
                 OperandUtils.generateMessage(
-                    candToken, "Unsigned second is too large to fit into a sign-extended " +
+                    candToken, "Unsigned value is too large to fit into a sign-extended " +
                         "immediate", errors
                 );
                 return false;

@@ -368,9 +368,9 @@ public class LabelsWindow extends JInternalFrame {
     // by address. The kernel address space is all negative integers, so we need
 
     /// ///////////////////////////////////////////////////////////////////////// some
-    // special processing to treat int address as unsigned 32 bit second.
+    // special processing to treat int address as unsigned 32 bit value.
     // Note: Integer.signum() is Java 1.5 and MARS is 1.4 so I can't use it.
-    // Remember, if not equal then any second with correct sign will work.
+    // Remember, if not equal then any value with correct sign will work.
     // If both have same sign, a-b will yield correct result.
     // If signs differ, b will yield correct result (think about it).
     private static class LabelAddressAscendingComparator implements Comparator<Symbol> {

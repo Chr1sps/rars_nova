@@ -19,7 +19,7 @@ public final class RegistersWindow extends RegisterBlockWindow {
         /* ra */ "return address (used by function call)",
         /* sp */ "stack pointer",
         /* gp */ "pointer to global area",
-        /* tp */ "pointer to thread local data (not given a second)",
+        /* tp */ "pointer to thread local data (not given a value)",
         /* t0 */ "temporary (not preserved across call)",
         /* t1 */ "temporary (not preserved across call)",
         /* t2 */ "temporary (not preserved across call)",
@@ -54,7 +54,7 @@ public final class RegistersWindow extends RegisterBlockWindow {
      * <p>Constructor for RegistersWindow.</p>
      */
     public RegistersWindow() {
-        super(getRegisters(), regToolTips, "Current 32 bit second");
+        super(getRegisters(), regToolTips, "Current 32 bit value");
     }
 
     /*

@@ -283,7 +283,7 @@ public final class SymbolTable {
      *     Address associated with 0 or more symtab entries.
      * @param replacementAddress
      *     Any entry that has originalAddress will have its
-     *     address updated to this second. Does nothing if none
+     *     address updated to this value. Does nothing if none
      *     do.
      */
     public void fixSymbolTableAddress(final int originalAddress, final int replacementAddress) {

@@ -344,7 +344,7 @@ public final class Main {
         }
     }
 
-    /// Formats int second for display: decimal, hex, ascii
+    /// Formats int value for display: decimal, hex, ascii
     private @NotNull String formatIntForDisplay(final int value) {
         return switch (this.programOptions.displayFormat) {
             case DECIMAL -> Integer.toString(value);

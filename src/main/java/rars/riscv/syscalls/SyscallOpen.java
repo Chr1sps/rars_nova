@@ -35,13 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallOpen class.</p>
- */
 public final class SyscallOpen extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallOpen.</p>
-     */
     public SyscallOpen() {
         super(
             "Open", "Opens a file from a path <br>Only supported flags (a1) are read-only (0), write-only (1) and" +
@@ -52,16 +46,13 @@ public final class SyscallOpen extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final int retValue = SystemIO.openFile(
             NullString.get(statement),
             RegisterFile.INSTANCE.getIntValue("a1")
         );
-        // set returned fd second in register
+        // set returned fd value in register
         RegisterFile.INSTANCE.updateRegisterByName("a0", retValue);
     }
 }

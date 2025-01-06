@@ -43,30 +43,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Input arguments: a0 = address of null-terminated string that is the message
  * to user <br>
  * Outputs:<br>
- * f0 contains second of float read <br>
- * a1 contains status second <br>
+ * f0 contains value of float read <br>
+ * a1 contains status value <br>
  * 0: valid input data, correctly parsed <br>
  * -1: input data cannot be correctly parsed <br>
  * -2: Cancel was chosen <br>
  * -3: OK was chosen but no data had been input into field <br>
  */
 public final class SyscallInputDialogFloat extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallInputDialogFloat.</p>
-     */
     public SyscallInputDialogFloat() {
         super("InputDialogFloat");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String message = NullString.get(statement);
 
         // Values returned by Java's InputDialog:
-        // A null return second means that "Cancel" was chosen rather than OK.
+        // A null return value means that "Cancel" was chosen rather than OK.
         // An empty string returned (that is, inputValue.length() of zero)
         // means that OK was chosen but no string was input.
         final String inputValue;

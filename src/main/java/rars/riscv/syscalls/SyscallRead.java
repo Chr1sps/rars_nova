@@ -37,13 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallRead class.</p>
- */
 public class SyscallRead extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallRead.</p>
-     */
     public SyscallRead() {
         super(
             "Read", "Read from a file descriptor into a buffer",
@@ -52,9 +46,6 @@ public class SyscallRead extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         int byteAddress = RegisterFile.INSTANCE.getIntValue("a1"); // destination of characters read from file
@@ -67,7 +58,7 @@ public class SyscallRead extends AbstractSyscall {
             myBuffer, // buffer
             length
         ); // length
-        // set returned second in register
+        // set returned value in register
         RegisterFile.INSTANCE.updateRegisterByName("a0", retLength);
 
         // copy bytes from returned buffer into memory

@@ -45,9 +45,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class BackStepper {
     private static final Logger LOGGER = LogManager.getLogger(BackStepper.class);
-    // Flag to mark BackStep object as prepresenting specific situation: user
-    // manipulates
-    // memory/register second via GUI after assembling program but before running it.
+    /**
+     * Flag to mark BackStep object as prepresenting specific situation: user manipulates
+     * memory/register value via GUI after assembling program but before running it.
+     */
     private static final int NOT_PC_VALUE = -1;
     private final BackstepStack backSteps;
     private boolean engaged;
@@ -65,7 +66,7 @@ public class BackStepper {
     // One can argue using java.util.Stack, given its clumsy implementation.
     // A homegrown linked implementation will be more streamlined, but
     // I anticipate that backstepping will only be used during timed
-    // (currently max 30 instructions/second) or stepped execution, where
+    // (currently max 30 instructions/value) or stepped execution, where
     // performance is not an issue. Its Vector implementation may result
     // in quicker garbage collection than a pure linked list implementation.
 
@@ -178,19 +179,19 @@ public class BackStepper {
     }
 
     /*
-     * Convenience method called below to get program counter second. If it needs to
+     * Convenience method called below to get program counter value. If it needs to
      * be
      * be modified (e.g. to subtract 4) that can be done here in one place.
      */
 
     /**
      * Add a new "back step" (the undo action) to the stack. The action here
-     * is to restore a raw memory word second (setRawWord).
+     * is to restore a raw memory word value (setRawWord).
      *
      * @param address
      *     The affected memory address.
      * @param value
-     *     The "restore" second to be stored there.
+     *     The "restore" value to be stored there.
      */
     public void addMemoryRestoreRawWord(final int address, final int value) {
         this.backSteps.push(Action.MEMORY_RESTORE_RAW_WORD, BackStepper.pc(), address, value);
@@ -198,13 +199,13 @@ public class BackStepper {
 
     /**
      * Add a new "back step" (the undo action) to the stack. The action here
-     * is to restore a memory word second.
+     * is to restore a memory word value.
      *
      * @param address
      *     The affected memory address.
      * @param value
-     *     The "restore" second to be stored there.
-     * @return the argument second
+     *     The "restore" value to be stored there.
+     * @return the argument value
      */
     public int addMemoryRestoreWord(final int address, final int value) {
         this.backSteps.push(Action.MEMORY_RESTORE_WORD, BackStepper.pc(), address, value);
@@ -227,13 +228,13 @@ public class BackStepper {
 
     /**
      * Add a new "back step" (the undo action) to the stack. The action here
-     * is to restore a memory half-word second.
+     * is to restore a memory half-word value.
      *
      * @param address
      *     The affected memory address.
      * @param value
-     *     The "restore" second to be stored there, in low order half.
-     * @return the argument second
+     *     The "restore" value to be stored there, in low order half.
+     * @return the argument value
      */
     public int addMemoryRestoreHalf(final int address, final int value) {
         this.backSteps.push(Action.MEMORY_RESTORE_HALF, BackStepper.pc(), address, value);
@@ -242,13 +243,13 @@ public class BackStepper {
 
     /**
      * Add a new "back step" (the undo action) to the stack. The action here
-     * is to restore a memory byte second.
+     * is to restore a memory byte value.
      *
      * @param address
      *     The affected memory address.
      * @param value
-     *     The "restore" second to be stored there, in low order byte.
-     * @return the argument second
+     *     The "restore" value to be stored there, in low order byte.
+     * @return the argument value
      */
     public int addMemoryRestoreByte(final int address, final int value) {
         this.backSteps.push(Action.MEMORY_RESTORE_BYTE, BackStepper.pc(), address, value);
@@ -257,12 +258,12 @@ public class BackStepper {
 
     /**
      * Add a new "back step" (the undo action) to the stack. The action here
-     * is to restore a register file register second.
+     * is to restore a register file register value.
      *
      * @param register
      *     The affected register number.
      * @param value
-     *     The "restore" second to be stored there.
+     *     The "restore" value to be stored there.
      */
     public void addRegisterFileRestore(final int register, final long value) {
         this.backSteps.push(Action.REGISTER_RESTORE, BackStepper.pc(), register, value);
@@ -273,13 +274,13 @@ public class BackStepper {
      * is to restore the program counter.
      *
      * @param value
-     *     The "restore" second to be stored there.
-     * @return the argument second
+     *     The "restore" value to be stored there.
+     * @return the argument value
      */
     public int addPCRestore(final int value) {
-        // adjust for second reflecting incremented PC.
+        // adjust for value reflecting incremented PC.
         final var newValue = value - BasicInstruction.BASIC_INSTRUCTION_LENGTH;
-        // Use "second" insead of "pc()" for second arg because
+        // Use "value" insead of "pc()" for value arg because
         // RegisterFile.getProgramCounter()
         // returns branch target address at this point.
         this.backSteps.push(Action.PC_RESTORE, newValue, newValue);
@@ -288,12 +289,12 @@ public class BackStepper {
 
     /**
      * Add a new "back step" (the undo action) to the stack. The action here
-     * is to restore a control and status register second.
+     * is to restore a control and status register value.
      *
      * @param register
      *     The affected register number.
      * @param value
-     *     The "restore" second to be stored there.
+     *     The "restore" value to be stored there.
      */
     public void addControlAndStatusRestore(final int register, final long value) {
         this.backSteps.push(Action.CONTROL_AND_STATUS_REGISTER_RESTORE, BackStepper.pc(), register, value);
@@ -301,13 +302,13 @@ public class BackStepper {
 
     /**
      * Add a new "back step" (the undo action) to the stack. The action here
-     * is to restore a control and status register second. This does not obey
+     * is to restore a control and status register value. This does not obey
      * read only restrictions and does not notify observers.
      *
      * @param register
      *     The affected register number.
      * @param value
-     *     The "restore" second to be stored there.
+     *     The "restore" value to be stored there.
      */
     public void addControlAndStatusBackdoor(final int register, final long value) {
         this.backSteps.push(Action.CONTROL_AND_STATUS_REGISTER_BACKDOOR, BackStepper.pc(), register, value);
@@ -315,12 +316,12 @@ public class BackStepper {
 
     /**
      * Add a new "back step" (the undo action) to the stack. The action here
-     * is to restore a floating point register second.
+     * is to restore a floating point register value.
      *
      * @param register
      *     The affected register number.
      * @param value
-     *     The "restore" second to be stored there.
+     *     The "restore" value to be stored there.
      */
     public void addFloatingPointRestore(final int register, final long value) {
         this.backSteps.push(Action.FLOATING_POINT_REGISTER_RESTORE, BackStepper.pc(), register, value);
@@ -359,10 +360,10 @@ public class BackStepper {
     // Represents a "back step" (undo action) on the stack.
     private static class BackStep {
         private Action action; // what do do MEMORY_RESTORE_WORD, etc
-        private int pc; // program counter second when original step occurred
+        private int pc; // program counter value when original step occurred
         private ProgramStatement ps; // statement whose action is being "undone" here
         private int param1; // first parameter required by that action
-        private long param2; // optional second parameter required by that action
+        private long param2; // optional value parameter required by that action
 
         // it is critical that BackStep object get its values by calling this method
         // rather than assigning to individual members, because of the technique used

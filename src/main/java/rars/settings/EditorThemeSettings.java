@@ -22,6 +22,7 @@ public final class EditorThemeSettings extends SettingsBase {
     private static final String THEME_PREFIX = "Theme";
 
     // region Preferences keys
+   
     private static final String BACKGROUND = "Background";
     private static final String FOREGROUND = "Foreground";
     private static final String LINE_HIGHLIGHT = "LineHighlight";
@@ -34,6 +35,7 @@ public final class EditorThemeSettings extends SettingsBase {
     public static @NotNull EditorThemeSettings EDITOR_THEME_SETTINGS = new EditorThemeSettings(SETTINGS_PREFERENCES);
 
     // endregion Preferences keys
+
     private final @NotNull Preferences preferences;
     /**
      * The current theme in memory. You can make changes to this theme and then
@@ -107,6 +109,7 @@ public final class EditorThemeSettings extends SettingsBase {
     }
 
     // region Preference writing methods
+    
     private void writeThemeToPreferences(final @NotNull SettingsTheme settingsTheme) {
         this.preferences.put(THEME_PREFIX + BACKGROUND, getColorAsHexString(settingsTheme.backgroundColor));
         this.preferences.put(THEME_PREFIX + FOREGROUND, getColorAsHexString(settingsTheme.foregroundColor));

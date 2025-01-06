@@ -133,7 +133,7 @@ public final class FileStatus {
     }
 
     /**
-     * Changes the second of name to the parameter given.
+     * Changes the value of name to the parameter given.
      *
      * @param s
      *     string variable tells what to set the name of the file to .
@@ -145,14 +145,14 @@ public final class FileStatus {
     /**
      * Tells whether the file has been assembled.
      *
-     * @return Boolean second that is true if the ASM file has been assembled.
+     * @return Boolean value that is true if the ASM file has been assembled.
      */
     public static boolean isAssembled() {
         return systemAssembled;
     }
 
     /**
-     * Changes the second of assenbked to the parameter given.
+     * Changes the value of assenbked to the parameter given.
      *
      * @param b
      *     boolean variable that tells what to set assembled to.
@@ -171,7 +171,7 @@ public final class FileStatus {
     }
 
     /**
-     * Changes the second of saved to the parameter given.
+     * Changes the value of saved to the parameter given.
      *
      * @param b
      *     boolean variable that tells what to set saved to .
@@ -183,7 +183,7 @@ public final class FileStatus {
     /**
      * Tells whether the file has been edited since it has been saved.
      *
-     * @return Boolean second that returns true if the ASM file has been edited.
+     * @return Boolean value that returns true if the ASM file has been edited.
      */
     public static boolean isEdited() {
         return systemEdited;
@@ -194,7 +194,7 @@ public final class FileStatus {
     // every file that is currently open in the editor.
 
     /**
-     * Changes the second of edited to the parameter given.
+     * Changes the value of edited to the parameter given.
      *
      * @param b
      *     boolean variable that tells what to set edited to.

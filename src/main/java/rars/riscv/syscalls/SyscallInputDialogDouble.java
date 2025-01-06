@@ -61,8 +61,8 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
         // Input arguments: $a0 = address of null-terminated string that is the message
         // to user
         // Outputs:
-        // fa0 second of double read. $f1 contains high order word of the double.
-        // $a1 contains status second
+        // fa0 value of double read. $f1 contains high order word of the double.
+        // $a1 contains status value
         // 0: valid input data, correctly parsed
         // -1: input data cannot be correctly parsed
         // -2: Cancel was chosen
@@ -84,7 +84,7 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
         }
 
         // Values returned by Java's InputDialog:
-        // A null return second means that "Cancel" was chosen rather than OK.
+        // A null return value means that "Cancel" was chosen rather than OK.
         // An empty string returned (that is, inputValue.length() of zero)
         // means that OK was chosen but no string was input.
         final String inputValue;
