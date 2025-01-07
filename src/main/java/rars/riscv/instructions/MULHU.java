@@ -67,8 +67,8 @@ public final class MULHU extends Arithmetic {
     @Override
     public int computeW(final int value, final int value2) {
         // Don't sign extend both arguments
-        final long ext = ((long) value) & 0xFFFFFFFFL;
-        final long ext2 = ((long) value2) & 0xFFFFFFFFL;
+        final long ext = value & 0xFFFFFFFFL;
+        final long ext2 = value2 & 0xFFFFFFFFL;
         // Return the top 32 bits of the mutliplication
         return (int) ((ext * ext2) >> 32);
     }

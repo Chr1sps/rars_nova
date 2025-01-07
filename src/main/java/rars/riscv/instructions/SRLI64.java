@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -47,8 +47,8 @@ public final class SRLI64 extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         // Uses >>> because 0 fill
-        final var value = RegisterFile.INSTANCE.getLongValue(statement.getOperand(1));
+        final var value = Globals.REGISTER_FILE.getLongValue(statement.getOperand(1));
         final var shifted = value >>> statement.getOperand(2);
-        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), shifted);
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), shifted);
     }
 }

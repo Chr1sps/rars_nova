@@ -9,7 +9,6 @@ import rars.assembler.TokenType;
 import rars.riscv.*;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
 import rars.venus.NumberDisplayBaseChooser;
@@ -17,7 +16,7 @@ import rars.venus.NumberDisplayBaseChooser;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 
 /*
@@ -135,59 +134,56 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         this.originalTokenList = this.strippedTokenList = null;
         this.sourceLine = null;
         this.machineStatement = this.basicAssemblyStatement = null;
-        final var instr = InstructionsRegistry.findBasicInstructionByBinaryCode(binaryStatement);
         this.operands = new ArrayList<>(5);
-        if (instr == null) {
-            this.instruction = null;
-        } else {
-            this.instruction = instr;
-            final var opCodeMask = instr.getOperationMask();
-            final var format = instr.getInstructionFormat();
-            switch (format) {
-                case J_FORMAT -> {
-                    this.operands.add(readBinaryCode(
-                        opCodeMask,
-                        Instruction.operandMask[0],
-                        binaryStatement
-                    ));
-                    this.operands.add(fromJumpImmediate(readBinaryCode(
-                        opCodeMask,
-                        Instruction.operandMask[1],
-                        binaryStatement
-                    )));
-                }
-                case B_FORMAT -> {
-                    this.operands.add(readBinaryCode(
-                        opCodeMask,
-                        Instruction.operandMask[0],
-                        binaryStatement
-                    ));
-                    this.operands.add(readBinaryCode(
-                        opCodeMask,
-                        Instruction.operandMask[1],
-                        binaryStatement
-                    ));
-                    this.operands.add(fromBranchImmediate(readBinaryCode(
-                        opCodeMask,
-                        Instruction.operandMask[2],
-                        binaryStatement
-                    )));
-                }
-                default -> {
-                    for (final var mask : Instruction.operandMask) {
-                        if (opCodeMask.indexOf(mask) != -1) {
-                            this.operands.add(readBinaryCode(
-                                opCodeMask,
-                                mask,
-                                binaryStatement
-                            ));
-                        }
+        final var foundInstruction = InstructionsRegistry.findBasicInstructionByBinaryCode(binaryStatement);
+        assert foundInstruction != null : "ERROR: basic instruction not found for this opcode.";
+        this.instruction = foundInstruction;
+        final var opCodeMask = foundInstruction.getOperationMask();
+        final var format = foundInstruction.getInstructionFormat();
+        switch (format) {
+            case J_FORMAT -> {
+                this.operands.add(readBinaryCode(
+                    opCodeMask,
+                    Instruction.operandMask[0],
+                    binaryStatement
+                ));
+                this.operands.add(fromJumpImmediate(readBinaryCode(
+                    opCodeMask,
+                    Instruction.operandMask[1],
+                    binaryStatement
+                )));
+            }
+            case B_FORMAT -> {
+                this.operands.add(readBinaryCode(
+                    opCodeMask,
+                    Instruction.operandMask[0],
+                    binaryStatement
+                ));
+                this.operands.add(readBinaryCode(
+                    opCodeMask,
+                    Instruction.operandMask[1],
+                    binaryStatement
+                ));
+                this.operands.add(fromBranchImmediate(readBinaryCode(
+                    opCodeMask,
+                    Instruction.operandMask[2],
+                    binaryStatement
+                )));
+            }
+            default -> {
+                for (final var mask : Instruction.operandMask) {
+                    if (opCodeMask.indexOf(mask) != -1) {
+                        this.operands.add(readBinaryCode(
+                            opCodeMask,
+                            mask,
+                            binaryStatement
+                        ));
                     }
                 }
             }
         }
         this.basicStatementList = buildBasicStatementListFromBinaryCode(
-            instr,
+            foundInstruction,
             this.operands
         );
     }
@@ -268,53 +264,58 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * intended to be used when source code is available. DPS 11-July-2013
      */
     private static @NotNull BasicStatementList buildBasicStatementListFromBinaryCode(
-        final BasicInstruction instr,
+        final @NotNull BasicInstruction instr,
         final @NotNull ArrayList<@NotNull Integer> operands
     ) {
-        final BasicStatementList statementList = new BasicStatementList();
-        int tokenListCounter = 1; // index 0 is operator; operands start at index 1
-        if (instr == null) {
-            statementList.addString(invalidOperator);
-            return statementList;
-        } else {
-            statementList.addString(instr.mnemonic + " ");
-        }
+        final var result = new BasicStatementList();
+        result.addString(instr.mnemonic + " ");
         final var tokenList = InstructionsRegistry.getTokenList(instr);
+        // index 0 is operator; operands start at index 1
+        int tokenListCounter = 1;
         for (final var operand : operands) {
             // add separator if not at end of token list AND neither current nor
             // next token is a parenthesis
             if (tokenListCounter > 1 && tokenListCounter < tokenList.size()) {
                 final TokenType thisTokenType = tokenList.get(tokenListCounter).getType();
                 if (thisTokenType != TokenType.LEFT_PAREN && thisTokenType != TokenType.RIGHT_PAREN) {
-                    statementList.addString(",");
+                    result.addString(",");
                 }
             }
             boolean notOperand = true;
             while (notOperand && tokenListCounter < tokenList.size()) {
                 final var tokenType = tokenList.get(tokenListCounter).getType();
                 switch (tokenType) {
-                    case LEFT_PAREN -> statementList.addString("(");
-                    case RIGHT_PAREN -> statementList.addString(")");
+                    case LEFT_PAREN -> result.addString("(");
+                    case RIGHT_PAREN -> result.addString(")");
                     case REGISTER_NAME, REGISTER_NUMBER, FP_REGISTER_NAME -> {
                         final var marker = (tokenType == TokenType.FP_REGISTER_NAME) ? "f" : "x";
-                        statementList.addString(marker + operand);
+                        result.addString(marker + operand);
                         notOperand = false;
                     }
                     case INTEGER_12 -> {
-                        statementList.addValue((operand << 20) >> 20);
+                        result.addValue((operand << 20) >> 20);
                         notOperand = false;
                     }
                     case ROUNDING_MODE -> {
-                        final var modes = new String[]{"rne", "rtz", "rdn", "rup", "rmm", "invalid", "invalid", "dyn"};
                         String value = "invalid";
                         if (operand >= 0 && operand < 8) {
+                            final var modes = new String[]{
+                                "rne",
+                                "rtz",
+                                "rdn",
+                                "rup",
+                                "rmm",
+                                "invalid",
+                                "invalid",
+                                "dyn"
+                            };
                             value = modes[operand];
                         }
-                        statementList.addString(value);
+                        result.addString(value);
                         notOperand = false;
                     }
                     default -> {
-                        statementList.addValue(operand);
+                        result.addValue(operand);
                         notOperand = false;
                     }
                 }
@@ -324,12 +325,12 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         while (tokenListCounter < tokenList.size()) {
             final TokenType tokenType = tokenList.get(tokenListCounter).getType();
             switch (tokenType) {
-                case LEFT_PAREN -> statementList.addString("(");
-                case RIGHT_PAREN -> statementList.addString(")");
+                case LEFT_PAREN -> result.addString("(");
+                case RIGHT_PAREN -> result.addString(")");
             }
             tokenListCounter++;
         }
-        return statementList;
+        return result;
     } // buildBasicStatementListFromBinaryCode()
 
     // endregion Statics
@@ -353,8 +354,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     public void buildBasicStatementFromBasicInstruction(final ErrorList errors) {
         final var firstToken = Objects.requireNonNull(this.strippedTokenList).get(0);
         final var firstElement = firstToken.getText() + " ";
-        final var basicInstructionBuilder = new StringBuilder(firstElement);
         this.basicStatementList.addString(firstElement); // the operator
+        final var basicInstructionBuilder = new StringBuilder(firstElement);
         for (int i = 1; i < this.strippedTokenList.size(); i++) {
             final var token = this.strippedTokenList.get(i);
             final var tokenType = token.getType();
@@ -367,7 +368,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     basicInstructionBuilder.append(basicStatementElement);
                     this.basicStatementList.addString(basicStatementElement);
                     try {
-                        registerNumber = RegisterFile.INSTANCE.getRegisterByName(tokenValue).number;
+                        registerNumber = Globals.REGISTER_FILE.getRegisterByName(tokenValue).number;
                     } catch (final Exception e) {
                         // should never happen; should be caught before now...
                         errors.addTokenError(
@@ -379,7 +380,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     this.operands.add(registerNumber);
                 }
                 case REGISTER_NAME -> {
-                    registerNumber = RegisterFile.INSTANCE.getRegisterByName(tokenValue).number;
+                    registerNumber = Globals.REGISTER_FILE.getRegisterByName(tokenValue).number;
                     basicStatementElement = "x" + registerNumber;
                     basicInstructionBuilder.append(basicStatementElement);
                     this.basicStatementList.addString(basicStatementElement);

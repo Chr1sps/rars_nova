@@ -5,7 +5,6 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -51,7 +50,7 @@ public final class SyscallExit2 extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
-        Globals.exitCode = RegisterFile.INSTANCE.getIntValue("a0");
+        Globals.exitCode = Globals.REGISTER_FILE.getIntValue("a0");
         throw new ExitingException(); // empty error list
     }
 }

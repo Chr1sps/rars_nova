@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -54,7 +54,7 @@ public final class CSRRC extends BasicInstruction {
             if (statement.getOperand(2) != 0) {
                 if (ControlAndStatusRegisterFile.clearRegister(
                     statement.getOperand(1),
-                    RegisterFile.INSTANCE.getLongValue(statement.getOperand(2))
+                    Globals.REGISTER_FILE.getLongValue(statement.getOperand(2))
                 )) {
                     throw new SimulationException(
                         statement, "Attempt to write to read-only CSR",
@@ -62,7 +62,7 @@ public final class CSRRC extends BasicInstruction {
                     );
                 }
             }
-            RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), csr);
+            Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), csr);
         } catch (final NullPointerException e) {
             throw new SimulationException(
                 statement, "Attempt to access unavailable CSR",

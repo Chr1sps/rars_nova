@@ -183,8 +183,8 @@ public final class TokenList implements Cloneable, Collection<Token> {
      *     Position in token list. Subsequent Tokens are shifted one position
      *     left.
      * @throws java.lang.IndexOutOfBoundsException
-     *     if <code>pos</code> is &lt; 0 or &ge;
-     *     <code>size()</code>
+     *     if {@code pos} is &lt; 0 or &ge;
+     *     {@code size()}
      */
     public void remove(final int pos) {
         this.tokenList.remove(pos);
@@ -193,7 +193,7 @@ public final class TokenList implements Cloneable, Collection<Token> {
     /**
      * Returns empty/non-empty status of list.
      *
-     * @return <code>true</code> if list has no tokens, else <code>false</code>.
+     * @return {@code true} if list has no tokens, else <code>false</code>.
      */
     @Override
     public boolean isEmpty() {

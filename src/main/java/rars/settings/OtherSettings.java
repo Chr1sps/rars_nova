@@ -13,6 +13,7 @@ public final class OtherSettings extends SettingsBase {
     private static final @NotNull Logger LOGGER = LogManager.getLogger(OtherSettings.class);
 
     // region Preferences keys
+
     private static final String OTHER_PREFIX = "Other";
 
     private static final String EXCEPTION_HANDLER = "Exception_handler";
@@ -20,7 +21,7 @@ public final class OtherSettings extends SettingsBase {
     private static final String MEMORY_CONFIGURATION = "Memory_configuration";
     private static final String CARET_BLINK_RATE = "Caret_blink_rate";
     private static final String EDITOR_TAB_SIZE = "Editor_tab_size";
-    public static @NotNull OtherSettings OTHER_SETTINGS = new OtherSettings(SETTINGS_PREFERENCES);
+
     // endregion Preferences keys
 
     private final @NotNull Preferences preferences;
@@ -127,6 +128,7 @@ public final class OtherSettings extends SettingsBase {
     }
 
     // region Preference loading methods
+
     private void loadSettingsFromPreferences() {
         this.labelSortState = preferences.getInt(OTHER_PREFIX + SORT_STATE, 0);
         this.memoryConfiguration = loadMemoryConfiguration();
@@ -143,5 +145,6 @@ public final class OtherSettings extends SettingsBase {
         // noinspection DataFlowIssue
         return MemoryConfiguration.fromIdString(memoryConfigurationName);
     }
+
     // endregion Preference loading methods
 }

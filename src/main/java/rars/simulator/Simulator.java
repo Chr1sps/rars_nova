@@ -9,7 +9,6 @@ import rars.notices.SimulatorNotice;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
-import rars.riscv.hardware.RegisterFile;
 import rars.settings.OtherSettings;
 import rars.util.BinaryUtils;
 import rars.util.ListenerDispatcher;
@@ -307,7 +306,7 @@ public final class Simulator {
             if (exceptionHandler != null) {
                 ControlAndStatusRegisterFile.orRegister("ustatus", 0x10); // Set UPIE
                 ControlAndStatusRegisterFile.clearRegister("ustatus", 0x1); // Clear UIE
-                RegisterFile.INSTANCE.setProgramCounter(base);
+                Globals.REGISTER_FILE.setProgramCounter(base);
                 return true;
             } else {
                 // If we don't have an error handler or exceptions are disabled terminate the
@@ -353,7 +352,7 @@ public final class Simulator {
             if (exceptionHandler != null) {
                 ControlAndStatusRegisterFile.orRegister("ustatus", 0x10); // Set UPIE
                 ControlAndStatusRegisterFile.clearRegister("ustatus", ControlAndStatusRegisterFile.INTERRUPT_ENABLE);
-                RegisterFile.INSTANCE.setProgramCounter(base);
+                Globals.REGISTER_FILE.setProgramCounter(base);
                 return true;
             } else {
                 // If we don't have an error handler or exceptions are disabled terminate the
@@ -420,7 +419,7 @@ public final class Simulator {
             // This is noticeable in stepped mode.
             // *********************************************************************
 
-            RegisterFile.INSTANCE.initializeProgramCounter(this.pc);
+            Globals.REGISTER_FILE.initializeProgramCounter(this.pc);
             int steps = 0;
 
             // Volatile variable initialized false but can be set true by the main thread.
@@ -444,7 +443,7 @@ public final class Simulator {
                             & ControlAndStatusRegisterFile.INTERRUPT_ENABLE
                     ) != 0;
                     // make sure no interrupts sneak in while we are processing them
-                    this.pc = RegisterFile.INSTANCE.getProgramCounter();
+                    this.pc = Globals.REGISTER_FILE.getProgramCounter();
                     synchronized (InterruptController.lock) {
                         boolean pendingExternal = InterruptController.externalPending();
                         boolean pendingTimer = InterruptController.timerPending();
@@ -509,9 +508,9 @@ public final class Simulator {
                         }
                     }
 
-                    this.pc = RegisterFile.INSTANCE.getProgramCounter();
+                    this.pc = Globals.REGISTER_FILE.getProgramCounter();
                     // Get instuction
-                    ProgramStatement statement;
+                    final ProgramStatement statement;
                     try {
                         statement = Globals.MEMORY_INSTANCE.getStatement(this.pc);
                     } catch (final AddressErrorException e) {
@@ -552,7 +551,7 @@ public final class Simulator {
                                 ExceptionReason.ILLEGAL_INSTRUCTION
                             );
                         }
-                        RegisterFile.INSTANCE.incrementPC(instruction.getInstructionLength());
+                        Globals.REGISTER_FILE.incrementPC(instruction.getInstructionLength());
                         // THIS IS WHERE THE INSTRUCTION EXECUTION IS ACTUALLY SIMULATED!
                         instruction.simulate(statement);
 
@@ -604,7 +603,7 @@ public final class Simulator {
 
                 // Return if we've reached a breakpoint.
                 if (ebreak || (this.breakPoints != null) &&
-                    (Arrays.binarySearch(this.breakPoints, RegisterFile.INSTANCE.getProgramCounter()) >= 0)) {
+                    (Arrays.binarySearch(this.breakPoints, Globals.REGISTER_FILE.getProgramCounter()) >= 0)) {
                     this.stopExecution(false, Reason.BREAKPOINT);
                     return;
                 }

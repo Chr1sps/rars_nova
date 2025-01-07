@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -59,7 +59,7 @@ public final class CSRRSI extends BasicInstruction {
                     );
                 }
             }
-            RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), csr);
+            Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), csr);
         } catch (final NullPointerException e) {
             throw new SimulationException(
                 statement, "Attempt to access unavailable CSR",

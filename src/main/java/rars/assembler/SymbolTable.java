@@ -52,10 +52,12 @@ public final class SymbolTable {
     // Note -1 is legal 32-bit address (0xFFFFFFFF) but it is the high address in
     // kernel address space so highly unlikely that any symbol will have this as
     // its associated address!
+
     public static final int NOT_FOUND = -1;
     private static final @NotNull Logger LOGGER = LogManager.getLogger(SymbolTable.class);
     private static final @NotNull String START_LABEL = "main";
     private final @Nullable File file;
+    private final @Nullable SymbolTable globalSymbolTable;
     private @NotNull ArrayList<@NotNull Symbol> table;
 
     /**
@@ -66,13 +68,19 @@ public final class SymbolTable {
      *     used only for output/display so it can be any descriptive
      *     string.
      */
-    public SymbolTable(final @Nullable File file) {
+    public SymbolTable(final @Nullable File file, final @NotNull SymbolTable globalSymbolTable) {
         this.file = file;
         this.table = new ArrayList<>();
+        this.globalSymbolTable = globalSymbolTable;
     }
 
-    public static @NotNull SymbolTable createGlobalSymbolTable() {
-        return new SymbolTable(null);
+    /**
+     * Special constructor only for the global symbol table.
+     */
+    public SymbolTable() {
+        this.file = null;
+        this.table = new ArrayList<>();
+        this.globalSymbolTable = null;
     }
 
     /**
@@ -169,9 +177,13 @@ public final class SymbolTable {
      */
     public int getAddressLocalOrGlobal(final @NotNull String label) {
         final int address = this.getAddress(label);
-        return (address == SymbolTable.NOT_FOUND)
-            ? Globals.symbolTable.getAddress(label)
-            : address;
+        if (address != SymbolTable.NOT_FOUND) {
+            return address;
+        } else if (this.globalSymbolTable != null) {
+            return this.globalSymbolTable.getAddress(label);
+        } else {
+            return SymbolTable.NOT_FOUND;
+        }
     }
 
     /**
@@ -197,7 +209,7 @@ public final class SymbolTable {
      * @return Symbol object having requested address, null if address not found in
      * symbol table.
      */
-    public @Nullable Symbol getSymbolGivenAddress(final @NotNull String addressString) {
+    private @Nullable Symbol getSymbolGivenAddress(final @NotNull String addressString) {
         final int address;
         try {
             address = BinaryUtils.stringToInt(addressString);// DPS 2-Aug-2010: was Integer.parseInt(s) but
@@ -218,14 +230,22 @@ public final class SymbolTable {
      * Produce Symbol object from either local or global symbol table that has the
      * given address.
      *
-     * @param s
+     * @param addressString
      *     String representing address
      * @return Symbol object having requested address, null if address not found in
      * symbol table.
      */
-    public @Nullable Symbol getSymbolGivenAddressLocalOrGlobal(final @NotNull String s) {
-        final Symbol sym = this.getSymbolGivenAddress(s);
-        return (sym == null) ? Globals.symbolTable.getSymbolGivenAddress(s) : sym;
+    public @Nullable Symbol getSymbolGivenAddressLocalOrGlobal(
+        final @NotNull String addressString
+    ) {
+        final var foundSymbol = this.getSymbolGivenAddress(addressString);
+        if (foundSymbol != null) {
+            return foundSymbol;
+        } else if (this.globalSymbolTable != null) {
+            return this.globalSymbolTable.getSymbolGivenAddress(addressString);
+        } else {
+            return null;
+        }
     }
 
     /**

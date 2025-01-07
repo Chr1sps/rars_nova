@@ -8,7 +8,6 @@ import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -54,7 +53,7 @@ public final class FLW extends BasicInstruction {
         try {
             FloatingPointRegisterFile.updateRegisterInt(
                 statement.getOperand(0),
-                Globals.MEMORY_INSTANCE.getWord(RegisterFile.INSTANCE.getIntValue(statement.getOperand(2)) + upperImmediate)
+                Globals.MEMORY_INSTANCE.getWord(Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate)
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

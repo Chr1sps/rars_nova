@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.Utils;
 
 /*
@@ -49,6 +49,7 @@ public final class JAL extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         Utils.processReturnAddress(statement.getOperand(0));
-        Utils.processJump(RegisterFile.INSTANCE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand( 1));
+        Utils.processJump(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(
+            1));
     }
 }

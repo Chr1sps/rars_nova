@@ -25,7 +25,7 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
@@ -323,13 +323,15 @@ public final class Main {
                 // It isn't clear to me what the best behaviour is
                 // floating point register
                 final int ivalue = RegisterUtils.getRegisterValue(registerName);
-                final float fvalue = Float.intBitsToFloat(ivalue);
                 if (!this.programOptions.brief) {
                     this.out.print(registerName + "\t");
                 }
                 switch (this.programOptions.displayFormat) {
                     case HEX -> this.out.println(BinaryUtils.intToHexString(ivalue));
-                    case DECIMAL -> this.out.println(fvalue);
+                    case DECIMAL -> {
+                        final float fvalue = Float.intBitsToFloat(ivalue);
+                        this.out.println(fvalue);
+                    }
                     default -> this.out.println(BinaryUtils.intToAscii(ivalue));
                 }
             } else if (ControlAndStatusRegisterFile.getRegister(registerName) != null) {
@@ -338,7 +340,7 @@ public final class Main {
                     .getValue()));
             } else if (this.programOptions.brief) {
                 this.out.print(registerName + "\t");
-                this.out.println(this.formatIntForDisplay((int) RegisterFile.INSTANCE.getRegisterByName(registerName)
+                this.out.println(this.formatIntForDisplay((int) Globals.REGISTER_FILE.getRegisterByName(registerName)
                     .getValue()));
             }
         }

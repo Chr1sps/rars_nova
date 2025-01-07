@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
 
@@ -61,6 +61,6 @@ public final class SyscallConfirmDialog extends AbstractSyscall {
         if (result == JOptionPane.CLOSED_OPTION) {
             result = JOptionPane.CANCEL_OPTION;
         }
-        RegisterFile.INSTANCE.updateRegisterByName("a0", result);
+        Globals.REGISTER_FILE.updateRegisterByName("a0", result);
     }
 }

@@ -56,7 +56,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * <br>
  * Example: <br>
  * The RISCV statement
- * <code>here:  lw  t3, 8(t4)   #load third member of array</code><br>
+ * {@code here:  lw  t3, 8(t4)   #load third member of array}<br>
  * generates the following token list<br>
  * IDENTIFIER, COLON, OPERATOR, REGISTER_NAME, COMMA, INTEGER_5, LEFT_PAREN,
  * REGISTER_NAME, RIGHT_PAREN, COMMENT<br>
@@ -137,10 +137,10 @@ public final class Tokenizer {
     public static @NotNull List<TokenList> tokenize(final @NotNull RISCVProgram program) throws AssemblyException {
 
         final var tokenizer = new Tokenizer(program);
-        final var tokenList = new ArrayList<TokenList>();
         final var source = tokenizer.processIncludes(program, new HashMap<>()); // DPS 9-Jan-2013
         program.setSourceLineList(source);
 
+        final var tokenList = new ArrayList<TokenList>();
         for (int i = 0; i < source.size(); i++) {
             final var sourceLine = source.get(i).source();
             final var currentLineTokens = tokenizer.tokenizeLineImpl(tokenizer.program, i + 1, sourceLine, true);
@@ -243,19 +243,18 @@ public final class Tokenizer {
             return result;
         }
         // will be faster to work with char arrays instead of strings
-        char c;
         final char[] line = theLine.toCharArray();
-        int linePos = 0;
         final char[] token = new char[line.length];
-        int tokenPos = 0;
-        int tokenStartPos = 1;
-        boolean insideQuotedString = false;
         if (Globals.debug) {
             Tokenizer.LOGGER.debug("source line --->{}<---", theLine);
         }
         // Each iteration of this loop processes one character in the source line.
+        boolean insideQuotedString = false;
+        int tokenStartPos = 1;
+        int tokenPos = 0;
+        int linePos = 0;
         while (linePos < line.length) {
-            c = line[linePos];
+            char c = line[linePos];
             if (insideQuotedString) { // everything goes into token
                 token[tokenPos++] = c;
                 if (c == '"' && token[tokenPos - 2] != '\\') { // If quote not preceded by backslash, this is end

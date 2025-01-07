@@ -7,7 +7,6 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
 
@@ -63,9 +62,10 @@ public final class SyscallMessageDialogDouble extends AbstractSyscall {
         // TODO: maybe refactor this, other null strings are handled in a central place
         // now
         String message = ""; // = "";
-        int byteAddress = RegisterFile.INSTANCE.getIntValue("a0");
-        final char[] ch = {' '}; // Need an array to convert to String
+        int byteAddress = Globals.REGISTER_FILE.getIntValue("a0");
         try {
+            // Need an array to convert to String
+            final char[] ch = {' '};
             ch[0] = (char) Globals.MEMORY_INSTANCE.getByte(byteAddress);
             while (ch[0] != 0) // only uses single location ch[0]
             {

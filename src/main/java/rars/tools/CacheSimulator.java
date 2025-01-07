@@ -539,14 +539,13 @@ public class CacheSimulator extends AbstractTool {
 
     // create and return a new cache object based on current specs
     private AbstractCache createNewCache() {
-        final AbstractCache theNewCache;
         int setSize = 1;
         try {
             setSize = Integer.parseInt((String) this.cacheSetSizeSelector.getSelectedItem());
         } catch (final
         NumberFormatException nfe) { // if this happens its my fault!
         }
-        theNewCache = new AnyCache(
+        final AbstractCache theNewCache = new AnyCache(
             this.cacheBlockCountChoicesInt[this.cacheBlockCountSelector.getSelectedIndex()],
             this.cacheBlockSizeChoicesInt[this.cacheBlockSizeSelector.getSelectedIndex()],
             setSize
@@ -769,7 +768,6 @@ public class CacheSimulator extends AbstractTool {
         @Override
         public CacheAccessResult isItAHitThenReadOnMiss(final int address) {
             final int SET_FULL = 0;
-            int result = SET_FULL;
             final int firstBlock = this.getFirstBlockToSearch(address);
             final int lastBlock = this.getLastBlockToSearch(address);
             if (CacheSimulator.debug) // System.out.print
@@ -783,6 +781,7 @@ public class CacheSimulator extends AbstractTool {
             int blockNumber;
             // Will do a sequential instead of associative search!
             final int HIT = 1;
+            int result = SET_FULL;
             for (blockNumber = firstBlock; blockNumber <= lastBlock; blockNumber++) {
                 block = this.blocks[blockNumber];
                 if (CacheSimulator.debug) // System.out.print

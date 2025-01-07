@@ -8,23 +8,26 @@ import rars.settings.BoolSetting;
 import rars.settings.OtherSettings;
 import rars.util.ConversionUtils;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 public final class RegisterFile extends RegisterFileBase {
-    public static final @NotNull RegisterFile INSTANCE = new RegisterFile(Globals.symbolTable);
     public static final int GLOBAL_POINTER_REGISTER_INDEX = 3;
     public static final int STACK_POINTER_REGISTER_INDEX = 2;
-    public final @NotNull Register zero, sp, gp, pc, a0, a1;
+    public final @NotNull Register zero, sp, gp, pc, a0, a1, a2;
     private final @NotNull SymbolTable globalSymbolTable;
 
-    public RegisterFile(final @NotNull SymbolTable globalSymbolTable) {
-        super('x', createRegisters());
+    public RegisterFile(
+        final @NotNull SymbolTable globalSymbolTable,
+        final @NotNull MemoryConfiguration initialMemoryConfiguration
+    ) {
+        super('x', createRegisters(initialMemoryConfiguration));
         this.globalSymbolTable = globalSymbolTable;
         this.zero = this.registers[0];
         this.sp = this.registers[STACK_POINTER_REGISTER_INDEX];
         this.gp = this.registers[GLOBAL_POINTER_REGISTER_INDEX];
         this.a0 = this.registers[10];
         this.a1 = this.registers[11];
+        this.a2 = this.registers[12];
         this.pc = new Register(
             "pc",
             -1,
@@ -32,16 +35,16 @@ public final class RegisterFile extends RegisterFileBase {
         );
     }
 
-    private static @NotNull Register @NotNull [] createRegisters() {
+    private static @NotNull Register @NotNull [] createRegisters(final @NotNull MemoryConfiguration initialMemoryConfiguration) {
         final var sp = new Register(
             "sp",
             STACK_POINTER_REGISTER_INDEX,
-            Globals.MEMORY_INSTANCE.getMemoryConfiguration().stackPointerAddress
+            initialMemoryConfiguration.stackPointerAddress
         );
         final var gp = new Register(
             "gp",
             GLOBAL_POINTER_REGISTER_INDEX,
-            Globals.MEMORY_INSTANCE.getMemoryConfiguration().globalPointerAddress
+            initialMemoryConfiguration.globalPointerAddress
         );
         final var a0 = new Register("a0", 10, 0);
         final var a1 = new Register("a1", 11, 0);

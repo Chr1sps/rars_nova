@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -48,6 +48,6 @@ public final class FMVXS extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement) {
 
         final long newValue = (int) FloatingPointRegisterFile.getValueLong(statement.getOperand(1));
-        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

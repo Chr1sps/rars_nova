@@ -585,7 +585,7 @@ public class FloatRepresentation extends AbstractTool {
     // String with decimal float second. variable length.
     // int with 32 bit representation of float second ("int bits").
     // String for display only, showing formula for expanding bits to decimal.
-    private class FlavorsOfFloat {
+    private final class FlavorsOfFloat {
         String hexString;
         String binaryString;
         String decimalString;

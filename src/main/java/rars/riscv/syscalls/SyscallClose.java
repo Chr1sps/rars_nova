@@ -1,9 +1,9 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -50,6 +50,6 @@ public final class SyscallClose extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        SystemIO.closeFile(RegisterFile.INSTANCE.getIntValue("a0"));
+        SystemIO.closeFile(Globals.REGISTER_FILE.getIntValue("a0"));
     }
 }

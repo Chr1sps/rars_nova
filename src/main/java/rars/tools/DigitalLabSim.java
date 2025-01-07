@@ -24,13 +24,7 @@ import java.awt.event.MouseListener;
  * didier.teifreto@univ-fcomte.fr
  */
 public class DigitalLabSim extends AbstractTool {
-    /**
-     * Constant <code>EXTERNAL_INTERRUPT_TIMER=0x00000100</code>
-     */
     public static final int EXTERNAL_INTERRUPT_TIMER = 0x00000100;
-    /**
-     * Constant <code>EXTERNAL_INTERRUPT_HEXA_KEYBOARD=0x00000200</code>
-     */
     public static final int EXTERNAL_INTERRUPT_HEXA_KEYBOARD = 0x00000200;
     private static final Logger LOGGER = LogManager.getLogger(DigitalLabSim.class);
     private static final String heading = "Digital Lab Sim";
@@ -289,57 +283,57 @@ public class DigitalLabSim extends AbstractTool {
             switch (segment) {
                 case 'a': // a segment
                     final int[] pxa1 = {12, 9, 12};
-                    final int[] pxa2 = {36, 39, 36};
                     final int[] pya = {5, 8, 11};
                     g.fillPolygon(pxa1, pya, 3);
+                    final int[] pxa2 = {36, 39, 36};
                     g.fillPolygon(pxa2, pya, 3);
                     g.fillRect(12, 5, 24, 6);
                     break;
                 case 'b': // b segment
                     final int[] pxb = {37, 40, 43};
                     final int[] pyb1 = {12, 9, 12};
-                    final int[] pyb2 = {36, 39, 36};
                     g.fillPolygon(pxb, pyb1, 3);
+                    final int[] pyb2 = {36, 39, 36};
                     g.fillPolygon(pxb, pyb2, 3);
                     g.fillRect(37, 12, 6, 24);
                     break;
                 case 'c': // c segment
                     final int[] pxc = {37, 40, 43};
                     final int[] pyc1 = {44, 41, 44};
-                    final int[] pyc2 = {68, 71, 68};
                     g.fillPolygon(pxc, pyc1, 3);
+                    final int[] pyc2 = {68, 71, 68};
                     g.fillPolygon(pxc, pyc2, 3);
                     g.fillRect(37, 44, 6, 24);
                     break;
                 case 'd': // d segment
                     final int[] pxd1 = {12, 9, 12};
-                    final int[] pxd2 = {36, 39, 36};
                     final int[] pyd = {69, 72, 75};
                     g.fillPolygon(pxd1, pyd, 3);
+                    final int[] pxd2 = {36, 39, 36};
                     g.fillPolygon(pxd2, pyd, 3);
                     g.fillRect(12, 69, 24, 6);
                     break;
                 case 'e': // e segment
                     final int[] pxe = {5, 8, 11};
                     final int[] pye1 = {44, 41, 44};
-                    final int[] pye2 = {68, 71, 68};
                     g.fillPolygon(pxe, pye1, 3);
+                    final int[] pye2 = {68, 71, 68};
                     g.fillPolygon(pxe, pye2, 3);
                     g.fillRect(5, 44, 6, 24);
                     break;
                 case 'f': // f segment
                     final int[] pxf = {5, 8, 11};
                     final int[] pyf1 = {12, 9, 12};
-                    final int[] pyf2 = {36, 39, 36};
                     g.fillPolygon(pxf, pyf1, 3);
+                    final int[] pyf2 = {36, 39, 36};
                     g.fillPolygon(pxf, pyf2, 3);
                     g.fillRect(5, 12, 6, 24);
                     break;
                 case 'g': // g segment
                     final int[] pxg1 = {12, 9, 12};
-                    final int[] pxg2 = {36, 39, 36};
                     final int[] pyg = {37, 40, 43};
                     g.fillPolygon(pxg1, pyg, 3);
+                    final int[] pxg2 = {36, 39, 36};
                     g.fillPolygon(pxg2, pyg, 3);
                     g.fillRect(12, 37, 24, 6);
                     break;
@@ -379,11 +373,10 @@ public class DigitalLabSim extends AbstractTool {
         public final SevenSegmentDisplay[] display;
 
         public SevenSegmentPanel() {
-            int i;
             final FlowLayout fl = new FlowLayout();
             this.setLayout(fl);
             this.display = new SevenSegmentDisplay[2];
-            for (i = 0; i < 2; i++) {
+            for (int i = 0; i < 2; i++) {
                 this.display[i] = new SevenSegmentDisplay((char) (0));
                 this.add(this.display[i]);
             }
@@ -395,8 +388,7 @@ public class DigitalLabSim extends AbstractTool {
         }
 
         public void resetSevenSegment() {
-            int i;
-            for (i = 0; i < 2; i++) {
+            for (int i = 0; i < 2; i++) {
                 this.modifyDisplay(i, (char) 0);
             }
         }
@@ -406,11 +398,10 @@ public class DigitalLabSim extends AbstractTool {
         public final JButton[] button;
 
         public HexaKeyboard() {
-            int i;
             final GridLayout layout = new GridLayout(4, 4);
             this.setLayout(layout);
             this.button = new JButton[16];
-            for (i = 0; i < 16; i++) {
+            for (int i = 0; i < 16; i++) {
                 this.button[i] = new JButton(Integer.toHexString(i));
                 this.button[i].setBackground(Color.WHITE);
                 this.button[i].setMargin(new Insets(10, 10, 10, 10));
@@ -420,9 +411,8 @@ public class DigitalLabSim extends AbstractTool {
         }
 
         public void resetHexaKeyboard() {
-            int i;
             DigitalLabSim.KeyBoardValueButtonClick = -1;
-            for (i = 0; i < 16; i++) {
+            for (int i = 0; i < 16; i++) {
                 this.button[i].setBackground(Color.WHITE);
             }
         }
@@ -452,11 +442,10 @@ public class DigitalLabSim extends AbstractTool {
 
             @Override
             public void mouseClicked(final MouseEvent arg0) {
-                int i;
                 if (DigitalLabSim.KeyBoardValueButtonClick != -1) {// Button already pressed -> now realease
                     DigitalLabSim.KeyBoardValueButtonClick = -1;
                     DigitalLabSim.this.updateMMIOControlAndData(DigitalLabSim.this.OUT_ADRESS_HEXA_KEYBOARD, 0);
-                    for (i = 0; i < 16; i++) {
+                    for (int i = 0; i < 16; i++) {
                         HexaKeyboard.this.button[i].setBackground(Color.WHITE);
                     }
                 } else { // new button pressed

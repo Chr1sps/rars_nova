@@ -124,9 +124,9 @@ public final class DataTypes {
      *     Directive that controls storage allocation for value.
      * @param value
      *     The value to be stored.
-     * @return Returns <code>true</code> if value can be stored in the number of bytes
+     * @return Returns {@code true} if value can be stored in the number of bytes
      * allowed
-     * by the given directive (.word, .half, .byte), <code>false</code>
+     * by the given directive (.word, .half, .byte), {@code false}
      * otherwise.
      */
     public static boolean outOfRange(final Directive direct, final int value) {
@@ -150,8 +150,8 @@ public final class DataTypes {
      *     Directive that controls storage allocation for value.
      * @param value
      *     The value to be stored.
-     * @return Returns <code>true</code> if value is within range of
-     * the given directive (.float, .double), <code>false</code> otherwise.
+     * @return Returns {@code true} if value is within range of
+     * the given directive (.float, .double), {@code false} otherwise.
      */
     public static boolean outOfRange(final Directive direct, final double value) {
         return direct == Directive.FLOAT && (value < LOW_FLOAT_VALUE || value > MAX_FLOAT_VALUE);

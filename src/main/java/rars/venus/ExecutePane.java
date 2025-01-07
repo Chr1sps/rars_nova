@@ -9,7 +9,7 @@ import rars.venus.registers.RegistersWindow;
 import javax.swing.*;
 import java.awt.*;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 
 /*
@@ -130,15 +130,15 @@ public final class ExecutePane extends JDesktopPane {
         final int fullWidth = this.getSize().width - this.getInsets().left - this.getInsets().right;
         final int fullHeight = this.getSize().height - this.getInsets().top - this.getInsets().bottom;
         final int halfHeight = fullHeight / 2;
-        final Dimension textDim = new Dimension((int) (fullWidth * .75), halfHeight);
+        final Dimension textDim = new Dimension((int) (fullWidth * 0.75), halfHeight);
         final Dimension dataDim = new Dimension(fullWidth, halfHeight);
-        final Dimension lablDim = new Dimension((int) (fullWidth * .25), halfHeight);
+        final Dimension labelDimension = new Dimension((int) (fullWidth * 0.25), halfHeight);
         final Dimension textFullDim = new Dimension(fullWidth, halfHeight);
         this.dataSegment.setBounds(0, textDim.height + 1, dataDim.width, dataDim.height);
         if (this.labelWindowVisible) {
 //            System.out.println("YEA");
             this.textSegment.setBounds(0, 0, textDim.width, textDim.height);
-            this.labelValues.setBounds(textDim.width + 1, 0, lablDim.width, lablDim.height);
+            this.labelValues.setBounds(textDim.width + 1, 0, labelDimension.width, labelDimension.height);
         } else {
             this.textSegment.setBounds(0, 0, textFullDim.width, textFullDim.height);
             this.labelValues.setBounds(0, 0, 0, 0);

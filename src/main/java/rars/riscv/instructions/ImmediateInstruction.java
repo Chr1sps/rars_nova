@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.InstructionsRegistry;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.ConversionUtils;
 
 /*
@@ -67,13 +67,13 @@ public abstract class ImmediateInstruction extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(2) << 20) >> 20;
         final long newValue = (InstructionsRegistry.RV64_MODE_FLAG)
             ? compute(
-            RegisterFile.INSTANCE.getLongValue(statement.getOperand(1)),
+            Globals.REGISTER_FILE.getLongValue(statement.getOperand(1)),
             Integer.valueOf(upperImmediate).longValue()
         ) : computeW(
-            RegisterFile.INSTANCE.getIntValue(statement.getOperand(1)),
+            Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)),
             upperImmediate
         );
-        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 
     /**

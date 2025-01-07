@@ -185,14 +185,13 @@ public final class BinaryUtils {
     public static @NotNull String binaryStringToHexString(final @NotNull String value) {
         final int digits = (value.length() + 3) / 4;
         final char[] hexChars = new char[digits + 2];
-        int position, result, pow, rep;
         hexChars[0] = '0';
         hexChars[1] = 'x';
-        position = value.length() - 1;
+        int position = value.length() - 1;
         for (int digs = 0; digs < digits; digs++) {
-            result = 0;
-            pow = 1;
-            rep = 0;
+            int result = 0;
+            int pow = 1;
+            int rep = 0;
             while (rep < 4 && position >= 0) {
                 if (value.charAt(position) == '1') {
                     result = result + pow;
@@ -220,11 +219,11 @@ public final class BinaryUtils {
      * @return String with equivalent second in binary.
      */
     public static @NotNull String hexStringToBinaryString(@NotNull String value) {
-        final StringBuilder result = new StringBuilder();
         // slice off leading Ox or 0X
         if (value.indexOf("0x") == 0 || value.indexOf("0X") == 0) {
             value = value.substring(2);
         }
+        final StringBuilder result = new StringBuilder();
         for (int digs = 0; digs < value.length(); digs++) {
             switch (value.charAt(digs)) {
                 case '0':
@@ -326,12 +325,12 @@ public final class BinaryUtils {
      */
     public static @NotNull String intToHexString(final int d) {
         final String leadingZero = "0";
-        final String leadingX = "0x";
         String t = Integer.toHexString(d);
         while (t.length() < 8) {
             t = leadingZero.concat(t);
         }
 
+        final String leadingX = "0x";
         t = leadingX.concat(t);
         return t;
     }
@@ -352,16 +351,16 @@ public final class BinaryUtils {
      * of int.
      */
     public static @NotNull String intToHalfHexString(final int d) {
-        final String leadingZero = "0";
-        final String leadingX = "0x";
         String t = Integer.toHexString(d);
         if (t.length() > 4) {
             t = t.substring(t.length() - 4);
         }
+        final String leadingZero = "0";
         while (t.length() < 4) {
             t = leadingZero.concat(t);
         }
 
+        final String leadingX = "0x";
         t = leadingX.concat(t);
         return t;
     }
@@ -493,13 +492,13 @@ public final class BinaryUtils {
             return null;
         }
 
-        int result = 0;
         int i = 0;
         if (first == '-') {
             i = 1;
         }
 
         // Not doing s = s.lowercase() because it is slightly slower
+        int result = 0;
         if (s.length() > 2 + i && s.charAt(i) == '0' && (s.charAt(i + 1) == 'x' || s.charAt(i + 1) == 'X')) { // Hex
             // case
             if (s.length() > 10 + i) {
@@ -593,10 +592,9 @@ public final class BinaryUtils {
             final var work = s.toLowerCase();
             if (work.length() == 18 && work.startsWith("0x")) {
                 final StringBuilder bitString = new StringBuilder();
-                int index;
                 // while testing characters, build bit string to set up for binaryStringToInt
                 for (int i = 2; i < 18; i++) {
-                    index = Arrays.binarySearch(BinaryUtils.chars, work.charAt(i));
+                    int index = Arrays.binarySearch(BinaryUtils.chars, work.charAt(i));
                     if (index < 0) {
                         throw new NumberFormatException();
                     }

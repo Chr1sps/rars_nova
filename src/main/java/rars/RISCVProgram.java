@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import rars.assembler.*;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
-import rars.riscv.hardware.RegisterFile;
 import rars.simulator.BackStepper;
 import rars.simulator.Simulator;
 
@@ -82,7 +81,7 @@ public final class RISCVProgram {
      */
     public static Simulator.Reason simulate(final int maxSteps) throws SimulationException {
         final Simulator sim = Simulator.INSTANCE;
-        return sim.simulate(RegisterFile.INSTANCE.getProgramCounter(), maxSteps, null);
+        return sim.simulate(Globals.REGISTER_FILE.getProgramCounter(), maxSteps, null);
     }
 
     /**
@@ -100,7 +99,7 @@ public final class RISCVProgram {
      */
     public static void startSimulation(final int maxSteps, final int[] breakPoints) {
         final Simulator sim = Simulator.INSTANCE;
-        sim.startSimulation(RegisterFile.INSTANCE.getProgramCounter(), maxSteps, breakPoints);
+        sim.startSimulation(Globals.REGISTER_FILE.getProgramCounter(), maxSteps, breakPoints);
     }
 
     /**
@@ -246,20 +245,17 @@ public final class RISCVProgram {
      */
     public void readSource(final @NotNull File file) throws AssemblyException {
         this.file = file;
-        final var sourceList = new ArrayList<String>();
-        final ErrorList errors;
-        final BufferedReader inputFile;
-        String line;
         try {
-            inputFile = new BufferedReader(new FileReader(file));
-            line = inputFile.readLine();
+            final BufferedReader inputFile = new BufferedReader(new FileReader(file));
+            String line = inputFile.readLine();
+            final var sourceList = new ArrayList<String>();
             while (line != null) {
                 sourceList.add(line);
                 line = inputFile.readLine();
             }
             this.sourceList = sourceList;
         } catch (final Exception e) {
-            errors = new ErrorList();
+            final ErrorList errors = new ErrorList();
             errors.add(ErrorMessage.error(null, 0, 0, e.toString()));
             throw new AssemblyException(errors);
         }
@@ -275,7 +271,7 @@ public final class RISCVProgram {
      */
     public void tokenize() throws AssemblyException {
         this.tokenList = Tokenizer.tokenize(this);
-        this.localSymbolTable = new SymbolTable(this.file); // prepare for assembly
+        this.localSymbolTable = new SymbolTable(this.file, Globals.GLOBAL_SYMBOL_TABLE); // prepare for assembly
     }
 
     /**

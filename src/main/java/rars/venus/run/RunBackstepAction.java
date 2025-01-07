@@ -3,7 +3,6 @@ package rars.venus.run;
 import rars.Globals;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
@@ -92,13 +91,13 @@ public class RunBackstepAction extends GuiAction {
         executePane.textSegment.setCodeHighlighting(true);
 
         if (OtherSettings.getBackSteppingEnabled()) {
-            Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment::processMemoryAccessNotice);
-            RegisterFile.INSTANCE.addRegistersListener(executePane.registerValues::processRegisterNotice);
-            ControlAndStatusRegisterFile.addRegistersObserver(executePane.csrValues::processRegisterNotice);
-            FloatingPointRegisterFile.addRegistersSubscriber(executePane.fpRegValues::processRegisterNotice);
+            Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment.processMemoryAccessNotice);
+            Globals.REGISTER_FILE.addRegistersListener(executePane.registerValues.processRegisterNotice);
+            ControlAndStatusRegisterFile.addRegistersObserver(executePane.csrValues.processRegisterNotice);
+            FloatingPointRegisterFile.addRegistersSubscriber(executePane.fpRegValues.processRegisterNotice);
             Globals.program.getBackStepper().backStep();
-            Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment::processMemoryAccessNotice);
-            RegisterFile.INSTANCE.deleteRegistersListener(executePane.registerValues::processRegisterNotice);
+            Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment.processMemoryAccessNotice);
+            Globals.REGISTER_FILE.deleteRegistersListener(executePane.registerValues.processRegisterNotice);
             executePane.registerValues.updateRegisters();
             executePane.fpRegValues.updateRegisters();
             executePane.csrValues.updateRegisters();

@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Unmodifiable;
 import rars.Globals;
 import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
-import rars.riscv.hardware.RegisterFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,9 +144,9 @@ public record ProgramArgumentList(@NotNull @Unmodifiable List<@NotNull String> p
             // Need to set $sp register to stack address, $a0 to argc, $a1 to argv
             // Need to by-pass the backstepping mechanism so go directly to Register instead
             // of RegisterFile
-            RegisterFile.INSTANCE.sp.setValue(stackAddress + DataTypes.WORD_SIZE);
-            RegisterFile.INSTANCE.a0.setValue(argStartAddress.length); // argc
-            RegisterFile.INSTANCE.a1.setValue(stackAddress + DataTypes.WORD_SIZE + DataTypes.WORD_SIZE); // argv
+            Globals.REGISTER_FILE.sp.setValue(stackAddress + DataTypes.WORD_SIZE);
+            Globals.REGISTER_FILE.a0.setValue(argStartAddress.length); // argc
+            Globals.REGISTER_FILE.a1.setValue(stackAddress + DataTypes.WORD_SIZE + DataTypes.WORD_SIZE); // argv
         } catch (final AddressErrorException aee) {
             ProgramArgumentList.LOGGER.fatal(
                 "Internal Error: Memory write error occurred while storing program " +

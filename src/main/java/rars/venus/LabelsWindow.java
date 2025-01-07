@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static rars.settings.OtherSettings.OTHER_SETTINGS;
+import static rars.Globals.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -421,7 +421,7 @@ public class LabelsWindow extends JInternalFrame {
         public LabelsForSymbolTable(final RISCVProgram program) {
             this.program = program;
             this.symbolTable = (program == null)
-                ? Globals.symbolTable
+                ? Globals.GLOBAL_SYMBOL_TABLE
                 : program.getLocalSymbolTable();
             this.tableName = (program == null)
                 ? "(global)"
@@ -440,7 +440,7 @@ public class LabelsWindow extends JInternalFrame {
         // builds the Table containing labels and addresses for this symbol table.
         private JTable generateLabelTable() {
             final SymbolTable symbolTable = (this.program == null)
-                ? Globals.symbolTable
+                ? Globals.GLOBAL_SYMBOL_TABLE
                 : this.program.getLocalSymbolTable();
             final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
             if (LabelsWindow.this.textLabels.isSelected() && LabelsWindow.this.dataLabels.isSelected()) {
@@ -480,12 +480,10 @@ public class LabelsWindow extends JInternalFrame {
                 return; // ignore if no content to change
             }
             final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
-            int address;
-            String formattedAddress;
             final int numSymbols = (this.labelData == null) ? 0 : this.labelData.length;
             for (int i = 0; i < numSymbols; i++) {
-                address = this.symbols.get(i).address();
-                formattedAddress = NumberDisplayBaseChooser.formatNumber(address, addressBase);
+                int address = this.symbols.get(i).address();
+                String formattedAddress = NumberDisplayBaseChooser.formatNumber(address, addressBase);
                 this.labelTable.getModel().setValueAt(formattedAddress, i, LabelsWindow.ADDRESS_COLUMN);
             }
         }

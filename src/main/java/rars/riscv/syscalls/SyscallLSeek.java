@@ -1,9 +1,9 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -55,10 +55,10 @@ public final class SyscallLSeek extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         final int result = SystemIO.seek(
-            RegisterFile.INSTANCE.getIntValue("a0"),
-            RegisterFile.INSTANCE.getIntValue("a1"),
-            RegisterFile.INSTANCE.getIntValue("a2")
+            Globals.REGISTER_FILE.getIntValue("a0"),
+            Globals.REGISTER_FILE.getIntValue("a1"),
+            Globals.REGISTER_FILE.getIntValue("a2")
         );
-        RegisterFile.INSTANCE.updateRegisterByName("a0", result);
+        Globals.REGISTER_FILE.updateRegisterByName("a0", result);
     }
 }

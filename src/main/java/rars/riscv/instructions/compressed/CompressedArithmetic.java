@@ -1,10 +1,10 @@
 package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 import rars.riscv.InstructionsRegistry;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.BinaryUtils;
 
 public final class CompressedArithmetic extends CompressedInstruction {
@@ -55,19 +55,19 @@ public final class CompressedArithmetic extends CompressedInstruction {
             statement -> {
                 if (InstructionsRegistry.RV64_MODE_FLAG) {
                     final long newValue = callback.computeDoubleWord(
-                        RegisterFile.INSTANCE.getLongValue(statement.getOperand(0)),
-                        RegisterFile.INSTANCE.getLongValue(statement.getOperand(1))
+                        Globals.REGISTER_FILE.getLongValue(statement.getOperand(0)),
+                        Globals.REGISTER_FILE.getLongValue(statement.getOperand(1))
                     );
-                    RegisterFile.INSTANCE.updateRegisterByNumber(
+                    Globals.REGISTER_FILE.updateRegisterByNumber(
                         statement.getOperand(statement.getOperand(0)),
                         newValue
                     );
                 } else {
                     final long newValue = callback.computeWord(
-                        RegisterFile.INSTANCE.getIntValue(statement.getOperand(0)),
-                        RegisterFile.INSTANCE.getIntValue(statement.getOperand(1))
+                        Globals.REGISTER_FILE.getIntValue(statement.getOperand(0)),
+                        Globals.REGISTER_FILE.getIntValue(statement.getOperand(1))
                     );
-                    RegisterFile.INSTANCE.updateRegisterByNumber(
+                    Globals.REGISTER_FILE.updateRegisterByNumber(
                         statement.getOperand(statement.getOperand(0)),
                         newValue
                     );

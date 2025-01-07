@@ -8,7 +8,6 @@ import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 public final class FLD extends BasicInstruction {
     public static final FLD INSTANCE = new FLD();
@@ -26,7 +25,7 @@ public final class FLD extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             final var value = Globals.MEMORY_INSTANCE.getDoubleWord(
-                RegisterFile.INSTANCE.getIntValue(statement.getOperand(2))
+                Globals.REGISTER_FILE.getIntValue(statement.getOperand(2))
                     + upperImmediate
             );
             FloatingPointRegisterFile.updateRegister(

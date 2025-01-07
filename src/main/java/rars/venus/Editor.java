@@ -38,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Manage the file being edited.
  * Currently only manages one file at a time, but can be expanded.
  */
-public class Editor {
+public final class Editor {
 
     public static final int MIN_TAB_SIZE = 1;
     public static final int MAX_TAB_SIZE = 32;
@@ -203,7 +203,7 @@ public class Editor {
             tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(), name + editIndicator);
         }
     }
-    
+
     public void setTitleFromFile(final @NotNull File file, final @NotNull FileStatus.State status) {
         this.setTitle(file.getPath(), file.getName(), status);
     }

@@ -86,7 +86,7 @@ public final class RunResetAction extends GuiAction {
             return;
         }
 
-        RegisterFile.INSTANCE.resetRegisters();
+        Globals.REGISTER_FILE.resetRegisters();
         FloatingPointRegisterFile.resetRegisters();
         ControlAndStatusRegisterFile.resetRegisters();
         InterruptController.reset();

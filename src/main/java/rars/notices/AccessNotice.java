@@ -38,7 +38,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Pete Sanderson
  * @version July 2005
  */
-public abstract sealed class AccessNotice implements Notice permits MemoryAccessNotice, RegisterAccessNotice {
+public abstract sealed class AccessNotice permits MemoryAccessNotice, RegisterAccessNotice {
 
     /** Type of access: READ or WRITE. */
     public final @NotNull AccessType accessType;

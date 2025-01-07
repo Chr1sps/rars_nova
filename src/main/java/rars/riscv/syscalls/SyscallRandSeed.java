@@ -1,9 +1,9 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 import java.util.Random;
 
@@ -54,12 +54,12 @@ public class SyscallRandSeed extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final Integer index = RegisterFile.INSTANCE.getIntValue("a0");
+        final Integer index = Globals.REGISTER_FILE.getIntValue("a0");
         final Random stream = RandomStreams.randomStreams.get(index);
         if (stream == null) {
-            RandomStreams.randomStreams.put(index, new Random(RegisterFile.INSTANCE.getIntValue("a1")));
+            RandomStreams.randomStreams.put(index, new Random(Globals.REGISTER_FILE.getIntValue("a1")));
         } else {
-            stream.setSeed(RegisterFile.INSTANCE.getIntValue("a1"));
+            stream.setSeed(Globals.REGISTER_FILE.getIntValue("a1"));
         }
     }
 }

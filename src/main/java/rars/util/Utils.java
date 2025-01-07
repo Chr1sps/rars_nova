@@ -1,15 +1,14 @@
 package rars.util;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.RoundingMode;
-import rars.riscv.AbstractSyscall;
 import rars.riscv.BasicInstruction;
 import rars.riscv.SyscallLoader;
-import rars.riscv.hardware.RegisterFile;
 import rars.riscv.syscalls.*;
 import rars.venus.editors.TokenStyle;
 
@@ -32,40 +31,40 @@ public final class Utils {
 
     public static void findAndSimulateSyscall(final int number, final ProgramStatement statement)
         throws SimulationException {
-        final AbstractSyscall service = SyscallLoader.findSyscall(number);
-        if (service != null) {
+        final var syscall = SyscallLoader.findSyscall(number);
+        if (syscall != null) {
             // TODO: find a cleaner way of doing this
             // This was introduced to solve issue #108
-            final boolean is_writing = service instanceof SyscallPrintChar ||
-                service instanceof SyscallPrintDouble ||
-                service instanceof SyscallPrintFloat ||
-                service instanceof SyscallPrintInt ||
-                service instanceof SyscallPrintIntBinary ||
-                service instanceof SyscallPrintIntHex ||
-                service instanceof SyscallPrintIntUnsigned ||
-                service instanceof SyscallPrintString ||
-                service instanceof SyscallWrite;
+            final boolean is_writing =
+                syscall instanceof SyscallPrintChar ||
+                    syscall instanceof SyscallPrintDouble ||
+                    syscall instanceof SyscallPrintFloat ||
+                    syscall instanceof SyscallPrintInt ||
+                    syscall instanceof SyscallPrintIntBinary ||
+                    syscall instanceof SyscallPrintIntHex ||
+                    syscall instanceof SyscallPrintIntUnsigned ||
+                    syscall instanceof SyscallPrintString ||
+                    syscall instanceof SyscallWrite;
             if (!is_writing) {
                 SystemIO.flush(true);
             }
-            service.simulate(statement);
+            syscall.simulate(statement);
             return;
         }
         throw new SimulationException(
             statement,
-            "invalid or unimplemented syscall service: " +
-                number + " ",
+            "invalid or unimplemented syscall service: %d ".formatted(number),
             ExceptionReason.ENVIRONMENT_CALL
         );
     }
 
     public static void processBranch(final int displacement) {
         // Decrement needed because PC has already been incremented
-        RegisterFile.INSTANCE.setProgramCounter(RegisterFile.INSTANCE.getProgramCounter() + displacement - BasicInstruction.BASIC_INSTRUCTION_LENGTH);
+        Globals.REGISTER_FILE.setProgramCounter(Globals.REGISTER_FILE.getProgramCounter() + displacement - BasicInstruction.BASIC_INSTRUCTION_LENGTH);
     }
 
     public static void processJump(final int targetAddress) {
-        RegisterFile.INSTANCE.setProgramCounter(targetAddress);
+        Globals.REGISTER_FILE.setProgramCounter(targetAddress);
     }
 
     /**
@@ -75,7 +74,7 @@ public final class Utils {
      * The parameter is register number to receive the return address.
      */
     public static void processReturnAddress(final int register) {
-        RegisterFile.INSTANCE.updateRegisterByNumber(register, RegisterFile.INSTANCE.getProgramCounter());
+        Globals.REGISTER_FILE.updateRegisterByNumber(register, Globals.REGISTER_FILE.getProgramCounter());
     }
 
     public static void flipRounding(@NotNull final Environment e) {

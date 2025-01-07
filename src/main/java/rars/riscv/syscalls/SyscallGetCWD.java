@@ -6,7 +6,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 import java.nio.charset.StandardCharsets;
 
@@ -58,15 +57,15 @@ public final class SyscallGetCWD extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String path = System.getProperty("user.dir");
-        final int buf = RegisterFile.INSTANCE.getIntValue("a0");
-        final int length = RegisterFile.INSTANCE.getIntValue("a1");
+        final int buf = Globals.REGISTER_FILE.getIntValue("a0");
+        final int length = Globals.REGISTER_FILE.getIntValue("a1");
 
         final byte[] utf8BytesList = path.getBytes(StandardCharsets.UTF_8);
         if (length < utf8BytesList.length + 1) {
             // This should be -34 (ERANGE) for compatibility with spike, but until other
             // syscalls are ready with compatable
             // error codes, lets keep internal consitency.
-            RegisterFile.INSTANCE.updateRegisterByName("a0", -1);
+            Globals.REGISTER_FILE.updateRegisterByName("a0", -1);
             return;
         }
         try {

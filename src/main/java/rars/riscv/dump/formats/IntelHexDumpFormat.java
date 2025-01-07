@@ -39,13 +39,12 @@ public class IntelHexDumpFormat extends AbstractDumpFormat {
     )
         throws AddressErrorException, IOException {
         try (final PrintStream out = new PrintStream(new FileOutputStream(file))) {
-            StringBuilder string;
             for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                 final Integer temp = memory.getRawWordOrNull(address);
                 if (temp == null) {
                     break;
                 }
-                string = new StringBuilder(Integer.toHexString(temp));
+                StringBuilder string = new StringBuilder(Integer.toHexString(temp));
                 while (string.length() < 8) {
                     string.insert(0, '0');
                 }
@@ -53,7 +52,6 @@ public class IntelHexDumpFormat extends AbstractDumpFormat {
                 while (addr.length() < 4) {
                     addr.insert(0, '0');
                 }
-                String chksum;
                 int tmp_chksum = 0;
                 tmp_chksum += 4;
                 tmp_chksum += 0xFF & (address - firstAddress);
@@ -64,7 +62,7 @@ public class IntelHexDumpFormat extends AbstractDumpFormat {
                 tmp_chksum += 0xFF & (temp >> 24);
                 tmp_chksum = tmp_chksum % 256;
                 tmp_chksum = ~tmp_chksum + 1;
-                chksum = Integer.toHexString(0xFF & tmp_chksum);
+                String chksum = Integer.toHexString(0xFF & tmp_chksum);
                 if (chksum.length() == 1) {
                     chksum = '0' + chksum;
                 }

@@ -8,7 +8,6 @@ import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.BinaryUtils;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public final class CompressedLoad extends CompressedInstruction {
         "c.lw t1, -100(t2)",
         "Set t1 to contents of effective memory word address",
         0b010,
-        (registerNumber, newValue) -> RegisterFile.INSTANCE.updateRegisterByNumber(registerNumber, newValue),
+        Globals.REGISTER_FILE::updateRegisterByNumber,
         address -> Globals.MEMORY_INSTANCE.getWord(address)
     );
     public static final @NotNull CompressedLoad CFLW = new CompressedLoad(
@@ -33,7 +32,7 @@ public final class CompressedLoad extends CompressedInstruction {
         "c.ld t1, -100(t2)",
         "Set t1 to contents of effective memory double word address",
         0b001,
-        (registerNumber, newValue) -> RegisterFile.INSTANCE.updateRegisterByNumber(registerNumber, newValue),
+        Globals.REGISTER_FILE::updateRegisterByNumber,
         address -> Globals.MEMORY_INSTANCE.getDoubleWord(address)
     );
     public static final @NotNull CompressedLoad CFLD = new CompressedLoad(
@@ -69,7 +68,7 @@ public final class CompressedLoad extends CompressedInstruction {
                 try {
                     updateCallback.update(
                         statement.getOperand(0),
-                        loadCallback.load(RegisterFile.INSTANCE.getIntValue(statement.getOperand(2)) + upperImmediate)
+                        loadCallback.load(Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate)
                     );
                 } catch (final AddressErrorException e) {
                     throw new SimulationException(statement, e);

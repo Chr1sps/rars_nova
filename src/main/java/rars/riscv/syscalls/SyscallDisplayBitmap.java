@@ -2,10 +2,10 @@ package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.notices.SimulatorNotice;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.simulator.Simulator;
 import rars.util.BitmapDisplay;
 
@@ -33,9 +33,9 @@ public final class SyscallDisplayBitmap extends AbstractSyscall {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final int baseAddress = RegisterFile.INSTANCE.getIntValue("a0");
-        final int width = RegisterFile.INSTANCE.getIntValue("a1");
-        final int height = RegisterFile.INSTANCE.getIntValue("a2");
+        final int baseAddress = Globals.REGISTER_FILE.getIntValue("a0");
+        final int width = Globals.REGISTER_FILE.getIntValue("a1");
+        final int height = Globals.REGISTER_FILE.getIntValue("a2");
         this.show(baseAddress, width, height);
     }
 

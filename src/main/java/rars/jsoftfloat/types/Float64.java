@@ -13,23 +13,23 @@ import java.math.BigInteger;
 public class Float64 implements Floating<Float64> {
     // TODO: make a more abstract binary float class
     /**
-     * Constant <code>Zero</code>
+     * Constant {@code Zero}
      */
     public static final Float64 Zero = new Float64(0);
     /**
-     * Constant <code>NegativeZero</code>
+     * Constant {@code NegativeZero}
      */
     public static final Float64 NegativeZero = new Float64(0x80000000_00000000L);
     /**
-     * Constant <code>NaN</code>
+     * Constant {@code NaN}
      */
     public static final Float64 NaN = new Float64(0x7FF80000_00000000L);
     /**
-     * Constant <code>Infinity</code>
+     * Constant {@code Infinity}
      */
     public static final Float64 Infinity = new Float64(0x7FF00000_00000000L);
     /**
-     * Constant <code>NegativeInfinity</code>
+     * Constant {@code NegativeInfinity}
      */
     public static final Float64 NegativeInfinity = new Float64(0xFFF00000_00000000L);
     // Some constants that allow fromExactFloat to be mostly copied

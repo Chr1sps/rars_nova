@@ -4,7 +4,6 @@ import rars.Globals;
 import rars.RISCVProgram;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
-import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
@@ -19,7 +18,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.function.Consumer;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
@@ -121,7 +120,7 @@ public class RunGoAction extends GuiAction {
                 // Setup cleanup procedures for the simulation
                 final var onSimulatorStopListener = new Consumer<SimulatorNotice>() {
                     @Override
-                    public void accept(SimulatorNotice notice) {
+                    public void accept(final SimulatorNotice notice) {
                         if (notice.action() != SimulatorNotice.Action.STOP) {
                             return;
                         }
@@ -233,7 +232,7 @@ public class RunGoAction extends GuiAction {
             this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues);
             this.executePane.textSegment.setCodeHighlighting(true);
             this.executePane.textSegment.unhighlightAllSteps();
-            this.executePane.textSegment.highlightStepAtAddress(RegisterFile.INSTANCE.getProgramCounter() - 4);
+            this.executePane.textSegment.highlightStepAtAddress(Globals.REGISTER_FILE.getProgramCounter() - 4);
         }
         switch (reason) {
             case NORMAL_TERMINATION:

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.settings.editor.views.OtherSettingsView;
 
-import static rars.settings.OtherSettings.OTHER_SETTINGS;
+import static rars.Globals.OTHER_SETTINGS;
 
 public final class OtherSettingsController {
     private final @NotNull OtherSettingsView view;

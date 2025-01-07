@@ -1,10 +1,10 @@
 package rars.assembler;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.BinaryUtils;
 
 /*
@@ -85,7 +85,7 @@ public enum TokenType {
      *     MIPS program.
      * @return Returns the corresponding TokenTypes object if the parameter matches
      * a
-     * defined MIPS token type, else returns <code>null</code>.
+     * defined MIPS token type, else returns {@code null}.
      */
     public static @NotNull TokenType matchTokenType(@NotNull final String value) {
         // If it starts with single quote ('), it is a mal-formed character literal
@@ -138,7 +138,7 @@ public enum TokenType {
         }
 
         // See if it is a register
-        if (RegisterFile.INSTANCE.getRegisterByName(value) != null) {
+        if (Globals.REGISTER_FILE.getRegisterByName(value) != null) {
             if (value.startsWith("x")) {
                 return TokenType.REGISTER_NUMBER;
             } else {

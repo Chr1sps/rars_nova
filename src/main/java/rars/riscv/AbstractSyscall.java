@@ -80,7 +80,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     }
 
     /**
-     * <p>Getter for the field <code>description</code>.</p>
+     * <p>Getter for the field {@code description}.</p>
      *
      * @return a string describing what the system call does
      */
@@ -89,7 +89,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     }
 
     /**
-     * <p>Getter for the field <code>inputs</code>.</p>
+     * <p>Getter for the field {@code inputs}.</p>
      *
      * @return a string documenting what registers should be set to before the
      * system call runs
@@ -99,7 +99,7 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
     }
 
     /**
-     * <p>Getter for the field <code>outputs</code>.</p>
+     * <p>Getter for the field {@code outputs}.</p>
      *
      * @return a string documenting what registers are set to after the system call
      * runs
@@ -151,8 +151,8 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
         if (this == other) {
             return 0;
         }
-        assert getNumber() != other.getNumber() : "Different syscalls have to have different numbers";
-        return getNumber() > other.getNumber() ? 1 : -1;
+        assert serviceNumber != other.serviceNumber : "Different syscalls have to have different numbers";
+        return serviceNumber > other.serviceNumber ? 1 : -1;
     }
 
 }

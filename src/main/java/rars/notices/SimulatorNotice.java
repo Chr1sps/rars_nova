@@ -18,7 +18,7 @@ import rars.venus.run.RunSpeedPanel;
 
 public record SimulatorNotice(Action action, int maxSteps, double runSpeed, int programCounter,
                               @Nullable Simulator.Reason reason,
-                              SimulationException exception, boolean done) implements Notice {
+                              SimulationException exception, boolean done) {
 
     @Contract(pure = true)
     @Override

@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
 
@@ -68,29 +68,28 @@ public final class SyscallInputDialogInt extends AbstractSyscall {
         // A null return value means that "Cancel" was chosen rather than OK.
         // An empty string returned (that is, inputValue.length() of zero)
         // means that OK was chosen but no string was input.
-        final String inputValue;
-        inputValue = JOptionPane.showInputDialog(message);
+        final String inputValue = JOptionPane.showInputDialog(message);
         if (inputValue == null) // Cancel was chosen
         {
-            RegisterFile.INSTANCE.updateRegisterByName("a0", 0);
-            RegisterFile.INSTANCE.updateRegisterByName("a1", -2);
+            Globals.REGISTER_FILE.updateRegisterByName("a0", 0);
+            Globals.REGISTER_FILE.updateRegisterByName("a1", -2);
         } else if (inputValue.isEmpty()) // OK was chosen but there was no input
         {
-            RegisterFile.INSTANCE.updateRegisterByName("a0", 0);
-            RegisterFile.INSTANCE.updateRegisterByName("a1", -3);
+            Globals.REGISTER_FILE.updateRegisterByName("a0", 0);
+            Globals.REGISTER_FILE.updateRegisterByName("a1", -3);
         } else {
             try {
                 final int i = Integer.parseInt(inputValue);
 
                 // Successful parse of valid input data
                 // set to the data read
-                RegisterFile.INSTANCE.updateRegisterByName("a0", i);
+                Globals.REGISTER_FILE.updateRegisterByName("a0", i);
                 // set to valid flag
-                RegisterFile.INSTANCE.updateRegisterByName("a1", 0);
+                Globals.REGISTER_FILE.updateRegisterByName("a1", 0);
             } catch (final NumberFormatException e) {
                 // Unsuccessful parse of input data
-                RegisterFile.INSTANCE.updateRegisterByName("a0", 0);
-                RegisterFile.INSTANCE.updateRegisterByName("a1", -1);
+                Globals.REGISTER_FILE.updateRegisterByName("a0", 0);
+                Globals.REGISTER_FILE.updateRegisterByName("a1", -1);
 
             }
 

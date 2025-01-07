@@ -490,12 +490,12 @@ public class MemoryReferenceVisualization extends AbstractTool {
             memoryConfiguration.memoryMapBaseAddress
         };
         // Must agree with above in number and order...
+        this.displayBaseAddresses = displayBaseAddressArray;
+        this.displayBaseAddressChoices = new String[displayBaseAddressArray.length];
         final String[] descriptions = {
             " (text)", " (global data)", " (gp)", " (static data)", " (heap)", " (memory " +
             "map)"
         };
-        this.displayBaseAddresses = displayBaseAddressArray;
-        this.displayBaseAddressChoices = new String[displayBaseAddressArray.length];
         for (int i = 0; i < this.displayBaseAddressChoices.length; i++) {
             this.displayBaseAddressChoices[i] = BinaryUtils.intToHexString(displayBaseAddressArray[i])
                 + descriptions[i];
@@ -645,7 +645,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
     }
 
     // Represents grid of memory access counts
-    private static class Grid {
+    private static final class Grid {
 
         final int[][] grid;
         final int rows;
@@ -765,7 +765,7 @@ public class MemoryReferenceVisualization extends AbstractTool {
         }
     }
 
-    private class ColorChooserControls {
+    private final class ColorChooserControls {
         private final JButton currentColorButton;
         private final JPanel colorChooserRow;
         private final JPanel countDisplayRow;

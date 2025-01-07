@@ -11,9 +11,7 @@ import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
-import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
-import rars.settings.EditorThemeSettings;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.util.FontUtilities;
@@ -31,10 +29,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Objects;
+import java.util.function.Consumer;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
-import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.HighlightingSettings.HIGHLIGHTING_SETTINGS;
+import static rars.Globals.*;
 import static rars.util.Utils.deriveFontFromStyle;
 
 /*
@@ -103,6 +100,11 @@ public class TextSegmentWindow extends JInternalFrame {
     private Hashtable<Integer, Integer> addressRows; // first is text address, value is table model row
     private Hashtable<Integer, ModifiedCode> executeMods; // first is table model row, value is original code, basic,
     private TextTableModel tableModel;
+    private final @NotNull Consumer<@NotNull MemoryAccessNotice> processMemoryAccessNotice = notice -> {
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            this.updateTable(notice.address, notice.value);
+        }
+    };
     private boolean codeHighlighting;
     private boolean breakpointsEnabled; // Added 31 Dec 2009
     private int highlightAddress;
@@ -194,7 +196,7 @@ public class TextSegmentWindow extends JInternalFrame {
                 } else {
                     lineNumber = " ".repeat(leadingSpacesCount) + statement.sourceLine.lineNumber() + ": ";
                 }
-                builder.append(lineNumber + FontUtilities.substituteSpacesForTabs(statement.sourceLine.source()));
+                builder.append(lineNumber).append(FontUtilities.substituteSpacesForTabs(statement.sourceLine.source()));
                 lastLine = statement.sourceLine.lineNumber();
             } else {
                 lastLine = -1;
@@ -496,7 +498,7 @@ public class TextSegmentWindow extends JInternalFrame {
      * execution and when reaching breakpoints.
      */
     public void highlightStepAtPC() {
-        this.highlightStepAtAddress(RegisterFile.INSTANCE.getProgramCounter());
+        this.highlightStepAtAddress(Globals.REGISTER_FILE.getProgramCounter());
     }
 
     /**
@@ -550,8 +552,8 @@ public class TextSegmentWindow extends JInternalFrame {
      * If any steps are highlighted, this erases the highlighting.
      */
     public void unhighlightAllSteps() {
-        final boolean saved = this.getCodeHighlighting();
-        this.setCodeHighlighting(false);
+        final boolean saved = this.codeHighlighting;
+        this.codeHighlighting = false;
         this.table.tableChanged(new TableModelEvent(
             this.tableModel, 0, this.data.length - 1,
             ColumnData.BASIC_INSTRUCTIONS_COLUMN.number
@@ -560,7 +562,7 @@ public class TextSegmentWindow extends JInternalFrame {
             this.tableModel, 0, this.data.length - 1,
             ColumnData.SOURCE_COLUMN.number
         ));
-        this.setCodeHighlighting(saved);
+        this.codeHighlighting = saved;
     }
 
     /**
@@ -633,7 +635,7 @@ public class TextSegmentWindow extends JInternalFrame {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         try {
             Globals.MEMORY_INSTANCE.subscribe(
-                this::processMemoryAccessNotice,
+                this.processMemoryAccessNotice,
                 memoryConfiguration.textBaseAddress,
                 memoryConfiguration.dataSegmentBaseAddress
             );
@@ -641,104 +643,93 @@ public class TextSegmentWindow extends JInternalFrame {
         }
     }
 
-    private void processMemoryAccessNotice(final @NotNull MemoryAccessNotice notice) {
-        // NOTE: observable != Memory.getInstance() because Memory class delegates
-        // notification duty.
-        // This will occur only if running program has written to text segment
-        // (self-modifying code)
-        if (notice.accessType == AccessNotice.AccessType.WRITE) {
-            final int address = notice.address;
-            final int value = notice.value;
-            final String strValue = BinaryUtils.intToHexString(notice.value);
-            final String strBasic;
-            String strSource = TextSegmentWindow.modifiedCodeMarker;
-            // Translate the address into table model row and modify the values in that row
-            // accordingly.
-            final int row;
-            try {
-                row = this.findRowForAddress(address);
-            } catch (final IllegalArgumentException e) {
-                return; // do nothing if address modified is outside the range of original program.
+    private void updateTable(final int address, final int value) {
+        final String strValue = BinaryUtils.intToHexString(value);
+        // Translate the address into table model row and modify the values in that row
+        // accordingly.
+        final int row;
+        try {
+            row = this.findRowForAddress(address);
+        } catch (final IllegalArgumentException e) {
+            return; // do nothing if address modified is outside the range of original program.
+        }
+        ModifiedCode mc = this.executeMods.get(row);
+        String strSource = TextSegmentWindow.modifiedCodeMarker;
+        final String strBasic;
+        if (mc == null) { // if not already modified
+            // Not already modified and new code is same as original --> do nothing.
+            if (this.tableModel.getValueAt(
+                row,
+                ColumnData.INSTRUCTION_CODE_COLUMN.number
+            ).equals(strValue)) {
+                return;
             }
-            ModifiedCode mc = this.executeMods.get(row);
-            if (mc == null) { // if not already modified
-                // Not already modified and new code is same as original --> do nothing.
-                if (this.tableModel.getValueAt(
-                    row,
-                    ColumnData.INSTRUCTION_CODE_COLUMN.number
-                ).equals(strValue)) {
-                    return;
-                }
-                mc = new ModifiedCode(
-                    row,
-                    this.tableModel.getValueAt(row, ColumnData.INSTRUCTION_CODE_COLUMN.number),
-                    this.tableModel.getValueAt(row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number),
-                    this.tableModel.getValueAt(row, ColumnData.SOURCE_COLUMN.number)
-                );
-                this.executeMods.put(row, mc);
+            mc = new ModifiedCode(
+                row,
+                this.tableModel.getValueAt(row, ColumnData.INSTRUCTION_CODE_COLUMN.number),
+                this.tableModel.getValueAt(row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number),
+                this.tableModel.getValueAt(row, ColumnData.SOURCE_COLUMN.number)
+            );
+            this.executeMods.put(row, mc);
+            // make a ProgramStatement and get basic code to display in BASIC_COLUMN
+            strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
+        } else {
+            // If restored to original value, restore the basic and source
+            // This will be the case upon backstepping.
+            if (mc.code().equals(strValue)) {
+                strBasic = (String) mc.basic();
+                strSource = (String) mc.source();
+                // remove from executeMods since we are back to original
+                this.executeMods.remove(row);
+            } else {
                 // make a ProgramStatement and get basic code to display in BASIC_COLUMN
                 strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
-            } else {
-                // If restored to original value, restore the basic and source
-                // This will be the case upon backstepping.
-                if (mc.code().equals(strValue)) {
-                    strBasic = (String) mc.basic();
-                    strSource = (String) mc.source();
-                    // remove from executeMods since we are back to original
-                    this.executeMods.remove(row);
-                } else {
-                    // make a ProgramStatement and get basic code to display in BASIC_COLUMN
-                    strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
-                }
-            }
-            // For the code column, we don't want to do the following:
-            // tableModel.setValueAt(strValue, row, CODE_COLUMN)
-            // because that method will write to memory using Memory.setRawWord() which will
-            // trigger notification to observers, which brings us back to here!!! Infinite
-            // indirect recursion results. Neither fun nor productive. So what happens is
-            // this: (1) change to memory cell causes setValueAt() to be automatically be
-            // called. (2) it updates the memory cell which in turn notifies us which
-            // invokes
-            // the update() method - the method we're in right now. All we need to do here
-            // is
-            // update the table model then notify the controller/view to update its display.
-            this.data[row][ColumnData.INSTRUCTION_CODE_COLUMN.number] = strValue;
-            this.tableModel.fireTableCellUpdated(row, ColumnData.INSTRUCTION_CODE_COLUMN.number);
-            // The other columns do not present a problem since they are not editable by
-            // user.
-            this.tableModel.setValueAt(strBasic, row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
-            this.tableModel.setValueAt(strSource, row, ColumnData.SOURCE_COLUMN.number);
-            // Let's update the value displayed in the DataSegmentWindow too. But it only
-            // observes memory while
-            // the MIPS program is running, and even then only in timed or step mode. There
-            // are good reasons
-            // for that. So we'll pretend to be Memory observable and send it a fake memory
-            // write update.
-            try {
-                Globals.gui.mainPane.executeTab.dataSegment.processMemoryAccessNotice(new MemoryAccessNotice(
-                    AccessNotice.AccessType.WRITE,
-                    address, DataTypes.WORD_SIZE,
-                    value
-                ));
-            } catch (final Exception e) {
-                // Not sure if anything bad can happen in this sequence, but if anything does we
-                // can let it go.
             }
         }
+        // For the code column, we don't want to do the following:
+        // tableModel.setValueAt(strValue, row, CODE_COLUMN)
+        // because that method will write to memory using Memory.setRawWord() which will
+        // trigger notification to observers, which brings us back to here!!! Infinite
+        // indirect recursion results. Neither fun nor productive. So what happens is
+        // this: (1) change to memory cell causes setValueAt() to be automatically be
+        // called. (2) it updates the memory cell which in turn notifies us which
+        // invokes
+        // the update() method - the method we're in right now. All we need to do here
+        // is
+        // update the table model then notify the controller/view to update its display.
+        this.data[row][ColumnData.INSTRUCTION_CODE_COLUMN.number] = strValue;
+        this.tableModel.fireTableCellUpdated(row, ColumnData.INSTRUCTION_CODE_COLUMN.number);
+        // The other columns do not present a problem since they are not editable by
+        // user.
+        this.tableModel.setValueAt(strBasic, row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
+        this.tableModel.setValueAt(strSource, row, ColumnData.SOURCE_COLUMN.number);
+        // Let's update the value displayed in the DataSegmentWindow too. But it only
+        // observes memory while
+        // the MIPS program is running, and even then only in timed or step mode. There
+        // are good reasons
+        // for that. So we'll pretend to be Memory observable and send it a fake memory
+        // write update.
+        try {
+            Globals.gui.mainPane.executeTab.dataSegment.processMemoryAccessNotice.accept(new MemoryAccessNotice(
+                AccessNotice.AccessType.WRITE,
+                address, DataTypes.WORD_SIZE,
+                value
+            ));
+        } catch (final Exception e) {
+            // Not sure if anything bad can happen in this sequence, but if anything does we
+            // can let it go.
+        }
+
     }
 
     /**
      * Little convenience method to remove this as observer of text segment
      */
     private void deleteAsTextSegmentObserver() {
-        Globals.MEMORY_INSTANCE.deleteSubscriber(this::processMemoryAccessNotice);
+        Globals.MEMORY_INSTANCE.deleteSubscriber(this.processMemoryAccessNotice);
     }
 
-    /*
-     * Re-order the Text segment columns according to saved preferences.
-     */
-
-    /*
+    /**
      * Helper method to find the table row corresponding to the given.
      * text segment address. This method is called by
      * a couple different public methods. Returns the table row
@@ -861,11 +852,10 @@ public class TextSegmentWindow extends JInternalFrame {
                 return;
             }
             // Handle changes in the Code column.
-            final int val;
-            int address = 0;
             if (value.equals(this.data[row][col])) {
                 return;
             }
+            final int val;
             try {
                 val = BinaryUtils.stringToInt((String) value);
             } catch (final NumberFormatException nfe) {
@@ -875,6 +865,7 @@ public class TextSegmentWindow extends JInternalFrame {
                 return;
             }
             // calculate address from row and column
+            int address = 0;
             try {
                 address =
                     BinaryUtils.stringToInt((String) this.data[row][ColumnData.INSTRUCTION_ADDRESS_COLUMN.number]);
@@ -933,7 +924,7 @@ public class TextSegmentWindow extends JInternalFrame {
                 cell.setForeground(style.foreground());
                 cell.setFont(deriveFontFromStyle(FONT_SETTINGS.getCurrentFont(), style));
             } else {
-                final var theme = EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme;
+                final var theme = Globals.EDITOR_THEME_SETTINGS.currentTheme;
                 cell.setBackground(theme.backgroundColor);
                 cell.setForeground(theme.foregroundColor);
                 cell.setFont(FONT_SETTINGS.getCurrentFont());

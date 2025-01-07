@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
 
@@ -36,13 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallMessageDialog class.</p>
- */
 public final class SyscallMessageDialog extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallMessageDialog.</p>
-     */
     public SyscallMessageDialog() {
         super(
             "MessageDialog", "Service to display a message to user",
@@ -53,15 +47,12 @@ public final class SyscallMessageDialog extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         // Display the dialog.
-        int msgType = RegisterFile.INSTANCE.getIntValue("a1");
-        if (msgType < 0 || msgType > 3) {
-            msgType = -1; // See values in http://java.sun.com/j2se/1.5.0/docs/api/constant-values.html
+        int msgType = Globals.REGISTER_FILE.getIntValue("a1");
+        if (msgType < JOptionPane.ERROR_MESSAGE || msgType > JOptionPane.ERROR_MESSAGE) {
+            msgType = JOptionPane.PLAIN_MESSAGE; // See values in http://java.sun.com/j2se/1.5.0/docs/api/constant-values.html
         }
         JOptionPane.showMessageDialog(null, NullString.get(statement), null, msgType);
     }

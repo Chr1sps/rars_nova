@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -47,7 +47,7 @@ public final class AUIPC extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement) {
         final var shiftedValue = statement.getOperand(1) << 12;
         final var convertedValue = Integer.valueOf(shiftedValue).longValue();
-        final long newValue = RegisterFile.INSTANCE.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + convertedValue;
-        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        final long newValue = Globals.REGISTER_FILE.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + convertedValue;
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

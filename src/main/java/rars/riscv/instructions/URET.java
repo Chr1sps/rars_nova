@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -62,6 +62,6 @@ public final class URET extends BasicInstruction {
         } else {
             ControlAndStatusRegisterFile.clearRegister("ustatus", 0x1);
         }
-        RegisterFile.INSTANCE.setProgramCounter(ControlAndStatusRegisterFile.getValue("uepc"));
+        Globals.REGISTER_FILE.setProgramCounter(ControlAndStatusRegisterFile.getValue("uepc"));
     }
 }

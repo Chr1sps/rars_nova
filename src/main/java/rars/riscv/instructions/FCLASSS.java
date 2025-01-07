@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.types.Floating;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -61,17 +61,17 @@ public final class FCLASSS extends BasicInstruction {
      */
     public static <T extends Floating<T>> void fclass(@NotNull final T in, final int out) {
         if (in.isNaN()) {
-            RegisterFile.INSTANCE.updateRegisterByNumber(out, in.isSignalling() ? 0x100 : 0x200);
+            Globals.REGISTER_FILE.updateRegisterByNumber(out, in.isSignalling() ? 0x100 : 0x200);
         } else {
             final boolean negative = in.isSignMinus();
             if (in.isInfinite()) {
-                RegisterFile.INSTANCE.updateRegisterByNumber(out, negative ? 0x001 : 0x080);
+                Globals.REGISTER_FILE.updateRegisterByNumber(out, negative ? 0x001 : 0x080);
             } else if (in.isZero()) {
-                RegisterFile.INSTANCE.updateRegisterByNumber(out, negative ? 0x008 : 0x010);
+                Globals.REGISTER_FILE.updateRegisterByNumber(out, negative ? 0x008 : 0x010);
             } else if (in.isSubnormal()) {
-                RegisterFile.INSTANCE.updateRegisterByNumber(out, negative ? 0x004 : 0x020);
+                Globals.REGISTER_FILE.updateRegisterByNumber(out, negative ? 0x004 : 0x020);
             } else {
-                RegisterFile.INSTANCE.updateRegisterByNumber(out, negative ? 0x002 : 0x040);
+                Globals.REGISTER_FILE.updateRegisterByNumber(out, negative ? 0x002 : 0x040);
             }
         }
     }

@@ -61,7 +61,7 @@ public enum TokenSettingKey {
         new Pair<>(HILO, RVTokenType.LO)
     );
 
-    TokenSettingKey(@NotNull String description) {
+    TokenSettingKey(@NotNull final String description) {
         this.description = description;
     }
 

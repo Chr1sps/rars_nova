@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Vector;
 import java.util.function.Consumer;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 
 /*
@@ -237,12 +237,12 @@ public final class Memory {
     ) {
         final int relative = (address - baseAddress) >> 2; // convert byte address to words
         final int block = relative / Memory.BLOCK_LENGTH_WORDS;
-        final int offset = relative % Memory.BLOCK_LENGTH_WORDS;
         if (block < Memory.TEXT_BLOCK_TABLE_LENGTH) {
             if (blockTable[block] == null) {
                 // No instructions are stored in this block, so allocate the block.
                 blockTable[block] = new ProgramStatement[Memory.BLOCK_LENGTH_WORDS];
             }
+            final int offset = relative % Memory.BLOCK_LENGTH_WORDS;
             blockTable[block][offset] = statement;
         }
     }
@@ -395,20 +395,19 @@ public final class Memory {
      *     if any.
      */
     public int set(final int address, int value, final int length) throws AddressErrorException {
-        int oldValue = 0;
         if (Globals.debug) {
             Memory.LOGGER.debug("memory[{}] set to {}({} bytes)", address, value, length);
         }
-        final int relativeByteAddress;
+        int oldValue = 0;
         if (this.isAddressInDataSegment(address)) {
             // in data segment. Will write one byte at a time, w/o regard to boundaries.
-            relativeByteAddress = address
+            final var relativeByteAddress = address
                 - this.currentConfiguration.dataSegmentBaseAddress; // relative to data segment start, in bytes
             oldValue = this.storeBytesInTable(this.dataBlockTable, relativeByteAddress, length, value);
         } else if (this.isAddressInStackRange(address)) {
             // in stack. Handle similarly to data segment write, except relative byte
             // address calculated "backward" because stack addresses grow down from base.
-            relativeByteAddress = this.currentConfiguration.stackBaseAddress - address;
+            final var relativeByteAddress = this.currentConfiguration.stackBaseAddress - address;
             oldValue = this.storeBytesInTable(this.stackBlockTable, relativeByteAddress, length, value);
         } else if (this.isAddressInTextSegment(address)) {
             // Burch Mod (Jan 2013): replace throw with call to setStatement
@@ -447,7 +446,7 @@ public final class Memory {
         } else if (address >= this.currentConfiguration.memoryMapBaseAddress
             && address < this.actualMemoryMapLimitAddress) {
             // memory mapped I/O.
-            relativeByteAddress = address - this.currentConfiguration.memoryMapBaseAddress;
+            final var relativeByteAddress = address - this.currentConfiguration.memoryMapBaseAddress;
             oldValue = this.storeBytesInTable(this.memoryMapBlockTable, relativeByteAddress, length, value);
         } else {
             // falls outside addressing range
@@ -473,9 +472,9 @@ public final class Memory {
      *     If address is not on word boundary.
      */
     public int setRawWord(final int address, final int value) throws AddressErrorException {
-        final int relative;
-        int oldValue = 0;
         MemoryUtils.checkStoreWordAligned(address);
+        int oldValue = 0;
+        final int relative;
         if (this.isAddressInDataSegment(address)) {
             // in data segment
             relative = (address - this.currentConfiguration.dataSegmentBaseAddress)
@@ -601,10 +600,8 @@ public final class Memory {
      *     if any.
      */
     public long setDoubleWord(final int address, final long value) throws AddressErrorException {
-        final int oldHighOrder;
-        final int oldLowOrder;
-        oldHighOrder = this.set(address + 4, (int) (value >> 32), 4);
-        oldLowOrder = this.set(address, (int) value, 4);
+        final int oldHighOrder = this.set(address + 4, (int) (value >> 32), 4);
+        final int oldLowOrder = this.set(address, (int) value, 4);
         final long old = ((long) oldHighOrder << 32) | (oldLowOrder & 0xFFFFFFFFL);
         return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreDoubleWord(
             address,
@@ -758,9 +755,9 @@ public final class Memory {
         // return either the int of its return value, or 0 if it returns null.
         // Doing so would be detrimental to simulation runtime performance, so
         // I decided to keep the duplicate logic.
-        final int value;
-        final int relative;
         MemoryUtils.checkLoadWordAligned(address);
+        final int relative;
+        final int value;
         if (this.isAddressInDataSegment(address)) {
             // in data segment
             relative = (address - this.currentConfiguration.dataSegmentBaseAddress)
@@ -1144,8 +1141,6 @@ public final class Memory {
         final int length,
         final int value
     ) {
-        int relativeByteAddress1 = relativeByteAddress;
-        int value1 = value;
         // IF added DPS 22-Dec-2008. NOTE: has NOT been tested with Big-Endian.
         // Fix provided by Saul Spatz; comments that follow are his.
         // If address in stack segment is 4k + m, with 0 < m < 4, then the
@@ -1154,21 +1149,25 @@ public final class Memory {
         // need to add 2m. Because of the change in sign, we get the
         // expression 4-delta below in place of m.
         synchronized (this) {
-            int oldValue = 0; // for STORE, return old values of replaced bytes
+            int relativeByteAddress1 = relativeByteAddress;
             if (blockTable == this.stackBlockTable) {
                 final int delta = relativeByteAddress1 % 4;
                 if (delta != 0) {
                     relativeByteAddress1 += (4 - delta) << 1;
                 }
             }
+            // for STORE, return old values of replaced bytes
+            int oldValue = 0;
+            int value1 = value;
             for (var bytePositionInValue = 3; bytePositionInValue > 3 - length; bytePositionInValue--) {
                 final var relativeWordAddress = relativeByteAddress1 >> 2;
                 final var block = relativeWordAddress / Memory.BLOCK_LENGTH_WORDS; // Block number
-                final var offset = relativeWordAddress % Memory.BLOCK_LENGTH_WORDS; // Word within that block
                 if (blockTable[block] == null) {
                     blockTable[block] = new int[Memory.BLOCK_LENGTH_WORDS];
                 }
                 final var bytePositionInMemory = 3 - relativeByteAddress1 % 4;
+                // Word within that block
+                final var offset = relativeWordAddress % Memory.BLOCK_LENGTH_WORDS;
                 oldValue = Memory.replaceByte(
                     blockTable[block][offset],
                     bytePositionInMemory,
@@ -1198,8 +1197,6 @@ public final class Memory {
         final int relativeByteAddress,
         final int length
     ) {
-        int relativeByteAddress1 = relativeByteAddress;
-        int result = 0;
         // IF added DPS 22-Dec-2008. NOTE: has NOT been tested with Big-Endian.
         // Fix provided by Saul Spatz; comments that follow are his.
         // If address in stack segment is 4k + m, with 0 < m < 4, then the
@@ -1208,22 +1205,25 @@ public final class Memory {
         // need to add 2m. Because of the change in sign, we get the
         // expression 4-delta below in place of m.
         synchronized (this) {
-            final int loopStopper = 3 - length;
+            int relativeByteAddress1 = relativeByteAddress;
             if (blockTable == this.stackBlockTable) {
                 final int delta = relativeByteAddress1 % 4;
                 if (delta != 0) {
                     relativeByteAddress1 += (4 - delta) << 1;
                 }
             }
+            final int loopStopper = 3 - length;
+            int result = 0;
             for (var bytePositionInValue = 3; bytePositionInValue > loopStopper; bytePositionInValue--) {
                 final var bytePositionInMemory = 3 - relativeByteAddress1 % 4;
                 final var relativeWordAddress = relativeByteAddress1 >> 2;
                 final var blockIndex = relativeWordAddress / Memory.BLOCK_LENGTH_WORDS; // Block number
-                final var offset = relativeWordAddress % Memory.BLOCK_LENGTH_WORDS; // Word within that block
                 if (blockTable[blockIndex] == null) {
                     return 0;
                 }
                 // noinspection DataFlowIssue
+                // Word within that block
+                final var offset = relativeWordAddress % Memory.BLOCK_LENGTH_WORDS;
                 result = Memory.replaceByte(
                     blockTable[blockIndex][offset],
                     bytePositionInMemory,
@@ -1249,11 +1249,11 @@ public final class Memory {
         final int value
     ) {
         final var blockIndex = relative / Memory.BLOCK_LENGTH_WORDS;
-        final var offset = relative % Memory.BLOCK_LENGTH_WORDS;
         if (blockTable[blockIndex] == null) {
             // First time writing to this block, so allocate the space.
             blockTable[blockIndex] = new int[Memory.BLOCK_LENGTH_WORDS];
         }
+        final var offset = relative % Memory.BLOCK_LENGTH_WORDS;
         @SuppressWarnings("DataFlowIssue")
         final int oldValue = blockTable[blockIndex][offset];
         // noinspection DataFlowIssue
@@ -1280,12 +1280,12 @@ public final class Memory {
     ) {
         // Developed by Greg Gibeling of UC Berkeley, fall 2007.
         final var block = relative / Memory.BLOCK_LENGTH_WORDS;
-        final var offset = relative % Memory.BLOCK_LENGTH_WORDS;
         if (blockTable[block] == null) {
             // first reference to an address in this block. Assume initialized to 0.
             return null;
         } else {
             // noinspection DataFlowIssue
+            final var offset = relative % Memory.BLOCK_LENGTH_WORDS;
             return blockTable[block][offset];
         }
     }
@@ -1313,8 +1313,8 @@ public final class Memory {
     ) {
         final int relative = (address - baseAddress) >> 2; // convert byte address to words
         final int block = relative / Memory.TEXT_BLOCK_LENGTH_WORDS;
-        final int offset = relative % Memory.TEXT_BLOCK_LENGTH_WORDS;
         if (block < Memory.TEXT_BLOCK_TABLE_LENGTH) {
+            final int offset = relative % Memory.TEXT_BLOCK_LENGTH_WORDS;
             if (blockTable[block] == null || blockTable[block][offset] == null) {
                 // No instructions are stored in this block or offset.
                 if (notify) {

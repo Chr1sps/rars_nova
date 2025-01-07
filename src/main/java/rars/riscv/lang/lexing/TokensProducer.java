@@ -8,11 +8,11 @@ public interface TokensProducer<CollectionType> {
         int startOffset
     );
 
-    default void addNullToken(char[] array, int segmentPos, int offset) {
+    default void addNullToken(final char[] array, final int segmentPos, final int offset) {
         this.addToken(array, segmentPos, segmentPos, RVTokenType.NULL, offset);
     }
 
-    default void addErrorToken(char[] array, int segmentPos, int offset, String notice) {
+    default void addErrorToken(final char[] array, final int segmentPos, final int offset, final String notice) {
         this.addToken(array, segmentPos, segmentPos, RVTokenType.ERROR, offset);
 
     }

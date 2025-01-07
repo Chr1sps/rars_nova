@@ -6,7 +6,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
 import java.nio.charset.StandardCharsets;
@@ -65,16 +64,15 @@ public class SyscallReadString extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
-        final String inputString;
-        final int buf = RegisterFile.INSTANCE.getIntValue("a0"); // buf addr
-        int maxLength = RegisterFile.INSTANCE.getIntValue("a1") - 1;
+        final int buf = Globals.REGISTER_FILE.getIntValue("a0"); // buf addr
+        int maxLength = Globals.REGISTER_FILE.getIntValue("a1") - 1;
         boolean addNullByte = true;
         // Guard against negative maxLength. DPS 13-July-2011
         if (maxLength < 0) {
             maxLength = 0;
             addNullByte = false;
         }
-        inputString = SystemIO.readString(this.getNumber(), maxLength);
+        final String inputString = SystemIO.readString(this.getNumber(), maxLength);
 
         final byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
         // TODO: allow for utf-8 encoded strings

@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -50,9 +50,9 @@ public final class SyscallOpen extends AbstractSyscall {
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final int retValue = SystemIO.openFile(
             NullString.get(statement),
-            RegisterFile.INSTANCE.getIntValue("a1")
+            Globals.REGISTER_FILE.getIntValue("a1")
         );
         // set returned fd value in register
-        RegisterFile.INSTANCE.updateRegisterByName("a0", retValue);
+        Globals.REGISTER_FILE.updateRegisterByName("a0", retValue);
     }
 }

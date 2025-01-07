@@ -1,9 +1,9 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.BinaryUtils;
 
 /*
@@ -54,8 +54,8 @@ public class SyscallTime extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         final long value = new java.util.Date().getTime();
-        RegisterFile.INSTANCE.updateRegisterByName("a0", BinaryUtils.lowOrderLongToInt(value));
-        RegisterFile.INSTANCE.updateRegisterByName("a1", BinaryUtils.highOrderLongToInt(value));
+        Globals.REGISTER_FILE.updateRegisterByName("a0", BinaryUtils.lowOrderLongToInt(value));
+        Globals.REGISTER_FILE.updateRegisterByName("a1", BinaryUtils.highOrderLongToInt(value));
     }
 
 }

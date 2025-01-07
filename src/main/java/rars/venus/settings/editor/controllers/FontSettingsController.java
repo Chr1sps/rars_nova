@@ -9,7 +9,7 @@ import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
 
 public final class FontSettingsController {
     private final @NotNull FontSettingsView view;

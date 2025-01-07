@@ -1,10 +1,10 @@
 package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.BinaryUtils;
 import rars.util.Utils;
 
@@ -13,13 +13,13 @@ public final class CompressedBranch extends CompressedInstruction {
         "c.beqz t1, label",
         "Branch if equal to zero : Branch to statement at label's address if t1 is equal to zero",
         0b110,
-        statement -> RegisterFile.INSTANCE.getLongValue(statement.getOperand(0)) == 0
+        statement -> Globals.REGISTER_FILE.getLongValue(statement.getOperand(0)) == 0
     );
     public static final @NotNull CompressedBranch CBNEZ = new CompressedBranch(
         "c.bnez t1, label",
         "Branch if not equal to zero : Branch to statement at label's address if t1 is not equal to zero",
         0b111,
-        statement -> RegisterFile.INSTANCE.getLongValue(statement.getOperand(0)) != 0
+        statement -> Globals.REGISTER_FILE.getLongValue(statement.getOperand(0)) != 0
     );
 
     private CompressedBranch(

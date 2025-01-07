@@ -23,7 +23,7 @@ import java.awt.event.KeyListener;
 import java.util.Arrays;
 import java.util.Random;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2014,  Pete Sanderson and Kenneth Vollmar
@@ -400,11 +400,11 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
             // High order 3 bytes are split in half to store (X,Y) second.
             // High 12 bits contain X second, next 12 bits contain Y second.
             int x = (intWithCharacterToDisplay & 0xFFF00000) >>> 20;
-            int y = (intWithCharacterToDisplay & 0x000FFF00) >>> 8;
             // If X or Y values are outside current range, set to range limit.
             if (x >= this.columns) {
                 x = this.columns - 1;
             }
+            int y = (intWithCharacterToDisplay & 0x000FFF00) >>> 8;
             if (y >= this.rows) {
                 y = this.rows - 1;
             }
@@ -705,12 +705,11 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
                 // Solution 2 is shorter but requires Java 1.6. Trying to keep MARS at 1.5. So
                 // we
                 // do it the hard way. DPS 16-July-2014
-                final JDialog d;
                 final String title = "Simulating the Keyboard and Display";
                 // The following is necessary because there are different JDialog constructors
                 // for Dialog and
                 // Frame and theWindow is declared a Window, superclass for both.
-                d = (KeyboardAndDisplaySimulator.this.theWindow instanceof Dialog) ?
+                final JDialog d = (KeyboardAndDisplaySimulator.this.theWindow instanceof Dialog) ?
                     new JDialog((Dialog) KeyboardAndDisplaySimulator.this.theWindow, title, false)
                     : new JDialog((Frame) KeyboardAndDisplaySimulator.this.theWindow, title, false);
                 d.setSize(ja.getPreferredSize());

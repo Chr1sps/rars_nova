@@ -19,7 +19,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 import static rars.util.Utils.concatStreams;
 
 /**
@@ -68,12 +68,12 @@ public final class InstructionsRegistry {
                 // endregion branch
 
                 // region Branch
-                BEQ.INSTANCE,
-                BGE.INSTANCE,
-                BGEU.INSTANCE,
-                BLT.INSTANCE,
-                BLTU.INSTANCE,
-                BNE.INSTANCE,
+                Branch.BEQ,
+                Branch.BGE,
+                Branch.BGEU,
+                Branch.BLT,
+                Branch.BLTU,
+                Branch.BNE,
                 // endregion
 
                 // region Double

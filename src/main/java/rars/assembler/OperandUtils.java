@@ -58,8 +58,8 @@ public final class OperandUtils {
      * @param errors
      *     ErrorList into which any error messages generated here
      *     will be added.
-     * @return Returns <tt>true</tt> if the programmer's statement matches the MIPS
-     * specification, else returns <tt>false</tt>.
+     * @return Returns {@code true} if the programmer's statement matches the MIPS
+     * specification, else returns {@code false}.
      */
 
     static boolean checkIfTokensMatchOperand(

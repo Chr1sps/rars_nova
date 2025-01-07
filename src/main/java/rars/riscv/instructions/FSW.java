@@ -8,7 +8,6 @@ import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -52,7 +51,7 @@ public final class FSW extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             Globals.MEMORY_INSTANCE.setWord(
-                RegisterFile.INSTANCE.getIntValue(statement.getOperand(2)) + upperImmediate,
+                Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate,
                 (int) FloatingPointRegisterFile.getValueLong(statement.getOperand(0))
             );
         } catch (final AddressErrorException e) {

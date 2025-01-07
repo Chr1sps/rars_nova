@@ -14,7 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 /**
  * Dump memory contents in Segment Window format. Each line of
@@ -65,9 +65,9 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
 
         // If address in data segment, print in same format as Data Segment Window
         if (Globals.MEMORY_INSTANCE.isAddressInDataSegment(firstAddress)) {
-            int offset = 0;
             try (final var outStream = new PrintStream(new FileOutputStream(file))) {
                 final var builder = new StringBuilder();
+                int offset = 0;
                 for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                     if (offset % 8 == 0) {
                         final var formattedAddress = (doDisplayAddressesInHex)

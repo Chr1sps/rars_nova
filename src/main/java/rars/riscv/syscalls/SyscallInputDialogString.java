@@ -6,7 +6,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
 import java.nio.charset.StandardCharsets;
@@ -77,18 +76,17 @@ public final class SyscallInputDialogString extends AbstractSyscall {
         // A null return value means that "Cancel" was chosen rather than OK.
         // An empty string returned (that is, inputString.length() of zero)
         // means that OK was chosen but no string was input.
-        final String inputString;
-        inputString = JOptionPane.showInputDialog(message);
-        final int byteAddress = RegisterFile.INSTANCE.getIntValue("a1"); // byteAddress of string is in a1
-        final int maxLength = RegisterFile.INSTANCE.getIntValue("a2"); // input buffer size for input string is in a2
+        final String inputString = JOptionPane.showInputDialog(message);
+        final int byteAddress = Globals.REGISTER_FILE.getIntValue("a1"); // byteAddress of string is in a1
+        final int maxLength = Globals.REGISTER_FILE.getIntValue("a2"); // input buffer size for input string is in a2
 
         try {
             if (inputString == null) // Cancel was chosen
             {
-                RegisterFile.INSTANCE.updateRegisterByName("a1", -2);
+                Globals.REGISTER_FILE.updateRegisterByName("a1", -2);
             } else if (inputString.isEmpty()) // OK was chosen but there was no input
             {
-                RegisterFile.INSTANCE.updateRegisterByName("a1", -3);
+                Globals.REGISTER_FILE.updateRegisterByName("a1", -3);
             } else {
                 final byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
                 // The buffer will contain characters, a '\n' character, and the null character
@@ -108,9 +106,9 @@ public final class SyscallInputDialogString extends AbstractSyscall {
 
                 if (utf8BytesList.length > maxLength - 1) {
                     // length of the input string exceeded the specified maximum
-                    RegisterFile.INSTANCE.updateRegisterByName("a1", -4);
+                    Globals.REGISTER_FILE.updateRegisterByName("a1", -4);
                 } else {
-                    RegisterFile.INSTANCE.updateRegisterByName("a1", 0);
+                    Globals.REGISTER_FILE.updateRegisterByName("a1", 0);
                 }
             } // end else
 

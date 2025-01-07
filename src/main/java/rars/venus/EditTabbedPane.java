@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
-import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
 import rars.util.Pair;
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -151,7 +150,7 @@ public class EditTabbedPane extends JPanel {
         FileStatus.setName(name);
         FileStatus.set(FileStatus.State.NEW_NOT_EDITED);
 
-        RegisterFile.INSTANCE.resetRegisters();
+        Globals.REGISTER_FILE.resetRegisters();
         this.mainUI.isMemoryReset = true;
         this.mainPane.executeTab.clearPane();
         this.mainPane.setSelectedComponent(this);
@@ -222,13 +221,12 @@ public class EditTabbedPane extends JPanel {
      * @return true if files closed, false otherwise.
      */
     public boolean closeAllFiles() {
-        final boolean result = true;
-        boolean unsavedChanges = false;
         final int tabCount = tabbedPane.getTabCount();
         if (tabCount > 0) {
             this.mainPane.executeTab.clearPane();
             this.mainPane.setSelectedComponent(this);
             final EditPane[] tabs = new EditPane[tabCount];
+            boolean unsavedChanges = false;
             for (int i = 0; i < tabCount; i++) {
                 tabs[i] = (EditPane) tabbedPane.getComponentAt(i);
                 if (tabs[i].hasUnsavedEdits()) {
@@ -269,6 +267,7 @@ public class EditTabbedPane extends JPanel {
                 }
             }
         }
+        final boolean result = true;
         return result;
     }
 
@@ -347,13 +346,13 @@ public class EditTabbedPane extends JPanel {
     private @Nullable File saveAsFile(final EditPane editPane) {
         File theFile = null;
         if (editPane != null) {
-            JFileChooser saveDialog;
             boolean operationOK = false;
             while (!operationOK) {
                 // Set Save As dialog directory in a logical way. If file in
                 // edit pane had been previously saved, default to its directory.
                 // If a new file (mipsN.asm), default to current save directory.
                 // DPS 13-July-2011
+                JFileChooser saveDialog;
                 if (editPane.isNew()) {
                     saveDialog = new JFileChooser(this.editor.getCurrentSaveDirectory());
                 } else {

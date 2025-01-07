@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.Utils;
 
 /*
@@ -35,15 +35,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>ECALL class.</p>
- */
 public final class ECALL extends BasicInstruction {
     public static final ECALL INSTANCE = new ECALL();
 
-    /**
-     * <p>Constructor for ECALL.</p>
-     */
     private ECALL() {
         super(
             "ecall", "Issue a system call : Execute the system call specified by second in a7",
@@ -51,11 +45,8 @@ public final class ECALL extends BasicInstruction {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        Utils.findAndSimulateSyscall(RegisterFile.INSTANCE.getIntValue("a7"), statement);
+        Utils.findAndSimulateSyscall(Globals.REGISTER_FILE.getIntValue("a7"), statement);
     }
 }

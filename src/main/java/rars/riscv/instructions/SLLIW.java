@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 
 public final class SLLIW extends BasicInstruction {
     public static final SLLIW INSTANCE = new SLLIW();
@@ -21,8 +21,8 @@ public final class SLLIW extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         // Copy from SLLI
-        final long newValue = (long) (int) RegisterFile.INSTANCE.getIntValue(statement.getOperand(1)) << statement.getOperand(
+        final long newValue = (long) (int) Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)) << statement.getOperand(
             2);
-        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

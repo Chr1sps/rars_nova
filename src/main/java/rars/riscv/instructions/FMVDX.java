@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 public final class FMVDX extends BasicInstruction {
     public static final FMVDX INSTANCE = new FMVDX();
@@ -22,7 +22,7 @@ public final class FMVDX extends BasicInstruction {
 
         FloatingPointRegisterFile.updateRegister(
             statement.getOperand(0),
-            RegisterFile.INSTANCE.getLongValue(statement.getOperand(1))
+            Globals.REGISTER_FILE.getLongValue(statement.getOperand(1))
         );
     }
 }

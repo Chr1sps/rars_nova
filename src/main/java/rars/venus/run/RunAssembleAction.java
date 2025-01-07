@@ -9,7 +9,6 @@ import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.InterruptController;
-import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
 import rars.util.SystemIO;
@@ -21,8 +20,8 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.List;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
-import static rars.settings.OtherSettings.OTHER_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
+import static rars.Globals.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -76,7 +75,7 @@ public class RunAssembleAction extends GuiAction {
     // conditions.
 
     /**
-     * <p>Getter for the field <code>programsToAssemble</code>.</p>
+     * <p>Getter for the field {@code programsToAssemble}.</p>
      *
      * @return a {@link java.util.ArrayList} object
      */
@@ -177,7 +176,7 @@ public class RunAssembleAction extends GuiAction {
                 FileStatus.setAssembled(true);
                 FileStatus.set(FileStatus.State.RUNNABLE);
 
-                RegisterFile.INSTANCE.resetRegisters();
+                Globals.REGISTER_FILE.resetRegisters();
                 FloatingPointRegisterFile.resetRegisters();
                 ControlAndStatusRegisterFile.resetRegisters();
                 InterruptController.reset();

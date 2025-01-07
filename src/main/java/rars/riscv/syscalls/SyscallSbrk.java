@@ -5,7 +5,6 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -52,9 +51,9 @@ public class SyscallSbrk extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         try {
-            RegisterFile.INSTANCE.updateRegisterByName(
+            Globals.REGISTER_FILE.updateRegisterByName(
                 "a0",
-                Globals.MEMORY_INSTANCE.allocateBytesFromHeap(RegisterFile.INSTANCE.getIntValue("a0"))
+                Globals.MEMORY_INSTANCE.allocateBytesFromHeap(Globals.REGISTER_FILE.getIntValue("a0"))
             );
         } catch (final IllegalArgumentException iae) {
             throw new ExitingException(

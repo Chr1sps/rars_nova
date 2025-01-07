@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.fail;
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 import static rars.util.Utils.getStacktraceString;
 
 public abstract class AbstractInstructionTest extends RarsTestBase {

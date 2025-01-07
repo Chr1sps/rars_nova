@@ -46,13 +46,12 @@ public class BinaryTextDumpFormat extends AbstractDumpFormat {
     )
         throws AddressErrorException, IOException {
         try (final PrintStream out = new PrintStream(new FileOutputStream(file))) {
-            StringBuilder string;
             for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                 final Integer temp = memory.getRawWordOrNull(address);
                 if (temp == null) {
                     break;
                 }
-                string = new StringBuilder(Integer.toBinaryString(temp));
+                StringBuilder string = new StringBuilder(Integer.toBinaryString(temp));
                 while (string.length() < 32) {
                     string.insert(0, '0');
                 }

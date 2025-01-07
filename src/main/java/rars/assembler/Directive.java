@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Enum representing RISCV assembler directives based on the original class by
  * Pete Sanderson. The directive name is indicative of the directive it
- * represents. For example, <code>DATA</code> represents the RISCV .data
+ * represents. For example, {@code DATA} represents the RISCV .data
  * directive.
  *
  * @author Chr1sps
@@ -134,7 +134,7 @@ public enum Directive {
      * @param str
      *     A String containing candidate directive name (e.g. ".ascii")
      * @return If match is found, returns matching Directives object, else returns
-     * <code>null</code>.
+     * {@code null}.
      */
     public static @Nullable Directive matchDirective(final @NotNull String str) {
         return Arrays.stream(Directive.values())
@@ -151,7 +151,7 @@ public enum Directive {
      * @param str
      *     A String
      * @return If match is found, returns ArrayList of matching Directives objects,
-     * else returns <code>null</code>.
+     * else returns {@code null}.
      */
     public static @NotNull List<@NotNull Directive> prefixMatchDirectives(final @NotNull String str) {
         return Arrays.stream(Directive.values())

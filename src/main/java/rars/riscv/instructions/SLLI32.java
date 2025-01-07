@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -48,9 +48,9 @@ public final class SLLI32 extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement) {
 
         final long newValue = Integer.toUnsignedLong(
-            RegisterFile.INSTANCE.getIntValue(statement.getOperand(1))
+            Globals.REGISTER_FILE.getIntValue(statement.getOperand(1))
                 << statement.getOperand(2)
         );
-        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

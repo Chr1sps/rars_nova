@@ -31,7 +31,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 final class AppTest extends RarsTestBase {
     // TODO: refactor this class to avoid repetitions and to enhance test speed
@@ -222,7 +222,7 @@ final class AppTest extends RarsTestBase {
         }
     }
 
-    private static void testPseudoInstructionsImpl(final boolean isRV64) {
+    private static void testPseudoInstructionsImpl(final boolean isRV64) throws Exception {
         final var programArgs = new ProgramOptions();
         programArgs.startAtMain = true;
         programArgs.maxSteps = 500;
@@ -238,37 +238,34 @@ final class AppTest extends RarsTestBase {
             : InstructionsRegistry.EXTENDED_INSTRUCTIONS.r32All;
         for (final var instruction : instructionsToTest) {
             final var programString = "label:" + instruction.exampleFormat;
-            try {
-                program.assembleString(programString);
+            program.assembleString(programString);
+            program.setup(List.of(), "");
+            final int first = program.getMemory().getWord(0x400000);
+            final int second = program.getMemory().getWord(0x400004);
+            final ProgramStatement ps = new ProgramStatement(first, 0x400000);
+            assertNotNull(ps.getInstruction(), "Error 11 on: " + programString);
+            assertThat(
+                "Error 12 on: " + programString, ps.getPrintableBasicAssemblyStatement(),
+                not(containsString("invalid"))
+            );
+            if (programString.contains("t0")
+                || programString.contains("t1")
+                || programString.contains("t2")
+                || programString.contains("f1")) {
+                // TODO: test that each register individually is meaningful and test every
+                // register.
+                // Currently this covers all instructions and is an alert if I made a trivial
+                // mistake.
+                final var register_substitute = programString
+                    .replaceAll("t0|t1|t2", "x0")
+                    .replaceAll("f1", "f0");
+                program.assembleString(register_substitute);
                 program.setup(List.of(), "");
-                final int first = program.getMemory().getWord(0x400000);
-                final int second = program.getMemory().getWord(0x400004);
-                final ProgramStatement ps = new ProgramStatement(first, 0x400000);
-                assertNotNull(ps.getInstruction(), "Error 11 on: " + programString);
-                assertThat(
-                    "Error 12 on: " + programString, ps.getPrintableBasicAssemblyStatement(),
-                    not(containsString("invalid"))
-                );
-                if (programString.contains("t0")
-                    || programString.contains("t1")
-                    || programString.contains("t2")
-                    || programString.contains("f1")) {
-                    // TODO: test that each register individually is meaningful and test every
-                    // register.
-                    // Currently this covers all instructions and is an alert if I made a trivial
-                    // mistake.
-                    final var register_substitute = programString
-                        .replaceAll("t0|t1|t2", "x0")
-                        .replaceAll("f1", "f0");
-                    program.assembleString(register_substitute);
-                    program.setup(List.of(), "");
-                    final int word1 = program.getMemory().getWord(0x400000);
-                    final int word2 = program.getMemory().getWord(0x400004);
-                    assertFalse(word1 == first && word2 == second, "Error 13 on: " + programString);
-                }
-            } catch (final Exception e) {
-                throw new RuntimeException("Error 14 on %s :%s".formatted(programString, e));
+                final int word1 = program.getMemory().getWord(0x400000);
+                final int word2 = program.getMemory().getWord(0x400004);
+                assertFalse(word1 == first && word2 == second, "Error 13 on: " + programString);
             }
+
         }
     }
 
@@ -309,12 +306,12 @@ final class AppTest extends RarsTestBase {
     }
 
     @Test
-    void testPseudoInstructions32() {
+    void testPseudoInstructions32() throws Exception {
         testPseudoInstructionsImpl(false);
     }
 
     @Test
-    void testPseudoInstructions64() {
+    void testPseudoInstructions64() throws Exception {
         testPseudoInstructionsImpl(true);
     }
 }

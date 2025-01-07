@@ -22,7 +22,7 @@ public final class EditorThemeSettings extends SettingsBase {
     private static final String THEME_PREFIX = "Theme";
 
     // region Preferences keys
-   
+
     private static final String BACKGROUND = "Background";
     private static final String FOREGROUND = "Foreground";
     private static final String LINE_HIGHLIGHT = "LineHighlight";
@@ -32,7 +32,6 @@ public final class EditorThemeSettings extends SettingsBase {
     private static final String BOLD = "Bold";
     private static final String ITALIC = "Italic";
     private static final String UNDERLINE = "Underline";
-    public static @NotNull EditorThemeSettings EDITOR_THEME_SETTINGS = new EditorThemeSettings(SETTINGS_PREFERENCES);
 
     // endregion Preferences keys
 
@@ -46,7 +45,7 @@ public final class EditorThemeSettings extends SettingsBase {
     public @NotNull SettingsTheme currentTheme;
     private @NotNull SettingsTheme backupTheme;
 
-    private EditorThemeSettings(final @NotNull Preferences preferences) {
+    public EditorThemeSettings(final @NotNull Preferences preferences) {
         this.preferences = preferences;
         this.currentTheme = loadThemeFromPreferences();
         this.backupTheme = this.currentTheme.clone();
@@ -109,7 +108,7 @@ public final class EditorThemeSettings extends SettingsBase {
     }
 
     // region Preference writing methods
-    
+
     private void writeThemeToPreferences(final @NotNull SettingsTheme settingsTheme) {
         this.preferences.put(THEME_PREFIX + BACKGROUND, getColorAsHexString(settingsTheme.backgroundColor));
         this.preferences.put(THEME_PREFIX + FOREGROUND, getColorAsHexString(settingsTheme.foregroundColor));

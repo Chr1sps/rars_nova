@@ -16,9 +16,9 @@ public final class OptionSection extends JPanel {
         final @Nullable Color colorPickerButtonState
     ) {
         super();
-        var isFirst = true;
         this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         this.add(new JLabel(label));
+        var isFirst = true;
         if (checkBoxState != null) {
             this.checkBox = new JCheckBox();
             this.checkBox.setSelected(checkBoxState);

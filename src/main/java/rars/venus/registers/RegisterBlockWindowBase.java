@@ -7,7 +7,6 @@ import rars.notices.RegisterAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
-import rars.settings.HighlightingSettings;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.venus.NumberDisplayBaseChooser;
@@ -20,10 +19,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.function.Consumer;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
-import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
-import static rars.settings.FontSettings.FONT_SETTINGS;
+import static rars.Globals.*;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -68,6 +66,15 @@ public abstract class RegisterBlockWindowBase extends JPanel {
     private final @NotNull JTable table;
     private final Register[] registers;
     private int highlightRow;
+    public final @NotNull Consumer<@NotNull RegisterAccessNotice> processRegisterNotice = notice -> {
+
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            // Uses the same highlighting technique as for Text Segment -- see
+            // AddressCellRenderer class in DataSegmentWindow.java.
+            this.highlightCellForRegister(notice.register);
+            Globals.gui.registersPane.setSelectedComponent(this);
+        }
+    };
 
     /**
      * Constructor which sets up a fresh window with a table that contains the
@@ -85,7 +92,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
             if (notice.action() == SimulatorNotice.Action.START) {
                 // Simulated MIPS execution starts.  Respond to memory changes if running in timed
                 // or stepped mode.
-                if (notice.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || notice.maxSteps() == 1) {
+                if (Double.compare(notice.runSpeed(), RunSpeedPanel.UNLIMITED_SPEED) != 0 || notice.maxSteps() == 1) {
                     beginObserving();
                 }
             } else {
@@ -195,22 +202,13 @@ public abstract class RegisterBlockWindowBase extends JPanel {
         }
     }
 
-    public final void processRegisterNotice(final @NotNull RegisterAccessNotice notice) {
-        if (notice.accessType == AccessNotice.AccessType.WRITE) {
-            // Uses the same highlighting technique as for Text Segment -- see
-            // AddressCellRenderer class in DataSegmentWindow.java.
-            this.highlightCellForRegister(notice.register);
-            Globals.gui.registersPane.setSelectedComponent(this);
-        }
-    }
-
     /**
      * Highlight the row corresponding to the given register.
      *
      * @param register
      *     Register object corresponding to row to be selected.
      */
-    private void highlightCellForRegister(Register register) {
+    private void highlightCellForRegister(final Register register) {
         for (int i = 0; i < registers.length; i++) {
             if (registers[i] == register) {
                 this.highlightRow = i;
@@ -232,7 +230,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      * don't want highlighting for a given column, don't use this. Currently we highlight
      * all columns.
      */
-    private class RegisterCellRenderer extends DefaultTableCellRenderer {
+    private final class RegisterCellRenderer extends DefaultTableCellRenderer {
         private final int alignment;
         private final @NotNull JTable table;
         private Font font;
@@ -261,7 +259,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
             cell.setFont(this.font);
             cell.setHorizontalAlignment(this.alignment);
             if (BOOL_SETTINGS.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && row == highlightRow) {
-                final var highlightingStyle = HighlightingSettings.HIGHLIGHTING_SETTINGS.getRegisterHighlightingStyle();
+                final var highlightingStyle = Globals.HIGHLIGHTING_SETTINGS.getRegisterHighlightingStyle();
                 cell.setForeground(highlightingStyle.foreground());
                 cell.setBackground(highlightingStyle.background());
             } else {
@@ -273,7 +271,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
         }
     }
 
-    private class RegTableModel extends AbstractTableModel {
+    private final class RegTableModel extends AbstractTableModel {
         private final String[] columnNames = {"", "", ""};
         private final Object[][] data;
 

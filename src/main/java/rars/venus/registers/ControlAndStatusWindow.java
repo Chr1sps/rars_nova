@@ -5,7 +5,7 @@ import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 public final class ControlAndStatusWindow extends RegisterBlockWindowBase {
     /**
@@ -47,12 +47,12 @@ public final class ControlAndStatusWindow extends RegisterBlockWindowBase {
 
     @Override
     protected void beginObserving() {
-        ControlAndStatusRegisterFile.addRegistersObserver(this::processRegisterNotice);
+        ControlAndStatusRegisterFile.addRegistersObserver(this.processRegisterNotice);
     }
 
     @Override
     protected void endObserving() {
-        ControlAndStatusRegisterFile.deleteRegistersObserver(this::processRegisterNotice);
+        ControlAndStatusRegisterFile.deleteRegistersObserver(this.processRegisterNotice);
     }
 
     @Override

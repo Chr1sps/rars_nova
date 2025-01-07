@@ -17,6 +17,7 @@ public final class HighlightingSettings extends SettingsBase {
     private static final Logger LOGGER = LogManager.getLogger(HighlightingSettings.class);
 
     // region Preferences keys
+
     private static final String HIGHLIGHTING_PREFIX = "Highlighting";
 
     private static final String BACKGROUND = "Background";
@@ -25,7 +26,7 @@ public final class HighlightingSettings extends SettingsBase {
     private static final String ITALIC = "Italic";
     private static final String UNDERLINE = "Underline";
     private static final String ENABLED = "Enabled";
-    public static @NotNull HighlightingSettings HIGHLIGHTING_SETTINGS = new HighlightingSettings(SETTINGS_PREFERENCES);
+
     // endregion Preferences keys
 
     private final @NotNull Preferences preferences;
@@ -38,6 +39,7 @@ public final class HighlightingSettings extends SettingsBase {
     }
 
     // region Preferences prefix methods
+
     private static @NotNull String foregroundPrefix(final @NotNull HighlightingType type) {
         return HIGHLIGHTING_PREFIX + type.name + FOREGROUND;
     }
@@ -77,6 +79,7 @@ public final class HighlightingSettings extends SettingsBase {
     public @NotNull TokenStyle getDelaySlotHighlightingStyle() {
         return delaySlotHighlightingStyle;
     }
+
     // endregion Preferences prefix methods
 
     public void saveSettings() {

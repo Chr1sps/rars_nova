@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 
 /*
@@ -125,7 +125,7 @@ public final class VenusUI extends JFrame {
      * @param files
      *     Files to open
      */
-    public VenusUI(final String name, final @NotNull List<@NotNull File> files) {
+    public VenusUI(final @NotNull String name, final @NotNull List<@NotNull File> files) {
         super(name);
         this.setInitialDarkModeState(BOOL_SETTINGS.getSetting(BoolSetting.DARK_MODE));
         Globals.gui = this;

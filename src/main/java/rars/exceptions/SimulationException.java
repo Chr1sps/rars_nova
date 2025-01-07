@@ -3,9 +3,9 @@ package rars.exceptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorMessage;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.BinaryUtils;
 
 /**
@@ -45,13 +45,12 @@ public class SimulationException extends Exception {
                 ps.sourceLine.lineNumber(),
                 0,
                 "Runtime exception at %s: %s".formatted(
-                    BinaryUtils.intToHexString(RegisterFile.INSTANCE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
+                    BinaryUtils.intToHexString(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
                     message
                 )
             ),
             0
         );
-        ps.getSourceProgram();
     }
 
     public SimulationException(final @NotNull ProgramStatement ps, final @NotNull AddressErrorException aee) {
@@ -62,7 +61,7 @@ public class SimulationException extends Exception {
                 ps.sourceLine.lineNumber(),
                 0,
                 "Runtime exception at %s: %s".formatted(
-                    BinaryUtils.intToHexString(RegisterFile.INSTANCE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
+                    BinaryUtils.intToHexString(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
                     aee.getMessage()
                 )
             ),

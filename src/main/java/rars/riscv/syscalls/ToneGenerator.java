@@ -204,8 +204,8 @@ final class Tone {
     public static void play(final byte pitch, final int duration, final byte instrument, final byte volume) {
 
         try {
-            Sequencer player;
             Tone.openLock.lock();
+            Sequencer player;
             try {
                 player = MidiSystem.getSequencer();
                 player.open();

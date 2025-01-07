@@ -15,10 +15,10 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.File;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
-import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
-import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.OtherSettings.OTHER_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
+import static rars.Globals.EDITOR_THEME_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
+import static rars.Globals.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar

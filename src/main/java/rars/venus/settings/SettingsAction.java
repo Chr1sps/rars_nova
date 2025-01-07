@@ -7,7 +7,7 @@ import rars.venus.GuiAction;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 /*
 Copyright (c) 20017,  Benjamin Landers

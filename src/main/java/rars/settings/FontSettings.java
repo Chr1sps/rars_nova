@@ -23,8 +23,6 @@ public final class FontSettings extends SettingsBase {
     private static final String LIGATURES = "Ligatures";
     // endregion Preferences keys
 
-    public static @NotNull FontSettings FONT_SETTINGS = new FontSettings(SETTINGS_PREFERENCES);
-
     private final @NotNull Preferences preferences;
     public @NotNull FontWeight fontWeight;
     public boolean isLigaturized;

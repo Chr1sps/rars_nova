@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.operations.Comparisons;
 import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -55,6 +55,6 @@ public final class FLTS extends BasicInstruction {
         final boolean result = Comparisons.compareSignalingLessThan(f1, f2, e);
         Floating.setfflags(e);
         final long newValue = result ? 1 : 0;
-        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

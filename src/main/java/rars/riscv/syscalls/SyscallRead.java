@@ -6,7 +6,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -48,21 +47,21 @@ public class SyscallRead extends AbstractSyscall {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
-        int byteAddress = RegisterFile.INSTANCE.getIntValue("a1"); // destination of characters read from file
-        int index = 0;
-        final int length = RegisterFile.INSTANCE.getIntValue("a2");
+        int byteAddress = Globals.REGISTER_FILE.getIntValue("a1"); // destination of characters read from file
+        final int length = Globals.REGISTER_FILE.getIntValue("a2");
         final byte[] myBuffer = new byte[length]; // specified length
         // Call to SystemIO.xxxx.read(xxx,xxx,xxx) returns actual length
         final int retLength = SystemIO.readFromFile(
-            RegisterFile.INSTANCE.getIntValue("a0"), // fd
+            Globals.REGISTER_FILE.getIntValue("a0"), // fd
             myBuffer, // buffer
             length
         ); // length
         // set returned value in register
-        RegisterFile.INSTANCE.updateRegisterByName("a0", retLength);
+        Globals.REGISTER_FILE.updateRegisterByName("a0", retLength);
 
         // copy bytes from returned buffer into memory
         try {
+            int index = 0;
             while (index < retLength) {
                 Globals.MEMORY_INSTANCE.setByte(
                     byteAddress++,

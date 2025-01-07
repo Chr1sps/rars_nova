@@ -65,7 +65,7 @@ public final class MULHSU extends Arithmetic {
     public int computeW(final int value, final int value2) {
         // Sign extend t2, but not t3
         final long ext = ((long) value << 32) >> 32;
-        final long ext2 = ((long) value2) & 0xFFFFFFFFL;
+        final long ext2 = value2 & 0xFFFFFFFFL;
         // Return the top 32 bits of the mutliplication
         return (int) ((ext * ext2) >> 32);
     }

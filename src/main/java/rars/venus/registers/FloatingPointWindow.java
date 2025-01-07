@@ -5,7 +5,7 @@ import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 public final class FloatingPointWindow extends RegisterBlockWindowBase {
     /**
@@ -61,12 +61,12 @@ public final class FloatingPointWindow extends RegisterBlockWindowBase {
 
     @Override
     protected void beginObserving() {
-        FloatingPointRegisterFile.addRegistersSubscriber(this::processRegisterNotice);
+        FloatingPointRegisterFile.addRegistersSubscriber(this.processRegisterNotice);
     }
 
     @Override
     protected void endObserving() {
-        FloatingPointRegisterFile.deleteRegistersObserver(this::processRegisterNotice);
+        FloatingPointRegisterFile.deleteRegistersObserver(this.processRegisterNotice);
     }
 
     @Override

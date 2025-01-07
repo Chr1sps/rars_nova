@@ -12,7 +12,7 @@ import rars.settings.BoolSetting;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.fail;
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 public abstract class AbstractCompressedInstructionTest {
 

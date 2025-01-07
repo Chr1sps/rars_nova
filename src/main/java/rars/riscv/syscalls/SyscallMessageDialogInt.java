@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
 
@@ -62,7 +62,7 @@ public final class SyscallMessageDialogInt extends AbstractSyscall {
         // Display the dialog.
         JOptionPane.showMessageDialog(
             null,
-            message + (int) RegisterFile.INSTANCE.getIntValue("a1"),
+            message + (int) Globals.REGISTER_FILE.getIntValue("a1"),
             null,
             JOptionPane.INFORMATION_MESSAGE
         );

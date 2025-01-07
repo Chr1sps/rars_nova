@@ -34,9 +34,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Stores information of macros defined by now. <br>
  * Will be used in first pass of assembling RISCV source code. When reached
- * <code>.macro</code> directive, parser calls
+ * {@code .macro} directive, parser calls
  * {@link MacroPool#beginMacro(Token)} and skips source code lines until
- * reaches <code>.end_macro</code> directive. then calls
+ * reaches {@code .end_macro} directive. then calls
  * {@link MacroPool#commitMacro(Token)} and the macro information stored in a
  * {@link Macro} instance will be added to {@link #macroList}. <br>
  * Each {@link RISCVProgram} will have one {@link MacroPool}<br>
@@ -79,14 +79,14 @@ public final class MacroPool {
     }
 
     /**
-     * This method will be called by parser when reached <code>.macro</code>
+     * This method will be called by parser when reached {@code .macro}
      * directive.<br>
-     * Instantiates a new {@link Macro} object and stores it in {@link #current}
-     * . {@link #current} will be added to {@link #macroList} by
+     * Instantiates a new {@link Macro} object and stores it in {@link #current}.
+     * {@link #current} will be added to {@link #macroList} by
      * {@link #commitMacro(Token)}
      *
      * @param nameToken
-     *     Token containing name of macro after <code>.macro</code>
+     *     Token containing name of macro after {@code .macro}
      *     directive
      */
     public void beginMacro(final @NotNull Token nameToken) {
@@ -98,12 +98,12 @@ public final class MacroPool {
     }
 
     /**
-     * This method will be called by parser when reached <code>.end_macro</code>
+     * This method will be called by parser when reached {@code .end_macro}
      * directive. <br>
      * Adds/Replaces {@link #current} macro into the {@link #macroList}.
      *
      * @param endToken
-     *     Token containing <code>.end_macro</code> directive in source
+     *     Token containing {@code .end_macro} directive in source
      *     code
      */
     public void commitMacro(final @NotNull Token endToken) {
@@ -146,7 +146,7 @@ public final class MacroPool {
      *
      * @param value
      *     a {@link java.lang.String} object
-     * @return true if any macros have been defined with name <code>value</code>
+     * @return true if any macros have been defined with name {@code value}
      * by now, not concerning arguments count.
      */
     public boolean matchesAnyMacroName(final @NotNull String value) {
@@ -159,7 +159,7 @@ public final class MacroPool {
     }
 
     /**
-     * <p>Getter for the field <code>current</code>.</p>
+     * <p>Getter for the field {@code current}.</p>
      *
      * @return a {@link Macro} object
      */

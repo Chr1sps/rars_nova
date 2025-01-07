@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.operations.Comparisons;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 
 public final class FEQD extends BasicInstruction {
     public static final FEQD INSTANCE = new FEQD();
@@ -28,6 +28,6 @@ public final class FEQD extends BasicInstruction {
         final boolean result = Comparisons.compareQuietEqual(f1, f2, e);
         Floating.setfflags(e);
         final long newValue = result ? 1 : 0;
-        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

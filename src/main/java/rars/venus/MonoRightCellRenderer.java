@@ -6,8 +6,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
-import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
-import static rars.settings.FontSettings.FONT_SETTINGS;
+import static rars.Globals.EDITOR_THEME_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar

@@ -140,7 +140,7 @@ public class Register {
 
     /**
      * Change the register's reset second; the second to which it will be
-     * set when <code>resetValue()</code> is called.
+     * set when {@code resetValue()} is called.
      *
      * @param reset
      *     a long

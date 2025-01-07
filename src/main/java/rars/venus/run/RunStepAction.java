@@ -5,7 +5,6 @@ import rars.Globals;
 import rars.RISCVProgram;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
-import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
@@ -19,7 +18,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.function.Consumer;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -58,22 +57,6 @@ public class RunStepAction extends GuiAction {
     private String name;
     private ExecutePane executePane;
 
-    /**
-     * <p>Constructor for RunStepAction.</p>
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
-     * @param gui
-     *     a {@link VenusUI} object
-     */
     public RunStepAction(
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
@@ -179,7 +162,7 @@ public class RunStepAction extends GuiAction {
             FileStatus.set(FileStatus.State.TERMINATED); // should be redundant.
             this.executePane.textSegment.setCodeHighlighting(true);
             this.executePane.textSegment.unhighlightAllSteps();
-            this.executePane.textSegment.highlightStepAtAddress(RegisterFile.INSTANCE.getProgramCounter() - 4);
+            this.executePane.textSegment.highlightStepAtAddress(Globals.REGISTER_FILE.getProgramCounter() - 4);
         }
         this.mainUI.isMemoryReset = false;
     }

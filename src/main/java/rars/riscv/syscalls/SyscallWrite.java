@@ -6,7 +6,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -58,16 +57,16 @@ public class SyscallWrite extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
-        int byteAddress = RegisterFile.INSTANCE.getIntValue("a1"); // source of characters to write to file
-        final int reqLength = RegisterFile.INSTANCE.getIntValue("a2"); // user-requested length
+        int byteAddress = Globals.REGISTER_FILE.getIntValue("a1"); // source of characters to write to file
+        final int reqLength = Globals.REGISTER_FILE.getIntValue("a2"); // user-requested length
         if (reqLength < 0) {
-            RegisterFile.INSTANCE.updateRegisterByName("a0", -1);
+            Globals.REGISTER_FILE.updateRegisterByName("a0", -1);
             return;
         }
-        int index = 0;
         final byte[] myBuffer = new byte[reqLength];
         try {
             var byteValue = Globals.MEMORY_INSTANCE.getByte(byteAddress);
+            int index = 0;
             while (index < reqLength) // Stop at requested length. Null bytes are included.
             {
                 myBuffer[index++] = byteValue;
@@ -78,11 +77,11 @@ public class SyscallWrite extends AbstractSyscall {
             throw new ExitingException(statement, e);
         }
         final int retValue = SystemIO.writeToFile(
-            RegisterFile.INSTANCE.getIntValue("a0"), // fd
+            Globals.REGISTER_FILE.getIntValue("a0"), // fd
             myBuffer, // buffer
-            RegisterFile.INSTANCE.getIntValue("a2")
+            Globals.REGISTER_FILE.getIntValue("a2")
         ); // length
         // set returned value in register
-        RegisterFile.INSTANCE.updateRegisterByName("a0", retValue);
+        Globals.REGISTER_FILE.updateRegisterByName("a0", retValue);
     }
 }

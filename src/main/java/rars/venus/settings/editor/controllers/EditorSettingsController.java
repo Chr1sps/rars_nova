@@ -9,7 +9,7 @@ import rars.venus.settings.editor.TreePanel;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
+import static rars.Globals.EDITOR_THEME_SETTINGS;
 
 public final class EditorSettingsController {
     private final @NotNull FontSettingsController fontSettingsController;

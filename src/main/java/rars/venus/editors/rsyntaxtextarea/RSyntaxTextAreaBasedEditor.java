@@ -25,7 +25,7 @@ import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
 
 public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private static final @NotNull String SYNTAX_STYLE_RISCV = "text/riscv";
@@ -53,9 +53,10 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         this.currentFont = FONT_SETTINGS.getCurrentFont();
         this.setFont(this.currentFont);
         this.setTheme(theme);
-        textArea.setSyntaxEditingStyle(SYNTAX_STYLE_RISCV);
-        textArea.setCodeFoldingEnabled(true);
-        textArea.setMarkOccurrencesDelay(1);
+        this.textArea.setSyntaxEditingStyle(SYNTAX_STYLE_RISCV);
+        this.textArea.setCodeFoldingEnabled(true);
+        this.textArea.setMarkOccurrences(true);
+        this.textArea.setMarkOccurrencesDelay(1);
     }
 
     @Override
@@ -188,6 +189,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void setSelectionColor(final Color c) {
         this.textArea.setSelectionColor(c);
+        this.textArea.setMarkOccurrencesColor(c);
     }
 
     @Override

@@ -9,6 +9,7 @@ import rars.riscv.SyscallNumberOverride;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.riscv.hardware.RegisterFile;
+import rars.settings.*;
 import rars.util.PropertiesFile;
 import rars.venus.VenusUI;
 
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static rars.settings.OtherSettings.OTHER_SETTINGS;
+import static java.util.prefs.Preferences.userNodeForPackage;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -47,10 +48,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
- * Collection of globally-available data structures.
- *
- * @author Pete Sanderson
- * @version August 2003
+ * Since the original RARS code contained *a lot* of globally accessible mutable state,
+ * it became necessary to encapsulate it in a single class to make it easier to reason about
+ * and to potentially make it easier to refactor in the future. This class serves as a place
+ * to put all the global mutable state that was previously scattered throughout the codebase.
  */
 public final class Globals {
     /// Lock variable used at head of synchronized block to guard memory and registers
@@ -69,8 +70,6 @@ public final class Globals {
     public static final @NotNull String copyrightYears = "2003-2019";
     /// Copyright holders
     public static final @NotNull String copyrightHolders = "Pete Sanderson and Kenneth Vollmar";
-    /// Symbol table for file currently being assembled.
-    public static final @NotNull SymbolTable symbolTable = new SymbolTable(null);
     /// List of accepted file extensions for RISCV assembly source files.
     public static final @NotNull List<@NotNull String> fileExtensions = List.of("asm", "s", "S");
     /// Maximum length of scrolled message window (RARS Messages and Run I/O)
@@ -79,26 +78,43 @@ public final class Globals {
     public static final int maximumErrorMessages = 200;
     /// Maximum number of back-step operations to buffer
     public static final int maximumBacksteps = 2000;
-
+    /// Symbol table for file currently being assembled.
+    public static final @NotNull SymbolTable GLOBAL_SYMBOL_TABLE;
+    ///  Register file for the RARS simulator.
+    public static final @NotNull RegisterFile REGISTER_FILE;
     private static final @NotNull Logger LOGGER = LogManager.getLogger(Globals.class);
-
     private static final String syscallPropertiesFile = "Syscall";
-
-    /// The program currently being worked with. Used by GUI only, not command line.
-    public static RISCVProgram program;
-
     /// Flag to determine whether to produce internal debugging information.
     public static boolean debug = false;
-
     /// Exit code -- useful with SYSCALL 17 when running from command line (not GUI)
     public static int exitCode = 0;
-
     /// The GUI being used (if any) with this simulator.
     public static @Nullable VenusUI gui = null;
-    public static @NotNull Memory MEMORY_INSTANCE = new Memory(OTHER_SETTINGS.getMemoryConfiguration());
+    /// The program currently being worked with. Used by GUI only, not command line.
+    public static RISCVProgram program;
+    public static @NotNull OtherSettings OTHER_SETTINGS;
+    public static @NotNull BoolSettings BOOL_SETTINGS;
+    public static @NotNull EditorThemeSettings EDITOR_THEME_SETTINGS;
+    public static @NotNull FontSettings FONT_SETTINGS;
+    public static @NotNull HighlightingSettings HIGHLIGHTING_SETTINGS;
+
+    public static @NotNull Memory MEMORY_INSTANCE;
 
     static {
-        setupGlobalMemoryConfiguration(OTHER_SETTINGS.getMemoryConfiguration());
+        final var settingsPreferences = userNodeForPackage(SettingsBase.class);
+
+        OTHER_SETTINGS = new OtherSettings(settingsPreferences);
+        BOOL_SETTINGS = new BoolSettings(settingsPreferences);
+        EDITOR_THEME_SETTINGS = new EditorThemeSettings(settingsPreferences);
+        FONT_SETTINGS = new FontSettings(settingsPreferences);
+        HIGHLIGHTING_SETTINGS = new HighlightingSettings(settingsPreferences);
+
+        final var initialMemoryConfiguration = OTHER_SETTINGS.getMemoryConfiguration();
+
+        MEMORY_INSTANCE = new Memory(initialMemoryConfiguration);
+
+        GLOBAL_SYMBOL_TABLE = new SymbolTable();
+        REGISTER_FILE = new RegisterFile(GLOBAL_SYMBOL_TABLE, initialMemoryConfiguration);
     }
 
     private Globals() {
@@ -128,7 +144,7 @@ public final class Globals {
 
     public static void setupGlobalMemoryConfiguration(final @NotNull MemoryConfiguration newConfiguration) {
         MEMORY_INSTANCE.setMemoryConfigurationAndReset(newConfiguration);
-        RegisterFile.INSTANCE.setValuesFromConfiguration(newConfiguration);
+        REGISTER_FILE.setValuesFromConfiguration(newConfiguration);
     }
 
     public static @NotNull Memory swapInstance(final @NotNull Memory mem) {

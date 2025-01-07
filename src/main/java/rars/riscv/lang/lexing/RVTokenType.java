@@ -31,5 +31,5 @@ public enum RVTokenType {
     ROUNDING_MODE, // "rne", "rtz", "rdn", "rup", "rmm", "dyn"
     MACRO_PARAMETER, // %ident, $ident
     HI, // %hi
-    LO; // %lo
+    LO // %lo
 }

@@ -73,7 +73,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
 
 /**
  * Instruction/memory dump tool. Dumps every instruction run and every memory
@@ -220,11 +220,11 @@ public class InstructionMemoryDump extends AbstractTool {
                 return;
             }
             final File file = new File(filename);
-            final String fullpath = file.getCanonicalPath();
             final BufferedWriter bwr = new BufferedWriter(new FileWriter(file));
             bwr.write(this.log.toString());
             bwr.flush();
             bwr.close();
+            final String fullpath = file.getCanonicalPath();
             this.logSuccess.setText("Successfully dumped to " + fullpath);
         } catch (final IOException e) {
             this.logSuccess.setText("Failed to successfully dump. Cause: " + e.getMessage());

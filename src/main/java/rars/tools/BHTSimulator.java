@@ -32,7 +32,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.riscv.hardware.RegisterFile;
 import rars.riscv.instructions.Branch;
 
 import javax.swing.*;
@@ -141,7 +140,7 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     protected void addAsObserver() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
-        this.addAsObserver(RegisterFile.INSTANCE.pc);
+        this.addAsObserver(Globals.REGISTER_FILE.pc);
     }
 
     /**
@@ -334,7 +333,7 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
                     // if current instruction is branch instruction
                     if (stmt.getInstruction() instanceof Branch) {
                         this.handlePreBranchInst(stmt);
-                        this.m_lastBranchTaken = ((Branch) stmt.getInstruction()).willBranch(stmt);
+                        this.m_lastBranchTaken = ((Branch) stmt.getInstruction()).willBranch.apply(stmt);
                         this.m_pendingBranchInstAddress = stmt.getAddress();
                         clearTextFields = false;
                     }

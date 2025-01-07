@@ -18,7 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 /**
  * <p>
@@ -123,7 +123,7 @@ public final class Program {
     }
 
     private ErrorList assemble(final @NotNull List<RISCVProgram> programs) throws AssemblyException {
-        RegisterFile.INSTANCE.setValuesFromConfiguration(this.assembled.getMemoryConfiguration());
+        Globals.REGISTER_FILE.setValuesFromConfiguration(this.assembled.getMemoryConfiguration());
         final Memory temp = Globals.swapInstance(this.assembled); // Assembling changes memory so we need to swap to 
         // capture that.
         ErrorList warnings = null;
@@ -142,8 +142,8 @@ public final class Program {
             throw e;
         }
 
-        RegisterFile.INSTANCE.initializeProgramCounter(this.programOptions.startAtMain);
-        this.startPC = RegisterFile.INSTANCE.getProgramCounter();
+        Globals.REGISTER_FILE.initializeProgramCounter(this.programOptions.startAtMain);
+        this.startPC = Globals.REGISTER_FILE.getProgramCounter();
 
         return warnings;
     }
@@ -163,11 +163,11 @@ public final class Program {
         new ProgramArgumentList(args).storeProgramArguments();
         Globals.swapInstance(tmpMem);
 
-        RegisterFile.INSTANCE.resetRegisters();
+        Globals.REGISTER_FILE.resetRegisters();
         FloatingPointRegisterFile.resetRegisters();
         ControlAndStatusRegisterFile.resetRegisters();
         InterruptController.reset();
-        RegisterFile.INSTANCE.initializeProgramCounter(this.startPC);
+        Globals.REGISTER_FILE.initializeProgramCounter(this.startPC);
         Globals.exitCode = 0;
 
         // Copy in assembled code and arguments
@@ -202,8 +202,6 @@ public final class Program {
      *     program cannot be simulated further.
      */
     public Simulator.Reason simulate() throws SimulationException {
-        Simulator.Reason ret = null;
-        SimulationException e = null;
 
         // Swap out global state for local state.
         final boolean selfMod = BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED);
@@ -214,6 +212,8 @@ public final class Program {
         final SystemIO.Data tmpFiles = SystemIO.swapData(this.fds);
         final Memory tmpMem = Globals.swapInstance(this.simulation);
 
+        SimulationException e = null;
+        Simulator.Reason ret = null;
         try {
             ret = RISCVProgram.simulate(this.programOptions.maxSteps);
         } catch (final SimulationException se) {

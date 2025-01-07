@@ -6,7 +6,7 @@ import rars.venus.settings.editor.GenericOptionSection;
 
 import javax.swing.*;
 
-import static rars.settings.OtherSettings.OTHER_SETTINGS;
+import static rars.Globals.OTHER_SETTINGS;
 import static rars.venus.settings.editor.views.SyntaxStyleView.buildRow;
 
 public final class OtherSettingsView extends JPanel {

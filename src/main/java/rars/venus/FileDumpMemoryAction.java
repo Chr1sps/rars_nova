@@ -215,18 +215,16 @@ public class FileDumpMemoryAction extends GuiAction {
     // User has clicked "Dump" button, so launch a file chooser then get
     // segment (memory range) and format selections and save to the file.
     private boolean performDump(final int firstAddress, final int lastAddress, final DumpFormat format) {
-        File theFile;
-        final JFileChooser saveDialog;
-        boolean operationOK = false;
 
-        saveDialog = new JFileChooser(this.mainUI.editor.getCurrentSaveDirectory());
+        final JFileChooser saveDialog = new JFileChooser(this.mainUI.editor.getCurrentSaveDirectory());
         saveDialog.setDialogTitle(FileDumpMemoryAction.title);
+        boolean operationOK = false;
         while (!operationOK) {
             final int decision = saveDialog.showSaveDialog(this.mainUI);
             if (decision != JFileChooser.APPROVE_OPTION) {
                 return false;
             }
-            theFile = saveDialog.getSelectedFile();
+            File theFile = saveDialog.getSelectedFile();
             operationOK = true;
             if (theFile.exists()) {
                 final int overwrite = JOptionPane.showConfirmDialog(

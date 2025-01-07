@@ -1,6 +1,7 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -9,7 +10,6 @@ import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 import java.math.BigInteger;
 
@@ -31,7 +31,7 @@ public final class FCVTDWU extends BasicInstruction {
         final Float64 tmp = new Float64(0);
         final Float64 converted = Conversions
             .convertFromInt(
-                BigInteger.valueOf(RegisterFile.INSTANCE.getIntValue(statement.getOperand(1)) & 0xFFFFFFFFL),
+                BigInteger.valueOf(Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)) & 0xFFFFFFFFL),
                 e,
                 tmp
             );

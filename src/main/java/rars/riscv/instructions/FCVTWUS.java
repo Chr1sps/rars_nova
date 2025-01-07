@@ -1,6 +1,7 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -9,7 +10,6 @@ import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -56,6 +56,6 @@ public final class FCVTWUS extends BasicInstruction {
         final Float32 in = new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1)));
         final int out = Conversions.convertToUnsignedInt(in, e, false);
         Floating.setfflags(e);
-        RegisterFile.INSTANCE.updateRegisterByNumber(statement.getOperand(0), out);
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), out);
     }
 }

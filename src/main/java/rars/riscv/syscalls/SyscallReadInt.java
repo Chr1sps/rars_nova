@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -52,7 +52,7 @@ public class SyscallReadInt extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         try {
-            RegisterFile.INSTANCE.updateRegisterByName("a0", SystemIO.readInteger(this.getNumber()));
+            Globals.REGISTER_FILE.updateRegisterByName("a0", SystemIO.readInteger(this.getNumber()));
         } catch (final NumberFormatException e) {
             throw new ExitingException(
                 statement,

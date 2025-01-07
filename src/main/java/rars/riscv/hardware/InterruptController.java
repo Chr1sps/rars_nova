@@ -1,5 +1,6 @@
 package rars.riscv.hardware;
 
+import rars.Globals;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.simulator.Simulator;
@@ -165,7 +166,7 @@ public final class InterruptController {
     public static SimulationException claimTrap() {
         synchronized (lock) {
             assert trapPending : "Cannot claim, no trap pending";
-            assert trapPC == RegisterFile.INSTANCE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH
+            assert trapPC == Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH
                 : "trapPC doesn't match current pc";
             trapPending = false;
             return trapSE;

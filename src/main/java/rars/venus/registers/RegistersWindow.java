@@ -1,14 +1,14 @@
 package rars.venus.registers;
 
 import org.jetbrains.annotations.NotNull;
-import rars.riscv.hardware.RegisterFile;
+import rars.Globals;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 
 import java.util.Arrays;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 public final class RegistersWindow extends RegisterBlockWindowBase {
     /**
@@ -50,9 +50,6 @@ public final class RegistersWindow extends RegisterBlockWindowBase {
         /* pc */ "program counter",
     };
 
-    /**
-     * <p>Constructor for RegistersWindow.</p>
-     */
     public RegistersWindow() {
         super(getRegisters(), regToolTips, "Current 32 bit value");
     }
@@ -61,9 +58,9 @@ public final class RegistersWindow extends RegisterBlockWindowBase {
      * A simple wrapper to add pc into the Registers array
      */
     private static Register @NotNull [] getRegisters() {
-        final Register[] base = RegisterFile.INSTANCE.getRegisters();
+        final Register[] base = Globals.REGISTER_FILE.getRegisters();
         final Register[] out = Arrays.copyOf(base, base.length + 1);
-        out[base.length] = RegisterFile.INSTANCE.sp;
+        out[base.length] = Globals.REGISTER_FILE.pc;
         return out;
     }
 
@@ -78,16 +75,16 @@ public final class RegistersWindow extends RegisterBlockWindowBase {
 
     @Override
     protected void beginObserving() {
-        RegisterFile.INSTANCE.addRegistersListener(this::processRegisterNotice);
+        Globals.REGISTER_FILE.addRegistersListener(this.processRegisterNotice);
     }
 
     @Override
     protected void endObserving() {
-        RegisterFile.INSTANCE.deleteRegistersListener(this::processRegisterNotice);
+        Globals.REGISTER_FILE.deleteRegistersListener(this.processRegisterNotice);
     }
 
     @Override
     protected void resetRegisters() {
-        RegisterFile.INSTANCE.resetRegisters();
+        Globals.REGISTER_FILE.resetRegisters();
     }
 }

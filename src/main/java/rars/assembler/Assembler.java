@@ -18,10 +18,9 @@ import rars.venus.NumberDisplayBaseChooser;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 
 /*
@@ -54,7 +53,7 @@ import static rars.settings.BoolSettings.BOOL_SETTINGS;
 
 /**
  * An Assembler is capable of assembling a RISCV program. It has only one public
- * method, <code>assemble()</code>, which implements a two-pass assembler. It
+ * method, {@code assemble()}, which implements a two-pass assembler. It
  * translates RISCV source code into binary machine code.
  *
  * @author Pete Sanderson
@@ -73,7 +72,7 @@ public final class Assembler {
     private TokenList globalDeclarationList;
     private int textAddress;
     private int dataAddress;
-    private DataSegmentForwardReferences currentFileDataSegmentForwardReferences;
+    private DataSegmentForwardReferenceList currentFileDataSegmentForwardReferenceList;
 
     /**
      * Will check for duplicate text addresses, which can happen inadvertently when
@@ -187,12 +186,11 @@ public final class Assembler {
      *     if any.
      * @see ProgramStatement
      */
-    public @Nullable List<ProgramStatement> assemble(
-        final @NotNull List<RISCVProgram> tokenizedProgramFiles,
+    public @Nullable List<@NotNull ProgramStatement> assemble(
+        final @NotNull List<@NotNull RISCVProgram> tokenizedProgramFiles,
         final boolean extendedAssemblerEnabled,
         final boolean warningsAreErrors
     ) throws AssemblyException {
-
         if (tokenizedProgramFiles.isEmpty()) {
             return null;
         }
@@ -200,11 +198,10 @@ public final class Assembler {
         this.textAddress = memoryConfiguration.textBaseAddress;
         this.dataAddress = memoryConfiguration.dataBaseAddress;
         this.externAddress = memoryConfiguration.externBaseAddress;
-        this.currentFileDataSegmentForwardReferences = new DataSegmentForwardReferences();
-        final DataSegmentForwardReferences accumulatedDataSegmentForwardReferences = new DataSegmentForwardReferences();
-        Globals.symbolTable.clear();
+        this.currentFileDataSegmentForwardReferenceList = new DataSegmentForwardReferenceList();
+        final DataSegmentForwardReferenceList accumulatedDataSegmentForwardReferenceList = new DataSegmentForwardReferenceList();
+        Globals.GLOBAL_SYMBOL_TABLE.clear();
         Globals.MEMORY_INSTANCE.reset();
-        final ArrayList<ProgramStatement> machineList = new ArrayList<>();
         this.errors = new ErrorList();
         if (Globals.debug) {
             Assembler.LOGGER.debug("Assembler first pass begins:");
@@ -218,11 +215,11 @@ public final class Assembler {
         // TO SECOND PASS. THIS ASSURES ALL SYMBOL TABLES ARE CORRECTLY BUILT.
         // THERE IS ONE GLOBAL SYMBOL TABLE (for identifiers declared .globl) PLUS
         // ONE LOCAL SYMBOL TABLE FOR EACH SOURCE FILE.
-        for (final RISCVProgram program : tokenizedProgramFiles) {
+        for (final var tokenizedProgram : tokenizedProgramFiles) {
             if (this.errors.errorLimitExceeded()) {
                 break;
             }
-            this.fileCurrentlyBeingAssembled = program;
+            this.fileCurrentlyBeingAssembled = tokenizedProgram;
             // List of labels declared ".globl". new list for each file assembled
             this.globalDeclarationList = new TokenList();
             // Parser begins by default in text segment until directed otherwise.
@@ -237,7 +234,7 @@ public final class Assembler {
             this.dataDirective = Directive.WORD;
             // Clear out (initialize) symbol table related structures.
             this.fileCurrentlyBeingAssembled.getLocalSymbolTable().clear();
-            this.currentFileDataSegmentForwardReferences.clear();
+            this.currentFileDataSegmentForwardReferenceList.clear();
             // sourceList is an ArrayList of String objects, one per source line.
             // tokenList is an ArrayList of TokenList objects, one per source line;
             // each ArrayList in tokenList consists of Token objects.
@@ -284,10 +281,10 @@ public final class Assembler {
             // Cannot determine which until all files are parsed, so copy unresolved entries
             // into accumulated list and clear out this one for re-use with the next source
             // file.
-            this.currentFileDataSegmentForwardReferences.resolve(this.fileCurrentlyBeingAssembled
+            this.currentFileDataSegmentForwardReferenceList.resolve(this.fileCurrentlyBeingAssembled
                 .getLocalSymbolTable());
-            accumulatedDataSegmentForwardReferences.add(this.currentFileDataSegmentForwardReferences);
-            this.currentFileDataSegmentForwardReferences.clear();
+            accumulatedDataSegmentForwardReferenceList.add(this.currentFileDataSegmentForwardReferenceList);
+            this.currentFileDataSegmentForwardReferenceList.clear();
         } // end of first-pass loop for each RISCVprogram
 
         // Have processed all source files. Attempt to resolve any remaining forward
@@ -295,8 +292,8 @@ public final class Assembler {
         // references from global symbol table. Those that remain unresolved are
         // undefined
         // and require error message.
-        accumulatedDataSegmentForwardReferences.resolve(Globals.symbolTable);
-        accumulatedDataSegmentForwardReferences.generateErrorMessages(this.errors);
+        accumulatedDataSegmentForwardReferenceList.resolve(Globals.GLOBAL_SYMBOL_TABLE);
+        accumulatedDataSegmentForwardReferenceList.generateErrorMessages(this.errors);
 
         // Throw collection of errors accumulated through the first pass.
         if (this.errors.errorsOccurred()) {
@@ -307,6 +304,7 @@ public final class Assembler {
         }
         // SECOND PASS OF ASSEMBLER GENERATES BASIC ASSEMBLER THEN MACHINE CODE.
         // Generates basic assembler statements...
+        final ArrayList<ProgramStatement> machineList = new ArrayList<>();
         for (final RISCVProgram program : tokenizedProgramFiles) {
             if (this.errors.errorLimitExceeded()) {
                 break;
@@ -348,22 +346,19 @@ public final class Assembler {
                         basicAssembly, this.errors, false
                     );
 
-                    // ////////////////////////////////////////////////////////////////////////////
                     // If we are using compact memory config and there is a compact expansion, use
                     // it
-                    final ArrayList<String> templateList;
-                    templateList = inst.getBasicIntructionTemplateList();
+                    final var templateList = inst.getBasicIntructionTemplateList();
 
-                    // subsequent ProgramStatement constructor needs the correct text segment
-                    // address.
+                    // subsequent ProgramStatement constructor needs the correct text segment address.
                     this.textAddress = statement.getAddress();
                     // Will generate one basic instruction for each template in the list.
                     final int PC = this.textAddress; // Save the starting PC so that it can be used for PC 
                     // relative stuff
-                    for (int instrNumber = 0; instrNumber < templateList.size(); instrNumber++) {
+                    for (final var s : templateList) {
                         final String instruction = ExtendedInstruction.makeTemplateSubstitutions(
                             this.fileCurrentlyBeingAssembled,
-                            templateList.get(instrNumber), tokenList, PC
+                            s, tokenList, PC
                         );
 
                         // All substitutions have been made so we have generated
@@ -404,11 +399,12 @@ public final class Assembler {
         if (Globals.debug) {
             Assembler.LOGGER.debug("Code generation begins");
         }
-        ///////////// THIRD MAJOR STEP IS PRODUCE MACHINE CODE FROM ASSEMBLY //////////
+
+        // THIRD MAJOR STEP IS PRODUCE MACHINE CODE FROM ASSEMBLY
+
         // Generates machine code statements from the list of basic assembler statements
         // and writes the statement to memory.
-
-        for (final ProgramStatement statement : machineList) {
+        for (final var statement : machineList) {
             if (this.errors.errorLimitExceeded()) {
                 break;
             }
@@ -437,12 +433,12 @@ public final class Assembler {
         // Yes, I would not have to sort here if I used SortedSet rather than ArrayList
         // but in case of duplicate I like having both statements handy for error
         // message.
-        Collections.sort(machineList);
-        Assembler.catchDuplicateAddresses(machineList, this.errors);
+        final var sortedMachineList = machineList.stream().sorted().toList();
+        Assembler.catchDuplicateAddresses(sortedMachineList, this.errors);
         if (this.errors.errorsOccurred() || this.errors.warningsOccurred() && warningsAreErrors) {
             throw new AssemblyException(this.errors);
         }
-        return machineList;
+        return sortedMachineList;
     } // assemble()
 
     private void checkEqvDirectives(final @NotNull RISCVProgram program) {
@@ -490,8 +486,6 @@ public final class Assembler {
         final boolean extendedAssemblerEnabled
     ) {
 
-        final var result = new ArrayList<ProgramStatement>();
-
         var tokens = Assembler.stripComment(tokenList);
 
         // Labels should not be processed in macro definition segment.
@@ -530,6 +524,7 @@ public final class Assembler {
         final Macro macro = macroPool.getMatchingMacro(parenFreeTokens);// parenFreeTokens.get(0).getSourceLine());
 
         // expand macro if this line is a macro expansion call
+        final var result = new ArrayList<ProgramStatement>();
         if (macro != null) {
             tokens = parenFreeTokens;
             // get unique id for this expansion
@@ -845,7 +840,7 @@ public final class Assembler {
                 } else if (value == 0) {
                     this.autoAlign = false;
                 } else {
-                    this.dataAddress = this.alignToBoundary(this.dataAddress, (int) Math.pow(2, value));
+                    this.dataAddress = this.alignToBoundary(this.dataAddress, (int) StrictMath.pow(2, value));
                 }
             }
             case SPACE -> {
@@ -886,8 +881,8 @@ public final class Assembler {
                 }
                 final int size = BinaryUtils.stringToInt(tokens.get(2).getText());
                 // If label already in global symtab, do nothing. If not, add it right now.
-                if (Globals.symbolTable.getAddress(tokens.get(1).getText()) == SymbolTable.NOT_FOUND) {
-                    Globals.symbolTable.addSymbol(
+                if (Globals.GLOBAL_SYMBOL_TABLE.getAddress(tokens.get(1).getText()) == SymbolTable.NOT_FOUND) {
+                    Globals.GLOBAL_SYMBOL_TABLE.addSymbol(
                         tokens.get(1), this.externAddress,
                         true, this.errors
                     );
@@ -944,14 +939,14 @@ public final class Assembler {
                 // actually implemented in other files
                 // GCC outputs assembly that uses this
             } else {
-                if (Globals.symbolTable.getAddress(label.getText()) != SymbolTable.NOT_FOUND) {
+                if (Globals.GLOBAL_SYMBOL_TABLE.getAddress(label.getText()) != SymbolTable.NOT_FOUND) {
                     this.errors.addTokenError(
                         label, "Label \"%s\" already defined as global in a different file."
                             .formatted(label.getText())
                     );
                 } else {
                     this.fileCurrentlyBeingAssembled.getLocalSymbolTable().removeSymbol(label);
-                    Globals.symbolTable.addSymbol(
+                    Globals.GLOBAL_SYMBOL_TABLE.addSymbol(
                         label, symtabEntry.address(),
                         symtabEntry.isData(), this.errors
                     );
@@ -1170,7 +1165,7 @@ public final class Assembler {
                 if (value == SymbolTable.NOT_FOUND) {
                     // Record value 0 for now, then set up backpatch entry
                     final int dataAddress = this.writeToDataSegment(0, lengthInBytes, token, errors);
-                    this.currentFileDataSegmentForwardReferences.add(dataAddress, lengthInBytes, token);
+                    this.currentFileDataSegmentForwardReferenceList.add(dataAddress, lengthInBytes, token);
                 } else { // label already defined, so write its address
                     this.writeToDataSegment(value, lengthInBytes, token, errors);
                 }
@@ -1188,9 +1183,11 @@ public final class Assembler {
         }
     }// storeInteger
 
-    // Store real (fixed or floating point) value given floating (float, double)
-    // directive.
-    // Called by storeNumeric()
+    /**
+     * Store real (fixed or floating point) value given floating (float, double)
+     * directive.
+     * Called by storeNumeric()
+     */
     private void storeRealNumber(final @NotNull Token token, final Directive directive, final ErrorList errors) {
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
         final double value;
@@ -1232,114 +1229,115 @@ public final class Assembler {
 
     } // storeRealNumber
 
-    // Use directive argument to distinguish between ASCII and ASCIZ. The
-    // latter stores a terminating null byte. Can handle a list of one or more
-    // strings on a single line.
+    /**
+     * Use directive argument to distinguish between ASCII and ASCIZ. The
+     * latter stores a terminating null byte. Can handle a list of one or more
+     * strings on a single line.
+     */
     private void storeStrings(final @NotNull TokenList tokens, final Directive direct, final ErrorList errors) {
-        Token token;
         // Correctly handles case where this is a "directive continuation" line.
-        int tokenStart = 0;
-        if (tokens.get(0).getType() == TokenType.DIRECTIVE) {
-            tokenStart = 1;
-        }
-        for (int i = tokenStart; i < tokens.size(); i++) {
-            token = tokens.get(i);
-            if (token.getType() != TokenType.QUOTED_STRING) {
-                errors.addTokenError(
-                    token, "\"%s\" is not a valid character string"
-                        .formatted(token.getText())
-                );
-            } else {
-                final String quote = token.getText();
-                char theChar;
-                for (int j = 1; j < quote.length() - 1; j++) {
-                    theChar = quote.charAt(j);
-                    if (theChar == '\\') {
-                        theChar = quote.charAt(++j);
-                        switch (theChar) {
-                            case 'n':
-                                theChar = '\n';
-                                break;
-                            case 't':
-                                theChar = '\t';
-                                break;
-                            case 'r':
-                                theChar = '\r';
-                                break;
-                            case '\\', '"', '\'':
-                                break;
-                            case 'b':
-                                theChar = '\b';
-                                break;
-                            case 'f':
-                                theChar = '\f';
-                                break;
-                            case '0':
-                                theChar = '\0';
-                                break;
-                            case 'u':
-                                String codePoint = "";
-                                try {
-                                    codePoint = quote.substring(j + 1, j + 5); // get the UTF-8 codepoint following the
-                                    // unicode escape sequence
-                                    theChar = Character.toChars(Integer.parseInt(codePoint, 16))[0]; // converts the
-                                    // codepoint to
-                                    // single character
-                                } catch (final
-                                StringIndexOutOfBoundsException e) {
-                                    final String invalidCodePoint = quote.substring(j + 1);
-                                    final var message = (
-                                        "unicode escape \"\\u%s\" is incomplete." +
-                                            " Only escapes with 4 digits are valid."
-                                    )
-                                        .formatted(invalidCodePoint);
-                                    errors.addTokenError(token, message);
-                                } catch (final NumberFormatException e) {
-                                    errors.addTokenError(
-                                        token,
+        final var isFirstDirective = tokens.get(0).getType() == TokenType.DIRECTIVE;
+        tokens.stream()
+            .skip(isFirstDirective ? 1 : 0)
+            .forEach(token -> {
+                if (token.getType() != TokenType.QUOTED_STRING) {
+                    errors.addTokenError(
+                        token, "\"%s\" is not a valid character string"
+                            .formatted(token.getText())
+                    );
+                } else {
+                    final String quote = token.getText();
+                    for (int j = 1; j < quote.length() - 1; j++) {
+                        char theChar = quote.charAt(j);
+                        if (theChar == '\\') {
+                            theChar = quote.charAt(++j);
+                            switch (theChar) {
+                                case 'n':
+                                    theChar = '\n';
+                                    break;
+                                case 't':
+                                    theChar = '\t';
+                                    break;
+                                case 'r':
+                                    theChar = '\r';
+                                    break;
+                                case '\\', '"', '\'':
+                                    break;
+                                case 'b':
+                                    theChar = '\b';
+                                    break;
+                                case 'f':
+                                    theChar = '\f';
+                                    break;
+                                case '0':
+                                    theChar = '\0';
+                                    break;
+                                case 'u':
+                                    String codePoint = "";
+                                    try {
+                                        codePoint = quote.substring(
+                                            j + 1,
+                                            j + 5
+                                        ); // get the UTF-8 codepoint following the
+                                        // unicode escape sequence
+                                        theChar = Character.toChars(Integer.parseInt(codePoint, 16))[0]; // converts the
+                                        // codepoint to
+                                        // single character
+                                    } catch (final
+                                    StringIndexOutOfBoundsException e) {
+                                        final String invalidCodePoint = quote.substring(j + 1);
+                                        final var message = (
+                                            "unicode escape \"\\u%s\" is incomplete." +
+                                                " Only escapes with 4 digits are valid."
+                                        )
+                                            .formatted(invalidCodePoint);
+                                        errors.addTokenError(token, message);
+                                    } catch (final NumberFormatException e) {
+                                        errors.addTokenError(
+                                            token,
 
-                                        "illegal unicode escape: \"\\u%s\"".formatted(codePoint)
-                                    );
-                                }
-                                j = j + 4; // skip past the codepoint for next iteration
-                                break;
+                                            "illegal unicode escape: \"\\u%s\"".formatted(codePoint)
+                                        );
+                                    }
+                                    j = j + 4; // skip past the codepoint for next iteration
+                                    break;
 
-                            // Not implemented: \ n = octal character (n is number)
-                            // \ x n = hex character (n is number)
-                            // There are of course no spaces in these escape
-                            // codes...
+                                // Not implemented: \ n = octal character (n is number)
+                                // \ x n = hex character (n is number)
+                                // There are of course no spaces in these escape
+                                // codes...
+                            }
                         }
-                    }
-                    final byte[] bytesOfChar = String.valueOf(theChar).getBytes(StandardCharsets.UTF_8);
-                    try {
-                        for (final byte b : bytesOfChar) {
-                            Globals.MEMORY_INSTANCE.set(
-                                this.dataAddress, b,
-                                DataTypes.CHAR_SIZE
+                        final byte[] bytesOfChar = String.valueOf(theChar).getBytes(StandardCharsets.UTF_8);
+                        try {
+                            for (final byte b : bytesOfChar) {
+                                Globals.MEMORY_INSTANCE.set(
+                                    this.dataAddress, b,
+                                    DataTypes.CHAR_SIZE
+                                );
+                                this.dataAddress += DataTypes.CHAR_SIZE;
+                            }
+                        } catch (final AddressErrorException e) {
+                            this.errors.addTokenError(
+                                token,
+                                "\"%d\" is not a valid data segment address".formatted(this.dataAddress)
                             );
-                            this.dataAddress += DataTypes.CHAR_SIZE;
                         }
-                    } catch (final AddressErrorException e) {
-                        this.errors.addTokenError(
-                            token,
-                            "\"%d\" is not a valid data segment address".formatted(this.dataAddress)
-                        );
-                    }
 
-                }
-                if (direct == Directive.ASCIZ || direct == Directive.STRING) {
-                    try {
-                        Globals.MEMORY_INSTANCE.set(this.dataAddress, 0, DataTypes.CHAR_SIZE);
-                    } catch (final AddressErrorException e) {
-                        this.errors.addTokenError(
-                            token,
-                            "\"%d\" is not a valid data segment address".formatted(this.dataAddress)
-                        );
                     }
-                    this.dataAddress += DataTypes.CHAR_SIZE;
+                    if (direct == Directive.ASCIZ || direct == Directive.STRING) {
+                        try {
+                            Globals.MEMORY_INSTANCE.set(this.dataAddress, 0, DataTypes.CHAR_SIZE);
+                        } catch (final AddressErrorException e) {
+                            this.errors.addTokenError(
+                                token,
+                                "\"%d\" is not a valid data segment address".formatted(this.dataAddress)
+                            );
+                        }
+                        this.dataAddress += DataTypes.CHAR_SIZE;
+                    }
                 }
-            }
-        }
+            });
     } // storeStrings()
 
     /**
@@ -1423,94 +1421,4 @@ public final class Assembler {
         }
     }
 
-    /**
-     * Handy class to handle forward label references appearing as data
-     * segment operands. This is needed because the data segment is comletely
-     * processed by the end of the first assembly pass, and its directives may
-     * contain labels as operands. When this occurs, the label's associated
-     * address becomes the operand value. If it is a forward reference, we will
-     * save the necessary information in this object for finding and patching in
-     * the correct address at the end of the first pass (for this file or for all
-     * files if more than one).
-     * If such a parsed label refers to a local or global label not defined yet,
-     * pertinent information is added to this object:
-     * - memory address that needs the label's address,
-     * - number of bytes (addresses are 4 bytes but may be used with any of
-     * the integer directives: .word, .half, .byte)
-     * - the label's token. Normally need only the name but error message needs
-     * more.
-     */
-    private static class DataSegmentForwardReferences {
-        private final ArrayList<DataSegmentForwardReference> forwardReferenceList;
-
-        private DataSegmentForwardReferences() {
-            this.forwardReferenceList = new ArrayList<>();
-        }
-
-        // Add a new forward reference entry. Client must supply the following:
-        // - memory address to receive the label's address once resolved
-        // - number of address bytes to store (1 for .byte, 2 for .half, 4 for .word)
-        // - the label's token. All its information will be needed if error message
-        // generated.
-        private void add(final int patchAddress, final int length, final Token token) {
-            this.forwardReferenceList.add(new DataSegmentForwardReference(patchAddress, length, token));
-        }
-
-        // Add the entries of another DataSegmentForwardReferences object to this one.
-        // Can be used at the end of each source file to dump all unresolved references
-        // into a common list to be processed after all source files parsed.
-        private void add(final DataSegmentForwardReferences another) {
-            this.forwardReferenceList.addAll(another.forwardReferenceList);
-        }
-
-        /**
-         * Clear out the list. Allows you to re-use it.
-         */
-        private void clear() {
-            this.forwardReferenceList.clear();
-        }
-
-        /**
-         * Will traverse the list of forward references, attempting to resolve them.
-         * For each entry it will first search the provided local symbol table and
-         * failing that, the global one. If passed the global symbol table, it will
-         * perform a second, redundant, search. If search is successful, the patch
-         * is applied and the forward reference removed. If search is not successful,
-         * the forward reference remains (it is either undefined or a global label
-         * defined in a file not yet parsed).
-         */
-        private void resolve(final SymbolTable localSymtab) {
-            int labelAddress;
-            DataSegmentForwardReference entry;
-            for (int i = 0; i < this.forwardReferenceList.size(); i++) {
-                entry = this.forwardReferenceList.get(i);
-                labelAddress = localSymtab.getAddressLocalOrGlobal(entry.token.getText());
-                if (labelAddress != SymbolTable.NOT_FOUND) {
-                    // patch address has to be valid b/c we already stored there...
-                    try {
-                        Globals.MEMORY_INSTANCE.set(entry.patchAddress, labelAddress, entry.length);
-                    } catch (final AddressErrorException ignored) {
-                    }
-                    this.forwardReferenceList.remove(i);
-                    i--; // needed because removal shifted the remaining list indices down
-                }
-            }
-        }
-
-        // Call this when you are confident that remaining list entries are to
-        // undefined labels.
-        private void generateErrorMessages(final ErrorList errors) {
-            for (final DataSegmentForwardReference entry : this.forwardReferenceList) {
-                final var message = "Symbol \"%s\" not found in symbol table."
-                    .formatted(entry.token().getText());
-                errors.addTokenError(entry.token(), message);
-            }
-        }
-
-        // inner-inner class to hold each entry of the forward reference list.
-        private record DataSegmentForwardReference(int patchAddress, int length,
-                                                   Token token) {
-        }
-
-    }
 }

@@ -1,9 +1,9 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -69,10 +69,10 @@ public final class SyscallMidiOut extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        int pitch = RegisterFile.INSTANCE.getIntValue("a0");
-        int duration = RegisterFile.INSTANCE.getIntValue("a1");
-        int instrument = RegisterFile.INSTANCE.getIntValue("a2");
-        int volume = RegisterFile.INSTANCE.getIntValue("a3");
+        int pitch = Globals.REGISTER_FILE.getIntValue("a0");
+        int duration = Globals.REGISTER_FILE.getIntValue("a1");
+        int instrument = Globals.REGISTER_FILE.getIntValue("a2");
+        int volume = Globals.REGISTER_FILE.getIntValue("a3");
         if (pitch < rangeLowEnd || pitch > rangeHighEnd) {
             pitch = ToneGenerator.DEFAULT_PITCH;
         }

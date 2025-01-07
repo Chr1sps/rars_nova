@@ -7,7 +7,6 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 import javax.swing.*;
 
@@ -69,9 +68,10 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
         // -3: OK was chosen but no data had been input into field
 
         String message = ""; // = "";
-        int byteAddress = RegisterFile.INSTANCE.getIntValue(4);
-        final char[] ch = {' '}; // Need an array to convert to String
+        int byteAddress = Globals.REGISTER_FILE.getIntValue(4);
         try {
+            // Need an array to convert to String
+            final char[] ch = {' '};
             ch[0] = (char) Globals.MEMORY_INSTANCE.getByte(byteAddress);
             while (ch[0] != 0) // only uses single location ch[0]
             {
@@ -87,33 +87,32 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
         // A null return value means that "Cancel" was chosen rather than OK.
         // An empty string returned (that is, inputValue.length() of zero)
         // means that OK was chosen but no string was input.
-        final String inputValue;
-        inputValue = JOptionPane.showInputDialog(message);
+        final String inputValue = JOptionPane.showInputDialog(message);
 
         try {
             FloatingPointRegisterFile.updateRegister(0, 0); // set $f0 to zero
             if (inputValue == null) // Cancel was chosen
             {
                 // set $a1 to -2 flag
-                RegisterFile.INSTANCE.updateRegisterByName("a1", -2);
+                Globals.REGISTER_FILE.updateRegisterByName("a1", -2);
             } else if (inputValue.isEmpty()) // OK was chosen but there was no input
             {
                 // set $a1 to -3 flag
-                RegisterFile.INSTANCE.updateRegisterByName("a1", -3);
+                Globals.REGISTER_FILE.updateRegisterByName("a1", -3);
             } else {
                 final double doubleValue = Double.parseDouble(inputValue);
 
                 // Successful parse of valid input data
                 FloatingPointRegisterFile.updateRegister(10, Double.doubleToRawLongBits(doubleValue));
                 // set $a1 to valid flag
-                RegisterFile.INSTANCE.updateRegisterByName("a1", 0);
+                Globals.REGISTER_FILE.updateRegisterByName("a1", 0);
 
             }
         } catch (final
         NumberFormatException e) // Unsuccessful parse of input data
         {
             // set $a1 to -1 flag
-            RegisterFile.INSTANCE.updateRegisterByName("a1", -1);
+            Globals.REGISTER_FILE.updateRegisterByName("a1", -1);
         }
     }
 }

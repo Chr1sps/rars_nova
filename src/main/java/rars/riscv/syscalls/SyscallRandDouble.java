@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 import java.util.Random;
 
@@ -55,7 +55,7 @@ public class SyscallRandDouble extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final Integer index = RegisterFile.INSTANCE.getIntValue("a0");
+        final Integer index = Globals.REGISTER_FILE.getIntValue("a0");
         Random stream = RandomStreams.randomStreams.get(index);
         if (stream == null) {
             stream = new Random(); // create a non-seeded stream

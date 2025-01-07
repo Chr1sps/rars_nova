@@ -20,7 +20,7 @@ import java.awt.event.MouseListener;
 // specified period of time and at a specified rate. 
 
 /**
- * <code>RepeatButton</code> is a <code>JButton</code> which contains a timer
+ * {@code RepeatButton} is a <code>JButton</code> which contains a timer
  * for firing events while the button is held down. There is a default
  * initial delay of 300ms before the key event is fired and a 60ms delay
  * between subsequent events. When the user holds the button down and moves
@@ -259,7 +259,7 @@ public class RepeatButton extends JButton
     @Override
     public void mousePressed(final MouseEvent me) {
         // process events only from this components
-        if (me.getSource() == this && this.isEnabled() && this.isRepeatEnabled()) {
+        if (me.getSource() == this && this.isEnabled() && this.repeatEnabled) {
             this.pressed = true;
             if (!this.timer.isRunning()) {
                 this.modifiers = me.getModifiersEx();
@@ -293,7 +293,7 @@ public class RepeatButton extends JButton
     @Override
     public void mouseEntered(final MouseEvent me) {
         // process events only from this components
-        if (me.getSource() == this && this.isEnabled() && this.isRepeatEnabled()) {
+        if (me.getSource() == this && this.isEnabled() && this.repeatEnabled) {
             if (this.pressed && !this.timer.isRunning()) {
                 this.modifiers = me.getModifiersEx();
                 this.timer.setInitialDelay(this.delay);

@@ -1,12 +1,12 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -56,8 +56,8 @@ public abstract class Store extends BasicInstruction {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             store(
-                RegisterFile.INSTANCE.getIntValue(statement.getOperand(2)) + upperImmediate,
-                RegisterFile.INSTANCE.getLongValue(statement.getOperand(0))
+                Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate,
+                Globals.REGISTER_FILE.getLongValue(statement.getOperand(0))
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(

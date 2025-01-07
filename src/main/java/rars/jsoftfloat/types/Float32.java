@@ -13,23 +13,23 @@ import java.math.BigInteger;
 public class Float32 implements Floating<Float32> {
     // TODO: make a more abstract binary float class
     /**
-     * Constant <code>Zero</code>
+     * Constant {@code Zero}
      */
     public static final Float32 Zero = new Float32(0),
     /**
-     * Constant <code>NegativeZero</code>
+     * Constant {@code NegativeZero}
      */
     NegativeZero = new Float32(0x80000000),
     /**
-     * Constant <code>NaN</code>
+     * Constant {@code NaN}
      */
     NaN = new Float32(0x7FC00000),
     /**
-     * Constant <code>Infinity</code>
+     * Constant {@code Infinity}
      */
     Infinity = new Float32(0x7F800000),
     /**
-     * Constant <code>NegativeInfinity</code>
+     * Constant {@code NegativeInfinity}
      */
     NegativeInfinity = new Float32(0xFF800000);
 

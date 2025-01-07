@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Vector;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -147,10 +147,9 @@ public final class HelpHelpAction extends GuiAction {
     private static @NotNull JPanel createCopyrightInfoPanel() {
         final JPanel copyrightInfo = new JPanel(new BorderLayout());
         JScrollPane copyrightScrollPane;
-        final JEditorPane copyrightDisplay;
         try {
             final StringBuilder text = HelpHelpAction.loadFiletoStringBuilder("/License.txt").append("</pre>");
-            copyrightDisplay = new JEditorPane("text/html", "<pre>" + text);
+            final JEditorPane copyrightDisplay = new JEditorPane("text/html", "<pre>" + text);
             copyrightDisplay.setEditable(false);
             copyrightDisplay.setCaretPosition(0); // assure top of document displayed
             copyrightScrollPane = new JScrollPane(
@@ -172,7 +171,6 @@ public final class HelpHelpAction extends GuiAction {
     @Contract(" -> new")
     private static @NotNull JScrollPane createSyscallsHelpPane() {
         final var list = SyscallLoader.getSyscallList();
-        final String[] columnNames = {"Name", "Number", "Description", "Inputs", "Ouputs"};
         final String[][] data = new String[list.size()][5];
         final var sortedList = list.stream().sorted().toList();
 
@@ -186,6 +184,7 @@ public final class HelpHelpAction extends GuiAction {
             i++;
         }
 
+        final String[] columnNames = {"Name", "Number", "Description", "Inputs", "Ouputs"};
         final JEditorPane html = new JEditorPane(
             "text/html",
             HelpHelpAction.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpPrelude.html") +
@@ -220,66 +219,13 @@ public final class HelpHelpAction extends GuiAction {
 
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Displays tabs with categories of information
-     */
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        final JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("RISCV", this.createHelpInfoPanel());
-        tabbedPane.addTab("RARS", this.createRarsHelpInfoPanel());
-        tabbedPane.addTab("License", HelpHelpAction.createCopyrightInfoPanel());
-        tabbedPane.addTab("Bugs/Comments", this.createHTMLHelpPanel("BugReportingHelp.html"));
-        tabbedPane.addTab("Acknowledgements", this.createHTMLHelpPanel("Acknowledgements.html"));
-        // Create non-modal dialog. Based on java.sun.com "How to Make Dialogs",
-        // DialogDemo.java
-        final JDialog dialog = new JDialog(this.mainUI, "RARS " + Globals.version + " Help");
-        // assure the dialog goes away if user clicks the X
-        dialog.addWindowListener(
-            new WindowAdapter() {
-                @Override
-                public void windowClosing(final WindowEvent e) {
-                    dialog.setVisible(false);
-                    dialog.dispose();
-                }
-            });
-        // Add a "close" button to the non-modal help dialog.
-        final JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(
-            e1 -> {
-                dialog.setVisible(false);
-                dialog.dispose();
-            });
-        final JPanel closePanel = new JPanel();
-        closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
-        closePanel.add(Box.createHorizontalGlue());
-        closePanel.add(closeButton);
-        closePanel.add(Box.createHorizontalGlue());
-        closePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 5));
-        final JPanel contentPane = new JPanel();
-        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
-        contentPane.add(tabbedPane);
-        contentPane.add(Box.createRigidArea(new Dimension(0, 5)));
-        contentPane.add(closePanel);
-        contentPane.setOpaque(true);
-        dialog.setContentPane(contentPane);
-        // Show it.
-        dialog.setSize(HelpHelpAction.WINDOW_SIZE);
-        dialog.setLocationRelativeTo(this.mainUI);
-        dialog.setVisible(true);
-
-    }
-
     /// Create panel containing Help Info read from html document.
-    private @NotNull JPanel createHTMLHelpPanel(final String filename) {
+    private static @NotNull JPanel createHTMLHelpPanel(final String filename) {
         final JPanel helpPanel = new JPanel(new BorderLayout());
         JScrollPane helpScrollPane;
-        final JEditorPane helpDisplay;
         try {
             final StringBuilder text = HelpHelpAction.loadFiletoStringBuilder(Globals.helpPath + filename);
-            helpDisplay = new JEditorPane("text/html", text.toString());
+            final JEditorPane helpDisplay = new JEditorPane("text/html", text.toString());
             helpDisplay.setEditable(false);
             helpDisplay.setCaretPosition(0); // assure top of document displayed
             helpScrollPane = new JScrollPane(
@@ -296,22 +242,22 @@ public final class HelpHelpAction extends GuiAction {
     }
 
     /// Set up MARS help tab. Subtabs get their contents from HTML files.
-    private @NotNull JPanel createRarsHelpInfoPanel() {
+    private static @NotNull JPanel createRarsHelpInfoPanel() {
         final JPanel helpInfo = new JPanel(new BorderLayout());
         final JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Intro", this.createHTMLHelpPanel("Intro.html"));
-        tabbedPane.addTab("IDE", this.createHTMLHelpPanel("IDE.html"));
-        tabbedPane.addTab("Debugging", this.createHTMLHelpPanel("Debugging.html"));
-        tabbedPane.addTab("Tools", this.createHTMLHelpPanel("Tools.html"));
-        tabbedPane.addTab("Command", this.createHTMLHelpPanel("Command.html"));
-        tabbedPane.addTab("Limits", this.createHTMLHelpPanel("Limits.html"));
-        tabbedPane.addTab("History", this.createHTMLHelpPanel("History.html"));
+        tabbedPane.addTab("Intro", HelpHelpAction.createHTMLHelpPanel("Intro.html"));
+        tabbedPane.addTab("IDE", HelpHelpAction.createHTMLHelpPanel("IDE.html"));
+        tabbedPane.addTab("Debugging", HelpHelpAction.createHTMLHelpPanel("Debugging.html"));
+        tabbedPane.addTab("Tools", HelpHelpAction.createHTMLHelpPanel("Tools.html"));
+        tabbedPane.addTab("Command", HelpHelpAction.createHTMLHelpPanel("Command.html"));
+        tabbedPane.addTab("Limits", HelpHelpAction.createHTMLHelpPanel("Limits.html"));
+        tabbedPane.addTab("History", HelpHelpAction.createHTMLHelpPanel("History.html"));
         helpInfo.add(tabbedPane);
         return helpInfo;
     }
 
     // Set up MIPS help tab. Most contents are generated from instruction set info.
-    private @NotNull JPanel createHelpInfoPanel() {
+    private static @NotNull JPanel createHelpInfoPanel() {
         final JPanel helpInfo = new JPanel(new BorderLayout());
         final String helpRemarksColor = "CCFF99";
         // Introductory remarks go at the top as a label
@@ -394,18 +340,18 @@ public final class HelpHelpAction extends GuiAction {
         );
         tabbedPane.addTab("Directives", HelpHelpAction.createDirectivesHelpPane());
         tabbedPane.addTab("Syscalls", HelpHelpAction.createSyscallsHelpPane());
-        tabbedPane.addTab("Exceptions", this.createHTMLHelpPanel("ExceptionsHelp.html"));
-        tabbedPane.addTab("Macros", this.createHTMLHelpPanel("MacrosHelp.html"));
+        tabbedPane.addTab("Exceptions", HelpHelpAction.createHTMLHelpPanel("ExceptionsHelp.html"));
+        tabbedPane.addTab("Macros", HelpHelpAction.createHTMLHelpPanel("MacrosHelp.html"));
         operandsScrollPane.setPreferredSize(
             new Dimension(
                 (int) HelpHelpAction.WINDOW_SIZE.getWidth(),
-                (int) (HelpHelpAction.WINDOW_SIZE.getHeight() * .2)
+                (int) (HelpHelpAction.WINDOW_SIZE.getHeight() * 0.2)
             ));
         operandsScrollPane.getVerticalScrollBar().setUnitIncrement(10);
         tabbedPane.setPreferredSize(
             new Dimension(
                 (int) HelpHelpAction.WINDOW_SIZE.getWidth(),
-                (int) (HelpHelpAction.WINDOW_SIZE.getHeight() * .6)
+                (int) (HelpHelpAction.WINDOW_SIZE.getHeight() * 0.6)
             ));
         final JSplitPane splitsville = new JSplitPane(JSplitPane.VERTICAL_SPLIT, operandsScrollPane, tabbedPane);
         splitsville.setOneTouchExpandable(true);
@@ -413,6 +359,58 @@ public final class HelpHelpAction extends GuiAction {
         helpInfo.add(splitsville);
         // mipsHelpInfo.add(tabbedPane);
         return helpInfo;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Displays tabs with categories of information
+     */
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        final JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("RISCV", HelpHelpAction.createHelpInfoPanel());
+        tabbedPane.addTab("RARS", HelpHelpAction.createRarsHelpInfoPanel());
+        tabbedPane.addTab("License", HelpHelpAction.createCopyrightInfoPanel());
+        tabbedPane.addTab("Bugs/Comments", HelpHelpAction.createHTMLHelpPanel("BugReportingHelp.html"));
+        tabbedPane.addTab("Acknowledgements", HelpHelpAction.createHTMLHelpPanel("Acknowledgements.html"));
+        // Create non-modal dialog. Based on java.sun.com "How to Make Dialogs",
+        // DialogDemo.java
+        final JDialog dialog = new JDialog(this.mainUI, "RARS " + Globals.version + " Help");
+        // assure the dialog goes away if user clicks the X
+        dialog.addWindowListener(
+            new WindowAdapter() {
+                @Override
+                public void windowClosing(final WindowEvent e) {
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                }
+            });
+        // Add a "close" button to the non-modal help dialog.
+        final JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(
+            e1 -> {
+                dialog.setVisible(false);
+                dialog.dispose();
+            });
+        final JPanel closePanel = new JPanel();
+        closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
+        closePanel.add(Box.createHorizontalGlue());
+        closePanel.add(closeButton);
+        closePanel.add(Box.createHorizontalGlue());
+        closePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 5));
+        final JPanel contentPane = new JPanel();
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
+        contentPane.add(tabbedPane);
+        contentPane.add(Box.createRigidArea(new Dimension(0, 5)));
+        contentPane.add(closePanel);
+        contentPane.setOpaque(true);
+        dialog.setContentPane(contentPane);
+        // Show it.
+        dialog.setSize(HelpHelpAction.WINDOW_SIZE);
+        dialog.setLocationRelativeTo(this.mainUI);
+        dialog.setVisible(true);
+
     }
 
     private static class MyCellRenderer extends JLabel implements ListCellRenderer<String> {

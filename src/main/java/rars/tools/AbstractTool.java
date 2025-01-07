@@ -13,6 +13,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -68,6 +69,7 @@ public abstract class AbstractTool extends JFrame {
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
     private final int lowMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().dataSegmentBaseAddress;
     private final int highMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().stackBaseAddress;
+    private final @NotNull Consumer<@NotNull AccessNotice> callback = this::processAccessNotice;
     protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
     protected ConnectButton connectButton;
     protected JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.
@@ -92,6 +94,8 @@ public abstract class AbstractTool extends JFrame {
         this.heading = heading;
     }
 
+    ///////////////////////////// METHODS WITH DEFAULT IMPLEMENTATIONS
+
     /**
      * Required Tool method to return Tool name. Must be defined by subclass.
      *
@@ -99,8 +103,6 @@ public abstract class AbstractTool extends JFrame {
      */
     @Override
     public abstract String getName();
-
-    ///////////////////////////// METHODS WITH DEFAULT IMPLEMENTATIONS
 
     /**
      * Abstract method that must be instantiated by subclass to build the main
@@ -188,6 +190,8 @@ public abstract class AbstractTool extends JFrame {
     protected void reset() {
     }
 
+    // Rest of the methods.
+
     /**
      * Constructs GUI header as label with default positioning and font. May be
      * overridden.
@@ -207,8 +211,6 @@ public abstract class AbstractTool extends JFrame {
         this.headingLabel.setFont(new Font(this.headingLabel.getFont().getFontName(), Font.PLAIN, 18));
         return headingPanel;
     }
-
-    // Rest of the methods.
 
     /**
      * The Tool default set of controls has one row of 3 buttons. It includes a
@@ -308,10 +310,10 @@ public abstract class AbstractTool extends JFrame {
      *     high end of memory address range; must be >= lowEnd
      */
     protected void addAsObserver(final int lowEnd, final int highEnd) {
-        final String errorMessage = "Error connecting to memory";
         try {
             Globals.MEMORY_INSTANCE.subscribe(this::processAccessNotice, lowEnd, highEnd);
         } catch (final AddressErrorException aee) {
+            final String errorMessage = "Error connecting to memory";
             this.headingLabel.setText(errorMessage);
         }
     }
@@ -331,7 +333,7 @@ public abstract class AbstractTool extends JFrame {
      */
     protected void addAsObserver(final Register reg) {
         if (reg != null) {
-            reg.registerChangeHook.subscribe(this::processAccessNotice);
+            reg.registerChangeHook.subscribe(callback);
         }
     }
 
@@ -346,7 +348,7 @@ public abstract class AbstractTool extends JFrame {
      * app terminates (e.g. when the button is re-enabled).
      */
     protected void deleteAsSubscriber() {
-        Globals.MEMORY_INSTANCE.deleteSubscriber(this::processAccessNotice);
+        Globals.MEMORY_INSTANCE.deleteSubscriber(callback);
     }
 
     /**
@@ -357,7 +359,7 @@ public abstract class AbstractTool extends JFrame {
      */
     protected void deleteAsSubscriber(final Register reg) {
         if (reg != null) {
-            reg.registerChangeHook.unsubscribe(this::processAccessNotice);
+            reg.registerChangeHook.unsubscribe(callback);
         }
     }
 

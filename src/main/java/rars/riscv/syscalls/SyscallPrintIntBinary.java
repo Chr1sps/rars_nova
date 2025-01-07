@@ -1,9 +1,9 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 import rars.util.BinaryUtils;
 import rars.util.SystemIO;
 
@@ -54,6 +54,6 @@ public final class SyscallPrintIntBinary extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        SystemIO.printString(BinaryUtils.intToBinaryString(RegisterFile.INSTANCE.getIntValue("a0")));
+        SystemIO.printString(BinaryUtils.intToBinaryString(Globals.REGISTER_FILE.getIntValue("a0")));
     }
 }

@@ -80,7 +80,10 @@ public abstract non-sealed class BasicInstruction extends Instruction {
             BasicInstruction.LOGGER.warn("{} mask not " + BASIC_INSTRUCTION_LENGTH_BITS + " bits!", example);
         }
 
-        this.opcodeMask = (int) Long.parseLong(this.operationMask.replaceAll("[01]", "1").replaceAll("[^01]", "0"), 2);
+        this.opcodeMask = (int) Long.parseLong(
+            this.operationMask.replaceAll("[01]", "1")
+                .replaceAll("[^01]", "0"), 2
+        );
         this.opcodeMatch = (int) Long.parseLong(this.operationMask.replaceAll("[^1]", "0"), 2);
     }
 

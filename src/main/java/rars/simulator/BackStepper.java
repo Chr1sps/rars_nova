@@ -7,7 +7,6 @@ import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.FloatingPointRegisterFile;
-import rars.riscv.hardware.RegisterFile;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -72,7 +71,7 @@ public class BackStepper {
 
     private static int pc() {
         // PC incremented prior to instruction simulation, so need to adjust for that.
-        return RegisterFile.INSTANCE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH;
+        return Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH;
     }
 
     /**
@@ -131,7 +130,7 @@ public class BackStepper {
                  * " parm1 "+step.param1+" parm2 "+step.param2);
                  */
                 if (step.pc != BackStepper.NOT_PC_VALUE) {
-                    RegisterFile.INSTANCE.setProgramCounter(step.pc);
+                    Globals.REGISTER_FILE.setProgramCounter(step.pc);
                 }
                 try {
                     switch (step.action) {
@@ -151,7 +150,7 @@ public class BackStepper {
                             Globals.MEMORY_INSTANCE.setByte(step.param1, (int) step.param2);
                             break;
                         case REGISTER_RESTORE:
-                            RegisterFile.INSTANCE.updateRegisterByNumber(step.param1, step.param2);
+                            Globals.REGISTER_FILE.updateRegisterByNumber(step.param1, step.param2);
                             break;
                         case FLOATING_POINT_REGISTER_RESTORE:
                             FloatingPointRegisterFile.updateRegister(step.param1, step.param2);
@@ -163,7 +162,7 @@ public class BackStepper {
                             ControlAndStatusRegisterFile.updateRegisterBackdoor(step.param1, step.param2);
                             break;
                         case PC_RESTORE:
-                            RegisterFile.INSTANCE.setProgramCounter(step.param1);
+                            Globals.REGISTER_FILE.setProgramCounter(step.param1);
                             break;
                         case DO_NOTHING:
                             break;
@@ -414,7 +413,7 @@ public class BackStepper {
     // regardless of how many steps are executed. This will speed things up a bit
     // and make life easier for the garbage collector.
 
-    private static class BackstepStack {
+    private static final class BackstepStack {
         private final int capacity;
         private final BackStep[] stack;
         private int size;
@@ -465,8 +464,7 @@ public class BackStepper {
         // NO PROTECTION. This class is used only within this file so there is no excuse
         // for trying to pop from empty stack.
         private synchronized BackStep pop() {
-            final BackStep bs;
-            bs = this.stack[this.top];
+            final BackStep bs = this.stack[this.top];
             if (this.size == 1) {
                 this.top = -1;
             } else {

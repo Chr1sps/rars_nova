@@ -7,7 +7,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
+import static rars.Globals.BOOL_SETTINGS;
 
 
 /*
@@ -207,7 +207,6 @@ public final class SystemIO {
      * @return int value with lowest byte corresponding to user input
      */
     public static int readChar(final int serviceNumber) {
-        final int returnValue;
 
         final String input = SystemIO.readStringInternal(
             "0", "Enter a character value (syscall " + serviceNumber +
@@ -216,7 +215,8 @@ public final class SystemIO {
         // The whole try-catch is not really necessary in this case since I'm
         // just propagating the runtime exception (the default behavior), but
         // I want to make it explicit. The client needs to catch it.
-        returnValue = input.charAt(0); // first character input
+        // first character input
+        final int returnValue = input.charAt(0);
 
         return returnValue;
 
@@ -300,7 +300,6 @@ public final class SystemIO {
      * @return number of bytes read, 0 on EOF, or -1 on error
      */
     public static int readFromFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
-        int retValue;
         // DPS 8-Jan-2013
         // Read from STDIN file descriptor while using IDE - get input from Messages
         // pane.
@@ -323,6 +322,7 @@ public final class SystemIO {
         }
         // retrieve FileInputStream from storage
         final InputStream InputStream = (InputStream) FileIOData.getStreamInUse(fd);
+        int retValue;
         try {
             // Reads up to lengthRequested bytes of data from this Input stream into an
             // array of bytes.
@@ -368,8 +368,8 @@ public final class SystemIO {
         if (stream == null) {
             return -1;
         }
-        final FileChannel channel;
         try {
+            final FileChannel channel;
             if (stream instanceof FileInputStream) {
                 channel = ((FileInputStream) stream).getChannel();
             } else if (stream instanceof FileOutputStream) {
@@ -413,14 +413,10 @@ public final class SystemIO {
         // of the file, flag, and the File???putStream associated with
         // that file descriptor.
 
-        int retValue;
-        final FileInputStream inputStream;
-        final FileOutputStream outputStream;
-        final int fdToUse;
-
         // Check internal plausibility of opening this file
-        fdToUse = FileIOData.nowOpening(filename, flags);
-        retValue = fdToUse; // return value is the fd
+        final int fdToUse = FileIOData.nowOpening(filename, flags);
+        // return value is the fd
+        int retValue = fdToUse;
         if (fdToUse < 0) {
             return -1;
         } // fileErrorString would have been set
@@ -436,7 +432,7 @@ public final class SystemIO {
         {
             try {
                 // Set up input stream from disk file
-                inputStream = new FileInputStream(filepath);
+                final FileInputStream inputStream = new FileInputStream(filepath);
                 FileIOData.setStreamInUse(fdToUse, inputStream); // Save stream for later use
             } catch (final FileNotFoundException e) {
                 SystemIO.fileErrorString = "File " + filename + " not found, open for input.";
@@ -446,7 +442,10 @@ public final class SystemIO {
         {
             // Set up output stream to disk file
             try {
-                outputStream = new FileOutputStream(filepath, ((flags & SystemIO.O_APPEND) != 0));
+                final FileOutputStream outputStream = new FileOutputStream(
+                    filepath,
+                    ((flags & SystemIO.O_APPEND) != 0)
+                );
                 FileIOData.setStreamInUse(fdToUse, outputStream); // Save stream for later use
             } catch (final FileNotFoundException e) {
                 SystemIO.fileErrorString = "File " + filename + " not found, open for output.";
@@ -720,7 +719,6 @@ public final class SystemIO {
         // available file descriptor.
         // Return: file descriptor in 0...(SYSCALL_MAXFILES-1), or -1 if error
         private static int nowOpening(final String filename, final int flag) {
-            int i = 0;
             if (FileIOData.filenameInUse(filename)) {
                 SystemIO.fileErrorString = "File name " + filename + " is already open.";
                 return -1;
@@ -733,6 +731,7 @@ public final class SystemIO {
                 return -1;
             }
 
+            int i = 0;
             while (FileIOData.fileNames[i] != null && i < SystemIO.SYSCALL_MAXFILES) {
                 i++;
             } // Attempt to find available file descriptor

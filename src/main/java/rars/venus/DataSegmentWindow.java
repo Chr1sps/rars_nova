@@ -10,7 +10,6 @@ import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.MemoryConfiguration;
-import rars.riscv.hardware.RegisterFile;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
@@ -30,11 +29,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Date;
+import java.util.function.Consumer;
 
-import static rars.settings.BoolSettings.BOOL_SETTINGS;
-import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
-import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.HighlightingSettings.HIGHLIGHTING_SETTINGS;
+import static rars.Globals.*;
 import static rars.util.Utils.deriveFontFromStyle;
 
 /*
@@ -131,6 +128,14 @@ public class DataSegmentWindow extends JInternalFrame {
     private int[] displayBaseAddresses;
     private int defaultBaseAddressIndex;
     private JButton[] baseAddressButtons;
+    public final @NotNull Consumer<@NotNull MemoryAccessNotice> processMemoryAccessNotice = notice -> {
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            // Uses the same highlighting technique as for Text Segment -- see
+            // AddressCellRenderer class in DataSegmentWindow.java.
+            final var address = notice.address;
+            this.highlightCellForAddress(address);
+        }
+    };
 
     /**
      * Constructor for the Data Segment window.
@@ -159,12 +164,12 @@ public class DataSegmentWindow extends JInternalFrame {
                 // timed
                 // or stepped mode.
                 if (s.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps() == 1) {
-                    Globals.MEMORY_INSTANCE.subscribe(this::processMemoryAccessNotice);
+                    Globals.MEMORY_INSTANCE.subscribe(this.processMemoryAccessNotice);
                     this.addressHighlighting = true;
                 }
             } else {
                 // Simulated MIPS execution stops. Stop responding.
-                Globals.MEMORY_INSTANCE.deleteSubscriber(this::processMemoryAccessNotice);
+                Globals.MEMORY_INSTANCE.deleteSubscriber(this.processMemoryAccessNotice);
             }
         });
 
@@ -260,23 +265,23 @@ public class DataSegmentWindow extends JInternalFrame {
      * same table as the static (0x10010000) so all are "Memory.inDataSegment()".
      */
     private static int getBaseAddressIndexForAddress(final int address) {
-        int desiredComboBoxIndex = -1; // assume not a data address.
         if (Globals.MEMORY_INSTANCE.isAddressInMemorySegment(address)) {
             return DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX;
         } else if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(address)) { // DPS. 8-July-2013
             return DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX;
         }
-        int shortDistance = 0x7fffffff;
-        int thisDistance;
         // Check distance from .extern base. Cannot be below it
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        thisDistance = address - memoryConfiguration.externBaseAddress;
+        int thisDistance = address - memoryConfiguration.externBaseAddress;
+        int shortDistance = 0x7fffffff;
+        // assume not a data address.
+        int desiredComboBoxIndex = -1;
         if (thisDistance >= 0 && thisDistance < shortDistance) {
             shortDistance = thisDistance;
             desiredComboBoxIndex = DataSegmentWindow.EXTERN_BASE_ADDRESS_INDEX;
         }
         // Check distance from global pointer; can be either side of it...
-        final var gpValue = ConversionUtils.longLowerHalfToInt(RegisterFile.INSTANCE.gp.getValue());
+        final var gpValue = ConversionUtils.longLowerHalfToInt(Globals.REGISTER_FILE.gp.getValue());
         thisDistance = Math.abs(address - gpValue); // 
         // distance from
         // global
@@ -298,7 +303,7 @@ public class DataSegmentWindow extends JInternalFrame {
             desiredComboBoxIndex = DataSegmentWindow.HEAP_BASE_ADDRESS_INDEX;
         }
         // Check distance from stack pointer. Can be on either side of it...
-        thisDistance = Math.abs(address - (int) RegisterFile.INSTANCE.gp.getValue());
+        thisDistance = Math.abs(address - (int) Globals.REGISTER_FILE.gp.getValue());
         if (thisDistance < shortDistance) {
             desiredComboBoxIndex = DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX;
         }
@@ -432,7 +437,7 @@ public class DataSegmentWindow extends JInternalFrame {
         // different than the one just displayed.
         int baseAddress = this.displayBaseAddressArray[desiredComboBoxIndex];
         if (baseAddress == -1) {
-            final var gpValue = (int) RegisterFile.INSTANCE.gp.getValue();
+            final var gpValue = (int) Globals.REGISTER_FILE.gp.getValue();
             if (desiredComboBoxIndex == DataSegmentWindow.GLOBAL_POINTER_ADDRESS_INDEX) {
                 baseAddress = gpValue - (gpValue % DataSegmentWindow.BYTES_PER_ROW);
             } else if (desiredComboBoxIndex == DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX) {
@@ -443,7 +448,6 @@ public class DataSegmentWindow extends JInternalFrame {
         }
         final int byteOffset = address - baseAddress;
         final int chunkOffset = byteOffset / DataSegmentWindow.MEMORY_CHUNK_SIZE;
-        final int byteOffsetIntoChunk = byteOffset % DataSegmentWindow.MEMORY_CHUNK_SIZE;
         // Subtract 1 from chunkOffset because we're gonna call the "next" action
         // listener to get the correct chunk loaded and displayed, and the first
         // thing it does is increment firstAddress by MEMORY_CHUNK_SIZE. Here
@@ -456,9 +460,10 @@ public class DataSegmentWindow extends JInternalFrame {
         // because table column 0 displays address, not memory contents. The
         // "convertColumnIndexToView()" is not necessary because the columns cannot be
         // reordered, but I included it as a precautionary measure in case that changes.
-        final int addrRow = byteOffsetIntoChunk / DataSegmentWindow.BYTES_PER_ROW;
+        final int byteOffsetIntoChunk = byteOffset % DataSegmentWindow.MEMORY_CHUNK_SIZE;
         int addrColumn = byteOffsetIntoChunk % DataSegmentWindow.BYTES_PER_ROW / DataSegmentWindow.BYTES_PER_VALUE + 1;
         addrColumn = DataSegmentWindow.dataTable.convertColumnIndexToView(addrColumn);
+        final int addrRow = byteOffsetIntoChunk / DataSegmentWindow.BYTES_PER_ROW;
         final Rectangle addressCell = DataSegmentWindow.dataTable.getCellRect(addrRow, addrColumn, true);
         // STEP 5: Center the row containing the cell of interest, to the extent
         // possible.
@@ -699,9 +704,8 @@ public class DataSegmentWindow extends JInternalFrame {
         }
         final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
         int address = this.firstAddress;
-        String formattedAddress;
         for (int i = 0; i < DataSegmentWindow.NUMBER_OF_ROWS; i++) {
-            formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase);
+            String formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase);
             ((DataTableModel) DataSegmentWindow.dataTable.getModel()).setDisplayAndModelValueAt(formattedAddress, i, 0);
             address += DataSegmentWindow.BYTES_PER_ROW;
         }
@@ -745,6 +749,10 @@ public class DataSegmentWindow extends JInternalFrame {
     }
 
     /*
+     * Establish action listeners for the data segment navigation buttons.
+     */
+
+    /*
      * Do this initially and upon reset.
      */
     private void disableAllButtons() {
@@ -759,10 +767,6 @@ public class DataSegmentWindow extends JInternalFrame {
         this.nextButton.setEnabled(false);
         this.dataButton.setEnabled(false);
     }
-
-    /*
-     * Establish action listeners for the data segment navigation buttons.
-     */
 
     /*
      * Do this upon reset.
@@ -810,7 +814,7 @@ public class DataSegmentWindow extends JInternalFrame {
                 // get $gp global pointer, but guard against it having value below data segment
                 DataSegmentWindow.this.firstAddress = Math.max(
                     memoryConfiguration.dataSegmentBaseAddress,
-                    (int) RegisterFile.INSTANCE.gp.getValue()
+                    (int) Globals.REGISTER_FILE.gp.getValue()
                 );
                 // updateModelForMemoryRange requires argument to be multiple of 4
                 // but for cleaner display we'll make it multiple of 32 (last nibble is 0).
@@ -830,7 +834,7 @@ public class DataSegmentWindow extends JInternalFrame {
                 // get $sp stack pointer, but guard against it having value below data segment
                 DataSegmentWindow.this.firstAddress = Math.max(
                     memoryConfiguration.dataSegmentBaseAddress,
-                    (int) RegisterFile.INSTANCE.sp.getValue()
+                    (int) Globals.REGISTER_FILE.sp.getValue()
                 );
                 // See comment above for gloButton...
                 DataSegmentWindow.this.firstAddress =
@@ -933,15 +937,6 @@ public class DataSegmentWindow extends JInternalFrame {
         return lowAddress;
     }
 
-    public void processMemoryAccessNotice(final @NotNull MemoryAccessNotice notice) {
-        if (notice.accessType == AccessNotice.AccessType.WRITE) {
-            // Uses the same highlighting technique as for Text Segment -- see
-            // AddressCellRenderer class in DataSegmentWindow.java.
-            final var address = notice.address;
-            this.highlightCellForAddress(address);
-        }
-    }
-
     private void updateRowHeight() {
         if (DataSegmentWindow.dataTable == null) {
             return;
@@ -1036,7 +1031,6 @@ public class DataSegmentWindow extends JInternalFrame {
         @Override
         public void setValueAt(final Object value, final int row, final int col) {
             final int val;
-            int address = 0;
             try {
                 val = BinaryUtils.stringToInt((String) value);
             } catch (final NumberFormatException nfe) {
@@ -1046,6 +1040,7 @@ public class DataSegmentWindow extends JInternalFrame {
             }
 
             // calculate address from row and column
+            int address = 0;
             try {
                 address =
                     BinaryUtils.stringToInt((String) this.data[row][DataSegmentWindow.ADDRESS_COLUMN]) + (col - 1) * DataSegmentWindow.BYTES_PER_VALUE; // KENV

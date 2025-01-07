@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -145,11 +145,11 @@ public final class MessagesPane extends JTabbedPane {
                                 }
                             }
                             int line = 0;
-                            int column = 0;
                             try {
                                 line = Integer.parseInt(lineString);
                             } catch (final NumberFormatException ignored) {
                             }
+                            int column = 0;
                             try {
                                 column = Integer.parseInt(columnString);
                             } catch (final NumberFormatException ignored) {
@@ -223,9 +223,8 @@ public final class MessagesPane extends JTabbedPane {
      */
     public static void selectEditorTextLine(final @NotNull File file, final int line) {
         final EditTabbedPane editTabbedPane = Globals.gui.mainPane.editTabbedPane;
-        final EditPane editPane;
+        final EditPane editPane = editTabbedPane.getEditPaneForFile(file);
         EditPane currentPane = null;
-        editPane = editTabbedPane.getEditPaneForFile(file);
         if (editPane != null) {
             if (editPane != editTabbedPane.getCurrentEditTab()) {
                 editTabbedPane.setCurrentEditTab(editPane);
@@ -262,13 +261,10 @@ public final class MessagesPane extends JTabbedPane {
             + ErrorList.POSITION_PREFIX + column;
         final var textPosition = this.assembleTextArea.getText().lastIndexOf(errorReportSubstring);
         if (textPosition >= 0) {
-            final int textLine;
-            final int lineStart;
-            final int lineEnd;
             try {
-                textLine = this.assembleTextArea.getLineOfOffset(textPosition);
-                lineStart = this.assembleTextArea.getLineStartOffset(textLine);
-                lineEnd = this.assembleTextArea.getLineEndOffset(textLine);
+                final int textLine = this.assembleTextArea.getLineOfOffset(textPosition);
+                final int lineStart = this.assembleTextArea.getLineStartOffset(textLine);
+                final int lineEnd = this.assembleTextArea.getLineEndOffset(textLine);
                 this.assembleTextArea.setSelectionColor(Color.YELLOW);
                 this.assembleTextArea.setSelectedTextColor(Color.BLACK);
                 this.assembleTextArea.select(lineStart, lineEnd);
@@ -361,7 +357,6 @@ public final class MessagesPane extends JTabbedPane {
      * @return User input.
      */
     public String getInputString(final String prompt) {
-        final String input;
         final boolean lock = Globals.memoryAndRegistersLock.isHeldByCurrentThread();
         if (lock) {
             Globals.memoryAndRegistersLock.unlock();
@@ -370,7 +365,7 @@ public final class MessagesPane extends JTabbedPane {
         pane.setWantsInput(true);
         final JDialog dialog = pane.createDialog(Globals.gui, "Keyboard Input");
         dialog.setVisible(true);
-        input = (String) pane.getInputValue();
+        final String input = (String) pane.getInputValue();
         this.postRunMessage(Globals.userInputAlert + input + "\n");
         if (lock) {
             Globals.memoryAndRegistersLock.lock();
@@ -496,7 +491,7 @@ public final class MessagesPane extends JTabbedPane {
             this.initialPos = MessagesPane.this.runTextArea.getCaretPosition();
             MessagesPane.this.runTextArea.setNavigationFilter(this.navigationFilter);
             MessagesPane.this.runTextArea.getDocument().addDocumentListener(this.listener);
-            Simulator self = Simulator.INSTANCE;
+            final Simulator self = Simulator.INSTANCE;
             self.stopEventHook.subscribe(this.stopListener);
         }
 
@@ -508,7 +503,7 @@ public final class MessagesPane extends JTabbedPane {
                     MessagesPane.this.runTextArea.setNavigationFilter(null);
                     MessagesPane.this.runTextArea.setCaretPosition(MessagesPane.this.runTextArea.getDocument()
                         .getLength());
-                    Simulator self = Simulator.INSTANCE;
+                    final Simulator self = Simulator.INSTANCE;
                     self.stopEventHook.unsubscribe(this.stopListener);
                 });
         }

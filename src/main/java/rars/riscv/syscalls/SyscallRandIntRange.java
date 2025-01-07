@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.RegisterFile;
 
 import java.util.Random;
 
@@ -58,7 +58,7 @@ public class SyscallRandIntRange extends AbstractSyscall {
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final Random stream = RandomStreams.get("a0");
         try {
-            RegisterFile.INSTANCE.updateRegisterByName("a0", stream.nextInt(RegisterFile.INSTANCE.getIntValue("a1")));
+            Globals.REGISTER_FILE.updateRegisterByName("a0", stream.nextInt(Globals.REGISTER_FILE.getIntValue("a1")));
         } catch (final IllegalArgumentException iae) {
             throw new ExitingException(
                 statement,

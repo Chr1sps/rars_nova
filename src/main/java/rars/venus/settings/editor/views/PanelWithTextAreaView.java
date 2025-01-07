@@ -1,15 +1,15 @@
 package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
-import rars.settings.EditorThemeSettings;
+import rars.Globals;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingAreaFactory;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.OtherSettings.OTHER_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
+import static rars.Globals.OTHER_SETTINGS;
 
 public final class PanelWithTextAreaView extends JPanel {
     public final @NotNull PickerCardView pickerCardView;
@@ -31,7 +31,7 @@ public final class PanelWithTextAreaView extends JPanel {
     }
 
     private static @NotNull TextEditingArea createTextArea() {
-        final var currentTheme = EditorThemeSettings.EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme();
+        final var currentTheme = Globals.EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme();
         final var result = TextEditingAreaFactory.createTextEditingArea(currentTheme);
         final var exampleText = """
             # Some macro definitions to print strings
@@ -51,10 +51,10 @@ public final class PanelWithTextAreaView extends JPanel {
         result.setText(exampleText);
         final var selectedText = "myLabel:";
         final var selectionStart = exampleText.indexOf(selectedText);
-        final var selectionEnd = selectionStart + selectedText.length();
         result.setTabSize(OTHER_SETTINGS.getEditorTabSize());
         result.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
         result.setFont(FONT_SETTINGS.getCurrentFont());
+        final var selectionEnd = selectionStart + selectedText.length();
         result.select(selectionStart, selectionEnd);
         return result;
     }

@@ -7,7 +7,7 @@ import rars.venus.settings.editor.OptionSection;
 import javax.swing.*;
 import java.util.Objects;
 
-import static rars.settings.EditorThemeSettings.EDITOR_THEME_SETTINGS;
+import static rars.Globals.EDITOR_THEME_SETTINGS;
 import static rars.venus.settings.editor.views.SyntaxStyleView.buildRow;
 
 public final class BaseStyleView extends JPanel {

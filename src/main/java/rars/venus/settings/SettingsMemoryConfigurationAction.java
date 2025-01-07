@@ -19,8 +19,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static rars.settings.FontSettings.FONT_SETTINGS;
-import static rars.settings.OtherSettings.OTHER_SETTINGS;
+import static rars.Globals.FONT_SETTINGS;
+import static rars.Globals.OTHER_SETTINGS;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -107,7 +107,7 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
     }
 
     /// Private class to do all the work!
-    private static class MemoryConfigurationDialog extends JDialog implements ActionListener {
+    private static final class MemoryConfigurationDialog extends JDialog implements ActionListener {
         JTextField[] addressDisplay;
         JLabel[] nameDisplay;
         ConfigurationButton selectedConfigurationButton, initialConfigurationButton;
@@ -304,10 +304,9 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
                 );
             }
             final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();
-            Map.Entry<String, String> pair;
             final int addressStringLength = BinaryUtils.intToHexString(configurationItemValues[0]).length();
             for (int i = 0; i < configurationItemValues.length; i++) {
-                pair = setSortedByAddress.next();
+                Map.Entry<String, String> pair = setSortedByAddress.next();
                 this.nameDisplay[i].setText(pair.getValue());
                 this.addressDisplay[i].setText(pair.getKey().substring(0, addressStringLength));
             }
