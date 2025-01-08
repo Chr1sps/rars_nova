@@ -3,7 +3,6 @@ package rars.util;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.registers.Register;
 
 public final class RegisterUtils {
@@ -24,7 +23,7 @@ public final class RegisterUtils {
     public static int getRegisterValue(final @NotNull String name) {
         Register r = Globals.REGISTER_FILE.getRegisterByName(name);
         if (r == null) {
-            r = FloatingPointRegisterFile.getRegister(name);
+            r = Globals.FP_REGISTER_FILE.getRegisterByName(name);
         }
         if (r == null) {
             return ControlAndStatusRegisterFile.getValue(name);

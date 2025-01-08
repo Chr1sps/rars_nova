@@ -1,6 +1,7 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -8,7 +9,6 @@ import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 public final class FCVTDS extends BasicInstruction {
     public static final FCVTDS INSTANCE = new FCVTDS();
@@ -24,10 +24,10 @@ public final class FCVTDS extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
-        final Float32 in = new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1)));
+        final Float32 in = new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1)));
         Float64 out = new Float64(0);
         out = FCVTSD.convert(in, out, e);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), out.bits);
+        Globals.FP_REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), out.bits);
     }
 }

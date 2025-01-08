@@ -1,9 +1,9 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -34,9 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallPrintDouble class.</p>
- */
 public final class SyscallPrintDouble extends AbstractSyscall {
     /**
      * Build an instance of the Print Double syscall. Default service number
@@ -54,6 +51,6 @@ public final class SyscallPrintDouble extends AbstractSyscall {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         // Note: Higher numbered reg contains high order word so concat 13-12.
-        SystemIO.printString(Double.toString(Double.longBitsToDouble(FloatingPointRegisterFile.getValueLong(10))));
+        SystemIO.printString(Double.toString(Double.longBitsToDouble(Globals.FP_REGISTER_FILE.fa0.getValue())));
     }
 }

@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 public abstract class Double extends BasicInstruction {
     protected Double(final String name, final String description, final String funct) {
@@ -25,7 +25,7 @@ public abstract class Double extends BasicInstruction {
     }
 
     public static @NotNull Float64 getDouble(final int num) {
-        return new Float64(FloatingPointRegisterFile.getValueLong(num));
+        return new Float64(Globals.FP_REGISTER_FILE.getLongValue(num));
     }
 
     @Override
@@ -36,11 +36,11 @@ public abstract class Double extends BasicInstruction {
             environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement);
         }
         final Float64 result = compute(
-            new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(1))),
-            new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(2))), environment
+            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1))),
+            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(2))), environment
         );
         Floating.setfflags(environment);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
+        Globals.FP_REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), result.bits);
     }
 
     public abstract @NotNull Float64 compute(@NotNull Float64 f1, @NotNull Float64 f2, @NotNull Environment e);

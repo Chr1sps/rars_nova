@@ -7,7 +7,6 @@ package rars.riscv.lang.lexing;
 import rars.Globals;
 import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 import javax.swing.text.Segment;
 import java.io.IOException;
@@ -745,7 +744,7 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
                         final var foundOps = InstructionsRegistry.matchOperator(yytext());
                         if (foundOps.isEmpty()) {
                             final var foundRegister = Globals.REGISTER_FILE.getRegisterByName(yytext());
-                            final var foundFPRegister = FloatingPointRegisterFile.getRegister(yytext());
+                            final var foundFPRegister = Globals.FP_REGISTER_FILE.getRegisterByName(yytext());
                             final var foundCASRegister = ControlAndStatusRegisterFile.getRegister(yytext());
                             if (foundRegister != null || foundFPRegister != null || foundCASRegister != null) {
                                 addToken(RVTokenType.REGISTER_NAME);

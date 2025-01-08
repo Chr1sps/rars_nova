@@ -153,7 +153,7 @@ public class TextSegmentWindow extends JInternalFrame {
      * Should convert the lines of code over to the table rows and columns.
      */
     public void setupTable() {
-        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
+        final int addressBase = this.mainUI.mainPane.executeTab.getAddressDisplayBase();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
         final var sourceStatementList = Globals.program.getMachineList();
@@ -328,7 +328,7 @@ public class TextSegmentWindow extends JInternalFrame {
         if (this.contentPane.getComponentCount() == 0) {
             return; // ignore if no content to change
         }
-        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
+        final int addressBase = this.mainUI.mainPane.executeTab.getAddressDisplayBase();
         for (int i = 0; i < this.intAddresses.length; i++) {
             final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(
                 this.intAddresses[i],
@@ -710,7 +710,7 @@ public class TextSegmentWindow extends JInternalFrame {
         // for that. So we'll pretend to be Memory observable and send it a fake memory
         // write update.
         try {
-            Globals.gui.mainPane.executeTab.dataSegment.processMemoryAccessNotice.accept(new MemoryAccessNotice(
+            this.mainUI.mainPane.executeTab.dataSegment.processMemoryAccessNotice.accept(new MemoryAccessNotice(
                 AccessNotice.AccessType.WRITE,
                 address, DataTypes.WORD_SIZE,
                 value
@@ -915,7 +915,7 @@ public class TextSegmentWindow extends JInternalFrame {
             );
             // cell.setFont(tableCellFont);
             final TextSegmentWindow textSegment =
-                Globals.gui.mainPane.executeTab.textSegment;
+                TextSegmentWindow.this.mainUI.mainPane.executeTab.textSegment;
             final boolean highlighting = textSegment.getCodeHighlighting();
 
             if (highlighting && textSegment.getIntCodeAddressAtRow(row) == TextSegmentWindow.this.highlightAddress) {

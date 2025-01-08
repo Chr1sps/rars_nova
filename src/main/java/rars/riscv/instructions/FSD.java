@@ -7,7 +7,6 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 public final class FSD extends BasicInstruction {
     public static final FSD INSTANCE = new FSD();
@@ -26,7 +25,7 @@ public final class FSD extends BasicInstruction {
         try {
             Globals.MEMORY_INSTANCE.setDoubleWord(
                 Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate,
-                FloatingPointRegisterFile.getValueLong(statement.getOperand(0))
+                Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(0))
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

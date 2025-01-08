@@ -7,7 +7,6 @@ import rars.Globals;
 import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.InterruptController;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
@@ -177,7 +176,7 @@ public class RunAssembleAction extends GuiAction {
                 FileStatus.set(FileStatus.State.RUNNABLE);
 
                 Globals.REGISTER_FILE.resetRegisters();
-                FloatingPointRegisterFile.resetRegisters();
+                Globals.FP_REGISTER_FILE.resetRegisters();
                 ControlAndStatusRegisterFile.resetRegisters();
                 InterruptController.reset();
 

@@ -7,7 +7,6 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 public final class FLD extends BasicInstruction {
     public static final FLD INSTANCE = new FLD();
@@ -28,7 +27,7 @@ public final class FLD extends BasicInstruction {
                 Globals.REGISTER_FILE.getIntValue(statement.getOperand(2))
                     + upperImmediate
             );
-            FloatingPointRegisterFile.updateRegister(
+            Globals.FP_REGISTER_FILE.updateRegisterByNumber(
                 statement.getOperand(0),
                 value
             );

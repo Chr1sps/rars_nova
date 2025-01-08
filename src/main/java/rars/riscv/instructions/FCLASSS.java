@@ -7,7 +7,6 @@ import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.types.Floating;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -78,7 +77,7 @@ public final class FCLASSS extends BasicInstruction {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final Float32 in = new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1)));
+        final Float32 in = new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1)));
         fclass(in, statement.getOperand(0));
     }
 }

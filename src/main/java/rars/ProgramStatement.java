@@ -8,7 +8,6 @@ import rars.assembler.TokenList;
 import rars.assembler.TokenType;
 import rars.riscv.*;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
 import rars.venus.NumberDisplayBaseChooser;
@@ -409,7 +408,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     this.operands.add(registerNumber);
                 }
                 case FP_REGISTER_NAME -> {
-                    registerNumber = FloatingPointRegisterFile.getRegister(tokenValue).number;
+                    registerNumber = Globals.FP_REGISTER_FILE.getRegisterByName(tokenValue).number;
                     basicStatementElement = "f" + registerNumber;
                     basicInstructionBuilder.append(basicStatementElement);
                     this.basicStatementList.addString(basicStatementElement);

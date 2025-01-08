@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -60,12 +60,12 @@ public abstract class FusedFloat extends BasicInstruction {
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(4), statement);
         final Float32 result = compute(
-            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1))),
-            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(2))),
-            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(3))), e
+            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1))),
+            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(2))),
+            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(3))), e
         );
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), result.bits);
+        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
     }
 
     /**

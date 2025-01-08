@@ -6,7 +6,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 import javax.swing.*;
 
@@ -79,7 +78,7 @@ public final class SyscallMessageDialogDouble extends AbstractSyscall {
 
         JOptionPane.showMessageDialog(
             null,
-            message + Double.longBitsToDouble(FloatingPointRegisterFile.getValueLong(10)),
+            message + Double.longBitsToDouble(Globals.FP_REGISTER_FILE.fa0.getValue()),
             null,
             JOptionPane.INFORMATION_MESSAGE
         );

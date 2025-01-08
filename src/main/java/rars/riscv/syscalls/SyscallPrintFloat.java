@@ -1,9 +1,9 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -34,23 +34,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallPrintFloat class.</p>
- */
 public final class SyscallPrintFloat extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallPrintFloat.</p>
-     */
     public SyscallPrintFloat() {
         super("PrintFloat", "Prints a floating point number", "fa0 = float to print", "N/A");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        SystemIO.printString(Float.toString(Float.intBitsToFloat(
-            FloatingPointRegisterFile.getValue("fa0"))));
+        final var registerValue = Globals.FP_REGISTER_FILE.convertFromLong(Globals.FP_REGISTER_FILE.fa0.getValue());
+        SystemIO.printString(Float.toString(Float.intBitsToFloat(registerValue)));
     }
 }

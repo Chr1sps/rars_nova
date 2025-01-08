@@ -85,7 +85,7 @@ public final class RegisterFile extends RegisterFileBase {
     }
 
     @Override
-    protected int convertFromLong(final long value) {
+    public int convertFromLong(final long value) {
         return ConversionUtils.longLowerHalfToInt(value);
     }
 

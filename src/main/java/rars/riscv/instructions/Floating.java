@@ -1,6 +1,7 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
@@ -10,7 +11,6 @@ import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -98,7 +98,7 @@ public abstract class Floating extends BasicInstruction {
     }
 
     public static @NotNull Float32 getFloat(final int num) {
-        return new Float32(FloatingPointRegisterFile.getValue(num));
+        return new Float32(Globals.FP_REGISTER_FILE.getIntValue(num));
     }
 
     @Override
@@ -109,11 +109,11 @@ public abstract class Floating extends BasicInstruction {
             environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement);
         }
         final Float32 result = this.compute(
-            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1))),
-            new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(2))), environment
+            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1))),
+            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(2))), environment
         );
         Floating.setfflags(environment);
-        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), result.bits);
+        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
     }
 
     /**

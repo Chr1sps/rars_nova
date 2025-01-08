@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.util.BinaryUtils;
 
 /*
@@ -147,7 +146,7 @@ public enum TokenType {
         }
         // See if it is a floating point register
 
-        if (FloatingPointRegisterFile.getRegister(value) != null) {
+        if (Globals.FP_REGISTER_FILE.getRegisterByName(value) != null) {
             return TokenType.FP_REGISTER_NAME;
         }
 

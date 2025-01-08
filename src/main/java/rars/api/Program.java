@@ -7,7 +7,9 @@ import rars.ProgramStatement;
 import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
-import rars.riscv.hardware.*;
+import rars.riscv.hardware.ControlAndStatusRegisterFile;
+import rars.riscv.hardware.InterruptController;
+import rars.riscv.hardware.Memory;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
@@ -124,7 +126,7 @@ public final class Program {
 
     private ErrorList assemble(final @NotNull List<RISCVProgram> programs) throws AssemblyException {
         Globals.REGISTER_FILE.setValuesFromConfiguration(this.assembled.getMemoryConfiguration());
-        final Memory temp = Globals.swapInstance(this.assembled); // Assembling changes memory so we need to swap to 
+        final Memory temp = Globals.swapMemoryInstance(this.assembled); // Assembling changes memory so we need to swap to 
         // capture that.
         ErrorList warnings = null;
         AssemblyException e = null;
@@ -137,7 +139,7 @@ public final class Program {
         } catch (final AssemblyException ae) {
             e = ae;
         }
-        Globals.swapInstance(temp);
+        Globals.swapMemoryInstance(temp);
         if (e != null) {
             throw e;
         }
@@ -159,12 +161,12 @@ public final class Program {
      *     to allow IO passthrough
      */
     public void setup(final @NotNull List<String> args, final String STDIN) {
-        final var tmpMem = Globals.swapInstance(this.simulation);
+        final var tmpMem = Globals.swapMemoryInstance(this.simulation);
         new ProgramArgumentList(args).storeProgramArguments();
-        Globals.swapInstance(tmpMem);
+        Globals.swapMemoryInstance(tmpMem);
 
         Globals.REGISTER_FILE.resetRegisters();
-        FloatingPointRegisterFile.resetRegisters();
+        Globals.FP_REGISTER_FILE.resetRegisters();
         ControlAndStatusRegisterFile.resetRegisters();
         InterruptController.reset();
         Globals.REGISTER_FILE.initializeProgramCounter(this.startPC);
@@ -210,7 +212,7 @@ public final class Program {
             this.programOptions.selfModifyingCode
         );
         final SystemIO.Data tmpFiles = SystemIO.swapData(this.fds);
-        final Memory tmpMem = Globals.swapInstance(this.simulation);
+        final Memory tmpMem = Globals.swapMemoryInstance(this.simulation);
 
         SimulationException e = null;
         Simulator.Reason ret = null;
@@ -223,7 +225,7 @@ public final class Program {
 
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, selfMod);
         SystemIO.swapData(tmpFiles);
-        Globals.swapInstance(tmpMem);
+        Globals.swapMemoryInstance(tmpMem);
 
         if (e != null) {
             throw e;

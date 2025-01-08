@@ -5,7 +5,6 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 public final class FMVXD extends BasicInstruction {
     public static final FMVXD INSTANCE = new FMVXD();
@@ -20,7 +19,7 @@ public final class FMVXD extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
 
-        final long newValue = FloatingPointRegisterFile.getValueLong(statement.getOperand(1));
+        final long newValue = Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1));
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

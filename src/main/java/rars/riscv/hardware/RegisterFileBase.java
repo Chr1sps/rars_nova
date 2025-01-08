@@ -31,6 +31,14 @@ public abstract class RegisterFileBase {
 
     protected abstract int convertFromLong(final long value);
 
+    public final long getLongValue(final @NotNull Register register) {
+        return register.getValue();
+    }
+
+    public final int getIntValue(final @NotNull Register register) {
+        return this.convertFromLong(register.getValue());
+    }
+
     public final @Nullable Integer getIntValue(final @NotNull String registerName) {
         final var register = this.getRegisterByName(registerName);
         if (register == null) {
@@ -60,7 +68,7 @@ public abstract class RegisterFileBase {
         if (register == null) {
             return null;
         }
-        return register.getValue();
+        return this.getLongValue(register);
     }
 
     public final @Nullable Long updateRegisterByNumber(final int registerNumber, final long newValue) {

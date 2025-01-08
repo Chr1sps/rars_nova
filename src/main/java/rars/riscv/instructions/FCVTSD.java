@@ -1,6 +1,7 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -8,7 +9,6 @@ import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 public final class FCVTSD extends BasicInstruction {
     public static final FCVTSD INSTANCE = new FCVTSD();
@@ -20,21 +20,6 @@ public final class FCVTSD extends BasicInstruction {
         );
     }
 
-    /**
-     * <p>convert.</p>
-     *
-     * @param toconvert
-     *     a D object
-     * @param constructor
-     *     a S object
-     * @param e
-     *     a {@link Environment} object
-     * @param <S>
-     *     a S class
-     * @param <D>
-     *     a D class
-     * @return a S object
-     */
     public static <S extends rars.jsoftfloat.types.Floating<S>, D extends rars.jsoftfloat.types.Floating<D>> S convert(
         @NotNull final D toconvert, @NotNull final S constructor, final Environment e) {
         if (toconvert.isInfinite()) {
@@ -57,10 +42,10 @@ public final class FCVTSD extends BasicInstruction {
 
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
-        final Float64 in = new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(1)));
+        final Float64 in = new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1)));
         Float32 out = new Float32(0);
         out = convert(in, out, e);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), out.bits);
+        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), out.bits);
     }
 }

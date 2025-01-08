@@ -6,7 +6,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 import javax.swing.*;
 
@@ -90,7 +89,7 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
         final String inputValue = JOptionPane.showInputDialog(message);
 
         try {
-            FloatingPointRegisterFile.updateRegister(0, 0); // set $f0 to zero
+            Globals.FP_REGISTER_FILE.updateRegister(Globals.FP_REGISTER_FILE.ft0, 0);
             if (inputValue == null) // Cancel was chosen
             {
                 // set $a1 to -2 flag
@@ -103,7 +102,10 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
                 final double doubleValue = Double.parseDouble(inputValue);
 
                 // Successful parse of valid input data
-                FloatingPointRegisterFile.updateRegister(10, Double.doubleToRawLongBits(doubleValue));
+                Globals.FP_REGISTER_FILE.updateRegister(
+                    Globals.FP_REGISTER_FILE.fa0,
+                    Double.doubleToRawLongBits(doubleValue)
+                );
                 // set $a1 to valid flag
                 Globals.REGISTER_FILE.updateRegisterByName("a1", 0);
 

@@ -9,7 +9,6 @@ import rars.jsoftfloat.operations.Conversions;
 import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 import java.math.BigInteger;
 
@@ -36,6 +35,6 @@ public final class FCVTSLU extends BasicInstruction {
         }
         final Float32 converted = Conversions.convertFromInt(unsigned, e, tmp);
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), converted.bits);
+        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), converted.bits);
     }
 }

@@ -5,7 +5,6 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -47,7 +46,7 @@ public final class FMVSX extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
 
-        FloatingPointRegisterFile.updateRegisterInt(
+        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(
             statement.getOperand(0),
             Globals.REGISTER_FILE.getIntValue(statement.getOperand(1))
         );

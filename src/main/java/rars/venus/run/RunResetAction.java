@@ -2,7 +2,8 @@ package rars.venus.run;
 
 import rars.Globals;
 import rars.exceptions.AssemblyException;
-import rars.riscv.hardware.*;
+import rars.riscv.hardware.ControlAndStatusRegisterFile;
+import rars.riscv.hardware.InterruptController;
 import rars.util.SystemIO;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
@@ -87,7 +88,7 @@ public final class RunResetAction extends GuiAction {
         }
 
         Globals.REGISTER_FILE.resetRegisters();
-        FloatingPointRegisterFile.resetRegisters();
+        Globals.FP_REGISTER_FILE.resetRegisters();
         ControlAndStatusRegisterFile.resetRegisters();
         InterruptController.reset();
 

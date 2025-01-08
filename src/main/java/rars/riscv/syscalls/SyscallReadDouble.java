@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -65,6 +65,6 @@ public class SyscallReadDouble extends AbstractSyscall {
             );
         }
 
-        FloatingPointRegisterFile.updateRegister(10, Double.doubleToRawLongBits(doubleValue));
+        Globals.FP_REGISTER_FILE.updateRegisterByNumber(10, Double.doubleToRawLongBits(doubleValue));
     }
 }

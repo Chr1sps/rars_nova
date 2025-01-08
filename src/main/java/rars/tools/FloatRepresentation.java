@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.notices.AccessNotice;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.registers.Register;
 import rars.util.BinaryUtils;
 
@@ -372,7 +371,7 @@ public class FloatRepresentation extends AbstractTool {
 
         // Means of selecting and deselecting an attached floating point register
 
-        this.fpRegisters = FloatingPointRegisterFile.getRegisters();
+        this.fpRegisters = Globals.FP_REGISTER_FILE.getRegisters();
         final String[] registerList = new String[this.fpRegisters.length + 1];
         registerList[0] = "None";
         for (int i = 0; i < this.fpRegisters.length; i++) {

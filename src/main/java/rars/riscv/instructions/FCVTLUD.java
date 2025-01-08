@@ -9,7 +9,6 @@ import rars.jsoftfloat.operations.Conversions;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 public final class FCVTLUD extends BasicInstruction {
     public static final FCVTLUD INSTANCE = new FCVTLUD();
@@ -27,7 +26,7 @@ public final class FCVTLUD extends BasicInstruction {
 
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
-        final Float64 in = new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(1)));
+        final Float64 in = new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1)));
         final long out = Conversions.convertToUnsignedLong(in, e, false);
         Floating.setfflags(e);
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), out);

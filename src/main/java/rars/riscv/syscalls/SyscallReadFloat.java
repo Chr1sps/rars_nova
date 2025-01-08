@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.util.SystemIO;
 
 /*
@@ -60,7 +60,7 @@ public class SyscallReadFloat extends AbstractSyscall {
                 "invalid float input (syscall " + this.getNumber() + ")"
             );
         }
-        FloatingPointRegisterFile.updateRegisterInt(
+        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(
             10,
             Float.floatToRawIntBits(floatValue)
         ); // TODO: update to string fa0

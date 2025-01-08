@@ -11,7 +11,9 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.InstructionsRegistry;
-import rars.riscv.hardware.*;
+import rars.riscv.hardware.ControlAndStatusRegisterFile;
+import rars.riscv.hardware.Memory;
+import rars.riscv.hardware.MemoryUtils;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
@@ -318,7 +320,7 @@ public final class Main {
     private void displayRegistersPostMortem() {
         // Display requested register contents
         for (final String registerName : this.programOptions.registers) {
-            if (FloatingPointRegisterFile.getRegister(registerName) != null) {
+            if (Globals.FP_REGISTER_FILE.getRegisterByName(registerName) != null) {
                 // TODO: do something for double vs float
                 // It isn't clear to me what the best behaviour is
                 // floating point register

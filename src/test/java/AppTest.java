@@ -292,7 +292,7 @@ final class AppTest extends RarsTestBase {
 
     @Test
     void runSingle() throws IOException {
-        run(getTestDataPath().resolve("riscv-tests/addi.s").toString(), false);
+        run(getTestDataPath().resolve("riscv-tests/ldstd.s").toString(), false);
     }
 
     @Test

@@ -7,7 +7,6 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -51,7 +50,7 @@ public final class FLW extends BasicInstruction {
 
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            FloatingPointRegisterFile.updateRegisterInt(
+            Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(
                 statement.getOperand(0),
                 Globals.MEMORY_INSTANCE.getWord(Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate)
             );

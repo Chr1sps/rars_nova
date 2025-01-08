@@ -6,7 +6,6 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -153,7 +152,7 @@ public class BackStepper {
                             Globals.REGISTER_FILE.updateRegisterByNumber(step.param1, step.param2);
                             break;
                         case FLOATING_POINT_REGISTER_RESTORE:
-                            FloatingPointRegisterFile.updateRegister(step.param1, step.param2);
+                            Globals.FP_REGISTER_FILE.updateRegisterByNumber(step.param1, step.param2);
                             break;
                         case CONTROL_AND_STATUS_REGISTER_RESTORE:
                             ControlAndStatusRegisterFile.updateRegister(step.param1, step.param2);

@@ -1,7 +1,7 @@
 package rars.venus.registers;
 
 import org.jetbrains.annotations.NotNull;
-import rars.riscv.hardware.FloatingPointRegisterFile;
+import rars.Globals;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 
@@ -47,7 +47,11 @@ public final class FloatingPointWindow extends RegisterBlockWindowBase {
     };
 
     public FloatingPointWindow() {
-        super(FloatingPointRegisterFile.getRegisters(), regToolTips, "32-bit single precision IEEE 754 floating point");
+        super(
+            Globals.FP_REGISTER_FILE.getRegisters(),
+            regToolTips,
+            "32-bit single precision IEEE 754 floating point"
+        );
     }
 
     @Override
@@ -61,16 +65,16 @@ public final class FloatingPointWindow extends RegisterBlockWindowBase {
 
     @Override
     protected void beginObserving() {
-        FloatingPointRegisterFile.addRegistersSubscriber(this.processRegisterNotice);
+        Globals.FP_REGISTER_FILE.addRegistersListener(this.processRegisterNotice);
     }
 
     @Override
     protected void endObserving() {
-        FloatingPointRegisterFile.deleteRegistersObserver(this.processRegisterNotice);
+        Globals.FP_REGISTER_FILE.deleteRegistersListener(this.processRegisterNotice);
     }
 
     @Override
     protected void resetRegisters() {
-        FloatingPointRegisterFile.resetRegisters();
+        Globals.FP_REGISTER_FILE.resetRegisters();
     }
 }

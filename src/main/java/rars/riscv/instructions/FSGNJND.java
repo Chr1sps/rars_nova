@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 public final class FSGNJND extends BasicInstruction {
     public static final FSGNJND INSTANCE = new FSGNJND();
@@ -21,8 +21,8 @@ public final class FSGNJND extends BasicInstruction {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final long result = (FloatingPointRegisterFile.getValueLong(statement.getOperand(1)) & 0x7FFFFFFF_FFFFFFFFL) |
-            ((~FloatingPointRegisterFile.getValueLong(statement.getOperand(2))) & 0x80000000_00000000L);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result);
+        final long result = (Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1)) & 0x7FFFFFFF_FFFFFFFFL) |
+            ((~Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(2))) & 0x80000000_00000000L);
+        Globals.FP_REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), result);
     }
 }

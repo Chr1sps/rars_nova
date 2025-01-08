@@ -1,10 +1,10 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 import javax.swing.*;
 
@@ -36,13 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallMessageDialogFloat class.</p>
- */
 public final class SyscallMessageDialogFloat extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallMessageDialogFloat.</p>
-     */
     public SyscallMessageDialogFloat() {
         super(
             "MessageDialogFloat", "Service to display a message followed by a float to user",
@@ -52,9 +46,6 @@ public final class SyscallMessageDialogFloat extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String message = NullString.get(statement);
@@ -62,7 +53,7 @@ public final class SyscallMessageDialogFloat extends AbstractSyscall {
         // Display the dialog.
         JOptionPane.showMessageDialog(
             null,
-            message + FloatingPointRegisterFile.getFloatFromRegister("fa1"),
+            message + Globals.FP_REGISTER_FILE.getFloatFromRegister(Globals.FP_REGISTER_FILE.fa1),
             null,
             JOptionPane.INFORMATION_MESSAGE
         );

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.SymbolTable;
 import rars.riscv.SyscallNumberOverride;
+import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.riscv.hardware.RegisterFile;
@@ -84,6 +85,8 @@ public final class Globals {
     public static final @NotNull RegisterFile REGISTER_FILE;
     private static final @NotNull Logger LOGGER = LogManager.getLogger(Globals.class);
     private static final String syscallPropertiesFile = "Syscall";
+    ///  Floating point register file for the RARS simulator.
+    public static @NotNull FloatingPointRegisterFile FP_REGISTER_FILE;
     /// Flag to determine whether to produce internal debugging information.
     public static boolean debug = false;
     /// Exit code -- useful with SYSCALL 17 when running from command line (not GUI)
@@ -115,6 +118,7 @@ public final class Globals {
 
         GLOBAL_SYMBOL_TABLE = new SymbolTable();
         REGISTER_FILE = new RegisterFile(GLOBAL_SYMBOL_TABLE, initialMemoryConfiguration);
+        FP_REGISTER_FILE = new FloatingPointRegisterFile();
     }
 
     private Globals() {
@@ -147,7 +151,7 @@ public final class Globals {
         REGISTER_FILE.setValuesFromConfiguration(newConfiguration);
     }
 
-    public static @NotNull Memory swapInstance(final @NotNull Memory mem) {
+    public static @NotNull Memory swapMemoryInstance(final @NotNull Memory mem) {
         final var previous = MEMORY_INSTANCE;
         MEMORY_INSTANCE = mem;
         return previous;

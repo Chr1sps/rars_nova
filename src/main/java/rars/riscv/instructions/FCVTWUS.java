@@ -9,7 +9,6 @@ import rars.jsoftfloat.operations.Conversions;
 import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -53,7 +52,7 @@ public final class FCVTWUS extends BasicInstruction {
 
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
-        final Float32 in = new Float32(FloatingPointRegisterFile.getValue(statement.getOperand(1)));
+        final Float32 in = new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1)));
         final int out = Conversions.convertToUnsignedInt(in, e, false);
         Floating.setfflags(e);
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), out);

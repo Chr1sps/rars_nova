@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 public abstract class FusedDouble extends BasicInstruction {
     /**
@@ -33,12 +33,12 @@ public abstract class FusedDouble extends BasicInstruction {
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(4), statement);
         final Float64 result = compute(
-            new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(1))),
-            new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(2))),
-            new Float64(FloatingPointRegisterFile.getValueLong(statement.getOperand(3))), e
+            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1))),
+            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(2))),
+            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(3))), e
         );
         Floating.setfflags(e);
-        FloatingPointRegisterFile.updateRegister(statement.getOperand(0), result.bits);
+        Globals.FP_REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), result.bits);
     }
 
     /**

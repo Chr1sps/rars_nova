@@ -5,7 +5,6 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 import javax.swing.*;
 
@@ -66,7 +65,10 @@ public final class SyscallInputDialogFloat extends AbstractSyscall {
         final String inputValue = JOptionPane.showInputDialog(message);
 
         try {
-            FloatingPointRegisterFile.setRegisterToFloat(0, 0.0f); // set f0 to zero
+            Globals.FP_REGISTER_FILE.updateRegisterInt(
+                Globals.FP_REGISTER_FILE.ft0,
+                Float.floatToIntBits(0.0f)
+            ); // set ft0 to zero
             if (inputValue == null) // Cancel was chosen
             {
                 Globals.REGISTER_FILE.updateRegisterByName("a1", -2);
@@ -80,7 +82,10 @@ public final class SyscallInputDialogFloat extends AbstractSyscall {
                 // System.out.println("SyscallInputDialogFloat: floatValue is " + floatValue);
 
                 // Successful parse of valid input data
-                FloatingPointRegisterFile.setRegisterToFloat(0, floatValue); // set f0 to input data
+                Globals.FP_REGISTER_FILE.updateRegisterInt(
+                    Globals.FP_REGISTER_FILE.ft0,
+                    Float.floatToIntBits(floatValue)
+                ); // set f0 to input data
                 // set to valid flag
                 Globals.REGISTER_FILE.updateRegisterByName("a1", 0);
 

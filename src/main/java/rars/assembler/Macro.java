@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
 import rars.RISCVProgram;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -117,7 +116,7 @@ public final class Macro {
             // DPS 7-July-2014.
             if (!tokenValue.isEmpty() && tokenValue.charAt(0) == '$' &&
                 Globals.REGISTER_FILE.getRegisterByName(tokenValue) == null &&
-                FloatingPointRegisterFile.getRegister(tokenValue) == null) // added 7-July-2014
+                Globals.FP_REGISTER_FILE.getRegisterByName(tokenValue) == null) // added 7-July-2014
             {
                 return true;
             }

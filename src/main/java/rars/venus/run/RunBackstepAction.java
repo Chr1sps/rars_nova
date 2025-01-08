@@ -2,7 +2,6 @@ package rars.venus.run;
 
 import rars.Globals;
 import rars.riscv.hardware.ControlAndStatusRegisterFile;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
@@ -94,7 +93,7 @@ public class RunBackstepAction extends GuiAction {
             Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment.processMemoryAccessNotice);
             Globals.REGISTER_FILE.addRegistersListener(executePane.registerValues.processRegisterNotice);
             ControlAndStatusRegisterFile.addRegistersObserver(executePane.csrValues.processRegisterNotice);
-            FloatingPointRegisterFile.addRegistersSubscriber(executePane.fpRegValues.processRegisterNotice);
+            Globals.FP_REGISTER_FILE.addRegistersListener(executePane.fpRegValues.processRegisterNotice);
             Globals.program.getBackStepper().backStep();
             Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment.processMemoryAccessNotice);
             Globals.REGISTER_FILE.deleteRegistersListener(executePane.registerValues.processRegisterNotice);

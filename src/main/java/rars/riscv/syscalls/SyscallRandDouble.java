@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 import java.util.Random;
 
@@ -50,9 +49,6 @@ public class SyscallRandDouble extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         final Integer index = Globals.REGISTER_FILE.getIntValue("a0");
@@ -61,6 +57,9 @@ public class SyscallRandDouble extends AbstractSyscall {
             stream = new Random(); // create a non-seeded stream
             RandomStreams.randomStreams.put(index, stream);
         }
-        FloatingPointRegisterFile.updateRegister(10, Double.doubleToRawLongBits(stream.nextDouble()));
+        Globals.FP_REGISTER_FILE.updateRegister(
+            Globals.FP_REGISTER_FILE.fa0,
+            Double.doubleToRawLongBits(stream.nextDouble())
+        );
     }
 }

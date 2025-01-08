@@ -7,7 +7,6 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -52,7 +51,8 @@ public final class FSW extends BasicInstruction {
         try {
             Globals.MEMORY_INSTANCE.setWord(
                 Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate,
-                (int) FloatingPointRegisterFile.getValueLong(statement.getOperand(0))
+                // not `getIntValue` because we want the lower 32 bits
+                (int) Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(0)).longValue()
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

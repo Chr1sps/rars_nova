@@ -1,10 +1,10 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -46,8 +46,8 @@ public final class FSGNJS extends BasicInstruction {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        final int result = (FloatingPointRegisterFile.getValue(statement.getOperand(1)) & 0x7FFFFFFF)
-            | (FloatingPointRegisterFile.getValue(statement.getOperand(2)) & 0x80000000);
-        FloatingPointRegisterFile.updateRegisterInt(statement.getOperand(0), result);
+        final int result = (Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1)) & 0x7FFFFFFF)
+            | (Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(2)) & 0x80000000);
+        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result);
     }
 }
