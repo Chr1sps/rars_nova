@@ -1,12 +1,13 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 
 import javax.swing.*;
+
+import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -50,16 +51,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * -3: OK was chosen but no data had been input into field <br>
  */
 public final class SyscallInputDialogInt extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallInputDialogInt.</p>
-     */
     public SyscallInputDialogInt() {
         super("InputDialogInt");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String message = NullString.get(statement);
@@ -71,25 +66,25 @@ public final class SyscallInputDialogInt extends AbstractSyscall {
         final String inputValue = JOptionPane.showInputDialog(message);
         if (inputValue == null) // Cancel was chosen
         {
-            Globals.REGISTER_FILE.updateRegisterByName("a0", 0);
-            Globals.REGISTER_FILE.updateRegisterByName("a1", -2);
+            REGISTER_FILE.updateRegisterByName("a0", 0);
+            REGISTER_FILE.updateRegisterByName("a1", -2);
         } else if (inputValue.isEmpty()) // OK was chosen but there was no input
         {
-            Globals.REGISTER_FILE.updateRegisterByName("a0", 0);
-            Globals.REGISTER_FILE.updateRegisterByName("a1", -3);
+            REGISTER_FILE.updateRegisterByName("a0", 0);
+            REGISTER_FILE.updateRegisterByName("a1", -3);
         } else {
             try {
                 final int i = Integer.parseInt(inputValue);
 
                 // Successful parse of valid input data
                 // set to the data read
-                Globals.REGISTER_FILE.updateRegisterByName("a0", i);
+                REGISTER_FILE.updateRegisterByName("a0", i);
                 // set to valid flag
-                Globals.REGISTER_FILE.updateRegisterByName("a1", 0);
+                REGISTER_FILE.updateRegisterByName("a1", 0);
             } catch (final NumberFormatException e) {
                 // Unsuccessful parse of input data
-                Globals.REGISTER_FILE.updateRegisterByName("a0", 0);
-                Globals.REGISTER_FILE.updateRegisterByName("a1", -1);
+                REGISTER_FILE.updateRegisterByName("a0", 0);
+                REGISTER_FILE.updateRegisterByName("a1", -1);
 
             }
 

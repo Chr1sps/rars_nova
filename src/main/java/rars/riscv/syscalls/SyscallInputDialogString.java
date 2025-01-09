@@ -1,7 +1,6 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
@@ -9,6 +8,9 @@ import rars.riscv.AbstractSyscall;
 
 import javax.swing.*;
 import java.nio.charset.StandardCharsets;
+
+import static rars.Globals.MEMORY_INSTANCE;
+import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -77,38 +79,38 @@ public final class SyscallInputDialogString extends AbstractSyscall {
         // An empty string returned (that is, inputString.length() of zero)
         // means that OK was chosen but no string was input.
         final String inputString = JOptionPane.showInputDialog(message);
-        final int byteAddress = Globals.REGISTER_FILE.getIntValue("a1"); // byteAddress of string is in a1
-        final int maxLength = Globals.REGISTER_FILE.getIntValue("a2"); // input buffer size for input string is in a2
+        final int byteAddress = REGISTER_FILE.getIntValue("a1"); // byteAddress of string is in a1
+        final int maxLength = REGISTER_FILE.getIntValue("a2"); // input buffer size for input string is in a2
 
         try {
             if (inputString == null) // Cancel was chosen
             {
-                Globals.REGISTER_FILE.updateRegisterByName("a1", -2);
+                REGISTER_FILE.updateRegisterByName("a1", -2);
             } else if (inputString.isEmpty()) // OK was chosen but there was no input
             {
-                Globals.REGISTER_FILE.updateRegisterByName("a1", -3);
+                REGISTER_FILE.updateRegisterByName("a1", -3);
             } else {
                 final byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
                 // The buffer will contain characters, a '\n' character, and the null character
                 // Copy the input data to buffer as space permits
                 int stringLength = Math.min(maxLength - 1, utf8BytesList.length);
                 for (int index = 0; index < stringLength; index++) {
-                    Globals.MEMORY_INSTANCE.setByte(
+                    MEMORY_INSTANCE.setByte(
                         byteAddress + index,
                         utf8BytesList[index]
                     );
                 }
                 if (stringLength < maxLength - 1) {
-                    Globals.MEMORY_INSTANCE.setByte(byteAddress + stringLength, '\n');
+                    MEMORY_INSTANCE.setByte(byteAddress + stringLength, '\n');
                     stringLength++;
                 }
-                Globals.MEMORY_INSTANCE.setByte(byteAddress + stringLength, 0);
+                MEMORY_INSTANCE.setByte(byteAddress + stringLength, 0);
 
                 if (utf8BytesList.length > maxLength - 1) {
                     // length of the input string exceeded the specified maximum
-                    Globals.REGISTER_FILE.updateRegisterByName("a1", -4);
+                    REGISTER_FILE.updateRegisterByName("a1", -4);
                 } else {
-                    Globals.REGISTER_FILE.updateRegisterByName("a1", 0);
+                    REGISTER_FILE.updateRegisterByName("a1", 0);
                 }
             } // end else
 

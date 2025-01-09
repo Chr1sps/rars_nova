@@ -13,7 +13,7 @@ import static rars.Globals.BOOL_SETTINGS;
 public final class RegisterFile extends RegisterFileBase {
     public static final int GLOBAL_POINTER_REGISTER_INDEX = 3;
     public static final int STACK_POINTER_REGISTER_INDEX = 2;
-    public final @NotNull Register zero, sp, gp, pc, a0, a1, a2;
+    public final @NotNull Register zero, sp, gp, pc, a0, a1, a2, a7;
     private final @NotNull SymbolTable globalSymbolTable;
 
     public RegisterFile(
@@ -28,10 +28,11 @@ public final class RegisterFile extends RegisterFileBase {
         this.a0 = this.registers[10];
         this.a1 = this.registers[11];
         this.a2 = this.registers[12];
+        this.a7 = this.registers[17];
         this.pc = new Register(
             "pc",
             -1,
-            Globals.MEMORY_INSTANCE.getMemoryConfiguration().textBaseAddress
+            initialMemoryConfiguration.textBaseAddress
         );
     }
 

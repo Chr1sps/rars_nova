@@ -1,10 +1,11 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 
 import java.util.HashMap;
 import java.util.Random;
+
+import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -58,7 +59,7 @@ public final class RandomStreams {
      * @return the stream a that index
      */
     static @NotNull Random get(final String reg) {
-        final int index = Globals.REGISTER_FILE.getIntValue(reg);
+        final int index = REGISTER_FILE.getIntValue(reg);
         Random stream = randomStreams.get(index);
         if (stream == null) {
             stream = new Random(); // create a non-seeded stream

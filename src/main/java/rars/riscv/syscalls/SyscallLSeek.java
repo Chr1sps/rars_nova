@@ -33,13 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallLSeek class.</p>
- */
 public final class SyscallLSeek extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallLSeek.</p>
-     */
     public SyscallLSeek() {
         super(
             "LSeek", "Seek to a position in a file",
@@ -49,9 +43,6 @@ public final class SyscallLSeek extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         final int result = SystemIO.seek(

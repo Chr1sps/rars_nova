@@ -1,13 +1,15 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 
 import java.nio.charset.StandardCharsets;
+
+import static rars.Globals.MEMORY_INSTANCE;
+import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 20017,  Benjamin Landers
@@ -36,13 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallGetCWD class.</p>
- */
 public final class SyscallGetCWD extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallGetCWD.</p>
-     */
     public SyscallGetCWD() {
         super(
             "GetCWD", "Writes the path of the current working directory into a buffer",
@@ -51,31 +47,28 @@ public final class SyscallGetCWD extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String path = System.getProperty("user.dir");
-        final int buf = Globals.REGISTER_FILE.getIntValue("a0");
-        final int length = Globals.REGISTER_FILE.getIntValue("a1");
+        final int buf = REGISTER_FILE.getIntValue(REGISTER_FILE.a0);
+        final int length = REGISTER_FILE.getIntValue(REGISTER_FILE.a0);
 
         final byte[] utf8BytesList = path.getBytes(StandardCharsets.UTF_8);
         if (length < utf8BytesList.length + 1) {
             // This should be -34 (ERANGE) for compatibility with spike, but until other
             // syscalls are ready with compatable
             // error codes, lets keep internal consitency.
-            Globals.REGISTER_FILE.updateRegisterByName("a0", -1);
+            REGISTER_FILE.updateRegisterByName("a0", -1);
             return;
         }
         try {
             for (int index = 0; index < utf8BytesList.length; index++) {
-                Globals.MEMORY_INSTANCE.setByte(
+                MEMORY_INSTANCE.setByte(
                     buf + index,
                     utf8BytesList[index]
                 );
             }
-            Globals.MEMORY_INSTANCE.setByte(buf + utf8BytesList.length, 0);
+            MEMORY_INSTANCE.setByte(buf + utf8BytesList.length, 0);
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);
         }

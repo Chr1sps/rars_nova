@@ -1,13 +1,15 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+
+import static rars.Globals.MEMORY_INSTANCE;
+import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 2003-2017,  Pete Sanderson,Benjamin Landers and Kenneth Vollmar
@@ -72,14 +74,14 @@ public final class NullString {
      *     if it hits a #AddressErrorException
      */
     public static @NotNull String get(final ProgramStatement statement, final String reg) throws ExitingException {
-        int byteAddress = Globals.REGISTER_FILE.getIntValue(reg);
+        int byteAddress = REGISTER_FILE.getIntValue(reg);
         final ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
         try {
-            utf8BytesList.add(Globals.MEMORY_INSTANCE.getByte(byteAddress));
+            utf8BytesList.add(MEMORY_INSTANCE.getByte(byteAddress));
             while (utf8BytesList.getLast() != 0) // until null terminator
             {
                 byteAddress++;
-                utf8BytesList.add(Globals.MEMORY_INSTANCE.getByte(byteAddress));
+                utf8BytesList.add(MEMORY_INSTANCE.getByte(byteAddress));
             }
         } catch (final AddressErrorException e) {
             throw new ExitingException(statement, e);

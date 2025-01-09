@@ -35,13 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallMessageDialogString class.</p>
- */
 public final class SyscallMessageDialogString extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallMessageDialogString.</p>
-     */
     public SyscallMessageDialogString() {
         super(
             "MessageDialogString", "Service to display a message followed by a string to user",
@@ -51,9 +45,6 @@ public final class SyscallMessageDialogString extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         // Display the dialog.

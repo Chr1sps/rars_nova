@@ -1,10 +1,11 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.AbstractSyscall;
 import rars.util.SystemIO;
+
+import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -34,22 +35,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallClose class.</p>
- */
 public final class SyscallClose extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallClose.</p>
-     */
     public SyscallClose() {
         super("Close", "Close a file", "a0 = the file descriptor to close", "N/A");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
-        SystemIO.closeFile(Globals.REGISTER_FILE.getIntValue("a0"));
+        SystemIO.closeFile(REGISTER_FILE.getIntValue(REGISTER_FILE.a0));
     }
 }

@@ -126,8 +126,8 @@ public final class ControlAndStatusRegisterFile {
      * @return old value in register prior to update
      */
     public static boolean updateRegister(final int num, final long val) {
-        final var register = ControlAndStatusRegisterFile.instance.getRegister(num);
-        return ControlAndStatusRegisterFile.updateRegister(register, val);
+        final var register = instance.getRegister(num);
+        return updateRegister(register, val);
     }
 
     public static boolean updateRegister(final @NotNull Register register, final long value) {
@@ -153,8 +153,8 @@ public final class ControlAndStatusRegisterFile {
      *     The desired value for the register.
      */
     public static boolean updateRegister(final @NotNull String name, final long val) {
-        final var register = ControlAndStatusRegisterFile.instance.getRegister(name);
-        return ControlAndStatusRegisterFile.updateRegister(register, val);
+        final var register = instance.getRegister(name);
+        return updateRegister(register, val);
     }
 
     /**
@@ -169,10 +169,10 @@ public final class ControlAndStatusRegisterFile {
         if ((OtherSettings.getBackSteppingEnabled())) {
             Globals.program.getBackStepper().addControlAndStatusBackdoor(
                 num,
-                ControlAndStatusRegisterFile.instance.getRegister(num).setValueBackdoor(val)
+                instance.getRegister(num).setValueBackdoor(val)
             );
         } else {
-            ControlAndStatusRegisterFile.instance.getRegister(num).setValueBackdoor(val);
+            instance.getRegister(num).setValueBackdoor(val);
         }
     }
 
@@ -185,8 +185,8 @@ public final class ControlAndStatusRegisterFile {
      *     The desired value for the register.
      */
     public static void updateRegisterBackdoor(final String name, final long val) {
-        ControlAndStatusRegisterFile.updateRegisterBackdoor(
-            ControlAndStatusRegisterFile.instance.getRegister(name).number, val
+        updateRegisterBackdoor(
+            instance.getRegister(name).number, val
         );
     }
 
@@ -200,9 +200,9 @@ public final class ControlAndStatusRegisterFile {
      * @return a boolean
      */
     public static boolean orRegister(final int num, final long val) {
-        return ControlAndStatusRegisterFile.updateRegister(
+        return updateRegister(
             num,
-            ControlAndStatusRegisterFile.instance.getValue(num) | val
+            instance.getValue(num) | val
         );
     }
 
@@ -215,7 +215,7 @@ public final class ControlAndStatusRegisterFile {
      *     The value to OR with
      */
     public static void orRegister(final String name, final long val) {
-        ControlAndStatusRegisterFile.updateRegister(name, ControlAndStatusRegisterFile.instance.getValue(name) | val);
+        updateRegister(name, instance.getValue(name) | val);
     }
 
     /**
@@ -228,9 +228,9 @@ public final class ControlAndStatusRegisterFile {
      * @return a boolean
      */
     public static boolean clearRegister(final int num, final long val) {
-        return ControlAndStatusRegisterFile.updateRegister(
+        return updateRegister(
             num,
-            ControlAndStatusRegisterFile.instance.getValue(num) & ~val
+            instance.getValue(num) & ~val
         );
     }
 
@@ -243,7 +243,7 @@ public final class ControlAndStatusRegisterFile {
      *     The value to clear by
      */
     public static void clearRegister(final String name, final long val) {
-        ControlAndStatusRegisterFile.updateRegister(name, ControlAndStatusRegisterFile.instance.getValue(name) & ~val);
+        updateRegister(name, instance.getValue(name) & ~val);
     }
 
     /**
@@ -254,7 +254,7 @@ public final class ControlAndStatusRegisterFile {
      * @return The value of the given register. 0 for non-implemented registers
      */
     public static int getValue(final int num) {
-        return (int) ControlAndStatusRegisterFile.instance.getValue(num);
+        return (int) instance.getValue(num);
     }
 
     /**
@@ -265,7 +265,7 @@ public final class ControlAndStatusRegisterFile {
      * @return The value of the given register. 0 for non-implemented registers
      */
     public static long getValueLong(final int num) {
-        return ControlAndStatusRegisterFile.instance.getValue(num);
+        return instance.getValue(num);
     }
 
     /**
@@ -276,7 +276,7 @@ public final class ControlAndStatusRegisterFile {
      * @return The value of the given register. 0 for non-implemented registers
      */
     public static int getValue(final String name) {
-        return (int) ControlAndStatusRegisterFile.instance.getValue(name);
+        return (int) instance.getValue(name);
     }
 
     /**
@@ -287,7 +287,7 @@ public final class ControlAndStatusRegisterFile {
      * @return The value of the given register. 0 for non-implemented registers
      */
     public static long getValueNoNotify(final String name) {
-        return ControlAndStatusRegisterFile.instance.getRegister(name).getValueNoNotify();
+        return instance.getRegister(name).getValueNoNotify();
     }
 
     /**
@@ -296,16 +296,16 @@ public final class ControlAndStatusRegisterFile {
      * @return The set of registers.
      */
     public static Register[] getRegisters() {
-        return ControlAndStatusRegisterFile.instance.getRegisters();
+        return instance.getRegisters();
     }
 
     public static Register getRegister(final String name) {
-        return ControlAndStatusRegisterFile.instance.getRegister(name);
+        return instance.getRegister(name);
     }
 
     /** Method to reinitialize the values of the registers. */
     public static void resetRegisters() {
-        ControlAndStatusRegisterFile.instance.resetRegisters();
+        instance.resetRegisters();
     }
 
     /**
@@ -317,7 +317,7 @@ public final class ControlAndStatusRegisterFile {
      *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public static void addRegistersObserver(final @NotNull Consumer<? super RegisterAccessNotice> observer) {
-        ControlAndStatusRegisterFile.instance.addRegistersObserver(observer);
+        instance.addRegistersObserver(observer);
     }
 
     /**
@@ -329,7 +329,7 @@ public final class ControlAndStatusRegisterFile {
      *     a {@link java.util.concurrent.Flow.Subscriber} object
      */
     public static void deleteRegistersObserver(final @NotNull Consumer<? super RegisterAccessNotice> observer) {
-        ControlAndStatusRegisterFile.instance.deleteRegistersSubscriber(observer);
+        instance.deleteRegistersSubscriber(observer);
     }
 
 }

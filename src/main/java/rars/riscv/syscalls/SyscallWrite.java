@@ -8,6 +8,8 @@ import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
 import rars.util.SystemIO;
 
+import static rars.Globals.REGISTER_FILE;
+
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
 
@@ -57,10 +59,10 @@ public class SyscallWrite extends AbstractSyscall {
      */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
-        int byteAddress = Globals.REGISTER_FILE.getIntValue("a1"); // source of characters to write to file
-        final int reqLength = Globals.REGISTER_FILE.getIntValue("a2"); // user-requested length
+        int byteAddress = REGISTER_FILE.getIntValue(REGISTER_FILE.a1); // source of characters to write to file
+        final int reqLength = REGISTER_FILE.getIntValue(REGISTER_FILE.a2); // user-requested length
         if (reqLength < 0) {
-            Globals.REGISTER_FILE.updateRegisterByName("a0", -1);
+            REGISTER_FILE.updateRegister(REGISTER_FILE.a0, -1);
             return;
         }
         final byte[] myBuffer = new byte[reqLength];
@@ -77,11 +79,11 @@ public class SyscallWrite extends AbstractSyscall {
             throw new ExitingException(statement, e);
         }
         final int retValue = SystemIO.writeToFile(
-            Globals.REGISTER_FILE.getIntValue("a0"), // fd
+            REGISTER_FILE.getIntValue(REGISTER_FILE.a0), // fd
             myBuffer, // buffer
-            Globals.REGISTER_FILE.getIntValue("a2")
+            REGISTER_FILE.getIntValue(REGISTER_FILE.a2)
         ); // length
         // set returned value in register
-        Globals.REGISTER_FILE.updateRegisterByName("a0", retValue);
+        REGISTER_FILE.updateRegister(REGISTER_FILE.a0, retValue);
     }
 }

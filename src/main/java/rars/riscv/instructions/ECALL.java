@@ -1,12 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.util.Utils;
+
+import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -47,6 +48,6 @@ public final class ECALL extends BasicInstruction {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        Utils.findAndSimulateSyscall(Globals.REGISTER_FILE.getIntValue("a7"), statement);
+        Utils.findAndSimulateSyscall(REGISTER_FILE.getIntValue(REGISTER_FILE.a7), statement);
     }
 }
