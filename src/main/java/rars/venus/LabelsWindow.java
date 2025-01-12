@@ -2,6 +2,7 @@ package rars.venus;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.RISCVProgram;
 import rars.assembler.Symbol;
@@ -17,7 +18,6 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -57,7 +57,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Team JSpim
  */
-public class LabelsWindow extends JInternalFrame {
+public final class LabelsWindow extends JInternalFrame {
     private static final Logger LOGGER = LogManager.getLogger(LabelsWindow.class);
     private static final int MAX_DISPLAYED_CHARS = 24;
     private static final int PREFERRED_NAME_COLUMN_WIDTH = 60;
@@ -113,7 +113,7 @@ public class LabelsWindow extends JInternalFrame {
     // "Click Name" column shows which state to go to when Name column is clicked.
     // "Click Addr" column shows which state to go to when Addr column is clicked.
     // The array of comparators; index corresponds to state in table above.
-    private final ArrayList<Comparator<Symbol>> tableSortingComparators = new ArrayList<>(Arrays.asList(
+    private final List<Comparator<Symbol>> tableSortingComparators = List.of(
         /* 0 */ new LabelAddressAscendingComparator(),
         /* 1 */ new DescendingComparator(new LabelAddressAscendingComparator()),
         /* 2 */ new LabelAddressAscendingComparator(),
@@ -122,7 +122,9 @@ public class LabelsWindow extends JInternalFrame {
         /* 5 */ new LabelNameAscendingComparator(),
         /* 6 */ new DescendingComparator(new LabelNameAscendingComparator()),
         /* 7 */ new DescendingComparator(new LabelNameAscendingComparator())
-    ));
+    );
+    @NotNull
+    private final ExecutePane executePane;
     private ArrayList<LabelsForSymbolTable> listOfLabelsForSymbolTable;
     private Comparator<Symbol> tableSortComparator;
     // Current sort state (0-7, see table above). Will be set from saved Settings in
@@ -132,8 +134,9 @@ public class LabelsWindow extends JInternalFrame {
     /**
      * Constructor for the Labels (symbol table) window.
      */
-    public LabelsWindow() {
+    public LabelsWindow(final @NotNull ExecutePane executePane) {
         super("Labels", true, false, true, true);
+        this.executePane = executePane;
         try {
             this.sortState = OTHER_SETTINGS.getLabelSortState();
         } catch (final NumberFormatException nfe) {
@@ -251,41 +254,6 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    private static class LabelDisplayMouseListener extends MouseAdapter {
-        @Override
-        public void mouseClicked(final MouseEvent e) {
-            final JTable table = (JTable) e.getSource();
-            final int row = table.rowAtPoint(e.getPoint());
-            final int column = table.columnAtPoint(e.getPoint());
-            Object data = table.getValueAt(row, column);
-            if (table.getColumnName(column).equals(LabelsWindow.columnNames[LabelsWindow.LABEL_COLUMN])) {
-                // Selected a Label name, so get its address.
-                data = table.getModel().getValueAt(row, LabelsWindow.ADDRESS_COLUMN);
-            }
-            int address = 0;
-            try {
-                address = BinaryUtils.stringToInt((String) data);
-            } catch (final NumberFormatException nfe) {
-                // Cannot happen because address is generated internally.
-            } catch (final ClassCastException cce) {
-                // Cannot happen because table contains only strings.
-            }
-            // Scroll to this address, either in Text Segment display or Data Segment
-            // display
-            if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(address)) {
-                Globals.gui.mainPane.executeTab.textSegment.selectStepAtAddress(address);
-            } else {
-                Globals.gui.mainPane.executeTab.dataSegment.selectCellForAddress(address);
-            }
-        }
-    }
-
-    // Private listener class to sense clicks on a table entry's
-    // Label or Address. This will trigger action by Text or Data
-    // segment to scroll to the corresponding label/address.
-    // Suggested by Ken Vollmar, implemented by Pete Sanderson
-    // July 2007.
-
     // Class representing label table data
     static class LabelTableModel extends AbstractTableModel {
         final String[] columns;
@@ -350,7 +318,11 @@ public class LabelsWindow extends JInternalFrame {
         }
     }
 
-    // Comparator class used to sort in ascending order a List of symbols
+    // Private listener class to sense clicks on a table entry's
+    // Label or Address. This will trigger action by Text or Data
+    // segment to scroll to the corresponding label/address.
+    // Suggested by Ken Vollmar, implemented by Pete Sanderson
+    // July 2007.
 
     /// ///////////////////////////////////////////////////////////////////////// alphabetically
     /// ///////////////////////////////////////////////////////////////////////// by
@@ -361,11 +333,8 @@ public class LabelsWindow extends JInternalFrame {
             return a.name().toLowerCase().compareTo(b.name().toLowerCase());
         }
     }
-    ////////////////////// end of LabelsForOneSymbolTable class //////////////////
 
     // Comparator class used to sort in ascending order a List of symbols
-    //////////////////////////////////////////////////////////////////////////// numerically
-    // by address. The kernel address space is all negative integers, so we need
 
     /// ///////////////////////////////////////////////////////////////////////// some
     // special processing to treat int address as unsigned 32 bit value.
@@ -381,9 +350,11 @@ public class LabelsWindow extends JInternalFrame {
             return (addrA >= 0 && addrB >= 0 || addrA < 0 && addrB < 0) ? addrA - addrB : addrB;
         }
     }
+    ////////////////////// end of LabelsForOneSymbolTable class //////////////////
 
-    // Comparator class used to sort in descending order a List of symbols. It will
-    // sort either alphabetically by name or numerically by address, depending on
+    // Comparator class used to sort in ascending order a List of symbols
+    //////////////////////////////////////////////////////////////////////////// numerically
+    // by address. The kernel address space is all negative integers, so we need
 
     /// ///////////////////////////////////////////////////////////////////////// the
     // Comparator object provided as the argument constructor. This works because it
@@ -395,6 +366,38 @@ public class LabelsWindow extends JInternalFrame {
         @Override
         public int compare(final Symbol a, final Symbol b) {
             return this.opposite.compare(b, a);
+        }
+    }
+
+    // Comparator class used to sort in descending order a List of symbols. It will
+    // sort either alphabetically by name or numerically by address, depending on
+
+    private class LabelDisplayMouseListener extends MouseAdapter {
+        @Override
+        public void mouseClicked(final MouseEvent e) {
+            final JTable table = (JTable) e.getSource();
+            final int row = table.rowAtPoint(e.getPoint());
+            final int column = table.columnAtPoint(e.getPoint());
+            Object data = table.getValueAt(row, column);
+            if (table.getColumnName(column).equals(LabelsWindow.columnNames[LabelsWindow.LABEL_COLUMN])) {
+                // Selected a Label name, so get its address.
+                data = table.getModel().getValueAt(row, LabelsWindow.ADDRESS_COLUMN);
+            }
+            int address = 0;
+            try {
+                address = BinaryUtils.stringToInt((String) data);
+            } catch (final NumberFormatException nfe) {
+                // Cannot happen because address is generated internally.
+            } catch (final ClassCastException cce) {
+                // Cannot happen because table contains only strings.
+            }
+            // Scroll to this address, either in Text Segment display or Data Segment
+            // display
+            if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(address)) {
+                LabelsWindow.this.executePane.textSegment.selectStepAtAddress(address);
+            } else {
+                LabelsWindow.this.executePane.dataSegment.selectCellForAddress(address);
+            }
         }
     }
 
@@ -442,7 +445,7 @@ public class LabelsWindow extends JInternalFrame {
             final SymbolTable symbolTable = (this.program == null)
                 ? Globals.GLOBAL_SYMBOL_TABLE
                 : this.program.getLocalSymbolTable();
-            final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
+            final int addressBase = LabelsWindow.this.executePane.getAddressDisplayBase();
             if (LabelsWindow.this.textLabels.isSelected() && LabelsWindow.this.dataLabels.isSelected()) {
                 this.symbols = symbolTable.getAllSymbols();
             } else if (LabelsWindow.this.textLabels.isSelected()) {
@@ -479,7 +482,7 @@ public class LabelsWindow extends JInternalFrame {
             if (LabelsWindow.this.labelPanel.getComponentCount() == 0) {
                 return; // ignore if no content to change
             }
-            final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
+            final int addressBase = LabelsWindow.this.executePane.getAddressDisplayBase();
             final int numSymbols = (this.labelData == null) ? 0 : this.labelData.length;
             for (int i = 0; i < numSymbols; i++) {
                 int address = this.symbols.get(i).address();
@@ -550,8 +553,8 @@ public class LabelsWindow extends JInternalFrame {
                     LabelsWindow.columnNames = LabelsWindow.sortColumnHeadings[LabelsWindow.this.sortState];
                     OTHER_SETTINGS.setLabelSortStateAndSave(LabelsWindow.this.sortState);
                     LabelsWindow.this.setupTable();
-                    Globals.gui.mainPane.executeTab.setLabelWindowVisibility(false);
-                    Globals.gui.mainPane.executeTab.setLabelWindowVisibility(true);
+                    LabelsWindow.this.executePane.setLabelWindowVisibility(false);
+                    LabelsWindow.this.executePane.setLabelWindowVisibility(true);
                 }
 
                 @Override

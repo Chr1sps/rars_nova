@@ -56,18 +56,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class HelpHelpAction extends GuiAction {
     // ideally read or computed from config file...
     private static final @NotNull Dimension WINDOW_SIZE = new Dimension(800, 600);
-    /**
-     * Separates Instruction name descriptor from detailed (operation) description
-     * in help string.
-     */
-    private final @NotNull VenusUI mainUI;
 
     public HelpHelpAction(
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel);
-        this.mainUI = gui;
+        super(name, icon, descrip, mnemonic, accel, gui);
     }
 
     private static @NotNull JScrollPane createDirectivesHelpPane() {

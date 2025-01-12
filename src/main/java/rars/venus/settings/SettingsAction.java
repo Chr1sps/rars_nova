@@ -3,6 +3,7 @@ package rars.venus.settings;
 import org.jetbrains.annotations.NotNull;
 import rars.settings.BoolSetting;
 import rars.venus.GuiAction;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -43,28 +44,23 @@ public class SettingsAction extends GuiAction {
     private final BoolSetting setting;
     private final Handler handler;
 
-    /**
-     * <p>Constructor for SettingsAction.</p>
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param setting
-     *     a {@link BoolSetting} object
-     */
     public SettingsAction(
-        final String name, final String descrip, final @NotNull BoolSetting setting,
+        final String name, final String descrip, final @NotNull BoolSetting setting, final @NotNull VenusUI mainUI,
         final @NotNull Handler handler
     ) {
-        super(name, null, descrip, null, null);
+        super(name, null, descrip, null, null, mainUI);
         this.setting = setting;
         this.handler = handler;
     }
 
-    public SettingsAction(final String name, final String descrip, final @NotNull BoolSetting setting) {
+    public SettingsAction(
+        final String name,
+        final String descrip,
+        final @NotNull BoolSetting setting,
+        final @NotNull VenusUI mainUI
+    ) {
         this(
-            name, descrip, setting, (ignored) -> {
+            name, descrip, setting, mainUI, (ignored) -> {
             }
         );
     }

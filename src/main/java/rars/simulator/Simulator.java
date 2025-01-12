@@ -13,6 +13,7 @@ import rars.settings.OtherSettings;
 import rars.util.BinaryUtils;
 import rars.util.ListenerDispatcher;
 import rars.util.SystemIO;
+import rars.venus.VenusUI;
 import rars.venus.run.RunSpeedPanel;
 
 import javax.swing.*;
@@ -55,34 +56,37 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2005
  */
 public final class Simulator {
-    public static final @NotNull Simulator INSTANCE = new Simulator(); // Singleton object
-    private static @Nullable Runnable interactiveGUIUpdater = null;
+    // private static @Nullable Runnable interactiveGUIUpdater = null;
     public final @NotNull ListenerDispatcher<@NotNull SimulatorNotice>.Hook simulatorNoticeHook;
     public final @NotNull ListenerDispatcher<Void>.Hook stopEventHook;
     private final @NotNull ListenerDispatcher<@NotNull SimulatorNotice> simulatorNoticeDispatcher;
     private final @NotNull ListenerDispatcher<Void> stopEventDispatcher;
+    private final @Nullable VenusUI mainUI;
     private @Nullable SimThread simulatorThread;
 
-    private Simulator() {
+    public Simulator(final @Nullable VenusUI mainUI) {
         this.simulatorThread = null;
-        if (Globals.gui != null) {
-            Simulator.interactiveGUIUpdater = Simulator::updateUi;
-        }
+        this.mainUI = mainUI;
+        // if (Globals.GUI != null) {
+        //     Simulator.interactiveGUIUpdater = Simulator::updateUI;
+        // }
         this.simulatorNoticeDispatcher = new ListenerDispatcher<>();
         this.simulatorNoticeHook = this.simulatorNoticeDispatcher.getHook();
         this.stopEventDispatcher = new ListenerDispatcher<>();
         this.stopEventHook = this.stopEventDispatcher.getHook();
     }
 
-    private static void updateUi() {
-        if (Globals.gui.registersPane.getSelectedComponent() == Globals.gui.mainPane.executeTab.registerValues) {
-            Globals.gui.mainPane.executeTab.registerValues.updateRegisters();
-        } else {
-            Globals.gui.mainPane.executeTab.fpRegValues.updateRegisters();
+    private void updateUI() {
+        if (this.mainUI != null) {
+            if (this.mainUI.registersPane.getSelectedComponent() == this.mainUI.mainPane.executePane.registerValues) {
+                this.mainUI.mainPane.executePane.registerValues.updateRegisters();
+            } else {
+                this.mainUI.mainPane.executePane.fpRegValues.updateRegisters();
+            }
+            this.mainUI.mainPane.executePane.dataSegment.updateValues();
+            this.mainUI.mainPane.executePane.textSegment.setCodeHighlighting(true);
+            this.mainUI.mainPane.executePane.textSegment.highlightStepAtPC();
         }
-        Globals.gui.mainPane.executeTab.dataSegment.updateValues();
-        Globals.gui.mainPane.executeTab.textSegment.setCodeHighlighting(true);
-        Globals.gui.mainPane.executeTab.textSegment.highlightStepAtPC();
     }
 
     /**
@@ -205,7 +209,7 @@ public final class Simulator {
      * is simulated. Thus interruption occurs in a tightly controlled fashion.
      */
 
-    static class SimThread implements Runnable {
+    private class SimThread implements Runnable {
         private final int maxSteps;
         private int pc;
         private int[] breakPoints;
@@ -250,11 +254,11 @@ public final class Simulator {
         }
 
         private void startExecution() {
-            Simulator.INSTANCE.notifyObserversOfExecution(new SimulatorNotice(
+            Globals.SIMULATOR.notifyObserversOfExecution(new SimulatorNotice(
                 SimulatorNotice.Action.START,
                 this.maxSteps,
-                Globals.gui != null
-                    ? Globals.gui.runSpeedPanel.getRunSpeed()
+                Simulator.this.mainUI != null
+                    ? Simulator.this.mainUI.runSpeedPanel.getRunSpeed()
                     : RunSpeedPanel.UNLIMITED_SPEED,
                 this.pc, null, this.pe, this.done
             ));
@@ -267,11 +271,11 @@ public final class Simulator {
             if (done) {
                 SystemIO.resetFiles(); // close any files opened in the process of simulating
             }
-            Simulator.INSTANCE.notifyObserversOfExecution(new SimulatorNotice(
+            Globals.SIMULATOR.notifyObserversOfExecution(new SimulatorNotice(
                 SimulatorNotice.Action.STOP,
                 this.maxSteps,
-                Globals.gui != null
-                    ? Globals.gui.runSpeedPanel.getRunSpeed()
+                Simulator.this.mainUI != null
+                    ? Simulator.this.mainUI.runSpeedPanel.getRunSpeed()
                     : RunSpeedPanel.UNLIMITED_SPEED,
                 this.pc, reason, this.pe, done
             ));
@@ -466,7 +470,7 @@ public final class Simulator {
                 // to access memory and registers only through synchronized blocks on same
                 // lock variable, then full (albeit heavy-handed) protection of memory and
                 // registers is assured. Not as critical for reading from those resources.
-                Globals.memoryAndRegistersLock.lock();
+                Globals.MEMORY_REGISTERS_LOCK.lock();
                 try {
                     // Handle pending interupts and traps first
                     long uip = CS_REGISTER_FILE.uip.getValueNoNotify();
@@ -474,7 +478,7 @@ public final class Simulator {
                     final boolean IE = (CS_REGISTER_FILE.ustatus.getValueNoNotify() & CSRegisterFile.INTERRUPT_ENABLE) != 0;
                     // make sure no interrupts sneak in while we are processing them
                     this.pc = Globals.REGISTER_FILE.getProgramCounter();
-                    synchronized (InterruptController.lock) {
+                    synchronized (InterruptController.LOCK) {
                         boolean pendingExternal = InterruptController.externalPending();
                         boolean pendingTimer = InterruptController.timerPending();
                         final boolean pendingTrap = InterruptController.trapPending();
@@ -628,7 +632,7 @@ public final class Simulator {
                         }
                     }
                 } finally {
-                    Globals.memoryAndRegistersLock.unlock();
+                    Globals.MEMORY_REGISTERS_LOCK.unlock();
                 }
 
                 // Update cycle(h) and instret(h)
@@ -663,13 +667,13 @@ public final class Simulator {
                 // schedule GUI update only if: there is in fact a GUI! AND
                 // using Run, not Step (maxSteps != 1) AND
                 // running slowly enough for GUI to keep up
-                if (Simulator.interactiveGUIUpdater != null && this.maxSteps != 1 &&
-                    Globals.gui.runSpeedPanel.getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
-                    SwingUtilities.invokeLater(Simulator.interactiveGUIUpdater);
+                if (Simulator.this.mainUI != null && this.maxSteps != 1 &&
+                    Simulator.this.mainUI.runSpeedPanel.getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
+                    SwingUtilities.invokeLater(Simulator.this::updateUI);
                 }
-                if (Globals.gui != null) { // OR added by DPS 24 July 2008 to enable
+                if (Simulator.this.mainUI != null) { // OR added by DPS 24 July 2008 to enable
                     // speed control by stand-alone tool
-                    final var runSpeedPanel = Globals.gui.runSpeedPanel;
+                    final var runSpeedPanel = Simulator.this.mainUI.runSpeedPanel;
                     if (this.maxSteps != 1 &&
                         runSpeedPanel.getRunSpeed() < RunSpeedPanel.UNLIMITED_SPEED) {
                         try {

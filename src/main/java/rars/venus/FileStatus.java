@@ -92,7 +92,7 @@ public final class FileStatus {
      */
     public static void set(final @NotNull FileStatus.State newStatus) {
         systemStatus = newStatus;
-        Globals.gui.setMenuState(systemStatus);
+        Globals.GUI.setMenuState(systemStatus);
     }
 
     /**
@@ -189,7 +189,6 @@ public final class FileStatus {
         return systemEdited;
     }
 
-
     // Remaining members are of instantiable class that can be used by
     // every file that is currently open in the editor.
 
@@ -213,10 +212,6 @@ public final class FileStatus {
         systemSaved = false;
         systemEdited = false;
         systemFile = null;
-    }
-
-    public void setFile(final @Nullable File file) {
-        this.file = file;
     }
 
     /**
@@ -274,6 +269,10 @@ public final class FileStatus {
      */
     public @Nullable File getFile() {
         return this.file;
+    }
+
+    public void setFile(final @Nullable File file) {
+        this.file = file;
     }
 
     /**

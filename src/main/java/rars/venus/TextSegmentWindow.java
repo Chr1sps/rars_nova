@@ -12,7 +12,6 @@ import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
-import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.util.FontUtilities;
 
@@ -83,8 +82,9 @@ public class TextSegmentWindow extends JInternalFrame {
     private final JTextField programArgumentsTextField; // DPS 17-July-2008
     // source.
     private final Container contentPane;
+    @NotNull
+    private final ExecutePane executePane;
 
-    private final @NotNull VenusUI mainUI;
     private JTable table;
     private JScrollPane tableScroller;
     private Object[][] data;
@@ -113,10 +113,10 @@ public class TextSegmentWindow extends JInternalFrame {
     /**
      * Constructor, sets up a new JInternalFrame.
      */
-    public TextSegmentWindow(final @NotNull VenusUI mainUI) {
+    public TextSegmentWindow(final @NotNull ExecutePane executePane) {
         super("Text Segment", true, false, true, true);
-        this.mainUI = mainUI;
-        Simulator.INSTANCE.simulatorNoticeHook.subscribe(notice -> {
+        this.executePane = executePane;
+        SIMULATOR.simulatorNoticeHook.subscribe(notice -> {
             if (notice.action() == SimulatorNotice.Action.START) {
                 this.deleteAsTextSegmentObserver();
                 if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
@@ -153,7 +153,7 @@ public class TextSegmentWindow extends JInternalFrame {
      * Should convert the lines of code over to the table rows and columns.
      */
     public void setupTable() {
-        final int addressBase = this.mainUI.mainPane.executeTab.getAddressDisplayBase();
+        final int addressBase = this.executePane.getAddressDisplayBase();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
         final var sourceStatementList = Globals.program.getMachineList();
@@ -328,7 +328,7 @@ public class TextSegmentWindow extends JInternalFrame {
         if (this.contentPane.getComponentCount() == 0) {
             return; // ignore if no content to change
         }
-        final int addressBase = this.mainUI.mainPane.executeTab.getAddressDisplayBase();
+        final int addressBase = this.executePane.getAddressDisplayBase();
         for (int i = 0; i < this.intAddresses.length; i++) {
             final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(
                 this.intAddresses[i],
@@ -710,7 +710,7 @@ public class TextSegmentWindow extends JInternalFrame {
         // for that. So we'll pretend to be Memory observable and send it a fake memory
         // write update.
         try {
-            this.mainUI.mainPane.executeTab.dataSegment.processMemoryAccessNotice.accept(new MemoryAccessNotice(
+            this.executePane.dataSegment.processMemoryAccessNotice.accept(new MemoryAccessNotice(
                 AccessNotice.AccessType.WRITE,
                 address, DataTypes.WORD_SIZE,
                 value
@@ -876,7 +876,7 @@ public class TextSegmentWindow extends JInternalFrame {
             }
             // Assures that if changed during MIPS program execution, the update will
             // occur only between instructions.
-            Globals.memoryAndRegistersLock.lock();
+            Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
                 try {
                     Globals.MEMORY_INSTANCE.setRawWord(address, val);
@@ -888,7 +888,7 @@ public class TextSegmentWindow extends JInternalFrame {
                     LOGGER.error("Address error exception when setting memory word in TextSegmentWindow.", exception);
                 }
             } finally {
-                Globals.memoryAndRegistersLock.unlock();
+                Globals.MEMORY_REGISTERS_LOCK.unlock();
             } // end synchronized block
         }
     }
@@ -915,7 +915,7 @@ public class TextSegmentWindow extends JInternalFrame {
             );
             // cell.setFont(tableCellFont);
             final TextSegmentWindow textSegment =
-                TextSegmentWindow.this.mainUI.mainPane.executeTab.textSegment;
+                TextSegmentWindow.this.executePane.textSegment;
             final boolean highlighting = textSegment.getCodeHighlighting();
 
             if (highlighting && textSegment.getIntCodeAddressAtRow(row) == TextSegmentWindow.this.highlightAddress) {

@@ -61,23 +61,12 @@ import java.util.Vector;
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
  */
-public class BHTableModel extends AbstractTableModel {
-
-    /**
-     * vector holding the entries of the BHT
-     */
-    private Vector<BHTEntry> m_entries;
-
-    /**
-     * number of entries in the BHT
-     */
-    private int m_entryCnt;
+public final class BHTableModel extends AbstractTableModel {
 
     /**
      * name of the table columns
      */
     private final String[] m_columnNames = {"Index", "History", "Prediction", "Correct", "Incorrect", "Precision"};
-
     /**
      * type of the table columns
      */
@@ -86,6 +75,14 @@ public class BHTableModel extends AbstractTableModel {
         Integer.class, String.class, String.class, Integer.class, Integer.class,
         Double.class
     };
+    /**
+     * vector holding the entries of the BHT
+     */
+    private Vector<BHTEntry> m_entries;
+    /**
+     * number of entries in the BHT
+     */
+    private int m_entryCnt;
 
     /**
      * Constructs a new BHT with given number of entries and history size.
@@ -158,7 +155,7 @@ public class BHTableModel extends AbstractTableModel {
     /**
      * {@inheritDoc}
      * <p>
-     * Returns the second of the cell at the given row and column
+     * Returns the value of the cell at the given row and column
      * Required by the TableModel interface.
      */
     @Override
@@ -201,7 +198,7 @@ public class BHTableModel extends AbstractTableModel {
      * @param historySize
      *     size of the history to consider
      * @param initVal
-     *     initial second for each entry (true means take branch,
+     *     initial value for each entry (true means take branch,
      *     false do not take branch)
      */
     public void initBHT(final int numEntries, final int historySize, final boolean initVal) {

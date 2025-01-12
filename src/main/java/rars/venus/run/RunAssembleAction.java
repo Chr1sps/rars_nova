@@ -59,14 +59,12 @@ public class RunAssembleAction extends GuiAction {
     private static List<RISCVProgram> programsToAssemble;
     private static boolean extendedAssemblerEnabled;
     private static boolean warningsAreErrors;
-    private final VenusUI mainUI;
 
     public RunAssembleAction(
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel);
-        this.mainUI = gui;
+        super(name, icon, descrip, mnemonic, accel, gui);
     }
 
     // These are both used by RunResetAction to re-assemble under identical
@@ -117,7 +115,7 @@ public class RunAssembleAction extends GuiAction {
     public void actionPerformed(final ActionEvent e) {
         final String name = this.getValue(Action.NAME).toString();
         final MessagesPane messagesPane = this.mainUI.messagesPane;
-        final ExecutePane executePane = this.mainUI.mainPane.executeTab;
+        final ExecutePane executePane = this.mainUI.mainPane.executePane;
         final RegistersPane registersPane = this.mainUI.registersPane;
         RunAssembleAction.extendedAssemblerEnabled =
             BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
@@ -210,7 +208,7 @@ public class RunAssembleAction extends GuiAction {
                         continue;
                     }
                     if (!em.isWarning || RunAssembleAction.warningsAreErrors) {
-                        Globals.gui.messagesPane.selectErrorMessage(
+                        this.mainUI.messagesPane.selectErrorMessage(
                             em.file, em.lineNumber,
                             em.position
                         );
@@ -223,8 +221,7 @@ public class RunAssembleAction extends GuiAction {
                         // test.
                         // DPS 9-Aug-2010
                         if (e != null) {
-                            MessagesPane.selectEditorTextLine(em.file, em.lineNumber
-                            );
+                            this.mainUI.mainPane.editTabbedPane.selectEditorTextLine(em.file, em.lineNumber);
                         }
                         break;
                     }

@@ -5,7 +5,8 @@ import rars.tools.*;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -49,20 +50,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class ToolLoader {
     private static final String TOOLS_MENU_NAME = "Tools";
-    private static final ArrayList<AbstractTool> tools = new ArrayList<>();
-
-    static {
-        ToolLoader.tools.add(new BHTSimulator());
-        ToolLoader.tools.add(new CacheSimulator());
-        ToolLoader.tools.add(new DigitalLabSim());
-        ToolLoader.tools.add(new FloatRepresentation());
-        ToolLoader.tools.add(new InstructionCounter());
-        ToolLoader.tools.add(new InstructionMemoryDump());
-        ToolLoader.tools.add(new InstructionStatistics());
-        ToolLoader.tools.add(new KeyboardAndDisplaySimulator());
-        ToolLoader.tools.add(new MemoryReferenceVisualization());
-        ToolLoader.tools.add(new TimerTool());
-    }
+    /**
+     * List of functions that produce tools given the main UI.
+     */
+    private static final @NotNull List<Function<@NotNull VenusUI, @NotNull AbstractTool>> toolProducers = List.of(
+        BHTSimulator::new,
+        CacheSimulator::new,
+        DigitalLabSim::new,
+        FloatRepresentation::new,
+        InstructionCounter::new,
+        InstructionMemoryDump::new,
+        InstructionStatistics::new,
+        KeyboardAndDisplaySimulator::new,
+        MemoryReferenceVisualization::new,
+        TimerTool::new
+    );
 
     private ToolLoader() {
     }
@@ -76,12 +78,12 @@ public final class ToolLoader {
      *
      * @return a Tools JMenu if qualifying tool classes are found, otherwise null
      */
-    public static @NotNull JMenu buildToolsMenu() {
+    public static @NotNull JMenu buildToolsMenu(final @NotNull VenusUI mainUI) {
         final var menu = new JMenu(ToolLoader.TOOLS_MENU_NAME);
         menu.setMnemonic(KeyEvent.VK_T);
         // traverse array list and build menu
-        for (final var tool : ToolLoader.tools) {
-            menu.add(new ToolAction(tool));
+        for (final var toolProducer : ToolLoader.toolProducers) {
+            menu.add(new ToolAction(toolProducer.apply(mainUI)));
         }
         return menu;
     }

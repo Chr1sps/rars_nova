@@ -1,6 +1,6 @@
 package rars.venus;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.venus.registers.ControlAndStatusWindow;
 import rars.venus.registers.FloatingPointWindow;
 import rars.venus.registers.RegistersWindow;
@@ -47,47 +47,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Sanderson and Bumgarner
  */
 public final class MainPane extends JTabbedPane {
-    public final ExecutePane executeTab;
-    public final EditTabbedPane editTabbedPane;
+    public final @NotNull ExecutePane executePane;
+    public final @NotNull EditTabbedPane editTabbedPane;
 
-    /**
-     * Constructor for the MainPane class.
-     *
-     * @param appFrame
-     *     a {@link VenusUI} object
-     * @param editor
-     *     a {@link Editor} object
-     * @param regs
-     *     a {@link RegistersWindow} object
-     * @param cop1Regs
-     *     a {@link FloatingPointWindow} object
-     * @param cop0Regs
-     *     a {@link ControlAndStatusWindow} object
-     */
     public MainPane(
-        final VenusUI appFrame, final Editor editor, final RegistersWindow regs,
+        final @NotNull VenusUI mainUI, final Editor editor, final RegistersWindow regs,
         final FloatingPointWindow cop1Regs, final ControlAndStatusWindow cop0Regs
     ) {
         super();
 
-        this.setTabPlacement(JTabbedPane.TOP); // LEFT);
-        this.editTabbedPane = new EditTabbedPane(appFrame, editor, this);
-        this.executeTab = new ExecutePane(appFrame, regs, cop1Regs, cop0Regs);
-        // >&nbsp;</center></html>";
-        // final Icon editTabIcon = null;// new
-        // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Edit_tab
-        // .jpg")));
-        // final Icon executeTabIcon = null;// new
-        // ImageIcon(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource(Globals.imagesPath+"Execute_tab
-        // .jpg")));
+        this.setTabPlacement(JTabbedPane.TOP);
+        this.editTabbedPane = new EditTabbedPane(mainUI, editor, this);
+        this.executePane = new ExecutePane(mainUI, regs, cop1Regs, cop0Regs);
 
         this.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         final String editTabTitle = "Edit";
         this.addTab(editTabTitle, null, this.editTabbedPane);
 
-        // "<html><center>&nbsp;<br>E<br>x<br>e<br>c<br>u<br>t<br>e<br
         final String executeTabTitle = "Execute";
-        this.addTab(executeTabTitle, null, this.executeTab);
+        this.addTab(executeTabTitle, null, this.executePane);
 
         this.setToolTipTextAt(0, "Text editor for composing RISCV programs.");
         this.setToolTipTextAt(
@@ -109,10 +87,10 @@ public final class MainPane extends JTabbedPane {
                     final JTabbedPane tabbedPane = (JTabbedPane) ce.getSource();
                     final int index = tabbedPane.getSelectedIndex();
                     final Component c = tabbedPane.getComponentAt(index);
-                    final ExecutePane executePane = Globals.gui.mainPane.executeTab;
+                    final ExecutePane executePane = MainPane.this.executePane;
                     if (c == executePane) {
                         executePane.setWindowBounds();
-                        Globals.gui.mainPane.removeChangeListener(this);
+                        MainPane.this.removeChangeListener(this);
                     }
                 }
             });

@@ -60,11 +60,13 @@ package rars.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -84,7 +86,7 @@ import static rars.Globals.FONT_SETTINGS;
  *
  * @author John Owens &lt;jowens@ece.ucdavis.edu&gt;
  */
-public class InstructionMemoryDump extends AbstractTool {
+public final class InstructionMemoryDump extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger(InstructionMemoryDump.class);
     private static final String name = "Instruction/Memory Dump";
     private static final String version = "Version 1.0 (John Owens)";
@@ -109,8 +111,8 @@ public class InstructionMemoryDump extends AbstractTool {
     /**
      * Simple construction, likely used by the RARS Tools menu mechanism.
      */
-    public InstructionMemoryDump() {
-        super(InstructionMemoryDump.name + ", " + InstructionMemoryDump.version, InstructionMemoryDump.heading);
+    public InstructionMemoryDump(final @NotNull VenusUI mainUI) {
+        super(InstructionMemoryDump.name + ", " + InstructionMemoryDump.version, InstructionMemoryDump.heading, mainUI);
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.lowDataSegmentAddress = memoryConfiguration.dataSegmentBaseAddress;
         this.highDataSegmentAddress = memoryConfiguration.stackBaseAddress;

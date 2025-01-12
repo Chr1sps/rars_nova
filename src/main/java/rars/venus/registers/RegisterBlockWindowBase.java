@@ -5,11 +5,12 @@ import rars.Globals;
 import rars.notices.AccessNotice;
 import rars.notices.RegisterAccessNotice;
 import rars.notices.SimulatorNotice;
+import rars.riscv.hardware.registerFiles.RegisterFileBase;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
-import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.venus.NumberDisplayBaseChooser;
+import rars.venus.VenusUI;
 import rars.venus.run.RunSpeedPanel;
 
 import javax.swing.*;
@@ -63,32 +64,33 @@ public abstract class RegisterBlockWindowBase extends JPanel {
     private static final int NUMBER_SIZE = 45;
     private static final int NAME_SIZE = 80;
     private static final int VALUE_SIZE = 160;
+    public final @NotNull Consumer<@NotNull RegisterAccessNotice> processRegisterNotice;
     private final @NotNull JTable table;
-    private final Register[] registers;
+    private final @NotNull RegisterFileBase registerFile;
+    @NotNull
+    private final VenusUI mainUI;
     private int highlightRow;
-    public final @NotNull Consumer<@NotNull RegisterAccessNotice> processRegisterNotice = notice -> {
-
-        if (notice.accessType == AccessNotice.AccessType.WRITE) {
-            // Uses the same highlighting technique as for Text Segment -- see
-            // AddressCellRenderer class in DataSegmentWindow.java.
-            this.highlightCellForRegister(notice.register);
-            Globals.gui.registersPane.setSelectedComponent(this);
-        }
-    };
 
     /**
      * Constructor which sets up a fresh window with a table that contains the
      * register values.
      *
-     * @param registers
-     *     an array of {@link Register} objects
+     * @param registerFile
+     *     the register file to be displayed
      * @param registerDescriptions
      *     an array of {@link java.lang.String} objects
      * @param valueTip
      *     a {@link java.lang.String} object
      */
-    RegisterBlockWindowBase(final Register[] registers, final String[] registerDescriptions, final String valueTip) {
-        Simulator.INSTANCE.simulatorNoticeHook.subscribe(notice -> {
+    RegisterBlockWindowBase(
+        final @NotNull RegisterFileBase registerFile,
+        final String[] registerDescriptions,
+        final String valueTip,
+        final @NotNull VenusUI mainUI
+    ) {
+        this.registerFile = registerFile;
+        this.mainUI = mainUI;
+        SIMULATOR.simulatorNoticeHook.subscribe(notice -> {
             if (notice.action() == SimulatorNotice.Action.START) {
                 // Simulated MIPS execution starts.  Respond to memory changes if running in timed
                 // or stepped mode.
@@ -100,7 +102,6 @@ public abstract class RegisterBlockWindowBase extends JPanel {
                 endObserving();
             }
         });
-        this.registers = registers;
         this.highlightRow = -1;
         this.table = new MyTippedJTable(
             new RegTableModel(this.setupWindow()), registerDescriptions,
@@ -140,15 +141,30 @@ public abstract class RegisterBlockWindowBase extends JPanel {
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         ));
+        processRegisterNotice = notice -> {
+
+            if (notice.accessType == AccessNotice.AccessType.WRITE) {
+                // Uses the same highlighting technique as for Text Segment -- see
+                // AddressCellRenderer class in DataSegmentWindow.java.
+                this.highlightCellForRegister(notice.register);
+                this.mainUI.registersPane.setSelectedComponent(this);
+            }
+        };
     }
 
     protected abstract @NotNull String formatRegisterValue(final long value, int base);
 
-    protected abstract void beginObserving();
+    private void beginObserving() {
+        this.registerFile.addRegistersListener(this.processRegisterNotice);
+    }
 
-    protected abstract void endObserving();
+    private void endObserving() {
+        this.registerFile.deleteRegistersListener(this.processRegisterNotice);
+    }
 
-    protected abstract void resetRegisters();
+    private void resetRegisters() {
+        this.registerFile.resetRegisters();
+    }
 
     /**
      * Sets up the data for the window.
@@ -157,15 +173,16 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      **/
 
     private Object @NotNull [] @NotNull [] setupWindow() {
-        final Object[][] tableData = new Object[this.registers.length][3];
-        for (int i = 0; i < this.registers.length; i++) {
-            tableData[i][RegisterBlockWindowBase.NAME_COLUMN] = this.registers[i].name;
-            final int temp = this.registers[i].number;
+        final var registers = this.registerFile.getRegisters();
+        final Object[][] tableData = new Object[registers.length][3];
+        for (int i = 0; i < registers.length; i++) {
+            tableData[i][RegisterBlockWindowBase.NAME_COLUMN] = registers[i].name;
+            final int temp = registers[i].number;
             tableData[i][RegisterBlockWindowBase.NUMBER_COLUMN] = temp == -1 ? "" : temp;
             final int base =
                 NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
             tableData[i][RegisterBlockWindowBase.VALUE_COLUMN] = this.formatRegisterValue(
-                this.registers[i].getValue(),
+                registers[i].getValue(),
                 base
             );
         }
@@ -193,11 +210,11 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      * Update register display using specified display base
      */
     public void updateRegisters() {
-        for (int i = 0; i < this.registers.length; i++) {
+        final var registers = this.registerFile.getRegisters();
+        for (int i = 0; i < registers.length; i++) {
             final var model = (RegTableModel) this.table.getModel();
-            final int base = Globals.gui.mainPane.executeTab
-                .getValueDisplayBase();
-            final var formattedValue = this.formatRegisterValue(this.registers[i].getValue(), base);
+            final int base = RegisterBlockWindowBase.this.mainUI.mainPane.executePane.getValueDisplayBase();
+            final var formattedValue = this.formatRegisterValue(registers[i].getValue(), base);
             model.setDisplayAndModelValueAt(formattedValue, i, RegisterBlockWindowBase.VALUE_COLUMN);
         }
     }
@@ -209,6 +226,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      *     Register object corresponding to row to be selected.
      */
     private void highlightCellForRegister(final Register register) {
+        final var registers = this.registerFile.getRegisters();
         for (int i = 0; i < registers.length; i++) {
             if (registers[i] == register) {
                 this.highlightRow = i;
@@ -342,13 +360,13 @@ public abstract class RegisterBlockWindowBase extends JPanel {
             }
             // Assures that if changed during program execution, the update will
             // occur only between instructions.
-            Globals.memoryAndRegistersLock.lock();
+            Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
-                RegisterBlockWindowBase.this.registers[row].setValue(newValue);
+                RegisterBlockWindowBase.this.registerFile.getRegisters()[row].setValue(newValue);
             } finally {
-                Globals.memoryAndRegistersLock.unlock();
+                Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
-            final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
+            final int valueBase = RegisterBlockWindowBase.this.mainUI.mainPane.executePane.getValueDisplayBase();
             final var formattedValue = RegisterBlockWindowBase.this.formatRegisterValue(newValue, valueBase);
             this.data[row][col] = formattedValue;
             this.fireTableCellUpdated(row, col);

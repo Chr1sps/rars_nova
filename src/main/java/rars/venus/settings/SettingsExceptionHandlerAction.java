@@ -1,8 +1,9 @@
 package rars.venus.settings;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.settings.BoolSetting;
 import rars.venus.GuiAction;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -58,25 +59,11 @@ public class SettingsExceptionHandlerAction extends GuiAction {
     private boolean initialSelected; // state of check box when dialog initiated.
     private String initialPathname; // selected exception handler when dialog initiated.
 
-    /**
-     * <p>Constructor for SettingsExceptionHandlerAction.</p>
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
-     */
     public SettingsExceptionHandlerAction(
         final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel
+        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI mainUI
     ) {
-        super(name, icon, descrip, mnemonic, accel);
+        super(name, icon, descrip, mnemonic, accel, mainUI);
     }
 
     /**
@@ -87,7 +74,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         this.initialSelected =
             BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED);
         this.initialPathname = OTHER_SETTINGS.getExceptionHandler();
-        this.exceptionHandlerDialog = new JDialog(Globals.gui, "Exception Handler", true);
+        this.exceptionHandlerDialog = new JDialog(this.mainUI, "Exception Handler", true);
         this.exceptionHandlerDialog.setContentPane(this.buildDialogPanel());
         this.exceptionHandlerDialog.setDefaultCloseOperation(
             JDialog.DO_NOTHING_ON_CLOSE);
@@ -99,7 +86,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
                 }
             });
         this.exceptionHandlerDialog.pack();
-        this.exceptionHandlerDialog.setLocationRelativeTo(Globals.gui);
+        this.exceptionHandlerDialog.setLocationRelativeTo(this.mainUI);
         this.exceptionHandlerDialog.setVisible(true);
     }
 
@@ -189,7 +176,7 @@ public class SettingsExceptionHandlerAction extends GuiAction {
             if (file.exists()) {
                 chooser.setSelectedFile(file);
             }
-            final int result = chooser.showOpenDialog(Globals.gui);
+            final int result = chooser.showOpenDialog(SettingsExceptionHandlerAction.this.mainUI);
             if (result == JFileChooser.APPROVE_OPTION) {
                 pathname = chooser.getSelectedFile().getPath();// .replaceAll("\\\\","/");
                 SettingsExceptionHandlerAction.this.exceptionHandlerDisplay.setText(pathname);

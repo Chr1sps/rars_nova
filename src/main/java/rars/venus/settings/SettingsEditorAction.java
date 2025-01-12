@@ -1,12 +1,12 @@
 package rars.venus.settings;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.venus.GuiAction;
+import rars.venus.VenusUI;
 import rars.venus.settings.editor.EditorSettingsDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.util.Objects;
 
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
@@ -43,23 +43,12 @@ public class SettingsEditorAction extends GuiAction {
 
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
      */
     public SettingsEditorAction(
         final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel
+        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI mainUI
     ) {
-        super(name, icon, descrip, mnemonic, accel);
+        super(name, icon, descrip, mnemonic, accel, mainUI);
     }
 
     /**
@@ -70,7 +59,7 @@ public class SettingsEditorAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final var editorDialog = new EditorSettingsDialog(Objects.requireNonNull(Globals.gui), "Editor Settings", true);
+        final var editorDialog = new EditorSettingsDialog(this.mainUI, "Editor Settings", true);
         editorDialog.setVisible(true);
     }
 

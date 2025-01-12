@@ -80,7 +80,7 @@ public final class RISCVProgram {
      *     simulating.
      */
     public static Simulator.Reason simulate(final int maxSteps) throws SimulationException {
-        final Simulator sim = Simulator.INSTANCE;
+        final Simulator sim = Globals.SIMULATOR;
         return sim.simulate(Globals.REGISTER_FILE.getProgramCounter(), maxSteps, null);
     }
 
@@ -98,7 +98,7 @@ public final class RISCVProgram {
      *     int array of breakpoints (PC addresses). Can be null.
      */
     public static void startSimulation(final int maxSteps, final int[] breakPoints) {
-        final Simulator sim = Simulator.INSTANCE;
+        final Simulator sim = Globals.SIMULATOR;
         sim.startSimulation(Globals.REGISTER_FILE.getProgramCounter(), maxSteps, breakPoints);
     }
 

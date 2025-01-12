@@ -1,5 +1,7 @@
 package rars.venus;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
@@ -36,10 +38,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * option.
  */
 public class GuiAction extends AbstractAction {
-    protected static final String CLOSE_TOOL_TIP_TEXT = "Apply current settings and close dialog";
     public static final String APPLY_TOOL_TIP_TEXT = "Apply current settings now and leave dialog open";
     public static final String RESET_TOOL_TIP_TEXT = "Reset to initial settings without applying";
     public static final String CANCEL_TOOL_TIP_TEXT = "Close dialog without applying current settings";
+    protected static final String CLOSE_TOOL_TIP_TEXT = "Apply current settings and close dialog";
     // NOTE: These must follow same sequence and buttons must
     // follow this sequence too!
     private static final int gridVGap = 2;
@@ -57,26 +59,14 @@ public class GuiAction extends AbstractAction {
     private static final String REGISTER_HIGHLIGHT_ENABLE_TOOL_TIP_TEXT = "Click, to enable or disable highlighting " +
         "in Register windows";
     private static final String fontButtonText = "font";
+    protected final @NotNull VenusUI mainUI;
 
-    /**
-     * <p>Constructor for GuiAction.</p>
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
-     */
     protected GuiAction(
         final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel
+        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI mainUI
     ) {
         super(name, icon);
+        this.mainUI = mainUI;
         putValue(SHORT_DESCRIPTION, descrip);
         putValue(MNEMONIC_KEY, mnemonic);
         putValue(ACCELERATOR_KEY, accel);

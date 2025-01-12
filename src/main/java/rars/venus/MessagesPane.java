@@ -67,13 +67,16 @@ public final class MessagesPane extends JTabbedPane {
 
     private final @NotNull JTextArea assembleTextArea, runTextArea;
     private final @NotNull JPanel assembleTab, runTab;
+    @NotNull
+    private final VenusUI mainUI;
 
     /**
      * Constructor for the class, sets up two fresh tabbed text areas for program
      * feedback.
      */
-    public MessagesPane() {
+    public MessagesPane(final @NotNull VenusUI mainUI) {
         super();
+        this.mainUI = mainUI;
         this.setMinimumSize(new Dimension(0, 0));
         this.assembleTextArea = new JTextArea();
         this.runTextArea = new JTextArea();
@@ -165,7 +168,7 @@ public final class MessagesPane extends JTabbedPane {
                             }
                             if (!fileName.isEmpty()) {
                                 final var file = new File(fileName);
-                                MessagesPane.selectEditorTextLine(file, line);
+                                MessagesPane.this.mainUI.mainPane.editTabbedPane.selectEditorTextLine(file, line);
                                 MessagesPane.this.selectErrorMessage(file, line, column);
                             }
                         }
@@ -208,39 +211,6 @@ public final class MessagesPane extends JTabbedPane {
         buttonBox.add(buttonRow);
         buttonBox.add(Box.createVerticalGlue());
         return buttonBox;
-    }
-
-    /**
-     * Will select the specified line in an editor tab. If the file is open
-     * but not current, its tab will be made current. If the file is not open,
-     * it will be opened in a new tab and made current, however the line will
-     * not be selected (apparent apparent problem with JEditTextArea).
-     *
-     * @param file
-     *     A String containing the file path name.
-     * @param line
-     *     Line number for error message
-     */
-    public static void selectEditorTextLine(final @NotNull File file, final int line) {
-        final EditTabbedPane editTabbedPane = Globals.gui.mainPane.editTabbedPane;
-        final EditPane editPane = editTabbedPane.getEditPaneForFile(file);
-        EditPane currentPane = null;
-        if (editPane != null) {
-            if (editPane != editTabbedPane.getCurrentEditTab()) {
-                editTabbedPane.setCurrentEditTab(editPane);
-            }
-            currentPane = editPane;
-        } else { // file is not open. Try to open it.
-            if (editTabbedPane.openFile(file)) {
-                currentPane = editTabbedPane.getCurrentEditTab();
-            }
-        }
-        // If editPane == null, it means the desired file was not open. Line selection
-        // does not properly with the JEditTextArea editor in this situation (it works
-        // fine for the original generic editor). So we just won't do it. DPS 9-Aug-2010
-        if (editPane != null) {
-            currentPane.selectLine(line);
-        }
     }
 
     /**
@@ -357,18 +327,18 @@ public final class MessagesPane extends JTabbedPane {
      * @return User input.
      */
     public String getInputString(final String prompt) {
-        final boolean lock = Globals.memoryAndRegistersLock.isHeldByCurrentThread();
+        final boolean lock = Globals.MEMORY_REGISTERS_LOCK.isHeldByCurrentThread();
         if (lock) {
-            Globals.memoryAndRegistersLock.unlock();
+            Globals.MEMORY_REGISTERS_LOCK.unlock();
         }
         final JOptionPane pane = new JOptionPane(prompt, JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION);
         pane.setWantsInput(true);
-        final JDialog dialog = pane.createDialog(Globals.gui, "Keyboard Input");
+        final JDialog dialog = pane.createDialog(this.mainUI, "Keyboard Input");
         dialog.setVisible(true);
         final String input = (String) pane.getInputValue();
         this.postRunMessage(Globals.userInputAlert + input + "\n");
         if (lock) {
-            Globals.memoryAndRegistersLock.lock();
+            Globals.MEMORY_REGISTERS_LOCK.lock();
         }
         return input;
     }
@@ -389,14 +359,14 @@ public final class MessagesPane extends JTabbedPane {
      * @return User input.
      */
     public String getInputString(final int maxLen) {
-        final boolean lock = Globals.memoryAndRegistersLock.isHeldByCurrentThread();
+        final boolean lock = Globals.MEMORY_REGISTERS_LOCK.isHeldByCurrentThread();
         if (lock) {
-            Globals.memoryAndRegistersLock.unlock();
+            Globals.MEMORY_REGISTERS_LOCK.unlock();
         }
         final var asker = new Asker(maxLen); // Asker defined immediately below.
         final String out = asker.response();
         if (lock) {
-            Globals.memoryAndRegistersLock.lock();
+            Globals.MEMORY_REGISTERS_LOCK.lock();
         }
         return out;
     }
@@ -491,7 +461,7 @@ public final class MessagesPane extends JTabbedPane {
             this.initialPos = MessagesPane.this.runTextArea.getCaretPosition();
             MessagesPane.this.runTextArea.setNavigationFilter(this.navigationFilter);
             MessagesPane.this.runTextArea.getDocument().addDocumentListener(this.listener);
-            final Simulator self = Simulator.INSTANCE;
+            final Simulator self = Globals.SIMULATOR;
             self.stopEventHook.subscribe(this.stopListener);
         }
 
@@ -503,7 +473,7 @@ public final class MessagesPane extends JTabbedPane {
                     MessagesPane.this.runTextArea.setNavigationFilter(null);
                     MessagesPane.this.runTextArea.setCaretPosition(MessagesPane.this.runTextArea.getDocument()
                         .getLength());
-                    final Simulator self = Simulator.INSTANCE;
+                    final Simulator self = Globals.SIMULATOR;
                     self.stopEventHook.unsubscribe(this.stopListener);
                 });
         }

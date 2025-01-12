@@ -12,6 +12,7 @@ import rars.riscv.hardware.registerFiles.CSRegisterFile;
 import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile;
 import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.settings.*;
+import rars.simulator.Simulator;
 import rars.util.PropertiesFile;
 import rars.venus.VenusUI;
 
@@ -56,8 +57,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * to put all the global mutable state that was previously scattered throughout the codebase.
  */
 public final class Globals {
-    /// Lock variable used at head of synchronized block to guard memory and registers
-    public static final @NotNull ReentrantLock memoryAndRegistersLock = new ReentrantLock();
+
     /// String to GUI's RunI/O text area when echoing user input from pop-up dialog.
     public static final @NotNull String userInputAlert = "**** user input : ";
     /// Path to folder that contains images.
@@ -74,18 +74,24 @@ public final class Globals {
     public static final @NotNull String copyrightHolders = "Pete Sanderson and Kenneth Vollmar";
     /// List of accepted file extensions for RISCV assembly source files.
     public static final @NotNull List<@NotNull String> fileExtensions = List.of("asm", "s", "S");
+
     /// Maximum length of scrolled message window (RARS Messages and Run I/O)
     public static final int maximumMessageCharacters = 1_000_000;
     /// Maximum number of assembler errors produced by one assemble operation
     public static final int maximumErrorMessages = 200;
     /// Maximum number of back-step operations to buffer
     public static final int maximumBacksteps = 2000;
+
+    /// Lock variable used at head of synchronized block to guard memory and registers
+    public static final @NotNull ReentrantLock MEMORY_REGISTERS_LOCK = new ReentrantLock();
+
     /// Symbol table for file currently being assembled.
     public static final @NotNull SymbolTable GLOBAL_SYMBOL_TABLE;
     ///  Register file for the RARS simulator.
     public static final @NotNull RegisterFile REGISTER_FILE;
     /// Control and status register file for the RARS simulator.
     public static final @NotNull CSRegisterFile CS_REGISTER_FILE;
+    public static final @NotNull Simulator SIMULATOR;
     private static final @NotNull Logger LOGGER = LogManager.getLogger(Globals.class);
     private static final String syscallPropertiesFile = "Syscall";
     ///  Floating point register file for the RARS simulator.
@@ -95,9 +101,11 @@ public final class Globals {
     /// Exit code -- useful with SYSCALL 17 when running from command line (not GUI)
     public static int exitCode = 0;
     /// The GUI being used (if any) with this simulator.
-    public static @Nullable VenusUI gui = null;
+    @Deprecated(forRemoval = true)
+    public static @Nullable VenusUI GUI = null;
     /// The program currently being worked with. Used by GUI only, not command line.
-    public static RISCVProgram program;
+    public static @Nullable RISCVProgram program;
+
     public static @NotNull OtherSettings OTHER_SETTINGS;
     public static @NotNull BoolSettings BOOL_SETTINGS;
     public static @NotNull EditorThemeSettings EDITOR_THEME_SETTINGS;
@@ -107,6 +115,8 @@ public final class Globals {
     public static @NotNull Memory MEMORY_INSTANCE;
 
     static {
+        SIMULATOR = new Simulator(GUI);
+
         final var settingsPreferences = userNodeForPackage(SettingsBase.class);
 
         OTHER_SETTINGS = new OtherSettings(settingsPreferences);

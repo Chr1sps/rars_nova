@@ -85,7 +85,12 @@ public abstract class RegisterFileBase {
     public abstract long updateRegister(final @NotNull Register register, final long newValue) throws
         SimulationException;
 
-    public final @NotNull Register @NotNull [] getRegisters() {
+    /**
+     * Returns all the registers in the register file.
+     *
+     * @return An array of all the registers in the register file.
+     */
+    public @NotNull Register @NotNull [] getRegisters() {
         return this.registers;
     }
 

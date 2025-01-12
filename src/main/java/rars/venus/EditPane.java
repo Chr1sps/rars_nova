@@ -2,7 +2,6 @@ package rars.venus;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.Globals;
 import rars.settings.BoolSetting;
 import rars.util.Pair;
 import rars.venus.editors.TextEditingArea;
@@ -15,10 +14,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.File;
 
-import static rars.Globals.BOOL_SETTINGS;
-import static rars.Globals.EDITOR_THEME_SETTINGS;
-import static rars.Globals.FONT_SETTINGS;
-import static rars.Globals.OTHER_SETTINGS;
+import static rars.Globals.*;
 
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
@@ -149,8 +145,7 @@ public final class EditPane extends JPanel {
                             FileStatus.set(FileStatus.State.EDITED);
                     }
 
-                    Globals.gui.mainPane.executeTab.clearPane(); // DPS 9-Aug-2011
-
+                    EditPane.this.mainUI.mainPane.executePane.clearPane(); // DPS 9-Aug-2011
                 }
 
                 @Override

@@ -2,10 +2,10 @@ package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.Globals;
 import rars.ProgramStatement;
 import rars.notices.SimulatorNotice;
 import rars.riscv.AbstractSyscall;
-import rars.simulator.Simulator;
 import rars.util.BitmapDisplay;
 
 import static rars.Globals.REGISTER_FILE;
@@ -22,7 +22,7 @@ public final class SyscallDisplayBitmap extends AbstractSyscall {
                 """, "N/A"
         );
         this.display = null;
-        Simulator.INSTANCE.simulatorNoticeHook.subscribe(notice -> {
+        Globals.SIMULATOR.simulatorNoticeHook.subscribe(notice -> {
             if (notice.action() == SimulatorNotice.Action.START) {
                 if (this.display != null) {
                     this.display.dispose();

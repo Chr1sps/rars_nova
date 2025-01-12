@@ -10,6 +10,9 @@ import rars.settings.BoolSetting;
 import rars.settings.OtherSettings;
 import rars.util.ConversionUtils;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 import static rars.Globals.BOOL_SETTINGS;
 
 public final class RegisterFile extends RegisterFileBase {
@@ -161,5 +164,21 @@ public final class RegisterFile extends RegisterFileBase {
         this.pc.changeResetValue(configuration.textBaseAddress);
         this.pc.setValue(configuration.textBaseAddress);
         this.resetRegisters();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This implementation append the program counter to the
+     * end of the array.
+     *
+     * @return an array of all registers, including the program counter
+     */
+    @Override
+    public @NotNull Register @NotNull [] getRegisters() {
+        return Stream.concat(
+            Arrays.stream(this.registers),
+            Stream.of(this.pc)
+        ).toArray(Register[]::new);
     }
 }

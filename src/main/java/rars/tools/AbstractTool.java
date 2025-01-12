@@ -6,6 +6,7 @@ import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.riscv.hardware.registers.Register;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -63,6 +64,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public abstract class AbstractTool extends JFrame {
+    protected final @NotNull VenusUI mainUI;
     private final String title; // descriptive title for title bar provided to constructor.
     private final String heading; // Text to be displayed in the top portion of the main window.
     // Some GUI settings
@@ -89,12 +91,17 @@ public abstract class AbstractTool extends JFrame {
      * @param heading
      *     a {@link java.lang.String} object
      */
-    protected AbstractTool(final String title, final String heading) {
+    protected AbstractTool(
+        final @NotNull String title,
+        final @NotNull String heading,
+        final @NotNull VenusUI mainUI
+    ) {
         this.title = title;
         this.heading = heading;
+        this.mainUI = mainUI;
     }
 
-    ///////////////////////////// METHODS WITH DEFAULT IMPLEMENTATIONS
+    // METHODS WITH DEFAULT IMPLEMENTATIONS
 
     /**
      * Required Tool method to return Tool name. Must be defined by subclass.
@@ -136,7 +143,7 @@ public abstract class AbstractTool extends JFrame {
      * to contain application-specific displays of parameters and results.
      */
     public void action() {
-        this.dialog = new JDialog(Globals.gui, this.title);
+        this.dialog = new JDialog(this.mainUI, this.title);
         // assure the dialog goes away if user clicks the X
         this.dialog.addWindowListener(
             new WindowAdapter() {
@@ -156,7 +163,7 @@ public abstract class AbstractTool extends JFrame {
         this.initializePostGUI();
         this.dialog.setContentPane(contentPane);
         this.dialog.pack();
-        this.dialog.setLocationRelativeTo(Globals.gui);
+        this.dialog.setLocationRelativeTo(this.mainUI);
         this.dialog.setVisible(true);
     }
 
@@ -480,22 +487,22 @@ public abstract class AbstractTool extends JFrame {
 
         public void connect() {
             AbstractTool.this.observing = true;
-            Globals.memoryAndRegistersLock.lock();
+            Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
                 AbstractTool.this.addAsObserver();
             } finally {
-                Globals.memoryAndRegistersLock.unlock();
+                Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
             this.setText(ConnectButton.disconnectText);
             this.notifyConnectionListeners();
         }
 
         public void disconnect() {
-            Globals.memoryAndRegistersLock.lock();
+            Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
                 AbstractTool.this.deleteAsSubscriber();
             } finally {
-                Globals.memoryAndRegistersLock.unlock();
+                Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
             AbstractTool.this.observing = false;
             this.setText(ConnectButton.connectText);

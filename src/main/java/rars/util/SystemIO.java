@@ -104,7 +104,7 @@ public final class SystemIO {
 
     private static String readStringInternal(final String init, final String prompt, final int maxlength) {
         String input = init;
-        if (Globals.gui == null) {
+        if (Globals.GUI == null) {
             try {
                 input = SystemIO.getInputReader().readLine();
                 if (input == null) {
@@ -114,9 +114,9 @@ public final class SystemIO {
             }
         } else {
             if (BOOL_SETTINGS.getSetting(BoolSetting.POPUP_SYSCALL_INPUT)) {
-                input = Globals.gui.messagesPane.getInputString(prompt);
+                input = Globals.GUI.messagesPane.getInputString(prompt);
             } else {
-                input = Globals.gui.messagesPane.getInputString(maxlength);
+                input = Globals.GUI.messagesPane.getInputString(maxlength);
             }
         }
         return input;
@@ -163,7 +163,7 @@ public final class SystemIO {
      *     a {@link java.lang.String} object
      */
     public static void printString(final String string) {
-        if (Globals.gui == null) {
+        if (Globals.GUI == null) {
             try {
                 SystemIO.getOutputWriter().write(string);
                 SystemIO.getOutputWriter().flush();
@@ -238,7 +238,7 @@ public final class SystemIO {
         /// Write to STDOUT or STDERR file descriptor while using IDE - write to
         /////////////// Messages pane.
         if ((fd == SystemIO.STDOUT || fd == SystemIO.STDERR)) {
-            if (Globals.gui != null) {
+            if (Globals.GUI != null) {
                 final String data = new String(myBuffer, StandardCharsets.UTF_8); // decode the bytes using UTF-8 
                 // charset
                 SystemIO.print2Gui(data);
@@ -304,8 +304,8 @@ public final class SystemIO {
         // Read from STDIN file descriptor while using IDE - get input from Messages
         // pane.
         if (fd == SystemIO.STDIN) {
-            if (Globals.gui != null) {
-                final String input = Globals.gui.messagesPane.getInputString(lengthRequested);
+            if (Globals.GUI != null) {
+                final String input = Globals.GUI.messagesPane.getInputString(lengthRequested);
                 final byte[] bytesRead = input.getBytes();
 
                 for (int i = 0; i < myBuffer.length; i++) {
@@ -503,7 +503,7 @@ public final class SystemIO {
     private static void print2Gui(final String output) {
         final long time = System.currentTimeMillis();
         if (time > SystemIO.lasttime) {
-            Globals.gui.messagesPane.postRunMessage(SystemIO.buffer + output);
+            Globals.GUI.messagesPane.postRunMessage(SystemIO.buffer + output);
             SystemIO.buffer = "";
             SystemIO.lasttime = time + 100;
         } else {
@@ -522,7 +522,7 @@ public final class SystemIO {
     public static void flush(final boolean force) {
         final long time = System.currentTimeMillis();
         if (!SystemIO.buffer.isEmpty() && (force || time > SystemIO.lasttime)) {
-            Globals.gui.messagesPane.postRunMessage(SystemIO.buffer);
+            Globals.GUI.messagesPane.postRunMessage(SystemIO.buffer);
             SystemIO.buffer = "";
             SystemIO.lasttime = time + 100;
         }

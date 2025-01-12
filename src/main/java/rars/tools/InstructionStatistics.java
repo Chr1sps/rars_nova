@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package rars.tools;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
@@ -34,6 +35,7 @@ import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.Instruction;
 import rars.riscv.instructions.*;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,7 +49,7 @@ import java.util.Arrays;
  *
  * @author Ingo Kofler &lt;ingo.kofler@itec.uni-klu.ac.at&gt;
  */
-public class InstructionStatistics extends AbstractTool {
+public final class InstructionStatistics extends AbstractTool {
 
     /**
      * name of the tool
@@ -131,8 +133,8 @@ public class InstructionStatistics extends AbstractTool {
     /**
      * Simple construction, likely used by the RARS Tools menu mechanism.
      */
-    public InstructionStatistics() {
-        super(InstructionStatistics.NAME + ", " + InstructionStatistics.VERSION, InstructionStatistics.HEADING);
+    public InstructionStatistics(final @NotNull VenusUI mainUI) {
+        super(InstructionStatistics.NAME + ", " + InstructionStatistics.VERSION, InstructionStatistics.HEADING, mainUI);
     }
 
     /**

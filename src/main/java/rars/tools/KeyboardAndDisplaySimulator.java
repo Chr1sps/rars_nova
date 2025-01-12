@@ -2,6 +2,7 @@ package rars.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
@@ -9,6 +10,7 @@ import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.hardware.InterruptController;
 import rars.util.BinaryUtils;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -93,7 +95,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * position of a virtual text-based terminal. X represents column, Y represents
  * row.
  */
-public class KeyboardAndDisplaySimulator extends AbstractTool {
+public final class KeyboardAndDisplaySimulator extends AbstractTool {
     public static final Dimension preferredTextAreaDimension = new Dimension(400, 200);
     public static final int EXTERNAL_INTERRUPT_KEYBOARD = 0x00000040;
     public static final int EXTERNAL_INTERRUPT_DISPLAY = 0x00000080;
@@ -146,34 +148,17 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
     private JCheckBox displayAfterDelayCheckBox;
     private JTextArea keyEventAccepter;
 
-    /**
-     * Simple constructor, likely used to run a stand-alone keyboard/display
-     * simulator.
-     *
-     * @param title
-     *     String containing title for title bar
-     * @param heading
-     *     String containing text for heading shown in upper part of
-     *     window.
-     */
-    public KeyboardAndDisplaySimulator(final String title, final String heading) {
-        super(title, heading);
+    public KeyboardAndDisplaySimulator(final @NotNull VenusUI mainUI) {
+        super(
+            KeyboardAndDisplaySimulator.heading + ", " + KeyboardAndDisplaySimulator.version,
+            KeyboardAndDisplaySimulator.heading, mainUI
+        );
         this.simulator = this;
     }
 
-    /**
-     * Simple constructor, likely used by the RARS Tools menu mechanism
-     */
-    public KeyboardAndDisplaySimulator() {
-        this(
-            KeyboardAndDisplaySimulator.heading + ", " + KeyboardAndDisplaySimulator.version,
-            KeyboardAndDisplaySimulator.heading
-        );
-    }
+    // Return value of the given MMIO control register after ready (low order) bit
 
-    // Return second of the given MMIO control register after ready (low order) bit
-
-    // Have to preserve the second of Interrupt Enable bit (bit 1)
+    // Have to preserve the value of Interrupt Enable bit (bit 1)
     private static boolean isReadyBitSet(final int mmioControlRegister) {
         try {
             return (Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE) & 1) == 1;
@@ -184,9 +169,9 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         return false; // to satisfy the compiler -- this will never happen.
     }
 
-    // Return second of the given MMIO control register after ready (low order) bit
+    // Return value of the given MMIO control register after ready (low order) bit
 
-    // Have to preserve the second of Interrupt Enable bit (bit 1)
+    // Have to preserve the value of Interrupt Enable bit (bit 1)
     private static int readyBitSet(final int mmioControlRegister) {
         try {
             return Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE) | 1;
@@ -200,8 +185,8 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
     // Rest of the protected methods. These all override do-nothing methods
     // the abstract superclass.
 
-    // Return second of the given MMIO control register after ready (low order) bit
-    // Have to preserve the second of Interrupt Enable bit (bit 1). Bits 2 and higher
+    // Return value of the given MMIO control register after ready (low order) bit
+    // Have to preserve the value of Interrupt Enable bit (bit 1). Bits 2 and higher
 
     private static int readyBitCleared(final int mmioControlRegister) {
         try {
@@ -397,8 +382,8 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
                 this.initializeDisplay(true);
             }
             // For SET_CURSOR_X_Y, we need data from the rest of the word.
-            // High order 3 bytes are split in half to store (X,Y) second.
-            // High 12 bits contain X second, next 12 bits contain Y second.
+            // High order 3 bytes are split in half to store (X,Y) value.
+            // High 12 bits contain X value, next 12 bits contain Y value.
             int x = (intWithCharacterToDisplay & 0xFFF00000) >>> 20;
             // If X or Y values are outside current range, set to range limit.
             if (x >= this.columns) {
@@ -617,7 +602,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
             +
             "The Ready bit is supposed to be read-only but in RARS it is not.\n" +
             "\n" +
-            "IMPORTANT NOTE: The Transmitter Controller Ready bit is set to its initial second of 1 only when you" +
+            "IMPORTANT NOTE: The Transmitter Controller Ready bit is set to its initial value of 1 only when you" +
             " click the tool's "
             +
             "'Connect to Program' button ('Assemble and Run' in the stand-alone version) or the tool's Reset " +
@@ -834,7 +819,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
         final boolean controlOnly
     ) {
         if (this.connectButton.isConnected()) {
-            Globals.memoryAndRegistersLock.lock();
+            Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
                 try {
                     Globals.MEMORY_INSTANCE.setRawWord(controlAddr, controlValue);
@@ -846,17 +831,15 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
                     System.exit(0);
                 }
             } finally {
-                Globals.memoryAndRegistersLock.unlock();
+                Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
-            // HERE'S A HACK!! Want to immediately display the updated memory second in MARS
+            // HERE'S A HACK!! Want to immediately display the updated memory value in MARS
             // but that code was not written for event-driven update (e.g. Observer) --
             // it was written to poll the memory cells for their values. So we force it to
             // do so.
 
-            if (Globals.gui != null) {
-                if (Globals.gui.mainPane.executeTab.textSegment.getCodeHighlighting()) {
-                    Globals.gui.mainPane.executeTab.dataSegment.updateValues();
-                }
+            if (this.mainUI.mainPane.executePane.textSegment.getCodeHighlighting()) {
+                this.mainUI.mainPane.executePane.dataSegment.updateValues();
             }
         }
     }
@@ -885,7 +868,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
 
     // Class to grab keystrokes going to keyboard echo area and send them to MMIO
 
-    // Delay second is fixed, and equal to slider second.
+    // Delay value is fixed, and equal to slider value.
     private static class FixedLengthDelay implements TransmitterDelayTechnique {
         @Override
         public String toString() {
@@ -900,8 +883,8 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
 
     // Class for selecting transmitter delay lengths (# of instruction executions).
 
-    // Randomly pick second from range 1 to slider setting, uniform distribution
-    // (each second has equal probability of being chosen).
+    // Randomly pick value from range 1 to slider setting, uniform distribution
+    // (each value has equal probability of being chosen).
     private static class UniformlyDistributedDelay implements TransmitterDelayTechnique {
         final Random randu;
 
@@ -925,7 +908,7 @@ public class KeyboardAndDisplaySimulator extends AbstractTool {
     /**
      * Pretty badly-hacked normal distribution, but is more realistic than uniform!
      * Get sample from Normal(0,1) -- mean=0, s.d.=1 -- multiply it by slider
-     * second, take absolute second to make sure we don't get negative,
+     * value, take absolute value to make sure we don't get negative,
      * add 1 to make sure we don't get 0.
      */
     private static class NormallyDistributedDelay implements TransmitterDelayTechnique {

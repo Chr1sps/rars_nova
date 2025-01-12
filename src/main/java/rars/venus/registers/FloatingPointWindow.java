@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
+import rars.venus.VenusUI;
 
 import static rars.Globals.BOOL_SETTINGS;
 
@@ -46,11 +47,12 @@ public final class FloatingPointWindow extends RegisterBlockWindowBase {
         /* ft11 */ "floating point temporary"
     };
 
-    public FloatingPointWindow() {
+    public FloatingPointWindow(final @NotNull VenusUI mainUI) {
         super(
-            Globals.FP_REGISTER_FILE.getRegisters(),
+            Globals.FP_REGISTER_FILE,
             regToolTips,
-            "32-bit single precision IEEE 754 floating point"
+            "32-bit single precision IEEE 754 floating point",
+            mainUI
         );
     }
 
@@ -61,20 +63,5 @@ public final class FloatingPointWindow extends RegisterBlockWindowBase {
         } else {
             return NumberDisplayBaseChooser.formatFloatNumber((int) value, base);
         }
-    }
-
-    @Override
-    protected void beginObserving() {
-        Globals.FP_REGISTER_FILE.addRegistersListener(this.processRegisterNotice);
-    }
-
-    @Override
-    protected void endObserving() {
-        Globals.FP_REGISTER_FILE.deleteRegistersListener(this.processRegisterNotice);
-    }
-
-    @Override
-    protected void resetRegisters() {
-        Globals.FP_REGISTER_FILE.resetRegisters();
     }
 }

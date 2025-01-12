@@ -43,14 +43,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class RunBackstepAction extends GuiAction {
 
-    private final VenusUI mainUI;
-
     public RunBackstepAction(
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel);
-        this.mainUI = gui;
+        super(name, icon, descrip, mnemonic, accel, gui);
     }
 
     /**
@@ -61,7 +58,7 @@ public class RunBackstepAction extends GuiAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         final String name = this.getValue(Action.NAME).toString();
-        final ExecutePane executePane = this.mainUI.mainPane.executeTab;
+        final ExecutePane executePane = this.mainUI.mainPane.executePane;
         if (!FileStatus.isAssembled()) {
             // note: this should never occur since backstepping is only enabled after
             // successful assembly.

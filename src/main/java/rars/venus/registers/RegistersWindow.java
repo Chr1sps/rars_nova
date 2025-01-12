@@ -2,11 +2,9 @@ package rars.venus.registers;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
-
-import java.util.Arrays;
+import rars.venus.VenusUI;
 
 import static rars.Globals.BOOL_SETTINGS;
 
@@ -50,18 +48,8 @@ public final class RegistersWindow extends RegisterBlockWindowBase {
         /* pc */ "program counter",
     };
 
-    public RegistersWindow() {
-        super(getRegisters(), regToolTips, "Current 32 bit value");
-    }
-
-    /*
-     * A simple wrapper to add pc into the Registers array
-     */
-    private static Register @NotNull [] getRegisters() {
-        final Register[] base = Globals.REGISTER_FILE.getRegisters();
-        final Register[] out = Arrays.copyOf(base, base.length + 1);
-        out[base.length] = Globals.REGISTER_FILE.pc;
-        return out;
+    public RegistersWindow(final @NotNull VenusUI mainUI) {
+        super(Globals.REGISTER_FILE, regToolTips, "Current 32 bit value", mainUI);
     }
 
     @Override
@@ -71,20 +59,5 @@ public final class RegistersWindow extends RegisterBlockWindowBase {
         } else {
             return NumberDisplayBaseChooser.formatNumber((int) value, base);
         }
-    }
-
-    @Override
-    protected void beginObserving() {
-        Globals.REGISTER_FILE.addRegistersListener(this.processRegisterNotice);
-    }
-
-    @Override
-    protected void endObserving() {
-        Globals.REGISTER_FILE.deleteRegistersListener(this.processRegisterNotice);
-    }
-
-    @Override
-    protected void resetRegisters() {
-        Globals.REGISTER_FILE.resetRegisters();
     }
 }

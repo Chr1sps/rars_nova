@@ -1,9 +1,11 @@
 package rars.tools;
 
+import org.jetbrains.annotations.NotNull;
 import rars.assembler.DataTypes;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.util.BinaryUtils;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -58,7 +60,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * GUI (previously System.out).
  * </p>
  */
-public class CacheSimulator extends AbstractTool {
+public final class CacheSimulator extends AbstractTool {
     private static final String version = "Version 1.2";
     private static final String heading = "Simulate and illustrate data cache performance";
     private static final String[] cacheBlockSizeChoices = {
@@ -108,23 +110,10 @@ public class CacheSimulator extends AbstractTool {
     private double cacheHitRate;
 
     /**
-     * Simple constructor, likely used to run a stand-alone cache simulator.
-     *
-     * @param title
-     *     String containing title for title bar
-     * @param heading
-     *     String containing text for heading shown in upper part of
-     *     window.
-     */
-    public CacheSimulator(final String title, final String heading) {
-        super(title, heading);
-    }
-
-    /**
      * Simple constructor, likely used by the RARS Tools menu mechanism
      */
-    public CacheSimulator() {
-        super("Data Cache Simulation Tool, " + CacheSimulator.version, CacheSimulator.heading);
+    public CacheSimulator(final @NotNull VenusUI mainUI) {
+        super("Data Cache Simulation Tool, " + CacheSimulator.version, CacheSimulator.heading, mainUI);
     }
 
     // Will determine range of choices for "set size in blocks", which is determined
@@ -609,7 +598,7 @@ public class CacheSimulator extends AbstractTool {
     }
 
     // Represents the outcome of a cache access. There are two parts:
-    // whether it was a hit or not, and in which block is the second stored.
+    // whether it was a hit or not, and in which block is the value stored.
     // In the case of a hit, the block associated with address. In the case of
     // a miss, the block where new association is made. DPS 23-Dec-2010
     private record CacheAccessResult(boolean hitOrMiss, int blockNumber) {
@@ -722,7 +711,7 @@ public class CacheSimulator extends AbstractTool {
     // set = log2 of #sets in the cache
     // tag = #bytes in address - (byte+word+set)
     // Direct Mapping (1 way set associative):
-    // The block second for a given address identifies its block index into the
+    // The block value for a given address identifies its block index into the
     ////////////////////////////////////////////////////////////////////////////// cache.
     // That's why its called "direct mapped." This is the only cache block it can
     // occupy. If that cache block is empty or if it is occupied by a different tag,
@@ -803,7 +792,7 @@ public class CacheSimulator extends AbstractTool {
                     {
                         CacheSimulator.this.writeLog(" -- MISS\n");
                     }
-                    result = 2; // miss second
+                    result = 2; // miss value
                     block.valid = true;
                     block.tag = this.getTag(address);
                     block.mostRecentAccessTime = CacheSimulator.this.memoryAccessCount;

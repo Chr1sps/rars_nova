@@ -3,10 +3,10 @@ package rars.venus.settings;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.hardware.MemoryConfiguration;
-import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -73,25 +73,11 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
         "memory map limit address"
     };
 
-    /**
-     * Create a new SettingsEditorAction. Has all the GuiAction parameters.
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
-     */
     public SettingsMemoryConfigurationAction(
         final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel
+        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI mainUI
     ) {
-        super(name, icon, descrip, mnemonic, accel);
+        super(name, icon, descrip, mnemonic, accel, mainUI);
     }
 
     /**
@@ -102,12 +88,22 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final JDialog configDialog = new MemoryConfigurationDialog(Globals.gui, "Memory Configuration", true);
+        final JDialog configDialog = new MemoryConfigurationDialog(this.mainUI, "Memory Configuration", true);
         configDialog.setVisible(true);
     }
 
+    // Handy class to connect button to its configuration...
+    private static class ConfigurationButton extends JRadioButton {
+        public final @NotNull MemoryConfiguration configuration;
+
+        public ConfigurationButton(final @NotNull MemoryConfiguration config) {
+            super(config.description, config == OTHER_SETTINGS.getMemoryConfiguration());
+            this.configuration = config;
+        }
+    }
+
     /// Private class to do all the work!
-    private static final class MemoryConfigurationDialog extends JDialog implements ActionListener {
+    private final class MemoryConfigurationDialog extends JDialog implements ActionListener {
         JTextField[] addressDisplay;
         JLabel[] nameDisplay;
         ConfigurationButton selectedConfigurationButton, initialConfigurationButton;
@@ -242,9 +238,9 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             if (newConfiguration != currentConfiguration) {
                 OTHER_SETTINGS.setMemoryConfigurationAndSave(newConfiguration);
                 Globals.setupGlobalMemoryConfiguration(newConfiguration);
-                Globals.gui.registersPane.getRegistersWindow().clearHighlighting();
-                Globals.gui.registersPane.getRegistersWindow().updateRegisters();
-                Globals.gui.mainPane.executeTab.dataSegment.updateBaseAddressComboBox();
+                SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow().clearHighlighting();
+                SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow().updateRegisters();
+                SettingsMemoryConfigurationAction.this.mainUI.mainPane.executePane.dataSegment.updateBaseAddressComboBox();
                 // 21 July 2009 Re-assemble if the situation demands it to maintain consistency.
                 if (FileStatus.get() == FileStatus.State.RUNNABLE ||
                     FileStatus.get() == FileStatus.State.RUNNING ||
@@ -252,9 +248,9 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
                     // Stop execution if executing -- should NEVER happen because this
                     // Action's widget is disabled during MIPS execution.
                     if (FileStatus.get() == FileStatus.State.RUNNING) {
-                        Simulator.INSTANCE.stopExecution();
+                        Globals.SIMULATOR.stopExecution();
                     }
-                    Globals.gui.getRunAssembleAction().actionPerformed(null);
+                    SettingsMemoryConfigurationAction.this.mainUI.getRunAssembleAction().actionPerformed(null);
                 }
             }
         }
@@ -312,16 +308,6 @@ public class SettingsMemoryConfigurationAction extends GuiAction {
             }
         }
 
-    }
-
-    // Handy class to connect button to its configuration...
-    private static class ConfigurationButton extends JRadioButton {
-        public final @NotNull MemoryConfiguration configuration;
-
-        public ConfigurationButton(final @NotNull MemoryConfiguration config) {
-            super(config.description, config == OTHER_SETTINGS.getMemoryConfiguration());
-            this.configuration = config;
-        }
     }
 
 }

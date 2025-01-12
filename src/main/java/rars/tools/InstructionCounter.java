@@ -28,6 +28,7 @@ package rars.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
@@ -35,6 +36,7 @@ import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,7 +49,7 @@ import java.awt.*;
  *
  * @author Felipe Lessa &lt;felipe.lessa@gmail.com&gt;
  */
-public class InstructionCounter extends AbstractTool {
+public final class InstructionCounter extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger(InstructionCounter.class);
     private static final String name = "Instruction Counter";
     private static final String version = "Version 1.0 (Felipe Lessa)";
@@ -102,8 +104,8 @@ public class InstructionCounter extends AbstractTool {
     /**
      * Simple construction, likely used by the RARS Tools menu mechanism.
      */
-    public InstructionCounter() {
-        super(InstructionCounter.name + ", " + InstructionCounter.version, InstructionCounter.heading);
+    public InstructionCounter(final @NotNull VenusUI mainUI) {
+        super(InstructionCounter.name + ", " + InstructionCounter.version, InstructionCounter.heading, mainUI);
     }
 
     @Override

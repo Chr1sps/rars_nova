@@ -1,6 +1,6 @@
 package rars.venus;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.util.BinaryUtils;
 
 import javax.swing.*;
@@ -42,7 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * a check box where checked means hex. If base 8 (octal)
  * is added later, the Component will need to change.
  */
-public class NumberDisplayBaseChooser extends JCheckBox {
+public final class NumberDisplayBaseChooser extends JCheckBox {
     public static final int DECIMAL = 10;
     public static final int HEXADECIMAL = 16;
     public static final int ASCII = 0;
@@ -58,7 +58,11 @@ public class NumberDisplayBaseChooser extends JCheckBox {
      * @param displayInHex
      *     Currently either DECIMAL or HEXADECIMAL
      */
-    public NumberDisplayBaseChooser(final String text, final boolean displayInHex) {
+    public NumberDisplayBaseChooser(
+        final @NotNull String text,
+        final boolean displayInHex,
+        final @NotNull ExecutePane executePane
+    ) {
         super(text, displayInHex);
         this.base = NumberDisplayBaseChooser.getBase(displayInHex);
         this.addItemListener(
@@ -83,7 +87,7 @@ public class NumberDisplayBaseChooser extends JCheckBox {
                     }
                 }
                 // Better to use notify, but I am tired...
-                Globals.gui.mainPane.executeTab.numberDisplayBaseChanged(choose);
+                executePane.numberDisplayBaseChanged(choose);
             });
     }
 

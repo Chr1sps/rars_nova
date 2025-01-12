@@ -27,12 +27,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package rars.tools;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.instructions.Branch;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -61,7 +63,7 @@ import java.awt.event.ActionListener;
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
  */
-public class BHTSimulator extends AbstractTool implements ActionListener {
+public final class BHTSimulator extends AbstractTool implements ActionListener {
     /**
      * constant for the default size of the BHT
      */
@@ -73,7 +75,7 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     public static final int BHT_DEFAULT_HISTORY = 1;
 
     /**
-     * constant for the default inital second
+     * constant for the default inital value
      */
     public static final boolean BHT_DEFAULT_INITVAL = false;
 
@@ -116,8 +118,8 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     /**
      * Creates a BHT Simulator with given name and heading.
      */
-    public BHTSimulator() {
-        super(BHTSimulator.BHT_NAME + ", " + BHTSimulator.BHT_VERSION, BHTSimulator.BHT_HEADING);
+    public BHTSimulator(final @NotNull VenusUI mainUI) {
+        super(BHTSimulator.BHT_NAME + ", " + BHTSimulator.BHT_VERSION, BHTSimulator.BHT_HEADING, mainUI);
     }
 
     /**
@@ -188,7 +190,7 @@ public class BHTSimulator extends AbstractTool implements ActionListener {
     /**
      * {@inheritDoc}
      * <p>
-     * Handles the actions when selecting another second in one of the two combo
+     * Handles the actions when selecting another value in one of the two combo
      * boxes.
      * Selecting a different BHT size or history causes a reset of the simulator.
      */

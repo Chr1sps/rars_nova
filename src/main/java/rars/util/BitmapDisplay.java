@@ -13,7 +13,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 
+// TODO: move this class to the common SystemIO class
+
 public final class BitmapDisplay extends JFrame {
+
     private static final @NotNull Logger LOGGER = LogManager.getLogger(BitmapDisplay.class);
 
     public final int displayWidth;

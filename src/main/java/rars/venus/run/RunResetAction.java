@@ -1,5 +1,6 @@
 package rars.venus.run;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.InterruptController;
@@ -44,14 +45,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Action for the Run -> Reset menu item
  */
 public final class RunResetAction extends GuiAction {
-    private final VenusUI mainUI;
 
     public RunResetAction(
         final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel, final VenusUI gui
+        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel);
-        mainUI = gui;
+        super(name, icon, descrip, mnemonic, accel, gui);
     }
 
     /**
@@ -63,7 +62,7 @@ public final class RunResetAction extends GuiAction {
     public void actionPerformed(final ActionEvent e) {
         RunGoAction.resetMaxSteps();
         final String name = this.getValue(Action.NAME).toString();
-        final ExecutePane executePane = mainUI.mainPane.executeTab;
+        final ExecutePane executePane = mainUI.mainPane.executePane;
         // The difficult part here is resetting the data segment. Two approaches are:
         // 1. After each assembly, get a deep copy of the Globals.memory array
         // containing data segment. Then replace it upon reset.

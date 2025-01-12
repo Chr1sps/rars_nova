@@ -1,10 +1,12 @@
 package rars.tools;
 
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.assembler.DataTypes;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.util.BinaryUtils;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -50,7 +52,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * AbstractToolAndApplication.
  * Pete Sanderson, verison 1.0, 14 November 2006.
  */
-public class MemoryReferenceVisualization extends AbstractTool {
+public final class MemoryReferenceVisualization extends AbstractTool {
 
     private static final String version = "Version 1.0";
     private static final String heading = "Visualizing memory reference patterns";
@@ -128,13 +130,10 @@ public class MemoryReferenceVisualization extends AbstractTool {
     private Grid theGrid;
     private CounterColorScale counterColorScale;
 
-    /**
-     * Simple constructor, likely used by the RARS Tools menu mechanism
-     */
-    public MemoryReferenceVisualization() {
+    public MemoryReferenceVisualization(final @NotNull VenusUI mainUI) {
         super(
             "Memory Reference Visualization, " + MemoryReferenceVisualization.version,
-            MemoryReferenceVisualization.heading
+            MemoryReferenceVisualization.heading, mainUI
         );
     }
 

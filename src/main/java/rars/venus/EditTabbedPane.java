@@ -58,7 +58,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson
  */
-public class EditTabbedPane extends JPanel {
+public final class EditTabbedPane extends JPanel {
     private final @NotNull MainPane mainPane;
     private final @NotNull VenusUI mainUI;
     private final @NotNull Editor editor;
@@ -97,7 +97,7 @@ public class EditTabbedPane extends JPanel {
                         EditTabbedPane.this.updateTitles(editPane);
                     } else {
                         EditTabbedPane.this.updateTitlesAndMenuState(editPane);
-                        this.mainPane.executeTab.clearPane();
+                        this.mainPane.executePane.clearPane();
                     }
                     editPane.tellEditingComponentToRequestFocusInWindow();
                 }
@@ -152,7 +152,7 @@ public class EditTabbedPane extends JPanel {
 
         Globals.REGISTER_FILE.resetRegisters();
         this.mainUI.isMemoryReset = true;
-        this.mainPane.executeTab.clearPane();
+        this.mainPane.executePane.clearPane();
         this.mainPane.setSelectedComponent(this);
         editPane.displayCaretPosition(Pair.of(1, 1));
         tabbedPane.setSelectedComponent(editPane);
@@ -196,7 +196,7 @@ public class EditTabbedPane extends JPanel {
         if (editPane != null) {
             if (this.editsSavedOrAbandoned()) {
                 this.remove(editPane);
-                this.mainPane.executeTab.clearPane();
+                this.mainPane.executePane.clearPane();
                 this.mainPane.setSelectedComponent(this);
             } else {
                 return false;
@@ -209,7 +209,7 @@ public class EditTabbedPane extends JPanel {
         final EditPane editPane = (EditPane) tabbedPane.getComponentAt(index);
         if (this.editsSavedOrAbandoned()) {
             this.remove(editPane);
-            this.mainPane.executeTab.clearPane();
+            this.mainPane.executePane.clearPane();
             this.mainPane.setSelectedComponent(this);
         }
     }
@@ -223,7 +223,7 @@ public class EditTabbedPane extends JPanel {
     public boolean closeAllFiles() {
         final int tabCount = tabbedPane.getTabCount();
         if (tabCount > 0) {
-            this.mainPane.executeTab.clearPane();
+            this.mainPane.executePane.clearPane();
             this.mainPane.setSelectedComponent(this);
             final EditPane[] tabs = new EditPane[tabCount];
             boolean unsavedChanges = false;
@@ -471,7 +471,7 @@ public class EditTabbedPane extends JPanel {
         if (editPane == null) {
             FileStatus.set(FileStatus.State.NO_FILE);
             this.editor.setTitle("", "", FileStatus.State.NO_FILE);
-            Globals.gui.setMenuState(FileStatus.State.NO_FILE);
+            this.mainUI.setMenuState(FileStatus.State.NO_FILE);
         } else {
             FileStatus.set(editPane.getFileStatus());
             this.updateTitlesAndMenuState(editPane);
@@ -489,7 +489,7 @@ public class EditTabbedPane extends JPanel {
     private void updateTitlesAndMenuState(final @NotNull EditPane editPane) {
         this.editor.setTitleFromFile(editPane.getFile(), editPane.getFileStatus());
         editPane.updateStaticFileStatus(); // for legacy code that depends on the static FileStatus (pre 4.0)
-        Globals.gui.setMenuState(editPane.getFileStatus());
+        this.mainUI.setMenuState(editPane.getFileStatus());
     }
 
     // Handy little utility to update the title on the current tab and the frame
@@ -558,6 +558,41 @@ public class EditTabbedPane extends JPanel {
         return tabbedPane;
     }
 
+    /**
+     * Will select the specified line in an editor tab. If the file is open
+     * but not current, its tab will be made current. If the file is not open,
+     * it will be opened in a new tab and made current, however the line will
+     * not be selected (apparent apparent problem with JEditTextArea).
+     *
+     * @param file
+     *     A String containing the file path name.
+     * @param line
+     *     Line number for error message
+     */
+    public void selectEditorTextLine(
+        final @NotNull File file,
+        final int line
+    ) {
+        final EditPane editPane = this.getEditPaneForFile(file);
+        EditPane currentPane = null;
+        if (editPane != null) {
+            if (editPane != this.getCurrentEditTab()) {
+                this.setCurrentEditTab(editPane);
+            }
+            currentPane = editPane;
+        } else { // file is not open. Try to open it.
+            if (this.openFile(file)) {
+                currentPane = this.getCurrentEditTab();
+            }
+        }
+        // If editPane == null, it means the desired file was not open. Line selection
+        // does not properly with the JEditTextArea editor in this situation (it works
+        // fine for the original generic editor). So we just won't do it. DPS 9-Aug-2010
+        if (editPane != null) {
+            currentPane.selectLine(line);
+        }
+    }
+   
     private final class FileOpener {
         private final @NotNull JFileChooser fileChooser;
         private final @NotNull ArrayList<@NotNull FileFilter> fileFilterList;
@@ -685,7 +720,7 @@ public class EditTabbedPane extends JPanel {
                     EditTabbedPane.this.updateTitles(editPane);
                 } else {// this was the original code...
                     EditTabbedPane.this.updateTitlesAndMenuState(editPane);
-                    EditTabbedPane.this.mainPane.executeTab.clearPane();
+                    EditTabbedPane.this.mainPane.executePane.clearPane();
                 }
 
                 EditTabbedPane.this.mainPane.setSelectedComponent(EditTabbedPane.this);

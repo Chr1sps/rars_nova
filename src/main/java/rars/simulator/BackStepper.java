@@ -40,7 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version February 2006
  */
-public class BackStepper {
+public final class BackStepper {
     private static final Logger LOGGER = LogManager.getLogger(BackStepper.class);
     /**
      * Flag to mark BackStep object as prepresenting specific situation: user manipulates

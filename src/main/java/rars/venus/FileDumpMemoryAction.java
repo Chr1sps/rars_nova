@@ -52,59 +52,38 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action for the File -> Save For Dump Memory menu item
  */
-public class FileDumpMemoryAction extends GuiAction {
+public final class FileDumpMemoryAction extends GuiAction {
 
     private static final String title = "Dump Memory To File";
-    private final VenusUI mainUI;
     private JDialog dumpDialog;
     private JComboBox<AugmentedSegmentInfo> segmentListSelector;
     private JComboBox<DumpFormat> formatListSelector;
 
-    /**
-     * <p>Constructor for FileDumpMemoryAction.</p>
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
-     * @param gui
-     *     a {@link VenusUI} object
-     */
     public FileDumpMemoryAction(
         final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel, final VenusUI gui
+        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel);
-        this.mainUI = gui;
+        super(name, icon, descrip, mnemonic, accel, gui);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void actionPerformed(final ActionEvent e) {
         this.dumpMemory();
     }
 
-    /*
+    /**
      * Save the memory segment in a supported format.
      */
     private void dumpMemory() {
         this.dumpDialog = this.createDumpDialog();
         this.dumpDialog.pack();
-        this.dumpDialog.setLocationRelativeTo(Globals.gui);
+        this.dumpDialog.setLocationRelativeTo(this.mainUI);
         this.dumpDialog.setVisible(true);
     }
 
-    // The dump dialog that appears when menu item is selected.
-    private JDialog createDumpDialog() {
-        final JDialog dumpDialog = new JDialog(Globals.gui, FileDumpMemoryAction.title, true);
+    /// The dump dialog that appears when menu item is selected.
+    private @NotNull JDialog createDumpDialog() {
+        final JDialog dumpDialog = new JDialog(this.mainUI, FileDumpMemoryAction.title, true);
         dumpDialog.setContentPane(this.buildDialogPanel());
         dumpDialog.setDefaultCloseOperation(
             JDialog.DO_NOTHING_ON_CLOSE);
@@ -118,7 +97,9 @@ public class FileDumpMemoryAction extends GuiAction {
         return dumpDialog;
     }
 
-    // Set contents of dump dialog.
+    /**
+     * Set contents of dump dialog.
+     */
     private JPanel buildDialogPanel() {
         final JPanel contents = new JPanel(new BorderLayout(20, 20));
         contents.setBorder(new EmptyBorder(10, 10, 10, 10));

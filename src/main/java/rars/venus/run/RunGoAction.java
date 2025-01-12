@@ -55,32 +55,14 @@ public class RunGoAction extends GuiAction {
 
     public static final int defaultMaxSteps = -1; // "forever", formerly 10000000; // 10 million
     public static int maxSteps = RunGoAction.defaultMaxSteps;
-    private final VenusUI mainUI;
     private String name;
     private ExecutePane executePane;
 
-    /**
-     * <p>Constructor for RunGoAction.</p>
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
-     * @param gui
-     *     a {@link VenusUI} object
-     */
     public RunGoAction(
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel);
-        this.mainUI = gui;
+        super(name, icon, descrip, mnemonic, accel, gui);
     }
 
     /**
@@ -99,7 +81,7 @@ public class RunGoAction extends GuiAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         this.name = this.getValue(Action.NAME).toString();
-        this.executePane = this.mainUI.mainPane.executeTab;
+        this.executePane = this.mainUI.mainPane.executePane;
         if (FileStatus.isAssembled()) {
             if (!this.mainUI.isExecutionStarted) {
                 this.processProgramArgumentsIfAny(); // DPS 17-July-2008
@@ -133,10 +115,10 @@ public class RunGoAction extends GuiAction {
                         } else {
                             EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.exception(), reason));
                         }
-                        Simulator.INSTANCE.simulatorNoticeHook.unsubscribe(this);
+                        Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this);
                     }
                 };
-                Simulator.INSTANCE.simulatorNoticeHook.subscribe(onSimulatorStopListener);
+                Globals.SIMULATOR.simulatorNoticeHook.subscribe(onSimulatorStopListener);
 
                 final int[] breakPoints = this.executePane.textSegment.getSortedBreakPointsArray();
                 RISCVProgram.startSimulation(RunGoAction.maxSteps, breakPoints);

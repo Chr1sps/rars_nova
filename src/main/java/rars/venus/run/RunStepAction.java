@@ -53,7 +53,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public class RunStepAction extends GuiAction {
 
-    private final VenusUI mainUI;
     private String name;
     private ExecutePane executePane;
 
@@ -61,8 +60,7 @@ public class RunStepAction extends GuiAction {
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel);
-        this.mainUI = gui;
+        super(name, icon, descrip, mnemonic, accel, gui);
     }
 
     /**
@@ -73,7 +71,7 @@ public class RunStepAction extends GuiAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         this.name = this.getValue(Action.NAME).toString();
-        this.executePane = this.mainUI.mainPane.executeTab;
+        this.executePane = this.mainUI.mainPane.executePane;
         if (FileStatus.isAssembled()) {
             if (!this.mainUI.isExecutionStarted) { // DPS 17-July-2008
                 this.processProgramArgumentsIfAny();
@@ -94,10 +92,10 @@ public class RunStepAction extends GuiAction {
                         item.exception()
                     ));
 
-                    Simulator.INSTANCE.simulatorNoticeHook.unsubscribe(this);
+                    Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this);
                 }
             };
-            Simulator.INSTANCE.simulatorNoticeHook.subscribe(stopListener);
+            Globals.SIMULATOR.simulatorNoticeHook.subscribe(stopListener);
 
             RISCVProgram.startSimulation(1, null);
         } else {

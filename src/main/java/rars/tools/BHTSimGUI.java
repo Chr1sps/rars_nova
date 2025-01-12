@@ -50,7 +50,7 @@ import java.util.Vector;
  *
  * @author ingo.kofler@itec.uni-klu.ac.at
  */
-public class BHTSimGUI extends JPanel {
+public final class BHTSimGUI extends JPanel {
 
     /**
      * constant for the color that highlights the current BHT entry
@@ -97,7 +97,7 @@ public class BHTSimGUI extends JPanel {
      */
     private JComboBox<Integer> m_cbBHThistory;
     /**
-     * combo box for selecting the initial second
+     * combo box for selecting the initial value
      */
     private JComboBox<String> m_cbBHTinitVal;
     /**
@@ -240,7 +240,7 @@ public class BHTSimGUI extends JPanel {
         panel.add(m_cbBHTentries);
         panel.add(new JLabel("BHT history size"));
         panel.add(m_cbBHThistory);
-        panel.add(new JLabel("Initial second"));
+        panel.add(new JLabel("Initial value"));
         panel.add(m_cbBHTinitVal);
 
         return panel;
@@ -283,7 +283,7 @@ public class BHTSimGUI extends JPanel {
     }
 
     /**
-     * Returns the combo box for selecting the initial second of the BHT
+     * Returns the combo box for selecting the initial value of the BHT
      *
      * @return the reference to the combo box
      */

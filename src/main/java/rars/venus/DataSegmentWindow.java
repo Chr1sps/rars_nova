@@ -11,7 +11,6 @@ import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.settings.BoolSetting;
-import rars.simulator.Simulator;
 import rars.util.BinaryUtils;
 import rars.util.ConversionUtils;
 import rars.venus.run.RunSpeedPanel;
@@ -113,6 +112,8 @@ public class DataSegmentWindow extends JInternalFrame {
     private final JComboBox<String> baseAddressSelector;
     // Must agree with above in number and order...
     private final int[] displayBaseAddressArray;
+    @NotNull
+    private final ExecutePane executePane;
     private JScrollPane dataTableScroller;
     private JButton dataButton, nextButton, prevButton, stakButton, globButton, heapButton, extnButton, mmioButton,
         textButton;
@@ -144,8 +145,12 @@ public class DataSegmentWindow extends JInternalFrame {
      *     an array of objects used by user to select number display
      *     base (10 or 16)
      */
-    public DataSegmentWindow(final NumberDisplayBaseChooser[] choosers) {
+    public DataSegmentWindow(
+        final @NotNull NumberDisplayBaseChooser @NotNull [] choosers,
+        final @NotNull ExecutePane executePane
+    ) {
         super("Data Segment", true, false, true, true);
+        this.executePane = executePane;
 
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.displayBaseAddressArray = new int[]{
@@ -157,7 +162,7 @@ public class DataSegmentWindow extends JInternalFrame {
             memoryConfiguration.textBaseAddress,
             memoryConfiguration.memoryMapBaseAddress,
         };
-        Simulator.INSTANCE.simulatorNoticeHook.subscribe(s -> {
+        SIMULATOR.simulatorNoticeHook.subscribe(s -> {
 
             if (s.action() == SimulatorNotice.Action.START) {
                 // Simulated MIPS execution starts. Respond to memory changes if running in
@@ -499,8 +504,8 @@ public class DataSegmentWindow extends JInternalFrame {
     // Returns the JScrollPane for the Address/Data part of the Data Segment window.
     private JScrollPane generateDataPanel() {
         DataSegmentWindow.dataData = new Object[DataSegmentWindow.NUMBER_OF_ROWS][DataSegmentWindow.NUMBER_OF_COLUMNS];
-        final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
-        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
+        final int valueBase = this.executePane.getValueDisplayBase();
+        final int addressBase = this.executePane.getAddressDisplayBase();
         int address = this.homeAddress;
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             DataSegmentWindow.dataData[row][DataSegmentWindow.ADDRESS_COLUMN] =
@@ -591,7 +596,7 @@ public class DataSegmentWindow extends JInternalFrame {
         if (this.asciiDisplay) {
             return NumberDisplayBaseChooser.ASCII;
         } else {
-            return Globals.gui.mainPane.executeTab.getValueDisplayBase();
+            return this.executePane.getValueDisplayBase();
         }
     }
 
@@ -609,7 +614,7 @@ public class DataSegmentWindow extends JInternalFrame {
             return; // ignore if no content to change
         }
         final int valueBase = this.getValueDisplayFormat();
-        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
+        final int addressBase = this.executePane.getAddressDisplayBase();
         int address = firstAddr;
         final TableModel dataModel = DataSegmentWindow.dataTable.getModel();
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
@@ -686,7 +691,7 @@ public class DataSegmentWindow extends JInternalFrame {
         final int row = offset / DataSegmentWindow.BYTES_PER_ROW;
         final int column = (offset % DataSegmentWindow.BYTES_PER_ROW) / DataSegmentWindow.BYTES_PER_VALUE + 1; // 
         // column 0 reserved for address
-        final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
+        final int valueBase = this.executePane.getValueDisplayBase();
         ((DataTableModel) DataSegmentWindow.dataTable.getModel()).setDisplayAndModelValueAt(
             NumberDisplayBaseChooser.formatNumber(value, valueBase),
             row, column
@@ -702,7 +707,7 @@ public class DataSegmentWindow extends JInternalFrame {
         if (this.tablePanel.getComponentCount() == 0) {
             return; // ignore if no content to change
         }
-        final int addressBase = Globals.gui.mainPane.executeTab.getAddressDisplayBase();
+        final int addressBase = this.executePane.getAddressDisplayBase();
         int address = this.firstAddress;
         for (int i = 0; i < DataSegmentWindow.NUMBER_OF_ROWS; i++) {
             String formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase);
@@ -737,7 +742,7 @@ public class DataSegmentWindow extends JInternalFrame {
      * Reset all data display values to 0
      */
     public void resetValues() {
-        final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
+        final int valueBase = this.executePane.getValueDisplayBase();
         final TableModel dataModel = DataSegmentWindow.dataTable.getModel();
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
@@ -1051,7 +1056,7 @@ public class DataSegmentWindow extends JInternalFrame {
             }
             // Assures that if changed during MIPS program execution, the update will
             // occur only between instructions.
-            Globals.memoryAndRegistersLock.lock();
+            Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
                 try {
                     Globals.MEMORY_INSTANCE.setRawWord(address, val);
@@ -1064,9 +1069,9 @@ public class DataSegmentWindow extends JInternalFrame {
                     return;
                 }
             } finally {
-                Globals.memoryAndRegistersLock.unlock();
+                Globals.MEMORY_REGISTERS_LOCK.unlock();
             } // end synchronized block
-            final int valueBase = Globals.gui.mainPane.executeTab.getValueDisplayBase();
+            final int valueBase = DataSegmentWindow.this.executePane.getValueDisplayBase();
             this.data[row][col] = NumberDisplayBaseChooser.formatNumber(val, valueBase);
             this.fireTableCellUpdated(row, col);
         }

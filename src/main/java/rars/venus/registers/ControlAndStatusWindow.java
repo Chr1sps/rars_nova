@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
+import rars.venus.VenusUI;
 
 import static rars.Globals.BOOL_SETTINGS;
 
@@ -32,8 +33,8 @@ public final class ControlAndStatusWindow extends RegisterBlockWindowBase {
         /* instreth */ "High 32 bits of instret"
     };
 
-    public ControlAndStatusWindow() {
-        super(Globals.CS_REGISTER_FILE.getRegisters(), regToolTips, "Current 32 bit value");
+    public ControlAndStatusWindow(final @NotNull VenusUI mainUI) {
+        super(Globals.CS_REGISTER_FILE, regToolTips, "Current 32 bit value", mainUI);
     }
 
     @Override
@@ -43,20 +44,5 @@ public final class ControlAndStatusWindow extends RegisterBlockWindowBase {
         } else {
             return NumberDisplayBaseChooser.formatNumber((int) value, base);
         }
-    }
-
-    @Override
-    protected void beginObserving() {
-        Globals.CS_REGISTER_FILE.addRegistersListener(this.processRegisterNotice);
-    }
-
-    @Override
-    protected void endObserving() {
-        Globals.CS_REGISTER_FILE.deleteRegistersListener(this.processRegisterNotice);
-    }
-
-    @Override
-    public void resetRegisters() {
-        Globals.CS_REGISTER_FILE.resetRegisters();
     }
 }

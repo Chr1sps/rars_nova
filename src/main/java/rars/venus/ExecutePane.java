@@ -81,11 +81,13 @@ public final class ExecutePane extends JDesktopPane {
         // windows within the Execute pane. So they will be housed here.
         this.addressDisplayBase = new NumberDisplayBaseChooser(
             "Hexadecimal Addresses",
-            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)
+            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX),
+            this
         );
         this.valueDisplayBase = new NumberDisplayBaseChooser(
             "Hexadecimal Values",
-            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX)
+            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX),
+            this
         );// VenusUI
         // .DEFAULT_NUMBER_BASE);
         this.addressDisplayBase
@@ -96,9 +98,9 @@ public final class ExecutePane extends JDesktopPane {
         this.registerValues = regs;
         this.fpRegValues = fpRegs;
         this.csrValues = csrRegs;
-        this.textSegment = new TextSegmentWindow(mainUI);
-        this.dataSegment = new DataSegmentWindow(choosers);
-        this.labelValues = new LabelsWindow();
+        this.textSegment = new TextSegmentWindow(this);
+        this.dataSegment = new DataSegmentWindow(choosers, this);
+        this.labelValues = new LabelsWindow(this);
         this.labelWindowVisible = BOOL_SETTINGS.getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY);
         this.add(this.textSegment); // these 3 LOC moved up. DPS 3-Sept-2014
         this.add(this.dataSegment);

@@ -1,7 +1,8 @@
 package rars.venus.run;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.venus.GuiAction;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -54,24 +55,13 @@ public class RunClearBreakpointsAction extends GuiAction implements TableModelLi
      * registration info and transfer it to the table model upon creation (which
      * happens with
      * each successful assembly).
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
      */
     public RunClearBreakpointsAction(
         final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel
+        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel);
-        Globals.gui.mainPane.executeTab.textSegment.registerTableModelListener(this);
+        super(name, icon, descrip, mnemonic, accel, gui);
+        this.mainUI.mainPane.executePane.textSegment.registerTableModelListener(this);
     }
 
     /**
@@ -82,7 +72,7 @@ public class RunClearBreakpointsAction extends GuiAction implements TableModelLi
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        Globals.gui.mainPane.executeTab.textSegment.clearAllBreakpoints();
+        this.mainUI.mainPane.executePane.textSegment.clearAllBreakpoints();
     }
 
     /**
@@ -98,8 +88,7 @@ public class RunClearBreakpointsAction extends GuiAction implements TableModelLi
      */
     @Override
     public void tableChanged(final TableModelEvent e) {
-        setEnabled(
-            Globals.gui.mainPane.executeTab.textSegment.getBreakpointCount() > 0);
+        setEnabled(this.mainUI.mainPane.executePane.textSegment.getBreakpointCount() > 0);
     }
 
 }

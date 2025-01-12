@@ -27,11 +27,13 @@ package rars.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,15 +43,19 @@ import java.util.TimerTask;
 /**
  * A RARS tool used to implement a timing module and timer inturrpts.
  */
-public class TimerTool extends AbstractTool {
+public final class TimerTool extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger(TimerTool.class);
 
     private static final String heading = "Timer Tool";
     private static final String version = "Version 1.0 (Zachary Selk)";
     // Internal time values
-    private static long time = 0L; // The current time of the program (starting from 0)
-    private static long startTime = 0L; // Tmp unix time used to keep track of how much time has passed
-    private static long savedTime = 0L; // Accumulates time as we pause/play the timer
+
+    /** The current time of the program (starting from 0) */
+    private static long time = 0L;
+    /** Tmp unix time used to keep track of how much time has passed */
+    private static long startTime = 0L;
+    /** Accumulates time as we pause/play the timer */
+    private static long savedTime = 0L;
     // Timing threads
     private static TimeCmpDaemon timeCmp = null; // Watches for changes made to timecmp
     // Internal timing flags
@@ -60,11 +66,8 @@ public class TimerTool extends AbstractTool {
     // GUI window sections
     private TimePanel timePanel;
 
-    /**
-     * <p>Constructor for TimerTool.</p>
-     */
-    public TimerTool() {
-        super(TimerTool.heading + ", " + TimerTool.version, TimerTool.heading);
+    public TimerTool(final @NotNull VenusUI mainUI) {
+        super(TimerTool.heading + ", " + TimerTool.version, TimerTool.heading, mainUI);
         TimerTool.startTimeCmpDaemon();
     }
 
@@ -198,7 +201,7 @@ public class TimerTool extends AbstractTool {
 
     // Writes a word to a virtual memory address
     private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
-        Globals.memoryAndRegistersLock.lock();
+        Globals.MEMORY_REGISTERS_LOCK.lock();
         try {
             try {
                 Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue);
@@ -207,7 +210,7 @@ public class TimerTool extends AbstractTool {
                 System.exit(0);
             }
         } finally {
-            Globals.memoryAndRegistersLock.unlock();
+            Globals.MEMORY_REGISTERS_LOCK.unlock();
         }
     }
 
