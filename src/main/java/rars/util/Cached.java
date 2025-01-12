@@ -4,19 +4,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public final class Lazy<T> implements Supplier<T> {
+public final class Cached<T> implements Supplier<T> {
     private final @NotNull Supplier<T> supplier;
     private boolean isInitialized;
     private T value;
 
-    public Lazy(final @NotNull Supplier<T> supplier) {
+    public Cached(final @NotNull Supplier<T> supplier) {
         this.isInitialized = false;
         this.value = null;
         this.supplier = supplier;
     }
 
-    public static <T> @NotNull Lazy<T> of(final @NotNull Supplier<T> supplier) {
-        return new Lazy<>(supplier);
+    public static <T> @NotNull Cached<T> of(final @NotNull Supplier<T> supplier) {
+        return new Cached<>(supplier);
+    }
+
+    public boolean isInitialized() {
+        return isInitialized;
     }
 
     @Override
@@ -28,7 +32,7 @@ public final class Lazy<T> implements Supplier<T> {
         return value;
     }
 
-    public boolean isInitialized() {
-        return isInitialized;
+    public synchronized void invalidate() {
+        isInitialized = false;
     }
 }

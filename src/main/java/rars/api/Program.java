@@ -181,7 +181,7 @@ public final class Program {
             this.fds = new SystemIO.Data(
                 new ByteArrayInputStream(STDIN.getBytes()), this.stdout, this.stderr);
         } else {
-            this.fds = new SystemIO.Data(true);
+            this.fds = new SystemIO.Data();
         }
     }
 

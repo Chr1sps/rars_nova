@@ -1116,16 +1116,14 @@ public final class Memory {
         final int length,
         final int value
     ) {
-        if ((Globals.program != null || Globals.GUI == null)) {
-            this.observables.stream()
-                .filter((mo) -> mo.match(address))
-                .forEach((mo) -> mo.dispatcher.dispatch(new MemoryAccessNotice(
-                    type,
-                    address,
-                    length,
-                    value
-                )));
-        }
+        this.observables.stream()
+            .filter((mo) -> mo.match(address))
+            .forEach((mo) -> mo.dispatcher.dispatch(new MemoryAccessNotice(
+                type,
+                address,
+                length,
+                value
+            )));
     }
 
     /**
