@@ -3,6 +3,7 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.operations.Comparisons;
 import rars.jsoftfloat.types.Float64;
@@ -20,7 +21,7 @@ public final class FEQD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
 
         final Float64 f1 = Double.getDouble(statement.getOperand(1));
         final Float64 f2 = Double.getDouble(statement.getOperand(2));

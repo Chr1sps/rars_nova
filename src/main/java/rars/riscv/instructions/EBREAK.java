@@ -34,15 +34,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>EBREAK class.</p>
- */
 public final class EBREAK extends BasicInstruction {
-    public static final EBREAK INSTANCE = new EBREAK();
+    public static final @NotNull EBREAK INSTANCE = new EBREAK();
 
-    /**
-     * <p>Constructor for EBREAK.</p>
-     */
     private EBREAK() {
         super(
             "ebreak", "Pause execution",
@@ -50,9 +44,6 @@ public final class EBREAK extends BasicInstruction {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         throw BreakpointException.INSTANCE;

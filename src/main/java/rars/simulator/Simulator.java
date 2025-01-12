@@ -7,8 +7,8 @@ import rars.ProgramStatement;
 import rars.exceptions.*;
 import rars.notices.SimulatorNotice;
 import rars.riscv.BasicInstruction;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
+import rars.riscv.hardware.registerFiles.CSRegisterFile;
 import rars.settings.OtherSettings;
 import rars.util.BinaryUtils;
 import rars.util.ListenerDispatcher;
@@ -17,6 +17,8 @@ import rars.venus.run.RunSpeedPanel;
 
 import javax.swing.*;
 import java.util.Arrays;
+
+import static rars.Globals.CS_REGISTER_FILE;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -284,18 +286,23 @@ public final class Simulator {
             assert !se.reason.isInterrupt() : "Interrupts cannot be handled by the trap handler";
 
             // set the relevant CSRs
-            ControlAndStatusRegisterFile.updateRegister("ucause", se.reason.value);
-            ControlAndStatusRegisterFile.updateRegister("uepc", pc);
-            ControlAndStatusRegisterFile.updateRegister("utval", se.value);
+            try {
+                CS_REGISTER_FILE.updateRegisterByName("ucause", se.reason.value);
+                CS_REGISTER_FILE.updateRegisterByName("uepc", pc);
+                CS_REGISTER_FILE.updateRegisterByName("utval", se.value);
+            } catch (final SimulationException e) {
+                // should never happen
+                throw new RuntimeException(e);
+            }
 
             // Get the interrupt handler if it exists
-            final int utvec = ControlAndStatusRegisterFile.getValue("utvec");
+            final var utvec = CS_REGISTER_FILE.getIntValue("utvec");
 
             // Mode can be ignored because we are only handling traps
             final int base = utvec & 0xFFFFFFFC;
 
             ProgramStatement exceptionHandler = null;
-            if ((ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) != 0) { // test user-interrupt enable (UIE)
+            if ((CS_REGISTER_FILE.getIntValue("ustatus") & 0x1) != 0) { // test user-interrupt enable (UIE)
                 try {
                     exceptionHandler = Globals.MEMORY_INSTANCE.getStatement(base);
                 } catch (final AddressErrorException aee) {
@@ -304,8 +311,20 @@ public final class Simulator {
             }
 
             if (exceptionHandler != null) {
-                ControlAndStatusRegisterFile.orRegister("ustatus", 0x10); // Set UPIE
-                ControlAndStatusRegisterFile.clearRegister("ustatus", 0x1); // Clear UIE
+                try {
+                    // Set UPIE
+                    CS_REGISTER_FILE.updateRegisterByName(
+                        "ustatus",
+                        CS_REGISTER_FILE.getIntValue("ustatus") | (long) 0x10
+                    );
+                    // Clear UIE
+                    CS_REGISTER_FILE.updateRegisterByName(
+                        "ustatus",
+                        CS_REGISTER_FILE.getLongValue("ustatus") & ~0x1
+                    );
+                } catch (final SimulationException e) {
+                    throw new RuntimeException(e);
+                }
                 Globals.REGISTER_FILE.setProgramCounter(base);
                 return true;
             } else {
@@ -323,18 +342,23 @@ public final class Simulator {
 
             // Don't handle cases where that interrupt isn't enabled
             assert (
-                (ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) != 0
-                    && (ControlAndStatusRegisterFile.getValue("uie") & (1 << code)) != 0
+                (CS_REGISTER_FILE.getLongValue("ustatus") & 0x1) != 0
+                    && (CS_REGISTER_FILE.getLongValue("uie") & (1 << code)) != 0
             )
                 : "The interrupt handler must be enabled";
 
             // set the relevant CSRs
-            ControlAndStatusRegisterFile.updateRegister("ucause", cause);
-            ControlAndStatusRegisterFile.updateRegister("uepc", pc);
-            ControlAndStatusRegisterFile.updateRegister("utval", value);
+            try {
+                CS_REGISTER_FILE.updateRegisterByName("ucause", cause);
+                CS_REGISTER_FILE.updateRegisterByName("uepc", pc);
+                CS_REGISTER_FILE.updateRegisterByName("utval", value);
+            } catch (final SimulationException e) {
+                // should never happen
+                throw new RuntimeException(e);
+            }
 
             // Get the interrupt handler if it exists
-            final int utvec = ControlAndStatusRegisterFile.getValue("utvec");
+            final int utvec = CS_REGISTER_FILE.getIntValue("utvec");
 
             // Handle vectored mode
             int base = utvec & 0xFFFFFFFC;
@@ -350,8 +374,17 @@ public final class Simulator {
                 // handled below
             }
             if (exceptionHandler != null) {
-                ControlAndStatusRegisterFile.orRegister("ustatus", 0x10); // Set UPIE
-                ControlAndStatusRegisterFile.clearRegister("ustatus", ControlAndStatusRegisterFile.INTERRUPT_ENABLE);
+                try {
+                    // Set UPIE
+                    CS_REGISTER_FILE.updateRegisterByName(
+                        "ustatus", CS_REGISTER_FILE.getLongValue("ustatus") | (long) 0x10);
+                    CS_REGISTER_FILE.updateRegisterByName(
+                        "ustatus", CS_REGISTER_FILE.getLongValue("ustatus") & ~CSRegisterFile.INTERRUPT_ENABLE);
+                } catch (SimulationException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // ControlAndStatusRegisterFile.clearRegister("ustatus", ControlAndStatusRegisterFile.INTERRUPT_ENABLE);
                 Globals.REGISTER_FILE.setProgramCounter(base);
                 return true;
             } else {
@@ -436,12 +469,9 @@ public final class Simulator {
                 Globals.memoryAndRegistersLock.lock();
                 try {
                     // Handle pending interupts and traps first
-                    long uip = ControlAndStatusRegisterFile.getValueNoNotify("uip");
-                    final long uie = ControlAndStatusRegisterFile.getValueNoNotify("uie");
-                    final boolean IE = (
-                        ControlAndStatusRegisterFile.getValueNoNotify("ustatus")
-                            & ControlAndStatusRegisterFile.INTERRUPT_ENABLE
-                    ) != 0;
+                    long uip = CS_REGISTER_FILE.uip.getValueNoNotify();
+                    final long uie = CS_REGISTER_FILE.uie.getValueNoNotify();
+                    final boolean IE = (CS_REGISTER_FILE.ustatus.getValueNoNotify() & CSRegisterFile.INTERRUPT_ENABLE) != 0;
                     // make sure no interrupts sneak in while we are processing them
                     this.pc = Globals.REGISTER_FILE.getProgramCounter();
                     synchronized (InterruptController.lock) {
@@ -449,7 +479,7 @@ public final class Simulator {
                         boolean pendingTimer = InterruptController.timerPending();
                         final boolean pendingTrap = InterruptController.trapPending();
                         // This is the explicit (in the spec) order that interrupts should be serviced
-                        if (IE && pendingExternal && (uie & ControlAndStatusRegisterFile.EXTERNAL_INTERRUPT) != 0) {
+                        if (IE && pendingExternal && (uie & CSRegisterFile.EXTERNAL_INTERRUPT) != 0) {
                             if (this.handleInterrupt(
                                 InterruptController.claimExternal(),
                                 ExceptionReason.EXTERNAL_INTERRUPT.value, this.pc
@@ -461,14 +491,14 @@ public final class Simulator {
                                 // thats an error
                             }
                         } else if (IE && (uip & 0x1) != 0
-                            && (uie & ControlAndStatusRegisterFile.SOFTWARE_INTERRUPT) != 0) {
+                            && (uie & CSRegisterFile.SOFTWARE_INTERRUPT) != 0) {
                             if (this.handleInterrupt(0, ExceptionReason.SOFTWARE_INTERRUPT.value, this.pc)) {
                                 uip &= ~0x1;
                             } else {
                                 return; // if the interrupt can't be handled, but the interrupt enable bit is high,
                                 // thats an error
                             }
-                        } else if (IE && pendingTimer && (uie & ControlAndStatusRegisterFile.TIMER_INTERRUPT) != 0) {
+                        } else if (IE && pendingTimer && (uie & CSRegisterFile.TIMER_INTERRUPT) != 0) {
                             if (this.handleInterrupt(
                                 InterruptController.claimTimer(),
                                 ExceptionReason.TIMER_INTERRUPT.value,
@@ -489,13 +519,17 @@ public final class Simulator {
                                 return;
                             }
                         }
-                        uip |= (pendingExternal ? ControlAndStatusRegisterFile.EXTERNAL_INTERRUPT : 0)
-                            | (pendingTimer ? ControlAndStatusRegisterFile.TIMER_INTERRUPT : 0);
+                        uip |= (pendingExternal ? CSRegisterFile.EXTERNAL_INTERRUPT : 0)
+                            | (pendingTimer ? CSRegisterFile.TIMER_INTERRUPT : 0);
                     }
-                    if (uip != ControlAndStatusRegisterFile.UIP.getValueNoNotify()) {
+                    if (uip != CS_REGISTER_FILE.uip.getValueNoNotify()) {
 
-                        // ControlAndStatusRegisterFile.UIP.
-                        ControlAndStatusRegisterFile.updateRegister("uip", uip);
+                        try {
+                            CS_REGISTER_FILE.updateRegisterByName("uip", uip);
+                        } catch (final SimulationException e) {
+                            // should never happen
+                            throw new RuntimeException(e);
+                        }
                     }
 
                     // always handle interrupts and traps before quiting
@@ -528,7 +562,11 @@ public final class Simulator {
                         }
                         if (!InterruptController.registerSynchronousTrap(tmp, this.pc)) {
                             this.pe = tmp;
-                            ControlAndStatusRegisterFile.updateRegister("uepc", this.pc);
+                            try {
+                                CS_REGISTER_FILE.updateRegisterByName("uepc", this.pc);
+                            } catch (final SimulationException ex) {
+                                throw new RuntimeException(ex);
+                            }
                             this.stopExecution(true, Reason.EXCEPTION);
                             return;
                         } else {
@@ -594,12 +632,12 @@ public final class Simulator {
                 }
 
                 // Update cycle(h) and instret(h)
-                final long cycle = ControlAndStatusRegisterFile.getValueNoNotify("cycle");
-                final long instret = ControlAndStatusRegisterFile.getValueNoNotify("instret");
+                final long cycle = CS_REGISTER_FILE.cycle.getValueNoNotify();
+                final long instret = CS_REGISTER_FILE.instret.getValueNoNotify();
                 final long time = System.currentTimeMillis();
-                ControlAndStatusRegisterFile.updateRegisterBackdoor("cycle", cycle + 1);
-                ControlAndStatusRegisterFile.updateRegisterBackdoor("instret", instret + 1);
-                ControlAndStatusRegisterFile.updateRegisterBackdoor("time", time);
+                CS_REGISTER_FILE.updateRegisterBackdoor(CS_REGISTER_FILE.cycle, cycle + 1);
+                CS_REGISTER_FILE.updateRegisterBackdoor(CS_REGISTER_FILE.instret, instret + 1);
+                CS_REGISTER_FILE.updateRegisterBackdoor(CS_REGISTER_FILE.time, time);
 
                 // Return if we've reached a breakpoint.
                 if (ebreak || (this.breakPoints != null) &&

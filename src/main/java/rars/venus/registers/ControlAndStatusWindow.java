@@ -1,7 +1,7 @@
 package rars.venus.registers;
 
 import org.jetbrains.annotations.NotNull;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
+import rars.Globals;
 import rars.settings.BoolSetting;
 import rars.venus.NumberDisplayBaseChooser;
 
@@ -33,7 +33,7 @@ public final class ControlAndStatusWindow extends RegisterBlockWindowBase {
     };
 
     public ControlAndStatusWindow() {
-        super(ControlAndStatusRegisterFile.getRegisters(), regToolTips, "Current 32 bit value");
+        super(Globals.CS_REGISTER_FILE.getRegisters(), regToolTips, "Current 32 bit value");
     }
 
     @Override
@@ -47,16 +47,16 @@ public final class ControlAndStatusWindow extends RegisterBlockWindowBase {
 
     @Override
     protected void beginObserving() {
-        ControlAndStatusRegisterFile.addRegistersObserver(this.processRegisterNotice);
+        Globals.CS_REGISTER_FILE.addRegistersListener(this.processRegisterNotice);
     }
 
     @Override
     protected void endObserving() {
-        ControlAndStatusRegisterFile.deleteRegistersObserver(this.processRegisterNotice);
+        Globals.CS_REGISTER_FILE.deleteRegistersListener(this.processRegisterNotice);
     }
 
     @Override
     public void resetRegisters() {
-        ControlAndStatusRegisterFile.resetRegisters();
+        Globals.CS_REGISTER_FILE.resetRegisters();
     }
 }

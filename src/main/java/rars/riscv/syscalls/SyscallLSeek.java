@@ -3,6 +3,7 @@ package rars.riscv.syscalls;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 import rars.util.SystemIO;
 
@@ -44,7 +45,7 @@ public final class SyscallLSeek extends AbstractSyscall {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final int result = SystemIO.seek(
             Globals.REGISTER_FILE.getIntValue("a0"),
             Globals.REGISTER_FILE.getIntValue("a1"),

@@ -34,13 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallPrintChar class.</p>
- */
 public final class SyscallPrintChar extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallPrintChar.</p>
-     */
     public SyscallPrintChar() {
         super(
             "PrintChar", "Prints an ascii character",
@@ -48,9 +42,6 @@ public final class SyscallPrintChar extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         final char t = (char) (Globals.REGISTER_FILE.getIntValue("a0") & 0x000000ff);

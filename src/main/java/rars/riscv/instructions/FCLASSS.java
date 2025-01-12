@@ -3,6 +3,7 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.types.Floating;
 import rars.riscv.BasicInstruction;
@@ -58,7 +59,7 @@ public final class FCLASSS extends BasicInstruction {
      * 8 t1 is a signaling NaN (Not implemented due to Java).
      * 9 t1 is a quiet NaN.
      */
-    public static <T extends Floating<T>> void fclass(@NotNull final T in, final int out) {
+    public static <T extends Floating<T>> void fclass(@NotNull final T in, final int out) throws SimulationException {
         if (in.isNaN()) {
             Globals.REGISTER_FILE.updateRegisterByNumber(out, in.isSignalling() ? 0x100 : 0x200);
         } else {
@@ -76,7 +77,7 @@ public final class FCLASSS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final Float32 in = new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1)));
         fclass(in, statement.getOperand(0));
     }

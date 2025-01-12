@@ -3,6 +3,7 @@ package rars.riscv.syscalls;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 
 import java.util.Random;
@@ -35,13 +36,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallRandFloat class.</p>
- */
 public class SyscallRandFloat extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallRandFloat.</p>
-     */
+
     public SyscallRandFloat() {
         super(
             "RandFloat", "Get a random float", "a0 = index of pseudorandom number generator",
@@ -49,11 +45,8 @@ public class SyscallRandFloat extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final Random stream = RandomStreams.get("a0");
         Globals.FP_REGISTER_FILE.setRegisterToFloat(
             10,

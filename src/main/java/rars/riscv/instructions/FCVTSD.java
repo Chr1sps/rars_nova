@@ -20,8 +20,8 @@ public final class FCVTSD extends BasicInstruction {
         );
     }
 
-    public static <S extends rars.jsoftfloat.types.Floating<S>, D extends rars.jsoftfloat.types.Floating<D>> S convert(
-        @NotNull final D toconvert, @NotNull final S constructor, final Environment e) {
+    public static <S extends rars.jsoftfloat.types.Floating<S>, D extends rars.jsoftfloat.types.Floating<D>> @NotNull S convert(
+        @NotNull final D toconvert, @NotNull final S constructor, final @NotNull Environment e) {
         if (toconvert.isInfinite()) {
             return toconvert.isSignMinus() ? constructor.NegativeInfinity() : constructor.Infinity();
         }

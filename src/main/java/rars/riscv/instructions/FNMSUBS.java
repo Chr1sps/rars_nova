@@ -7,7 +7,7 @@ import rars.jsoftfloat.types.Float32;
 import rars.util.Utils;
 
 public final class FNMSUBS extends FusedFloat {
-    public static final FNMSUBS INSTANCE = new FNMSUBS();
+    public static final @NotNull FNMSUBS INSTANCE = new FNMSUBS();
 
     private FNMSUBS() {
         super("fnmsub.s f1, f2, f3, f4", "Fused Negated Multiply Subatract: Assigns -(f2*f3-f4) to f1", "10");

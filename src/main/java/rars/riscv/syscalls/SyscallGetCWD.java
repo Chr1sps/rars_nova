@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 
 import java.nio.charset.StandardCharsets;
@@ -48,7 +49,7 @@ public final class SyscallGetCWD extends AbstractSyscall {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final String path = System.getProperty("user.dir");
         final int buf = REGISTER_FILE.getIntValue(REGISTER_FILE.a0);
         final int length = REGISTER_FILE.getIntValue(REGISTER_FILE.a0);

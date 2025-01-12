@@ -3,6 +3,7 @@ package rars.riscv;
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 
 /**
  * Abstract class that a syscall system service must extend. A qualifying
@@ -136,16 +137,8 @@ public abstract class AbstractSyscall implements Comparable<AbstractSyscall> {
      * @throws ExitingException
      *     if any.
      */
-    public abstract void simulate(@NotNull ProgramStatement statement)
-        throws ExitingException;
+    public abstract void simulate(@NotNull ProgramStatement statement) throws SimulationException;
 
-    /**
-     * <p>compareTo.</p>
-     *
-     * @param other
-     *     a {@link AbstractSyscall} object
-     * @return a int
-     */
     @Override
     public int compareTo(@NotNull final AbstractSyscall other) {
         if (this == other) {

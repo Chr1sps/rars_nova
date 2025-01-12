@@ -11,7 +11,6 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.InstructionsRegistry;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryUtils;
 import rars.settings.BoolSetting;
@@ -336,10 +335,10 @@ public final class Main {
                     }
                     default -> this.out.println(BinaryUtils.intToAscii(ivalue));
                 }
-            } else if (ControlAndStatusRegisterFile.getRegister(registerName) != null) {
+            } else if (Globals.CS_REGISTER_FILE.getRegisterByName(registerName) != null) {
                 this.out.print(registerName + "\t");
-                this.out.println(this.formatIntForDisplay((int) ControlAndStatusRegisterFile.getRegister(registerName)
-                    .getValue()));
+                this.out.println(this.formatIntForDisplay(Globals.CS_REGISTER_FILE.getLongValue(registerName)
+                    .intValue()));
             } else if (this.programOptions.brief) {
                 this.out.print(registerName + "\t");
                 this.out.println(this.formatIntForDisplay((int) Globals.REGISTER_FILE.getRegisterByName(registerName)

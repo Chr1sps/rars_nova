@@ -25,16 +25,16 @@ public final class FCVTDWU extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
 
-        final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        final var environment = new Environment();
+        environment.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float64 tmp = new Float64(0);
         final Float64 converted = Conversions
             .convertFromInt(
                 BigInteger.valueOf(Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)) & 0xFFFFFFFFL),
-                e,
+                environment,
                 tmp
             );
-        Floating.setfflags(e);
+        Floating.setfflags(environment);
         Globals.FP_REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), converted.bits);
     }
 }

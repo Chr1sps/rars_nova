@@ -43,9 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * and a2 specifies length. Number of characters written is returned in a0.
  */
 public class SyscallWrite extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallWrite.</p>
-     */
+
     public SyscallWrite() {
         super(
             "Write", "Write to a filedescriptor from a buffer",
@@ -54,15 +52,16 @@ public class SyscallWrite extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         int byteAddress = REGISTER_FILE.getIntValue(REGISTER_FILE.a1); // source of characters to write to file
         final int reqLength = REGISTER_FILE.getIntValue(REGISTER_FILE.a2); // user-requested length
         if (reqLength < 0) {
-            REGISTER_FILE.updateRegister(REGISTER_FILE.a0, -1);
+            try {
+                REGISTER_FILE.updateRegister(REGISTER_FILE.a0, -1);
+            } catch (rars.exceptions.SimulationException e) {
+                throw new RuntimeException(e);
+            }
             return;
         }
         final byte[] myBuffer = new byte[reqLength];
@@ -84,6 +83,10 @@ public class SyscallWrite extends AbstractSyscall {
             REGISTER_FILE.getIntValue(REGISTER_FILE.a2)
         ); // length
         // set returned value in register
-        REGISTER_FILE.updateRegister(REGISTER_FILE.a0, retValue);
+        try {
+            REGISTER_FILE.updateRegister(REGISTER_FILE.a0, retValue);
+        } catch (rars.exceptions.SimulationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

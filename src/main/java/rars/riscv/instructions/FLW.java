@@ -36,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class FLW extends BasicInstruction {
-    public static final FLW INSTANCE = new FLW();
+    public static final @NotNull FLW INSTANCE = new FLW();
 
     private FLW() {
         super(

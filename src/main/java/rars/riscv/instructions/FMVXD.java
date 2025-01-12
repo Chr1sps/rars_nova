@@ -3,11 +3,12 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
 public final class FMVXD extends BasicInstruction {
-    public static final FMVXD INSTANCE = new FMVXD();
+    public static final @NotNull FMVXD INSTANCE = new FMVXD();
 
     private FMVXD() {
         super(
@@ -17,7 +18,7 @@ public final class FMVXD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
 
         final long newValue = Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1));
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);

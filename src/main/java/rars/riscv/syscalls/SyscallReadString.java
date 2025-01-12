@@ -49,9 +49,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * newline to end. In either case, then pad with null byte.
  */
 public class SyscallReadString extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallReadString.</p>
-     */
+
     public SyscallReadString() {
         super(
             "ReadString", "Reads a string from the console",
@@ -59,9 +57,6 @@ public class SyscallReadString extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final int buf = Globals.REGISTER_FILE.getIntValue("a0"); // buf addr

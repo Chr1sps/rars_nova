@@ -3,11 +3,12 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
 public final class FSGNJXD extends BasicInstruction {
-    public static final FSGNJXD INSTANCE = new FSGNJXD();
+    public static final @NotNull FSGNJXD INSTANCE = new FSGNJXD();
 
     private FSGNJXD() {
         super(
@@ -20,7 +21,7 @@ public final class FSGNJXD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final var f2 = Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1));
         final var f3 = Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(2));
         final var result = (f2 & 0x7FFFFFFF_FFFFFFFFL) | ((f2 ^ f3) & 0x80000000_00000000L);

@@ -27,15 +27,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>ANDI class.</p>
- */
-public final class ANDI extends ImmediateInstruction {
-    public static final ImmediateInstruction INSTANCE = new ANDI();
+import org.jetbrains.annotations.NotNull;
 
-    /**
-     * <p>Constructor for ANDI.</p>
-     */
+public final class ANDI extends ImmediateInstruction {
+    public static final @NotNull ANDI INSTANCE = new ANDI();
+
     private ANDI() {
         super(
             "andi t1,t2,-100",
@@ -43,9 +39,6 @@ public final class ANDI extends ImmediateInstruction {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long immediate) {
         return value & immediate;

@@ -36,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class FSW extends BasicInstruction {
-    public static final FSW INSTANCE = new FSW();
+    public static final @NotNull FSW INSTANCE = new FSW();
 
     private FSW() {
         super(

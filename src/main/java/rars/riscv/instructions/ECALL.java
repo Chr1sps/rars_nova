@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class ECALL extends BasicInstruction {
-    public static final ECALL INSTANCE = new ECALL();
+    public static final @NotNull ECALL INSTANCE = new ECALL();
 
     private ECALL() {
         super(

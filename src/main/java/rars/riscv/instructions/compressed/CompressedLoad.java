@@ -86,6 +86,6 @@ public final class CompressedLoad extends CompressedInstruction {
 
     @FunctionalInterface
     private interface UpdateCallback {
-        void update(int address, long value);
+        void update(int address, long value) throws SimulationException;
     }
 }

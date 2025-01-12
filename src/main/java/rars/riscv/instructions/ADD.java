@@ -27,8 +27,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
+import org.jetbrains.annotations.NotNull;
+
 public final class ADD extends Arithmetic {
-    public static final ADD INSTANCE = new ADD();
+    public static final @NotNull ADD INSTANCE = new ADD();
 
     private ADD() {
         super(

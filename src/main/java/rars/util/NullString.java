@@ -1,4 +1,4 @@
-package rars.riscv.syscalls;
+package rars.util;
 
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;

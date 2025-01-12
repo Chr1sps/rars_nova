@@ -3,8 +3,9 @@ package rars.riscv.syscalls;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
+import rars.util.NullString;
 import rars.util.SystemIO;
 
 /*
@@ -47,7 +48,7 @@ public final class SyscallOpen extends AbstractSyscall {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final int retValue = SystemIO.openFile(
             NullString.get(statement),
             Globals.REGISTER_FILE.getIntValue("a1")

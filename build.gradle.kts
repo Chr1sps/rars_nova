@@ -11,10 +11,12 @@ plugins {
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
+
 application {
     mainClass = "rars.Main"
 //    mainModule = "RARSNova"
 }
+
 repositories {
     mavenCentral()
 }
@@ -22,26 +24,26 @@ repositories {
 val graphDoclet: Configuration by configurations.creating
 
 dependencies {
-    implementation("com.formdev:flatlaf:3.4")
     compileOnly("org.jetbrains:annotations:24.0.0")
-    testCompileOnly("org.jetbrains:annotations:24.0.0")
+    implementation("com.formdev:flatlaf:3.4")
     implementation("org.apache.logging.log4j:log4j-core:2.23.1")
     implementation("org.apache.logging.log4j:log4j-api:2.23.1")
     implementation("com.fifesoft:rsyntaxtextarea:3.5.2")
     implementation("de.jflex:jflex:1.9.1")
     implementation("info.picocli:picocli:4.7.6")
+
+    testCompileOnly("org.jetbrains:annotations:24.0.0")
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
+
     graphDoclet("nl.talsmasoftware:umldoclet:2.2.0")
 }
-
 
 group = "io.github.chr1sps"
 version = "0.0.1"
 description = "RARS Nova"
-
 
 tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
     archiveClassifier.set("all")
@@ -138,7 +140,7 @@ fun String.findYYReset(): IntRange? =
 // endregion Utils
 
 // region Paths
-val buildPath = layout.buildDirectory.asFile.get().absolutePath
+val buildPath: String = layout.buildDirectory.asFile.get().absolutePath
 
 val lexerClassName = "RVLexer"
 val lexerFlexDir = "src/main/resources"
@@ -244,7 +246,9 @@ val createLexer = tasks.register("createLexer") {
 tasks.named("compileJava") {
     dependsOn(createLexer)
 }
+
 // endregion JFlex
+
 abstract class CacheFileTask : DefaultTask() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)

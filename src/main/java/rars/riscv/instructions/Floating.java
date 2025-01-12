@@ -10,7 +10,6 @@ import rars.jsoftfloat.RoundingMode;
 import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -60,21 +59,22 @@ public abstract class Floating extends BasicInstruction {
         );
     }
 
-    public static void setfflags(final @NotNull Environment e) {
+    public static void setfflags(final @NotNull Environment e) throws SimulationException {
         final int fflags = (e.inexact ? 1 : 0) +
             (e.underflow ? 2 : 0) +
             (e.overflow ? 4 : 0) +
             (e.divByZero ? 8 : 0) +
             (e.invalid ? 16 : 0);
         if (fflags != 0) {
-            ControlAndStatusRegisterFile.orRegister("fflags", fflags);
+            Globals.CS_REGISTER_FILE.updateRegisterByName(
+                "fflags", Globals.CS_REGISTER_FILE.getLongValue("fflags") | (long) fflags);
         }
     }
 
-    public static @NotNull RoundingMode getRoundingMode(final int RM, final ProgramStatement statement) throws
+    public static @NotNull RoundingMode getRoundingMode(final int RM, final @NotNull ProgramStatement statement) throws
         SimulationException {
         int rm = RM;
-        final int frm = ControlAndStatusRegisterFile.getValue("frm");
+        final int frm = Globals.CS_REGISTER_FILE.getIntValue("frm");
         if (rm == 7) {
             rm = frm;
         }
@@ -116,16 +116,5 @@ public abstract class Floating extends BasicInstruction {
         Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
     }
 
-    /**
-     * <p>compute.</p>
-     *
-     * @param f1
-     *     a {@link Float32} object
-     * @param f2
-     *     a {@link Float32} object
-     * @param e
-     *     a {@link Environment} object
-     * @return a {@link Float32} object
-     */
     public abstract Float32 compute(Float32 f1, Float32 f2, Environment e);
 }

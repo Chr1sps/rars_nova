@@ -38,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class FSQRTS extends BasicInstruction {
-    public static final FSQRTS INSTANCE = new FSQRTS();
+    public static final @NotNull FSQRTS INSTANCE = new FSQRTS();
 
     private FSQRTS() {
         super(

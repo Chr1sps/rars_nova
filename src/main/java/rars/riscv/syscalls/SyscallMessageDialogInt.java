@@ -5,6 +5,7 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
+import rars.util.NullString;
 
 import javax.swing.*;
 
@@ -36,13 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallMessageDialogInt class.</p>
- */
 public final class SyscallMessageDialogInt extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallMessageDialogInt.</p>
-     */
     public SyscallMessageDialogInt() {
         super(
             "MessageDialogInt", "Service to display a message followed by a int to user",
@@ -52,9 +47,6 @@ public final class SyscallMessageDialogInt extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         final String message = NullString.get(statement);

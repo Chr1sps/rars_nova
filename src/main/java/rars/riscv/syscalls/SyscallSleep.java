@@ -33,13 +33,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallSleep class.</p>
- */
 public class SyscallSleep extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallSleep.</p>
-     */
+
     public SyscallSleep() {
         super(
             "Sleep", "Set the current thread to sleep for a time (not precise)", "a0 = time to sleep in milliseconds",
@@ -47,9 +42,6 @@ public class SyscallSleep extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         try {

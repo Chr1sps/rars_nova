@@ -49,7 +49,11 @@ public final class FDIVS extends Floating {
      * {@inheritDoc}
      */
     @Override
-    public Float32 compute(final @NotNull Float32 f1, final Float32 f2, final Environment e) {
+    public @NotNull Float32 compute(
+        final @NotNull Float32 f1,
+        final @NotNull Float32 f2,
+        final @NotNull Environment e
+    ) {
         return Arithmetic.division(f1, f2, e);
     }
 }

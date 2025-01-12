@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
+import rars.util.NullString;
 
 import javax.swing.*;
 import java.nio.charset.StandardCharsets;
@@ -71,7 +73,7 @@ public final class SyscallInputDialogString extends AbstractSyscall {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final String message = NullString.get(statement);
 
         // Values returned by Java's InputDialog:

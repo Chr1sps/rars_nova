@@ -6,7 +6,7 @@ import rars.jsoftfloat.operations.Arithmetic;
 import rars.jsoftfloat.types.Float32;
 
 public final class FMADDS extends FusedFloat {
-    public static final FMADDS INSTANCE = new FMADDS();
+    public static final @NotNull FMADDS INSTANCE = new FMADDS();
 
     private FMADDS() {
         super("fmadd.s f1, f2, f3, f4", "Fused Multiply Add: Assigns f2*f3+f4 to f1", "00");

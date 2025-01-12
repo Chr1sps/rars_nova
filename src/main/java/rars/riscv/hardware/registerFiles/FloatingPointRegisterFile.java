@@ -1,8 +1,9 @@
-package rars.riscv.hardware;
+package rars.riscv.hardware.registerFiles;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
+import rars.exceptions.SimulationException;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.OtherSettings;
 
@@ -63,7 +64,7 @@ public final class FloatingPointRegisterFile extends RegisterFileBase {
     }
 
     @Override
-    public long updateRegister(@NotNull final Register register, final long newValue) {
+    public long updateRegister(@NotNull final Register register, final long newValue) throws SimulationException {
         final var previousValue = register.setValue(newValue);
         if ((OtherSettings.getBackSteppingEnabled())) {
             Globals.program.getBackStepper().addFloatingPointRestore(
@@ -74,14 +75,18 @@ public final class FloatingPointRegisterFile extends RegisterFileBase {
         return previousValue;
     }
 
-    public void updateRegisterByNumberInt(final int registerNumber, final int value) {
+    public void updateRegisterByNumberInt(final int registerNumber, final int value) throws SimulationException {
         final var longValue = value | 0xFFFFFFFF_00000000L; // NAN box if used as float
         this.updateRegisterByNumber(registerNumber, longValue);
     }
 
     public void updateRegisterInt(final @NotNull Register register, final int value) {
         final var longValue = value | 0xFFFFFFFF_00000000L; // NAN box if used as float
-        this.updateRegister(register, longValue);
+        try {
+            this.updateRegister(register, longValue);
+        } catch (SimulationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -92,7 +97,7 @@ public final class FloatingPointRegisterFile extends RegisterFileBase {
      * @param value
      *     The desired float value for the register.
      */
-    public void setRegisterToFloat(final int registerNumber, final float value) {
+    public void setRegisterToFloat(final int registerNumber, final float value) throws SimulationException {
         final int intValue = Float.floatToIntBits(value);
         this.updateRegisterByNumberInt(registerNumber, intValue);
     }

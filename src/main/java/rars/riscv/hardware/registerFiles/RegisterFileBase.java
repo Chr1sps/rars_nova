@@ -1,7 +1,8 @@
-package rars.riscv.hardware;
+package rars.riscv.hardware.registerFiles;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.exceptions.SimulationException;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.hardware.registers.Register;
 import rars.util.BinaryUtils;
@@ -10,8 +11,8 @@ import java.util.function.Consumer;
 
 public abstract class RegisterFileBase {
 
-    protected final char registerNumberPrefix;
     protected final @NotNull Register @NotNull [] registers;
+    private final char registerNumberPrefix;
 
     protected RegisterFileBase(
         final char registerNumberPrefix,
@@ -21,7 +22,8 @@ public abstract class RegisterFileBase {
         this.registers = registers;
     }
 
-    public final @Nullable Long updateRegisterByName(final @NotNull String registerName, final long newValue) {
+    public final @Nullable Long updateRegisterByName(final @NotNull String registerName, final long newValue) throws
+        SimulationException {
         final var register = this.getRegisterByName(registerName);
         if (register == null) {
             return null;
@@ -71,7 +73,8 @@ public abstract class RegisterFileBase {
         return this.getLongValue(register);
     }
 
-    public final @Nullable Long updateRegisterByNumber(final int registerNumber, final long newValue) {
+    public final @Nullable Long updateRegisterByNumber(final int registerNumber, final long newValue) throws
+        SimulationException {
         final var register = this.getRegisterByNumber(registerNumber);
         if (register == null) {
             return null;
@@ -79,7 +82,8 @@ public abstract class RegisterFileBase {
         return this.updateRegister(register, newValue);
     }
 
-    public abstract long updateRegister(final @NotNull Register register, final long newValue);
+    public abstract long updateRegister(final @NotNull Register register, final long newValue) throws
+        SimulationException;
 
     public final @NotNull Register @NotNull [] getRegisters() {
         return this.registers;

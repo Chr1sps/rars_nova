@@ -27,15 +27,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>DIV class.</p>
- */
-public final class DIV extends Arithmetic {
-    public static final DIV INSTANCE = new DIV();
+import org.jetbrains.annotations.NotNull;
 
-    /**
-     * <p>Constructor for DIV.</p>
-     */
+public final class DIV extends Arithmetic {
+    public static final @NotNull DIV INSTANCE = new DIV();
+
     private DIV() {
         super(
             "div t1,t2,t3", "Division: set t1 to the result of t2/t3",
@@ -43,9 +39,6 @@ public final class DIV extends Arithmetic {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long value2) {
         // Signal illegal division with -1

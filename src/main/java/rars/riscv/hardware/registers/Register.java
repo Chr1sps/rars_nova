@@ -124,7 +124,7 @@ public class Register {
      *     Value to set the Register to.
      * @return previous second of register
      */
-    public synchronized long setValueBackdoor(final long val) {
+    public synchronized long setValueNoNotify(final long val) {
         final long old = this.value;
         this.value = val;
         return old;

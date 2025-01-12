@@ -6,10 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.SymbolTable;
 import rars.riscv.SyscallNumberOverride;
-import rars.riscv.hardware.FloatingPointRegisterFile;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
-import rars.riscv.hardware.RegisterFile;
+import rars.riscv.hardware.registerFiles.CSRegisterFile;
+import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile;
+import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.settings.*;
 import rars.util.PropertiesFile;
 import rars.venus.VenusUI;
@@ -83,6 +84,8 @@ public final class Globals {
     public static final @NotNull SymbolTable GLOBAL_SYMBOL_TABLE;
     ///  Register file for the RARS simulator.
     public static final @NotNull RegisterFile REGISTER_FILE;
+    /// Control and status register file for the RARS simulator.
+    public static final @NotNull CSRegisterFile CS_REGISTER_FILE;
     private static final @NotNull Logger LOGGER = LogManager.getLogger(Globals.class);
     private static final String syscallPropertiesFile = "Syscall";
     ///  Floating point register file for the RARS simulator.
@@ -119,6 +122,7 @@ public final class Globals {
         GLOBAL_SYMBOL_TABLE = new SymbolTable();
         REGISTER_FILE = new RegisterFile(GLOBAL_SYMBOL_TABLE, initialMemoryConfiguration);
         FP_REGISTER_FILE = new FloatingPointRegisterFile();
+        CS_REGISTER_FILE = new CSRegisterFile();
     }
 
     private Globals() {

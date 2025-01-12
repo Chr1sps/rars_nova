@@ -1,7 +1,6 @@
 package rars.venus.run;
 
 import rars.Globals;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
@@ -46,22 +45,6 @@ public class RunBackstepAction extends GuiAction {
 
     private final VenusUI mainUI;
 
-    /**
-     * <p>Constructor for RunBackstepAction.</p>
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     * @param icon
-     *     a {@link javax.swing.Icon} object
-     * @param descrip
-     *     a {@link java.lang.String} object
-     * @param mnemonic
-     *     a {@link java.lang.Integer} object
-     * @param accel
-     *     a {@link javax.swing.KeyStroke} object
-     * @param gui
-     *     a {@link VenusUI} object
-     */
     public RunBackstepAction(
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
@@ -92,7 +75,7 @@ public class RunBackstepAction extends GuiAction {
         if (OtherSettings.getBackSteppingEnabled()) {
             Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment.processMemoryAccessNotice);
             Globals.REGISTER_FILE.addRegistersListener(executePane.registerValues.processRegisterNotice);
-            ControlAndStatusRegisterFile.addRegistersObserver(executePane.csrValues.processRegisterNotice);
+            Globals.CS_REGISTER_FILE.addRegistersListener(executePane.csrValues.processRegisterNotice);
             Globals.FP_REGISTER_FILE.addRegistersListener(executePane.fpRegValues.processRegisterNotice);
             Globals.program.getBackStepper().backStep();
             Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment.processMemoryAccessNotice);

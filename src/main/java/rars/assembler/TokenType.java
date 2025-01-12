@@ -3,7 +3,6 @@ package rars.assembler;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.InstructionsRegistry;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.util.BinaryUtils;
 
 /*
@@ -150,7 +149,7 @@ public enum TokenType {
             return TokenType.FP_REGISTER_NAME;
         }
 
-        if (ControlAndStatusRegisterFile.getRegister(value) != null) {
+        if (Globals.CS_REGISTER_FILE.getRegisterByName(value) != null) {
             return TokenType.CSR_NAME;
         }
         // See if it is an immediate (constant) integer value

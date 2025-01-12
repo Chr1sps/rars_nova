@@ -3,6 +3,7 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
@@ -34,7 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class FSGNJS extends BasicInstruction {
-    public static final FSGNJS INSTANCE = new FSGNJS();
+    public static final @NotNull FSGNJS INSTANCE = new FSGNJS();
 
     private FSGNJS() {
         super(
@@ -45,7 +46,7 @@ public final class FSGNJS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final int result = (Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1)) & 0x7FFFFFFF)
             | (Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(2)) & 0x80000000);
         Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result);

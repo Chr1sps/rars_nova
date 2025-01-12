@@ -3,11 +3,12 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
 public final class SLLIW extends BasicInstruction {
-    public static final SLLIW INSTANCE = new SLLIW();
+    public static final @NotNull SLLIW INSTANCE = new SLLIW();
 
     private SLLIW() {
         super(
@@ -19,9 +20,9 @@ public final class SLLIW extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         // Copy from SLLI
-        final long newValue = (long) (int) Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)) << statement.getOperand(
+        final long newValue = Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)) << statement.getOperand(
             2);
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }

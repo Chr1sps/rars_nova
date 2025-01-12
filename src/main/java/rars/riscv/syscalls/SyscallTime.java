@@ -3,6 +3,7 @@ package rars.riscv.syscalls;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 import rars.util.BinaryUtils;
 
@@ -34,13 +35,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallTime class.</p>
- */
 public class SyscallTime extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallTime.</p>
-     */
+
     public SyscallTime() {
         super(
             "Time", "Get the current time (milliseconds since 1 January 1970)", "N/A",
@@ -48,11 +44,8 @@ public class SyscallTime extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final long value = new java.util.Date().getTime();
         Globals.REGISTER_FILE.updateRegisterByName("a0", BinaryUtils.lowOrderLongToInt(value));
         Globals.REGISTER_FILE.updateRegisterByName("a1", BinaryUtils.highOrderLongToInt(value));

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
+import rars.util.NullString;
 import rars.util.SystemIO;
 
 /*
@@ -34,13 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallPrintString class.</p>
- */
 public class SyscallPrintString extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallPrintString.</p>
-     */
     public SyscallPrintString() {
         super(
             "PrintString", "Prints a null-terminated string to the console",
@@ -48,9 +43,6 @@ public class SyscallPrintString extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
         SystemIO.printString(NullString.get(statement));

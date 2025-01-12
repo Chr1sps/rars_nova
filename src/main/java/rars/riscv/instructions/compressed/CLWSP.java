@@ -6,7 +6,7 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
-import rars.riscv.hardware.RegisterFile;
+import rars.riscv.hardware.registerFiles.RegisterFile;
 
 /**
  * From RISC-V spec:

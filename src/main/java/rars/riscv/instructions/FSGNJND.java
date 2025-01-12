@@ -3,11 +3,12 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
 public final class FSGNJND extends BasicInstruction {
-    public static final FSGNJND INSTANCE = new FSGNJND();
+    public static final @NotNull FSGNJND INSTANCE = new FSGNJND();
 
     private FSGNJND() {
         super(
@@ -20,7 +21,7 @@ public final class FSGNJND extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final long result = (Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1)) & 0x7FFFFFFF_FFFFFFFFL) |
             ((~Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(2))) & 0x80000000_00000000L);
         Globals.FP_REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), result);

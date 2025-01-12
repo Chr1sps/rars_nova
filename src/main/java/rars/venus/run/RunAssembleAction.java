@@ -6,7 +6,6 @@ import rars.ErrorMessage;
 import rars.Globals;
 import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
@@ -177,7 +176,7 @@ public class RunAssembleAction extends GuiAction {
 
                 Globals.REGISTER_FILE.resetRegisters();
                 Globals.FP_REGISTER_FILE.resetRegisters();
-                ControlAndStatusRegisterFile.resetRegisters();
+                Globals.CS_REGISTER_FILE.resetRegisters();
                 InterruptController.reset();
 
                 executePane.textSegment.setupTable();

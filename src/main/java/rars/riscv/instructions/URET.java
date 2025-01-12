@@ -3,9 +3,11 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
+
+import static rars.Globals.CS_REGISTER_FILE;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -34,15 +36,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>URET class.</p>
- */
 public final class URET extends BasicInstruction {
     public static final URET INSTANCE = new URET();
 
-    /**
-     * <p>Constructor for URET.</p>
-     */
     private URET() {
         super(
             "uret", "Return from handling an interrupt or exception (to uepc)",
@@ -50,18 +46,21 @@ public final class URET extends BasicInstruction {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
-        final boolean upie = (ControlAndStatusRegisterFile.getValue("ustatus") & 0x10) == 0x10;
-        ControlAndStatusRegisterFile.clearRegister("ustatus", 0x10); // Clear UPIE
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+        final boolean upie = (CS_REGISTER_FILE.getIntValue("ustatus") & 0x10) == 0x10;
+        CS_REGISTER_FILE.updateRegisterByName(
+            "ustatus",
+            CS_REGISTER_FILE.getLongValue("ustatus") & ~0x10L
+        ); // Clear UPIE
         if (upie) { // Set UIE to UPIE
-            ControlAndStatusRegisterFile.orRegister("ustatus", 0x1);
+            CS_REGISTER_FILE.updateRegisterByName("ustatus", CS_REGISTER_FILE.getLongValue("ustatus") | 0x1L);
         } else {
-            ControlAndStatusRegisterFile.clearRegister("ustatus", 0x1);
+            CS_REGISTER_FILE.updateRegisterByName(
+                "ustatus",
+                CS_REGISTER_FILE.getLongValue("ustatus") & ~0x1L
+            ); // Clear UIE
         }
-        Globals.REGISTER_FILE.setProgramCounter(ControlAndStatusRegisterFile.getValue("uepc"));
+        Globals.REGISTER_FILE.setProgramCounter(CS_REGISTER_FILE.getIntValue("uepc"));
     }
 }

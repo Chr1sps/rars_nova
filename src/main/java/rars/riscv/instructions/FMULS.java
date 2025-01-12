@@ -22,7 +22,11 @@ public final class FMULS extends Floating {
      * {@inheritDoc}
      */
     @Override
-    public Float32 compute(@NotNull final Float32 f1, final Float32 f2, final Environment e) {
+    public @NotNull Float32 compute(
+        @NotNull final Float32 f1,
+        final @NotNull Float32 f2,
+        final @NotNull Environment e
+    ) {
         return Arithmetic.multiplication(f1, f2, e);
     }
 }

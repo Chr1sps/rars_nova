@@ -3,6 +3,7 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
@@ -34,7 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class AUIPC extends BasicInstruction {
-    public static final AUIPC INSTANCE = new AUIPC();
+    public static final @NotNull AUIPC INSTANCE = new AUIPC();
 
     private AUIPC() {
         super(
@@ -44,7 +45,7 @@ public final class AUIPC extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final var shiftedValue = statement.getOperand(1) << 12;
         final var convertedValue = Integer.valueOf(shiftedValue).longValue();
         final long newValue = Globals.REGISTER_FILE.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + convertedValue;

@@ -5,6 +5,7 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 
 import javax.swing.*;
@@ -55,7 +56,7 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
      * System call to input data.
      */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         // Input arguments: $a0 = address of null-terminated string that is the message
         // to user
         // Outputs:
@@ -115,6 +116,8 @@ public final class SyscallInputDialogDouble extends AbstractSyscall {
         {
             // set $a1 to -1 flag
             Globals.REGISTER_FILE.updateRegisterByName("a1", -1);
+        } catch (rars.exceptions.SimulationException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 import rars.util.SystemIO;
 
@@ -35,22 +36,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallReadFloat class.</p>
- */
 public class SyscallReadFloat extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallReadFloat.</p>
-     */
+
     public SyscallReadFloat() {
         super("ReadFloat", "Reads a float from input console", "N/A", "fa0 = the float");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final float floatValue;
         try {
             floatValue = SystemIO.readFloat(this.getNumber());

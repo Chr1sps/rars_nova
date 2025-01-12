@@ -3,6 +3,7 @@ package rars.riscv.syscalls;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 
 import java.util.Random;
@@ -35,22 +36,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallRandInt class.</p>
- */
 public class SyscallRandInt extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallRandInt.</p>
-     */
+
     public SyscallRandInt() {
         super("RandInt", "Get a random integer", "a0 = index of pseudorandom number generator", "a0 = random integer");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final Random stream = RandomStreams.get("a0");
         Globals.REGISTER_FILE.updateRegisterByName("a0", stream.nextInt());
     }

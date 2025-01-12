@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -155,10 +154,10 @@ public class BackStepper {
                             Globals.FP_REGISTER_FILE.updateRegisterByNumber(step.param1, step.param2);
                             break;
                         case CONTROL_AND_STATUS_REGISTER_RESTORE:
-                            ControlAndStatusRegisterFile.updateRegister(step.param1, step.param2);
+                            Globals.CS_REGISTER_FILE.updateRegisterByNumber(step.param1, step.param2);
                             break;
                         case CONTROL_AND_STATUS_REGISTER_BACKDOOR:
-                            ControlAndStatusRegisterFile.updateRegisterBackdoor(step.param1, step.param2);
+                            Globals.CS_REGISTER_FILE.updateRegisterBackdoorByNumber(step.param1, step.param2);
                             break;
                         case PC_RESTORE:
                             Globals.REGISTER_FILE.setProgramCounter(step.param1);

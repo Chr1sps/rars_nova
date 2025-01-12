@@ -3,6 +3,7 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.InstructionsRegistry;
@@ -63,7 +64,7 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final var upperImmediate = (statement.getOperand(2) << 20) >> 20;
         final long newValue = (InstructionsRegistry.RV64_MODE_FLAG)
             ? compute(
@@ -76,26 +77,8 @@ public abstract class ImmediateInstruction extends BasicInstruction {
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 
-    /**
-     * <p>compute.</p>
-     *
-     * @param value
-     *     the second from the register
-     * @param immediate
-     *     the second from the immediate
-     * @return the result to be stored from the instruction
-     */
     protected abstract long compute(long value, long immediate);
 
-    /**
-     * <p>computeW.</p>
-     *
-     * @param value
-     *     the truncated second from the register
-     * @param immediate
-     *     the second from the immediate
-     * @return the result to be stored from the instruction
-     */
     protected int computeW(final int value, final int immediate) {
         return ConversionUtils.longLowerHalfToInt(compute(value, immediate));
     }

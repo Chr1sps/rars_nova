@@ -3,8 +3,9 @@ package rars.riscv.syscalls;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
+import rars.util.NullString;
 
 import javax.swing.*;
 
@@ -36,13 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallConfirmDialog class.</p>
- */
 public final class SyscallConfirmDialog extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallConfirmDialog.</p>
-     */
     public SyscallConfirmDialog() {
         super(
             "ConfirmDialog", "Service to display a message to user",
@@ -51,11 +46,8 @@ public final class SyscallConfirmDialog extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final String message = NullString.get(statement);
         int result = JOptionPane.showConfirmDialog(null, message);
         if (result == JOptionPane.CLOSED_OPTION) {

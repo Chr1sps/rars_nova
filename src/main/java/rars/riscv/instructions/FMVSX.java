@@ -3,6 +3,7 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
@@ -34,7 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class FMVSX extends BasicInstruction {
-    public static final FMVSX INSTANCE = new FMVSX();
+    public static final @NotNull FMVSX INSTANCE = new FMVSX();
 
     private FMVSX() {
         super(
@@ -44,7 +45,7 @@ public final class FMVSX extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
 
         Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(
             statement.getOperand(0),

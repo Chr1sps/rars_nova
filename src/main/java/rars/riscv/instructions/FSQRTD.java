@@ -11,7 +11,7 @@ import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
 public final class FSQRTD extends BasicInstruction {
-    public static final FSQRTD INSTANCE = new FSQRTD();
+    public static final @NotNull FSQRTD INSTANCE = new FSQRTD();
 
     private FSQRTD() {
         super(

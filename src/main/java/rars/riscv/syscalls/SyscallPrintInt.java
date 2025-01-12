@@ -34,20 +34,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallPrintInt class.</p>
- */
 public final class SyscallPrintInt extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallPrintInt.</p>
-     */
     public SyscallPrintInt() {
         super("PrintInt", "Prints an integer", "a0 = integer to print", "N/A");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         SystemIO.printString(Integer.toString(Globals.REGISTER_FILE.getIntValue("a0")));

@@ -73,7 +73,7 @@ public final class Utils {
      * instructions: jal and jalr
      * The parameter is register number to receive the return address.
      */
-    public static void processReturnAddress(final int register) {
+    public static void processReturnAddress(final int register) throws SimulationException {
         Globals.REGISTER_FILE.updateRegisterByNumber(register, Globals.REGISTER_FILE.getProgramCounter());
     }
 

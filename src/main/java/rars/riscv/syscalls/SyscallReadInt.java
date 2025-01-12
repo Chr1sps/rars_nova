@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 import rars.util.SystemIO;
 
@@ -35,22 +36,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallReadInt class.</p>
- */
 public class SyscallReadInt extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallReadInt.</p>
-     */
     public SyscallReadInt() {
         super("ReadInt", "Reads an int from input console", "N/A", "a0 = the int");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         try {
             Globals.REGISTER_FILE.updateRegisterByName("a0", SystemIO.readInteger(this.getNumber()));
         } catch (final NumberFormatException e) {

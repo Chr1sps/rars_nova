@@ -9,7 +9,7 @@ import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
 public final class FSD extends BasicInstruction {
-    public static final FSD INSTANCE = new FSD();
+    public static final @NotNull FSD INSTANCE = new FSD();
 
     private FSD() {
         super(

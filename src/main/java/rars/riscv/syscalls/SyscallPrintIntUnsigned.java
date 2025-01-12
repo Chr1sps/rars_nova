@@ -35,20 +35,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallPrintIntUnsigned class.</p>
- */
 public class SyscallPrintIntUnsigned extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallPrintIntUnsigned.</p>
-     */
     public SyscallPrintIntUnsigned() {
         super("PrintIntUnsigned", "Prints an integer (unsigned)", "a0 = integer to print", "N/A");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         SystemIO.printString(

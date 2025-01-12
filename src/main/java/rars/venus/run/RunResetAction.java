@@ -2,7 +2,6 @@ package rars.venus.run;
 
 import rars.Globals;
 import rars.exceptions.AssemblyException;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
 import rars.util.SystemIO;
 import rars.venus.ExecutePane;
@@ -89,7 +88,7 @@ public final class RunResetAction extends GuiAction {
 
         Globals.REGISTER_FILE.resetRegisters();
         Globals.FP_REGISTER_FILE.resetRegisters();
-        ControlAndStatusRegisterFile.resetRegisters();
+        Globals.CS_REGISTER_FILE.resetRegisters();
         InterruptController.reset();
 
         executePane.registerValues.clearHighlighting();

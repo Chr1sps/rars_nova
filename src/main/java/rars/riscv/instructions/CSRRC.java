@@ -7,7 +7,6 @@ import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -37,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class CSRRC extends BasicInstruction {
-    public static final CSRRC INSTANCE = new CSRRC();
+    public static final @NotNull CSRRC INSTANCE = new CSRRC();
 
     private CSRRC() {
         super(
@@ -49,25 +48,21 @@ public final class CSRRC extends BasicInstruction {
 
     @Override
     public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        try {
-            final long csr = ControlAndStatusRegisterFile.getValueLong(statement.getOperand(1));
-            if (statement.getOperand(2) != 0) {
-                if (ControlAndStatusRegisterFile.clearRegister(
-                    statement.getOperand(1),
-                    Globals.REGISTER_FILE.getLongValue(statement.getOperand(2))
-                )) {
-                    throw new SimulationException(
-                        statement, "Attempt to write to read-only CSR",
-                        ExceptionReason.ILLEGAL_INSTRUCTION
-                    );
-                }
-            }
-            Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), csr);
-        } catch (final NullPointerException e) {
+        final var csr = Globals.CS_REGISTER_FILE.getLongValue(statement.getOperand(1));
+        if (csr == null) {
             throw new SimulationException(
-                statement, "Attempt to access unavailable CSR",
+                statement,
+                "Attempt to access unavailable CSR",
                 ExceptionReason.ILLEGAL_INSTRUCTION
             );
         }
+        if (statement.getOperand(2) != 0) {
+            final var previousValue = Globals.CS_REGISTER_FILE.getLongValue(statement.getOperand(1));
+            Globals.CS_REGISTER_FILE.updateRegisterByNumber(
+                statement.getOperand(1),
+                previousValue & ~Globals.REGISTER_FILE.getLongValue(statement.getOperand(2))
+            );
+        }
+        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), csr);
     }
 }

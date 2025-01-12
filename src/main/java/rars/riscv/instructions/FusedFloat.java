@@ -37,16 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public abstract class FusedFloat extends BasicInstruction {
-    /**
-     * <p>Constructor for FusedFloat.</p>
-     *
-     * @param usage
-     *     a {@link java.lang.String} object
-     * @param description
-     *     a {@link java.lang.String} object
-     * @param op
-     *     a {@link java.lang.String} object
-     */
     protected FusedFloat(final String usage, final String description, final String op) {
         super(
             usage + ", dyn", description, BasicInstructionFormat.R4_FORMAT,
@@ -68,19 +58,6 @@ public abstract class FusedFloat extends BasicInstruction {
         Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
     }
 
-    /**
-     * <p>compute.</p>
-     *
-     * @param r1
-     *     The first register
-     * @param r2
-     *     The second register
-     * @param r3
-     *     The third register
-     * @param e
-     *     a {@link Environment} object
-     * @return The second to store to the destination
-     */
     protected abstract @NotNull Float32 compute(
         @NotNull Float32 r1, @NotNull Float32 r2, @NotNull Float32 r3,
         @NotNull Environment e

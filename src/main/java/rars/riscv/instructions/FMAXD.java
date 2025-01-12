@@ -6,7 +6,7 @@ import rars.jsoftfloat.operations.Comparisons;
 import rars.jsoftfloat.types.Float64;
 
 public final class FMAXD extends Double {
-    public static final FMAXD INSTANCE = new FMAXD();
+    public static final @NotNull FMAXD INSTANCE = new FMAXD();
 
     private FMAXD() {
         super("fmax.d", "Floating MAXimum (64 bit): assigns f1 to the larger of f1 and f3", "0010101", "001");

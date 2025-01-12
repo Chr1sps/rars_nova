@@ -5,6 +5,7 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 import rars.util.SystemIO;
 
@@ -46,7 +47,7 @@ public class SyscallRead extends AbstractSyscall {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         int byteAddress = Globals.REGISTER_FILE.getIntValue("a1"); // destination of characters read from file
         final int length = Globals.REGISTER_FILE.getIntValue("a2");
         final byte[] myBuffer = new byte[length]; // specified length

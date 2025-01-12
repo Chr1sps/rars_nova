@@ -5,6 +5,7 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
 import rars.riscv.AbstractSyscall;
+import rars.util.NullString;
 
 import javax.swing.*;
 

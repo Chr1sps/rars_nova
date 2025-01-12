@@ -7,7 +7,7 @@ import rars.assembler.SymbolTable;
 import rars.assembler.TokenList;
 import rars.assembler.TokenType;
 import rars.riscv.*;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
+import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
 import rars.venus.NumberDisplayBaseChooser;
@@ -360,15 +360,14 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             final var tokenType = token.getType();
             final var tokenValue = token.getText();
             final String basicStatementElement;
-            final int registerNumber;
+            final @Nullable Register register;
             switch (tokenType) {
                 case REGISTER_NUMBER -> {
                     basicStatementElement = tokenValue;
                     basicInstructionBuilder.append(basicStatementElement);
+                    register = Globals.REGISTER_FILE.getRegisterByName(tokenValue);
                     this.basicStatementList.addString(basicStatementElement);
-                    try {
-                        registerNumber = Globals.REGISTER_FILE.getRegisterByName(tokenValue).number;
-                    } catch (final Exception e) {
+                    if (register == null) {
                         // should never happen; should be caught before now...
                         errors.addTokenError(
                             token,
@@ -376,14 +375,11 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         );
                         return;
                     }
-                    this.operands.add(registerNumber);
+                    this.operands.add(register.number);
                 }
                 case REGISTER_NAME -> {
-                    registerNumber = Globals.REGISTER_FILE.getRegisterByName(tokenValue).number;
-                    basicStatementElement = "x" + registerNumber;
-                    basicInstructionBuilder.append(basicStatementElement);
-                    this.basicStatementList.addString(basicStatementElement);
-                    if (registerNumber < 0) {
+                    register = Globals.REGISTER_FILE.getRegisterByName(tokenValue);
+                    if (register == null) {
                         // should never happen; should be caught before now...
                         errors.addTokenError(
                             token,
@@ -391,11 +387,14 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         );
                         return;
                     }
-                    this.operands.add(registerNumber);
+                    basicStatementElement = "x" + register.number;
+                    basicInstructionBuilder.append(basicStatementElement);
+                    this.basicStatementList.addString(basicStatementElement);
+                    this.operands.add(register.number);
                 }
                 case CSR_NAME -> {
-                    registerNumber = ControlAndStatusRegisterFile.getRegister(tokenValue).number;
-                    if (registerNumber < 0) {
+                    register = Globals.CS_REGISTER_FILE.getRegisterByName(tokenValue);
+                    if (register == null) {
                         // should never happen; should be caught before now...
                         errors.addTokenError(
                             token,
@@ -403,16 +402,13 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         );
                         return;
                     }
-                    basicInstructionBuilder.append(registerNumber);
-                    this.basicStatementList.addString("" + registerNumber);
-                    this.operands.add(registerNumber);
+                    basicInstructionBuilder.append(register.number);
+                    this.basicStatementList.addString("" + register.number);
+                    this.operands.add(register.number);
                 }
                 case FP_REGISTER_NAME -> {
-                    registerNumber = Globals.FP_REGISTER_FILE.getRegisterByName(tokenValue).number;
-                    basicStatementElement = "f" + registerNumber;
-                    basicInstructionBuilder.append(basicStatementElement);
-                    this.basicStatementList.addString(basicStatementElement);
-                    if (registerNumber < 0) {
+                    register = Globals.FP_REGISTER_FILE.getRegisterByName(tokenValue);
+                    if (register == null) {
                         // should never happen; should be caught before now...
                         errors.addTokenError(
                             token,
@@ -420,7 +416,10 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         );
                         return;
                     }
-                    this.operands.add(registerNumber);
+                    basicStatementElement = "f" + register.number;
+                    basicInstructionBuilder.append(basicStatementElement);
+                    this.basicStatementList.addString(basicStatementElement);
+                    this.operands.add(register.number);
                 }
                 case ROUNDING_MODE -> {
                     final int rounding_mode = switch (tokenValue) {

@@ -3,6 +3,7 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 
@@ -34,7 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class LUI extends BasicInstruction {
-    public static final LUI INSTANCE = new LUI();
+    public static final @NotNull LUI INSTANCE = new LUI();
 
     private LUI() {
         super(
@@ -46,7 +47,7 @@ public final class LUI extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
 
         final var shiftedValue = Integer.valueOf(statement.getOperand(1) << 12).longValue();
 

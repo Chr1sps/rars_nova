@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 
 import java.util.Random;
@@ -36,13 +37,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallRandIntRange class.</p>
- */
 public class SyscallRandIntRange extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallRandIntRange.</p>
-     */
+
     public SyscallRandIntRange() {
         super(
             "RandIntRange", "Get a random bounded integer",
@@ -51,11 +47,8 @@ public class SyscallRandIntRange extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final Random stream = RandomStreams.get("a0");
         try {
             Globals.REGISTER_FILE.updateRegisterByName("a0", stream.nextInt(Globals.REGISTER_FILE.getIntValue("a1")));

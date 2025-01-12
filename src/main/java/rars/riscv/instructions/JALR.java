@@ -3,6 +3,7 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.util.Utils;
@@ -35,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 public final class JALR extends BasicInstruction {
-    public static final JALR INSTANCE = new JALR();
+    public static final @NotNull JALR INSTANCE = new JALR();
 
     private JALR() {
         super(
@@ -48,7 +49,7 @@ public final class JALR extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final int target = Globals.REGISTER_FILE.getIntValue(statement.getOperand(1));
         Utils.processReturnAddress(statement.getOperand(0));
         // Set PC = $t2 + immediate with the last bit set to 0

@@ -30,8 +30,8 @@ import org.apache.logging.log4j.Logger;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.MemoryAccessNotice;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
+import rars.riscv.hardware.registerFiles.CSRegisterFile;
 
 import javax.swing.*;
 import java.awt.*;
@@ -304,8 +304,8 @@ public class TimerTool extends AbstractTool {
 
         // Checks the control bits to see if user-level timer inturrupts are enabled
         private static boolean bitsEnabled() {
-            final boolean utip = (ControlAndStatusRegisterFile.getValue("uie") & 0x10) == 0x10;
-            final boolean uie = (ControlAndStatusRegisterFile.getValue("ustatus") & 0x1) == 0x1;
+            final boolean utip = (Globals.CS_REGISTER_FILE.getIntValue("uie") & 0x10) == 0x10;
+            final boolean uie = (Globals.CS_REGISTER_FILE.getIntValue("ustatus") & 0x1) == 0x1;
 
             return (utip && uie);
         }
@@ -333,7 +333,7 @@ public class TimerTool extends AbstractTool {
                     // Note: if either the UTIP bit in the uie CSR or the UIE bit in the ustatus CSR
                     // are zero then this interrupt will be stopped further on in the pipeline
                     if (TimerTool.time >= TimerTool.timeCmp.value && TimerTool.timeCmp.postInterrupt && Tick.bitsEnabled()) {
-                        InterruptController.registerTimerInterrupt(ControlAndStatusRegisterFile.TIMER_INTERRUPT);
+                        InterruptController.registerTimerInterrupt(CSRegisterFile.TIMER_INTERRUPT);
                         TimerTool.timeCmp.postInterrupt = false; // Wait for timecmp to be writen to again
                     }
                     TimerTool.this.timePanel.updateTime();

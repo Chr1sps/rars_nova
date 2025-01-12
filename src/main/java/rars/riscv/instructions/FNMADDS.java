@@ -7,7 +7,7 @@ import rars.jsoftfloat.types.Float32;
 import rars.util.Utils;
 
 public final class FNMADDS extends FusedFloat {
-    public static final FNMADDS INSTANCE = new FNMADDS();
+    public static final @NotNull FNMADDS INSTANCE = new FNMADDS();
 
     private FNMADDS() {
         super("fnmadd.s f1, f2, f3, f4", "Fused Negate Multiply Add: Assigns -(f2*f3+f4) to f1", "11");

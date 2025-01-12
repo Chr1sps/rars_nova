@@ -7,7 +7,7 @@ import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 import rars.riscv.SimulationCallback;
-import rars.riscv.hardware.RegisterFile;
+import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.util.BinaryUtils;
 
 public final class CompressedStackBasedLoad extends CompressedInstruction {

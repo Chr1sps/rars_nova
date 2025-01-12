@@ -3,8 +3,9 @@ package rars.riscv.syscalls;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
+import rars.util.NullString;
 
 import javax.swing.*;
 
@@ -55,7 +56,7 @@ public final class SyscallInputDialogFloat extends AbstractSyscall {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final String message = NullString.get(statement);
 
         // Values returned by Java's InputDialog:
@@ -91,8 +92,7 @@ public final class SyscallInputDialogFloat extends AbstractSyscall {
 
             }
 
-        } catch (final
-        NumberFormatException e) // Unsuccessful parse of input data
+        } catch (final NumberFormatException e) // Unsuccessful parse of input data
         {
             Globals.REGISTER_FILE.updateRegisterByName("a1", -1);
         }

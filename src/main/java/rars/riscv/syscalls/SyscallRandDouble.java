@@ -57,9 +57,13 @@ public class SyscallRandDouble extends AbstractSyscall {
             stream = new Random(); // create a non-seeded stream
             RandomStreams.randomStreams.put(index, stream);
         }
-        Globals.FP_REGISTER_FILE.updateRegister(
-            Globals.FP_REGISTER_FILE.fa0,
-            Double.doubleToRawLongBits(stream.nextDouble())
-        );
+        try {
+            Globals.FP_REGISTER_FILE.updateRegister(
+                Globals.FP_REGISTER_FILE.fa0,
+                Double.doubleToRawLongBits(stream.nextDouble())
+            );
+        } catch (rars.exceptions.SimulationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

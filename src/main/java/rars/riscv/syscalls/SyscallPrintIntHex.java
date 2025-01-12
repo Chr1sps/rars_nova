@@ -35,13 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallPrintIntHex class.</p>
- */
 public final class SyscallPrintIntHex extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallPrintIntHex.</p>
-     */
     public SyscallPrintIntHex() {
         super(
             "PrintIntHex", "Prints an integer (in hexdecimal format left-padded with zeroes)",
@@ -49,9 +43,6 @@ public final class SyscallPrintIntHex extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         SystemIO.printString(BinaryUtils.intToHexString(Globals.REGISTER_FILE.getIntValue("a0")));

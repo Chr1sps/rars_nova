@@ -27,15 +27,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>DIVU class.</p>
- */
-public final class DIVU extends Arithmetic {
-    public static final DIVU INSTANCE = new DIVU();
+import org.jetbrains.annotations.NotNull;
 
-    /**
-     * <p>Constructor for DIVU.</p>
-     */
+public final class DIVU extends Arithmetic {
+    public static final @NotNull DIVU INSTANCE = new DIVU();
+
     private DIVU() {
         super(
             "divu t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division",
@@ -43,9 +39,6 @@ public final class DIVU extends Arithmetic {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long compute(final long value, final long value2) {
         // Signal illegal division with -1
@@ -55,9 +48,6 @@ public final class DIVU extends Arithmetic {
         return Long.divideUnsigned(value, value2);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int computeW(final int value, final int value2) {
         return (int) this.compute(value & 0xFFFFFFFFL, value2 & 0xFFFFFFFFL);

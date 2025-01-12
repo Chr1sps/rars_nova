@@ -7,7 +7,6 @@ import rars.ProgramStatement;
 import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
-import rars.riscv.hardware.ControlAndStatusRegisterFile;
 import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.Memory;
 import rars.settings.BoolSetting;
@@ -167,7 +166,7 @@ public final class Program {
 
         Globals.REGISTER_FILE.resetRegisters();
         Globals.FP_REGISTER_FILE.resetRegisters();
-        ControlAndStatusRegisterFile.resetRegisters();
+        Globals.CS_REGISTER_FILE.resetRegisters();
         InterruptController.reset();
         Globals.REGISTER_FILE.initializeProgramCounter(this.startPC);
         Globals.exitCode = 0;

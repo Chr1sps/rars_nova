@@ -35,13 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallPrintIntBinary class.</p>
- */
 public final class SyscallPrintIntBinary extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallPrintIntBinary.</p>
-     */
     public SyscallPrintIntBinary() {
         super(
             "PrintIntBinary", "Prints an integer (in binary format left-padded with zeroes) ",
@@ -49,9 +43,6 @@ public final class SyscallPrintIntBinary extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         SystemIO.printString(BinaryUtils.intToBinaryString(Globals.REGISTER_FILE.getIntValue("a0")));

@@ -1,8 +1,10 @@
-package rars.riscv.hardware;
+package rars.riscv.hardware.registerFiles;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.assembler.SymbolTable;
+import rars.exceptions.SimulationException;
+import rars.riscv.hardware.MemoryConfiguration;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
 import rars.settings.OtherSettings;
@@ -91,7 +93,7 @@ public final class RegisterFile extends RegisterFileBase {
     }
 
     @Override
-    public long updateRegister(final @NotNull Register register, final long newValue) {
+    public long updateRegister(final @NotNull Register register, final long newValue) throws SimulationException {
         if (register == this.zero) {
             return 0;
         }
@@ -123,7 +125,11 @@ public final class RegisterFile extends RegisterFileBase {
     }
 
     public int setProgramCounter(final int value) {
-        return (int) this.updateRegister(this.pc, value);
+        try {
+            return (int) this.updateRegister(this.pc, value);
+        } catch (SimulationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void initializeProgramCounter(final boolean startAtMain) {

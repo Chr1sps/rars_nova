@@ -3,6 +3,7 @@ package rars.riscv.instructions;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.InstructionsRegistry;
@@ -53,7 +54,7 @@ public abstract class Arithmetic extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         if (InstructionsRegistry.RV64_MODE_FLAG) {
             final long newValue = compute(
                 Globals.REGISTER_FILE.getLongValue(statement.getOperand(1)),

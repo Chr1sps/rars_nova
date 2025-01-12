@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExitingException;
+import rars.exceptions.SimulationException;
 import rars.riscv.AbstractSyscall;
 import rars.util.SystemIO;
 
@@ -54,7 +55,7 @@ public class SyscallReadDouble extends AbstractSyscall {
      * Performs syscall function to read the bits of input double into $f0 and $f1.
      */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws ExitingException {
+    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
         final double doubleValue;
         try {
             doubleValue = SystemIO.readDouble(this.getNumber());

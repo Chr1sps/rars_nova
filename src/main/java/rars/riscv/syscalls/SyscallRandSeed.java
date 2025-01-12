@@ -35,13 +35,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SyscallRandSeed class.</p>
- */
 public class SyscallRandSeed extends AbstractSyscall {
-    /**
-     * <p>Constructor for SyscallRandSeed.</p>
-     */
+
     public SyscallRandSeed() {
         super(
             "RandSeed", "Set seed for the underlying Java pseudorandom number generator",
@@ -49,9 +44,6 @@ public class SyscallRandSeed extends AbstractSyscall {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void simulate(final @NotNull ProgramStatement statement) {
         final Integer index = Globals.REGISTER_FILE.getIntValue("a0");
