@@ -14,7 +14,7 @@ public final class CEBREAK extends CompressedInstruction {
             "Pause execution",
             CompressedInstructionFormat.CB,
             "100 1 00000 00000 10",
-            operands -> {
+            (statement, context) -> {
                 throw BreakpointException.INSTANCE;
             }
         );

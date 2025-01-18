@@ -14,7 +14,6 @@ import rars.riscv.InstructionsRegistry;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
 import rars.util.Pair;
-import rars.util.SystemIO;
 import rars.venus.NumberDisplayBaseChooser;
 
 import java.nio.charset.StandardCharsets;
@@ -434,9 +433,6 @@ public final class Assembler {
                 errors.addTokenError(token, "Invalid address for text segment: %d".formatted(e.address));
             }
         }
-        // Aug. 24, 2005 Ken Vollmar
-        // Ensure that I/O "file descriptors" are initialized for a new program run
-        SystemIO.resetFiles();
         // DPS 6 Dec 2006:
         // We will now sort the ArrayList of ProgramStatements by getAddress() value.
         // This is for display purposes, since they have already been stored to Memory.

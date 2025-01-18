@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -9,6 +8,7 @@ import rars.jsoftfloat.operations.Conversions;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class FCVTWUD extends BasicInstruction {
     public static final FCVTWUD INSTANCE = new FCVTWUD();
@@ -21,13 +21,14 @@ public final class FCVTWUD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
 
         final var environment = new Environment();
         environment.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
-        final var input = new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1)));
+        final var input = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1)));
         final var output = Conversions.convertToUnsignedInt(input, environment, false);
         Floating.setfflags(environment);
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), output);
+        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), output);
     }
 }

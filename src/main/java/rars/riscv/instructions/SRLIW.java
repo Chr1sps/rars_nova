@@ -6,6 +6,7 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class SRLIW extends BasicInstruction {
     public static final @NotNull SRLIW INSTANCE = new SRLIW();
@@ -20,7 +21,8 @@ public final class SRLIW extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         // Use the code directly from SRLI
         final long newValue = Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)) >>> statement.getOperand(2);
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);

@@ -4,19 +4,19 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 
-public abstract non-sealed class CompressedInstruction extends Instruction implements SimulationCallback {
+public abstract non-sealed class CompressedInstruction extends Instruction implements SimullationCallback {
     private static final int COMPRESSED_INSTRUCTION_LENGTH = 2;
 
     public final @NotNull CompressedInstructionFormat instructionFormat;
     private final @NotNull String operationMask;
-    private final @NotNull SimulationCallback callback;
+    private final @NotNull SimullationCallback callback;
 
     protected CompressedInstruction(
         final @NotNull String example,
         final @NotNull String description,
         final @NotNull CompressedInstructionFormat instrFormat,
         final @NotNull String operMask,
-        final @NotNull SimulationCallback callback
+        final @NotNull SimullationCallback callback
     ) {
         super(example, description);
         this.callback = callback;
@@ -38,7 +38,10 @@ public abstract non-sealed class CompressedInstruction extends Instruction imple
     }
 
     @Override
-    public final void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        callback.simulate(statement);
+    public final void simulate(
+        final @NotNull ProgramStatement statement,
+        final @NotNull SimulationContext context
+    ) throws SimulationException {
+        callback.simulate(statement, context);
     }
 }

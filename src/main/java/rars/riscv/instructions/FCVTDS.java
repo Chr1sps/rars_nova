@@ -9,6 +9,7 @@ import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class FCVTDS extends BasicInstruction {
     public static final FCVTDS INSTANCE = new FCVTDS();
@@ -21,7 +22,8 @@ public final class FCVTDS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float32 in = new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1)));

@@ -2,7 +2,6 @@ package rars.venus.run;
 
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.RISCVProgram;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
@@ -97,7 +96,7 @@ public final class RunStepAction extends GuiAction {
             };
             Globals.SIMULATOR.simulatorNoticeHook.subscribe(stopListener);
 
-            RISCVProgram.startSimulation(1, null);
+            Globals.SIMULATOR.startSimulation(Globals.REGISTER_FILE.getProgramCounter(), 1, new int[0], this.mainUI);
         } else {
             // note: this should never occur since "Step" is only enabled after successful
             // assembly.

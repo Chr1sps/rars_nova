@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.InterruptController;
-import rars.util.SystemIO;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
@@ -107,7 +106,7 @@ public final class RunResetAction extends GuiAction {
         mainUI.isExecutionStarted = false;
 
         // Aug. 24, 2005 Ken Vollmar
-        SystemIO.resetFiles(); // Ensure that I/O "file descriptors" are initialized for a new program run
+        this.mainUI.venusIO.resetFiles(); // Ensure that I/O "file descriptors" are initialized for a new program run
 
         mainUI.messagesPane.postRunMessage(
             "\n" + name + ": reset completed.\n\n");

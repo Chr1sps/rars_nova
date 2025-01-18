@@ -9,6 +9,7 @@ import rars.jsoftfloat.operations.Conversions;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class FCVTLUD extends BasicInstruction {
     public static final FCVTLUD INSTANCE = new FCVTLUD();
@@ -22,7 +23,8 @@ public final class FCVTLUD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
 
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);

@@ -8,8 +8,8 @@ import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.RoundingMode;
 import rars.riscv.BasicInstruction;
-import rars.riscv.SyscallLoader;
-import rars.riscv.syscalls.*;
+import rars.riscv.SimulationContext;
+import rars.riscv.Syscall;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
@@ -29,26 +29,38 @@ public final class Utils {
         return writer.toString();
     }
 
-    public static void findAndSimulateSyscall(final int number, final ProgramStatement statement)
-        throws SimulationException {
-        final var syscall = SyscallLoader.findSyscall(number);
+    public static void findAndSimulateSyscall(
+        final int number,
+        final @NotNull ProgramStatement statement,
+        final @NotNull SimulationContext context
+    ) throws SimulationException {
+        final var syscall = Syscall.findSyscall(number);
         if (syscall != null) {
             // TODO: find a cleaner way of doing this
             // This was introduced to solve issue #108
-            final boolean is_writing =
-                syscall instanceof SyscallPrintChar ||
-                    syscall instanceof SyscallPrintDouble ||
-                    syscall instanceof SyscallPrintFloat ||
-                    syscall instanceof SyscallPrintInt ||
-                    syscall instanceof SyscallPrintIntBinary ||
-                    syscall instanceof SyscallPrintIntHex ||
-                    syscall instanceof SyscallPrintIntUnsigned ||
-                    syscall instanceof SyscallPrintString ||
-                    syscall instanceof SyscallWrite;
-            if (!is_writing) {
-                SystemIO.flush();
+            final boolean isWriting = switch (syscall) {
+                case Close,
+                     PrintDouble,
+                     PrintFloat,
+                     PrintInt,
+                     PrintIntBinary,
+                     PrintIntHex,
+                     PrintIntUnsigned,
+                     PrintString,
+                     Write -> true;
+                default -> false;
+            };
+            if (!isWriting) {
+                context.io().flush();
             }
-            syscall.simulate(statement);
+            // final var context = new SimulationContext(
+            //     Globals.REGISTER_FILE,
+            //     Globals.FP_REGISTER_FILE,
+            //     Globals.CS_REGISTER_FILE,
+            //     Globals.MEMORY_INSTANCE,
+            //     Globals.IO
+            // );
+            syscall.simulate(statement, context);
             return;
         }
         throw new SimulationException(

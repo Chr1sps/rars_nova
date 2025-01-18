@@ -13,7 +13,7 @@ public final class CADDI4SPN extends CompressedInstruction {
             "Adds a zero-extended non-zero scaled by 4 to the stack pointer and saves the result to t1",
             CompressedInstructionFormat.CIW,
             "000 ssssssss fff 00",
-            operands -> {
+            (statement, context) -> {
                 // TODO: implement
             }
         );

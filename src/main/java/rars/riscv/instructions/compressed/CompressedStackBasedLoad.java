@@ -1,12 +1,11 @@
 package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
-import rars.riscv.SimulationCallback;
+import rars.riscv.SimullationCallback;
 import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.util.BinaryUtils;
 
@@ -15,13 +14,13 @@ public final class CompressedStackBasedLoad extends CompressedInstruction {
         "c.lwsp t1, -100(sp)",
         "Load word from a given offset from the stack pointer",
         0b010,
-        statement -> {
+        (statement, context) -> {
             final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
             try {
-                final long newValue = Globals.MEMORY_INSTANCE.getWord(
-                    Globals.REGISTER_FILE.getIntValue(RegisterFile.STACK_POINTER_REGISTER_INDEX) + upperImmediate
+                final long newValue = context.memory().getWord(
+                    context.registerFile().getIntValue(RegisterFile.STACK_POINTER_REGISTER_INDEX) + upperImmediate
                 );
-                Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+                context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
             } catch (final AddressErrorException e) {
                 throw new SimulationException(statement, e);
             }
@@ -32,7 +31,7 @@ public final class CompressedStackBasedLoad extends CompressedInstruction {
         final @NotNull String example,
         final @NotNull String description,
         final int funct3,
-        final @NotNull SimulationCallback callback
+        final @NotNull SimullationCallback callback
     ) {
         super(
             example,

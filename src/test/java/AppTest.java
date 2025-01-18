@@ -292,7 +292,7 @@ final class AppTest extends RarsTestBase {
 
     @Test
     void runSingle() throws IOException {
-        run(getTestDataPath().resolve("examples/csr.s").toString(), false);
+        run(getTestDataPath().resolve("examples/unicode.s").toString(), false);
     }
 
     @Test

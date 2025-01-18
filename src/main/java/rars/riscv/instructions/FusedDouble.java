@@ -8,6 +8,7 @@ import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public abstract class FusedDouble extends BasicInstruction {
     public FusedDouble(final String usage, final String description, final String op) {
@@ -18,7 +19,8 @@ public abstract class FusedDouble extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
 
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(4), statement);

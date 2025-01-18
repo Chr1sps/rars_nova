@@ -1,12 +1,12 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.InstructionsRegistry;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -54,19 +54,20 @@ public abstract class Arithmetic extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         if (InstructionsRegistry.RV64_MODE_FLAG) {
             final long newValue = compute(
-                Globals.REGISTER_FILE.getLongValue(statement.getOperand(1)),
-                Globals.REGISTER_FILE.getLongValue(statement.getOperand(2))
+                context.registerFile().getLongValue(statement.getOperand(1)),
+                context.registerFile().getLongValue(statement.getOperand(2))
             );
-            Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+            context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
         } else {
             final long newValue = computeW(
-                Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)),
-                Globals.REGISTER_FILE.getIntValue(statement.getOperand(2))
+                context.registerFile().getIntValue(statement.getOperand(1)),
+                context.registerFile().getIntValue(statement.getOperand(2))
             );
-            Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+            context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
         }
     }
 

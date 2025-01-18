@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
+import rars.io.VenusIO;
 import rars.riscv.InstructionsRegistry;
 import rars.settings.BoolSetting;
 import rars.settings.OtherSettings;
@@ -88,10 +89,10 @@ public final class VenusUI extends JFrame {
     public final @NotNull MessagesPane messagesPane;
     public final @NotNull Editor editor;
     public final @NotNull RunSpeedPanel runSpeedPanel;
+    public final @NotNull VenusIO venusIO;
     // PLEASE PUT THESE TWO (& THEIR METHODS) SOMEWHERE THEY BELONG, NOT HERE
     private final @NotNull Action fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction;
     private final @NotNull Action fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction;
-
     // The "action" objects, which include action listeners. One of each will be
     // created then
     // shared between a menu item and its corresponding toolbar button. This is a
@@ -532,6 +533,8 @@ public final class VenusUI extends JFrame {
         );
 
         // endregion Action objects
+
+        this.venusIO = new VenusIO(this.messagesPane, BOOL_SETTINGS);
 
         this.menu = this.setUpMenuBar();
         this.setJMenuBar(this.menu);

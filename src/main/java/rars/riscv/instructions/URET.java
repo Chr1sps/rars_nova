@@ -6,6 +6,7 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 import static rars.Globals.CS_REGISTER_FILE;
 
@@ -47,7 +48,8 @@ public final class URET extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         final boolean upie = (CS_REGISTER_FILE.getIntValue("ustatus") & 0x10) == 0x10;
         CS_REGISTER_FILE.updateRegisterByName(
             "ustatus",

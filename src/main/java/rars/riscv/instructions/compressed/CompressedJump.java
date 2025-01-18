@@ -1,11 +1,10 @@
 package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.riscv.BasicInstruction;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
-import rars.riscv.SimulationCallback;
+import rars.riscv.SimullationCallback;
 import rars.util.BinaryUtils;
 import rars.util.Utils;
 
@@ -14,8 +13,8 @@ public final class CompressedJump extends CompressedInstruction {
         "c.j target",
         "Compressed jump: Jump to statement at target address",
         0b101,
-        statement -> Utils.processJump(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(
-            0))
+        (statement, context) -> Utils.processJump(context.registerFile()
+            .getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(0))
     );
 
     public static final @NotNull CompressedJump CJAL = new CompressedJump(
@@ -23,9 +22,10 @@ public final class CompressedJump extends CompressedInstruction {
         "Compressed jump and link: Set t1 to Program Counter (return address) "
             + "then jump to statement at target address",
         0b001,
-        statement -> {
+        (statement, context) -> {
             Utils.processReturnAddress(1); // x1 is the link register
-            Utils.processJump(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(
+            Utils.processJump(context.registerFile()
+                .getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(
                 0));
         }
     );
@@ -34,7 +34,7 @@ public final class CompressedJump extends CompressedInstruction {
         final @NotNull String example,
         final @NotNull String description,
         final int funct3,
-        final @NotNull SimulationCallback callback
+        final @NotNull SimullationCallback callback
     ) {
         super(
             example,

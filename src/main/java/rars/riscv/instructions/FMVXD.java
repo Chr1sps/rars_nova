@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class FMVXD extends BasicInstruction {
     public static final @NotNull FMVXD INSTANCE = new FMVXD();
@@ -18,9 +18,10 @@ public final class FMVXD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
 
-        final long newValue = Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1));
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        final long newValue = context.fpRegisterFile().getLongValue(statement.getOperand(1));
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

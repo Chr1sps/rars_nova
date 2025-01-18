@@ -3,7 +3,7 @@ package rars.riscv.instructions.compressed;
 import org.jetbrains.annotations.NotNull;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
-import rars.riscv.SimulationCallback;
+import rars.riscv.SimullationCallback;
 import rars.util.BinaryUtils;
 
 public final class CompressedStackBasedStore extends CompressedInstruction {
@@ -11,7 +11,7 @@ public final class CompressedStackBasedStore extends CompressedInstruction {
         "c.fsdsp f1, -100(sp)",
         "Store a floating point double from f1 to memory at address relative to the stack pointer",
         0b101,
-        statement -> {
+        (statement, context) -> {
             // TODO: implement
         }
     );
@@ -19,7 +19,7 @@ public final class CompressedStackBasedStore extends CompressedInstruction {
         "c.swsp t1, -100(sp)",
         "Store word from t1 to memory at address relative to the stack pointer",
         0b110,
-        statement -> {
+        (statement, context) -> {
             // TODO: implement
         }
     );
@@ -27,7 +27,7 @@ public final class CompressedStackBasedStore extends CompressedInstruction {
         "c.sdsp t1, -100(sp)",
         "Store a double word from t1 to memory at address relative to the stack pointer",
         0b111,
-        statement -> {
+        (statement, context) -> {
             // TODO: implement
         }
     );
@@ -35,7 +35,7 @@ public final class CompressedStackBasedStore extends CompressedInstruction {
         "c.fswsp f1, -100(sp)",
         "Store a floating point word from f1 to memory at address relative to the stack pointer",
         0b111,
-        statement -> {
+        (statement, context) -> {
             // TODO: implement
         }
     );
@@ -44,7 +44,7 @@ public final class CompressedStackBasedStore extends CompressedInstruction {
         final @NotNull String example,
         final @NotNull String description,
         final int opcode,
-        final @NotNull SimulationCallback callback
+        final @NotNull SimullationCallback callback
     ) {
         super(
             example,

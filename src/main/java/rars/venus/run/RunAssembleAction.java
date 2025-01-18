@@ -9,7 +9,6 @@ import rars.exceptions.AssemblyException;
 import rars.riscv.hardware.InterruptController;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
-import rars.util.SystemIO;
 import rars.venus.*;
 import rars.venus.registers.RegistersPane;
 
@@ -192,7 +191,9 @@ public final class RunAssembleAction extends GuiAction {
                 this.mainUI.mainPane.setSelectedComponent(executePane);
 
                 // Aug. 24, 2005 Ken Vollmar
-                SystemIO.resetFiles(); // Ensure that I/O "file descriptors" are initialized for a new program run
+
+                // Ensure that I/O "file descriptors" are initialized for a new program run
+                this.mainUI.venusIO.resetFiles();
 
             } catch (final AssemblyException pe) {
                 final String errorReport = pe.errors.generateErrorAndWarningReport();

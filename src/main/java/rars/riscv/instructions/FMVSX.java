@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -45,11 +45,12 @@ public final class FMVSX extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
 
-        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(
+        context.fpRegisterFile().updateRegisterByNumberInt(
             statement.getOperand(0),
-            Globals.REGISTER_FILE.getIntValue(statement.getOperand(1))
+            context.registerFile().getIntValue(statement.getOperand(1))
         );
     }
 }

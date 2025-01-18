@@ -6,6 +6,7 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class SRAIW extends BasicInstruction {
     public static final @NotNull SRAIW INSTANCE = new SRAIW();
@@ -20,7 +21,8 @@ public final class SRAIW extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         // Use the code directly from SRAI
         final long newValue = Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)) >> statement.getOperand(2);
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);

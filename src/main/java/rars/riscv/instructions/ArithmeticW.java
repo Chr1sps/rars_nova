@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 import rars.util.ConversionUtils;
 
 public abstract class ArithmeticW extends BasicInstruction {
@@ -26,11 +26,12 @@ public abstract class ArithmeticW extends BasicInstruction {
     }
 
     @Override
-    public void simulate(@NotNull final ProgramStatement statement) throws SimulationException {
+    public void simulate(@NotNull final ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         final long newValue = base.computeW(
-            ConversionUtils.longLowerHalfToInt(Globals.REGISTER_FILE.getLongValue(statement.getOperand(1))),
-            ConversionUtils.longLowerHalfToInt(Globals.REGISTER_FILE.getLongValue(statement.getOperand(2)))
+            ConversionUtils.longLowerHalfToInt(context.registerFile().getLongValue(statement.getOperand(1))),
+            ConversionUtils.longLowerHalfToInt(context.registerFile().getLongValue(statement.getOperand(2)))
         );
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

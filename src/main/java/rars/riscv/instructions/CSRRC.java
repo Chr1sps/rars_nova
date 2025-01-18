@@ -1,12 +1,12 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -47,8 +47,9 @@ public final class CSRRC extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        final var csr = Globals.CS_REGISTER_FILE.getLongValue(statement.getOperand(1));
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
+        final var csr = context.csrRegisterFile().getLongValue(statement.getOperand(1));
         if (csr == null) {
             throw new SimulationException(
                 statement,
@@ -57,12 +58,12 @@ public final class CSRRC extends BasicInstruction {
             );
         }
         if (statement.getOperand(2) != 0) {
-            final var previousValue = Globals.CS_REGISTER_FILE.getLongValue(statement.getOperand(1));
-            Globals.CS_REGISTER_FILE.updateRegisterByNumber(
+            final var previousValue = context.csrRegisterFile().getLongValue(statement.getOperand(1));
+            context.csrRegisterFile().updateRegisterByNumber(
                 statement.getOperand(1),
-                previousValue & ~Globals.REGISTER_FILE.getLongValue(statement.getOperand(2))
+                previousValue & ~context.registerFile().getLongValue(statement.getOperand(2))
             );
         }
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), csr);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), csr);
     }
 }

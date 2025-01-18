@@ -5,6 +5,7 @@ import rars.ProgramStatement;
 import rars.exceptions.WaitException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -53,7 +54,8 @@ public final class WFI extends BasicInstruction {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws WaitException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        WaitException {
         throw WaitException.INSTANCE;
     }
 }

@@ -1,7 +1,6 @@
 package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
@@ -25,17 +24,18 @@ public final class CLWSP extends CompressedInstruction {
             "Load word from a given offset from the stack pointer",
             CompressedInstructionFormat.CI,
             "010 s fffff ssss 10",
-            statement -> {
+            (statement, context) -> {
                 final var destinationRegister = statement.getOperand(0);
                 assert isRVCRegister(destinationRegister) : "Destination register must be one of the ones supported " +
                     "by the C " +
                     "extension (x8-x15)";
-                final var currentStackPointer = (int) Globals.REGISTER_FILE.getIntValue(RegisterFile.STACK_POINTER_REGISTER_INDEX);
+                final var currentStackPointer = (int) context.registerFile()
+                    .getIntValue(RegisterFile.STACK_POINTER_REGISTER_INDEX);
                 final var offset = statement.getOperand(1) << 2;
                 try {
                     final var address = currentStackPointer + offset;
-                    final var data = Globals.MEMORY_INSTANCE.getWord(address);
-                    Globals.REGISTER_FILE.updateRegisterByNumber(destinationRegister, data);
+                    final var data = context.memory().getWord(address);
+                    context.registerFile().updateRegisterByNumber(destinationRegister, data);
                 } catch (final AddressErrorException e) {
                     throw new SimulationException(statement, e);
                 }

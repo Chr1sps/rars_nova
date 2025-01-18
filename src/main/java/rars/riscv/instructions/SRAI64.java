@@ -6,6 +6,7 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class SRAI64 extends BasicInstruction {
     public static final @NotNull SRAI64 INSTANCE = new SRAI64();
@@ -20,7 +21,8 @@ public final class SRAI64 extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         // Uses >> because sign fill
         final var shifted = Globals.REGISTER_FILE.getLongValue(statement.getOperand(1)) >> statement.getOperand(2);
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), shifted);

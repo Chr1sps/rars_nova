@@ -46,7 +46,7 @@ public final class RandomStreams {
      * syscalls.
      * The streams are by default not seeded.
      */
-    static final HashMap<Integer, Random> randomStreams = new HashMap<>();
+    public static final HashMap<Integer, Random> randomStreams = new HashMap<>();
 
     private RandomStreams() {
     }
@@ -58,7 +58,7 @@ public final class RandomStreams {
      *     The name of the register that holds the stream index
      * @return the stream a that index
      */
-    static @NotNull Random get(final String reg) {
+    public static @NotNull Random get(final String reg) {
         final int index = REGISTER_FILE.getIntValue(reg);
         Random stream = randomStreams.get(index);
         if (stream == null) {

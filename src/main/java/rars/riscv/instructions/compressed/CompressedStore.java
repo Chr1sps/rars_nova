@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
-import rars.riscv.SimulationCallback;
+import rars.riscv.SimullationCallback;
 import rars.util.BinaryUtils;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public final class CompressedStore extends CompressedInstruction {
         "c.fsd f1, -100(t1)",
         "Store a double to memory",
         0b101,
-        statement -> {
+        (statement, context) -> {
             // TODO: implement
         }
     );
@@ -22,7 +22,7 @@ public final class CompressedStore extends CompressedInstruction {
         "c.fsw f1, -100(t1)",
         "Store a float to memory",
         0b111,
-        statement -> {
+        (statement, context) -> {
             // TODO: implement
         }
     );
@@ -30,7 +30,7 @@ public final class CompressedStore extends CompressedInstruction {
         "c.sw t1, -100(t2)",
         "Store word : Store contents of t1 into effective memory word address",
         0b110,
-        statement -> {
+        (statement, context) -> {
             // TODO: implement
         }
     );
@@ -38,7 +38,7 @@ public final class CompressedStore extends CompressedInstruction {
         "c.sd t1, -100(t2)",
         "Store double word : Store contents of t1 into effective memory double word address",
         0b111,
-        statement -> {
+        (statement, context) -> {
             // TODO: implement
         }
     );
@@ -54,7 +54,7 @@ public final class CompressedStore extends CompressedInstruction {
         final @NotNull String example,
         final @NotNull String description,
         final int opcode,
-        final @NotNull SimulationCallback callback
+        final @NotNull SimullationCallback callback
     ) {
         super(
             example,

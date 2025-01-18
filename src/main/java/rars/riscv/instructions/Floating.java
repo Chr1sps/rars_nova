@@ -10,6 +10,7 @@ import rars.jsoftfloat.RoundingMode;
 import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -102,7 +103,8 @@ public abstract class Floating extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         final var environment = new Environment();
         final var hasRoundingMode = statement.hasOperand(3);
         if (hasRoundingMode) {

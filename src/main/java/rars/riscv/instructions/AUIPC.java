@@ -1,11 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -45,10 +45,11 @@ public final class AUIPC extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+        SimulationException {
         final var shiftedValue = statement.getOperand(1) << 12;
         final var convertedValue = Integer.valueOf(shiftedValue).longValue();
-        final long newValue = Globals.REGISTER_FILE.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + convertedValue;
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        final long newValue = context.registerFile().getProgramCounter() - BASIC_INSTRUCTION_LENGTH + convertedValue;
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

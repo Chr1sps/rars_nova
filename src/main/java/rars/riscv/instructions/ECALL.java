@@ -5,9 +5,8 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 import rars.util.Utils;
-
-import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -47,7 +46,12 @@ public final class ECALL extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
-        Utils.findAndSimulateSyscall(REGISTER_FILE.getIntValue(REGISTER_FILE.a7), statement);
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
+        Utils.findAndSimulateSyscall(
+            context.registerFile().getIntValue("a7"),
+            statement,
+            context
+        );
     }
 }

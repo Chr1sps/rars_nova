@@ -16,6 +16,7 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Vector;
@@ -164,17 +165,16 @@ public final class HelpHelpAction extends GuiAction {
      */
     @Contract(" -> new")
     private static @NotNull JScrollPane createSyscallsHelpPane() {
-        final var list = SyscallLoader.getSyscallList();
-        final String[][] data = new String[list.size()][5];
-        final var sortedList = list.stream().sorted().toList();
+        final var sortedList = Arrays.stream(Syscall.values()).sorted().toList();
+        final String[][] data = new String[sortedList.size()][5];
 
         int i = 0;
         for (final var syscall : sortedList) {
-            data[i][0] = syscall.getName();
-            data[i][1] = Integer.toString(syscall.getNumber());
-            data[i][2] = syscall.getDescription();
-            data[i][3] = syscall.getInputs();
-            data[i][4] = syscall.getOutputs();
+            data[i][0] = syscall.serviceName;
+            data[i][1] = Integer.toString(syscall.serviceNumber);
+            data[i][2] = syscall.description;
+            data[i][3] = syscall.inputs;
+            data[i][4] = syscall.outputs;
             i++;
         }
 

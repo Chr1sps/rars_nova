@@ -80,6 +80,12 @@ public final class FloatingPointRegisterFile extends RegisterFileBase {
         this.updateRegisterByNumber(registerNumber, longValue);
     }
 
+    public void updateRegisterByNameInt(final @NotNull String registerName, final int value) throws
+        SimulationException {
+        final var longValue = value | 0xFFFFFFFF_00000000L; // NAN box if used as float
+        this.updateRegisterByName(registerName, longValue);
+    }
+
     public void updateRegisterInt(final @NotNull Register register, final int value) {
         final var longValue = value | 0xFFFFFFFF_00000000L; // NAN box if used as float
         try {

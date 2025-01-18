@@ -2,11 +2,11 @@ package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
+import rars.riscv.SimulationContext;
 import rars.util.BinaryUtils;
 
 import java.util.List;
@@ -17,29 +17,29 @@ public final class CompressedLoad extends CompressedInstruction {
         "c.lw t1, -100(t2)",
         "Set t1 to contents of effective memory word address",
         0b010,
-        Globals.REGISTER_FILE::updateRegisterByNumber,
-        address -> Globals.MEMORY_INSTANCE.getWord(address)
+        (address, value, context) -> context.registerFile().updateRegisterByNumber(address, value),
+        (address, context) -> context.memory().getWord(address)
     );
     public static final @NotNull CompressedLoad CFLW = new CompressedLoad(
         "c.flw f1, -100(t1)",
         "Load a float from memory",
         0b001,
-        Globals.FP_REGISTER_FILE::updateRegisterByNumber,
-        address -> Globals.MEMORY_INSTANCE.getWord(address)
+        (address, value, context) -> context.fpRegisterFile().updateRegisterByNumber(address, value),
+        (address, context) -> context.memory().getWord(address)
     );
     public static final @NotNull CompressedLoad CLD = new CompressedLoad(
         "c.ld t1, -100(t2)",
         "Set t1 to contents of effective memory double word address",
         0b001,
-        Globals.REGISTER_FILE::updateRegisterByNumber,
-        address -> Globals.MEMORY_INSTANCE.getDoubleWord(address)
+        (address, value, context) -> context.registerFile().updateRegisterByNumber(address, value),
+        (address, context) -> context.memory().getDoubleWord(address)
     );
     public static final @NotNull CompressedLoad CFLD = new CompressedLoad(
         "c.fld f1, -100(t1)",
         "Load a double from memory",
         0b001,
-        Globals.FP_REGISTER_FILE::updateRegisterByNumber,
-        address -> Globals.MEMORY_INSTANCE.getDoubleWord(address)
+        (address, value, context) -> context.fpRegisterFile().updateRegisterByNumber(address, value),
+        (address, context) -> context.memory().getDoubleWord(address)
     );
 
     public static final @NotNull
@@ -62,12 +62,16 @@ public final class CompressedLoad extends CompressedInstruction {
             description,
             CompressedInstructionFormat.CL,
             BinaryUtils.intToBinaryString(opcode, 3) + " sss ttt ss fff 00",
-            statement -> {
+            (statement, context) -> {
                 final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
                 try {
                     updateCallback.update(
                         statement.getOperand(0),
-                        loadCallback.load(Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate)
+                        loadCallback.load(
+                            context.registerFile().getIntValue(statement.getOperand(2)) + upperImmediate,
+                            context
+                        )
+                        , context
                     );
                 } catch (final AddressErrorException e) {
                     throw new SimulationException(statement, e);
@@ -81,11 +85,11 @@ public final class CompressedLoad extends CompressedInstruction {
 
     @FunctionalInterface
     private interface LoadCallback {
-        long load(int address) throws AddressErrorException;
+        long load(int address, final @NotNull SimulationContext context) throws AddressErrorException;
     }
 
     @FunctionalInterface
     private interface UpdateCallback {
-        void update(int address, long value) throws SimulationException;
+        void update(int address, long value, final @NotNull SimulationContext context) throws SimulationException;
     }
 }

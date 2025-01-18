@@ -13,7 +13,7 @@ public final class CADDI extends CompressedInstruction {
             "Add immediate to register",
             CompressedInstructionFormat.CI,
             "000 s fffff sssss 01",
-            statement -> {
+            (statement, context) -> {
                 // TODO: implement
             }
         );

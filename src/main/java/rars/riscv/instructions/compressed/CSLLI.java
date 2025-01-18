@@ -13,7 +13,7 @@ public final class CSLLI extends CompressedInstruction {
             "",
             CompressedInstructionFormat.CI,
             "000 s fffff ssss 10",
-            operands -> {
+            (statement, context) -> {
                 // TODO: Implement
             }
         );

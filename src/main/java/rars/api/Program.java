@@ -8,12 +8,12 @@ import rars.ProgramStatement;
 import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
+import rars.io.ConsoleIO;
 import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.Memory;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
-import rars.util.SystemIO;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -59,9 +59,9 @@ public final class Program {
     private final @NotNull Memory assembled;
     private final @NotNull Memory simulation;
     private final @NotNull ProgramOptions programOptions;
-    private SystemIO.Data fds;
     private @NotNull ByteArrayOutputStream stdout, stderr;
     private int startPC, exitCode;
+    private ConsoleIO consoleIO;
 
     public Program(final @NotNull ProgramOptions programOptions) {
         this.programOptions = programOptions;
@@ -175,10 +175,19 @@ public final class Program {
         if (STDIN != null) {
             this.stdout = new ByteArrayOutputStream();
             this.stderr = new ByteArrayOutputStream();
-            this.fds = new SystemIO.Data(
-                new ByteArrayInputStream(STDIN.getBytes()), this.stdout, this.stderr);
+            this.consoleIO = new ConsoleIO(
+                new ByteArrayInputStream(STDIN.getBytes()),
+                this.stdout,
+                this.stderr,
+                BOOL_SETTINGS
+            );
         } else {
-            this.fds = new SystemIO.Data();
+            this.consoleIO = new ConsoleIO(
+                System.in,
+                System.out,
+                System.err,
+                BOOL_SETTINGS
+            );
         }
     }
 
@@ -207,20 +216,22 @@ public final class Program {
             BoolSetting.SELF_MODIFYING_CODE_ENABLED,
             this.programOptions.selfModifyingCode
         );
-        final SystemIO.Data tmpFiles = SystemIO.swapData(this.fds);
         final Memory tmpMem = Globals.swapMemoryInstance(this.simulation);
 
         SimulationException e = null;
         Simulator.Reason ret = null;
         try {
-            ret = RISCVProgram.simulate(this.programOptions.maxSteps);
+            ret = Globals.SIMULATOR.simulateCli(
+                Globals.REGISTER_FILE.getProgramCounter(),
+                this.programOptions.maxSteps,
+                this.consoleIO
+            );
         } catch (final SimulationException se) {
             e = se;
         }
         this.exitCode = Globals.exitCode;
 
         BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, selfMod);
-        SystemIO.swapData(tmpFiles);
         Globals.swapMemoryInstance(tmpMem);
 
         if (e != null) {

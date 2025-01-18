@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.SymbolTable;
-import rars.riscv.SyscallNumberOverride;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
@@ -13,10 +12,8 @@ import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile;
 import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.settings.*;
 import rars.simulator.Simulator;
-import rars.util.PropertiesFile;
 import rars.venus.VenusUI;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -49,6 +46,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
+
+// TODO: Remove all the mutable state from this class, leave only all the constants.
 
 /**
  * Since the original RARS code contained *a lot* of globally accessible mutable state,
@@ -93,7 +92,6 @@ public final class Globals {
     public static final @NotNull CSRegisterFile CS_REGISTER_FILE;
     public static final @NotNull Simulator SIMULATOR;
     private static final @NotNull Logger LOGGER = LogManager.getLogger(Globals.class);
-    private static final String syscallPropertiesFile = "Syscall";
     ///  Floating point register file for the RARS simulator.
     public static @NotNull FloatingPointRegisterFile FP_REGISTER_FILE;
     /// Flag to determine whether to produce internal debugging information.
@@ -115,7 +113,7 @@ public final class Globals {
     public static @NotNull Memory MEMORY_INSTANCE;
 
     static {
-        SIMULATOR = new Simulator(GUI);
+        SIMULATOR = new Simulator();
 
         final var settingsPreferences = userNodeForPackage(SettingsBase.class);
 
@@ -136,28 +134,6 @@ public final class Globals {
     }
 
     private Globals() {
-    }
-
-    /**
-     * Read any syscall number assignment overrides from config file.
-     *
-     * @return ArrayList of SyscallNumberOverride objects
-     */
-    public static @NotNull List<@NotNull SyscallNumberOverride> getSyscallOverrides() {
-        final var overrides = new ArrayList<SyscallNumberOverride>();
-        final var properties = PropertiesFile.loadPropertiesFromFile(Globals.syscallPropertiesFile);
-        for (final var key : properties.keySet()) {
-            final String stringKey = (String) key;
-            final String property = properties.getProperty(stringKey).trim();
-            try {
-                final int value = Integer.parseInt(property);
-                overrides.add(new SyscallNumberOverride(stringKey, value));
-            } catch (final NumberFormatException e) {
-                LOGGER.fatal("Error processing Syscall number override: '{}' is not a valid integer", property);
-                System.exit(0);
-            }
-        }
-        return overrides;
     }
 
     public static void setupGlobalMemoryConfiguration(final @NotNull MemoryConfiguration newConfiguration) {

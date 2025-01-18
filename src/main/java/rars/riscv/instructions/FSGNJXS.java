@@ -6,6 +6,7 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -47,7 +48,8 @@ public final class FSGNJXS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         final var f2 = Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1));
         final var f3 = Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(2));
         final var result = (f2 & 0x7FFFFFFF) | ((f2 ^ f3) & 0x80000000);

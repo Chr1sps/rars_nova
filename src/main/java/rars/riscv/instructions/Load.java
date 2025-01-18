@@ -7,6 +7,7 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -52,7 +53,8 @@ public abstract class Load extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             final long newValue = load(Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate);

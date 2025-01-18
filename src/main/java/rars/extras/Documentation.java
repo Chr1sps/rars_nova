@@ -3,7 +3,7 @@ package rars.extras;
 import org.jetbrains.annotations.NotNull;
 import rars.assembler.Directive;
 import rars.riscv.Instruction;
-import rars.riscv.SyscallLoader;
+import rars.riscv.Syscall;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -53,19 +53,18 @@ public final class Documentation {
     }
 
     private static @NotNull String createSyscallMarkdown() {
-        final var list = SyscallLoader.getSyscallList();
-        final var sorted = list.stream().sorted().toList();
+        final var sorted = Arrays.stream(Syscall.values()).sorted().toList();
         final var builder = new StringBuilder(
             """
                 | Name | Call Number (a7) | Description | Inputs | Outputs |
                 |------|------------------|-------------|--------|---------|""");
         for (final var syscall : sorted) {
             builder.append("\n|%s|%s|%s|%s|%s|".formatted(
-                syscall.getName(),
-                syscall.getNumber(),
-                syscall.getDescription(),
-                syscall.getInputs(),
-                syscall.getOutputs()
+                syscall.serviceName,
+                syscall.serviceNumber,
+                syscall.description,
+                syscall.inputs,
+                syscall.outputs
             ));
         }
 

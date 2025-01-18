@@ -9,6 +9,7 @@ import rars.jsoftfloat.operations.Comparisons;
 import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -48,7 +49,8 @@ public final class FLTS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
 
         final Float32 f1 = Floating.getFloat(statement.getOperand(1));
         final Float32 f2 = Floating.getFloat(statement.getOperand(2));

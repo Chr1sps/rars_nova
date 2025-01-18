@@ -42,20 +42,6 @@ appear.
     because it displays binary, hexadecimal and decimal representations for a 32 bit floating point
     value; when any of them is modified the other two are updated as well.
 
-<h4>Adding more system calls</h4>
-
-System calls (<tt>ecall</tt> instruction) are implemented using
-a technique similar to that for tools. This permits anyone to add a new syscall by defining
-a new class that meets these requirements:
-<ol>
-    <li>It extends the <tt>rars.riscv.AbstractSyscall</tt> class.</li>
-    <li>It is part of the <tt>rars.riscv.syscalls</tt> package.</li>
-    <li>It compiles cleanly into a ".class" file, stored in the
-        <tt>rars/riscv/syscalls</tt> directory.
-    </li>
-    <li>An entry is added to Syscall.properties</li>
-</ol>
-
 <h4>Extending the instruction set</h4>
 
 You can add customized pseudo-instructions to the instruction set by editing

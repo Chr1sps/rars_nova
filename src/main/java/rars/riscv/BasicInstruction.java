@@ -126,9 +126,11 @@ public abstract non-sealed class BasicInstruction extends Instruction {
      * @param statement
      *     A ProgramStatement representing the MIPS instruction to
      *     simulate.
+     * @param context
      * @throws SimulationException
      *     This is a run-time exception generated during
      *     simulation.
      */
-    public abstract void simulate(@NotNull ProgramStatement statement) throws SimulationException;
+    public abstract void simulate(@NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException;
 }

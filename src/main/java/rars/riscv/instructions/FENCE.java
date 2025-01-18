@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -55,7 +56,7 @@ public final class FENCE extends BasicInstruction {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) {
         // Do nothing, currently there are no other threads so local consitency is
         // enough
     }

@@ -7,6 +7,7 @@ import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.InstructionsRegistry;
+import rars.riscv.SimulationContext;
 import rars.util.ConversionUtils;
 
 /*
@@ -64,7 +65,8 @@ public abstract class ImmediateInstruction extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         final var upperImmediate = (statement.getOperand(2) << 20) >> 20;
         final long newValue = (InstructionsRegistry.RV64_MODE_FLAG)
             ? compute(

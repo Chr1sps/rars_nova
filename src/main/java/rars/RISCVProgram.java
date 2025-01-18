@@ -4,9 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.*;
 import rars.exceptions.AssemblyException;
-import rars.exceptions.SimulationException;
 import rars.simulator.BackStepper;
-import rars.simulator.Simulator;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -64,43 +62,6 @@ public final class RISCVProgram {
     private SymbolTable localSymbolTable;
     private MacroPool macroPool;
     private List<SourceLine> sourceLineList;
-
-    /**
-     * Simulates execution of the program (in this thread). Program must have
-     * already been assembled.
-     * Begins simulation at current program counter address and continues until
-     * stopped,
-     * paused, maximum steps exceeded, or exception occurs.
-     *
-     * @param maxSteps
-     *     the maximum number of steps to simulate.
-     * @return reason for the interruption of the program
-     * @throws SimulationException
-     *     Will throw exception if errors occurred while
-     *     simulating.
-     */
-    public static Simulator.Reason simulate(final int maxSteps) throws SimulationException {
-        final Simulator sim = Globals.SIMULATOR;
-        return sim.simulate(Globals.REGISTER_FILE.getProgramCounter(), maxSteps, null);
-    }
-
-    /**
-     * Simulates execution of the program (in a new thread). Program must have
-     * already been assembled.
-     * Begins simulation at current program counter address and continues until
-     * stopped,
-     * paused, maximum steps exceeded, or exception occurs.
-     *
-     * @param maxSteps
-     *     maximum number of instruction executions. Default -1 means
-     *     no maximum.
-     * @param breakPoints
-     *     int array of breakpoints (PC addresses). Can be null.
-     */
-    public static void startSimulation(final int maxSteps, final int[] breakPoints) {
-        final Simulator sim = Globals.SIMULATOR;
-        sim.startSimulation(Globals.REGISTER_FILE.getProgramCounter(), maxSteps, breakPoints);
-    }
 
     /**
      * Produces list of source statements that comprise the program.

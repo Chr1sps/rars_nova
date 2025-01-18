@@ -9,6 +9,7 @@ import rars.jsoftfloat.operations.Arithmetic;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class FSQRTD extends BasicInstruction {
     public static final @NotNull FSQRTD INSTANCE = new FSQRTD();
@@ -21,7 +22,8 @@ public final class FSQRTD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
         final Float64 result = Arithmetic

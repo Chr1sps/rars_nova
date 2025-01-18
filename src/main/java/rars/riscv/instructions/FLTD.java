@@ -9,6 +9,7 @@ import rars.jsoftfloat.operations.Comparisons;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class FLTD extends BasicInstruction {
     public static final @NotNull FLTD INSTANCE = new FLTD();
@@ -21,7 +22,8 @@ public final class FLTD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
 
         final Float64 f1 = Double.getDouble(statement.getOperand(1));
         final Float64 f2 = Double.getDouble(statement.getOperand(2));

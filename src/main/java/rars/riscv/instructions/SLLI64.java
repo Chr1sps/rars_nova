@@ -6,6 +6,7 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
+import rars.riscv.SimulationContext;
 
 public final class SLLI64 extends BasicInstruction {
     public static final @NotNull SLLI64 INSTANCE = new SLLI64();
@@ -19,7 +20,8 @@ public final class SLLI64 extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement) throws SimulationException {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+        SimulationException {
         final long newValue = Globals.REGISTER_FILE.getLongValue(statement.getOperand(1)) << statement.getOperand(2);
         Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
     }

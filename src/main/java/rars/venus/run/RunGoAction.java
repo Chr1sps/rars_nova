@@ -1,13 +1,11 @@
 package rars.venus.run;
 
 import rars.Globals;
-import rars.RISCVProgram;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
-import rars.util.SystemIO;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
@@ -121,7 +119,12 @@ public final class RunGoAction extends GuiAction {
                 Globals.SIMULATOR.simulatorNoticeHook.subscribe(onSimulatorStopListener);
 
                 final int[] breakPoints = this.executePane.textSegment.getSortedBreakPointsArray();
-                RISCVProgram.startSimulation(RunGoAction.maxSteps, breakPoints);
+                Globals.SIMULATOR.startSimulation(
+                    Globals.REGISTER_FILE.getProgramCounter(),
+                    RunGoAction.maxSteps,
+                    breakPoints,
+                    this.mainUI
+                );
             } else {
                 // This should never occur because at termination the Go and Step buttons are
                 // disabled.
@@ -208,7 +211,7 @@ public final class RunGoAction extends GuiAction {
         this.executePane.csrValues.updateRegisters();
         this.executePane.dataSegment.updateValues();
         FileStatus.set(FileStatus.State.TERMINATED);
-        SystemIO.resetFiles(); // close any files opened in MIPS program
+        this.mainUI.venusIO.resetFiles(); // close any files opened in MIPS program
         // Bring CSRs to the front if terminated due to exception.
         if (pe != null) {
             this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues);

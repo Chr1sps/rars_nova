@@ -1,7 +1,6 @@
 package rars.riscv.instructions.compressed;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.riscv.CompressedInstruction;
 import rars.riscv.CompressedInstructionFormat;
 import rars.riscv.InstructionsRegistry;
@@ -52,22 +51,22 @@ public final class CompressedArithmetic extends CompressedInstruction {
                 BinaryUtils.intToBinaryString(funct6, 6),
                 BinaryUtils.intToBinaryString(funct2, 2)
             ),
-            statement -> {
+            (statement, context) -> {
                 if (InstructionsRegistry.RV64_MODE_FLAG) {
                     final long newValue = callback.computeDoubleWord(
-                        Globals.REGISTER_FILE.getLongValue(statement.getOperand(0)),
-                        Globals.REGISTER_FILE.getLongValue(statement.getOperand(1))
+                        context.registerFile().getLongValue(statement.getOperand(0)),
+                        context.registerFile().getLongValue(statement.getOperand(1))
                     );
-                    Globals.REGISTER_FILE.updateRegisterByNumber(
+                    context.registerFile().updateRegisterByNumber(
                         statement.getOperand(statement.getOperand(0)),
                         newValue
                     );
                 } else {
                     final long newValue = callback.computeWord(
-                        Globals.REGISTER_FILE.getIntValue(statement.getOperand(0)),
-                        Globals.REGISTER_FILE.getIntValue(statement.getOperand(1))
+                        context.registerFile().getIntValue(statement.getOperand(0)),
+                        context.registerFile().getIntValue(statement.getOperand(1))
                     );
-                    Globals.REGISTER_FILE.updateRegisterByNumber(
+                    context.registerFile().updateRegisterByNumber(
                         statement.getOperand(statement.getOperand(0)),
                         newValue
                     );
