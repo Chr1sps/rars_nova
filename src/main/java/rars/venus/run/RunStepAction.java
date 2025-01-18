@@ -51,7 +51,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action for the Run -> Step menu item
  */
-public class RunStepAction extends GuiAction {
+public final class RunStepAction extends GuiAction {
 
     private String name;
     private ExecutePane executePane;

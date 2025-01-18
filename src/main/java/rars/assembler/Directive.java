@@ -39,8 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Pete Sanderson. The directive name is indicative of the directive it
  * represents. For example, {@code DATA} represents the RISCV .data
  * directive.
- *
- * @author Chr1sps
  */
 public enum Directive {
 

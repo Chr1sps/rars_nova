@@ -40,7 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Simple wrapper for boolean settings actions
  */
-public class SettingsAction extends GuiAction {
+public final class SettingsAction extends GuiAction {
     private final BoolSetting setting;
     private final Handler handler;
 

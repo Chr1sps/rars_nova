@@ -129,7 +129,7 @@ import java.io.Reader;
              * <br>
              * All internal variables are reset, the old input stream 
              * <b>cannot</b> be reused (internal buffer is discarded and lost).
-             * Lexical state is set to <tt>YY_INITIAL</tt>.
+             * Lexical state is set to {@link YY_INITIAL}.
              *
              * @param reader   the new input stream 
              */

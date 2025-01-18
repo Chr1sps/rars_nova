@@ -6,8 +6,6 @@ import java.awt.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static rars.Globals.OTHER_SETTINGS;
-
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
 
@@ -70,8 +68,7 @@ public final class FontUtilities {
      *     The original string
      * @return New string in which spaces are substituted for tabs
      */
-    public static @NotNull String substituteSpacesForTabs(final @NotNull String string) {
-        final var tabSize = OTHER_SETTINGS.getEditorTabSize();
+    public static @NotNull String substituteSpacesForTabs(final @NotNull String string, final int tabSize) {
         return IntStream.range(0, string.length())
             .mapToObj(i -> {
                 if (string.charAt(i) == '\t') {

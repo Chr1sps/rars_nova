@@ -13,14 +13,16 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 public final class FontSettings extends SettingsBase {
-    private static final Logger LOGGER = LogManager.getLogger(FontSettings.class);
+    private static final @NotNull Logger LOGGER = LogManager.getLogger(FontSettings.class);
 
     // region Preferences keys
-    private static final String FONT_PREFIX = "Font";
-    private static final String SIZE = "Size";
-    private static final String FAMILY = "Family";
-    private static final String WEIGHT = "Weight";
-    private static final String LIGATURES = "Ligatures";
+
+    private static final @NotNull String FONT_PREFIX = "Font";
+    private static final @NotNull String SIZE = "Size";
+    private static final @NotNull String FAMILY = "Family";
+    private static final @NotNull String WEIGHT = "Weight";
+    private static final @NotNull String LIGATURES = "Ligatures";
+
     // endregion Preferences keys
 
     private final @NotNull Preferences preferences;

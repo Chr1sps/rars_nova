@@ -66,7 +66,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Sanderson and Bumgarner
  */
-public class DataSegmentWindow extends JInternalFrame {
+public final class DataSegmentWindow extends JInternalFrame {
     private static final Logger LOGGER = LogManager.getLogger(DataSegmentWindow.class);
 
     private static final String[] dataSegmentNames = {"Data", "Stack", "Kernel"};

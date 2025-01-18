@@ -52,7 +52,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action class for the Run -> Assemble menu item (and toolbar icon)
  */
-public class RunAssembleAction extends GuiAction {
+public final class RunAssembleAction extends GuiAction {
 
     // Threshold for adding file to printed message of files being assembled.
     private static final int LINE_LENGTH_LIMIT = 60;

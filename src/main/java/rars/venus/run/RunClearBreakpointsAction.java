@@ -45,7 +45,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * set its enabled status true or false depending on whether breakpoints remain
  * after that action.
  */
-public class RunClearBreakpointsAction extends GuiAction implements TableModelListener {
+public final class RunClearBreakpointsAction extends GuiAction implements TableModelListener {
 
     /**
      * Create the object and register with text segment window as a listener on its

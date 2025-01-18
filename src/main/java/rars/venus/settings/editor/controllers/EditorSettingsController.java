@@ -1,6 +1,9 @@
 package rars.venus.settings.editor.controllers;
 
 import org.jetbrains.annotations.NotNull;
+import rars.settings.EditorThemeSettings;
+import rars.settings.FontSettings;
+import rars.settings.OtherSettings;
 import rars.settings.SettingsTheme;
 import rars.venus.settings.editor.EditorSettingsDialog;
 import rars.venus.settings.editor.EditorSettingsPanel;
@@ -9,27 +12,31 @@ import rars.venus.settings.editor.TreePanel;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import static rars.Globals.EDITOR_THEME_SETTINGS;
-
 public final class EditorSettingsController {
     private final @NotNull FontSettingsController fontSettingsController;
     private final @NotNull BaseStyleSettingsController baseStyleSettingsController;
     private final @NotNull SyntaxStyleSettingsController syntaxStyleSettingsController;
     private final @NotNull OtherSettingsController otherSettingsController;
+    private final @NotNull EditorThemeSettings editorThemeSettings;
     public @NotNull SettingsTheme settingsTheme;
 
     public EditorSettingsController(
         final @NotNull EditorSettingsPanel editorSettingsView,
         final @NotNull EditorSettingsDialog dialog,
-        final @NotNull TreePanel treePanel
+        final @NotNull TreePanel treePanel,
+        final @NotNull FontSettings fontSettings,
+        final @NotNull EditorThemeSettings editorThemeSettings,
+        final @NotNull OtherSettings otherSettings
     ) {
-        this.settingsTheme = EDITOR_THEME_SETTINGS.currentTheme.clone();
+        this.settingsTheme = editorThemeSettings.currentTheme.clone();
+        this.editorThemeSettings = editorThemeSettings;
         final var pickerCardView = editorSettingsView.panelWithTextAreaView.pickerCardView;
         final var textArea = editorSettingsView.panelWithTextAreaView.textArea;
 
         this.fontSettingsController = new FontSettingsController(
             pickerCardView.fontSettingsView,
-            textArea
+            textArea,
+            fontSettings
         );
         new PresetsController(
             pickerCardView.presetsView,
@@ -48,7 +55,8 @@ public final class EditorSettingsController {
         );
         this.otherSettingsController = new OtherSettingsController(
             pickerCardView.otherSettingsView,
-            textArea
+            textArea,
+            otherSettings
         );
         final var bottomRow = editorSettingsView.bottomRowComponent;
         bottomRow.applyButton.addActionListener(e -> applySettings());
@@ -94,7 +102,7 @@ public final class EditorSettingsController {
     }
 
     private void discardSettings() {
-        this.settingsTheme = EDITOR_THEME_SETTINGS.currentTheme.clone();
+        this.settingsTheme = this.editorThemeSettings.currentTheme.clone();
         this.fontSettingsController.resetButtonValues();
         this.baseStyleSettingsController.resetButtonValues();
         this.syntaxStyleSettingsController.resetButtonValues();
@@ -108,8 +116,8 @@ public final class EditorSettingsController {
     private void applySettings() {
         this.fontSettingsController.applySettings();
 
-        EDITOR_THEME_SETTINGS.currentTheme = this.settingsTheme;
-        EDITOR_THEME_SETTINGS.commitChanges();
+        this.editorThemeSettings.currentTheme = this.settingsTheme;
+        this.editorThemeSettings.commitChanges();
 
         this.otherSettingsController.applySettings();
     }

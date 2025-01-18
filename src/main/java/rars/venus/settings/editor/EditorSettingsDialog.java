@@ -10,6 +10,8 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import static rars.Globals.*;
+
 public final class EditorSettingsDialog extends JDialog {
     public EditorSettingsDialog(
         final @NotNull Frame owner,
@@ -21,7 +23,14 @@ public final class EditorSettingsDialog extends JDialog {
         final var panelWithTextAreaView = new PanelWithTextAreaView(pickerCardView);
         final var treePanel = new TreePanel();
         final var mainPanel = new EditorSettingsPanel(treePanel, panelWithTextAreaView);
-        new EditorSettingsController(mainPanel, this, treePanel);
+        new EditorSettingsController(
+            mainPanel,
+            this,
+            treePanel,
+            FONT_SETTINGS,
+            EDITOR_THEME_SETTINGS,
+            OTHER_SETTINGS
+        );
         this.setContentPane(mainPanel);
         this.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         this.pack();

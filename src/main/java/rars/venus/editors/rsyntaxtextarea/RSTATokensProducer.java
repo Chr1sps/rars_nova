@@ -16,9 +16,9 @@ import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 @SuppressWarnings("unused")
 public final class RSTATokensProducer extends TokenMakerBase implements TokensProducer<Token> {
     private static final String[] LINE_COMMENT_START_AND_END = {"#", null};
-    private final Lexer<Token, RSTATokensProducer> lexer;
+    private final Lexer<@NotNull Token, RSTATokensProducer> lexer;
 
-    public RSTATokensProducer(final Lexer<Token, RSTATokensProducer> lexer) {
+    public RSTATokensProducer(final Lexer<@NotNull Token, RSTATokensProducer> lexer) {
         this.lexer = lexer;
     }
 

@@ -67,7 +67,7 @@ public final class Editor {
      * @param ui
      *     the GUI that owns this editor
      */
-    public Editor(final VenusUI ui) {
+    public Editor(final @NotNull VenusUI ui) {
         this.mainUI = ui;
         FileStatus.reset();
         this.mainUIbaseTitle = this.mainUI.getTitle();
@@ -89,7 +89,7 @@ public final class Editor {
      * @param editTabbedPane
      *     an existing editTabbedPane object
      */
-    public void setEditTabbedPane(final EditTabbedPane editTabbedPane) {
+    public void setEditTabbedPane(final @Nullable EditTabbedPane editTabbedPane) {
         this.editTabbedPane = editTabbedPane;
     }
 

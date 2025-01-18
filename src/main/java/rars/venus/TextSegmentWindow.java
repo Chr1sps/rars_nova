@@ -66,7 +66,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Team JSpim
  */
-public class TextSegmentWindow extends JInternalFrame {
+public final class TextSegmentWindow extends JInternalFrame {
     private static final Logger LOGGER = LogManager.getLogger(TextSegmentWindow.class);
     private static final int PROGRAM_ARGUMENT_TEXTFIELD_COLUMNS = 40;
     // The following is displayed in the Basic and Source columns if existing code
@@ -80,7 +80,6 @@ public class TextSegmentWindow extends JInternalFrame {
         sourceToolTip = "Source code line";
     private final JPanel programArgumentsPanel; // DPS 17-July-2008
     private final JTextField programArgumentsTextField; // DPS 17-July-2008
-    // source.
     private final Container contentPane;
     @NotNull
     private final ExecutePane executePane;
@@ -196,7 +195,11 @@ public class TextSegmentWindow extends JInternalFrame {
                 } else {
                     lineNumber = " ".repeat(leadingSpacesCount) + statement.sourceLine.lineNumber() + ": ";
                 }
-                builder.append(lineNumber).append(FontUtilities.substituteSpacesForTabs(statement.sourceLine.source()));
+                builder.append(lineNumber)
+                    .append(FontUtilities.substituteSpacesForTabs(
+                        statement.sourceLine.source(),
+                        OTHER_SETTINGS.getEditorTabSize()
+                    ));
                 lastLine = statement.sourceLine.lineNumber();
             } else {
                 lastLine = -1;

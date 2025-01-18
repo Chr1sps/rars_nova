@@ -49,7 +49,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Action class for the Settings menu item for optionally loading a MIPS
  * exception handler.
  */
-public class SettingsExceptionHandlerAction extends GuiAction {
+public final class SettingsExceptionHandlerAction extends GuiAction {
 
     private JDialog exceptionHandlerDialog;
     private JCheckBox exceptionHandlerSetting;
@@ -90,8 +90,10 @@ public class SettingsExceptionHandlerAction extends GuiAction {
         this.exceptionHandlerDialog.setVisible(true);
     }
 
-    // The dialog box that appears when menu item is selected.
-    private JPanel buildDialogPanel() {
+    /**
+     * The dialog box that appears when menu item is selected.
+     */
+    private @NotNull JPanel buildDialogPanel() {
         final JPanel contents = new JPanel(new BorderLayout(20, 20));
         contents.setBorder(new EmptyBorder(10, 10, 10, 10));
         // Top row - the check box for setting...

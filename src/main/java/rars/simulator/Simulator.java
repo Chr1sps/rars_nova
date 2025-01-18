@@ -56,7 +56,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2005
  */
 public final class Simulator {
-    // private static @Nullable Runnable interactiveGUIUpdater = null;
     public final @NotNull ListenerDispatcher<@NotNull SimulatorNotice>.Hook simulatorNoticeHook;
     public final @NotNull ListenerDispatcher<Void>.Hook stopEventHook;
     private final @NotNull ListenerDispatcher<@NotNull SimulatorNotice> simulatorNoticeDispatcher;
@@ -267,7 +266,7 @@ public final class Simulator {
         private void stopExecution(final boolean done, final Reason reason) {
             this.done = done;
             this.constructReturnReason = reason;
-            SystemIO.flush(true);
+            SystemIO.flush();
             if (done) {
                 SystemIO.resetFiles(); // close any files opened in the process of simulating
             }
@@ -464,7 +463,6 @@ public final class Simulator {
             boolean ebreak = false;
             boolean waiting = false;
             while (!this.stop) {
-                SystemIO.flush(false);
                 // Perform the RISCV instruction in synchronized block. If external threads
                 // agree
                 // to access memory and registers only through synchronized blocks on same

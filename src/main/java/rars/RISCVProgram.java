@@ -73,7 +73,7 @@ public final class RISCVProgram {
      * paused, maximum steps exceeded, or exception occurs.
      *
      * @param maxSteps
-     *     the maximum maximum number of steps to simulate.
+     *     the maximum number of steps to simulate.
      * @return reason for the interruption of the program
      * @throws SimulationException
      *     Will throw exception if errors occurred while
@@ -180,7 +180,7 @@ public final class RISCVProgram {
      * basic RISCV instruction.
      * @see ProgramStatement
      */
-    public List<ProgramStatement> getMachineList() {
+    public @NotNull List<@NotNull ProgramStatement> getMachineList() {
         return this.machineList;
     }
 
@@ -301,7 +301,7 @@ public final class RISCVProgram {
      *     Will throw exception if errors occurred while
      *     reading or tokenizing.
      */
-    public @NotNull List<RISCVProgram> prepareFilesForAssembly(
+    public @NotNull List<@NotNull RISCVProgram> prepareFilesForAssembly(
         final @NotNull List<@NotNull File> files,
         final @NotNull File leadFile,
         final @Nullable File exceptionHandler
@@ -352,16 +352,20 @@ public final class RISCVProgram {
      *     Will throw exception if errors occurred while
      *     assembling.
      */
-    public ErrorList assemble(
-        final @NotNull List<RISCVProgram> programsToAssemble,
+    public @NotNull ErrorList assemble(
+        final @NotNull List<@NotNull RISCVProgram> programsToAssemble,
         final boolean extendedAssemblerEnabled,
         final boolean warningsAreErrors
     ) throws AssemblyException {
         this.backStepper = null;
-        final var assembler = new Assembler();
-        this.machineList = assembler.assemble(programsToAssemble, extendedAssemblerEnabled, warningsAreErrors);
+        final var assemblyResult = Assembler.assemble(
+            programsToAssemble,
+            extendedAssemblerEnabled,
+            warningsAreErrors
+        );
+        this.machineList = assemblyResult.first();
         this.backStepper = new BackStepper();
-        return assembler.getErrorList();
+        return assemblyResult.second();
     }
 
     /**

@@ -17,7 +17,7 @@ import static rars.riscv.InstructionsRegistry.EXTENDED_INSTRUCTIONS;
  * <p>
  * Currently it makes some Markdown tables, but in the future it could do
  * something
- * with javadocs or generate a website with all of the help information
+ * with javadocs or generate a website with all the help information
  */
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
 public final class Documentation {
@@ -34,60 +34,54 @@ public final class Documentation {
         System.out.println(createInstructionMarkdown(EXTENDED_INSTRUCTIONS.r64Only));
     }
 
-    public static @NotNull String createDirectiveMarkdown() {
+    private static @NotNull String createDirectiveMarkdown() {
         final var sortedDirectives = Arrays
             .stream(Directive.values())
             .sorted(Comparator.comparing(
                 Directive::getName
             )).toList();
-        final var builder = new StringBuilder("| Name | Description|\n|------|------------|");
+        final var builder = new StringBuilder("""
+            | Name | Description|
+            |------|------------|""");
         for (final var directive : sortedDirectives) {
-            builder.append("\n|");
-            builder.append(directive.getName());
-            builder.append('|');
-            builder.append(directive.getDescription());
-            builder.append('|');
+            builder.append("\n|%s|%s|".formatted(
+                directive.getName(),
+                directive.getDescription()
+            ));
         }
         return builder.toString();
     }
 
-    public static @NotNull String createSyscallMarkdown() {
+    private static @NotNull String createSyscallMarkdown() {
         final var list = SyscallLoader.getSyscallList();
         final var sorted = list.stream().sorted().toList();
         final var builder = new StringBuilder(
-            "| Name | Call Number (a7) | Description | Inputs | Outputs " +
-                "|\n|------|------------------|-------------|--------|---------|");
+            """
+                | Name | Call Number (a7) | Description | Inputs | Outputs |
+                |------|------------------|-------------|--------|---------|""");
         for (final var syscall : sorted) {
-            builder.append("\n|");
-            builder.append(syscall.getName());
-            builder.append('|');
-            builder.append(syscall.getNumber());
-            builder.append('|');
-            builder.append(syscall.getDescription());
-            builder.append('|');
-            builder.append(syscall.getInputs());
-            builder.append('|');
-            builder.append(syscall.getOutputs());
-            builder.append('|');
+            builder.append("\n|%s|%s|%s|%s|%s|".formatted(
+                syscall.getName(),
+                syscall.getNumber(),
+                syscall.getDescription(),
+                syscall.getInputs(),
+                syscall.getOutputs()
+            ));
         }
 
         return builder.toString();
     }
 
-    public static @NotNull String createInstructionMarkdown(final @NotNull List<? extends Instruction> instructionList) {
+    private static @NotNull String createInstructionMarkdown(final @NotNull List<? extends Instruction> instructionList) {
         final var sorted = instructionList
             .stream()
             .sorted(Comparator.comparing(instruction -> instruction.exampleFormat))
             .toList();
-        final StringBuilder output = new StringBuilder("| Example Usage | Description " +
-            "|\n|---------------|-------------|");
+        final StringBuilder output = new StringBuilder("""
+            | Example Usage | Description |
+            |---------------|-------------|""");
         for (final var instr : sorted) {
-            output.append("\n|");
-            output.append(instr.exampleFormat);
-            output.append('|');
-            output.append(instr.description);
-            output.append('|');
-
+            output.append("\n|%s|%s|".formatted(instr.exampleFormat, instr.description));
         }
         return output.toString();
     }

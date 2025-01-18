@@ -57,7 +57,7 @@ public final class NullString {
      * @throws ExitingException
      *     if any.
      */
-    public static @NotNull String get(final ProgramStatement statement) throws ExitingException {
+    public static @NotNull String get(final @NotNull ProgramStatement statement) throws ExitingException {
         return NullString.get(statement, "a0");
     }
 
@@ -73,7 +73,8 @@ public final class NullString {
      * @throws ExitingException
      *     if it hits a #AddressErrorException
      */
-    public static @NotNull String get(final ProgramStatement statement, final String reg) throws ExitingException {
+    public static @NotNull String get(final @NotNull ProgramStatement statement, final @NotNull String reg) throws
+        ExitingException {
         int byteAddress = REGISTER_FILE.getIntValue(reg);
         final ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
         try {

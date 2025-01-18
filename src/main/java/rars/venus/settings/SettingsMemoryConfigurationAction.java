@@ -53,7 +53,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action class for the Settings menu item for text editor settings.
  */
-public class SettingsMemoryConfigurationAction extends GuiAction {
+public final class SettingsMemoryConfigurationAction extends GuiAction {
     private static final String[] configurationItemNames = {
         ".text base address",
         "data segment base address",

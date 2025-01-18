@@ -2,8 +2,10 @@ package rars.simulator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.exceptions.AddressErrorException;
 import rars.riscv.BasicInstruction;
 
 /*
@@ -104,16 +106,16 @@ public final class BackStepper {
     /**
      * Carry out a "back step", which will undo the latest execution step.
      * Does nothing if backstepping not enabled or if there are no steps to undo.
+     * Note that there may be more than one "step" in an instruction execution; for
+     * instance the multiply, divide, and double-precision floating point operations
+     * all store their result in register pairs which results in two store
+     * operations.
+     * Both must be undone transparently, so we need to detect that multiple steps
+     * happen
+     * together and carry out all of them here.
+     * Use a do-while loop based on the backstep's program statement reference.
      */
 
-    // Note that there may be more than one "step" in an instruction execution; for
-    // instance the multiply, divide, and double-precision floating point operations
-    // all store their result in register pairs which results in two store
-    // operations.
-    // Both must be undone transparently, so we need to detect that multiple steps
-    // happen
-    // together and carry out all of them here.
-    // Use a do-while loop based on the backstep's program statement reference.
     public void backStep() {
         if (this.engaged && !this.backSteps.empty()) {
             final ProgramStatement statement = this.backSteps.peek().ps;
@@ -191,7 +193,7 @@ public final class BackStepper {
      *     The "restore" value to be stored there.
      */
     public void addMemoryRestoreRawWord(final int address, final int value) {
-        this.backSteps.push(Action.MEMORY_RESTORE_RAW_WORD, BackStepper.pc(), address, value);
+        this.backSteps.push(BackstepAction.MEMORY_RESTORE_RAW_WORD, BackStepper.pc(), address, value);
     }
 
     /**
@@ -205,7 +207,7 @@ public final class BackStepper {
      * @return the argument value
      */
     public int addMemoryRestoreWord(final int address, final int value) {
-        this.backSteps.push(Action.MEMORY_RESTORE_WORD, BackStepper.pc(), address, value);
+        this.backSteps.push(BackstepAction.MEMORY_RESTORE_WORD, BackStepper.pc(), address, value);
         return value;
     }
 
@@ -219,7 +221,7 @@ public final class BackStepper {
      * @return a long
      */
     public long addMemoryRestoreDoubleWord(final int address, final long value) {
-        this.backSteps.push(Action.MEMORY_RESTORE_DOUBLE_WORD, BackStepper.pc(), address, value);
+        this.backSteps.push(BackstepAction.MEMORY_RESTORE_DOUBLE_WORD, BackStepper.pc(), address, value);
         return value;
     }
 
@@ -234,7 +236,7 @@ public final class BackStepper {
      * @return the argument value
      */
     public int addMemoryRestoreHalf(final int address, final int value) {
-        this.backSteps.push(Action.MEMORY_RESTORE_HALF, BackStepper.pc(), address, value);
+        this.backSteps.push(BackstepAction.MEMORY_RESTORE_HALF, BackStepper.pc(), address, value);
         return value;
     }
 
@@ -249,7 +251,7 @@ public final class BackStepper {
      * @return the argument value
      */
     public int addMemoryRestoreByte(final int address, final int value) {
-        this.backSteps.push(Action.MEMORY_RESTORE_BYTE, BackStepper.pc(), address, value);
+        this.backSteps.push(BackstepAction.MEMORY_RESTORE_BYTE, BackStepper.pc(), address, value);
         return value;
     }
 
@@ -263,7 +265,7 @@ public final class BackStepper {
      *     The "restore" value to be stored there.
      */
     public void addRegisterFileRestore(final int register, final long value) {
-        this.backSteps.push(Action.REGISTER_RESTORE, BackStepper.pc(), register, value);
+        this.backSteps.push(BackstepAction.REGISTER_RESTORE, BackStepper.pc(), register, value);
     }
 
     /**
@@ -280,7 +282,7 @@ public final class BackStepper {
         // Use "value" insead of "pc()" for value arg because
         // RegisterFile.getProgramCounter()
         // returns branch target address at this point.
-        this.backSteps.push(Action.PC_RESTORE, newValue, newValue);
+        this.backSteps.push(BackstepAction.PC_RESTORE, newValue, newValue);
         return newValue;
     }
 
@@ -294,7 +296,7 @@ public final class BackStepper {
      *     The "restore" value to be stored there.
      */
     public void addControlAndStatusRestore(final int register, final long value) {
-        this.backSteps.push(Action.CONTROL_AND_STATUS_REGISTER_RESTORE, BackStepper.pc(), register, value);
+        this.backSteps.push(BackstepAction.CONTROL_AND_STATUS_REGISTER_RESTORE, BackStepper.pc(), register, value);
     }
 
     /**
@@ -308,7 +310,7 @@ public final class BackStepper {
      *     The "restore" value to be stored there.
      */
     public void addControlAndStatusBackdoor(final int register, final long value) {
-        this.backSteps.push(Action.CONTROL_AND_STATUS_REGISTER_BACKDOOR, BackStepper.pc(), register, value);
+        this.backSteps.push(BackstepAction.CONTROL_AND_STATUS_REGISTER_BACKDOOR, BackStepper.pc(), register, value);
     }
 
     /**
@@ -321,7 +323,7 @@ public final class BackStepper {
      *     The "restore" value to be stored there.
      */
     public void addFloatingPointRestore(final int register, final long value) {
-        this.backSteps.push(Action.FLOATING_POINT_REGISTER_RESTORE, BackStepper.pc(), register, value);
+        this.backSteps.push(BackstepAction.FLOATING_POINT_REGISTER_RESTORE, BackStepper.pc(), register, value);
     }
 
     /**
@@ -336,11 +338,11 @@ public final class BackStepper {
      */
     public void addDoNothing(final int pc) {
         if (this.backSteps.empty() || this.backSteps.peek().pc != pc) {
-            this.backSteps.push(Action.DO_NOTHING, pc);
+            this.backSteps.push(BackstepAction.DO_NOTHING, pc);
         }
     }
 
-    private enum Action {
+    private enum BackstepAction {
         MEMORY_RESTORE_RAW_WORD,
         MEMORY_RESTORE_DOUBLE_WORD,
         MEMORY_RESTORE_WORD,
@@ -354,27 +356,43 @@ public final class BackStepper {
         DO_NOTHING
     }
 
-    // Represents a "back step" (undo action) on the stack.
+    /**
+     * Represents a "back step" (undo action) on the stack.
+     */
     private static class BackStep {
-        private Action action; // what do do MEMORY_RESTORE_WORD, etc
-        private int pc; // program counter value when original step occurred
-        private ProgramStatement ps; // statement whose action is being "undone" here
-        private int param1; // first parameter required by that action
-        private long param2; // optional value parameter required by that action
+        /** what to do MEMORY_RESTORE_WORD, etc */
+        public BackstepAction action = null;
+        /** program counter value when original step occurred */
+        public int pc = 0;
+        /** statement whose action is being "undone" here */
+        public ProgramStatement ps = null;
+        /** first parameter required by that action */
+        public int param1 = 0;
+        /** optional value parameter required by that action */
+        public long param2 = 0;
 
-        // it is critical that BackStep object get its values by calling this method
-        // rather than assigning to individual members, because of the technique used
-        // to set its ps member (and possibly pc).
-        private void assign(final Action act, final int programCounter, final int parm1, final long parm2) {
+        /**
+         * It is critical that BackStep object get its values by calling this method
+         * rather than assigning to individual members, because of the technique used
+         * to set its ps member (and possibly pc).
+         */
+        private void assign(
+            final @NotNull BackstepAction act,
+            final int programCounter,
+            final int param1,
+            final long param2
+        ) {
             this.action = act;
-            this.pc = programCounter;
+            int counter;
+            ProgramStatement statement;
             try {
                 // Client does not have direct access to program statement, and rather than
                 // making all
                 // of them go through the methods below to obtain it, we will do it here.
                 // Want the program statement but do not want observers notified.
-                this.ps = Globals.MEMORY_INSTANCE.getStatementNoNotify(programCounter);
-            } catch (final Exception e) {
+                statement = Globals.MEMORY_INSTANCE.getStatementNoNotify(programCounter);
+                counter = programCounter;
+            } catch (final AddressErrorException e) {
                 // The only situation causing this so far: user modifies memory or register
                 // contents through direct manipulation on the GUI, after assembling the program
                 // but
@@ -382,38 +400,34 @@ public final class BackStepper {
                 // The action will not be associated with any instruction, but will be carried
                 // out
                 // when popped.
-                this.ps = null;
-                this.pc = BackStepper.NOT_PC_VALUE; // Backstep method above will see this as flag to not set PC
+                statement = null;
+                counter = BackStepper.NOT_PC_VALUE; // Backstep method above will see this as flag to not set PC
             }
-            this.param1 = parm1;
-            this.param2 = parm2;
-            /*
-             * System.out.println("backstep PUSH: action "+action+" pc "+rars.util.Binary.
-             * intToHexString(pc)+
-             * " source "+((ps==null)? "none":ps.getSource())+
-             * " parm1 "+param1+" parm2 "+param2);
-             */
+            this.ps = statement;
+            this.pc = counter;
+            this.param1 = param1;
+            this.param2 = param2;
         }
     }
 
-    // *****************************************************************************
-    // special purpose stack class for backstepping. You've heard of circular queues
-    // implemented with an array, right? This is a circular stack! When full, the
-    // newly-pushed item overwrites the oldest item, with circular top! All
-    // operations
-    // are constant time. It's synchronized too, to be safe (is used by both the
-    // simulation thread and the GUI thread for the back-step button).
-    // Upon construction, it is filled with newly-created empty BackStep objects
-    // which
-    // will exist for the life of the stack. Push does not create a BackStep object
-    // but instead overwrites the contents of the existing one. Thus during RISCV
-    // program (simulated) execution, BackStep objects are never created or junked
-    // regardless of how many steps are executed. This will speed things up a bit
-    // and make life easier for the garbage collector.
-
+    /**
+     * Special purpose stack class for backstepping. You've heard of circular queues
+     * implemented with an array, right? This is a circular stack! When full, the
+     * newly-pushed item overwrites the oldest item, with circular top! All
+     * operations
+     * are constant time. It's synchronized too, to be safe (is used by both the
+     * simulation thread and the GUI thread for the back-step button).
+     * Upon construction, it is filled with newly-created empty BackStep objects
+     * which
+     * will exist for the life of the stack. Push does not create a BackStep object
+     * but instead overwrites the contents of the existing one. Thus during RISCV
+     * program (simulated) execution, BackStep objects are never created or junked
+     * regardless of how many steps are executed. This will speed things up a bit
+     * and make life easier for the garbage collector.
+     */
     private static final class BackstepStack {
         private final int capacity;
-        private final BackStep[] stack;
+        private final @NotNull BackStep @NotNull [] stack;
         private int size;
         private int top;
 
@@ -436,7 +450,12 @@ public final class BackStepper {
             return this.size == 0;
         }
 
-        private synchronized void push(final Action act, final int programCounter, final int parm1, final long parm2) {
+        private synchronized void push(
+            final @NotNull BackStepper.BackstepAction act,
+            final int programCounter,
+            final int param1,
+            final long param2
+        ) {
             if (this.size == 0) {
                 this.top = 0;
                 this.size++;
@@ -448,19 +467,21 @@ public final class BackStepper {
             }
             // We'll re-use existing objects rather than create/discard each time.
             // Must use assign() method rather than series of assignment statements!
-            this.stack[this.top].assign(act, programCounter, parm1, parm2);
+            this.stack[this.top].assign(act, programCounter, param1, param2);
         }
 
-        private synchronized void push(final Action act, final int programCounter, final int parm1) {
-            this.push(act, programCounter, parm1, 0);
+        private synchronized void push(final @NotNull BackstepAction act, final int programCounter, final int param1) {
+            this.push(act, programCounter, param1, 0);
         }
 
-        private synchronized void push(final Action act, final int programCounter) {
+        private synchronized void push(final @NotNull BackstepAction act, final int programCounter) {
             this.push(act, programCounter, 0, 0);
         }
 
-        // NO PROTECTION. This class is used only within this file so there is no excuse
-        // for trying to pop from empty stack.
+        /**
+         * NO PROTECTION. This class is used only within this file so there is no excuse
+         * for trying to pop from empty stack.
+         */
         private synchronized BackStep pop() {
             final BackStep bs = this.stack[this.top];
             if (this.size == 1) {
@@ -472,12 +493,12 @@ public final class BackStepper {
             return bs;
         }
 
-        // NO PROTECTION. This class is used only within this file so there is no excuse
-        // for trying to peek from empty stack.
+        /**
+         * NO PROTECTION. This class is used only within this file so there is no excuse
+         * for trying to peek from empty stack.
+         */
         private synchronized BackStep peek() {
             return this.stack[this.top];
         }
-
     }
-
 }

@@ -39,7 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action class for the Settings menu item for text editor settings.
  */
-public class SettingsEditorAction extends GuiAction {
+public final class SettingsEditorAction extends GuiAction {
 
     /**
      * Create a new SettingsEditorAction. Has all the GuiAction parameters.

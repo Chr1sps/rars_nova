@@ -129,8 +129,12 @@ public final class RegisterFile extends RegisterFileBase {
 
     public int setProgramCounter(final int value) {
         try {
-            return (int) this.updateRegister(this.pc, value);
-        } catch (SimulationException e) {
+            final var oldValue = (int) this.updateRegister(this.pc, value);
+            if (OtherSettings.getBackSteppingEnabled()) {
+                Globals.program.getBackStepper().addPCRestore(oldValue);
+            }
+            return oldValue;
+        } catch (final SimulationException e) {
             throw new RuntimeException(e);
         }
     }

@@ -1,6 +1,7 @@
 package rars.venus.settings.editor.controllers;
 
 import org.jetbrains.annotations.NotNull;
+import rars.settings.FontSettings;
 import rars.util.FontWeight;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.settings.editor.views.FontSettingsView;
@@ -9,11 +10,10 @@ import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
-import static rars.Globals.FONT_SETTINGS;
-
 public final class FontSettingsController {
     private final @NotNull FontSettingsView view;
     private final @NotNull TextEditingArea textArea;
+    private final @NotNull FontSettings settings;
 
     private boolean ligaturesEnabled;
     private int fontSize;
@@ -22,10 +22,12 @@ public final class FontSettingsController {
 
     public FontSettingsController(
         final @NotNull FontSettingsView view,
-        final @NotNull TextEditingArea textArea
+        final @NotNull TextEditingArea textArea,
+        final @NotNull FontSettings settings
     ) {
         this.view = view;
         this.textArea = textArea;
+        this.settings = settings;
         resetButtonValues();
         initializeControls();
     }
@@ -68,17 +70,17 @@ public final class FontSettingsController {
     }
 
     public void applySettings() {
-        FONT_SETTINGS.setFontFamily(this.fontFamily);
-        FONT_SETTINGS.setFontSize(this.fontSize);
-        FONT_SETTINGS.isLigaturized = this.ligaturesEnabled;
-        FONT_SETTINGS.fontWeight = this.fontWeight;
-        FONT_SETTINGS.saveSettingsToPreferences();
+        this.settings.setFontFamily(this.fontFamily);
+        this.settings.setFontSize(this.fontSize);
+        this.settings.isLigaturized = this.ligaturesEnabled;
+        this.settings.fontWeight = this.fontWeight;
+        this.settings.saveSettingsToPreferences();
     }
 
     public void resetButtonValues() {
-        this.ligaturesEnabled = FONT_SETTINGS.isLigaturized;
-        this.fontFamily = FONT_SETTINGS.getFontFamily();
-        this.fontSize = FONT_SETTINGS.getFontSize();
-        this.fontWeight = FONT_SETTINGS.fontWeight;
+        this.ligaturesEnabled = this.settings.isLigaturized;
+        this.fontFamily = this.settings.getFontFamily();
+        this.fontSize = this.settings.getFontSize();
+        this.fontWeight = this.settings.fontWeight;
     }
 }

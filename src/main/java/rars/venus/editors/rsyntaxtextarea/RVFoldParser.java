@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
-public final class RVFoldParser implements FoldParser {
+final class RVFoldParser implements FoldParser {
     private static boolean canBeAChildInList(
         final @NotNull List<@NotNull FoldData> folds,
         final @NotNull FoldData element
@@ -132,6 +132,7 @@ public final class RVFoldParser implements FoldParser {
     }
 
     // region getFolds methods
+
     private static @NotNull List<Fold> getFoldsBase(
         final @NotNull RSyntaxTextArea textArea,
         final @NotNull FoldParserCallback callback
@@ -266,9 +267,11 @@ public final class RVFoldParser implements FoldParser {
             }
         );
     }
+
     // endregion getFolds methods
 
     // region Token line predicates
+
     private static boolean hasALabel(final Token tokens) {
         return lineContainsToken(tokens, (token) -> token.getType() == tokenValue(RVTokenType.LABEL));
     }
@@ -328,6 +331,7 @@ public final class RVFoldParser implements FoldParser {
         }
         return false;
     }
+
     // endregion Token line predicates
 
     private static @Nullable Token findToken(
@@ -364,8 +368,8 @@ public final class RVFoldParser implements FoldParser {
         ) throws BadLocationException;
     }
 
-    private record FoldData(@NotNull Fold baseFold, @NotNull List<FoldData> children) {
-        public FoldData(@NotNull final Fold baseFold) {
+    private record FoldData(@NotNull Fold baseFold, @NotNull ArrayList<@NotNull FoldData> children) {
+        private FoldData(@NotNull final Fold baseFold) {
             this(baseFold, new ArrayList<>());
         }
 

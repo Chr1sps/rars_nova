@@ -84,7 +84,7 @@ public final class FloatingPointRegisterFile extends RegisterFileBase {
         final var longValue = value | 0xFFFFFFFF_00000000L; // NAN box if used as float
         try {
             this.updateRegister(register, longValue);
-        } catch (SimulationException e) {
+        } catch (final SimulationException e) {
             throw new RuntimeException(e);
         }
     }

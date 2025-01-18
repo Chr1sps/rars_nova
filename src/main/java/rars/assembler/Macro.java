@@ -67,7 +67,7 @@ public final class Macro {
 
     /**
      * replaces token {@code tokenToBeReplaced} which is occurred in
-     * {@code source} with <code>substitute</code>.
+     * {@code source} with {@code substitute}.
      *
      * @param source
      * @param tokenToBeReplaced
@@ -129,7 +129,7 @@ public final class Macro {
      *
      * @return a {@link java.lang.String} object
      */
-    public String getName() {
+    public @NotNull String getName() {
         return this.name;
     }
 
@@ -139,7 +139,7 @@ public final class Macro {
      * @param name
      *     a {@link java.lang.String} object
      */
-    public void setName(final String name) {
+    public void setName(final @NotNull String name) {
         this.name = name;
     }
 
@@ -158,7 +158,7 @@ public final class Macro {
      * @param program
      *     a {@link RISCVProgram} object
      */
-    public void setProgram(final RISCVProgram program) {
+    public void setProgram(final @Nullable RISCVProgram program) {
         this.program = program;
     }
 

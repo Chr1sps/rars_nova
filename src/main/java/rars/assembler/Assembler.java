@@ -13,6 +13,7 @@ import rars.riscv.Instruction;
 import rars.riscv.InstructionsRegistry;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
+import rars.util.Pair;
 import rars.util.SystemIO;
 import rars.venus.NumberDisplayBaseChooser;
 
@@ -146,6 +147,20 @@ public final class Assembler {
             && tokens.get(1).getType() == TokenType.COLON;
     }
 
+    public static @NotNull Pair<@NotNull List<@NotNull ProgramStatement>, @NotNull ErrorList> assemble(
+        final @NotNull List<@NotNull RISCVProgram> tokenizedProgramFiles,
+        final boolean extendedAssemblerEnabled,
+        final boolean warningsAreErrors
+    ) throws AssemblyException {
+        final var assembler = new Assembler();
+        final var machineList = assembler.assembleImpl(
+            tokenizedProgramFiles,
+            extendedAssemblerEnabled,
+            warningsAreErrors
+        );
+        return Pair.of(machineList, assembler.errors);
+    }
+
     /**
      * Get list of assembler errors and warnings
      *
@@ -186,13 +201,13 @@ public final class Assembler {
      *     if any.
      * @see ProgramStatement
      */
-    public @Nullable List<@NotNull ProgramStatement> assemble(
+    private @NotNull List<@NotNull ProgramStatement> assembleImpl(
         final @NotNull List<@NotNull RISCVProgram> tokenizedProgramFiles,
         final boolean extendedAssemblerEnabled,
         final boolean warningsAreErrors
     ) throws AssemblyException {
         if (tokenizedProgramFiles.isEmpty()) {
-            return null;
+            throw new IllegalStateException("No source code to assemble.");
         }
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.textAddress = memoryConfiguration.textBaseAddress;
@@ -1084,30 +1099,34 @@ public final class Assembler {
      * NOTE: The token itself may be a label, in which case the correct action is
      * to store the address of that label (into however many bytes specified).
      */
-    private void storeInteger(final @NotNull Token token, final Directive directive, final ErrorList errors) {
+    private void storeInteger(
+        final @NotNull Token token,
+        final @NotNull Directive directive,
+        final @NotNull ErrorList errors
+    ) {
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
         if (TokenType.isIntegerTokenType(token.getType())) {
             int value;
-            final long longvalue;
+            final long longValue;
             if (TokenType.INTEGER_64 == token.getType()) {
-                longvalue = BinaryUtils.stringToLong(token.getText());
-                value = (int) longvalue;
+                longValue = BinaryUtils.stringToLong(token.getText());
+                value = (int) longValue;
                 if (directive != Directive.DWORD) {
                     final var message = "value %s is out-of-range and truncated to %s"
                         .formatted(
-                            BinaryUtils.longToHexString(longvalue),
+                            BinaryUtils.longToHexString(longValue),
                             BinaryUtils.intToHexString(value)
                         );
                     errors.addWarning(token, message);
                 }
             } else {
                 value = BinaryUtils.stringToInt(token.getText());
-                longvalue = value;
+                longValue = value;
             }
 
             if (directive == Directive.DWORD) {
-                this.writeToDataSegment((int) longvalue, 4, token, errors);
-                this.writeToDataSegment((int) (longvalue >> 32), 4, token, errors);
+                this.writeToDataSegment((int) longValue, 4, token, errors);
+                this.writeToDataSegment((int) (longValue >> 32), 4, token, errors);
                 return;
             }
 
@@ -1188,7 +1207,11 @@ public final class Assembler {
      * directive.
      * Called by storeNumeric()
      */
-    private void storeRealNumber(final @NotNull Token token, final Directive directive, final ErrorList errors) {
+    private void storeRealNumber(
+        final @NotNull Token token,
+        final @NotNull Directive directive,
+        final @NotNull ErrorList errors
+    ) {
         final int lengthInBytes = DataTypes.getLengthInBytes(directive);
         final double value;
 
@@ -1234,7 +1257,11 @@ public final class Assembler {
      * latter stores a terminating null byte. Can handle a list of one or more
      * strings on a single line.
      */
-    private void storeStrings(final @NotNull TokenList tokens, final Directive direct, final ErrorList errors) {
+    private void storeStrings(
+        final @NotNull TokenList tokens,
+        final @NotNull Directive direct,
+        final @NotNull ErrorList errors
+    ) {
         // Correctly handles case where this is a "directive continuation" line.
         final var isFirstDirective = tokens.get(0).getType() == TokenType.DIRECTIVE;
         tokens.stream()

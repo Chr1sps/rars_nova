@@ -51,7 +51,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Action class for the Run -> Go menu item (and toolbar icon)
  */
-public class RunGoAction extends GuiAction {
+public final class RunGoAction extends GuiAction {
 
     public static final int defaultMaxSteps = -1; // "forever", formerly 10000000; // 10 million
     public static int maxSteps = RunGoAction.defaultMaxSteps;

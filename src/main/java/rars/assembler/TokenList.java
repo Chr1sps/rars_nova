@@ -74,6 +74,8 @@ public final class TokenList implements Cloneable, Collection<Token> {
         return this.tokenList.toArray(a);
     }
 
+    // DPS 03-Jan-2013/
+
     /**
      * Retrieve the source line String associated with this
      * token list. It may or may not have been modified during
@@ -81,10 +83,11 @@ public final class TokenList implements Cloneable, Collection<Token> {
      *
      * @return The source line for this token list.
      */
-    // DPS 03-Jan-2013/
     public @NotNull String getProcessedLine() {
         return this.processedLine;
     }
+
+    // DPS 03-Jan-2013
 
     /**
      * Use this to record the source line String for this token list
@@ -95,7 +98,6 @@ public final class TokenList implements Cloneable, Collection<Token> {
      * @param line
      *     The source line, possibly modified (possibly not)
      */
-    // DPS 03-Jan-2013
     public void setProcessedLine(final @NotNull String line) {
         this.processedLine = line;
     }
@@ -193,7 +195,7 @@ public final class TokenList implements Cloneable, Collection<Token> {
     /**
      * Returns empty/non-empty status of list.
      *
-     * @return {@code true} if list has no tokens, else <code>false</code>.
+     * @return {@code true} if list has no tokens, else {@code false}.
      */
     @Override
     public boolean isEmpty() {
@@ -213,11 +215,11 @@ public final class TokenList implements Cloneable, Collection<Token> {
      */
     @Override
     public String toString() {
-        final StringBuilder stringified = new StringBuilder();
-        for (final Token token : this.tokenList) {
-            stringified.append(token.toString()).append(" ");
+        final var builder = new StringBuilder();
+        for (final var token : this.tokenList) {
+            builder.append(token.toString()).append(" ");
         }
-        return stringified.toString();
+        return builder.toString();
     }
 
     /**
@@ -225,13 +227,13 @@ public final class TokenList implements Cloneable, Collection<Token> {
      *
      * @return the cloned list.
      */
-    // Clones are a bit tricky. super.clone() handles primitives (e.g. values)
-    // correctly
-    // but the ArrayList itself has to be cloned separately -- otherwise clone will
-    // have
-    // alias to original token list!!
     @Override
     public Object clone() {
+        // Clones are a bit tricky. super.clone() handles primitives (e.g. values)
+        // correctly
+        // but the ArrayList itself has to be cloned separately -- otherwise clone will
+        // have
+        // alias to original token list!!
         try {
             final TokenList t = (TokenList) super.clone();
             t.tokenList = new ArrayList<>(this.tokenList);

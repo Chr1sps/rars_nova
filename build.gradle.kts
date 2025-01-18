@@ -1,11 +1,3 @@
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
-
 plugins {
     java
     application
@@ -83,7 +75,7 @@ tasks {
         docletOptions.apply {
             encoding = "UTF-8"
             docletpath = graphDoclet.files.toList()
-//            doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
+            doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
         }
     }
 }

@@ -326,7 +326,7 @@ public final class MessagesPane extends JTabbedPane {
      *     Prompt to display to the user.
      * @return User input.
      */
-    public String getInputString(final String prompt) {
+    public String getInputStringFromDialog(final String prompt) {
         final boolean lock = Globals.MEMORY_REGISTERS_LOCK.isHeldByCurrentThread();
         if (lock) {
             Globals.MEMORY_REGISTERS_LOCK.unlock();

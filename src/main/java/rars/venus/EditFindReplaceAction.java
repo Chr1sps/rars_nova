@@ -97,7 +97,7 @@ public final class EditFindReplaceAction extends GuiAction {
 
             this.caseSensitiveCheckBox = new JCheckBox("Case Sensitive", EditFindReplaceAction.caseSensitivity);
             this.resultsLabel = new JLabel("");
-            this.resultsLabel.setForeground(Color.RED);
+            // this.resultsLabel.setForeground(Color.RED);
             this.resultsLabel.setToolTipText(FindReplaceDialog.RESULTS_TOOL_TIP_TEXT);
             dialogPanel.add(buildOptionsPanel(caseSensitiveCheckBox, resultsLabel));
 

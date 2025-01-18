@@ -38,5 +38,6 @@ public final class OtherSettingsView extends JPanel {
         );
         this.tabSizeSpinner = tabSizePicker.component;
         this.add(buildRow(true, blinkRatePicker, tabSizePicker));
+        this.add(Box.createVerticalGlue());
     }
 }

@@ -46,7 +46,7 @@ public final class Utils {
                     syscall instanceof SyscallPrintString ||
                     syscall instanceof SyscallWrite;
             if (!is_writing) {
-                SystemIO.flush(true);
+                SystemIO.flush();
             }
             syscall.simulate(statement);
             return;

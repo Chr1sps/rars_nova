@@ -28,7 +28,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -90,31 +89,30 @@ public final class VenusUI extends JFrame {
     public final @NotNull Editor editor;
     public final @NotNull RunSpeedPanel runSpeedPanel;
     // PLEASE PUT THESE TWO (& THEIR METHODS) SOMEWHERE THEY BELONG, NOT HERE
-    /// registers/memory reset for execution
-    public boolean isMemoryReset = true;
-    public boolean isExecutionStarted = false;
+    private final @NotNull Action fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction;
+    private final @NotNull Action fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction;
 
     // The "action" objects, which include action listeners. One of each will be
     // created then
     // shared between a menu item and its corresponding toolbar button. This is a
     // very cool
     // technique because it relates the button and menu item so closely
-
-    private Action fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction;
-    private Action fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction;
-    private Action editUndoAction;
-    private Action editRedoAction;
-    private Action editCutAction, editCopyAction, editPasteAction, editFindReplaceAction;
-    private Action runAssembleAction, runGoAction, runStepAction, runBackstepAction, runResetAction,
+    private final @NotNull Action editUndoAction;
+    private final @NotNull Action editRedoAction;
+    private final @NotNull Action editCutAction, editCopyAction, editPasteAction, editFindReplaceAction;
+    private final @NotNull Action runAssembleAction, runGoAction, runStepAction, runBackstepAction, runResetAction,
         runStopAction, runPauseAction, runClearBreakpointsAction, runToggleBreakpointsAction;
-    private Action settingsLabelAction, settingsDarkModeAction, settingsPopupInputAction,
+    private final @NotNull Action settingsLabelAction, settingsDarkModeAction, settingsPopupInputAction,
         settingsValueDisplayBaseAction,
         settingsAddressDisplayBaseAction,
         settingsExtendedAction, settingsAssembleOnOpenAction, settingsAssembleOpenAction, settingsAssembleAllAction,
         settingsWarningsAreErrorsAction, settingsStartAtMainAction, settingsProgramArgumentsAction,
         settingsExceptionHandlerAction, settingsEditorAction, settingsMemoryConfigurationAction,
         settingsSelfModifyingCodeAction, settingsRV64Action, settingsDeriveCurrentWorkingDirectoryAction;
-    private Action helpHelpAction, helpAboutAction;
+    private final @NotNull Action helpHelpAction, helpAboutAction;
+    /// registers/memory reset for execution
+    public boolean isMemoryReset = true;
+    public boolean isExecutionStarted = false;
 
     /**
      * Constructor for the Class. Sets up a window object for the UI
@@ -153,14 +151,13 @@ public final class VenusUI extends JFrame {
             (int) (screenHeight * registersHeightPct)
         );
 
-        // image courtesy of NASA/JPL.
-        final URL im = this.getClass().getResource(Globals.imagesPath + "RISC-V.png");
-        if (im == null) {
+        final var imageUrl = this.getClass().getResource(Globals.imagesPath + "RISC-V.png");
+        if (imageUrl == null) {
             VenusUI.LOGGER.fatal("Internal Error: images folder or file not found.");
             System.exit(0);
         }
-        final Image mars = Toolkit.getDefaultToolkit().getImage(im);
-        this.setIconImage(mars);
+        final var rvImage = Toolkit.getDefaultToolkit().getImage(imageUrl);
+        this.setIconImage(rvImage);
         // Everything in frame will be arranged on JPanel "center", which is only frame
         // component.
         // "center" has BorderLayout and 2 major components:
@@ -197,7 +194,345 @@ public final class VenusUI extends JFrame {
         horizontalLayout.add(this.registersPane, BorderLayout.EAST);
 
         // due to dependencies, do not set up menu/toolbar until now.
-        this.createActionObjects();
+
+        // region Action objects
+
+        this.fileNewAction = new GuiAction(
+            "New",
+            VenusUI.loadIcon("New22.png"),
+            "Create a new file for editing", KeyEvent.VK_N, VenusUI.makeShortcut(KeyEvent.VK_N),
+            VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.editor.newFile();
+            }
+        };
+        this.fileOpenAction = new GuiAction(
+            "Open ...", VenusUI.loadIcon("Open22.png"),
+            "Open a file for editing", KeyEvent.VK_O, VenusUI.makeShortcut(KeyEvent.VK_O),
+            VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.editor.openFile();
+            }
+        };
+        this.fileCloseAction = new GuiAction(
+            "Close", null, "Close the current file", KeyEvent.VK_C,
+            VenusUI.makeShortcut(KeyEvent.VK_W),
+            VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.editor.close();
+            }
+        };
+        this.fileCloseAllAction = new GuiAction(
+            "Close All", null, "Close all open files",
+            KeyEvent.VK_L, null,
+            VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.editor.closeAll();
+            }
+        };
+        this.fileSaveAction = new GuiAction(
+            "Save", VenusUI.loadIcon("Save22.png"), "Save the current file",
+            KeyEvent.VK_S, VenusUI.makeShortcut(KeyEvent.VK_S), VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.editor.save();
+            }
+        };
+        this.fileSaveAsAction = new GuiAction(
+            "Save as ...", VenusUI.loadIcon("SaveAs22.png"),
+            "Save current file with different name", KeyEvent.VK_A, null, VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.editor.saveAs();
+            }
+        };
+        this.fileSaveAllAction = new GuiAction(
+            "Save All", null, "Save all open files",
+            KeyEvent.VK_V, null, VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.editor.saveAll();
+            }
+        };
+        this.fileDumpMemoryAction = new FileDumpMemoryAction(
+            "Dump Memory ...", VenusUI.loadIcon("Dump22.png"),
+            "Dump machine code or data in an available format", KeyEvent.VK_D,
+            VenusUI.makeShortcut(KeyEvent.VK_D),
+            this
+        );
+        this.fileExitAction = new GuiAction("Exit", null, "Exit Rars", KeyEvent.VK_X, null, VenusUI.this) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                if (VenusUI.this.editor.closeAll()) {
+                    System.exit(0);
+                }
+            }
+        };
+
+        this.editUndoAction = new GuiAction(
+            "Undo", VenusUI.loadIcon("Undo22.png"), "Undo last edit",
+            KeyEvent.VK_U, VenusUI.makeShortcut(KeyEvent.VK_Z), VenusUI.this
+        ) {
+            {
+                this.setEnabled(false);
+            }
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final EditPane editPane = VenusUI.this.mainPane.getEditPane();
+                if (editPane != null) {
+                    editPane.undo();
+                    VenusUI.this.updateUndoAndRedoState();
+                }
+            }
+        };
+        this.editRedoAction = new GuiAction(
+            "Redo", VenusUI.loadIcon("Redo22.png"), "Redo last edit",
+            KeyEvent.VK_R, VenusUI.makeShortcut(KeyEvent.VK_Y), VenusUI.this
+        ) {
+            {
+                this.setEnabled(false);
+            }
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final EditPane editPane = VenusUI.this.mainPane.getEditPane();
+                if (editPane != null) {
+                    editPane.redo();
+                    VenusUI.this.updateUndoAndRedoState();
+                }
+            }
+        };
+        this.editCutAction = new GuiAction(
+            "Cut", VenusUI.loadIcon("Cut22.gif"), "Cut", KeyEvent.VK_C,
+            VenusUI.makeShortcut(KeyEvent.VK_X), VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.mainPane.getEditPane().cutText();
+            }
+        };
+        this.editCopyAction = new GuiAction(
+            "Copy", VenusUI.loadIcon("Copy22.png"), "Copy", KeyEvent.VK_O,
+            VenusUI.makeShortcut(KeyEvent.VK_C), VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.mainPane.getEditPane().copyText();
+            }
+        };
+        this.editPasteAction = new GuiAction(
+            "Paste", VenusUI.loadIcon("Paste22.png"), "Paste", KeyEvent.VK_P,
+            VenusUI.makeShortcut(KeyEvent.VK_V), VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                VenusUI.this.mainPane.getEditPane().pasteText();
+            }
+        };
+        this.editFindReplaceAction = new EditFindReplaceAction(
+            "Find/Replace", VenusUI.loadIcon("Find22.png"),
+            "Find/Replace", KeyEvent.VK_F, VenusUI.makeShortcut(KeyEvent.VK_F), this
+        );
+
+        this.runAssembleAction = new RunAssembleAction(
+            "Assemble", VenusUI.loadIcon("Assemble22.png"),
+            "Assemble the current file and clear breakpoints", KeyEvent.VK_A,
+            KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0), this
+        );
+        this.runGoAction = new RunGoAction(
+            "Go", VenusUI.loadIcon("Play22.png"), "Run the current program",
+            KeyEvent.VK_G, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), this
+        );
+        this.runStepAction = new RunStepAction(
+            "Step", VenusUI.loadIcon("StepForward22.png"),
+            "Run one step at a time", KeyEvent.VK_T, KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), this
+        );
+        this.runBackstepAction = new RunBackstepAction(
+            "Backstep", VenusUI.loadIcon("StepBack22.png"),
+            "Undo the last step", KeyEvent.VK_B, KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0), this
+        );
+        this.runPauseAction = new GuiAction(
+            "Pause", VenusUI.loadIcon("Pause22.png"),
+            "Pause the currently running program", KeyEvent.VK_P, KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0),
+            VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                Globals.SIMULATOR.pauseExecution();
+                // RunGoAction's "paused" method will do the cleanup.
+            }
+        };
+        this.runStopAction = new GuiAction(
+            "Stop", VenusUI.loadIcon("Stop22.png"),
+            "Stop the currently running program", KeyEvent.VK_S, KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0),
+            VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                Globals.SIMULATOR.stopExecution();
+                // RunGoAction's "stopped" method will take care of the cleanup.
+            }
+        };
+        this.runResetAction = new RunResetAction(
+            "Reset", VenusUI.loadIcon("Reset22.png"), "Reset memory and " +
+            "registers",
+            KeyEvent.VK_R, KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0), this
+        );
+        this.runClearBreakpointsAction = new RunClearBreakpointsAction(
+            "Clear all breakpoints", null,
+            "Clears all execution breakpoints set since the last assemble.", KeyEvent.VK_K,
+            VenusUI.makeShortcut(KeyEvent.VK_K), this
+        );
+        this.runToggleBreakpointsAction = new GuiAction(
+            "Toggle all breakpoints", null,
+            "Disable/enable all breakpoints without clearing (can also click Bkpt column header)",
+            KeyEvent.VK_T, VenusUI.makeShortcut(KeyEvent.VK_T), VenusUI.this
+        ) {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                // settingsLabelAction.actionPerformed(e);
+                VenusUI.this.mainPane.executePane.textSegment.toggleBreakpoints();
+            }
+        };
+        this.settingsLabelAction = new SettingsAction(
+            "Show Labels Window (symbol table)",
+            "Toggle visibility of Labels window (symbol table) in the Execute tab",
+            BoolSetting.LABEL_WINDOW_VISIBILITY, this, (value) -> {
+            this.mainPane.executePane.setLabelWindowVisibility(value);
+            VenusUI.LOGGER.info("ExecutePane reference 2");
+        }
+        );
+        this.settingsDarkModeAction = new SettingsAction(
+            "Dark mode", "Toggle between light and dark mode",
+            BoolSetting.DARK_MODE, this, this::setDarkModeState
+        );
+
+        this.settingsPopupInputAction = new SettingsAction(
+            "Popup dialog for input syscalls (5,6,7,8,12)",
+            "If set, use popup dialog for input syscalls (5,6,7,8,12) instead of cursor in Run I/O window",
+            BoolSetting.POPUP_SYSCALL_INPUT, this, (v) -> {
+        }
+        );
+
+        this.settingsValueDisplayBaseAction = new SettingsAction(
+            "Values displayed in hexadecimal",
+            "Toggle between hexadecimal and decimal display of memory/register values",
+            BoolSetting.DISPLAY_VALUES_IN_HEX, this,
+            this.mainPane.executePane.valueDisplayBase::setSelected
+        );
+        this.settingsAddressDisplayBaseAction = new SettingsAction(
+            "Addresses displayed in hexadecimal",
+            "Toggle between hexadecimal and decimal display of memory addresses",
+            BoolSetting.DISPLAY_ADDRESSES_IN_HEX, this, this.mainPane.executePane.addressDisplayBase::setSelected
+        );
+        this.settingsExtendedAction = new SettingsAction(
+            "Permit extended (usePseudoInstructions) instructions " +
+                "and formats",
+            "If set, extended (usePseudoInstructions) instructions are formats are permitted.",
+            BoolSetting.EXTENDED_ASSEMBLER_ENABLED, this
+        );
+        this.settingsAssembleOnOpenAction = new SettingsAction(
+            "Assemble file upon opening",
+            "If set, a file will be automatically assembled as soon as it is opened.  File Open dialog will " +
+                "show most recently opened file.",
+            BoolSetting.ASSEMBLE_ON_OPEN, this
+        );
+        this.settingsAssembleAllAction = new SettingsAction(
+            "Assemble all files in directory",
+            "If set, all files in current directory will be assembled when Assemble operation is selected.",
+            BoolSetting.ASSEMBLE_ALL, this
+        );
+        this.settingsAssembleOpenAction = new SettingsAction(
+            "Assemble all files currently open",
+            "If set, all files currently open for editing will be assembled when Assemble operation is " +
+                "selected.",
+            BoolSetting.ASSEMBLE_OPEN, this
+        );
+        this.settingsWarningsAreErrorsAction = new SettingsAction(
+            "Assembler warnings are considered errors",
+            "If set, assembler warnings will be interpreted as errors and prevent successful assembly.",
+            BoolSetting.WARNINGS_ARE_ERRORS, this
+        );
+        this.settingsStartAtMainAction = new SettingsAction(
+            "Initialize Program Counter to global 'main' if " +
+                "defined",
+            "If set, assembler will initialize Program Counter to text address globally labeled 'main', if " +
+                "defined.",
+            BoolSetting.START_AT_MAIN, this
+        );
+        this.settingsProgramArgumentsAction = new SettingsAction(
+            "Program arguments provided to program",
+            "If set, program arguments for the program can be entered in border of Text Segment window.",
+            BoolSetting.PROGRAM_ARGUMENTS, this, (selected) -> {
+            if (selected) {
+                this.mainPane.executePane.textSegment.addProgramArgumentsPanel();
+            } else {
+                this.mainPane.executePane.textSegment.removeProgramArgumentsPanel();
+            }
+        }
+        )
+        ;
+        this.settingsSelfModifyingCodeAction = new SettingsAction(
+            "Self-modifying code",
+            "If set, the program can write and branch to both text and data segments.",
+            BoolSetting.SELF_MODIFYING_CODE_ENABLED, this
+        );
+
+        this.settingsRV64Action = new SettingsAction(
+            "64 bit",
+            "If set, registers are 64 bits wide and new instructions are available",
+            BoolSetting.RV64_ENABLED, this, (isRV64) -> {
+            InstructionsRegistry.RV64_MODE_FLAG = isRV64;
+            this.registersTab.updateRegisters();
+            this.floatingPointTab.updateRegisters();
+            this.csrTab.updateRegisters();
+        }
+        );
+        this.settingsDeriveCurrentWorkingDirectoryAction = new SettingsAction(
+            "Derive current working directory",
+            "If set, the working directory is derived from the main file instead of the RARS executable " +
+                "directory.",
+            BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY, this
+        );
+
+        this.settingsEditorAction = new SettingsEditorAction(
+            "Editor...", null,
+            "View and modify text editor settings.", null, null, this
+        );
+        this.settingsExceptionHandlerAction = new SettingsExceptionHandlerAction(
+            "Exception Handler...", null,
+            "If set, the specified exception handler file will be included in all Assemble operations.",
+            null, null, this
+        );
+        this.settingsMemoryConfigurationAction = new SettingsMemoryConfigurationAction(
+            "Memory Configuration...",
+            null, "View and modify memory segment base addresses for the simulated processor",
+            null, null, this
+        );
+
+        this.helpHelpAction = new HelpHelpAction(
+            "Help", VenusUI.loadIcon("Help22.png"),
+            "Help", KeyEvent.VK_H, KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0), this
+        );
+        this.helpAboutAction = new HelpAboutAction(
+            "About ...", null,
+            "Information about Rars", null, null, this
+        );
+
+        // endregion Action objects
+
         this.menu = this.setUpMenuBar();
         this.setJMenuBar(this.menu);
 
@@ -306,8 +641,7 @@ public final class VenusUI extends JFrame {
 
     private static @NotNull ImageIcon loadIcon(final @NotNull String name) {
         final var resource = VenusUI.class.getResource(Globals.imagesPath + name);
-        return new ImageIcon(
-            Toolkit.getDefaultToolkit().getImage(resource));
+        return new ImageIcon(Toolkit.getDefaultToolkit().getImage(resource));
     }
 
     private void setInitialDarkModeState(final boolean isDarkMode) {
@@ -336,355 +670,6 @@ public final class VenusUI extends JFrame {
 
         } catch (final UnsupportedLookAndFeelException e) {
             LOGGER.error("Error when loading look and feel.", e);
-        }
-    }
-
-    /*
-     * Action objects are used instead of action listeners because one can be easily
-     * shared between
-     * a menu item and a toolbar button. Does nice things like disable both if the
-     * action is
-     * disabled, etc.
-     */
-    private void createActionObjects() {
-        try {
-            this.fileNewAction = new GuiAction(
-                "New",
-                VenusUI.loadIcon("New22.png"),
-                "Create a new file for editing", KeyEvent.VK_N, VenusUI.makeShortcut(KeyEvent.VK_N),
-                this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.editor.newFile();
-                }
-            };
-            this.fileOpenAction = new GuiAction(
-                "Open ...", VenusUI.loadIcon("Open22.png"),
-                "Open a file for editing", KeyEvent.VK_O, VenusUI.makeShortcut(KeyEvent.VK_O),
-                this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.editor.openFile();
-                }
-            };
-            this.fileCloseAction = new GuiAction(
-                "Close", null, "Close the current file", KeyEvent.VK_C,
-                VenusUI.makeShortcut(KeyEvent.VK_W),
-                this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.editor.close();
-                }
-            };
-            this.fileCloseAllAction = new GuiAction(
-                "Close All", null, "Close all open files",
-                KeyEvent.VK_L, null,
-                this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.editor.closeAll();
-                }
-            };
-            this.fileSaveAction = new GuiAction(
-                "Save", VenusUI.loadIcon("Save22.png"), "Save the current file",
-                KeyEvent.VK_S, VenusUI.makeShortcut(KeyEvent.VK_S), this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.editor.save();
-                }
-            };
-            this.fileSaveAsAction = new GuiAction(
-                "Save as ...", VenusUI.loadIcon("SaveAs22.png"),
-                "Save current file with different name", KeyEvent.VK_A, null, this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.editor.saveAs();
-                }
-            };
-            this.fileSaveAllAction = new GuiAction(
-                "Save All", null, "Save all open files",
-                KeyEvent.VK_V, null, this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.editor.saveAll();
-                }
-            };
-            this.fileDumpMemoryAction = new FileDumpMemoryAction(
-                "Dump Memory ...", VenusUI.loadIcon("Dump22.png"),
-                "Dump machine code or data in an available format", KeyEvent.VK_D,
-                VenusUI.makeShortcut(KeyEvent.VK_D),
-                this
-            );
-            this.fileExitAction = new GuiAction("Exit", null, "Exit Rars", KeyEvent.VK_X, null, this) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    if (VenusUI.this.editor.closeAll()) {
-                        System.exit(0);
-                    }
-                }
-            };
-
-            this.editUndoAction = new GuiAction(
-                "Undo", VenusUI.loadIcon("Undo22.png"), "Undo last edit",
-                KeyEvent.VK_U, VenusUI.makeShortcut(KeyEvent.VK_Z), this
-            ) {
-                {
-                    this.setEnabled(false);
-                }
-
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    final EditPane editPane = VenusUI.this.mainPane.getEditPane();
-                    if (editPane != null) {
-                        editPane.undo();
-                        VenusUI.this.updateUndoAndRedoState();
-                    }
-                }
-            };
-            this.editRedoAction = new GuiAction(
-                "Redo", VenusUI.loadIcon("Redo22.png"), "Redo last edit",
-                KeyEvent.VK_R, VenusUI.makeShortcut(KeyEvent.VK_Y), this
-            ) {
-                {
-                    this.setEnabled(false);
-                }
-
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    final EditPane editPane = VenusUI.this.mainPane.getEditPane();
-                    if (editPane != null) {
-                        editPane.redo();
-                        VenusUI.this.updateUndoAndRedoState();
-                    }
-                }
-            };
-            this.editCutAction = new GuiAction(
-                "Cut", VenusUI.loadIcon("Cut22.gif"), "Cut", KeyEvent.VK_C,
-                VenusUI.makeShortcut(KeyEvent.VK_X), this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.mainPane.getEditPane().cutText();
-                }
-            };
-            this.editCopyAction = new GuiAction(
-                "Copy", VenusUI.loadIcon("Copy22.png"), "Copy", KeyEvent.VK_O,
-                VenusUI.makeShortcut(KeyEvent.VK_C), this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.mainPane.getEditPane().copyText();
-                }
-            };
-            this.editPasteAction = new GuiAction(
-                "Paste", VenusUI.loadIcon("Paste22.png"), "Paste", KeyEvent.VK_P,
-                VenusUI.makeShortcut(KeyEvent.VK_V), this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    VenusUI.this.mainPane.getEditPane().pasteText();
-                }
-            };
-            this.editFindReplaceAction = new EditFindReplaceAction(
-                "Find/Replace", VenusUI.loadIcon("Find22.png"),
-                "Find/Replace", KeyEvent.VK_F, VenusUI.makeShortcut(KeyEvent.VK_F), this
-            );
-
-            this.runAssembleAction = new RunAssembleAction(
-                "Assemble", VenusUI.loadIcon("Assemble22.png"),
-                "Assemble the current file and clear breakpoints", KeyEvent.VK_A,
-                KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0), this
-            );
-            this.runGoAction = new RunGoAction(
-                "Go", VenusUI.loadIcon("Play22.png"), "Run the current program",
-                KeyEvent.VK_G, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), this
-            );
-            this.runStepAction = new RunStepAction(
-                "Step", VenusUI.loadIcon("StepForward22.png"),
-                "Run one step at a time", KeyEvent.VK_T, KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), this
-            );
-            this.runBackstepAction = new RunBackstepAction(
-                "Backstep", VenusUI.loadIcon("StepBack22.png"),
-                "Undo the last step", KeyEvent.VK_B, KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0), this
-            );
-            this.runPauseAction = new GuiAction(
-                "Pause", VenusUI.loadIcon("Pause22.png"),
-                "Pause the currently running program", KeyEvent.VK_P, KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0), this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    Globals.SIMULATOR.pauseExecution();
-                    // RunGoAction's "paused" method will do the cleanup.
-                }
-            };
-            this.runStopAction = new GuiAction(
-                "Stop", VenusUI.loadIcon("Stop22.png"),
-                "Stop the currently running program", KeyEvent.VK_S, KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    Globals.SIMULATOR.stopExecution();
-                    // RunGoAction's "stopped" method will take care of the cleanup.
-                }
-            };
-            this.runResetAction = new RunResetAction(
-                "Reset", VenusUI.loadIcon("Reset22.png"), "Reset memory and " +
-                "registers",
-                KeyEvent.VK_R, KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0), this
-            );
-            this.runClearBreakpointsAction = new RunClearBreakpointsAction(
-                "Clear all breakpoints", null,
-                "Clears all execution breakpoints set since the last assemble.", KeyEvent.VK_K,
-                VenusUI.makeShortcut(KeyEvent.VK_K), this
-            );
-            this.runToggleBreakpointsAction = new GuiAction(
-                "Toggle all breakpoints", null,
-                "Disable/enable all breakpoints without clearing (can also click Bkpt column header)",
-                KeyEvent.VK_T, VenusUI.makeShortcut(KeyEvent.VK_T), this
-            ) {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    // settingsLabelAction.actionPerformed(e);
-                    VenusUI.this.mainPane.executePane.textSegment.toggleBreakpoints();
-                }
-            };
-            this.settingsLabelAction = new SettingsAction(
-                "Show Labels Window (symbol table)",
-                "Toggle visibility of Labels window (symbol table) in the Execute tab",
-                BoolSetting.LABEL_WINDOW_VISIBILITY, this, (value) -> {
-                this.mainPane.executePane.setLabelWindowVisibility(value);
-                VenusUI.LOGGER.info("ExecutePane reference 2");
-            }
-            );
-            this.settingsDarkModeAction = new SettingsAction(
-                "Dark mode", "Toggle between light and dark mode",
-                BoolSetting.DARK_MODE, this, this::setDarkModeState
-            );
-
-            this.settingsPopupInputAction = new SettingsAction(
-                "Popup dialog for input syscalls (5,6,7,8,12)",
-                "If set, use popup dialog for input syscalls (5,6,7,8,12) instead of cursor in Run I/O window",
-                BoolSetting.POPUP_SYSCALL_INPUT, this, (v) -> {
-            }
-            );
-
-            this.settingsValueDisplayBaseAction = new SettingsAction(
-                "Values displayed in hexadecimal",
-                "Toggle between hexadecimal and decimal display of memory/register values",
-                BoolSetting.DISPLAY_VALUES_IN_HEX, this,
-                this.mainPane.executePane.valueDisplayBase::setSelected
-            );
-            this.settingsAddressDisplayBaseAction = new SettingsAction(
-                "Addresses displayed in hexadecimal",
-                "Toggle between hexadecimal and decimal display of memory addresses",
-                BoolSetting.DISPLAY_ADDRESSES_IN_HEX, this, this.mainPane.executePane.addressDisplayBase::setSelected
-            );
-            this.settingsExtendedAction = new SettingsAction(
-                "Permit extended (usePseudoInstructions) instructions " +
-                    "and formats",
-                "If set, extended (usePseudoInstructions) instructions are formats are permitted.",
-                BoolSetting.EXTENDED_ASSEMBLER_ENABLED, this
-            );
-            this.settingsAssembleOnOpenAction = new SettingsAction(
-                "Assemble file upon opening",
-                "If set, a file will be automatically assembled as soon as it is opened.  File Open dialog will " +
-                    "show most recently opened file.",
-                BoolSetting.ASSEMBLE_ON_OPEN, this
-            );
-            this.settingsAssembleAllAction = new SettingsAction(
-                "Assemble all files in directory",
-                "If set, all files in current directory will be assembled when Assemble operation is selected.",
-                BoolSetting.ASSEMBLE_ALL, this
-            );
-            this.settingsAssembleOpenAction = new SettingsAction(
-                "Assemble all files currently open",
-                "If set, all files currently open for editing will be assembled when Assemble operation is " +
-                    "selected.",
-                BoolSetting.ASSEMBLE_OPEN, this
-            );
-            this.settingsWarningsAreErrorsAction = new SettingsAction(
-                "Assembler warnings are considered errors",
-                "If set, assembler warnings will be interpreted as errors and prevent successful assembly.",
-                BoolSetting.WARNINGS_ARE_ERRORS, this
-            );
-            this.settingsStartAtMainAction = new SettingsAction(
-                "Initialize Program Counter to global 'main' if " +
-                    "defined",
-                "If set, assembler will initialize Program Counter to text address globally labeled 'main', if " +
-                    "defined.",
-                BoolSetting.START_AT_MAIN, this
-            );
-            this.settingsProgramArgumentsAction = new SettingsAction(
-                "Program arguments provided to program",
-                "If set, program arguments for the program can be entered in border of Text Segment window.",
-                BoolSetting.PROGRAM_ARGUMENTS, this, (selected) -> {
-                if (selected) {
-                    this.mainPane.executePane.textSegment.addProgramArgumentsPanel();
-                } else {
-                    this.mainPane.executePane.textSegment.removeProgramArgumentsPanel();
-                }
-            }
-            )
-            ;
-            this.settingsSelfModifyingCodeAction = new SettingsAction(
-                "Self-modifying code",
-                "If set, the program can write and branch to both text and data segments.",
-                BoolSetting.SELF_MODIFYING_CODE_ENABLED, this
-            );
-
-            this.settingsRV64Action = new SettingsAction(
-                "64 bit",
-                "If set, registers are 64 bits wide and new instructions are available",
-                BoolSetting.RV64_ENABLED, this, (isRV64) -> {
-                InstructionsRegistry.RV64_MODE_FLAG = isRV64;
-                VenusUI.this.registersTab.updateRegisters();
-                VenusUI.this.floatingPointTab.updateRegisters();
-                VenusUI.this.csrTab.updateRegisters();
-            }
-            );
-            this.settingsDeriveCurrentWorkingDirectoryAction = new SettingsAction(
-                "Derive current working directory",
-                "If set, the working directory is derived from the main file instead of the RARS executable " +
-                    "directory.",
-                BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY, this
-            );
-
-            this.settingsEditorAction = new SettingsEditorAction(
-                "Editor...", null,
-                "View and modify text editor settings.", null, null, this
-            );
-            this.settingsExceptionHandlerAction = new SettingsExceptionHandlerAction(
-                "Exception Handler...", null,
-                "If set, the specified exception handler file will be included in all Assemble operations.",
-                null, null, this
-            );
-            this.settingsMemoryConfigurationAction = new SettingsMemoryConfigurationAction(
-                "Memory Configuration...",
-                null, "View and modify memory segment base addresses for the simulated processor",
-                null, null, this
-            );
-
-            this.helpHelpAction = new HelpHelpAction(
-                "Help", VenusUI.loadIcon("Help22.png"),
-                "Help", KeyEvent.VK_H, KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0), this
-            );
-            this.helpAboutAction = new HelpAboutAction(
-                "About ...", null,
-                "Information about Rars", null, null, this
-            );
-        } catch (final NullPointerException e) {
-            VenusUI.LOGGER.fatal(
-                "Internal Error: images folder not found, or other null pointer exception while " +
-                    "creating Action objects", e
-            );
-            System.exit(0);
         }
     }
 
@@ -856,7 +841,7 @@ public final class VenusUI extends JFrame {
             // convert each action to a button
             .map(list -> list.stream()
                 .map(VenusUI::createActionButton)
-                .collect(Collectors.toList()))
+                .toList())
             // insert separators and flatten the lists
             .flatMap(list -> Stream.concat(list.stream(), Stream.of(new JToolBar.Separator())))
             // add everything to the toolbar
@@ -1049,7 +1034,7 @@ public final class VenusUI extends JFrame {
      *
      * @return the Action object for the Run->Assemble operation.
      */
-    public Action getRunAssembleAction() {
+    public @NotNull Action getRunAssembleAction() {
         return this.runAssembleAction;
     }
 
@@ -1060,7 +1045,7 @@ public final class VenusUI extends JFrame {
         this.menu.requestFocus();
     }
 
-    void updateUndoAndRedoState() {
+    private void updateUndoAndRedoState() {
         final EditPane editPane = this.mainPane.getEditPane();
         this.editUndoAction.setEnabled(editPane != null && editPane.canUndo());
         this.editRedoAction.setEnabled(editPane != null && editPane.canRedo());

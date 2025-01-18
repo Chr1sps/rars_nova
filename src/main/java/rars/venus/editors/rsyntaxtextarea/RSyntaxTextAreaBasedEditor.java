@@ -75,6 +75,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         context.setSearchFor(find);
         context.setMatchCase(caseSensitive);
         context.setSearchForward(true);
+        context.setMarkAll(false);
 
         final var found = SearchEngine.find(textArea, context);
         if (found.wasFound()) {
