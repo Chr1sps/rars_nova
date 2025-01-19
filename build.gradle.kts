@@ -2,6 +2,7 @@ plugins {
     java
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    kotlin("jvm") version "2.1.0"
 }
 
 application {
@@ -82,6 +83,7 @@ tasks {
 
 sourceSets.main {
     java.srcDirs("src/main/java", "src/generated/java")
+    kotlin.srcDir("src/main/java")
 }
 
 // region JFlex
