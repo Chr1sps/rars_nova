@@ -282,7 +282,9 @@ public final class BackStepper {
         // Use "value" insead of "pc()" for value arg because
         // RegisterFile.getProgramCounter()
         // returns branch target address at this point.
-        this.backSteps.push(BackstepAction.PC_RESTORE, newValue, newValue);
+        synchronized (this.backSteps) {
+            this.backSteps.push(BackstepAction.PC_RESTORE, newValue, newValue, 0);
+        }
         return newValue;
     }
 
@@ -338,7 +340,9 @@ public final class BackStepper {
      */
     public void addDoNothing(final int pc) {
         if (this.backSteps.empty() || this.backSteps.peek().pc != pc) {
-            this.backSteps.push(BackstepAction.DO_NOTHING, pc);
+            synchronized (this.backSteps) {
+                this.backSteps.push(BackstepAction.DO_NOTHING, pc, 0, 0);
+            }
         }
     }
 
@@ -468,14 +472,6 @@ public final class BackStepper {
             // We'll re-use existing objects rather than create/discard each time.
             // Must use assign() method rather than series of assignment statements!
             this.stack[this.top].assign(act, programCounter, param1, param2);
-        }
-
-        private synchronized void push(final @NotNull BackstepAction act, final int programCounter, final int param1) {
-            this.push(act, programCounter, param1, 0);
-        }
-
-        private synchronized void push(final @NotNull BackstepAction act, final int programCounter) {
-            this.push(act, programCounter, 0, 0);
         }
 
         /**

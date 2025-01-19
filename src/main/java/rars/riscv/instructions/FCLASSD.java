@@ -19,7 +19,7 @@ public final class FCLASSD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         final Float64 in = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1)));
         FCLASSS.fclass(in, statement.getOperand(0), context.registerFile());

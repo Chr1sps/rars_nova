@@ -45,7 +45,7 @@ public final class FMVXS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
 
         // not `getIntValue` because we're moving bits

@@ -31,7 +31,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.MemoryAccessNotice;
-import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
 import rars.venus.VenusUI;
 
@@ -336,7 +335,7 @@ public final class TimerTool extends AbstractTool {
                     // Note: if either the UTIP bit in the uie CSR or the UIE bit in the ustatus CSR
                     // are zero then this interrupt will be stopped further on in the pipeline
                     if (TimerTool.time >= TimerTool.timeCmp.value && TimerTool.timeCmp.postInterrupt && Tick.bitsEnabled()) {
-                        InterruptController.registerTimerInterrupt(CSRegisterFile.TIMER_INTERRUPT);
+                        Globals.INTERRUPT_CONTROLLER.registerTimerInterrupt(CSRegisterFile.TIMER_INTERRUPT);
                         TimerTool.timeCmp.postInterrupt = false; // Wait for timecmp to be writen to again
                     }
                     TimerTool.this.timePanel.updateTime();

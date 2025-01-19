@@ -48,7 +48,7 @@ public final class Simulator {
     private final @NotNull ListenerDispatcher<@NotNull SimulatorNotice> simulatorNoticeDispatcher;
     private final @NotNull ListenerDispatcher<Void> stopEventDispatcher;
 
-    private @Nullable SimThreadNew simulatorThread;
+    private @Nullable SimThread simulatorThread;
 
     public Simulator() {
         this.simulatorThread = null;
@@ -77,7 +77,7 @@ public final class Simulator {
         final int maxSteps,
         final @NotNull ConsoleIO consoleIO
     ) throws SimulationException {
-        this.simulatorThread = new SimThreadNew(
+        this.simulatorThread = new SimThread(
             pc,
             maxSteps,
             new int[0],

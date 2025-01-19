@@ -48,7 +48,7 @@ public final class FSGNJNS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         final int result = (context.fpRegisterFile().getIntValue(statement.getOperand(1)) & 0x7FFFFFFF)
             | ((~context.fpRegisterFile().getIntValue(statement.getOperand(2))) & 0x80000000);

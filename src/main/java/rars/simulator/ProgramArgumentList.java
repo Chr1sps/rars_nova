@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import rars.Globals;
 import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 
@@ -12,7 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import static rars.Globals.*;
+import static rars.Globals.MEMORY_INSTANCE;
+import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar

@@ -21,7 +21,7 @@ public final class FEQD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
 
         final Float64 f1 = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1)));

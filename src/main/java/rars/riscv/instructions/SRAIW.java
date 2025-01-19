@@ -20,7 +20,7 @@ public final class SRAIW extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         // Use the code directly from SRAI
         final long newValue = context.registerFile().getIntValue(statement.getOperand(1)) >> statement.getOperand(2);

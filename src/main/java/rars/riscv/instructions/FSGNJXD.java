@@ -21,7 +21,7 @@ public final class FSGNJXD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         final var f2 = context.fpRegisterFile().getLongValue(statement.getOperand(1));
         final var f3 = context.fpRegisterFile().getLongValue(statement.getOperand(2));

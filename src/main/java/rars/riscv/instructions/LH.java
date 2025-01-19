@@ -39,7 +39,7 @@ public final class LH extends Load {
     }
 
     @Override
-    public long load(final int address, @NotNull Memory memory) throws AddressErrorException {
+    public long load(final int address, @NotNull final Memory memory) throws AddressErrorException {
         final var halfValue = memory.getHalf(address);
         return Short.valueOf(halfValue).longValue();
     }

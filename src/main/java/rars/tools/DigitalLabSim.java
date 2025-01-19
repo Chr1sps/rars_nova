@@ -7,7 +7,6 @@ import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.riscv.hardware.InterruptController;
 import rars.util.BinaryUtils;
 import rars.venus.VenusUI;
 
@@ -103,7 +102,7 @@ public final class DigitalLabSim extends AbstractTool {
                 DigitalLabSim.CounterValue--;
             } else {
                 DigitalLabSim.CounterValue = DigitalLabSim.CounterValueMax;
-                InterruptController.registerTimerInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_TIMER);
+                Globals.INTERRUPT_CONTROLLER.registerTimerInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_TIMER);
             }
         }
     }
@@ -440,7 +439,7 @@ public final class DigitalLabSim extends AbstractTool {
                     DigitalLabSim.KeyBoardValueButtonClick = this.buttonValue;
                     HexaKeyboard.this.button[DigitalLabSim.KeyBoardValueButtonClick].setBackground(Color.GREEN);
                     if (DigitalLabSim.KeyboardInterruptOnOff) {
-                        InterruptController.registerExternalInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
+                        Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
                     }
 
                 }

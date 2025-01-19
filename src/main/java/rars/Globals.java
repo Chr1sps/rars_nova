@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.SymbolTable;
+import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
@@ -89,6 +90,7 @@ public final class Globals {
     /// Control and status register file for the RARS simulator.
     public static final @NotNull CSRegisterFile CS_REGISTER_FILE;
     public static final @NotNull Simulator SIMULATOR;
+    public static final @NotNull InterruptController INTERRUPT_CONTROLLER;
     private static final @NotNull Logger LOGGER = LogManager.getLogger(Globals.class);
     ///  Floating point register file for the RARS simulator.
     public static @NotNull FloatingPointRegisterFile FP_REGISTER_FILE;
@@ -129,6 +131,8 @@ public final class Globals {
         REGISTER_FILE = new RegisterFile(GLOBAL_SYMBOL_TABLE, initialMemoryConfiguration);
         FP_REGISTER_FILE = new FloatingPointRegisterFile();
         CS_REGISTER_FILE = new CSRegisterFile();
+
+        INTERRUPT_CONTROLLER = new InterruptController(SIMULATOR, REGISTER_FILE);
     }
 
     private Globals() {

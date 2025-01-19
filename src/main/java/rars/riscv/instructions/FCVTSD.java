@@ -38,7 +38,7 @@ public final class FCVTSD extends BasicInstruction {
     // quads to be implemented.
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
 
         final Environment e = new Environment();

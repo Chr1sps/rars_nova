@@ -1,9 +1,10 @@
 package rars.riscv.hardware;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
+import rars.riscv.hardware.registerFiles.RegisterFile;
+import rars.simulator.Simulator;
 
 // TODO: add backstepper support
 
@@ -13,168 +14,97 @@ import rars.riscv.BasicInstruction;
  * Roughly corresponds to PLIC in the spec, but it additionally (kindof) handles
  */
 public final class InterruptController {
-    /// Lock for synchronizing as this is a static class
-    public static final @NotNull Object LOCK = new Object();
 
-    /**
-     * Status for the interrupt state
-     */
-    private static boolean externalPending = false;
-    private static int externalValue;
-    private static boolean timerPending = false;
-    private static int timerValue;
+    private final @NotNull Simulator simulator;
+    private final @NotNull RegisterFile registerFile;
+    /** Status for the interrupt state */
+    private boolean externalPending = false;
+    private int externalValue;
+    private boolean timerPending = false;
+    private int timerValue;
 
-    /**
-     * Status for trap state
-     */
-    private static boolean trapPending = false;
-    private static SimulationException trapSE;
-    private static int trapPC;
+    /** Status for trap state */
+    private boolean trapPending = false;
+    private SimulationException trapSE;
+    private int trapPC;
 
-    private InterruptController() {
+    public InterruptController(
+        final @NotNull Simulator simulator,
+        final @NotNull RegisterFile registerFile
+    ) {
+        this.simulator = simulator;
+        this.registerFile = registerFile;
     }
 
-    /**
-     * <p>reset.</p>
-     */
-    public static void reset() {
-        synchronized (LOCK) {
-            externalPending = false;
-            timerPending = false;
-            trapPending = false;
-        }
+    public synchronized SimulationException claimTrap() {
+        assert trapPending : "Cannot claim, no trap pending";
+        assert trapPC == this.registerFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH
+            : "trapPC doesn't match current pc";
+        trapPending = false;
+        return trapSE;
+
     }
 
-    /**
-     * <p>registerExternalInterrupt.</p>
-     *
-     * @param value
-     *     a int
-     * @return a boolean
-     */
-    public static boolean registerExternalInterrupt(final int value) {
-        synchronized (LOCK) {
-            if (externalPending) {
-                return false;
-            }
-            externalValue = value;
-            externalPending = true;
-            Globals.SIMULATOR.interrupt();
-            return true;
-        }
+    public synchronized boolean externalPending() {
+        return externalPending;
     }
 
-    /**
-     * <p>registerTimerInterrupt.</p>
-     *
-     * @param value
-     *     a int
-     * @return a boolean
-     */
-    public static boolean registerTimerInterrupt(final int value) {
-        synchronized (LOCK) {
-            if (timerPending) {
-                return false;
-            }
-            timerValue = value;
-            timerPending = true;
-            Globals.SIMULATOR.interrupt();
-            return true;
-        }
+    public synchronized boolean timerPending() {
+        return timerPending;
     }
 
-    /**
-     * <p>registerSynchronousTrap.</p>
-     *
-     * @param se
-     *     a {@link SimulationException} object
-     * @param pc
-     *     a int
-     * @return a boolean
-     */
-    public static boolean registerSynchronousTrap(final SimulationException se, final int pc) {
-        synchronized (LOCK) {
-            if (trapPending) {
-                return false;
-            }
-            trapSE = se;
-            trapPC = pc;
-            trapPending = true;
-            return true;
-        }
+    public synchronized boolean trapPending() {
+        return trapPending;
     }
 
-    /**
-     * <p>externalPending.</p>
-     *
-     * @return a boolean
-     */
-    public static boolean externalPending() {
-        synchronized (LOCK) {
-            return externalPending;
-        }
+    public synchronized int claimExternal() {
+        assert externalPending : "Cannot claim, no external interrupt pending";
+        externalPending = false;
+        return externalValue;
+
     }
 
-    /**
-     * <p>timerPending.</p>
-     *
-     * @return a boolean
-     */
-    public static boolean timerPending() {
-        synchronized (LOCK) {
-            return timerPending;
-        }
+    public synchronized int claimTimer() {
+        assert timerPending : "Cannot claim, no timer interrupt pending";
+        timerPending = false;
+        return timerValue;
+
     }
 
-    /**
-     * <p>trapPending.</p>
-     *
-     * @return a boolean
-     */
-    public static boolean trapPending() {
-        synchronized (LOCK) {
-            return trapPending;
-        }
+    public synchronized void reset() {
+        externalPending = false;
+        timerPending = false;
+        trapPending = false;
     }
 
-    /**
-     * <p>claimExternal.</p>
-     *
-     * @return a int
-     */
-    public static int claimExternal() {
-        synchronized (LOCK) {
-            assert externalPending : "Cannot claim, no external interrupt pending";
-            externalPending = false;
-            return externalValue;
+    public synchronized boolean registerExternalInterrupt(final int value) {
+        if (externalPending) {
+            return false;
         }
+        externalValue = value;
+        externalPending = true;
+        this.simulator.interrupt();
+        return true;
     }
 
-    /**
-     * <p>claimTimer.</p>
-     *
-     * @return a int
-     */
-    public static int claimTimer() {
-        synchronized (LOCK) {
-            assert timerPending : "Cannot claim, no timer interrupt pending";
-            timerPending = false;
-            return timerValue;
+    public synchronized boolean registerTimerInterrupt(final int value) {
+        if (timerPending) {
+            return false;
         }
+        timerValue = value;
+        timerPending = true;
+        this.simulator.interrupt();
+        return true;
     }
 
-    /**
-     * <p>claimTrap.</p>
-     *
-     * @return a {@link SimulationException} object
-     */
-    public static SimulationException claimTrap() {
-        synchronized (LOCK) {
-            assert trapPending : "Cannot claim, no trap pending";
-            assert trapPC == Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH
-                : "trapPC doesn't match current pc";
-            trapPending = false;
-            return trapSE;
+    public synchronized boolean registerSynchronousTrap(final SimulationException se, final int pc) {
+        if (trapPending) {
+            return false;
         }
+        trapSE = se;
+        trapPC = pc;
+        trapPending = true;
+        return true;
+
     }
 }

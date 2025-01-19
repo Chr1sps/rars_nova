@@ -56,7 +56,7 @@ public final class FENCE extends BasicInstruction {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) {
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) {
         // Do nothing, currently there are no other threads so local consitency is
         // enough
     }

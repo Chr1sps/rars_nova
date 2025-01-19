@@ -39,7 +39,7 @@ public final class LBU extends Load {
     }
 
     @Override
-    public long load(final int address, @NotNull Memory memory) throws AddressErrorException {
+    public long load(final int address, @NotNull final Memory memory) throws AddressErrorException {
         return Byte.toUnsignedLong(memory.getByte(address));
     }
 }

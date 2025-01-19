@@ -9,7 +9,6 @@ import rars.io.AbstractIO;
 import rars.notices.SimulatorNotice;
 import rars.riscv.BasicInstruction;
 import rars.riscv.SimulationContext;
-import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
 import rars.settings.OtherSettings;
 import rars.util.BinaryUtils;
@@ -19,8 +18,9 @@ import rars.venus.run.RunSpeedPanel;
 import java.util.Arrays;
 
 import static rars.Globals.CS_REGISTER_FILE;
+import static rars.Globals.INTERRUPT_CONTROLLER;
 
-public class SimThreadNew implements Runnable {
+public class SimThread implements Runnable {
     protected final int maxSteps;
     private final @NotNull AbstractIO io;
     private final @NotNull ListenerDispatcher<@NotNull SimulatorNotice> simulatorNoticeDispatcher;
@@ -31,7 +31,7 @@ public class SimThreadNew implements Runnable {
     private volatile boolean stop = false;
     private Simulator.Reason constructReturnReason;
 
-    protected SimThreadNew(
+    protected SimThread(
         final int pc,
         final int maxSteps,
         final int[] breakPoints,
@@ -72,8 +72,6 @@ public class SimThreadNew implements Runnable {
     protected double getRunSpeed() {
         return RunSpeedPanel.UNLIMITED_SPEED;
     }
-
-    ;
 
     private void startExecution() {
         final @NotNull SimulatorNotice notice = new SimulatorNotice(
@@ -136,7 +134,7 @@ public class SimThreadNew implements Runnable {
                 // Set UPIE
                 CS_REGISTER_FILE.updateRegisterByName(
                     "ustatus",
-                    CS_REGISTER_FILE.getIntValue("ustatus") | (long) 0x10
+                    CS_REGISTER_FILE.getIntValue("ustatus") | 0x10L
                 );
                 // Clear UIE
                 CS_REGISTER_FILE.updateRegisterByName(
@@ -198,7 +196,7 @@ public class SimThreadNew implements Runnable {
             try {
                 // Set UPIE
                 CS_REGISTER_FILE.updateRegisterByName(
-                    "ustatus", CS_REGISTER_FILE.getLongValue("ustatus") | (long) 0x10);
+                    "ustatus", CS_REGISTER_FILE.getLongValue("ustatus") | 0x10L);
                 CS_REGISTER_FILE.updateRegisterByName(
                     "ustatus", CS_REGISTER_FILE.getLongValue("ustatus") & ~CSRegisterFile.INTERRUPT_ENABLE);
             } catch (final SimulationException e) {
@@ -295,54 +293,53 @@ public class SimThreadNew implements Runnable {
                 final boolean IE = (CS_REGISTER_FILE.ustatus.getValueNoNotify() & CSRegisterFile.INTERRUPT_ENABLE) != 0;
                 // make sure no interrupts sneak in while we are processing them
                 this.pc = Globals.REGISTER_FILE.getProgramCounter();
-                synchronized (InterruptController.LOCK) {
-                    boolean pendingExternal = InterruptController.externalPending();
-                    boolean pendingTimer = InterruptController.timerPending();
-                    final boolean pendingTrap = InterruptController.trapPending();
-                    // This is the explicit (in the spec) order that interrupts should be serviced
-                    if (IE && pendingExternal && (uie & CSRegisterFile.EXTERNAL_INTERRUPT) != 0) {
-                        if (this.handleInterrupt(
-                            InterruptController.claimExternal(),
-                            ExceptionReason.EXTERNAL_INTERRUPT.value, this.pc
-                        )) {
-                            pendingExternal = false;
-                            uip &= ~0x100;
-                        } else {
-                            return; // if the interrupt can't be handled, but the interrupt enable bit is high,
-                            // thats an error
-                        }
-                    } else if (IE && (uip & 0x1) != 0
-                        && (uie & CSRegisterFile.SOFTWARE_INTERRUPT) != 0) {
-                        if (this.handleInterrupt(0, ExceptionReason.SOFTWARE_INTERRUPT.value, this.pc)) {
-                            uip &= ~0x1;
-                        } else {
-                            return; // if the interrupt can't be handled, but the interrupt enable bit is high,
-                            // thats an error
-                        }
-                    } else if (IE && pendingTimer && (uie & CSRegisterFile.TIMER_INTERRUPT) != 0) {
-                        if (this.handleInterrupt(
-                            InterruptController.claimTimer(),
-                            ExceptionReason.TIMER_INTERRUPT.value,
-                            this.pc
-                        )) {
-                            pendingTimer = false;
-                            uip &= ~0x10;
-                        } else {
-                            return; // if the interrupt can't be handled, but the interrupt enable bit is high,
-                            // thats an error
-                        }
-                    } else if (pendingTrap) { // if we have a pending trap and aren't handling an interrupt it must
-                        // be handled
-                        if (!this.handleTrap(
-                            InterruptController.claimTrap(),
-                            this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH
-                        )) {
-                            return;
-                        }
+                boolean pendingExternal = INTERRUPT_CONTROLLER.externalPending();
+                boolean pendingTimer = INTERRUPT_CONTROLLER.timerPending();
+                final boolean pendingTrap = INTERRUPT_CONTROLLER.trapPending();
+                // This is the explicit (in the spec) order that interrupts should be serviced
+                if (IE && pendingExternal && (uie & CSRegisterFile.EXTERNAL_INTERRUPT) != 0) {
+                    if (this.handleInterrupt(
+                        INTERRUPT_CONTROLLER.claimExternal(),
+                        ExceptionReason.EXTERNAL_INTERRUPT.value, this.pc
+                    )) {
+                        pendingExternal = false;
+                        uip &= ~0x100;
+                    } else {
+                        return; // if the interrupt can't be handled, but the interrupt enable bit is high,
+                        // thats an error
                     }
-                    uip |= (pendingExternal ? CSRegisterFile.EXTERNAL_INTERRUPT : 0)
-                        | (pendingTimer ? CSRegisterFile.TIMER_INTERRUPT : 0);
+                } else if (IE && (uip & 0x1) != 0
+                    && (uie & CSRegisterFile.SOFTWARE_INTERRUPT) != 0) {
+                    if (this.handleInterrupt(0, ExceptionReason.SOFTWARE_INTERRUPT.value, this.pc)) {
+                        uip &= ~0x1;
+                    } else {
+                        return; // if the interrupt can't be handled, but the interrupt enable bit is high,
+                        // thats an error
+                    }
+                } else if (IE && pendingTimer && (uie & CSRegisterFile.TIMER_INTERRUPT) != 0) {
+                    if (this.handleInterrupt(
+                        INTERRUPT_CONTROLLER.claimTimer(),
+                        ExceptionReason.TIMER_INTERRUPT.value,
+                        this.pc
+                    )) {
+                        pendingTimer = false;
+                        uip &= ~0x10;
+                    } else {
+                        return; // if the interrupt can't be handled, but the interrupt enable bit is high,
+                        // thats an error
+                    }
+                } else if (pendingTrap) { // if we have a pending trap and aren't handling an interrupt it must
+                    // be handled
+                    if (!this.handleTrap(
+                        INTERRUPT_CONTROLLER.claimTrap(),
+                        this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH
+                    )) {
+                        return;
+                    }
                 }
+                uip |= (pendingExternal ? CSRegisterFile.EXTERNAL_INTERRUPT : 0)
+                    | (pendingTimer ? CSRegisterFile.TIMER_INTERRUPT : 0);
+
                 if (uip != CS_REGISTER_FILE.uip.getValueNoNotify()) {
 
                     try {
@@ -381,7 +378,7 @@ public class SimThreadNew implements Runnable {
                             ExceptionReason.INSTRUCTION_ADDR_MISALIGNED
                         );
                     }
-                    if (!InterruptController.registerSynchronousTrap(tmp, this.pc)) {
+                    if (!INTERRUPT_CONTROLLER.registerSynchronousTrap(tmp, this.pc)) {
                         this.pe = tmp;
                         try {
                             CS_REGISTER_FILE.updateRegisterByName("uepc", this.pc);
@@ -440,7 +437,7 @@ public class SimThreadNew implements Runnable {
                     this.stopExecution(true, this.constructReturnReason);
                     return;
                 } catch (final SimulationException se) {
-                    if (InterruptController.registerSynchronousTrap(se, this.pc)) {
+                    if (INTERRUPT_CONTROLLER.registerSynchronousTrap(se, this.pc)) {
                         continue;
                     } else {
                         this.pe = se;
@@ -468,7 +465,7 @@ public class SimThreadNew implements Runnable {
 
             // Wait if WFI ran
             if (waiting) {
-                if (!(InterruptController.externalPending() || InterruptController.timerPending())) {
+                if (!(INTERRUPT_CONTROLLER.externalPending() || INTERRUPT_CONTROLLER.timerPending())) {
                     synchronized (this) {
                         try {
                             this.wait();

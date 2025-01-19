@@ -42,7 +42,7 @@ public final class LHU extends Load {
     }
 
     @Override
-    public long load(final int address, @NotNull Memory memory) throws AddressErrorException {
+    public long load(final int address, @NotNull final Memory memory) throws AddressErrorException {
         final var value = memory.getHalf(address);
         return Short.toUnsignedLong(value);
     }

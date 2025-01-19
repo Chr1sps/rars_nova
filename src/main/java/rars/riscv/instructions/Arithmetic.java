@@ -54,7 +54,7 @@ public abstract class Arithmetic extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         if (InstructionsRegistry.RV64_MODE_FLAG) {
             final long newValue = compute(

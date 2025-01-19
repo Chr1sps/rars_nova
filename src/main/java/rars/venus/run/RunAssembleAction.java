@@ -6,7 +6,6 @@ import rars.ErrorMessage;
 import rars.Globals;
 import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
-import rars.riscv.hardware.InterruptController;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
 import rars.venus.*;
@@ -174,7 +173,7 @@ public final class RunAssembleAction extends GuiAction {
                 Globals.REGISTER_FILE.resetRegisters();
                 Globals.FP_REGISTER_FILE.resetRegisters();
                 Globals.CS_REGISTER_FILE.resetRegisters();
-                InterruptController.reset();
+                Globals.INTERRUPT_CONTROLLER.reset();
 
                 executePane.textSegment.setupTable();
                 executePane.dataSegment.setupTable();

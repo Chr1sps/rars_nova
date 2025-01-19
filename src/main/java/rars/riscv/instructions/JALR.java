@@ -49,7 +49,7 @@ public final class JALR extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         final int target = context.registerFile().getIntValue(statement.getOperand(1));
         Utils.processReturnAddress(statement.getOperand(0), context.registerFile());

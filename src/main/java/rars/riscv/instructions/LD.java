@@ -12,7 +12,7 @@ public final class LD extends Load {
     }
 
     @Override
-    public long load(final int address, @NotNull Memory memory) throws AddressErrorException {
+    public long load(final int address, @NotNull final Memory memory) throws AddressErrorException {
         return memory.getDoubleWord(address);
     }
 }

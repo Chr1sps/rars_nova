@@ -48,7 +48,7 @@ public final class JAL extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         Utils.processReturnAddress(statement.getOperand(0), context.registerFile());
         Utils.processJump(

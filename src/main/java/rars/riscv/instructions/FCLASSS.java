@@ -82,7 +82,7 @@ public final class FCLASSS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         final Float32 in = new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1)));
         fclass(in, statement.getOperand(0), context.registerFile());

@@ -19,7 +19,7 @@ public final class SLLI64 extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         final long newValue = context.registerFile().getLongValue(statement.getOperand(1)) << statement.getOperand(2);
         context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);

@@ -8,10 +8,10 @@ import rars.venus.run.RunSpeedPanel;
 
 import javax.swing.*;
 
-public final class GuiSimThread extends SimThreadNew {
+public final class GuiSimThread extends SimThread {
     private final @NotNull VenusUI mainUI;
 
-    protected GuiSimThread(
+    public GuiSimThread(
         final int pc,
         final int maxSteps,
         final int[] breakPoints,

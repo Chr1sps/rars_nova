@@ -8,7 +8,6 @@ import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.riscv.hardware.InterruptController;
 import rars.util.BinaryUtils;
 import rars.venus.VenusUI;
 
@@ -352,7 +351,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
                     KeyboardAndDisplaySimulator.readyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL);
                 this.updateMMIOControl(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL, updatedTransmitterControl);
                 if (updatedTransmitterControl != 1) {
-                    InterruptController.registerExternalInterrupt(KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_DISPLAY);
+                    Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_DISPLAY);
                 }
             }
         }
@@ -950,7 +949,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
                 e.getKeyChar() & 0x00000ff
             );
             if (updatedReceiverControl != 1) {
-                InterruptController.registerExternalInterrupt(KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_KEYBOARD);
+                Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_KEYBOARD);
             }
         }
 

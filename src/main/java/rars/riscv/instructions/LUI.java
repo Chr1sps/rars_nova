@@ -47,7 +47,7 @@ public final class LUI extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
         SimulationException {
         final var shiftedValue = Integer.valueOf(statement.getOperand(1) << 12).longValue();
         context.registerFile().updateRegisterByNumber(statement.getOperand(0), shiftedValue);
