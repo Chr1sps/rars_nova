@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
@@ -52,9 +51,9 @@ public final class FLW extends BasicInstruction {
 
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(
+            context.fpRegisterFile().updateRegisterByNumberInt(
                 statement.getOperand(0),
-                Globals.MEMORY_INSTANCE.getWord(Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate)
+                context.memory().getWord(context.registerFile().getIntValue(statement.getOperand(2)) + upperImmediate)
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

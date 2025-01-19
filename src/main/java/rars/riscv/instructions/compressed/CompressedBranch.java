@@ -37,7 +37,11 @@ public final class CompressedBranch extends CompressedInstruction {
             ),
             (statement, context) -> {
                 if (callback.doesBranch(statement, context)) {
-                    Utils.processBranch(statement.getOperand(1));
+                    Utils.processBranch(
+                        context.registerFile(),
+                        statement.getOperand(1),
+                        CompressedInstruction.COMPRESSED_INSTRUCTION_LENGTH
+                    );
                 }
             }
         );

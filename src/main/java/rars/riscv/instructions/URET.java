@@ -1,14 +1,11 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.SimulationContext;
-
-import static rars.Globals.CS_REGISTER_FILE;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -50,19 +47,20 @@ public final class URET extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
-        final boolean upie = (CS_REGISTER_FILE.getIntValue("ustatus") & 0x10) == 0x10;
-        CS_REGISTER_FILE.updateRegisterByName(
+        final boolean upie = (context.csrRegisterFile().getIntValue("ustatus") & 0x10) == 0x10;
+        context.csrRegisterFile().updateRegisterByName(
             "ustatus",
-            CS_REGISTER_FILE.getLongValue("ustatus") & ~0x10L
+            context.csrRegisterFile().getLongValue("ustatus") & ~0x10L
         ); // Clear UPIE
         if (upie) { // Set UIE to UPIE
-            CS_REGISTER_FILE.updateRegisterByName("ustatus", CS_REGISTER_FILE.getLongValue("ustatus") | 0x1L);
+            context.csrRegisterFile()
+                .updateRegisterByName("ustatus", context.csrRegisterFile().getLongValue("ustatus") | 0x1L);
         } else {
-            CS_REGISTER_FILE.updateRegisterByName(
+            context.csrRegisterFile().updateRegisterByName(
                 "ustatus",
-                CS_REGISTER_FILE.getLongValue("ustatus") & ~0x1L
+                context.csrRegisterFile().getLongValue("ustatus") & ~0x1L
             ); // Clear UIE
         }
-        Globals.REGISTER_FILE.setProgramCounter(CS_REGISTER_FILE.getIntValue("uepc"));
+        context.registerFile().setProgramCounter(context.csrRegisterFile().getIntValue("uepc"));
     }
 }

@@ -5,6 +5,7 @@ import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.SimulationContext;
+import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.util.Utils;
 
 import java.util.Objects;
@@ -51,10 +52,8 @@ public final class Branch extends BasicInstruction {
         "beq",
         "Branch if equal : Branch to statement at label's address if t1 and t2 are equal",
         "000",
-        (statement, ctxt) -> Objects.equals(
-            ctxt.registerFile().getLongValue(statement.getOperand(0)), ctxt.registerFile()
-                .getLongValue(
-                    statement.getOperand(1))
+        (statement, registerFile) -> Objects.equals(
+            registerFile.getLongValue(statement.getOperand(0)), registerFile.getLongValue(statement.getOperand(1))
         )
     );
     public static final @NotNull Branch BGE = makeBranch(
@@ -62,27 +61,24 @@ public final class Branch extends BasicInstruction {
         "Branch if greater than or equal: Branch to statement at label's address if t1 is greater than or equal " +
             "to t2",
         "101",
-        (statement, context) -> {
-            final var registerFile = context.registerFile();
-            return registerFile.getLongValue(statement.getOperand(0)) >=
-                registerFile.getLongValue(statement.getOperand(1));
-        }
+        (statement, registerFile) -> registerFile.getLongValue(statement.getOperand(0)) >=
+            registerFile.getLongValue(statement.getOperand(1))
     );
     public static final @NotNull Branch BGEU = makeBranch(
         "bgeu",
         "Branch if greater than or equal to (unsigned): Branch to statement at label's address if t1 is greater " +
             "than or equal to t2 (with an unsigned interpretation)",
         "111",
-        (statement, context) -> Long.compareUnsigned(
-            context.registerFile().getLongValue(statement.getOperand(0)),
-            context.registerFile().getLongValue(statement.getOperand(1))
+        (statement, registerFile) -> Long.compareUnsigned(
+            registerFile.getLongValue(statement.getOperand(0)),
+            registerFile.getLongValue(statement.getOperand(1))
         ) >= 0
     );
     public static final @NotNull Branch BLT = makeBranch(
         "blt",
         "Branch if less than: Branch to statement at label's address if t1 is less than t2",
         "100",
-        (statement, context) -> context.registerFile().getLongValue(statement.getOperand(0)) < context.registerFile()
+        (statement, registerFile) -> registerFile.getLongValue(statement.getOperand(0)) < registerFile
             .getLongValue(
                 statement.getOperand(1))
     );
@@ -91,28 +87,28 @@ public final class Branch extends BasicInstruction {
         "Branch if less than (unsigned): Branch to statement at label's address if t1 is less than t2 (with an " +
             "unsigned interpretation)",
         "110",
-        (statement, context) -> Long.compareUnsigned(
-            context.registerFile().getLongValue(statement.getOperand(0)),
-            context.registerFile().getLongValue(statement.getOperand(1))
+        (statement, registerFile) -> Long.compareUnsigned(
+            registerFile.getLongValue(statement.getOperand(0)),
+            registerFile.getLongValue(statement.getOperand(1))
         ) < 0
     );
     public static final @NotNull Branch BNE = makeBranch(
         "bne",
         "Branch if not equal : Branch to statement at label's address if t1 and t2 are not equal",
         "001",
-        (statement, context) -> {
-            final var firstValue = (int) context.registerFile().getIntValue(statement.getOperand(0));
-            final var secondValue = (int) context.registerFile().getIntValue(statement.getOperand(1));
+        (statement, registerFile) -> {
+            final var firstValue = (int) registerFile.getIntValue(statement.getOperand(0));
+            final var secondValue = (int) registerFile.getIntValue(statement.getOperand(1));
             return firstValue != secondValue;
         }
     );
-    public final @NotNull BiFunction<@NotNull ProgramStatement, @NotNull SimulationContext, @NotNull Boolean> willBranch;
+    public final @NotNull BiFunction<@NotNull ProgramStatement, @NotNull RegisterFile, @NotNull Boolean> willBranch;
 
     private Branch(
         final @NotNull String operand,
         final @NotNull String description,
         final @NotNull String funct,
-        final @NotNull BiFunction<@NotNull ProgramStatement, @NotNull SimulationContext, @NotNull Boolean> willBranch
+        final @NotNull BiFunction<@NotNull ProgramStatement, @NotNull RegisterFile, @NotNull Boolean> willBranch
     ) {
         super(
             "%s t1,t2,label".formatted(operand),
@@ -127,15 +123,15 @@ public final class Branch extends BasicInstruction {
         final @NotNull String usage,
         final @NotNull String description,
         final @NotNull String funct,
-        final @NotNull BiFunction<@NotNull ProgramStatement, @NotNull SimulationContext, @NotNull Boolean> willBranchCallback
+        final @NotNull BiFunction<@NotNull ProgramStatement, @NotNull RegisterFile, @NotNull Boolean> willBranchCallback
     ) {
         return new Branch(usage, description, funct, willBranchCallback);
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) {
-        if (this.willBranch.apply(statement, context)) {
-            Utils.processBranch(statement.getOperand(2));
+    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) {
+        if (this.willBranch.apply(statement, context.registerFile())) {
+            Utils.processBranch(context.registerFile(), statement.getOperand(2), this.getInstructionLength());
         }
     }
 }

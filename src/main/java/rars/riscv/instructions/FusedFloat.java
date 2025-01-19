@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -50,14 +49,14 @@ public abstract class FusedFloat extends BasicInstruction {
         SimulationException {
 
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement, context.csrRegisterFile());
         final Float32 result = compute(
-            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1))),
-            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(2))),
-            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(3))), e
+            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1))),
+            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(2))),
+            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(3))), e
         );
-        Floating.setfflags(e);
-        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
+        Floating.setfflags(context.csrRegisterFile(), e);
+        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), result.bits);
     }
 
     protected abstract @NotNull Float32 compute(

@@ -1,7 +1,8 @@
 package rars.riscv.instructions;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -42,10 +43,7 @@ public final class SB extends Store {
     }
 
     @Override
-    public void store(final int address, final long data) throws AddressErrorException {
-        Globals.MEMORY_INSTANCE.setByte(
-            address,
-            (int) data & 0x000000FF
-        );
+    public void store(final int address, final long data, final @NotNull Memory memory) throws AddressErrorException {
+        memory.setByte(address, (int) data & 0x000000FF);
     }
 }

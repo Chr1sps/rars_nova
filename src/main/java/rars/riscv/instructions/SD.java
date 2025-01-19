@@ -1,7 +1,8 @@
 package rars.riscv.instructions;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 public final class SD extends Store {
     public static final SD INSTANCE = new SD();
@@ -14,7 +15,7 @@ public final class SD extends Store {
     }
 
     @Override
-    public void store(final int address, final long data) throws AddressErrorException {
-        Globals.MEMORY_INSTANCE.setDoubleWord(address, data);
+    public void store(final int address, final long data, final @NotNull Memory memory) throws AddressErrorException {
+        memory.setDoubleWord(address, data);
     }
 }

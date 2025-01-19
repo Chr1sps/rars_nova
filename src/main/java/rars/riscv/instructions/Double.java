@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -25,24 +24,20 @@ public abstract class Double extends BasicInstruction {
         );
     }
 
-    public static @NotNull Float64 getDouble(final int num) {
-        return new Float64(Globals.FP_REGISTER_FILE.getLongValue(num));
-    }
-
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
         final var environment = new Environment();
         final var hasRoundingMode = statement.hasOperand(3);
         if (hasRoundingMode) {
-            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement);
+            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement, context.csrRegisterFile());
         }
         final Float64 result = compute(
-            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1))),
-            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(2))), environment
+            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1))),
+            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(2))), environment
         );
-        Floating.setfflags(environment);
-        Globals.FP_REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), result.bits);
+        Floating.setfflags(context.csrRegisterFile(), environment);
+        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), result.bits);
     }
 
     public abstract @NotNull Float64 compute(@NotNull Float64 f1, @NotNull Float64 f2, @NotNull Environment e);

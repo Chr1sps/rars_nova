@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
@@ -51,10 +50,10 @@ public final class FSW extends BasicInstruction {
         SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            Globals.MEMORY_INSTANCE.setWord(
-                Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate,
+            context.memory().setWord(
+                context.registerFile().getIntValue(statement.getOperand(2)) + upperImmediate,
                 // not `getIntValue` because we want the lower 32 bits
-                (int) Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(0)).longValue()
+                (int) context.fpRegisterFile().getLongValue(statement.getOperand(0)).longValue()
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

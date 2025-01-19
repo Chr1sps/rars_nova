@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -28,15 +27,15 @@ public final class FCVTSLU extends BasicInstruction {
         SimulationException {
 
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
         final Float32 tmp = new Float32(0);
-        final long value = Globals.REGISTER_FILE.getLongValue(statement.getOperand(1));
+        final long value = context.registerFile().getLongValue(statement.getOperand(1));
         BigInteger unsigned = BigInteger.valueOf(value);
         if (value < 0) {
             unsigned = unsigned.add(BigInteger.ONE.shiftLeft(64));
         }
         final Float32 converted = Conversions.convertFromInt(unsigned, e, tmp);
-        Floating.setfflags(e);
-        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), converted.bits);
+        Floating.setfflags(context.csrRegisterFile(), e);
+        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), converted.bits);
     }
 }

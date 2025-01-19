@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.types.Float64;
@@ -22,7 +21,7 @@ public final class FCLASSD extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
-        final Float64 in = new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1)));
-        FCLASSS.fclass(in, statement.getOperand(0));
+        final Float64 in = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1)));
+        FCLASSS.fclass(in, statement.getOperand(0), context.registerFile());
     }
 }

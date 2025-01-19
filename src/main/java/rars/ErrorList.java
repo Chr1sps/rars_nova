@@ -48,6 +48,7 @@ public final class ErrorList {
     public static final @NotNull String LINE_PREFIX = " line ";
     public static final @NotNull String POSITION_PREFIX = " column ";
     public static final @NotNull String MESSAGE_SEPARATOR = ": ";
+    public static final int ERROR_LIMIT = 200;
     private final @NotNull ArrayList<@NotNull ErrorMessage> messages;
     private int errorCount;
     private int warningCount;
@@ -59,17 +60,6 @@ public final class ErrorList {
         this.messages = new ArrayList<>();
         this.errorCount = 0;
         this.warningCount = 0;
-    }
-
-    /**
-     * Get limit on number of error messages to be generated
-     * by one assemble operation.
-     *
-     * @return error limit.
-     */
-    @SuppressWarnings("SameReturnValue")
-    public static int getErrorLimit() {
-        return Globals.maximumErrorMessages;
     }
 
     /**
@@ -107,16 +97,16 @@ public final class ErrorList {
      *     ErrorMessage object to be added to end of error list.
      */
     public void add(final @NotNull ErrorMessage mess) {
-        if (this.errorCount > ErrorList.getErrorLimit()) {
+        if (this.errorCount > ERROR_LIMIT) {
             return;
         }
-        if (this.errorCount == ErrorList.getErrorLimit()) {
+        if (this.errorCount == ERROR_LIMIT) {
             this.messages.add(ErrorMessage.error(
                 null,
                 mess.lineNumber,
                 mess.position,
                 "Error Limit of %d exceeded."
-                    .formatted(ErrorList.getErrorLimit())
+                    .formatted(ERROR_LIMIT)
             ));
             this.errorCount++; // subsequent errors will not be added; see if statement above
             return;
@@ -155,7 +145,7 @@ public final class ErrorList {
      * @return True if error limit exceeded, false otherwise.
      */
     public boolean errorLimitExceeded() {
-        return this.errorCount > ErrorList.getErrorLimit();
+        return this.errorCount > ERROR_LIMIT;
     }
 
     /**

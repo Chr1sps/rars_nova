@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -51,8 +50,8 @@ public final class SRAI32 extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
         // Uses >> because sign fill
-        final long newValue = Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)) >> statement.getOperand(2);
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        final long newValue = context.registerFile().getIntValue(statement.getOperand(1)) >> statement.getOperand(2);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
 
     }
 }

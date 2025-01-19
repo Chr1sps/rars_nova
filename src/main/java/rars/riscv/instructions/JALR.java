@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -52,9 +51,9 @@ public final class JALR extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
-        final int target = Globals.REGISTER_FILE.getIntValue(statement.getOperand(1));
-        Utils.processReturnAddress(statement.getOperand(0));
+        final int target = context.registerFile().getIntValue(statement.getOperand(1));
+        Utils.processReturnAddress(statement.getOperand(0), context.registerFile());
         // Set PC = $t2 + immediate with the last bit set to 0
-        Utils.processJump((target + ((statement.getOperand(2) << 20) >> 20)) & 0xFFFFFFFE);
+        Utils.processJump((target + ((statement.getOperand(2) << 20) >> 20)) & 0xFFFFFFFE, context.registerFile());
     }
 }

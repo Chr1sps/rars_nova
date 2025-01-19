@@ -25,10 +25,10 @@ public final class FCVTWUD extends BasicInstruction {
         SimulationException {
 
         final var environment = new Environment();
-        environment.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        environment.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
         final var input = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1)));
         final var output = Conversions.convertToUnsignedInt(input, environment, false);
-        Floating.setfflags(environment);
-        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), output);
+        Floating.setfflags(context.csrRegisterFile(), environment);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), output);
     }
 }

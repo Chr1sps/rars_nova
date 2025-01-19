@@ -1,13 +1,13 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.SimulationContext;
+import rars.riscv.hardware.Memory;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -57,8 +57,11 @@ public abstract class Load extends BasicInstruction {
         SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            final long newValue = load(Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate);
-            Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+            final long newValue = load(
+                context.registerFile().getIntValue(statement.getOperand(2)) + upperImmediate,
+                context.memory()
+            );
+            context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);
         }
@@ -69,9 +72,10 @@ public abstract class Load extends BasicInstruction {
      *
      * @param address
      *     the address to load from
+     * @param memory
      * @return The second to store to the register
      * @throws AddressErrorException
      *     if any.
      */
-    protected abstract long load(int address) throws AddressErrorException;
+    protected abstract long load(int address, @NotNull Memory memory) throws AddressErrorException;
 }

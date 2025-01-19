@@ -1,7 +1,8 @@
 package rars.riscv.instructions;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -30,15 +31,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-/**
- * <p>SH class.</p>
- */
 public final class SH extends Store {
     public static final SH INSTANCE = new SH();
 
-    /**
-     * <p>Constructor for SH.</p>
-     */
     private SH() {
         super(
             "sh t1, -100(t2)",
@@ -46,11 +41,8 @@ public final class SH extends Store {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void store(final int address, final long data) throws AddressErrorException {
-        Globals.MEMORY_INSTANCE.setHalf(address, (int) data & 0x0000FFFF);
+    public void store(final int address, final long data, final @NotNull Memory memory) throws AddressErrorException {
+        memory.setHalf(address, (int) data & 0x0000FFFF);
     }
 }

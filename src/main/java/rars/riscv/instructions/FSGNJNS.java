@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -51,8 +50,8 @@ public final class FSGNJNS extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
-        final int result = (Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1)) & 0x7FFFFFFF)
-            | ((~Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(2))) & 0x80000000);
-        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result);
+        final int result = (context.fpRegisterFile().getIntValue(statement.getOperand(1)) & 0x7FFFFFFF)
+            | ((~context.fpRegisterFile().getIntValue(statement.getOperand(2))) & 0x80000000);
+        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), result);
     }
 }

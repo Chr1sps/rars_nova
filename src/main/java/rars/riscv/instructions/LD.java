@@ -1,8 +1,8 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 public final class LD extends Load {
     public static final @NotNull LD INSTANCE = new LD();
@@ -12,7 +12,7 @@ public final class LD extends Load {
     }
 
     @Override
-    public long load(final int address) throws AddressErrorException {
-        return Globals.MEMORY_INSTANCE.getDoubleWord(address);
+    public long load(final int address, @NotNull Memory memory) throws AddressErrorException {
+        return memory.getDoubleWord(address);
     }
 }

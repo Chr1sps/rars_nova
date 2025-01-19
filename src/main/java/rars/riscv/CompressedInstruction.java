@@ -5,7 +5,7 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 
 public abstract non-sealed class CompressedInstruction extends Instruction implements SimullationCallback {
-    private static final int COMPRESSED_INSTRUCTION_LENGTH = 2;
+    protected static final int COMPRESSED_INSTRUCTION_LENGTH = 2;
 
     public final @NotNull CompressedInstructionFormat instructionFormat;
     private final @NotNull String operationMask;

@@ -2,11 +2,12 @@ package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.SimulationContext;
-import rars.util.Utils;
+import rars.riscv.Syscall;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -45,10 +46,42 @@ public final class ECALL extends BasicInstruction {
         );
     }
 
+    private static void findAndSimulateSyscall(
+        final int number,
+        final @NotNull ProgramStatement statement,
+        final @NotNull SimulationContext context
+    ) throws SimulationException {
+        final var syscall = Syscall.findSyscall(number);
+        if (syscall != null) {
+            final boolean isWriting = switch (syscall) {
+                case Close,
+                     PrintDouble,
+                     PrintFloat,
+                     PrintInt,
+                     PrintIntBinary,
+                     PrintIntHex,
+                     PrintIntUnsigned,
+                     PrintString,
+                     Write -> true;
+                default -> false;
+            };
+            if (!isWriting) {
+                context.io().flush();
+            }
+            syscall.simulate(statement, context);
+            return;
+        }
+        throw new SimulationException(
+            statement,
+            "invalid or unimplemented syscall service: %d ".formatted(number),
+            ExceptionReason.ENVIRONMENT_CALL
+        );
+    }
+
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
-        Utils.findAndSimulateSyscall(
+        findAndSimulateSyscall(
             context.registerFile().getIntValue("a7"),
             statement,
             context

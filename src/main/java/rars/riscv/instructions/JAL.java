@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -51,8 +50,11 @@ public final class JAL extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
-        Utils.processReturnAddress(statement.getOperand(0));
-        Utils.processJump(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(
-            1));
+        Utils.processReturnAddress(statement.getOperand(0), context.registerFile());
+        Utils.processJump(
+            context.registerFile()
+                .getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(
+                1), context.registerFile()
+        );
     }
 }

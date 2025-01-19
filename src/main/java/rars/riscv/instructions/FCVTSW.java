@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -55,11 +54,11 @@ public final class FCVTSW extends BasicInstruction {
         SimulationException {
 
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
         final Float32 tmp = new Float32(0);
         final Float32 converted = Conversions
-            .convertFromInt(BigInteger.valueOf(Globals.REGISTER_FILE.getIntValue(statement.getOperand(1))), e, tmp);
-        Floating.setfflags(e);
-        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), converted.bits);
+            .convertFromInt(BigInteger.valueOf(context.registerFile().getIntValue(statement.getOperand(1))), e, tmp);
+        Floating.setfflags(context.csrRegisterFile(), e);
+        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), converted.bits);
     }
 }

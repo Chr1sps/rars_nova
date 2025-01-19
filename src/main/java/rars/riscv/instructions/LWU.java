@@ -1,8 +1,8 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 public final class LWU extends Load {
     public static final @NotNull LWU INSTANCE = new LWU();
@@ -12,7 +12,7 @@ public final class LWU extends Load {
     }
 
     @Override
-    public long load(final int address) throws AddressErrorException {
-        return Integer.toUnsignedLong(Globals.MEMORY_INSTANCE.getWord(address));
+    public long load(final int address, @NotNull Memory memory) throws AddressErrorException {
+        return Integer.toUnsignedLong(memory.getWord(address));
     }
 }

@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -51,9 +50,9 @@ public final class SLLI32 extends BasicInstruction {
         SimulationException {
 
         final long newValue = Integer.toUnsignedLong(
-            Globals.REGISTER_FILE.getIntValue(statement.getOperand(1))
+            context.registerFile().getIntValue(statement.getOperand(1))
                 << statement.getOperand(2)
         );
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

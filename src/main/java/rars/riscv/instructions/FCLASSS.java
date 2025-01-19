@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.types.Float32;
@@ -9,6 +8,7 @@ import rars.jsoftfloat.types.Floating;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.SimulationContext;
+import rars.riscv.hardware.registerFiles.RegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -60,19 +60,23 @@ public final class FCLASSS extends BasicInstruction {
      * 8 t1 is a signaling NaN (Not implemented due to Java).
      * 9 t1 is a quiet NaN.
      */
-    public static <T extends Floating<T>> void fclass(@NotNull final T in, final int out) throws SimulationException {
+    public static <T extends Floating<T>> void fclass(
+        @NotNull final T in,
+        final int out,
+        final @NotNull RegisterFile registerFile
+    ) throws SimulationException {
         if (in.isNaN()) {
-            Globals.REGISTER_FILE.updateRegisterByNumber(out, in.isSignalling() ? 0x100 : 0x200);
+            registerFile.updateRegisterByNumber(out, in.isSignalling() ? 0x100 : 0x200);
         } else {
             final boolean negative = in.isSignMinus();
             if (in.isInfinite()) {
-                Globals.REGISTER_FILE.updateRegisterByNumber(out, negative ? 0x001 : 0x080);
+                registerFile.updateRegisterByNumber(out, negative ? 0x001 : 0x080);
             } else if (in.isZero()) {
-                Globals.REGISTER_FILE.updateRegisterByNumber(out, negative ? 0x008 : 0x010);
+                registerFile.updateRegisterByNumber(out, negative ? 0x008 : 0x010);
             } else if (in.isSubnormal()) {
-                Globals.REGISTER_FILE.updateRegisterByNumber(out, negative ? 0x004 : 0x020);
+                registerFile.updateRegisterByNumber(out, negative ? 0x004 : 0x020);
             } else {
-                Globals.REGISTER_FILE.updateRegisterByNumber(out, negative ? 0x002 : 0x040);
+                registerFile.updateRegisterByNumber(out, negative ? 0x002 : 0x040);
             }
         }
     }
@@ -80,7 +84,7 @@ public final class FCLASSS extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
-        final Float32 in = new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1)));
-        fclass(in, statement.getOperand(0));
+        final Float32 in = new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1)));
+        fclass(in, statement.getOperand(0), context.registerFile());
     }
 }

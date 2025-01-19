@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -23,14 +22,14 @@ public abstract class FusedDouble extends BasicInstruction {
         SimulationException {
 
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement, context.csrRegisterFile());
         final Float64 result = compute(
-            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(1))),
-            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(2))),
-            new Float64(Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(3))), e
+            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1))),
+            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(2))),
+            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(3))), e
         );
-        Floating.setfflags(e);
-        Globals.FP_REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), result.bits);
+        Floating.setfflags(context.csrRegisterFile(), e);
+        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), result.bits);
     }
 
     protected abstract Float64 compute(Float64 r1, Float64 r2, Float64 r3, Environment e);

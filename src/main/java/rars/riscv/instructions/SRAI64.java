@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -24,7 +23,7 @@ public final class SRAI64 extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
         // Uses >> because sign fill
-        final var shifted = Globals.REGISTER_FILE.getLongValue(statement.getOperand(1)) >> statement.getOperand(2);
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), shifted);
+        final var shifted = context.registerFile().getLongValue(statement.getOperand(1)) >> statement.getOperand(2);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), shifted);
     }
 }

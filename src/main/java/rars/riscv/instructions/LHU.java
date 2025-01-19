@@ -1,7 +1,8 @@
 package rars.riscv.instructions;
 
-import rars.Globals;
+import org.jetbrains.annotations.NotNull;
 import rars.exceptions.AddressErrorException;
+import rars.riscv.hardware.Memory;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -41,8 +42,8 @@ public final class LHU extends Load {
     }
 
     @Override
-    public long load(final int address) throws AddressErrorException {
-        final var value = Globals.MEMORY_INSTANCE.getHalf(address);
+    public long load(final int address, @NotNull Memory memory) throws AddressErrorException {
+        final var value = memory.getHalf(address);
         return Short.toUnsignedLong(value);
     }
 }

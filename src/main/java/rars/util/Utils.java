@@ -1,15 +1,10 @@
 package rars.util;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.ProgramStatement;
-import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.RoundingMode;
-import rars.riscv.BasicInstruction;
-import rars.riscv.SimulationContext;
-import rars.riscv.Syscall;
+import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
@@ -29,54 +24,17 @@ public final class Utils {
         return writer.toString();
     }
 
-    public static void findAndSimulateSyscall(
-        final int number,
-        final @NotNull ProgramStatement statement,
-        final @NotNull SimulationContext context
-    ) throws SimulationException {
-        final var syscall = Syscall.findSyscall(number);
-        if (syscall != null) {
-            // TODO: find a cleaner way of doing this
-            // This was introduced to solve issue #108
-            final boolean isWriting = switch (syscall) {
-                case Close,
-                     PrintDouble,
-                     PrintFloat,
-                     PrintInt,
-                     PrintIntBinary,
-                     PrintIntHex,
-                     PrintIntUnsigned,
-                     PrintString,
-                     Write -> true;
-                default -> false;
-            };
-            if (!isWriting) {
-                context.io().flush();
-            }
-            // final var context = new SimulationContext(
-            //     Globals.REGISTER_FILE,
-            //     Globals.FP_REGISTER_FILE,
-            //     Globals.CS_REGISTER_FILE,
-            //     Globals.MEMORY_INSTANCE,
-            //     Globals.IO
-            // );
-            syscall.simulate(statement, context);
-            return;
-        }
-        throw new SimulationException(
-            statement,
-            "invalid or unimplemented syscall service: %d ".formatted(number),
-            ExceptionReason.ENVIRONMENT_CALL
-        );
-    }
-
-    public static void processBranch(final int displacement) {
+    public static void processBranch(
+        final @NotNull RegisterFile registerFile,
+        final int displacement,
+        final int instructionLength
+    ) {
         // Decrement needed because PC has already been incremented
-        Globals.REGISTER_FILE.setProgramCounter(Globals.REGISTER_FILE.getProgramCounter() + displacement - BasicInstruction.BASIC_INSTRUCTION_LENGTH);
+        registerFile.setProgramCounter(registerFile.getProgramCounter() + displacement - instructionLength);
     }
 
-    public static void processJump(final int targetAddress) {
-        Globals.REGISTER_FILE.setProgramCounter(targetAddress);
+    public static void processJump(final int targetAddress, final @NotNull RegisterFile registerFile) {
+        registerFile.setProgramCounter(targetAddress);
     }
 
     /**
@@ -85,8 +43,9 @@ public final class Utils {
      * instructions: jal and jalr
      * The parameter is register number to receive the return address.
      */
-    public static void processReturnAddress(final int register) throws SimulationException {
-        Globals.REGISTER_FILE.updateRegisterByNumber(register, Globals.REGISTER_FILE.getProgramCounter());
+    public static void processReturnAddress(final int register, final @NotNull RegisterFile registerFile) throws
+        SimulationException {
+        registerFile.updateRegisterByNumber(register, registerFile.getProgramCounter());
     }
 
     public static void flipRounding(@NotNull final Environment e) {

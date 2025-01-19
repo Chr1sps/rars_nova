@@ -76,8 +76,6 @@ public final class Globals {
 
     /// Maximum length of scrolled message window (RARS Messages and Run I/O)
     public static final int maximumMessageCharacters = 1_000_000;
-    /// Maximum number of assembler errors produced by one assemble operation
-    public static final int maximumErrorMessages = 200;
     /// Maximum number of back-step operations to buffer
     public static final int maximumBacksteps = 2000;
 

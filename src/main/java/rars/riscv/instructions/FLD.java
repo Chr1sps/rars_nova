@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
@@ -25,11 +24,11 @@ public final class FLD extends BasicInstruction {
 
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            final var value = Globals.MEMORY_INSTANCE.getDoubleWord(
-                Globals.REGISTER_FILE.getIntValue(statement.getOperand(2))
+            final var value = context.memory().getDoubleWord(
+                context.registerFile().getIntValue(statement.getOperand(2))
                     + upperImmediate
             );
-            Globals.FP_REGISTER_FILE.updateRegisterByNumber(
+            context.fpRegisterFile().updateRegisterByNumber(
                 statement.getOperand(0),
                 value
             );

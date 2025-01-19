@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -25,12 +24,12 @@ public final class FLED extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
 
-        final Float64 f1 = Double.getDouble(statement.getOperand(1));
-        final Float64 f2 = Double.getDouble(statement.getOperand(2));
+        final Float64 f1 = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1)));
+        final Float64 f2 = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(2)));
         final Environment e = new Environment();
         final boolean result = Comparisons.compareSignalingLessThanEqual(f1, f2, e);
-        Floating.setfflags(e);
+        Floating.setfflags(context.csrRegisterFile(), e);
         final long newValue = result ? 1 : 0;
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

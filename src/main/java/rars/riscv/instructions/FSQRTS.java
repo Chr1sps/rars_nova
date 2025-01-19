@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -52,10 +51,10 @@ public final class FSQRTS extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
         final Float32 result = Arithmetic
-            .squareRoot(new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1))), e);
-        Floating.setfflags(e);
-        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
+            .squareRoot(new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1))), e);
+        Floating.setfflags(context.csrRegisterFile(), e);
+        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), result.bits);
     }
 }

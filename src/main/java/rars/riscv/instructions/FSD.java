@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
@@ -25,9 +24,9 @@ public final class FSD extends BasicInstruction {
 
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            Globals.MEMORY_INSTANCE.setDoubleWord(
-                Globals.REGISTER_FILE.getIntValue(statement.getOperand(2)) + upperImmediate,
-                Globals.FP_REGISTER_FILE.getLongValue(statement.getOperand(0))
+            context.memory().setDoubleWord(
+                context.registerFile().getIntValue(statement.getOperand(2)) + upperImmediate,
+                context.fpRegisterFile().getLongValue(statement.getOperand(0))
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.jsoftfloat.Environment;
@@ -52,12 +51,12 @@ public final class FLTS extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
 
-        final Float32 f1 = Floating.getFloat(statement.getOperand(1));
-        final Float32 f2 = Floating.getFloat(statement.getOperand(2));
+        final Float32 f1 = Floating.getFloat(context.fpRegisterFile(), statement.getOperand(1));
+        final Float32 f2 = Floating.getFloat(context.fpRegisterFile(), statement.getOperand(2));
         final Environment e = new Environment();
         final boolean result = Comparisons.compareSignalingLessThan(f1, f2, e);
-        Floating.setfflags(e);
+        Floating.setfflags(context.csrRegisterFile(), e);
         final long newValue = result ? 1 : 0;
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -24,8 +23,8 @@ public final class SLLIW extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
         // Copy from SLLI
-        final long newValue = Globals.REGISTER_FILE.getIntValue(statement.getOperand(1)) << statement.getOperand(
+        final long newValue = context.registerFile().getIntValue(statement.getOperand(1)) << statement.getOperand(
             2);
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), newValue);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

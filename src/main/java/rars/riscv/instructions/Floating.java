@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
@@ -11,6 +10,8 @@ import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.SimulationContext;
+import rars.riscv.hardware.registerFiles.CSRegisterFile;
+import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -60,22 +61,26 @@ public abstract class Floating extends BasicInstruction {
         );
     }
 
-    public static void setfflags(final @NotNull Environment e) throws SimulationException {
+    public static void setfflags(final @NotNull CSRegisterFile csRegisterFile, final @NotNull Environment e) throws
+        SimulationException {
         final int fflags = (e.inexact ? 1 : 0) +
             (e.underflow ? 2 : 0) +
             (e.overflow ? 4 : 0) +
             (e.divByZero ? 8 : 0) +
             (e.invalid ? 16 : 0);
         if (fflags != 0) {
-            Globals.CS_REGISTER_FILE.updateRegisterByName(
-                "fflags", Globals.CS_REGISTER_FILE.getLongValue("fflags") | (long) fflags);
+            csRegisterFile.updateRegisterByName(
+                "fflags", csRegisterFile.getLongValue("fflags") | (long) fflags);
         }
     }
 
-    public static @NotNull RoundingMode getRoundingMode(final int RM, final @NotNull ProgramStatement statement) throws
-        SimulationException {
+    public static @NotNull RoundingMode getRoundingMode(
+        final int RM,
+        final @NotNull ProgramStatement statement,
+        final @NotNull CSRegisterFile csRegisterFile
+    ) throws SimulationException {
         int rm = RM;
-        final int frm = Globals.CS_REGISTER_FILE.getIntValue("frm");
+        final int frm = csRegisterFile.getIntValue("frm");
         if (rm == 7) {
             rm = frm;
         }
@@ -98,8 +103,8 @@ public abstract class Floating extends BasicInstruction {
         };
     }
 
-    public static @NotNull Float32 getFloat(final int num) {
-        return new Float32(Globals.FP_REGISTER_FILE.getIntValue(num));
+    public static @NotNull Float32 getFloat(final @NotNull FloatingPointRegisterFile fpRegisterFile, final int num) {
+        return new Float32(fpRegisterFile.getIntValue(num));
     }
 
     @Override
@@ -108,14 +113,14 @@ public abstract class Floating extends BasicInstruction {
         final var environment = new Environment();
         final var hasRoundingMode = statement.hasOperand(3);
         if (hasRoundingMode) {
-            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement);
+            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement, context.csrRegisterFile());
         }
         final Float32 result = this.compute(
-            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(1))),
-            new Float32(Globals.FP_REGISTER_FILE.getIntValue(statement.getOperand(2))), environment
+            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1))),
+            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(2))), environment
         );
-        Floating.setfflags(environment);
-        Globals.FP_REGISTER_FILE.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
+        Floating.setfflags(context.csrRegisterFile(), environment);
+        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), result.bits);
     }
 
     public abstract Float32 compute(Float32 f1, Float32 f2, Environment e);

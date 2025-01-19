@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
@@ -50,7 +49,7 @@ public final class CSRRWI extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
-        final var csr = Globals.CS_REGISTER_FILE.getLongValue(statement.getOperand(1));
+        final var csr = context.csrRegisterFile().getLongValue(statement.getOperand(1));
         if (csr == null) {
             throw new SimulationException(
                 statement,
@@ -58,8 +57,8 @@ public final class CSRRWI extends BasicInstruction {
                 ExceptionReason.ILLEGAL_INSTRUCTION
             );
         }
-        Globals.CS_REGISTER_FILE.updateRegisterByNumber(statement.getOperand(1), statement.getOperand(2));
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), csr);
+        context.csrRegisterFile().updateRegisterByNumber(statement.getOperand(1), statement.getOperand(2));
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), csr);
 
     }
 }

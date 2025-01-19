@@ -52,10 +52,10 @@ public final class FCVTWS extends BasicInstruction {
         SimulationException {
 
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement);
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
         final Float32 in = new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1)));
         final int out = Conversions.convertToInt(in, e, false);
-        Floating.setfflags(e);
+        Floating.setfflags(context.csrRegisterFile(), e);
         context.registerFile().updateRegisterByNumber(statement.getOperand(0), out);
     }
 }

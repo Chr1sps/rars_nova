@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -50,9 +49,7 @@ public final class LUI extends BasicInstruction {
     @Override
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
-
         final var shiftedValue = Integer.valueOf(statement.getOperand(1) << 12).longValue();
-
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), shiftedValue);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), shiftedValue);
     }
 }

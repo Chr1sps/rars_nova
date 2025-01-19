@@ -1,7 +1,6 @@
 package rars.riscv.instructions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.Globals;
 import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
@@ -50,8 +49,8 @@ public final class SRLI64 extends BasicInstruction {
     public void simulate(final @NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
         SimulationException {
         // Uses >>> because 0 fill
-        final var value = Globals.REGISTER_FILE.getLongValue(statement.getOperand(1));
+        final var value = context.registerFile().getLongValue(statement.getOperand(1));
         final var shifted = value >>> statement.getOperand(2);
-        Globals.REGISTER_FILE.updateRegisterByNumber(statement.getOperand(0), shifted);
+        context.registerFile().updateRegisterByNumber(statement.getOperand(0), shifted);
     }
 }
