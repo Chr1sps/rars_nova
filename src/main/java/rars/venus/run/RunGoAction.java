@@ -186,7 +186,7 @@ public final class RunGoAction extends GuiAction {
         this.executePane.fpRegValues.updateRegisters();
         this.executePane.csrValues.updateRegisters();
         this.executePane.dataSegment.updateValues();
-        FileStatus.set(FileStatus.State.RUNNABLE);
+        FileStatus.setSystemState(FileStatus.State.RUNNABLE);
         this.mainUI.isMemoryReset = false;
     }
 
@@ -210,7 +210,7 @@ public final class RunGoAction extends GuiAction {
         this.executePane.fpRegValues.updateRegisters();
         this.executePane.csrValues.updateRegisters();
         this.executePane.dataSegment.updateValues();
-        FileStatus.set(FileStatus.State.TERMINATED);
+        FileStatus.setSystemState(FileStatus.State.TERMINATED);
         this.mainUI.venusIO.resetFiles(); // close any files opened in MIPS program
         // Bring CSRs to the front if terminated due to exception.
         if (pe != null) {

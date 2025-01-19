@@ -100,7 +100,7 @@ public final class RunResetAction extends GuiAction {
         executePane.textSegment.setCodeHighlighting(true);
         executePane.textSegment.highlightStepAtPC();
         mainUI.registersPane.setSelectedComponent(executePane.registerValues);
-        FileStatus.set(FileStatus.State.RUNNABLE);
+        FileStatus.setSystemState(FileStatus.State.RUNNABLE);
         mainUI.isMemoryReset = true;
         mainUI.isExecutionStarted = false;
 

@@ -75,6 +75,7 @@ public final class ConsoleIO implements AbstractIO {
             case STDOUT -> {
                 try {
                     this.outputWriter.get().write(new String(myBuffer));
+                    this.outputWriter.get().flush();
                     return myBuffer.length;
                 } catch (final IOException e) {
                     return -1;
@@ -83,6 +84,7 @@ public final class ConsoleIO implements AbstractIO {
             case STDERR -> {
                 try {
                     this.errorWriter.get().write(new String(myBuffer));
+                    this.errorWriter.get().flush();
                     return myBuffer.length;
                 } catch (final IOException e) {
                     return -1;

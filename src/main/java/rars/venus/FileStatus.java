@@ -45,18 +45,7 @@ public final class FileStatus {
 
     private static @NotNull FileStatus.State systemStatus = State.NO_FILE;
 
-    // The static part. Legacy code from original student team's
-    // 2003 Practicum project through MARS 3.8, when the editor
-    // was limited to one file. The status of that file became
-    // the de facto status of the system. Should have used a
-    // singleton class but in 2003 did not know what that was!
-    // My plan is to phase out all statics but the constants
-    // in MARS 4.0 but will keep it in place while at the same time
-    // defining non-static members for use by individual files
-    // currently opened in the editor. DPS, 9 April 2010.
     private static boolean systemAssembled;
-    private static boolean systemSaved;
-    private static boolean systemEdited;
     private static String systemName;
     private static @Nullable File systemFile;
 
@@ -85,23 +74,25 @@ public final class FileStatus {
     }
 
     /**
+     * Get file status
+     *
+     * @return file status EDITED, RUNNABLE, etc, see list above
+     */
+    public static @NotNull FileStatus.State getSystemState() {
+        return systemStatus;
+    }
+
+    /**
      * Set file status. Also updates menu state accordingly.
      *
      * @param newStatus
      *     New status: EDITED, RUNNABLE, etc, see list above.
      */
-    public static void set(final @NotNull FileStatus.State newStatus) {
+    public static void setSystemState(final @NotNull FileStatus.State newStatus) {
         systemStatus = newStatus;
-        Globals.GUI.setMenuState(systemStatus);
-    }
-
-    /**
-     * Get file status
-     *
-     * @return file status EDITED, RUNNABLE, etc, see list above
-     */
-    public static @NotNull FileStatus.State get() {
-        return systemStatus;
+        if (Globals.GUI != null) {
+            Globals.GUI.setMenuState(systemStatus);
+        }
     }
 
     /**
@@ -119,7 +110,7 @@ public final class FileStatus {
      * @param f
      *     file object variable that stores the ASM file.
      */
-    public static void setSystemFile(final File f) {
+    public static void setSystemFile(final @Nullable File f) {
         systemFile = f;
     }
 
@@ -128,7 +119,7 @@ public final class FileStatus {
      *
      * @return The name of the ASM file.
      */
-    public static String getName() {
+    public static String getSystemName() {
         return systemName;
     }
 
@@ -138,7 +129,7 @@ public final class FileStatus {
      * @param s
      *     string variable tells what to set the name of the file to .
      */
-    public static void setName(final String s) {
+    public static void setSystemName(final String s) {
         systemName = s;
     }
 
@@ -162,55 +153,12 @@ public final class FileStatus {
     }
 
     /**
-     * Tells whether the file has been saved.
-     *
-     * @return Boolean variable that is true if the ASM file has been saved
-     */
-    public static boolean isSaved() {
-        return systemSaved;
-    }
-
-    /**
-     * Changes the value of saved to the parameter given.
-     *
-     * @param b
-     *     boolean variable that tells what to set saved to .
-     */
-    public static void setSaved(final boolean b) {
-        systemSaved = b;
-    }
-
-    /**
-     * Tells whether the file has been edited since it has been saved.
-     *
-     * @return Boolean value that returns true if the ASM file has been edited.
-     */
-    public static boolean isEdited() {
-        return systemEdited;
-    }
-
-    // Remaining members are of instantiable class that can be used by
-    // every file that is currently open in the editor.
-
-    /**
-     * Changes the value of edited to the parameter given.
-     *
-     * @param b
-     *     boolean variable that tells what to set edited to.
-     */
-    public static void setEdited(final boolean b) {
-        systemEdited = b;
-    }
-
-    /**
      * Resets all the values in FileStatus
      */
     public static void reset() {
         systemStatus = State.NO_FILE;
         systemName = "";
         systemAssembled = false;
-        systemSaved = false;
-        systemEdited = false;
         systemFile = null;
     }
 
@@ -283,11 +231,6 @@ public final class FileStatus {
         systemStatus = this.status;
         systemName = this.file.getPath();
         systemAssembled = false;
-        systemSaved = switch (status) {
-            case NOT_EDITED, RUNNABLE, RUNNING, TERMINATED -> true;
-            default -> false;
-        };
-        systemEdited = hasUnsavedEdits();
         systemFile = this.file;
 
     }

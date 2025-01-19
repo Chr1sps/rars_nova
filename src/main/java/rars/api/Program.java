@@ -47,7 +47,7 @@ import static rars.Globals.BOOL_SETTINGS;
  * </p>
  *
  * <p>
- * Also, it is not threadsafe, calling assemble in another thread could
+ * Also, it is not thread safe, calling assemble in another thread could
  * invalidate
  * a concurrent simulation.
  * </p>

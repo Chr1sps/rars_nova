@@ -126,7 +126,6 @@ public final class VenusUI extends JFrame {
     public VenusUI(final @NotNull String name, final @NotNull List<@NotNull File> files) {
         super(name);
         this.setInitialDarkModeState(BOOL_SETTINGS.getSetting(BoolSetting.DARK_MODE));
-        Globals.GUI = this;
         this.editor = new Editor(this);
 
         final double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
@@ -553,7 +552,7 @@ public final class VenusUI extends JFrame {
 
         FileStatus.reset();
         // The following has side effect of establishing menu state
-        FileStatus.set(FileStatus.State.NO_FILE);
+        FileStatus.setSystemState(FileStatus.State.NO_FILE);
 
         this.addWindowListener(
             new WindowAdapter() {

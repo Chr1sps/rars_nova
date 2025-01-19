@@ -3,8 +3,10 @@ package rars.api;
 import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import picocli.CommandLine.Spec;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.util.Pair;
 
@@ -14,7 +16,7 @@ import java.util.List;
 import java.util.Stack;
 
 @Command(name = "rars_nova", showEndOfOptionsDelimiterInUsageHelp = true)
-public final class ProgramOptions {
+public final class ProgramOptions implements Runnable {
     static {
         System.setProperty(
             "picocli.endofoptions.description",
@@ -22,7 +24,7 @@ public final class ProgramOptions {
         );
     }
 
-    @Option(names = "--use-pseudo-instructions", negatable = true, description = "Enable/disable use of pseudo instructions and formats.")
+    @Option(names = "--use-pseudo-instructions", negatable = true, description = "Enable/disable use of pseudo instructions and formats.", defaultValue = "true", fallbackValue = "true")
     public boolean usePseudoInstructions = true;
 
     @Option(names = "--assemble-only", description = "Assemble only, do not run the program.")
@@ -34,13 +36,13 @@ public final class ProgramOptions {
     @Option(names = {"--debug", "-d"}, description = "Display RARS debugging statements.")
     public boolean debug = false;
 
-    @Option(names = "--assembly-error-code")
+    @Option(names = "--assembly-error-code", description = "Error code to return if assembly fails.")
     public int assemblyErrorCode = 1;
 
-    @Option(names = "--simulation-error-code")
+    @Option(names = "--simulation-error-code", description = "Error code to return if simulation fails.")
     public int simulationErrorCode = 1;
 
-    @Option(names = "--gui", negatable = true, description = "Explicitly enable/disable GUI mode.")
+    @Option(names = "--gui", negatable = true, description = "Explicitly enable/disable GUI mode.", defaultValue = "true", fallbackValue = "true")
     public boolean gui = true;
 
     @Option(names = "--acknowledgements", description = "Display copyright notice and acknowledgements.")
@@ -70,7 +72,7 @@ public final class ProgramOptions {
     @Option(names = "--memory-configuration", description = "Set memory configuration. Valid values: ${COMPLETION-CANDIDATES}.")
     public @NotNull MemoryConfiguration memoryConfiguration = MemoryConfiguration.DEFAULT;
 
-    @Option(names = "--registers", description = "List of register names or numbers whose content to display at end of run.")
+    @Option(names = "--registers", arity = "1..*", description = "List of register names or numbers whose content to display at end of run.")
     public @NotNull List<@NotNull String> registers = List.of();
 
     @Option(names = "--max-steps", description = "Maximum count of steps to simulate. If 0, negative or not specified, there is no maximum.")
@@ -86,14 +88,58 @@ public final class ProgramOptions {
 
     @Option(names = "--print-to-stderr", description = "Print RARS messages to standard error instead of standard output.")
     public boolean printToStdErr = false;
-    
+
     @Option(names = {
         "--files", "-f"
-    }, description = "Files to be assembled. The first file is assumed to be the main file unless the global statement label 'main' is defined in one of the files.")
+    }, arity = "1..*", description = "Files to be assembled. The first file is assumed to be the main file unless the global statement label 'main' is defined in one of the files.")
     public @NotNull List<@NotNull File> files = List.of();
 
     @Parameters(description = "Arguments to be passed to the executed program.")
     public @NotNull List<@NotNull String> programArgs = List.of();
+
+    @SuppressWarnings("InstanceVariableMayNotBeInitialized")
+    @Spec
+    private CommandSpec spec;
+
+    @Override
+    public String toString() {
+        return "ProgramOptions{" +
+            "programArgs=" + programArgs +
+            ", files=" + files +
+            ", printToStdErr=" + printToStdErr +
+            ", memoryRanges=" + memoryRanges +
+            ", isProjectMode=" + isProjectMode +
+            ", maxSteps=" + maxSteps +
+            ", registers=" + registers +
+            ", memoryConfiguration=" + memoryConfiguration +
+            ", startAtMain=" + startAtMain +
+            ", selfModifyingCode=" + selfModifyingCode +
+            ", isRV64=" + isRV64 +
+            ", displayInstructionCount=" + displayInstructionCount +
+            ", displayFormat=" + displayFormat +
+            ", warningsAreErrors=" + warningsAreErrors +
+            ", showHelp=" + showHelp +
+            ", acknowledgements=" + acknowledgements +
+            ", gui=" + gui +
+            ", simulationErrorCode=" + simulationErrorCode +
+            ", assemblyErrorCode=" + assemblyErrorCode +
+            ", debug=" + debug +
+            ", brief=" + brief +
+            ", assembleOnly=" + assembleOnly +
+            ", usePseudoInstructions=" + usePseudoInstructions +
+            '}';
+    }
+
+    @Override
+    public void run() {
+        final var parseResult = spec.commandLine().getParseResult();
+
+        if (!parseResult.originalArgs().isEmpty()) {
+            if (!(parseResult.hasMatchedOption("--gui") || parseResult.hasMatchedOption("--no-gui"))) {
+                gui = false;
+            }
+        }
+    }
 
     private static class MemoryRangeListConverter implements CommandLine.IParameterConsumer {
 
@@ -101,7 +147,7 @@ public final class ProgramOptions {
         public void consumeParameters(
             final @NotNull Stack<String> args,
             final CommandLine.Model.ArgSpec argSpec,
-            final CommandLine.Model.CommandSpec commandSpec
+            final CommandSpec commandSpec
         ) {
             if (args.size() != 2) {
                 throw new CommandLine.ParameterException(

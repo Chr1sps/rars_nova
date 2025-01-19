@@ -120,7 +120,7 @@ public final class RunAssembleAction extends GuiAction {
         RunAssembleAction.warningsAreErrors =
             BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
         if (FileStatus.getSystemFile() != null) {
-            if (FileStatus.get() == FileStatus.State.EDITED) {
+            if (FileStatus.getSystemState() == FileStatus.State.EDITED) {
                 this.mainUI.editor.save();
             }
             try {
@@ -130,9 +130,9 @@ public final class RunAssembleAction extends GuiAction {
                     // for multiple
                     // file assembly
                     filesToAssemble = FilenameFinder.getFilenameListForDirectory(
-                        new File(FileStatus.getName()).getParentFile(), Globals.fileExtensions);
+                        new File(FileStatus.getSystemName()).getParentFile(), Globals.fileExtensions);
                 } else {
-                    filesToAssemble = List.of(new File(FileStatus.getName()));
+                    filesToAssemble = List.of(new File(FileStatus.getSystemName()));
                 }
                 if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
                     this.mainUI.editor.saveAll();
@@ -168,7 +168,7 @@ public final class RunAssembleAction extends GuiAction {
                 messagesPane.postMessage(
                     name + ": operation completed successfully.\n\n");
                 FileStatus.setAssembled(true);
-                FileStatus.set(FileStatus.State.RUNNABLE);
+                FileStatus.setSystemState(FileStatus.State.RUNNABLE);
 
                 Globals.REGISTER_FILE.resetRegisters();
                 Globals.FP_REGISTER_FILE.resetRegisters();
@@ -227,7 +227,7 @@ public final class RunAssembleAction extends GuiAction {
                     }
                 }
                 FileStatus.setAssembled(false);
-                FileStatus.set(FileStatus.State.NOT_EDITED);
+                FileStatus.setSystemState(FileStatus.State.NOT_EDITED);
             }
         }
     }

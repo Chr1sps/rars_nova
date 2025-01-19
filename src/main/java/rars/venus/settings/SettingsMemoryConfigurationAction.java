@@ -242,12 +242,12 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
                 SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow().updateRegisters();
                 SettingsMemoryConfigurationAction.this.mainUI.mainPane.executePane.dataSegment.updateBaseAddressComboBox();
                 // 21 July 2009 Re-assemble if the situation demands it to maintain consistency.
-                if (FileStatus.get() == FileStatus.State.RUNNABLE ||
-                    FileStatus.get() == FileStatus.State.RUNNING ||
-                    FileStatus.get() == FileStatus.State.TERMINATED) {
+                if (FileStatus.getSystemState() == FileStatus.State.RUNNABLE ||
+                    FileStatus.getSystemState() == FileStatus.State.RUNNING ||
+                    FileStatus.getSystemState() == FileStatus.State.TERMINATED) {
                     // Stop execution if executing -- should NEVER happen because this
                     // Action's widget is disabled during MIPS execution.
-                    if (FileStatus.get() == FileStatus.State.RUNNING) {
+                    if (FileStatus.getSystemState() == FileStatus.State.RUNNING) {
                         Globals.SIMULATOR.stopExecution();
                     }
                     SettingsMemoryConfigurationAction.this.mainUI.getRunAssembleAction().actionPerformed(null);

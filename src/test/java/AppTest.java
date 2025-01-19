@@ -292,7 +292,7 @@ final class AppTest extends RarsTestBase {
 
     @Test
     void runSingle() throws IOException {
-        final var path = "riscv-tests/fcvt_wd.s";
+        final var path = "examples/unicode.s";
         run(getTestDataPath().resolve(path).toString(), false);
     }
 

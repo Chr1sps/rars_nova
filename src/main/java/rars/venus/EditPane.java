@@ -109,9 +109,9 @@ public final class EditPane extends JPanel {
                     // This method is triggered when file contents added to document
                     // upon opening, even though not edited by user. The IF
                     // statement will sense this situation and immediately return.
-                    if (FileStatus.get() == FileStatus.State.OPENING) {
+                    if (FileStatus.getSystemState() == FileStatus.State.OPENING) {
                         EditPane.this.setFileStatus(FileStatus.State.NOT_EDITED);
-                        FileStatus.set(FileStatus.State.NOT_EDITED);
+                        FileStatus.setSystemState(FileStatus.State.NOT_EDITED);
                         return;
                     }
                     // End of 9-Aug-2011 modification.
@@ -134,15 +134,14 @@ public final class EditPane extends JPanel {
                         );
                     }
 
-                    FileStatus.setEdited(true);
-                    switch (FileStatus.get()) {
+                    switch (FileStatus.getSystemState()) {
                         case FileStatus.State.NEW_NOT_EDITED:
-                            FileStatus.set(FileStatus.State.NEW_EDITED);
+                            FileStatus.setSystemState(FileStatus.State.NEW_EDITED);
                             break;
                         case FileStatus.State.NEW_EDITED:
                             break;
                         default:
-                            FileStatus.set(FileStatus.State.EDITED);
+                            FileStatus.setSystemState(FileStatus.State.EDITED);
                     }
 
                     EditPane.this.mainUI.mainPane.executePane.clearPane(); // DPS 9-Aug-2011

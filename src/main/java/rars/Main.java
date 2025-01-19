@@ -78,7 +78,7 @@ public final class Main {
         Globals.setupGlobalMemoryConfiguration(this.programOptions.memoryConfiguration);
 
         if (this.programOptions.gui) {
-            this.launchIDE();
+            Main.launchIDE(programOptions);
         } else {
             // running from command line.
             // assure command mode works in headless environment (generates exception if
@@ -93,11 +93,10 @@ public final class Main {
 
     public static void main(final String[] args) {
         final var programArgs = new ProgramOptions();
-        new CommandLine(programArgs).parseArgs(args);
+        new CommandLine(programArgs).execute(args);
         if (programArgs.showHelp) {
             CommandLine.usage(programArgs, System.out);
         } else {
-
             new Main(programArgs);
         }
     }
@@ -127,10 +126,23 @@ public final class Main {
         return memoryRange;
     }
 
-    private void displayAllPostMortem(final @NotNull Program program) {
-        this.displayMiscellaneousPostMortem();
-        this.displayRegistersPostMortem();
-        this.displayMemoryPostMortem(program.getMemory());
+    /**
+     * There are no command arguments, so run in interactive mode by
+     * launching the GUI-fronted integrated development environment.
+     */
+    private static void launchIDE(final @NotNull ProgramOptions options) {
+        System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts RARS menu
+        // on Mac OS menu bar
+        if (SystemInfo.isLinux) {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
+        }
+        if (SystemInfo.isMacOS) {
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            System.setProperty("apple.awt.application.name", "RARS Nova");
+            System.setProperty("apple.awt.application.appearance", "system");
+        }
+        SwingUtilities.invokeLater(() -> Globals.GUI = new VenusUI("RARS " + Globals.version, options.files));
     }
 
     // /**
@@ -188,28 +200,10 @@ public final class Main {
     //     }
     // }
 
-    /**
-     * There are no command arguments, so run in interactive mode by
-     * launching the GUI-fronted integrated development environment.
-     */
-    private void launchIDE() {
-        System.setProperty("apple.laf.useScreenMenuBar", "true"); // Puts RARS menu
-        // on Mac OS menu bar
-        if (SystemInfo.isLinux) {
-            JFrame.setDefaultLookAndFeelDecorated(true);
-            JDialog.setDefaultLookAndFeelDecorated(true);
-        }
-        if (SystemInfo.isMacOS) {
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-            System.setProperty("apple.awt.application.name", "RARS Nova");
-            System.setProperty("apple.awt.application.appearance", "system");
-        }
-        SwingUtilities.invokeLater(
-            () -> {
-                // Turn off metal's use of bold fonts
-                // UIManager.put("swing.boldMetal", Boolean.FALSE);
-                new VenusUI("RARS " + Globals.version, this.programOptions.files);
-            });
+    private void displayAllPostMortem(final @NotNull Program program) {
+        this.displayMiscellaneousPostMortem();
+        this.displayRegistersPostMortem();
+        this.displayMemoryPostMortem(program.getMemory());
     }
 
     /** Carry out the RARS command: assemble then optionally run */

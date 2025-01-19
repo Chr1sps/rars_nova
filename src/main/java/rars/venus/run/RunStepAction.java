@@ -125,12 +125,12 @@ public final class RunStepAction extends GuiAction {
         this.executePane.dataSegment.updateValues();
         if (!done) {
             this.executePane.textSegment.highlightStepAtPC();
-            FileStatus.set(FileStatus.State.RUNNABLE);
+            FileStatus.setSystemState(FileStatus.State.RUNNABLE);
         }
         if (done) {
             RunGoAction.resetMaxSteps();
             this.executePane.textSegment.unhighlightAllSteps();
-            FileStatus.set(FileStatus.State.TERMINATED);
+            FileStatus.setSystemState(FileStatus.State.TERMINATED);
         }
         if (done && pe == null) {
             this.mainUI.messagesPane.postMessage(
@@ -156,7 +156,7 @@ public final class RunStepAction extends GuiAction {
             this.mainUI.messagesPane.postMessage(
                 "\n" + this.name + ": execution terminated with errors.\n\n");
             this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues);
-            FileStatus.set(FileStatus.State.TERMINATED); // should be redundant.
+            FileStatus.setSystemState(FileStatus.State.TERMINATED); // should be redundant.
             this.executePane.textSegment.setCodeHighlighting(true);
             this.executePane.textSegment.unhighlightAllSteps();
             this.executePane.textSegment.highlightStepAtAddress(Globals.REGISTER_FILE.getProgramCounter() - 4);
