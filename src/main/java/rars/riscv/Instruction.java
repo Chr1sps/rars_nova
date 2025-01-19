@@ -38,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson and Ken Vollmar
  * @version August 2003
  */
-public abstract sealed class Instruction permits BasicInstruction, CompressedInstruction, ExtendedInstruction {
+public abstract sealed class Instruction permits BasicInstruction, ExtendedInstruction {
     /**
      * Characters used in instruction mask to indicate bit positions
      * for 'f'irst, 's'econd, 't'hird, 'q'uad, and 'p'enta operands .

@@ -8,9 +8,6 @@ import rars.assembler.TokenList;
 import rars.assembler.Tokenizer;
 import rars.exceptions.AssemblyException;
 import rars.riscv.instructions.*;
-import rars.riscv.instructions.compressed.CADDI4SPN;
-import rars.riscv.instructions.compressed.CEBREAK;
-import rars.riscv.instructions.compressed.CompressedJump;
 import rars.settings.BoolSetting;
 
 import java.io.BufferedReader;
@@ -32,7 +29,6 @@ import static rars.util.Utils.concatStreams;
 public final class InstructionsRegistry {
 
     public static final @NotNull SingleInstructionSet<@NotNull BasicInstruction> BASIC_INSTRUCTIONS;
-    public static final @NotNull SingleInstructionSet<@NotNull CompressedInstruction> COMPRESSED_INSTRUCTIONS;
     public static final @NotNull SingleInstructionSet<@NotNull ExtendedInstruction> EXTENDED_INSTRUCTIONS;
     public static final @NotNull SingleInstructionSet<@NotNull Instruction> ALL_INSTRUCTIONS;
     private static final @NotNull String PSEUDO_OPS_PATH = "/pseudoOps/";
@@ -231,15 +227,6 @@ public final class InstructionsRegistry {
                 SRLIW.INSTANCE
                 // endregion Other
             )
-        );
-        COMPRESSED_INSTRUCTIONS = new SingleInstructionSet<>(
-            List.of(
-                CADDI4SPN.INSTANCE,
-                CEBREAK.INSTANCE,
-                CompressedJump.CJ
-            ),
-            List.of(),
-            List.of()
         );
         EXTENDED_INSTRUCTIONS = new SingleInstructionSet<>(
             loadPseudoInstructions("shared.txt"),

@@ -645,29 +645,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 }
                 this.binaryStatement = BinaryUtils.binaryStringToInt(this.machineStatement);
             }
-            case final CompressedInstruction compressed -> {
-                // TODO
-                // mask indicates bit positions for 'f'irst, 's'econd, 't'hird operand
-//                this.machineStatement = compressed.getOperationMask();
-//                final var format = compressed.getInstructionFormat();
-
-//                if (format == BasicInstructionFormat.J_FORMAT) {
-//                    this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
-//                    this.insertBinaryCode(ProgramStatement.toJumpImmediate(this.operands[1]),
-//                            Instruction.operandMask[1],
-//                            errors);
-//                } else if (format == BasicInstructionFormat.B_FORMAT) {
-//                    this.insertBinaryCode(this.operands[0], Instruction.operandMask[0], errors);
-//                    this.insertBinaryCode(this.operands[1], Instruction.operandMask[1], errors);
-//                    this.insertBinaryCode(ProgramStatement.toBranchImmediate(this.operands[2]),
-//                            Instruction.operandMask[2],
-//                            errors);
-//                } else { // Everything else is normal
-//                    for (int i = 0; i < this.numOperands; i++)
-//                        this.insertBinaryCode(this.operands[i], Instruction.operandMask[i], errors);
-//                }
-//                this.binaryStatement = Binary.binaryStringToInt(this.machineStatement);
-            }
             case null -> throw new IllegalStateException("Instruction is null");
         }
     }
