@@ -37,20 +37,19 @@ group = "io.github.chr1sps"
 version = "0.0.1"
 description = "RARS Nova"
 
-tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
-    archiveClassifier.set("all")
-    mergeServiceFiles()
-    manifest {
-        attributes(
-            "Main-Class" to "rars.Main",
-            "Multi-Release" to "true"
-        )
-    }
-}
-
 tasks {
     compileJava {
         options.encoding = "UTF-8"
+    }
+    shadowJar {
+        archiveClassifier.set("all")
+        mergeServiceFiles()
+        manifest {
+            attributes(
+                "Main-Class" to "rars.Main",
+                "Multi-Release" to "true"
+            )
+        }
     }
     jar {
         manifest {
@@ -59,7 +58,9 @@ tasks {
             )
         }
         from(
-            configurations.runtimeClasspath.get().filter { it.isDirectory }
+            configurations.runtimeClasspath
+                .get()
+                .filter { it.isDirectory }
                 .map { zipTree(it) }
         )
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -235,7 +236,7 @@ val createLexer = tasks.register("createLexer") {
     }
 }
 
-tasks.named("compileJava") {
+tasks.compileJava {
     dependsOn(createLexer)
 }
 
