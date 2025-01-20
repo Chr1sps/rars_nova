@@ -90,7 +90,6 @@ public final class VenusUI extends JFrame {
     public final @NotNull Editor editor;
     public final @NotNull RunSpeedPanel runSpeedPanel;
     public final @NotNull VenusIO venusIO;
-    // PLEASE PUT THESE TWO (& THEIR METHODS) SOMEWHERE THEY BELONG, NOT HERE
     private final @NotNull Action fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction;
     private final @NotNull Action fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction;
     // The "action" objects, which include action listeners. One of each will be
@@ -553,6 +552,7 @@ public final class VenusUI extends JFrame {
         FileStatus.reset();
         // The following has side effect of establishing menu state
         FileStatus.setSystemState(FileStatus.State.NO_FILE);
+        this.setMenuStateInitial();
 
         this.addWindowListener(
             new WindowAdapter() {

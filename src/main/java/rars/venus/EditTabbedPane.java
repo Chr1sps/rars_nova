@@ -1,5 +1,7 @@
 package rars.venus;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
@@ -18,6 +20,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -147,7 +151,6 @@ public final class EditTabbedPane extends JPanel {
         tabbedPane.addTab(name, editPane);
 
         FileStatus.reset();
-        FileStatus.setSystemName(name);
         FileStatus.setSystemState(FileStatus.State.NEW_NOT_EDITED);
 
         Globals.REGISTER_FILE.resetRegisters();
@@ -325,8 +328,7 @@ public final class EditTabbedPane extends JPanel {
         final EditPane editPane = this.getCurrentEditTab();
         final File theFile = this.saveAsFile(editPane);
         if (theFile != null) {
-            FileStatus.setSystemFile(theFile);
-            FileStatus.setSystemName(theFile.getPath());
+            FileStatus.systemFile = theFile;
             FileStatus.setSystemState(FileStatus.State.NOT_EDITED);
             this.editor.setCurrentSaveDirectory(theFile.getParent());
             editPane.setFile(theFile);
@@ -588,6 +590,7 @@ public final class EditTabbedPane extends JPanel {
     }
 
     private final class FileOpener {
+        private static final @NotNull Logger LOGGER = LogManager.getLogger(FileOpener.class);
         private final @NotNull JFileChooser fileChooser;
         private final @NotNull ArrayList<@NotNull FileFilter> fileFilterList;
         private final @NotNull PropertyChangeListener listenForUserAddedFileFilter;
@@ -632,6 +635,7 @@ public final class EditTabbedPane extends JPanel {
             }
 
             if (this.fileChooser.showOpenDialog(EditTabbedPane.this.mainUI) == JFileChooser.APPROVE_OPTION) {
+                final var startTime = Instant.now();
                 final File theFile = this.fileChooser.getSelectedFile();
                 this.theEditor.setCurrentOpenDirectory(theFile.getParent());
                 // theEditor.setCurrentSaveDirectory(theFile.getParent());// 13-July-2011 DPS.
@@ -647,6 +651,9 @@ public final class EditTabbedPane extends JPanel {
                         EditTabbedPane.this.mainUI.getRunAssembleAction().actionPerformed(null);
                     }
                 }
+                final var endTime = Instant.now();
+                final var duration = Duration.between(startTime, endTime);
+                LOGGER.info("Opened file in {}ms.", duration.toMillis());
             }
             return true;
         }
@@ -673,8 +680,7 @@ public final class EditTabbedPane extends JPanel {
             }
             editPane.setFile(theFile);
             // FileStatus.reset();
-            FileStatus.setSystemName(theFile.getPath());
-            FileStatus.setSystemFile(theFile);
+            FileStatus.systemFile = theFile;
             FileStatus.setSystemState(FileStatus.State.OPENING);// DPS 9-Aug-2011
             if (theFile.canRead()) {
                 Globals.program = new RISCVProgram();

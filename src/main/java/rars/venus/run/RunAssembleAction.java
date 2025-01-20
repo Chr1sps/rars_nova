@@ -119,7 +119,7 @@ public final class RunAssembleAction extends GuiAction {
             BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
         RunAssembleAction.warningsAreErrors =
             BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
-        if (FileStatus.getSystemFile() != null) {
+        if (FileStatus.systemFile != null) {
             if (FileStatus.getSystemState() == FileStatus.State.EDITED) {
                 this.mainUI.editor.save();
             }
@@ -130,9 +130,9 @@ public final class RunAssembleAction extends GuiAction {
                     // for multiple
                     // file assembly
                     filesToAssemble = FilenameFinder.getFilenameListForDirectory(
-                        new File(FileStatus.getSystemName()).getParentFile(), Globals.fileExtensions);
+                        FileStatus.systemFile.getParentFile(), Globals.fileExtensions);
                 } else {
-                    filesToAssemble = List.of(new File(FileStatus.getSystemName()));
+                    filesToAssemble = List.of(FileStatus.systemFile);
                 }
                 if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
                     this.mainUI.editor.saveAll();
@@ -150,7 +150,7 @@ public final class RunAssembleAction extends GuiAction {
                     : null;
                 RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(
                     filesToAssemble,
-                    FileStatus.getSystemFile(), exceptionHandler
+                    FileStatus.systemFile, exceptionHandler
                 );
                 messagesPane.postMessage(RunAssembleAction.buildFileNameList(
                     name + ": assembling ",

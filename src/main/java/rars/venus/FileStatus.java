@@ -43,12 +43,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class FileStatus {
 
-    private static @NotNull FileStatus.State systemStatus = State.NO_FILE;
-
-    private static boolean systemAssembled;
-    private static String systemName;
-    private static @Nullable File systemFile;
-
+    public static @Nullable File systemFile = null;
+    private static @NotNull FileStatus.State systemState = State.NO_FILE;
+    private static boolean systemAssembled = false;
     private @NotNull FileStatus.State status;
     private @Nullable File file;
 
@@ -79,7 +76,7 @@ public final class FileStatus {
      * @return file status EDITED, RUNNABLE, etc, see list above
      */
     public static @NotNull FileStatus.State getSystemState() {
-        return systemStatus;
+        return systemState;
     }
 
     /**
@@ -89,48 +86,10 @@ public final class FileStatus {
      *     New status: EDITED, RUNNABLE, etc, see list above.
      */
     public static void setSystemState(final @NotNull FileStatus.State newStatus) {
-        systemStatus = newStatus;
+        systemState = newStatus;
         if (Globals.GUI != null) {
-            Globals.GUI.setMenuState(systemStatus);
+            Globals.GUI.setMenuState(systemState);
         }
-    }
-
-    /**
-     * Returns the ASM file.
-     *
-     * @return The ASM file.
-     */
-    public static @Nullable File getSystemFile() {
-        return systemFile;
-    }
-
-    /**
-     * Sets the file to the ASM file passed.
-     *
-     * @param f
-     *     file object variable that stores the ASM file.
-     */
-    public static void setSystemFile(final @Nullable File f) {
-        systemFile = f;
-    }
-
-    /**
-     * Returns the name of the file.
-     *
-     * @return The name of the ASM file.
-     */
-    public static String getSystemName() {
-        return systemName;
-    }
-
-    /**
-     * Changes the value of name to the parameter given.
-     *
-     * @param s
-     *     string variable tells what to set the name of the file to .
-     */
-    public static void setSystemName(final String s) {
-        systemName = s;
     }
 
     /**
@@ -156,8 +115,7 @@ public final class FileStatus {
      * Resets all the values in FileStatus
      */
     public static void reset() {
-        systemStatus = State.NO_FILE;
-        systemName = "";
+        systemState = State.NO_FILE;
         systemAssembled = false;
         systemFile = null;
     }
@@ -228,11 +186,9 @@ public final class FileStatus {
      * To support legacy code that depends on the static.
      */
     public void updateStaticFileStatus() {
-        systemStatus = this.status;
-        systemName = this.file.getPath();
+        systemState = this.status;
         systemAssembled = false;
         systemFile = this.file;
-
     }
 
     public enum State {
@@ -254,7 +210,14 @@ public final class FileStatus {
         TERMINATED,
         // DPS 9-Aug-2011
         /// File is being opened.
-        OPENING
+        OPENING;
+
+        public boolean isAssembled() {
+            return switch (this) {
+                case RUNNABLE, RUNNING, TERMINATED -> true;
+                default -> false;
+            };
+        }
     }
 
 }

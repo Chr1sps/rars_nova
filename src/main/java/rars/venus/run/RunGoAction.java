@@ -90,7 +90,7 @@ public final class RunGoAction extends GuiAction {
                 this.mainUI.isExecutionStarted = true;
 
                 this.mainUI.messagesPane.postMessage(
-                    this.name + ": running " + FileStatus.getSystemFile().getName() + "\n\n");
+                    this.name + ": running " + FileStatus.systemFile.getName() + "\n\n");
                 this.mainUI.messagesPane.selectRunMessageTab();
                 this.executePane.textSegment.setCodeHighlighting(false);
                 this.executePane.textSegment.unhighlightAllSteps();
@@ -174,10 +174,10 @@ public final class RunGoAction extends GuiAction {
         }
         if (pauseReason == Simulator.Reason.BREAKPOINT) {
             this.mainUI.messagesPane.postMessage(
-                this.name + ": execution paused at breakpoint: " + FileStatus.getSystemFile().getName() + "\n\n");
+                this.name + ": execution paused at breakpoint: " + FileStatus.systemFile.getName() + "\n\n");
         } else {
             this.mainUI.messagesPane.postMessage(
-                this.name + ": execution paused by user: " + FileStatus.getSystemFile().getName() + "\n\n");
+                this.name + ": execution paused by user: " + FileStatus.systemFile.getName() + "\n\n");
         }
         this.mainUI.messagesPane.selectMessageTab();
         this.executePane.textSegment.setCodeHighlighting(true);
