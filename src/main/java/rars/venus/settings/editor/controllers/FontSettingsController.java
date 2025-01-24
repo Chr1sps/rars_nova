@@ -72,15 +72,15 @@ public final class FontSettingsController {
     public void applySettings() {
         this.settings.setFontFamily(this.fontFamily);
         this.settings.setFontSize(this.fontSize);
-        this.settings.isLigaturized = this.ligaturesEnabled;
-        this.settings.fontWeight = this.fontWeight;
+        this.settings.setLigaturized(this.ligaturesEnabled);
+        this.settings.setFontWeight(this.fontWeight);
         this.settings.saveSettingsToPreferences();
     }
 
     public void resetButtonValues() {
-        this.ligaturesEnabled = this.settings.isLigaturized;
+        this.ligaturesEnabled = this.settings.isLigaturized();
         this.fontFamily = this.settings.getFontFamily();
         this.fontSize = this.settings.getFontSize();
-        this.fontWeight = this.settings.fontWeight;
+        this.fontWeight = this.settings.getFontWeight();
     }
 }

@@ -60,7 +60,8 @@ public final class OtherSettings {
     public void setMemoryConfigurationAndSave(final @NotNull MemoryConfiguration memoryConfiguration) {
         if (!this.memoryConfiguration.equals(memoryConfiguration)) {
             this.memoryConfiguration = memoryConfiguration;
-            this.saveSettingsToPreferences();
+            this.preferences.put(OTHER_PREFIX + MEMORY_CONFIGURATION, this.memoryConfiguration.identifier);
+            this.commitChanges();
         }
     }
 
@@ -71,7 +72,8 @@ public final class OtherSettings {
     public void setExceptionHandlerAndSave(final @NotNull String exceptionHandler) {
         if (!this.exceptionHandler.equals(exceptionHandler)) {
             this.exceptionHandler = exceptionHandler;
-            this.saveSettingsToPreferences();
+            this.preferences.put(OTHER_PREFIX + EXCEPTION_HANDLER, this.exceptionHandler);
+            this.commitChanges();
         }
     }
 
@@ -82,7 +84,8 @@ public final class OtherSettings {
     public void setLabelSortStateAndSave(final int labelSortState) {
         if (this.labelSortState != labelSortState) {
             this.labelSortState = labelSortState;
-            this.saveSettingsToPreferences();
+            this.preferences.putInt(OTHER_PREFIX + SORT_STATE, this.labelSortState);
+            this.commitChanges();
         }
     }
 
@@ -93,7 +96,8 @@ public final class OtherSettings {
     public void setCaretBlinkRateAndSave(final int caretBlinkRate) {
         if (this.caretBlinkRate != caretBlinkRate) {
             this.caretBlinkRate = caretBlinkRate;
-            this.saveSettingsToPreferences();
+            this.preferences.putInt(OTHER_PREFIX + CARET_BLINK_RATE, this.caretBlinkRate);
+            this.commitChanges();
         }
     }
 
@@ -104,21 +108,13 @@ public final class OtherSettings {
     public void setEditorTabSizeAndSave(final int editorTabSize) {
         if (this.editorTabSize != editorTabSize) {
             this.editorTabSize = editorTabSize;
-            this.saveSettingsToPreferences();
+            this.preferences.putInt(OTHER_PREFIX + EDITOR_TAB_SIZE, this.editorTabSize);
+            this.commitChanges();
         }
     }
 
     public int getEditorTabSize() {
         return editorTabSize;
-    }
-
-    private void saveSettingsToPreferences() {
-        this.preferences.putInt(OTHER_PREFIX + SORT_STATE, this.labelSortState);
-        this.preferences.put(OTHER_PREFIX + MEMORY_CONFIGURATION, this.memoryConfiguration.identifier);
-        this.preferences.putInt(OTHER_PREFIX + CARET_BLINK_RATE, this.caretBlinkRate);
-        this.preferences.putInt(OTHER_PREFIX + EDITOR_TAB_SIZE, this.editorTabSize);
-        this.preferences.put(OTHER_PREFIX + EXCEPTION_HANDLER, this.exceptionHandler);
-        commitChanges();
     }
 
     private void commitChanges() {

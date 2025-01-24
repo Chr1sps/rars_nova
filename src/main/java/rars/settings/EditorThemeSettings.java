@@ -35,14 +35,13 @@ public final class EditorThemeSettings {
     private static final String UNDERLINE = "Underline";
 
     // endregion Preferences keys
+
     public final @NotNull ListenerDispatcher<Void>.Hook onChangeListenerHook;
     private final @NotNull Preferences preferences;
     private final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
     /**
      * The current theme in memory. You can make changes to this theme and then
      * call {@link #commitChanges()} to save the changes to the preferences.
-     * You can also call {@link #discardChanges()} to revert the changes to the
-     * state present in the preferences.
      */
     public @NotNull SettingsTheme currentTheme;
     private @NotNull SettingsTheme backupTheme;
@@ -101,14 +100,6 @@ public final class EditorThemeSettings {
             writeThemeToPreferences(this.backupTheme);
             this.currentTheme = this.backupTheme;
         }
-    }
-
-    /**
-     * Restores the state of the theme settings in memory to the state in the
-     * preferences.
-     */
-    public void discardChanges() {
-        this.currentTheme = this.backupTheme;
     }
 
     // region Preference writing methods

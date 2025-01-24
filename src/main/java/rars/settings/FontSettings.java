@@ -29,18 +29,35 @@ public final class FontSettings {
     public final @NotNull ListenerDispatcher<Void>.Hook onChangeListenerHook;
     private final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
     private final @NotNull Preferences preferences;
-    public @NotNull FontWeight fontWeight;
-    public boolean isLigaturized;
+
+    private @NotNull FontWeight fontWeight;
+    private boolean isLigaturized;
     private int fontSize;
     private @NotNull String fontFamily;
-
-    // region Getters and setters
 
     public FontSettings(final @NotNull Preferences preferences) {
         this.onChangeDispatcher = new ListenerDispatcher<>();
         this.onChangeListenerHook = this.onChangeDispatcher.getHook();
         this.preferences = preferences;
         loadSettingsFromPreferences();
+    }
+
+    // region Getters and setters
+
+    public boolean isLigaturized() {
+        return isLigaturized;
+    }
+
+    public void setLigaturized(final boolean ligaturized) {
+        isLigaturized = ligaturized;
+    }
+
+    public @NotNull FontWeight getFontWeight() {
+        return fontWeight;
+    }
+
+    public void setFontWeight(@NotNull final FontWeight fontWeight) {
+        this.fontWeight = fontWeight;
     }
 
     public @NotNull Font getCurrentFont() {

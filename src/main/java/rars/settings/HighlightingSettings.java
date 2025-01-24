@@ -33,7 +33,7 @@ public final class HighlightingSettings {
     public final @NotNull ListenerDispatcher<Void>.Hook onChangeListenerHook;
     private final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
     private final @NotNull Preferences preferences;
-    private @NotNull TokenStyle textSegmentHighlightingStyle, delaySlotHighlightingStyle;
+    private @NotNull TokenStyle textSegmentHighlightingStyle;
     private @Nullable TokenStyle dataSegmentHighlightingStyle, registerHighlightingStyle;
 
     public HighlightingSettings(final @NotNull Preferences preferences) {
@@ -81,15 +81,10 @@ public final class HighlightingSettings {
         return dataSegmentHighlightingStyle;
     }
 
-    public @NotNull TokenStyle getDelaySlotHighlightingStyle() {
-        return delaySlotHighlightingStyle;
-    }
-
     // endregion Preferences prefix methods
 
     public void saveSettings() {
         writeTokenStyleToPreferences(HighlightingType.TEXT_SEGMENT, this.textSegmentHighlightingStyle);
-        writeTokenStyleToPreferences(HighlightingType.DELAY_SLOT, this.delaySlotHighlightingStyle);
         writeNullableTokenStyleToPreferences(HighlightingType.DATA_SEGMENT, this.dataSegmentHighlightingStyle);
         writeNullableTokenStyleToPreferences(HighlightingType.REGISTER, this.registerHighlightingStyle);
         try {
@@ -146,10 +141,6 @@ public final class HighlightingSettings {
         this.textSegmentHighlightingStyle = loadTokenStyleFromPreferences(
             HighlightingType.TEXT_SEGMENT,
             HighlightingDefaults.DEFAULT_TEXT_SEGMENT_STYLE
-        );
-        this.delaySlotHighlightingStyle = loadTokenStyleFromPreferences(
-            HighlightingType.DELAY_SLOT,
-            HighlightingDefaults.DEFAULT_DELAY_SLOT_STYLE
         );
         this.dataSegmentHighlightingStyle = loadNullableTokenStyleFromPreferences(
             HighlightingType.DATA_SEGMENT,
