@@ -3,17 +3,22 @@ package rars.settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import rars.util.ListenerDispatcher;
 
 import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public final class BoolSettings extends SettingsBase {
+public final class BoolSettings {
     private static final Logger LOGGER = LogManager.getLogger(BoolSettings.class);
+    public final @NotNull ListenerDispatcher<Void>.Hook onChangeListenerHook;
     private final @NotNull Preferences preferences;
     private final @NotNull HashMap<BoolSetting, Boolean> currentSettings;
+    private final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
 
     public BoolSettings(final @NotNull Preferences preferences) {
+        this.onChangeDispatcher = new ListenerDispatcher<>();
+        this.onChangeListenerHook = this.onChangeDispatcher.getHook();
         this.preferences = preferences;
         this.currentSettings = new HashMap<>();
         loadSettingsFromPreferences();

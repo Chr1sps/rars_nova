@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.util.ListenerDispatcher;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
@@ -14,7 +15,7 @@ import java.util.prefs.Preferences;
 
 import static rars.util.Utils.getColorAsHexString;
 
-public final class EditorThemeSettings extends SettingsBase {
+public final class EditorThemeSettings {
     private static final @NotNull Logger LOGGER = LogManager.getLogger(EditorThemeSettings.class);
     /**
      * Top level theme settings prefix.
@@ -34,8 +35,9 @@ public final class EditorThemeSettings extends SettingsBase {
     private static final String UNDERLINE = "Underline";
 
     // endregion Preferences keys
-
+    public final @NotNull ListenerDispatcher<Void>.Hook onChangeListenerHook;
     private final @NotNull Preferences preferences;
+    private final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
     /**
      * The current theme in memory. You can make changes to this theme and then
      * call {@link #commitChanges()} to save the changes to the preferences.
@@ -46,6 +48,8 @@ public final class EditorThemeSettings extends SettingsBase {
     private @NotNull SettingsTheme backupTheme;
 
     public EditorThemeSettings(final @NotNull Preferences preferences) {
+        this.onChangeDispatcher = new ListenerDispatcher<>();
+        this.onChangeListenerHook = this.onChangeDispatcher.getHook();
         this.preferences = preferences;
         this.currentTheme = loadThemeFromPreferences();
         this.backupTheme = this.currentTheme.clone();

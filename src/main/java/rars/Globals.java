@@ -15,8 +15,7 @@ import rars.venus.VenusUI;
 
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static java.util.prefs.Preferences.userNodeForPackage;
+import java.util.prefs.Preferences;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -112,7 +111,7 @@ public final class Globals {
     static {
         SIMULATOR = new Simulator();
 
-        final var settingsPreferences = userNodeForPackage(SettingsBase.class);
+        final var settingsPreferences = Preferences.userRoot().node("/rars/settings");
 
         OTHER_SETTINGS = new OtherSettings(settingsPreferences);
         BOOL_SETTINGS = new BoolSettings(settingsPreferences);

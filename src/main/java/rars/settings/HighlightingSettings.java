@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.util.ListenerDispatcher;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
@@ -12,7 +13,7 @@ import java.util.prefs.Preferences;
 
 import static rars.util.Utils.getColorAsHexString;
 
-public final class HighlightingSettings extends SettingsBase {
+public final class HighlightingSettings {
 
     private static final Logger LOGGER = LogManager.getLogger(HighlightingSettings.class);
 
@@ -29,11 +30,15 @@ public final class HighlightingSettings extends SettingsBase {
 
     // endregion Preferences keys
 
+    public final @NotNull ListenerDispatcher<Void>.Hook onChangeListenerHook;
+    private final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
     private final @NotNull Preferences preferences;
     private @NotNull TokenStyle textSegmentHighlightingStyle, delaySlotHighlightingStyle;
     private @Nullable TokenStyle dataSegmentHighlightingStyle, registerHighlightingStyle;
 
     public HighlightingSettings(final @NotNull Preferences preferences) {
+        this.onChangeDispatcher = new ListenerDispatcher<>();
+        this.onChangeListenerHook = this.onChangeDispatcher.getHook();
         this.preferences = preferences;
         this.loadSettingsFromPreferences();
     }

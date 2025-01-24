@@ -5,11 +5,12 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.hardware.MemoryConfiguration;
+import rars.util.ListenerDispatcher;
 
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public final class OtherSettings extends SettingsBase {
+public final class OtherSettings {
     private static final @NotNull Logger LOGGER = LogManager.getLogger(OtherSettings.class);
 
     // region Preferences keys
@@ -24,6 +25,8 @@ public final class OtherSettings extends SettingsBase {
 
     // endregion Preferences keys
 
+    public final @NotNull ListenerDispatcher<Void>.Hook onChangeListenerHook;
+    private final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
     private final @NotNull Preferences preferences;
     private @NotNull String /*labelSortState,*/ exceptionHandler;
     private @NotNull MemoryConfiguration memoryConfiguration;
@@ -31,6 +34,8 @@ public final class OtherSettings extends SettingsBase {
     private int caretBlinkRate, editorTabSize, labelSortState;
 
     public OtherSettings(final @NotNull Preferences preferences) {
+        this.onChangeDispatcher = new ListenerDispatcher<>();
+        this.onChangeListenerHook = this.onChangeDispatcher.getHook();
         this.preferences = preferences;
         this.loadSettingsFromPreferences();
     }
