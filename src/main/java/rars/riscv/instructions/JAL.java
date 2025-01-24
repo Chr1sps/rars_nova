@@ -5,7 +5,7 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.SimulationContext;
+import rars.simulator.SimulationContext;
 import rars.util.Utils;
 
 /*

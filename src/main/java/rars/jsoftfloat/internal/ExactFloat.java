@@ -17,7 +17,7 @@ import java.math.BigInteger;
  * precision issue. They have to stop
  * computing digits once they get past the maximum length of the significand.
  */
-public class ExactFloat implements Comparable<ExactFloat> {
+public final class ExactFloat implements Comparable<ExactFloat> {
     // Value = (-1)^sign * significand * 2^exponent
     public final boolean sign;
     public final int exponent;

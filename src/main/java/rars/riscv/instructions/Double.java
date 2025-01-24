@@ -7,7 +7,7 @@ import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.SimulationContext;
+import rars.simulator.SimulationContext;
 
 public abstract class Double extends BasicInstruction {
     protected Double(final String name, final String description, final String funct) {

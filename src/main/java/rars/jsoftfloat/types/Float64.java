@@ -10,7 +10,7 @@ import java.math.BigInteger;
 /**
  * Represents the Binary32 format
  */
-public class Float64 implements Floating<Float64> {
+public final class Float64 implements Floating<Float64> {
     // TODO: make a more abstract binary float class
     /**
      * Constant {@code Zero}

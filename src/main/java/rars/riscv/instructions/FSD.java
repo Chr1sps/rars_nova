@@ -6,7 +6,7 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.SimulationContext;
+import rars.simulator.SimulationContext;
 
 public final class FSD extends BasicInstruction {
     public static final @NotNull FSD INSTANCE = new FSD();

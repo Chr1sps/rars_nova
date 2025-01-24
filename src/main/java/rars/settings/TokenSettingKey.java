@@ -33,33 +33,32 @@ public enum TokenSettingKey {
     MACRO_PARAMETER("Macro parameters"),
     HILO("%hi/%lo offsets");
 
-    public final @NotNull String description;
-
     private static final @NotNull List<@NotNull Pair<@NotNull TokenSettingKey, @NotNull RVTokenType>> settingMappings = List.of(
-        new Pair<>(ERROR, RVTokenType.UNFINISHED_STRING),
-        new Pair<>(ERROR, RVTokenType.UNFINISHED_CHAR),
-        new Pair<>(ERROR, RVTokenType.ERROR),
-        new Pair<>(COMMENT, RVTokenType.COMMENT),
-        new Pair<>(DIRECTIVE, RVTokenType.DIRECTIVE),
-        new Pair<>(REGISTER_NAME, RVTokenType.REGISTER_NAME),
-        new Pair<>(IDENTIFIER, RVTokenType.IDENTIFIER),
-        new Pair<>(NUMBER, RVTokenType.INTEGER),
-        new Pair<>(NUMBER, RVTokenType.FLOATING),
-        new Pair<>(STRING, RVTokenType.STRING),
-        new Pair<>(STRING, RVTokenType.CHAR),
-        new Pair<>(LABEL, RVTokenType.LABEL),
-        new Pair<>(INSTRUCTION, RVTokenType.INSTRUCTION),
-        new Pair<>(PUNCTUATION, RVTokenType.PLUS),
-        new Pair<>(PUNCTUATION, RVTokenType.MINUS),
-        new Pair<>(PUNCTUATION, RVTokenType.COMMA),
-        new Pair<>(PUNCTUATION, RVTokenType.LEFT_PAREN),
-        new Pair<>(PUNCTUATION, RVTokenType.RIGHT_PAREN),
-        new Pair<>(PUNCTUATION, RVTokenType.OPERATOR),
-        new Pair<>(ROUNDING_MODE, RVTokenType.ROUNDING_MODE),
-        new Pair<>(MACRO_PARAMETER, RVTokenType.MACRO_PARAMETER),
-        new Pair<>(HILO, RVTokenType.HI),
-        new Pair<>(HILO, RVTokenType.LO)
+        Pair.of(ERROR, RVTokenType.UNFINISHED_STRING),
+        Pair.of(ERROR, RVTokenType.UNFINISHED_CHAR),
+        Pair.of(ERROR, RVTokenType.ERROR),
+        Pair.of(COMMENT, RVTokenType.COMMENT),
+        Pair.of(DIRECTIVE, RVTokenType.DIRECTIVE),
+        Pair.of(REGISTER_NAME, RVTokenType.REGISTER_NAME),
+        Pair.of(IDENTIFIER, RVTokenType.IDENTIFIER),
+        Pair.of(NUMBER, RVTokenType.INTEGER),
+        Pair.of(NUMBER, RVTokenType.FLOATING),
+        Pair.of(STRING, RVTokenType.STRING),
+        Pair.of(STRING, RVTokenType.CHAR),
+        Pair.of(LABEL, RVTokenType.LABEL),
+        Pair.of(INSTRUCTION, RVTokenType.INSTRUCTION),
+        Pair.of(PUNCTUATION, RVTokenType.PLUS),
+        Pair.of(PUNCTUATION, RVTokenType.MINUS),
+        Pair.of(PUNCTUATION, RVTokenType.COMMA),
+        Pair.of(PUNCTUATION, RVTokenType.LEFT_PAREN),
+        Pair.of(PUNCTUATION, RVTokenType.RIGHT_PAREN),
+        Pair.of(PUNCTUATION, RVTokenType.OPERATOR),
+        Pair.of(ROUNDING_MODE, RVTokenType.ROUNDING_MODE),
+        Pair.of(MACRO_PARAMETER, RVTokenType.MACRO_PARAMETER),
+        Pair.of(HILO, RVTokenType.HI),
+        Pair.of(HILO, RVTokenType.LO)
     );
+    public final @NotNull String description;
 
     TokenSettingKey(@NotNull final String description) {
         this.description = description;

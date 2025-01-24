@@ -1,4 +1,4 @@
-package rars.riscv;
+package rars.simulator;
 
 import org.jetbrains.annotations.NotNull;
 import rars.io.AbstractIO;

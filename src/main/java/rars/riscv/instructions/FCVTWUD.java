@@ -8,7 +8,7 @@ import rars.jsoftfloat.operations.Conversions;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.SimulationContext;
+import rars.simulator.SimulationContext;
 
 public final class FCVTWUD extends BasicInstruction {
     public static final FCVTWUD INSTANCE = new FCVTWUD();

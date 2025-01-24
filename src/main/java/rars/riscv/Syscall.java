@@ -11,6 +11,7 @@ import rars.exceptions.SimulationException;
 import rars.riscv.syscalls.DisplayBitmapImpl;
 import rars.riscv.syscalls.RandomStreams;
 import rars.riscv.syscalls.ToneGenerator;
+import rars.simulator.SimulationContext;
 import rars.util.BinaryUtils;
 import rars.util.NullString;
 
@@ -19,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 @SuppressWarnings("DataFlowIssue")
-public enum Syscall implements SimullationCallback {
+public enum Syscall implements SimulationCallback {
     Close(
         "Close",
         57,
@@ -880,7 +881,7 @@ public enum Syscall implements SimullationCallback {
      * must store into a7 before issuing the ECALL instruction.
      */
     public final int serviceNumber;
-    private final @NotNull SimullationCallback callback;
+    private final @NotNull SimulationCallback callback;
 
     /**
      * <p>Constructor for SyscallEnum.</p>
@@ -895,7 +896,7 @@ public enum Syscall implements SimullationCallback {
         final @NotNull String name,
         final int number,
         final @NotNull String description,
-        final @NotNull SimullationCallback callback
+        final @NotNull SimulationCallback callback
     ) {
         this(name, number, description, "N/A", "N/A", callback);
     }
@@ -920,7 +921,7 @@ public enum Syscall implements SimullationCallback {
         final @NotNull String description,
         final @NotNull String in,
         final @NotNull String out,
-        final @NotNull SimullationCallback callback
+        final @NotNull SimulationCallback callback
     ) {
         this.serviceNumber = number;
         this.serviceName = name;

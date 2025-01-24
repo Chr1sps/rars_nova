@@ -8,7 +8,7 @@ import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.SimulationContext;
+import rars.simulator.SimulationContext;
 
 public final class FCVTDS extends BasicInstruction {
     public static final FCVTDS INSTANCE = new FCVTDS();

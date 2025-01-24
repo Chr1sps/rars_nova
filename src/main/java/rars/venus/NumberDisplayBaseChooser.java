@@ -157,48 +157,6 @@ public final class NumberDisplayBaseChooser extends JCheckBox {
     }
 
     /**
-     * Produces a string form of a float given the value and the
-     * numerical base to convert it to. There is an instance
-     * method that uses the internally stored base. This class
-     * method can be used by anyone anytime.
-     *
-     * @param value
-     *     the number to be converted
-     * @param base
-     *     the numerical base to use (currently 10 or 16)
-     * @return a String equivalent of the value rendered appropriately.
-     */
-    public static String formatNumber(final float value, final int base) {
-        if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return BinaryUtils.intToHexString(Float.floatToIntBits(value));
-        } else {
-            return Float.toString(value);
-        }
-    }
-
-    /**
-     * Produces a string form of a double given the value and the
-     * numerical base to convert it to. There is an instance
-     * method that uses the internally stored base. This class
-     * method can be used by anyone anytime.
-     *
-     * @param value
-     *     the number to be converted
-     * @param base
-     *     the numerical base to use (currently 10 or 16)
-     * @return a String equivalent of the value rendered appropriately.
-     */
-    public static String formatNumber(final double value, final int base) {
-        if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            final long lguy = Double.doubleToLongBits(value);
-            return BinaryUtils.intToHexString(BinaryUtils.highOrderLongToInt(lguy)) +
-                BinaryUtils.intToHexString(BinaryUtils.lowOrderLongToInt(lguy)).substring(2);
-        } else {
-            return Double.toString(value);
-        }
-    }
-
-    /**
      * Produces a string form of a float given an integer containing
      * the 32 bit pattern and the numerical base to use (10 or 16). If the
      * base is 16, the string will be built from the 32 bits. If the
@@ -287,36 +245,6 @@ public final class NumberDisplayBaseChooser extends JCheckBox {
         if (newBase == NumberDisplayBaseChooser.DECIMAL || newBase == NumberDisplayBaseChooser.HEXADECIMAL) {
             this.base = newBase;
         }
-    }
-
-    /**
-     * Produces a string form of a number given the value. There
-     * is also an class (static method) that uses a specified
-     * base.
-     *
-     * @param value
-     *     the number to be converted
-     * @return a String equivalent of the value rendered appropriately.
-     */
-    public String formatNumber(final int value) {
-        if (this.base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return BinaryUtils.intToHexString(value);
-        } else {
-            return Integer.valueOf(value).toString();
-        }
-    }
-
-    /**
-     * Produces a string form of an unsigned integer given the value. There
-     * is also an class (static method) that uses a specified base.
-     * If the current base is 16, this produces the same result as formatNumber().
-     *
-     * @param value
-     *     the number to be converted
-     * @return a String equivalent of the value rendered appropriately.
-     */
-    public String formatUnsignedInteger(final int value) {
-        return NumberDisplayBaseChooser.formatUnsignedInteger(value, this.base);
     }
 
     /**

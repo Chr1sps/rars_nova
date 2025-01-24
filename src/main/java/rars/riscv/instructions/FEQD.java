@@ -8,7 +8,7 @@ import rars.jsoftfloat.operations.Comparisons;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.SimulationContext;
+import rars.simulator.SimulationContext;
 
 public final class FEQD extends BasicInstruction {
     public static final FEQD INSTANCE = new FEQD();

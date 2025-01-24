@@ -6,7 +6,7 @@ import rars.exceptions.SimulationException;
 import rars.jsoftfloat.types.Float64;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.SimulationContext;
+import rars.simulator.SimulationContext;
 
 public final class FCLASSD extends BasicInstruction {
     public static final FCLASSD INSTANCE = new FCLASSD();

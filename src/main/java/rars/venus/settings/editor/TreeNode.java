@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.settings.TokenSettingKey;
 
 public class TreeNode {
-    final @NotNull String display;
+    private final @NotNull String display;
 
     public TreeNode(final @NotNull String display) {
         this.display = display;

@@ -70,7 +70,6 @@ public final class BHTableModel extends AbstractTableModel {
     /**
      * type of the table columns
      */
-    // @SuppressWarnings("unchecked")
     private final Class<?>[] m_columnClasses = {
         Integer.class, String.class, String.class, Integer.class, Integer.class,
         Double.class

@@ -14,7 +14,6 @@ public interface TokensProducer<CollectionType> {
 
     default void addErrorToken(final char[] array, final int segmentPos, final int offset, final String notice) {
         this.addToken(array, segmentPos, segmentPos, RVTokenType.ERROR, offset);
-
     }
 
     CollectionType getResult();
@@ -22,5 +21,4 @@ public interface TokensProducer<CollectionType> {
     CollectionType getEmptyResult();
 
     CollectionType getTokenList(Segment text, int initialTokenType, int lineOffset, int lineNum);
-
 }

@@ -5,7 +5,7 @@ import rars.ProgramStatement;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.SimulationContext;
+import rars.simulator.SimulationContext;
 
 public final class FSGNJXD extends BasicInstruction {
     public static final @NotNull FSGNJXD INSTANCE = new FSGNJXD();

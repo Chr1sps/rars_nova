@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -54,21 +53,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class RISCVProgram {
 
     private @Nullable File file;
-    private List<String> sourceList;
-    private List<TokenList> tokenList;
-    private ArrayList<ProgramStatement> parsedList;
-    private List<ProgramStatement> machineList;
+    private List<@NotNull String> sourceList;
+    private List<@NotNull TokenList> tokenList;
+    private List<@NotNull ProgramStatement> parsedList;
+    private List<@NotNull ProgramStatement> machineList;
     private BackStepper backStepper;
     private SymbolTable localSymbolTable;
     private MacroPool macroPool;
-    private List<SourceLine> sourceLineList;
+    private List<@NotNull SourceLine> sourceLineList;
 
     /**
      * Produces list of source statements that comprise the program.
      *
      * @return ArrayList of String. Each String is one line of RISCV source code.
      */
-    public List<String> getSourceList() {
+    public List<@NotNull String> getSourceList() {
         return this.sourceList;
     }
 
@@ -78,7 +77,7 @@ public final class RISCVProgram {
      * @return ArrayList of SourceLine.
      * Each SourceLine represents one line of RISCV source code
      */
-    public List<SourceLine> getSourceLineList() {
+    public List<@NotNull SourceLine> getSourceLineList() {
         return this.sourceLineList;
     }
 
@@ -90,7 +89,7 @@ public final class RISCVProgram {
      *     Each SourceLine represents one line of RISCV source
      *     code.
      */
-    public void setSourceLineList(final @NotNull List<SourceLine> sourceLineList) {
+    public void setSourceLineList(final @NotNull List<@NotNull SourceLine> sourceLineList) {
         this.sourceLineList = sourceLineList;
         this.sourceList = sourceLineList.stream().map(SourceLine::source).toList();
     }
@@ -106,20 +105,8 @@ public final class RISCVProgram {
      * corresponding line of RISCV source code.
      * @see TokenList
      */
-    public List<TokenList> getTokenList() {
+    public List<@NotNull TokenList> getTokenList() {
         return this.tokenList;
-    }
-
-    /**
-     * Produces new empty list to hold parsed source code statements.
-     *
-     * @return ArrayList of ProgramStatement. Each ProgramStatement represents a
-     * parsed RISCV statement.
-     * @see ProgramStatement
-     */
-    public ArrayList<ProgramStatement> createParsedList() {
-        this.parsedList = new ArrayList<>();
-        return this.parsedList;
     }
 
     /**
@@ -129,8 +116,12 @@ public final class RISCVProgram {
      * parsed RISCV statement.
      * @see ProgramStatement
      */
-    public List<ProgramStatement> getParsedList() {
+    public List<@NotNull ProgramStatement> getParsedList() {
         return this.parsedList;
+    }
+
+    public void setParsedList(final @NotNull List<@NotNull ProgramStatement> parsedList) {
+        this.parsedList = parsedList;
     }
 
     /**
@@ -269,9 +260,6 @@ public final class RISCVProgram {
     ) throws AssemblyException {
         final var programsToAssemble = new ArrayList<RISCVProgram>();
         final int leadFilePosition = exceptionHandler == null ? 0 : 1;
-        final var actualFilesList = exceptionHandler == null
-            ? files
-            : Stream.concat(Stream.of(exceptionHandler), files.stream()).toList();
         for (final var file : files) {
             final var prepareeProgram = (file.equals(leadFile)) ? this : new RISCVProgram();
             prepareeProgram.readSource(file);

@@ -8,7 +8,6 @@ import rars.exceptions.*;
 import rars.io.AbstractIO;
 import rars.notices.SimulatorNotice;
 import rars.riscv.BasicInstruction;
-import rars.riscv.SimulationContext;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
 import rars.settings.OtherSettings;
 import rars.util.BinaryUtils;

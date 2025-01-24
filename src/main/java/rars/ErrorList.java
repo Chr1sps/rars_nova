@@ -84,7 +84,7 @@ public final class ErrorList {
     /**
      * Determine whether warning has occurred or not.
      *
-     * @return {@code true} if an warning has occurred, <code>false</code> otherwise.
+     * @return {@code true} if an warning has occurred, {@code false} otherwise.
      */
     public boolean warningsOccurred() {
         return (this.warningCount != 0);
@@ -175,7 +175,7 @@ public final class ErrorList {
         return this.generateWarningReport() + this.generateErrorReport();
     }
 
-    // Produces either error or warning report.
+    /** Produces either error or warning report. */
     private @NotNull String generateReport(final boolean isWarning) {
         final StringBuilder report = new StringBuilder();
         for (final ErrorMessage m : this.messages) {

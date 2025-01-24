@@ -36,7 +36,6 @@ import java.util.Vector;
 /**
  * Represents the GUI of the BHT Simulator Tool.
  * <p>
- * <p>
  * The GUI consists of mainly four parts:
  * <ul>
  * <li>A configuration panel to select the number of entries and the history

@@ -3,9 +3,7 @@ package rars.riscv;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
 import rars.assembler.DataTypes;
-import rars.exceptions.SimulationException;
 
 /**
  * Class to represent a basic instruction in the MIPS instruction set.
@@ -15,7 +13,7 @@ import rars.exceptions.SimulationException;
  * @author Pete Sanderson and Ken Vollmar
  * @version August 2003
  */
-public abstract non-sealed class BasicInstruction extends Instruction {
+public abstract non-sealed class BasicInstruction extends Instruction implements SimulationCallback {
     /**
      * Length in bytes of a machine instruction. Currently just 4 because other
      * instruction sizes defined in the specification are nor supported.
@@ -119,18 +117,4 @@ public abstract non-sealed class BasicInstruction extends Instruction {
     public int getInstructionLength() {
         return BasicInstruction.BASIC_INSTRUCTION_LENGTH;
     }
-
-    /**
-     * Method to simulate the execution of a specific MIPS basic instruction.
-     *
-     * @param statement
-     *     A ProgramStatement representing the MIPS instruction to
-     *     simulate.
-     * @param context
-     * @throws SimulationException
-     *     This is a run-time exception generated during
-     *     simulation.
-     */
-    public abstract void simulate(@NotNull ProgramStatement statement, @NotNull SimulationContext context) throws
-        SimulationException;
 }

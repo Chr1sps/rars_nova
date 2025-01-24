@@ -254,7 +254,7 @@ public final class Assembler {
             // each ArrayList in tokenList consists of Token objects.
             final var sourceLineList = this.fileCurrentlyBeingAssembled.getSourceLineList();
             final var tokenList = this.fileCurrentlyBeingAssembled.getTokenList();
-            final ArrayList<ProgramStatement> parsedList = this.fileCurrentlyBeingAssembled.createParsedList();
+            final var parsedList = new ArrayList<ProgramStatement>();
             // each file keeps its own macro definitions
             this.fileCurrentlyBeingAssembled.createMacroPool();
             // FIRST PASS OF ASSEMBLER VERIFIES SYNTAX, GENERATES SYMBOL TABLE,
@@ -278,6 +278,7 @@ public final class Assembler {
                     parsedList.addAll(statements);
                 }
             }
+            this.fileCurrentlyBeingAssembled.setParsedList(parsedList);
             if (this.inMacroSegment) {
                 this.errors.add(ErrorMessage.error(
                     this.fileCurrentlyBeingAssembled,

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * <p>Environment class.</p>
  */
-public class Environment {
+public final class Environment {
     public @NotNull RoundingMode mode;
 
     /**

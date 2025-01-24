@@ -9,7 +9,7 @@ import rars.jsoftfloat.RoundingMode;
 import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.riscv.SimulationContext;
+import rars.simulator.SimulationContext;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
 import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile;
 

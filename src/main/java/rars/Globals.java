@@ -1,7 +1,5 @@
 package rars;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.SymbolTable;
@@ -91,7 +89,6 @@ public final class Globals {
     public static final @NotNull CSRegisterFile CS_REGISTER_FILE;
     public static final @NotNull Simulator SIMULATOR;
     public static final @NotNull InterruptController INTERRUPT_CONTROLLER;
-    private static final @NotNull Logger LOGGER = LogManager.getLogger(Globals.class);
     ///  Floating point register file for the RARS simulator.
     public static @NotNull FloatingPointRegisterFile FP_REGISTER_FILE;
     /// Flag to determine whether to produce internal debugging information.
