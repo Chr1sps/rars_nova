@@ -42,25 +42,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class BinaryUtils {
 
-    // Using int second 0-15 as index, yields equivalent hex digit as char.
+    // Using int value 0-15 as index, yields equivalent hex digit as char.
     private static final char[] chars = {
         '0', '1', '2', '3',
         '4', '5', '6', '7',
         '8', '9', 'a', 'b',
         'c', 'd', 'e', 'f'
     };
-    // Use this to produce String equivalent of unsigned int second (add it to int
-    // second, result is long)
+    // Use this to produce String equivalent of unsigned int value (add it to int
+    // value, result is long)
     private static final long UNSIGNED_BASE = 0x1_0000_0000L;
 
     private BinaryUtils() {
     }
 
     /**
-     * Translate int second into a String consisting of '1's and '0's.
+     * Translate int value into a String consisting of '1's and '0's.
      *
      * @param value
-     *     The int second to convert.
+     *     The int value to convert.
      * @param length
      *     The number of bit positions, starting at least significant, to
      *     process.
@@ -78,12 +78,12 @@ public final class BinaryUtils {
     }
 
     /**
-     * Translate int second into a String consisting of '1's and '0's. Assumes all 32
+     * Translate int value into a String consisting of '1's and '0's. Assumes all 32
      * bits are
      * to be translated.
      *
      * @param value
-     *     The int second to convert.
+     *     The int value to convert.
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
@@ -93,10 +93,10 @@ public final class BinaryUtils {
     }
 
     /**
-     * Translate long second into a String consisting of '1's and '0's.
+     * Translate long value into a String consisting of '1's and '0's.
      *
      * @param value
-     *     The long second to convert.
+     *     The long value to convert.
      * @param length
      *     The number of bit positions, starting at least significant, to
      *     process.
@@ -115,12 +115,12 @@ public final class BinaryUtils {
     }
 
     /**
-     * Translate long second into a String consisting of '1's and '0's. Assumes all
+     * Translate long value into a String consisting of '1's and '0's. Assumes all
      * 64 bits are
      * to be translated.
      *
      * @param value
-     *     The long second to convert.
+     *     The long value to convert.
      * @return String consisting of '1' and '0' characters corresponding to the
      * requested binary sequence.
      */
@@ -130,7 +130,7 @@ public final class BinaryUtils {
     }
 
     /**
-     * Translate String consisting of '1's and '0's into an int second having that
+     * Translate String consisting of '1's and '0's into an int value having that
      * binary representation.
      * The String is assumed to be at most 32 characters long. No error checking is
      * performed.
@@ -138,8 +138,8 @@ public final class BinaryUtils {
      * least-significant.
      *
      * @param value
-     *     The String second to convert.
-     * @return int whose binary second corresponds to decoded String.
+     *     The String value to convert.
+     * @return int whose binary value corresponds to decoded String.
      */
     public static int binaryStringToInt(final @NotNull String value) {
         int result = value.charAt(0) - 48;
@@ -150,7 +150,7 @@ public final class BinaryUtils {
     }
 
     /**
-     * Translate String consisting of '1's and '0's into a long second having that
+     * Translate String consisting of '1's and '0's into a long value having that
      * binary representation.
      * The String is assumed to be at most 64 characters long. No error checking is
      * performed.
@@ -158,8 +158,8 @@ public final class BinaryUtils {
      * least-significant.
      *
      * @param value
-     *     The String second to convert.
-     * @return long whose binary second corresponds to decoded String.
+     *     The String value to convert.
+     * @return long whose binary value corresponds to decoded String.
      */
     public static long binaryStringToLong(final @NotNull String value) {
         long result = value.charAt(0) - 48;
@@ -172,12 +172,12 @@ public final class BinaryUtils {
     /**
      * Translate String consisting of '1's and '0's into String equivalent of the
      * corresponding
-     * hexadecimal second. No length limit.
+     * hexadecimal value. No length limit.
      * String position 0 has most-significant bit, position length-1 has
      * least-significant.
      *
      * @param value
-     *     The String second to convert.
+     *     The String value to convert.
      * @return String containing '0', '1', ...'F' characters which form hexadecimal
      * equivalent of decoded String.
      */
@@ -216,7 +216,7 @@ public final class BinaryUtils {
      *     characters which form hexadecimal. Letters may be either upper
      *     or lower case.
      *     Works either with or without leading "Ox".
-     * @return String with equivalent second in binary.
+     * @return String with equivalent value in binary.
      */
     public static @NotNull String hexStringToBinaryString(@NotNull String value) {
         // slice off leading Ox or 0X
@@ -293,7 +293,7 @@ public final class BinaryUtils {
      * least-significant.
      *
      * @param value
-     *     The String second to convert.
+     *     The String value to convert.
      * @return char '0', '1', ...'F' which form hexadecimal equivalent of decoded
      * String.
      * If string length > 4, returns '0'.
@@ -319,7 +319,7 @@ public final class BinaryUtils {
      * to that string as necessary to make it always eight hexadecimal digits.
      *
      * @param d
-     *     The int second to convert.
+     *     The int value to convert.
      * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
      * of int.
      */
@@ -338,7 +338,7 @@ public final class BinaryUtils {
     /**
      * Returns a 6 character string representing the 16-bit hexadecimal equivalent
      * of the
-     * given integer second. First two characters are "0x". It assumes second will
+     * given integer value. First two characters are "0x". It assumes value will
      * "fit"
      * in 16 bits. If non-negative, prepend leading zeroes to that string as
      * necessary
@@ -346,7 +346,7 @@ public final class BinaryUtils {
      * four 'f' digits so result is always four hexadecimal digits
      *
      * @param d
-     *     The int second to convert.
+     *     The int value to convert.
      * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
      * of int.
      */
@@ -367,11 +367,11 @@ public final class BinaryUtils {
 
     /**
      * Prefix a hexadecimal-indicating string "0x" to the string equivalent to the
-     * hexadecimal second in the long parameter. Prepend leading zeroes
+     * hexadecimal value in the long parameter. Prepend leading zeroes
      * to that string as necessary to make it always sixteen hexadecimal digits.
      *
      * @param value
-     *     The long second to convert.
+     *     The long value to convert.
      * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
      * of long.
      */
@@ -381,12 +381,12 @@ public final class BinaryUtils {
     }
 
     /**
-     * Produce String equivalent of integer second interpreting it as an unsigned
+     * Produce String equivalent of integer value interpreting it as an unsigned
      * integer.
      * For instance, -1 (0xffffffff) produces "4294967295" instead of "-1".
      *
      * @param d
-     *     The int second to interpret.
+     *     The int value to interpret.
      * @return String which forms unsigned 32 bit equivalent of int.
      */
     public static @NotNull String unsignedIntToIntString(final int d) {
@@ -394,15 +394,15 @@ public final class BinaryUtils {
     }
 
     /**
-     * Produce ASCII string equivalent of integer second, interpreting it as 4
+     * Produce ASCII string equivalent of integer value, interpreting it as 4
      * one-byte
-     * characters. If the second in a given byte does not correspond to a printable
+     * characters. If the value in a given byte does not correspond to a printable
      * character, it will be assigned a default character (defined in
      * config.properties)
      * for a placeholder.
      *
      * @param d
-     *     The int second to interpret
+     *     The int value to interpret
      * @return String that represents ASCII equivalent
      */
     public static @NotNull String intToAscii(final int d) {
@@ -456,7 +456,7 @@ public final class BinaryUtils {
      *
      * @param s
      *     candidate string
-     * @return returns int second represented by given string
+     * @return returns int value represented by given string
      * @throws java.lang.NumberFormatException
      *     if string cannot be translated into an int
      */
@@ -551,7 +551,7 @@ public final class BinaryUtils {
                 return null;
             }
         }
-        // Overflowing to min and negating keeps the second at min
+        // Overflowing to min and negating keeps the value at min
         if (result == Integer.MIN_VALUE && first == '-') {
             return Integer.MIN_VALUE;
         }
@@ -573,7 +573,7 @@ public final class BinaryUtils {
      *
      * @param s
      *     candidate string
-     * @return returns long second represented by given string
+     * @return returns long value represented by given string
      * @throws java.lang.NumberFormatException
      *     if string cannot be translated into a long
      */
@@ -610,10 +610,10 @@ public final class BinaryUtils {
 
     /**
      * Returns int representing the bit values of the high order 32 bits of given
-     * 64 bit long second.
+     * 64 bit long value.
      *
      * @param longValue
-     *     The long second from which to extract bits.
+     *     The long value from which to extract bits.
      * @return int containing high order 32 bits of argument
      */
     public static int highOrderLongToInt(final long longValue) {
@@ -622,10 +622,10 @@ public final class BinaryUtils {
 
     /**
      * Returns int representing the bit values of the low order 32 bits of given
-     * 64 bit long second.
+     * 64 bit long value.
      *
      * @param longValue
-     *     The long second from which to extract bits.
+     *     The long value from which to extract bits.
      * @return int containing low order 32 bits of argument
      */
     public static int lowOrderLongToInt(final long longValue) {
@@ -633,10 +633,10 @@ public final class BinaryUtils {
     }
 
     /**
-     * Returns the bit second of the given bit position of the given int second.
+     * Returns the bit value of the given bit position of the given int value.
      *
      * @param value
-     *     The second to read the bit from.
+     *     The value to read the bit from.
      * @param bit
      *     bit position in range 0 (least significant) to 31 (most)
      * @return 0 if the bit position contains 0, and 1 otherwise.
@@ -646,10 +646,10 @@ public final class BinaryUtils {
     }
 
     /**
-     * Returns the bit second of the given bit position of the given long second.
+     * Returns the bit value of the given bit position of the given long value.
      *
      * @param value
-     *     The second to read the bit from.
+     *     The value to read the bit from.
      * @param bit
      *     bit position in range 0 (least significant) to 63 (most)
      * @return 0 if the bit position contains 0, and 1 otherwise.
@@ -661,13 +661,13 @@ public final class BinaryUtils {
     // setByte and getByte added by DPS on 12 July 2006
 
     /**
-     * Gets the specified byte of the specified second.
+     * Gets the specified byte of the specified value.
      *
      * @param value
-     *     The second in which the byte is to be retrieved.
+     *     The value in which the byte is to be retrieved.
      * @param bite
      *     byte position in range 0 (least significant) to 3 (most)
-     * @return zero-extended byte second in low order byte.
+     * @return zero-extended byte value in low order byte.
      */
     public static int getByte(final int value, final int bite) {
         return value << ((3 - bite) << 3) >>> 24;

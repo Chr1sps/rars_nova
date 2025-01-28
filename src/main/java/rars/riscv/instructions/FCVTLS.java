@@ -15,7 +15,7 @@ public final class FCVTLS extends BasicInstruction {
 
     private FCVTLS() {
         super(
-            "fcvt.l.s t1, f1, dyn", "Convert 64 bit integer from float: Assigns the second of f1 (rounded) to t1",
+            "fcvt.l.s t1, f1, dyn", "Convert 64 bit integer from float: Assigns the value of f1 (rounded) to t1",
             BasicInstructionFormat.I_FORMAT, "1100000 00010 sssss ttt fffff 1010011"
         );
     }

@@ -42,7 +42,7 @@ public final class FCVTWS extends BasicInstruction {
 
     private FCVTWS() {
         super(
-            "fcvt.w.s t1, f1, dyn", "Convert integer from float: Assigns the second of f1 (rounded) to t1",
+            "fcvt.w.s t1, f1, dyn", "Convert integer from float: Assigns the value of f1 (rounded) to t1",
             BasicInstructionFormat.I_FORMAT, "1100000 00000 sssss ttt fffff 1010011"
         );
     }

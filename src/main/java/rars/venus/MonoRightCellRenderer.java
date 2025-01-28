@@ -56,7 +56,7 @@ public final class MonoRightCellRenderer extends DefaultTableCellRenderer {
         );
         cell.setFont(FONT_SETTINGS.getCurrentFont());
         cell.setHorizontalAlignment(SwingConstants.RIGHT);
-        final var theme = EDITOR_THEME_SETTINGS.currentTheme;
+        final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
         cell.setForeground(theme.foregroundColor);
         cell.setBackground(theme.backgroundColor);
         return cell;

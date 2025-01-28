@@ -42,7 +42,7 @@ public final class FCVTWUS extends BasicInstruction {
 
     private FCVTWUS() {
         super(
-            "fcvt.wu.s t1, f1, dyn", "Convert unsinged integer from float: Assigns the second of f1 (rounded) to t1",
+            "fcvt.wu.s t1, f1, dyn", "Convert unsinged integer from float: Assigns the value of f1 (rounded) to t1",
             BasicInstructionFormat.I_FORMAT, "1100000 00001 sssss ttt fffff 1010011"
         );
     }

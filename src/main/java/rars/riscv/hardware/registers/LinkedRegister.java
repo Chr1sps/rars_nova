@@ -38,7 +38,7 @@ public final class LinkedRegister extends Register {
     private final int shift;
 
     public LinkedRegister(final @NotNull String name, final int num, final @NotNull Register base, final long mask) {
-        super(name, num, 0); // reset second does not matter
+        super(name, num, 0); // reset value does not matter
         this.base = base;
         this.mask = mask;
         this.shift = calculateShift(mask);
@@ -63,7 +63,7 @@ public final class LinkedRegister extends Register {
     public synchronized long setValue(final long val) {
         final long old = base.getValueNoNotify();
         base.setValue(((val << shift) & mask) | (old & ~mask));
-        super.setValue(0); // second doesn't matter just notify
+        super.setValue(0); // value doesn't matter just notify
         return (old & mask) >>> shift;
     }
 

@@ -291,9 +291,9 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             on the display represents one or more memory words (default 1)
             and each time a memory word is accessed by the program,
             its reference count is incremented then rendered in the color
-            assigned to the count second.  You can change the count-color
+            assigned to the count value.  You can change the count-color
             assignments using the count slider and color patch.  Select a
-            counter second then click on the color patch to change the color.
+            counter value then click on the color patch to change the color.
             This color will apply beginning at the selected count and
             extending up to the next slider-provided count.
             """;
@@ -510,12 +510,12 @@ public final class MemoryReferenceVisualization extends AbstractTool {
         /*
          * If you want to extend this app to allow user to edit combo box, you can
          * always
-         * parse the getSelectedItem() second, because the pre-defined items are all
+         * parse the getSelectedItem() value, because the pre-defined items are all
          * formatted
-         * such that the first 10 characters contain the integer's hex second. And if the
-         * second is user-entered, the numeric part cannot exceed 10 characters for a
+         * such that the first 10 characters contain the integer's hex value. And if the
+         * value is user-entered, the numeric part cannot exceed 10 characters for a
          * 32-bit
-         * address anyway. So if the second is > 10 characters long, slice off the first
+         * address anyway. So if the value is > 10 characters long, slice off the first
          * 10 and apply Integer.parseInt() to it to get custom base address.
          */
     }
@@ -558,7 +558,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
 
     // Specialized inner classes for modeling and animation.
 
-    // Object that represents mapping from counter second to color it is displayed
+    // Object that represents mapping from counter value to color it is displayed
 
     /// ///////////////////////////////////////////////////////////////////////////// as.
     private static class CounterColorScale {
@@ -568,7 +568,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             this.counterColors = colors;
         }
 
-        // return color associated with specified counter second
+        // return color associated with specified counter value
         private Color getColor(final int count) {
             Color result = this.counterColors[0].associatedColor;
             int index = 0;
@@ -579,7 +579,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             return result;
         }
 
-        // For a given counter second, return the counter second at the high end of the
+        // For a given counter value, return the counter value at the high end of the
         // range of
         // counter values having the same color.
         private int getHighEndOfRange(final int count) {
@@ -597,7 +597,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
         // The given entry should either be inserted into the the scale or replace an
         // existing
         // element. The latter occurs if the new CounterColor has same starting counter
-        // second
+        // value
         // as an existing one.
         private void insertOrReplace(final CounterColor newColor) {
             final int index = Arrays.binarySearch(this.counterColors, newColor);
@@ -618,9 +618,9 @@ public final class MemoryReferenceVisualization extends AbstractTool {
     }
 
     // Class that simply defines UI controls for use with slider to view and/or
-    // change the color associated with each memory reference count second.
+    // change the color associated with each memory reference count value.
 
-    // Each object represents beginning of a counter second range (non-negative
+    // Each object represents beginning of a counter value range (non-negative
     /////////////////////////////////////////////////////////////////////////////////////// integer)
     /////////////////////////////////////////////////////////////////////////////////////// and
     // color for rendering the range. High end of the range is defined as low end of
@@ -665,13 +665,13 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             return this.columns;
         }
 
-        // Returns second in given grid element; -1 if row or column is out of range.
+        // Returns value in given grid element; -1 if row or column is out of range.
         private int getElement(final int row, final int column) {
             return (row >= 0 && row <= this.rows && column >= 0 && column <= this.columns) ? this.grid[row][column] :
                 -1;
         }
 
-        // Returns second in given grid element without doing any row/column index
+        // Returns value in given grid element without doing any row/column index
         // checking.
         // Is faster than getElement but will throw array index out of bounds exception
         // if
@@ -680,7 +680,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             return this.grid[row][column];
         }
 
-        // Increment the given grid element and return incremented second.
+        // Increment the given grid element and return incremented value.
         // Returns -1 if row or column is out of range.
         private int incrementElement(final int row, final int column) {
             return (row >= 0 && row <= this.rows && column >= 0 && column <= this.columns) ?
@@ -778,7 +778,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
                 MemoryReferenceVisualization.this.countTable.length - 1,
                 MemoryReferenceVisualization.COUNT_INDEX_INIT
             );
-            colorRangeSlider.setToolTipText("View or change color associated with each reference count second");
+            colorRangeSlider.setToolTipText("View or change color associated with each reference count value");
             colorRangeSlider.setPaintTicks(false);
             colorRangeSlider.addChangeListener(new ColorChooserListener());
             this.counterIndex = MemoryReferenceVisualization.COUNT_INDEX_INIT;
@@ -790,7 +790,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             this.sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             this.currentColorButton = new JButton("   ");
             this.currentColorButton.setToolTipText(
-                "Click here to change color for the reference count subrange based at current second");
+                "Click here to change color for the reference count subrange based at current value");
             this.currentColorButton.setBackground(MemoryReferenceVisualization.this.counterColorScale.getColor(
                 MemoryReferenceVisualization.this.countTable[this.counterIndex]));
             this.currentColorButton.addActionListener(
@@ -802,7 +802,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
                     final String dialogLabel = "Select color for reference count " +
                         (
                             (counterValue == highEnd)
-                                ? "second " + counterValue
+                                ? "value " + counterValue
                                 : "range " + counterValue + "-" + highEnd
                         );
                     final Color newColor = JColorChooser.showDialog(
@@ -835,7 +835,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             } else if (value >= 10) {
                 spaces = " ";
             }
-            return "Counter second " + spaces + value;
+            return "Counter value " + spaces + value;
         }
 
         // Listener that both revises label as user slides and updates current index

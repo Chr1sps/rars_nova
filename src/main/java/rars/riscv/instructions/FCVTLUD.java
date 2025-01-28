@@ -16,7 +16,7 @@ public final class FCVTLUD extends BasicInstruction {
     private FCVTLUD() {
         super(
             "fcvt.lu.d t1, f1, dyn",
-            "Convert unsigned 64 bit integer from double: Assigns the second of f1 (rounded) to t1",
+            "Convert unsigned 64 bit integer from double: Assigns the value of f1 (rounded) to t1",
             BasicInstructionFormat.I_FORMAT, "1100001 00011 sssss ttt fffff 1010011"
         );
     }

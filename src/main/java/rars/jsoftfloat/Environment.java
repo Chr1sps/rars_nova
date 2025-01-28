@@ -33,7 +33,7 @@ public final class Environment {
      */
     public boolean divByZero = false;
     /**
-     * Triggered when an operation produces no meaningful second
+     * Triggered when an operation produces no meaningful value
      * <p>
      * For example, it would be triggered by 0/0, Infinity - Infinity, etc
      */

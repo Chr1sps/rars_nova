@@ -15,7 +15,7 @@ public final class FCVTSD extends BasicInstruction {
 
     private FCVTSD() {
         super(
-            "fcvt.s.d f1, f2, dyn", "Convert a double to a float: Assigned the second of f2 to f1",
+            "fcvt.s.d f1, f2, dyn", "Convert a double to a float: Assigned the value of f2 to f1",
             BasicInstructionFormat.R4_FORMAT, "0100000 00001 sssss ttt fffff 1010011"
         );
     }

@@ -42,10 +42,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version July 2007
  */
 public final class FontUtilities {
-
-    public static final int MIN_SIZE = 6;
-    public static final int MAX_SIZE = 72;
-    public static final int DEFAULT_SIZE = 12;
     /**
      * An array of all available font family names. These are guaranteed to
      * be available at runtime, as they come from the local GraphicsEnvironment.

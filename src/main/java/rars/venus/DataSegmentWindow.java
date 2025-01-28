@@ -1105,7 +1105,7 @@ public final class DataSegmentWindow extends JInternalFrame {
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
             final int rowFirstAddress =
                 BinaryUtils.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
-            final var theme = EDITOR_THEME_SETTINGS.currentTheme;
+            final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
             final var defaultFont = FONT_SETTINGS.getCurrentFont();
             if (/*DataSegmentWindow.this.settings.getBoolSettings().getSetting(BoolSetting.DATA_SEGMENT_HIGHLIGHTING)
              &&*/

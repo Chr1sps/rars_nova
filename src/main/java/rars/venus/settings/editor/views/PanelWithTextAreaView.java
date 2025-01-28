@@ -31,7 +31,7 @@ public final class PanelWithTextAreaView extends JPanel {
     }
 
     private static @NotNull TextEditingArea createTextArea() {
-        final var currentTheme = Globals.EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme();
+        final var currentTheme = Globals.EDITOR_THEME_SETTINGS.getCurrentTheme().toEditorTheme();
         final var result = TextEditingAreaFactory.createTextEditingArea(currentTheme);
         final var exampleText = """
             # Some macro definitions to print strings

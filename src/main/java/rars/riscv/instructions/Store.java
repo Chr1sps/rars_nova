@@ -6,8 +6,8 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.simulator.SimulationContext;
 import rars.riscv.hardware.Memory;
+import rars.simulator.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -76,7 +76,7 @@ public abstract class Store extends BasicInstruction {
      * @param address
      *     the address to store to
      * @param value
-     *     the second to store
+     *     the value to store
      * @throws AddressErrorException
      *     if any.
      */

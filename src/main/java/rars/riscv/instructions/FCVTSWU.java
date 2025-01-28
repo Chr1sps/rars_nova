@@ -44,7 +44,7 @@ public final class FCVTSWU extends BasicInstruction {
 
     private FCVTSWU() {
         super(
-            "fcvt.s.wu f1, t1, dyn", "Convert float from unsigned integer: Assigns the second of t1 to f1",
+            "fcvt.s.wu f1, t1, dyn", "Convert float from unsigned integer: Assigns the value of t1 to f1",
             BasicInstructionFormat.I_FORMAT, "1101000 00001 sssss ttt fffff 1010011"
         );
     }

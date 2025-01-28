@@ -927,7 +927,7 @@ public final class TextSegmentWindow extends JInternalFrame {
                 cell.setForeground(style.foreground());
                 cell.setFont(deriveFontFromStyle(FONT_SETTINGS.getCurrentFont(), style));
             } else {
-                final var theme = Globals.EDITOR_THEME_SETTINGS.currentTheme;
+                final var theme = Globals.EDITOR_THEME_SETTINGS.getCurrentTheme();
                 cell.setBackground(theme.backgroundColor);
                 cell.setForeground(theme.foregroundColor);
                 cell.setFont(FONT_SETTINGS.getCurrentFont());

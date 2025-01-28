@@ -41,9 +41,9 @@ public final class EditorThemeSettings {
     private final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
     /**
      * The current theme in memory. You can make changes to this theme and then
-     * call {@link #commitChanges()} to save the changes to the preferences.
+     * call {@link #saveSettingsToPreferences()} to save the changes to the preferences.
      */
-    public @NotNull SettingsTheme currentTheme;
+    private @NotNull SettingsTheme currentTheme;
     private @NotNull SettingsTheme backupTheme;
 
     public EditorThemeSettings(final @NotNull Preferences preferences) {
@@ -54,8 +54,6 @@ public final class EditorThemeSettings {
         this.backupTheme = this.currentTheme.clone();
     }
 
-    // region Preferences prefix methods
-
     private static @NotNull String foregroundPrefix(final @NotNull TokenSettingKey key) {
         return THEME_PREFIX + STYLES + key.ordinal() + FOREGROUND;
     }
@@ -63,6 +61,8 @@ public final class EditorThemeSettings {
     private static @NotNull String backgroundPrefix(final @NotNull TokenSettingKey key) {
         return THEME_PREFIX + STYLES + key.ordinal() + BACKGROUND;
     }
+
+    // region Preferences prefix methods
 
     private static @NotNull String boldPrefix(final @NotNull TokenSettingKey key) {
         return THEME_PREFIX + STYLES + key.ordinal() + BOLD;
@@ -76,13 +76,21 @@ public final class EditorThemeSettings {
         return THEME_PREFIX + STYLES + key.ordinal() + UNDERLINE;
     }
 
+    public @NotNull SettingsTheme getCurrentTheme() {
+        return currentTheme.clone();
+    }
+
+    public void setCurrentTheme(@NotNull final SettingsTheme currentTheme) {
+        this.currentTheme = currentTheme;
+    }
+
     // endregion Preferences prefix methods
 
     /**
      * Commits the theme currently in memory to the preferences. If the commit
      * fails, the theme in memory will be reverted to the previous state.
      */
-    public void commitChanges() {
+    public void saveSettingsToPreferences() {
         writeThemeToPreferences(this.currentTheme);
         try {
             this.preferences.flush();

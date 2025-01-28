@@ -26,7 +26,7 @@ public final class BaseStyleView extends JPanel {
     public BaseStyleView() {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        final var theme = EDITOR_THEME_SETTINGS.currentTheme;
+        final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
 
         // foreground
         final var foregroundSection = new OptionSection(FOREGROUND, null, theme.foregroundColor);

@@ -107,6 +107,7 @@ public enum BoolSetting {
     DARK_MODE("dark_mode", false);
 
     // TODO: add option for turning off user trap handling and interrupts
+
     private final @NotNull String name;
     private final boolean value;
 

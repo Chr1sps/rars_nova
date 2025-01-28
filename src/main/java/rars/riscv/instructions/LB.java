@@ -35,7 +35,7 @@ public final class LB extends Load {
     public static final @NotNull LB INSTANCE = new LB();
 
     private LB() {
-        super("lb t1, -100(t2)", "Set t1 to sign-extended 8-bit second from effective memory byte address", "000");
+        super("lb t1, -100(t2)", "Set t1 to sign-extended 8-bit value from effective memory byte address", "000");
     }
 
     @Override

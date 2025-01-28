@@ -36,7 +36,7 @@ public final class SRA extends Arithmetic {
         super(
             "sra t1,t2,t3",
             "Shift right arithmetic: Set t1 to result of sign-extended shifting t2 right by number of bits specified " +
-                "by second in low-order 5 bits of t3",
+                "by value in low-order 5 bits of t3",
             "0100000",
             "101"
         );

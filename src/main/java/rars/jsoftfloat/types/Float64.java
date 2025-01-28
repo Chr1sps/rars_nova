@@ -405,7 +405,7 @@ public final class Float64 implements Floating<Float64> {
             significand = BigInteger.valueOf(this.bits & Float64.sigmask);
         } else {
             assert false : "This should not be reachable";
-            // Dummy second
+            // Dummy value
             return new ExactFloat(sign, 0, BigInteger.ZERO);
         }
         return new ExactFloat(sign, exponent, significand);

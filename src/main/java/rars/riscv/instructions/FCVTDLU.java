@@ -17,7 +17,7 @@ public final class FCVTDLU extends BasicInstruction {
 
     private FCVTDLU() {
         super(
-            "fcvt.d.lu f1, t1, dyn", "Convert double from unsigned long: Assigns the second of t1 to f1",
+            "fcvt.d.lu f1, t1, dyn", "Convert double from unsigned long: Assigns the value of t1 to f1",
             BasicInstructionFormat.I_FORMAT, "1101001 00011 sssss ttt fffff 1010011"
         );
     }

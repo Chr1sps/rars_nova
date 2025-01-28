@@ -53,14 +53,14 @@ public class Register {
     private volatile long value;
 
     /**
-     * Creates a new register with specified name, number, and second.
+     * Creates a new register with specified name, number, and value.
      *
      * @param name
      *     The name of the register.
      * @param number
      *     The number of the register.
      * @param initialValue
-     *     The inital (and reset) second of the register.
+     *     The inital (and reset) value of the register.
      */
     public Register(final @NotNull String name, final int number, final long initialValue) {
         this.name = name;
@@ -72,10 +72,10 @@ public class Register {
     }
 
     /**
-     * Returns the second of the Register. Observers are notified
+     * Returns the value of the Register. Observers are notified
      * of the READ operation.
      *
-     * @return second The second of the Register.
+     * @return value The value of the Register.
      */
     public final synchronized long getValue() {
         this.registerChangeDispatcher.dispatch(new RegisterAccessNotice(AccessNotice.AccessType.READ, this));
@@ -83,31 +83,31 @@ public class Register {
     }
 
     /**
-     * Returns the second of the Register. Observers are not notified.
+     * Returns the value of the Register. Observers are not notified.
      * Added for release 3.8.
      *
-     * @return second The second of the Register.
+     * @return value The value of the Register.
      */
     public synchronized long getValueNoNotify() {
         return this.value;
     }
 
     /**
-     * Returns the reset second of the Register.
+     * Returns the reset value of the Register.
      *
-     * @return The reset (initial) second of the Register.
+     * @return The reset (initial) value of the Register.
      */
     public long getResetValue() {
         return this.resetValue;
     }
 
     /**
-     * Sets the second of the register to the val passed to it.
+     * Sets the value of the register to the val passed to it.
      * Observers are notified of the WRITE operation.
      *
      * @param val
      *     Value to set the Register to.
-     * @return previous second of register
+     * @return previous value of register
      */
     public synchronized long setValue(final long val) {
         final long old = this.value;
@@ -117,12 +117,12 @@ public class Register {
     }
 
     /**
-     * Sets the second of the register to the val passed to it. This should only
+     * Sets the value of the register to the val passed to it. This should only
      * be used to update registers not related to the current instruction.
      *
      * @param val
      *     Value to set the Register to.
-     * @return previous second of register
+     * @return previous value of register
      */
     public synchronized long setValueNoNotify(final long val) {
         final long old = this.value;
@@ -131,7 +131,7 @@ public class Register {
     }
 
     /**
-     * Resets the second of the register to the second it was constructed with.
+     * Resets the value of the register to the value it was constructed with.
      * Observers are not notified.
      */
     public synchronized void resetValue() {
@@ -139,7 +139,7 @@ public class Register {
     }
 
     /**
-     * Change the register's reset second; the second to which it will be
+     * Change the register's reset value; the value to which it will be
      * set when {@code resetValue()} is called.
      *
      * @param reset

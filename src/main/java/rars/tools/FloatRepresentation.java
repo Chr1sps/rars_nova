@@ -83,7 +83,7 @@ public final class FloatRepresentation extends AbstractTool {
     private static final String zeroes = "0000000000000000000000000000000000000000000000000000000000000000"; // 64
     private static final String HTMLspaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
     private final JLabel significandLabel = new JLabel(FloatRepresentation.denormalizedLabel, JLabel.CENTER);
-    private final String defaultInstructions = "Modify any second then press the Enter first to update all values.";
+    private final String defaultInstructions = "Modify any value then press the Enter first to update all values.";
     private Register attachedRegister = null;
     private Register[] fpRegisters;
     // Panels to hold binary displays and decorations (labels, arrows)
@@ -190,7 +190,7 @@ public final class FloatRepresentation extends AbstractTool {
         subMainPanel.add(rightPanel);
         mainPanel.add(subMainPanel);
 
-        // Editable display for hexadecimal version of the float second
+        // Editable display for hexadecimal version of the float value
         this.hexDisplay = new JTextField(FloatRepresentation.defaultHex, FloatRepresentation.maxLengthHex + 1);
         this.hexDisplay.setFont(FloatRepresentation.hexDisplayFont);
         this.hexDisplay.setForeground(FloatRepresentation.hexDisplayColor);
@@ -209,7 +209,7 @@ public final class FloatRepresentation extends AbstractTool {
         // ################ Grid Row : Hex-to-binary graphic ########################
         leftPanel.add(hexToBinaryGraphic);
 
-        // Editable display for binary version of float second.
+        // Editable display for binary version of float value.
         // It is split into 3 separately editable components (sign,exponent,fraction)
 
         this.binarySignDisplay = new JTextField(
@@ -284,7 +284,7 @@ public final class FloatRepresentation extends AbstractTool {
         // ################ Grid Row : Formula mapping binary to decimal ########
         leftPanel.add(expansionDisplayBox);
 
-        // Editable display for decimal version of float second.
+        // Editable display for decimal version of float value.
         this.decimalDisplay = new JTextField(
             FloatRepresentation.defaultDecimal,
             FloatRepresentation.maxLengthDecimal + 1
@@ -292,7 +292,7 @@ public final class FloatRepresentation extends AbstractTool {
         this.decimalDisplay.setFont(FloatRepresentation.decimalDisplayFont);
         this.decimalDisplay.setForeground(FloatRepresentation.decimalDisplayColor);
         this.decimalDisplay.setHorizontalAlignment(JTextField.RIGHT);
-        this.decimalDisplay.setToolTipText("Decimal floating point second");
+        this.decimalDisplay.setToolTipText("Decimal floating point value");
         this.decimalDisplay.setMargin(new Insets(0, 0, 0, 0));
         this.decimalDisplay.setEditable(true);
         this.decimalDisplay.revalidate();

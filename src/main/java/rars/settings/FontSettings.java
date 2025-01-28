@@ -3,7 +3,6 @@ package rars.settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import rars.util.FontUtilities;
 import rars.util.FontWeight;
 import rars.util.ListenerDispatcher;
 
@@ -15,6 +14,18 @@ import java.util.prefs.Preferences;
 
 public final class FontSettings {
     private static final @NotNull Logger LOGGER = LogManager.getLogger(FontSettings.class);
+
+    private static final int MIN_FONT_SIZE = 6;
+    private static final int MAX_FONT_SIZE = 72;
+
+    // region Defaults
+
+    private static final @NotNull String DEFAULT_FONT_FAMILY = "Monospaced";
+    private static final int DEFAULT_FONT_SIZE = 14;
+    private static final @NotNull FontWeight DEFAULT_FONT_WEIGHT = FontWeight.REGULAR;
+    private static final boolean DEFAULT_LIGATURES = false;
+
+    // endregion Defaults
 
     // region Preferences keys
 
@@ -84,12 +95,12 @@ public final class FontSettings {
     }
 
     public void setFontSize(final int fontSize) {
-        if (fontSize < FontUtilities.MIN_SIZE || fontSize > FontUtilities.MAX_SIZE) {
+        if (fontSize < MIN_FONT_SIZE || fontSize > MAX_FONT_SIZE) {
             LOGGER.error("Attempted to set invalid font size: {}", fontSize);
             throw new IllegalArgumentException(
                 "Font size must be between %d and %d. Provided: %d".formatted(
-                    FontUtilities.MIN_SIZE,
-                    FontUtilities.MAX_SIZE,
+                    MIN_FONT_SIZE,
+                    MAX_FONT_SIZE,
                     fontSize
                 ));
         }
@@ -113,9 +124,9 @@ public final class FontSettings {
     }
 
     private void loadSettingsFromPreferences() {
-        this.fontFamily = preferences.get(FONT_PREFIX + FAMILY, "Monospaced");
-        this.fontSize = preferences.getInt(FONT_PREFIX + SIZE, FontUtilities.DEFAULT_SIZE);
-        this.fontWeight = FontWeight.valueOf(preferences.get(FONT_PREFIX + WEIGHT, FontWeight.REGULAR.name()));
-        this.isLigaturized = preferences.getBoolean(FONT_PREFIX + LIGATURES, false);
+        this.fontFamily = preferences.get(FONT_PREFIX + FAMILY, DEFAULT_FONT_FAMILY);
+        this.fontSize = preferences.getInt(FONT_PREFIX + SIZE, DEFAULT_FONT_SIZE);
+        this.fontWeight = FontWeight.valueOf(preferences.get(FONT_PREFIX + WEIGHT, DEFAULT_FONT_WEIGHT.name()));
+        this.isLigaturized = preferences.getBoolean(FONT_PREFIX + LIGATURES, DEFAULT_LIGATURES);
     }
 }

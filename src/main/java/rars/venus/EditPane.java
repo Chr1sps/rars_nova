@@ -77,10 +77,12 @@ public final class EditPane extends JPanel {
 
         this.fileStatus = new FileStatus();
 
-        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme());
+        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.getCurrentTheme()
+            .toEditorTheme());
 
-        this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme());
-        EDITOR_THEME_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.currentTheme.toEditorTheme()));
+        this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.getCurrentTheme().toEditorTheme());
+        EDITOR_THEME_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.getCurrentTheme()
+            .toEditorTheme()));
 
         this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
         FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont()));

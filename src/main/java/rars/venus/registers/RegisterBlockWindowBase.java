@@ -281,7 +281,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
                 cell.setForeground(highlightingStyle.foreground());
                 cell.setBackground(highlightingStyle.background());
             } else {
-                final var theme = EDITOR_THEME_SETTINGS.currentTheme;
+                final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
                 cell.setForeground(theme.foregroundColor);
                 cell.setBackground(theme.backgroundColor);
             }

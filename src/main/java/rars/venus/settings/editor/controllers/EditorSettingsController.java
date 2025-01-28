@@ -28,7 +28,7 @@ public final class EditorSettingsController {
         final @NotNull EditorThemeSettings editorThemeSettings,
         final @NotNull OtherSettings otherSettings
     ) {
-        this.settingsTheme = editorThemeSettings.currentTheme.clone();
+        this.settingsTheme = editorThemeSettings.getCurrentTheme();
         this.editorThemeSettings = editorThemeSettings;
         final var pickerCardView = editorSettingsView.panelWithTextAreaView.pickerCardView;
         final var textArea = editorSettingsView.panelWithTextAreaView.textArea;
@@ -102,7 +102,7 @@ public final class EditorSettingsController {
     }
 
     private void discardSettings() {
-        this.settingsTheme = this.editorThemeSettings.currentTheme.clone();
+        this.settingsTheme = this.editorThemeSettings.getCurrentTheme();
         this.fontSettingsController.resetButtonValues();
         this.baseStyleSettingsController.resetButtonValues();
         this.syntaxStyleSettingsController.resetButtonValues();
@@ -116,8 +116,8 @@ public final class EditorSettingsController {
     private void applySettings() {
         this.fontSettingsController.applySettings();
 
-        this.editorThemeSettings.currentTheme = this.settingsTheme;
-        this.editorThemeSettings.commitChanges();
+        this.editorThemeSettings.setCurrentTheme(this.settingsTheme);
+        this.editorThemeSettings.saveSettingsToPreferences();
 
         this.otherSettingsController.applySettings();
     }

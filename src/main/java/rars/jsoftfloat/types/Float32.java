@@ -403,7 +403,7 @@ public final class Float32 implements Floating<Float32> {
             significand = BigInteger.valueOf(this.bits & 0x007FFFFF);
         } else {
             assert false : "This should not be reachable";
-            // Dummy second
+            // Dummy value
             return new ExactFloat(sign, 0, BigInteger.ZERO);
         }
         return new ExactFloat(sign, exponent, significand);

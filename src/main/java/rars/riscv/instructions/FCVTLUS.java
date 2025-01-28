@@ -16,7 +16,7 @@ public final class FCVTLUS extends BasicInstruction {
     private FCVTLUS() {
         super(
             "fcvt.lu.s t1, f1, dyn",
-            "Convert unsigned 64 bit integer from float: Assigns the second of f1 (rounded) to t1",
+            "Convert unsigned 64 bit integer from float: Assigns the value of f1 (rounded) to t1",
             BasicInstructionFormat.I_FORMAT, "1100000 00011 sssss ttt fffff 1010011"
         );
     }

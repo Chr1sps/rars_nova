@@ -6,8 +6,8 @@ import rars.exceptions.ExceptionReason;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.simulator.SimulationContext;
 import rars.riscv.Syscall;
+import rars.simulator.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -41,7 +41,7 @@ public final class ECALL extends BasicInstruction {
 
     private ECALL() {
         super(
-            "ecall", "Issue a system call : Execute the system call specified by second in a7",
+            "ecall", "Issue a system call : Execute the system call specified by value in a7",
             BasicInstructionFormat.I_FORMAT, "000000000000 00000 000 00000 1110011"
         );
     }

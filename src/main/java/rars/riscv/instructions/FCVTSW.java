@@ -44,7 +44,7 @@ public final class FCVTSW extends BasicInstruction {
 
     private FCVTSW() {
         super(
-            "fcvt.s.w f1, t1, dyn", "Convert float from integer: Assigns the second of t1 to f1",
+            "fcvt.s.w f1, t1, dyn", "Convert float from integer: Assigns the value of t1 to f1",
             BasicInstructionFormat.I_FORMAT, "1101000 00000 sssss ttt fffff 1010011"
         );
     }

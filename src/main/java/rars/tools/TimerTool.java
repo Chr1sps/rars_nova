@@ -262,7 +262,7 @@ public final class TimerTool extends AbstractTool {
     // Watches for changes made to the timecmp MMIO
     public final static class TimeCmpDaemon {
         public boolean postInterrupt = false;
-        public long value = 0L; // Holds the most recent second of timecmp writen to the MMIO
+        public long value = 0L; // Holds the most recent value of timecmp writen to the MMIO
 
         public TimeCmpDaemon() {
             this.addAsObserver();
