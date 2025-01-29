@@ -42,7 +42,7 @@ tasks {
         options.encoding = "UTF-8"
     }
     shadowJar {
-        archiveClassifier.set("all")
+        archiveClassifier.set("")
         mergeServiceFiles()
         manifest {
             attributes(
@@ -51,19 +51,17 @@ tasks {
             )
         }
     }
-    jar {
-        manifest {
-            attributes(
-                "Main-Class" to "rars.Main"
-            )
-        }
-        from(
-            configurations.runtimeClasspath
-                .get()
-                .filter { it.isDirectory }
-                .map { zipTree(it) }
-        )
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // Disable all unnecessary tasks
+    arrayOf(
+        jar,
+        distZip,
+        distTar,
+        shadowDistZip,
+        shadowDistTar,
+        startScripts,
+        startShadowScripts
+    ).forEach {
+        it { enabled = false }
     }
     build {
         dependsOn(shadowJar)
@@ -73,7 +71,7 @@ tasks {
     }
     javadoc {
         val docletOptions = options as StandardJavadocDocletOptions
-        docletOptions.apply {
+        docletOptions.run {
             encoding = "UTF-8"
             docletpath = graphDoclet.files.toList()
             doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"

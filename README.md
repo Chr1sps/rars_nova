@@ -1,47 +1,61 @@
-RARS -- RISC-V Assembler and Runtime Simulator
-----------------------------------------------
+# RARS Nova - RARS, modernized
 
-RARS, the RISC-V Assembler, Simulator, and Runtime, will assemble and simulate
-the execution of RISC-V assembly language programs. Its primary goal is to be
-an effective development environment for people getting started with RISC-V. 
+This repository is a fork of the [RARS](https://github.com/TheThirdOne/rars)
+project.
 
-## Features
+Main goals of this fork are:
 
-  - RISC-V IMFDN Base (riscv32 and riscv64)
-  - Several system calls that match behaviour from MARS or SPIKE.
-  - Support for debugging using breakpoints and/or `ebreak`
-  - Side by side comparison from pseudo-instruction to machine code with
-    intermediate steps
-  - Multifile assembly using either files open or a directory
+- modernization of the codebase
+- introduction of external dependencies to simplify the codebase
+- improving the user experience in various areas (i.e. the code editor).
 
-## Documentation
+This project currently has achieved the following:
 
-Documentation for supported [instructions](https://github.com/TheThirdOne/rars/wiki/Supported-Instructions), [system calls](https://github.com/TheThirdOne/rars/wiki/Environment-Calls), [assembler directives](https://github.com/TheThirdOne/rars/wiki/Assembler-Directives) and more can be found on the [wiki](https://github.com/TheThirdOne/rars/wiki). Documentation included in the download can be accessed via the help menu. 
+- migration to Java 21, removal of deprecated APIs from the standard library
+- migration to Gradle as the build tool
+- addition of JUnit 5 for testing
+- replacement of the old Bitmap Display tool with a dedicated syscall
+- introduction of a new code editor ([RSyntaxTextArea]) that improves
+  syntax highlighting, adds code folding and commenting capabilities
+- redesign of the editor settings UI
+- addition of the [JetBrains Annotations] library to improve nullity analysis
+- overall API changes.
 
-## Download
+Despite all the changes, the project is still in a stage, where the internal
+API is heavily subject to change. However, it is very much usable, so feel free
+to try it out.
 
-RARS is distributed as an executable jar. You will need at least Java 8 to run it. 
+## Building the project
 
-The latest stable release can be found [here](https://github.com/TheThirdOne/rars/releases/latest), a release with the latest developments can be found on the [continuous release](https://github.com/TheThirdOne/rars/releases/tag/continuous), and the [releases page](https://github.com/TheThirdOne/rars/releases) contains all previous stable releases with patch notes.
+You only require a JDK 21 or newer to build the project, as there is a
+Gradle wrapper included in the repository.
 
-Alternatively, if you wish to make your own jar and/or modify the code, you
-should clone the repo with `git clone https://github.com/TheThirdOne/rars --recursive`.
-Running the script `./build-jar.sh` on a Unix system will build `rars.jar`.
+To build the project on Unix-like systems, run the following command:
 
-## Screenshot
+```shell
+./gradlew shadowJar
+```
 
-![Screenshot of sample program](screenshot.png)
+On Windows, run the following command:
 
-## Changes from MARS 4.5
+```shell
+.\gradlew.bat shadowJar
+```
 
-RARS was built on MARS 4.5 and owes a lot to the development of MARS; its
-important to note what are new developments and what come straight from MARS.
-Besides moving from supporting MIPS to RISC-V and the associated small changes,
-there are several general changes worth noting.
+The resulting JAR file will be located in the `build/libs` directory.
 
-  - Instructions can now be hot-loaded like Tools. If you want to support an additional extension to the RISC-V instruction set. the .class files just need to be added to the right folder
-  - ScreenMagnifier, MARS Bot, Intro to Tools, Scavenger Hunt, and MARS Xray were removed from the included tools. ScreenMagnifier, MARS Bot, Intro to Tools, and Scavenger Hunt were removed because they provide little benefit. And MARS Xray was removed because it is not set up to work with RISC-V, however if someone ports it, it could be merged in.
-  - Removed delayed branching
-  - Removed the print feature
-  - Added a testing framework to verify compatibility with the RISC-V specification
-  - Significant internal restructuring and refactoring.
+## Running the project
+
+To run the project, you only require a JRE 21 or newer. Simply invoke:
+
+```shell
+java -jar "<path-to-jar>"
+```
+
+from the command line. On Windows, you can also double-click the JAR file.
+
+<!-- links: -->
+
+[RSyntaxTextArea]: https://github.com/bobbylight/RSyntaxTextArea
+
+[JetBrains Annotations]: https://github.com/JetBrains/java-annotations
