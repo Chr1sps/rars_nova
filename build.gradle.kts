@@ -14,6 +14,7 @@ repositories {
 }
 
 val graphDoclet: Configuration by configurations.creating
+val jflexConfiguration: Configuration by configurations.creating
 
 dependencies {
     compileOnly("org.jetbrains:annotations:24.0.0")
@@ -21,7 +22,7 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-core:2.23.1")
     implementation("org.apache.logging.log4j:log4j-api:2.23.1")
     implementation("com.fifesoft:rsyntaxtextarea:3.5.2")
-    implementation("de.jflex:jflex:1.9.1")
+    jflexConfiguration("de.jflex:jflex:1.9.1")
     implementation("info.picocli:picocli:4.7.6")
 
     testCompileOnly("org.jetbrains:annotations:24.0.0")
@@ -151,7 +152,7 @@ val runJFlex = tasks.register<JavaExec>("runJFlex") {
     withCache(cacheJFlexFile)
     description = "Generates a lexer"
     mainClass = "jflex.Main"
-    classpath = sourceSets["main"].compileClasspath
+    classpath = jflexConfiguration
     inputs.file(flexCacheFileName)
     outputs.file(lexerOutputName)
     args = listOf(
