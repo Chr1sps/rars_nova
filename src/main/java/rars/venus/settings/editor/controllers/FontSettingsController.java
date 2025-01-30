@@ -1,7 +1,7 @@
 package rars.venus.settings.editor.controllers;
 
 import org.jetbrains.annotations.NotNull;
-import rars.settings.FontSettings;
+import rars.settings.FontSettingsImpl;
 import rars.util.FontWeight;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.settings.editor.views.FontSettingsView;
@@ -13,7 +13,7 @@ import java.util.Map;
 public final class FontSettingsController {
     private final @NotNull FontSettingsView view;
     private final @NotNull TextEditingArea textArea;
-    private final @NotNull FontSettings settings;
+    private final @NotNull FontSettingsImpl settings;
 
     private boolean ligaturesEnabled;
     private int fontSize;
@@ -23,7 +23,7 @@ public final class FontSettingsController {
     public FontSettingsController(
         final @NotNull FontSettingsView view,
         final @NotNull TextEditingArea textArea,
-        final @NotNull FontSettings settings
+        final @NotNull FontSettingsImpl settings
     ) {
         this.view = view;
         this.textArea = textArea;

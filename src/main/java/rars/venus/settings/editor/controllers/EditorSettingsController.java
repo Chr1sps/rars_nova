@@ -1,9 +1,9 @@
 package rars.venus.settings.editor.controllers;
 
 import org.jetbrains.annotations.NotNull;
-import rars.settings.EditorThemeSettings;
-import rars.settings.FontSettings;
-import rars.settings.OtherSettings;
+import rars.settings.EditorThemeSettingsImpl;
+import rars.settings.FontSettingsImpl;
+import rars.settings.OtherSettingsImpl;
 import rars.settings.SettingsTheme;
 import rars.venus.settings.editor.EditorSettingsDialog;
 import rars.venus.settings.editor.EditorSettingsPanel;
@@ -17,16 +17,16 @@ public final class EditorSettingsController {
     private final @NotNull BaseStyleSettingsController baseStyleSettingsController;
     private final @NotNull SyntaxStyleSettingsController syntaxStyleSettingsController;
     private final @NotNull OtherSettingsController otherSettingsController;
-    private final @NotNull EditorThemeSettings editorThemeSettings;
+    private final @NotNull EditorThemeSettingsImpl editorThemeSettings;
     public @NotNull SettingsTheme settingsTheme;
 
     public EditorSettingsController(
         final @NotNull EditorSettingsPanel editorSettingsView,
         final @NotNull EditorSettingsDialog dialog,
         final @NotNull TreePanel treePanel,
-        final @NotNull FontSettings fontSettings,
-        final @NotNull EditorThemeSettings editorThemeSettings,
-        final @NotNull OtherSettings otherSettings
+        final @NotNull FontSettingsImpl fontSettings,
+        final @NotNull EditorThemeSettingsImpl editorThemeSettings,
+        final @NotNull OtherSettingsImpl otherSettings
     ) {
         this.settingsTheme = editorThemeSettings.getCurrentTheme();
         this.editorThemeSettings = editorThemeSettings;

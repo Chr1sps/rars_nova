@@ -1,20 +1,20 @@
 package rars.venus.settings.editor.controllers;
 
 import org.jetbrains.annotations.NotNull;
-import rars.settings.OtherSettings;
+import rars.settings.OtherSettingsImpl;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.settings.editor.views.OtherSettingsView;
 
 public final class OtherSettingsController {
     private final @NotNull OtherSettingsView view;
     private final @NotNull TextEditingArea textArea;
-    private final @NotNull OtherSettings settings;
+    private final @NotNull OtherSettingsImpl settings;
     private int caretBlinkRate, editorTabSize;
 
     public OtherSettingsController(
         final @NotNull OtherSettingsView view,
         final @NotNull TextEditingArea textArea,
-        final @NotNull OtherSettings settings
+        final @NotNull OtherSettingsImpl settings
     ) {
         this.view = view;
         this.textArea = textArea;

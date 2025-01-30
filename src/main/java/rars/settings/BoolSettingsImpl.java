@@ -1,0 +1,78 @@
+package rars.settings;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import rars.util.ListenerDispatcher;
+
+import java.util.HashMap;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
+
+public final class BoolSettingsImpl implements BoolSettings {
+    private static final Logger LOGGER = LogManager.getLogger(BoolSettingsImpl.class);
+    public final @NotNull ListenerDispatcher<Void>.Hook onChangeListenerHook;
+    private final @NotNull Preferences preferences;
+    private final @NotNull HashMap<BoolSetting, Boolean> currentSettings;
+    private final @NotNull ListenerDispatcher<Void> onChangeDispatcher;
+
+    public BoolSettingsImpl(final @NotNull Preferences preferences) {
+        this.onChangeDispatcher = new ListenerDispatcher<>();
+        this.onChangeListenerHook = this.onChangeDispatcher.getHook();
+        this.preferences = preferences;
+        this.currentSettings = new HashMap<>();
+        loadSettingsFromPreferences();
+    }
+
+    /**
+     * Sets the value of a setting. Does not save the setting to persistent storage.
+     *
+     * @param setting
+     *     The setting to change
+     * @param value
+     *     The new value of the setting
+     */
+    public void setSetting(final @NotNull BoolSetting setting, final boolean value) {
+        currentSettings.put(setting, value);
+    }
+
+    /**
+     * Sets the value of a setting and immediately saves it to persistent storage.
+     *
+     * @param setting
+     *     The setting to change
+     * @param value
+     *     The new value of the setting
+     */
+    public void setSettingAndSave(final @NotNull BoolSetting setting, final boolean value) {
+        currentSettings.put(setting, value);
+        preferences.putBoolean(setting.repr, value);
+        try {
+            this.preferences.flush();
+        } catch (final SecurityException se) {
+            LOGGER.error("Unable to write to persistent storage for security reasons.");
+        } catch (final BackingStoreException bse) {
+            LOGGER.error("Unable to communicate with persistent storage.");
+        }
+        this.onChangeDispatcher.dispatch(null);
+    }
+
+    /**
+     * Gets the value of a setting.
+     *
+     * @param setting
+     *     The setting to get
+     * @return The value of the setting
+     */
+    @Override
+    public boolean getSetting(final @NotNull BoolSetting setting) {
+        return currentSettings.get(setting);
+    }
+
+    private void loadSettingsFromPreferences() {
+        for (final var setting : BoolSetting.values()) {
+            final var value = preferences.getBoolean(setting.repr, setting.defaultValue);
+            currentSettings.put(setting, value);
+        }
+    }
+}

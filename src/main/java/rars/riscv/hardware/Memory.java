@@ -603,10 +603,11 @@ public final class Memory {
         final int oldHighOrder = this.set(address + 4, (int) (value >> 32), 4);
         final int oldLowOrder = this.set(address, (int) value, 4);
         final long old = ((long) oldHighOrder << 32) | (oldLowOrder & 0xFFFFFFFFL);
-        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreDoubleWord(
-            address,
-            old
-        ) : old;
+        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper()
+            .addMemoryRestoreDoubleWord(
+                address,
+                old
+            ) : old;
     }
 
     /**
