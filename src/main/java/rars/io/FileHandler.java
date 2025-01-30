@@ -3,7 +3,7 @@ package rars.io;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.settings.BoolSetting;
-import rars.settings.BoolSettings;
+import rars.settings.BoolSettingsImpl;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -30,9 +30,9 @@ public final class FileHandler {
     private final int fdCount;
     private final FileEntry[] entries;
 
-    private final @NotNull BoolSettings boolSettings;
+    private final @NotNull BoolSettingsImpl boolSettings;
 
-    public FileHandler(final int fdCount, final @NotNull BoolSettings boolSettings) {
+    public FileHandler(final int fdCount, final @NotNull BoolSettingsImpl boolSettings) {
         this.fdCount = fdCount;
         this.entries = new FileEntry[fdCount];
         this.boolSettings = boolSettings;

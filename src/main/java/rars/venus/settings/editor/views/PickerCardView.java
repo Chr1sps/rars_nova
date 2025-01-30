@@ -5,7 +5,15 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 
+import static rars.Globals.OTHER_SETTINGS;
+
 public final class PickerCardView extends JPanel {
+    private static final @NotNull String EMPTY = "empty",
+        FONT = "font",
+        PRESETS = "presets",
+        BASE = "base",
+        SYNTAX = "syntax",
+        OTHER = "other";
     public final @NotNull BaseStyleView baseStyleView;
     public final @NotNull PresetsView presetsView;
     public final @NotNull SyntaxStyleView syntaxStyleView;
@@ -13,13 +21,6 @@ public final class PickerCardView extends JPanel {
     public final @NotNull OtherSettingsView otherSettingsView;
     private final @NotNull JPanel upperPanel;
     private final @NotNull CardLayout upperLayout;
-
-    private static final @NotNull String EMPTY = "empty",
-        FONT = "font",
-        PRESETS = "presets",
-        BASE = "base",
-        SYNTAX = "syntax",
-        OTHER = "other";
 
     public PickerCardView() {
         super();
@@ -35,7 +36,7 @@ public final class PickerCardView extends JPanel {
         presetsView = new PresetsView();
         syntaxStyleView = new SyntaxStyleView();
         fontSettingsView = new FontSettingsView();
-        otherSettingsView = new OtherSettingsView();
+        otherSettingsView = new OtherSettingsView(OTHER_SETTINGS);
 
         upperPanel.add(emptyPanel, EMPTY);
         upperPanel.add(fontSettingsView, FONT);

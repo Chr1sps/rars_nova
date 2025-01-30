@@ -1,7 +1,7 @@
 package rars.io;
 
 import org.jetbrains.annotations.NotNull;
-import rars.settings.BoolSettings;
+import rars.settings.BoolSettingsImpl;
 import rars.util.Lazy;
 
 import java.io.*;
@@ -16,7 +16,7 @@ public final class ConsoleIO implements AbstractIO {
         final @NotNull InputStream stdin,
         final @NotNull OutputStream stdout,
         final @NotNull OutputStream stderr,
-        final @NotNull BoolSettings boolSettings
+        final @NotNull BoolSettingsImpl boolSettings
     ) {
         this.stdin = stdin;
         this.fileHandler = new FileHandler(SYSCALL_MAXFILES - 3, boolSettings);

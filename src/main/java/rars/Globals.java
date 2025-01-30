@@ -100,11 +100,11 @@ public final class Globals {
     /// The program currently being worked with. Used by GUI only, not command line.
     public static @Nullable RISCVProgram program;
 
-    public static @NotNull OtherSettings OTHER_SETTINGS;
-    public static @NotNull BoolSettings BOOL_SETTINGS;
-    public static @NotNull EditorThemeSettings EDITOR_THEME_SETTINGS;
-    public static @NotNull FontSettings FONT_SETTINGS;
-    public static @NotNull HighlightingSettings HIGHLIGHTING_SETTINGS;
+    public static @NotNull OtherSettingsImpl OTHER_SETTINGS;
+    public static @NotNull BoolSettingsImpl BOOL_SETTINGS;
+    public static @NotNull EditorThemeSettingsImpl EDITOR_THEME_SETTINGS;
+    public static @NotNull FontSettingsImpl FONT_SETTINGS;
+    public static @NotNull HighlightingSettingsImpl HIGHLIGHTING_SETTINGS;
 
     public static @NotNull Memory MEMORY_INSTANCE;
 
@@ -113,11 +113,11 @@ public final class Globals {
 
         final var settingsPreferences = Preferences.userRoot().node("/rars/settings");
 
-        OTHER_SETTINGS = new OtherSettings(settingsPreferences);
-        BOOL_SETTINGS = new BoolSettings(settingsPreferences);
-        EDITOR_THEME_SETTINGS = new EditorThemeSettings(settingsPreferences);
-        FONT_SETTINGS = new FontSettings(settingsPreferences);
-        HIGHLIGHTING_SETTINGS = new HighlightingSettings(settingsPreferences);
+        OTHER_SETTINGS = new OtherSettingsImpl(settingsPreferences);
+        BOOL_SETTINGS = new BoolSettingsImpl(settingsPreferences);
+        EDITOR_THEME_SETTINGS = new EditorThemeSettingsImpl(settingsPreferences);
+        FONT_SETTINGS = new FontSettingsImpl(settingsPreferences);
+        HIGHLIGHTING_SETTINGS = new HighlightingSettingsImpl(settingsPreferences);
 
         final var initialMemoryConfiguration = OTHER_SETTINGS.getMemoryConfiguration();
 

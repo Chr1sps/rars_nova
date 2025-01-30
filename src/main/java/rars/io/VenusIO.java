@@ -2,7 +2,7 @@ package rars.io;
 
 import org.jetbrains.annotations.NotNull;
 import rars.settings.BoolSetting;
-import rars.settings.BoolSettings;
+import rars.settings.BoolSettingsImpl;
 import rars.venus.MessagesPane;
 
 import java.nio.charset.StandardCharsets;
@@ -11,14 +11,14 @@ public final class VenusIO implements AbstractIO {
 
     private final @NotNull MessagesPane messagesPane;
 
-    private final @NotNull BoolSettings boolSettings;
+    private final @NotNull BoolSettingsImpl boolSettings;
     private final @NotNull FileHandler fileHandler;
     private @NotNull String buffer;
     private long lastTime;
 
     public VenusIO(
         final @NotNull MessagesPane messagesPane,
-        final @NotNull BoolSettings boolSettings
+        final @NotNull BoolSettingsImpl boolSettings
     ) {
         super();
         this.messagesPane = messagesPane;

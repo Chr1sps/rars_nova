@@ -1,22 +1,22 @@
 package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
+import rars.settings.OtherSettingsImpl;
 import rars.venus.Editor;
 import rars.venus.settings.editor.GenericOptionSection;
 
 import javax.swing.*;
 
-import static rars.Globals.OTHER_SETTINGS;
 import static rars.venus.settings.editor.views.SyntaxStyleView.buildRow;
 
 public final class OtherSettingsView extends JPanel {
     public final @NotNull JSpinner blinkRateSpinner, tabSizeSpinner;
 
-    public OtherSettingsView() {
+    public OtherSettingsView(final @NotNull OtherSettingsImpl otherSettings) {
         super();
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         final var blinkRateModel = new SpinnerNumberModel(
-            OTHER_SETTINGS.getCaretBlinkRate(),
+            otherSettings.getCaretBlinkRate(),
             Editor.MIN_BLINK_RATE,
             Editor.MAX_BLINK_RATE,
             1
@@ -27,7 +27,7 @@ public final class OtherSettingsView extends JPanel {
         );
         this.blinkRateSpinner = blinkRatePicker.component;
         final var tabSizeModel = new SpinnerNumberModel(
-            OTHER_SETTINGS.getEditorTabSize(),
+            otherSettings.getEditorTabSize(),
             Editor.MIN_TAB_SIZE,
             Editor.MAX_TAB_SIZE,
             1
