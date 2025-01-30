@@ -1,8 +1,8 @@
 package rars.venus.editors;
 
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import rars.riscv.lang.lexing.RVTokenType;
-import rars.util.Pair;
 
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
@@ -99,7 +99,7 @@ public interface TextEditingArea {
 
     void setTabSize(int chars);
 
-    @NotNull Pair<Integer, Integer> getCaretPosition();
+    @NotNull Pair<@NotNull Integer, @NotNull Integer> getCaretPosition();
 
     Component getOuterComponent();
 

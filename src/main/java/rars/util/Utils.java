@@ -11,7 +11,6 @@ import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 public final class Utils {
@@ -54,18 +53,6 @@ public final class Utils {
         } else if (e.mode == RoundingMode.MIN) {
             e.mode = RoundingMode.MAX;
         }
-    }
-
-    public static <T, U> Stream<Pair<T, U>> zip(@NotNull final Stream<T> first, @NotNull final Stream<U> second) {
-        final var firstIterator = first.iterator();
-        final var secondIterator = second.iterator();
-        return Stream.generate(() -> {
-            if (firstIterator.hasNext() && secondIterator.hasNext()) {
-                return new Pair<>(firstIterator.next(), secondIterator.next());
-            }
-            // noinspection ReturnOfNull
-            return null;
-        }).takeWhile(Objects::nonNull);
     }
 
     @SafeVarargs

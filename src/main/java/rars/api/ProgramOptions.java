@@ -1,5 +1,6 @@
 package rars.api;
 
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -8,7 +9,6 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 import rars.riscv.hardware.MemoryConfiguration;
-import rars.util.Pair;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -157,7 +157,7 @@ public final class ProgramOptions implements Runnable {
             }
             final var start = Integer.parseInt(args.pop());
             final var end = Integer.parseInt(args.pop());
-            final var pair = Pair.of(start, end);
+            final var pair = new Pair<>(start, end);
             final var currentList = argSpec.<List<Pair<Integer, Integer>>>getValue();
             final var result = new ArrayList<>(currentList);
             result.add(pair);

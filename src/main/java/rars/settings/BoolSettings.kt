@@ -18,7 +18,10 @@ class BoolSettingsImpl(private val preferences: Preferences) : BoolSettings {
     private val currentSettings = mutableMapOf<BoolSetting, Boolean>()
 
     init {
-        loadSettingsFromPreferences()
+        for (setting in BoolSetting.entries) {
+            val value = preferences.getBoolean(setting.repr, setting.defaultValue)
+            currentSettings.put(setting, value)
+        }
     }
 
     /**
@@ -61,16 +64,7 @@ class BoolSettingsImpl(private val preferences: Preferences) : BoolSettings {
      * The setting to get
      * @return The value of the setting
      */
-    override fun getSetting(setting: BoolSetting): Boolean {
-        return currentSettings[setting]!!
-    }
-
-    private fun loadSettingsFromPreferences() {
-        for (setting in BoolSetting.entries) {
-            val value = preferences.getBoolean(setting.repr, setting.defaultValue)
-            currentSettings.put(setting, value)
-        }
-    }
+    override fun getSetting(setting: BoolSetting): Boolean = currentSettings[setting]!!
 
     companion object {
         private val LOGGER: Logger = LogManager.getLogger(BoolSettingsImpl::class.java)

@@ -13,7 +13,6 @@ import rars.riscv.Instruction;
 import rars.riscv.InstructionsRegistry;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
-import rars.util.Pair;
 import rars.venus.NumberDisplayBaseChooser;
 
 import java.nio.charset.StandardCharsets;
@@ -146,7 +145,7 @@ public final class Assembler {
             && tokens.get(1).getType() == TokenType.COLON;
     }
 
-    public static @NotNull Pair<@NotNull List<@NotNull ProgramStatement>, @NotNull ErrorList> assemble(
+    public static @NotNull kotlin.Pair<@NotNull List<@NotNull ProgramStatement>, @NotNull ErrorList> assemble(
         final @NotNull List<@NotNull RISCVProgram> tokenizedProgramFiles,
         final boolean extendedAssemblerEnabled,
         final boolean warningsAreErrors
@@ -157,7 +156,7 @@ public final class Assembler {
             extendedAssemblerEnabled,
             warningsAreErrors
         );
-        return Pair.of(machineList, assembler.errors);
+        return new kotlin.Pair<>(machineList, assembler.errors);
     }
 
     /**

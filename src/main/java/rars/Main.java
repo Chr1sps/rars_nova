@@ -354,8 +354,8 @@ public final class Main {
     private void displayMemoryPostMortem(final Memory memory) {
         for (final var memoryRange : this.programOptions.memoryRanges) {
 
-            final int startAddress = memoryRange.first();
-            final int endAddress = memoryRange.second();
+            final int startAddress = memoryRange.getFirst();
+            final int endAddress = memoryRange.getSecond();
             int valuesDisplayed = 0;
             for (int addr = startAddress; addr <= endAddress; addr += DataTypes.WORD_SIZE) {
                 if (addr < 0 && endAddress > 0) {
