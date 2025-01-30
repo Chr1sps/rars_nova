@@ -1,86 +1,75 @@
-package rars.settings;
+package rars.settings
 
-import org.jetbrains.annotations.NotNull;
-import rars.riscv.lang.lexing.RVTokenType;
-import rars.venus.editors.EditorTheme;
-import rars.venus.editors.TokenStyle;
+import rars.riscv.lang.lexing.RVTokenType
+import rars.venus.editors.EditorTheme
+import rars.venus.editors.TokenStyle
+import java.awt.Color
 
-import java.awt.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+class SettingsTheme(
+    @JvmField var backgroundColor: Color,
+    @JvmField var foregroundColor: Color,
+    @JvmField var lineHighlightColor: Color,
+    @JvmField var caretColor: Color,
+    @JvmField var selectionColor: Color,
+    tokenStyles: Map<TokenSettingKey, TokenStyle>
+) : Cloneable {
+    @JvmField
+    var tokenStyles: MutableMap<TokenSettingKey, TokenStyle>
 
-import static rars.settings.SettingsThemePresets.LIGHT_THEME;
-
-public final class SettingsTheme implements Cloneable {
-    public static @NotNull SettingsTheme DEFAULT_THEME = LIGHT_THEME;
-    public @NotNull Color foregroundColor;
-    public @NotNull Color backgroundColor;
-    public @NotNull Color lineHighlightColor;
-    public @NotNull Color selectionColor;
-    public @NotNull Color caretColor;
-    public @NotNull HashMap<@NotNull TokenSettingKey, @NotNull TokenStyle> tokenStyles;
-
-    public SettingsTheme(
-        final @NotNull Color backgroundColor,
-        final @NotNull Color foregroundColor,
-        final @NotNull Color lineHighlightColor,
-        final @NotNull Color caretColor,
-        final @NotNull Color selectionColor,
-        final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> tokenStyles
-    ) {
-        this.backgroundColor = backgroundColor;
-        this.foregroundColor = foregroundColor;
-        this.lineHighlightColor = lineHighlightColor;
-        this.caretColor = caretColor;
-        this.selectionColor = selectionColor;
-        this.tokenStyles = getFilledMap(tokenStyles);
+    init {
+        this.tokenStyles = getFilledMap(tokenStyles)
     }
 
-    private static @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> convertSettingsToThemeTokenStyles(
-        final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> tokenStyles
-    ) {
-        final var result = new HashMap<@NotNull RVTokenType, @NotNull TokenStyle>();
-        tokenStyles.forEach((key, style) ->
-            TokenSettingKey.getTokenTypesForSetting(key)
-                .forEach(tokenType -> result.put(tokenType, style)));
-        return result;
-    }
-
-    private static @NotNull HashMap<@NotNull TokenSettingKey, @NotNull TokenStyle> getFilledMap(final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> baseMap) {
-        final var result = new HashMap<>(baseMap);
-        Arrays.stream(TokenSettingKey.values()).forEach(key -> result.putIfAbsent(key, TokenStyle.DEFAULT));
-        return result;
-    }
-
-    public @NotNull EditorTheme toEditorTheme() {
-        return new EditorTheme(
+    fun toEditorTheme(): EditorTheme {
+        return EditorTheme(
             convertSettingsToThemeTokenStyles(this.tokenStyles),
             this.backgroundColor,
             this.foregroundColor,
             this.lineHighlightColor,
             this.caretColor,
             this.selectionColor
-        );
+        )
     }
 
-    @Override
-    public @NotNull SettingsTheme clone() {
-        final SettingsTheme clone;
+    public override fun clone(): SettingsTheme {
+        val clone: SettingsTheme
         try {
-            clone = (SettingsTheme) super.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+            clone = super.clone() as SettingsTheme
+        } catch (e: CloneNotSupportedException) {
+            throw RuntimeException(e)
         }
 
-        clone.backgroundColor = new Color(this.backgroundColor.getRGB(), false);
-        clone.foregroundColor = new Color(this.foregroundColor.getRGB(), false);
-        clone.lineHighlightColor = new Color(this.lineHighlightColor.getRGB(), false);
-        clone.caretColor = new Color(this.caretColor.getRGB(), false);
-        clone.selectionColor = new Color(this.selectionColor.getRGB(), false);
+        clone.backgroundColor = Color(this.backgroundColor.rgb, false)
+        clone.foregroundColor = Color(this.foregroundColor.rgb, false)
+        clone.lineHighlightColor = Color(this.lineHighlightColor.rgb, false)
+        clone.caretColor = Color(this.caretColor.rgb, false)
+        clone.selectionColor = Color(this.selectionColor.rgb, false)
 
-        clone.tokenStyles = new HashMap<>(this.tokenStyles);
+        clone.tokenStyles = HashMap<TokenSettingKey, TokenStyle>(this.tokenStyles)
 
-        return clone;
+        return clone
+    }
+
+    companion object {
+        @JvmField
+        var DEFAULT_THEME: SettingsTheme = SettingsThemePresets.LIGHT_THEME
+
+        private fun convertSettingsToThemeTokenStyles(
+            tokenStyles: MutableMap<TokenSettingKey, TokenStyle>
+        ) = mutableMapOf<RVTokenType, TokenStyle>().apply {
+            tokenStyles.forEach { (key, style) ->
+                TokenSettingKey
+                    .getTokenTypesForSetting(key)
+                    .forEach { tokenType -> this[tokenType] = style }
+            }
+        }
+
+        private fun getFilledMap(baseMap: Map<TokenSettingKey, TokenStyle>): MutableMap<TokenSettingKey, TokenStyle> {
+            val result = baseMap.toMutableMap()
+            TokenSettingKey.entries.forEach { key ->
+                result.putIfAbsent(key, TokenStyle.DEFAULT)
+            }
+            return result
+        }
     }
 }
