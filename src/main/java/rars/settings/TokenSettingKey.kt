@@ -1,18 +1,12 @@
-package rars.settings;
+package rars.settings
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
-import rars.riscv.lang.lexing.RVTokenType;
-import rars.util.Pair;
-
-import java.util.List;
+import rars.riscv.lang.lexing.RVTokenType
 
 /**
  * Sometimes it's nice to group a couple of different token types together in a
  * single color setting. This enum helps with that.
  */
-public enum TokenSettingKey {
+enum class TokenSettingKey(@JvmField val description: String) {
     ERROR("Errors"),
 
     COMMENT("Comments"),
@@ -33,49 +27,38 @@ public enum TokenSettingKey {
     MACRO_PARAMETER("Macro parameters"),
     HILO("%hi/%lo offsets");
 
-    private static final @NotNull List<@NotNull Pair<@NotNull TokenSettingKey, @NotNull RVTokenType>> settingMappings = List.of(
-        Pair.of(ERROR, RVTokenType.UNFINISHED_STRING),
-        Pair.of(ERROR, RVTokenType.UNFINISHED_CHAR),
-        Pair.of(ERROR, RVTokenType.ERROR),
-        Pair.of(COMMENT, RVTokenType.COMMENT),
-        Pair.of(DIRECTIVE, RVTokenType.DIRECTIVE),
-        Pair.of(REGISTER_NAME, RVTokenType.REGISTER_NAME),
-        Pair.of(IDENTIFIER, RVTokenType.IDENTIFIER),
-        Pair.of(NUMBER, RVTokenType.INTEGER),
-        Pair.of(NUMBER, RVTokenType.FLOATING),
-        Pair.of(STRING, RVTokenType.STRING),
-        Pair.of(STRING, RVTokenType.CHAR),
-        Pair.of(LABEL, RVTokenType.LABEL),
-        Pair.of(INSTRUCTION, RVTokenType.INSTRUCTION),
-        Pair.of(PUNCTUATION, RVTokenType.PLUS),
-        Pair.of(PUNCTUATION, RVTokenType.MINUS),
-        Pair.of(PUNCTUATION, RVTokenType.COMMA),
-        Pair.of(PUNCTUATION, RVTokenType.LEFT_PAREN),
-        Pair.of(PUNCTUATION, RVTokenType.RIGHT_PAREN),
-        Pair.of(PUNCTUATION, RVTokenType.OPERATOR),
-        Pair.of(ROUNDING_MODE, RVTokenType.ROUNDING_MODE),
-        Pair.of(MACRO_PARAMETER, RVTokenType.MACRO_PARAMETER),
-        Pair.of(HILO, RVTokenType.HI),
-        Pair.of(HILO, RVTokenType.LO)
-    );
-    public final @NotNull String description;
+    companion object {
+        private val settingMappings = listOf(
+            Pair(ERROR, RVTokenType.UNFINISHED_STRING),
+            Pair(ERROR, RVTokenType.UNFINISHED_CHAR),
+            Pair(ERROR, RVTokenType.ERROR),
+            Pair(COMMENT, RVTokenType.COMMENT),
+            Pair(DIRECTIVE, RVTokenType.DIRECTIVE),
+            Pair(REGISTER_NAME, RVTokenType.REGISTER_NAME),
+            Pair(IDENTIFIER, RVTokenType.IDENTIFIER),
+            Pair(NUMBER, RVTokenType.INTEGER),
+            Pair(NUMBER, RVTokenType.FLOATING),
+            Pair(STRING, RVTokenType.STRING),
+            Pair(STRING, RVTokenType.CHAR),
+            Pair(LABEL, RVTokenType.LABEL),
+            Pair(INSTRUCTION, RVTokenType.INSTRUCTION),
+            Pair(PUNCTUATION, RVTokenType.PLUS),
+            Pair(PUNCTUATION, RVTokenType.MINUS),
+            Pair(PUNCTUATION, RVTokenType.COMMA),
+            Pair(PUNCTUATION, RVTokenType.LEFT_PAREN),
+            Pair(PUNCTUATION, RVTokenType.RIGHT_PAREN),
+            Pair(PUNCTUATION, RVTokenType.OPERATOR),
+            Pair(ROUNDING_MODE, RVTokenType.ROUNDING_MODE),
+            Pair(MACRO_PARAMETER, RVTokenType.MACRO_PARAMETER),
+            Pair(HILO, RVTokenType.HI),
+            Pair(HILO, RVTokenType.LO)
+        )
 
-    TokenSettingKey(@NotNull final String description) {
-        this.description = description;
-    }
+        @JvmStatic
+        fun fromRVTokenType(type: RVTokenType): TokenSettingKey? = settingMappings.find { it.second == type }?.first
 
-    public static @Nullable TokenSettingKey fromRVTokenType(final @NotNull RVTokenType type) {
-        return settingMappings.stream()
-            .filter(pair -> pair.second() == type)
-            .map(Pair::first)
-            .findAny()
-            .orElse(null);
-    }
-
-    public static @NotNull @Unmodifiable List<@NotNull RVTokenType> getTokenTypesForSetting(final @NotNull TokenSettingKey tokenSettingKey) {
-        return settingMappings.stream()
-            .filter(pair -> pair.first() == tokenSettingKey)
-            .map(Pair::second)
-            .toList();
+        @JvmStatic
+        fun getTokenTypesForSetting(tokenSettingKey: TokenSettingKey): List<RVTokenType> =
+            settingMappings.filter { it.first == tokenSettingKey }.map { it.second }.toList()
     }
 }

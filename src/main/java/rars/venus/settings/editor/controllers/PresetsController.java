@@ -12,9 +12,9 @@ public final class PresetsController {
         final @NotNull EditorSettingsController parentController
     ) {
         SettingsThemePresets.THEMES.forEach(themeEntry -> {
-            final var section = new PresetsView.PresetSection(themeEntry.name());
+            final var section = new PresetsView.PresetSection(themeEntry.name);
             section.button.addActionListener(e -> {
-                parentController.settingsTheme = themeEntry.theme().clone();
+                parentController.settingsTheme = themeEntry.theme.clone();
                 textArea.setTheme(parentController.settingsTheme.toEditorTheme());
                 // We need to update the info regarding the theme in all the theme
                 // related controllers.
