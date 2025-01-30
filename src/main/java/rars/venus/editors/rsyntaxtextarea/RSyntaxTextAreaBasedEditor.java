@@ -1,5 +1,6 @@
 package rars.venus.editors.rsyntaxtextarea;
 
+import kotlin.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
@@ -12,7 +13,6 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.jetbrains.annotations.NotNull;
 import rars.riscv.lang.lexing.RVTokenType;
-import rars.util.Pair;
 import rars.venus.editors.EditorTheme;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TokenStyle;
@@ -292,15 +292,15 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public @NotNull Pair<Integer, Integer> getCaretPosition() {
+    public @NotNull Pair<@NotNull Integer, @NotNull Integer> getCaretPosition() {
         final var offset = textArea.getCaretPosition();
         try {
             final var line = textArea.getLineOfOffset(offset);
             final var column = offset - textArea.getLineStartOffset(line);
-            return Pair.of(line, column);
+            return new Pair<>(line, column);
         } catch (final BadLocationException e) {
             LOGGER.error("Failed to get caret position", e);
-            return Pair.of(0, 0);
+            return new Pair<>(0, 0);
         }
     }
 

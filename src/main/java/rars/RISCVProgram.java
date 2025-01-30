@@ -312,9 +312,9 @@ public final class RISCVProgram {
             extendedAssemblerEnabled,
             warningsAreErrors
         );
-        this.machineList = assemblyResult.first();
+        this.machineList = assemblyResult.getFirst();
         this.backStepper = new BackStepper();
-        return assemblyResult.second();
+        return assemblyResult.getSecond();
     }
 
     /**

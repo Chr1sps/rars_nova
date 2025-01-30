@@ -1,5 +1,6 @@
 package rars.venus;
 
+import kotlin.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +10,6 @@ import rars.RISCVProgram;
 import rars.exceptions.AssemblyException;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
-import rars.util.Pair;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -157,7 +157,7 @@ public final class EditTabbedPane extends JPanel {
         this.mainUI.isMemoryReset = true;
         this.mainPane.executePane.clearPane();
         this.mainPane.setSelectedComponent(this);
-        editPane.displayCaretPosition(Pair.of(1, 1));
+        editPane.displayCaretPosition(new Pair<>(1, 1));
         tabbedPane.setSelectedComponent(editPane);
         this.updateTitlesAndMenuState(editPane);
         editPane.tellEditingComponentToRequestFocusInWindow();

@@ -1,8 +1,8 @@
 package rars.venus.editors;
 
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import rars.riscv.lang.lexing.RVTokenType;
-import rars.util.Pair;
 
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
@@ -99,7 +99,7 @@ public interface TextEditingArea {
 
     void setTabSize(int chars);
 
-    @NotNull Pair<Integer, Integer> getCaretPosition();
+    @NotNull Pair<@NotNull Integer, @NotNull Integer> getCaretPosition();
 
     Component getOuterComponent();
 
@@ -109,12 +109,12 @@ public interface TextEditingArea {
 
     @NotNull EditorTheme getTheme();
 
-    void setTokenStyle(final @NotNull RVTokenType type, final @NotNull TokenStyle style);
-
     void setTheme(final @NotNull EditorTheme theme);
 
+    void setTokenStyle(final @NotNull RVTokenType type, final @NotNull TokenStyle style);
+
     void forceSettingsRestore();
-    
+
     // Used by Find/Replace
     enum FindReplaceResult {
         TEXT_NOT_FOUND,

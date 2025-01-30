@@ -1,9 +1,9 @@
 package rars.venus;
 
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.settings.BoolSetting;
-import rars.util.Pair;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
 import rars.venus.editors.TextEditingAreaFactory;
@@ -173,10 +173,10 @@ public final class EditPane extends JPanel {
         final JPanel editInfo = new JPanel(new BorderLayout());
         this.caretPositionLabel = new JLabel();
         this.caretPositionLabel.setToolTipText("Tracks the current position of the text editing cursor.");
-        this.displayCaretPosition(Pair.of(0, 0));
+        this.displayCaretPosition(new Pair<>(0, 0));
         this.sourceCode.getCaret().addChangeListener(e -> {
             final var position = this.sourceCode.getCaretPosition();
-            this.displayCaretPosition(Pair.of(position.first() + 1, position.second() + 1));
+            this.displayCaretPosition(new Pair<>(position.getFirst() + 1, position.getSecond() + 1));
         });
         editInfo.add(this.caretPositionLabel, BorderLayout.WEST);
         this.add(editInfo, BorderLayout.SOUTH);
@@ -331,7 +331,7 @@ public final class EditPane extends JPanel {
      *     Point object with x-y (column, line number) coordinates of cursor
      */
     public void displayCaretPosition(final @NotNull Pair<Integer, Integer> p) {
-        this.caretPositionLabel.setText("Line: " + p.first() + " Column: " + p.second());
+        this.caretPositionLabel.setText("Line: " + p.getFirst() + " Column: " + p.getSecond());
     }
 
     /**
