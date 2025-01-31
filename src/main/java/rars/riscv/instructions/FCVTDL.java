@@ -23,14 +23,14 @@ public final class FCVTDL extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile);
         final Float64 tmp = new Float64(0);
         final Float64 converted = Conversions
-            .convertFromInt(BigInteger.valueOf(context.registerFile().getLongValue(statement.getOperand(1))), e, tmp);
-        Floating.setfflags(context.csrRegisterFile(), e);
-        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), converted.bits);
+            .convertFromInt(BigInteger.valueOf(context.registerFile.getLongValue(statement.getOperand(1))), e, tmp);
+        Floating.setfflags(context.csrRegisterFile, e);
+        context.fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits);
     }
 }

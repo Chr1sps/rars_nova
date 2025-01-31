@@ -45,22 +45,22 @@ public final class URET extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        final boolean upie = (context.csrRegisterFile().getIntValue("ustatus") & 0x10) == 0x10;
-        context.csrRegisterFile().updateRegisterByName(
+        final boolean upie = (context.csrRegisterFile.getIntValue("ustatus") & 0x10) == 0x10;
+        context.csrRegisterFile.updateRegisterByName(
             "ustatus",
-            context.csrRegisterFile().getLongValue("ustatus") & ~0x10L
+            context.csrRegisterFile.getLongValue("ustatus") & ~0x10L
         ); // Clear UPIE
         if (upie) { // Set UIE to UPIE
-            context.csrRegisterFile()
-                .updateRegisterByName("ustatus", context.csrRegisterFile().getLongValue("ustatus") | 0x1L);
+            context.csrRegisterFile
+                .updateRegisterByName("ustatus", context.csrRegisterFile.getLongValue("ustatus") | 0x1L);
         } else {
-            context.csrRegisterFile().updateRegisterByName(
+            context.csrRegisterFile.updateRegisterByName(
                 "ustatus",
-                context.csrRegisterFile().getLongValue("ustatus") & ~0x1L
+                context.csrRegisterFile.getLongValue("ustatus") & ~0x1L
             ); // Clear UIE
         }
-        context.registerFile().setProgramCounter(context.csrRegisterFile().getIntValue("uepc"));
+        context.registerFile.setProgramCounter(context.csrRegisterFile.getIntValue("uepc"));
     }
 }

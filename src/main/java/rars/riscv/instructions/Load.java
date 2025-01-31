@@ -6,8 +6,8 @@ import rars.exceptions.AddressErrorException;
 import rars.exceptions.SimulationException;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.simulator.SimulationContext;
 import rars.riscv.hardware.Memory;
+import rars.simulator.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -53,15 +53,15 @@ public abstract class Load extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             final long newValue = load(
-                context.registerFile().getIntValue(statement.getOperand(2)) + upperImmediate,
-                context.memory()
+                context.registerFile.getIntValue(statement.getOperand(2)) + upperImmediate,
+                context.memory
             );
-            context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
+            context.registerFile.updateRegisterByNumber(statement.getOperand(0), newValue);
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);
         }

@@ -22,14 +22,14 @@ public final class FCVTLUS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
-        final Float32 in = new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1)));
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile);
+        final Float32 in = new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(1)));
         final long out = Conversions.convertToUnsignedLong(in, e, false);
-        Floating.setfflags(context.csrRegisterFile(), e);
-        context.registerFile().updateRegisterByNumber(statement.getOperand(0), out);
+        Floating.setfflags(context.csrRegisterFile, e);
+        context.registerFile.updateRegisterByNumber(statement.getOperand(0), out);
     }
 }

@@ -216,7 +216,7 @@ public final class Main {
         InstructionsRegistry.RV64_MODE_FLAG = this.programOptions.isRV64;
 
         final var mainFile = this.programOptions.files.getFirst().getAbsoluteFile();
-        final @NotNull List<@NotNull File> filesToAssemble;
+        final @NotNull List<? extends @NotNull File> filesToAssemble;
         if (this.programOptions.isProjectMode) {
             final var allFoundProjectFiles = FilenameFinder.getFilenameListForDirectory(
                 mainFile.getParentFile(),

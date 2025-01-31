@@ -1,9 +1,9 @@
-package rars.exceptions;
+package rars.exceptions
 
-public enum ExceptionReason {
-    SOFTWARE_INTERRUPT(0x80000000),
-    TIMER_INTERRUPT(0x80000004),
-    EXTERNAL_INTERRUPT(0x80000008),
+enum class ExceptionReason(@JvmField val value: Int) {
+    SOFTWARE_INTERRUPT(-0x80000000),
+    TIMER_INTERRUPT(-0x7ffffffc),
+    EXTERNAL_INTERRUPT(-0x7ffffff8),
     INSTRUCTION_ADDR_MISALIGNED(0),
     INSTRUCTION_ACCESS_FAULT(1),
     ILLEGAL_INSTRUCTION(2),
@@ -13,16 +13,10 @@ public enum ExceptionReason {
     STORE_ACCESS_FAULT(7),
     ENVIRONMENT_CALL(8),
     OTHER(-1);
-    public final int value;
 
-    ExceptionReason(final int value) {
-        this.value = value;
-    }
-
-    public boolean isInterrupt() {
-        return switch (this) {
-            case SOFTWARE_INTERRUPT, TIMER_INTERRUPT, EXTERNAL_INTERRUPT -> true;
-            default -> false;
-        };
-    }
+    val isInterrupt
+        get() = when (this) {
+            SOFTWARE_INTERRUPT, TIMER_INTERRUPT, EXTERNAL_INTERRUPT -> true
+            else -> false
+        }
 }

@@ -49,11 +49,11 @@ public final class JALR extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        final int target = context.registerFile().getIntValue(statement.getOperand(1));
-        Utils.processReturnAddress(statement.getOperand(0), context.registerFile());
+        final int target = context.registerFile.getIntValue(statement.getOperand(1));
+        Utils.processReturnAddress(statement.getOperand(0), context.registerFile);
         // Set PC = $t2 + immediate with the last bit set to 0
-        Utils.processJump((target + ((statement.getOperand(2) << 20) >> 20)) & 0xFFFFFFFE, context.registerFile());
+        Utils.processJump((target + ((statement.getOperand(2) << 20) >> 20)) & 0xFFFFFFFE, context.registerFile);
     }
 }

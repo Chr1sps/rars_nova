@@ -45,11 +45,11 @@ public final class AUIPC extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final var shiftedValue = statement.getOperand(1) << 12;
         final var convertedValue = Integer.valueOf(shiftedValue).longValue();
-        final long newValue = context.registerFile().getProgramCounter() - BASIC_INSTRUCTION_LENGTH + convertedValue;
-        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
+        final long newValue = context.registerFile.getProgramCounter() - BASIC_INSTRUCTION_LENGTH + convertedValue;
+        context.registerFile.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

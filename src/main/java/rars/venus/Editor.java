@@ -294,7 +294,7 @@ public final class Editor {
      *     Files to open
      * @return true if succeeded, else false.
      */
-    public boolean openFiles(final @NotNull List<@NotNull File> files) {
+    public boolean openFiles(final @NotNull List<? extends @NotNull File> files) {
         for (final var file : files) {
             if (!this.editTabbedPane.openFile(file)) {
                 return false;

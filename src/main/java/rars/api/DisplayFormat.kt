@@ -1,14 +1,11 @@
-package rars.api;
+package rars.api
 
-import org.jetbrains.annotations.NotNull;
+import java.util.*
 
-public enum DisplayFormat {
+enum class DisplayFormat {
     DECIMAL,
     HEX,
     ASCII;
 
-    @Override
-    public @NotNull String toString() {
-        return name().toLowerCase();
-    }
+    override fun toString(): String = name.lowercase(Locale.getDefault())
 }

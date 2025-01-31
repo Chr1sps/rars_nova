@@ -21,10 +21,10 @@ public final class FSGNJND extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        final long result = (context.fpRegisterFile().getLongValue(statement.getOperand(1)) & 0x7FFFFFFF_FFFFFFFFL) |
-            ((~context.fpRegisterFile().getLongValue(statement.getOperand(2))) & 0x80000000_00000000L);
-        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), result);
+        final long result = (context.fpRegisterFile.getLongValue(statement.getOperand(1)) & 0x7FFFFFFF_FFFFFFFFL) |
+            ((~context.fpRegisterFile.getLongValue(statement.getOperand(2))) & 0x80000000_00000000L);
+        context.fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result);
     }
 }

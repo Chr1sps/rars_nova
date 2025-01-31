@@ -27,7 +27,7 @@ public enum Syscall implements SimulationCallback {
         "Close a file",
         "a0 = the file descriptor to close",
         "N/A",
-        (stmt, ctxt) -> ctxt.io().closeFile(ctxt.registerFile().getIntValue(ctxt.registerFile().a0))
+        (ctxt, stmt) -> ctxt.io.closeFile(ctxt.registerFile.getIntValue(ctxt.registerFile.a0))
     ),
     ConfirmDialog(
         "ConfirmDialog",
@@ -35,13 +35,13 @@ public enum Syscall implements SimulationCallback {
         "Service to display a message to user",
         "a0 = address of null-terminated string that is the message to user",
         "a0 = Yes (0), No (1), or Cancel(2)",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
             final var message = NullString.get(stmt);
             int result = JOptionPane.showConfirmDialog(null, message);
             if (result == JOptionPane.CLOSED_OPTION) {
                 result = JOptionPane.CANCEL_OPTION;
             }
-            ctxt.registerFile().updateRegisterByName("a0", result);
+            ctxt.registerFile.updateRegisterByName("a0", result);
         }
     ),
     DisplayBitmap(
@@ -54,16 +54,16 @@ public enum Syscall implements SimulationCallback {
             a2 = height of the bitmap
             """,
         "N/A",
-        (stmt, ctxt) -> DisplayBitmapImpl.INSTANCE.show(
-            ctxt.registerFile().getIntValue("a0"),
-            ctxt.registerFile().getIntValue("a1"),
-            ctxt.registerFile().getIntValue("a2")
+        (ctxt, stmt) -> DisplayBitmapImpl.INSTANCE.show(
+            ctxt.registerFile.getIntValue("a0"),
+            ctxt.registerFile.getIntValue("a1"),
+            ctxt.registerFile.getIntValue("a2")
         )
     ),
     Exit(
         "Exit", 10,
         "Exits the program with code 0",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
             Globals.exitCode = 0;
             throw new ExitingException();
         }
@@ -73,8 +73,8 @@ public enum Syscall implements SimulationCallback {
         "Exits the program with a code",
         "a0 = the number to exit with",
         "N/A",
-        (stmt, ctxt) -> {
-            Globals.exitCode = ctxt.registerFile().getIntValue("a0");
+        (ctxt, stmt) -> {
+            Globals.exitCode = ctxt.registerFile.getIntValue("a0");
             throw new ExitingException(); // empty error list
         }
     ),
@@ -83,9 +83,9 @@ public enum Syscall implements SimulationCallback {
         """
             a0 = the buffer to write into
             a1 = the length of the buffer""",
-        "a0 = -1 if the path is longer than the buffer", (stmt, ctxt) -> {
-        final var registerFile = ctxt.registerFile();
-        final var memory = ctxt.memory();
+        "a0 = -1 if the path is longer than the buffer", (ctxt, stmt) -> {
+        final var registerFile = ctxt.registerFile;
+        final var memory = ctxt.memory;
 
         final var path = System.getProperty("user.dir");
         final int buf = registerFile.getIntValue(registerFile.a0);
@@ -96,7 +96,7 @@ public enum Syscall implements SimulationCallback {
             // This should be -34 (ERANGE) for compatibility with spike, but until other
             // syscalls are ready with compatable
             // error codes, lets keep internal consitency.
-            ctxt.registerFile().updateRegisterByName("a0", -1);
+            ctxt.registerFile.updateRegisterByName("a0", -1);
             return;
         }
         try {
@@ -127,7 +127,7 @@ public enum Syscall implements SimulationCallback {
             -1: Input data cannot be correctly parsed.
             -2: Cancel was chosen.
             -3: OK was chosen but no data had been input into field.""",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
 
             // Input arguments: $a0 = address of null-terminated string that is the message
             // to user
@@ -139,8 +139,8 @@ public enum Syscall implements SimulationCallback {
             // -2: Cancel was chosen
             // -3: OK was chosen but no data had been input into field
 
-            final var registerFile = ctxt.registerFile();
-            final var fpRegisterFile = ctxt.fpRegisterFile();
+            final var registerFile = ctxt.registerFile;
+            final var fpRegisterFile = ctxt.fpRegisterFile;
 
             final var prompt = NullString.get(stmt, "tp");
 
@@ -169,14 +169,14 @@ public enum Syscall implements SimulationCallback {
     ),
     // TODO: improve and unify it
     InputDialogFloat(
-        "InputDialogFloat", 52, "TODO", "TODO", "TODO", (stmt, ctxt) -> {
+        "InputDialogFloat", 52, "TODO", "TODO", "TODO", (ctxt, stmt) -> {
 
         final var prompt = NullString.get(stmt);
 
         final var input = JOptionPane.showInputDialog(prompt);
 
-        final var registerFile = ctxt.registerFile();
-        final var fpRegisterFile = ctxt.fpRegisterFile();
+        final var registerFile = ctxt.registerFile;
+        final var fpRegisterFile = ctxt.fpRegisterFile;
 
         var result = 0.0f;
         var exitCode = 0;
@@ -210,7 +210,7 @@ public enum Syscall implements SimulationCallback {
               - 1 - Input data couldn't be correctly parsed.
               - 2 - Cancel was chosen.
               - 3 - OK was chosen but no data had been input into field.""",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
             final var prompt = NullString.get(stmt);
             final var inputValue = JOptionPane.showInputDialog(prompt);
             int exitCode = 0, result = 0;
@@ -228,8 +228,8 @@ public enum Syscall implements SimulationCallback {
                     exitCode = -1;
                 }
             }
-            ctxt.registerFile().updateRegisterByName("a0", result);
-            ctxt.registerFile().updateRegisterByName("a1", exitCode);
+            ctxt.registerFile.updateRegisterByName("a0", result);
+            ctxt.registerFile.updateRegisterByName("a1", exitCode);
         }
     ),
     InputDialogString(
@@ -245,11 +245,11 @@ public enum Syscall implements SimulationCallback {
         -2: Cancel was chosen. No change to buffer.
         -3: OK was chosen but no data had been input into field. No change to buffer.
         -4: length of the input string exceeded the specified maximum. Buffer contains the maximum allowable input string terminated with null.""",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
             final var prompt = NullString.get(stmt);
 
-            final var registerFile = ctxt.registerFile();
-            final var memory = ctxt.memory();
+            final var registerFile = ctxt.registerFile;
+            final var memory = ctxt.memory;
 
             // Values returned by Java's InputDialog:
             // A null return value means that "Cancel" was chosen rather than OK.
@@ -306,9 +306,9 @@ public enum Syscall implements SimulationCallback {
             a1 = the offset for the base
             a2 is the beginning of the file (0), the current position (1), or the end of the file (2)""",
         "a0 = the selected position from the beginning of the file or -1 is an error occurred",
-        (stmt, ctxt) -> {
-            final var registerFile = ctxt.registerFile();
-            final int result = ctxt.io().seek(
+        (ctxt, stmt) -> {
+            final var registerFile = ctxt.registerFile;
+            final int result = ctxt.io.seek(
                 registerFile.getIntValue("a0"),
                 registerFile.getIntValue("a1"),
                 registerFile.getIntValue("a2")
@@ -326,8 +326,8 @@ public enum Syscall implements SimulationCallback {
             - 2: warning message
             - 3: question message
             - other: plain message""",
-        "N/A", (stmt, ctxt) -> {
-        int msgType = ctxt.registerFile().getIntValue("a1");
+        "N/A", (ctxt, stmt) -> {
+        int msgType = ctxt.registerFile.getIntValue("a1");
         if (msgType < JOptionPane.ERROR_MESSAGE || msgType > JOptionPane.ERROR_MESSAGE) {
             msgType = JOptionPane.PLAIN_MESSAGE;
         }
@@ -347,21 +347,21 @@ public enum Syscall implements SimulationCallback {
             a0 = address of null-terminated string that is the message to user
             fa0 = the double""",
         "N/A",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
 
             // TODO: maybe refactor this, other null strings are handled in a central place
             // now
             String message = ""; // = "";
-            int byteAddress = ctxt.registerFile().getIntValue("a0");
+            int byteAddress = ctxt.registerFile.getIntValue("a0");
             try {
                 // Need an array to convert to String
                 final char[] ch = {' '};
-                ch[0] = (char) ctxt.memory().getByte(byteAddress);
+                ch[0] = (char) ctxt.memory.getByte(byteAddress);
                 while (ch[0] != 0) // only uses single location ch[0]
                 {
                     message = message.concat(new String(ch)); // parameter to String constructor is a char[] array
                     byteAddress++;
-                    ch[0] = (char) ctxt.memory().getByte(byteAddress);
+                    ch[0] = (char) ctxt.memory.getByte(byteAddress);
                 }
             } catch (final AddressErrorException e) {
                 throw new ExitingException(stmt, e);
@@ -369,7 +369,7 @@ public enum Syscall implements SimulationCallback {
 
             JOptionPane.showMessageDialog(
                 null,
-                message + Double.longBitsToDouble(ctxt.fpRegisterFile().fa0.getValue()),
+                message + Double.longBitsToDouble(ctxt.fpRegisterFile.fa0.getValue()),
                 null,
                 JOptionPane.INFORMATION_MESSAGE
             );
@@ -380,13 +380,13 @@ public enum Syscall implements SimulationCallback {
         """
             a0 = address of null-terminated string that is the message to user
             fa1 = the float to display""",
-        "N/A", (stmt, ctxt) -> {
+        "N/A", (ctxt, stmt) -> {
         final String message = NullString.get(stmt);
 
         // Display the dialog.
         JOptionPane.showMessageDialog(
             null,
-            message + ctxt.fpRegisterFile().getFloatFromRegister(ctxt.fpRegisterFile().fa1),
+            message + ctxt.fpRegisterFile.getFloatFromRegister(ctxt.fpRegisterFile.fa1),
             null,
             JOptionPane.INFORMATION_MESSAGE
         );
@@ -397,13 +397,13 @@ public enum Syscall implements SimulationCallback {
         """
             a0 = address of null-terminated string that is the message to user
             a1 = the int to display""",
-        "N/A", (stmt, ctxt) -> {
+        "N/A", (ctxt, stmt) -> {
         final String message = NullString.get(stmt);
 
         // Display the dialog.
         JOptionPane.showMessageDialog(
             null,
-            message + (int) ctxt.registerFile().getIntValue("a1"),
+            message + (int) ctxt.registerFile.getIntValue("a1"),
             null,
             JOptionPane.INFORMATION_MESSAGE
         );
@@ -414,7 +414,7 @@ public enum Syscall implements SimulationCallback {
         """
             a0 = address of null-terminated string that is the message to user
             a1 = address of the second string to display""",
-        "N/A", (stmt, ctxt) -> JOptionPane.showMessageDialog(
+        "N/A", (ctxt, stmt) -> JOptionPane.showMessageDialog(
         null,
         NullString.get(stmt) + NullString.get(stmt, "a1"),
         null,
@@ -423,13 +423,13 @@ public enum Syscall implements SimulationCallback {
     ),
     MidiOut(
         "MidiOut", 31, "Outputs simulated MIDI tone to sound card (does not wait for sound to end).",
-        "See MIDI note below", "N/A", (stmt, ctxt) -> {
+        "See MIDI note below", "N/A", (ctxt, stmt) -> {
         final int rangeLowEnd = 0;
         final int rangeHighEnd = 127;
-        int pitch = ctxt.registerFile().getIntValue("a0");
-        int duration = ctxt.registerFile().getIntValue("a1");
-        int instrument = ctxt.registerFile().getIntValue("a2");
-        int volume = ctxt.registerFile().getIntValue("a3");
+        int pitch = ctxt.registerFile.getIntValue("a0");
+        int duration = ctxt.registerFile.getIntValue("a1");
+        int instrument = ctxt.registerFile.getIntValue("a2");
+        int volume = ctxt.registerFile.getIntValue("a3");
         if (pitch < rangeLowEnd || pitch > rangeHighEnd) {
             pitch = ToneGenerator.DEFAULT_PITCH;
         }
@@ -447,7 +447,7 @@ public enum Syscall implements SimulationCallback {
     ),
     MidiOutSync(
         "MidiOutSync", 33, "Outputs simulated MIDI tone to sound card, then waits until the sound finishes playing.",
-        "See MIDI note below", "N/A", (stmt, ctxt) -> {
+        "See MIDI note below", "N/A", (ctxt, stmt) -> {
         /*
          * Arguments:
          * a0 - pitch (note). Integer value from 0 to 127, with 60 being middle-C on a
@@ -469,10 +469,10 @@ public enum Syscall implements SimulationCallback {
          */
         final var RANGE_LOW_END = 0;
         final var RANGE_HIGH_END = 127;
-        int pitch = ctxt.registerFile().getIntValue("a0");
-        int duration = ctxt.registerFile().getIntValue("a1");
-        int instrument = ctxt.registerFile().getIntValue("a2");
-        int volume = ctxt.registerFile().getIntValue("a3");
+        int pitch = ctxt.registerFile.getIntValue("a0");
+        int duration = ctxt.registerFile.getIntValue("a1");
+        int instrument = ctxt.registerFile.getIntValue("a2");
+        int volume = ctxt.registerFile.getIntValue("a3");
         if (pitch < RANGE_LOW_END || pitch > RANGE_HIGH_END) {
             pitch = ToneGenerator.DEFAULT_PITCH;
         }
@@ -495,21 +495,21 @@ public enum Syscall implements SimulationCallback {
          write-append (9). write-only flag creates file if it does not exist, so it is technically\
          write-create. write-append will start writing at end of existing file.""",
         "a0 = Null terminated string for the path \na1 = flags",
-        "a0 = the file decriptor or -1 if an error occurred", (stmt, ctxt) -> {
+        "a0 = the file decriptor or -1 if an error occurred", (ctxt, stmt) -> {
 
-        final int retValue = ctxt.io().openFile(
+        final int retValue = ctxt.io.openFile(
             NullString.get(stmt),
-            ctxt.registerFile().getIntValue("a1")
+            ctxt.registerFile.getIntValue("a1")
         );
         // set returned fd value in register
-        ctxt.registerFile().updateRegisterByName("a0", retValue);
+        ctxt.registerFile.updateRegisterByName("a0", retValue);
     }
     ),
     PrintChar(
         "PrintChar", 11, "Prints an ascii character",
-        "a0 = character to print (only lowest byte is considered)", "N/A", (stmt, ctxt) -> {
-        final char t = (char) (ctxt.registerFile().getIntValue("a0") & 0x000000ff);
-        ctxt.io().printString(Character.toString(t));
+        "a0 = character to print (only lowest byte is considered)", "N/A", (ctxt, stmt) -> {
+        final char t = (char) (ctxt.registerFile.getIntValue("a0") & 0x000000ff);
+        ctxt.io.printString(Character.toString(t));
     }
     ),
     PrintDouble(
@@ -518,16 +518,16 @@ public enum Syscall implements SimulationCallback {
         "Prints a double precision floating point number",
         "fa0 = double to print",
         "N/A",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
             // Note: Higher numbered reg contains high order word so concat 13-12.
-            ctxt.io()
-                .printString(Double.toString(Double.longBitsToDouble(ctxt.fpRegisterFile().fa0.getValue())));
+            ctxt.io
+                .printString(Double.toString(Double.longBitsToDouble(ctxt.fpRegisterFile.fa0.getValue())));
         }
     ),
     PrintFloat(
-        "PrintFloat", 2, "Prints a floating point number", "fa0 = float to print", "N/A", (stmt, ctxt) -> {
-        final var registerValue = ctxt.fpRegisterFile().getIntValue("fa0");
-        ctxt.io().printString(Float.toString(Float.intBitsToFloat(registerValue)));
+        "PrintFloat", 2, "Prints a floating point number", "fa0 = float to print", "N/A", (ctxt, stmt) -> {
+        final var registerValue = ctxt.fpRegisterFile.getIntValue("fa0");
+        ctxt.io.printString(Float.toString(Float.intBitsToFloat(registerValue)));
     }
     ),
     PrintInt(
@@ -536,7 +536,7 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer",
         "a0 = integer to print",
         "N/A",
-        (stmt, ctxt) -> ctxt.io().printString(Integer.toString(ctxt.registerFile().getIntValue("a0")))
+        (ctxt, stmt) -> ctxt.io.printString(Integer.toString(ctxt.registerFile.getIntValue("a0")))
     ),
     PrintIntBinary(
         "PrintIntBinary",
@@ -544,7 +544,7 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer (in binary format left-padded with zeroes) ",
         "a0 = integer to print",
         "N/A",
-        (stmt, ctxt) -> ctxt.io().printString(BinaryUtils.intToBinaryString(ctxt.registerFile().getIntValue("a0")))
+        (ctxt, stmt) -> ctxt.io.printString(BinaryUtils.intToBinaryString(ctxt.registerFile.getIntValue("a0")))
     ),
     PrintIntHex(
         "PrintIntHex",
@@ -552,7 +552,7 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer (in hexdecimal format left-padded with zeroes)",
         "a0 = integer to print",
         "N/A",
-        (stmt, ctxt) -> ctxt.io().printString(BinaryUtils.intToHexString(ctxt.registerFile().getIntValue("a0")))
+        (ctxt, stmt) -> ctxt.io.printString(BinaryUtils.intToHexString(ctxt.registerFile.getIntValue("a0")))
     ),
     PrintIntUnsigned(
         "PrintIntUnsigned",
@@ -560,24 +560,24 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer (unsigned)",
         "a0 = integer to print",
         "N/A",
-        (stmt, ctxt) -> ctxt.io().printString(
-            BinaryUtils.unsignedIntToIntString(ctxt.registerFile().getIntValue("a0")))
+        (ctxt, stmt) -> ctxt.io.printString(
+            BinaryUtils.unsignedIntToIntString(ctxt.registerFile.getIntValue("a0")))
     ),
     PrintString(
         "PrintString", 4, "Prints a null-terminated string to the console",
-        "a0 = the address of the string", "N/A", (stmt, ctxt) -> ctxt.io().printString(NullString.get(stmt))
+        "a0 = the address of the string", "N/A", (ctxt, stmt) -> ctxt.io.printString(NullString.get(stmt))
     ),
     RandDouble(
         "RandDouble", 44, "Get a random double from the range 0.0-1.0",
-        "a0 = index of pseudorandom number generator", "fa0 = the next pseudorandom", (stmt, ctxt) -> {
-        final Integer index = ctxt.registerFile().getIntValue("a0");
+        "a0 = index of pseudorandom number generator", "fa0 = the next pseudorandom", (ctxt, stmt) -> {
+        final Integer index = ctxt.registerFile.getIntValue("a0");
         Random stream = RandomStreams.randomStreams.get(index);
         if (stream == null) {
             stream = new Random(); // create a non-seeded stream
             RandomStreams.randomStreams.put(index, stream);
         }
         try {
-            ctxt.fpRegisterFile().updateRegisterByName("fa0", Double.doubleToRawLongBits(stream.nextDouble())
+            ctxt.fpRegisterFile.updateRegisterByName("fa0", Double.doubleToRawLongBits(stream.nextDouble())
             );
         } catch (rars.exceptions.SimulationException e) {
             throw new RuntimeException(e);
@@ -587,9 +587,9 @@ public enum Syscall implements SimulationCallback {
     ),
     RandFloat(
         "RandFloat", 43, "Get a random float", "a0 = index of pseudorandom number generator",
-        "fa0 = uniformly randomly selected from from [0,1]", (stmt, ctxt) -> {
+        "fa0 = uniformly randomly selected from from [0,1]", (ctxt, stmt) -> {
         final Random stream = RandomStreams.get("a0");
-        ctxt.fpRegisterFile().updateRegisterByNameInt(
+        ctxt.fpRegisterFile.updateRegisterByNameInt(
             "fa0",
             Float.floatToRawIntBits(stream.nextFloat())
         );
@@ -601,9 +601,9 @@ public enum Syscall implements SimulationCallback {
         "Get a random integer",
         "a0 = index of pseudorandom number generator",
         "a0 = random integer",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
             final Random stream = RandomStreams.get("a0");
-            ctxt.registerFile().updateRegisterByName("a0", stream.nextInt());
+            ctxt.registerFile.updateRegisterByName("a0", stream.nextInt());
         }
     ),
     RandIntRange(
@@ -611,10 +611,10 @@ public enum Syscall implements SimulationCallback {
         """
             a0 = index of pseudorandom number generator
             a1 = upper bound for random number""",
-        "a0 = uniformly selectect from [0,bound]", (stmt, ctxt) -> {
+        "a0 = uniformly selectect from [0,bound]", (ctxt, stmt) -> {
         final var stream = RandomStreams.get("a0");
         try {
-            ctxt.registerFile().updateRegisterByName("a0", stream.nextInt(ctxt.registerFile().getIntValue("a1")));
+            ctxt.registerFile.updateRegisterByName("a0", stream.nextInt(ctxt.registerFile.getIntValue("a1")));
         } catch (final IllegalArgumentException iae) {
             throw new ExitingException(
                 stmt,
@@ -627,13 +627,13 @@ public enum Syscall implements SimulationCallback {
         "RandSeed", 40, "Set seed for the underlying Java pseudorandom number generator",
         """
             a0 = index of pseudorandom number generator
-            a1 = the seed""", "N/A", (stmt, ctxt) -> {
-        final var index = ctxt.registerFile().getIntValue("a0");
+            a1 = the seed""", "N/A", (ctxt, stmt) -> {
+        final var index = ctxt.registerFile.getIntValue("a0");
         final Random stream = RandomStreams.randomStreams.get(index);
         if (stream == null) {
-            RandomStreams.randomStreams.put(index, new Random(ctxt.registerFile().getIntValue("a1")));
+            RandomStreams.randomStreams.put(index, new Random(ctxt.registerFile.getIntValue("a1")));
         } else {
-            stream.setSeed(ctxt.registerFile().getIntValue("a1"));
+            stream.setSeed(ctxt.registerFile.getIntValue("a1"));
         }
     }
     ),
@@ -643,25 +643,25 @@ public enum Syscall implements SimulationCallback {
             a0 = the file descriptor
             a1 = address of the buffer
             a2 = maximum length to read""",
-        "a0 = the length read or -1 if error", (stmt, ctxt) -> {
+        "a0 = the length read or -1 if error", (ctxt, stmt) -> {
 
-        int byteAddress = ctxt.registerFile().getIntValue("a1"); // destination of characters read from file
-        final int length = ctxt.registerFile().getIntValue("a2");
+        int byteAddress = ctxt.registerFile.getIntValue("a1"); // destination of characters read from file
+        final int length = ctxt.registerFile.getIntValue("a2");
         final byte[] myBuffer = new byte[length]; // specified length
         // Call to ctxt.io().xxxx.read(xxx,xxx,xxx) returns actual length
-        final int retLength = ctxt.io().readFromFile(
-            ctxt.registerFile().getIntValue("a0"), // fd
+        final int retLength = ctxt.io.readFromFile(
+            ctxt.registerFile.getIntValue("a0"), // fd
             myBuffer, // buffer
             length
         ); // length
         // set returned value in register
-        ctxt.registerFile().updateRegisterByName("a0", retLength);
+        ctxt.registerFile.updateRegisterByName("a0", retLength);
 
         // copy bytes from returned buffer into memory
         try {
             int index = 0;
             while (index < retLength) {
-                ctxt.memory().setByte(
+                ctxt.memory.setByte(
                     byteAddress++,
                     myBuffer[index++]
                 );
@@ -672,9 +672,9 @@ public enum Syscall implements SimulationCallback {
     }
     ),
     ReadChar(
-        "ReadChar", 12, "Reads a character from input console", "N/A", "a0 = the character", (stmt, ctxt) -> {
+        "ReadChar", 12, "Reads a character from input console", "N/A", "a0 = the character", (ctxt, stmt) -> {
         try {
-            ctxt.registerFile().updateRegisterByName("a0", ctxt.io().readChar());
+            ctxt.registerFile.updateRegisterByName("a0", ctxt.io.readChar());
         } catch (final IndexOutOfBoundsException e) {
             throw new ExitingException(
                 stmt,
@@ -689,10 +689,10 @@ public enum Syscall implements SimulationCallback {
         "Reads a double from input console",
         "N/A",
         "fa0 = the double",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
             final double doubleValue;
             try {
-                doubleValue = ctxt.io().readDouble();
+                doubleValue = ctxt.io.readDouble();
             } catch (final NumberFormatException e) {
                 throw new ExitingException(
                     stmt,
@@ -700,21 +700,21 @@ public enum Syscall implements SimulationCallback {
                 );
             }
 
-            ctxt.fpRegisterFile().updateRegisterByNumber(10, Double.doubleToRawLongBits(doubleValue));
+            ctxt.fpRegisterFile.updateRegisterByNumber(10, Double.doubleToRawLongBits(doubleValue));
         }
     ),
     ReadFloat(
-        "ReadFloat", 6, "Reads a float from input console", "N/A", "fa0 = the float", (stmt, ctxt) -> {
+        "ReadFloat", 6, "Reads a float from input console", "N/A", "fa0 = the float", (ctxt, stmt) -> {
         final float floatValue;
         try {
-            floatValue = ctxt.io().readFloat();
+            floatValue = ctxt.io.readFloat();
         } catch (final NumberFormatException e) {
             throw new ExitingException(
                 stmt,
                 "invalid float input (syscall 6)"
             );
         }
-        ctxt.fpRegisterFile().updateRegisterByNumberInt(
+        ctxt.fpRegisterFile.updateRegisterByNumberInt(
             10,
             Float.floatToRawIntBits(floatValue)
         ); // TODO: update to string fa0
@@ -726,9 +726,9 @@ public enum Syscall implements SimulationCallback {
         "Reads an int from input console",
         "N/A",
         "a0 = the int",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
             try {
-                ctxt.registerFile().updateRegisterByName("a0", ctxt.io().readInt());
+                ctxt.registerFile.updateRegisterByName("a0", ctxt.io.readInt());
             } catch (final NumberFormatException e) {
                 throw new ExitingException(
                     stmt,
@@ -751,33 +751,33 @@ public enum Syscall implements SimulationCallback {
         "ReadString", 8, "Reads a string from the console",
         """
             a0 = address of input buffer
-            a1 = maximum number of characters to read""", "N/A", (stmt, ctxt) -> {
-        final int buf = ctxt.registerFile().getIntValue("a0"); // buf addr
-        int maxLength = ctxt.registerFile().getIntValue("a1") - 1;
+            a1 = maximum number of characters to read""", "N/A", (ctxt, stmt) -> {
+        final int buf = ctxt.registerFile.getIntValue("a0"); // buf addr
+        int maxLength = ctxt.registerFile.getIntValue("a1") - 1;
         boolean addNullByte = true;
         // Guard against negative maxLength. DPS 13-July-2011
         if (maxLength < 0) {
             maxLength = 0;
             addNullByte = false;
         }
-        final String inputString = ctxt.io().readString(maxLength);
+        final String inputString = ctxt.io.readString(maxLength);
 
         final byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
         // TODO: allow for utf-8 encoded strings
         int stringLength = Math.min(maxLength, utf8BytesList.length);
         try {
             for (int index = 0; index < stringLength; index++) {
-                ctxt.memory().setByte(
+                ctxt.memory.setByte(
                     buf + index,
                     utf8BytesList[index]
                 );
             }
             if (stringLength < maxLength) {
-                ctxt.memory().setByte(buf + stringLength, '\n');
+                ctxt.memory.setByte(buf + stringLength, '\n');
                 stringLength++;
             }
             if (addNullByte) {
-                ctxt.memory().setByte(buf + stringLength, 0);
+                ctxt.memory.setByte(buf + stringLength, 0);
             }
         } catch (final AddressErrorException e) {
             throw new ExitingException(stmt, e);
@@ -790,11 +790,11 @@ public enum Syscall implements SimulationCallback {
         "Allocate heap memory",
         "a0 = amount of memory in bytes",
         "a0 = address to the allocated block",
-        (stmt, ctxt) -> {
+        (ctxt, stmt) -> {
             try {
-                ctxt.registerFile().updateRegisterByName(
+                ctxt.registerFile.updateRegisterByName(
                     "a0",
-                    ctxt.memory().allocateBytesFromHeap(ctxt.registerFile().getIntValue("a0"))
+                    ctxt.memory.allocateBytesFromHeap(ctxt.registerFile.getIntValue("a0"))
                 );
             } catch (final IllegalArgumentException iae) {
                 throw new ExitingException(
@@ -806,10 +806,10 @@ public enum Syscall implements SimulationCallback {
     ),
     Sleep(
         "Sleep", 32, "Set the current thread to sleep for a time (not precise)", "a0 = time to sleep in milliseconds",
-        "N/A", (stmt, ctxt) -> {
+        "N/A", (ctxt, stmt) -> {
 
         try {
-            Thread.sleep(ctxt.registerFile().getIntValue("a0"));
+            Thread.sleep(ctxt.registerFile.getIntValue("a0"));
         } catch (final InterruptedException ignored) {
         }
     }
@@ -818,10 +818,10 @@ public enum Syscall implements SimulationCallback {
         "Time", 30, "Get the current time (milliseconds since 1 January 1970)", "N/A",
         """
             a0 = low order 32 bits
-            a1=high order 32 bits""", (stmt, ctxt) -> {
+            a1=high order 32 bits""", (ctxt, stmt) -> {
         final var time = System.currentTimeMillis();
-        ctxt.registerFile().updateRegisterByName("a0", BinaryUtils.lowOrderLongToInt(time));
-        ctxt.registerFile().updateRegisterByName("a1", BinaryUtils.highOrderLongToInt(time));
+        ctxt.registerFile.updateRegisterByName("a0", BinaryUtils.lowOrderLongToInt(time));
+        ctxt.registerFile.updateRegisterByName("a1", BinaryUtils.highOrderLongToInt(time));
     }
     ),
     Write(
@@ -831,10 +831,10 @@ public enum Syscall implements SimulationCallback {
             a0 = the file descriptor
             a1 = the buffer address
             a2 = the length to write""",
-        "a0 = the number of characters written", (stmt, ctxt) -> {
+        "a0 = the number of characters written", (ctxt, stmt) -> {
 
-        final var registerFile = ctxt.registerFile();
-        final var memory = ctxt.memory();
+        final var registerFile = ctxt.registerFile;
+        final var memory = ctxt.memory;
         int byteAddress = registerFile.getIntValue("a1"); // source of characters to write to file
         final int reqLength = registerFile.getIntValue("a2"); // user-requested length
         if (reqLength < 0) {
@@ -854,7 +854,7 @@ public enum Syscall implements SimulationCallback {
         } catch (final AddressErrorException e) {
             throw new ExitingException(stmt, e);
         }
-        final int retValue = ctxt.io().writeToFile(
+        final int retValue = ctxt.io.writeToFile(
             registerFile.getIntValue("a0"), // fd
             myBuffer, // buffer
             registerFile.getIntValue("a2")
@@ -941,10 +941,9 @@ public enum Syscall implements SimulationCallback {
     }
 
     @Override
-    public void simulate(
-        final @NotNull ProgramStatement statement,
-        final @NotNull SimulationContext context
+    public void simulateImpl(
+        final @NotNull SimulationContext context, final @NotNull ProgramStatement statement
     ) throws SimulationException {
-        this.callback.simulate(statement, context);
+        this.callback.simulateImpl(context, statement);
     }
 }

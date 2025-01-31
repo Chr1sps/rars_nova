@@ -122,7 +122,7 @@ public final class VenusUI extends JFrame {
      * @param files
      *     Files to open
      */
-    public VenusUI(final @NotNull String name, final @NotNull List<@NotNull File> files) {
+    public VenusUI(final @NotNull String name, final @NotNull List<? extends @NotNull File> files) {
         super(name);
         this.setInitialDarkModeState(BOOL_SETTINGS.getSetting(BoolSetting.DARK_MODE));
         this.editor = new Editor(this);

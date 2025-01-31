@@ -53,14 +53,14 @@ public abstract class Store extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
             store(
-                context.registerFile().getIntValue(statement.getOperand(2)) + upperImmediate,
-                context.registerFile().getLongValue(statement.getOperand(0)),
-                context.memory()
+                context.registerFile.getIntValue(statement.getOperand(2)) + upperImmediate,
+                context.registerFile.getLongValue(statement.getOperand(0)),
+                context.memory
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(

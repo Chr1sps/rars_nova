@@ -48,15 +48,15 @@ public final class FEQS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
-        final Float32 f1 = Floating.getFloat(context.fpRegisterFile(), statement.getOperand(1));
-        final Float32 f2 = Floating.getFloat(context.fpRegisterFile(), statement.getOperand(2));
+        final Float32 f1 = Floating.getFloat(context.fpRegisterFile, statement.getOperand(1));
+        final Float32 f2 = Floating.getFloat(context.fpRegisterFile, statement.getOperand(2));
         final Environment e = new Environment();
         final boolean result = Comparisons.compareQuietEqual(f1, f2, e);
-        Floating.setfflags(context.csrRegisterFile(), e);
+        Floating.setfflags(context.csrRegisterFile, e);
         final long newValue = result ? 1 : 0;
-        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
+        context.registerFile.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

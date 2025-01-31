@@ -46,14 +46,14 @@ public final class FSW extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            context.memory().setWord(
-                context.registerFile().getIntValue(statement.getOperand(2)) + upperImmediate,
+            context.memory.setWord(
+                context.registerFile.getIntValue(statement.getOperand(2)) + upperImmediate,
                 // not `getIntValue` because we want the lower 32 bits
-                (int) context.fpRegisterFile().getLongValue(statement.getOperand(0)).longValue()
+                (int) context.fpRegisterFile.getLongValue(statement.getOperand(0)).longValue()
             );
         } catch (final AddressErrorException e) {
             throw new SimulationException(statement, e);

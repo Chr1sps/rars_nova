@@ -66,9 +66,9 @@ public final class ECALL extends BasicInstruction {
                 default -> false;
             };
             if (!isWriting) {
-                context.io().flush();
+                context.io.flush();
             }
-            syscall.simulate(statement, context);
+            syscall.simulateImpl(context, statement);
             return;
         }
         throw new SimulationException(
@@ -79,10 +79,10 @@ public final class ECALL extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         findAndSimulateSyscall(
-            context.registerFile().getIntValue("a7"),
+            context.registerFile.getIntValue("a7"),
             statement,
             context
         );

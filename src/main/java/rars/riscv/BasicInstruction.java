@@ -67,7 +67,7 @@ public abstract non-sealed class BasicInstruction extends Instruction implements
      */
     protected BasicInstruction(
         final @NotNull String example,
-        final String description,
+        final @NotNull String description,
         final @NotNull BasicInstructionFormat instrFormat,
         final @NotNull String operMask
     ) {

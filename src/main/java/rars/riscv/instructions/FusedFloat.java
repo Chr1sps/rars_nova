@@ -45,18 +45,18 @@ public abstract class FusedFloat extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement, context.csrRegisterFile());
+        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement, context.csrRegisterFile);
         final Float32 result = compute(
-            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1))),
-            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(2))),
-            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(3))), e
+            new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(1))),
+            new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(2))),
+            new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(3))), e
         );
-        Floating.setfflags(context.csrRegisterFile(), e);
-        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), result.bits);
+        Floating.setfflags(context.csrRegisterFile, e);
+        context.fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
     }
 
     protected abstract @NotNull Float32 compute(

@@ -46,11 +46,11 @@ public final class SRLI32 extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         // Uses >>> because 0 fill
-        final long newValue = context.registerFile().getIntValue(statement.getOperand(1)) >>> statement.getOperand(2);
-        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
+        final long newValue = context.registerFile.getIntValue(statement.getOperand(1)) >>> statement.getOperand(2);
+        context.registerFile.updateRegisterByNumber(statement.getOperand(0), newValue);
 
     }
 }

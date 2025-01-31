@@ -21,11 +21,11 @@ public final class FSGNJXD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        final var f2 = context.fpRegisterFile().getLongValue(statement.getOperand(1));
-        final var f3 = context.fpRegisterFile().getLongValue(statement.getOperand(2));
+        final var f2 = context.fpRegisterFile.getLongValue(statement.getOperand(1));
+        final var f3 = context.fpRegisterFile.getLongValue(statement.getOperand(2));
         final var result = (f2 & 0x7FFFFFFF_FFFFFFFFL) | ((f2 ^ f3) & 0x80000000_00000000L);
-        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), result);
+        context.fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result);
     }
 }

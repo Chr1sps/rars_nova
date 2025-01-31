@@ -21,14 +21,14 @@ public final class FCVTWUD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
         final var environment = new Environment();
-        environment.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
-        final var input = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1)));
+        environment.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile);
+        final var input = new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(1)));
         final var output = Conversions.convertToUnsignedInt(input, environment, false);
-        Floating.setfflags(context.csrRegisterFile(), environment);
-        context.registerFile().updateRegisterByNumber(statement.getOperand(0), output);
+        Floating.setfflags(context.csrRegisterFile, environment);
+        context.registerFile.updateRegisterByNumber(statement.getOperand(0), output);
     }
 }

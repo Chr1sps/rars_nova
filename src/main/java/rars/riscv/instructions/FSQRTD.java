@@ -21,13 +21,13 @@ public final class FSQRTD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile);
         final Float64 result = Arithmetic
-            .squareRoot(new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1))), e);
-        Floating.setfflags(context.csrRegisterFile(), e);
-        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), result.bits);
+            .squareRoot(new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(1))), e);
+        Floating.setfflags(context.csrRegisterFile, e);
+        context.fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result.bits);
     }
 }

@@ -25,19 +25,19 @@ public abstract class Double extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final var environment = new Environment();
         final var hasRoundingMode = statement.hasOperand(3);
         if (hasRoundingMode) {
-            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement, context.csrRegisterFile());
+            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement, context.csrRegisterFile);
         }
         final Float64 result = compute(
-            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1))),
-            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(2))), environment
+            new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(1))),
+            new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(2))), environment
         );
-        Floating.setfflags(context.csrRegisterFile(), environment);
-        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), result.bits);
+        Floating.setfflags(context.csrRegisterFile, environment);
+        context.fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result.bits);
     }
 
     public abstract @NotNull Float64 compute(@NotNull Float64 f1, @NotNull Float64 f2, @NotNull Environment e);

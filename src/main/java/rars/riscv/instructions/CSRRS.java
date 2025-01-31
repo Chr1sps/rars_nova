@@ -46,9 +46,9 @@ public final class CSRRS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        final var csr = context.csrRegisterFile().getLongValue(statement.getOperand(1));
+        final var csr = context.csrRegisterFile.getLongValue(statement.getOperand(1));
         if (csr == null) {
             throw new SimulationException(
                 statement,
@@ -57,13 +57,13 @@ public final class CSRRS extends BasicInstruction {
             );
         }
         if (statement.getOperand(2) != 0) {
-            final var previousValue = context.csrRegisterFile().getLongValue(statement.getOperand(1));
-            context.csrRegisterFile().updateRegisterByNumber(
+            final var previousValue = context.csrRegisterFile.getLongValue(statement.getOperand(1));
+            context.csrRegisterFile.updateRegisterByNumber(
                 statement.getOperand(1),
-                previousValue | context.registerFile().getLongValue(statement.getOperand(2))
+                previousValue | context.registerFile.getLongValue(statement.getOperand(2))
             );
         }
-        context.registerFile().updateRegisterByNumber(statement.getOperand(0), csr);
+        context.registerFile.updateRegisterByNumber(statement.getOperand(0), csr);
 
     }
 }

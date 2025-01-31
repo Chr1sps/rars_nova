@@ -1,87 +1,59 @@
-package rars.extras;
+@file:Suppress("ReplacePrintlnWithLogging")
 
-import org.jetbrains.annotations.NotNull;
-import rars.assembler.Directive;
-import rars.riscv.Instruction;
-import rars.riscv.Syscall;
+package rars.extras
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-
-import static rars.riscv.InstructionsRegistry.BASIC_INSTRUCTIONS;
-import static rars.riscv.InstructionsRegistry.EXTENDED_INSTRUCTIONS;
+import rars.assembler.Directive
+import rars.riscv.Instruction
+import rars.riscv.InstructionsRegistry
+import rars.riscv.Syscall
 
 /**
- * Small class for automatically generating documentation.
- * <p>
- * Currently it makes some Markdown tables, but in the future it could do
- * something
+ * Small file for automatically generating documentation.
+ *
+ * Currently, it makes some Markdown tables, but in the future it could do something
  * with javadocs or generate a website with all the help information
  */
-@SuppressWarnings("UseOfSystemOutOrSystemErr")
-public final class Documentation {
+fun main() {
+    println(createDirectiveMarkdown())
+    println(createSyscallMarkdown())
+    println(createInstructionMarkdown(InstructionsRegistry.BASIC_INSTRUCTIONS.r32All))
+    println(createInstructionMarkdown(InstructionsRegistry.BASIC_INSTRUCTIONS.r64Only))
+    println(createInstructionMarkdown(InstructionsRegistry.EXTENDED_INSTRUCTIONS.r32All))
+    println(createInstructionMarkdown(InstructionsRegistry.EXTENDED_INSTRUCTIONS.r64Only))
+}
 
-    private Documentation() {
+private fun createDirectiveMarkdown(): String = buildString {
+    append(
+        """
+        | Name | Description|
+        |------|------------|
+        """.trimIndent()
+    )
+    Directive.entries.sortedBy { it.name }.forEach {
+        append("\n|${it.name}|${it.description}|")
     }
+}
 
-    public static void main(final String[] args) {
-        System.out.println(createDirectiveMarkdown());
-        System.out.println(createSyscallMarkdown());
-        System.out.println(createInstructionMarkdown(BASIC_INSTRUCTIONS.r32All));
-        System.out.println(createInstructionMarkdown(BASIC_INSTRUCTIONS.r64Only));
-        System.out.println(createInstructionMarkdown(EXTENDED_INSTRUCTIONS.r32All));
-        System.out.println(createInstructionMarkdown(EXTENDED_INSTRUCTIONS.r64Only));
+private fun createSyscallMarkdown(): String = buildString {
+    append(
+        """
+        | Name | Call Number (a7) | Description | Inputs | Outputs |
+        |------|------------------|-------------|--------|---------|
+        """.trimIndent()
+    )
+    Syscall.entries.sortedBy { it.serviceName }.forEach {
+        append("\n|${it.serviceName}|${it.serviceNumber}|${it.description}|${it.inputs}|${it.outputs}|")
     }
+}
 
-    private static @NotNull String createDirectiveMarkdown() {
-        final var sortedDirectives = Arrays
-            .stream(Directive.values())
-            .sorted(Comparator.comparing(
-                Directive::getName
-            )).toList();
-        final var builder = new StringBuilder("""
-            | Name | Description|
-            |------|------------|""");
-        for (final var directive : sortedDirectives) {
-            builder.append("\n|%s|%s|".formatted(
-                directive.getName(),
-                directive.getDescription()
-            ));
-        }
-        return builder.toString();
-    }
-
-    private static @NotNull String createSyscallMarkdown() {
-        final var sorted = Arrays.stream(Syscall.values()).sorted().toList();
-        final var builder = new StringBuilder(
-            """
-                | Name | Call Number (a7) | Description | Inputs | Outputs |
-                |------|------------------|-------------|--------|---------|""");
-        for (final var syscall : sorted) {
-            builder.append("\n|%s|%s|%s|%s|%s|".formatted(
-                syscall.serviceName,
-                syscall.serviceNumber,
-                syscall.description,
-                syscall.inputs,
-                syscall.outputs
-            ));
-        }
-
-        return builder.toString();
-    }
-
-    private static @NotNull String createInstructionMarkdown(final @NotNull List<? extends Instruction> instructionList) {
-        final var sorted = instructionList
-            .stream()
-            .sorted(Comparator.comparing(instruction -> instruction.exampleFormat))
-            .toList();
-        final StringBuilder output = new StringBuilder("""
-            | Example Usage | Description |
-            |---------------|-------------|""");
-        for (final var instr : sorted) {
-            output.append("\n|%s|%s|".formatted(instr.exampleFormat, instr.description));
-        }
-        return output.toString();
+private fun createInstructionMarkdown(instructionList: MutableList<out Instruction>): String = buildString {
+    append(
+        """
+        | Example Usage | Description |
+        |---------------|-------------|
+        """.trimIndent()
+    )
+    instructionList.sortedBy { it.exampleFormat }.forEach {
+        append("\n|${it.exampleFormat}|${it.description}|")
     }
 }
