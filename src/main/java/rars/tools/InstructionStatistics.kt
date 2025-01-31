@@ -25,242 +25,135 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-package rars.tools;
+package rars.tools
 
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.ProgramStatement;
-import rars.exceptions.AddressErrorException;
-import rars.notices.AccessNotice;
-import rars.notices.MemoryAccessNotice;
-import rars.riscv.Instruction;
-import rars.riscv.instructions.*;
-import rars.venus.VenusUI;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.Arrays;
+import rars.Globals
+import rars.exceptions.AddressErrorException
+import rars.notices.AccessNotice
+import rars.notices.MemoryAccessNotice
+import rars.riscv.Instruction
+import rars.riscv.instructions.*
+import rars.venus.VenusUI
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.Insets
+import java.util.*
+import javax.swing.*
 
 /**
  * A RARS tool for obtaining instruction statistics by instruction category.
- * <p>
+ *
+ *
  * The code of this tools is initially based on the Instruction counter tool by
  * Felipe Lassa.
  *
  * @author Ingo Kofler &lt;ingo.kofler@itec.uni-klu.ac.at&gt;
  */
-public final class InstructionStatistics extends AbstractTool {
+class InstructionStatistics(mainUI: VenusUI) : AbstractTool("$NAME, Version 1.0 (Ingo Kofler)", "", mainUI) {
+    /** array of counter variables - one for each instruction category */
+    private val counters = IntArray(InstructionCategory.count)
 
-    /**
-     * name of the tool
-     */
-    private static final String NAME = "Instruction Statistics";
+    /** names of the instruction categories as array */
+    private val categoryLabels = arrayOf("ALU", "Jump", "Branch", "Memory", "Other")
 
-    /**
-     * version and author information of the tool
-     */
-    private static final String VERSION = "Version 1.0 (Ingo Kofler)";
-
-    /**
-     * heading of the tool
-     */
-    private static final String HEADING = "";
-
-    /**
-     * number of instruction categories used by this tool
-     */
-    private static final int MAX_CATEGORY = 5;
-
-    /**
-     * constant for ALU instructions category
-     */
-    private static final int CATEGORY_ALU = 0;
-
-    /**
-     * constant for jump instructions category
-     */
-    private static final int CATEGORY_JUMP = 1;
-
-    /**
-     * constant for branch instructions category
-     */
-    private static final int CATEGORY_BRANCH = 2;
-
-    /**
-     * constant for memory instructions category
-     */
-    private static final int CATEGORY_MEM = 3;
-
-    /**
-     * constant for any other instruction category
-     */
-    private static final int CATEGORY_OTHER = 4;
-    /**
-     * array of counter variables - one for each instruction category
-     */
-    private final int[] m_counters = new int[InstructionStatistics.MAX_CATEGORY];
-    /**
-     * names of the instruction categories as array
-     */
-    private final String[] m_categoryLabels = {"ALU", "Jump", "Branch", "Memory", "Other"};
     /**
      * The last address we saw. We ignore it because the only way for a
      * program to execute twice the same instruction is to enter an infinite
      * loop, which is not insteresting in the POV of counting instructions.
      */
-    protected int lastAddress = -1;
-    /**
-     * text field for visualizing the total number of instructions processed
-     */
-    private JTextField m_tfTotalCounter;
-    /**
-     * array of text field - one for each instruction category
-     */
-    private JTextField[] m_tfCounters;
-    /**
-     * array of progress pars - one for each instruction category
-     */
-    private JProgressBar[] m_pbCounters;
+    private var lastAddress: Int = -1
+
+    /** text field for visualizing the total number of instructions processed */
+    private lateinit var tfTotalCounter: JTextField
+
+    /** array of text field - one for each instruction category */
+    private lateinit var tfCounters: List<JTextField>
+
+    /** array of progress pars - one for each instruction category */
+    private lateinit var pbCounters: List<JProgressBar>
 
     // From Felipe Lessa's instruction counter. Prevent double-counting of
     // instructions
     // which happens because 2 read events are generated.
-    /**
-     * counter for the total number of instructions processed
-     */
-    private int m_totalCounter = 0;
+    /** counter for the total number of instructions processed */
+    private var totalCounter = 0
 
-    /**
-     * Simple construction, likely used by the RARS Tools menu mechanism.
-     */
-    public InstructionStatistics(final @NotNull VenusUI mainUI) {
-        super(InstructionStatistics.NAME + ", " + InstructionStatistics.VERSION, InstructionStatistics.HEADING, mainUI);
-    }
-
-    /**
-     * decodes the instruction and determines the category of the instruction.
-     * <p>
-     * The instruction is decoded by checking the java instance of the instruction.
-     * Only the most relevant instructions are decoded and categorized.
-     *
-     * @param instruction
-     *     the instruction to decode
-     * @return the category of the instruction
-     * @author Giancarlo Pernudi Segura
-     * @see InstructionStatistics#CATEGORY_ALU
-     * @see InstructionStatistics#CATEGORY_JUMP
-     * @see InstructionStatistics#CATEGORY_BRANCH
-     * @see InstructionStatistics#CATEGORY_MEM
-     * @see InstructionStatistics#CATEGORY_OTHER
-     */
-    protected static int getInstructionCategory(final Instruction instruction) {
-        if (instruction instanceof Arithmetic || instruction instanceof ArithmeticW) {
-            return InstructionStatistics.CATEGORY_ALU; // add, addw, sub, subw, and, or, xor, slt, sltu, m extension
-        }
-        if (instruction instanceof ADDI || instruction instanceof ADDIW || instruction instanceof ANDI
-            || instruction instanceof ORI || instruction instanceof XORI
-            || instruction instanceof SLTI || instruction instanceof SLTIU
-            || instruction instanceof LUI || instruction instanceof AUIPC) {
-            return InstructionStatistics.CATEGORY_ALU; // addi, addiw, andi, ori, xori, slti, sltiu, lui, auipc
-        }
-        if (instruction instanceof SLLI32 || instruction instanceof SLLIW) {
-            return InstructionStatistics.CATEGORY_ALU; // slli, slliw
-        }
-        if (instruction instanceof SRLI32 || instruction instanceof SRLIW) {
-            return InstructionStatistics.CATEGORY_ALU; // srli, srliw
-        }
-        if (instruction instanceof SRAI32 || instruction instanceof SRAIW) {
-            return InstructionStatistics.CATEGORY_ALU; // srai, sraiw
-        }
-        if (instruction instanceof JAL || instruction instanceof JALR) {
-            return InstructionStatistics.CATEGORY_JUMP; // jal, jalr
-        }
-        if (instruction instanceof Branch) {
-            return InstructionStatistics.CATEGORY_BRANCH; // beq, bge, bgeu, blt, bltu, bne
-        }
-        if (instruction instanceof Load) {
-            return InstructionStatistics.CATEGORY_MEM; // lb, lh, lwl, lw, lbu, lhu, lwr
-        }
-        if (instruction instanceof Store) {
-            return InstructionStatistics.CATEGORY_MEM; // sb, sh, swl, sw, swr
-        }
-
-        return InstructionStatistics.CATEGORY_OTHER;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getName() {
-        return InstructionStatistics.NAME;
-    }
+    override fun getName(): String = NAME
 
     /**
      * creates the display area for the tool as required by the API
      *
      * @return a panel that holds the GUI of the tool
      */
-    @Override
-    protected JComponent buildMainDisplayArea() {
-
+    override fun buildMainDisplayArea(): JComponent {
         // Create GUI elements for the tool
-        final JPanel panel = new JPanel(new GridBagLayout());
 
-        this.m_tfTotalCounter = new JTextField("0", 10);
-        this.m_tfTotalCounter.setEditable(false);
+        val panel = JPanel(GridBagLayout())
 
-        this.m_tfCounters = new JTextField[InstructionStatistics.MAX_CATEGORY];
-        this.m_pbCounters = new JProgressBar[InstructionStatistics.MAX_CATEGORY];
+        this.tfTotalCounter = JTextField("0", 10)
+        this.tfTotalCounter.isEditable = false
 
-        // for each category a text field and a progress bar is created
-        for (int i = 0; i < InstructionStatistics.MAX_CATEGORY; i++) {
-            this.m_tfCounters[i] = new JTextField("0", 10);
-            this.m_tfCounters[i].setEditable(false);
-            this.m_pbCounters[i] = new JProgressBar(JProgressBar.HORIZONTAL);
-            this.m_pbCounters[i].setStringPainted(true);
+
+//        this.pbCounters = arrayOfNulls<JProgressBar>(InstructionCategory.count)
+
+        this.tfCounters = buildList {
+            InstructionCategory.entries.forEach {
+                add(JTextField("0", 10).apply {
+                    isEditable = false
+                })
+            }
+        }
+        this.pbCounters = buildList {
+            InstructionCategory.entries.forEach {
+                add(JProgressBar(JProgressBar.HORIZONTAL).apply {
+                    setStringPainted(true)
+                })
+            }
         }
 
-        final GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.LINE_START;
-        c.gridheight = c.gridwidth = 1;
+        val c = GridBagConstraints()
+        c.anchor = GridBagConstraints.LINE_START
+        c.gridwidth = 1
+        c.gridheight = c.gridwidth
 
         // create the label and text field for the total instruction counter
-        c.gridx = 2;
-        c.gridy = 1;
-        c.insets = new Insets(0, 0, 17, 0);
-        panel.add(new JLabel("Total: "), c);
-        c.gridx = 3;
-        panel.add(this.m_tfTotalCounter, c);
+        c.apply {
+            gridx = 1
+            gridy = 1
+            insets = Insets(0, 0, 17, 0)
+        }
+        panel.add(JLabel("Total: "), c)
+        c.gridx = 3
+        panel.add(this.tfTotalCounter, c)
 
-        c.insets = new Insets(3, 3, 3, 3);
+        c.insets = Insets(3, 3, 3, 3)
 
         // create label, text field and progress bar for each category
-        for (int i = 0; i < InstructionStatistics.MAX_CATEGORY; i++) {
-            c.gridy++;
-            c.gridx = 2;
-            panel.add(new JLabel(this.m_categoryLabels[i] + ":   "), c);
-            c.gridx = 3;
-            panel.add(this.m_tfCounters[i], c);
-            c.gridx = 4;
-            panel.add(this.m_pbCounters[i], c);
+        for (i in 0..<InstructionCategory.count) {
+            c.gridy++
+            c.gridx = 2
+            panel.add(JLabel(this.categoryLabels[i] + ":   "), c)
+            c.gridx = 3
+            panel.add(this.tfCounters[i], c)
+            c.gridx = 4
+            panel.add(this.pbCounters[i], c)
         }
 
-        return panel;
+        return panel
     }
 
     /**
      * registers the tool as observer for the text segment of the program
      */
-    @Override
-    protected void addAsObserver() {
-        final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
+    override fun addAsObserver() {
+        val memoryConfiguration = Globals.MEMORY_INSTANCE.memoryConfiguration
+        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress)
     }
 
     /**
      * {@inheritDoc}
-     * <p>
+     *
+     *
      * method that is called each time the simulator accesses the text segment.
      * Before an instruction is executed by the simulator, the instruction is
      * fetched from the program memory.
@@ -269,42 +162,40 @@ public final class InstructionStatistics extends AbstractTool {
      * According to the category the counter values are increased and the display
      * gets updated.
      */
-    @Override
-    protected void processRISCVUpdate(final AccessNotice notice) {
-
+    override fun processRISCVUpdate(notice: AccessNotice) {
         if (!notice.isAccessFromRISCV) {
-            return;
+            return
         }
 
         // check for a read access in the text segment
-        if (notice.accessType == AccessNotice.AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
-
+        if (notice.accessType == AccessNotice.AccessType.READ && notice is MemoryAccessNotice) {
             // now it is safe to make a cast of the notice
 
             // The next three statments are from Felipe Lessa's instruction counter.
             // Prevents double-counting.
-            final int a = memAccNotice.address;
+
+            val a = notice.address
             if (a == this.lastAddress) {
-                return;
+                return
             }
-            this.lastAddress = a;
+            this.lastAddress = a
 
             try {
-
                 // access the statement in the text segment without notifying other tools etc.
-                final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatementNoNotify(memAccNotice.address);
+
+                val stmt = Globals.MEMORY_INSTANCE.getStatementNoNotify(notice.address)
 
                 // necessary to handle possible null pointers at the end of the program
                 // (e.g., if the simulator tries to execute the next instruction after the last
                 // instruction in the text segment)
                 if (stmt != null) {
-                    final int category = InstructionStatistics.getInstructionCategory(stmt.getInstruction());
+                    val category = stmt.instruction!!.getInstructionCategory()
 
-                    this.m_totalCounter++;
-                    this.m_counters[category]++;
-                    this.updateDisplay();
+                    this.totalCounter++
+                    this.counters[category.ordinal]++
+                    this.updateDisplay()
                 }
-            } catch (final AddressErrorException e) {
+            } catch (_: AddressErrorException) {
                 // silently ignore these exceptions
             }
         }
@@ -313,36 +204,80 @@ public final class InstructionStatistics extends AbstractTool {
     /**
      * performs initialization tasks of the counters before the GUI is created.
      */
-    @Override
-    protected void initializePreGUI() {
-        this.m_totalCounter = 0;
-        this.lastAddress = -1; // from Felipe Lessa's instruction counter tool
-        Arrays.fill(this.m_counters, 0);
+    override fun initializePreGUI() {
+        this.totalCounter = 0
+        this.lastAddress = -1 // from Felipe Lessa's instruction counter tool
+        Arrays.fill(this.counters, 0)
     }
 
     /**
      * resets the counter values of the tool and updates the display.
      */
-    @Override
-    protected void reset() {
-        this.m_totalCounter = 0;
-        this.lastAddress = -1; // from Felipe Lessa's instruction counter tool
-        Arrays.fill(this.m_counters, 0);
-        this.updateDisplay();
+    override fun reset() {
+        this.totalCounter = 0
+        this.lastAddress = -1 // from Felipe Lessa's instruction counter tool
+        Arrays.fill(this.counters, 0)
+        this.updateDisplay()
     }
 
     /**
      * updates the text fields and progress bars according to the current counter
      * values.
      */
-    @Override
-    protected void updateDisplay() {
-        this.m_tfTotalCounter.setText(String.valueOf(this.m_totalCounter));
+    override fun updateDisplay() {
+        this.tfTotalCounter.text = this.totalCounter.toString()
 
-        for (int i = 0; i < InstructionStatistics.MAX_CATEGORY; i++) {
-            this.m_tfCounters[i].setText(String.valueOf(this.m_counters[i]));
-            this.m_pbCounters[i].setMaximum(this.m_totalCounter);
-            this.m_pbCounters[i].setValue(this.m_counters[i]);
+        for (i in 0..<InstructionCategory.count) {
+            this.tfCounters[i].text = this.counters[i].toString()
+            this.pbCounters[i].maximum = this.totalCounter
+            this.pbCounters[i].setValue(this.counters[i])
+        }
+    }
+
+    enum class InstructionCategory {
+        ALU, JUMP, BRANCH, MEM, OTHER;
+
+        companion object {
+            val count = entries.size
+        }
+    }
+
+    companion object {
+        /** name of the tool */
+        private const val NAME = "Instruction Statistics"
+
+        /**
+         * decodes the instruction and determines the category of the instruction.
+         *
+         * The instruction is decoded by checking the java instance of the instruction.
+         * Only the most relevant instructions are decoded and categorized.
+         *
+         * @param this@getInstructionCategory
+         * the instruction to decode
+         * @return the category of the instruction
+         * @author Giancarlo Pernudi Segura
+         * @author Chr1sps
+         * @see InstructionCategory
+         */
+        private fun Instruction.getInstructionCategory() = when (this) {
+            is Arithmetic, is ArithmeticW, // add, addw, sub, subw, and, or, xor, slt, sltu, m extension
+            ADDI.INSTANCE,
+            ADDIW.INSTANCE,
+            ANDI.INSTANCE,
+            ORI.INSTANCE,
+            XORI.INSTANCE,
+            SLTI.INSTANCE,
+            SLTIU.INSTANCE,
+            LUI.INSTANCE,
+            AUIPC.INSTANCE, // addi, addiw, andi, ori, xori, slti, sltiu, lui, auipc
+            SLLI32.INSTANCE, SLLIW.INSTANCE, // slli, slliw
+            SRLI32.INSTANCE, SRLIW.INSTANCE, // srli, srliw
+            SRAI32.INSTANCE, SRAIW.INSTANCE -> InstructionCategory.ALU // srai, sraiw
+            JAL.INSTANCE, JALR.INSTANCE -> InstructionCategory.JUMP // jal, jalr
+            is Branch -> InstructionCategory.BRANCH // beq, bge, bgeu, blt, bltu, bne
+            is Load, // lb, lh, lwl, lw, lbu, lhu, lwr
+            is Store -> InstructionCategory.MEM // sb, sh, swl, sw, swr
+            else -> InstructionCategory.OTHER
         }
     }
 }

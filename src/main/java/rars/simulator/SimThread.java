@@ -408,7 +408,7 @@ public class SimThread implements Runnable {
                     }
                     Globals.REGISTER_FILE.incrementPC(instruction.getInstructionLength());
                     // THIS IS WHERE THE INSTRUCTION EXECUTION IS ACTUALLY SIMULATED!
-                    instruction.simulate(statement, context);
+                    instruction.simulateImpl(context, statement);
 
                     // IF statement added 7/26/06 (explanation above)
                     if (OtherSettings.getBackSteppingEnabled()) {

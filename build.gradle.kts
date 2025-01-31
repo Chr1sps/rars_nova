@@ -86,6 +86,10 @@ sourceSets.main {
     kotlin.srcDir("src/main/java")
 }
 
+sourceSets.test {
+    kotlin.srcDir("src/test/java")
+}
+
 // region JFlex
 
 // region Utils

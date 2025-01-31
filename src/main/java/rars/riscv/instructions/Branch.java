@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.simulator.SimulationContext;
 import rars.riscv.hardware.registerFiles.RegisterFile;
+import rars.simulator.SimulationContext;
 import rars.util.Utils;
 
 import java.util.Objects;
@@ -129,9 +129,9 @@ public final class Branch extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) {
-        if (this.willBranch.apply(statement, context.registerFile())) {
-            Utils.processBranch(context.registerFile(), statement.getOperand(2), this.getInstructionLength());
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) {
+        if (this.willBranch.apply(statement, context.registerFile)) {
+            Utils.processBranch(context.registerFile, statement.getOperand(2), this.getInstructionLength());
         }
     }
 }

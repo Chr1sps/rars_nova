@@ -46,10 +46,10 @@ public final class FSGNJS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        final int result = (context.fpRegisterFile().getIntValue(statement.getOperand(1)) & 0x7FFFFFFF)
-            | (context.fpRegisterFile().getIntValue(statement.getOperand(2)) & 0x80000000);
-        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), result);
+        final int result = (context.fpRegisterFile.getIntValue(statement.getOperand(1)) & 0x7FFFFFFF)
+            | (context.fpRegisterFile.getIntValue(statement.getOperand(2)) & 0x80000000);
+        context.fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result);
     }
 }

@@ -18,18 +18,18 @@ public abstract class FusedDouble extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement, context.csrRegisterFile());
+        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement, context.csrRegisterFile);
         final Float64 result = compute(
-            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1))),
-            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(2))),
-            new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(3))), e
+            new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(1))),
+            new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(2))),
+            new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(3))), e
         );
-        Floating.setfflags(context.csrRegisterFile(), e);
-        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), result.bits);
+        Floating.setfflags(context.csrRegisterFile, e);
+        context.fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result.bits);
     }
 
     protected abstract Float64 compute(Float64 r1, Float64 r2, Float64 r3, Environment e);

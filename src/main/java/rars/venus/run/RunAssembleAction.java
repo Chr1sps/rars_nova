@@ -14,6 +14,7 @@ import rars.venus.registers.RegistersPane;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static rars.Globals.BOOL_SETTINGS;
@@ -125,21 +126,21 @@ public final class RunAssembleAction extends GuiAction {
             }
             try {
                 Globals.program = new RISCVProgram();
-                final @NotNull List<@NotNull File> filesToAssemble;
+                final @NotNull ArrayList<@NotNull File> filesToAssembleNew = new ArrayList<>();
                 if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls 
                     // for multiple
                     // file assembly
-                    filesToAssemble = FilenameFinder.getFilenameListForDirectory(
-                        FileStatus.systemFile.getParentFile(), Globals.fileExtensions);
+                    filesToAssembleNew.addAll(FilenameFinder.getFilenameListForDirectory(
+                        FileStatus.systemFile.getParentFile(), Globals.fileExtensions));
                 } else {
-                    filesToAssemble = List.of(FileStatus.systemFile);
+                    filesToAssembleNew.add(FileStatus.systemFile);
                 }
                 if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
                     this.mainUI.editor.saveAll();
                     final var paths = this.mainUI.editor.getOpenFilePaths();
                     for (final var path : paths) {
-                        if (!filesToAssemble.contains(path)) {
-                            filesToAssemble.add(path);
+                        if (!filesToAssembleNew.contains(path)) {
+                            filesToAssembleNew.add(path);
                         }
                     }
                 }
@@ -149,7 +150,7 @@ public final class RunAssembleAction extends GuiAction {
                     ? new File(OTHER_SETTINGS.getExceptionHandler())
                     : null;
                 RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(
-                    filesToAssemble,
+                    filesToAssembleNew,
                     FileStatus.systemFile, exceptionHandler
                 );
                 messagesPane.postMessage(RunAssembleAction.buildFileNameList(

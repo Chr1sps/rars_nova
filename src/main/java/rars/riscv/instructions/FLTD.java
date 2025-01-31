@@ -21,15 +21,15 @@ public final class FLTD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
-        final Float64 f1 = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1)));
-        final Float64 f2 = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(2)));
+        final Float64 f1 = new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(1)));
+        final Float64 f2 = new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(2)));
         final Environment e = new Environment();
         final boolean result = Comparisons.compareSignalingLessThan(f1, f2, e);
-        Floating.setfflags(context.csrRegisterFile(), e);
+        Floating.setfflags(context.csrRegisterFile, e);
         final long newValue = result ? 1 : 0;
-        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
+        context.registerFile.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

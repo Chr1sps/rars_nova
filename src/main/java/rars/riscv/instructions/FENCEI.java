@@ -53,7 +53,7 @@ public final class FENCEI extends BasicInstruction {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) {
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) {
         // Do nothing, currently all stores are immediately available to instruction
         // fetches
     }

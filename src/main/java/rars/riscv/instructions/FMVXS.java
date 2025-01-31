@@ -45,12 +45,12 @@ public final class FMVXS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
         // not `getIntValue` because we're moving bits
-        final long newValue = (int) context.fpRegisterFile().getLongValue(statement.getOperand(1))
+        final long newValue = (int) context.fpRegisterFile.getLongValue(statement.getOperand(1))
             .longValue();
-        context.registerFile().updateRegisterByNumber(statement.getOperand(0), newValue);
+        context.registerFile.updateRegisterByNumber(statement.getOperand(0), newValue);
     }
 }

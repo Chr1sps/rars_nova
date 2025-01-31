@@ -254,7 +254,7 @@ public final class RISCVProgram {
      *     reading or tokenizing.
      */
     public @NotNull List<@NotNull RISCVProgram> prepareFilesForAssembly(
-        final @NotNull List<@NotNull File> files,
+        final @NotNull List<? extends @NotNull File> files,
         final @NotNull File leadFile,
         final @Nullable File exceptionHandler
     ) throws AssemblyException {

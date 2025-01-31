@@ -47,11 +47,11 @@ public final class FSGNJXS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        final var f2 = context.fpRegisterFile().getIntValue(statement.getOperand(1));
-        final var f3 = context.fpRegisterFile().getIntValue(statement.getOperand(2));
+        final var f2 = context.fpRegisterFile.getIntValue(statement.getOperand(1));
+        final var f3 = context.fpRegisterFile.getIntValue(statement.getOperand(2));
         final var result = (f2 & 0x7FFFFFFF) | ((f2 ^ f3) & 0x80000000);
-        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), result);
+        context.fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result);
     }
 }

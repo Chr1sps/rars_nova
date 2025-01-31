@@ -19,16 +19,16 @@ public final class FLD extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
         final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
         try {
-            final var value = context.memory().getDoubleWord(
-                context.registerFile().getIntValue(statement.getOperand(2))
+            final var value = context.memory.getDoubleWord(
+                context.registerFile.getIntValue(statement.getOperand(2))
                     + upperImmediate
             );
-            context.fpRegisterFile().updateRegisterByNumber(
+            context.fpRegisterFile.updateRegisterByNumber(
                 statement.getOperand(0),
                 value
             );

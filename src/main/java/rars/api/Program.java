@@ -83,7 +83,7 @@ public final class Program {
      *     thrown if any errors are found in the code
      */
     public @NotNull ErrorList assembleFiles(
-        final @NotNull List<@NotNull File> files,
+        final @NotNull List<? extends @NotNull File> files,
         final @NotNull File mainFile
     ) throws AssemblyException {
         final var programs = this.code.prepareFilesForAssembly(files, mainFile, null);

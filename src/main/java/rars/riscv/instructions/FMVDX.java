@@ -18,12 +18,12 @@ public final class FMVDX extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
-        context.fpRegisterFile().updateRegisterByNumber(
+        context.fpRegisterFile.updateRegisterByNumber(
             statement.getOperand(0),
-            context.registerFile().getLongValue(statement.getOperand(1))
+            context.registerFile.getLongValue(statement.getOperand(1))
         );
     }
 }

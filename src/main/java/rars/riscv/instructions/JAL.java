@@ -48,13 +48,13 @@ public final class JAL extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        Utils.processReturnAddress(statement.getOperand(0), context.registerFile());
+        Utils.processReturnAddress(statement.getOperand(0), context.registerFile);
         Utils.processJump(
-            context.registerFile()
+            context.registerFile
                 .getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH + statement.getOperand(
-                1), context.registerFile()
+                1), context.registerFile
         );
     }
 }

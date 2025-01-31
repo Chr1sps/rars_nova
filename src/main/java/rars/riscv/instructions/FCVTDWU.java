@@ -23,19 +23,19 @@ public final class FCVTDWU extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
         final var environment = new Environment();
-        environment.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
+        environment.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile);
         final Float64 tmp = new Float64(0);
         final Float64 converted = Conversions
             .convertFromInt(
-                BigInteger.valueOf(context.registerFile().getIntValue(statement.getOperand(1)) & 0xFFFFFFFFL),
+                BigInteger.valueOf(context.registerFile.getIntValue(statement.getOperand(1)) & 0xFFFFFFFFL),
                 environment,
                 tmp
             );
-        Floating.setfflags(context.csrRegisterFile(), environment);
-        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), converted.bits);
+        Floating.setfflags(context.csrRegisterFile, environment);
+        context.fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits);
     }
 }

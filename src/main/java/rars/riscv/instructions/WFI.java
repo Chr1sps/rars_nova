@@ -54,7 +54,7 @@ public final class WFI extends BasicInstruction {
      * {@inheritDoc}
      */
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         WaitException {
         throw WaitException.INSTANCE;
     }

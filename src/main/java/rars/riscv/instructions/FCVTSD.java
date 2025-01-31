@@ -38,15 +38,15 @@ public final class FCVTSD extends BasicInstruction {
     // quads to be implemented.
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
-        final Float64 in = new Float64(context.fpRegisterFile().getLongValue(statement.getOperand(1)));
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile);
+        final Float64 in = new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(1)));
         Float32 out = new Float32(0);
         out = convert(in, out, e);
-        Floating.setfflags(context.csrRegisterFile(), e);
-        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), out.bits);
+        Floating.setfflags(context.csrRegisterFile, e);
+        context.fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), out.bits);
     }
 }

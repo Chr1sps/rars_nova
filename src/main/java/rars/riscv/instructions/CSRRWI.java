@@ -47,9 +47,9 @@ public final class CSRRWI extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        final var csr = context.csrRegisterFile().getLongValue(statement.getOperand(1));
+        final var csr = context.csrRegisterFile.getLongValue(statement.getOperand(1));
         if (csr == null) {
             throw new SimulationException(
                 statement,
@@ -57,8 +57,8 @@ public final class CSRRWI extends BasicInstruction {
                 ExceptionReason.ILLEGAL_INSTRUCTION
             );
         }
-        context.csrRegisterFile().updateRegisterByNumber(statement.getOperand(1), statement.getOperand(2));
-        context.registerFile().updateRegisterByNumber(statement.getOperand(0), csr);
+        context.csrRegisterFile.updateRegisterByNumber(statement.getOperand(1), statement.getOperand(2));
+        context.registerFile.updateRegisterByNumber(statement.getOperand(0), csr);
 
     }
 }

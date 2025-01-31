@@ -23,18 +23,18 @@ public final class FCVTDLU extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile());
+        e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile);
         final Float64 tmp = new Float64(0);
-        final long value = context.registerFile().getLongValue(statement.getOperand(1));
+        final long value = context.registerFile.getLongValue(statement.getOperand(1));
         BigInteger unsigned = BigInteger.valueOf(value);
         if (value < 0) {
             unsigned = unsigned.add(BigInteger.ONE.shiftLeft(64));
         }
         final Float64 converted = Conversions.convertFromInt(unsigned, e, tmp);
-        Floating.setfflags(context.csrRegisterFile(), e);
-        context.fpRegisterFile().updateRegisterByNumber(statement.getOperand(0), converted.bits);
+        Floating.setfflags(context.csrRegisterFile, e);
+        context.fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits);
     }
 }

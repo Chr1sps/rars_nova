@@ -81,16 +81,16 @@ public final class FilenameFinder {
      * @return array list of matching file names (absolute path). If none, list is
      * empty.
      */
-    public static @NotNull List<@NotNull File> getFilenameListForDirectory(
+    public static @NotNull List<? extends @NotNull File> getFilenameListForDirectory(
         final @NotNull File directory,
         final @NotNull List<@NotNull String> fileExtensions
     ) {
-        final var allFiles = Arrays.asList(directory.listFiles());
+        final List<? extends @NotNull File> allFiles = Arrays.asList(directory.listFiles());
         return filterFilesByExtensions(allFiles, fileExtensions);
     }
 
-    public static @NotNull List<@NotNull File> filterFilesByExtensions(
-        final @NotNull List<@NotNull File> files,
+    public static @NotNull List<? extends @NotNull File> filterFilesByExtensions(
+        final @NotNull List<? extends @NotNull File> files,
         final @NotNull List<@NotNull String> fileExtensions
     ) {
         return files.stream().filter(file -> isFileExtensionMatch(file, fileExtensions)).toList();

@@ -7,8 +7,8 @@ import rars.jsoftfloat.types.Float32;
 import rars.jsoftfloat.types.Floating;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.simulator.SimulationContext;
 import rars.riscv.hardware.registerFiles.RegisterFile;
+import rars.simulator.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -82,9 +82,9 @@ public final class FCLASSS extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
-        final Float32 in = new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1)));
-        fclass(in, statement.getOperand(0), context.registerFile());
+        final Float32 in = new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(1)));
+        fclass(in, statement.getOperand(0), context.registerFile);
     }
 }

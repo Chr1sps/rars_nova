@@ -9,9 +9,9 @@ import rars.jsoftfloat.RoundingMode;
 import rars.jsoftfloat.types.Float32;
 import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
-import rars.simulator.SimulationContext;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
 import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile;
+import rars.simulator.SimulationContext;
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -108,19 +108,19 @@ public abstract class Floating extends BasicInstruction {
     }
 
     @Override
-    public void simulate(final @NotNull ProgramStatement statement, @NotNull final SimulationContext context) throws
+    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final var environment = new Environment();
         final var hasRoundingMode = statement.hasOperand(3);
         if (hasRoundingMode) {
-            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement, context.csrRegisterFile());
+            environment.mode = Floating.getRoundingMode(statement.getOperand(3), statement, context.csrRegisterFile);
         }
         final Float32 result = this.compute(
-            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(1))),
-            new Float32(context.fpRegisterFile().getIntValue(statement.getOperand(2))), environment
+            new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(1))),
+            new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(2))), environment
         );
-        Floating.setfflags(context.csrRegisterFile(), environment);
-        context.fpRegisterFile().updateRegisterByNumberInt(statement.getOperand(0), result.bits);
+        Floating.setfflags(context.csrRegisterFile, environment);
+        context.fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
     }
 
     public abstract Float32 compute(Float32 f1, Float32 f2, Environment e);
