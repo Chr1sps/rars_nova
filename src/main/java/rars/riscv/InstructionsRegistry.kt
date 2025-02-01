@@ -72,9 +72,10 @@ object InstructionsRegistry {
             FMAXS.INSTANCE,
             FMINS.INSTANCE,
             FMULS.INSTANCE,
-            FSUBS.INSTANCE,  // endregion Floating
-            // region FusedDouble
+            FSUBS.INSTANCE,
+            // endregion Floating
 
+            // region FusedDouble
             FMADDD.INSTANCE,
             FMSUBD.INSTANCE,
             FNMADDD.INSTANCE,
@@ -89,26 +90,26 @@ object InstructionsRegistry {
             // endregion FusedFloat
 
             // region ImmediateInstruction
-            ADDI.INSTANCE,
-            ANDI.INSTANCE,
-            ORI.INSTANCE,
-            SLTI.INSTANCE,
-            SLTIU.INSTANCE,
-            XORI.INSTANCE,
+            ImmediateInstruction.ADDI,
+            ImmediateInstruction.ANDI,
+            ImmediateInstruction.ORI,
+            ImmediateInstruction.SLTI,
+            ImmediateInstruction.SLTIU,
+            ImmediateInstruction.XORI,
             // endregion ImmediateInstruction
 
             // region Load
-            LB.INSTANCE,
-            LBU.INSTANCE,
-            LH.INSTANCE,
-            LHU.INSTANCE,
-            LW.INSTANCE,
+            Load.LB,
+            Load.LBU,
+            Load.LH,
+            Load.LHU,
+            Load.LW,
             // endregion Load
 
             // region Store
-            SB.INSTANCE,
-            SH.INSTANCE,
-            SW.INSTANCE,
+            Store.SB,
+            Store.SH,
+            Store.SW,
             // endregion Store
 
             // region Other
@@ -182,14 +183,14 @@ object InstructionsRegistry {
             // endregion ArithmeticW
 
             // ImmediateInstruction
-            ADDIW.INSTANCE,
+            ImmediateInstruction.ADDIW,
 
             // Load
-            LD.INSTANCE,
-            LWU.INSTANCE,
+            Load.LD,
+            Load.LWU,
 
             // Store
-            SD.INSTANCE,
+            Store.SD,
 
             // region Other
             FCVTDL.INSTANCE,
@@ -267,7 +268,7 @@ object InstructionsRegistry {
     private fun loadPseudoInstructions(filename: String): MutableList<ExtendedInstruction> {
         val instructionList = ArrayList<ExtendedInstruction>()
         try {
-            InstructionsRegistry::class.java.getResourceAsStream(PSEUDO_OPS_PATH + filename).use { stream ->
+            javaClass.getResourceAsStream(PSEUDO_OPS_PATH + filename).use { stream ->
                 if (stream == null) {
                     LOGGER.error("Error: Could not load pseudo instructions from file: {}", filename)
                     exitProcess(1)

@@ -1,13 +1,16 @@
-package rars.riscv.instructions;
+package rars.riscv.instructions
 
-import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
-import rars.exceptions.AddressErrorException;
-import rars.exceptions.SimulationException;
-import rars.riscv.BasicInstruction;
-import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.Memory;
-import rars.simulator.SimulationContext;
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
+import rars.ProgramStatement
+import rars.exceptions.AddressErrorException
+import rars.exceptions.SimulationError
+import rars.exceptions.SimulationEvent
+import rars.riscv.BasicInstruction
+import rars.riscv.BasicInstructionFormat
+import rars.riscv.hardware.Memory
+import rars.simulator.SimulationContext
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -34,51 +37,71 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
+*/
 /**
  * Base class for all Store instructions
  *
  * @author Benjamin Landers
  * @version June 2017
  */
-public abstract class Store extends BasicInstruction {
-    public Store(@NotNull final String usage, final String description, final String funct) {
-        super(
-            usage,
-            description,
-            BasicInstructionFormat.S_FORMAT,
-            "sssssss fffff ttttt " + funct + " sssss 0100011"
-        );
-    }
-
-    @Override
-    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
-        SimulationException {
-        final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
-        try {
+class Store(
+    usage: String,
+    description: String,
+    funct: String,
+    private val store: (Int, Long, Memory) -> Unit
+) : BasicInstruction(
+    usage,
+    description,
+    BasicInstructionFormat.S_FORMAT,
+    "sssssss fffff ttttt $funct sssss 0100011"
+) {
+    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> {
+        val upperImmediate: Int = (statement.getOperand(1) shl 20) shr 20
+        return try {
             store(
-                context.registerFile.getIntValue(statement.getOperand(2)) + upperImmediate,
-                context.registerFile.getLongValue(statement.getOperand(0)),
-                context.memory
-            );
-        } catch (final AddressErrorException e) {
-            throw new SimulationException(
-                statement,
-                e
-            );
+                registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate,
+                registerFile.getLongValue(statement.getOperand(0))!!,
+                memory
+            ).right()
+        } catch (e: AddressErrorException) {
+            SimulationError.create(statement, e).left()
         }
     }
 
-    /**
-     * <p>store.</p>
-     *
-     * @param address
-     *     the address to store to
-     * @param value
-     *     the value to store
-     * @throws AddressErrorException
-     *     if any.
-     */
-    protected abstract void store(int address, long value, final @NotNull Memory memory) throws AddressErrorException;
+    companion object {
+        private fun store(
+            usage: String,
+            description: String,
+            funct: String,
+            store: (Int, Long, Memory) -> Unit
+        ) = Store(usage, description, funct, store)
+
+        @JvmField
+        val SB = store(
+            "sb t1, -100(t2)",
+            "Store byte : Store the low-order 8 bits of t1 into the effective memory byte address",
+            "000"
+        ) { address, value, memory -> memory.setByte(address, value.and(0xFFL).toInt()) }
+
+        @JvmField
+        val SH = store(
+            "sh t1, -100(t2)",
+            "Store halfword : Store the low-order 16 bits of t1 into the effective memory halfword address",
+            "001"
+        ) { address, value, memory -> memory.setHalf(address, value.and(0xFFFFL).toInt()) }
+
+        @JvmField
+        val SW = store(
+            "sw t1, -100(t2)",
+            "Store word : Store contents of t1 into effective memory word address",
+            "010"
+        ) { address, value, memory -> memory.setWord(address, value.toInt()) }
+
+        @JvmField
+        val SD = store(
+            "sd t1, -100(t2)",
+            "Store double word : Store contents of t1 into effective memory double word address",
+            "011"
+        ) { address, value, memory -> memory.setDoubleWord(address, value) }
+    }
 }
