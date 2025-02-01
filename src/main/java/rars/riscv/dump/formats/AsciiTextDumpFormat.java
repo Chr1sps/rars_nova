@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsOld;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,7 +54,7 @@ public class AsciiTextDumpFormat extends AbstractDumpFormat {
                 if (temp == null) {
                     break;
                 }
-                out.println(BinaryUtils.intToAscii(temp));
+                out.println(BinaryUtilsOld.intToAscii(temp));
             }
         }
     }

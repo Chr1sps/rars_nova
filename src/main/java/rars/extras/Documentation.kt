@@ -46,7 +46,7 @@ private fun createSyscallMarkdown(): String = buildString {
     }
 }
 
-private fun createInstructionMarkdown(instructionList: MutableList<out Instruction>): String = buildString {
+private fun createInstructionMarkdown(instructionList: List<Instruction>): String = buildString {
     append(
         """
         | Example Usage | Description |

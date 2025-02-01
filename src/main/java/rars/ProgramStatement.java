@@ -9,7 +9,8 @@ import rars.assembler.TokenType;
 import rars.riscv.*;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
+import rars.util.BinaryUtilsOld;
 import rars.venus.NumberDisplayBaseChooser;
 
 import java.util.ArrayList;
@@ -498,7 +499,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 }
                 case INTEGER_5, INTEGER_6, INTEGER_12, INTEGER_12U, INTEGER_20, INTEGER_32 -> {
 
-                    final int tempNumeric = BinaryUtils.stringToInt(tokenValue);
+                    final int tempNumeric = BinaryUtilsOld.stringToInt(tokenValue);
 
                     /* **************************************************************************
                      * MODIFICATION AND COMMENT, DPS 3-July-2008
@@ -643,7 +644,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         );
                     }
                 }
-                this.binaryStatement = BinaryUtils.binaryStringToInt(this.machineStatement);
+                this.binaryStatement = BinaryUtilsOld.binaryStringToInt(this.machineStatement);
             }
             case null -> throw new IllegalStateException("Instruction is null");
         }
@@ -657,7 +658,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     @Override
     public @NotNull String toString() {
         final var builder = new StringBuilder();
-        final var textAddressString = "[%s]".formatted(BinaryUtils.intToHexString(this.textAddress));
+        final var textAddressString = "[%s]".formatted(BinaryUtilsKt.intToHexStringWithPrefix(this.textAddress));
         builder.append(textAddressString);
         if (this.basicAssemblyStatement != null) {
             final var firstSpaceIndex = this.basicAssemblyStatement.indexOf(" ");
@@ -669,7 +670,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         }
         if (this.machineStatement != null) {
             final var machineStatementString = "| %s | %s|%s|%s|%s".formatted(
-                BinaryUtils.binaryStringToHexString(this.machineStatement),
+                BinaryUtilsOld.binaryStringToHexString(this.machineStatement),
                 this.machineStatement.substring(0, 8),
                 this.machineStatement.substring(8, 16),
                 this.machineStatement.substring(16, 24),
@@ -808,7 +809,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
 
         // Replace the mask bit for bit with the binary version of the value
         // The old version of this function assumed that the mask was continuous
-        final String bitString = BinaryUtils.intToBinaryString(
+        final String bitString = BinaryUtilsKt.intToBinaryString(
             value,
             length
         );
@@ -902,7 +903,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         break;
                     case 2:
                         if (valueBase == NumberDisplayBaseChooser.HEXADECIMAL) {
-                            result.append(BinaryUtils.intToHexString(e.iValue)); // 13-July-2011,
+                            result.append(BinaryUtilsKt.intToHexStringWithPrefix(e.iValue)); // 13-July-2011,
                             // was:
                             // intToHalfHexString()
                         } else {

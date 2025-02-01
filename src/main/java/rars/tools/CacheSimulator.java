@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.assembler.DataTypes;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -761,9 +761,9 @@ public final class CacheSimulator extends AbstractTool {
             final int lastBlock = this.getLastBlockToSearch(address);
             if (CacheSimulator.debug) // System.out.print
             {
-                CacheSimulator.this.writeLog("(" + CacheSimulator.this.memoryAccessCount + ") address: " + BinaryUtils.intToHexString(
+                CacheSimulator.this.writeLog("(" + CacheSimulator.this.memoryAccessCount + ") address: " + BinaryUtilsKt.intToHexStringWithPrefix(
                     address) + " (tag "
-                    + BinaryUtils.intToHexString(this.getTag(address)) + ") " + " block range: " + firstBlock + "-"
+                    + BinaryUtilsKt.intToHexStringWithPrefix(this.getTag(address)) + ") " + " block range: " + firstBlock + "-"
                     + lastBlock + "\n");
             }
             CacheBlock block;
@@ -776,7 +776,7 @@ public final class CacheSimulator extends AbstractTool {
                 if (CacheSimulator.debug) // System.out.print
                 {
                     CacheSimulator.this.writeLog("   trying block " + blockNumber
-                        + ((block.valid) ? " tag " + BinaryUtils.intToHexString(block.tag) : " empty"));
+                        + ((block.valid) ? " tag " + BinaryUtilsKt.intToHexStringWithPrefix(block.tag) : " empty"));
                 }
                 if (block.valid && block.tag == this.getTag(address)) {// it's a hit!
                     if (CacheSimulator.debug) // System.out.print

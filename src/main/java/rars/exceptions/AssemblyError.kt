@@ -1,4 +1,6 @@
-package rars.exceptions;
+package rars.exceptions
+
+import rars.ErrorList
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -25,23 +27,14 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
-import org.jetbrains.annotations.NotNull;
-import rars.ErrorList;
+*/
 
 /**
- * Exception wrapping ErrorList, used mainly in Tokenizer and Assembler;
- * Represents errors that occurs while assembling a RISCV program.
+ * Class used mainly in Tokenizer and Assembler; represents errors that occur
+ * while assembling a RISC-V program.
  *
  * @author Benjamin Landers
  * @version July 2017
  */
-public final class AssemblyException extends Exception {
-    public final @NotNull ErrorList errors;
-
-    public AssemblyException(final @NotNull ErrorList errors) {
-        super(errors.generateErrorAndWarningReport());
-        this.errors = errors;
-    }
-}
+@JvmInline
+value class AssemblyError(@JvmField val errors: ErrorList)

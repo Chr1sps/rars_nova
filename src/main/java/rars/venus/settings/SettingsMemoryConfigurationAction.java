@@ -3,7 +3,7 @@ package rars.venus.settings;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.hardware.MemoryConfiguration;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
 import rars.venus.VenusUI;
@@ -295,12 +295,13 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
             final TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
             for (int i = 0; i < configurationItemValues.length; i++) {
                 treeSortedByAddress.put(
-                    BinaryUtils.intToHexString(configurationItemValues[i]) + configurationItemNames[i],
+                    BinaryUtilsKt.intToHexStringWithPrefix(configurationItemValues[i]) + configurationItemNames[i],
                     configurationItemNames[i]
                 );
             }
             final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();
-            final int addressStringLength = BinaryUtils.intToHexString(configurationItemValues[0]).length();
+            final int addressStringLength = BinaryUtilsKt.intToHexStringWithPrefix(configurationItemValues[0])
+                .length();
             for (int i = 0; i < configurationItemValues.length; i++) {
                 Map.Entry<String, String> pair = setSortedByAddress.next();
                 this.nameDisplay[i].setText(pair.getValue());

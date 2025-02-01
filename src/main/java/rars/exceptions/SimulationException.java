@@ -6,7 +6,7 @@ import rars.ErrorMessage;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.riscv.BasicInstruction;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
 
 /**
  * For exceptions thrown during runtime
@@ -45,7 +45,7 @@ public class SimulationException extends Exception {
                 ps.sourceLine.lineNumber(),
                 0,
                 "Runtime exception at %s: %s".formatted(
-                    BinaryUtils.intToHexString(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
+                    BinaryUtilsKt.intToHexStringWithPrefix(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
                     message
                 )
             ),
@@ -61,7 +61,7 @@ public class SimulationException extends Exception {
                 ps.sourceLine.lineNumber(),
                 0,
                 "Runtime exception at %s: %s".formatted(
-                    BinaryUtils.intToHexString(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
+                    BinaryUtilsKt.intToHexStringWithPrefix(Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH),
                     aee.getMessage()
                 )
             ),

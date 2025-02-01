@@ -6,7 +6,7 @@ import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.dump.DumpFormat;
 import rars.riscv.dump.DumpFormats;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
 import rars.util.MemoryDump;
 
 import javax.swing.*;
@@ -274,8 +274,8 @@ public final class FileDumpMemoryAction extends GuiAction {
         public String toString() {
             return "%s (%s - %s)".formatted(
                 segmentInfo.name(),
-                BinaryUtils.intToHexString(segmentInfo.baseAddress()),
-                BinaryUtils.intToHexString(actualHighAddress)
+                BinaryUtilsKt.intToHexStringWithPrefix(segmentInfo.baseAddress()),
+                BinaryUtilsKt.intToHexStringWithPrefix(actualHighAddress)
             );
         }
     }

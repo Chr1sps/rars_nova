@@ -6,7 +6,7 @@ import rars.Globals;
 import rars.RISCVProgram;
 import rars.assembler.Symbol;
 import rars.assembler.SymbolTable;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsOld;
 import rars.venus.run.RunAssembleAction;
 
 import javax.swing.*;
@@ -334,7 +334,7 @@ public final class LabelsWindow extends JInternalFrame {
             }
             int address = 0;
             try {
-                address = BinaryUtils.stringToInt((String) data);
+                address = BinaryUtilsOld.stringToInt((String) data);
             } catch (final NumberFormatException nfe) {
                 // Cannot happen because address is generated internally.
             } catch (final ClassCastException cce) {

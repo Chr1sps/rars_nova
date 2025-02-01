@@ -3,7 +3,7 @@ package rars.assembler;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.InstructionsRegistry;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsOld;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -159,7 +159,7 @@ public enum TokenType {
 
         try {
 
-            final int i = BinaryUtils.stringToInt(value); // KENV 1/6/05
+            final int i = BinaryUtilsOld.stringToInt(value); // KENV 1/6/05
 
             // Comments from 2008 and 2005 were removed - Benjamin Landers 2019
 
@@ -185,7 +185,7 @@ public enum TokenType {
         }
 
         try {
-            BinaryUtils.stringToLong(value);
+            BinaryUtilsOld.stringToLong(value);
             return TokenType.INTEGER_64;
         } catch (final NumberFormatException e) {
             // NO ACTION -- exception suppressed

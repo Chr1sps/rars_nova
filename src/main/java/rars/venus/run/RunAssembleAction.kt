@@ -1,24 +1,19 @@
-package rars.venus.run;
+package rars.venus.run
 
-import org.jetbrains.annotations.NotNull;
-import rars.ErrorList;
-import rars.ErrorMessage;
-import rars.Globals;
-import rars.RISCVProgram;
-import rars.exceptions.AssemblyException;
-import rars.settings.BoolSetting;
-import rars.util.FilenameFinder;
-import rars.venus.*;
-import rars.venus.registers.RegistersPane;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import static rars.Globals.BOOL_SETTINGS;
-import static rars.Globals.OTHER_SETTINGS;
+import arrow.core.raise.either
+import rars.ErrorList
+import rars.Globals
+import rars.RISCVProgram
+import rars.exceptions.AssemblyError
+import rars.settings.BoolSetting
+import rars.util.FilenameFinder
+import rars.venus.FileStatus
+import rars.venus.GuiAction
+import rars.venus.VenusUI
+import java.awt.event.ActionEvent
+import java.io.File
+import javax.swing.Icon
+import javax.swing.KeyStroke
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -47,172 +42,125 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
 */
-
 /**
  * Action class for the Run -> Assemble menu item (and toolbar icon)
  */
-public final class RunAssembleAction extends GuiAction {
-
-    // Threshold for adding file to printed message of files being assembled.
-    private static final int LINE_LENGTH_LIMIT = 60;
-    private static List<RISCVProgram> programsToAssemble;
-    private static boolean extendedAssemblerEnabled;
-    private static boolean warningsAreErrors;
-
-    public RunAssembleAction(
-        final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel, final VenusUI gui
-    ) {
-        super(name, icon, descrip, mnemonic, accel, gui);
-    }
-
-    // These are both used by RunResetAction to re-assemble under identical
-    // conditions.
-
-    /**
-     * <p>Getter for the field {@code programsToAssemble}.</p>
-     *
-     * @return a {@link java.util.ArrayList} object
-     */
-    public static List<RISCVProgram> getProgramsToAssemble() {
-        return RunAssembleAction.programsToAssemble;
-    }
-
-    static boolean getExtendedAssemblerEnabled() {
-        return RunAssembleAction.extendedAssemblerEnabled;
-    }
-
-    static boolean getWarningsAreErrors() {
-        return RunAssembleAction.warningsAreErrors;
-    }
-
-    // Handy little utility for building comma-separated list of filenames
-    // while not letting line length get out of hand.
-    private static @NotNull String buildFileNameList(
-        final @NotNull String preamble,
-        final @NotNull List<RISCVProgram> programList
-    ) {
-        final StringBuilder result = new StringBuilder(preamble);
-        int lineLength = result.length();
-        for (int i = 0; i < programList.size(); i++) {
-            final var file = programList.get(i).getFile();
-            final var fileName = file.getName();
-            result.append(fileName).append((i < programList.size() - 1) ? ", " : "");
-            lineLength += fileName.length();
-            if (lineLength > RunAssembleAction.LINE_LENGTH_LIMIT) {
-                result.append("\n");
-                lineLength = 0;
-            }
-        }
-        return result + ((lineLength == 0) ? "" : "\n") + "\n";
-    }
-
+class RunAssembleAction(
+    name: String?, icon: Icon?, descrip: String?,
+    mnemonic: Int?, accel: KeyStroke?, gui: VenusUI
+) : GuiAction(name, icon, descrip, mnemonic, accel, gui) {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        final String name = this.getValue(Action.NAME).toString();
-        final MessagesPane messagesPane = this.mainUI.messagesPane;
-        final ExecutePane executePane = this.mainUI.mainPane.executePane;
-        final RegistersPane registersPane = this.mainUI.registersPane;
-        RunAssembleAction.extendedAssemblerEnabled =
-            BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED);
-        RunAssembleAction.warningsAreErrors =
-            BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS);
+    override fun actionPerformed(e: ActionEvent?) {
+        val name: String? = this.getValue(NAME).toString()
+        val messagesPane = this.mainUI.messagesPane
+        val executePane = this.mainUI.mainPane.executePane
+        val registersPane = this.mainUI.registersPane
+        extendedAssemblerEnabled =
+            Globals.BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED)
+        warningsAreErrors =
+            Globals.BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS)
         if (FileStatus.systemFile != null) {
             if (FileStatus.getSystemState() == FileStatus.State.EDITED) {
-                this.mainUI.editor.save();
+                this.mainUI.editor.save()
             }
-            try {
-                Globals.program = new RISCVProgram();
-                final @NotNull ArrayList<@NotNull File> filesToAssembleNew = new ArrayList<>();
-                if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {// setting calls 
+            either<AssemblyError, Unit> {
+                Globals.program = RISCVProgram()
+                val filesToAssembleNew = mutableListOf<File>()
+                if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) { // setting calls 
                     // for multiple
                     // file assembly
-                    filesToAssembleNew.addAll(FilenameFinder.getFilenameListForDirectory(
-                        FileStatus.systemFile.getParentFile(), Globals.fileExtensions));
+                    filesToAssembleNew.addAll(
+                        FilenameFinder.getFilenameListForDirectory(
+                            FileStatus.systemFile!!.getParentFile(), Globals.fileExtensions
+                        )
+                    )
                 } else {
-                    filesToAssembleNew.add(FileStatus.systemFile);
+                    filesToAssembleNew.add(FileStatus.systemFile!!)
                 }
-                if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
-                    this.mainUI.editor.saveAll();
-                    final var paths = this.mainUI.editor.getOpenFilePaths();
-                    for (final var path : paths) {
+                if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
+                    this@RunAssembleAction.mainUI.editor.saveAll()
+                    val paths: List<File> = this@RunAssembleAction.mainUI.editor.openFilePaths
+                    for (path in paths) {
                         if (!filesToAssembleNew.contains(path)) {
-                            filesToAssembleNew.add(path);
+                            filesToAssembleNew.add(path)
                         }
                     }
                 }
-                final var useExceptionHandler = BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED);
-                final var isExceptionHandlerSet = !OTHER_SETTINGS.getExceptionHandler().isEmpty();
-                final var exceptionHandler = useExceptionHandler && isExceptionHandlerSet
-                    ? new File(OTHER_SETTINGS.getExceptionHandler())
-                    : null;
-                RunAssembleAction.programsToAssemble = Globals.program.prepareFilesForAssembly(
+                val useExceptionHandler = Globals.BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)
+                val isExceptionHandlerSet = !Globals.OTHER_SETTINGS.exceptionHandler.isEmpty()
+                val exceptionHandler = if (useExceptionHandler && isExceptionHandlerSet)
+                    File(Globals.OTHER_SETTINGS.exceptionHandler)
+                else
+                    null
+                programsToAssemble = Globals.program!!.prepareFilesForAssembly(
                     filesToAssembleNew,
-                    FileStatus.systemFile, exceptionHandler
-                );
-                messagesPane.postMessage(RunAssembleAction.buildFileNameList(
-                    name + ": assembling ",
-                    RunAssembleAction.programsToAssemble
-                ));
+                    FileStatus.systemFile!!, exceptionHandler
+                ).bind()
+                messagesPane.postMessage(
+                    buildFileNameList(
+                        "$name: assembling ",
+                        programsToAssemble
+                    )
+                )
                 // added logic to receive any warnings and output them.... DPS 11/28/06
-                final ErrorList warnings = Globals.program.assemble(
-                    RunAssembleAction.programsToAssemble,
-                    RunAssembleAction.extendedAssemblerEnabled,
-                    RunAssembleAction.warningsAreErrors
-                );
+                val warnings: ErrorList = Globals.program!!.assemble(
+                    programsToAssemble,
+                    extendedAssemblerEnabled,
+                    warningsAreErrors
+                ).bind()
                 if (warnings.warningsOccurred()) {
-                    messagesPane.postMessage(warnings.generateWarningReport());
+                    messagesPane.postMessage(warnings.generateWarningReport())
                 }
                 messagesPane.postMessage(
-                    name + ": operation completed successfully.\n\n");
-                FileStatus.setAssembled(true);
-                FileStatus.setSystemState(FileStatus.State.RUNNABLE);
+                    "$name: operation completed successfully.\n\n"
+                )
+                FileStatus.setAssembled(true)
+                FileStatus.setSystemState(FileStatus.State.RUNNABLE)
 
-                Globals.REGISTER_FILE.resetRegisters();
-                Globals.FP_REGISTER_FILE.resetRegisters();
-                Globals.CS_REGISTER_FILE.resetRegisters();
-                Globals.INTERRUPT_CONTROLLER.reset();
+                Globals.REGISTER_FILE.resetRegisters()
+                Globals.FP_REGISTER_FILE.resetRegisters()
+                Globals.CS_REGISTER_FILE.resetRegisters()
+                Globals.INTERRUPT_CONTROLLER.reset()
 
-                executePane.textSegment.setupTable();
-                executePane.dataSegment.setupTable();
-                executePane.dataSegment.highlightCellForAddress(Globals.MEMORY_INSTANCE.getMemoryConfiguration().dataBaseAddress);
-                executePane.dataSegment.clearHighlighting();
-                executePane.labelValues.setupTable();
-                executePane.textSegment.setCodeHighlighting(true);
-                executePane.textSegment.highlightStepAtPC();
-                registersPane.getRegistersWindow().clearWindow();
-                registersPane.getFloatingPointWindow().clearWindow();
-                registersPane.getControlAndStatusWindow().clearWindow();
-                this.mainUI.isMemoryReset = true;
-                this.mainUI.isExecutionStarted = false;
-                this.mainUI.mainPane.setSelectedComponent(executePane);
+                executePane.textSegment.setupTable()
+                executePane.dataSegment.setupTable()
+                executePane.dataSegment.highlightCellForAddress(Globals.MEMORY_INSTANCE.memoryConfiguration.dataBaseAddress)
+                executePane.dataSegment.clearHighlighting()
+                executePane.labelValues.setupTable()
+                executePane.textSegment.codeHighlighting = true
+                executePane.textSegment.highlightStepAtPC()
+                registersPane.registersWindow.clearWindow()
+                registersPane.floatingPointWindow.clearWindow()
+                registersPane.controlAndStatusWindow.clearWindow()
+                this@RunAssembleAction.mainUI.isMemoryReset = true
+                this@RunAssembleAction.mainUI.isExecutionStarted = false
+                this@RunAssembleAction.mainUI.mainPane.setSelectedComponent(executePane)
 
                 // Aug. 24, 2005 Ken Vollmar
 
                 // Ensure that I/O "file descriptors" are initialized for a new program run
-                this.mainUI.venusIO.resetFiles();
-
-            } catch (final AssemblyException pe) {
-                final String errorReport = pe.errors.generateErrorAndWarningReport();
-                messagesPane.postMessage(errorReport);
+                this@RunAssembleAction.mainUI.venusIO.resetFiles()
+            }.onLeft { assemblyError ->
+                val errorReport = assemblyError.errors.generateErrorAndWarningReport()
+                messagesPane.postMessage(errorReport)
                 messagesPane.postMessage(
-                    name + ": operation completed with errors.\n\n");
+                    "$name: operation completed with errors.\n\n"
+                )
                 // Select editor line containing first error, and corresponding error message.
-                final var errorMessages = pe.errors.getErrorMessages();
-                for (final ErrorMessage em : errorMessages) {
+                val errorMessages = assemblyError.errors.errorMessages
+                for (em in errorMessages) {
                     // No line or position may mean File Not Found (e.g. exception file). Don't try
                     // to open. DPS 3-Oct-2010
                     if (em.lineNumber == 0 && em.position == 0) {
-                        continue;
+                        continue
                     }
-                    if (!em.isWarning || RunAssembleAction.warningsAreErrors) {
+                    if (!em.isWarning || warningsAreErrors) {
                         this.mainUI.messagesPane.selectErrorMessage(
-                            em.file, em.lineNumber,
+                            em.file!!, em.lineNumber,
                             em.position
-                        );
+                        )
                         // Bug workaround: Line selection does not work correctly for the JEditTextArea
                         // editor
                         // when the file is opened then automatically assembled (assemble-on-open
@@ -222,14 +170,56 @@ public final class RunAssembleAction extends GuiAction {
                         // test.
                         // DPS 9-Aug-2010
                         if (e != null) {
-                            this.mainUI.mainPane.editTabbedPane.selectEditorTextLine(em.file, em.lineNumber);
+                            this.mainUI.mainPane.editTabbedPane.selectEditorTextLine(em.file, em.lineNumber)
                         }
-                        break;
+                        break
                     }
                 }
-                FileStatus.setAssembled(false);
-                FileStatus.setSystemState(FileStatus.State.NOT_EDITED);
+                FileStatus.setAssembled(false)
+                FileStatus.setSystemState(FileStatus.State.NOT_EDITED)
             }
+        }
+    }
+
+    companion object {
+        // Threshold for adding file to printed message of files being assembled.
+        private const val LINE_LENGTH_LIMIT = 60
+        private lateinit var programsToAssemble: List<RISCVProgram>
+        var extendedAssemblerEnabled: Boolean = false
+            private set
+        var warningsAreErrors: Boolean = false
+            private set
+
+        // These are both used by RunResetAction to re-assemble under identical
+        // conditions.
+        /**
+         *
+         * Getter for the field `programsToAssemble`.
+         *
+         * @return a [ArrayList] object
+         */
+        @JvmStatic
+        fun getProgramsToAssemble(): List<RISCVProgram> = programsToAssemble
+
+        // Handy little utility for building comma-separated list of filenames
+        // while not letting line length get out of hand.
+        private fun buildFileNameList(
+            preamble: String,
+            programList: List<RISCVProgram>
+        ): String {
+            val result = StringBuilder(preamble)
+            var lineLength = result.length
+            for (i in programList.indices) {
+                val file = programList[i].file
+                val fileName = file!!.getName()
+                result.append(fileName).append(if (i < programList.size - 1) ", " else "")
+                lineLength += fileName.length
+                if (lineLength > LINE_LENGTH_LIMIT) {
+                    result.append("\n")
+                    lineLength = 0
+                }
+            }
+            return result.toString() + (if (lineLength == 0) "" else "\n") + "\n"
         }
     }
 }

@@ -7,7 +7,7 @@ import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -168,18 +168,18 @@ public final class DigitalLabSim extends AbstractTool {
             "keyboard and counter \n"
             +
             "Seven segment display\n" +
-            " Byte value at address " + BinaryUtils.intToHexString(this.IN_ADRESS_DISPLAY_1)
+            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_DISPLAY_1)
             + " : command right seven segment display \n " +
-            " Byte value at address " + BinaryUtils.intToHexString(this.IN_ADRESS_DISPLAY_2)
+            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_DISPLAY_2)
             + " : command left seven segment display \n " +
             " Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 " +
             "for point \n \n"
             +
             "Hexadecimal keyboard\n" +
-            " Byte value at address " + BinaryUtils.intToHexString(this.IN_ADRESS_HEXA_KEYBOARD)
+            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_HEXA_KEYBOARD)
             + " : command row number of hexadecimal keyboard (bit 0 to 3) and enable keyboard interrupt (bit 7) \n"
             +
-            " Byte value at address " + BinaryUtils.intToHexString(this.OUT_ADRESS_HEXA_KEYBOARD)
+            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.OUT_ADRESS_HEXA_KEYBOARD)
             + " : receive row and column of the first pressed, 0 if not first pressed \n" +
             " The program has to scan, one by one, each row (send 1,2,4,8...)" +
             " and then observe if a first is pressed (that mean byte value at adresse 0xFFFF0014 is different " +
@@ -192,7 +192,7 @@ public final class DigitalLabSim extends AbstractTool {
             " For exemple first number 2 return 0x41, that mean the first is on column 3 and row 1. \n" +
             " If keyboard interruption is enable, an external interrupt is started with value 0x00000200\n \n" +
             "Counter\n" +
-            " Byte value at address " + BinaryUtils.intToHexString(this.IN_ADRESS_COUNTER)
+            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_COUNTER)
             + " : If one bit of this byte is set, the counter interruption is enabled.\n" +
             " If counter interruption is enable, every 30 instructions, a timer interrupt is started with value " +
             "0x00000100.\n"

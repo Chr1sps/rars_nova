@@ -1,63 +1,41 @@
-package utils;
+package utils
 
-import org.jetbrains.annotations.NotNull;
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.stream.Collectors
+import kotlin.io.path.name
+import kotlin.io.path.pathString
+import kotlin.io.path.toPath
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.stream.Collectors;
+object ProjectPaths {
 
-public final class ProjectPaths {
-
-    private ProjectPaths() {
-    }
-
-    private static @NotNull String getPathName(final @NotNull Path path) {
-        return Optional.ofNullable(path.getFileName()).map(Object::toString).orElse("");
-    }
-
-    public static @NotNull Path getProjectRoot() {
-        var directory = getProjectRootByClass();
-        while (directory != null) {
-            try {
-                try (final var fileList = Files.list(directory)) {
-                    final var children = fileList.map(ProjectPaths::getPathName).collect(Collectors.toSet());
+    val projectRoot: Path
+        get() {
+            var directory: Path? = projectRootByClass
+            while (directory != null) {
+                try {
+                    val children = Files.list(directory).use {
+                        it.map(Path::name).collect(Collectors.toSet())
+                    }
                     if (children.contains("gradle") && children.contains("src")) {
-                        return directory;
+                        return directory
                     }
+                } catch (_: IOException) {
                 }
-            } catch (final IOException ignore) {
+                directory = directory.parent
             }
-            directory = directory.getParent();
+            error("Could not find project root")
         }
-        throw new RuntimeException("Could not find project root");
-    }
 
-    private static @NotNull Path getProjectRootByClass() {
-        final var replacedName = ProjectPaths.class.getName().replace(".", "/");
-        final var url = ProjectPaths.class.getResource("/" + replacedName + ".class");
-        if (url == null) {
-            throw new RuntimeException("Could not find class file");
+    private val projectRootByClass: Path
+        get() {
+            val replacedName = javaClass.name.replace(".", "/")
+            val url = javaClass.getResource("/$replacedName.class")
+            return when (url?.protocol) {
+                "file" -> url.toURI().toPath()
+                "jar" -> url.toURI().toPath().pathString.split("!").firstOrNull()?.let { Path.of(it) }
+                else -> error("Unsupported protocol")
+            } ?: error("Could not find project root")
         }
-        try {
-            return switch (url.getProtocol()) {
-                case "file" -> Paths.get(url.toURI());
-                case "jar" -> {
-                    final var pathElements = Paths.get(new URI(url.getFile())).toString().split("!");
-                    if (pathElements.length == 0) {
-                        throw new RuntimeException("Could not find jar file");
-                    } else {
-                        yield Paths.get(pathElements[0]);
-                    }
-                }
-                default -> throw new RuntimeException("Unsupported protocol");
-            };
-        } catch (final URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

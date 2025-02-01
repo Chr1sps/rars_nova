@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import rars.exceptions.SimulationException;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.hardware.registers.Register;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsOld;
 
 import java.util.function.Consumer;
 
@@ -124,7 +124,7 @@ public abstract class RegisterFileBase {
 
             }
 
-            final var integerNumber = BinaryUtils.stringToIntFast(name.substring(1));
+            final var integerNumber = BinaryUtilsOld.stringToIntFast(name.substring(1));
             if (integerNumber == null) {
                 return null;
             }

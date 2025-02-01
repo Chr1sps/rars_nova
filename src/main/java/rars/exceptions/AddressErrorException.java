@@ -1,7 +1,7 @@
 package rars.exceptions;
 
 import org.jetbrains.annotations.NotNull;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -57,7 +57,7 @@ public final class AddressErrorException extends Exception {
         final @NotNull String message, final @NotNull ExceptionReason exceptType,
         final int addr
     ) {
-        super(message + BinaryUtils.intToHexString(addr));
+        super(message + BinaryUtilsKt.intToHexStringWithPrefix(addr));
         this.address = addr;
         this.reason = switch (exceptType) {
             case INSTRUCTION_ACCESS_FAULT,

@@ -5,7 +5,7 @@ import rars.Globals;
 import rars.assembler.DataTypes;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -496,7 +496,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             "map)"
         };
         for (int i = 0; i < this.displayBaseAddressChoices.length; i++) {
-            this.displayBaseAddressChoices[i] = BinaryUtils.intToHexString(displayBaseAddressArray[i])
+            this.displayBaseAddressChoices[i] = BinaryUtilsKt.intToHexStringWithPrefix(displayBaseAddressArray[i])
                 + descriptions[i];
         }
         this.defaultBaseAddressIndex = 3; // default to 0x10010000 (static data)

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import rars.RISCVProgram;
 import rars.assembler.Symbol;
 import rars.assembler.TokenList;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsOld;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -149,11 +149,11 @@ public final class ExtendedInstruction extends Instruction {
             final String strValue = tokenList.get(op).getText();
             int val;
             try {
-                val = BinaryUtils.stringToInt(strValue); // KENV 1/6/05
+                val = BinaryUtilsOld.stringToInt(strValue); // KENV 1/6/05
             } catch (final NumberFormatException e) {
                 final long lval;
                 try {
-                    lval = BinaryUtils.stringToLong(strValue);
+                    lval = BinaryUtilsOld.stringToLong(strValue);
                 } catch (final NumberFormatException nfe) {
                     continue;
                 }
@@ -161,7 +161,7 @@ public final class ExtendedInstruction extends Instruction {
                 final int vall = (int) lval;
                 // this shouldn't happen if is is for LL .. VH
                 if (instruction.contains("LIA" + op)) {
-                    final int extra = BinaryUtils.bitValue(val, 11); // add extra to compesate for sign extension
+                    final int extra = BinaryUtilsOld.bitValue(val, 11); // add extra to compesate for sign extension
                     instruction = instruction.replace("LIA" + op, String.valueOf((val >> 12) + extra));
                 } else if (instruction.contains("LIB" + op)) {
                     instruction = instruction.replace("LIB" + op, String.valueOf(val << 20 >> 20));
@@ -177,7 +177,7 @@ public final class ExtendedInstruction extends Instruction {
 
             final int relative = val - PC;
             if (instruction.contains("PCH" + op)) {
-                final int extra = BinaryUtils.bitValue(relative, 11);// add extra to compesate for sign extension
+                final int extra = BinaryUtilsOld.bitValue(relative, 11);// add extra to compesate for sign extension
                 instruction = instruction.replace("PCH" + op, String.valueOf((relative >> 12) + extra));
             }
             if (instruction.contains("PCL" + op)) {
@@ -185,7 +185,7 @@ public final class ExtendedInstruction extends Instruction {
             }
 
             if (instruction.contains("LH" + op)) {
-                final int extra = BinaryUtils.bitValue(val, 11);// add extra to compesate for sign extension
+                final int extra = BinaryUtilsOld.bitValue(val, 11);// add extra to compesate for sign extension
 //                instruction = ExtendedInstruction.substitute(instruction, "LH" + op, String.valueOf((val >> 12) + 
 //                extra));
                 instruction = instruction.replace("LH" + op, String.valueOf((val >> 12) + extra));
@@ -195,7 +195,7 @@ public final class ExtendedInstruction extends Instruction {
             }
 
             if (instruction.contains("VH" + op)) {
-                final int extra = BinaryUtils.bitValue(val, 11); // add extra to compesate for sign extension
+                final int extra = BinaryUtilsOld.bitValue(val, 11); // add extra to compesate for sign extension
                 instruction = instruction.replace("VH" + op, String.valueOf((val >> 12) + extra));
             }
             if (instruction.contains("VL" + op)) {

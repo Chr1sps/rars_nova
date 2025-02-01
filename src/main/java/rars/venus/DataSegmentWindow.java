@@ -11,7 +11,8 @@ import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.settings.BoolSetting;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
+import rars.util.BinaryUtilsOld;
 import rars.util.ConversionUtils;
 import rars.venus.run.RunSpeedPanel;
 import rars.venus.util.RepeatButton;
@@ -252,7 +253,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         for (int i = 0; i < baseAddressChoices.length; i++) {
             baseAddressChoices[i] = (
                 (baseAddressArray[i] != -1)
-                    ? BinaryUtils.intToHexString(baseAddressArray[i])
+                    ? BinaryUtilsKt.intToHexStringWithPrefix(baseAddressArray[i])
                     : ""
             )
                 + descriptions[i];
@@ -388,7 +389,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         }
         final int addressRow = rowColumn.x;
         this.addressColumn = rowColumn.y;
-        this.addressRowFirstAddress = BinaryUtils
+        this.addressRowFirstAddress = BinaryUtilsOld
             .stringToInt(DataSegmentWindow.dataTable.getValueAt(addressRow, DataSegmentWindow.ADDRESS_COLUMN)
                 .toString());
         // System.out.println("Address "+Binary.intToHexString(address)+" becomes row "+
@@ -798,17 +799,17 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.globButton.setToolTipText("View range around global pointer");
         this.stakButton.setToolTipText("View range around stack pointer");
         this.heapButton.setToolTipText("View range around heap base address " +
-            BinaryUtils.intToHexString(memoryConfiguration.heapBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.heapBaseAddress));
         this.extnButton.setToolTipText("View range around static global base address " +
-            BinaryUtils.intToHexString(memoryConfiguration.externBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.externBaseAddress));
         this.mmioButton.setToolTipText("View range around MMIO base address " +
-            BinaryUtils.intToHexString(memoryConfiguration.memoryMapBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.memoryMapBaseAddress));
         this.textButton.setToolTipText("View range around program code " +
-            BinaryUtils.intToHexString(memoryConfiguration.textBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.textBaseAddress));
         this.prevButton.setToolTipText("View next lower address range; hold down for rapid fire");
         this.nextButton.setToolTipText("View next higher address range; hold down for rapid fire");
         this.dataButton.setToolTipText("View range around static data segment base address " +
-            BinaryUtils.intToHexString(memoryConfiguration.dataBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.dataBaseAddress));
 
         // add the action listeners to maintain button state and table contents
         // Currently there is no memory upper bound so next button always enabled.
@@ -1037,7 +1038,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         public void setValueAt(final Object value, final int row, final int col) {
             final int val;
             try {
-                val = BinaryUtils.stringToInt((String) value);
+                val = BinaryUtilsOld.stringToInt((String) value);
             } catch (final NumberFormatException nfe) {
                 this.data[row][col] = "INVALID";
                 this.fireTableCellUpdated(row, col);
@@ -1048,7 +1049,7 @@ public final class DataSegmentWindow extends JInternalFrame {
             int address = 0;
             try {
                 address =
-                    BinaryUtils.stringToInt((String) this.data[row][DataSegmentWindow.ADDRESS_COLUMN]) + (col - 1) * DataSegmentWindow.BYTES_PER_VALUE; // KENV
+                    BinaryUtilsOld.stringToInt((String) this.data[row][DataSegmentWindow.ADDRESS_COLUMN]) + (col - 1) * DataSegmentWindow.BYTES_PER_VALUE; // KENV
                 // 1/6/05
             } catch (final NumberFormatException nfe) {
                 // can't really happen since memory addresses are completely under
@@ -1104,7 +1105,7 @@ public final class DataSegmentWindow extends JInternalFrame {
 
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
             final int rowFirstAddress =
-                BinaryUtils.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
+                BinaryUtilsOld.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
             final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
             final var defaultFont = FONT_SETTINGS.getCurrentFont();
             if (/*DataSegmentWindow.this.settings.getBoolSettings().getSetting(BoolSetting.DATA_SEGMENT_HIGHLIGHTING)

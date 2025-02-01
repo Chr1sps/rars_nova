@@ -12,7 +12,8 @@ import rars.riscv.syscalls.DisplayBitmapImpl;
 import rars.riscv.syscalls.RandomStreams;
 import rars.riscv.syscalls.ToneGenerator;
 import rars.simulator.SimulationContext;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
+import rars.util.BinaryUtilsOld;
 import rars.util.NullString;
 
 import javax.swing.*;
@@ -544,7 +545,7 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer (in binary format left-padded with zeroes) ",
         "a0 = integer to print",
         "N/A",
-        (ctxt, stmt) -> ctxt.io.printString(BinaryUtils.intToBinaryString(ctxt.registerFile.getIntValue("a0")))
+        (ctxt, stmt) -> ctxt.io.printString(BinaryUtilsKt.intToBinaryString(ctxt.registerFile.getIntValue("a0")))
     ),
     PrintIntHex(
         "PrintIntHex",
@@ -552,7 +553,7 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer (in hexdecimal format left-padded with zeroes)",
         "a0 = integer to print",
         "N/A",
-        (ctxt, stmt) -> ctxt.io.printString(BinaryUtils.intToHexString(ctxt.registerFile.getIntValue("a0")))
+        (ctxt, stmt) -> ctxt.io.printString(BinaryUtilsKt.intToHexStringWithPrefix(ctxt.registerFile.getIntValue("a0")))
     ),
     PrintIntUnsigned(
         "PrintIntUnsigned",
@@ -561,7 +562,7 @@ public enum Syscall implements SimulationCallback {
         "a0 = integer to print",
         "N/A",
         (ctxt, stmt) -> ctxt.io.printString(
-            BinaryUtils.unsignedIntToIntString(ctxt.registerFile.getIntValue("a0")))
+            BinaryUtilsOld.unsignedIntToIntString(ctxt.registerFile.getIntValue("a0")))
     ),
     PrintString(
         "PrintString", 4, "Prints a null-terminated string to the console",
@@ -820,8 +821,8 @@ public enum Syscall implements SimulationCallback {
             a0 = low order 32 bits
             a1=high order 32 bits""", (ctxt, stmt) -> {
         final var time = System.currentTimeMillis();
-        ctxt.registerFile.updateRegisterByName("a0", BinaryUtils.lowOrderLongToInt(time));
-        ctxt.registerFile.updateRegisterByName("a1", BinaryUtils.highOrderLongToInt(time));
+        ctxt.registerFile.updateRegisterByName("a0", BinaryUtilsOld.lowOrderLongToInt(time));
+        ctxt.registerFile.updateRegisterByName("a1", BinaryUtilsOld.highOrderLongToInt(time));
     }
     ),
     Write(
