@@ -96,7 +96,7 @@ public final class Utils {
      * @return String containing hex-coded color second.
      */
     public static @NotNull String getColorAsHexString(final @NotNull Color color) {
-        return BinaryUtils.intToHexString(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
+        return BinaryUtilsKt.intToHexStringWithPrefix(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
     }
 
     public static @NotNull Font deriveFontFromStyle(final @NotNull Font baseFont, final @NotNull TokenStyle style) {

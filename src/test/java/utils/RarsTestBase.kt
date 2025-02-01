@@ -1,43 +1,34 @@
-package utils;
+package utils
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestInfo;
-
-import java.nio.file.Path;
-import java.util.Objects;
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.TestInfo
+import java.nio.file.Path
 
 /**
  * Base class for RARS tests containing common utility methods.
  */
-public abstract class RarsTestBase {
+abstract class RarsTestBase {
     /**
-     * Inner field used for storing {@link TestInfo} fetched from the
-     * {@link RarsTestBase} method.
+     * Inner field used for storing [TestInfo] fetched from the
+     * [RarsTestBase] method.
      */
-    private @Nullable TestInfo testInfo;
+    private lateinit var testInfo: TestInfo
 
     /**
-     * @return the absolute path to the test data directory.
-     */
-    protected static @NotNull Path getTestDataPath() {
-        return ProjectPaths.getProjectRoot().resolve("src/test/resources/test-data").toAbsolutePath();
-    }
-
-    /**
-     * Fetches the {@link TestInfo} object for the current test.
+     * Fetches the [TestInfo] object for the current test.
      */
     @BeforeEach
-    protected void getTestInfo(final TestInfo testInfo) {
-        this.testInfo = testInfo;
+    protected fun getTestInfo(testInfo: TestInfo) {
+        this.testInfo = testInfo
     }
 
-    /**
-     * @return the name of the current test.
-     */
-    protected @NotNull String getTestName() {
-        return Objects.requireNonNull(testInfo).getDisplayName();
-    }
+    /** The name of the current test */
+    protected val testName: String
+        get() = testInfo.displayName
 
+    companion object {
+        /** The absolute path to the test data directory. */
+        val testDataPath: Path
+            get() = ProjectPaths.projectRoot.resolve("src/test/resources/test-data").toAbsolutePath()
+    }
 }

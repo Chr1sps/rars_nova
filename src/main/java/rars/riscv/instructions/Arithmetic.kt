@@ -117,7 +117,7 @@ class Arithmetic private constructor(
             "divu t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division",
             "0000001", "101", { first, other ->
                 if (other == 0) -1
-                else (first / other)
+                else (first.toUInt() / other.toUInt()).toInt()
             }
         ) { first, other ->
             if (other == 0L) -1
@@ -146,13 +146,6 @@ class Arithmetic private constructor(
             "0000001",
             "010",
             { first, other ->
-                /*
-        // Sign extend t2, but not t3
-        final long ext = ((long) value << 32) >> 32;
-        final long ext2 = value2 & 0xFFFFFFFFL;
-        // Return the top 32 bits of the mutliplication
-        return (int) ((ext * ext2) >> 32);
-                 */
                 (first.toULong() * other.lowerToULong()).shr(32).toInt()
             }
         ) { first, other ->

@@ -1,15 +1,12 @@
-package rars.venus.run;
+package rars.venus.run
 
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.exceptions.AssemblyException;
-import rars.venus.ExecutePane;
-import rars.venus.FileStatus;
-import rars.venus.GuiAction;
-import rars.venus.VenusUI;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
+import rars.Globals
+import rars.venus.FileStatus
+import rars.venus.GuiAction
+import rars.venus.VenusUI
+import java.awt.event.ActionEvent
+import javax.swing.Icon
+import javax.swing.KeyStroke
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -38,29 +35,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
 */
-
 /**
  * Action for the Run -> Reset menu item
  */
-public final class RunResetAction extends GuiAction {
-
-    public RunResetAction(
-        final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
-    ) {
-        super(name, icon, descrip, mnemonic, accel, gui);
-    }
-
+class RunResetAction(
+    name: String?, icon: Icon?, descrip: String?,
+    mnemonic: Int?, accel: KeyStroke?, gui: VenusUI
+) : GuiAction(name, icon, descrip, mnemonic, accel, gui) {
     /**
      * {@inheritDoc}
-     * <p>
+     *
+     *
      * reset GUI components and MIPS resources
      */
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        RunGoAction.resetMaxSteps();
-        final String name = this.getValue(Action.NAME).toString();
-        final ExecutePane executePane = mainUI.mainPane.executePane;
+    override fun actionPerformed(e: ActionEvent?) {
+        RunGoAction.resetMaxSteps()
+        val name: String? = this.getValue(NAME).toString()
+        val executePane = mainUI.mainPane.executePane
+
         // The difficult part here is resetting the data segment. Two approaches are:
         // 1. After each assembly, get a deep copy of the Globals.memory array
         // containing data segment. Then replace it upon reset.
@@ -69,45 +61,42 @@ public final class RunResetAction extends GuiAction {
         // assembly, so there is "no" chance of assembler error.
         // I am choosing the second approach although it will slow down the reset
         // operation. The first approach requires additional Memory class methods.
-        try {
-            Globals.program.assemble(
-                RunAssembleAction.getProgramsToAssemble(),
-                RunAssembleAction.getExtendedAssemblerEnabled(),
-                RunAssembleAction.getWarningsAreErrors()
-            );
-        } catch (final AssemblyException pe) {
+        Globals.program!!.assemble(
+            RunAssembleAction.getProgramsToAssemble(),
+            RunAssembleAction.extendedAssemblerEnabled,
+            RunAssembleAction.warningsAreErrors
+        ).onLeft {
             // Should not be possible
-            mainUI.messagesPane.postMessage(
-                // pe.errors().generateErrorReport());
-                "Unable to reset.  Please close file then re-open and re-assemble.\n");
-            return;
+            mainUI.messagesPane.postMessage( // pe.errors().generateErrorReport());
+                "Unable to reset.  Please close file then re-open and re-assemble.\n"
+            )
+            return
         }
 
-        Globals.REGISTER_FILE.resetRegisters();
-        Globals.FP_REGISTER_FILE.resetRegisters();
-        Globals.CS_REGISTER_FILE.resetRegisters();
-        Globals.INTERRUPT_CONTROLLER.reset();
+        Globals.REGISTER_FILE.resetRegisters()
+        Globals.FP_REGISTER_FILE.resetRegisters()
+        Globals.CS_REGISTER_FILE.resetRegisters()
+        Globals.INTERRUPT_CONTROLLER.reset()
 
-        executePane.registerValues.clearHighlighting();
-        executePane.registerValues.updateRegisters();
-        executePane.fpRegValues.clearHighlighting();
-        executePane.fpRegValues.updateRegisters();
-        executePane.csrValues.clearHighlighting();
-        executePane.csrValues.updateRegisters();
-        executePane.dataSegment.highlightCellForAddress(Globals.MEMORY_INSTANCE.getMemoryConfiguration().dataBaseAddress);
-        executePane.dataSegment.clearHighlighting();
-        executePane.textSegment.resetModifiedSourceCode();
-        executePane.textSegment.setCodeHighlighting(true);
-        executePane.textSegment.highlightStepAtPC();
-        mainUI.registersPane.setSelectedComponent(executePane.registerValues);
-        FileStatus.setSystemState(FileStatus.State.RUNNABLE);
-        mainUI.isMemoryReset = true;
-        mainUI.isExecutionStarted = false;
+        executePane.registerValues.clearHighlighting()
+        executePane.registerValues.updateRegisters()
+        executePane.fpRegValues.clearHighlighting()
+        executePane.fpRegValues.updateRegisters()
+        executePane.csrValues.clearHighlighting()
+        executePane.csrValues.updateRegisters()
+        executePane.dataSegment.highlightCellForAddress(Globals.MEMORY_INSTANCE.memoryConfiguration.dataBaseAddress)
+        executePane.dataSegment.clearHighlighting()
+        executePane.textSegment.resetModifiedSourceCode()
+        executePane.textSegment.codeHighlighting = true
+        executePane.textSegment.highlightStepAtPC()
+        mainUI.registersPane.setSelectedComponent(executePane.registerValues)
+        FileStatus.setSystemState(FileStatus.State.RUNNABLE)
+        mainUI.isMemoryReset = true
+        mainUI.isExecutionStarted = false
 
         // Aug. 24, 2005 Ken Vollmar
-        this.mainUI.venusIO.resetFiles(); // Ensure that I/O "file descriptors" are initialized for a new program run
+        this.mainUI.venusIO.resetFiles() // Ensure that I/O "file descriptors" are initialized for a new program run
 
-        mainUI.messagesPane.postRunMessage(
-            "\n" + name + ": reset completed.\n\n");
+        mainUI.messagesPane.postRunMessage("\n$name: reset completed.\n\n")
     }
 }

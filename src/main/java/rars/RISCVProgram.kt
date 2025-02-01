@@ -1,17 +1,14 @@
-package rars;
+package rars
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import rars.assembler.*;
-import rars.exceptions.AssemblyException;
-import rars.simulator.BackStepper;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import arrow.core.Either
+import arrow.core.raise.either
+import rars.assembler.*
+import rars.assembler.Tokenizer.Companion.tokenize
+import rars.exceptions.AssemblyError
+import rars.simulator.BackStepper
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileReader
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -40,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-
 /**
  * Internal representations of the program. Connects source, tokens and machine
  * code. Having
@@ -50,53 +46,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public final class RISCVProgram {
-
-    private @Nullable File file;
-    private List<@NotNull String> sourceList;
-    private List<@NotNull TokenList> tokenList;
-    private List<@NotNull ProgramStatement> parsedList;
-    private List<@NotNull ProgramStatement> machineList;
-    private BackStepper backStepper;
-    private SymbolTable localSymbolTable;
-    private MacroPool macroPool;
-    private List<@NotNull SourceLine> sourceLineList;
-
-    /**
-     * Produces list of source statements that comprise the program.
-     *
-     * @return ArrayList of String. Each String is one line of RISCV source code.
-     */
-    public List<@NotNull String> getSourceList() {
-        return this.sourceList;
-    }
-
-    /**
-     * Retrieve list of source statements that comprise the program.
-     *
-     * @return ArrayList of SourceLine.
-     * Each SourceLine represents one line of RISCV source code
-     */
-    public List<@NotNull SourceLine> getSourceLineList() {
-        return this.sourceLineList;
-    }
-
-    /**
-     * Set list of source statements that comprise the program.
-     *
-     * @param sourceLineList
-     *     ArrayList of SourceLine.
-     *     Each SourceLine represents one line of RISCV source
-     *     code.
-     */
-    public void setSourceLineList(final @NotNull List<@NotNull SourceLine> sourceLineList) {
-        this.sourceLineList = sourceLineList;
-        this.sourceList = sourceLineList.stream().map(SourceLine::source).toList();
-    }
-
-    public @Nullable File getFile() {
-        return this.file;
-    }
+class RISCVProgram {
+    var file: File? = null
+        private set
+    var sourceList: List<String>? = null
+        private set
 
     /**
      * Produces list of tokens that comprise the program.
@@ -105,9 +59,8 @@ public final class RISCVProgram {
      * corresponding line of RISCV source code.
      * @see TokenList
      */
-    public List<@NotNull TokenList> getTokenList() {
-        return this.tokenList;
-    }
+    var tokenList: List<TokenList>? = null
+        private set
 
     /**
      * Produces existing list of parsed source code statements.
@@ -116,13 +69,49 @@ public final class RISCVProgram {
      * parsed RISCV statement.
      * @see ProgramStatement
      */
-    public List<@NotNull ProgramStatement> getParsedList() {
-        return this.parsedList;
-    }
+    @JvmField
+    var parsedList: List<ProgramStatement>? = null
+    private var machineList: List<ProgramStatement>? = null
 
-    public void setParsedList(final @NotNull List<@NotNull ProgramStatement> parsedList) {
-        this.parsedList = parsedList;
-    }
+    /**
+     * Returns BackStepper associated with this program. It is created upon
+     * successful assembly.
+     *
+     * @return BackStepper object, null if there is none.
+     */
+    var backStepper: BackStepper? = null
+        private set
+
+    /**
+     * Returns SymbolTable associated with this program. It is created at assembly
+     * time,
+     * and stores local labels (those not declared using .globl directive).
+     *
+     * @return a [SymbolTable] object
+     */
+    var localSymbolTable: SymbolTable? = null
+        private set
+    private var macroPool: MacroPool? = null
+
+    /**
+     * Retrieve list of source statements that comprise the program.
+     *
+     * @return ArrayList of SourceLine.
+     * Each SourceLine represents one line of RISCV source code
+     */
+    var sourceLineList: List<SourceLine>? = null
+        /**
+         * Set list of source statements that comprise the program.
+         *
+         * @param sourceLineList
+         * ArrayList of SourceLine.
+         * Each SourceLine represents one line of RISCV source
+         * code.
+         */
+        set(sourceLineList) {
+            field = sourceLineList
+            this.sourceList = sourceLineList!!.stream().map<String?>(SourceLine::source).toList()
+        }
 
     /**
      * Produces list of machine statements that are assembled from the program.
@@ -132,44 +121,23 @@ public final class RISCVProgram {
      * basic RISCV instruction.
      * @see ProgramStatement
      */
-    public @NotNull List<@NotNull ProgramStatement> getMachineList() {
-        return this.machineList;
-    }
-
-    /**
-     * Returns BackStepper associated with this program. It is created upon
-     * successful assembly.
-     *
-     * @return BackStepper object, null if there is none.
-     */
-    public BackStepper getBackStepper() {
-        return this.backStepper;
-    }
-
-    /**
-     * Returns SymbolTable associated with this program. It is created at assembly
-     * time,
-     * and stores local labels (those not declared using .globl directive).
-     *
-     * @return a {@link SymbolTable} object
-     */
-    public SymbolTable getLocalSymbolTable() {
-        return this.localSymbolTable;
+    fun getMachineList(): List<ProgramStatement> {
+        return this.machineList!!
     }
 
     /**
      * Produces specified line of RISCV source program.
      *
      * @param i
-     *     Line number of RISCV source program to get. Line 1 is first line.
+     * Line number of RISCV source program to get. Line 1 is first line.
      * @return Returns specified line of RISCV source. If outside the line range,
      * it returns null. Line 1 is first line.
      */
-    public @Nullable String getSourceLine(final int i) {
-        if ((i >= 1) && (i <= this.sourceList.size())) {
-            return this.sourceList.get(i - 1);
+    fun getSourceLine(i: Int): String? {
+        return if ((i >= 1) && (i <= this.sourceList!!.size)) {
+            this.sourceList!![i - 1]
         } else {
-            return null;
+            null
         }
     }
 
@@ -177,11 +145,12 @@ public final class RISCVProgram {
      * Reads RISCV source code from a string into structure.
      *
      * @param source
-     *     String containing the RISCV source code.
+     * String containing the RISCV source code.
      */
-    public void fromString(final @NotNull String source) {
-        this.file = null;
-        this.sourceList = Arrays.asList(source.split("\n"));
+    fun fromString(source: String) {
+        this.file = null
+        this.sourceList =
+            listOf(*source.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
     }
 
     /**
@@ -190,26 +159,26 @@ public final class RISCVProgram {
      * when user selects compile or run/step options.
      *
      * @param file
-     *     String containing name of RISCV source code file.
-     * @throws AssemblyException
-     *     Will throw exception if there is any problem
-     *     reading the file.
+     * String containing name of RISCV source code file.
+     * @throws AssemblyError
+     * Will throw exception if there is any problem
+     * reading the file.
      */
-    public void readSource(final @NotNull File file) throws AssemblyException {
-        this.file = file;
+    fun readSource(file: File): Either<AssemblyError, Unit> = either {
+        this@RISCVProgram.file = file
         try {
-            final BufferedReader inputFile = new BufferedReader(new FileReader(file));
-            String line = inputFile.readLine();
-            final var sourceList = new ArrayList<String>();
+            val inputFile = BufferedReader(FileReader(file))
+            var line = inputFile.readLine()
+            val sourceList = ArrayList<String>()
             while (line != null) {
-                sourceList.add(line);
-                line = inputFile.readLine();
+                sourceList.add(line)
+                line = inputFile.readLine()
             }
-            this.sourceList = sourceList;
-        } catch (final Exception e) {
-            final ErrorList errors = new ErrorList();
-            errors.add(ErrorMessage.error(null, 0, 0, e.toString()));
-            throw new AssemblyException(errors);
+            this@RISCVProgram.sourceList = sourceList
+        } catch (e: Exception) {
+            val errors = ErrorList()
+            errors.add(ErrorMessage.error(null, 0, 0, e.toString()))
+            raise(AssemblyError(errors))
         }
     }
 
@@ -217,13 +186,14 @@ public final class RISCVProgram {
      * Tokenizes the RISCV source program. Program must have already been read from
      * file.
      *
-     * @throws AssemblyException
-     *     Will throw exception if errors occurred while
-     *     tokenizing.
+     * @throws AssemblyError
+     * Will throw exception if errors occurred while
+     * tokenizing.
      */
-    public void tokenize() throws AssemblyException {
-        this.tokenList = Tokenizer.tokenize(this);
-        this.localSymbolTable = new SymbolTable(this.file, Globals.GLOBAL_SYMBOL_TABLE); // prepare for assembly
+    fun tokenize(): Either<AssemblyError, Unit> = either {
+        tokenList = tokenize(this@RISCVProgram).bind()
+        this@RISCVProgram.localSymbolTable =
+            SymbolTable(this@RISCVProgram.file, Globals.GLOBAL_SYMBOL_TABLE) // prepare for assembly
     }
 
     /**
@@ -231,48 +201,49 @@ public final class RISCVProgram {
      * reading and tokenizing all the source files. There may be only one.
      *
      * @param files
-     *     ArrayList containing the source file name(s) in no
-     *     particular order
+     * ArrayList containing the source file name(s) in no
+     * particular order
      * @param leadFile
-     *     String containing name of source file that needs to
-     *     go first and
-     *     will be represented by "this" RISCVprogram object.
+     * String containing name of source file that needs to
+     * go first and
+     * will be represented by "this" RISCVprogram object.
      * @param exceptionHandler
-     *     String containing name of source file containing
-     *     exception
-     *     handler. This will be assembled first, even ahead of
-     *     leadFilename, to allow it to
-     *     include "startup" instructions loaded beginning at
-     *     0x00400000. Specify null or
-     *     empty String to indicate there is no such designated
-     *     exception handler.
+     * String containing name of source file containing
+     * exception
+     * handler. This will be assembled first, even ahead of
+     * leadFilename, to allow it to
+     * include "startup" instructions loaded beginning at
+     * 0x00400000. Specify null or
+     * empty String to indicate there is no such designated
+     * exception handler.
      * @return ArrayList containing one RISCVprogram object for each file to
      * assemble.
      * objects for any additional files (send ArrayList to assembler)
-     * @throws AssemblyException
-     *     Will throw exception if errors occurred while
-     *     reading or tokenizing.
+     * @throws AssemblyError
+     * Will throw exception if errors occurred while
+     * reading or tokenizing.
      */
-    public @NotNull List<@NotNull RISCVProgram> prepareFilesForAssembly(
-        final @NotNull List<? extends @NotNull File> files,
-        final @NotNull File leadFile,
-        final @Nullable File exceptionHandler
-    ) throws AssemblyException {
-        final var programsToAssemble = new ArrayList<RISCVProgram>();
-        final int leadFilePosition = exceptionHandler == null ? 0 : 1;
-        for (final var file : files) {
-            final var prepareeProgram = (file.equals(leadFile)) ? this : new RISCVProgram();
-            prepareeProgram.readSource(file);
-            prepareeProgram.tokenize();
+//    @Throws(AssemblyException::class)
+    fun prepareFilesForAssembly(
+        files: List<File>,
+        leadFile: File,
+        exceptionHandler: File?
+    ): Either<AssemblyError, List<RISCVProgram>> = either {
+        val programsToAssemble = mutableListOf<RISCVProgram>()
+        val leadFilePosition = if (exceptionHandler == null) 0 else 1
+        for (file in files) {
+            val prepareeProgram = if (file == leadFile) this@RISCVProgram else RISCVProgram()
+            prepareeProgram.readSource(file).onLeft { raise(it) }
+            prepareeProgram.tokenize().onLeft { raise(it) }
             // I want "this" RISCVprogram to be the first in the list...except for exception
             // handler
-            if (prepareeProgram == this && !programsToAssemble.isEmpty()) {
-                programsToAssemble.add(leadFilePosition, prepareeProgram);
+            if (prepareeProgram == this@RISCVProgram && !programsToAssemble.isEmpty()) {
+                programsToAssemble.add(leadFilePosition, prepareeProgram)
             } else {
-                programsToAssemble.add(prepareeProgram);
+                programsToAssemble.add(prepareeProgram)
             }
         }
-        return programsToAssemble;
+        programsToAssemble
     }
 
     /**
@@ -281,73 +252,55 @@ public final class RISCVProgram {
      * already been tokenized.
      *
      * @param programsToAssemble
-     *     ArrayList of RISCVprogram objects, each
-     *     representing a tokenized source file.
+     * ArrayList of RISCVprogram objects, each
+     * representing a tokenized source file.
      * @param extendedAssemblerEnabled
-     *     A boolean value - true means extended
-     *     (usePseudoInstructions) instructions
-     *     are permitted in source code and false means
-     *     they are to be flagged as errors
+     * A boolean value - true means extended
+     * (usePseudoInstructions) instructions
+     * are permitted in source code and false means
+     * they are to be flagged as errors
      * @param warningsAreErrors
-     *     A boolean value - true means assembler
-     *     warnings will be considered errors and
-     *     terminate
-     *     the assemble; false means the assembler will
-     *     produce warning message but otherwise ignore
-     *     warnings.
+     * A boolean value - true means assembler
+     * warnings will be considered errors and
+     * terminate
+     * the assemble; false means the assembler will
+     * produce warning message but otherwise ignore
+     * warnings.
      * @return ErrorList containing nothing or only warnings (otherwise would have
      * thrown exception).
-     * @throws AssemblyException
-     *     Will throw exception if errors occurred while
-     *     assembling.
+     * @throws AssemblyError
+     * Will throw exception if errors occurred while
+     * assembling.
      */
-    public @NotNull ErrorList assemble(
-        final @NotNull List<@NotNull RISCVProgram> programsToAssemble,
-        final boolean extendedAssemblerEnabled,
-        final boolean warningsAreErrors
-    ) throws AssemblyException {
-        this.backStepper = null;
-        final var assemblyResult = Assembler.assemble(
+//    @Throws(AssemblyException::class)
+    fun assemble(
+        programsToAssemble: List<RISCVProgram>,
+        extendedAssemblerEnabled: Boolean,
+        warningsAreErrors: Boolean
+    ): Either<AssemblyError, ErrorList> = either {
+        backStepper = null
+        val assemblyResult = Assembler.assemble(
             programsToAssemble,
             extendedAssemblerEnabled,
             warningsAreErrors
-        );
-        this.machineList = assemblyResult.getFirst();
-        this.backStepper = new BackStepper();
-        return assemblyResult.getSecond();
+        ).bind()
+        this@RISCVProgram.machineList = assemblyResult.first
+        this@RISCVProgram.backStepper = BackStepper()
+        assemblyResult.second
     }
 
     /**
-     * Instantiates a new {@link MacroPool} and sends reference of this
-     * {@link RISCVProgram} to it
+     * Instantiates a new [MacroPool] and sends reference of this
+     * [RISCVProgram] to it
      *
      * @return instatiated MacroPool
      * @author M.H.Sekhavat &lt;sekhavat17@gmail.com&gt;
      */
-    public MacroPool createMacroPool() {
-        this.macroPool = new MacroPool(this);
-        return this.macroPool;
+    fun createMacroPool(): MacroPool {
+        this.macroPool = MacroPool(this)
+        return this.macroPool!!
     }
 
-    /**
-     * Gets local macro pool {@link MacroPool} for this program
-     *
-     * @return MacroPool
-     * @author M.H.Sekhavat &lt;sekhavat17@gmail.com&gt;
-     */
-    public MacroPool getLocalMacroPool() {
-        return this.macroPool;
-    }
-
-    /**
-     * Sets local macro pool {@link MacroPool} for this program
-     *
-     * @param macroPool
-     *     reference to MacroPool
-     * @author M.H.Sekhavat &lt;sekhavat17@gmail.com&gt;
-     */
-    public void setLocalMacroPool(final MacroPool macroPool) {
-        this.macroPool = macroPool;
-    }
-
+    var localMacroPool: MacroPool? by this::macroPool
 } // RISCVprogram
+

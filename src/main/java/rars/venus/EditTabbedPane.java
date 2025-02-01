@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.RISCVProgram;
-import rars.exceptions.AssemblyException;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
 
@@ -684,10 +683,7 @@ public final class EditTabbedPane extends JPanel {
             FileStatus.setSystemState(FileStatus.State.OPENING);// DPS 9-Aug-2011
             if (theFile.canRead()) {
                 Globals.program = new RISCVProgram();
-                try {
-                    Globals.program.readSource(theFile);
-                } catch (final AssemblyException ignored) {
-                }
+                Globals.program.readSource(theFile); // ignore the potential assembly error
                 // DPS 1 Nov 2006. Defined a StringBuffer to receive all file contents,
                 // one line at a time, before adding to the Edit pane with one setText.
                 // StringBuffer is preallocated to full filelength to eliminate dynamic

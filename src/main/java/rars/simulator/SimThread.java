@@ -10,7 +10,7 @@ import rars.notices.SimulatorNotice;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
 import rars.settings.OtherSettings;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
 import rars.util.ListenerDispatcher;
 import rars.venus.run.RunSpeedPanel;
 
@@ -401,7 +401,7 @@ public class SimThread implements Runnable {
                         // TODO: Proper error handling here
                         throw new SimulationException(
                             statement,
-                            "undefined instruction (" + BinaryUtils.intToHexString(statement.getBinaryStatement())
+                            "undefined instruction (" + BinaryUtilsKt.intToHexStringWithPrefix(statement.getBinaryStatement())
                                 + ")",
                             ExceptionReason.ILLEGAL_INSTRUCTION
                         );

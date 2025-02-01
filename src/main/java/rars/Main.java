@@ -8,14 +8,14 @@ import rars.api.Program;
 import rars.api.ProgramOptions;
 import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
-import rars.exceptions.AssemblyException;
 import rars.exceptions.SimulationException;
 import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryUtils;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
+import rars.util.BinaryUtilsOld;
 import rars.util.FilenameFinder;
 import rars.util.RegisterUtils;
 import rars.venus.VenusUI;
@@ -117,9 +117,9 @@ public final class Main {
             memoryRange[1] = arg.substring(arg.indexOf(Main.rangeSeparator) + 1);
             // NOTE: I will use homegrown decoder, because Integer.decode will throw
             // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
-            if (BinaryUtils.stringToInt(memoryRange[0]) > BinaryUtils.stringToInt(memoryRange[1]) ||
-                !MemoryUtils.wordAligned(BinaryUtils.stringToInt(memoryRange[0])) ||
-                !MemoryUtils.wordAligned(BinaryUtils.stringToInt(memoryRange[1]))) {
+            if (BinaryUtilsOld.stringToInt(memoryRange[0]) > BinaryUtilsOld.stringToInt(memoryRange[1]) ||
+                !MemoryUtils.wordAligned(BinaryUtilsOld.stringToInt(memoryRange[0])) ||
+                !MemoryUtils.wordAligned(BinaryUtilsOld.stringToInt(memoryRange[1]))) {
                 throw new NumberFormatException();
             }
         }
@@ -246,18 +246,34 @@ public final class Main {
             filesToAssemble = this.programOptions.files;
         }
         final Program program = new Program(this.programOptions);
-        try {
-            if (Globals.debug) {
-                this.out.println("---  TOKENIZING & ASSEMBLY BEGINS  ---");
+
+        // program.assembleFiles(filesToAssemble, mainFile).fold(
+        //     error -> {
+        //        
+        //     },
+        //     errorList -> {
+        //        
+        //     }
+        // );
+        if (Globals.debug) {
+            this.out.println("---  TOKENIZING & ASSEMBLY BEGINS  ---");
+        }
+        final var result = program.assembleFiles(filesToAssemble, mainFile);
+        final var didSucceed = result.fold(
+            assemblyError -> {
+                Globals.exitCode = this.programOptions.assemblyErrorCode;
+                this.out.println(assemblyError.errors.generateErrorAndWarningReport());
+                this.out.println("Processing terminated due to errors.");
+                return false;
+            },
+            right -> {
+                if (right.warningsOccurred()) {
+                    this.out.println(right.generateWarningReport());
+                }
+                return true;
             }
-            final ErrorList warnings = program.assembleFiles(filesToAssemble, mainFile);
-            if (warnings != null && warnings.warningsOccurred()) {
-                this.out.println(warnings.generateWarningReport());
-            }
-        } catch (final AssemblyException e) {
-            Globals.exitCode = this.programOptions.assemblyErrorCode;
-            this.out.println(e.errors.generateErrorAndWarningReport());
-            this.out.println("Processing terminated due to errors.");
+        );
+        if (!didSucceed) {
             return null;
         }
         // Setup for program simulation even if just assembling to prepare memory dumps
@@ -322,12 +338,12 @@ public final class Main {
                     this.out.print(registerName + "\t");
                 }
                 switch (this.programOptions.displayFormat) {
-                    case HEX -> this.out.println(BinaryUtils.intToHexString(ivalue));
+                    case HEX -> this.out.println(BinaryUtilsKt.intToHexStringWithPrefix(ivalue));
                     case DECIMAL -> {
                         final float fvalue = Float.intBitsToFloat(ivalue);
                         this.out.println(fvalue);
                     }
-                    default -> this.out.println(BinaryUtils.intToAscii(ivalue));
+                    default -> this.out.println(BinaryUtilsOld.intToAscii(ivalue));
                 }
             } else if (Globals.CS_REGISTER_FILE.getRegisterByName(registerName) != null) {
                 this.out.print(registerName + "\t");
@@ -345,8 +361,8 @@ public final class Main {
     private @NotNull String formatIntForDisplay(final int value) {
         return switch (this.programOptions.displayFormat) {
             case DECIMAL -> Integer.toString(value);
-            case HEX -> BinaryUtils.intToAscii(value);
-            default -> BinaryUtils.intToHexString(value); // hex case
+            case HEX -> BinaryUtilsOld.intToAscii(value);
+            default -> BinaryUtilsKt.intToHexStringWithPrefix(value); // hex case
         };
     }
 
@@ -364,7 +380,7 @@ public final class Main {
                 if (valuesDisplayed % Main.memoryWordsPerLine == 0) {
                     this.out.print((valuesDisplayed > 0) ? "\n" : "");
                     if (!this.programOptions.brief) {
-                        this.out.print("Mem[" + BinaryUtils.intToHexString(addr) + "]\t");
+                        this.out.print("Mem[" + BinaryUtilsKt.intToHexStringWithPrefix(addr) + "]\t");
                     }
                 }
                 try {

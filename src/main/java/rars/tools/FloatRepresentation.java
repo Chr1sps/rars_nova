@@ -5,7 +5,8 @@ import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.notices.AccessNotice;
 import rars.riscv.hardware.registers.Register;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
+import rars.util.BinaryUtilsOld;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -440,7 +441,7 @@ public final class FloatRepresentation extends AbstractTool {
                 FloatRepresentation.maxLengthBinaryTotal
             ));
         this.decimalDisplay.setText(flavors.decimalString);
-        this.binaryToDecimalFormulaGraphic.drawSubtractLabel(BinaryUtils.binaryStringToInt(
+        this.binaryToDecimalFormulaGraphic.drawSubtractLabel(BinaryUtilsOld.binaryStringToInt(
             (
                 flavors.binaryString.substring(
                     FloatRepresentation.maxLengthBinarySign,
@@ -590,7 +591,7 @@ public final class FloatRepresentation extends AbstractTool {
 
         // Build binary expansion formula for display -- will not be editable.
         public static String buildExpansionFromBinaryString(final String binaryString) {
-            final int biasedExponent = BinaryUtils.binaryStringToInt(
+            final int biasedExponent = BinaryUtilsOld.binaryStringToInt(
                 binaryString.substring(
                     FloatRepresentation.maxLengthBinarySign,
                     FloatRepresentation.maxLengthBinarySign + FloatRepresentation.maxLengthBinaryExponent
@@ -633,20 +634,20 @@ public final class FloatRepresentation extends AbstractTool {
                 ),
                 FloatRepresentation.maxLengthHex
             );
-            this.binaryString = BinaryUtils.hexStringToBinaryString(this.hexString);
-            this.decimalString = Float.toString(Float.intBitsToFloat(BinaryUtils.binaryStringToInt(this.binaryString)));
+            this.binaryString = BinaryUtilsOld.hexStringToBinaryString(this.hexString);
+            this.decimalString = Float.toString(Float.intBitsToFloat(BinaryUtilsOld.binaryStringToInt(this.binaryString)));
             this.expansionString = FlavorsOfFloat.buildExpansionFromBinaryString(this.binaryString);
-            this.intValue = BinaryUtils.binaryStringToInt(this.binaryString);
+            this.intValue = BinaryUtilsOld.binaryStringToInt(this.binaryString);
             return this;
         }
 
         // Assign all fields given a string representing 32 bit binary value
         private FlavorsOfFloat buildOneFromBinaryString() {
             this.binaryString = this.getFullBinaryStringFromDisplays();
-            this.hexString = BinaryUtils.binaryStringToHexString(this.binaryString);
-            this.decimalString = Float.toString(Float.intBitsToFloat(BinaryUtils.binaryStringToInt(this.binaryString)));
+            this.hexString = BinaryUtilsOld.binaryStringToHexString(this.binaryString);
+            this.decimalString = Float.toString(Float.intBitsToFloat(BinaryUtilsOld.binaryStringToInt(this.binaryString)));
             this.expansionString = FlavorsOfFloat.buildExpansionFromBinaryString(this.binaryString);
-            this.intValue = BinaryUtils.binaryStringToInt(this.binaryString);
+            this.intValue = BinaryUtilsOld.binaryStringToInt(this.binaryString);
             return this;
         }
 
@@ -660,8 +661,8 @@ public final class FloatRepresentation extends AbstractTool {
             }
             this.decimalString = Float.toString(floatValue);
             this.intValue = Float.floatToIntBits(floatValue);// use floatToRawIntBits?
-            this.binaryString = BinaryUtils.intToBinaryString(this.intValue);
-            this.hexString = BinaryUtils.binaryStringToHexString(this.binaryString);
+            this.binaryString = BinaryUtilsKt.intToBinaryString(this.intValue);
+            this.hexString = BinaryUtilsOld.binaryStringToHexString(this.binaryString);
             this.expansionString = FlavorsOfFloat.buildExpansionFromBinaryString(this.binaryString);
             return this;
         }
@@ -669,9 +670,9 @@ public final class FloatRepresentation extends AbstractTool {
         // Assign all fields given int representing 32 bit representation of float value
         private FlavorsOfFloat buildOneFromInt(final int intValue) {
             this.intValue = intValue;
-            this.binaryString = BinaryUtils.intToBinaryString(intValue);
-            this.hexString = BinaryUtils.binaryStringToHexString(this.binaryString);
-            this.decimalString = Float.toString(Float.intBitsToFloat(BinaryUtils.binaryStringToInt(this.binaryString)));
+            this.binaryString = BinaryUtilsKt.intToBinaryString(intValue);
+            this.hexString = BinaryUtilsOld.binaryStringToHexString(this.binaryString);
+            this.decimalString = Float.toString(Float.intBitsToFloat(BinaryUtilsOld.binaryStringToInt(this.binaryString)));
             this.expansionString = FlavorsOfFloat.buildExpansionFromBinaryString(this.binaryString);
             return this;
         }
@@ -953,7 +954,7 @@ public final class FloatRepresentation extends AbstractTool {
         final int upperYArrowHead = this.upperY - this.arrowHeadOffset;
         int centerX, exponentCenterX;
         int subtractLabelWidth, subtractLabelHeight;
-        int currentExponent = BinaryUtils.binaryStringToInt(FloatRepresentation.defaultBinaryExponent);
+        int currentExponent = BinaryUtilsOld.binaryStringToInt(FloatRepresentation.defaultBinaryExponent);
 
         @Override
         public void paintComponent(final Graphics g) {

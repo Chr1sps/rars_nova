@@ -12,7 +12,8 @@ import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
+import rars.util.BinaryUtilsOld;
 import rars.util.FontUtilities;
 
 import javax.swing.*;
@@ -366,12 +367,12 @@ public final class TextSegmentWindow extends JInternalFrame {
             } else {
                 try {
                     final ProgramStatement statement = new ProgramStatement(
-                        BinaryUtils
+                        BinaryUtilsOld
                             .stringToInt((String) this.table.getModel().getValueAt(
                                 i,
                                 ColumnData.INSTRUCTION_CODE_COLUMN.number
                             )),
-                        BinaryUtils
+                        BinaryUtilsOld
                             .stringToInt((String) this.table.getModel().getValueAt(
                                 i,
                                 ColumnData.INSTRUCTION_ADDRESS_COLUMN.number
@@ -647,7 +648,7 @@ public final class TextSegmentWindow extends JInternalFrame {
     }
 
     private void updateTable(final int address, final int value) {
-        final String strValue = BinaryUtils.intToHexString(value);
+        final String strValue = BinaryUtilsKt.intToHexStringWithPrefix(value);
         // Translate the address into table model row and modify the values in that row
         // accordingly.
         final int row;
@@ -860,7 +861,7 @@ public final class TextSegmentWindow extends JInternalFrame {
             }
             final int val;
             try {
-                val = BinaryUtils.stringToInt((String) value);
+                val = BinaryUtilsOld.stringToInt((String) value);
             } catch (final NumberFormatException nfe) {
                 LOGGER.error("NumberFormatException when decoding value from table model.", nfe);
                 this.data[row][col] = "INVALID";
@@ -871,7 +872,7 @@ public final class TextSegmentWindow extends JInternalFrame {
             int address = 0;
             try {
                 address =
-                    BinaryUtils.stringToInt((String) this.data[row][ColumnData.INSTRUCTION_ADDRESS_COLUMN.number]);
+                    BinaryUtilsOld.stringToInt((String) this.data[row][ColumnData.INSTRUCTION_ADDRESS_COLUMN.number]);
             } catch (final NumberFormatException nfe) {
                 // can't really happen since memory addresses are completely under
                 // the control of my software.

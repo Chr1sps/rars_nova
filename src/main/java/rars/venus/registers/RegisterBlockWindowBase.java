@@ -8,7 +8,7 @@ import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.registerFiles.RegisterFileBase;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsOld;
 import rars.venus.NumberDisplayBaseChooser;
 import rars.venus.VenusUI;
 import rars.venus.run.RunSpeedPanel;
@@ -350,9 +350,9 @@ public abstract class RegisterBlockWindowBase extends JPanel {
             final long newValue;
             try {
                 if (BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)) {
-                    newValue = BinaryUtils.stringToLong((String) value);
+                    newValue = BinaryUtilsOld.stringToLong((String) value);
                 } else {
-                    newValue = BinaryUtils.stringToInt((String) value);
+                    newValue = BinaryUtilsOld.stringToInt((String) value);
                 }
             } catch (final NumberFormatException nfe) {
                 // If the user enters an invalid value, don't do anything.

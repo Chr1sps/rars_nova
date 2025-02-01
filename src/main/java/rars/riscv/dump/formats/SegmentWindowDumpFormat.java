@@ -7,7 +7,8 @@ import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.riscv.hardware.Memory;
 import rars.settings.BoolSetting;
-import rars.util.BinaryUtils;
+import rars.util.BinaryUtilsKt;
+import rars.util.BinaryUtilsOld;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -71,8 +72,8 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
                 for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                     if (offset % 8 == 0) {
                         final var formattedAddress = (doDisplayAddressesInHex)
-                            ? BinaryUtils.intToHexString(address)
-                            : BinaryUtils.unsignedIntToIntString(address);
+                            ? BinaryUtilsKt.intToHexStringWithPrefix(address)
+                            : BinaryUtilsOld.unsignedIntToIntString(address);
                         builder.append(formattedAddress).append("    ");
                     }
                     offset++;
@@ -81,7 +82,7 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
                         break;
                     }
                     builder.append((doDisplayAddressesInHex)
-                        ? BinaryUtils.intToHexString(optWord)
+                        ? BinaryUtilsKt.intToHexStringWithPrefix(optWord)
                         : ("           " + optWord).substring(optWord.toString().length())).append(" ");
                     if (offset % 8 == 0) {
                         outStream.println(builder);
@@ -96,14 +97,14 @@ public class SegmentWindowDumpFormat extends AbstractDumpFormat {
                 for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
                     final var builder = new StringBuilder();
                     final var formattedAddress = (doDisplayAddressesInHex)
-                        ? BinaryUtils.intToHexString(address)
-                        : BinaryUtils.unsignedIntToIntString(address);
+                        ? BinaryUtilsKt.intToHexStringWithPrefix(address)
+                        : BinaryUtilsOld.unsignedIntToIntString(address);
                     builder.append(formattedAddress).append("    ");
                     final var optWord = memory.getRawWordOrNull(address);
                     if (optWord == null) {
                         break;
                     }
-                    builder.append(BinaryUtils.intToHexString(optWord));
+                    builder.append(BinaryUtilsKt.intToHexStringWithPrefix(optWord));
                     builder.append("  ");
                     try {
                         final ProgramStatement ps = memory.getStatement(address);
