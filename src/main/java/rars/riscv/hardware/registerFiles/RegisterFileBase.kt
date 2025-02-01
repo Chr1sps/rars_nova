@@ -1,153 +1,129 @@
-package rars.riscv.hardware.registerFiles;
+package rars.riscv.hardware.registerFiles
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import rars.exceptions.SimulationException;
-import rars.notices.RegisterAccessNotice;
-import rars.riscv.hardware.registers.Register;
-import rars.util.BinaryUtilsOld;
+import arrow.core.Either
+import arrow.core.raise.either
+import rars.exceptions.SimulationError
+import rars.notices.RegisterAccessNotice
+import rars.riscv.hardware.registers.Register
+import rars.util.BinaryUtilsOld
+import java.util.function.Consumer
 
-import java.util.function.Consumer;
-
-public abstract class RegisterFileBase {
-
-    protected final @NotNull Register @NotNull [] registers;
-    private final char registerNumberPrefix;
-
-    protected RegisterFileBase(
-        final char registerNumberPrefix,
-        final @NotNull Register @NotNull [] registers
-    ) {
-        this.registerNumberPrefix = registerNumberPrefix;
-        this.registers = registers;
+abstract class RegisterFileBase protected constructor(
+    private val registerNumberPrefix: Char,
+    protected val myRegisters: Array<Register>
+) {
+    fun updateRegisterByName(registerName: String, newValue: Long): Either<SimulationError, Long?> = either {
+        val register = this@RegisterFileBase.getRegisterByName(registerName)
+        if (register == null) null
+        else this@RegisterFileBase.updateRegister(register, newValue).bind()
     }
-
-    public final @Nullable Long updateRegisterByName(final @NotNull String registerName, final long newValue) throws
-        SimulationException {
-        final var register = this.getRegisterByName(registerName);
-        if (register == null) {
-            return null;
-        }
-        return this.updateRegister(register, newValue);
-    }
-
-    protected abstract int convertFromLong(final long value);
-
-    public final long getLongValue(final @NotNull Register register) {
-        return register.getValue();
-    }
-
-    public final int getIntValue(final @NotNull Register register) {
-        return this.convertFromLong(register.getValue());
-    }
-
-    public final @Nullable Integer getIntValue(final @NotNull String registerName) {
-        final var register = this.getRegisterByName(registerName);
-        if (register == null) {
-            return null;
-        }
-        return this.convertFromLong(register.getValue());
-    }
-
-    public final @Nullable Integer getIntValue(final int registerNumber) {
-        final var register = this.getRegisterByNumber(registerNumber);
-        if (register == null) {
-            return null;
-        }
-        return this.convertFromLong(register.getValue());
-    }
-
-    public final @Nullable Long getLongValue(final @NotNull String registerName) {
-        final var register = this.getRegisterByName(registerName);
-        if (register == null) {
-            return null;
-        }
-        return register.getValue();
-    }
-
-    public final @Nullable Long getLongValue(final int registerNumber) {
-        final var register = this.getRegisterByNumber(registerNumber);
-        if (register == null) {
-            return null;
-        }
-        return this.getLongValue(register);
-    }
-
-    public final @Nullable Long updateRegisterByNumber(final int registerNumber, final long newValue) throws
-        SimulationException {
-        final var register = this.getRegisterByNumber(registerNumber);
-        if (register == null) {
-            return null;
-        }
-        return this.updateRegister(register, newValue);
-    }
-
-    public abstract long updateRegister(final @NotNull Register register, final long newValue) throws
-        SimulationException;
 
     /**
      * Returns all the registers in the register file.
      *
      * @return An array of all the registers in the register file.
      */
-    public @NotNull Register @NotNull [] getRegisters() {
-        return this.registers;
+    open val registers: Array<Register> = myRegisters
+
+    protected abstract fun convertFromLong(value: Long): Int
+
+    fun getLongValue(register: Register): Long = register.getValue()
+
+    fun getIntValue(register: Register): Int = this.convertFromLong(register.getValue())
+
+    fun getIntValue(registerName: String): Int? {
+        val register = this.getRegisterByName(registerName)
+        if (register == null) {
+            return null
+        }
+        return this.convertFromLong(register.getValue())
     }
 
-    public final @Nullable Register getRegisterByNumber(final int registerNumber) {
-        for (final var register : this.registers) {
+    fun getIntValue(registerNumber: Int): Int? {
+        val register = this.getRegisterByNumber(registerNumber)
+        if (register == null) {
+            return null
+        }
+        return this.convertFromLong(register.getValue())
+    }
+
+    fun getLongValue(registerName: String): Long? {
+        val register = this.getRegisterByName(registerName)
+        if (register == null) {
+            return null
+        }
+        return register.getValue()
+    }
+
+    fun getLongValue(registerNumber: Int): Long? {
+        val register = this.getRegisterByNumber(registerNumber)
+        if (register == null) {
+            return null
+        }
+        return this.getLongValue(register)
+    }
+
+    fun updateRegisterByNumber(registerNumber: Int, newValue: Long): Either<SimulationError, Long?> = either {
+        val register = this@RegisterFileBase.getRegisterByNumber(registerNumber)
+        if (register == null) null
+        else this@RegisterFileBase.updateRegister(register, newValue).bind()
+    }
+
+    abstract fun updateRegister(register: Register, newValue: Long): Either<SimulationError, Long>
+
+    fun getRegisterByNumber(registerNumber: Int): Register? {
+        for (register in this.myRegisters) {
             if (register.number == registerNumber) {
-                return register;
+                return register
             }
         }
-        return null;
+        return null
     }
 
-    public final @Nullable Register getRegisterByName(final @NotNull String name) {
-        if (name.length() < 2) {
-            return null;
+    fun getRegisterByName(name: String): Register? {
+        if (name.length < 2) {
+            return null
         }
 
         // Handle a direct name
-        for (final var register : this.registers) {
-            if (register.name.equals(name)) {
-                return register;
+        for (register in this.myRegisters) {
+            if (register.name == name) {
+                return register
             }
         }
         // Handle prefix case
-        if (name.charAt(0) == this.registerNumberPrefix) {
-            if (name.charAt(1) == 0) { // Ensure that it is a normal decimal number
-                if (name.length() > 2) {
-                    return null;
+        if (name[0] == this.registerNumberPrefix) {
+            if (name[1].code == 0) { // Ensure that it is a normal decimal number
+                if (name.length > 2) {
+                    return null
                 }
-                return this.getRegisterByNumber(0);
-
+                return this.getRegisterByNumber(0)
             }
 
-            final var integerNumber = BinaryUtilsOld.stringToIntFast(name.substring(1));
+            val integerNumber: Int? = BinaryUtilsOld.stringToIntFast(name.substring(1))
             if (integerNumber == null) {
-                return null;
+                return null
             }
-            return this.getRegisterByNumber(integerNumber);
+            return this.getRegisterByNumber(integerNumber)
         }
-        return null;
+        return null
     }
 
-    public void resetRegisters() {
-        for (final var register : this.registers) {
-            register.resetValue();
-        }
-    }
-
-    public void addRegistersListener(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
-        for (final var register : this.registers) {
-            register.registerChangeHook.subscribe(listener);
+    open fun resetRegisters() {
+        for (register in this.myRegisters) {
+            register.resetValue()
         }
     }
 
-    public void deleteRegistersListener(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
-        for (final var register : this.registers) {
-            register.registerChangeHook.unsubscribe(listener);
+    fun addRegistersListener(listener: Consumer<in RegisterAccessNotice?>) {
+        for (register in this.myRegisters) {
+            register.registerChangeHook.subscribe(listener)
+        }
+    }
+
+    fun deleteRegistersListener(listener: Consumer<in RegisterAccessNotice?>) {
+        for (register in this.myRegisters) {
+            register.registerChangeHook.unsubscribe(listener)
         }
     }
 }

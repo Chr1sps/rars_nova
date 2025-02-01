@@ -8,10 +8,9 @@ import rars.api.Program;
 import rars.api.ProgramOptions;
 import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
-import rars.exceptions.SimulationException;
 import rars.riscv.InstructionsRegistry;
 import rars.riscv.hardware.Memory;
-import rars.riscv.hardware.MemoryUtils;
+import rars.riscv.hardware.MemoryUtilsKt;
 import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.util.BinaryUtilsKt;
@@ -118,8 +117,8 @@ public final class Main {
             // NOTE: I will use homegrown decoder, because Integer.decode will throw
             // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
             if (BinaryUtilsOld.stringToInt(memoryRange[0]) > BinaryUtilsOld.stringToInt(memoryRange[1]) ||
-                !MemoryUtils.wordAligned(BinaryUtilsOld.stringToInt(memoryRange[0])) ||
-                !MemoryUtils.wordAligned(BinaryUtilsOld.stringToInt(memoryRange[1]))) {
+                !MemoryUtilsKt.wordAligned(BinaryUtilsOld.stringToInt(memoryRange[0])) ||
+                !MemoryUtilsKt.wordAligned(BinaryUtilsOld.stringToInt(memoryRange[1]))) {
                 throw new NumberFormatException();
             }
         }

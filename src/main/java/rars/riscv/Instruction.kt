@@ -1,8 +1,6 @@
-package rars.riscv;
+package rars.riscv
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.StringTokenizer;
+import java.util.*
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -31,51 +29,44 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-
 /**
  * Base class to represent member of RISCV instruction set.
  *
  * @author Pete Sanderson and Ken Vollmar
  * @version August 2003
  */
-public abstract sealed class Instruction permits BasicInstruction, ExtendedInstruction {
-    /**
-     * Characters used in instruction mask to indicate bit positions
-     * for 'f'irst, 's'econd, 't'hird, 'q'uad, and 'p'enta operands .
-     **/
-    public static final char[] operandMask = {'f', 's', 't', 'q', 'p'};
-    /**
-     * The instruction name.
-     **/
-    public final @NotNull String mnemonic;
+sealed class Instruction protected constructor(
     /**
      * Example usage of this instruction. Is provided as subclass constructor
      * argument.
-     **/
-    public final @NotNull String exampleFormat;
+     */
+    @JvmField val exampleFormat: String,
     /**
      * Description of instruction for display to user
-     **/
-    public final @NotNull String description;
-
-    protected Instruction(final @NotNull String example, final @NotNull String description) {
-        this.mnemonic = extractOperator(example);
-        this.exampleFormat = example;
-        this.description = description;
-    }
-
-    /**
-     * Used by subclass constructors to extract operator mnemonic from the
-     * instruction example.
-     *
-     * @param example
-     *     a {@link java.lang.String} object
-     * @return a {@link java.lang.String} object
      */
-    protected static String extractOperator(final @NotNull String example) {
-        final StringTokenizer st = new StringTokenizer(example, " ,\t");
-        return st.nextToken();
-    }
+    @JvmField val description: String
+) {
+    /** The instruction name. */
+    @JvmField
+    val mnemonic: String = extractOperator(exampleFormat)
 
-    public abstract int getInstructionLength();
+    abstract val instructionLength: Int
+
+    companion object {
+        /**
+         * Characters used in instruction mask to indicate bit positions
+         * for 'f'irst, 's'econd, 't'hird, 'q'uad, and 'p'enta operands .
+         */
+        @JvmField
+        val operandMask: CharArray = charArrayOf('f', 's', 't', 'q', 'p')
+
+        /**
+         * Used by subclass constructors to extract operator mnemonic from the
+         * instruction example.
+         */
+        protected fun extractOperator(example: String): String {
+            val st = StringTokenizer(example, " ,\t")
+            return st.nextToken()
+        }
+    }
 }

@@ -108,7 +108,7 @@ public abstract class Floating extends BasicInstruction {
     }
 
     @Override
-    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
+    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final var environment = new Environment();
         final var hasRoundingMode = statement.hasOperand(3);

@@ -7,7 +7,7 @@ import rars.Globals
 import rars.ProgramStatement
 import rars.RISCVProgram
 import rars.exceptions.AssemblyError
-import rars.exceptions.SimulationException
+import rars.exceptions.SimulationEvent
 import rars.io.ConsoleIO
 import rars.riscv.hardware.Memory
 import rars.settings.BoolSetting
@@ -28,12 +28,12 @@ import java.io.File
  * The order you are expected to run the methods is:
  *
  *  1. assemble(...)
- *  1. setup(...)
- *  1. get/set for any specific setup
- *  1. simulate()
- *  1. get/set to check output
- *  1. repeat 3-5 if simulation hasn't terminated
- *  1. repeat 2-6 for multiple inputs as needed
+ *  2. setup(...)
+ *  3. get/set for any specific setup
+ *  4. simulate()
+ *  5. get/set to check output
+ *  6. repeat 3-5 if simulation hasn't terminated
+ *  7. repeat 2-6 for multiple inputs as needed
  *
  *
  *
@@ -209,12 +209,11 @@ class Program(private val programOptions: ProgramOptions) {
      * code).
      *
      * Only BREAKPOINT and MAX_STEPS can be simulated further.
-     * @throws SimulationException
+     * @throws SimulationError
      * thrown if there is an uncaught interrupt. The
      * program cannot be simulated further.
      */
-    @Throws(SimulationException::class)
-    fun simulate(): Simulator.Reason {
+    fun simulate(): Either<SimulationEvent, Simulator.Reason> {
         // Swap out global state for local state.
 
         val selfMod = Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
@@ -224,26 +223,17 @@ class Program(private val programOptions: ProgramOptions) {
         )
         val tmpMem = Globals.swapMemoryInstance(this.memory)
 
-        var e: SimulationException? = null
-        lateinit var ret: Simulator.Reason
-        try {
-            ret = Globals.SIMULATOR.simulateCli(
-                Globals.REGISTER_FILE.programCounter,
-                this.programOptions.maxSteps,
-                this.consoleIO!!
-            )
-        } catch (se: SimulationException) {
-            e = se
-        }
+        val result = Globals.SIMULATOR.simulateCli(
+            Globals.REGISTER_FILE.programCounter,
+            this.programOptions.maxSteps,
+            this.consoleIO!!
+        )
         this.exitCode = Globals.exitCode
 
         Globals.BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, selfMod)
         Globals.swapMemoryInstance(tmpMem)
 
-        if (e != null) {
-            throw e
-        }
-        return ret
+        return result
     }
 
     val sTDOUT: String

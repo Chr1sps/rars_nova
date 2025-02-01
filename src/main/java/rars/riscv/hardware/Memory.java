@@ -472,7 +472,7 @@ public final class Memory {
      *     If address is not on word boundary.
      */
     public int setRawWord(final int address, final int value) throws AddressErrorException {
-        MemoryUtils.checkStoreWordAligned(address);
+        MemoryUtilsKt.checkStoreWordAligned(address);
         int oldValue = 0;
         final int relative;
         if (this.isAddressInDataSegment(address)) {
@@ -531,7 +531,7 @@ public final class Memory {
      *     If address is not on word boundary.
      */
     public int setWord(final int address, final int value) throws AddressErrorException {
-        MemoryUtils.checkStoreWordAligned(address);
+        MemoryUtilsKt.checkStoreWordAligned(address);
         return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreWord(
             address,
             this.set(address, value, DataTypes.WORD_SIZE)
@@ -645,7 +645,7 @@ public final class Memory {
      * @see ProgramStatement
      */
     public void setStatement(final int address, final ProgramStatement statement) throws AddressErrorException {
-        MemoryUtils.checkStoreWordAligned(address);
+        MemoryUtilsKt.checkStoreWordAligned(address);
         if (!this.isAddressInTextSegment(address)) {
             throw new AddressErrorException(
                 "Store address to text segment out of range",
@@ -756,7 +756,7 @@ public final class Memory {
         // return either the int of its return value, or 0 if it returns null.
         // Doing so would be detrimental to simulation runtime performance, so
         // I decided to keep the duplicate logic.
-        MemoryUtils.checkLoadWordAligned(address);
+        MemoryUtilsKt.checkLoadWordAligned(address);
         final int relative;
         final int value;
         if (this.isAddressInDataSegment(address)) {
@@ -820,7 +820,7 @@ public final class Memory {
      */
     public @Nullable Integer getRawWordOrNull(final int address) throws AddressErrorException {
         // See note above, with getRawWord(), concerning duplicated logic.
-        MemoryUtils.checkLoadWordAligned(address);
+        MemoryUtilsKt.checkLoadWordAligned(address);
         if (this.isAddressInDataSegment(address)) {
             // in data segment
             final var relativeAddress = (address - this.currentConfiguration.dataSegmentBaseAddress)
@@ -887,7 +887,7 @@ public final class Memory {
      *     If address is not on word boundary.
      */
     public long getDoubleWord(final int address) throws AddressErrorException {
-        MemoryUtils.checkLoadWordAligned(address);
+        MemoryUtilsKt.checkLoadWordAligned(address);
         final var oldHighOrder = this.get(address + 4, 4);
         final var oldLowOrder = this.get(address, 4);
         return ((long) oldHighOrder << 32) | (oldLowOrder & 0xFFFFFFFFL);
@@ -905,7 +905,7 @@ public final class Memory {
      *     If address is not on word boundary.
      */
     public int getWord(final int address) throws AddressErrorException {
-        MemoryUtils.checkLoadWordAligned(address);
+        MemoryUtilsKt.checkLoadWordAligned(address);
         return this.get(address, DataTypes.WORD_SIZE, true);
     }
 
@@ -921,7 +921,7 @@ public final class Memory {
      *     If address is not on word boundary.
      */
     public int getWordNoNotify(final int address) throws AddressErrorException {
-        MemoryUtils.checkLoadWordAligned(address);
+        MemoryUtilsKt.checkLoadWordAligned(address);
         return this.get(address, DataTypes.WORD_SIZE, false);
     }
 
@@ -1000,7 +1000,7 @@ public final class Memory {
     }
 
     private ProgramStatement getStatement(final int address, final boolean notify) throws AddressErrorException {
-        MemoryUtils.checkLoadWordAligned(address);
+        MemoryUtilsKt.checkLoadWordAligned(address);
         if (!BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
             && !this.isAddressInTextSegment(address)) {
             throw new AddressErrorException(
@@ -1076,8 +1076,8 @@ public final class Memory {
         final int startAddr,
         final int endAddr
     ) throws AddressErrorException {
-        MemoryUtils.checkLoadWordAligned(startAddr);
-        MemoryUtils.checkLoadWordAligned(endAddr);
+        MemoryUtilsKt.checkLoadWordAligned(startAddr);
+        MemoryUtilsKt.checkLoadWordAligned(endAddr);
         // upper half of address space (above 0x7fffffff) has sign bit 1 thus is seen as
         // negative.
         if (startAddr >= 0 && endAddr < 0) {

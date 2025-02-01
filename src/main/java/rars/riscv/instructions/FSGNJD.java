@@ -21,7 +21,7 @@ public final class FSGNJD extends BasicInstruction {
     }
 
     @Override
-    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
+    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final long result = (context.fpRegisterFile.getLongValue(statement.getOperand(1)) & 0x7FFFFFFF_FFFFFFFFL) | (
             context.fpRegisterFile.getLongValue(statement.getOperand(2)) & 0x80000000_00000000L

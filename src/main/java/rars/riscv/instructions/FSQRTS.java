@@ -48,7 +48,7 @@ public final class FSQRTS extends BasicInstruction {
     }
 
     @Override
-    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
+    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final Environment e = new Environment();
         e.mode = Floating.getRoundingMode(statement.getOperand(2), statement, context.csrRegisterFile);

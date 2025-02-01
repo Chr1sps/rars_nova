@@ -1,7 +1,9 @@
 package rars.riscv.instructions
 
+import arrow.core.Either
+import arrow.core.raise.either
 import rars.ProgramStatement
-import rars.exceptions.SimulationException
+import rars.exceptions.SimulationEvent
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
 import rars.riscv.InstructionsRegistry
@@ -51,23 +53,21 @@ class Arithmetic private constructor(
     usage, description, BasicInstructionFormat.R_FORMAT,
     "$funct7 ttttt sssss $funct3 fffff 0110011"
 ) {
-    @Throws(SimulationException::class)
-    override fun SimulationContext.simulateImpl(statement: ProgramStatement) {
+    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
         if (InstructionsRegistry.RV64_MODE_FLAG) {
             val newValue = compute(
                 registerFile.getLongValue(statement.getOperand(1))!!,
                 registerFile.getLongValue(statement.getOperand(2))!!
             )
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue)
+            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).bind()
         } else {
             val newValue = computeW(
                 registerFile.getIntValue(statement.getOperand(1))!!,
                 registerFile.getIntValue(statement.getOperand(2))!!
             ).toLong()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue)
+            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).bind()
         }
     }
-
 
     companion object {
         @JvmStatic

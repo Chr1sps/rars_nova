@@ -1,7 +1,9 @@
 package rars.util;
 
+import arrow.core.Either;
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
-import rars.exceptions.SimulationException;
+import rars.exceptions.SimulationError;
 import rars.jsoftfloat.Environment;
 import rars.jsoftfloat.RoundingMode;
 import rars.riscv.hardware.registerFiles.RegisterFile;
@@ -42,9 +44,12 @@ public final class Utils {
      * instructions: jal and jalr
      * The parameter is register number to receive the return address.
      */
-    public static void processReturnAddress(final int register, final @NotNull RegisterFile registerFile) throws
-        SimulationException {
-        registerFile.updateRegisterByNumber(register, registerFile.getProgramCounter());
+    public static @NotNull Either<@NotNull SimulationError, Unit> processReturnAddress(
+        final int register,
+        final @NotNull RegisterFile registerFile
+    ) {
+        return registerFile.updateRegisterByNumber(register, registerFile.getProgramCounter())
+            .map(right -> Unit.INSTANCE);
     }
 
     public static void flipRounding(@NotNull final Environment e) {

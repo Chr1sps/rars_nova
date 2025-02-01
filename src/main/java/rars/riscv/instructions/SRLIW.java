@@ -20,7 +20,7 @@ public final class SRLIW extends BasicInstruction {
     }
 
     @Override
-    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
+    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         // Use the code directly from SRLI
         final long newValue = context.registerFile.getIntValue(statement.getOperand(1)) >>> statement.getOperand(2);

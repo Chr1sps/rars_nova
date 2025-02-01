@@ -359,7 +359,7 @@ public final class FloatRepresentation extends AbstractTool {
 
         // Means of selecting and deselecting an attached floating point register
 
-        this.fpRegisters = Globals.FP_REGISTER_FILE.getRegisters();
+        this.fpRegisters = Globals.FP_REGISTER_FILE.registers;
         final String[] registerList = new String[this.fpRegisters.length + 1];
         registerList[0] = "None";
         for (int i = 0; i < this.fpRegisters.length; i++) {

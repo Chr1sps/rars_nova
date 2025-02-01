@@ -21,7 +21,7 @@ public final class FLTD extends BasicInstruction {
     }
 
     @Override
-    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
+    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
 
         final Float64 f1 = new Float64(context.fpRegisterFile.getLongValue(statement.getOperand(1)));

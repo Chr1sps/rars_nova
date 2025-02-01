@@ -942,9 +942,9 @@ public enum Syscall implements SimulationCallback {
     }
 
     @Override
-    public void simulateImpl(
+    public void simulate(
         final @NotNull SimulationContext context, final @NotNull ProgramStatement statement
     ) throws SimulationException {
-        this.callback.simulateImpl(context, statement);
+        this.callback.simulate(context, statement);
     }
 }
