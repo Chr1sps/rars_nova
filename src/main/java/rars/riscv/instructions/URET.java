@@ -45,7 +45,7 @@ public final class URET extends BasicInstruction {
     }
 
     @Override
-    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
+    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         final boolean upie = (context.csrRegisterFile.getIntValue("ustatus") & 0x10) == 0x10;
         context.csrRegisterFile.updateRegisterByName(

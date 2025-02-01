@@ -281,7 +281,7 @@ class Assembler {
 
                         // If we are using compact memory config and there is a compact expansion, use
                         // it
-                        val templateList: ArrayList<String> = instruction.basicIntructionTemplateList
+                        val templateList = instruction.basicIntructionTemplateList
 
                         // subsequent ProgramStatement constructor needs the correct text segment address.
                         this@Assembler.textAddress = statement.address
@@ -587,7 +587,7 @@ class Assembler {
                 // instruction
                 // Modified to permit use of compact expansion if address fits
                 // in 15 bits. DPS 4-Aug-2009
-                val instLength = instruction.getInstructionLength()
+                val instLength = instruction.instructionLength
                 this.textAddress += (instLength)
                 result.add(programStatement)
                 return result

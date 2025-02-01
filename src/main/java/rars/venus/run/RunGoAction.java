@@ -101,10 +101,10 @@ public final class RunGoAction extends GuiAction {
                 final var onSimulatorStopListener = new Consumer<SimulatorNotice>() {
                     @Override
                     public void accept(final SimulatorNotice notice) {
-                        if (notice.action() != SimulatorNotice.Action.STOP) {
+                        if (notice.action != SimulatorNotice.Action.STOP) {
                             return;
                         }
-                        final Simulator.Reason reason = notice.reason();
+                        final Simulator.Reason reason = notice.reason;
                         if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
                             EventQueue.invokeLater(() -> RunGoAction.this.paused(
                                 notice.done(), reason,

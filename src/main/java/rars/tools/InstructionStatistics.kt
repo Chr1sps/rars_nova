@@ -269,7 +269,7 @@ class InstructionStatistics(mainUI: VenusUI) : AbstractTool("$NAME, Version 1.0 
             SLTI.INSTANCE,
             SLTIU.INSTANCE,
             LUI.INSTANCE,
-            AUIPC.INSTANCE, // addi, addiw, andi, ori, xori, slti, sltiu, lui, auipc
+            BasicInstructions.AUIPC, // addi, addiw, andi, ori, xori, slti, sltiu, lui, auipc
             SLLI32.INSTANCE, SLLIW.INSTANCE, // slli, slliw
             SRLI32.INSTANCE, SRLIW.INSTANCE, // srli, srliw
             SRAI32.INSTANCE, SRAIW.INSTANCE -> InstructionCategory.ALU // srai, sraiw

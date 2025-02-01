@@ -129,7 +129,7 @@ public final class Branch extends BasicInstruction {
     }
 
     @Override
-    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) {
+    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) {
         if (this.willBranch.apply(statement, context.registerFile)) {
             Utils.processBranch(context.registerFile, statement.getOperand(2), this.getInstructionLength());
         }

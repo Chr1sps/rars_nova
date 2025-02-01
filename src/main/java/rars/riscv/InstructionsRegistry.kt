@@ -112,8 +112,8 @@ object InstructionsRegistry {
             // endregion Store
 
             // region Other
-            AUIPC.INSTANCE,
-            CSRRC.INSTANCE,
+            BasicInstructions.AUIPC,
+            BasicInstructions.CSRRC,
             CSRRCI.INSTANCE,
             CSRRS.INSTANCE,
             CSRRSI.INSTANCE,

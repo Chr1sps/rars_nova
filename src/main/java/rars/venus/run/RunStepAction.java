@@ -83,11 +83,11 @@ public final class RunStepAction extends GuiAction {
             final var stopListener = new Consumer<@NotNull SimulatorNotice>() {
                 @Override
                 public void accept(final @NotNull SimulatorNotice item) {
-                    if (item.action() != SimulatorNotice.Action.STOP) {
+                    if (item.action != SimulatorNotice.Action.STOP) {
                         return;
                     }
                     EventQueue.invokeLater(() -> RunStepAction.this.stepped(
-                        item.done(), item.reason(),
+                        item.done(), item.reason,
                         item.exception()
                     ));
 

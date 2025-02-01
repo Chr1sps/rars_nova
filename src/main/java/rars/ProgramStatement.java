@@ -138,8 +138,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         final var foundInstruction = InstructionsRegistry.findBasicInstructionByBinaryCode(binaryStatement);
         assert foundInstruction != null : "ERROR: basic instruction not found for this opcode.";
         this.instruction = foundInstruction;
-        final var opCodeMask = foundInstruction.getOperationMask();
-        final var format = foundInstruction.getInstructionFormat();
+        final var opCodeMask = foundInstruction.operationMask;
+        final var format = foundInstruction.instructionFormat;
         switch (format) {
             case J_FORMAT -> {
                 this.operands.add(readBinaryCode(
@@ -460,7 +460,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
 
                     if (this.instruction instanceof BasicInstruction) {
                         final BasicInstructionFormat format =
-                            ((BasicInstruction) this.instruction).getInstructionFormat();
+                            ((BasicInstruction) this.instruction).instructionFormat;
                         if (format == BasicInstructionFormat.B_FORMAT) {
                             address -= this.textAddress;
                             if (address >= (1 << 12) || address < -(1 << 12)) {
@@ -605,8 +605,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 ));
             case final BasicInstruction basic -> {
                 // mask indicates bit positions for 'f'irst, 's'econd, 't'hird operand
-                this.machineStatement = basic.getOperationMask();
-                final BasicInstructionFormat format = basic.getInstructionFormat();
+                this.machineStatement = basic.operationMask;
+                final BasicInstructionFormat format = basic.instructionFormat;
 
                 if (format == BasicInstructionFormat.J_FORMAT) {
                     this.insertBinaryCode(

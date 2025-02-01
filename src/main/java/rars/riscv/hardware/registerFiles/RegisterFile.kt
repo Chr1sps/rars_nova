@@ -1,113 +1,59 @@
-package rars.riscv.hardware.registerFiles;
+package rars.riscv.hardware.registerFiles
 
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.assembler.SymbolTable;
-import rars.exceptions.SimulationException;
-import rars.riscv.hardware.MemoryConfiguration;
-import rars.riscv.hardware.registers.Register;
-import rars.settings.BoolSetting;
-import rars.settings.OtherSettings;
-import rars.util.ConversionUtils;
+import arrow.core.Either
+import arrow.core.raise.either
+import rars.Globals
+import rars.assembler.SymbolTable
+import rars.exceptions.SimulationError
+import rars.riscv.hardware.MemoryConfiguration
+import rars.riscv.hardware.registers.Register
+import rars.settings.BoolSetting
+import rars.settings.OtherSettings
+import rars.util.ConversionUtils
+import rars.util.unwrap
 
-import java.util.Arrays;
-import java.util.stream.Stream;
+class RegisterFile(
+    private val globalSymbolTable: SymbolTable,
+    initialMemoryConfiguration: MemoryConfiguration
+) : RegisterFileBase('x', createRegisters(initialMemoryConfiguration)) {
+    val zero: Register = this.myRegisters[0]
 
-import static rars.Globals.BOOL_SETTINGS;
+    @JvmField
+    val sp: Register = this.myRegisters[STACK_POINTER_REGISTER_INDEX]
 
-public final class RegisterFile extends RegisterFileBase {
-    public static final int GLOBAL_POINTER_REGISTER_INDEX = 3;
-    public static final int STACK_POINTER_REGISTER_INDEX = 2;
-    public final @NotNull Register zero, sp, gp, pc, a0, a1, a2, a7;
-    private final @NotNull SymbolTable globalSymbolTable;
+    @JvmField
+    val gp: Register = this.myRegisters[GLOBAL_POINTER_REGISTER_INDEX]
 
-    public RegisterFile(
-        final @NotNull SymbolTable globalSymbolTable,
-        final @NotNull MemoryConfiguration initialMemoryConfiguration
-    ) {
-        super('x', createRegisters(initialMemoryConfiguration));
-        this.globalSymbolTable = globalSymbolTable;
-        this.zero = this.registers[0];
-        this.sp = this.registers[STACK_POINTER_REGISTER_INDEX];
-        this.gp = this.registers[GLOBAL_POINTER_REGISTER_INDEX];
-        this.a0 = this.registers[10];
-        this.a1 = this.registers[11];
-        this.a2 = this.registers[12];
-        this.a7 = this.registers[17];
-        this.pc = new Register(
-            "pc",
-            -1,
-            initialMemoryConfiguration.textBaseAddress
-        );
-    }
+    @JvmField
+    val pc: Register = Register(
+        "pc",
+        -1,
+        initialMemoryConfiguration.textBaseAddress.toLong()
+    )
 
-    private static @NotNull Register @NotNull [] createRegisters(final @NotNull MemoryConfiguration initialMemoryConfiguration) {
-        final var sp = new Register(
-            "sp",
-            STACK_POINTER_REGISTER_INDEX,
-            initialMemoryConfiguration.stackPointerAddress
-        );
-        final var gp = new Register(
-            "gp",
-            GLOBAL_POINTER_REGISTER_INDEX,
-            initialMemoryConfiguration.globalPointerAddress
-        );
-        final var a0 = new Register("a0", 10, 0);
-        final var a1 = new Register("a1", 11, 0);
-        return new Register[]{
-            new Register("zero", 0, 0),
-            new Register("ra", 1, 0),
-            sp,
-            gp,
-            new Register("tp", 4, 0),
-            new Register("t0", 5, 0),
-            new Register("t1", 6, 0),
-            new Register("t2", 7, 0),
-            new Register("s0", 8, 0),
-            new Register("s1", 9, 0),
-            a0,
-            a1,
-            new Register("a2", 12, 0),
-            new Register("a3", 13, 0),
-            new Register("a4", 14, 0),
-            new Register("a5", 15, 0),
-            new Register("a6", 16, 0),
-            new Register("a7", 17, 0),
-            new Register("s2", 18, 0),
-            new Register("s3", 19, 0),
-            new Register("s4", 20, 0),
-            new Register("s5", 21, 0),
-            new Register("s6", 22, 0),
-            new Register("s7", 23, 0),
-            new Register("s8", 24, 0),
-            new Register("s9", 25, 0),
-            new Register("s10", 26, 0),
-            new Register("s11", 27, 0),
-            new Register("t3", 28, 0),
-            new Register("t4", 29, 0),
-            new Register("t5", 30, 0),
-            new Register("t6", 31, 0)
-        };
-    }
+    @JvmField
+    val a0: Register = this.myRegisters[10]
 
-    @Override
-    public int convertFromLong(final long value) {
-        return ConversionUtils.longLowerHalfToInt(value);
-    }
+    @JvmField
+    val a1: Register = this.myRegisters[11]
+    val a2: Register = this.myRegisters[12]
+    val a7: Register = this.myRegisters[17]
 
-    @Override
-    public long updateRegister(final @NotNull Register register, final long newValue) throws SimulationException {
-        if (register == this.zero) {
-            return 0;
+    public override fun convertFromLong(value: Long): Int = ConversionUtils.longLowerHalfToInt(value)
+
+    override fun updateRegister(register: Register, newValue: Long): Either<SimulationError, Long> = either {
+        if (register === this@RegisterFile.zero) {
+            0
+        } else {
+            val prevValue = register.setValue(newValue)
+            if ((OtherSettings.getBackSteppingEnabled())) {
+                Globals.program!!.backStepper!!.addRegisterFileRestore(
+                    register.number,
+                    prevValue
+                )
+            }
+            prevValue
         }
-        final var prevValue = register.setValue(newValue);
-        if ((OtherSettings.getBackSteppingEnabled())) {
-            Globals.program.getBackStepper().addRegisterFileRestore(
-                register.number,
-                prevValue
-            );
-        }
-        return prevValue;
     }
 
     /**
@@ -115,74 +61,118 @@ public final class RegisterFile extends RegisterFileBase {
      * branch). The offset value is here to allow for non-32-bit instructions
      * (like compressed ones).
      */
-    public void incrementPC(final int offset) {
-        this.pc.setValue(this.pc.getValue() + offset);
+    fun incrementPC(offset: Int) {
+        this.pc.setValue(this.pc.getValue() + offset)
     }
 
-    public void initializeProgramCounter(final int value) {
-        this.pc.setValue(value);
+    fun initializeProgramCounter(value: Int) {
+        this.pc.setValue(value.toLong())
     }
 
-    public int getProgramCounter() {
-        return (int) this.pc.getValue();
-    }
+    val programCounter: Int
+        get() = this.pc.getValue().toInt()
 
-    public int setProgramCounter(final int value) {
-        try {
-            final var oldValue = (int) this.updateRegister(this.pc, value);
-            if (OtherSettings.getBackSteppingEnabled()) {
-                Globals.program.getBackStepper().addPCRestore(oldValue);
-            }
-            return oldValue;
-        } catch (final SimulationException e) {
-            throw new RuntimeException(e);
+    fun setProgramCounter(value: Int): Int {
+        val oldValue = this.updateRegister(this.pc, value.toLong()).unwrap().toInt()
+        if (OtherSettings.getBackSteppingEnabled()) {
+            Globals.program!!.backStepper!!.addPCRestore(oldValue)
         }
+        return oldValue
     }
 
-    public void initializeProgramCounter(final boolean startAtMain) {
-        final int mainAddr = this.globalSymbolTable.getAddress(SymbolTable.getStartLabel());
-        final var useMainAddr = startAtMain && mainAddr != SymbolTable.NOT_FOUND && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
-            mainAddr);
-        final var programCounterValue = useMainAddr ? mainAddr : (int) this.pc.getResetValue();
-        this.initializeProgramCounter(programCounterValue);
+    fun initializeProgramCounter(startAtMain: Boolean) {
+        val mainAddr = this.globalSymbolTable.getAddress(SymbolTable.getStartLabel())
+        val useMainAddr =
+            startAtMain && mainAddr != SymbolTable.NOT_FOUND && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
+                mainAddr
+            )
+        val programCounterValue = if (useMainAddr) mainAddr else this.pc.resetValue.toInt()
+        this.initializeProgramCounter(programCounterValue)
     }
 
-    @Override
-    public void resetRegisters() {
-        final var startAtMain = BOOL_SETTINGS.getSetting(BoolSetting.START_AT_MAIN);
-        final int mainAddr = this.globalSymbolTable.getAddress(SymbolTable.getStartLabel());
-        final var useMainAddr = startAtMain && mainAddr != SymbolTable.NOT_FOUND && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
-            mainAddr);
-        final var programCounterValue = useMainAddr ? mainAddr : (int) this.pc.getResetValue();
-        this.resetRegisters(programCounterValue);
+    override fun resetRegisters() {
+        val startAtMain: Boolean = Globals.BOOL_SETTINGS.getSetting(BoolSetting.START_AT_MAIN)
+        val mainAddr = this.globalSymbolTable.getAddress(SymbolTable.getStartLabel())
+        val useMainAddr =
+            startAtMain && mainAddr != SymbolTable.NOT_FOUND && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
+                mainAddr
+            )
+        val programCounterValue = if (useMainAddr) mainAddr else this.pc.resetValue.toInt()
+        this.resetRegisters(programCounterValue)
     }
 
-    public void resetRegisters(final int programCounterValue) {
-        super.resetRegisters();
-        this.initializeProgramCounter(programCounterValue);
+    fun resetRegisters(programCounterValue: Int) {
+        super.resetRegisters()
+        this.initializeProgramCounter(programCounterValue)
     }
 
-    public void setValuesFromConfiguration(final @NotNull MemoryConfiguration configuration) {
-        this.gp.changeResetValue(configuration.globalPointerAddress);
-        this.sp.changeResetValue(configuration.stackPointerAddress);
-        this.pc.changeResetValue(configuration.textBaseAddress);
-        this.pc.setValue(configuration.textBaseAddress);
-        this.resetRegisters();
+    fun setValuesFromConfiguration(configuration: MemoryConfiguration) {
+        this.gp.changeResetValue(configuration.globalPointerAddress.toLong())
+        this.sp.changeResetValue(configuration.stackPointerAddress.toLong())
+        this.pc.changeResetValue(configuration.textBaseAddress.toLong())
+        this.pc.setValue(configuration.textBaseAddress.toLong())
+        this.resetRegisters()
     }
 
     /**
      * {@inheritDoc}
-     * <p>
-     * This implementation append the program counter to the
-     * end of the array.
      *
-     * @return an array of all registers, including the program counter
+     *
+     * This implementation appends the program counter to the
+     * end of the array.
      */
-    @Override
-    public @NotNull Register @NotNull [] getRegisters() {
-        return Stream.concat(
-            Arrays.stream(this.registers),
-            Stream.of(this.pc)
-        ).toArray(Register[]::new);
+    override val registers: Array<Register> = myRegisters + pc
+
+    companion object {
+        const val GLOBAL_POINTER_REGISTER_INDEX: Int = 3
+        const val STACK_POINTER_REGISTER_INDEX: Int = 2
+        private fun createRegisters(initialMemoryConfiguration: MemoryConfiguration): Array<Register> {
+            val sp = Register(
+                "sp",
+                STACK_POINTER_REGISTER_INDEX,
+                initialMemoryConfiguration.stackPointerAddress.toLong()
+            )
+            val gp = Register(
+                "gp",
+                GLOBAL_POINTER_REGISTER_INDEX,
+                initialMemoryConfiguration.globalPointerAddress.toLong()
+            )
+            val a0 = Register("a0", 10, 0)
+            val a1 = Register("a1", 11, 0)
+            return arrayOf(
+                Register("zero", 0, 0),
+                Register("ra", 1, 0),
+                sp,
+                gp,
+                Register("tp", 4, 0),
+                Register("t0", 5, 0),
+                Register("t1", 6, 0),
+                Register("t2", 7, 0),
+                Register("s0", 8, 0),
+                Register("s1", 9, 0),
+                a0,
+                a1,
+                Register("a2", 12, 0),
+                Register("a3", 13, 0),
+                Register("a4", 14, 0),
+                Register("a5", 15, 0),
+                Register("a6", 16, 0),
+                Register("a7", 17, 0),
+                Register("s2", 18, 0),
+                Register("s3", 19, 0),
+                Register("s4", 20, 0),
+                Register("s5", 21, 0),
+                Register("s6", 22, 0),
+                Register("s7", 23, 0),
+                Register("s8", 24, 0),
+                Register("s9", 25, 0),
+                Register("s10", 26, 0),
+                Register("s11", 27, 0),
+                Register("t3", 28, 0),
+                Register("t4", 29, 0),
+                Register("t5", 30, 0),
+                Register("t6", 31, 0)
+            )
+        }
     }
 }

@@ -20,7 +20,7 @@ public final class SRAI64 extends BasicInstruction {
     }
 
     @Override
-    public void simulateImpl(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
+    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
         SimulationException {
         // Uses >> because sign fill
         final var shifted = context.registerFile.getLongValue(statement.getOperand(1)) >> statement.getOperand(2);

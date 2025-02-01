@@ -276,7 +276,7 @@ public final class InstructionCounter extends AbstractTool {
             // a null statement will cause the simulator to stall.
             if (stmt != null) {
                 final BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
-                final BasicInstructionFormat format = instr.getInstructionFormat();
+                final BasicInstructionFormat format = instr.instructionFormat;
                 switch (format) {
                     case R_FORMAT -> this.counterR++;
                     case R4_FORMAT -> this.counterR4++;

@@ -1,7 +1,7 @@
 package rars.riscv.hardware;
 
 import org.jetbrains.annotations.NotNull;
-import rars.exceptions.SimulationException;
+import rars.exceptions.SimulationError;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.simulator.Simulator;
@@ -25,7 +25,7 @@ public final class InterruptController {
 
     /** Status for trap state */
     private boolean trapPending = false;
-    private SimulationException trapSE;
+    private SimulationError trapSE;
     private int trapPC;
 
     public InterruptController(
@@ -36,7 +36,7 @@ public final class InterruptController {
         this.registerFile = registerFile;
     }
 
-    public synchronized SimulationException claimTrap() {
+    public synchronized SimulationError claimTrap() {
         assert trapPending : "Cannot claim, no trap pending";
         assert trapPC == this.registerFile.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH
             : "trapPC doesn't match current pc";
@@ -97,7 +97,7 @@ public final class InterruptController {
         return true;
     }
 
-    public synchronized boolean registerSynchronousTrap(final SimulationException se, final int pc) {
+    public synchronized boolean registerSynchronousTrap(final SimulationError se, final int pc) {
         if (trapPending) {
             return false;
         }
