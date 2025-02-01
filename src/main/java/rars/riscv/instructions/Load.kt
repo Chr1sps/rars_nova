@@ -1,13 +1,15 @@
-package rars.riscv.instructions;
+package rars.riscv.instructions
 
-import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
-import rars.exceptions.AddressErrorException;
-import rars.exceptions.SimulationException;
-import rars.riscv.BasicInstruction;
-import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.Memory;
-import rars.simulator.SimulationContext;
+import arrow.core.Either
+import arrow.core.raise.either
+import rars.ProgramStatement
+import rars.exceptions.AddressErrorException
+import rars.exceptions.SimulationError
+import rars.exceptions.SimulationEvent
+import rars.riscv.BasicInstruction
+import rars.riscv.BasicInstructionFormat
+import rars.riscv.hardware.Memory
+import rars.simulator.SimulationContext
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -34,48 +36,90 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
+*/
 /**
  * Base class for all Load instructions
  *
  * @author Benjamin Landers
  * @version June 2017
  */
-public abstract class Load extends BasicInstruction {
-    protected Load(@NotNull final String usage, final String description, final String funct) {
-        super(
-            usage,
-            description,
-            BasicInstructionFormat.I_FORMAT,
-            "ssssssssssss ttttt " + funct + " fffff 0000011"
-        );
-    }
-
-    @Override
-    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
-        SimulationException {
-        final var upperImmediate = (statement.getOperand(1) << 20) >> 20;
+class Load private constructor(
+    usage: String,
+    description: String,
+    funct: String,
+    private val load: (Int, Memory) -> Long
+) : BasicInstruction(
+    usage,
+    description,
+    BasicInstructionFormat.I_FORMAT,
+    "ssssssssssss ttttt $funct fffff 0000011"
+) {
+    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
+        val upperImmediate: Int = (statement.getOperand(1) shl 20) shr 20
         try {
-            final long newValue = load(
-                context.registerFile.getIntValue(statement.getOperand(2)) + upperImmediate,
-                context.memory
-            );
-            context.registerFile.updateRegisterByNumber(statement.getOperand(0), newValue);
-        } catch (final AddressErrorException e) {
-            throw new SimulationException(statement, e);
+            val newValue = load(
+                registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate,
+                memory
+            )
+            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).bind()
+        } catch (addressError: AddressErrorException) {
+            raise(SimulationError.create(statement, addressError))
         }
     }
 
-    /**
-     * <p>load.</p>
-     *
-     * @param address
-     *     the address to load from
-     * @param memory
-     * @return The second to store to the register
-     * @throws AddressErrorException
-     *     if any.
-     */
-    protected abstract long load(int address, @NotNull Memory memory) throws AddressErrorException;
+    companion object {
+        private fun load(
+            usage: String,
+            description: String,
+            funct: String,
+            load: (Int, Memory) -> Long
+        ): Load = Load(usage, description, funct, load)
+
+        @JvmField
+        val LB = load(
+            "lb t1, -100(t2)",
+            "Set t1 to sign-extended 8-bit value from effective memory byte address",
+            "000"
+        ) { address, memory -> memory.getByte(address).toLong() }
+
+        @JvmField
+        val LBU = load(
+            "lbu t1, -100(t2)",
+            "Set t1 to zero-extended 8-bit value from effective memory byte address",
+            "100"
+        ) { address, memory -> memory.getByte(address).toLong() and 0xFFL }
+
+        @JvmField
+        val LH = load(
+            "lh t1, -100(t2)",
+            "Set t1 to sign-extended 16-bit value from effective memory halfword address",
+            "001"
+        ) { address, memory -> memory.getHalf(address).toLong() }
+
+        @JvmField
+        val LHU = load(
+            "lhu t1, -100(t2)",
+            "Set t1 to zero-extended 16-bit value from effective memory halfword address",
+            "101"
+        ) { address, memory -> memory.getHalf(address).toLong() and 0xFFFFL }
+
+        @JvmField
+        val LW = load(
+            "lw t1, -100(t2)",
+            "Set t1 to contents of effective memory word address",
+            "010"
+        ) { address, memory -> memory.getWord(address).toLong() }
+
+        @JvmField
+        val LD = load(
+            "ld t1, -100(t2)",
+            "Set t1 to contents of effective memory double word address",
+            "011"
+        ) { address, memory -> memory.getDoubleWord(address) }
+
+        @JvmField
+        val LWU = load(
+            "lwu t1, -100(t2)", "Set t1 to contents of effective memory word address without sign-extension", "110"
+        ) { address, memory -> memory.getWord(address).toLong() and 0xFFFFFFFFL }
+    }
 }
