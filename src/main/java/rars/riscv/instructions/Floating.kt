@@ -1,22 +1,17 @@
 package rars.riscv.instructions
 
 import arrow.core.Either
-import arrow.core.left
 import arrow.core.raise.either
-import arrow.core.right
 import rars.ProgramStatement
-import rars.exceptions.ExceptionReason
-import rars.exceptions.SimulationError
 import rars.exceptions.SimulationEvent
 import rars.jsoftfloat.Environment
-import rars.jsoftfloat.RoundingMode
 import rars.jsoftfloat.operations.Arithmetic
 import rars.jsoftfloat.operations.Comparisons
 import rars.jsoftfloat.types.Float32
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
-import rars.riscv.hardware.registerFiles.CSRegisterFile
-import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile
+import rars.riscv.getRoundingMode
+import rars.riscv.setfflags
 import rars.simulator.SimulationContext
 
 /*
@@ -68,10 +63,9 @@ class Floating(
         val environment = Environment()
         val hasRoundingMode: Boolean = statement.hasOperand(3)
         if (hasRoundingMode) {
-            environment.mode = FloatingUtils.getRoundingMode(
+            environment.mode = csrRegisterFile.getRoundingMode(
                 statement.getOperand(3),
-                statement,
-                csrRegisterFile
+                statement
             ).bind()
         }
         val result: Float32 = compute(
@@ -79,59 +73,8 @@ class Floating(
             Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!),
             environment
         )
-        FloatingUtils.setfflags(csrRegisterFile, environment).bind()
+        csrRegisterFile.setfflags(environment).bind()
         fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result.bits).bind()
-    }
-
-    object FloatingUtils {
-        @JvmStatic
-        fun setfflags(csRegisterFile: CSRegisterFile, environment: Environment): Either<SimulationError, Unit> =
-            either {
-                val fflags = listOf(
-                    environment.inexact to 1,
-                    environment.underflow to 2,
-                    environment.overflow to 4,
-                    environment.divByZero to 8,
-                    environment.invalid to 16
-                ).filter { it.first }.sumOf { it.second }
-                if (fflags != 0) {
-                    csRegisterFile.updateRegisterByName(
-                        "fflags",
-                        csRegisterFile.getLongValue("fflags")!! or fflags.toLong()
-                    ).bind()
-                }
-            }
-
-        @JvmStatic
-        fun getRoundingMode(
-            rmValue: Int,
-            statement: ProgramStatement,
-            csRegisterFile: CSRegisterFile
-        ): Either<SimulationError, RoundingMode> {
-            val frm = csRegisterFile.getIntValue("frm")!!
-            val rm = if (rmValue == 7) {
-                frm
-            } else {
-                rmValue
-            }
-            return when (rm) {
-                0 -> RoundingMode.EVEN.right() // RNE
-                1 -> RoundingMode.ZERO.right() // RTZ
-                2 -> RoundingMode.MIN.right()  // RDN
-                3 -> RoundingMode.MAX.right()  // RUP
-                4 -> RoundingMode.AWAY.right() // RMM
-                else -> SimulationError.create(
-                    statement,
-                    "Invalid rounding mode. RM = $rmValue and frm = $frm",
-                    ExceptionReason.OTHER
-                ).left()
-            }
-        }
-
-        @JvmStatic
-        fun FloatingPointRegisterFile.getFloat32(num: Int): Float32 {
-            return Float32(getIntValue(num)!!)
-        }
     }
 
     companion object {

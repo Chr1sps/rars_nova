@@ -10,7 +10,8 @@ import rars.jsoftfloat.operations.Comparisons
 import rars.jsoftfloat.types.Float64
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
-import rars.riscv.instructions.Floating.FloatingUtils
+import rars.riscv.getRoundingMode
+import rars.riscv.setfflags
 import rars.simulator.SimulationContext
 
 class DoubleFloat private constructor(
@@ -24,10 +25,9 @@ class DoubleFloat private constructor(
     override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
         val environment = Environment()
         if (statement.hasOperand(3)) {
-            environment.mode = FloatingUtils.getRoundingMode(
+            environment.mode = csrRegisterFile.getRoundingMode(
                 statement.getOperand(3),
-                statement,
-                csrRegisterFile
+                statement
             ).bind()
         }
         val result: Float64 = compute(
@@ -35,7 +35,7 @@ class DoubleFloat private constructor(
             Float64(fpRegisterFile.getLongValue(statement.getOperand(2))!!),
             environment
         )
-        FloatingUtils.setfflags(csrRegisterFile, environment).bind()
+        csrRegisterFile.setfflags(environment).bind()
         fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result.bits).bind()
     }
 
