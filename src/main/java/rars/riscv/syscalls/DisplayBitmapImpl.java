@@ -18,7 +18,7 @@ public final class DisplayBitmapImpl {
         this.memory = memory;
         this.display = null;
         Globals.SIMULATOR.simulatorNoticeHook.subscribe(notice -> {
-            if (notice.action() == SimulatorNotice.Action.START) {
+            if (notice.action == SimulatorNotice.Action.START) {
                 if (this.display != null) {
                     this.display.dispose();
                 }
