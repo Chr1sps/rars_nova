@@ -40,7 +40,7 @@ public final class Utils {
      * instructions: jal and jalr
      * The parameter is register number to receive the return address.
      */
-    public static @NotNull Either<@NotNull SimulationError, Unit> processReturnAddress(
+    public static @NotNull Either<@NotNull SimulationError, @NotNull Unit> processReturnAddress(
         final int register,
         final @NotNull RegisterFile registerFile
     ) {

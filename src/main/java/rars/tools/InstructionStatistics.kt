@@ -262,12 +262,12 @@ class InstructionStatistics(mainUI: VenusUI) : AbstractTool("$NAME, Version 1.0 
         private fun Instruction.getInstructionCategory() = when (this) {
             is Arithmetic, is ArithmeticW, // add, addw, sub, subw, and, or, xor, slt, sltu, m extension
             is ImmediateInstruction, // addi, addiw, andi, ori, xori, slti, sltiu
-            LUI.INSTANCE,
+            BasicInstructions.LUI,
             BasicInstructions.AUIPC, // addi, addiw, andi, ori, xori, slti, sltiu, lui, auipc
-            SLLI32.INSTANCE, SLLIW.INSTANCE, // slli, slliw
-            SRLI32.INSTANCE, SRLIW.INSTANCE, // srli, srliw
-            SRAI32.INSTANCE, SRAIW.INSTANCE -> InstructionCategory.ALU // srai, sraiw
-            JAL.INSTANCE, JALR.INSTANCE -> InstructionCategory.JUMP // jal, jalr
+            BasicInstructions.SLLI32, BasicInstructions.SLLIW, // slli, slliw
+            BasicInstructions.SRLI32, BasicInstructions.SRLIW, // srli, srliw
+            BasicInstructions.SRAI32, BasicInstructions.SRAIW -> InstructionCategory.ALU // srai, sraiw
+            BasicInstructions.JAL, BasicInstructions.JALR -> InstructionCategory.JUMP // jal, jalr
             is Branch -> InstructionCategory.BRANCH // beq, bge, bgeu, blt, bltu, bne
             is Load, // lb, lh, lwl, lw, lbu, lhu, lwr
             is Store -> InstructionCategory.MEM // sb, sh, swl, sw, swr

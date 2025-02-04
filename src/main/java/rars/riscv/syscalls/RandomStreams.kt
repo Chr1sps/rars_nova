@@ -1,13 +1,11 @@
+/**
+ * Utilities for managing random number streams in RARS.
+ */
 package rars.riscv.syscalls
 
 import rars.simulator.SimulationContext
 import java.util.*
 
-/**
- * Collection of pseudorandom number streams available for use in Rand-type
- * syscalls.
- * The streams are by default not seeded.
- */
 private val randomStreams = mutableMapOf<Int, Random>()
 
 fun SimulationContext.setRandomStreamSeed(index: Int, seed: Long) {

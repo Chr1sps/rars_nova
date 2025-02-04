@@ -153,20 +153,20 @@ object InstructionsRegistry {
             FSGNJS.INSTANCE,
             FSGNJXD.INSTANCE,
             FSGNJXS.INSTANCE,
-            FSQRTD.INSTANCE,
-            FSQRTS.INSTANCE,
-            FSW.INSTANCE,
-            JAL.INSTANCE,
-            JALR.INSTANCE,
-            LUI.INSTANCE,
-            URET.INSTANCE,
-            WFI.INSTANCE
+            BasicInstructions.FSQRTD,
+            BasicInstructions.FSQRTS,
+            BasicInstructions.FSW,
+            BasicInstructions.JAL,
+            BasicInstructions.JALR,
+            BasicInstructions.LUI,
+            BasicInstructions.URET,
+            BasicInstructions.WFI
             // endregion Other
         ),
         listOf(
-            SLLI32.INSTANCE,
-            SRAI32.INSTANCE,
-            SRLI32.INSTANCE
+            BasicInstructions.SLLI32,
+            BasicInstructions.SRAI32,
+            BasicInstructions.SRLI32
         ),
         listOf(
             // region ArithmeticW
@@ -203,12 +203,12 @@ object InstructionsRegistry {
             FCVTSLU.INSTANCE,
             FMVDX.INSTANCE,
             FMVXD.INSTANCE,
-            SLLI64.INSTANCE,
-            SLLIW.INSTANCE,
-            SRAI64.INSTANCE,
-            SRAIW.INSTANCE,
-            SRLI64.INSTANCE,
-            SRLIW.INSTANCE
+            BasicInstructions.SLLI64,
+            BasicInstructions.SLLIW,
+            BasicInstructions.SRAI64,
+            BasicInstructions.SRAIW,
+            BasicInstructions.SRLI64,
+            BasicInstructions.SRLIW
             // endregion Other
         )
     )
