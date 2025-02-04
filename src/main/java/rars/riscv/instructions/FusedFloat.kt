@@ -9,6 +9,8 @@ import rars.jsoftfloat.operations.Arithmetic
 import rars.jsoftfloat.types.Float32
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
+import rars.riscv.getRoundingMode
+import rars.riscv.setfflags
 import rars.simulator.SimulationContext
 import rars.util.flipRounding
 
@@ -50,14 +52,14 @@ class FusedFloat private constructor(
     override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
         val environment = Environment()
         environment.mode =
-            Floating.FloatingUtils.getRoundingMode(statement.getOperand(4), statement, csrRegisterFile).bind()
+            csrRegisterFile.getRoundingMode(statement.getOperand(4), statement).bind()
         val result: Float32 = compute(
             Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!),
             Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!),
             Float32(fpRegisterFile.getIntValue(statement.getOperand(3))!!),
             environment
         )
-        Floating.FloatingUtils.setfflags(csrRegisterFile, environment).bind()
+        csrRegisterFile.setfflags(environment).bind()
         fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result.bits)
     }
 

@@ -1,10 +1,6 @@
 package rars.util;
 
-import arrow.core.Either;
-import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
-import rars.exceptions.SimulationError;
-import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
@@ -19,33 +15,6 @@ public final class Utils {
         final var writer = new StringWriter();
         throwable.printStackTrace(new PrintWriter(writer));
         return writer.toString();
-    }
-
-    public static void processBranch(
-        final @NotNull RegisterFile registerFile,
-        final int displacement,
-        final int instructionLength
-    ) {
-        // Decrement needed because PC has already been incremented
-        registerFile.setProgramCounter(registerFile.getProgramCounter() + displacement - instructionLength);
-    }
-
-    public static void processJump(final int targetAddress, final @NotNull RegisterFile registerFile) {
-        registerFile.setProgramCounter(targetAddress);
-    }
-
-    /**
-     * Method to process storing of a return address in the given
-     * register. This is used only by the "and link"
-     * instructions: jal and jalr
-     * The parameter is register number to receive the return address.
-     */
-    public static @NotNull Either<@NotNull SimulationError, @NotNull Unit> processReturnAddress(
-        final int register,
-        final @NotNull RegisterFile registerFile
-    ) {
-        return registerFile.updateRegisterByNumber(register, registerFile.getProgramCounter())
-            .map(right -> Unit.INSTANCE);
     }
 
     /**

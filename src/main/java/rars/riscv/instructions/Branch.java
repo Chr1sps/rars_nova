@@ -6,7 +6,6 @@ import rars.riscv.BasicInstruction;
 import rars.riscv.BasicInstructionFormat;
 import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.simulator.SimulationContext;
-import rars.util.Utils;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -131,7 +130,9 @@ public final class Branch extends BasicInstruction {
     @Override
     public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) {
         if (this.willBranch.apply(statement, context.registerFile)) {
-            Utils.processBranch(context.registerFile, statement.getOperand(2), this.getInstructionLength());
+            final int instructionLength = this.getInstructionLength();
+            // Decrement needed because PC has already been incremented
+            context.registerFile.setProgramCounter(context.registerFile.getProgramCounter() + statement.getOperand(2) - instructionLength);
         }
     }
 }
