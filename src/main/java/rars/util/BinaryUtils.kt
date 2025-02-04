@@ -1,12 +1,15 @@
 package rars.util
 
+import java.lang.Double.doubleToRawLongBits
+import java.lang.Double.longBitsToDouble
+import java.lang.Float.floatToIntBits
+import java.lang.Float.intBitsToFloat
+
 /**
  * Translate int value into a String consisting of '1's and '0's. Assumes all 32
  * bits are
  * to be translated.
  *
- * @param value
- *     The int value to convert.
  * @return String consisting of '1' and '0' characters corresponding to the
  * requested binary sequence.
  */
@@ -26,9 +29,7 @@ fun Int.toBinaryString(length: Int): String = buildString {
  * returned by the method "Integer.toHexString". Prepend leading zeroes
  * to that string as necessary to make it always eight hexadecimal digits.
  *
- * @param d
- *     The int value to convert.
- * @return String containing '0', '1', ...'F' which form hexadecimal equivalent
+ * @return String containing '0', '1', ... 'F' which form hexadecimal equivalent
  * of int.
  */
 @JvmName("intToHexStringWithPrefix")
@@ -52,3 +53,9 @@ fun Long.toBinaryString(length: Int): String = buildString {
         append(if ((this@toBinaryString shr i) and 1 == 1L) '1' else '0')
     }
 }
+
+fun Long.toDoubleReinterpreted(): Double = longBitsToDouble(this)
+fun Double.toLongReinterpreted(): Long = doubleToRawLongBits(this)
+
+fun Float.toIntReinterpreted(): Int = floatToIntBits(this)
+fun Int.toFloatReinterpreted(): Float = intBitsToFloat(this)

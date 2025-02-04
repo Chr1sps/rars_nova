@@ -4,16 +4,12 @@ import arrow.core.Either;
 import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.exceptions.SimulationError;
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.RoundingMode;
 import rars.riscv.hardware.registerFiles.RegisterFile;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.stream.Stream;
 
 public final class Utils {
     private Utils() {
@@ -50,45 +46,6 @@ public final class Utils {
     ) {
         return registerFile.updateRegisterByNumber(register, registerFile.getProgramCounter())
             .map(right -> Unit.INSTANCE);
-    }
-
-    public static void flipRounding(@NotNull final Environment e) {
-        if (e.mode == RoundingMode.MAX) {
-            e.mode = RoundingMode.MIN;
-        } else if (e.mode == RoundingMode.MIN) {
-            e.mode = RoundingMode.MAX;
-        }
-    }
-
-    @SafeVarargs
-    public static <T> Stream<? extends T> concatStreams(
-        final @NotNull Stream<? extends T> first,
-        final Stream<? extends T> @NotNull ... others
-    ) {
-        var result = first;
-        for (final var other : others) {
-            result = Stream.concat(result, other);
-        }
-        return result;
-    }
-
-    /**
-     * Intersperses a separator between each element of the stream.
-     *
-     * @param stream
-     *     The stream to intersperse
-     * @param separator
-     *     The separator element to insert between each element of the stream
-     * @return A new stream with the separator interspersed between each element of the original stream
-     */
-    public static <T> @NotNull Stream<T> intersperseStream(final @NotNull Stream<T> stream, final T separator) {
-        return stream.flatMap(t ->
-            Stream.of(separator, t)
-        ).skip(1);
-    }
-
-    public static <T> @NotNull List<T> intersperseList(final @NotNull List<T> list, final T separator) {
-        return intersperseStream(list.stream(), separator).toList();
     }
 
     /**

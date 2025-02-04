@@ -1,15 +1,12 @@
-package rars.util;
+package rars.util
 
-import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
-import rars.exceptions.AddressErrorException;
-import rars.exceptions.ExitingException;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-
-import static rars.Globals.MEMORY_INSTANCE;
-import static rars.Globals.REGISTER_FILE;
+import arrow.core.Either
+import arrow.core.raise.either
+import rars.ProgramStatement
+import rars.exceptions.AddressErrorException
+import rars.exceptions.ExitingError
+import rars.simulator.SimulationContext
+import java.nio.charset.StandardCharsets
 
 /*
 Copyright (c) 2003-2017,  Pete Sanderson,Benjamin Landers and Kenneth Vollmar
@@ -38,63 +35,49 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+*/
 
 /**
- * Small helper class to wrap getting null terminated strings from memory
+ * Just a wrapper around #String get(ProgramStatement, String) which passes in
+ * the default "a0"
+ *
+ * @param statement
+ * a [ProgramStatement] object
+ * @return a [java.lang.String] object
+ * @throws ExitingError
+ * if any.
  */
-public final class NullString {
-    private NullString() {
-    }
+fun SimulationContext.readNullString(statement: ProgramStatement) = readNullString(statement, "a0")
 
-    /**
-     * Just a wrapper around #String get(ProgramStatement, String) which passes in
-     * the default "a0"
-     *
-     * @param statement
-     *     a {@link ProgramStatement} object
-     * @return a {@link java.lang.String} object
-     * @throws ExitingException
-     *     if any.
-     */
-    public static @NotNull String get(final @NotNull ProgramStatement statement) throws ExitingException {
-        return NullString.get(statement, "a0");
-    }
-
-    /**
-     * Reads a NULL terminated string from memory starting at the address in reg
-     *
-     * @param statement
-     *     the program statement this was called from (used for error
-     *     handling)
-     * @param reg
-     *     The name of the register for the address of the string
-     * @return the string read from memory
-     * @throws ExitingException
-     *     if it hits a #AddressErrorException
-     */
-    public static @NotNull String get(final @NotNull ProgramStatement statement, final @NotNull String reg) throws
-        ExitingException {
-        int byteAddress = REGISTER_FILE.getIntValue(reg);
-        final ArrayList<Byte> utf8BytesList = new ArrayList<>(); // Need an array to hold bytes
-        try {
-            utf8BytesList.add(MEMORY_INSTANCE.getByte(byteAddress));
-            while (utf8BytesList.getLast() != 0) // until null terminator
-            {
-                byteAddress++;
-                utf8BytesList.add(MEMORY_INSTANCE.getByte(byteAddress));
-            }
-        } catch (final AddressErrorException e) {
-            throw new ExitingException(statement, e);
+/**
+ * Reads a NULL terminated string from memory starting at the address in reg
+ *
+ * @param statement
+ * the program statement this was called from (used for error
+ * handling)
+ * @param registerName
+ * The name of the register for the address of the string
+ * @return the string read from memory
+ * @throws ExitingError
+ * if it hits a #AddressErrorException
+ */
+fun SimulationContext.readNullString(
+    statement: ProgramStatement,
+    registerName: String
+): Either<ExitingError, String> = either {
+    var byteAddress = registerFile.getIntValue(registerName)!!
+    val utf8BytesList = mutableListOf<Byte>() // Need an array to hold bytes
+    try {
+        utf8BytesList.add(memory.getByte(byteAddress))
+        while (utf8BytesList.last() != 0.toByte())  // until null terminator
+        {
+            byteAddress++
+            utf8BytesList.add(memory.getByte(byteAddress))
         }
-
-        final int size = utf8BytesList.size() - 1; // size - 1 so we dont include the null terminator in the 
-        // utf8Bytes array
-        final byte[] utf8Bytes = new byte[size];
-        for (int i = 0; i < size; i++) {
-            utf8Bytes[i] = utf8BytesList.get(i);
-        }
-
-        return new String(utf8Bytes, StandardCharsets.UTF_8);
+    } catch (e: AddressErrorException) {
+        raise(ExitingError(statement, e))
     }
+
+    val utf8Bytes = utf8BytesList.dropLast(1).toByteArray()
+    String(utf8Bytes, StandardCharsets.UTF_8)
 }

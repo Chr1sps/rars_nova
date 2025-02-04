@@ -1,118 +1,154 @@
-package rars.riscv;
+package rars.riscv
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Range;
-import rars.Globals;
-import rars.ProgramStatement;
-import rars.exceptions.AddressErrorException;
-import rars.exceptions.ExitingException;
-import rars.exceptions.SimulationException;
-import rars.riscv.syscalls.DisplayBitmapImpl;
-import rars.riscv.syscalls.RandomStreams;
-import rars.riscv.syscalls.ToneGenerator;
-import rars.simulator.SimulationContext;
-import rars.util.BinaryUtilsKt;
-import rars.util.BinaryUtilsOld;
-import rars.util.NullString;
+import arrow.core.Either
+import arrow.core.flatMap
+import arrow.core.left
+import arrow.core.raise.either
+import arrow.core.right
+import org.jetbrains.annotations.Range
+import rars.Globals
+import rars.ProgramStatement
+import rars.exceptions.AddressErrorException
+import rars.exceptions.ExitingError
+import rars.exceptions.ExitingEvent
+import rars.exceptions.SimulationEvent
+import rars.riscv.syscalls.DisplayBitmapImpl
+import rars.riscv.syscalls.ToneGenerator
+import rars.riscv.syscalls.getRandomStream
+import rars.riscv.syscalls.setRandomStreamSeed
+import rars.simulator.SimulationContext
+import rars.util.*
+import java.lang.Double
+import java.lang.Float
+import java.nio.charset.StandardCharsets
+import java.util.*
+import javax.swing.JOptionPane
+import kotlin.ByteArray
+import kotlin.IllegalArgumentException
+import kotlin.Int
+import kotlin.NumberFormatException
+import kotlin.String
+import kotlin.Unit
+import kotlin.code
+import kotlin.error
+import kotlin.let
+import kotlin.math.min
+import kotlin.takeIf
+import kotlin.to
+import kotlin.toUInt
 
-import javax.swing.*;
-import java.nio.charset.StandardCharsets;
-import java.util.Random;
-
-@SuppressWarnings("DataFlowIssue")
-public enum Syscall implements SimulationCallback {
+enum class Syscall(
+    /**
+     * The name of this syscall. This can be used by a RARS
+     * user to refer to the service when choosing to override its default service
+     * number in the configuration file.
+     */
+    @JvmField val serviceName: String,
+    /**
+     * The assigned service number. This is the number the programmer
+     * must store into a7 before issuing the ECALL instruction.
+     */
+    @JvmField val serviceNumber: Int,
+    /** A string describing what the system call does  */
+    @JvmField val description: String,
+    /** A string documenting what registers should be set to before the system call runs.  */
+    @JvmField val inputs: String,
+    /** A string documenting what registers are set to after the system call runs  */
+    @JvmField val outputs: String,
+    private val callback: SimulationCallbackFunc
+) : SimulationCallback {
     Close(
-        "Close",
-        57,
-        "Close a file",
-        "a0 = the file descriptor to close",
-        "N/A",
-        (ctxt, stmt) -> ctxt.io.closeFile(ctxt.registerFile.getIntValue(ctxt.registerFile.a0))
+        "Close", 57, "Close a file",
+        "a0 = the file descriptor to close", "N/A",
+        { stmt ->
+            io.closeFile(
+                registerFile.getIntValue(
+                    registerFile.a0
+                )
+            ).right()
+        }
     ),
     ConfirmDialog(
-        "ConfirmDialog",
-        50,
-        "Service to display a message to user",
+        "ConfirmDialog", 50, "Service to display a message to user",
         "a0 = address of null-terminated string that is the message to user",
         "a0 = Yes (0), No (1), or Cancel(2)",
-        (ctxt, stmt) -> {
-            final var message = NullString.get(stmt);
-            int result = JOptionPane.showConfirmDialog(null, message);
-            if (result == JOptionPane.CLOSED_OPTION) {
-                result = JOptionPane.CANCEL_OPTION;
+        { stmt ->
+            either {
+                val message = readNullString(stmt).bind()
+                var result = JOptionPane.showConfirmDialog(null, message)
+                if (result == JOptionPane.CLOSED_OPTION) {
+                    result = JOptionPane.CANCEL_OPTION
+                }
+                registerFile.updateRegisterByName("a0", result.toLong()).bind()
             }
-            ctxt.registerFile.updateRegisterByName("a0", result);
         }
     ),
     DisplayBitmap(
-        "DisplayBitmap",
-        61,
-        "Bitmap displaying memory contents",
+        "DisplayBitmap", 61, "Bitmap displaying memory contents",
         """
             a0 = address of the bitmap to display
             a1 = width of the bitmap
             a2 = height of the bitmap
-            """,
+            """.trimIndent(),
         "N/A",
-        (ctxt, stmt) -> DisplayBitmapImpl.INSTANCE.show(
-            ctxt.registerFile.getIntValue("a0"),
-            ctxt.registerFile.getIntValue("a1"),
-            ctxt.registerFile.getIntValue("a2")
-        )
+        { stmt ->
+            DisplayBitmapImpl.INSTANCE.show(
+                registerFile.getIntValue("a0")!!,
+                registerFile.getIntValue("a1")!!,
+                registerFile.getIntValue("a2")!!
+            ).right()
+        }
     ),
     Exit(
-        "Exit", 10,
-        "Exits the program with code 0",
-        (ctxt, stmt) -> {
-            Globals.exitCode = 0;
-            throw new ExitingException();
+        "Exit", 10, "Exits the program with code 0",
+        { stmt ->
+            Globals.exitCode = 0
+            ExitingEvent.left()
         }
     ),
     Exit2(
-        "Exit2", 93,
-        "Exits the program with a code",
-        "a0 = the number to exit with",
-        "N/A",
-        (ctxt, stmt) -> {
-            Globals.exitCode = ctxt.registerFile.getIntValue("a0");
-            throw new ExitingException(); // empty error list
+        "Exit2", 93, "Exits the program with a code",
+        "a0 = the number to exit with", "N/A",
+        { stmt ->
+            Globals.exitCode = registerFile.getIntValue("a0")!!
+            ExitingEvent.left()
         }
     ),
     GetCWD(
-        "GetCWD", 17, "Writes the path of the current working directory into a buffer",
+        "GetCWD", 17,
+        "Writes the path of the current working directory into a buffer",
         """
             a0 = the buffer to write into
-            a1 = the length of the buffer""",
-        "a0 = -1 if the path is longer than the buffer", (ctxt, stmt) -> {
-        final var registerFile = ctxt.registerFile;
-        final var memory = ctxt.memory;
+            a1 = the length of the buffer
+            """.trimIndent(),
+        "a0 = -1 if the path is longer than the buffer",
+        { stmt ->
+            either {
+                val path = System.getProperty("user.dir")
+                val buf = registerFile.getIntValue(registerFile.a0)
+                val length = registerFile.getIntValue(registerFile.a0)
 
-        final var path = System.getProperty("user.dir");
-        final int buf = registerFile.getIntValue(registerFile.a0);
-        final int length = registerFile.getIntValue(registerFile.a0);
-
-        final byte[] utf8BytesList = path.getBytes(StandardCharsets.UTF_8);
-        if (length < utf8BytesList.length + 1) {
-            // This should be -34 (ERANGE) for compatibility with spike, but until other
-            // syscalls are ready with compatable
-            // error codes, lets keep internal consitency.
-            ctxt.registerFile.updateRegisterByName("a0", -1);
-            return;
-        }
-        try {
-            for (int index = 0; index < utf8BytesList.length; index++) {
-                memory.setByte(
-                    buf + index,
-                    utf8BytesList[index]
-                );
+                val utf8BytesList = path.toByteArray(StandardCharsets.UTF_8)
+                if (length < utf8BytesList.size + 1) {
+                    // This should be -34 (ERANGE) for compatibility with spike, but until other
+                    // syscalls are ready with compatable
+                    // error codes, lets keep internal consitency.
+                    registerFile.updateRegisterByName("a0", -1).bind()
+                } else try {
+                    for (index in utf8BytesList.indices) {
+                        memory.setByte(
+                            buf + index,
+                            utf8BytesList[index].toInt()
+                        )
+                    }
+                    memory.setByte(buf + utf8BytesList.size, 0)
+                } catch (e: AddressErrorException) {
+                    ExitingError(stmt, e).left()
+                }
             }
-            memory.setByte(buf + utf8BytesList.length, 0);
-        } catch (final AddressErrorException e) {
-            throw new ExitingException(stmt, e);
         }
-    }
     ),
+
     // TODO: improve and unify it
     InputDialogDouble(
         "InputDialogDouble",
@@ -121,84 +157,84 @@ public enum Syscall implements SimulationCallback {
         """
             a0 = address of null-terminated string that is the message to user
             a1 = address of input buffer
-            a2 = maximum number of characters to read (including the terminating null)""",
+            a2 = maximum number of characters to read (including the terminating null)
+            """.trimIndent(),
         """
             a1 contains status value.
             0: Valid input data, correctly parsed.
             -1: Input data cannot be correctly parsed.
             -2: Cancel was chosen.
-            -3: OK was chosen but no data had been input into field.""",
-        (ctxt, stmt) -> {
+            -3: OK was chosen but no data had been input into field.
+            """.trimIndent(),
+        { stmt ->
+            either {
+                // Input arguments: $a0 = address of null-terminated string that is the message
+                // to user
+                // Outputs:
+                // fa0 value of double read. $f1 contains high order word of the double.
+                // $a1 contains status value
+                // 0: valid input data, correctly parsed
+                // -1: input data cannot be correctly parsed
+                // -2: Cancel was chosen
+                // -3: OK was chosen but no data had been input into field
 
-            // Input arguments: $a0 = address of null-terminated string that is the message
-            // to user
-            // Outputs:
-            // fa0 value of double read. $f1 contains high order word of the double.
-            // $a1 contains status value
-            // 0: valid input data, correctly parsed
-            // -1: input data cannot be correctly parsed
-            // -2: Cancel was chosen
-            // -3: OK was chosen but no data had been input into field
+                val prompt = readNullString(stmt, "tp").bind()
 
-            final var registerFile = ctxt.registerFile;
-            final var fpRegisterFile = ctxt.fpRegisterFile;
+                val inputValue = JOptionPane.showInputDialog(prompt)
 
-            final var prompt = NullString.get(stmt, "tp");
-
-            final var inputValue = JOptionPane.showInputDialog(prompt);
-
-            var exitCode = 0;
-            var result = 0.0;
-            if (inputValue == null) {
-                // Cancel was chosen
-                exitCode = -2;
-            } else if (inputValue.isEmpty()) {
-                // OK was chosen but there was no input
-                exitCode = -3;
-            } else {
-                try {
-                    result = Double.parseDouble(inputValue);
-                } catch (final NumberFormatException e) {
-                    // Unsuccessful parse of input data
-                    exitCode = -1;
-
+                var exitCode = 0
+                var result = 0.0
+                if (inputValue == null) {
+                    // Cancel was chosen
+                    exitCode = -2
+                } else if (inputValue.isEmpty()) {
+                    // OK was chosen but there was no input
+                    exitCode = -3
+                } else {
+                    try {
+                        result = inputValue.toDouble()
+                    } catch (_: NumberFormatException) {
+                        // Unsuccessful parse of input data
+                        exitCode = -1
+                    }
                 }
+                fpRegisterFile.updateRegisterByName("ft0", Double.doubleToRawLongBits(result)).bind()
+                registerFile.updateRegisterByName("a1", exitCode.toLong()).bind()
             }
-            fpRegisterFile.updateRegisterByName("ft0", Double.doubleToRawLongBits(result));
-            registerFile.updateRegisterByName("a1", exitCode);
         }
     ),
+
     // TODO: improve and unify it
     InputDialogFloat(
-        "InputDialogFloat", 52, "TODO", "TODO", "TODO", (ctxt, stmt) -> {
+        "InputDialogFloat",
+        52,
+        "TODO",
+        "TODO",
+        "TODO",
+        { stmt ->
+            either {
+                val prompt = readNullString(stmt).bind()
+                val input = JOptionPane.showInputDialog(prompt)
 
-        final var prompt = NullString.get(stmt);
+                var result = 0.0f
+                var exitCode = 0
+                if (input == null) {
+                    // Cancel was chosen
+                    exitCode = -2
+                } else if (input.isEmpty()) {
+                    // OK was chosen but there was no input
+                    exitCode = -3
+                } else try {
+                    result = input.toFloat()
+                } catch (_: NumberFormatException) {
+                    // Unsuccessful parse of input data
+                    exitCode = -1
+                }
 
-        final var input = JOptionPane.showInputDialog(prompt);
-
-        final var registerFile = ctxt.registerFile;
-        final var fpRegisterFile = ctxt.fpRegisterFile;
-
-        var result = 0.0f;
-        var exitCode = 0;
-        try {
-            if (input == null) {
-                // Cancel was chosen
-                exitCode = -2;
-            } else if (input.isEmpty()) {
-                // OK was chosen but there was no input
-                exitCode = -3;
-            } else {
-                result = Float.parseFloat(input);
+                fpRegisterFile.updateRegisterByNameInt("ft0", Float.floatToIntBits(result))
+                registerFile.updateRegisterByName("a1", exitCode.toLong())
             }
-
-        } catch (final NumberFormatException e) {
-            // Unsuccessful parse of input data
-            exitCode = -1;
         }
-        fpRegisterFile.updateRegisterByNameInt("ft0", Float.floatToIntBits(result));
-        registerFile.updateRegisterByName("a1", exitCode);
-    }
     ),
     InputDialogInt(
         "InputDialogInt", 51,
@@ -210,27 +246,31 @@ public enum Syscall implements SimulationCallback {
               - 0 - OK status.
               - 1 - Input data couldn't be correctly parsed.
               - 2 - Cancel was chosen.
-              - 3 - OK was chosen but no data had been input into field.""",
-        (ctxt, stmt) -> {
-            final var prompt = NullString.get(stmt);
-            final var inputValue = JOptionPane.showInputDialog(prompt);
-            int exitCode = 0, result = 0;
-            if (inputValue == null) {
-                // Cancel was chosen
-                exitCode = -2;
-            } else if (inputValue.isEmpty()) {
-                // OK was chosen but there was no input
-                exitCode = -3;
-            } else {
-                try {
-                    result = Integer.parseInt(inputValue);
-                } catch (final NumberFormatException e) {
-                    // Unsuccessful parse of input data
-                    exitCode = -1;
+              - 3 - OK was chosen but no data had been input into field.
+              """.trimIndent(),
+        { stmt ->
+            either {
+                val prompt = readNullString(stmt).bind()
+                val inputValue = JOptionPane.showInputDialog(prompt)
+                var exitCode = 0
+                var result = 0
+                if (inputValue == null) {
+                    // Cancel was chosen
+                    exitCode = -2
+                } else if (inputValue.isEmpty()) {
+                    // OK was chosen but there was no input
+                    exitCode = -3
+                } else {
+                    try {
+                        result = inputValue.toInt()
+                    } catch (_: NumberFormatException) {
+                        // Unsuccessful parse of input data
+                        exitCode = -1
+                    }
                 }
+                registerFile.updateRegisterByName("a0", result.toLong()).bind()
+                registerFile.updateRegisterByName("a1", exitCode.toLong()).bind()
             }
-            ctxt.registerFile.updateRegisterByName("a0", result);
-            ctxt.registerFile.updateRegisterByName("a1", exitCode);
         }
     ),
     InputDialogString(
@@ -240,61 +280,56 @@ public enum Syscall implements SimulationCallback {
         """
             a0 = address of null-terminated string that is the message to user
             a1 = address of input buffer
-            a2 = maximum number of characters to read (including the terminating null)""", """
+            a2 = maximum number of characters to read (including the terminating null)
+            """.trimIndent(), """
         a1 contains status value.
         0: OK status. Buffer contains the input string.
         -2: Cancel was chosen. No change to buffer.
         -3: OK was chosen but no data had been input into field. No change to buffer.
-        -4: length of the input string exceeded the specified maximum. Buffer contains the maximum allowable input string terminated with null.""",
-        (ctxt, stmt) -> {
-            final var prompt = NullString.get(stmt);
+        -4: length of the input string exceeded the specified maximum. Buffer contains the maximum allowable input string terminated with null.
+        """.trimIndent(),
+        { stmt ->
+            either {
+                val prompt = readNullString(stmt).bind()
 
-            final var registerFile = ctxt.registerFile;
-            final var memory = ctxt.memory;
-
-            // Values returned by Java's InputDialog:
-            // A null return value means that "Cancel" was chosen rather than OK.
-            // An empty string returned (that is, inputString.length() of zero)
-            // means that OK was chosen but no string was input.
-            final String inputString = JOptionPane.showInputDialog(prompt);
-            final int byteAddress = registerFile.getIntValue("a1"); // byteAddress of string is in a1
-            final int maxLength = registerFile.getIntValue("a2"); // input buffer size for input string is in a2
-
-            try {
-                if (inputString == null) // Cancel was chosen
-                {
-                    registerFile.updateRegisterByName("a1", -2);
-                } else if (inputString.isEmpty()) // OK was chosen but there was no input
-                {
-                    registerFile.updateRegisterByName("a1", -3);
+                // Values returned by Java's InputDialog:
+                // A null return value means that "Cancel" was chosen rather than OK.
+                // An empty string returned (that is, inputString.length() of zero)
+                // means that OK was chosen but no string was input.
+                val inputString = JOptionPane.showInputDialog(prompt)
+                // byteAddress of string is in a1
+                val byteAddress = registerFile.getIntValue("a1")!!
+                // input buffer size for input string is in a2
+                val maxLength = registerFile.getIntValue("a2")!!
+                val status: Int = if (inputString == null) {
+                    // Cancel was chosen
+                    -2
+                } else if (inputString.isEmpty()) {
+                    // OK was chosen but there was no input
+                    -3
                 } else {
-                    final byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
+                    val utf8BytesList = inputString.toByteArray(StandardCharsets.UTF_8)
                     // The buffer will contain characters, a '\n' character, and the null character
                     // Copy the input data to buffer as space permits
-                    int stringLength = Math.min(maxLength - 1, utf8BytesList.length);
-                    for (int index = 0; index < stringLength; index++) {
-                        memory.setByte(
-                            byteAddress + index,
-                            utf8BytesList[index]
-                        );
+                    var stringLength = min((maxLength - 1).toDouble(), utf8BytesList.size.toDouble()).toInt()
+                    try {
+                        for (index in 0..<stringLength) {
+                            memory.setByte(
+                                byteAddress + index,
+                                utf8BytesList[index].toInt()
+                            )
+                        }
+                        if (stringLength < maxLength - 1) {
+                            memory.setByte(byteAddress + stringLength, '\n'.code)
+                            stringLength++
+                        }
+                        memory.setByte(byteAddress + stringLength, 0)
+                    } catch (e: AddressErrorException) {
+                        raise(ExitingError(stmt, e))
                     }
-                    if (stringLength < maxLength - 1) {
-                        memory.setByte(byteAddress + stringLength, '\n');
-                        stringLength++;
-                    }
-                    memory.setByte(byteAddress + stringLength, 0);
-
-                    if (utf8BytesList.length > maxLength - 1) {
-                        // length of the input string exceeded the specified maximum
-                        registerFile.updateRegisterByName("a1", -4);
-                    } else {
-                        registerFile.updateRegisterByName("a1", 0);
-                    }
-                } // end else
-
-            } // end try
-            catch (final AddressErrorException e) {
-                throw new ExitingException(stmt, e);
+                    if (utf8BytesList.size > maxLength - 1) -4 else 0
+                }
+                registerFile.updateRegisterByName("a1", status.toLong()).bind()
             }
         }
     ),
@@ -305,16 +340,16 @@ public enum Syscall implements SimulationCallback {
         """
             a0 = the file descriptor
             a1 = the offset for the base
-            a2 is the beginning of the file (0), the current position (1), or the end of the file (2)""",
+            a2 is the beginning of the file (0), the current position (1), or the end of the file (2)
+            """.trimIndent(),
         "a0 = the selected position from the beginning of the file or -1 is an error occurred",
-        (ctxt, stmt) -> {
-            final var registerFile = ctxt.registerFile;
-            final int result = ctxt.io.seek(
-                registerFile.getIntValue("a0"),
-                registerFile.getIntValue("a1"),
-                registerFile.getIntValue("a2")
-            );
-            registerFile.updateRegisterByName("a0", result);
+        { stmt ->
+            val result: Int = io.seek(
+                registerFile.getIntValue("a0")!!,
+                registerFile.getIntValue("a1")!!,
+                registerFile.getIntValue("a2")!!
+            )
+            registerFile.updateRegisterByName("a0", result.toLong()).ignoreOk()
         }
     ),
     MessageDialog(
@@ -326,19 +361,21 @@ public enum Syscall implements SimulationCallback {
             - 1: information message
             - 2: warning message
             - 3: question message
-            - other: plain message""",
-        "N/A", (ctxt, stmt) -> {
-        int msgType = ctxt.registerFile.getIntValue("a1");
-        if (msgType < JOptionPane.ERROR_MESSAGE || msgType > JOptionPane.ERROR_MESSAGE) {
-            msgType = JOptionPane.PLAIN_MESSAGE;
+            - other: plain message
+            """.trimIndent(),
+        "N/A", { stmt ->
+            var msgType: Int = registerFile.getIntValue("a1")!!
+            if (msgType < JOptionPane.ERROR_MESSAGE || msgType > JOptionPane.ERROR_MESSAGE) {
+                msgType = JOptionPane.PLAIN_MESSAGE
+            }
+            JOptionPane.showMessageDialog(
+                null,
+                readNullString(stmt),
+                null,
+                msgType
+            )
+            Unit.right()
         }
-        JOptionPane.showMessageDialog(
-            null,
-            NullString.get(stmt),
-            null,
-            msgType
-        );
-    }
     ),
     MessageDialogDouble(
         "MessageDialogDouble",
@@ -346,110 +383,102 @@ public enum Syscall implements SimulationCallback {
         "Service to display message followed by a double",
         """
             a0 = address of null-terminated string that is the message to user
-            fa0 = the double""",
+            fa0 = the double
+            """.trimIndent(),
         "N/A",
-        (ctxt, stmt) -> {
-
-            // TODO: maybe refactor this, other null strings are handled in a central place
-            // now
-            String message = ""; // = "";
-            int byteAddress = ctxt.registerFile.getIntValue("a0");
-            try {
-                // Need an array to convert to String
-                final char[] ch = {' '};
-                ch[0] = (char) ctxt.memory.getByte(byteAddress);
-                while (ch[0] != 0) // only uses single location ch[0]
-                {
-                    message = message.concat(new String(ch)); // parameter to String constructor is a char[] array
-                    byteAddress++;
-                    ch[0] = (char) ctxt.memory.getByte(byteAddress);
-                }
-            } catch (final AddressErrorException e) {
-                throw new ExitingException(stmt, e);
+        { stmt ->
+            either {
+                val message = readNullString(stmt).bind()
+                JOptionPane.showMessageDialog(
+                    null,
+                    message + Double.longBitsToDouble(fpRegisterFile.fa0.getValue()),
+                    null,
+                    JOptionPane.INFORMATION_MESSAGE
+                )
             }
-
-            JOptionPane.showMessageDialog(
-                null,
-                message + Double.longBitsToDouble(ctxt.fpRegisterFile.fa0.getValue()),
-                null,
-                JOptionPane.INFORMATION_MESSAGE
-            );
         }
     ),
     MessageDialogFloat(
         "MessageDialogFloat", 60, "Service to display a message followed by a float to user",
         """
             a0 = address of null-terminated string that is the message to user
-            fa1 = the float to display""",
-        "N/A", (ctxt, stmt) -> {
-        final String message = NullString.get(stmt);
-
-        // Display the dialog.
-        JOptionPane.showMessageDialog(
-            null,
-            message + ctxt.fpRegisterFile.getFloatFromRegister(ctxt.fpRegisterFile.fa1),
-            null,
-            JOptionPane.INFORMATION_MESSAGE
-        );
-    }
+            fa1 = the float to display
+            """.trimIndent(),
+        "N/A", { stmt ->
+            either {
+                val message = readNullString(stmt).bind()
+                // Display the dialog.
+                JOptionPane.showMessageDialog(
+                    null,
+                    message + fpRegisterFile.getFloatFromRegister(fpRegisterFile.fa1),
+                    null,
+                    JOptionPane.INFORMATION_MESSAGE
+                )
+            }
+        }
     ),
     MessageDialogInt(
         "MessageDialogInt", 56, "Service to display a message followed by a int to user",
         """
             a0 = address of null-terminated string that is the message to user
-            a1 = the int to display""",
-        "N/A", (ctxt, stmt) -> {
-        final String message = NullString.get(stmt);
-
-        // Display the dialog.
-        JOptionPane.showMessageDialog(
-            null,
-            message + (int) ctxt.registerFile.getIntValue("a1"),
-            null,
-            JOptionPane.INFORMATION_MESSAGE
-        );
-    }
+            a1 = the int to display
+            """.trimIndent(),
+        "N/A", { stmt ->
+            either {
+                val message = readNullString(stmt).bind()
+                // Display the dialog.
+                JOptionPane.showMessageDialog(
+                    null,
+                    message + registerFile.getIntValue("a1") as Int,
+                    null,
+                    JOptionPane.INFORMATION_MESSAGE
+                )
+            }
+        }
     ),
     MessageDialogString(
         "MessageDialogString", 59, "Service to display a message followed by a string to user",
         """
             a0 = address of null-terminated string that is the message to user
-            a1 = address of the second string to display""",
-        "N/A", (ctxt, stmt) -> JOptionPane.showMessageDialog(
-        null,
-        NullString.get(stmt) + NullString.get(stmt, "a1"),
-        null,
-        JOptionPane.INFORMATION_MESSAGE
-    )
+            a1 = address of the second string to display
+            """.trimIndent(),
+        "N/A", { stmt ->
+            either {
+                JOptionPane.showMessageDialog(
+                    null,
+                    readNullString(stmt).bind() +
+                            readNullString(stmt, "a1").bind(),
+                    null,
+                    JOptionPane.INFORMATION_MESSAGE
+                )
+            }
+        }
     ),
     MidiOut(
         "MidiOut", 31, "Outputs simulated MIDI tone to sound card (does not wait for sound to end).",
-        "See MIDI note below", "N/A", (ctxt, stmt) -> {
-        final int rangeLowEnd = 0;
-        final int rangeHighEnd = 127;
-        int pitch = ctxt.registerFile.getIntValue("a0");
-        int duration = ctxt.registerFile.getIntValue("a1");
-        int instrument = ctxt.registerFile.getIntValue("a2");
-        int volume = ctxt.registerFile.getIntValue("a3");
-        if (pitch < rangeLowEnd || pitch > rangeHighEnd) {
-            pitch = ToneGenerator.DEFAULT_PITCH;
+        "See MIDI note below", "N/A", { stmt ->
+            val rangeLowEnd = 0
+            val rangeHighEnd = 127
+            val pitch: Int = registerFile.getIntValue("a0")!!
+                .takeIf { it in rangeLowEnd..rangeHighEnd }
+                ?: ToneGenerator.DEFAULT_PITCH.toInt()
+            val duration: Int = registerFile.getIntValue("a1")!!
+                .takeIf { it > 0 }
+                ?: ToneGenerator.DEFAULT_DURATION
+            val instrument: Int = registerFile.getIntValue("a2")!!
+                .takeIf { it in rangeLowEnd..rangeHighEnd }
+                ?: ToneGenerator.DEFAULT_INSTRUMENT.toInt()
+            val volume: Int = registerFile.getIntValue("a3")!!
+                .takeIf { it in rangeLowEnd..rangeHighEnd }
+                ?: ToneGenerator.DEFAULT_VOLUME.toInt()
+            ToneGenerator.generateTone(pitch.toByte(), duration, instrument.toByte(), volume.toByte())
+            Unit.right()
         }
-        if (duration < 0) {
-            duration = ToneGenerator.DEFAULT_DURATION;
-        }
-        if (instrument < rangeLowEnd || instrument > rangeHighEnd) {
-            instrument = ToneGenerator.DEFAULT_INSTRUMENT;
-        }
-        if (volume < rangeLowEnd || volume > rangeHighEnd) {
-            volume = ToneGenerator.DEFAULT_VOLUME;
-        }
-        ToneGenerator.generateTone((byte) pitch, duration, (byte) instrument, (byte) volume);
-    }
     ),
     MidiOutSync(
         "MidiOutSync", 33, "Outputs simulated MIDI tone to sound card, then waits until the sound finishes playing.",
-        "See MIDI note below", "N/A", (ctxt, stmt) -> {
-        /*
+        "See MIDI note below", "N/A", { stmt ->
+            /*
          * Arguments:
          * a0 - pitch (note). Integer value from 0 to 127, with 60 being middle-C on a
          * piano.\n
@@ -468,50 +497,60 @@ public enum Syscall implements SimulationCallback {
          * MIDI instruments
          * use the range 1-128.
          */
-        final var RANGE_LOW_END = 0;
-        final var RANGE_HIGH_END = 127;
-        int pitch = ctxt.registerFile.getIntValue("a0");
-        int duration = ctxt.registerFile.getIntValue("a1");
-        int instrument = ctxt.registerFile.getIntValue("a2");
-        int volume = ctxt.registerFile.getIntValue("a3");
-        if (pitch < RANGE_LOW_END || pitch > RANGE_HIGH_END) {
-            pitch = ToneGenerator.DEFAULT_PITCH;
+            val rangeLowEnd = 0
+            val rangeHighEnd = 127
+            val pitch: Int = registerFile.getIntValue("a0")!!
+                .takeIf { it in rangeLowEnd..rangeHighEnd }
+                ?: ToneGenerator.DEFAULT_PITCH.toInt()
+            val duration: Int = registerFile.getIntValue("a1")!!
+                .takeIf { it > 0 }
+                ?: ToneGenerator.DEFAULT_DURATION
+            val instrument: Int = registerFile.getIntValue("a2")!!
+                .takeIf { it in rangeLowEnd..rangeHighEnd }
+                ?: ToneGenerator.DEFAULT_INSTRUMENT.toInt()
+            val volume: Int = registerFile.getIntValue("a3")!!
+                .takeIf { it in rangeLowEnd..rangeHighEnd }
+                ?: ToneGenerator.DEFAULT_VOLUME.toInt()
+            ToneGenerator.generateToneSynchronously(pitch.toByte(), duration, instrument.toByte(), volume.toByte())
+            Unit.right()
         }
-        if (duration < 0) {
-            duration = ToneGenerator.DEFAULT_DURATION;
-        }
-        if (instrument < RANGE_LOW_END || instrument > RANGE_HIGH_END) {
-            instrument = ToneGenerator.DEFAULT_INSTRUMENT;
-        }
-        if (volume < RANGE_LOW_END || volume > RANGE_HIGH_END) {
-            volume = ToneGenerator.DEFAULT_VOLUME;
-        }
-        ToneGenerator.generateToneSynchronously((byte) pitch, duration, (byte) instrument, (byte) volume);
-    }
     ),
     Open(
-        "Open", 1024, """
+        "Open",
+        1024,
+        """
         Opens a file from a path
-        Only supported flags (a1) are read-only (0), write-only (1) and\
-         write-append (9). write-only flag creates file if it does not exist, so it is technically\
-         write-create. write-append will start writing at end of existing file.""",
+        Only supported flags (a1) are:
+        - read-only (0),
+        - write-only (1),
+        - write-append (9).
+        Write-only flag creates file if it does not exist, so it is technically write-create.
+        Write-append will start writing at end of existing file.
+        """.trimIndent(),
         "a0 = Null terminated string for the path \na1 = flags",
-        "a0 = the file decriptor or -1 if an error occurred", (ctxt, stmt) -> {
-
-        final int retValue = ctxt.io.openFile(
-            NullString.get(stmt),
-            ctxt.registerFile.getIntValue("a1")
-        );
-        // set returned fd value in register
-        ctxt.registerFile.updateRegisterByName("a0", retValue);
-    }
+        "a0 = the file decriptor or -1 if an error occurred",
+        { stmt ->
+            either {
+                val retValue: Int = io.openFile(
+                    readNullString(stmt).bind(),
+                    registerFile.getIntValue("a1")!!
+                )
+                // set returned fd value in register
+                registerFile.updateRegisterByName("a0", retValue.toLong()).bind()
+            }
+        }
     ),
     PrintChar(
-        "PrintChar", 11, "Prints an ascii character",
-        "a0 = character to print (only lowest byte is considered)", "N/A", (ctxt, stmt) -> {
-        final char t = (char) (ctxt.registerFile.getIntValue("a0") & 0x000000ff);
-        ctxt.io.printString(Character.toString(t));
-    }
+        "PrintChar",
+        11,
+        "Prints an ascii character",
+        "a0 = character to print (only lowest byte is considered)",
+        "N/A",
+        { stmt ->
+            val t = (registerFile.getIntValue("a0")!! and 0x000000ff).toChar()
+            io.printString(t.toString())
+            Unit.right()
+        }
     ),
     PrintDouble(
         "PrintDouble",
@@ -519,17 +558,24 @@ public enum Syscall implements SimulationCallback {
         "Prints a double precision floating point number",
         "fa0 = double to print",
         "N/A",
-        (ctxt, stmt) -> {
+        { stmt ->
             // Note: Higher numbered reg contains high order word so concat 13-12.
-            ctxt.io
-                .printString(Double.toString(Double.longBitsToDouble(ctxt.fpRegisterFile.fa0.getValue())));
+            val value = fpRegisterFile.fa0.getValue().toDoubleReinterpreted()
+            io.printString(value.toString())
+            Unit.right()
         }
     ),
     PrintFloat(
-        "PrintFloat", 2, "Prints a floating point number", "fa0 = float to print", "N/A", (ctxt, stmt) -> {
-        final var registerValue = ctxt.fpRegisterFile.getIntValue("fa0");
-        ctxt.io.printString(Float.toString(Float.intBitsToFloat(registerValue)));
-    }
+        "PrintFloat",
+        2,
+        "Prints a floating point number",
+        "fa0 = float to print",
+        "N/A",
+        { stmt ->
+            val registerValue = fpRegisterFile.getIntValue("fa0")!!
+            io.printString(Float.intBitsToFloat(registerValue).toString())
+            Unit.right()
+        }
     ),
     PrintInt(
         "PrintInt",
@@ -537,7 +583,14 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer",
         "a0 = integer to print",
         "N/A",
-        (ctxt, stmt) -> ctxt.io.printString(Integer.toString(ctxt.registerFile.getIntValue("a0")))
+        { stmt ->
+            io.printString(
+                registerFile.getIntValue(
+                    "a0"
+                )!!.toString()
+            )
+            Unit.right()
+        }
     ),
     PrintIntBinary(
         "PrintIntBinary",
@@ -545,7 +598,14 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer (in binary format left-padded with zeroes) ",
         "a0 = integer to print",
         "N/A",
-        (ctxt, stmt) -> ctxt.io.printString(BinaryUtilsKt.intToBinaryString(ctxt.registerFile.getIntValue("a0")))
+        { stmt ->
+            io.printString(
+                registerFile.getIntValue(
+                    "a0"
+                )!!.toBinaryString()
+            )
+            Unit.right()
+        }
     ),
     PrintIntHex(
         "PrintIntHex",
@@ -553,7 +613,14 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer (in hexdecimal format left-padded with zeroes)",
         "a0 = integer to print",
         "N/A",
-        (ctxt, stmt) -> ctxt.io.printString(BinaryUtilsKt.intToHexStringWithPrefix(ctxt.registerFile.getIntValue("a0")))
+        { stmt ->
+            io.printString(
+                registerFile.getIntValue(
+                    "a0"
+                )!!.toHexStringWithPrefix()
+            )
+            Unit.right()
+        }
     ),
     PrintIntUnsigned(
         "PrintIntUnsigned",
@@ -561,40 +628,52 @@ public enum Syscall implements SimulationCallback {
         "Prints an integer (unsigned)",
         "a0 = integer to print",
         "N/A",
-        (ctxt, stmt) -> ctxt.io.printString(
-            BinaryUtilsOld.unsignedIntToIntString(ctxt.registerFile.getIntValue("a0")))
+        { stmt ->
+            val value = registerFile.getIntValue("a0")!!.toUInt()
+            io.printString(value.toString())
+            Unit.right()
+        }
     ),
     PrintString(
-        "PrintString", 4, "Prints a null-terminated string to the console",
-        "a0 = the address of the string", "N/A", (ctxt, stmt) -> ctxt.io.printString(NullString.get(stmt))
+        "PrintString",
+        4,
+        "Prints a null-terminated string to the console",
+        "a0 = the address of the string",
+        "N/A",
+        { stmt ->
+            either {
+                io.printString(readNullString(stmt).bind())
+                Unit.right()
+            }
+        }
     ),
     RandDouble(
-        "RandDouble", 44, "Get a random double from the range 0.0-1.0",
-        "a0 = index of pseudorandom number generator", "fa0 = the next pseudorandom", (ctxt, stmt) -> {
-        final Integer index = ctxt.registerFile.getIntValue("a0");
-        Random stream = RandomStreams.randomStreams.get(index);
-        if (stream == null) {
-            stream = new Random(); // create a non-seeded stream
-            RandomStreams.randomStreams.put(index, stream);
+        "RandDouble",
+        44,
+        "Get a random double from the range 0.0-1.0",
+        "a0 = index of pseudorandom number generator",
+        "fa0 = the next pseudorandom",
+        { stmt ->
+            val stream = getRandomStream("a0")
+            fpRegisterFile.updateRegisterByName(
+                "fa0", stream.nextDouble().toLongReinterpreted()
+            ).onLeft { error(it.toString()) }
+            Unit.right()
         }
-        try {
-            ctxt.fpRegisterFile.updateRegisterByName("fa0", Double.doubleToRawLongBits(stream.nextDouble())
-            );
-        } catch (rars.exceptions.SimulationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     ),
     RandFloat(
-        "RandFloat", 43, "Get a random float", "a0 = index of pseudorandom number generator",
-        "fa0 = uniformly randomly selected from from [0,1]", (ctxt, stmt) -> {
-        final Random stream = RandomStreams.get("a0");
-        ctxt.fpRegisterFile.updateRegisterByNameInt(
-            "fa0",
-            Float.floatToRawIntBits(stream.nextFloat())
-        );
-    }
+        "RandFloat",
+        43,
+        "Get a random float",
+        "a0 = index of pseudorandom number generator",
+        "fa0 = uniformly randomly selected from from [0,1]",
+        { stmt ->
+            val stream: Random = getRandomStream("a0")
+            fpRegisterFile.updateRegisterByNameInt(
+                "fa0",
+                stream.nextFloat().toIntReinterpreted()
+            )
+        }
     ),
     RandInt(
         "RandInt",
@@ -602,87 +681,100 @@ public enum Syscall implements SimulationCallback {
         "Get a random integer",
         "a0 = index of pseudorandom number generator",
         "a0 = random integer",
-        (ctxt, stmt) -> {
-            final Random stream = RandomStreams.get("a0");
-            ctxt.registerFile.updateRegisterByName("a0", stream.nextInt());
+        { stmt ->
+            val stream = getRandomStream("a0")
+            registerFile.updateRegisterByName(
+                "a0",
+                stream.nextInt().toLong()
+            ).ignoreOk()
         }
     ),
     RandIntRange(
-        "RandIntRange", 42, "Get a random bounded integer",
+        "RandIntRange",
+        42,
+        "Get a random bounded integer",
         """
             a0 = index of pseudorandom number generator
-            a1 = upper bound for random number""",
-        "a0 = uniformly selectect from [0,bound]", (ctxt, stmt) -> {
-        final var stream = RandomStreams.get("a0");
-        try {
-            ctxt.registerFile.updateRegisterByName("a0", stream.nextInt(ctxt.registerFile.getIntValue("a1")));
-        } catch (final IllegalArgumentException iae) {
-            throw new ExitingException(
-                stmt,
-                "Upper bound of range cannot be negative (syscall 42)"
-            );
+            a1 = upper bound for random number
+            """.trimIndent(),
+        "a0 = uniformly selected from [0,bound]",
+        { stmt ->
+            either {
+                val stream = getRandomStream("a0")
+                val value = try {
+                    stream.nextInt(registerFile.getIntValue("a1")!!).toLong()
+                } catch (_: IllegalArgumentException) {
+                    raise(ExitingError(stmt, "Upper bound of range cannot be negative (syscall 42)"))
+                }
+                registerFile.updateRegisterByName(
+                    "a0",
+                    value
+                ).bind()
+            }
         }
-    }
     ),
     RandSeed(
         "RandSeed", 40, "Set seed for the underlying Java pseudorandom number generator",
         """
             a0 = index of pseudorandom number generator
-            a1 = the seed""", "N/A", (ctxt, stmt) -> {
-        final var index = ctxt.registerFile.getIntValue("a0");
-        final Random stream = RandomStreams.randomStreams.get(index);
-        if (stream == null) {
-            RandomStreams.randomStreams.put(index, new Random(ctxt.registerFile.getIntValue("a1")));
-        } else {
-            stream.setSeed(ctxt.registerFile.getIntValue("a1"));
+            a1 = the seed
+            """.trimIndent(), "N/A", { stmt ->
+            val index = registerFile.getIntValue("a0")!!
+            val seed = registerFile.getIntValue("a1")!!.toLong()
+            setRandomStreamSeed(index, seed)
+            Unit.right()
         }
-    }
     ),
     Read(
         "Read", 63, "Read from a file descriptor into a buffer",
         """
             a0 = the file descriptor
             a1 = address of the buffer
-            a2 = maximum length to read""",
-        "a0 = the length read or -1 if error", (ctxt, stmt) -> {
+            a2 = maximum length to read
+            """.trimIndent(),
+        "a0 = the length read or -1 if error", { stmt ->
+            val destinationAddress = registerFile.getIntValue("a1")!!
+            val length = registerFile.getIntValue("a2")!!
+            val myBuffer = ByteArray(length)
+            // Call to io().xxxx.read(xxx,xxx,xxx) returns actual length
+            val retLength = io.readFromFile(
+                registerFile.getIntValue("a0")!!,
+                myBuffer,
+                length
+            )
+            either {
+                // set returned value in register
+                registerFile.updateRegisterByName(
+                    "a0",
+                    retLength.toLong()
+                ).bind()
 
-        int byteAddress = ctxt.registerFile.getIntValue("a1"); // destination of characters read from file
-        final int length = ctxt.registerFile.getIntValue("a2");
-        final byte[] myBuffer = new byte[length]; // specified length
-        // Call to ctxt.io().xxxx.read(xxx,xxx,xxx) returns actual length
-        final int retLength = ctxt.io.readFromFile(
-            ctxt.registerFile.getIntValue("a0"), // fd
-            myBuffer, // buffer
-            length
-        ); // length
-        // set returned value in register
-        ctxt.registerFile.updateRegisterByName("a0", retLength);
-
-        // copy bytes from returned buffer into memory
-        try {
-            int index = 0;
-            while (index < retLength) {
-                ctxt.memory.setByte(
-                    byteAddress++,
-                    myBuffer[index++]
-                );
+                // copy bytes from returned buffer into memory
+                try {
+                    for (index in 0..<retLength) {
+                        memory.setByte(
+                            destinationAddress + index,
+                            myBuffer[index].toInt()
+                        )
+                    }
+                } catch (e: AddressErrorException) {
+                    raise(ExitingError(stmt, e))
+                }
             }
-        } catch (final AddressErrorException e) {
-            throw new ExitingException(stmt, e);
         }
-    }
     ),
     ReadChar(
-        "ReadChar", 12, "Reads a character from input console", "N/A", "a0 = the character", (ctxt, stmt) -> {
-        try {
-            ctxt.registerFile.updateRegisterByName("a0", ctxt.io.readChar());
-        } catch (final IndexOutOfBoundsException e) {
-            throw new ExitingException(
-                stmt,
-                "invalid char input (syscall 12)"
-            );
+        "ReadChar",
+        12,
+        "Reads a character from input console",
+        "N/A",
+        "a0 = the character",
+        { stmt ->
+            registerFile.updateRegisterByName(
+                "a0",
+                io.readChar().code.toLong()
+            ).ignoreOk()
         }
-    }
     ),
     ReadDouble(
         "ReadDouble",
@@ -690,36 +782,39 @@ public enum Syscall implements SimulationCallback {
         "Reads a double from input console",
         "N/A",
         "fa0 = the double",
-        (ctxt, stmt) -> {
-            final double doubleValue;
-            try {
-                doubleValue = ctxt.io.readDouble();
-            } catch (final NumberFormatException e) {
-                throw new ExitingException(
+        { stmt ->
+            val doubleValue = try {
+                io.readDouble().right()
+            } catch (_: NumberFormatException) {
+                ExitingError(
                     stmt,
                     "invalid double input (syscall 7)"
-                );
+                ).left()
             }
-
-            ctxt.fpRegisterFile.updateRegisterByNumber(10, Double.doubleToRawLongBits(doubleValue));
+            doubleValue.map {
+                fpRegisterFile.updateRegisterByNumber(10, it.toLongReinterpreted())
+            }
         }
     ),
     ReadFloat(
-        "ReadFloat", 6, "Reads a float from input console", "N/A", "fa0 = the float", (ctxt, stmt) -> {
-        final float floatValue;
-        try {
-            floatValue = ctxt.io.readFloat();
-        } catch (final NumberFormatException e) {
-            throw new ExitingException(
-                stmt,
-                "invalid float input (syscall 6)"
-            );
+        "ReadFloat",
+        6,
+        "Reads a float from input console",
+        "N/A",
+        "fa0 = the float",
+        { stmt ->
+            val floatValue = try {
+                io.readFloat().right()
+            } catch (_: NumberFormatException) {
+                ExitingError(
+                    stmt,
+                    "invalid float input (syscall 6)"
+                ).left()
+            }
+            floatValue.map {
+                fpRegisterFile.updateRegisterByNumberInt(10, it.toIntReinterpreted())
+            }
         }
-        ctxt.fpRegisterFile.updateRegisterByNumberInt(
-            10,
-            Float.floatToRawIntBits(floatValue)
-        ); // TODO: update to string fa0
-    }
     ),
     ReadInt(
         "ReadInt",
@@ -727,21 +822,26 @@ public enum Syscall implements SimulationCallback {
         "Reads an int from input console",
         "N/A",
         "a0 = the int",
-        (ctxt, stmt) -> {
-            try {
-                ctxt.registerFile.updateRegisterByName("a0", ctxt.io.readInt());
-            } catch (final NumberFormatException e) {
-                throw new ExitingException(
-                    stmt,
-                    "invalid integer input (syscall 5)"
-                );
+        { stmt ->
+            either {
+                try {
+                    val newValue = io.readInt().toLong()
+                    registerFile.updateRegisterByName("a0", newValue)
+                } catch (_: NumberFormatException) {
+                    ExitingError(
+                        stmt,
+                        "invalid integer input (syscall 5)"
+                    )
+                }
             }
         }
     ),
+
     /**
      * Service to read console input string into buffer starting at address in a0
      * for a1-1 bytes.
-     * <p>
+     *
+     *
      * Performs syscall function to read console input string into buffer starting
      * at address in $a0.
      * Follows semantics of UNIX 'fgets'. For specified length n,
@@ -752,38 +852,37 @@ public enum Syscall implements SimulationCallback {
         "ReadString", 8, "Reads a string from the console",
         """
             a0 = address of input buffer
-            a1 = maximum number of characters to read""", "N/A", (ctxt, stmt) -> {
-        final int buf = ctxt.registerFile.getIntValue("a0"); // buf addr
-        int maxLength = ctxt.registerFile.getIntValue("a1") - 1;
-        boolean addNullByte = true;
-        // Guard against negative maxLength. DPS 13-July-2011
-        if (maxLength < 0) {
-            maxLength = 0;
-            addNullByte = false;
-        }
-        final String inputString = ctxt.io.readString(maxLength);
+            a1 = maximum number of characters to read
+            """.trimIndent(), "N/A", { stmt ->
+            val bufferAddress = registerFile.getIntValue("a0")!!
+            val (maxLength, addNullByte) = registerFile.getIntValue("a1")!!.let {
+                if (it < 0) 0 to false
+                else it - 1 to true
+            }
+            val inputString = io.readString(maxLength)
 
-        final byte[] utf8BytesList = inputString.getBytes(StandardCharsets.UTF_8);
-        // TODO: allow for utf-8 encoded strings
-        int stringLength = Math.min(maxLength, utf8BytesList.length);
-        try {
-            for (int index = 0; index < stringLength; index++) {
-                ctxt.memory.setByte(
-                    buf + index,
-                    utf8BytesList[index]
-                );
+            val utf8BytesList = inputString.toByteArray(StandardCharsets.UTF_8)
+            // TODO: allow for utf-8 encoded strings
+            var stringLength = min(maxLength.toDouble(), utf8BytesList.size.toDouble()).toInt()
+            try {
+                for (index in 0..<stringLength) {
+                    memory.setByte(
+                        bufferAddress + index,
+                        utf8BytesList[index].toInt()
+                    )
+                }
+                if (stringLength < maxLength) {
+                    memory.setByte(bufferAddress + stringLength, '\n'.code)
+                    stringLength++
+                }
+                if (addNullByte) {
+                    memory.setByte(bufferAddress + stringLength, 0)
+                }
+                Unit.right()
+            } catch (e: AddressErrorException) {
+                ExitingError(stmt, e).left()
             }
-            if (stringLength < maxLength) {
-                ctxt.memory.setByte(buf + stringLength, '\n');
-                stringLength++;
-            }
-            if (addNullByte) {
-                ctxt.memory.setByte(buf + stringLength, 0);
-            }
-        } catch (final AddressErrorException e) {
-            throw new ExitingException(stmt, e);
         }
-    }
     ),
     Sbrk(
         "Sbrk",
@@ -791,160 +890,108 @@ public enum Syscall implements SimulationCallback {
         "Allocate heap memory",
         "a0 = amount of memory in bytes",
         "a0 = address to the allocated block",
-        (ctxt, stmt) -> {
-            try {
-                ctxt.registerFile.updateRegisterByName(
-                    "a0",
-                    ctxt.memory.allocateBytesFromHeap(ctxt.registerFile.getIntValue("a0"))
-                );
-            } catch (final IllegalArgumentException iae) {
-                throw new ExitingException(
+        { stmt ->
+            val address = try {
+                memory.allocateBytesFromHeap(registerFile.getIntValue("a0")!!).toLong().right()
+            } catch (e: IllegalArgumentException) {
+                // TODO: Exiting event n' stuff
+                ExitingError(
                     stmt,
-                    iae.getMessage() + " (syscall 9)"
-                );
+                    "${e.message} (syscall 9)"
+                ).left()
             }
+            address.flatMap {
+                registerFile.updateRegisterByName("a0", it)
+            }.ignoreOk()
         }
     ),
     Sleep(
         "Sleep", 32, "Set the current thread to sleep for a time (not precise)", "a0 = time to sleep in milliseconds",
-        "N/A", (ctxt, stmt) -> {
-
-        try {
-            Thread.sleep(ctxt.registerFile.getIntValue("a0"));
-        } catch (final InterruptedException ignored) {
+        "N/A", { stmt ->
+            try {
+                Thread.sleep(registerFile.getIntValue("a0")!!.toLong())
+            } catch (_: InterruptedException) {
+            }
+            Unit.right()
         }
-    }
     ),
     Time(
         "Time", 30, "Get the current time (milliseconds since 1 January 1970)", "N/A",
         """
             a0 = low order 32 bits
-            a1=high order 32 bits""", (ctxt, stmt) -> {
-        final var time = System.currentTimeMillis();
-        ctxt.registerFile.updateRegisterByName("a0", BinaryUtilsOld.lowOrderLongToInt(time));
-        ctxt.registerFile.updateRegisterByName("a1", BinaryUtilsOld.highOrderLongToInt(time));
-    }
+            a1=high order 32 bits
+            """.trimIndent(), { stmt ->
+            either {
+                val time = System.currentTimeMillis()
+                registerFile.updateRegisterByName("a0", BinaryUtilsOld.lowOrderLongToInt(time).toLong()).bind()
+                registerFile.updateRegisterByName("a1", BinaryUtilsOld.highOrderLongToInt(time).toLong()).bind()
+            }
+        }
     ),
     Write(
-        "Write", 64,
+        "Write",
+        64,
         "Write to a file descriptor from a buffer",
         """
             a0 = the file descriptor
             a1 = the buffer address
-            a2 = the length to write""",
-        "a0 = the number of characters written", (ctxt, stmt) -> {
-
-        final var registerFile = ctxt.registerFile;
-        final var memory = ctxt.memory;
-        int byteAddress = registerFile.getIntValue("a1"); // source of characters to write to file
-        final int reqLength = registerFile.getIntValue("a2"); // user-requested length
-        if (reqLength < 0) {
-            registerFile.updateRegisterByName("a0", -1);
-            return;
-        }
-        final byte[] myBuffer = new byte[reqLength];
-        try {
-            var byteValue = memory.getByte(byteAddress);
-            int index = 0;
-            while (index < reqLength) // Stop at requested length. Null bytes are included.
-            {
-                myBuffer[index++] = byteValue;
-                byteAddress++;
-                byteValue = memory.getByte(byteAddress);
+            a2 = the length to write
+            """.trimIndent(),
+        "a0 = the number of characters written",
+        { stmt ->
+            either {
+                var byteAddress = registerFile.getIntValue("a1")!! // source of characters to write to file
+                val reqLength = registerFile.getIntValue("a2")!! // user-requested length
+                if (reqLength < 0) {
+                    registerFile.updateRegisterByName("a0", -1).bind()
+                    return@either
+                }
+                val myBuffer = ByteArray(reqLength)
+                try {
+                    var byteValue = memory.getByte(byteAddress)
+                    var index = 0
+                    while (index < reqLength)  // Stop at requested length. Null bytes are included.
+                    {
+                        myBuffer[index++] = byteValue
+                        byteAddress++
+                        byteValue = memory.getByte(byteAddress)
+                    }
+                } catch (e: AddressErrorException) {
+                    raise(ExitingError(stmt, e))
+                }
+                val retValue: Int = io.writeToFile(
+                    registerFile.getIntValue("a0")!!, // fd
+                    myBuffer, // buffer
+                    registerFile.getIntValue("a2")!! // length
+                )
+                registerFile.updateRegisterByName("a0", retValue.toLong()).bind()
             }
-        } catch (final AddressErrorException e) {
-            throw new ExitingException(stmt, e);
         }
-        final int retValue = ctxt.io.writeToFile(
-            registerFile.getIntValue("a0"), // fd
-            myBuffer, // buffer
-            registerFile.getIntValue("a2")
-        ); // length
-        // set returned value in register
-        registerFile.updateRegisterByName("a0", retValue);
-    }
     );
 
-    /**
-     * The name of this syscall. This can be used by a RARS
-     * user to refer to the service when choosing to override its default service
-     * number in the configuration file.
-     */
-    public final @NotNull String serviceName;
-    /** A string describing what the system call does */
-    public final @NotNull String description;
-    /** A string documenting what registers should be set to before the system call runs. */
-    public final @NotNull String inputs;
-    /** A string documenting what registers are set to after the system call runs */
-    public final @NotNull String outputs;
-    /**
-     * The assigned service number. This is the number the programmer
-     * must store into a7 before issuing the ECALL instruction.
-     */
-    public final int serviceNumber;
-    private final @NotNull SimulationCallback callback;
+    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> =
+        callback(statement)
 
     /**
-     * <p>Constructor for SyscallEnum.</p>
+     *
+     * Constructor for SyscallEnum.
      *
      * @param name
-     *     service name which may be used for reference independent of
-     *     number
+     * service name which may be used for reference independent of
+     * number
      * @param description
-     *     a hort description of what the system calll does
+     * a hort description of what the system calll does
      */
-    Syscall(
-        final @NotNull String name,
-        final int number,
-        final @NotNull String description,
-        final @NotNull SimulationCallback callback
-    ) {
-        this(name, number, description, "N/A", "N/A", callback);
-    }
+    constructor(
+        name: String,
+        number: Int,
+        description: String,
+        callback: SimulationCallbackFunc
+    ) : this(name, number, description, "N/A", "N/A", callback)
 
-    /**
-     * <p>Constructor for SyscallEnum.</p>
-     *
-     * @param name
-     *     service name which may be used for reference independent of
-     *     number
-     * @param description
-     *     a short description of what the system call does
-     * @param in
-     *     a description of what registers should be set to before the
-     *     system call
-     * @param out
-     *     a description of what registers are set to after the system call
-     */
-    Syscall(
-        final @NotNull String name,
-        final int number,
-        final @NotNull String description,
-        final @NotNull String in,
-        final @NotNull String out,
-        final @NotNull SimulationCallback callback
-    ) {
-        this.serviceNumber = number;
-        this.serviceName = name;
-        this.description = description;
-        this.inputs = in;
-        this.outputs = out;
-        this.callback = callback;
-    }
-
-    public static @Nullable Syscall findSyscall(final @Range(from = 0, to = Integer.MAX_VALUE) int number) {
-        for (final var syscall : values()) {
-            if (syscall.serviceNumber == number) {
-                return syscall;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void simulate(
-        final @NotNull SimulationContext context, final @NotNull ProgramStatement statement
-    ) throws SimulationException {
-        this.callback.simulate(context, statement);
+    companion object {
+        @JvmStatic
+        fun findSyscall(number: @Range(from = 0, to = Int.MAX_VALUE.toLong()) Int) =
+            entries.find { it.serviceNumber == number }
     }
 }

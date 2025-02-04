@@ -24,3 +24,5 @@ fun interface SimulationCallback {
      */
     fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit>
 }
+
+typealias SimulationCallbackFunc = SimulationContext.(ProgramStatement) -> Either<SimulationEvent, Unit>

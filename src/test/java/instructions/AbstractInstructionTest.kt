@@ -10,7 +10,6 @@ import rars.riscv.InstructionsRegistry
 import rars.riscv.hardware.MemoryConfiguration
 import rars.settings.BoolSetting
 import rars.simulator.Simulator
-import rars.util.Utils
 import utils.RarsTestBase
 import java.util.*
 
@@ -140,7 +139,7 @@ abstract class AbstractInstructionTest : RarsTestBase() {
                     "Reason: " + se.reason + "\n" +
                     "Value: " + se.value + "\n" +
                     "Message: " + se.errorMessage!!.message + "\n" +
-                    "Stacktrace: " + Utils.getStacktraceString(se) + "\n"
+                    "Stacktrace: " + KotlinUtilsKt.getStacktraceString() + "\n"
 
             Assertions.fail<Any?>(msg)
         }
@@ -152,11 +151,13 @@ abstract class AbstractInstructionTest : RarsTestBase() {
         secondValue: String,
         result: String
     ) {
-        val finalCode = "li x1, " + firstValue + "\n" +
-                "li x2, " + secondValue + "\n" +
-                op + " x30, x1, x2\n" +
-                "li x29, " + result + "\n" +
-                "bne x30, x29, fail\n"
+        val finalCode = """
+            li x1, $firstValue
+            li x2, $secondValue
+            $op x30, x1, x2
+            li x29, $result
+            bne x30, x29, fail
+        """.trimIndent()
         runTest32(finalCode)
     }
 
@@ -166,10 +167,12 @@ abstract class AbstractInstructionTest : RarsTestBase() {
         immediate: String,
         result: String
     ) {
-        val finalCode = "li x1, " + firstValue + "\n" +
-                op + " x30, x1, " + immediate + "\n" +
-                "li x29, " + result + "\n" +
-                "bne x30, x29, fail\n"
+        val finalCode = """
+            li x1, $firstValue
+            $op x30, x1, $immediate
+            li x29, $result
+            bne x30, x29, fail
+        """.trimIndent()
         runTest32(finalCode)
     }
 
