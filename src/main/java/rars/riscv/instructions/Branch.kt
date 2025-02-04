@@ -1,14 +1,18 @@
-package rars.riscv.instructions;
+package rars.riscv.instructions
 
-import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
-import rars.riscv.BasicInstruction;
-import rars.riscv.BasicInstructionFormat;
-import rars.riscv.hardware.registerFiles.RegisterFile;
-import rars.simulator.SimulationContext;
-
-import java.util.Objects;
-import java.util.function.BiFunction;
+import arrow.core.Either
+import arrow.core.right
+import rars.ProgramStatement
+import rars.exceptions.SimulationEvent
+import rars.riscv.BasicInstruction
+import rars.riscv.BasicInstructionFormat
+import rars.riscv.hardware.registerFiles.RegisterFile
+import rars.simulator.SimulationContext
+import java.lang.Long
+import kotlin.Boolean
+import kotlin.Int
+import kotlin.String
+import kotlin.Unit
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -36,103 +40,101 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-
 /**
  * Base class for all branching instructions
- * <p>
+ *
+ *
  * Created mainly for making the branch simulator code simpler, but also does
  * help with code reuse
  *
  * @author Benjamin Landers
  * @version June 2017
  */
-public final class Branch extends BasicInstruction {
-    public static final @NotNull Branch BEQ = makeBranch(
-        "beq",
-        "Branch if equal : Branch to statement at label's address if t1 and t2 are equal",
-        "000",
-        (statement, registerFile) -> Objects.equals(
-            registerFile.getLongValue(statement.getOperand(0)), registerFile.getLongValue(statement.getOperand(1))
-        )
-    );
-    public static final @NotNull Branch BGE = makeBranch(
-        "bge",
-        "Branch if greater than or equal: Branch to statement at label's address if t1 is greater than or equal " +
-            "to t2",
-        "101",
-        (statement, registerFile) -> registerFile.getLongValue(statement.getOperand(0)) >=
-            registerFile.getLongValue(statement.getOperand(1))
-    );
-    public static final @NotNull Branch BGEU = makeBranch(
-        "bgeu",
-        "Branch if greater than or equal to (unsigned): Branch to statement at label's address if t1 is greater " +
-            "than or equal to t2 (with an unsigned interpretation)",
-        "111",
-        (statement, registerFile) -> Long.compareUnsigned(
-            registerFile.getLongValue(statement.getOperand(0)),
-            registerFile.getLongValue(statement.getOperand(1))
-        ) >= 0
-    );
-    public static final @NotNull Branch BLT = makeBranch(
-        "blt",
-        "Branch if less than: Branch to statement at label's address if t1 is less than t2",
-        "100",
-        (statement, registerFile) -> registerFile.getLongValue(statement.getOperand(0)) < registerFile
-            .getLongValue(
-                statement.getOperand(1))
-    );
-    public static final @NotNull Branch BLTU = makeBranch(
-        "bltu",
-        "Branch if less than (unsigned): Branch to statement at label's address if t1 is less than t2 (with an " +
-            "unsigned interpretation)",
-        "110",
-        (statement, registerFile) -> Long.compareUnsigned(
-            registerFile.getLongValue(statement.getOperand(0)),
-            registerFile.getLongValue(statement.getOperand(1))
-        ) < 0
-    );
-    public static final @NotNull Branch BNE = makeBranch(
-        "bne",
-        "Branch if not equal : Branch to statement at label's address if t1 and t2 are not equal",
-        "001",
-        (statement, registerFile) -> {
-            final var firstValue = (int) registerFile.getIntValue(statement.getOperand(0));
-            final var secondValue = (int) registerFile.getIntValue(statement.getOperand(1));
-            return firstValue != secondValue;
-        }
-    );
-    public final @NotNull BiFunction<@NotNull ProgramStatement, @NotNull RegisterFile, @NotNull Boolean> willBranch;
-
-    private Branch(
-        final @NotNull String operand,
-        final @NotNull String description,
-        final @NotNull String funct,
-        final @NotNull BiFunction<@NotNull ProgramStatement, @NotNull RegisterFile, @NotNull Boolean> willBranch
-    ) {
-        super(
-            "%s t1,t2,label".formatted(operand),
-            description,
-            BasicInstructionFormat.B_FORMAT,
-            "ttttttt sssss fffff %s ttttt 1100011 ".formatted(funct)
-        );
-        this.willBranch = willBranch;
-    }
-
-    private static @NotNull Branch makeBranch(
-        final @NotNull String usage,
-        final @NotNull String description,
-        final @NotNull String funct,
-        final @NotNull BiFunction<@NotNull ProgramStatement, @NotNull RegisterFile, @NotNull Boolean> willBranchCallback
-    ) {
-        return new Branch(usage, description, funct, willBranchCallback);
-    }
-
-    @Override
-    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) {
-        if (this.willBranch.apply(statement, context.registerFile)) {
-            final int instructionLength = this.getInstructionLength();
+class Branch private constructor(
+    operand: String,
+    description: String,
+    funct: String,
+    @JvmField val willBranch: (ProgramStatement, RegisterFile) -> Boolean
+) : BasicInstruction(
+    "$operand t1,t2,label",
+    description,
+    BasicInstructionFormat.B_FORMAT,
+    "ttttttt sssss fffff $funct ttttt 1100011 "
+) {
+    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> {
+        if (willBranch(statement, registerFile)) {
+            val instructionLength = this@Branch.instructionLength
             // Decrement needed because PC has already been incremented
-            context.registerFile.setProgramCounter(context.registerFile.getProgramCounter() + statement.getOperand(2) - instructionLength);
+            registerFile.setProgramCounter(registerFile.programCounter + statement.getOperand(2) - instructionLength)
         }
+        return Unit.right()
+    }
+
+    companion object {
+        val BEQ: Branch = makeBranch(
+            "beq",
+            "Branch if equal : Branch to statement at label's address if t1 and t2 are equal",
+            "000"
+        ) { statement, registerFile ->
+            registerFile.getLongValue(statement.getOperand(0)) ==
+                    registerFile.getLongValue(statement.getOperand(1))
+        }
+        val BGE: Branch = makeBranch(
+            "bge",
+            "Branch if greater than or equal: Branch to statement at label's address if t1 is greater than or equal " +
+                    "to t2",
+            "101"
+        ) { statement, registerFile ->
+            registerFile.getLongValue(statement.getOperand(0))!! >=
+                    registerFile.getLongValue(statement.getOperand(1))!!
+        }
+        val BGEU: Branch = makeBranch(
+            "bgeu",
+            "Branch if greater than or equal to (unsigned): Branch to statement at label's address if t1 is greater " +
+                    "than or equal to t2 (with an unsigned interpretation)",
+            "111"
+        ) { statement, registerFile ->
+            Long.compareUnsigned(
+                registerFile.getLongValue(statement.getOperand(0))!!,
+                registerFile.getLongValue(statement.getOperand(1))!!
+            ) >= 0
+        }
+        val BLT: Branch = makeBranch(
+            "blt",
+            "Branch if less than: Branch to statement at label's address if t1 is less than t2",
+            "100"
+        ) { statement, registerFile ->
+            registerFile.getLongValue(statement.getOperand(0))!! < registerFile
+                .getLongValue(
+                    statement.getOperand(1)
+                )!!
+        }
+        val BLTU: Branch = makeBranch(
+            "bltu",
+            "Branch if less than (unsigned): Branch to statement at label's address if t1 is less than t2 (with an " +
+                    "unsigned interpretation)",
+            "110"
+        ) { statement, registerFile ->
+            Long.compareUnsigned(
+                registerFile.getLongValue(statement.getOperand(0))!!,
+                registerFile.getLongValue(statement.getOperand(1))!!
+            ) < 0
+        }
+        val BNE: Branch = makeBranch(
+            "bne",
+            "Branch if not equal : Branch to statement at label's address if t1 and t2 are not equal",
+            "001"
+        ) { statement, registerFile ->
+            val firstValue = registerFile.getIntValue(statement.getOperand(0)) as Int
+            val secondValue = registerFile.getIntValue(statement.getOperand(1)) as Int
+            firstValue != secondValue
+        }
+
+        private fun makeBranch(
+            usage: String,
+            description: String,
+            funct: String,
+            willBranchCallback: (ProgramStatement, RegisterFile) -> Boolean
+        ) = Branch(usage, description, funct, willBranchCallback)
     }
 }
