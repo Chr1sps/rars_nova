@@ -4,11 +4,8 @@ import arrow.core.Either
 import arrow.core.raise.either
 import rars.ProgramStatement
 import rars.exceptions.SimulationEvent
-import rars.riscv.BasicInstruction
-import rars.riscv.BasicInstructionFormat
-import rars.riscv.InstructionsRegistry
+import rars.riscv.*
 import rars.simulator.SimulationContext
-import java.math.BigInteger
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -264,12 +261,3 @@ class Arithmetic private constructor(
 }
 
 
-private fun Int.lowerToULong(): ULong = this.toULong() and 0xFFFFFFFFu
-private fun Long.toBigInteger(): BigInteger = BigInteger.valueOf(this)
-private fun ULong.toBigInteger(): BigInteger {
-    val converted = this.toLong()
-    return BigInteger.valueOf(converted).let {
-        if (converted < 0) it.add(BigInteger.ONE.shiftLeft(64))
-        else it
-    }
-}

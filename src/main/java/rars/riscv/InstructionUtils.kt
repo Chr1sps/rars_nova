@@ -11,10 +11,12 @@ import rars.jsoftfloat.Environment
 import rars.jsoftfloat.RoundingMode
 import rars.jsoftfloat.types.Float32
 import rars.jsoftfloat.types.Float64
+import rars.jsoftfloat.types.Floating
 import rars.riscv.hardware.registerFiles.CSRegisterFile
 import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile
+import java.math.BigInteger
 
-fun CSRegisterFile.setfflags(environment: Environment): Either<SimulationError, Unit> =
+internal fun CSRegisterFile.setfflags(environment: Environment): Either<SimulationError, Unit> =
     either {
         val fflags = listOf(
             environment.inexact to 1,
@@ -28,7 +30,7 @@ fun CSRegisterFile.setfflags(environment: Environment): Either<SimulationError, 
         }
     }
 
-fun CSRegisterFile.getRoundingMode(
+internal fun CSRegisterFile.getRoundingMode(
     rmValue: Int,
     statement: ProgramStatement
 ): Either<SimulationError, RoundingMode> {
@@ -52,6 +54,27 @@ fun CSRegisterFile.getRoundingMode(
     }
 }
 
-fun FloatingPointRegisterFile.getFloat32(num: Int) = Float32(getIntValue(num)!!)
+internal fun FloatingPointRegisterFile.getFloat32(num: Int) = Float32(getIntValue(num)!!)
 
-fun FloatingPointRegisterFile.getFloat64(num: Int) = Float64(getLongValue(num)!!)
+internal fun FloatingPointRegisterFile.getFloat64(num: Int) = Float64(getLongValue(num)!!)
+internal fun Int.lowerToULong(): ULong = this.toULong() and 0xFFFFFFFFu
+internal fun Long.toBigInteger(): BigInteger = BigInteger.valueOf(this)
+internal fun ULong.toBigInteger(): BigInteger {
+    val converted = this.toLong()
+    return BigInteger.valueOf(converted).let {
+        if (converted < 0) it.add(BigInteger.ONE.shiftLeft(64))
+        else it
+    }
+}
+
+// TODO: Create some kind of a factory interface for the Floating types to use here
+internal fun <S : Floating<S>, D : Floating<D>> convert(
+    toconvert: D,
+    constructor: S,
+    environment: Environment
+): S = when {
+    toconvert.isInfinite -> if (toconvert.isSignMinus) constructor.NegativeInfinity() else constructor.Infinity()
+    toconvert.isZero -> if (toconvert.isSignMinus) constructor.NegativeZero() else constructor.Zero()
+    toconvert.isNaN -> constructor.NaN()
+    else -> constructor.fromExactFloat(toconvert.toExactFloat(), environment)
+}

@@ -1,6 +1,7 @@
 package rars.riscv.instructions
 
 import arrow.core.Either
+import arrow.core.flatMap
 import arrow.core.left
 import arrow.core.raise.either
 import arrow.core.raise.ensureNotNull
@@ -10,6 +11,7 @@ import rars.exceptions.*
 import rars.jsoftfloat.Environment
 import rars.jsoftfloat.operations.Arithmetic
 import rars.jsoftfloat.operations.Comparisons
+import rars.jsoftfloat.operations.Conversions
 import rars.jsoftfloat.types.Float32
 import rars.jsoftfloat.types.Float64
 import rars.jsoftfloat.types.Floating
@@ -250,36 +252,403 @@ object BasicInstructions {
         registerFile.fclass(input, statement.getOperand(0))
     }
 
-    /**
-     * Sets the one bit in t1 for every number
-     * 0 t1 is −infinity.
-     * 1 t1 is a negative normal number.
-     * 2 t1 is a negative subnormal number.
-     * 3 t1 is −0.
-     * 4 t1 is +0.
-     * 5 t1 is a positive subnormal number.
-     * 6 t1 is a positive normal number.
-     * 7 t1 is +infinity.
-     * 8 t1 is a signaling NaN (Not implemented due to Java).
-     * 9 t1 is a quiet NaN.
-     */
-    private fun <T : Floating<T>> RegisterFile.fclass(
-        input: T,
-        registerNumber: Int
-    ): Either<SimulationError, Unit> {
-        val newValue = if (input.isNaN) {
-            if (input.isSignalling) 0x100 else 0x200
-        } else {
-            val isNegative = input.isSignMinus
-            when {
-                input.isInfinite -> if (isNegative) 0x001 else 0x080
-                input.isZero -> if (isNegative) 0x008 else 0x010
-                input.isSubnormal -> if (isNegative) 0x004 else 0x020
-                else -> if (isNegative) 0x002 else 0x040
-            }
+    @JvmField
+    val FCVTDL = basicInstruction(
+        "fcvt.d.l f1, t1, dyn", "Convert double from long: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT, "1101001 00010 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val converted = Conversions.convertFromInt(
+                registerFile.getLongValue(statement.getOperand(1))!!.toBigInteger(),
+                environment,
+                Float64(0)
+            )
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                converted.bits
+            ).bind()
         }
-        return updateRegisterByNumber(registerNumber, newValue.toLong()).ignoreOk()
     }
+
+    @JvmField
+    val FCVTDLU = basicInstruction(
+        "fcvt.d.lu f1, t1, dyn", "Convert double from unsigned long: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT, "1101001 00011 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val value = registerFile.getLongValue(statement.getOperand(1))!!
+            val unsigned = value.toULong().toBigInteger()
+            val converted = Conversions.convertFromInt(unsigned, environment, Float64(0))
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits).bind()
+
+        }
+    }
+
+    @JvmField
+    val FCVTDS = basicInstruction(
+        "fcvt.d.s f1, f2, dyn", "Convert a float to a double: Assigned the value of f2 to f1",
+        BasicInstructionFormat.R4_FORMAT, "0100001 00000 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat32(statement.getOperand(1))
+            val output = convert(input, Float64(0), environment)
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), output.bits).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTDW = basicInstruction(
+        "fcvt.d.w f1, t1, dyn", "Convert double from integer: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT, "1101001 00000 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val converted = Conversions.convertFromInt(
+                registerFile.getIntValue(statement.getOperand(1))!!.toBigInteger(),
+                environment,
+                Float64(0)
+            )
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTDWU = basicInstruction(
+        "fcvt.d.wu f1, t1, dyn", "Convert double from unsigned integer: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT, "1101001 00001 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val converted = Conversions.convertFromInt(
+                registerFile.getIntValue(statement.getOperand(1))!!.lowerToULong().toBigInteger(),
+                environment,
+                Float64(0)
+            )
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTLD = basicInstruction(
+        "fcvt.l.d t1, f1, dyn", "Convert 64 bit integer from double: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT, "1100001 00010 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat64(statement.getOperand(1))
+            val output = Conversions.convertToLong(input, environment, false)
+            csrRegisterFile.setfflags(environment).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTLS = basicInstruction(
+        "fcvt.l.s t1, f1, dyn", "Convert 64 bit integer from float: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT, "1100000 00010 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat32(statement.getOperand(1))
+            val output = Conversions.convertToLong(input, environment, false)
+            csrRegisterFile.setfflags(environment).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTLUD = basicInstruction(
+        "fcvt.lu.d t1, f1, dyn",
+        "Convert unsigned 64 bit integer from double: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT, "1100001 00011 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat64(statement.getOperand(1))
+            val output = Conversions.convertToUnsignedLong(input, environment, false)
+            csrRegisterFile.setfflags(environment).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTLUS = basicInstruction(
+        "fcvt.lu.s t1, f1, dyn",
+        "Convert unsigned 64 bit integer from float: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT, "1100000 00011 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat32(statement.getOperand(1))
+            val output = Conversions.convertToUnsignedLong(input, environment, false)
+            csrRegisterFile.setfflags(environment).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTSD = basicInstruction(
+        "fcvt.s.d f1, f2, dyn", "Convert a double to a float: Assigned the value of f2 to f1",
+        BasicInstructionFormat.R4_FORMAT, "0100000 00001 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat64(statement.getOperand(1))
+            val output = convert(input, Float32(0), environment)
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), output.bits).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTSL = basicInstruction(
+        "fcvt.s.l f1, t1, dyn", "Convert float from long: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT, "1101000 00010 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val converted = Conversions.convertFromInt(
+                registerFile.getLongValue(statement.getOperand(1))!!.toBigInteger(),
+                environment,
+                Float32(0)
+            )
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTSLU = basicInstruction(
+        "fcvt.s.lu f1, t1, dyn", "Convert float from unsigned long: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT, "1101000 00011 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val value = registerFile.getLongValue(statement.getOperand(1))!!
+            val unsigned = value.toULong().toBigInteger()
+            val converted = Conversions.convertFromInt(unsigned, environment, Float32(0))
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTSW = basicInstruction(
+        "fcvt.s.w f1, t1, dyn", "Convert float from integer: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT, "1101000 00000 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val converted = Conversions.convertFromInt(
+                registerFile.getIntValue(statement.getOperand(1))!!.toBigInteger(),
+                environment,
+                Float32(0)
+            )
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTSWU = basicInstruction(
+        "fcvt.s.wu f1, t1, dyn", "Convert float from unsigned integer: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT, "1101000 00001 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val converted = Conversions.convertFromInt(
+                registerFile.getIntValue(statement.getOperand(1))!!.lowerToULong().toBigInteger(),
+                environment,
+                Float32(0)
+            )
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTWD = basicInstruction(
+        "fcvt.w.d t1, f1, dyn", "Convert integer from double: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT, "1100001 00000 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat64(statement.getOperand(1))
+            val output = Conversions.convertToInt(input, environment, false)
+            csrRegisterFile.setfflags(environment).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTWS = basicInstruction(
+        "fcvt.w.s t1, f1, dyn", "Convert integer from float: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT, "1100000 00000 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat32(statement.getOperand(1))
+            val output = Conversions.convertToInt(input, environment, false)
+            csrRegisterFile.setfflags(environment).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTWUD = basicInstruction(
+        "fcvt.wu.d t1, f1, dyn", "Convert unsinged integer from double: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT, "1100001 00001 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat64(statement.getOperand(1))
+            val output = Conversions.convertToUnsignedInt(input, environment, false)
+            csrRegisterFile.setfflags(environment).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+        }
+    }
+
+    @JvmField
+    val FCVTWUS = basicInstruction(
+        "fcvt.wu.s t1, f1, dyn", "Convert unsinged integer from float: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT, "1100000 00001 sssss ttt fffff 1010011"
+    ) { statement ->
+        either {
+            val environment = Environment()
+            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val input = fpRegisterFile.getFloat32(statement.getOperand(1))
+            val output = Conversions.convertToUnsignedInt(input, environment, false)
+            csrRegisterFile.setfflags(environment).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+        }
+    }
+
+    @JvmField
+    val FENCE = basicInstruction(
+        "fence 1, 1",
+        "Ensure that IO and memory accesses before the fence happen before the following IO and memory accesses " +
+                "as viewed by a different thread",
+        BasicInstructionFormat.I_FORMAT,
+        "0000 ffff ssss 00000 000 00000 0001111"
+    ) {
+        // Do nothing, currently there are no other threads so local consistency is
+        // enough
+        Unit.right()
+    }
+
+    @JvmField
+    val FENCEI = basicInstruction(
+        "fence.i", "Ensure that stores to instruction memory are visible to instruction fetches",
+        BasicInstructionFormat.I_FORMAT, "0000 0000 0000 00000 001 00000 0001111"
+    ) {
+        // Do nothing, currently all stores are immediately available to instruction
+        // fetches
+        Unit.right()
+    }
+
+    @JvmField
+    val FEQD = basicInstruction(
+        "feq.d t1, f1, f2", "Floating EQuals (64 bit): if f1 = f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 010 fffff 1010011"
+    ) { statement ->
+        val f1 = Float64(fpRegisterFile.getLongValue(statement.getOperand(1))!!)
+        val f2 = Float64(fpRegisterFile.getLongValue(statement.getOperand(2))!!)
+        val environment = Environment()
+        val result = Comparisons.compareQuietEqual(f1, f2, environment)
+        val newValue = if (result) 1L else 0L
+        csrRegisterFile.setfflags(environment).flatMap {
+            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+        }
+    }
+
+    @JvmField
+    val FEQS = basicInstruction(
+        "feq.s t1, f1, f2", "Floating EQuals: if f1 = f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 010 fffff 1010011"
+    ) { statement ->
+        val f1 = Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!)
+        val f2 = Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!)
+        val environment = Environment()
+        val result = Comparisons.compareQuietEqual(f1, f2, environment)
+        val newValue = if (result) 1L else 0L
+        csrRegisterFile.setfflags(environment).flatMap {
+            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+        }
+    }
+
+    @JvmField
+    val FLD = basicInstruction(
+        "fld f1, -100(t1)", "Load a double from memory",
+        BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 011 fffff 0000111"
+    ) { statement ->
+        val upperImmediate = (statement.getOperand(1) shl 20) shr 20
+        try {
+            val value = memory.getDoubleWord(
+                registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate
+            )
+            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), value).ignoreOk()
+        } catch (e: AddressErrorException) {
+            SimulationError.create(statement, e).left()
+        }
+    }
+
+    @JvmField
+    val FLED = basicInstruction(
+        "fle.d t1, f1, f2", "Floating Less than or Equals (64 bit): if f1 <= f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 000 fffff 1010011"
+    ) { statement ->
+        val f1 = Float64(fpRegisterFile.getLongValue(statement.getOperand(1))!!)
+        val f2 = Float64(fpRegisterFile.getLongValue(statement.getOperand(2))!!)
+        val environment = Environment()
+        val result = Comparisons.compareSignalingLessThanEqual(f1, f2, environment)
+        val newValue = if (result) 1L else 0L
+        csrRegisterFile.setfflags(environment).flatMap {
+            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+        }
+    }
+
+    @JvmField
+    val FLES = basicInstruction(
+        "fle.s t1, f1, f2", "Floating Less than or Equals: if f1 <= f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 000 fffff 1010011"
+    ) { statement ->
+        val f1 = Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!)
+        val f2 = Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!)
+        val environment = Environment()
+        val result = Comparisons.compareSignalingLessThanEqual(f1, f2, environment)
+        val newValue = if (result) 1L else 0L
+        csrRegisterFile.setfflags(environment).flatMap {
+            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+        }
+
+    }
+
+    // TODO: Implement everything here
 
     @JvmField
     val FLTD = basicInstruction(
@@ -691,4 +1060,35 @@ object BasicInstructions {
         "wfi", "Wait for Interrupt",
         BasicInstructionFormat.I_FORMAT, "000100000101 00000 000 00000 1110011"
     ) { WaitEvent.left() }
+}
+
+/**
+ * Sets the one bit in t1 for every number
+ * 0 t1 is −infinity.
+ * 1 t1 is a negative normal number.
+ * 2 t1 is a negative subnormal number.
+ * 3 t1 is −0.
+ * 4 t1 is +0.
+ * 5 t1 is a positive subnormal number.
+ * 6 t1 is a positive normal number.
+ * 7 t1 is +infinity.
+ * 8 t1 is a signaling NaN (Not implemented due to Java).
+ * 9 t1 is a quiet NaN.
+ */
+private fun <T : Floating<T>> RegisterFile.fclass(
+    input: T,
+    registerNumber: Int
+): Either<SimulationError, Unit> {
+    val newValue = if (input.isNaN) {
+        if (input.isSignalling) 0x100 else 0x200
+    } else {
+        val isNegative = input.isSignMinus
+        when {
+            input.isInfinite -> if (isNegative) 0x001 else 0x080
+            input.isZero -> if (isNegative) 0x008 else 0x010
+            input.isSubnormal -> if (isNegative) 0x004 else 0x020
+            else -> if (isNegative) 0x002 else 0x040
+        }
+    }
+    return updateRegisterByNumber(registerNumber, newValue.toLong()).ignoreOk()
 }
