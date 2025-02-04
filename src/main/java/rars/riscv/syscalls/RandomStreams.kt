@@ -1,70 +1,30 @@
-package rars.riscv.syscalls;
+package rars.riscv.syscalls
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
-import java.util.Random;
-
-import static rars.Globals.REGISTER_FILE;
-
-/*
-Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import rars.simulator.SimulationContext
+import java.util.*
 
 /**
- * This small class serves only to hold a static HashMap for storing
- * random number generators for use by all the random number generator
+ * Collection of pseudorandom number streams available for use in Rand-type
  * syscalls.
+ * The streams are by default not seeded.
  */
-public final class RandomStreams {
-    /**
-     * Collection of pseudorandom number streams available for use in Rand-type
-     * syscalls.
-     * The streams are by default not seeded.
-     */
-    public static final HashMap<Integer, Random> randomStreams = new HashMap<>();
+private val randomStreams = mutableMapOf<Int, Random>()
 
-    private RandomStreams() {
+fun SimulationContext.setRandomStreamSeed(index: Int, seed: Long) {
+    val stream = randomStreams[index]
+    if (stream != null) {
+        stream.setSeed(seed)
+    } else {
+        randomStreams.put(index, Random(seed))
     }
+}
 
-    /**
-     * Just a little helper method to initialize streams on stream being empty
-     *
-     * @param reg
-     *     The name of the register that holds the stream index
-     * @return the stream a that index
-     */
-    public static @NotNull Random get(final String reg) {
-        final int index = REGISTER_FILE.getIntValue(reg);
-        Random stream = randomStreams.get(index);
-        if (stream == null) {
-            stream = new Random(); // create a non-seeded stream
-            RandomStreams.randomStreams.put(index, stream);
-        }
-        return stream;
+fun SimulationContext.getRandomStream(reg: String): Random {
+    val index: Int = registerFile.getIntValue(reg)!!
+    var stream = randomStreams[index]
+    if (stream == null) {
+        stream = Random() // create a non-seeded stream
+        randomStreams.put(index, stream)
     }
+    return stream
 }

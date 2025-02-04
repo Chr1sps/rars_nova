@@ -58,35 +58,35 @@ object InstructionsRegistry {
             // endregion Branch
 
             // region Double
-            FADDD.INSTANCE,
-            FDIVD.INSTANCE,
-            FMAXD.INSTANCE,
-            FMIND.INSTANCE,
-            FMULD.INSTANCE,
-            FSUBD.INSTANCE,
+            DoubleFloat.FADDD,
+            DoubleFloat.FDIVD,
+            DoubleFloat.FMAXD,
+            DoubleFloat.FMIND,
+            DoubleFloat.FMULD,
+            DoubleFloat.FSUBD,
             // endregion Double
 
             // region Floating
-            FADDS.INSTANCE,
-            FDIVS.INSTANCE,
-            FMAXS.INSTANCE,
-            FMINS.INSTANCE,
-            FMULS.INSTANCE,
-            FSUBS.INSTANCE,
+            Floating.FADDS,
+            Floating.FDIVS,
+            Floating.FMAXS,
+            Floating.FMINS,
+            Floating.FMULS,
+            Floating.FSUBS,
             // endregion Floating
 
             // region FusedDouble
-            FMADDD.INSTANCE,
-            FMSUBD.INSTANCE,
-            FNMADDD.INSTANCE,
-            FNMSUBD.INSTANCE,
+            FusedDouble.FMADD,
+            FusedDouble.FMSUBD,
+            FusedDouble.FNMADDD,
+            FusedDouble.FNMSUBD,
             // endregion FusedDouble
 
             // region FusedFloat
-            FMADDS.INSTANCE,
-            FMSUBS.INSTANCE,
-            FNMADDS.INSTANCE,
-            FNMSUBS.INSTANCE,
+            FusedFloat.FMADDS,
+            FusedFloat.FMSUBS,
+            FusedFloat.FNMADDS,
+            FusedFloat.FNMSUBS,
             // endregion FusedFloat
 
             // region ImmediateInstruction
@@ -120,8 +120,8 @@ object InstructionsRegistry {
             CSRRSI.INSTANCE,
             CSRRW.INSTANCE,
             CSRRWI.INSTANCE,
-            EBREAK.INSTANCE,
-            ECALL.INSTANCE,
+            BasicInstructions.EBREAK,
+            BasicInstructions.ECALL,
             FCLASSD.INSTANCE,
             FCLASSS.INSTANCE,
             FCVTDS.INSTANCE,

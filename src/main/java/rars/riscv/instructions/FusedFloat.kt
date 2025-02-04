@@ -1,13 +1,16 @@
-package rars.riscv.instructions;
+package rars.riscv.instructions
 
-import org.jetbrains.annotations.NotNull;
-import rars.ProgramStatement;
-import rars.exceptions.SimulationException;
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.types.Float32;
-import rars.riscv.BasicInstruction;
-import rars.riscv.BasicInstructionFormat;
-import rars.simulator.SimulationContext;
+import arrow.core.Either
+import arrow.core.raise.either
+import rars.ProgramStatement
+import rars.exceptions.SimulationEvent
+import rars.jsoftfloat.Environment
+import rars.jsoftfloat.operations.Arithmetic
+import rars.jsoftfloat.types.Float32
+import rars.riscv.BasicInstruction
+import rars.riscv.BasicInstructionFormat
+import rars.simulator.SimulationContext
+import rars.util.flipRounding
 
 /*
 Copyright (c) 2017,  Benjamin Landers
@@ -34,33 +37,58 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
-public abstract class FusedFloat extends BasicInstruction {
-    protected FusedFloat(final String usage, final String description, final String op) {
-        super(
-            usage + ", dyn", description, BasicInstructionFormat.R4_FORMAT,
-            "qqqqq 00 ttttt sssss " + "ppp" + " fffff 100" + op + "11"
-        );
+*/
+class FusedFloat private constructor(
+    usage: String,
+    description: String,
+    op: String,
+    private val compute: (Float32, Float32, Float32, Environment) -> Float32
+) : BasicInstruction(
+    "$usage, dyn", description, BasicInstructionFormat.R4_FORMAT,
+    "qqqqq 00 ttttt sssss ppp fffff 100${op}11"
+) {
+    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
+        val environment = Environment()
+        environment.mode =
+            Floating.FloatingUtils.getRoundingMode(statement.getOperand(4), statement, csrRegisterFile).bind()
+        val result: Float32 = compute(
+            Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!),
+            Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!),
+            Float32(fpRegisterFile.getIntValue(statement.getOperand(3))!!),
+            environment
+        )
+        Floating.FloatingUtils.setfflags(csrRegisterFile, environment).bind()
+        fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result.bits)
     }
 
-    @Override
-    public void simulate(@NotNull final SimulationContext context, final @NotNull ProgramStatement statement) throws
-        SimulationException {
+    companion object {
+        @JvmField
+        val FMADDS = FusedFloat(
+            "fmadd.s f1, f2, f3, f4", "Fused Multiply Add: Assigns f2*f3+f4 to f1", "00"
+        ) { f1, f2, f3, env -> Arithmetic.fusedMultiplyAdd(f1, f2, f3, env) }
 
-        final Environment e = new Environment();
-        e.mode = Floating.getRoundingMode(statement.getOperand(4), statement, context.csrRegisterFile);
-        final Float32 result = compute(
-            new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(1))),
-            new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(2))),
-            new Float32(context.fpRegisterFile.getIntValue(statement.getOperand(3))), e
-        );
-        Floating.setfflags(context.csrRegisterFile, e);
-        context.fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result.bits);
+        @JvmField
+        val FMSUBS = FusedFloat(
+            "fmsub.s f1, f2, f3, f4", "Fused Multiply Subtract: Assigns f2*f3-f4 to f1", "01"
+        ) { f1, f2, f3, env -> Arithmetic.fusedMultiplyAdd(f1, f2, f3.negate(), env) }
+
+        @JvmField
+        val FNMADDS = FusedFloat(
+            "fnmadd.s f1, f2, f3, f4", "Fused Negate Multiply Add: Assigns -(f2*f3+f4) to f1", "11"
+        ) { f1, f2, f3, env ->
+            env.flipRounding()
+            Arithmetic.fusedMultiplyAdd(f1, f2, f3, env).negate()
+        }
+
+        @JvmField
+        val FNMSUBS = FusedFloat(
+            "fnmsub.s f1, f2, f3, f4", "Fused Negate Multiply Subtract: Assigns -(f2*f3-f4) to f1", "10"
+        ) { f1, f2, f3, env ->
+            env.flipRounding()
+            Arithmetic.fusedMultiplyAdd(f1, f2, f3.negate(), env).negate()
+        }
+
+//        @JvmField
+//        val INSTRUCTIONS = arrayOf(FMADDS, FMSUBS, FNMADDS, FNMSUBS)
     }
-
-    protected abstract @NotNull Float32 compute(
-        @NotNull Float32 r1, @NotNull Float32 r2, @NotNull Float32 r3,
-        @NotNull Environment e
-    );
 }

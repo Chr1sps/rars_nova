@@ -83,5 +83,39 @@ class ExitingError(
     override val reason: ExceptionReason,
     override val message: ErrorMessage,
     override val value: Int,
-) : SimulationError
+) : SimulationError {
+    companion object {
+        operator fun invoke(
+            statement: ProgramStatement,
+            addressError: AddressErrorException,
+        ): ExitingError {
+            val address =
+                (Globals.REGISTER_FILE.programCounter - BasicInstruction.BASIC_INSTRUCTION_LENGTH).toHexStringWithPrefix()
+            return ExitingError(
+                addressError.reason,
+                ErrorMessage.error(
+                    statement.sourceProgram,
+                    statement.sourceLine!!.lineNumber,
+                    0,
+                    "Runtime exception at $address: ${addressError.message}"
+                ),
+                addressError.address
+            )
+        }
+
+        operator fun invoke(
+            statement: ProgramStatement,
+            message: String,
+        ) = ExitingError(
+            ExceptionReason.OTHER,
+            ErrorMessage.error(
+                statement.sourceProgram,
+                statement.sourceLine!!.lineNumber,
+                0,
+                message
+            ),
+            0
+        )
+    }
+}
 
