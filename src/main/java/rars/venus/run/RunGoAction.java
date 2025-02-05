@@ -1,7 +1,9 @@
 package rars.venus.run;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
-import rars.exceptions.SimulationException;
+import rars.exceptions.SimulationError;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
@@ -107,11 +109,11 @@ public final class RunGoAction extends GuiAction {
                         final Simulator.Reason reason = notice.reason;
                         if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
                             EventQueue.invokeLater(() -> RunGoAction.this.paused(
-                                notice.done(), reason,
-                                notice.exception()
+                                notice.done, reason,
+                                notice.error
                             ));
                         } else {
-                            EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.exception(), reason));
+                            EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.error, reason));
                         }
                         Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this);
                     }
@@ -157,15 +159,12 @@ public final class RunGoAction extends GuiAction {
      * status of menu items based on FileStatus. Set GUI as if at breakpoint or
      * executing
      * step by step.
-     *
-     * @param done
-     *     a boolean
-     * @param pauseReason
-     *     a {@link Simulator.Reason} object
-     * @param pe
-     *     a {@link SimulationException} object
      */
-    public void paused(final boolean done, final Simulator.Reason pauseReason, final SimulationException pe) {
+    public void paused(
+        final boolean done,
+        final @NotNull Simulator.Reason pauseReason,
+        final @Nullable SimulationError pe
+    ) {
         // I doubt this can happen (pause when execution finished), but if so treat it
         // as stopped.
         if (done) {
@@ -198,13 +197,8 @@ public final class RunGoAction extends GuiAction {
      * status of menu items based on FileStatus. Display finalized values as if
      * execution
      * terminated due to completion or exception.
-     *
-     * @param pe
-     *     a {@link SimulationException} object
-     * @param reason
-     *     a {@link Simulator.Reason} object
      */
-    public void stopped(final SimulationException pe, final Simulator.Reason reason) {
+    public void stopped(final @Nullable SimulationError pe, final Simulator.Reason reason) {
         // show final register and data segment values.
         this.executePane.registerValues.updateRegisters();
         this.executePane.fpRegValues.updateRegisters();
@@ -236,7 +230,7 @@ public final class RunGoAction extends GuiAction {
                 break;
             case EXCEPTION:
                 this.mainUI.messagesPane.postMessage(
-                    pe.errorMessage.generateReport());
+                    pe.getMessage().generateReport());
                 this.mainUI.messagesPane.postMessage(
                     "\n" + this.name + ": execution terminated with errors.\n\n");
                 break;

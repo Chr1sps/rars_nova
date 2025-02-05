@@ -23,7 +23,7 @@ abstract class RarsTestBase {
     }
 
     /** The name of the current test */
-    protected val testName: String
+    val testName: String
         get() = testInfo.displayName
 
     companion object {

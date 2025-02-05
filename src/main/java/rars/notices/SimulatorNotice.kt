@@ -15,12 +15,12 @@ import rars.venus.run.RunSpeedPanel
  */
 class SimulatorNotice(
     @JvmField val action: Action?,
-    val maxSteps: Int,
-    val runSpeed: Double,
-    val programCounter: Int,
+    @JvmField val maxSteps: Int,
+    @JvmField val runSpeed: Double,
+    @JvmField val programCounter: Int,
     @JvmField val reason: Simulator.Reason?,
-    val error: SimulationError?,
-    val done: Boolean
+    @JvmField val error: SimulationError?,
+    @JvmField val done: Boolean
 ) {
     @Contract(pure = true)
     override fun toString(): String {

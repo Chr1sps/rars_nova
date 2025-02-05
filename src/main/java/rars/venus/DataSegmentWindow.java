@@ -164,12 +164,11 @@ public final class DataSegmentWindow extends JInternalFrame {
             memoryConfiguration.memoryMapBaseAddress,
         };
         SIMULATOR.simulatorNoticeHook.subscribe(s -> {
-
-            if (s.action() == SimulatorNotice.Action.START) {
+            if (s.action == SimulatorNotice.Action.START) {
                 // Simulated MIPS execution starts. Respond to memory changes if running in
                 // timed
                 // or stepped mode.
-                if (s.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps() == 1) {
+                if (s.runSpeed != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps == 1) {
                     Globals.MEMORY_INSTANCE.subscribe(this.processMemoryAccessNotice);
                     this.addressHighlighting = true;
                 }
