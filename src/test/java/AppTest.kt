@@ -107,7 +107,7 @@ internal class AppTest : RarsTestBase() {
             val instructionsToTest = if (isRV64Enabled) InstructionsRegistry.BASIC_INSTRUCTIONS.r64All
             else InstructionsRegistry.BASIC_INSTRUCTIONS.r32All
             for (instruction in instructionsToTest) {
-                System.out.printf("Testing: %s%n", instruction.mnemonic)
+                println("Testing: ${instruction.mnemonic}")
                 when (instruction.instructionFormat) {
                     BasicInstructionFormat.B_FORMAT, BasicInstructionFormat.J_FORMAT -> {
                         continue
@@ -118,7 +118,7 @@ internal class AppTest : RarsTestBase() {
                 val format = instruction.exampleFormat
 
                 program.assembleString(format)
-                program.setup(mutableListOf<String>(), "")
+                program.setup(emptyList(), "")
                 val instructionAddress = MemoryConfiguration.DEFAULT.textBaseAddress
                 val word = program.memory.getWord(instructionAddress)
 
@@ -136,7 +136,7 @@ internal class AppTest : RarsTestBase() {
                     CoreMatchers.not(CoreMatchers.containsString("invalid"))
                 )
                 program.assembleString(format)
-                program.setup(mutableListOf<String>(), "")
+                program.setup(emptyList(), "")
                 val word2 = program.memory.getWord(instructionAddress)
                 assertEquals(word, word2, "Error 3 on: $format")
                 assertEquals(instruction, statementFromMemory.instruction, "Error 4 on: $format")
@@ -159,7 +159,7 @@ internal class AppTest : RarsTestBase() {
             for (instruction in instructionsToTest) {
                 val programString = "label:" + instruction.exampleFormat
                 program.assembleString(programString)
-                program.setup(mutableListOf<String>(), "")
+                program.setup(emptyList(), "")
                 val first = program.memory.getWord(0x400000)
                 val second = program.memory.getWord(0x400004)
                 val ps = ProgramStatement(first, 0x400000)
@@ -169,10 +169,7 @@ internal class AppTest : RarsTestBase() {
                     ps.printableBasicAssemblyStatement,
                     CoreMatchers.not<String?>(CoreMatchers.containsString("invalid"))
                 )
-                if (programString.contains("t0") || programString.contains("t1") || programString.contains("t2") || programString.contains(
-                        "f1"
-                    )
-                ) {
+                if ("t0" in programString || "t1" in programString || "t2" in programString || "f1" in programString) {
                     // TODO: test that each register individually is meaningful and test every
                     // register.
                     // Currently this covers all instructions and is an alert if I made a trivial
@@ -180,7 +177,7 @@ internal class AppTest : RarsTestBase() {
                     val registerSubstitute =
                         programString.replace("t0|t1|t2".toRegex(), "x0").replace("f1".toRegex(), "f0")
                     program.assembleString(registerSubstitute)
-                    program.setup(mutableListOf<String>(), "")
+                    program.setup(emptyList(), "")
                     val word1 = program.memory.getWord(0x400000)
                     val word2 = program.memory.getWord(0x400004)
                     Assertions.assertFalse(word1 == first && word2 == second, "Error 13 on: $programString")
@@ -192,7 +189,7 @@ internal class AppTest : RarsTestBase() {
     @Test
     @Throws(IOException::class)
     fun runSingle() {
-        val path = "riscv-tests/fadd.s"
+        val path = "riscv-tests/fclass.s"
         runTest(testDataPath.resolve(path).toString(), false)
     }
 
