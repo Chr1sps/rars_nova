@@ -1,8 +1,9 @@
 package rars.venus.run;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
-import rars.exceptions.SimulationException;
+import rars.exceptions.SimulationError;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
@@ -87,8 +88,8 @@ public final class RunStepAction extends GuiAction {
                         return;
                     }
                     EventQueue.invokeLater(() -> RunStepAction.this.stepped(
-                        item.done(), item.reason,
-                        item.exception()
+                        item.done, item.reason,
+                        item.error
                     ));
 
                     Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this);
@@ -104,21 +105,16 @@ public final class RunStepAction extends GuiAction {
         }
     }
 
-    // When step is completed, control returns here (from execution thread,
-    // indirectly)
-    // to update the GUI.
-
     /**
-     * <p>stepped.</p>
-     *
-     * @param done
-     *     a boolean
-     * @param reason
-     *     a {@link Simulator.Reason} object
-     * @param pe
-     *     a {@link SimulationException} object
+     * When step is completed, control returns here (from execution thread,
+     * indirectly)
+     * to update the GUI.
      */
-    public void stepped(final boolean done, final Simulator.Reason reason, final SimulationException pe) {
+    public void stepped(
+        final boolean done,
+        final @Nullable Simulator.Reason reason,
+        final @Nullable SimulationError pe
+    ) {
         this.executePane.registerValues.updateRegisters();
         this.executePane.fpRegValues.updateRegisters();
         this.executePane.csrValues.updateRegisters();
@@ -152,7 +148,7 @@ public final class RunStepAction extends GuiAction {
         if (pe != null) {
             RunGoAction.resetMaxSteps();
             this.mainUI.messagesPane.postMessage(
-                pe.errorMessage.generateReport());
+                pe.getMessage().generateReport());
             this.mainUI.messagesPane.postMessage(
                 "\n" + this.name + ": execution terminated with errors.\n\n");
             this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues);

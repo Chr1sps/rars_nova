@@ -91,10 +91,10 @@ public abstract class RegisterBlockWindowBase extends JPanel {
         this.registerFile = registerFile;
         this.mainUI = mainUI;
         SIMULATOR.simulatorNoticeHook.subscribe(notice -> {
-            if (notice.action() == SimulatorNotice.Action.START) {
+            if (notice.action == SimulatorNotice.Action.START) {
                 // Simulated MIPS execution starts.  Respond to memory changes if running in timed
                 // or stepped mode.
-                if (Double.compare(notice.runSpeed(), RunSpeedPanel.UNLIMITED_SPEED) != 0 || notice.maxSteps() == 1) {
+                if (Double.compare(notice.runSpeed, RunSpeedPanel.UNLIMITED_SPEED) != 0 || notice.maxSteps == 1) {
                     beginObserving();
                 }
             } else {
@@ -173,7 +173,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      **/
 
     private Object @NotNull [] @NotNull [] setupWindow() {
-        final var registers = this.registerFile.registers;
+        final var registers = this.registerFile.getRegisters();
         final Object[][] tableData = new Object[registers.length][3];
         for (int i = 0; i < registers.length; i++) {
             tableData[i][RegisterBlockWindowBase.NAME_COLUMN] = registers[i].name;
@@ -210,7 +210,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      * Update register display using specified display base
      */
     public void updateRegisters() {
-        final var registers = this.registerFile.registers;
+        final var registers = this.registerFile.getRegisters();
         for (int i = 0; i < registers.length; i++) {
             final var model = (RegTableModel) this.table.getModel();
             final int base = RegisterBlockWindowBase.this.mainUI.mainPane.executePane.getValueDisplayBase();
@@ -226,7 +226,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      *     Register object corresponding to row to be selected.
      */
     private void highlightCellForRegister(final Register register) {
-        final var registers = this.registerFile.registers;
+        final var registers = this.registerFile.getRegisters();
         for (int i = 0; i < registers.length; i++) {
             if (registers[i] == register) {
                 this.highlightRow = i;
@@ -362,7 +362,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
             // occur only between instructions.
             Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
-                RegisterBlockWindowBase.this.registerFile.registers[row].setValue(newValue);
+                RegisterBlockWindowBase.this.registerFile.getRegisters()[row].setValue(newValue);
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }

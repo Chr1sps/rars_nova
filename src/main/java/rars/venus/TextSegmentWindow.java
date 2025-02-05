@@ -117,7 +117,7 @@ public final class TextSegmentWindow extends JInternalFrame {
         super("Text Segment", true, false, true, true);
         this.executePane = executePane;
         SIMULATOR.simulatorNoticeHook.subscribe(notice -> {
-            if (notice.action() == SimulatorNotice.Action.START) {
+            if (notice.action == SimulatorNotice.Action.START) {
                 this.deleteAsTextSegmentObserver();
                 if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
                     // (notice.getRunSpeed()

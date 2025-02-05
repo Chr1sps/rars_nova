@@ -223,7 +223,6 @@ class RISCVProgram {
      * Will throw exception if errors occurred while
      * reading or tokenizing.
      */
-//    @Throws(AssemblyException::class)
     fun prepareFilesForAssembly(
         files: List<File>,
         leadFile: File,
@@ -233,8 +232,8 @@ class RISCVProgram {
         val leadFilePosition = if (exceptionHandler == null) 0 else 1
         for (file in files) {
             val prepareeProgram = if (file == leadFile) this@RISCVProgram else RISCVProgram()
-            prepareeProgram.readSource(file).onLeft { raise(it) }
-            prepareeProgram.tokenize().onLeft { raise(it) }
+            prepareeProgram.readSource(file).bind()
+            prepareeProgram.tokenize().bind()
             // I want "this" RISCVprogram to be the first in the list...except for exception
             // handler
             if (prepareeProgram == this@RISCVProgram && !programsToAssemble.isEmpty()) {

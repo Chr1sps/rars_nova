@@ -1,3 +1,4 @@
+import arrow.core.Either
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.*
@@ -5,12 +6,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import rars.ErrorList
 import rars.Globals
 import rars.ProgramStatement
 import rars.api.Program
 import rars.api.ProgramOptions
 import rars.exceptions.AddressErrorException
-import rars.exceptions.SimulationException
+import rars.exceptions.AssemblyError
 import rars.riscv.BasicInstructionFormat
 import rars.riscv.InstructionsRegistry
 import rars.riscv.hardware.MemoryConfiguration
@@ -24,23 +26,32 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
-import java.util.function.Consumer
 import java.util.stream.Stream
 
 @Suppress("ReplacePrintlnWithLogging")
 internal class AppTest : RarsTestBase() {
+    // TODO: refactor this class to avoid repetitions and to enhance test speed
+    private fun runTest(path: String, is64Bit: Boolean) {
+        Globals.BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, is64Bit)
+        InstructionsRegistry.RV64_MODE_FLAG = is64Bit
+
+        val (stdin, stdout, stderr, errorLines) = getTestIO(path)
+        val programArgs = ProgramOptions().apply {
+            startAtMain = true
+            maxSteps = 1000
+            memoryConfiguration = MemoryConfiguration.DEFAULT
+        }
+        val program = Program(programArgs)
+        doRunFile(path, program, TestIO(stdin, stdout, stderr, errorLines))
+    }
+
     companion object {
 
-        // TODO: refactor this class to avoid repetitions and to enhance test speed
-        @Throws(IOException::class)
-        private fun runTest(path: String, is64Bit: Boolean) {
-            Globals.BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, is64Bit)
-            InstructionsRegistry.RV64_MODE_FLAG = is64Bit
-
-            val errorLines = HashSet<Int?>()
+        private fun getTestIO(path: String): TestIO {
             var stdin = ""
             var stdout = ""
             var stderr = ""
+            val errorLines = mutableSetOf<Int>()
             BufferedReader(FileReader(path)).use { br ->
                 var line = br.readLine()
                 while (line.startsWith("#")) {
@@ -60,90 +71,7 @@ internal class AppTest : RarsTestBase() {
                     line = br.readLine()
                 }
             }
-            val programArgs = ProgramOptions()
-            programArgs.startAtMain = true
-            programArgs.maxSteps = 1000
-            programArgs.memoryConfiguration = MemoryConfiguration.DEFAULT
-            val program = Program(programArgs)
-            try {
-                program.assembleFile(File(path)).onLeft { assemblyError ->
-                    if (errorLines.isEmpty()) {
-                        val builder = StringBuilder()
-                        builder.append("Failed to assemble `$path` due to following error(s):\n")
-                        for (error in assemblyError.errors.errorMessages) {
-                            builder.append(error.generateReport()).append("\n")
-                        }
-                        Assertions.fail<Any?>(builder.toString())
-                    }
-                    val errors = assemblyError.errors.errorMessages
-                    val foundErrorLines = HashSet<Int?>()
-                    for (error in errors) {
-                        if (error.isWarning) continue
-                        foundErrorLines.add(error.lineNumber)
-                    }
-                    if (errorLines != foundErrorLines) {
-                        fail {
-                            buildString {
-                                append(
-                                    """
-                                Expected and actual error lines are not equal for `$path`.
-                                Expected lines: $errorLines
-                                Errors found:
-                                """.trimIndent()
-                                )
-                                for (error in errors) {
-                                    append("[${error.lineNumber},${error.position}] ${error.generateReport()}\n")
-                                }
-                            }
-                        }
-                    }
-                    return
-                }
-                if (!errorLines.isEmpty()) {
-                    fail { "Expected assembly error, but successfully assembled `$path`.\n" }
-                }
-                program.setup(mutableListOf<String>(), stdin)
-                println("Machine list:")
-                program.machineList.forEach(Consumer { x: ProgramStatement? -> println(x) })
-                println()
-                val r = program.simulate()
-                if (r != Simulator.Reason.NORMAL_TERMINATION) {
-                    Assertions.fail(
-                        """
-                            Ended abnormally while executing `$path`.
-                            Reason: $r.
-                        """.trimIndent()
-                    )
-                } else {
-                    if (program.exitCode != 42) {
-                        val msg =
-                            "Final exit code was wrong for `" + path + "`.\n" + "Expected: 42, but got " + program.exitCode + "."
-                        Assertions.fail<Any?>(msg)
-                    }
-                    if (program.sTDOUT != stdout) {
-                        val msg =
-                            "STDOUT was wrong for `" + path + "`.\n" + "Expected:\n\"" + stdout + "\",\nbut got \"" + program.sTDOUT + "\"."
-                        Assertions.fail<Any?>(msg)
-                    }
-                    if (program.sTDERR != stderr) {
-                        val msg =
-                            "STDERR was wrong for `" + path + "`.\n" + "Expected:\n\"" + stderr + "\",\nbut got \"" + program.sTDERR + "\"."
-                        Assertions.fail<Any?>(msg)
-                    }
-                }
-            } catch (se: SimulationException) {
-                fail {
-                    """
-                    Crashed while executing `$path`.
-                    Reason: ${se.reason}.
-                    Value: ${se.value}.
-                    Message:
-                    ```
-                    ${se.errorMessage!!.generateReport()}
-                    ```
-                    """.trimIndent()
-                }
-            }
+            return TestIO(stdin, stdout, stderr, errorLines)
         }
 
         @Throws(IOException::class)
@@ -164,9 +92,7 @@ internal class AppTest : RarsTestBase() {
         @JvmStatic
         fun examplesTestFileProvider() = fileProvider("examples")
 
-        private fun testBasicInstructionBinaryCodesImpl(
-            isRV64Enabled: Boolean
-        ) {
+        private fun testBasicInstructionBinaryCodesImpl(isRV64Enabled: Boolean) {
             val programArgs = ProgramOptions()
             programArgs.startAtMain = true
             programArgs.maxSteps = 500
@@ -272,49 +198,152 @@ internal class AppTest : RarsTestBase() {
 
     @Test
     @Throws(AddressErrorException::class)
-    fun testBasicInstructionBinaryCodes32() {
-        testBasicInstructionBinaryCodesImpl(false)
-    }
+    fun testBasicInstructionBinaryCodes32() = testBasicInstructionBinaryCodesImpl(false)
 
     @Test
     @Throws(AddressErrorException::class)
-    fun testBasicInstructionBinaryCodes64() {
-        testBasicInstructionBinaryCodesImpl(true)
-    }
+    fun testBasicInstructionBinaryCodes64() = testBasicInstructionBinaryCodesImpl(true)
 
     @Test
     @Throws(Exception::class)
-    fun testPseudoInstructions32() {
-        testPseudoInstructionsImpl(false)
-    }
+    fun testPseudoInstructions32() = testPseudoInstructionsImpl(false)
 
     @Test
     @Throws(Exception::class)
-    fun testPseudoInstructions64() {
-        testPseudoInstructionsImpl(true)
-    }
+    fun testPseudoInstructions64() = testPseudoInstructionsImpl(true)
 
     @DisplayName("32 bit instructions")
     @ParameterizedTest
     @MethodSource("rv32TestFileProvider")
     @Throws(IOException::class)
-    fun test32(path: Path) {
-        runTest(path.toString(), false)
-    }
+    fun test32(path: Path) = runTest(path.toString(), false)
 
     @DisplayName("64 bit instructions")
     @ParameterizedTest
     @MethodSource("rv64TestFileProvider")
     @Throws(IOException::class)
-    fun test64(path: Path) {
-        runTest(path.toString(), true)
-    }
+    fun test64(path: Path) = runTest(path.toString(), true)
 
     @DisplayName("Examples")
     @ParameterizedTest
     @MethodSource("examplesTestFileProvider")
     @Throws(IOException::class)
-    fun testExamples(path: Path) {
-        runTest(path.toString(), false)
-    }
+    fun testExamples(path: Path) = runTest(path.toString(), false)
 }
+
+data class TestIO(
+    val stdin: String,
+    val stdout: String,
+    val stderr: String,
+    val errorLines: Set<Int>
+) {
+    constructor() : this("", "", "", emptySet())
+}
+
+@Suppress("ReplacePrintlnWithLogging")
+private fun RarsTestBase.doRunImpl(
+    program: Program,
+    testIO: TestIO,
+    assemblyFunc: Program.() -> Either<AssemblyError, ErrorList>
+) {
+    val (stdin, stdout, stderr, errorLines) = testIO
+    program.assemblyFunc().onLeft { assemblyError ->
+        if (errorLines.isEmpty()) {
+            fail {
+                buildString {
+                    append("Failed to assemble `$testName` due to following error(s):\n")
+                    for (error in assemblyError.errors.errorMessages) {
+                        append("[${error.lineNumber},${error.position}] ${error.generateReport()}\n")
+                    }
+                }
+            }
+        }
+        val errors = assemblyError.errors.errorMessages
+        val foundErrorLines = buildSet {
+            for (error in errors) {
+                if (error.isWarning) continue
+                add(error.lineNumber)
+            }
+        }
+        if (errorLines != foundErrorLines) {
+            fail {
+                buildString {
+                    append(
+                        """
+                                Expected and actual error lines are not equal for `$testName`.
+                                Expected lines: $errorLines
+                                Errors found:
+                                """.trimIndent()
+                    )
+                    for (error in errors) {
+                        append("[${error.lineNumber},${error.position}] ${error.generateReport()}\n")
+                    }
+                }
+            }
+        }
+        return
+    }
+    if (!errorLines.isEmpty()) {
+        fail { "Expected assembly error, but successfully assembled `$testName`.\n" }
+    }
+    program.setup(emptyList(), stdin)
+    println("Machine list:")
+    program.machineList.forEach { x -> println(x) }
+    println()
+    program.simulate().fold(
+        { error ->
+            fail {
+                """
+                    Crashed while executing `$testName`.
+                    Reason: ${error.reason}.
+                    Value: ${error.value}.
+                    Message:
+                    ```
+                    ${error.message.generateReport()}
+                    ```
+                    """.trimIndent()
+            }
+        },
+        { reason ->
+            when {
+                reason != Simulator.Reason.NORMAL_TERMINATION -> fail {
+                    """
+                    Ended abnormally while executing `$testName`.
+                    Reason: $reason.
+                    """.trimIndent()
+                }
+                program.exitCode != 42 -> fail {
+                    """
+                    Final exit code was wrong for `$testName`.
+                    Expected: 42, but got ${program.exitCode}.
+                    """.trimIndent()
+                }
+                program.stdout != stdout -> fail {
+                    """
+                    STDOUT was wrong for `$testName`.
+                    Expected:
+                    \"$stdout\",
+                    but got
+                    \"${program.stdout}\".
+                    """.trimIndent()
+                }
+                program.stderr != stderr -> fail {
+                    """
+                    STDERR was wrong for `$testName`.
+                    Expected:
+                    \"$stderr\",
+                    but got
+                    \"${program.stderr}\".
+                    """.trimIndent()
+                }
+                else -> Unit
+            }
+        }
+    )
+}
+
+fun RarsTestBase.doRunFile(path: String, program: Program, testIO: TestIO) =
+    doRunImpl(program, testIO) { assembleFile(File(path)) }
+
+fun RarsTestBase.doRunString(code: String, program: Program, testIO: TestIO = TestIO()) =
+    doRunImpl(program, testIO) { assembleString(code) }

@@ -3,6 +3,7 @@ package rars.simulator
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import org.jetbrains.annotations.NotNull
 import rars.exceptions.SimulationError
 import rars.io.ConsoleIO
 import rars.notices.SimulatorNotice
@@ -43,8 +44,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2005
  */
 class Simulator {
-    private val simulatorNoticeDispatcher = ListenerDispatcher<SimulatorNotice>()
-    private val stopEventDispatcher = ListenerDispatcher<Unit>()
+    private val simulatorNoticeDispatcher = ListenerDispatcher<@NotNull SimulatorNotice>()
+    private val stopEventDispatcher = ListenerDispatcher<@NotNull Unit>()
 
     @JvmField
     val simulatorNoticeHook = this.simulatorNoticeDispatcher.getHook()

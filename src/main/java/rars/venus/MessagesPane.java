@@ -1,5 +1,6 @@
 package rars.venus;
 
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
@@ -378,7 +379,7 @@ public final class MessagesPane extends JTabbedPane {
         private final int maxLen;
         private final @NotNull DocumentListener listener;
         private final @NotNull NavigationFilter navigationFilter;
-        private final @NotNull Consumer<Void> stopListener;
+        private final @NotNull Consumer<@NotNull Unit> stopListener;
         private int initialPos;
 
         public Asker(final int maxLen) {
@@ -449,7 +450,7 @@ public final class MessagesPane extends JTabbedPane {
                     fb.setDot(dot, bias);
                 }
             };
-            stopListener = s -> Asker.this.returnResponse();
+            stopListener = ignored -> Asker.this.returnResponse();
             resultQueue = new ArrayBlockingQueue<>(1);
         }
 

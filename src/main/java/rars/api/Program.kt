@@ -4,10 +4,9 @@ import arrow.core.Either
 import arrow.core.raise.either
 import rars.ErrorList
 import rars.Globals
-import rars.ProgramStatement
 import rars.RISCVProgram
 import rars.exceptions.AssemblyError
-import rars.exceptions.SimulationEvent
+import rars.exceptions.SimulationError
 import rars.io.ConsoleIO
 import rars.riscv.hardware.Memory
 import rars.settings.BoolSetting
@@ -57,25 +56,16 @@ class Program(private val programOptions: ProgramOptions) {
     private val assembled: Memory = Memory(this.programOptions.memoryConfiguration)
 
     /**
-     * Gets the instance of memory the program is using.
-     *
-     *
+     * The instance of memory the program is using.
      * This is only valid when setup has been called.
-     *
-     * @return a [Memory] object
      */
-    val memory: Memory = Memory(this.programOptions.memoryConfiguration)
-    private var stdout: ByteArrayOutputStream? = null
-    private var stderr: ByteArrayOutputStream? = null
+    val memory = Memory(this.programOptions.memoryConfiguration)
+    private var outStream: ByteArrayOutputStream? = null
+    private var errStream: ByteArrayOutputStream? = null
     private var startPC = 0
 
-    /**
-     * Returns the exit code passed to the exit syscall if it was called, otherwise
-     * returns 0
-     *
-     * @return a int
-     */
-    var exitCode: Int = 0
+    /** The exit code of the program. */
+    var exitCode = 0
         private set
     private var consoleIO: ConsoleIO? = null
 
@@ -93,7 +83,7 @@ class Program(private val programOptions: ProgramOptions) {
      * thrown if any errors are found in the code
      */
     fun assembleFiles(
-        files: MutableList<out File>,
+        files: List<File>,
         mainFile: File
     ): Either<AssemblyError, ErrorList> = either {
         val programs = this@Program.code.prepareFilesForAssembly(files, mainFile, null).bind()
@@ -161,7 +151,7 @@ class Program(private val programOptions: ProgramOptions) {
      * A string that can be read in the program like its stdin or null
      * to allow IO passthrough
      */
-    fun setup(args: MutableList<String>, stdin: String?) {
+    fun setup(args: List<String>, stdin: String?) {
         val tmpMem = Globals.swapMemoryInstance(this.memory)
         ProgramArgumentList(args).storeProgramArguments()
         Globals.swapMemoryInstance(tmpMem)
@@ -178,12 +168,12 @@ class Program(private val programOptions: ProgramOptions) {
 
         // To capture the IO we need to replace stdin and friends
         if (stdin != null) {
-            this.stdout = ByteArrayOutputStream()
-            this.stderr = ByteArrayOutputStream()
+            this.outStream = ByteArrayOutputStream()
+            this.errStream = ByteArrayOutputStream()
             this.consoleIO = ConsoleIO(
                 ByteArrayInputStream(stdin.toByteArray()),
-                this.stdout!!,
-                this.stderr!!,
+                this.outStream!!,
+                this.errStream!!,
                 Globals.BOOL_SETTINGS
             )
         } else {
@@ -213,7 +203,7 @@ class Program(private val programOptions: ProgramOptions) {
      * thrown if there is an uncaught interrupt. The
      * program cannot be simulated further.
      */
-    fun simulate(): Either<SimulationEvent, Simulator.Reason> {
+    fun simulate(): Either<SimulationError, Simulator.Reason> {
         // Swap out global state for local state.
 
         val selfMod = Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
@@ -236,29 +226,12 @@ class Program(private val programOptions: ProgramOptions) {
         return result
     }
 
-    val sTDOUT: String
-        /**
-         *
-         * getSTDOUT.
-         *
-         * @return converts the bytes sent to stdout into a string (resets to "" when
-         * setup is called)
-         */
-        get() = this.stdout.toString()
+    /** Bytes sent to stdout as a string. */
+    val stdout get() = this.outStream.toString()
 
-    val sTDERR: String
-        /**
-         *
-         * getSTDERR.
-         *
-         * @return converts the bytes sent to stderr into a string (resets to "" when
-         * setup is called)
-         */
-        get() = this.stderr.toString()
+    /** Bytes sent to stderr as a string. */
+    val stderr get() = this.errStream.toString()
 
-    val parsedList: List<ProgramStatement>?
-        get() = this.code.parsedList
-
-    val machineList: List<ProgramStatement>
-        get() = this.code.getMachineList()
+    val parsedList get() = this.code.parsedList
+    val machineList get() = this.code.getMachineList()
 }
