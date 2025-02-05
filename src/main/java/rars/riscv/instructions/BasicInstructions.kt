@@ -713,8 +713,8 @@ object BasicInstructions {
         "fmv.s.x f1, t1", "Move float: move bits representing a float from an integer register",
         BasicInstructionFormat.I_FORMAT, "1111000 00000 sssss 000 fffff 1010011"
     ) { statement ->
-        val newValue = fpRegisterFile.getIntValue(statement.getOperand(1))!!.toLong()
-        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+        val newValue = registerFile.getIntValue(statement.getOperand(1))!!
+        fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), newValue).ignoreOk()
     }
 
     @JvmField

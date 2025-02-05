@@ -103,8 +103,8 @@ class ImmediateInstruction private constructor(
 
         @JvmField
         val ORI = immediate32(
-            "xori t1,t2,-100", "Bitwise XOR immediate : Set t1 to bitwise XOR of t2 and sign-extended 12-bit immediate",
-            "100", Long::or
+            "ori t1,t2,-100", "Bitwise OR immediate : Set t1 to bitwise OR of t2 and sign-extended 12-bit immediate",
+            "110", Long::or
         )
 
         @JvmField
