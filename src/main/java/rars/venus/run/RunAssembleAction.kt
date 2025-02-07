@@ -66,7 +66,7 @@ class RunAssembleAction(
                 this.mainUI.editor.save()
             }
             either<AssemblyError, Unit> {
-                Globals.program = RISCVProgram()
+                Globals.PROGRAM = RISCVProgram()
                 val filesToAssembleNew = mutableListOf<File>()
                 if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) { // setting calls 
                     // for multiple
@@ -94,7 +94,7 @@ class RunAssembleAction(
                     File(Globals.OTHER_SETTINGS.exceptionHandler)
                 else
                     null
-                programsToAssemble = Globals.program!!.prepareFilesForAssembly(
+                programsToAssemble = Globals.PROGRAM!!.prepareFilesForAssembly(
                     filesToAssembleNew,
                     FileStatus.systemFile!!, exceptionHandler
                 ).bind()
@@ -105,7 +105,7 @@ class RunAssembleAction(
                     )
                 )
                 // added logic to receive any warnings and output them.... DPS 11/28/06
-                val warnings: ErrorList = Globals.program!!.assemble(
+                val warnings: ErrorList = Globals.PROGRAM!!.assemble(
                     programsToAssemble,
                     extendedAssemblerEnabled,
                     warningsAreErrors

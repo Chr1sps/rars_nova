@@ -78,17 +78,36 @@ public final class Globals {
     public static final int maximumBacksteps = 2000;
 
     /// Lock variable used at head of synchronized block to guard memory and registers
+    @Deprecated
     public static final @NotNull ReentrantLock MEMORY_REGISTERS_LOCK = new ReentrantLock();
 
     /// Symbol table for file currently being assembled.
+    @Deprecated
     public static final @NotNull SymbolTable GLOBAL_SYMBOL_TABLE;
     ///  Register file for the RARS simulator.
+    @Deprecated(forRemoval = true)
     public static final @NotNull RegisterFile REGISTER_FILE;
     /// Control and status register file for the RARS simulator.
+    @Deprecated(forRemoval = true)
     public static final @NotNull CSRegisterFile CS_REGISTER_FILE;
+    @Deprecated
     public static final @NotNull Simulator SIMULATOR;
+    @Deprecated(forRemoval = true)
     public static final @NotNull InterruptController INTERRUPT_CONTROLLER;
+    @Deprecated(forRemoval = true)
+    public static final @NotNull OtherSettingsImpl OTHER_SETTINGS;
+    @Deprecated(forRemoval = true)
+    public static final @NotNull BoolSettingsImpl BOOL_SETTINGS;
+    @Deprecated(forRemoval = true)
+    public static final @NotNull EditorThemeSettingsImpl EDITOR_THEME_SETTINGS;
+    @Deprecated(forRemoval = true)
+    public static final @NotNull FontSettingsImpl FONT_SETTINGS;
+    @Deprecated(forRemoval = true)
+    public static final @NotNull HighlightingSettingsImpl HIGHLIGHTING_SETTINGS;
+    @Deprecated(forRemoval = true)
+    public static final @NotNull AllSettings ALL_SETTINGS;
     ///  Floating point register file for the RARS simulator.
+    @Deprecated(forRemoval = true)
     public static @NotNull FloatingPointRegisterFile FP_REGISTER_FILE;
     /// Flag to determine whether to produce internal debugging information.
     public static boolean debug = false;
@@ -98,14 +117,8 @@ public final class Globals {
     @Deprecated(forRemoval = true)
     public static @Nullable VenusUI GUI = null;
     /// The program currently being worked with. Used by GUI only, not command line.
-    public static @Nullable RISCVProgram program;
-
-    public static @NotNull OtherSettingsImpl OTHER_SETTINGS;
-    public static @NotNull BoolSettingsImpl BOOL_SETTINGS;
-    public static @NotNull EditorThemeSettingsImpl EDITOR_THEME_SETTINGS;
-    public static @NotNull FontSettingsImpl FONT_SETTINGS;
-    public static @NotNull HighlightingSettingsImpl HIGHLIGHTING_SETTINGS;
-
+    @Deprecated(forRemoval = true)
+    public static @Nullable RISCVProgram PROGRAM;
     public static @NotNull Memory MEMORY_INSTANCE;
 
     static {
@@ -118,6 +131,14 @@ public final class Globals {
         EDITOR_THEME_SETTINGS = new EditorThemeSettingsImpl(settingsPreferences);
         FONT_SETTINGS = new FontSettingsImpl(settingsPreferences);
         HIGHLIGHTING_SETTINGS = new HighlightingSettingsImpl(settingsPreferences);
+
+        ALL_SETTINGS = new AllSettings(
+            BOOL_SETTINGS,
+            FONT_SETTINGS,
+            EDITOR_THEME_SETTINGS,
+            HIGHLIGHTING_SETTINGS,
+            OTHER_SETTINGS
+        );
 
         final var initialMemoryConfiguration = OTHER_SETTINGS.getMemoryConfiguration();
 

@@ -1,5 +1,6 @@
 package rars.venus.settings;
 
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.hardware.MemoryConfiguration;
@@ -174,6 +175,7 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
                 for (final var textField : this.addressDisplay) {
                     textField.setFont(FONT_SETTINGS.getCurrentFont());
                 }
+                return Unit.INSTANCE;
             });
             // Display vertically from high to low memory addresses so
             // add the components in reverse order.

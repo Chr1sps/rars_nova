@@ -1,67 +1,57 @@
-package rars.venus.registers;
+package rars.venus.registers
 
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.settings.BoolSetting;
-import rars.venus.NumberDisplayBaseChooser;
-import rars.venus.VenusUI;
+import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile
+import rars.settings.AllSettings
+import rars.settings.BoolSetting
+import rars.venus.NumberDisplayBaseChooser
+import rars.venus.VenusUI
 
-import static rars.Globals.BOOL_SETTINGS;
-
-public final class FloatingPointWindow extends RegisterBlockWindowBase {
-    /**
-     * The tips to show when hovering over the names of the registers
-     */
-    private static final String[] regToolTips = {
-        /* ft0 */ "floating point temporary",
-        /* ft1 */ "floating point temporary",
-        /* ft2 */ "floating point temporary",
-        /* ft3 */ "floating point temporary",
-        /* ft4 */ "floating point temporary",
-        /* ft5 */ "floating point temporary",
-        /* ft6 */ "floating point temporary",
-        /* ft7 */ "floating point temporary",
-        /* fs0 */ "saved temporary (preserved across call)",
-        /* fs1 */ "saved temporary (preserved across call)",
-        /* fa0 */ "floating point argument / return value",
-        /* fa1 */ "floating point argument / return value",
-        /* fa2 */ "floating point argument",
-        /* fa3 */ "floating point argument",
-        /* fa4 */ "floating point argument",
-        /* fa5 */ "floating point argument",
-        /* fa6 */ "floating point argument",
-        /* fa7 */ "floating point argument",
-        /* fs2 */ "saved temporary (preserved across call)",
-        /* fs3 */ "saved temporary (preserved across call)",
-        /* fs4 */ "saved temporary (preserved across call)",
-        /* fs5 */ "saved temporary (preserved across call)",
-        /* fs6 */ "saved temporary (preserved across call)",
-        /* fs7 */ "saved temporary (preserved across call)",
-        /* fs8 */ "saved temporary (preserved across call)",
-        /* fs9 */ "saved temporary (preserved across call)",
-        /* fs10 */ "saved temporary (preserved across call)",
-        /* fs11 */ "saved temporary (preserved across call)",
-        /* ft8 */ "floating point temporary",
-        /* ft9 */ "floating point temporary",
-        /* ft10 */ "floating point temporary",
-        /* ft11 */ "floating point temporary"
-    };
-
-    public FloatingPointWindow(final @NotNull VenusUI mainUI) {
-        super(
-            Globals.FP_REGISTER_FILE,
-            regToolTips,
-            "32-bit single precision IEEE 754 floating point",
-            mainUI
-        );
-    }
-
-    @Override
-    protected @NotNull String formatRegisterValue(final long value, final int base) {
-        if (BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)) {
-            return NumberDisplayBaseChooser.formatDoubleNumber(value, base);
+class FloatingPointWindow(
+    fpRegisterFile: FloatingPointRegisterFile,
+    mainUI: VenusUI,
+    settings: AllSettings,
+) : RegisterBlockWindowBase(
+    fpRegisterFile,
+    regToolTips,
+    "32-bit single precision IEEE 754 floating point",
+    mainUI,
+    settings
+) {
+    override fun formatRegisterValue(value: Long, base: Int): String =
+        if (settings.boolSettings.getSetting(BoolSetting.RV64_ENABLED)) {
+            NumberDisplayBaseChooser.formatDoubleNumber(value, base)
         } else {
-            return NumberDisplayBaseChooser.formatFloatNumber((int) value, base);
+            NumberDisplayBaseChooser.formatFloatNumber(value.toInt(), base)
         }
+
+    companion object {
+        /** The tips to show when hovering over the names of the registers */
+        private val regToolTips = arrayOf(
+            "floating point temporary", // ft0
+            "floating point temporary", // ft1
+            "floating point temporary", // ft2
+            "floating point temporary", // ft3
+            "floating point temporary", // ft4
+            "floating point temporary", // ft5
+            "floating point temporary", // ft6
+            "floating point temporary", // ft7
+            "saved temporary (preserved across call)", // fs0
+            "saved temporary (preserved across call)", // fs1
+            "floating point argument / return value", // fa0
+            "floating point argument / return value", // fa1
+            "floating point argument", // fa2
+            "floating point argument", // fa3
+            "floating point argument", // fa4
+            "floating point argument", // fa5
+            "floating point argument", // fa6
+            "floating point argument", // fa7
+            "saved temporary (preserved across call)", // fs2
+            "saved temporary (preserved across call)", // fs3
+            "saved temporary (preserved across call)", // fs4
+            "saved temporary (preserved across call)", // fs5
+            "saved temporary (preserved across call)", // fs6
+            "saved temporary (preserved across call)", // fs7
+            "saved temporary (preserved across call)" // fs8
+        )
     }
 }

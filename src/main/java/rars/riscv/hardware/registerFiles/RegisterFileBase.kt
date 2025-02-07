@@ -5,8 +5,8 @@ import arrow.core.raise.either
 import rars.exceptions.SimulationError
 import rars.notices.RegisterAccessNotice
 import rars.riscv.hardware.registers.Register
-import rars.util.BinaryUtilsOld
-import java.util.function.Consumer
+import rars.util.Listener
+import rars.util.translateToIntFast
 
 abstract class RegisterFileBase protected constructor(
     private val registerNumberPrefix: Char,
@@ -81,32 +81,22 @@ abstract class RegisterFileBase protected constructor(
     }
 
     fun getRegisterByName(name: String): Register? {
-        if (name.length < 2) {
-            return null
-        }
+        if (name.length < 2) return null
 
         // Handle a direct name
-        for (register in this.myRegisters) {
-            if (register.name == name) {
-                return register
-            }
-        }
-        // Handle prefix case
-        if (name[0] == this.registerNumberPrefix) {
-            if (name[1].code == 0) { // Ensure that it is a normal decimal number
-                if (name.length > 2) {
-                    return null
-                }
-                return this.getRegisterByNumber(0)
-            }
+        this.myRegisters.find { it.name == name }?.let { return it }
 
-            val integerNumber: Int? = BinaryUtilsOld.stringToIntFast(name.substring(1))
-            if (integerNumber == null) {
-                return null
+        // Handle prefix case
+        return if (name[0] == this.registerNumberPrefix) {
+            // Ensure that it is a normal decimal number
+            if (name[1].code == 0) {
+                if (name.length > 2) null
+                else this.getRegisterByNumber(0)
+            } else {
+                val integerNumber = name.substring(1).translateToIntFast()
+                integerNumber?.let { this.getRegisterByNumber(it) }
             }
-            return this.getRegisterByNumber(integerNumber)
-        }
-        return null
+        } else null
     }
 
     open fun resetRegisters() {
@@ -115,13 +105,13 @@ abstract class RegisterFileBase protected constructor(
         }
     }
 
-    fun addRegistersListener(listener: Consumer<in RegisterAccessNotice?>) {
+    fun addRegistersListener(listener: Listener<RegisterAccessNotice>) {
         for (register in this.myRegisters) {
             register.registerChangeHook.subscribe(listener)
         }
     }
 
-    fun deleteRegistersListener(listener: Consumer<in RegisterAccessNotice?>) {
+    fun deleteRegistersListener(listener: Listener<RegisterAccessNotice>) {
         for (register in this.myRegisters) {
             register.registerChangeHook.unsubscribe(listener)
         }

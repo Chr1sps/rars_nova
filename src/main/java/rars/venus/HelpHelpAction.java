@@ -1,5 +1,6 @@
 package rars.venus;
 
+import kotlin.Unit;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
@@ -85,7 +86,10 @@ public final class HelpHelpAction extends GuiAction {
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
         examples.setFont(FONT_SETTINGS.getCurrentFont());
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+            examples.setFont(FONT_SETTINGS.getCurrentFont());
+            return Unit.INSTANCE;
+        });
         return scrollPane;
     }
 
@@ -98,7 +102,10 @@ public final class HelpHelpAction extends GuiAction {
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
         examples.setFont(FONT_SETTINGS.getCurrentFont());
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> examples.setFont(FONT_SETTINGS.getCurrentFont()));
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+            examples.setFont(FONT_SETTINGS.getCurrentFont());
+            return Unit.INSTANCE;
+        });
         examples.setCellRenderer(new MyCellRenderer());
         return scrollPane;
     }

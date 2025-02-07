@@ -5,8 +5,10 @@ plugins {
     kotlin("jvm") version "2.1.0"
 }
 
+val rarsMainClass = "rars.MainKt"
+
 application {
-    mainClass = "rars.Main"
+    mainClass = rarsMainClass
 //    mainModule = "RARSNova"
 }
 
@@ -26,6 +28,7 @@ dependencies {
     implementation("io.arrow-kt:arrow-core:2.0.1")
     jflexConfiguration("de.jflex:jflex:1.9.1")
     implementation("info.picocli:picocli:4.7.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     testCompileOnly("org.jetbrains:annotations:24.0.0")
     testImplementation("org.hamcrest:hamcrest:2.2")
@@ -49,7 +52,7 @@ tasks {
         mergeServiceFiles()
         manifest {
             attributes(
-                "Main-Class" to "rars.Main",
+                "Main-Class" to rarsMainClass,
                 "Multi-Release" to "true"
             )
         }

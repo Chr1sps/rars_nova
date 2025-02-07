@@ -6,7 +6,7 @@ import rars.Globals;
 import rars.RISCVProgram;
 import rars.assembler.Symbol;
 import rars.assembler.SymbolTable;
-import rars.util.BinaryUtilsOld;
+import rars.util.BinaryUtilsKt;
 import rars.venus.run.RunAssembleAction;
 
 import javax.swing.*;
@@ -332,14 +332,8 @@ public final class LabelsWindow extends JInternalFrame {
                 // Selected a Label name, so get its address.
                 data = table.getModel().getValueAt(row, LabelsWindow.ADDRESS_COLUMN);
             }
-            int address = 0;
-            try {
-                address = BinaryUtilsOld.stringToInt((String) data);
-            } catch (final NumberFormatException nfe) {
-                // Cannot happen because address is generated internally.
-            } catch (final ClassCastException cce) {
-                // Cannot happen because table contains only strings.
-            }
+            final int address = BinaryUtilsKt.stringToInt((String) data);
+
             // Scroll to this address, either in Text Segment display or Data Segment
             // display
             if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(address)) {

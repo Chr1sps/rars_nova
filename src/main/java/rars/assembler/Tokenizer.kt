@@ -222,14 +222,10 @@ class Tokenizer private constructor(
                         token[tokenPos++] = c // Put the quote in token[0]
                         val lookaheadChars = line.size - linePos - 1
                         // need minimum 2 more characters, 1 for char and 1 for ending quote
-                        if (lookaheadChars < 2) {
-                            // gonna be an error
-                        } else {
+                        if (lookaheadChars >= 2) {
                             c = line[++linePos]
                             token[tokenPos++] = c // grab second character, put it in token[1]
-                            if (c == '\'') {
-                                // gonna be an error: nothing between the quotes
-                            } else {
+                            if (c != '\'') {
                                 c = line[++linePos]
                                 token[tokenPos++] = c // grab third character, put it in token[2]
                                 // Process if we've either reached second, non-escaped, quote or end of line.
@@ -254,7 +250,6 @@ class Tokenizer private constructor(
                                         )
                                         tokenPos = 0
                                         tokenStartPos = linePos + 1
-                                        continue
                                     } else {
                                         // At this point, we've handled all legal possibilities except octal, e.g.
                                         // '\377'
@@ -283,6 +278,7 @@ class Tokenizer private constructor(
                                     }
                                 }
                             }
+                            // gonna be an error: nothing between the quotes
                         }
                     }
 

@@ -47,7 +47,7 @@ class RegisterFile(
         } else {
             val prevValue = register.setValue(newValue)
             if ((OtherSettings.getBackSteppingEnabled())) {
-                Globals.program!!.backStepper!!.addRegisterFileRestore(
+                Globals.PROGRAM!!.backStepper!!.addRegisterFileRestore(
                     register.number,
                     prevValue
                 )
@@ -75,7 +75,7 @@ class RegisterFile(
     fun setProgramCounter(value: Int): Int {
         val oldValue = this.updateRegister(this.pc, value.toLong()).unwrap().toInt()
         if (OtherSettings.getBackSteppingEnabled()) {
-            Globals.program!!.backStepper!!.addPCRestore(oldValue)
+            Globals.PROGRAM!!.backStepper!!.addPCRestore(oldValue)
         }
         return oldValue
     }

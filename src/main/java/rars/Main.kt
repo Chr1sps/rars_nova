@@ -12,10 +12,7 @@ import rars.riscv.hardware.Memory
 import rars.riscv.hardware.wordAligned
 import rars.settings.BoolSetting
 import rars.simulator.Simulator
-import rars.util.BinaryUtilsOld
-import rars.util.FilenameFinder
-import rars.util.RegisterUtils
-import rars.util.toHexStringWithPrefix
+import rars.util.*
 import rars.venus.VenusUI
 import java.io.File
 import java.io.PrintStream
@@ -286,7 +283,7 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
                         this.out.println(fvalue)
                     }
 
-                    else -> this.out.println(BinaryUtilsOld.intToAscii(ivalue))
+                    else -> this.out.println(ivalue.toAscii())
                 }
             } else if (Globals.CS_REGISTER_FILE.getRegisterByName(registerName) != null) {
                 this.out.print(registerName + "\t")
@@ -312,7 +309,7 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
     private fun formatIntForDisplay(value: Int): String {
         return when (this.programOptions.displayFormat) {
             DisplayFormat.DECIMAL -> value.toString()
-            DisplayFormat.HEX -> BinaryUtilsOld.intToAscii(value)
+            DisplayFormat.HEX -> value.toAscii()
             else -> value.toHexStringWithPrefix()
         }
     }
@@ -385,9 +382,9 @@ private fun checkMemoryAddressRange(arg: String): Array<String?>? {
         memoryRange[1] = arg.substring(arg.indexOf(RANGE_SEPARATOR) + 1)
         // NOTE: I will use homegrown decoder, because Integer.decode will throw
         // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
-        if (BinaryUtilsOld.stringToInt(memoryRange[0]) > BinaryUtilsOld.stringToInt(memoryRange[1]) || !wordAligned(
-                BinaryUtilsOld.stringToInt(memoryRange[0])
-            ) || !wordAligned(BinaryUtilsOld.stringToInt(memoryRange[1]))
+        if (memoryRange[0]!!.translateToInt()!! > memoryRange[1]!!.translateToInt()!! ||
+            !wordAligned(memoryRange[0]!!.translateToInt()!!) ||
+            !wordAligned(memoryRange[1]!!.translateToInt()!!)
         ) {
             throw NumberFormatException()
         }

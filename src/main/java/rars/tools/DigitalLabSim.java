@@ -1,5 +1,6 @@
 package rars.tools;
 
+import kotlin.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -84,7 +85,7 @@ public final class DigitalLabSim extends AbstractTool {
     }
 
     @Override
-    public void processAccessNotice(final @NotNull AccessNotice notice) {
+    public @NotNull Unit processAccessNotice(final @NotNull AccessNotice notice) {
         final var memNotice = (MemoryAccessNotice) notice;
         final int address = memNotice.address;
         final char value = (char) memNotice.value;
@@ -105,6 +106,7 @@ public final class DigitalLabSim extends AbstractTool {
                 Globals.INTERRUPT_CONTROLLER.registerTimerInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_TIMER);
             }
         }
+        return Unit.INSTANCE;
     }
 
     /**

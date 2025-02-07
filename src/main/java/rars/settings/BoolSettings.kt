@@ -11,10 +11,10 @@ interface BoolSettings {
 }
 
 class BoolSettingsImpl(private val preferences: Preferences) : BoolSettings {
-    private val onChangeDispatcher = ListenerDispatcher<Void?>()
+    private val onChangeDispatcher = ListenerDispatcher<Unit>()
 
     @JvmField
-    val onChangeListenerHook = this.onChangeDispatcher.getHook()
+    val onChangeListenerHook = this.onChangeDispatcher.hook
     private val currentSettings = mutableMapOf<BoolSetting, Boolean>()
 
     init {
@@ -54,7 +54,7 @@ class BoolSettingsImpl(private val preferences: Preferences) : BoolSettings {
         } catch (_: BackingStoreException) {
             LOGGER.error("Unable to communicate with persistent storage.")
         }
-        this.onChangeDispatcher.dispatch(null)
+        this.onChangeDispatcher.dispatch(Unit)
     }
 
     /**

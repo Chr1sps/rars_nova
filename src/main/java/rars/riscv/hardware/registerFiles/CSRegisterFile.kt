@@ -44,7 +44,7 @@ class CSRegisterFile : RegisterFileBase('_', createRegisters()) {
         }
         val previousValue = register.setValue(newValue)
         if ((getBackSteppingEnabled())) {
-            Globals.program!!.backStepper!!.addControlAndStatusRestore(register.number, previousValue)
+            Globals.PROGRAM!!.backStepper!!.addControlAndStatusRestore(register.number, previousValue)
         }
         previousValue
     }
@@ -52,7 +52,7 @@ class CSRegisterFile : RegisterFileBase('_', createRegisters()) {
     fun updateRegisterBackdoor(register: Register, newValue: Long): Long {
         val previousValue = register.setValueNoNotify(newValue)
         if ((getBackSteppingEnabled())) {
-            Globals.program!!.backStepper!!.addControlAndStatusBackdoor(
+            Globals.PROGRAM!!.backStepper!!.addControlAndStatusBackdoor(
                 register.number,
                 previousValue
             )

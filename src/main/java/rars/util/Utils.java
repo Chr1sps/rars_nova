@@ -4,17 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import rars.venus.editors.TokenStyle;
 
 import java.awt.*;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 public final class Utils {
     private Utils() {
-    }
-
-    public static @NotNull String getStacktraceString(@NotNull final Throwable throwable) {
-        final var writer = new StringWriter();
-        throwable.printStackTrace(new PrintWriter(writer));
-        return writer.toString();
     }
 
     /**

@@ -173,10 +173,9 @@ public final class VenusUI extends JFrame {
         // roughly in bottom-up order; some are created in component constructors and
         // thus are
         // not visible here.
-
-        this.registersTab = new RegistersWindow(this);
-        this.floatingPointTab = new FloatingPointWindow(this);
-        this.csrTab = new ControlAndStatusWindow(this);
+        this.registersTab = new RegistersWindow(Globals.REGISTER_FILE, this, Globals.ALL_SETTINGS);
+        this.floatingPointTab = new FloatingPointWindow(Globals.FP_REGISTER_FILE, this, Globals.ALL_SETTINGS);
+        this.csrTab = new ControlAndStatusWindow(Globals.CS_REGISTER_FILE, this, Globals.ALL_SETTINGS);
         this.registersPane = new RegistersPane(this.registersTab, this.floatingPointTab, this.csrTab);
         this.registersPane.setPreferredSize(registersPanePreferredSize);
 
@@ -962,7 +961,7 @@ public final class VenusUI extends JFrame {
             editCopyAction, editPasteAction, editFindReplaceAction,
             settingsMemoryConfigurationAction, runAssembleAction, runGoAction, runStepAction
         );
-        runBackstepAction.setEnabled(OtherSettings.getBackSteppingEnabled() && !Globals.program.getBackStepper()
+        runBackstepAction.setEnabled(OtherSettings.getBackSteppingEnabled() && !Globals.PROGRAM.getBackStepper()
             .empty());
         setEnabled(runResetAction);
         setDisabled(runStopAction, runPauseAction);
@@ -999,7 +998,7 @@ public final class VenusUI extends JFrame {
             settingsMemoryConfigurationAction, runAssembleAction
         );
         setDisabled(runGoAction, runStepAction);
-        runBackstepAction.setEnabled(OtherSettings.getBackSteppingEnabled() && !Globals.program.getBackStepper()
+        runBackstepAction.setEnabled(OtherSettings.getBackSteppingEnabled() && !Globals.PROGRAM.getBackStepper()
             .empty());
         setEnabled(runResetAction);
         setDisabled(runStopAction, runPauseAction);

@@ -13,8 +13,9 @@ import rars.riscv.ExtendedInstruction
 import rars.riscv.Instruction
 import rars.riscv.InstructionsRegistry
 import rars.settings.BoolSetting
-import rars.util.BinaryUtilsOld
 import rars.util.toHexStringWithPrefix
+import rars.util.translateToInt
+import rars.util.translateToLong
 import rars.venus.NumberDisplayBaseChooser
 import java.lang.Float
 import java.nio.charset.StandardCharsets
@@ -25,6 +26,7 @@ import kotlin.Long
 import kotlin.NumberFormatException
 import kotlin.Pair
 import kotlin.String
+import kotlin.Unit
 import kotlin.assert
 import kotlin.check
 import kotlin.repeat
@@ -700,22 +702,20 @@ class Assembler {
                 this.fileCurrentlyBeingAssembled!!.localMacroPool!!.commitMacro(token)
             }
 
-            this.inMacroSegment -> {
-                // should not parse lines even directives in macro segment
-            }
+            this.inMacroSegment -> Unit // should not parse lines even directives in macro segment
 
             direct == Directive.DATA -> {
                 this.inDataSegment = true
                 this.autoAlign = true
                 if (tokens.size > 1 && TokenType.isIntegerTokenType(tokens.get(1).type)) {
-                    this.dataAddress = BinaryUtilsOld.stringToInt(tokens.get(1).text) // KENV 1/6/05
+                    this.dataAddress = tokens.get(1).text.translateToInt()!!
                 }
             }
 
             direct == Directive.TEXT -> {
                 this.inDataSegment = false
                 if (tokens.size > 1 && TokenType.isIntegerTokenType(tokens.get(1).type)) {
-                    this.textAddress = BinaryUtilsOld.stringToInt(tokens.get(1).text) // KENV 1/6/05
+                    this.textAddress = tokens.get(1).text.translateToInt()!!
                 }
             }
 
@@ -768,7 +768,7 @@ class Assembler {
                     return
                 }
                 if (!TokenType.isIntegerTokenType(tokens.get(1).type)
-                    || BinaryUtilsOld.stringToInt(tokens.get(1).text) < 0
+                    || tokens[1].text.translateToInt()!! < 0
                 ) {
                     this.errors!!.addTokenError(
                         token,
@@ -776,7 +776,7 @@ class Assembler {
                     )
                     return
                 }
-                val value = BinaryUtilsOld.stringToInt(tokens.get(1).text) // KENV 1/6/05
+                val value = tokens[1].text.translateToInt()!! // KENV 1/6/05
                 if (value < 2 && !this.inDataSegment) {
                     this.errors!!.add(
                         ErrorMessage.warning(
@@ -805,7 +805,7 @@ class Assembler {
                         return
                     }
                     if (!TokenType.isIntegerTokenType(tokens.get(1).type)
-                        || BinaryUtilsOld.stringToInt(tokens.get(1).text) < 0
+                        || tokens.get(1).text.translateToInt()!! < 0
                     ) {
                         this.errors!!.addTokenError(
                             token,
@@ -813,7 +813,7 @@ class Assembler {
                         )
                         return
                     }
-                    val value = BinaryUtilsOld.stringToInt(tokens.get(1).text) // KENV 1/6/05
+                    val value = tokens.get(1).text.translateToInt()!! // KENV 1/6/05
                     this.dataAddress += value
                 }
             }
@@ -826,7 +826,7 @@ class Assembler {
                     return
                 }
                 if (!TokenType.isIntegerTokenType(tokens.get(2).type)
-                    || BinaryUtilsOld.stringToInt(tokens.get(2).text) < 0
+                    || tokens.get(2).text.translateToInt()!! < 0
                 ) {
                     this.errors!!.addTokenError(
                         token,
@@ -834,7 +834,7 @@ class Assembler {
                     )
                     return
                 }
-                val size = BinaryUtilsOld.stringToInt(tokens.get(2).text)
+                val size = tokens.get(2).text.translateToInt()!!
                 // If label already in global symtab, do nothing. If not, add it right now.
                 if (Globals.GLOBAL_SYMBOL_TABLE.getAddress(tokens.get(1).text) == SymbolTable.NOT_FOUND) {
                     Globals.GLOBAL_SYMBOL_TABLE.addSymbol(
@@ -992,7 +992,7 @@ class Assembler {
                 )
                 return
             }
-            val repetitions = BinaryUtilsOld.stringToInt(repetitionsToken.text) // KENV 1/6/05
+            val repetitions = repetitionsToken.text.translateToInt()!! // KENV 1/6/05
             if (repetitions <= 0) {
                 errors.addTokenError(
                     repetitionsToken,
@@ -1043,15 +1043,15 @@ class Assembler {
             var value: Int
             val longValue: Long
             if (TokenType.INTEGER_64 == token.type) {
-                longValue = BinaryUtilsOld.stringToLong(token.text)
+                longValue = token.text.translateToLong()!!
                 value = longValue.toInt()
                 if (directive != Directive.DWORD) {
-                    val message = "value ${BinaryUtilsOld.longToHexString(longValue)} " +
+                    val message = "value ${longValue.toHexStringWithPrefix()} " +
                             "is out-of-range and truncated to ${value.toHexStringWithPrefix()}"
                     errors.addWarning(token, message)
                 }
             } else {
-                value = BinaryUtilsOld.stringToInt(token.text)
+                value = token.text.translateToInt()!!
                 longValue = value.toLong()
             }
 

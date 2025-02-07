@@ -1,5 +1,7 @@
 package rars.venus;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +14,6 @@ import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtilsKt;
-import rars.util.BinaryUtilsOld;
 import rars.util.ConversionUtils;
 import rars.venus.run.RunSpeedPanel;
 import rars.venus.util.RepeatButton;
@@ -29,7 +30,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Date;
-import java.util.function.Consumer;
 
 import static rars.Globals.*;
 import static rars.util.Utils.deriveFontFromStyle;
@@ -130,13 +130,14 @@ public final class DataSegmentWindow extends JInternalFrame {
     private int[] displayBaseAddresses;
     private int defaultBaseAddressIndex;
     private JButton[] baseAddressButtons;
-    public final @NotNull Consumer<@NotNull MemoryAccessNotice> processMemoryAccessNotice = notice -> {
+    public final @NotNull Function1<@NotNull MemoryAccessNotice, @NotNull Unit> processMemoryAccessNotice = notice -> {
         if (notice.accessType == AccessNotice.AccessType.WRITE) {
             // Uses the same highlighting technique as for Text Segment -- see
             // AddressCellRenderer class in DataSegmentWindow.java.
             final var address = notice.address;
             this.highlightCellForAddress(address);
         }
+        return Unit.INSTANCE;
     };
 
     /**
@@ -176,9 +177,13 @@ public final class DataSegmentWindow extends JInternalFrame {
                 // Simulated MIPS execution stops. Stop responding.
                 Globals.MEMORY_INSTANCE.deleteSubscriber(this.processMemoryAccessNotice);
             }
+            return Unit.INSTANCE;
         });
 
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.updateRowHeight());
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+            this.updateRowHeight();
+            return Unit.INSTANCE;
+        });
 
         this.homeAddress = memoryConfiguration.dataBaseAddress; // address for Home button
         this.firstAddress = this.homeAddress; // first address to display at any given time
@@ -388,7 +393,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         }
         final int addressRow = rowColumn.x;
         this.addressColumn = rowColumn.y;
-        this.addressRowFirstAddress = BinaryUtilsOld
+        this.addressRowFirstAddress = BinaryUtilsKt
             .stringToInt(DataSegmentWindow.dataTable.getValueAt(addressRow, DataSegmentWindow.ADDRESS_COLUMN)
                 .toString());
         // System.out.println("Address "+Binary.intToHexString(address)+" becomes row "+
@@ -1035,31 +1040,24 @@ public final class DataSegmentWindow extends JInternalFrame {
          */
         @Override
         public void setValueAt(final Object value, final int row, final int col) {
-            final int val;
-            try {
-                val = BinaryUtilsOld.stringToInt((String) value);
-            } catch (final NumberFormatException nfe) {
+            final var parsed = BinaryUtilsKt.stringToInt((String) value);
+            if (parsed == null) {
                 this.data[row][col] = "INVALID";
                 this.fireTableCellUpdated(row, col);
                 return;
             }
 
             // calculate address from row and column
-            int address = 0;
-            try {
-                address =
-                    BinaryUtilsOld.stringToInt((String) this.data[row][DataSegmentWindow.ADDRESS_COLUMN]) + (col - 1) * DataSegmentWindow.BYTES_PER_VALUE; // KENV
-                // 1/6/05
-            } catch (final NumberFormatException nfe) {
-                // can't really happen since memory addresses are completely under
-                // the control of my software.
-            }
-            // Assures that if changed during MIPS program execution, the update will
+            final var address = BinaryUtilsKt.stringToInt(
+                (String) this.data[row][DataSegmentWindow.ADDRESS_COLUMN]
+            ) + (col - 1) * DataSegmentWindow.BYTES_PER_VALUE;
+
+            // Assures that if changed during program execution, the update will
             // occur only between instructions.
             Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
                 try {
-                    Globals.MEMORY_INSTANCE.setRawWord(address, val);
+                    Globals.MEMORY_INSTANCE.setRawWord(address, parsed);
                 }
                 // somehow, user was able to display out-of-range address. Most likely to occur
                 // between
@@ -1072,7 +1070,7 @@ public final class DataSegmentWindow extends JInternalFrame {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             } // end synchronized block
             final int valueBase = DataSegmentWindow.this.executePane.getValueDisplayBase();
-            this.data[row][col] = NumberDisplayBaseChooser.formatNumber(val, valueBase);
+            this.data[row][col] = NumberDisplayBaseChooser.formatNumber(parsed, valueBase);
             this.fireTableCellUpdated(row, col);
         }
 
@@ -1103,8 +1101,10 @@ public final class DataSegmentWindow extends JInternalFrame {
             );
 
             cell.setHorizontalAlignment(SwingConstants.RIGHT);
-            final int rowFirstAddress =
-                BinaryUtilsOld.stringToInt(table.getValueAt(row, DataSegmentWindow.ADDRESS_COLUMN).toString());
+            final int rowFirstAddress = BinaryUtilsKt.stringToInt(table.getValueAt(
+                row,
+                DataSegmentWindow.ADDRESS_COLUMN
+            ).toString());
             final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
             final var defaultFont = FONT_SETTINGS.getCurrentFont();
             if (/*DataSegmentWindow.this.settings.getBoolSettings().getSetting(BoolSetting.DATA_SEGMENT_HIGHLIGHTING)

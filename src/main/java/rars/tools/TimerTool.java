@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package rars.tools;
 
+import kotlin.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -272,7 +273,6 @@ public final class TimerTool extends AbstractTool {
             try {
                 Globals.MEMORY_INSTANCE.subscribe(
                     notice -> {
-
                         final var accessType = notice.accessType;
                         // If is was a WRITE operation
                         if (accessType == MemoryAccessNotice.AccessType.WRITE) {
@@ -288,6 +288,7 @@ public final class TimerTool extends AbstractTool {
                                 this.postInterrupt = true; // timecmp was writen to
                             }
                         }
+                        return Unit.INSTANCE;
                     },
                     TimerTool.getTimeCmpAddress(),
                     TimerTool.getTimeCmpAddress() + 8

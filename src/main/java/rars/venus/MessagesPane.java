@@ -1,6 +1,7 @@
 package rars.venus;
 
 import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
@@ -19,7 +20,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.function.Consumer;
 
 import static rars.Globals.FONT_SETTINGS;
 
@@ -84,6 +84,7 @@ public final class MessagesPane extends JTabbedPane {
         FONT_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
             this.assembleTextArea.setFont(FONT_SETTINGS.getCurrentFont());
             this.runTextArea.setFont(FONT_SETTINGS.getCurrentFont());
+            return Unit.INSTANCE;
         });
         this.assembleTextArea.setEditable(false);
         this.runTextArea.setEditable(false);
@@ -379,7 +380,7 @@ public final class MessagesPane extends JTabbedPane {
         private final int maxLen;
         private final @NotNull DocumentListener listener;
         private final @NotNull NavigationFilter navigationFilter;
-        private final @NotNull Consumer<@NotNull Unit> stopListener;
+        private final @NotNull Function1<@NotNull Unit, @NotNull Unit> stopListener;
         private int initialPos;
 
         public Asker(final int maxLen) {
@@ -450,7 +451,10 @@ public final class MessagesPane extends JTabbedPane {
                     fb.setDot(dot, bias);
                 }
             };
-            stopListener = ignored -> Asker.this.returnResponse();
+            stopListener = ignored -> {
+                Asker.this.returnResponse();
+                return Unit.INSTANCE;
+            };
             resultQueue = new ArrayBlockingQueue<>(1);
         }
 

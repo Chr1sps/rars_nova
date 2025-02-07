@@ -1,30 +1,24 @@
-package rars.util;
+package rars.util
 
-import java.awt.*;
-import java.util.Arrays;
+import java.awt.Color
 
-// Represents grid of colors
-public final class Grid {
-
-    public final Color[][] grid;
-    public final int rows;
-    public final int columns;
-
-    public Grid(final int rows, final int columns) {
-        this.grid = new Color[rows][columns];
-        this.rows = rows;
-        this.columns = columns;
-        this.reset();
+/**
+ * Represents grid of colors
+ */
+class Grid(@JvmField val rows: Int, @JvmField val columns: Int) {
+    @JvmField
+    val grid: Array<Array<Color>> = Array<Array<Color>>(rows) {
+        Array<Color>(columns) { Color.BLACK }
     }
 
-    public void setColor(final int row, final int column, final Color color) {
-        this.grid[row][column] = color;
+    fun setColor(row: Int, column: Int, color: Color) {
+        this.grid[row][column] = color
     }
 
-    // Just set all grid elements to black.
-    public void reset() {
-        for (final var row : this.grid) {
-            Arrays.fill(row, Color.BLACK);
-        }
+    /**
+     * Just set all grid elements to black.
+     */
+    fun reset() {
+        grid.forEach { row -> row.fill(Color.BLACK) }
     }
 }

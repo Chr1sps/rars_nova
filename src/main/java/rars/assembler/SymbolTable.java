@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
-import rars.util.BinaryUtilsOld;
+import rars.util.BinaryUtilsKt;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -210,14 +210,8 @@ public final class SymbolTable {
      * symbol table.
      */
     private @Nullable Symbol getSymbolGivenAddress(final @NotNull String addressString) {
-        final int address;
-        try {
-            address = BinaryUtilsOld.stringToInt(addressString);// DPS 2-Aug-2010: was Integer.parseInt(s) but
-            // croaked
-            // on hex
-        } catch (final NumberFormatException e) {
-            return null;
-        }
+        final var address = BinaryUtilsKt.stringToInt(addressString);
+        if (address == null) return null;
         for (final Symbol sym : this.table) {
             if (sym.address() == address) {
                 return sym;

@@ -58,6 +58,7 @@
 
 package rars.tools;
 
+import kotlin.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -136,7 +137,10 @@ public final class InstructionMemoryDump extends AbstractTool {
 
         this.logSuccess = new JLabel("");
         this.logSuccess.setFont(FONT_SETTINGS.getCurrentFont());
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.logSuccess.setFont(FONT_SETTINGS.getCurrentFont()));
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+            this.logSuccess.setFont(FONT_SETTINGS.getCurrentFont());
+            return Unit.INSTANCE;
+        });
         this.logSuccess.setFocusable(false);
         this.logSuccess.setBackground(panel.getBackground());
         panel.add(this.logSuccess);

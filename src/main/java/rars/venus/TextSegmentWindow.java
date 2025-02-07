@@ -1,5 +1,7 @@
 package rars.venus;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +15,6 @@ import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtilsKt;
-import rars.util.BinaryUtilsOld;
 import rars.util.FontUtilities;
 
 import javax.swing.*;
@@ -29,7 +30,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import static rars.Globals.*;
 import static rars.util.Utils.deriveFontFromStyle;
@@ -100,10 +100,11 @@ public final class TextSegmentWindow extends JInternalFrame {
     private Hashtable<Integer, Integer> addressRows; // first is text address, value is table model row
     private Hashtable<Integer, ModifiedCode> executeMods; // first is table model row, value is original code, basic,
     private TextTableModel tableModel;
-    private final @NotNull Consumer<@NotNull MemoryAccessNotice> processMemoryAccessNotice = notice -> {
+    private final @NotNull Function1<@NotNull MemoryAccessNotice, @NotNull Unit> processMemoryAccessNotice = notice -> {
         if (notice.accessType == AccessNotice.AccessType.WRITE) {
             this.updateTable(notice.address, notice.value);
         }
+        return Unit.INSTANCE;
     };
     private boolean codeHighlighting;
     private boolean breakpointsEnabled; // Added 31 Dec 2009
@@ -129,14 +130,19 @@ public final class TextSegmentWindow extends JInternalFrame {
                     this.addAsTextSegmentObserver();
                 }
             }
+            return Unit.INSTANCE;
         });
         BOOL_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
             this.deleteAsTextSegmentObserver();
             if (BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 this.addAsTextSegmentObserver();
             }
+            return Unit.INSTANCE;
         });
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignore -> this.updateRowHeight());
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
+            this.updateRowHeight();
+            return Unit.INSTANCE;
+        });
         this.contentPane = this.getContentPane();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
@@ -156,7 +162,7 @@ public final class TextSegmentWindow extends JInternalFrame {
         final int addressBase = this.executePane.getAddressDisplayBase();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
-        final var sourceStatementList = Globals.program.getMachineList();
+        final var sourceStatementList = Globals.PROGRAM.getMachineList();
         this.data = new Object[sourceStatementList.size()][ColumnData.values().length];
         this.intAddresses = new int[this.data.length];
         this.addressRows = new Hashtable<>(this.data.length);
@@ -351,7 +357,7 @@ public final class TextSegmentWindow extends JInternalFrame {
         if (this.contentPane.getComponentCount() == 0) {
             return; // ignore if no content to change
         }
-        final var sourceStatementList = Globals.program.getMachineList();
+        final var sourceStatementList = Globals.PROGRAM.getMachineList();
         for (int i = 0; i < sourceStatementList.size(); i++) {
             // Loop has been extended to cover self-modifying code. If code at this memory
             // location has been
@@ -365,28 +371,22 @@ public final class TextSegmentWindow extends JInternalFrame {
                     ColumnData.BASIC_INSTRUCTIONS_COLUMN.number
                 );
             } else {
-                try {
-                    final ProgramStatement statement = new ProgramStatement(
-                        BinaryUtilsOld
-                            .stringToInt((String) this.table.getModel().getValueAt(
-                                i,
-                                ColumnData.INSTRUCTION_CODE_COLUMN.number
-                            )),
-                        BinaryUtilsOld
-                            .stringToInt((String) this.table.getModel().getValueAt(
-                                i,
-                                ColumnData.INSTRUCTION_ADDRESS_COLUMN.number
-                            ))
-                    );
-                    this.table.getModel().setValueAt(
-                        statement.getPrintableBasicAssemblyStatement(), i,
-                        ColumnData.BASIC_INSTRUCTIONS_COLUMN.number
-                    );
-                } catch (
-                    final
-                    NumberFormatException e) { // should never happen but just in case...
-                    this.table.getModel().setValueAt("", i, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
-                }
+                final var statement = new ProgramStatement(
+                    BinaryUtilsKt
+                        .stringToInt((String) this.table.getModel().getValueAt(
+                            i,
+                            ColumnData.INSTRUCTION_CODE_COLUMN.number
+                        )),
+                    BinaryUtilsKt
+                        .stringToInt((String) this.table.getModel().getValueAt(
+                            i,
+                            ColumnData.INSTRUCTION_ADDRESS_COLUMN.number
+                        ))
+                );
+                this.table.getModel().setValueAt(
+                    statement.getPrintableBasicAssemblyStatement(), i,
+                    ColumnData.BASIC_INSTRUCTIONS_COLUMN.number
+                );
             }
         }
     }
@@ -714,7 +714,7 @@ public final class TextSegmentWindow extends JInternalFrame {
         // for that. So we'll pretend to be Memory observable and send it a fake memory
         // write update.
         try {
-            this.executePane.dataSegment.processMemoryAccessNotice.accept(new MemoryAccessNotice(
+            this.executePane.dataSegment.processMemoryAccessNotice.invoke(new MemoryAccessNotice(
                 AccessNotice.AccessType.WRITE,
                 address, DataTypes.WORD_SIZE,
                 value
@@ -859,26 +859,15 @@ public final class TextSegmentWindow extends JInternalFrame {
             if (value.equals(this.data[row][col])) {
                 return;
             }
-            final int val;
-            try {
-                val = BinaryUtilsOld.stringToInt((String) value);
-            } catch (final NumberFormatException nfe) {
-                LOGGER.error("NumberFormatException when decoding value from table model.", nfe);
+            final var val = BinaryUtilsKt.stringToInt((String) value);
+            if (val == null) {
                 this.data[row][col] = "INVALID";
                 this.fireTableCellUpdated(row, col);
                 return;
             }
             // calculate address from row and column
-            int address = 0;
-            try {
-                address =
-                    BinaryUtilsOld.stringToInt((String) this.data[row][ColumnData.INSTRUCTION_ADDRESS_COLUMN.number]);
-            } catch (final NumberFormatException nfe) {
-                // can't really happen since memory addresses are completely under
-                // the control of my software.
-                LOGGER.error("Unexpected NumberFormatException when decoding address from table model.", nfe);
-            }
-            // Assures that if changed during MIPS program execution, the update will
+            final int address = BinaryUtilsKt.stringToInt((String) this.data[row][ColumnData.INSTRUCTION_ADDRESS_COLUMN.number]);
+            // Assures that if changed during program execution, the update will
             // occur only between instructions.
             Globals.MEMORY_REGISTERS_LOCK.lock();
             try {

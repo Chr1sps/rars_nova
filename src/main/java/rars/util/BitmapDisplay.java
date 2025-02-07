@@ -1,5 +1,7 @@
 package rars.util;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +13,6 @@ import rars.riscv.hardware.Memory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.function.Consumer;
 
 // TODO: move this class to the common SystemIO class
 
@@ -23,7 +24,7 @@ public final class BitmapDisplay extends JFrame {
     public final int displayHeight;
     private final @NotNull Grid grid;
     private final @NotNull GraphicsPanel panel;
-    private final @NotNull Consumer<@NotNull MemoryAccessNotice> accessNoticeCallback;
+    private final @NotNull Function1<@NotNull MemoryAccessNotice, @NotNull Unit> accessNoticeCallback;
     private final @NotNull Memory memory;
     public int baseAddress;
     private int upperAddressBound;
@@ -55,6 +56,7 @@ public final class BitmapDisplay extends JFrame {
             if (notice.accessType == AccessNotice.AccessType.WRITE) {
                 this.updateDisplay(notice.address, notice.length);
             }
+            return Unit.INSTANCE;
         };
 
         try {
