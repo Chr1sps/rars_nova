@@ -1,5 +1,6 @@
 package rars.tools;
 
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
@@ -159,10 +160,11 @@ public final class FloatRepresentation extends AbstractTool {
     }
 
     @Override
-    protected void processAccessNotice(@NotNull final AccessNotice notice) {
+    protected @NotNull Unit processAccessNotice(@NotNull final AccessNotice notice) {
         if (notice.accessType == AccessNotice.AccessType.WRITE) {
             this.updateDisplays(new FlavorsOfFloat().buildOneFromInt((int) this.attachedRegister.getValue()));
         }
+        return Unit.INSTANCE;
     }
 
     /**

@@ -74,7 +74,7 @@ public final class RunBackstepAction extends GuiAction {
             Globals.REGISTER_FILE.addRegistersListener(executePane.registerValues.processRegisterNotice);
             Globals.CS_REGISTER_FILE.addRegistersListener(executePane.csrValues.processRegisterNotice);
             Globals.FP_REGISTER_FILE.addRegistersListener(executePane.fpRegValues.processRegisterNotice);
-            Globals.program.getBackStepper().backStep();
+            Globals.PROGRAM.getBackStepper().backStep();
             Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment.processMemoryAccessNotice);
             Globals.REGISTER_FILE.deleteRegistersListener(executePane.registerValues.processRegisterNotice);
             executePane.registerValues.updateRegisters();

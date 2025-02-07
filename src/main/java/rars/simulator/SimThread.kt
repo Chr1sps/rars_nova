@@ -370,14 +370,14 @@ open class SimThread(
 
                     // IF statement added 7/26/06 (explanation above)
                     if (getBackSteppingEnabled()) {
-                        Globals.program!!.backStepper!!.addDoNothing(this@SimThread.pc)
+                        Globals.PROGRAM!!.backStepper!!.addDoNothing(this@SimThread.pc)
                     }
                 }.fold({ event ->
                     when (event) {
                         is BreakpointEvent -> {
                             // EBREAK needs backstepping support too.
                             if (getBackSteppingEnabled()) {
-                                Globals.program!!.backStepper!!.addDoNothing(this.pc)
+                                Globals.PROGRAM!!.backStepper!!.addDoNothing(this.pc)
                             }
                             ebreak = true
                             false
@@ -385,7 +385,7 @@ open class SimThread(
 
                         is WaitEvent -> {
                             if (getBackSteppingEnabled()) {
-                                Globals.program!!.backStepper!!.addDoNothing(this.pc)
+                                Globals.PROGRAM!!.backStepper!!.addDoNothing(this.pc)
                             }
                             waiting = true
                             false

@@ -1,5 +1,6 @@
 package rars.riscv.syscalls;
 
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
@@ -24,6 +25,7 @@ public final class DisplayBitmapImpl {
                 }
                 this.display = null;
             }
+            return Unit.INSTANCE;
         });
     }
 

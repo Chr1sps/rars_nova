@@ -682,8 +682,8 @@ public final class EditTabbedPane extends JPanel {
             FileStatus.systemFile = theFile;
             FileStatus.setSystemState(FileStatus.State.OPENING);// DPS 9-Aug-2011
             if (theFile.canRead()) {
-                Globals.program = new RISCVProgram();
-                Globals.program.readSource(theFile); // ignore the potential assembly error
+                Globals.PROGRAM = new RISCVProgram();
+                Globals.PROGRAM.readSource(theFile); // ignore the potential assembly error
                 // DPS 1 Nov 2006. Defined a StringBuffer to receive all file contents,
                 // one line at a time, before adding to the Edit pane with one setText.
                 // StringBuffer is preallocated to full filelength to eliminate dynamic
@@ -691,10 +691,10 @@ public final class EditTabbedPane extends JPanel {
                 // to the Edit pane as it was read, way slower due to dynamic string alloc.
                 final StringBuilder fileContents = new StringBuilder((int) theFile.length());
                 int lineNumber = 1;
-                String line = Globals.program.getSourceLine(lineNumber++);
+                String line = Globals.PROGRAM.getSourceLine(lineNumber++);
                 while (line != null) {
                     fileContents.append(line).append("\n");
-                    line = Globals.program.getSourceLine(lineNumber++);
+                    line = Globals.PROGRAM.getSourceLine(lineNumber++);
                 }
                 editPane.setSourceCode(fileContents.toString(), true);
                 // The above operation generates an undoable edit, setting the initial

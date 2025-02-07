@@ -1,28 +1,26 @@
-package rars.venus.registers;
+package rars.venus.registers
 
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.notices.AccessNotice;
-import rars.notices.RegisterAccessNotice;
-import rars.notices.SimulatorNotice;
-import rars.riscv.hardware.registerFiles.RegisterFileBase;
-import rars.riscv.hardware.registers.Register;
-import rars.settings.BoolSetting;
-import rars.util.BinaryUtilsOld;
-import rars.venus.NumberDisplayBaseChooser;
-import rars.venus.VenusUI;
-import rars.venus.run.RunSpeedPanel;
-
-import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.util.function.Consumer;
-
-import static rars.Globals.*;
+import rars.Globals
+import rars.notices.AccessNotice
+import rars.notices.RegisterAccessNotice
+import rars.notices.SimulatorNotice
+import rars.riscv.hardware.registerFiles.RegisterFileBase
+import rars.riscv.hardware.registers.Register
+import rars.settings.AllSettings
+import rars.settings.BoolSetting
+import rars.settings.BoolSettings
+import rars.util.translateToInt
+import rars.util.translateToLong
+import rars.venus.VenusUI
+import rars.venus.run.RunSpeedPanel
+import java.awt.*
+import java.awt.event.MouseEvent
+import java.util.concurrent.locks.ReentrantLock
+import javax.swing.*
+import javax.swing.event.TableModelEvent
+import javax.swing.table.AbstractTableModel
+import javax.swing.table.DefaultTableCellRenderer
+import javax.swing.table.JTableHeader
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -51,196 +49,157 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-
 /**
  * Sets up a window to display registers in the UI.
  *
  * @author Sanderson, Bumgarner
  */
-public abstract class RegisterBlockWindowBase extends JPanel {
-    private static final int NUMBER_COLUMN = 0;
-    private static final int NAME_COLUMN = 1;
-    private static final int VALUE_COLUMN = 2;
-    private static final int NUMBER_SIZE = 45;
-    private static final int NAME_SIZE = 80;
-    private static final int VALUE_SIZE = 160;
-    public final @NotNull Consumer<@NotNull RegisterAccessNotice> processRegisterNotice;
-    private final @NotNull JTable table;
-    private final @NotNull RegisterFileBase registerFile;
-    @NotNull
-    private final VenusUI mainUI;
-    private int highlightRow;
+abstract class RegisterBlockWindowBase internal constructor(
+    private val registerFile: RegisterFileBase,
+    registerDescriptions: Array<String>,
+    valueTip: String,
+    private val mainUI: VenusUI,
+    protected val settings: AllSettings
+) : JPanel() {
+    @JvmField
+    val processRegisterNotice = { notice: RegisterAccessNotice ->
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            // Uses the same highlighting technique as for Text Segment -- see
+            // AddressCellRenderer class in DataSegmentWindow.java.
+            this.highlightCellForRegister(notice.register)
+            this.mainUI.registersPane.setSelectedComponent(this)
+        }
+    }
+    private val table: JTable = MyTippedJTable(
+        RegisterTableModel(
+            registerFile,
+            settings.boolSettings,
+            Globals.MEMORY_REGISTERS_LOCK,
+        ),
+        registerDescriptions,
+        arrayOf(
+            "Each register has a tool tip describing its usage convention",
+            "Corresponding register number",
+            valueTip
+        )
+    )
+    private var highlightRow: Int = -1
 
     /**
      * Constructor which sets up a fresh window with a table that contains the
      * register values.
      *
      * @param registerFile
-     *     the register file to be displayed
+     * the register file to be displayed
      * @param registerDescriptions
-     *     an array of {@link java.lang.String} objects
+     * an array of [java.lang.String] objects
      * @param valueTip
-     *     a {@link java.lang.String} object
+     * a [java.lang.String] object
      */
-    RegisterBlockWindowBase(
-        final @NotNull RegisterFileBase registerFile,
-        final String[] registerDescriptions,
-        final String valueTip,
-        final @NotNull VenusUI mainUI
-    ) {
-        this.registerFile = registerFile;
-        this.mainUI = mainUI;
-        SIMULATOR.simulatorNoticeHook.subscribe(notice -> {
+    init {
+        Globals.SIMULATOR.simulatorNoticeHook.subscribe { notice ->
             if (notice.action == SimulatorNotice.Action.START) {
                 // Simulated MIPS execution starts.  Respond to memory changes if running in timed
                 // or stepped mode.
-                if (Double.compare(notice.runSpeed, RunSpeedPanel.UNLIMITED_SPEED) != 0 || notice.maxSteps == 1) {
-                    beginObserving();
+                if (notice.runSpeed.compareTo(RunSpeedPanel.UNLIMITED_SPEED) != 0 || notice.maxSteps == 1) {
+                    beginObserving()
                 }
             } else {
                 // Simulated MIPS execution stops.  Stop responding.
-                endObserving();
+                endObserving()
             }
-        });
-        this.highlightRow = -1;
-        this.table = new MyTippedJTable(
-            new RegTableModel(this.setupWindow()), registerDescriptions,
-            new String[]{
-                "Each register has a tool tip describing its usage convention",
-                "Corresponding register number", valueTip
-            }
-        ) {
-        };
-        this.updateRowHeight();
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.updateRowHeight());
-        final var columnModel = this.table.getColumnModel();
-
-        final var nameColumn = columnModel.getColumn(RegisterBlockWindowBase.NAME_COLUMN);
-        nameColumn.setMinWidth(RegisterBlockWindowBase.NAME_SIZE);
-        nameColumn.setMaxWidth(RegisterBlockWindowBase.NAME_SIZE);
-        nameColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.LEFT, table));
-
-        final var numberColumn = columnModel.getColumn(RegisterBlockWindowBase.NUMBER_COLUMN);
-        numberColumn.setMinWidth(RegisterBlockWindowBase.NUMBER_SIZE);
-        numberColumn.setMaxWidth(RegisterBlockWindowBase.NUMBER_SIZE);
-        // Display register values (String-ified) right-justified in mono font
-        numberColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT, table));
-
-        final var valueColumn = columnModel.getColumn(RegisterBlockWindowBase.VALUE_COLUMN);
-        valueColumn.setMinWidth(RegisterBlockWindowBase.VALUE_SIZE);
-        valueColumn.setMaxWidth(RegisterBlockWindowBase.VALUE_SIZE);
-        valueColumn.setCellRenderer(new RegisterCellRenderer(SwingConstants.RIGHT, table));
-
-        this.table.setPreferredScrollableViewportSize(new Dimension(
-            RegisterBlockWindowBase.NAME_SIZE + RegisterBlockWindowBase.NUMBER_SIZE + RegisterBlockWindowBase.VALUE_SIZE,
-            700
-        ));
-        this.setLayout(new BorderLayout()); // table display will occupy entire width if widened
-        this.add(new JScrollPane(
-            this.table,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
-        ));
-        processRegisterNotice = notice -> {
-
-            if (notice.accessType == AccessNotice.AccessType.WRITE) {
-                // Uses the same highlighting technique as for Text Segment -- see
-                // AddressCellRenderer class in DataSegmentWindow.java.
-                this.highlightCellForRegister(notice.register);
-                this.mainUI.registersPane.setSelectedComponent(this);
-            }
-        };
-    }
-
-    protected abstract @NotNull String formatRegisterValue(final long value, int base);
-
-    private void beginObserving() {
-        this.registerFile.addRegistersListener(this.processRegisterNotice);
-    }
-
-    private void endObserving() {
-        this.registerFile.deleteRegistersListener(this.processRegisterNotice);
-    }
-
-    private void resetRegisters() {
-        this.registerFile.resetRegisters();
-    }
-
-    /**
-     * Sets up the data for the window.
-     *
-     * @return The array object with the data for the window.
-     **/
-
-    private Object @NotNull [] @NotNull [] setupWindow() {
-        final var registers = this.registerFile.getRegisters();
-        final Object[][] tableData = new Object[registers.length][3];
-        for (int i = 0; i < registers.length; i++) {
-            tableData[i][RegisterBlockWindowBase.NAME_COLUMN] = registers[i].name;
-            final int temp = registers[i].number;
-            tableData[i][RegisterBlockWindowBase.NUMBER_COLUMN] = temp == -1 ? "" : temp;
-            final int base =
-                NumberDisplayBaseChooser.getBase(BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX));
-            tableData[i][RegisterBlockWindowBase.VALUE_COLUMN] = this.formatRegisterValue(
-                registers[i].getValue(),
-                base
-            );
         }
-        return tableData;
+        this.updateRowHeight()
+        settings.fontSettings.onChangeListenerHook.subscribe { this.updateRowHeight() }
+        val columnModel = this.table.getColumnModel()
+
+        val nameColumn = columnModel.getColumn(NAME_COLUMN)
+        nameColumn.setMinWidth(NAME_SIZE)
+        nameColumn.setMaxWidth(NAME_SIZE)
+        nameColumn.setCellRenderer(RegisterCellRenderer(SwingConstants.LEFT, table))
+
+        val numberColumn = columnModel.getColumn(NUMBER_COLUMN)
+        numberColumn.setMinWidth(NUMBER_SIZE)
+        numberColumn.setMaxWidth(NUMBER_SIZE)
+        // Display register values (String-ified) right-justified in mono font
+        numberColumn.setCellRenderer(RegisterCellRenderer(SwingConstants.RIGHT, table))
+
+        val valueColumn = columnModel.getColumn(VALUE_COLUMN)
+        valueColumn.setMinWidth(VALUE_SIZE)
+        valueColumn.setMaxWidth(VALUE_SIZE)
+        valueColumn.setCellRenderer(RegisterCellRenderer(SwingConstants.RIGHT, table))
+
+        this.table.preferredScrollableViewportSize = Dimension(
+            NAME_SIZE + NUMBER_SIZE + VALUE_SIZE,
+            700
+        )
+        this.setLayout(BorderLayout()) // table display will occupy entire width if widened
+        this.add(
+            JScrollPane(
+                this.table,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+            )
+        )
+    }
+
+    protected abstract fun formatRegisterValue(value: Long, base: Int): String
+
+    private fun beginObserving() {
+        this.registerFile.addRegistersListener(this.processRegisterNotice)
+    }
+
+    private fun endObserving() {
+        this.registerFile.deleteRegistersListener(this.processRegisterNotice)
+    }
+
+    private fun resetRegisters() {
+        this.registerFile.resetRegisters()
     }
 
     /**
      * Reset and redisplay registers
      */
-    public void clearWindow() {
-        this.clearHighlighting();
-        this.resetRegisters();
-        this.updateRegisters();
+    fun clearWindow() {
+        this.clearHighlighting()
+        this.resetRegisters()
+        this.updateRegisters()
     }
 
     /**
      * Clear highlight background color from any row currently highlighted.
      */
-    public void clearHighlighting() {
-        this.table.tableChanged(new TableModelEvent(this.table.getModel()));
-        this.highlightRow = -1;
+    fun clearHighlighting() {
+        this.table.tableChanged(TableModelEvent(this.table.model))
+        this.highlightRow = -1
     }
 
-    /**
-     * Update register display using specified display base
-     */
-    public void updateRegisters() {
-        final var registers = this.registerFile.getRegisters();
-        for (int i = 0; i < registers.length; i++) {
-            final var model = (RegTableModel) this.table.getModel();
-            final int base = RegisterBlockWindowBase.this.mainUI.mainPane.executePane.getValueDisplayBase();
-            final var formattedValue = this.formatRegisterValue(registers[i].getValue(), base);
-            model.setDisplayAndModelValueAt(formattedValue, i, RegisterBlockWindowBase.VALUE_COLUMN);
-        }
+    fun updateRegisters() {
+        (table.model as AbstractTableModel).fireTableDataChanged()
     }
 
     /**
      * Highlight the row corresponding to the given register.
      *
      * @param register
-     *     Register object corresponding to row to be selected.
+     * Register object corresponding to row to be selected.
      */
-    private void highlightCellForRegister(final Register register) {
-        final var registers = this.registerFile.getRegisters();
-        for (int i = 0; i < registers.length; i++) {
-            if (registers[i] == register) {
-                this.highlightRow = i;
-                table.tableChanged(new TableModelEvent(table.getModel()));
-                return;
+    private fun highlightCellForRegister(register: Register) {
+        val registers = this.registerFile.registers
+        for (i in registers.indices) {
+            if (registers[i] === register) {
+                this.highlightRow = i
+                table.tableChanged(TableModelEvent(table.model))
+                return
             }
         }
-        this.highlightRow = -1;
+        this.highlightRow = -1
     }
 
-    private void updateRowHeight() {
-        final var font = FONT_SETTINGS.getCurrentFont();
-        final var height = this.getFontMetrics(font).getHeight();
-        this.table.setRowHeight(height);
+    private fun updateRowHeight() {
+        val font = this.settings.fontSettings.currentFont
+        val height = this.getFontMetrics(font).height
+        this.table.setRowHeight(height)
     }
 
     /**
@@ -248,136 +207,111 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      * don't want highlighting for a given column, don't use this. Currently we highlight
      * all columns.
      */
-    private final class RegisterCellRenderer extends DefaultTableCellRenderer {
-        private final int alignment;
-        private final @NotNull JTable table;
-        private Font font;
+    private inner class RegisterCellRenderer(
+        private val alignment: Int,
+        private val table: JTable,
+    ) :
+        DefaultTableCellRenderer() {
+        private var font: Font?
 
-        private RegisterCellRenderer(final int alignment, final @NotNull JTable table) {
-            super();
-            this.alignment = alignment;
-            this.font = FONT_SETTINGS.getCurrentFont();
-            this.table = table;
-            FONT_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
-                this.font = FONT_SETTINGS.getCurrentFont();
-                this.table.repaint();
-            });
+        init {
+            this.font = settings.fontSettings.currentFont
+            settings.fontSettings.onChangeListenerHook.subscribe {
+                this.font = settings.fontSettings.currentFont
+                this.table.repaint()
+            }
         }
 
-        @Override
-        public @NotNull Component getTableCellRendererComponent(
-            final JTable table, final Object value,
-            final boolean isSelected, final boolean hasFocus,
-            final int row, final int column
-        ) {
-            final JLabel cell = (JLabel) super.getTableCellRendererComponent(
-                table, value,
+        override fun getTableCellRendererComponent(
+            table: JTable?, value: Any?,
+            isSelected: Boolean, hasFocus: Boolean,
+            row: Int, column: Int
+        ): Component {
+            val formattedValue = if (column == VALUE_COLUMN) {
+                val value = value as Long
+                val displayBase = this@RegisterBlockWindowBase.mainUI.mainPane.executePane.getValueDisplayBase()
+                this@RegisterBlockWindowBase.formatRegisterValue(value, displayBase)
+            } else value
+            val cell = super.getTableCellRendererComponent(
+                table, formattedValue,
                 isSelected, hasFocus, row, column
-            );
-            cell.setFont(this.font);
-            cell.setHorizontalAlignment(this.alignment);
-            if (BOOL_SETTINGS.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && row == highlightRow) {
-                final var highlightingStyle = Globals.HIGHLIGHTING_SETTINGS.getRegisterHighlightingStyle();
-                cell.setForeground(highlightingStyle.foreground());
-                cell.setBackground(highlightingStyle.background());
+            ) as JLabel
+            cell.setFont(this.font)
+            cell.setHorizontalAlignment(this.alignment)
+            if (settings.boolSettings.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && row == highlightRow) {
+                val highlightingStyle = settings.highlightingSettings.registerHighlightingStyle
+                cell.setForeground(highlightingStyle!!.foreground)
+                cell.setBackground(highlightingStyle.background)
             } else {
-                final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
-                cell.setForeground(theme.foregroundColor);
-                cell.setBackground(theme.backgroundColor);
+                val theme = settings.editorThemeSettings.currentTheme
+                cell.setForeground(theme.foregroundColor)
+                cell.setBackground(theme.backgroundColor)
             }
-            return cell;
+            return cell
         }
     }
 
-    private final class RegTableModel extends AbstractTableModel {
-        private final String[] columnNames = {"", "", ""};
-        private final Object[][] data;
+    private class RegisterTableModel(
+        private val registersFile: RegisterFileBase,
+        private val boolSettings: BoolSettings,
+        private val memoryAndRegistersLock: ReentrantLock,
+    ) : AbstractTableModel() {
+        private val registers = registersFile.registers
 
-        private RegTableModel(final Object[][] d) {
-            this.data = d;
-            this.columnNames[RegisterBlockWindowBase.NUMBER_COLUMN] = "No.";
-            this.columnNames[RegisterBlockWindowBase.NAME_COLUMN] = "Name";
-            this.columnNames[RegisterBlockWindowBase.VALUE_COLUMN] = "Value";
+        companion object {
+            private val columnNames = mapOf(
+                NUMBER_COLUMN to "No.",
+                NAME_COLUMN to "Name",
+                VALUE_COLUMN to "Value"
+            )
         }
 
-        @Override
-        public int getColumnCount() {
-            return this.columnNames.length;
+        override fun getColumnName(col: Int): String = columnNames[col]!!
+
+        override fun getRowCount() = registers.size
+
+        override fun getColumnCount() = 3
+
+        override fun getValueAt(rowIndex: Int, columnIndex: Int) = registers[rowIndex].let {
+            when (columnIndex) {
+                NUMBER_COLUMN -> it.number
+                NAME_COLUMN -> it.name
+                VALUE_COLUMN -> it.value
+                else -> error("Invalid column index")
+            }
         }
 
-        @Override
-        public int getRowCount() {
-            return this.data.length;
-        }
+        override fun getColumnClass(c: Int): Class<*> = this.getValueAt(0, c).javaClass
 
-        @Override
-        public String getColumnName(final int col) {
-            return this.columnNames[col];
-        }
-
-        @Override
-        public Object getValueAt(final int row, final int col) {
-            return this.data[row][col];
-        }
-
-        /*
-         * JTable uses this method to determine the default renderer/
-         * editor for each cell.
-         */
-        @Override
-        public Class<?> getColumnClass(final int c) {
-            return this.getValueAt(0, c).getClass();
-        }
-
-        /*
-         * Don't need to implement this method unless your table's
-         * editable.
-         */
-        @Override
-        public boolean isCellEditable(final int row, final int col) {
-            // Note that the data/cell address is constant,
-            // no matter where the cell appears onscreen.
-            return col == RegisterBlockWindowBase.VALUE_COLUMN;
-        }
+        override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean = columnIndex == VALUE_COLUMN
 
         /**
          * Update cell contents in table model. This method should be called
          * only when user edits cell, so input validation has to be done. If
          * value is valid, the register is updated.
          */
-        @Override
-        public void setValueAt(final Object value, final int row, final int col) {
-            final long newValue;
-            try {
-                if (BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)) {
-                    newValue = BinaryUtilsOld.stringToLong((String) value);
+        override fun setValueAt(value: Any?, row: Int, col: Int) {
+            if (value == null) return
+            val newValue: Long = try {
+                if (boolSettings.getSetting(BoolSetting.RV64_ENABLED)) {
+                    (value as String).translateToLong() ?: return
                 } else {
-                    newValue = BinaryUtilsOld.stringToInt((String) value);
+                    (value as String).translateToInt()!!.toLong()
                 }
-            } catch (final NumberFormatException nfe) {
+            } catch (_: NumberFormatException) {
                 // If the user enters an invalid value, don't do anything.
-                return;
+                return
             }
             // Assures that if changed during program execution, the update will
             // occur only between instructions.
-            Globals.MEMORY_REGISTERS_LOCK.lock();
+            this.memoryAndRegistersLock.lock()
             try {
-                RegisterBlockWindowBase.this.registerFile.getRegisters()[row].setValue(newValue);
+                registersFile.registers[row].value = newValue
             } finally {
-                Globals.MEMORY_REGISTERS_LOCK.unlock();
+                this.memoryAndRegistersLock.unlock()
             }
-            final int valueBase = RegisterBlockWindowBase.this.mainUI.mainPane.executePane.getValueDisplayBase();
-            final var formattedValue = RegisterBlockWindowBase.this.formatRegisterValue(newValue, valueBase);
-            this.data[row][col] = formattedValue;
-            this.fireTableCellUpdated(row, col);
-        }
-
-        /**
-         * Update cell contents in table model.
-         */
-        private void setDisplayAndModelValueAt(final Object value, final int row, final int col) {
-            this.data[row][col] = value;
-            this.fireTableCellUpdated(row, col);
+            this.registersFile.registers[row].value = newValue
+            this.fireTableCellUpdated(row, col)
         }
     }
 
@@ -385,48 +319,51 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      * JTable subclass to provide custom tool tips for each of the
      * register table column headers and for each register name in
      * the first column. From
-     * <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/table.html">Sun's JTable tutorial</a>.
+     * [Sun's JTable tutorial](http://java.sun.com/docs/books/tutorial/uiswing/components/table.html).
      */
-    private class MyTippedJTable extends JTable {
-        private final String[] regToolTips;
-        private final String[] columnToolTips;
-
-        private MyTippedJTable(final @NotNull RegTableModel m, final String[] row, final String[] col) {
-            super(m);
-            this.regToolTips = row;
-            this.columnToolTips = col;
-            this.setRowSelectionAllowed(true); // highlights background color of entire row
-            this.setSelectionBackground(Color.GREEN);
+    private open inner class MyTippedJTable(
+        model: RegisterTableModel,
+        private val regToolTips: Array<String>,
+        private val columnToolTips: Array<String>
+    ) : JTable(model) {
+        init {
+            this.setRowSelectionAllowed(true) // highlights background color of entire row
+            this.setSelectionBackground(Color.GREEN)
         }
 
-        @Override
-        public String getToolTipText(final MouseEvent e) {
+        override fun getToolTipText(event: MouseEvent): String? {
             // Implement table cell tool tips.
-            final java.awt.Point p = e.getPoint();
-            final int rowIndex = this.rowAtPoint(p);
-            final int colIndex = this.columnAtPoint(p);
-            final int realColumnIndex = this.convertColumnIndexToModel(colIndex);
-            if (realColumnIndex == RegisterBlockWindowBase.NAME_COLUMN) { // Register name column
-                return this.regToolTips[rowIndex];
+            val point = event.getPoint()
+            val rowIndex = this.rowAtPoint(point)
+            val colIndex = this.columnAtPoint(point)
+            val realColumnIndex = this.convertColumnIndexToModel(colIndex)
+            return if (realColumnIndex == NAME_COLUMN) {
+                // Register name column
+                this.regToolTips[rowIndex]
             } else {
                 // You can omit this part if you know you don't have any
                 // renderers that supply their own tool tips.
-                return super.getToolTipText(e);
+                super.getToolTipText(event)
             }
         }
 
-        @Override
-        protected JTableHeader createDefaultTableHeader() {
-            // Implement table header tool tips.
-            return new JTableHeader(this.columnModel) {
-                @Override
-                public String getToolTipText(final MouseEvent e) {
-                    final java.awt.Point p = e.getPoint();
-                    final int index = this.columnModel.getColumnIndexAtX(p.x);
-                    final int realIndex = this.columnModel.getColumn(index).getModelIndex();
-                    return MyTippedJTable.this.columnToolTips[realIndex];
-                }
-            };
+        // Implement table header tool tips.
+        override fun createDefaultTableHeader(): JTableHeader = object : JTableHeader(this.columnModel) {
+            override fun getToolTipText(event: MouseEvent): String? {
+                val point = event.getPoint()
+                val index = this.columnModel.getColumnIndexAtX(point.x)
+                val realIndex = this.columnModel.getColumn(index).getModelIndex()
+                return this@MyTippedJTable.columnToolTips[realIndex]
+            }
         }
+    }
+
+    companion object {
+        private const val NUMBER_COLUMN = 0
+        private const val NAME_COLUMN = 1
+        private const val VALUE_COLUMN = 2
+        private const val NUMBER_SIZE = 45
+        private const val NAME_SIZE = 80
+        private const val VALUE_SIZE = 160
     }
 }

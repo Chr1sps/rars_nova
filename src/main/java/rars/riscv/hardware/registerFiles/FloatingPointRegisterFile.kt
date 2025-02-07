@@ -30,7 +30,7 @@ class FloatingPointRegisterFile : RegisterFileBase('f', createRegisters()) {
     ): Either<SimulationError, Long> {
         val previousValue = register.setValue(newValue)
         if ((OtherSettings.getBackSteppingEnabled())) {
-            Globals.program!!.backStepper!!.addFloatingPointRestore(
+            Globals.PROGRAM!!.backStepper!!.addFloatingPointRestore(
                 register.number,
                 previousValue
             )

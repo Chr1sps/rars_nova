@@ -499,7 +499,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 }
                 case INTEGER_5, INTEGER_6, INTEGER_12, INTEGER_12U, INTEGER_20, INTEGER_32 -> {
 
-                    final int tempNumeric = BinaryUtilsOld.stringToInt(tokenValue);
+                    final int tempNumeric = BinaryUtilsKt.stringToInt(tokenValue);
 
                     /* **************************************************************************
                      * MODIFICATION AND COMMENT, DPS 3-July-2008
@@ -559,7 +559,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     }
                     this.operands.add(tempNumeric);
                 }
-                ///// End modification 1/7/05 KENV ///////////////////////////////////////////
                 default -> {
                     basicStatementElement = tokenValue;
                     basicInstructionBuilder.append(basicStatementElement);

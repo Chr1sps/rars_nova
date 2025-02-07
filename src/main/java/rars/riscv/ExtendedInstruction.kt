@@ -3,6 +3,8 @@ package rars.riscv
 import rars.RISCVProgram
 import rars.assembler.TokenList
 import rars.util.BinaryUtilsOld
+import rars.util.translateToInt
+import rars.util.translateToLong
 import java.util.*
 
 /*
@@ -108,30 +110,30 @@ class ExtendedInstruction @JvmOverloads constructor(
                 instruction = instruction.replace("RG$op", tokenList.get(op).text)
 
                 val strValue = tokenList.get(op).text
-                var value: Int
-                try {
-                    value = BinaryUtilsOld.stringToInt(strValue) // KENV 1/6/05
-                } catch (_: NumberFormatException) {
-                    val lval: Long
-                    try {
-                        lval = BinaryUtilsOld.stringToLong(strValue)
-                    } catch (_: NumberFormatException) {
-                        continue
-                    }
-                    value = (lval shr 32).toInt()
+                val value = strValue.translateToInt()
+                if (value == null) {
+                    val lval = strValue.translateToLong() ?: continue
+                    val shifted = (lval shr 32).toInt()
                     val vall = lval.toInt()
-                    // this shouldn't happen if is is for LL .. VH
-                    if (instruction.contains("LIA$op")) {
-                        val extra = BinaryUtilsOld.bitValue(value, 11) // add extra to compesate for sign extension
-                        instruction = instruction.replace("LIA$op", ((value shr 12) + extra).toString())
-                    } else if (instruction.contains("LIB$op")) {
-                        instruction = instruction.replace("LIB$op", (value shl 20 shr 20).toString())
-                    } else if (instruction.contains("LIC$op")) {
-                        instruction = instruction.replace("LIC$op", ((vall shr 21) and 0x7FF).toString())
-                    } else if (instruction.contains("LID$op")) {
-                        instruction = instruction.replace("LID$op", ((vall shr 10) and 0x7FF).toString())
-                    } else if (instruction.contains("LIE$op")) {
-                        instruction = instruction.replace("LIE$op", (vall and 0x3FF).toString())
+                    // this shouldn't happen if it is for LL...VH
+                    when {
+                        "LIA$op" in instruction -> {
+                            // add extra to compensate for sign extension
+                            val extra = BinaryUtilsOld.bitValue(shifted, 11)
+                            instruction = instruction.replace("LIA$op", ((shifted shr 12) + extra).toString())
+                        }
+                        "LIB$op" in instruction -> {
+                            instruction = instruction.replace("LIB$op", (shifted shl 20 shr 20).toString())
+                        }
+                        "LIC$op" in instruction -> {
+                            instruction = instruction.replace("LIC$op", ((vall shr 21) and 0x7FF).toString())
+                        }
+                        "LID$op" in instruction -> {
+                            instruction = instruction.replace("LID$op", ((vall shr 10) and 0x7FF).toString())
+                        }
+                        "LIE$op" in instruction -> {
+                            instruction = instruction.replace("LIE$op", (vall and 0x3FF).toString())
+                        }
                     }
                     continue
                 }

@@ -3,7 +3,7 @@ package rars.assembler;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.InstructionsRegistry;
-import rars.util.BinaryUtilsOld;
+import rars.util.BinaryUtilsKt;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -152,17 +152,13 @@ public enum TokenType {
         if (Globals.CS_REGISTER_FILE.getRegisterByName(value) != null) {
             return TokenType.CSR_NAME;
         }
+
         // See if it is an immediate (constant) integer value
         // Classify based on # bits needed to represent in binary
         // This is needed because most immediate operands limited to 16 bits
         // others limited to 5 bits unsigned (shift amounts) others 32 bits.
-
-        try {
-
-            final int i = BinaryUtilsOld.stringToInt(value); // KENV 1/6/05
-
-            // Comments from 2008 and 2005 were removed - Benjamin Landers 2019
-
+        final var i = BinaryUtilsKt.stringToInt(value);
+        if (i != null) {
             // shift operands must be in range 0-31
             if (i >= 0 && i <= 31) {
                 return TokenType.INTEGER_5;
@@ -180,15 +176,10 @@ public enum TokenType {
                 return TokenType.INTEGER_20;
             }
             return TokenType.INTEGER_32; // default when no other type is applicable
-        } catch (final NumberFormatException e) {
-            // NO ACTION -- exception suppressed
         }
 
-        try {
-            BinaryUtilsOld.stringToLong(value);
+        if (BinaryUtilsKt.stringToLong(value) != null) {
             return TokenType.INTEGER_64;
-        } catch (final NumberFormatException e) {
-            // NO ACTION -- exception suppressed
         }
 
         // See if it is a real (fixed or floating point) number. Note that parseDouble()

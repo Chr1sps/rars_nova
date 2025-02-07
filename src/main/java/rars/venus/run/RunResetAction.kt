@@ -61,7 +61,7 @@ class RunResetAction(
         // assembly, so there is "no" chance of assembler error.
         // I am choosing the second approach although it will slow down the reset
         // operation. The first approach requires additional Memory class methods.
-        Globals.program!!.assemble(
+        Globals.PROGRAM!!.assemble(
             RunAssembleAction.getProgramsToAssemble(),
             RunAssembleAction.extendedAssemblerEnabled,
             RunAssembleAction.warningsAreErrors

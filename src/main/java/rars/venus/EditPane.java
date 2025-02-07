@@ -1,6 +1,7 @@
 package rars.venus;
 
 import kotlin.Pair;
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.settings.BoolSetting;
@@ -81,22 +82,33 @@ public final class EditPane extends JPanel {
             .toEditorTheme());
 
         this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.getCurrentTheme().toEditorTheme());
-        EDITOR_THEME_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.getCurrentTheme()
-            .toEditorTheme()));
+        EDITOR_THEME_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+            this.sourceCode.setTheme(
+                EDITOR_THEME_SETTINGS.getCurrentTheme().toEditorTheme()
+            );
+            return Unit.INSTANCE;
+        });
 
         this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont()));
+        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+            this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
+            return Unit.INSTANCE;
+        });
 
         this.sourceCode.setLineHighlightEnabled(BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
-        BOOL_SETTINGS.onChangeListenerHook.subscribe(ignored -> this.sourceCode.setLineHighlightEnabled(
-            BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
-        ));
+        BOOL_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+            this.sourceCode.setLineHighlightEnabled(
+                BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
+            );
+            return Unit.INSTANCE;
+        });
 
         this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
         this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
         OTHER_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
             this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
             this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
+            return Unit.INSTANCE;
         });
 
         // sourceCode is responsible for its own scrolling

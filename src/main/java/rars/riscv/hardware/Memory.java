@@ -1,5 +1,7 @@
 package rars.riscv.hardware;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Contract;
@@ -19,7 +21,6 @@ import rars.util.ListenerDispatcher;
 
 import java.util.Collection;
 import java.util.Vector;
-import java.util.function.Consumer;
 
 import static rars.Globals.BOOL_SETTINGS;
 
@@ -512,7 +513,7 @@ public final class Memory {
         }
         this.notifyAnyObservers(AccessNotice.AccessType.WRITE, address, DataTypes.WORD_SIZE, value);
         if (OtherSettings.getBackSteppingEnabled()) {
-            Globals.program.getBackStepper().addMemoryRestoreRawWord(address, oldValue);
+            Globals.PROGRAM.getBackStepper().addMemoryRestoreRawWord(address, oldValue);
         }
         return oldValue;
     }
@@ -532,7 +533,7 @@ public final class Memory {
      */
     public int setWord(final int address, final int value) throws AddressErrorException {
         MemoryUtilsKt.checkStoreWordAligned(address);
-        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreWord(
+        return (OtherSettings.getBackSteppingEnabled()) ? Globals.PROGRAM.getBackStepper().addMemoryRestoreWord(
             address,
             this.set(address, value, DataTypes.WORD_SIZE)
         ) : this.set(address, value, DataTypes.WORD_SIZE);
@@ -560,7 +561,7 @@ public final class Memory {
                 address
             );
         }
-        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreHalf(
+        return (OtherSettings.getBackSteppingEnabled()) ? Globals.PROGRAM.getBackStepper().addMemoryRestoreHalf(
             address,
             this.set(address, value, 2)
         ) : this.set(address, value, 2);
@@ -579,7 +580,7 @@ public final class Memory {
      *     if any.
      */
     public int setByte(final int address, final int value) throws AddressErrorException {
-        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper().addMemoryRestoreByte(
+        return (OtherSettings.getBackSteppingEnabled()) ? Globals.PROGRAM.getBackStepper().addMemoryRestoreByte(
             address,
             this.set(address, value, 1)
         ) : this.set(address, value, 1);
@@ -603,7 +604,7 @@ public final class Memory {
         final int oldHighOrder = this.set(address + 4, (int) (value >> 32), 4);
         final int oldLowOrder = this.set(address, (int) value, 4);
         final long old = ((long) oldHighOrder << 32) | (oldLowOrder & 0xFFFFFFFFL);
-        return (OtherSettings.getBackSteppingEnabled()) ? Globals.program.getBackStepper()
+        return (OtherSettings.getBackSteppingEnabled()) ? Globals.PROGRAM.getBackStepper()
             .addMemoryRestoreDoubleWord(
                 address,
                 old
@@ -1024,7 +1025,7 @@ public final class Memory {
     /**
      * Method to accept registration from observer for any memory address.
      */
-    public void subscribe(final @NotNull Consumer<? super MemoryAccessNotice> listener) {
+    public void subscribe(final @NotNull Function1<? super @NotNull MemoryAccessNotice, @NotNull Unit> listener) {
         try { // split so start address always >= end address
             this.subscribe(listener, 0, 0x7ffffffc);
             this.subscribe(listener, 0x80000000, 0xfffffffc);
@@ -1046,7 +1047,7 @@ public final class Memory {
      *     if any.
      */
     public void subscribe(
-        final @NotNull Consumer<? super MemoryAccessNotice> obs,
+        final @NotNull Function1<? super @NotNull MemoryAccessNotice, @NotNull Unit> obs,
         final int addr
     ) throws AddressErrorException {
         this.subscribe(obs, addr, addr);
@@ -1072,7 +1073,7 @@ public final class Memory {
      *     if any.
      */
     public void subscribe(
-        final @NotNull Consumer<? super MemoryAccessNotice> listener,
+        final @NotNull Function1<? super @NotNull MemoryAccessNotice, @NotNull Unit> listener,
         final int startAddr,
         final int endAddr
     ) throws AddressErrorException {
@@ -1100,7 +1101,7 @@ public final class Memory {
     /**
      * Remove specified memory observers
      */
-    public void deleteSubscriber(final @NotNull Consumer<? super MemoryAccessNotice> listener) {
+    public void deleteSubscriber(final @NotNull Function1<? super @NotNull MemoryAccessNotice, @NotNull Unit> listener) {
         for (final var observable : this.observables) {
             observable.hook.unsubscribe(listener);
         }
@@ -1388,7 +1389,7 @@ public final class Memory {
         private final int highAddress;
 
         public MemoryObservable(
-            final @NotNull Consumer<? super MemoryAccessNotice> listener,
+            final @NotNull Function1<? super @NotNull MemoryAccessNotice, @NotNull Unit> listener,
             final int startAddr,
             final int endAddr
         ) {

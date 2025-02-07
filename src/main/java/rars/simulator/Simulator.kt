@@ -48,10 +48,10 @@ class Simulator {
     private val stopEventDispatcher = ListenerDispatcher<@NotNull Unit>()
 
     @JvmField
-    val simulatorNoticeHook = this.simulatorNoticeDispatcher.getHook()
+    val simulatorNoticeHook = this.simulatorNoticeDispatcher.hook
 
     @JvmField
-    val stopEventHook = this.stopEventDispatcher.getHook()
+    val stopEventHook = this.stopEventDispatcher.hook
 
     private var simulatorThread: SimThread? = null
 
@@ -123,7 +123,7 @@ class Simulator {
     private fun interruptExecution(reason: Reason) {
         if (this.simulatorThread != null) {
             this.simulatorThread!!.setStop(reason)
-            this.stopEventDispatcher.dispatch(null)
+            this.stopEventDispatcher.dispatch(Unit)
             this.simulatorThread = null
         }
     }

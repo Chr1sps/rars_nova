@@ -129,7 +129,7 @@ public final class NumberDisplayBaseChooser extends JCheckBox {
     public static String formatNumber(final int value, final int base) {
         return switch (base) {
             case NumberDisplayBaseChooser.HEXADECIMAL -> BinaryUtilsKt.intToHexStringWithPrefix(value);
-            case NumberDisplayBaseChooser.ASCII -> BinaryUtilsOld.intToAscii(value);
+            case NumberDisplayBaseChooser.ASCII -> BinaryUtilsKt.intToAscii(value);
             default -> Integer.toString(value);
         };
         // if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
@@ -151,7 +151,7 @@ public final class NumberDisplayBaseChooser extends JCheckBox {
      */
     public static String formatNumber(final long value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return BinaryUtilsOld.longToHexString(value);
+            return BinaryUtilsKt.longToHexStringWithPrefix(value);
         } else {
             return Long.toString(value);
         }
@@ -209,7 +209,7 @@ public final class NumberDisplayBaseChooser extends JCheckBox {
      */
     public static String formatDoubleNumber(final long value, final int base) {
         if (base == NumberDisplayBaseChooser.HEXADECIMAL) {
-            return BinaryUtilsOld.longToHexString(value);
+            return BinaryUtilsKt.longToHexStringWithPrefix(value);
         } else {
             return Double.toString(Double.longBitsToDouble(value));
         }

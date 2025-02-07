@@ -1,5 +1,7 @@
 package rars.venus.run;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
@@ -16,7 +18,6 @@ import rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.function.Consumer;
 
 import static rars.Globals.BOOL_SETTINGS;
 
@@ -100,11 +101,11 @@ public final class RunGoAction extends GuiAction {
                 this.mainUI.setMenuState(FileStatus.State.RUNNING);
 
                 // Setup cleanup procedures for the simulation
-                final var onSimulatorStopListener = new Consumer<SimulatorNotice>() {
+                final var onSimulatorStopListener = new Function1<@NotNull SimulatorNotice, @NotNull Unit>() {
                     @Override
-                    public void accept(final SimulatorNotice notice) {
+                    public @NotNull Unit invoke(final @NotNull SimulatorNotice notice) {
                         if (notice.action != SimulatorNotice.Action.STOP) {
-                            return;
+                            return Unit.INSTANCE;
                         }
                         final Simulator.Reason reason = notice.reason;
                         if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
@@ -116,6 +117,7 @@ public final class RunGoAction extends GuiAction {
                             EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.error, reason));
                         }
                         Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this);
+                        return Unit.INSTANCE;
                     }
                 };
                 Globals.SIMULATOR.simulatorNoticeHook.subscribe(onSimulatorStopListener);

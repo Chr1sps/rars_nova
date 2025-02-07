@@ -86,8 +86,8 @@ class Program(private val programOptions: ProgramOptions) {
         files: List<File>,
         mainFile: File
     ): Either<AssemblyError, ErrorList> = either {
-        val programs = this@Program.code.prepareFilesForAssembly(files, mainFile, null).bind()
-        this@Program.assemble(programs).bind()
+        val programs = code.prepareFilesForAssembly(files, mainFile, null).bind()
+        assemble(programs).bind()
     }
 
     /**
@@ -101,8 +101,8 @@ class Program(private val programOptions: ProgramOptions) {
      * thrown if any errors are found in the code
      */
     fun assembleFile(file: File): Either<AssemblyError, ErrorList> = either {
-        val programs = this@Program.code.prepareFilesForAssembly(listOf(file), file, null).bind()
-        this@Program.assemble(programs).bind()
+        val programs = code.prepareFilesForAssembly(listOf(file), file, null).bind()
+        assemble(programs).bind()
     }
 
     /**
@@ -116,27 +116,27 @@ class Program(private val programOptions: ProgramOptions) {
      * thrown if any errors are found in the code
      */
     fun assembleString(source: String): Either<AssemblyError, ErrorList> = either {
-        this@Program.code.fromString(source)
-        this@Program.code.tokenize().bind()
-        this@Program.assemble(listOf(this@Program.code)).bind()
+        code.fromString(source)
+        code.tokenize().bind()
+        assemble(listOf(code)).bind()
     }
 
     private fun assemble(programs: List<RISCVProgram>): Either<AssemblyError, ErrorList> = either {
-        Globals.REGISTER_FILE.setValuesFromConfiguration(this@Program.assembled.memoryConfiguration)
+        Globals.REGISTER_FILE.setValuesFromConfiguration(assembled.memoryConfiguration)
         // Assembling changes memory so we need to swap to capture that.
-        val temp = Globals.swapMemoryInstance(this@Program.assembled)
-        val errorList = this@Program.code.assemble(
+        val temp = Globals.swapMemoryInstance(assembled)
+        val errorList = code.assemble(
             programs,
-            this@Program.programOptions.usePseudoInstructions,
-            this@Program.programOptions.warningsAreErrors
+            programOptions.usePseudoInstructions,
+            programOptions.warningsAreErrors
         ).onLeft {
             Globals.swapMemoryInstance(temp)
             raise(it)
         }.bind()
         Globals.swapMemoryInstance(temp)
 
-        Globals.REGISTER_FILE.initializeProgramCounter(this@Program.programOptions.startAtMain)
-        this@Program.startPC = Globals.REGISTER_FILE.programCounter
+        Globals.REGISTER_FILE.initializeProgramCounter(programOptions.startAtMain)
+        startPC = Globals.REGISTER_FILE.programCounter
         errorList
 
     }

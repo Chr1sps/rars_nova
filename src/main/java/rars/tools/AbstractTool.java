@@ -1,5 +1,7 @@
 package rars.tools;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
@@ -14,7 +16,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -71,7 +72,7 @@ public abstract class AbstractTool extends JFrame {
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
     private final int lowMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().dataSegmentBaseAddress;
     private final int highMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().stackBaseAddress;
-    private final @NotNull Consumer<@NotNull AccessNotice> callback = this::processAccessNotice;
+    private final @NotNull Function1<@NotNull AccessNotice, @NotNull Unit> callback = this::processAccessNotice;
     protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
     protected ConnectButton connectButton;
     protected JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.
@@ -325,11 +326,12 @@ public abstract class AbstractTool extends JFrame {
         }
     }
 
-    protected void processAccessNotice(final @NotNull AccessNotice notice) {
+    protected @NotNull Unit processAccessNotice(final @NotNull AccessNotice notice) {
         if (notice.isAccessFromRISCV) {
             this.processRISCVUpdate(notice);
             this.updateDisplay();
         }
+        return Unit.INSTANCE;
     }
 
     /**

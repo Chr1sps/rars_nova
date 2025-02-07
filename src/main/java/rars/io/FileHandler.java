@@ -57,9 +57,9 @@ public final class FileHandler {
         }
 
         File filepath = new File(filename);
-        if (!filepath.isAbsolute() && Globals.program != null) {
+        if (!filepath.isAbsolute() && Globals.PROGRAM != null) {
             if (this.boolSettings.getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY)) {
-                final var parent = Globals.program.getFile().getParentFile();
+                final var parent = Globals.PROGRAM.getFile().getParentFile();
                 filepath = new File(parent, filename);
             }
         }

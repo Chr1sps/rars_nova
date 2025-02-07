@@ -1,6 +1,7 @@
 package rars.venus.run;
 
-import org.jetbrains.annotations.NotNull;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.exceptions.SimulationError;
@@ -16,7 +17,6 @@ import rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.function.Consumer;
 
 import static rars.Globals.BOOL_SETTINGS;
 
@@ -80,12 +80,11 @@ public final class RunStepAction extends GuiAction {
             this.mainUI.messagesPane.selectRunMessageTab();
             this.executePane.textSegment.setCodeHighlighting(true);
 
-            // Setup callback for after step finishes
-            final var stopListener = new Consumer<@NotNull SimulatorNotice>() {
+            final var stopListener = new Function1<SimulatorNotice, Unit>() {
                 @Override
-                public void accept(final @NotNull SimulatorNotice item) {
+                public Unit invoke(SimulatorNotice item) {
                     if (item.action != SimulatorNotice.Action.STOP) {
-                        return;
+                        return Unit.INSTANCE;
                     }
                     EventQueue.invokeLater(() -> RunStepAction.this.stepped(
                         item.done, item.reason,
@@ -93,6 +92,7 @@ public final class RunStepAction extends GuiAction {
                     ));
 
                     Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this);
+                    return Unit.INSTANCE;
                 }
             };
             Globals.SIMULATOR.simulatorNoticeHook.subscribe(stopListener);
