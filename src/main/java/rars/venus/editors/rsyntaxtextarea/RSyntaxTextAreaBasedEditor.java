@@ -304,12 +304,6 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         }
     }
 
-    @Override
-    public void forceSettingsRestore() {
-        this.setFont(this.currentFont);
-        this.setTheme(this.theme);
-    }
-
     private void applyColorScheme(final @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles) {
         final var converted = RSTASchemeConverter.convert(tokenStyles, textArea.getFont());
         this.textArea.setSyntaxScheme(converted);

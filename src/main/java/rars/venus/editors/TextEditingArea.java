@@ -109,12 +109,10 @@ public interface TextEditingArea {
 
     @NotNull EditorTheme getTheme();
 
-    void setTokenStyle(final @NotNull RVTokenType type, final @NotNull TokenStyle style);
-
     void setTheme(final @NotNull EditorTheme theme);
 
-    void forceSettingsRestore();
-    
+    void setTokenStyle(final @NotNull RVTokenType type, final @NotNull TokenStyle style);
+
     // Used by Find/Replace
     enum FindReplaceResult {
         TEXT_NOT_FOUND,
