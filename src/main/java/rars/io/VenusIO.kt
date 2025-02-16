@@ -1,115 +1,85 @@
-package rars.io;
+package rars.io
 
-import org.jetbrains.annotations.NotNull;
-import rars.settings.BoolSetting;
-import rars.settings.BoolSettingsImpl;
-import rars.venus.MessagesPane;
+import rars.settings.BoolSetting
+import rars.settings.BoolSettingsImpl
+import rars.venus.MessagesPane
+import java.nio.charset.StandardCharsets
+import kotlin.math.min
 
-import java.nio.charset.StandardCharsets;
+class VenusIO(
+    private val messagesPane: MessagesPane,
+    private val boolSettings: BoolSettingsImpl
+) : AbstractIO {
+    private val fileHandler = FileHandler(SYSCALL_MAXFILES - 3, this.boolSettings)
+    private var buffer = ""
+    private var lastTime = 0L
 
-public final class VenusIO implements AbstractIO {
-
-    private final @NotNull MessagesPane messagesPane;
-
-    private final @NotNull BoolSettingsImpl boolSettings;
-    private final @NotNull FileHandler fileHandler;
-    private @NotNull String buffer;
-    private long lastTime;
-
-    public VenusIO(
-        final @NotNull MessagesPane messagesPane,
-        final @NotNull BoolSettingsImpl boolSettings
-    ) {
-        super();
-        this.messagesPane = messagesPane;
-        this.boolSettings = boolSettings;
-        this.fileHandler = new FileHandler(SYSCALL_MAXFILES - 3, this.boolSettings);
-        this.buffer = "";
-        this.lastTime = 0;
+    override fun readImpl(
+        initialValue: String,
+        prompt: String,
+        maxLength: Int
+    ): String {
+        val isPopup = this.boolSettings.getSetting(BoolSetting.POPUP_SYSCALL_INPUT)
+        return if (isPopup) messagesPane.getInputStringFromDialog(prompt)
+        else messagesPane.getInputString(maxLength)
     }
 
-    @Override
-    public @NotNull String readImpl(
-        @NotNull final String initialValue,
-        @NotNull final String prompt,
-        final int maxLength
-    ) {
-        final var isPopup = this.boolSettings.getSetting(BoolSetting.POPUP_SYSCALL_INPUT);
-        return (isPopup) ? messagesPane.getInputStringFromDialog(prompt) : messagesPane.getInputString(maxLength);
+    override fun printString(message: String) {
+        this.printToGui(message)
     }
 
-    @Override
-    public void printString(final @NotNull String message) {
-        this.printToGui(message);
+    override fun openFile(filename: String, flags: Int): Int {
+        val fd = this.fileHandler.openFile(filename, flags)
+        return if (fd == -1) -1 else fd + 3
     }
 
-    @Override
-    public int openFile(final @NotNull String filename, final int flags) {
-        final var fd = this.fileHandler.openFile(filename, flags);
-        if (fd == -1) {
-            return -1;
-        } else {
-            return fd + 3;
+    override fun closeFile(fd: Int) {
+        this.fileHandler.closeFile(fd - 3)
+    }
+
+    fun resetFiles() {
+        this.fileHandler.closeAll()
+    }
+
+    override fun writeToFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int = when (fd) {
+        STDOUT, STDERR -> {
+            val string = String(myBuffer, StandardCharsets.UTF_8) // decode the bytes using UTF-8 
+            this.printToGui(string)
+            myBuffer.size
         }
+        else -> this.fileHandler.writeToFile(fd - 3, myBuffer, lengthRequested)
     }
 
-    @Override
-    public void closeFile(final int fd) {
-        this.fileHandler.closeFile(fd - 3);
-    }
+    override fun seek(fd: Int, offset: Int, base: Int): Int = if (fd !in STDERR..SYSCALL_MAXFILES)
+        -1
+    else
+        this.fileHandler.seek(fd - 3, offset, base)
 
-    public void resetFiles() {
-        this.fileHandler.closeAll();
-    }
+    override fun readFromFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int = if (fd == STDIN) {
+        val input = this.messagesPane.getInputString(lengthRequested)
+        val bytesRead = input.toByteArray()
 
-    @Override
-    public int writeToFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
-        if (fd == STDOUT || fd == STDERR) {
-            final var string = new String(myBuffer, StandardCharsets.UTF_8); // decode the bytes using UTF-8 
-            this.printToGui(string);
-            return myBuffer.length;
-        } else {
-            return this.fileHandler.writeToFile(fd - 3, myBuffer, lengthRequested);
+        for (i in myBuffer.indices) {
+            myBuffer[i] = if (i < bytesRead.size) bytesRead[i] else 0
         }
+        min(myBuffer.size.toDouble(), bytesRead.size.toDouble()).toInt()
+    } else
+        this.fileHandler.readFromFile(fd - 3, myBuffer, lengthRequested)
+
+    override fun flush() {
+        this.messagesPane.postRunMessage(this.buffer)
+        this.buffer = ""
+        this.lastTime = System.currentTimeMillis() + 100
     }
 
-    @Override
-    public int seek(final int fd, final int offset, final int base) {
-        if (fd <= STDERR || fd >= SYSCALL_MAXFILES) {
-            return -1;
-        }
-        return this.fileHandler.seek(fd - 3, offset, base);
-    }
-
-    @Override
-    public int readFromFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
-        if (fd == STDIN) {
-            final var input = this.messagesPane.getInputString(lengthRequested);
-            final var bytesRead = input.getBytes();
-
-            for (int i = 0; i < myBuffer.length; i++) {
-                myBuffer[i] = (i < bytesRead.length) ? bytesRead[i] : 0;
-            }
-            return Math.min(myBuffer.length, bytesRead.length);
-        }
-        return this.fileHandler.readFromFile(fd - 3, myBuffer, lengthRequested);
-    }
-
-    @Override
-    public void flush() {
-        this.messagesPane.postRunMessage(this.buffer);
-        this.buffer = "";
-        this.lastTime = System.currentTimeMillis() + 100;
-    }
-
-    private void printToGui(final @NotNull String message) {
-        final long time = System.currentTimeMillis();
+    private fun printToGui(message: String) {
+        val time = System.currentTimeMillis()
         if (time > this.lastTime) {
-            this.messagesPane.postRunMessage(this.buffer + message);
-            this.buffer = "";
-            this.lastTime = time + 100;
+            this.messagesPane.postRunMessage(this.buffer + message)
+            this.buffer = ""
+            this.lastTime = time + 100
         } else {
-            this.buffer += message;
+            this.buffer += message
         }
     }
 }

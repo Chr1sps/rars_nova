@@ -1,123 +1,91 @@
-package rars.io;
+package rars.io
 
-import org.jetbrains.annotations.NotNull;
-import rars.settings.BoolSettingsImpl;
-import rars.util.Lazy;
+import rars.settings.BoolSettingsImpl
+import java.io.*
 
-import java.io.*;
+class ConsoleIO(
+    private val stdin: InputStream,
+    stdout: OutputStream,
+    stderr: OutputStream,
+    boolSettings: BoolSettingsImpl
+) : AbstractIO {
+    private val inputReader by lazy { BufferedReader(InputStreamReader(stdin)) }
+    private val outputWriter by lazy { BufferedWriter(OutputStreamWriter(stdout)) }
+    private val errorWriter by lazy { BufferedWriter(OutputStreamWriter(stderr)) }
+    private val fileHandler = FileHandler(SYSCALL_MAXFILES - 3, boolSettings)
 
-public final class ConsoleIO implements AbstractIO {
-    private final @NotNull Lazy<@NotNull BufferedReader> inputReader;
-    private final @NotNull Lazy<@NotNull BufferedWriter> outputWriter, errorWriter;
-    private final @NotNull InputStream stdin;
-    private final @NotNull FileHandler fileHandler;
-
-    public ConsoleIO(
-        final @NotNull InputStream stdin,
-        final @NotNull OutputStream stdout,
-        final @NotNull OutputStream stderr,
-        final @NotNull BoolSettingsImpl boolSettings
-    ) {
-        this.stdin = stdin;
-        this.fileHandler = new FileHandler(SYSCALL_MAXFILES - 3, boolSettings);
-        this.outputWriter = Lazy.of(() ->
-            new BufferedWriter(new OutputStreamWriter(stdout))
-        );
-        this.errorWriter = Lazy.of(() ->
-            new BufferedWriter(new OutputStreamWriter(stderr))
-        );
-        this.inputReader = Lazy.of(() ->
-            new BufferedReader(new InputStreamReader(stdin))
-        );
+    override fun readImpl(
+        initialValue: String,
+        prompt: String,
+        maxLength: Int
+    ): String = try {
+        val readLine = this.inputReader.readLine()
+        readLine ?: ""
+    } catch (_: IOException) {
+        ""
     }
 
-    @Override
-    public @NotNull String readImpl(
-        @NotNull final String initialValue,
-        @NotNull final String prompt,
-        final int maxLength
-    ) {
+    override fun printString(message: String) {
         try {
-            final var readLine = this.inputReader.get().readLine();
-            return readLine == null ? "" : readLine;
-        } catch (final IOException e) {
-            return "";
+            this.outputWriter.write(message)
+            this.outputWriter.flush()
+        } catch (_: IOException) {
         }
     }
 
-    @Override
-    public void printString(final @NotNull String message) {
-        try {
-            this.outputWriter.get().write(message);
-            this.outputWriter.get().flush();
-        } catch (final IOException ignored) {
-        }
-    }
-
-    @Override
-    public int openFile(final @NotNull String filename, final int flags) {
-        final var fd = this.fileHandler.openFile(filename, flags);
-        if (fd == -1) {
-            return -1;
+    override fun openFile(filename: String, flags: Int): Int {
+        val fd = this.fileHandler.openFile(filename, flags)
+        return if (fd == -1) {
+            -1
         } else {
-            return fd + 3;
+            fd + 3
         }
     }
 
-    @Override
-    public void closeFile(final int fd) {
-        this.fileHandler.closeFile(fd - 3);
+    override fun closeFile(fd: Int) {
+        this.fileHandler.closeFile(fd - 3)
     }
 
-    @Override
-    public int writeToFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
-        switch (fd) {
-            case STDOUT -> {
+    override fun writeToFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int {
+        when (fd) {
+            STDOUT -> {
                 try {
-                    this.outputWriter.get().write(new String(myBuffer));
-                    this.outputWriter.get().flush();
-                    return myBuffer.length;
-                } catch (final IOException e) {
-                    return -1;
+                    this.outputWriter.write(String(myBuffer))
+                    this.outputWriter.flush()
+                    return myBuffer.size
+                } catch (_: IOException) {
+                    return -1
                 }
             }
-            case STDERR -> {
+
+            STDERR -> {
                 try {
-                    this.errorWriter.get().write(new String(myBuffer));
-                    this.errorWriter.get().flush();
-                    return myBuffer.length;
-                } catch (final IOException e) {
-                    return -1;
+                    this.errorWriter.write(String(myBuffer))
+                    this.errorWriter.flush()
+                    return myBuffer.size
+                } catch (_: IOException) {
+                    return -1
                 }
             }
-            default -> {
-                return this.fileHandler.writeToFile(fd - 3, myBuffer, lengthRequested);
+
+            else -> {
+                return this.fileHandler.writeToFile(fd - 3, myBuffer, lengthRequested)
             }
         }
     }
 
-    @Override
-    public int seek(final int fd, final int offset, final int base) {
+    override fun seek(fd: Int, offset: Int, base: Int): Int {
         if (fd <= STDERR || fd >= SYSCALL_MAXFILES) {
-            return -1;
+            return -1
         }
-        return this.fileHandler.seek(fd - 3, offset, base);
+        return this.fileHandler.seek(fd - 3, offset, base)
     }
 
-    @Override
-    public int readFromFile(final int fd, final byte[] myBuffer, final int lengthRequested) {
-        if (fd == STDIN) {
-            try {
-                return this.stdin.read(myBuffer, 0, lengthRequested);
-            } catch (final IOException e) {
-                return -1;
-            }
-        }
-        return this.fileHandler.readFromFile(fd - 3, myBuffer, lengthRequested);
-    }
+    override fun readFromFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int = if (fd == STDIN) try {
+        this.stdin.read(myBuffer, 0, lengthRequested)
+    } catch (_: IOException) {
+        -1
+    } else this.fileHandler.readFromFile(fd - 3, myBuffer, lengthRequested)
 
-    @Override
-    public void flush() {
-
-    }
+    override fun flush() {}
 }

@@ -1,143 +1,110 @@
-package rars.io;
+package rars.io
 
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.settings.BoolSetting;
-import rars.settings.BoolSettingsImpl;
+import rars.Globals
+import rars.settings.BoolSetting
+import rars.settings.BoolSettingsImpl
+import java.io.*
+import java.nio.channels.FileChannel
 
-import java.io.*;
-import java.nio.channels.FileChannel;
-
-public final class FileHandler {
-    private static final int SYSCALL_MAXFILES = 32;
-
-    private static final int STDIN = 0;
-    private static final int STDOUT = 1;
-    private static final int STDERR = 2;
-
-    private static final int O_RDONLY = 0x00000000;
-    private static final int O_WRONLY = 0x00000001;
-    private static final int O_RDWR = 0x00000002;
-    private static final int O_APPEND = 0x00000008;
-    private static final int O_CREAT = 0x00000200; // 512
-    private static final int O_TRUNC = 0x00000400; // 1024
-    private static final int O_EXCL = 0x00000800; // 2048
-
-    private static final int SEEK_SET = 0;
-    private static final int SEEK_CUR = 1;
-    private static final int SEEK_END = 2;
-
-    private final int fdCount;
-    private final FileEntry[] entries;
-
-    private final @NotNull BoolSettingsImpl boolSettings;
-
-    public FileHandler(final int fdCount, final @NotNull BoolSettingsImpl boolSettings) {
-        this.fdCount = fdCount;
-        this.entries = new FileEntry[fdCount];
-        this.boolSettings = boolSettings;
-    }
+class FileHandler(
+    private val fdCount: Int,
+    private val boolSettings: BoolSettingsImpl
+) {
+    private val entries: Array<FileEntry?> = arrayOfNulls<FileEntry>(fdCount)
 
     /**
      * Open a file for either reading or writing. Note that read/write flag is NOT
      * IMPLEMENTED. Also note that file permission modes are also NOT IMPLEMENTED.
      *
      * @param filename
-     *     string containing file
+     * string containing file
      * @param flags
-     *     0 for read, 1 for write
+     * 0 for read, 1 for write
      * @return file descriptor in the range 0 to SYSCALL_MAXFILES-1, or -1 if error
      * @author Ken Vollmar
      */
-    public int openFile(final @NotNull String filename, final int flags) {
+    fun openFile(filename: String, flags: Int): Int {
         // Check internal plausibility of opening this file
-        final int fdToUse = this.tryFindEmptyFd(filename, flags);
-        if (fdToUse < 0) {
-            return -1;
-        }
+        val fdToUse = this.tryFindEmptyFd(filename, flags)
+        if (fdToUse < 0) return -1
 
-        File filepath = new File(filename);
-        if (!filepath.isAbsolute() && Globals.PROGRAM != null) {
+        var filepath = File(filename)
+        if (!filepath.isAbsolute && Globals.PROGRAM != null) {
             if (this.boolSettings.getSetting(BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY)) {
-                final var parent = Globals.PROGRAM.getFile().getParentFile();
-                filepath = new File(parent, filename);
+                val parent = Globals.PROGRAM!!.file!!.getParentFile()
+                filepath = File(parent, filename)
             }
         }
-        final Closeable stream;
-        if (flags == O_RDONLY) {
-            try {
-                stream = new FileInputStream(filepath);
-            } catch (final FileNotFoundException e) {
-                return -1;
-            }
-        } else if ((flags & O_WRONLY) != 0) {
-            try {
-                stream = new FileOutputStream(filepath, (flags & O_APPEND) != 0);
-            } catch (final FileNotFoundException e) {
-                return -1;
-            }
-        } else {
-            return -1;
-        }
+        val stream = if (flags == O_RDONLY) try {
+            FileInputStream(filepath)
+        } catch (_: FileNotFoundException) {
+            return -1
+        } else if ((flags and O_WRONLY) != 0) try {
+            FileOutputStream(filepath, (flags and O_APPEND) != 0)
+        } catch (_: FileNotFoundException) {
+            return -1
+        } else return -1
 
-        final var newEntry = new FileEntry(filename, flags, stream);
-        this.entries[fdToUse] = newEntry;
+        val newEntry = FileEntry(filename, flags, stream)
+        this.entries[fdToUse] = newEntry
 
-        return fdToUse;
+        return fdToUse
     }
 
     /**
      * Read bytes from file.
      *
      * @param fd
-     *     file descriptor
+     * file descriptor
      * @param buffer
-     *     byte array to contain bytes read
+     * byte array to contain bytes read
      * @param length
-     *     number of bytes to read
+     * number of bytes to read
      * @return number of bytes read, 0 on EOF, or -1 on error
      */
-    public int readFromFile(final int fd, final byte[] buffer, final int length) {
+    fun readFromFile(fd: Int, buffer: ByteArray, length: Int): Int {
         // Check the existence of the "read" fd
         if (this.fdNotInUse(fd, O_RDONLY)) {
-            return -1;
+            return -1
         }
         // retrieve FileInputStream from storage
-        final var inputStream = (InputStream) this.entries[fd].stream;
-        int retValue;
+        val inputStream = this.entries[fd]!!.stream as InputStream
+        var retValue: Int
         try {
             // Reads up to lengthRequested bytes of data from this Input stream into an
             // array of bytes.
-            retValue = inputStream.read(buffer, 0, length);
+            retValue = inputStream.read(buffer, 0, length)
             // This method will return -1 upon EOF, but our spec says that negative
             // value represents an error, so we return 0 for EOF. DPS 10-July-2008.
             if (retValue == -1) {
-                retValue = 0;
+                retValue = 0
             }
-        } catch (final IOException | IndexOutOfBoundsException e) {
-            return -1;
+        } catch (_: IOException) {
+            return -1
+        } catch (_: IndexOutOfBoundsException) {
+            return -1
         }
-        return retValue;
+        return retValue
     }
 
     /**
      * Write bytes to file.
      *
      * @param fd
-     *     file descriptor
+     * file descriptor
      * @param buffer
-     *     byte array containing characters to write
+     * byte array containing characters to write
      * @param length
-     *     number of bytes to write
+     * number of bytes to write
      * @return number of bytes written, or -1 on error
      */
-    public int writeToFile(final int fd, final byte[] buffer, final int length) {
+    fun writeToFile(fd: Int, buffer: ByteArray, length: Int): Int {
         // Check the existence of the "write" fd
         if (this.fdNotInUse(fd, O_WRONLY)) {
-            return -1;
+            return -1
         }
         // retrieve FileOutputStream from storage
-        final var outputStream = (OutputStream) this.entries[fd].stream;
+        val outputStream = this.entries[fd]!!.stream as OutputStream
         try {
             // Oct. 9 2005 Ken Vollmar
             // Observation: made a call to outputStream.write(myBuffer, 0, lengthRequested)
@@ -155,136 +122,117 @@ public final class FileHandler {
             // Oct. 9 2005 Ken Vollmar Force the write statement to write exactly
             // the number of bytes requested, even though those bytes include many ZERO
             // values.
-            for (int i = 0; i < length; i++) {
-                outputStream.write(buffer[i]);
+
+            for (i in 0..<length) {
+                outputStream.write(buffer[i].toInt())
             }
-            outputStream.flush();// DPS 7-Jan-2013
-        } catch (final IOException | IndexOutOfBoundsException e) {
-            return -1;
+            outputStream.flush() // DPS 7-Jan-2013
+        } catch (_: IOException) {
+            return -1
+        } catch (_: IndexOutOfBoundsException) {
+            return -1
         }
 
-        return length;
+        return length
     }
 
     /**
      * Set a position in a file to read or write from.
      *
      * @param fd
-     *     file descriptor
+     * file descriptor
      * @param offset
-     *     where in the file to seek to
+     * where in the file to seek to
      * @param base
-     *     the point to reference 0 for start of file, 1 for current
-     *     position, 2 for end of the file
+     * the point to reference 0 for start of file, 1 for current
+     * position, 2 for end of the file
      * @return -1 on error
      */
-    public int seek(final int fd, int offset, final int base) {
+    fun seek(fd: Int, offset: Int, base: Int): Int {
         // Check the existence of the "read" fd
-        if (this.fdNotInUse(fd, 0)) {
-            return -1;
-        }
-        if (fd < 0 || fd >= this.fdCount) {
-            return -1;
-        }
-        final var stream = this.entries[fd].stream;
+        if (this.fdNotInUse(fd, 0)) return -1
+        if (fd !in 0..<this.fdCount) return -1
+        val stream = this.entries[fd]!!.stream
         try {
-            final FileChannel channel;
-            if (stream instanceof FileInputStream) {
-                channel = ((FileInputStream) stream).getChannel();
-            } else if (stream instanceof FileOutputStream) {
-                channel = ((FileOutputStream) stream).getChannel();
+            val channel: FileChannel = when (stream) {
+                is FileInputStream -> stream.getChannel()
+                is FileOutputStream -> stream.getChannel()
+                else -> return -1
+            }
+            val newOffset = offset + when (base) {
+                SEEK_CUR -> channel.position().toInt()
+                SEEK_END -> channel.size().toInt()
+                SEEK_SET -> 0
+                else -> return -1
+            }
+            return if (newOffset < 0) {
+                -1
             } else {
-                return -1;
+                channel.position(newOffset.toLong())
+                offset
             }
-
-            switch (base) {
-                case SEEK_CUR -> offset += (int) channel.position();
-                case SEEK_END -> offset += (int) channel.size();
-                case SEEK_SET -> {
-                }
-                default -> {
-                    return -1;
-                }
-            }
-            if (offset < 0) {
-                return -1;
-            }
-            channel.position(offset);
-            return offset;
-        } catch (final IOException io) {
-            return -1;
+        } catch (_: IOException) {
+            return -1
         }
     }
 
-    public void closeAll() {
-        for (var i = 0; i < this.fdCount; ++i) {
+    fun closeAll() {
+        for (i in 0..<this.fdCount) {
             if (this.entries[i] != null) {
                 try {
-                    this.entries[i].stream.close();
-                } catch (final IOException e) {
+                    this.entries[i]!!.stream.close()
+                } catch (_: IOException) {
                     // ignore
                 }
-                this.entries[i] = null;
+                this.entries[i] = null
             }
         }
     }
 
-    public void closeFile(final int fd) {
-        if (fd < 0 || fd >= this.fdCount) {
-            return;
-        }
+    fun closeFile(fd: Int) {
+        if (fd !in 0..<this.fdCount) return
         if (this.entries[fd] != null) {
             try {
-                this.entries[fd].stream.close();
-            } catch (final IOException e) {
-                // ignore
+                this.entries[fd]!!.stream.close()
+            } catch (_: IOException) {
             }
-            this.entries[fd] = null;
+            this.entries[fd] = null
         }
     }
 
     /**
      * Determine whether a given fd is already in use with the given flag.
      */
-    private boolean fdNotInUse(final int fd, final int flag) {
-        if (fd < 0 || fd >= fdCount) {
-            return true;
-        } else if (entries[fd] != null && entries[fd].flags == 0 && flag == 0) {
-            // O_RDONLY 
-            // O_WRONLY
-            // write-only
-            // read-only
-            return false;
+    private fun fdNotInUse(fd: Int, flag: Int): Boolean = if (fd !in 0..<fdCount) {
+        true
+    } else {
+        val entry = entries[fd]
+        if (entry != null && entry.flags == 0 && flag == 0) {
+            false
         } else {
-            return entries[fd] == null || ((entries[fd].flags & flag & O_WRONLY) != O_WRONLY);
+            entry == null || ((entry.flags and flag and O_WRONLY) != O_WRONLY)
         }
     }
 
-    private boolean isFilenameInUse(final @NotNull String filename) {
-        for (final var entry : entries) {
-            if (entry != null && entry.filename.equals(filename)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    private fun isFilenameInUse(filename: String): Boolean = entries.any { it != null && it.filename == filename }
 
-    private int tryFindEmptyFd(final @NotNull String filename, final int flag) {
+    private fun tryFindEmptyFd(filename: String, flag: Int): Int {
         if (this.isFilenameInUse(filename)) {
-            return -1;
+            return -1
         }
         // Only read and write are implemented
-        if (flag != O_RDONLY && flag != O_WRONLY && flag != (O_WRONLY | O_APPEND)) {
-            return -1;
+        if (flag != O_RDONLY && flag != O_WRONLY && flag != (O_WRONLY or O_APPEND)) {
+            return -1
         }
-        for (var i = 0; i < this.fdCount; ++i) {
+        for (i in 0..<this.fdCount) {
             if (this.entries[i] == null) {
-                return i;
+                return i
             }
         }
-        return -1;
+        return -1
     }
 
-    private record FileEntry(@NotNull String filename, int flags, @NotNull Closeable stream) {
-    }
+    @JvmRecord
+    private data class FileEntry(val filename: String, val flags: Int, val stream: Closeable)
+
 }

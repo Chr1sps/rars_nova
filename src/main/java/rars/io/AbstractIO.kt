@@ -1,42 +1,19 @@
-package rars.io;
+package rars.io
 
-import org.jetbrains.annotations.NotNull;
-import rars.riscv.Syscall;
+import rars.riscv.Syscall.*
 
-public interface AbstractIO {
-    int SYSCALL_MAXFILES = 32;
-
-    int STDIN = 0;
-    int STDOUT = 1;
-    int STDERR = 2;
-
-    int O_RDONLY = 0x00000000;
-    int O_WRONLY = 0x00000001;
-    int O_RDWR = 0x00000002;
-    int O_APPEND = 0x00000008;
-    int O_CREAT = 0x00000200; // 512
-    int O_TRUNC = 0x00000400; // 1024
-    int O_EXCL = 0x00000800; // 2048
-
-    int SEEK_SET = 0;
-    int SEEK_CUR = 1;
-    int SEEK_END = 2;
-
+interface AbstractIO {
     /**
      * Implements syscall to read a double value.
      * Client is responsible for catching NumberFormatException.
      *
      * @return double value corresponding to user input
      */
-    default double readDouble() {
-        final var input = this.readImpl(
-            "0",
-            "Enter a Double value (syscall %d)".formatted(
-                Syscall.ReadDouble.serviceNumber
-            ), -1
-        );
-        return Double.parseDouble(input.trim());
-    }
+    fun readDouble() = readImpl(
+        "0",
+        "Enter a Double value (syscall ${ReadDouble.serviceNumber})",
+        -1
+    ).trim { it <= ' ' }.toDouble()
 
     /**
      * Implements syscall to read a float value.
@@ -45,14 +22,11 @@ public interface AbstractIO {
      * @return float value corresponding to user input
      * Feb 14 2005 Ken Vollmar
      */
-    default float readFloat() {
-        final var input = this.readImpl(
-            "0", "Enter a Float value (syscall %d)".formatted(
-                Syscall.ReadFloat.serviceNumber
-            ), -1
-        );
-        return Float.parseFloat(input.trim());
-    }
+    fun readFloat() = readImpl(
+        "0",
+        "Enter a Float value (syscall ${ReadFloat.serviceNumber})",
+        -1
+    ).trim { it <= ' ' }.toFloat()
 
     /**
      * Implements syscall to read an integer value.
@@ -60,39 +34,26 @@ public interface AbstractIO {
      *
      * @return int value corresponding to user input
      */
-    default int readInt() {
-        final var input = this.readImpl(
-            "0", "Enter an Integer value (syscall %d)".formatted(
-                Syscall.ReadInt.serviceNumber
-            ), -1
-        );
-        return Integer.parseInt(input.trim());
-    }
+    fun readInt() = readImpl(
+        "0",
+        "Enter an Integer value (syscall ${ReadInt.serviceNumber})",
+        -1
+    ).trim { it <= ' ' }.toInt()
 
     /**
      * Implements syscall to read a string.
      *
      * @param maxLength
-     *     the maximum string length
+     * the maximum string length
      * @return the entered string, truncated to maximum length if necessary
      */
-    default @NotNull String readString(final int maxLength) {
-        var input = this.readImpl(
+    fun readString(maxLength: Int): String {
+        val input = this.readImpl(
             "",
-            "Enter a string of maximum length %d (syscall %d)".formatted(
-                maxLength,
-                Syscall.ReadString.serviceNumber
-            ),
+            "Enter a string of maximum length $maxLength (syscall ${ReadString.serviceNumber})",
             maxLength
-        );
-        if (input.endsWith("\n")) {
-            input = input.substring(0, input.length() - 1);
-        }
-        if (input.length() > maxLength) {
-            return (maxLength <= 0) ? "" : input.substring(0, maxLength);
-        } else {
-            return input;
-        }
+        ).removeSuffix("\n")
+        return if (maxLength <= 0) "" else input.take(maxLength)
     }
 
     /**
@@ -100,92 +61,82 @@ public interface AbstractIO {
      *
      * @return char value corresponding to user input
      */
-    default char readChar() {
-        final var input = this.readImpl(
-            "0",
-            "Enter a character value (syscall %d)".formatted(
-                Syscall.ReadChar.serviceNumber
-            ), 1
-        );
-        // The whole try-catch is not really necessary in this case since I'm
-        // just propagating the runtime exception (the default behavior), but
-        // I want to make it explicit. The client needs to catch it.
-        // first character input
+    fun readChar() = this.readImpl(
+        "0",
+        "Enter a character value (syscall ${ReadChar.serviceNumber})", 1
+    )[0]
 
-        return input.charAt(0);
-    }
-
-    String readImpl(
-        final @NotNull String initialValue,
-        final @NotNull String prompt,
-        final int maxLength
-    );
+    fun readImpl(
+        initialValue: String,
+        prompt: String,
+        maxLength: Int
+    ): String
 
     /**
      * Implements syscall to print a string.
      */
-    void printString(final @NotNull String message);
+    fun printString(message: String)
 
     /**
      * Open a file for either reading or writing. Note that read/write flag is NOT
      * IMPLEMENTED. Also note that file permission modes are also NOT IMPLEMENTED.
      *
      * @param filename
-     *     string containing file
+     * string containing file
      * @param flags
-     *     0 for read, 1 for write
+     * 0 for read, 1 for write
      * @return file descriptor in the range 0 to SYSCALL_MAXFILES-1, or -1 if error
      * @author Ken Vollmar
      */
-    int openFile(final String filename, final int flags);
+    fun openFile(filename: String, flags: Int): Int
 
     /**
      * Close the file with specified file descriptor
      *
      * @param fd
-     *     the file descriptor of an open file
+     * the file descriptor of an open file
      */
-    void closeFile(final int fd);
+    fun closeFile(fd: Int)
 
     /**
      * Write bytes to file.
      *
      * @param fd
-     *     file descriptor
+     * file descriptor
      * @param myBuffer
-     *     byte array containing characters to write
+     * byte array containing characters to write
      * @param lengthRequested
-     *     number of bytes to write
+     * number of bytes to write
      * @return number of bytes written, or -1 on error
      */
-    int writeToFile(final int fd, final byte[] myBuffer, final int lengthRequested);
+    fun writeToFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int
 
     /**
      * Read bytes from file.
      *
      * @param fd
-     *     file descriptor
+     * file descriptor
      * @param offset
-     *     where in the file to seek to
+     * where in the file to seek to
      * @param base
-     *     the point to reference 0 for start of file, 1 for current
-     *     position, 2 for end of the file
+     * the point to reference 0 for start of file, 1 for current
+     * position, 2 for end of the file
      * @return -1 on error
      */
-    int seek(final int fd, int offset, final int base);
+    fun seek(fd: Int, offset: Int, base: Int): Int
 
     /**
      * Read bytes from file.
      *
      * @param fd
-     *     file descriptor
+     * file descriptor
      * @param myBuffer
-     *     byte array to contain bytes read
+     * byte array to contain bytes read
      * @param lengthRequested
-     *     number of bytes to read
+     * number of bytes to read
      * @return number of bytes read, 0 on EOF, or -1 on error
      */
-    int readFromFile(final int fd, final byte[] myBuffer, final int lengthRequested);
+    fun readFromFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int
 
-    void flush();
+    fun flush()
 }
