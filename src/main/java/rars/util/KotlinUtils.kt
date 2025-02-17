@@ -1,8 +1,8 @@
 package rars.util
 
 import arrow.core.Either
-import rars.jsoftfloat.Environment
-import rars.jsoftfloat.RoundingMode
+import rars.ksoftfloat.Environment
+import rars.ksoftfloat.RoundingMode
 import java.io.PrintWriter
 import java.io.StringWriter
 

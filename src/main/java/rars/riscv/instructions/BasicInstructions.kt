@@ -8,13 +8,11 @@ import arrow.core.raise.ensureNotNull
 import arrow.core.right
 import rars.ProgramStatement
 import rars.exceptions.*
-import rars.jsoftfloat.Environment
-import rars.jsoftfloat.operations.Arithmetic
-import rars.jsoftfloat.operations.Comparisons
-import rars.jsoftfloat.operations.Conversions
-import rars.jsoftfloat.types.Float32
-import rars.jsoftfloat.types.Float64
-import rars.jsoftfloat.types.Floating
+import rars.ksoftfloat.Environment
+import rars.ksoftfloat.operations.*
+import rars.ksoftfloat.types.Float32
+import rars.ksoftfloat.types.Float64
+import rars.ksoftfloat.types.Floating
 import rars.riscv.*
 import rars.riscv.BasicInstruction.Companion.BASIC_INSTRUCTION_LENGTH
 import rars.riscv.hardware.registerFiles.RegisterFile
@@ -260,10 +258,9 @@ object BasicInstructions {
         either {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
-            val converted = Conversions.convertFromInt(
+            val converted = Float64.fromBigInteger(
                 registerFile.getLongValue(statement.getOperand(1))!!.toBigInteger(),
                 environment,
-                Float64(0)
             )
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumber(
@@ -283,7 +280,7 @@ object BasicInstructions {
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val value = registerFile.getLongValue(statement.getOperand(1))!!
             val unsigned = value.toULong().toBigInteger()
-            val converted = Conversions.convertFromInt(unsigned, environment, Float64(0))
+            val converted = Float64.fromBigInteger(unsigned, environment)
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits).bind()
 
@@ -299,7 +296,7 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
-            val output = convert(input, Float64(0), environment)
+            val output = convert(input, Float64, environment)
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), output.bits).bind()
         }
@@ -313,10 +310,9 @@ object BasicInstructions {
         either {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
-            val converted = Conversions.convertFromInt(
+            val converted = Float64.fromBigInteger(
                 registerFile.getIntValue(statement.getOperand(1))!!.toBigInteger(),
                 environment,
-                Float64(0)
             )
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits).bind()
@@ -331,10 +327,9 @@ object BasicInstructions {
         either {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
-            val converted = Conversions.convertFromInt(
+            val converted = Float64.fromBigInteger(
                 registerFile.getIntValue(statement.getOperand(1))!!.lowerToULong().toBigInteger(),
                 environment,
-                Float64(0)
             )
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits).bind()
@@ -350,7 +345,7 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
-            val output = Conversions.convertToLong(input, environment, false)
+            val output = input.toLong(environment, false)
             csrRegisterFile.setfflags(environment).bind()
             registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
         }
@@ -365,7 +360,7 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
-            val output = Conversions.convertToLong(input, environment, false)
+            val output = input.toLong(environment, false)
             csrRegisterFile.setfflags(environment).bind()
             registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
         }
@@ -381,9 +376,9 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
-            val output = Conversions.convertToUnsignedLong(input, environment, false)
+            val output = input.toULong(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
         }
     }
 
@@ -397,9 +392,9 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
-            val output = Conversions.convertToUnsignedLong(input, environment, false)
+            val output = input.toULong(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
         }
     }
 
@@ -412,7 +407,7 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
-            val output = convert(input, Float32(0), environment)
+            val output = convert(input, Float32, environment)
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), output.bits).bind()
         }
@@ -426,10 +421,9 @@ object BasicInstructions {
         either {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
-            val converted = Conversions.convertFromInt(
+            val converted = Float32.fromBigInteger(
                 registerFile.getLongValue(statement.getOperand(1))!!.toBigInteger(),
-                environment,
-                Float32(0)
+                environment
             )
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
@@ -446,7 +440,7 @@ object BasicInstructions {
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val value = registerFile.getLongValue(statement.getOperand(1))!!
             val unsigned = value.toULong().toBigInteger()
-            val converted = Conversions.convertFromInt(unsigned, environment, Float32(0))
+            val converted = Float32.fromBigInteger(unsigned, environment)
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
         }
@@ -460,10 +454,9 @@ object BasicInstructions {
         either {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
-            val converted = Conversions.convertFromInt(
+            val converted = Float32.fromBigInteger(
                 registerFile.getIntValue(statement.getOperand(1))!!.toBigInteger(),
                 environment,
-                Float32(0)
             )
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
@@ -478,10 +471,9 @@ object BasicInstructions {
         either {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
-            val converted = Conversions.convertFromInt(
+            val converted = Float32.fromBigInteger(
                 registerFile.getIntValue(statement.getOperand(1))!!.lowerToULong().toBigInteger(),
                 environment,
-                Float32(0)
             )
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
@@ -497,7 +489,7 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
-            val output = Conversions.convertToInt(input, environment, false)
+            val output = input.toInt(environment, false)
             csrRegisterFile.setfflags(environment).bind()
             registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
         }
@@ -512,7 +504,7 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
-            val output = Conversions.convertToInt(input, environment, false)
+            val output = input.toInt(environment, false)
             csrRegisterFile.setfflags(environment).bind()
             registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
         }
@@ -527,7 +519,7 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
-            val output = Conversions.convertToUnsignedInt(input, environment, false)
+            val output = input.toUInt(environment, false)
             csrRegisterFile.setfflags(environment).bind()
             registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
         }
@@ -542,7 +534,7 @@ object BasicInstructions {
             val environment = Environment()
             environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
-            val output = Conversions.convertToUnsignedInt(input, environment, false)
+            val output = input.toUInt(environment, false)
             csrRegisterFile.setfflags(environment).bind()
             registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
         }
@@ -579,7 +571,7 @@ object BasicInstructions {
         val f1 = Float64(fpRegisterFile.getLongValue(statement.getOperand(1))!!)
         val f2 = Float64(fpRegisterFile.getLongValue(statement.getOperand(2))!!)
         val environment = Environment()
-        val result = Comparisons.compareQuietEqual(f1, f2, environment)
+        val result = environment.compareQuietEqual(f1, f2)
         val newValue = if (result) 1L else 0L
         csrRegisterFile.setfflags(environment).flatMap {
             registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
@@ -594,7 +586,7 @@ object BasicInstructions {
         val f1 = Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!)
         val f2 = Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!)
         val environment = Environment()
-        val result = Comparisons.compareQuietEqual(f1, f2, environment)
+        val result = environment.compareQuietEqual(f1, f2)
         val newValue = if (result) 1L else 0L
         csrRegisterFile.setfflags(environment).flatMap {
             registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
@@ -625,7 +617,7 @@ object BasicInstructions {
         val f1 = Float64(fpRegisterFile.getLongValue(statement.getOperand(1))!!)
         val f2 = Float64(fpRegisterFile.getLongValue(statement.getOperand(2))!!)
         val environment = Environment()
-        val result = Comparisons.compareSignalingLessThanEqual(f1, f2, environment)
+        val result = environment.compareSignalingLessThanEqual(f1, f2)
         val newValue = if (result) 1L else 0L
         csrRegisterFile.setfflags(environment).flatMap {
             registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
@@ -640,7 +632,7 @@ object BasicInstructions {
         val f1 = Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!)
         val f2 = Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!)
         val environment = Environment()
-        val result = Comparisons.compareSignalingLessThanEqual(f1, f2, environment)
+        val result = environment.compareSignalingLessThanEqual(f1, f2)
         val newValue = if (result) 1L else 0L
         csrRegisterFile.setfflags(environment).flatMap {
             registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
@@ -658,7 +650,7 @@ object BasicInstructions {
         val f1 = fpRegisterFile.getFloat64(statement.getOperand(1))
         val f2 = fpRegisterFile.getFloat64(statement.getOperand(2))
         val environment = Environment()
-        val result = Comparisons.compareSignalingLessThan(f1, f2, environment)
+        val result = environment.compareSignalingLessThan(f1, f2)
         either {
             csrRegisterFile.setfflags(environment).bind()
             val newValue = if (result) 1L else 0L
@@ -674,7 +666,7 @@ object BasicInstructions {
         val f1 = fpRegisterFile.getFloat32(statement.getOperand(1))
         val f2 = fpRegisterFile.getFloat32(statement.getOperand(2))
         val environment = Environment()
-        val result = Comparisons.compareSignalingLessThan(f1, f2, environment)
+        val result = environment.compareSignalingLessThan(f1, f2)
         either {
             csrRegisterFile.setfflags(environment).bind()
             val newValue = if (result) 1L else 0L
@@ -840,7 +832,7 @@ object BasicInstructions {
                 stmt
             ).bind()
             val registerValue = fpRegisterFile.getLongValue(stmt.getOperand(1))!!
-            val result = Arithmetic.squareRoot(Float64(registerValue), environment)
+            val result = Float64.squareRoot(environment, Float64(registerValue))
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumber(stmt.getOperand(0), result.bits)
         }
@@ -858,7 +850,7 @@ object BasicInstructions {
                 stmt
             ).bind()
             val registerValue = fpRegisterFile.getIntValue(stmt.getOperand(1))!!
-            val result = Arithmetic.squareRoot(Float32(registerValue), environment)
+            val result = Float32.squareRoot(environment, Float32(registerValue))
             csrRegisterFile.setfflags(environment).bind()
             fpRegisterFile.updateRegisterByNumberInt(stmt.getOperand(0), result.bits)
         }

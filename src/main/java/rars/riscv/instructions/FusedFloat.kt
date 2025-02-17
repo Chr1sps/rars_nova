@@ -4,9 +4,9 @@ import arrow.core.Either
 import arrow.core.raise.either
 import rars.ProgramStatement
 import rars.exceptions.SimulationEvent
-import rars.jsoftfloat.Environment
-import rars.jsoftfloat.operations.Arithmetic
-import rars.jsoftfloat.types.Float32
+import rars.ksoftfloat.Environment
+import rars.ksoftfloat.operations.fusedMultiplyAdd
+import rars.ksoftfloat.types.Float32
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
 import rars.riscv.getRoundingMode
@@ -44,20 +44,20 @@ class FusedFloat private constructor(
     usage: String,
     description: String,
     op: String,
-    private val compute: (Float32, Float32, Float32, Environment) -> Float32
+    private val compute: (Environment, Float32, Float32, Float32) -> Float32
 ) : BasicInstruction(
     "$usage, dyn", description, BasicInstructionFormat.R4_FORMAT,
     "qqqqq 00 ttttt sssss ppp fffff 100${op}11"
 ) {
     override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
-        val environment = Environment()
-        environment.mode =
-            csrRegisterFile.getRoundingMode(statement.getOperand(4), statement).bind()
+        val environment = Environment().apply {
+            mode = csrRegisterFile.getRoundingMode(statement.getOperand(4), statement).bind()
+        }
         val result: Float32 = compute(
+            environment,
             Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!),
             Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!),
             Float32(fpRegisterFile.getIntValue(statement.getOperand(3))!!),
-            environment
         )
         csrRegisterFile.setfflags(environment).bind()
         fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result.bits)
@@ -66,28 +66,30 @@ class FusedFloat private constructor(
     companion object {
         @JvmField
         val FMADDS = FusedFloat(
-            "fmadd.s f1, f2, f3, f4", "Fused Multiply Add: Assigns f2*f3+f4 to f1", "00"
-        ) { f1, f2, f3, env -> Arithmetic.fusedMultiplyAdd(f1, f2, f3, env) }
+            "fmadd.s f1, f2, f3, f4", "Fused Multiply Add: Assigns f2*f3+f4 to f1", "00",
+            Float32::fusedMultiplyAdd
+        )
 
         @JvmField
         val FMSUBS = FusedFloat(
-            "fmsub.s f1, f2, f3, f4", "Fused Multiply Subtract: Assigns f2*f3-f4 to f1", "01"
-        ) { f1, f2, f3, env -> Arithmetic.fusedMultiplyAdd(f1, f2, f3.negate(), env) }
+            "fmsub.s f1, f2, f3, f4", "Fused Multiply Subtract: Assigns f2*f3-f4 to f1", "01",
+        ) { env, f1, f2, f3 -> Float32.fusedMultiplyAdd(env, f1, f2, f3.negate()) }
 
         @JvmField
         val FNMADDS = FusedFloat(
-            "fnmadd.s f1, f2, f3, f4", "Fused Negate Multiply Add: Assigns -(f2*f3+f4) to f1", "11"
-        ) { f1, f2, f3, env ->
+            "fnmadd.s f1, f2, f3, f4", "Fused Negate Multiply Add: Assigns -(f2*f3+f4) to f1", "11",
+        ) { env, f1, f2, f3 ->
+            // TODO: test if this is the right behaviour
             env.flipRounding()
-            Arithmetic.fusedMultiplyAdd(f1, f2, f3, env).negate()
+            Float32.fusedMultiplyAdd(env, f1, f2, f3).negate()
         }
 
         @JvmField
         val FNMSUBS = FusedFloat(
-            "fnmsub.s f1, f2, f3, f4", "Fused Negate Multiply Subtract: Assigns -(f2*f3-f4) to f1", "10"
-        ) { f1, f2, f3, env ->
+            "fnmsub.s f1, f2, f3, f4", "Fused Negate Multiply Subtract: Assigns -(f2*f3-f4) to f1", "10",
+        ) { env, f1, f2, f3 ->
             env.flipRounding()
-            Arithmetic.fusedMultiplyAdd(f1, f2, f3.negate(), env).negate()
+            Float32.fusedMultiplyAdd(env, f1, f2, f3.negate()).negate()
         }
 
 //        @JvmField

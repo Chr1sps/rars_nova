@@ -7,11 +7,12 @@ import arrow.core.right
 import rars.ProgramStatement
 import rars.exceptions.ExceptionReason
 import rars.exceptions.SimulationError
-import rars.jsoftfloat.Environment
-import rars.jsoftfloat.RoundingMode
-import rars.jsoftfloat.types.Float32
-import rars.jsoftfloat.types.Float64
-import rars.jsoftfloat.types.Floating
+import rars.ksoftfloat.Environment
+import rars.ksoftfloat.RoundingMode
+import rars.ksoftfloat.types.Float32
+import rars.ksoftfloat.types.Float64
+import rars.ksoftfloat.types.Floating
+import rars.ksoftfloat.types.FloatingFactory
 import rars.riscv.hardware.registerFiles.CSRegisterFile
 import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile
 import java.math.BigInteger
@@ -69,12 +70,12 @@ internal fun ULong.toBigInteger(): BigInteger {
 
 // TODO: Create some kind of a factory interface for the Floating types to use here
 internal fun <S : Floating<S>, D : Floating<D>> convert(
-    toconvert: D,
-    constructor: S,
+    valueToConvert: D,
+    constructor: FloatingFactory<S>,
     environment: Environment
 ): S = when {
-    toconvert.isInfinite -> if (toconvert.isSignMinus) constructor.NegativeInfinity() else constructor.Infinity()
-    toconvert.isZero -> if (toconvert.isSignMinus) constructor.NegativeZero() else constructor.Zero()
-    toconvert.isNaN -> constructor.NaN()
-    else -> constructor.fromExactFloat(toconvert.toExactFloat(), environment)
+    valueToConvert.isInfinite -> if (valueToConvert.isSignMinus) constructor.negativeInfinity else constructor.infinity
+    valueToConvert.isZero -> if (valueToConvert.isSignMinus) constructor.negativeZero else constructor.zero
+    valueToConvert.isNaN -> constructor.NaN
+    else -> constructor.fromExactFloat(environment, valueToConvert.toExactFloat())
 }

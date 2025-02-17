@@ -1,426 +1,226 @@
-package rars.jsoftfloat.types;
+package rars.ksoftfloat.types
 
-import org.jetbrains.annotations.NotNull;
-import rars.jsoftfloat.Environment;
-import rars.jsoftfloat.RoundingMode;
-import rars.jsoftfloat.internal.ExactFloat;
-
-import java.math.BigInteger;
+import rars.ksoftfloat.Environment
+import rars.ksoftfloat.RoundingMode
+import rars.ksoftfloat.internal.ExactFloat
+import java.math.BigInteger
+import kotlin.math.absoluteValue
 
 /**
  * Represents the Binary32 format
  */
-public final class Float32 implements Floating<Float32> {
-    // TODO: make a more abstract binary float class
-    /**
-     * Constant {@code Zero}
-     */
-    public static final Float32 Zero = new Float32(0),
-    /**
-     * Constant {@code NegativeZero}
-     */
-    NegativeZero = new Float32(0x80000000),
-    /**
-     * Constant {@code NaN}
-     */
-    NaN = new Float32(0x7FC00000),
-    /**
-     * Constant {@code Infinity}
-     */
-    Infinity = new Float32(0x7F800000),
-    /**
-     * Constant {@code NegativeInfinity}
-     */
-    NegativeInfinity = new Float32(0xFF800000);
+class Float32(val bits: Int) : Floating<Float32> {
+    constructor(
+        sign: Boolean,
+        exponent: Int,
+        significand: Int
+    ) : this((if (sign) -0x80000000 else 0) or (((exponent + 127) and 0xFF) shl 23) or (significand and 0x007FFFFF))
 
-    public final int bits;
+    val exponent: Int get() = ((this.bits ushr 23) and 0xFF) - 127
 
-    /**
-     * <p>Constructor for Float32.</p>
-     *
-     * @param bits
-     *     a int
-     */
-    public Float32(final int bits) {
-        this.bits = bits;
+    // Flip the sign bit
+    override fun negate(): Float32 = Float32(this.bits xor -0x80000000)
+
+    fun abs(): Float32 = Float32(this.bits and 0x7FFFFFFF)
+
+    fun copySign(signToTake: Float32): Float32 {
+        return Float32((this.bits and 0x7FFFFFFF) or (signToTake.bits and -0x80000000))
     }
 
-    /**
-     * <p>Constructor for Float32.</p>
-     *
-     * @param sign
-     *     a boolean
-     * @param exponent
-     *     a int
-     * @param significand
-     *     a int
-     */
-    public Float32(final boolean sign, final int exponent, final int significand) {
-        this(((sign) ? 0x80000000 : 0) | (((exponent + 127) & 0xFF) << 23) | (significand & 0x007FFFFF));
-    }
+    override val isSignMinus get() = (this.bits ushr 31) == 1
 
-    /**
-     * <p>fromInteger.</p>
-     *
-     * @param num
-     *     An integer to be converted to
-     * @return a {@link Float32} object
-     */
-    public static Float32 fromInteger(int num) {
-        if (num == 0) {
-            return Float32.Zero;
-        }
-        final boolean sign = num < 0;
-        num = sign ? -num : num;
-        int exponent = 0, significand = 0;
-        for (int i = 30; i >= 0; i--) {
-            if (((num >> i) & 1) == 1) {
-                exponent = i + 127;
-                significand = (num << (32 - i)) >>> 9;
-                break;
-            }
-        }
-        final int bits = ((sign) ? 0x80000000 : 0) | (exponent << 23) | significand;
-        return new Float32(bits);
-    }
+    override val isInfinite get() = this.exponent == 128 && (this.bits and 0x007FFFFF) == 0
 
-    /**
-     * <p>fromExact.</p>
-     *
-     * @param ef
-     *     a {@link ExactFloat} object
-     * @param e
-     *     a {@link Environment} object
-     * @return a {@link Float32} object
-     */
-    public static Float32 fromExact(final @NotNull ExactFloat ef, final @NotNull Environment e) {
-        return Float32.Zero.fromExactFloat(ef, e);
-    }
+    override val isNormal get() = this.exponent != -127 && this.exponent != 128
 
-    /**
-     * <p>exponent.</p>
-     *
-     * @return a int
-     */
-    public int exponent() {
-        return ((this.bits >>> 23) & 0xFF) - 127;
-    }
-
-    /**
-     * <p>negate.</p>
-     *
-     * @return a {@link Float32} object
-     */
-    @Override
-    public @NotNull Float32 negate() {
-        return new Float32(this.bits ^ 0x80000000); // Flip the sign bit
-    }
-
-    /**
-     * <p>abs.</p>
-     *
-     * @return a {@link Float32} object
-     */
-    public @NotNull Float32 abs() {
-        return new Float32(this.bits & 0x7FFFFFFF);
-    }
-
-    /**
-     * <p>copySign.</p>
-     *
-     * @param signToTake
-     *     a {@link Float32} object
-     * @return a {@link Float32} object
-     */
-    public @NotNull Float32 copySign(final @NotNull Float32 signToTake) {
-        return new Float32((this.bits & 0x7FFFFFFF) | (signToTake.bits & 0x80000000));
-    }
-
-    /**
-     * <p>isSignMinus.</p>
-     *
-     * @return a boolean
-     */
-    @Override
-    public boolean isSignMinus() {
-        return (this.bits >>> 31) == 1;
-    }
-
-    /**
-     * <p>isInfinite.</p>
-     *
-     * @return a boolean
-     */
-    @Override
-    public boolean isInfinite() {
-        return this.exponent() == 128 && (this.bits & 0x007FFFFF) == 0;
-    }
-
-    /**
-     * <p>isNormal.</p>
-     *
-     * @return a boolean
-     */
-    @Override
-    public boolean isNormal() {
-        return this.exponent() != -127 && this.exponent() != 128;
-    }
-
-    /**
-     * <p>isSubnormal.</p>
-     *
-     * @return a boolean
-     */
-    @Override
-    public boolean isSubnormal() {
-        return this.exponent() == -127 && !this.isZero();
-    }
+    override val isSubnormal get() = this.exponent == -127 && !this.isZero
 
     // Section 6.2.1
+    override val isNaN get() = this.exponent == 128 && !this.isInfinite
 
-    /**
-     * <p>isNaN.</p>
-     *
-     * @return a boolean
-     */
-    @Override
-    public boolean isNaN() {
-        return this.exponent() == 128 && !this.isInfinite();
-    }
+    override val isSignalling
+        get() = if (!this.isNaN) {
+            false
+        } else (this.bits and 0x400000) == 0
 
-    /**
-     * <p>isSignalling.</p>
-     *
-     * @return a boolean
-     */
-    @Override
-    public boolean isSignalling() {
-        if (!this.isNaN()) {
-            return false;
+    override val isZero get() = this.bits == 0 || this.bits == -0x80000000
+
+    override fun toExactFloat(): ExactFloat {
+        assert(!this.isInfinite) { "Infinity is not exact" }
+        assert(!this.isNaN) { "NaNs are not exact" }
+        assert(!this.isZero) { "Zeros should be handled explicitly" }
+
+        val exponent: Int
+        val significand: BigInteger
+        when {
+            this.isZero -> {
+                exponent = 0
+                significand = BigInteger.ZERO
+            }
+            this.isNormal -> {
+                exponent = this.exponent - 23
+                // Add back the implied one
+                significand = BigInteger.valueOf(((this.bits and 0x007FFFFF) + 0x00800000).toLong())
+            }
+            this.isSubnormal -> {
+                exponent = this.exponent - 22
+                significand = BigInteger.valueOf((this.bits and 0x007FFFFF).toLong())
+            }
+            else -> error("This should not be reachable")
         }
-        return (this.bits & 0x400000) == 0;
+        return ExactFloat(this.isSignMinus, exponent, significand)
     }
 
-    /**
-     * <p>isZero.</p>
-     *
-     * @return a boolean
-     */
-    @Override
-    public boolean isZero() {
-        return this.bits == 0 || this.bits == 0x80000000;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public @NotNull Float32 NaN() {
-        return Float32.NaN;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public @NotNull Float32 Zero() {
-        return Float32.Zero;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public @NotNull Float32 NegativeZero() {
-        return Float32.NegativeZero;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public @NotNull Float32 Infinity() {
-        return Float32.Infinity;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public @NotNull Float32 NegativeInfinity() {
-        return Float32.NegativeInfinity;
-    }    // Some constants that allow fromExactFloat to be mostly copied
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public @NotNull Float32 fromExactFloat(@NotNull ExactFloat ef, final @NotNull Environment env) {
-        if (ef.isZero()) {
-            return ef.sign ? Float32.NegativeZero : Float32.Zero;
-        }
-        ef = ef.normalize();
-        final int normalizedExponent = ef.exponent + ef.significand.bitLength();
-
-        // Used to calculate how to round at the end
-        final Float32 awayZero;
-        final Float32 towardsZero;
-        final BigInteger roundedBits;
-        final int bitsToRound;
-
-        if (normalizedExponent <= Float32.minexp + 1) {
-            // Subnormal
-
-            if (ef.exponent > Float32.minexp - Float32.sigbits) {
-                assert ef.significand.bitLength() <= Float32.sigbits : "Its actually normal";
-                return new Float32(
-                    ef.sign, Float32.minexp,
-                    ef.significand.shiftLeft(-(Float32.minexp - Float32.sigbits + 1) + ef.exponent).intValueExact()
-                );
+    companion object : FloatingFactory<Float32> {
+        override val NaN: Float32 = Float32(0x7FC00000)
+        override val zero = Float32(0)
+        override val negativeZero = Float32(-0x80000000)
+        override val infinity = Float32(0x7F800000)
+        override val negativeInfinity = Float32(-0x800000)
+        override fun fromExactFloat(
+            env: Environment,
+            value: ExactFloat
+        ): Float32 {
+            var ef = value
+            if (ef.isZero) {
+                return if (ef.sign) negativeZero else zero
             }
+            ef = ef.normalize()
+            val normalizedExponent = ef.exponent + ef.significand.bitLength()
 
-            env.inexact = true;
-            env.underflow = true; // Section 7.5
-            bitsToRound = (Float32.minexp - Float32.sigbits + 1) - ef.exponent;
-            final BigInteger mainBits = ef.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound);
-            roundedBits = ef.significand.subtract(mainBits);
+            // Used to calculate how to round at the end
+            val awayZero: Float32
+            val towardsZero: Float32
+            val roundedBits: BigInteger
+            val bitsToRound: Int
 
-            towardsZero = new Float32(ef.sign, Float32.minexp, ef.significand.shiftRight(bitsToRound).intValueExact());
-            final BigInteger upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1));
-            if (upBits.testBit(0) || upBits.bitLength() <= Float32.sigbits) {
-                assert upBits.bitLength() <= Float32.sigbits;
-                awayZero = new Float32(ef.sign, Float32.minexp, upBits.intValueExact());
-            } else {
-                awayZero = new Float32(ef.sign, Float32.minexp + 1, upBits.intValueExact() & Float32.sigmask);
-            }
-        } else if (normalizedExponent > Float32.maxexp) {
-            // Section 7.4
-            env.overflow = true;
-            env.inexact = true;
-            switch (env.mode) {
-                case ZERO:
-                    return new Float32(ef.sign, Float32.maxexp - 1, -1); // Largest finite number
-                case MIN:
-                case MAX:
-                    if (ef.sign != (env.mode == RoundingMode.MAX)) {
-                        return ef.sign ? Float32.NegativeInfinity : Float32.Infinity;
-                    } else {
-                        return new Float32(ef.sign, Float32.maxexp - 1, -1); // Largest finite number
-                    }
-                case AWAY:
-                case EVEN:
-                    return ef.sign ? Float32.NegativeInfinity : Float32.Infinity;
-            }
-            assert false : "Not reachable";
-            return ef.sign ? Float32.NegativeInfinity : Float32.Infinity;
-        } else {
-            if (ef.significand.bitLength() <= (Float32.sigbits + 1)) {
-                // No rounding needed
-                final var bitCount = ef.exponent + ef.significand.bitLength() - 1;
-                assert bitCount > Float32.minexp : "Its actually subnormal";
+            if (normalizedExponent <= MINEXP + 1) {
+                // Subnormal
 
-                return new Float32(
-                    ef.sign, bitCount,
-                    ef.significand.shiftLeft((Float32.sigbits + 1) - ef.significand.bitLength())
-                        .intValueExact() & Float32.sigmask
-                );
-            }
-            env.inexact = true;
-            bitsToRound = ef.significand.bitLength() - (Float32.sigbits + 1);
-            final BigInteger mainBits = ef.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound);
-            roundedBits = ef.significand.subtract(mainBits);
-
-            final BigInteger upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1));
-
-            towardsZero = new Float32(
-                ef.sign, ef.exponent + Float32.sigbits + bitsToRound,
-                ef.significand.shiftRight(bitsToRound).intValueExact() & Float32.sigmask
-            );
-            if (upBits.testBit(0) || upBits.bitLength() <= Float32.sigbits + 1) {
-                awayZero = new Float32(
-                    ef.sign,
-                    ef.exponent + Float32.sigbits + bitsToRound,
-                    upBits.intValueExact() & Float32.sigmask
-                );
-            } else {
-                awayZero = new Float32(
-                    ef.sign, ef.exponent + (Float32.sigbits + 1) + bitsToRound,
-                    upBits.shiftRight(1).intValueExact() & Float32.sigmask
-                );
-            }
-
-        }
-
-        // Either round towards or away from zero based on rounding mode
-        switch (env.mode) {
-            case ZERO:
-                return towardsZero;
-            case MAX:
-            case MIN:
-                if (ef.sign != (env.mode == RoundingMode.MAX)) {
-                    return awayZero;
-                } else {
-                    return towardsZero;
+                if (ef.exponent > MINEXP - SIGBITS) {
+                    assert(ef.significand.bitLength() <= SIGBITS) { "Its actually normal" }
+                    return Float32(
+                        ef.sign, MINEXP,
+                        ef.significand.shiftLeft(-(MINEXP - SIGBITS + 1) + ef.exponent).intValueExact()
+                    )
                 }
-            default:
-                break;
-        }
 
-        // See which result is closer to the non-rounded version
-        if (roundedBits.equals(BigInteger.ONE.shiftLeft(bitsToRound - 1))) {
-            if (env.mode == RoundingMode.AWAY || (awayZero.bits & 1) == 0) {
-                return awayZero;
+                env.inexact = true
+                env.underflow = true // Section 7.5
+                bitsToRound = (MINEXP - SIGBITS + 1) - ef.exponent
+                val mainBits = ef.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound)
+                roundedBits = ef.significand.subtract(mainBits)
+
+                towardsZero = Float32(ef.sign, MINEXP, ef.significand.shiftRight(bitsToRound).intValueExact())
+                val upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1))
+                if (upBits.testBit(0) || upBits.bitLength() <= SIGBITS) {
+                    assert(upBits.bitLength() <= SIGBITS)
+                    awayZero = Float32(ef.sign, MINEXP, upBits.intValueExact())
+                } else {
+                    awayZero = Float32(ef.sign, MINEXP + 1, upBits.intValueExact() and SIGMASK)
+                }
+            } else if (normalizedExponent > MAXEXP) {
+                // Section 7.4
+                env.overflow = true
+                env.inexact = true
+                return when (env.mode) {
+                    RoundingMode.ZERO -> Float32(ef.sign, MAXEXP - 1, -1) // Largest finite number
+                    RoundingMode.MIN, RoundingMode.MAX -> if (ef.sign != (env.mode == RoundingMode.MAX)) {
+                        if (ef.sign) negativeInfinity else infinity
+                    } else {
+                        Float32(ef.sign, MAXEXP - 1, -1) // Largest finite number
+                    }
+
+                    RoundingMode.AWAY, RoundingMode.EVEN -> if (ef.sign) negativeInfinity else infinity
+                }
+                assert(false) { "Not reachable" }
+                return if (ef.sign) negativeInfinity else infinity
             } else {
-                return towardsZero;
+                if (ef.significand.bitLength() <= (SIGBITS + 1)) {
+                    // No rounding needed
+                    val bitCount = ef.exponent + ef.significand.bitLength() - 1
+                    assert(bitCount > MINEXP) { "Its actually subnormal" }
+
+                    return Float32(
+                        ef.sign, bitCount,
+                        ef.significand.shiftLeft((SIGBITS + 1) - ef.significand.bitLength())
+                            .intValueExact() and SIGMASK
+                    )
+                }
+                env.inexact = true
+                bitsToRound = ef.significand.bitLength() - (SIGBITS + 1)
+                val mainBits = ef.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound)
+                roundedBits = ef.significand.subtract(mainBits)
+
+                val upBits = ef.significand.shiftRight(bitsToRound).add(BigInteger.valueOf(1))
+
+                towardsZero = Float32(
+                    ef.sign, ef.exponent + SIGBITS + bitsToRound,
+                    ef.significand.shiftRight(bitsToRound).intValueExact() and SIGMASK
+                )
+                awayZero = if (upBits.testBit(0) || upBits.bitLength() <= SIGBITS + 1) {
+                    Float32(
+                        ef.sign,
+                        ef.exponent + SIGBITS + bitsToRound,
+                        upBits.intValueExact() and SIGMASK
+                    )
+                } else {
+                    Float32(
+                        ef.sign, ef.exponent + (SIGBITS + 1) + bitsToRound,
+                        upBits.shiftRight(1).intValueExact() and SIGMASK
+                    )
+                }
             }
-        } else if (roundedBits.compareTo(BigInteger.ONE.shiftLeft(bitsToRound - 1)) > 0) {
-            return awayZero;
-        } else {
-            return towardsZero;
+
+            // Either round towards or away from zero based on rounding mode
+            when (env.mode) {
+                RoundingMode.ZERO -> return towardsZero
+                RoundingMode.MAX, RoundingMode.MIN -> return if (ef.sign != (env.mode == RoundingMode.MAX)) {
+                    awayZero
+                } else {
+                    towardsZero
+                }
+
+                else -> {}
+            }
+
+            // See which result is closer to the non-rounded version
+            return if (roundedBits == BigInteger.ONE.shiftLeft(bitsToRound - 1)) {
+                if (env.mode == RoundingMode.AWAY || (awayZero.bits and 1) == 0) {
+                    awayZero
+                } else {
+                    towardsZero
+                }
+            } else if (roundedBits > BigInteger.ONE.shiftLeft(bitsToRound - 1)) {
+                awayZero
+            } else {
+                towardsZero
+            }
+        }
+
+        override val maxPrecision = 30
+
+        private const val SIGBITS = 23
+        private const val EXPBITS = 8
+        private const val MAXEXP = 1 shl (EXPBITS - 1)
+        private const val MINEXP = -(1 shl (EXPBITS - 1)) + 1
+        private const val SIGMASK = (1 shl SIGBITS) - 1
+
+        fun fromInteger(value: Int): Float32? {
+            if (value == 0) return zero
+            val sign = value < 0
+            val absolute = value.absoluteValue
+            var exponent = 0
+            var significand = 0
+            for (i in 30 downTo 0) {
+                if (((absolute shr i) and 1) == 1) {
+                    exponent = i + 127
+                    significand = (absolute shl (32 - i)) ushr 9
+                    break
+                }
+            }
+            val bits = (if (sign) -0x80000000 else 0) or (exponent shl 23) or significand
+            return Float32(bits)
         }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public @NotNull ExactFloat toExactFloat() {
-        assert !this.isInfinite() : "Infinity is not exact";
-        assert !this.isNaN() : "NaNs are not exact";
-        assert !this.isZero() : "Zeros should be handled explicitly";
-
-        final boolean sign = this.isSignMinus();
-        final int exponent;
-        final BigInteger significand;
-        if (this.isZero()) {
-            exponent = 0;
-            significand = BigInteger.ZERO;
-        } else if (this.isNormal()) {
-            exponent = this.exponent() - 23;
-            significand = BigInteger.valueOf((this.bits & 0x007FFFFF) + 0x00800000); // Add back the implied one
-        } else if (this.isSubnormal()) {
-            exponent = this.exponent() - 22;
-            significand = BigInteger.valueOf(this.bits & 0x007FFFFF);
-        } else {
-            assert false : "This should not be reachable";
-            // Dummy value
-            return new ExactFloat(sign, 0, BigInteger.ZERO);
-        }
-        return new ExactFloat(sign, exponent, significand);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int maxPrecision() {
-        // TODO: make a tight bound around actual required precision
-        return 30;
-    }
-
-    private static final int sigbits = 23, expbits = 8,
-        maxexp = 1 << (Float32.expbits - 1),
-        minexp = -(1 << (Float32.expbits - 1)) + 1,
-        sigmask = (1 << Float32.sigbits) - 1;
-
 }

@@ -4,10 +4,9 @@ import arrow.core.Either
 import arrow.core.raise.either
 import rars.ProgramStatement
 import rars.exceptions.SimulationEvent
-import rars.jsoftfloat.Environment
-import rars.jsoftfloat.operations.Arithmetic
-import rars.jsoftfloat.operations.Comparisons
-import rars.jsoftfloat.types.Float64
+import rars.ksoftfloat.Environment
+import rars.ksoftfloat.operations.*
+import rars.ksoftfloat.types.Float64
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
 import rars.riscv.getRoundingMode
@@ -19,7 +18,7 @@ class DoubleFloat private constructor(
     description: String,
     funct: String,
     rm: String,
-    private val compute: (Float64, Float64, Environment) -> Float64
+    private val compute: Environment.(Float64, Float64) -> Float64
 ) : BasicInstruction(usage, description, BasicInstructionFormat.R_FORMAT, "$funct ttttt sssss $rm fffff 1010011") {
 
     override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
@@ -30,10 +29,9 @@ class DoubleFloat private constructor(
                 statement
             ).bind()
         }
-        val result: Float64 = compute(
+        val result: Float64 = environment.compute(
             Float64(fpRegisterFile.getLongValue(statement.getOperand(1))!!),
             Float64(fpRegisterFile.getLongValue(statement.getOperand(2))!!),
-            environment
         )
         csrRegisterFile.setfflags(environment).bind()
         fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result.bits).bind()
@@ -44,7 +42,7 @@ class DoubleFloat private constructor(
             name: String,
             description: String,
             funct: String,
-            compute: (Float64, Float64, Environment) -> Float64
+            compute: Environment.(Float64, Float64) -> Float64
         ): DoubleFloat = DoubleFloat("$name f1, f2, f3, dyn", description, funct, "qqq", compute)
 
         private fun double(
@@ -52,37 +50,43 @@ class DoubleFloat private constructor(
             description: String,
             funct: String,
             rm: String,
-            compute: (Float64, Float64, Environment) -> Float64
+            compute: Environment.(Float64, Float64) -> Float64
         ): DoubleFloat = DoubleFloat("$name f1, f2, f3", description, funct, rm, compute)
 
         @JvmField
         val FADDD = double(
-            "fadd.d", "Floating ADD (64 bit): assigns f1 to f2 + f3", "0000001"
-        ) { f1, f2, e -> Arithmetic.add(f1, f2, e) }
+            "fadd.d", "Floating ADD (64 bit): assigns f1 to f2 + f3", "0000001",
+            Float64::add
+        )
 
         @JvmField
         val FDIVD = double(
-            "fdiv.d", "Floating DIVide (64 bit): assigns f1 to f2 / f3", "0001101"
-        ) { f1, f2, e -> Arithmetic.division(f1, f2, e) }
+            "fdiv.d", "Floating DIVide (64 bit): assigns f1 to f2 / f3", "0001101",
+            Float64::divide
+        )
 
         @JvmField
         val FMAXD = double(
-            "fmax.d", "Floating MAXimum (64 bit): assigns f1 to the larger of f1 and f3", "0010101", "001"
-        ) { f1, f2, e -> Comparisons.maximumNumber(f1, f2, e) }
+            "fmax.d", "Floating MAXimum (64 bit): assigns f1 to the larger of f1 and f3", "0010101", "001",
+            Float64::max
+        )
 
         @JvmField
         val FMIND = double(
-            "fmin.d", "Floating MINimum (64 bit): assigns f1 to the smaller of f1 and f3", "0010101", "000"
-        ) { f1, f2, e -> Comparisons.minimumNumber(f1, f2, e) }
+            "fmin.d", "Floating MINimum (64 bit): assigns f1 to the smaller of f1 and f3", "0010101", "000",
+            Float64::min
+        )
 
         @JvmField
         val FMULD = double(
-            "fmul.d", "Floating MULtiply (64 bit): assigns f1 to f2 * f3", "0001001"
-        ) { f1, f2, e -> Arithmetic.multiplication(f1, f2, e) }
+            "fmul.d", "Floating MULtiply (64 bit): assigns f1 to f2 * f3", "0001001",
+            Float64::multiply
+        )
 
         @JvmField
         val FSUBD = double(
-            "fsub.d", "Floating SUBtract (64 bit): assigns f1 to f2 - f3", "0000101"
-        ) { f1, f2, e -> Arithmetic.subtraction(f1, f2, e) }
+            "fsub.d", "Floating SUBtract (64 bit): assigns f1 to f2 - f3", "0000101",
+            Float64::subtract
+        )
     }
 }
