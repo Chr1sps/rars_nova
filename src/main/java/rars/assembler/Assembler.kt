@@ -369,8 +369,8 @@ class Assembler {
         catchDuplicateAddresses(sortedMachineList, this@Assembler.errors!!)
         ensure(
             !(this@Assembler.errors!!.errorsOccurred()
-            || this@Assembler.errors!!.warningsOccurred()
-            && warningsAreErrors)
+                || this@Assembler.errors!!.warningsOccurred()
+                && warningsAreErrors)
         ) {
             AssemblyError(this@Assembler.errors!!)
         }
@@ -382,8 +382,8 @@ class Assembler {
         val tokens = program.tokenList!!
         for (line in tokens) {
             if (line.size > 2 && (line.get(0).type == TokenType.DIRECTIVE ||
-                line.get(2).type == TokenType.DIRECTIVE
-                )
+                    line.get(2).type == TokenType.DIRECTIVE
+                    )
             ) {
                 val dirPos = if (line.get(0).type == TokenType.DIRECTIVE) 0 else 2
                 if (Directive.matchDirective(line.get(dirPos).text) == Directive.EQV) {
@@ -492,7 +492,7 @@ class Assembler {
                     val statements = this.parseLine(
                         tokenList2,
                         ("<" + (i - macro.fromLine + macro.originalFromLine) + "> "
-                        + substituted.trim { it <= ' ' }),
+                            + substituted.trim { it <= ' ' }),
                         sourceLineNumber, extendedAssemblerEnabled
                     )
                     if (statements != null) {
@@ -542,11 +542,11 @@ class Assembler {
         // is contained in this.dataDirective (the current data directive).
         if (this.inDataSegment &&  // Added data segment guard...
             (tokenType == TokenType.PLUS ||  // because invalid instructions were being caught...
-            tokenType == TokenType.MINUS ||  // here and reported as a directive in text segment!
-            tokenType == TokenType.QUOTED_STRING ||
-            tokenType == TokenType.IDENTIFIER ||
-            TokenType.isIntegerTokenType(tokenType) ||
-            TokenType.isFloatingTokenType(tokenType))
+                tokenType == TokenType.MINUS ||  // here and reported as a directive in text segment!
+                tokenType == TokenType.QUOTED_STRING ||
+                tokenType == TokenType.IDENTIFIER ||
+                TokenType.isIntegerTokenType(tokenType) ||
+                TokenType.isFloatingTokenType(tokenType))
         ) {
             this.executeDirectiveContinuation(tokens)
             return null
@@ -570,7 +570,7 @@ class Assembler {
                 this.errors!!.addTokenError(
                     token,
                     "Extended (pseudo) instruction or format not permitted.  See Settings" +
-                    "."
+                        "."
                 )
             }
             if (OperandUtils.checkIfTokensMatchOperand(tokens, instruction, this.errors)) {
@@ -596,7 +596,7 @@ class Assembler {
     /**
      * Pre-process the token list for a statement by stripping off any label, if
      * either are present. Any label definition will be recorded in the symbol
-     * table. NOTE: the ArrayList parameter will be modified.
+     * table. NOTE: the TokenList parameter will be modified.
      */
     private fun stripLabels(tokens: TokenList) {
         // If there is a label, handle it here and strip it off.
@@ -641,9 +641,8 @@ class Assembler {
         }
         when {
             direct == null -> this.errors!!.addTokenError(token, "Unrecognized directive: ${token.text}")
-            direct == Directive.EQV -> {
-                // Do nothing. This was vetted and processed during tokenizing.
-            }
+
+            direct == Directive.EQV -> Unit // Do nothing. This was vetted and processed during tokenizing.
 
             direct == Directive.MACRO -> {
                 if (tokens.size < 2) {
@@ -743,11 +742,11 @@ class Assembler {
             }
 
             direct == Directive.WORD ||
-            direct == Directive.HALF ||
-            direct == Directive.BYTE ||
-            direct == Directive.FLOAT ||
-            direct == Directive.DOUBLE ||
-            direct == Directive.DWORD -> {
+                direct == Directive.HALF ||
+                direct == Directive.BYTE ||
+                direct == Directive.FLOAT ||
+                direct == Directive.DOUBLE ||
+                direct == Directive.DWORD -> {
                 this.dataDirective = direct
                 if (this.passesDataSegmentCheck(token) && tokens.size > 1) {
                     // added text segment prohibition
@@ -756,8 +755,8 @@ class Assembler {
             }
 
             direct == Directive.ASCII ||
-            direct == Directive.ASCIZ ||
-            direct == Directive.STRING -> {
+                direct == Directive.ASCIZ ||
+                direct == Directive.STRING -> {
                 this.dataDirective = direct
                 if (this.passesDataSegmentCheck(token)) {
                     this.storeStrings(tokens, direct, this.errors!!)
@@ -786,7 +785,7 @@ class Assembler {
                             token.sourceLine,
                             token.startPos,
                             "Alignments less than 4 bytes are not supported in the text section."
-                            + " The alignment has been rounded up to 4 bytes."
+                                + " The alignment has been rounded up to 4 bytes."
                         )
                     )
                     this.dataAddress = this.alignToBoundary(this.dataAddress, 4)
@@ -847,7 +846,8 @@ class Assembler {
                 }
             }
 
-            direct == Directive.GLOBL || direct == Directive.GLOBAL -> {
+            direct == Directive.GLOBL ||
+                direct == Directive.GLOBAL -> {
                 if (tokens.size < 2) {
                     this.errors!!.addTokenError(
                         token,
@@ -1049,7 +1049,7 @@ class Assembler {
                 value = longValue.toInt()
                 if (directive != Directive.DWORD) {
                     val message = "value ${longValue.toHexStringWithPrefix()} " +
-                    "is out-of-range and truncated to ${value.toHexStringWithPrefix()}"
+                        "is out-of-range and truncated to ${value.toHexStringWithPrefix()}"
                     errors.addWarning(token, message)
                 }
             } else {
@@ -1214,7 +1214,7 @@ class Assembler {
                                         val invalidCodePoint = quote.substring(j + 1)
                                         val message: String =
                                             "unicode escape \"\\u$invalidCodePoint\" is incomplete. " +
-                                            "Only escapes with 4 digits are valid."
+                                                "Only escapes with 4 digits are valid."
                                         errors.addTokenError(token, message)
                                     } catch (_: NumberFormatException) {
                                         errors.addTokenError(
@@ -1358,9 +1358,9 @@ class Assembler {
                     else
                         ".ktext"
                     val message = "Duplicate text segment address: $formattedAddress " +
-                    "already occupied by ${ps1.sourceLine!!.program.file} " +
-                    "line ${ps1.sourceLine.lineNumber} " +
-                    "(caused by use of $directiveText operand)"
+                        "already occupied by ${ps1.sourceLine!!.program.file} " +
+                        "line ${ps1.sourceLine.lineNumber} " +
+                        "(caused by use of $directiveText operand)"
                     errors.add(
                         ErrorMessage.error(
                             ps2.sourceProgram,
@@ -1397,8 +1397,8 @@ class Assembler {
 
         private fun tokenListBeginsWithLabel(tokens: TokenList): Boolean = if (tokens.size < 2) false
         else (tokens[0].type == TokenType.IDENTIFIER ||
-        tokens[0].type == TokenType.OPERATOR)
-        && tokens[1].type == TokenType.COLON
+            tokens[0].type == TokenType.OPERATOR)
+            && tokens[1].type == TokenType.COLON
 
         fun assemble(
             tokenizedProgramFiles: List<RISCVProgram>,

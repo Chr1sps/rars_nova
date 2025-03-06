@@ -65,7 +65,7 @@ class BitmapDisplay(
         for (row in 0..<this.displayHeight) {
             for (col in 0..<this.displayWidth) {
                 val address = this.baseAddress + currentOffset
-                val word = this.memory.getWordNoNotify(address).unwrap { e ->
+                val word = this.memory.silentMemoryView.getWord(address).unwrap { e ->
                     LOGGER.error("Error updating color for address {} in bitmap display: {}", address, e)
                     return
                 }
@@ -92,7 +92,7 @@ class BitmapDisplay(
             var col = (start - this.baseAddress) % (this.displayWidth * 4) / 4
             var i = start
             while (i < end) {
-                when (val word = this.memory.getWordNoNotify(i)) {
+                when (val word = this.memory.silentMemoryView.getWord(i)) {
                     is Either.Left -> {
                         LOGGER.error("Error updating color for address {} in bitmap display: {}", i, word.value)
                         break

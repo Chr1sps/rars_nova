@@ -633,7 +633,7 @@ public final class DataSegmentWindow extends JInternalFrame {
                 final var finalRow = row;
                 final var finalColumn = column;
                 final int finalAddress = address;
-                Globals.MEMORY_INSTANCE.getWordNoNotify(address).fold(
+                Globals.MEMORY_INSTANCE.getSilentMemoryView().getWord(address).fold(
                 error -> {
                     // Bit of a hack here. Memory will throw an exception if you try to read
                     // directly from text segment when the
@@ -647,7 +647,7 @@ public final class DataSegmentWindow extends JInternalFrame {
                         int displayValue = 0;
                         if (!BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                             BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
-                            displayValue = unwrap(Globals.MEMORY_INSTANCE.getWordNoNotify(finalAddress));
+                            displayValue = unwrap(Globals.MEMORY_INSTANCE.getSilentMemoryView().getWord(finalAddress));
                             BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, false);
                         }
                         ((DataTableModel) dataModel).setDisplayAndModelValueAt(

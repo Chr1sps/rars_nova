@@ -180,7 +180,7 @@ class InstructionStatistics(mainUI: VenusUI) : AbstractTool("$NAME, Version 1.0 
             this.lastAddress = a
 
             // access the statement in the text segment without notifying other tools etc.
-            Globals.MEMORY_INSTANCE.getStatementNoNotify(notice.address).onRight { statement ->
+            Globals.MEMORY_INSTANCE.silentMemoryView.getProgramStatement(notice.address).onRight { statement ->
 
                 // necessary to handle possible null pointers at the end of the program
                 // (e.g., if the simulator tries to execute the next instruction after the last

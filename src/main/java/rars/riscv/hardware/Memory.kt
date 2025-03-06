@@ -83,8 +83,37 @@ class Memory(
      */
     private val observables = mutableListOf<MemoryObservable>()
 
-    override val silentMemoryView: ReadableMemory<Int>
-        get() = TODO("Not yet implemented")
+    override val silentMemoryView = object : ReadableMemory<Int> {
+        override val memoryConfiguration get() = this@Memory.memoryConfiguration
+
+        override fun getByte(address: Int) = get(address, 1, false).map {
+            (it and 0xFF).toByte()
+        }
+
+        override fun getHalf(address: Int) = if (address % 2 != 0) {
+            MemoryError(
+                "Load address not aligned on halfword boundary ",
+                ExceptionReason.LOAD_ADDRESS_MISALIGNED,
+                address
+            ).left()
+        } else get(address, 2, false).map {
+            (it and 0xFFFF).toShort()
+        }
+
+        override fun getWord(address: Int) = checkLoadWordAligned(address).flatMap {
+            get(address, DataTypes.WORD_SIZE, false)
+        }
+
+        override fun getDoubleWord(address: Int) = either {
+            checkLoadWordAligned(address).bind()
+            val oldHighOrder = get(address + 4, 4, false).bind()
+            val oldLowOrder = get(address, 4, false).bind()
+            (oldHighOrder.toLong() shl 32) or (oldLowOrder.toLong() and 0xFFFFFFFFL)
+        }
+
+        override fun getProgramStatement(address: Int) = this@Memory.getStatementNoNotify(address)
+
+    }
 
     private var actualDataSegmentLimitAddress: Int = min(
         this.memoryConfiguration.dataSegmentLimitAddress.toDouble(),
@@ -367,7 +396,7 @@ class Memory(
                         address
                     )
                 }
-                val oldStatement = getStatementNoNotify((address / 4) * 4).bind()
+                val oldStatement = getStatementImpl((address / 4) * 4, false).bind()
                 if (oldStatement != null) {
                     oldValue = oldStatement.binaryStatement
                 }
@@ -827,7 +856,7 @@ class Memory(
      * If address is not on word boundary.
      */
     @CheckReturnValue
-    fun getWordNoNotify(address: Int): Either<MemoryError, Int> = checkLoadWordAligned(address).flatMap {
+    private fun getWordNoNotify(address: Int): Either<MemoryError, Int> = checkLoadWordAligned(address).flatMap {
         get(address, DataTypes.WORD_SIZE, false)
     }
 
@@ -888,7 +917,7 @@ class Memory(
      * @see ProgramStatement
      */
     @CheckReturnValue
-    fun getStatementNoNotify(address: Int): Either<MemoryError, ProgramStatement?> =
+    private fun getStatementNoNotify(address: Int): Either<MemoryError, ProgramStatement?> =
         this.getStatementImpl(address, false)
 
     @CheckReturnValue

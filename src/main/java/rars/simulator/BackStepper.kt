@@ -363,26 +363,27 @@ class BackStepper {
             param2: Long
         ) {
             this.action = act
-            val (statement, counter) = Globals.MEMORY_INSTANCE.getStatementNoNotify(programCounter).fold(
-                {
-                    // The only situation causing this so far: user modifies memory or register
-                    // contents through direct manipulation on the GUI, after assembling the program
-                    // but
-                    // before starting to run it (or after backstepping all the way to the start).
-                    // The action will not be associated with any instruction, but will be carried
-                    // out
-                    // when popped.
-                    // Backstep method above will see this as flag to not set PC
-                    Pair(null, NOT_PC_VALUE)
-                },
-                { statement ->
-                    // Client does not have direct access to program statement, and rather than
-                    // making all
-                    // of them go through the methods below to obtain it, we will do it here.
-                    // Want the program statement but do not want observers notified.
-                    Pair(statement, programCounter)
-                }
-            )
+            val (statement, counter) = Globals.MEMORY_INSTANCE.silentMemoryView.getProgramStatement(programCounter)
+                .fold(
+                    {
+                        // The only situation causing this so far: user modifies memory or register
+                        // contents through direct manipulation on the GUI, after assembling the program
+                        // but
+                        // before starting to run it (or after backstepping all the way to the start).
+                        // The action will not be associated with any instruction, but will be carried
+                        // out
+                        // when popped.
+                        // Backstep method above will see this as flag to not set PC
+                        Pair(null, NOT_PC_VALUE)
+                    },
+                    { statement ->
+                        // Client does not have direct access to program statement, and rather than
+                        // making all
+                        // of them go through the methods below to obtain it, we will do it here.
+                        // Want the program statement but do not want observers notified.
+                        Pair(statement, programCounter)
+                    }
+                )
             this.ps = statement
             this.pc = counter
             this.param1 = param1
