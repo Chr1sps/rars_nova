@@ -27,10 +27,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package rars.tools;
 
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
-import rars.exceptions.AddressErrorException;
+import rars.exceptions.MemoryError;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.instructions.Branch;
@@ -314,10 +315,7 @@ public final class BHTSimulator extends AbstractTool implements ActionListener {
 
             // now it is safe to make a cast of the notice
 
-            try {
-                // access the statement in the text segment without notifying other tools etc.
-                final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatementNoNotify(memAccNotice.address);
-
+            Globals.MEMORY_INSTANCE.getStatementNoNotify(memAccNotice.address).onRight(stmt -> {
                 // necessary to handle possible null pointers at the end of the program
                 // (e.g., if the simulator tries to execute the next instruction after the last
                 // instruction in the text segment)
@@ -357,10 +355,8 @@ public final class BHTSimulator extends AbstractTool implements ActionListener {
                         this.m_pendingBranchInstAddress = 0;
                     }
                 }
-            } catch (final AddressErrorException e) {
-                // silently ignore these exceptions
-            }
-
+                return Unit.INSTANCE;
+            });
         }
     }
 }

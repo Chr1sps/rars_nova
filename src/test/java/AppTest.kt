@@ -11,13 +11,13 @@ import rars.Globals
 import rars.ProgramStatement
 import rars.api.Program
 import rars.api.ProgramOptions
-import rars.exceptions.AddressErrorException
 import rars.exceptions.AssemblyError
 import rars.riscv.BasicInstructionFormat
 import rars.riscv.InstructionsRegistry
 import rars.riscv.hardware.MemoryConfiguration
 import rars.settings.BoolSetting
 import rars.simulator.Simulator
+import rars.util.unwrap
 import utils.RarsTestBase
 import java.io.BufferedReader
 import java.io.File
@@ -120,7 +120,7 @@ internal class AppTest : RarsTestBase() {
                 program.assembleString(format)
                 program.setup(emptyList(), "")
                 val instructionAddress = MemoryConfiguration.DEFAULT.textBaseAddress
-                val word = program.memory.getWord(instructionAddress)
+                val word = program.memory.getWord(instructionAddress).unwrap()
 
                 val baseStatement = program.machineList.first()
                 val statementFromMemory = ProgramStatement(word, instructionAddress)
@@ -137,7 +137,7 @@ internal class AppTest : RarsTestBase() {
                 )
                 program.assembleString(format)
                 program.setup(emptyList(), "")
-                val word2 = program.memory.getWord(instructionAddress)
+                val word2 = program.memory.getWord(instructionAddress).unwrap()
                 assertEquals(word, word2, "Error 3 on: $format")
                 assertEquals(instruction, statementFromMemory.instruction, "Error 4 on: $format")
             }
@@ -160,14 +160,14 @@ internal class AppTest : RarsTestBase() {
                 val programString = "label:" + instruction.exampleFormat
                 program.assembleString(programString)
                 program.setup(emptyList(), "")
-                val first = program.memory.getWord(0x400000)
-                val second = program.memory.getWord(0x400004)
+                val first = program.memory.getWord(0x400000).unwrap()
+                val second = program.memory.getWord(0x400004).unwrap()
                 val ps = ProgramStatement(first, 0x400000)
                 assertNotNull(ps.instruction, "Error 11 on: $programString")
-                assertThat<String>(
+                assertThat(
                     "Error 12 on: $programString",
                     ps.printableBasicAssemblyStatement,
-                    CoreMatchers.not<String?>(CoreMatchers.containsString("invalid"))
+                    CoreMatchers.not(CoreMatchers.containsString("invalid"))
                 )
                 if ("t0" in programString || "t1" in programString || "t2" in programString || "f1" in programString) {
                     // TODO: test that each register individually is meaningful and test every
@@ -178,8 +178,8 @@ internal class AppTest : RarsTestBase() {
                         programString.replace("t0|t1|t2".toRegex(), "x0").replace("f1".toRegex(), "f0")
                     program.assembleString(registerSubstitute)
                     program.setup(emptyList(), "")
-                    val word1 = program.memory.getWord(0x400000)
-                    val word2 = program.memory.getWord(0x400004)
+                    val word1 = program.memory.getWord(0x400000).unwrap()
+                    val word2 = program.memory.getWord(0x400004).unwrap()
                     Assertions.assertFalse(word1 == first && word2 == second, "Error 13 on: $programString")
                 }
             }
@@ -194,19 +194,15 @@ internal class AppTest : RarsTestBase() {
     }
 
     @Test
-    @Throws(AddressErrorException::class)
     fun testBasicInstructionBinaryCodes32() = testBasicInstructionBinaryCodesImpl(false)
 
     @Test
-    @Throws(AddressErrorException::class)
     fun testBasicInstructionBinaryCodes64() = testBasicInstructionBinaryCodesImpl(true)
 
     @Test
-    @Throws(Exception::class)
     fun testPseudoInstructions32() = testPseudoInstructionsImpl(false)
 
     @Test
-    @Throws(Exception::class)
     fun testPseudoInstructions64() = testPseudoInstructionsImpl(true)
 
     @DisplayName("32 bit instructions")

@@ -124,24 +124,31 @@ class RunAssembleAction(
                 Globals.CS_REGISTER_FILE.resetRegisters()
                 Globals.INTERRUPT_CONTROLLER.reset()
 
-                executePane.textSegment.setupTable()
-                executePane.dataSegment.setupTable()
-                executePane.dataSegment.highlightCellForAddress(Globals.MEMORY_INSTANCE.memoryConfiguration.dataBaseAddress)
-                executePane.dataSegment.clearHighlighting()
-                executePane.labelValues.setupTable()
-                executePane.textSegment.codeHighlighting = true
-                executePane.textSegment.highlightStepAtPC()
-                registersPane.registersWindow.clearWindow()
-                registersPane.floatingPointWindow.clearWindow()
-                registersPane.controlAndStatusWindow.clearWindow()
-                this@RunAssembleAction.mainUI.isMemoryReset = true
-                this@RunAssembleAction.mainUI.isExecutionStarted = false
-                this@RunAssembleAction.mainUI.mainPane.setSelectedComponent(executePane)
+                executePane.apply {
+                    textSegment.setupTable()
+                    dataSegment.apply {
+                        setupTable()
+                        highlightCellForAddress(Globals.MEMORY_INSTANCE.memoryConfiguration.dataBaseAddress)
+                        clearHighlighting()
+                    }
+                    textSegment.apply {
+                        codeHighlighting = true
+                        highlightStepAtPC()
+                    }
+                }
+                registersPane.apply {
+                    registersWindow.clearWindow()
+                    floatingPointWindow.clearWindow()
+                    controlAndStatusWindow.clearWindow()
+                }
+                mainUI.apply {
+                    isMemoryReset = true
+                    isExecutionStarted = false
+                    mainPane.selectedComponent = executePane
+                    // Ensure that I/O "file descriptors" are initialized for a new program run
+                    venusIO.resetFiles()
+                }
 
-                // Aug. 24, 2005 Ken Vollmar
-
-                // Ensure that I/O "file descriptors" are initialized for a new program run
-                this@RunAssembleAction.mainUI.venusIO.resetFiles()
             }.onLeft { assemblyError ->
                 val errorReport = assemblyError.errors.generateErrorAndWarningReport()
                 messagesPane.postMessage(errorReport)

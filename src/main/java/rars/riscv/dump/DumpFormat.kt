@@ -1,11 +1,10 @@
-package rars.riscv.dump;
+package rars.riscv.dump
 
-import org.jetbrains.annotations.NotNull;
-import rars.exceptions.AddressErrorException;
-import rars.riscv.hardware.Memory;
-
-import java.io.File;
-import java.io.IOException;
+import arrow.core.Either
+import rars.exceptions.MemoryError
+import rars.riscv.hardware.Memory
+import java.io.File
+import java.io.IOException
 
 /**
  * Interface for memory dump file formats. All RARS needs to be able
@@ -16,8 +15,7 @@ import java.io.IOException;
  * @author Pete Sanderson
  * @version December 2007
  */
-public interface DumpFormat {
-
+interface DumpFormat {
     /**
      * Get a short description of the format, suitable
      * for displaying along with the extension, if any, in the file
@@ -27,46 +25,48 @@ public interface DumpFormat {
      * or as tool tip when mouse hovers over GUI component representing
      * this format.
      */
-    @NotNull String getDescription();
+    val description: String
 
     /**
      * A short one-word descriptor that will be used by the RARS
      * command line parser (and the RARS command line user) to specify
      * that this format is to be used.
      *
-     * @return a {@link java.lang.String} object
+     * @return a [java.lang.String] object
      */
-    @NotNull String getCommandDescriptor();
+    val commandDescriptor: String
 
     /**
      * Descriptive name for the format.
      *
      * @return Format name.
      */
-    @NotNull String toString();
+    val name: String
 
     /**
      * Write memory contents according to the
      * specification for this format.
      *
      * @param file
-     *     File in which to store memory contents.
+     * File in which to store memory contents.
      * @param firstAddress
-     *     first (lowest) memory address to dump. In bytes but
-     *     must be on word boundary.
+     * first (lowest) memory address to dump. In bytes but
+     * must be on word boundary.
      * @param lastAddress
-     *     last (highest) memory address to dump. In bytes but
-     *     must be on word boundary. Will dump the word that starts
-     *     at this address.
+     * last (highest) memory address to dump. In bytes but
+     * must be on word boundary. Will dump the word that starts
+     * at this address.
      * @param memory
-     *     a {@link Memory} object
-     * @throws AddressErrorException
-     *     if firstAddress is invalid or not on a word
-     *     boundary.
-     * @throws java.io.IOException
-     *     if error occurs during file output.
+     * a [Memory] object
+     * @return MemoryError if firstAddress is invalid or not on a word boundary.
+     * @throws IOException
+     * if error occurs during file output.
      */
-    void dumpMemoryRange(@NotNull File file, int firstAddress, int lastAddress, @NotNull Memory memory)
-        throws AddressErrorException, IOException;
-
+    @Throws(IOException::class)
+    fun dumpMemoryRange(
+        file: File,
+        firstAddress: Int,
+        lastAddress: Int,
+        memory: Memory
+    ): Either<MemoryError, Unit>
 }

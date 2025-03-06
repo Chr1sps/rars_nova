@@ -210,8 +210,7 @@ abstract class RegisterBlockWindowBase internal constructor(
     private inner class RegisterCellRenderer(
         private val alignment: Int,
         private val table: JTable,
-    ) :
-        DefaultTableCellRenderer() {
+    ) : DefaultTableCellRenderer() {
         private var font: Font?
 
         init {
@@ -236,18 +235,19 @@ abstract class RegisterBlockWindowBase internal constructor(
                 table, formattedValue,
                 isSelected, hasFocus, row, column
             ) as JLabel
-            cell.setFont(this.font)
-            cell.setHorizontalAlignment(this.alignment)
-            if (settings.boolSettings.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && row == highlightRow) {
-                val highlightingStyle = settings.highlightingSettings.registerHighlightingStyle
-                cell.setForeground(highlightingStyle!!.foreground)
-                cell.setBackground(highlightingStyle.background)
-            } else {
-                val theme = settings.editorThemeSettings.currentTheme
-                cell.setForeground(theme.foregroundColor)
-                cell.setBackground(theme.backgroundColor)
+            return cell.apply {
+                font = this@RegisterCellRenderer.font
+                horizontalAlignment = this@RegisterCellRenderer.alignment
+                if (settings.boolSettings.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && row == highlightRow) {
+                    val highlightingStyle = settings.highlightingSettings.registerHighlightingStyle
+                    foreground = highlightingStyle!!.foreground
+                    background = highlightingStyle.background
+                } else {
+                    val theme = settings.editorThemeSettings.currentTheme
+                    foreground = theme.foregroundColor
+                    background = theme.backgroundColor
+                }
             }
-            return cell
         }
     }
 
@@ -294,9 +294,9 @@ abstract class RegisterBlockWindowBase internal constructor(
             if (value == null) return
             val newValue: Long = try {
                 if (boolSettings.getSetting(BoolSetting.RV64_ENABLED)) {
-                    (value as String).translateToLong() ?: return
+                    value.toString().translateToLong() ?: return
                 } else {
-                    (value as String).translateToInt()!!.toLong()
+                    value.toString().translateToInt()!!.toLong()
                 }
             } catch (_: NumberFormatException) {
                 // If the user enters an invalid value, don't do anything.

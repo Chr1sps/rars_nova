@@ -5,8 +5,8 @@ import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
-import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
+import rars.riscv.hardware.MemoryListenerHandle;
 import rars.riscv.hardware.registers.Register;
 import rars.venus.VenusUI;
 
@@ -76,6 +76,7 @@ public abstract class AbstractTool extends JFrame {
     protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
     protected ConnectButton connectButton;
     protected JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.
+    private @Nullable MemoryListenerHandle<Integer> memoryHandle;
     // Major GUI components
     private JLabel headingLabel;
     // For Tool, is set true when "Connect" clicked, false when "Disconnect"
@@ -88,14 +89,14 @@ public abstract class AbstractTool extends JFrame {
      * Simple constructor
      *
      * @param title
-     *     String containing title bar text
+     * String containing title bar text
      * @param heading
-     *     a {@link java.lang.String} object
+     * a {@link java.lang.String} object
      */
     protected AbstractTool(
-        final @NotNull String title,
-        final @NotNull String heading,
-        final @NotNull VenusUI mainUI
+    final @NotNull String title,
+    final @NotNull String heading,
+    final @NotNull VenusUI mainUI
     ) {
         this.title = title;
         this.heading = heading;
@@ -147,12 +148,12 @@ public abstract class AbstractTool extends JFrame {
         this.dialog = new JDialog(this.mainUI, this.title);
         // assure the dialog goes away if user clicks the X
         this.dialog.addWindowListener(
-            new WindowAdapter() {
-                @Override
-                public void windowClosing(final WindowEvent e) {
-                    AbstractTool.this.performToolClosingDuties();
-                }
-            });
+        new WindowAdapter() {
+            @Override
+            public void windowClosing(final WindowEvent e) {
+                AbstractTool.this.performToolClosingDuties();
+            }
+        });
         this.theWindow = this.dialog;
         this.initializePreGUI();
         final JPanel contentPane = new JPanel(new BorderLayout(5, 5));
@@ -236,25 +237,25 @@ public abstract class AbstractTool extends JFrame {
         this.connectButton = new ConnectButton();
         this.connectButton.setToolTipText("Control whether tool will respond to running program");
         this.connectButton.addActionListener(
-            e -> {
-                if (this.connectButton.isConnected()) {
-                    this.connectButton.disconnect();
-                } else {
-                    this.connectButton.connect();
-                }
-            });
+        e -> {
+            if (this.connectButton.isConnected()) {
+                this.connectButton.disconnect();
+            } else {
+                this.connectButton.connect();
+            }
+        });
         this.connectButton.addKeyListener(new EnterKeyListener(this.connectButton));
 
         final JButton resetButton = new JButton("Reset");
         resetButton.setToolTipText("Reset all counters and other structures");
         resetButton.addActionListener(
-            e -> this.reset());
+        e -> this.reset());
         resetButton.addKeyListener(new EnterKeyListener(resetButton));
 
         final JButton closeButton = new JButton("Close");
         closeButton.setToolTipText("Close (exit) this tool");
         closeButton.addActionListener(
-            e -> this.performToolClosingDuties());
+        e -> this.performToolClosingDuties());
         closeButton.addKeyListener(new EnterKeyListener(closeButton));
 
         // Add all the buttons...
@@ -313,17 +314,21 @@ public abstract class AbstractTool extends JFrame {
      * or number of subranges it is registered for.
      *
      * @param lowEnd
-     *     low end of memory address range.
+     * low end of memory address range.
      * @param highEnd
-     *     high end of memory address range; must be >= lowEnd
+     * high end of memory address range; must be >= lowEnd
      */
     protected void addAsObserver(final int lowEnd, final int highEnd) {
-        try {
-            Globals.MEMORY_INSTANCE.subscribe(this::processAccessNotice, lowEnd, highEnd);
-        } catch (final AddressErrorException aee) {
-            final String errorMessage = "Error connecting to memory";
-            this.headingLabel.setText(errorMessage);
+        Globals.MEMORY_INSTANCE.subscribe(this::processAccessNotice, lowEnd, highEnd).fold(
+        __ -> {
+            this.headingLabel.setText("Error connecting to memory");
+            return Unit.INSTANCE;
+        },
+        handle -> {
+            this.memoryHandle = handle;
+            return Unit.INSTANCE;
         }
+        );
     }
 
     protected @NotNull Unit processAccessNotice(final @NotNull AccessNotice notice) {
@@ -338,11 +343,11 @@ public abstract class AbstractTool extends JFrame {
      * Add this app/tool as an Observer of the specified register.
      *
      * @param reg
-     *     a {@link Register} object
+     * a {@link Register} object
      */
     protected void addAsObserver(final Register reg) {
         if (reg != null) {
-            reg.registerChangeHook.subscribe(callback);
+            reg.registerChangeHook.subscribe(this::processAccessNotice);
         }
     }
 
@@ -357,14 +362,17 @@ public abstract class AbstractTool extends JFrame {
      * app terminates (e.g. when the button is re-enabled).
      */
     protected void deleteAsSubscriber() {
-        Globals.MEMORY_INSTANCE.deleteSubscriber(callback);
+        if (memoryHandle != null) {
+            Globals.MEMORY_INSTANCE.unsubscribe(memoryHandle);
+        }
+        memoryHandle = null;
     }
 
     /**
      * Delete this app/tool as an Observer of the specified register
      *
      * @param reg
-     *     a {@link Register} object
+     * a {@link Register} object
      */
     protected void deleteAsSubscriber(final Register reg) {
         if (reg != null) {
@@ -411,7 +419,7 @@ public abstract class AbstractTool extends JFrame {
      * invoked automatically.
      *
      * @param notice
-     *     a {@link AccessNotice} object
+     * a {@link AccessNotice} object
      */
     protected void processRISCVUpdate(final AccessNotice notice) {
     }
@@ -465,8 +473,8 @@ public abstract class AbstractTool extends JFrame {
                 e.consume();
                 try {
                     this.myButton.getActionListeners()[0].actionPerformed(new ActionEvent(
-                        this.myButton, 0,
-                        this.myButton.getText()
+                    this.myButton, 0,
+                    this.myButton.getText()
                     ));
                 } catch (final ArrayIndexOutOfBoundsException oob) {
                     // do nothing, since there is no action listener.

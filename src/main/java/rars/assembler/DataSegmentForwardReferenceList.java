@@ -3,7 +3,6 @@ package rars.assembler;
 import org.jetbrains.annotations.NotNull;
 import rars.ErrorList;
 import rars.Globals;
-import rars.exceptions.AddressErrorException;
 
 import java.util.ArrayList;
 
@@ -73,10 +72,7 @@ final class DataSegmentForwardReferenceList {
             final var doRemove = labelAddress != SymbolTable.NOT_FOUND;
             if (doRemove) {
                 // patch address has to be valid b/c we already stored there...
-                try {
-                    Globals.MEMORY_INSTANCE.set(entry.patchAddress, labelAddress, entry.length);
-                } catch (final AddressErrorException ignored) {
-                }
+                Globals.MEMORY_INSTANCE.set(entry.patchAddress, labelAddress, entry.length);
             }
             return doRemove;
         });

@@ -11,8 +11,9 @@ import java.io.StringWriter
  * if the value is an [Either.Left].
  * By default, the callback throws an [IllegalStateException].
  */
-fun <Err, Ok> Either<Err, Ok>.unwrap(
-    errorCallback: (Err) -> Nothing = { error("Expected Right, got Left") }
+@JvmOverloads
+inline fun <Err, Ok> Either<Err, Ok>.unwrap(
+    errorCallback: (Err) -> Nothing = { error("Expected Right, got Left. Left value: $it") }
 ): Ok = this.fold(errorCallback) { it }
 
 /**
@@ -20,8 +21,8 @@ fun <Err, Ok> Either<Err, Ok>.unwrap(
  * if the value is an [Either.Right].
  * By default, the callback throws an [IllegalStateException].
  */
-fun <Err, Ok> Either<Err, Ok>.unwrapErr(
-    okCallback: (Ok) -> Nothing = { error("Expected Left, got Right") }
+inline fun <Err, Ok> Either<Err, Ok>.unwrapErr(
+    okCallback: (Ok) -> Nothing = { error("Expected Left, got Right. Right value: $it") }
 ): Err = this.fold({ it }, okCallback)
 
 /**
@@ -39,7 +40,7 @@ fun <Err, Ok> Either<Err, Ok>.ignoreErr(): Either<Unit, Ok> = this.mapLeft {}
  * Otherwise, invokes the [guardFunc] with the value
  * stored in the [Either.Left] instance.
  */
-fun <Err, Ok> Either<Err, Ok>.rightOrThrow(
+inline fun <Err, Ok> Either<Err, Ok>.rightOrThrow(
     guardFunc: (Err) -> Nothing
 ): Either.Right<Ok> = this.fold(guardFunc) { Either.Right(it) }
 
@@ -48,11 +49,14 @@ fun <Err, Ok> Either<Err, Ok>.rightOrThrow(
  * Otherwise, invokes the [guardFunc] with the value
  * stored in the [Either.Right] instance.
  */
-fun <Err, Ok> Either<Err, Ok>.leftOrThrow(
+inline fun <Err, Ok> Either<Err, Ok>.leftOrThrow(
     guardFunc: (Ok) -> Nothing = { error("Expected Left, got Right") }
 ): Either.Left<Err> = this.fold(
     { Either.Left(it) }, guardFunc
 )
+
+inline fun <Ok> Either<*, Ok>.rightOr(defaultValue: Ok): Ok = this.fold({ defaultValue }, { it })
+inline fun <Err> Either<Err, *>.leftOr(defaultValue: Err): Err = this.fold({ it }, { defaultValue })
 
 fun Environment.flipRounding() {
     if (mode == RoundingMode.MAX) {

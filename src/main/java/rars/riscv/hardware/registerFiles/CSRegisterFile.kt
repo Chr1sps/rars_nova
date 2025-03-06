@@ -10,7 +10,7 @@ import rars.riscv.hardware.registers.LinkedRegister
 import rars.riscv.hardware.registers.MaskedRegister
 import rars.riscv.hardware.registers.ReadOnlyRegister
 import rars.riscv.hardware.registers.Register
-import rars.settings.OtherSettings.Companion.getBackSteppingEnabled
+import rars.settings.OtherSettings.Companion.isBacksteppingEnabled
 
 class CSRegisterFile : RegisterFileBase('_', createRegisters()) {
     val ustatus: Register = this.registers[0]
@@ -43,7 +43,7 @@ class CSRegisterFile : RegisterFileBase('_', createRegisters()) {
             )
         }
         val previousValue = register.setValue(newValue)
-        if ((getBackSteppingEnabled())) {
+        if (isBacksteppingEnabled) {
             Globals.PROGRAM!!.backStepper!!.addControlAndStatusRestore(register.number, previousValue)
         }
         previousValue
@@ -51,7 +51,7 @@ class CSRegisterFile : RegisterFileBase('_', createRegisters()) {
 
     fun updateRegisterBackdoor(register: Register, newValue: Long): Long {
         val previousValue = register.setValueNoNotify(newValue)
-        if ((getBackSteppingEnabled())) {
+        if (isBacksteppingEnabled) {
             Globals.PROGRAM!!.backStepper!!.addControlAndStatusBackdoor(
                 register.number,
                 previousValue

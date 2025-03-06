@@ -56,17 +56,17 @@ sealed interface SimulationError : SimulationEvent {
         }
 
         @JvmStatic
-        fun create(statement: ProgramStatement, addressError: AddressErrorException): SimulationError {
+        fun create(statement: ProgramStatement, memoryError: MemoryError): SimulationError {
             val address = Globals.REGISTER_FILE.programCounter - BasicInstruction.BASIC_INSTRUCTION_LENGTH
             return create(
-                addressError.reason,
+                memoryError.reason,
                 ErrorMessage.error(
                     statement.sourceProgram,
                     statement.sourceLine!!.lineNumber,
                     0,
-                    "Runtime exception at ${address.toHexStringWithPrefix()}: ${addressError.message}"
+                    "Runtime exception at ${address.toHexStringWithPrefix()}: ${memoryError.message}"
                 ),
-                addressError.address
+                memoryError.address
             )
         }
     }
@@ -87,19 +87,19 @@ class ExitingError(
     companion object {
         operator fun invoke(
             statement: ProgramStatement,
-            addressError: AddressErrorException,
+            memoryError: MemoryError,
         ): ExitingError {
             val address =
                 (Globals.REGISTER_FILE.programCounter - BasicInstruction.BASIC_INSTRUCTION_LENGTH).toHexStringWithPrefix()
             return ExitingError(
-                addressError.reason,
+                memoryError.reason,
                 ErrorMessage.error(
                     statement.sourceProgram,
                     statement.sourceLine!!.lineNumber,
                     0,
-                    "Runtime exception at $address: ${addressError.message}"
+                    "Runtime exception at $address: ${memoryError.message}"
                 ),
-                addressError.address
+                memoryError.address
             )
         }
 

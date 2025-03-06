@@ -3,7 +3,6 @@ package rars.util
 import arrow.core.Either
 import arrow.core.raise.either
 import rars.ProgramStatement
-import rars.exceptions.AddressErrorException
 import rars.exceptions.ExitingError
 import rars.simulator.SimulationContext
 import java.nio.charset.StandardCharsets
@@ -67,15 +66,15 @@ fun SimulationContext.readNullString(
 ): Either<ExitingError, String> = either {
     var byteAddress = registerFile.getIntValue(registerName)!!
     val utf8BytesList = mutableListOf<Byte>() // Need an array to hold bytes
-    try {
-        utf8BytesList.add(memory.getByte(byteAddress))
-        while (utf8BytesList.last() != 0.toByte())  // until null terminator
-        {
+    either {
+        utf8BytesList.add(memory.getByte(byteAddress).bind())
+        // until null terminator
+        while (utf8BytesList.last() != 0.toByte()) {
             byteAddress++
-            utf8BytesList.add(memory.getByte(byteAddress))
+            utf8BytesList.add(memory.getByte(byteAddress).bind())
         }
-    } catch (e: AddressErrorException) {
-        raise(ExitingError(statement, e))
+    }.onLeft { error ->
+        raise(ExitingError(statement, error))
     }
 
     val utf8Bytes = utf8BytesList.dropLast(1).toByteArray()

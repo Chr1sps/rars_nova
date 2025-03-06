@@ -1,21 +1,20 @@
-package rars.riscv.dump.formats;
+package rars.riscv.dump.formats
 
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.ProgramStatement;
-import rars.assembler.DataTypes;
-import rars.exceptions.AddressErrorException;
-import rars.riscv.hardware.Memory;
-import rars.settings.BoolSetting;
-import rars.util.BinaryUtilsKt;
-import rars.util.BinaryUtilsOld;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-
-import static rars.Globals.BOOL_SETTINGS;
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
+import rars.Globals
+import rars.assembler.DataTypes
+import rars.exceptions.MemoryError
+import rars.riscv.hardware.Memory
+import rars.settings.BoolSetting
+import rars.util.BinaryUtilsOld
+import rars.util.toHexStringWithPrefix
+import rars.util.unwrap
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.PrintStream
 
 /**
  * Dump memory contents in Segment Window format. Each line of
@@ -27,101 +26,120 @@ import static rars.Globals.BOOL_SETTINGS;
  * (4) source line. Each line of Data Segment Window represents 8
  * words of data segment memory. The line includes address of first
  * word for that line followed by 8 32-bit values.
- * <p>
+ *
+ *
  * In either case, addresses and values are displayed in decimal or
  * hexadecimal representation according to the corresponding settings.
  *
  * @author Pete Sanderson
  * @version January 2008
  */
-public class SegmentWindowDumpFormat extends AbstractDumpFormat {
-
-    public SegmentWindowDumpFormat() {
-        super(
-            "Text/Data Segment Window", "SegmentWindow",
-            " Text Segment Window or Data Segment Window format to text file"
-        );
-    }
-
+object SegmentWindowDumpFormat : AbstractDumpFormat(
+    "Text/Data Segment Window", "SegmentWindow",
+    " Text Segment Window or Data Segment Window format to text file"
+) {
     /**
      * {@inheritDoc}
-     * <p>
+     *
+     *
      * Write memory contents in Segment Window format. Each line of
      * text output resembles the Text Segment Window or Data Segment Window
      * depending on which segment is selected for the dump. Written
      * using PrintStream's println() method.
      *
+     * @return
      * @see AbstractDumpFormat
      */
-    @Override
-    public void dumpMemoryRange(
-        final @NotNull File file,
-        final int firstAddress,
-        final int lastAddress,
-        final @NotNull Memory memory
-    ) throws AddressErrorException, IOException {
-
+    @Throws(IOException::class)
+    override fun dumpMemoryRange(
+        file: File,
+        firstAddress: Int,
+        lastAddress: Int,
+        memory: Memory
+    ): Either<MemoryError, Unit> {
         // TODO: check if these settings work right
-        final boolean doDisplayAddressesInHex = BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX);
+        val doDisplayAddressesInHex = Globals.BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)
 
-        // If address in data segment, print in same format as Data Segment Window
-        if (Globals.MEMORY_INSTANCE.isAddressInDataSegment(firstAddress)) {
-            try (final var outStream = new PrintStream(new FileOutputStream(file))) {
-                final var builder = new StringBuilder();
-                int offset = 0;
-                for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
-                    if (offset % 8 == 0) {
-                        final var formattedAddress = (doDisplayAddressesInHex)
-                            ? BinaryUtilsKt.intToHexStringWithPrefix(address)
-                            : BinaryUtilsOld.unsignedIntToIntString(address);
-                        builder.append(formattedAddress).append("    ");
-                    }
-                    offset++;
-                    final var optWord = memory.getRawWordOrNull(address);
-                    if (optWord == null) {
-                        break;
-                    }
-                    builder.append((doDisplayAddressesInHex)
-                        ? BinaryUtilsKt.intToHexStringWithPrefix(optWord)
-                        : ("           " + optWord).substring(optWord.toString().length())).append(" ");
-                    if (offset % 8 == 0) {
-                        outStream.println(builder);
-                    }
-                }
-            }
-        } else if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(firstAddress)) {
-            // If address in text segment, print in same format as Text Segment Window
-            try (final var outStream = new PrintStream(new FileOutputStream(file))) {
-                outStream.println("Address     Code        Basic                        Line Source");
-                outStream.println();
-                for (int address = firstAddress; address <= lastAddress; address += DataTypes.WORD_SIZE) {
-                    final var builder = new StringBuilder();
-                    final var formattedAddress = (doDisplayAddressesInHex)
-                        ? BinaryUtilsKt.intToHexStringWithPrefix(address)
-                        : BinaryUtilsOld.unsignedIntToIntString(address);
-                    builder.append(formattedAddress).append("    ");
-                    final var optWord = memory.getRawWordOrNull(address);
-                    if (optWord == null) {
-                        break;
-                    }
-                    builder.append(BinaryUtilsKt.intToHexStringWithPrefix(optWord));
-                    builder.append("  ");
-                    try {
-                        final ProgramStatement ps = memory.getStatement(address);
-                        builder.append("%-29s".formatted(ps.getPrintableBasicAssemblyStatement()));
-                        if (ps.sourceLine != null) {
-                            builder.append("%-5s".formatted(ps.sourceLine.lineNumber()));
-                            builder.append(ps.sourceLine.source());
-                            builder.append(("%-5s".formatted(Integer.toString(ps.sourceLine.lineNumber()))));
-                            builder.append(ps.sourceLine.source());
-                        }
-                    } catch (final AddressErrorException ignored) {
-                    }
-                    outStream.println(builder);
-                }
-            }
-        }
-
+        if (Globals.MEMORY_INSTANCE.isAddressInDataSegment(firstAddress))
+            return PrintStream(FileOutputStream(file)).doDumpDataSegment(
+                firstAddress,
+                lastAddress,
+                memory,
+                doDisplayAddressesInHex
+            )
+        if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(firstAddress))
+            return PrintStream(FileOutputStream(file)).doDumpTextSegment(
+                firstAddress,
+                lastAddress,
+                memory,
+                doDisplayAddressesInHex
+            )
+        error("Address not in text or data segment")
     }
 
+    private fun PrintStream.doDumpDataSegment(
+        firstAddress: Int,
+        lastAddress: Int,
+        memory: Memory,
+        doDisplayAddressesInHex: Boolean
+    ): Either<MemoryError, Unit> = use { out ->
+        TODO()
+//        val builder = StringBuilder()
+//        var offset = 0
+//        for (address in firstAddress..lastAddress step DataTypes.WORD_SIZE) {
+//            if (offset % 8 == 0) {
+//                val formattedAddress = if (doDisplayAddressesInHex)
+//                    address.toHexStringWithPrefix()
+//                else
+//                    BinaryUtilsOld.unsignedIntToIntString(address)
+//                builder.append(formattedAddress).append("    ")
+//            }
+//            offset++
+//            val optWord: Either<MemoryError?, Int?> = memory.getRawWordOrNull(address)
+//            if (optWord == null) {
+//                break
+//            }
+//            builder.append(
+//                if (doDisplayAddressesInHex)
+//                    optWord.toHexStringWithPrefix()
+//                else
+//                    ("           " + optWord).substring(optWord.toString().length)
+//            ).append(" ")
+//            if (offset % 8 == 0) {
+//                out.println(builder)
+//            }
+//        }
+    }
+
+    private fun PrintStream.doDumpTextSegment(
+        firstAddress: Int,
+        lastAddress: Int,
+        memory: Memory,
+        doDisplayAddressesInHex: Boolean
+    ): Either<MemoryError, Unit> = use { out ->
+        out.println("Address     Code        Basic                        Line Source")
+        out.println()
+        for (address in firstAddress..lastAddress step DataTypes.WORD_SIZE) memory
+            .getRawWordOrNull(address)
+            .unwrap { return@use it.left() }
+            ?.let { word ->
+                buildString {
+                    val formattedAddress = if (doDisplayAddressesInHex)
+                        address.toHexStringWithPrefix()
+                    else
+                        BinaryUtilsOld.unsignedIntToIntString(address)
+                    append(formattedAddress).append("    ")
+                    append(word.toHexStringWithPrefix()).append("  ")
+                    memory.getProgramStatement(address).onRight { ps ->
+                        append(String.format("%-29s", ps!!.printableBasicAssemblyStatement))
+                        if (ps.sourceLine != null) {
+                            append(String.format("%-5s", ps.sourceLine.lineNumber))
+                            append(ps.sourceLine.source)
+                        }
+                    }
+                }
+            }?.let(out::println)
+            ?: break
+        Unit.right()
+    }
 }

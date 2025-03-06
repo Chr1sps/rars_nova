@@ -7,7 +7,6 @@ import rars.Globals;
 import rars.exceptions.SimulationError;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
-import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
@@ -19,6 +18,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 import static rars.Globals.BOOL_SETTINGS;
+import static rars.simulator.ProgramArgumentListKt.storeProgramArguments;
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -162,17 +162,14 @@ public final class RunStepAction extends GuiAction {
 
     // Method to store any program arguments into MIPS memory and registers before
     // execution begins. Arguments go into the gap between $sp and kernel memory.
-    // Argument pointers and count go into runtime stack and $sp is adjusted
-    //////////////////////////////////////////////////////////////////////////////////// accordingly.
-    // $a0 gets argument count (argc), $a1 gets stack address of first arg pointer
-
-    /// ///////////////////////////////////////////////////////////////////////////////// (argv).
+    // Argument pointers and count go into runtime stack and $sp is adjusted accordingly.
+    // $a0 gets argument count (argc), $a1 gets stack address of first arg pointer (argv).
     private void processProgramArgumentsIfAny() {
         final String programArguments = this.executePane.textSegment.getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||
             !BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             return;
         }
-        new ProgramArgumentList(programArguments).storeProgramArguments();
+        storeProgramArguments(programArguments);
     }
 }

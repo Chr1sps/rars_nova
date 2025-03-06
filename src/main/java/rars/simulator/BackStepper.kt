@@ -1,12 +1,10 @@
-package rars.simulator;
+package rars.simulator
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.ProgramStatement;
-import rars.exceptions.AddressErrorException;
-import rars.riscv.BasicInstruction;
+import rars.Globals
+import rars.ProgramStatement
+import rars.riscv.BasicInstruction
+import rars.simulator.BackStepper.BackstepAction.*
+import rars.util.unwrap
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -35,63 +33,34 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
-
 /**
  * Used to "step backward" through execution, undoing each instruction.
  *
  * @author Pete Sanderson
  * @version February 2006
  */
-public final class BackStepper {
-    private static final Logger LOGGER = LogManager.getLogger(BackStepper.class);
-    /**
-     * Flag to mark BackStep object as prepresenting specific situation: user manipulates
-     * memory/register value via GUI after assembling program but before running it.
-     */
-    private static final int NOT_PC_VALUE = -1;
-    private final BackstepStack backSteps;
-    private boolean engaged;
-
-    /**
-     * Create a fresh BackStepper. It is enabled, which means all
-     * subsequent instruction executions will have their "undo" action
-     * recorded here.
-     */
-    public BackStepper() {
-        this.engaged = true;
-        this.backSteps = new BackstepStack(Globals.maximumBacksteps);
-    }
-
-    // One can argue using java.util.Stack, given its clumsy implementation.
-    // A homegrown linked implementation will be more streamlined, but
-    // I anticipate that backstepping will only be used during timed
-    // (currently max 30 instructions/value) or stepped execution, where
-    // performance is not an issue. Its Vector implementation may result
-    // in quicker garbage collection than a pure linked list implementation.
-
-    private static int pc() {
-        // PC incremented prior to instruction simulation, so need to adjust for that.
-        return Globals.REGISTER_FILE.getProgramCounter() - BasicInstruction.BASIC_INSTRUCTION_LENGTH;
-    }
+class BackStepper {
+    private val backSteps: BackstepStack = BackstepStack(Globals.maximumBacksteps)
+    private var engaged = true
 
     /**
      * Determine whether execution "undo" steps are currently being recorded.
      *
      * @return true if undo steps being recorded, false if not.
      */
-    public boolean enabled() {
-        return this.engaged;
+    fun enabled(): Boolean {
+        return this.engaged
     }
 
     /**
      * Set enable status.
      *
      * @param state
-     *     If true, will begin (or continue) recoding "undo" steps. If
-     *     false, will stop.
+     * If true, will begin (or continue) recoding "undo" steps. If
+     * false, will stop.
      */
-    public void setEnabled(final boolean state) {
-        this.engaged = state;
+    fun setEnabled(state: Boolean) {
+        this.engaged = state
     }
 
     /**
@@ -99,8 +68,8 @@ public final class BackStepper {
      *
      * @return true if there are no steps to be undone, false otherwise.
      */
-    public boolean empty() {
-        return this.backSteps.empty();
+    fun empty(): Boolean {
+        return this.backSteps.empty()
     }
 
     /**
@@ -115,85 +84,89 @@ public final class BackStepper {
      * together and carry out all of them here.
      * Use a do-while loop based on the backstep's program statement reference.
      */
-
-    public void backStep() {
+    fun backStep() {
         if (this.engaged && !this.backSteps.empty()) {
-            final ProgramStatement statement = this.backSteps.peek().ps;
-            this.engaged = false; // GOTTA DO THIS SO METHOD CALL IN SWITCH WILL NOT RESULT IN NEW ACTION ON
-            // STACK!
+            val statement = this.backSteps.peek().ps
+            // GOTTA DO THIS SO METHOD CALL IN SWITCH WILL NOT RESULT IN NEW ACTION ON STACK!
+            this.engaged = false
             do {
-                final BackStep step = this.backSteps.pop();
+                val step = this.backSteps.pop()
                 /*
                  * System.out.println("backstep POP: action "+step.action+" pc "+rars.util.
                  * Binary.intToHexString(step.pc)+
                  * " source "+((step.ps==null)? "none":step.ps.getSource())+
                  * " parm1 "+step.param1+" parm2 "+step.param2);
                  */
-                if (step.pc != BackStepper.NOT_PC_VALUE) {
-                    Globals.REGISTER_FILE.setProgramCounter(step.pc);
+                if (step.pc != NOT_PC_VALUE) {
+                    Globals.REGISTER_FILE.setProgramCounter(step.pc)
                 }
-                try {
-                    switch (step.action) {
-                        case MEMORY_RESTORE_RAW_WORD:
-                            Globals.MEMORY_INSTANCE.setRawWord(step.param1, (int) step.param2);
-                            break;
-                        case MEMORY_RESTORE_DOUBLE_WORD:
-                            Globals.MEMORY_INSTANCE.setDoubleWord(step.param1, step.param2);
-                            break;
-                        case MEMORY_RESTORE_WORD:
-                            Globals.MEMORY_INSTANCE.setWord(step.param1, (int) step.param2);
-                            break;
-                        case MEMORY_RESTORE_HALF:
-                            Globals.MEMORY_INSTANCE.setHalf(step.param1, (int) step.param2);
-                            break;
-                        case MEMORY_RESTORE_BYTE:
-                            Globals.MEMORY_INSTANCE.setByte(step.param1, (int) step.param2);
-                            break;
-                        case REGISTER_RESTORE:
-                            Globals.REGISTER_FILE.updateRegisterByNumber(step.param1, step.param2);
-                            break;
-                        case FLOATING_POINT_REGISTER_RESTORE:
-                            Globals.FP_REGISTER_FILE.updateRegisterByNumber(step.param1, step.param2);
-                            break;
-                        case CONTROL_AND_STATUS_REGISTER_RESTORE:
-                            Globals.CS_REGISTER_FILE.updateRegisterByNumber(step.param1, step.param2);
-                            break;
-                        case CONTROL_AND_STATUS_REGISTER_BACKDOOR:
-                            Globals.CS_REGISTER_FILE.updateRegisterBackdoorByNumber(step.param1, step.param2);
-                            break;
-                        case PC_RESTORE:
-                            Globals.REGISTER_FILE.setProgramCounter(step.param1);
-                            break;
-                        case DO_NOTHING:
-                            break;
-                    }
-                } catch (final Exception e) {
-                    // if the original action did not cause an exception this will not either.
-                    BackStepper.LOGGER.fatal("Internal RARS error - address exception while back-stepping.", e);
-                    System.exit(0);
+                val param1 = step.param1
+                val param2 = step.param2
+                when (step.action) {
+                    MEMORY_RESTORE_RAW_WORD -> Globals.MEMORY_INSTANCE.setRawWord(
+                        param1,
+                        param2.toInt()
+                    ).unwrap()
+
+                    MEMORY_RESTORE_DOUBLE_WORD -> Globals.MEMORY_INSTANCE.setDoubleWord(
+                        param1,
+                        param2
+                    ).unwrap()
+
+                    MEMORY_RESTORE_WORD -> Globals.MEMORY_INSTANCE.setWord(
+                        param1,
+                        param2.toInt()
+                    ).unwrap()
+
+                    MEMORY_RESTORE_HALF -> Globals.MEMORY_INSTANCE.setHalf(
+                        param1,
+                        param2.toShort()
+                    ).unwrap()
+
+                    MEMORY_RESTORE_BYTE -> Globals.MEMORY_INSTANCE.setByte(
+                        param1,
+                        param2.toByte()
+                    ).unwrap()
+
+                    REGISTER_RESTORE -> Globals.REGISTER_FILE.updateRegisterByNumber(
+                        param1,
+                        param2
+                    ).unwrap()
+
+                    FLOATING_POINT_REGISTER_RESTORE -> Globals.FP_REGISTER_FILE.updateRegisterByNumber(
+                        param1,
+                        param2
+                    ).unwrap()
+
+                    CONTROL_AND_STATUS_REGISTER_RESTORE -> Globals.CS_REGISTER_FILE.updateRegisterByNumber(
+                        param1,
+                        param2
+                    ).unwrap()
+
+                    CONTROL_AND_STATUS_REGISTER_BACKDOOR -> Globals.CS_REGISTER_FILE.updateRegisterBackdoorByNumber(
+                        param1,
+                        param2
+                    )
+
+                    PC_RESTORE -> Globals.REGISTER_FILE.setProgramCounter(param1)
+                    DO_NOTHING -> {}
                 }
-            } while (!this.backSteps.empty() && statement == this.backSteps.peek().ps);
-            this.engaged = true; // RESET IT (was disabled at top of loop -- see comment)
+            } while (!this.backSteps.empty() && statement == this.backSteps.peek().ps)
+            this.engaged = true // RESET IT (was disabled at top of loop -- see comment)
         }
     }
-
-    /*
-     * Convenience method called below to get program counter value. If it needs to
-     * be
-     * be modified (e.g. to subtract 4) that can be done here in one place.
-     */
 
     /**
      * Add a new "back step" (the undo action) to the stack. The action here
      * is to restore a raw memory word value (setRawWord).
      *
      * @param address
-     *     The affected memory address.
+     * The affected memory address.
      * @param value
-     *     The "restore" value to be stored there.
+     * The "restore" value to be stored there.
      */
-    public void addMemoryRestoreRawWord(final int address, final int value) {
-        this.backSteps.push(BackstepAction.MEMORY_RESTORE_RAW_WORD, BackStepper.pc(), address, value);
+    fun addMemoryRestoreRawWord(address: Int, value: Int) {
+        this.backSteps.push(MEMORY_RESTORE_RAW_WORD, pc(), address, value.toLong())
     }
 
     /**
@@ -201,28 +174,29 @@ public final class BackStepper {
      * is to restore a memory word value.
      *
      * @param address
-     *     The affected memory address.
+     * The affected memory address.
      * @param value
-     *     The "restore" value to be stored there.
+     * The "restore" value to be stored there.
      * @return the argument value
      */
-    public int addMemoryRestoreWord(final int address, final int value) {
-        this.backSteps.push(BackstepAction.MEMORY_RESTORE_WORD, BackStepper.pc(), address, value);
-        return value;
+    fun addMemoryRestoreWord(address: Int, value: Int): Int {
+        this.backSteps.push(MEMORY_RESTORE_WORD, pc(), address, value.toLong())
+        return value
     }
 
     /**
-     * <p>addMemoryRestoreDoubleWord.</p>
+     *
+     * addMemoryRestoreDoubleWord.
      *
      * @param address
-     *     a int
+     * a int
      * @param value
-     *     a long
+     * a long
      * @return a long
      */
-    public long addMemoryRestoreDoubleWord(final int address, final long value) {
-        this.backSteps.push(BackstepAction.MEMORY_RESTORE_DOUBLE_WORD, BackStepper.pc(), address, value);
-        return value;
+    fun addMemoryRestoreDoubleWord(address: Int, value: Long): Long {
+        this.backSteps.push(MEMORY_RESTORE_DOUBLE_WORD, pc(), address, value)
+        return value
     }
 
     /**
@@ -230,14 +204,14 @@ public final class BackStepper {
      * is to restore a memory half-word value.
      *
      * @param address
-     *     The affected memory address.
+     * The affected memory address.
      * @param value
-     *     The "restore" value to be stored there, in low order half.
+     * The "restore" value to be stored there, in low order half.
      * @return the argument value
      */
-    public int addMemoryRestoreHalf(final int address, final int value) {
-        this.backSteps.push(BackstepAction.MEMORY_RESTORE_HALF, BackStepper.pc(), address, value);
-        return value;
+    fun addMemoryRestoreHalf(address: Int, value: Int): Int {
+        this.backSteps.push(MEMORY_RESTORE_HALF, pc(), address, value.toLong())
+        return value
     }
 
     /**
@@ -245,14 +219,14 @@ public final class BackStepper {
      * is to restore a memory byte value.
      *
      * @param address
-     *     The affected memory address.
+     * The affected memory address.
      * @param value
-     *     The "restore" value to be stored there, in low order byte.
+     * The "restore" value to be stored there, in low order byte.
      * @return the argument value
      */
-    public int addMemoryRestoreByte(final int address, final int value) {
-        this.backSteps.push(BackstepAction.MEMORY_RESTORE_BYTE, BackStepper.pc(), address, value);
-        return value;
+    fun addMemoryRestoreByte(address: Int, value: Int): Int {
+        this.backSteps.push(MEMORY_RESTORE_BYTE, pc(), address, value.toLong())
+        return value
     }
 
     /**
@@ -260,12 +234,12 @@ public final class BackStepper {
      * is to restore a register file register value.
      *
      * @param register
-     *     The affected register number.
+     * The affected register number.
      * @param value
-     *     The "restore" value to be stored there.
+     * The "restore" value to be stored there.
      */
-    public void addRegisterFileRestore(final int register, final long value) {
-        this.backSteps.push(BackstepAction.REGISTER_RESTORE, BackStepper.pc(), register, value);
+    fun addRegisterFileRestore(register: Int, value: Long) {
+        this.backSteps.push(REGISTER_RESTORE, pc(), register, value)
     }
 
     /**
@@ -273,19 +247,19 @@ public final class BackStepper {
      * is to restore the program counter.
      *
      * @param value
-     *     The "restore" value to be stored there.
+     * The "restore" value to be stored there.
      * @return the argument value
      */
-    public int addPCRestore(final int value) {
+    fun addPCRestore(value: Int): Int {
         // adjust for value reflecting incremented PC.
-        final var newValue = value - BasicInstruction.BASIC_INSTRUCTION_LENGTH;
+        val newValue = value - BasicInstruction.BASIC_INSTRUCTION_LENGTH
         // Use "value" insead of "pc()" for value arg because
         // RegisterFile.getProgramCounter()
         // returns branch target address at this point.
-        synchronized (this.backSteps) {
-            this.backSteps.push(BackstepAction.PC_RESTORE, newValue, newValue, 0);
+        synchronized(this.backSteps) {
+            this.backSteps.push(PC_RESTORE, newValue, newValue, 0)
         }
-        return newValue;
+        return newValue
     }
 
     /**
@@ -293,12 +267,12 @@ public final class BackStepper {
      * is to restore a control and status register value.
      *
      * @param register
-     *     The affected register number.
+     * The affected register number.
      * @param value
-     *     The "restore" value to be stored there.
+     * The "restore" value to be stored there.
      */
-    public void addControlAndStatusRestore(final int register, final long value) {
-        this.backSteps.push(BackstepAction.CONTROL_AND_STATUS_REGISTER_RESTORE, BackStepper.pc(), register, value);
+    fun addControlAndStatusRestore(register: Int, value: Long) {
+        this.backSteps.push(CONTROL_AND_STATUS_REGISTER_RESTORE, pc(), register, value)
     }
 
     /**
@@ -307,12 +281,12 @@ public final class BackStepper {
      * read only restrictions and does not notify observers.
      *
      * @param register
-     *     The affected register number.
+     * The affected register number.
      * @param value
-     *     The "restore" value to be stored there.
+     * The "restore" value to be stored there.
      */
-    public void addControlAndStatusBackdoor(final int register, final long value) {
-        this.backSteps.push(BackstepAction.CONTROL_AND_STATUS_REGISTER_BACKDOOR, BackStepper.pc(), register, value);
+    fun addControlAndStatusBackdoor(register: Int, value: Long) {
+        this.backSteps.push(CONTROL_AND_STATUS_REGISTER_BACKDOOR, pc(), register, value)
     }
 
     /**
@@ -320,12 +294,12 @@ public final class BackStepper {
      * is to restore a floating point register value.
      *
      * @param register
-     *     The affected register number.
+     * The affected register number.
      * @param value
-     *     The "restore" value to be stored there.
+     * The "restore" value to be stored there.
      */
-    public void addFloatingPointRestore(final int register, final long value) {
-        this.backSteps.push(BackstepAction.FLOATING_POINT_REGISTER_RESTORE, BackStepper.pc(), register, value);
+    fun addFloatingPointRestore(register: Int, value: Long) {
+        this.backSteps.push(FLOATING_POINT_REGISTER_RESTORE, pc(), register, value)
     }
 
     /**
@@ -336,17 +310,17 @@ public final class BackStepper {
      * stack has the same PC counter, the do-nothing action will not be added.
      *
      * @param pc
-     *     a int
+     * a int
      */
-    public void addDoNothing(final int pc) {
+    fun addDoNothing(pc: Int) {
         if (this.backSteps.empty() || this.backSteps.peek().pc != pc) {
-            synchronized (this.backSteps) {
-                this.backSteps.push(BackstepAction.DO_NOTHING, pc, 0, 0);
+            synchronized(this.backSteps) {
+                this.backSteps.push(DO_NOTHING, pc, 0, 0)
             }
         }
     }
 
-    private enum BackstepAction {
+    private enum class BackstepAction {
         MEMORY_RESTORE_RAW_WORD,
         MEMORY_RESTORE_DOUBLE_WORD,
         MEMORY_RESTORE_WORD,
@@ -360,57 +334,59 @@ public final class BackStepper {
         DO_NOTHING
     }
 
-    /**
-     * Represents a "back step" (undo action) on the stack.
-     */
-    private static class BackStep {
-        /** what to do MEMORY_RESTORE_WORD, etc */
-        public BackstepAction action = null;
-        /** program counter value when original step occurred */
-        public int pc = 0;
-        /** statement whose action is being "undone" here */
-        public ProgramStatement ps = null;
-        /** first parameter required by that action */
-        public int param1 = 0;
-        /** optional value parameter required by that action */
-        public long param2 = 0;
+    /** Represents a "back step" (undo action) on the stack. */
+    private class BackStep {
+        /** what to do MEMORY_RESTORE_WORD, etc  */
+        var action: BackstepAction = DO_NOTHING // some default value
+
+        /** program counter value when original step occurred  */
+        var pc: Int = 0
+
+        /** statement whose action is being "undone" here  */
+        var ps: ProgramStatement? = null
+
+        /** first parameter required by that action  */
+        var param1: Int = 0
+
+        /** optional value parameter required by that action  */
+        var param2: Long = 0
 
         /**
          * It is critical that BackStep object get its values by calling this method
          * rather than assigning to individual members, because of the technique used
          * to set its ps member (and possibly pc).
          */
-        private void assign(
-            final @NotNull BackstepAction act,
-            final int programCounter,
-            final int param1,
-            final long param2
+        fun assign(
+            act: BackstepAction,
+            programCounter: Int,
+            param1: Int,
+            param2: Long
         ) {
-            this.action = act;
-            int counter;
-            ProgramStatement statement;
-            try {
-                // Client does not have direct access to program statement, and rather than
-                // making all
-                // of them go through the methods below to obtain it, we will do it here.
-                // Want the program statement but do not want observers notified.
-                statement = Globals.MEMORY_INSTANCE.getStatementNoNotify(programCounter);
-                counter = programCounter;
-            } catch (final AddressErrorException e) {
-                // The only situation causing this so far: user modifies memory or register
-                // contents through direct manipulation on the GUI, after assembling the program
-                // but
-                // before starting to run it (or after backstepping all the way to the start).
-                // The action will not be associated with any instruction, but will be carried
-                // out
-                // when popped.
-                statement = null;
-                counter = BackStepper.NOT_PC_VALUE; // Backstep method above will see this as flag to not set PC
-            }
-            this.ps = statement;
-            this.pc = counter;
-            this.param1 = param1;
-            this.param2 = param2;
+            this.action = act
+            val (statement, counter) = Globals.MEMORY_INSTANCE.getStatementNoNotify(programCounter).fold(
+                {
+                    // The only situation causing this so far: user modifies memory or register
+                    // contents through direct manipulation on the GUI, after assembling the program
+                    // but
+                    // before starting to run it (or after backstepping all the way to the start).
+                    // The action will not be associated with any instruction, but will be carried
+                    // out
+                    // when popped.
+                    // Backstep method above will see this as flag to not set PC
+                    Pair(null, NOT_PC_VALUE)
+                },
+                { statement ->
+                    // Client does not have direct access to program statement, and rather than
+                    // making all
+                    // of them go through the methods below to obtain it, we will do it here.
+                    // Want the program statement but do not want observers notified.
+                    Pair(statement, programCounter)
+                }
+            )
+            this.ps = statement
+            this.pc = counter
+            this.param1 = param1
+            this.param2 = param2
         }
     }
 
@@ -429,72 +405,74 @@ public final class BackStepper {
      * regardless of how many steps are executed. This will speed things up a bit
      * and make life easier for the garbage collector.
      */
-    private static final class BackstepStack {
-        private final int capacity;
-        private final @NotNull BackStep @NotNull [] stack;
-        private int size;
-        private int top;
+    private class BackstepStack(private val capacity: Int) {
+        private var size = 0
 
         // Stack is created upon successful assembly or reset. The one-time overhead of
         // creating all the BackStep objects will not be noticed by the user, and
         // enhances
         // runtime performance by not having to create or recycle them during
         // program execution.
-        private BackstepStack(final int capacity) {
-            this.capacity = capacity;
-            this.size = 0;
-            this.top = -1;
-            this.stack = new BackStep[capacity];
-            for (int i = 0; i < capacity; i++) {
-                this.stack[i] = new BackStep();
-            }
-        }
+        private val stack = Array(capacity) { BackStep() }
+        private var top = -1
 
-        private synchronized boolean empty() {
-            return this.size == 0;
-        }
+        @Synchronized
+        fun empty() = this.size == 0
 
-        private synchronized void push(
-            final @NotNull BackStepper.BackstepAction act,
-            final int programCounter,
-            final int param1,
-            final long param2
+        @Synchronized
+        fun push(
+            act: BackstepAction,
+            programCounter: Int,
+            param1: Int,
+            param2: Long
         ) {
             if (this.size == 0) {
-                this.top = 0;
-                this.size++;
+                this.top = 0
+                this.size++
             } else if (this.size < this.capacity) {
-                this.top = (this.top + 1) % this.capacity;
-                this.size++;
+                this.top = (this.top + 1) % this.capacity
+                this.size++
             } else { // size == capacity. The top moves up one, replacing oldest entry (goodbye!)
-                this.top = (this.top + 1) % this.capacity;
+                this.top = (this.top + 1) % this.capacity
             }
             // We'll re-use existing objects rather than create/discard each time.
             // Must use assign() method rather than series of assignment statements!
-            this.stack[this.top].assign(act, programCounter, param1, param2);
+            this.stack[this.top].assign(act, programCounter, param1, param2)
         }
 
         /**
          * NO PROTECTION. This class is used only within this file so there is no excuse
          * for trying to pop from empty stack.
          */
-        private synchronized BackStep pop() {
-            final BackStep bs = this.stack[this.top];
+        @Synchronized
+        fun pop(): BackStep {
+            val bs = this.stack[this.top]
             if (this.size == 1) {
-                this.top = -1;
+                this.top = -1
             } else {
-                this.top = (this.top + this.capacity - 1) % this.capacity;
+                this.top = (this.top + this.capacity - 1) % this.capacity
             }
-            this.size--;
-            return bs;
+            this.size--
+            return bs
         }
 
         /**
          * NO PROTECTION. This class is used only within this file so there is no excuse
          * for trying to peek from empty stack.
          */
-        private synchronized BackStep peek() {
-            return this.stack[this.top];
-        }
+        @Synchronized
+        fun peek() = this.stack[this.top]
+    }
+
+    companion object {
+
+        /**
+         * Flag to mark BackStep object as prepresenting specific situation: user manipulates
+         * memory/register value via GUI after assembling program but before running it.
+         */
+        private const val NOT_PC_VALUE = -1
+
+        // PC incremented prior to instruction simulation, so need to adjust for that.
+        private fun pc(): Int = Globals.REGISTER_FILE.programCounter - BasicInstruction.BASIC_INSTRUCTION_LENGTH
     }
 }

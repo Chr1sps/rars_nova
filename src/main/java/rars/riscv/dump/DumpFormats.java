@@ -3,9 +3,12 @@ package rars.riscv.dump;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import rars.riscv.dump.formats.*;
+import rars.riscv.dump.formats.IntelHexDumpFormat;
+import rars.riscv.dump.formats.SegmentWindowDumpFormat;
 
 import java.util.List;
+
+import static rars.riscv.dump.formats.DumpFormatBaseKt.*;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -41,12 +44,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class DumpFormats {
     public static final @NotNull
     @Unmodifiable List<@NotNull DumpFormat> DUMP_FORMATS = List.of(
-        new AsciiTextDumpFormat(),
-        new BinaryDumpFormat(),
-        new BinaryTextDumpFormat(),
-        new HexTextDumpFormat(),
-        new IntelHexDumpFormat(),
-        new SegmentWindowDumpFormat()
+        ASCII_TEXT_DUMP_FORMAT,
+        BINARY_DUMP_FORMAT,
+        BINARY_TEXT_DUMP_FORMAT,
+        HEX_TEXT_DUMP_FORMAT,
+        IntelHexDumpFormat.INSTANCE,
+        SegmentWindowDumpFormat.INSTANCE
     );
 
     private DumpFormats() {

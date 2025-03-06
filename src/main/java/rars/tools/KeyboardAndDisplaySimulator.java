@@ -1,16 +1,5 @@
 package rars.tools;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.assembler.DataTypes;
-import rars.exceptions.AddressErrorException;
-import rars.notices.AccessNotice;
-import rars.notices.MemoryAccessNotice;
-import rars.util.BinaryUtilsKt;
-import rars.venus.VenusUI;
-
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -25,6 +14,17 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static rars.Globals.FONT_SETTINGS;
+import static rars.util.KotlinUtilsKt.unwrap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import rars.Globals;
+import rars.assembler.DataTypes;
+import rars.notices.AccessNotice;
+import rars.notices.MemoryAccessNotice;
+import rars.util.BinaryUtilsKt;
+import rars.venus.VenusUI;
 
 /*
 Copyright (c) 2003-2014,  Pete Sanderson and Kenneth Vollmar
@@ -159,26 +159,14 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
 
     // Have to preserve the value of Interrupt Enable bit (bit 1)
     private static boolean isReadyBitSet(final int mmioControlRegister) {
-        try {
-            return (Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE) & 1) == 1;
-        } catch (final AddressErrorException aee) {
-            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
-            System.exit(0);
-        }
-        return false; // to satisfy the compiler -- this will never happen.
+        return (unwrap(Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE)) & 1) == 1;
     }
 
     // Return value of the given MMIO control register after ready (low order) bit
 
     // Have to preserve the value of Interrupt Enable bit (bit 1)
     private static int readyBitSet(final int mmioControlRegister) {
-        try {
-            return Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE) | 1;
-        } catch (final AddressErrorException aee) {
-            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
-            System.exit(0);
-        }
-        return 1; // to satisfy the compiler -- this will never happen.
+        return unwrap(Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE)) | 1;
     }
 
     // Rest of the protected methods. These all override do-nothing methods
@@ -188,13 +176,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
     // Have to preserve the value of Interrupt Enable bit (bit 1). Bits 2 and higher
 
     private static int readyBitCleared(final int mmioControlRegister) {
-        try {
-            return Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE) & 2;
-        } catch (final AddressErrorException aee) {
-            KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
-            System.exit(0);
-        }
-        return 0; // to satisfy the compiler -- this will never happen.
+        return unwrap(Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE)) & 2;
     }
 
     /**
@@ -821,14 +803,9 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         if (this.connectButton.isConnected()) {
             Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
-                try {
-                    Globals.MEMORY_INSTANCE.setRawWord(controlAddr, controlValue);
-                    if (!controlOnly) {
-                        Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue);
-                    }
-                } catch (final AddressErrorException aee) {
-                    KeyboardAndDisplaySimulator.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
-                    System.exit(0);
+                unwrap(Globals.MEMORY_INSTANCE.setRawWord(controlAddr, controlValue));
+                if (!controlOnly) {
+                    unwrap(Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue));
                 }
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();

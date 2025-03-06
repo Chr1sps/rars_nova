@@ -1,25 +1,24 @@
-package rars.venus;
+package rars.venus
 
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.assembler.DataTypes;
-import rars.exceptions.AddressErrorException;
-import rars.riscv.dump.DumpFormat;
-import rars.riscv.dump.DumpFormats;
-import rars.util.BinaryUtilsKt;
-import rars.util.MemoryDump;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import rars.Globals
+import rars.assembler.DataTypes
+import rars.riscv.dump.DumpFormat
+import rars.riscv.dump.DumpFormats
+import rars.util.MemoryDump
+import rars.util.MemoryDump.SegmentInfo
+import rars.util.toHexStringWithPrefix
+import java.awt.BorderLayout
+import java.awt.Component
+import java.awt.Label
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import java.io.IOException
+import javax.swing.*
+import javax.swing.border.EmptyBorder
+import javax.swing.plaf.basic.BasicComboBoxRenderer
+import kotlin.collections.toTypedArray
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -48,63 +47,46 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
 */
-
 /**
  * Action for the File -> Save For Dump Memory menu item
  */
-public final class FileDumpMemoryAction extends GuiAction {
+class FileDumpMemoryAction(
+    name: String, icon: Icon, description: String,
+    mnemonic: Int, accel: KeyStroke, gui: VenusUI
+) : GuiAction(name, icon, description, mnemonic, accel, gui) {
+    private var dumpDialog: JDialog? = null
+    private var segmentListSelector: JComboBox<AugmentedSegmentInfo>? = null
+    private var formatListSelector: JComboBox<DumpFormat>? = null
 
-    private static final String title = "Dump Memory To File";
-    private JDialog dumpDialog;
-    private JComboBox<AugmentedSegmentInfo> segmentListSelector;
-    private JComboBox<DumpFormat> formatListSelector;
-
-    public FileDumpMemoryAction(
-        final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
-    ) {
-        super(name, icon, descrip, mnemonic, accel, gui);
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        this.dumpMemory();
-    }
+    override fun actionPerformed(e: ActionEvent) = this.dumpMemory()
 
     /**
      * Save the memory segment in a supported format.
      */
-    private void dumpMemory() {
-        this.dumpDialog = this.createDumpDialog();
-        this.dumpDialog.pack();
-        this.dumpDialog.setLocationRelativeTo(this.mainUI);
-        this.dumpDialog.setVisible(true);
+    private fun dumpMemory() {
+        this.dumpDialog = this.createDumpDialog().apply {
+            pack()
+            setLocationRelativeTo(mainUI)
+            isVisible = true
+        }
     }
 
-    /// The dump dialog that appears when menu item is selected.
-    private @NotNull JDialog createDumpDialog() {
-        final JDialog dumpDialog = new JDialog(this.mainUI, FileDumpMemoryAction.title, true);
-        dumpDialog.setContentPane(this.buildDialogPanel());
-        dumpDialog.setDefaultCloseOperation(
-            JDialog.DO_NOTHING_ON_CLOSE);
-        dumpDialog.addWindowListener(
-            new WindowAdapter() {
-                @Override
-                public void windowClosing(final WindowEvent we) {
-                    FileDumpMemoryAction.this.closeDialog();
-                }
-            });
-        return dumpDialog;
-    }
+    /** The dump dialog that appears when menu item is selected. */
+    private fun createDumpDialog() = JDialog(mainUI, TITLE, true)
+        .apply {
+            contentPane = buildDialogPanel()
+            defaultCloseOperation = JDialog.DO_NOTHING_ON_CLOSE
+            addWindowListener(object : WindowAdapter() {
+                override fun windowClosing(we: WindowEvent?) = closeDialog()
+            })
+        }
 
-    /**
-     * Set contents of dump dialog.
-     */
-    private JPanel buildDialogPanel() {
-        final JPanel contents = new JPanel(new BorderLayout(20, 20));
-        contents.setBorder(new EmptyBorder(10, 10, 10, 10));
+    /** Set contents of dump dialog. */
+    private fun buildDialogPanel(): JPanel {
+        val contents = JPanel(BorderLayout(20, 20))
+        contents.setBorder(EmptyBorder(10, 10, 10, 10))
 
-        final var segments = MemoryDump.SEGMENTS;
+        val segments = MemoryDump.SEGMENTS
 
         // Calculate the actual highest address to be dumped. For text segment, this depends on the
         // program length (number of machine code instructions). For data segment, this depends on
@@ -113,19 +95,17 @@ public final class FileDumpMemoryAction extends GuiAction {
         // Initially not editable but maybe add this later.
         // If there is nothing to dump (e.g. address of first null == base address), then
         // the segment will not be listed.
-        final var actualSegments = new ArrayList<AugmentedSegmentInfo>();
-        for (final var segment : segments) {
-            int highAddress;
-            try {
-                highAddress = Globals.MEMORY_INSTANCE.getAddressOfFirstNull(
-                    segment.baseAddress(),
-                    segment.limitAddress()
-                ) - DataTypes.WORD_SIZE;
-            } catch (final AddressErrorException e) {
-                highAddress = segment.baseAddress() - DataTypes.WORD_SIZE;
-            }
-            if (highAddress >= segment.baseAddress()) {
-                actualSegments.add(new AugmentedSegmentInfo(segment, highAddress));
+        val actualSegments: ArrayList<AugmentedSegmentInfo?> = ArrayList<AugmentedSegmentInfo?>()
+        for (segment in segments) {
+            val highAddress = Globals.MEMORY_INSTANCE.getAddressOfFirstNull(
+                segment.baseAddress,
+                segment.limitAddress
+            ).fold(
+                { segment.baseAddress - DataTypes.WORD_SIZE },
+                { it?.minus(DataTypes.WORD_SIZE) }
+            )
+            if (highAddress != null) {
+                actualSegments.add(AugmentedSegmentInfo(segment, highAddress))
             }
         }
 
@@ -134,149 +114,132 @@ public final class FileDumpMemoryAction extends GuiAction {
         // non-null).
         // But just in case...
         if (segments.isEmpty()) {
-            contents.add(new Label("There is nothing to dump!"), BorderLayout.NORTH);
-            final JButton OKButton = new JButton("OK");
-            OKButton.addActionListener(
-                e -> this.closeDialog());
-            contents.add(OKButton, BorderLayout.SOUTH);
-            return contents;
+            contents.add(Label("There is nothing to dump!"), BorderLayout.NORTH)
+            val okButton = JButton("OK")
+            okButton.addActionListener(
+                ActionListener { e: ActionEvent? -> this.closeDialog() })
+            contents.add(okButton, BorderLayout.SOUTH)
+            return contents
         }
 
         // Create segment selector. First element selected by default.
-        this.segmentListSelector = new JComboBox<>(actualSegments.toArray(AugmentedSegmentInfo[]::new));
-        this.segmentListSelector.setSelectedIndex(0);
-        final JPanel segmentPanel = new JPanel(new BorderLayout());
-        segmentPanel.add(new Label("Memory Segment"), BorderLayout.NORTH);
-        segmentPanel.add(this.segmentListSelector);
-        contents.add(segmentPanel, BorderLayout.WEST);
+        this.segmentListSelector = JComboBox(actualSegments.toTypedArray())
+        this.segmentListSelector!!.setSelectedIndex(0)
+        val segmentPanel = JPanel(BorderLayout())
+        segmentPanel.add(Label("Memory Segment"), BorderLayout.NORTH)
+        segmentPanel.add(this.segmentListSelector)
+        contents.add(segmentPanel, BorderLayout.WEST)
 
         // Next, create list of all available dump formats.
-        final List<DumpFormat> dumpFormats = DumpFormats.DUMP_FORMATS;
-        this.formatListSelector = new JComboBox<>(dumpFormats.toArray(new DumpFormat[0]));
-        this.formatListSelector.setRenderer(new DumpFormatComboBoxRenderer<>(this.formatListSelector));
-        this.formatListSelector.setSelectedIndex(0);
-        final JPanel formatPanel = new JPanel(new BorderLayout());
-        formatPanel.add(new Label("Dump Format"), BorderLayout.NORTH);
-        formatPanel.add(this.formatListSelector);
-        contents.add(formatPanel, BorderLayout.EAST);
+        val dumpFormats = DumpFormats.DUMP_FORMATS
+        this.formatListSelector = JComboBox(dumpFormats.toTypedArray())
+        this.formatListSelector!!.setRenderer(DumpFormatComboBoxRenderer(this.formatListSelector!!))
+        this.formatListSelector!!.setSelectedIndex(0)
+        val formatPanel = JPanel(BorderLayout())
+        formatPanel.add(Label("Dump Format"), BorderLayout.NORTH)
+        formatPanel.add(this.formatListSelector)
+        contents.add(formatPanel, BorderLayout.EAST)
 
         // Bottom row - the control buttons for Dump and Cancel
-        final Box controlPanel = Box.createHorizontalBox();
-        final JButton dumpButton = createDumpButton();
-        final JButton cancelButton = new JButton("Cancel");
+        val controlPanel = Box.createHorizontalBox()
+        val dumpButton = createDumpButton()
+        val cancelButton = JButton("Cancel")
         cancelButton.addActionListener(
-            e -> this.closeDialog());
-        controlPanel.add(Box.createHorizontalGlue());
-        controlPanel.add(dumpButton);
-        controlPanel.add(Box.createHorizontalGlue());
-        controlPanel.add(cancelButton);
-        controlPanel.add(Box.createHorizontalGlue());
-        contents.add(controlPanel, BorderLayout.SOUTH);
-        return contents;
+            ActionListener { e: ActionEvent? -> this.closeDialog() })
+        controlPanel.add(Box.createHorizontalGlue())
+        controlPanel.add(dumpButton)
+        controlPanel.add(Box.createHorizontalGlue())
+        controlPanel.add(cancelButton)
+        controlPanel.add(Box.createHorizontalGlue())
+        contents.add(controlPanel, BorderLayout.SOUTH)
+        return contents
     }
 
-    private @NotNull JButton createDumpButton() {
-        final var dumpButton = new JButton("Dump To File...");
-        dumpButton.addActionListener(
-            e -> {
-                final var selectedSegment = (AugmentedSegmentInfo) this.segmentListSelector.getSelectedItem();
-                if (selectedSegment == null) return;
-                final var wasDumped = this.performDump(
-                    selectedSegment.segmentInfo.baseAddress(),
-                    selectedSegment.actualHighAddress,
-                    (DumpFormat) this.formatListSelector.getSelectedItem()
-                );
-                if (wasDumped) {
-                    this.closeDialog();
-                }
-            });
-        return dumpButton;
+    private fun createDumpButton(): JButton = JButton("Dump").apply {
+        addActionListener { 
+            val selectedSegment = segmentListSelector!!.selectedItem as AugmentedSegmentInfo?
+            if (selectedSegment == null) return@addActionListener
+            val wasDumped = performDump(
+                selectedSegment.segmentInfo.baseAddress,
+                selectedSegment.actualHighAddress,
+                (formatListSelector!!.selectedItem as DumpFormat?)!!
+            )
+            if (wasDumped) {
+                closeDialog()
+            }
+        }
     }
 
     // User has clicked "Dump" button, so launch a file chooser then get
     // segment (memory range) and format selections and save to the file.
-    private boolean performDump(final int firstAddress, final int lastAddress, final DumpFormat format) {
-
-        final JFileChooser saveDialog = new JFileChooser(this.mainUI.editor.getCurrentSaveDirectory());
-        saveDialog.setDialogTitle(FileDumpMemoryAction.title);
-        boolean operationOK = false;
+    private fun performDump(firstAddress: Int, lastAddress: Int, format: DumpFormat): Boolean {
+        val saveDialog = JFileChooser(this.mainUI.editor.currentSaveDirectory)
+        saveDialog.setDialogTitle(TITLE)
+        var operationOK = false
         while (!operationOK) {
-            final int decision = saveDialog.showSaveDialog(this.mainUI);
+            val decision = saveDialog.showSaveDialog(this.mainUI)
             if (decision != JFileChooser.APPROVE_OPTION) {
-                return false;
+                return false
             }
-            File theFile = saveDialog.getSelectedFile();
-            operationOK = true;
+            val theFile = saveDialog.selectedFile
+            operationOK = true
             if (theFile.exists()) {
-                final int overwrite = JOptionPane.showConfirmDialog(
+                val overwrite = JOptionPane.showConfirmDialog(
                     this.mainUI,
                     "File " + theFile.getName() + " already exists.  Do you wish to overwrite it?",
                     "Overwrite existing file?",
                     JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE
-                );
-                switch (overwrite) {
-                    case JOptionPane.YES_OPTION:
-                        break;
-                    case JOptionPane.NO_OPTION:
-                        operationOK = false;
-                        break;
-                    case JOptionPane.CANCEL_OPTION:
-                        return false;
-                    default: // should never occur
-                        return false;
+                )
+                when (overwrite) {
+                    JOptionPane.YES_OPTION -> {}
+                    JOptionPane.NO_OPTION -> operationOK = false
+                    JOptionPane.CANCEL_OPTION -> return false
+                    else -> return false
                 }
             }
             if (operationOK) {
                 try {
-                    format.dumpMemoryRange(theFile, firstAddress, lastAddress, Globals.MEMORY_INSTANCE);
-                } catch (final AddressErrorException | IOException ignored) {
-
+                    format.dumpMemoryRange(theFile, firstAddress, lastAddress, Globals.MEMORY_INSTANCE)
+                } catch (_: IOException) {
                 }
             }
         }
-        return true;
+        return true
     }
 
     // We're finished with this modal dialog.
-    private void closeDialog() {
-        this.dumpDialog.setVisible(false);
-        this.dumpDialog.dispose();
+    private fun closeDialog() {
+        this.dumpDialog!!.isVisible = false
+        this.dumpDialog!!.dispose()
     }
 
     // Display tool tip for dump format list items. Got the technique from
     // http://forum.java.sun.com/thread.jspa?threadID=488762&messageID=2292482
-
-    private static class DumpFormatComboBoxRenderer<T> extends BasicComboBoxRenderer {
-        private final JComboBox<T> myMaster;
-
-        public DumpFormatComboBoxRenderer(final JComboBox<T> myMaster) {
-            super();
-            this.myMaster = myMaster;
-        }
-
-        @Override
-        public Component getListCellRendererComponent(
-            final JList list, final Object value, final int index,
-            final boolean isSelected, final boolean cellHasFocus
-        ) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            this.setToolTipText(value.toString());
+    private class DumpFormatComboBoxRenderer<T>(private val myMaster: JComboBox<T>) : BasicComboBoxRenderer() {
+        override fun getListCellRendererComponent(
+            list: JList<*>?, value: Any, index: Int,
+            isSelected: Boolean, cellHasFocus: Boolean
+        ): Component {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+            this.setToolTipText(value.toString())
             if (index >= 0) {
-                ((DumpFormat) (this.myMaster.getItemAt(index))).getDescription();
-                this.setToolTipText(((DumpFormat) (this.myMaster.getItemAt(index))).getDescription());
+                ((this.myMaster.getItemAt(index)) as DumpFormat).description
+                this.setToolTipText(((this.myMaster.getItemAt(index)) as DumpFormat).description)
             }
-            return this;
+            return this
         }
     }
 
-    private record AugmentedSegmentInfo(@NotNull MemoryDump.SegmentInfo segmentInfo, int actualHighAddress) {
-        @Override
-        public String toString() {
-            return "%s (%s - %s)".formatted(
-                segmentInfo.name(),
-                BinaryUtilsKt.intToHexStringWithPrefix(segmentInfo.baseAddress()),
-                BinaryUtilsKt.intToHexStringWithPrefix(actualHighAddress)
-            );
-        }
+    private data class AugmentedSegmentInfo(val segmentInfo: SegmentInfo, val actualHighAddress: Int) {
+        override fun toString() = String.format(
+            "%s (%s - %s)",
+            segmentInfo.name,
+            segmentInfo.baseAddress.toHexStringWithPrefix(),
+            actualHighAddress.toHexStringWithPrefix()
+        )
+    }
+
+    companion object {
+        private const val TITLE = "Dump Memory To File"
     }
 }

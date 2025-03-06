@@ -961,7 +961,7 @@ public final class VenusUI extends JFrame {
             editCopyAction, editPasteAction, editFindReplaceAction,
             settingsMemoryConfigurationAction, runAssembleAction, runGoAction, runStepAction
         );
-        runBackstepAction.setEnabled(OtherSettings.getBackSteppingEnabled() && !Globals.PROGRAM.getBackStepper()
+        runBackstepAction.setEnabled(OtherSettings.isBacksteppingEnabled() && !Globals.PROGRAM.getBackStepper()
             .empty());
         setEnabled(runResetAction);
         setDisabled(runStopAction, runPauseAction);
@@ -998,7 +998,7 @@ public final class VenusUI extends JFrame {
             settingsMemoryConfigurationAction, runAssembleAction
         );
         setDisabled(runGoAction, runStepAction);
-        runBackstepAction.setEnabled(OtherSettings.getBackSteppingEnabled() && !Globals.PROGRAM.getBackStepper()
+        runBackstepAction.setEnabled(OtherSettings.isBacksteppingEnabled() && !Globals.PROGRAM.getBackStepper()
             .empty());
         setEnabled(runResetAction);
         setDisabled(runStopAction, runPauseAction);

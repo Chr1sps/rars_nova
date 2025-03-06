@@ -15,8 +15,6 @@ enum class MemoryConfiguration(
     @JvmField val dataBaseAddress: Int,
     /** base address for heap  */
     @JvmField val heapBaseAddress: Int,
-    /** starting address for stack  */
-    @JvmField val stackPointerAddress: Int,
     /** base address for stack  */
     @JvmField val stackBaseAddress: Int,
     /** highest address accessible in user (not kernel) mode.  */
@@ -35,63 +33,78 @@ enum class MemoryConfiguration(
     DEFAULT(
         "Default",
         "Default",
-        0x00400000,  // .text Base Address
-        0x10000000,  // Data Segment base address
-        0x10000000,  // .extern Base Address
-        0x10008000,  // Global Pointer $gp)
-        0x10010000,  // .data base Address
-        0x10040000,  // heap base address
-        0x7fffeffc,  // stack pointer $sp (from SPIM not MIPS)
-        0x7ffffffc,  // stack base address
-        0x7fffffff,  // highest address in user space
-        -0x80000000,  // lowest address in kernel space
-        -0x10000,  // MMIO base address
-        -0x1,  // highest address in kernel (and memory)
-        0x7fffffff,  // data segment limit address
-        0x0ffffffc,  // text limit address
-        0x10040000,  // stack limit address
-        -0x1 // memory map limit address
+        textBaseAddress = 0x00400000,
+        textLimitAddress = 0x0ffffffc,
+
+        dataSegmentBaseAddress = 0x10000000,
+        externBaseAddress = 0x10000000,
+
+        globalPointerAddress = 0x10008000,
+        dataBaseAddress = 0x10010000,
+
+        heapBaseAddress = 0x10040000,
+        stackLimitAddress = 0x10040000,
+        stackBaseAddress = 0x7ffffffc,
+
+        userHighAddress = 0x7fffffff,
+        dataSegmentLimitAddress = 0x7fffffff,
+
+        kernelBaseAddress = -0x80000000,
+        memoryMapBaseAddress = -0x00010000,
+        memoryMapLimitAddress = -0x00000001,
+        kernelHighAddress = -0x00000001,
     ),
     DATA_BASED_COMPACT(
         "CompactDataAtZero",
         "Compact, data at address 0",
-        0x00003000,  // .text Base Address
-        0x00000000,  // Data Segment base address
-        0x00001000,  // .extern Base Address
-        0x00001800,  // Global Pointer $gp)
-        0x00000000,  // .data base Address
-        0x00002000,  // heap base address
-        0x00002ffc,  // stack pointer $sp
-        0x00002ffc,  // stack base address
-        0x00003fff,  // highest address in user space
-        0x00004000,  // lowest address in kernel space
-        0x00007f00,  // MMIO base address
-        0x00007fff,  // highest address in kernel (and memory)
-        0x00002fff,  // data segment limit address
-        0x00003ffc,  // text limit address
-        0x00002000,  // stack limit address
-        0x00007fff // memory map limit address
+
+        dataSegmentBaseAddress = 0x00000000,
+        externBaseAddress = 0x00001000,
+
+        globalPointerAddress = 0x00001800,
+        dataBaseAddress = 0x00000000,
+        heapBaseAddress = 0x00002000,
+        stackBaseAddress = 0x00002ffc,
+        dataSegmentLimitAddress = 0x00002fff,
+        stackLimitAddress = 0x00002000,
+
+        textBaseAddress = 0x00003000,
+        textLimitAddress = 0x00003ffc,
+        userHighAddress = 0x00003fff,
+
+        kernelBaseAddress = 0x00004000,
+        memoryMapBaseAddress = 0x00007f00,
+        memoryMapLimitAddress = 0x00007fff,
+        kernelHighAddress = 0x00007fff,
     ),
     TEXT_BASED_COMPACT(
         "CompactTextAtZero",
         "Compact, text at address 0",
-        0x00000000,  // .text Base Address
-        0x00001000,  // Data Segment base address
-        0x00001000,  // .extern Base Address
-        0x00001800,  // Global Pointer $gp)
-        0x00002000,  // .data base Address
-        0x00003000,  // heap base address
-        0x00003ffc,  // stack pointer $sp
-        0x00003ffc,  // stack base address
-        0x00003fff,  // highest address in user space
-        0x00004000,  // lowest address in kernel space
-        0x00007f00,  // MMIO base address
-        0x00007fff,  // highest address in kernel (and memory)
-        0x00003fff,  // data segment limit address
-        0x00000ffc,  // text limit address
-        0x00003000,  // stack limit address
-        0x00007fff // memory map limit address
+
+        textBaseAddress = 0x00000000,
+        textLimitAddress = 0x00000ffc,
+
+        dataSegmentBaseAddress = 0x00001000,
+        externBaseAddress = 0x00001000,
+
+        globalPointerAddress = 0x00001800,
+        dataBaseAddress = 0x00002000,
+
+        heapBaseAddress = 0x00003000,
+        stackLimitAddress = 0x00003000,
+        stackBaseAddress = 0x00003ffc,
+
+        userHighAddress = 0x00003fff,
+        dataSegmentLimitAddress = 0x00003fff,
+
+        kernelBaseAddress = 0x00004000,
+        memoryMapBaseAddress = 0x00007f00,
+        memoryMapLimitAddress = 0x00007fff,
+        kernelHighAddress = 0x00007fff,
     );
+
+    @JvmField
+    val stackPointerAddress: Int = stackBaseAddress.alignTo(4)
 
     override fun toString() = identifier
 
@@ -100,3 +113,14 @@ enum class MemoryConfiguration(
         fun fromIdString(id: String) = entries.find { it.identifier == id }
     }
 }
+
+/**
+ * Represents a memory configuration of the given memory object.
+ */
+
+infix fun Int.alignTo(alignment: Int) = this / alignment * alignment
+infix fun Long.alignTo(alignment: Long) = this / alignment * alignment
+infix fun Short.alignTo(alignment: Short) = this / alignment * alignment
+infix fun Byte.alignTo(alignment: Byte) = this / alignment * alignment
+
+//infix fun 

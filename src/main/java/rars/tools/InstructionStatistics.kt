@@ -28,7 +28,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package rars.tools
 
 import rars.Globals
-import rars.exceptions.AddressErrorException
 import rars.notices.AccessNotice
 import rars.notices.MemoryAccessNotice
 import rars.riscv.Instruction
@@ -180,23 +179,19 @@ class InstructionStatistics(mainUI: VenusUI) : AbstractTool("$NAME, Version 1.0 
             }
             this.lastAddress = a
 
-            try {
-                // access the statement in the text segment without notifying other tools etc.
-
-                val stmt = Globals.MEMORY_INSTANCE.getStatementNoNotify(notice.address)
+            // access the statement in the text segment without notifying other tools etc.
+            Globals.MEMORY_INSTANCE.getStatementNoNotify(notice.address).onRight { statement ->
 
                 // necessary to handle possible null pointers at the end of the program
                 // (e.g., if the simulator tries to execute the next instruction after the last
                 // instruction in the text segment)
-                if (stmt != null) {
-                    val category = stmt.instruction!!.getInstructionCategory()
+                if (statement != null) {
+                    val category = statement.instruction!!.getInstructionCategory()
 
-                    this.totalCounter++
-                    this.counters[category.ordinal]++
-                    this.updateDisplay()
+                    totalCounter++
+                    counters[category.ordinal]++
+                    updateDisplay()
                 }
-            } catch (_: AddressErrorException) {
-                // silently ignore these exceptions
             }
         }
     }

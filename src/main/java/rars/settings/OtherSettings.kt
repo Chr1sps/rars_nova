@@ -19,8 +19,8 @@ interface OtherSettings {
          *
          * @return true if backstepping is permitted, false otherwise.
          */
-        @JvmStatic
-        fun getBackSteppingEnabled(): Boolean = Globals.PROGRAM?.backStepper?.enabled() == true
+        @get: JvmStatic
+        val isBacksteppingEnabled: Boolean get() = Globals.PROGRAM?.backStepper?.enabled() == true
     }
 
     val memoryConfiguration: MemoryConfiguration

@@ -1,20 +1,19 @@
 package rars.tools;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
 import kotlin.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.util.BinaryUtilsKt;
 import rars.venus.VenusUI;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 /*
  * Didier Teifreto LIFC Universit� de franche-Comt�
@@ -144,12 +143,11 @@ public final class DigitalLabSim extends AbstractTool {
         if (this.connectButton.isConnected()) {
             Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
-                try {
-                    Globals.MEMORY_INSTANCE.setByte(dataAddr, dataValue);
-                } catch (final AddressErrorException aee) {
+                Globals.MEMORY_INSTANCE.setByte(dataAddr, (byte) dataValue).onLeft(aee -> {
                     DigitalLabSim.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
                     System.exit(0);
-                }
+                    return Unit.INSTANCE;
+                });
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }

@@ -599,13 +599,13 @@ object BasicInstructions {
         BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 011 fffff 0000111"
     ) { statement ->
         val upperImmediate = (statement.getOperand(1) shl 20) shr 20
-        try {
+        either {
             val value = memory.getDoubleWord(
                 registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate
-            )
-            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), value).ignoreOk()
-        } catch (e: AddressErrorException) {
-            SimulationError.create(statement, e).left()
+            ).mapLeft { error ->
+                SimulationError.create(statement, error)
+            }.bind()
+            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), value).bind()
         }
     }
 
@@ -680,14 +680,13 @@ object BasicInstructions {
         BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 0000111"
     ) { statement ->
         val upperImmediate = (statement.getOperand(1) shl 20) shr 20
-        try {
-            val valueAddress = registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate
-            fpRegisterFile.updateRegisterByNumberInt(
-                statement.getOperand(0),
-                memory.getWord(valueAddress)
-            )
-        } catch (e: AddressErrorException) {
-            SimulationError.create(statement, e).left()
+        val valueAddress = registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate
+        either {
+            val memoryWord = memory
+                .getWord(valueAddress)
+                .mapLeft { SimulationError.create(statement, it) }
+                .bind()
+            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), memoryWord).bind()
         }
     }
 
@@ -735,12 +734,10 @@ object BasicInstructions {
         val upperImmediate = (statement.getOperand(1) shl 20) shr 20
         val address = registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate
         val value = fpRegisterFile.getLongValue(statement.getOperand(0))!!
-        try {
-            memory.setDoubleWord(address, value)
-            Unit.right()
-        } catch (e: AddressErrorException) {
-            SimulationError.create(statement, e).left()
-        }
+
+        memory.setDoubleWord(address, value).mapLeft { error ->
+            SimulationError.create(statement, error)
+        }.ignoreOk()
     }
 
     @JvmField
@@ -864,12 +861,9 @@ object BasicInstructions {
         val upperImmediate = (stmt.getOperand(1) shl 20) shr 20
         val address = registerFile.getIntValue(stmt.getOperand(2))!! + upperImmediate
         val value = fpRegisterFile.getLongValue(stmt.getOperand(0))!!.toInt()
-        try {
-            memory.setWord(address, value)
-            Unit.right()
-        } catch (e: AddressErrorException) {
-            SimulationError.create(stmt, e).left()
-        }
+        memory.setWord(address, value).mapLeft { error ->
+            SimulationError.create(stmt, error)
+        }.ignoreOk()
     }
 
     @JvmField

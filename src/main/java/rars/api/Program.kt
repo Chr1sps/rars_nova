@@ -10,8 +10,8 @@ import rars.exceptions.SimulationError
 import rars.io.ConsoleIO
 import rars.riscv.hardware.Memory
 import rars.settings.BoolSetting
-import rars.simulator.ProgramArgumentList
 import rars.simulator.Simulator
+import rars.simulator.storeProgramArguments
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -153,7 +153,7 @@ class Program(private val programOptions: ProgramOptions) {
      */
     fun setup(args: List<String>, stdin: String?) {
         val tmpMem = Globals.swapMemoryInstance(this.memory)
-        ProgramArgumentList(args).storeProgramArguments()
+        storeProgramArguments(args)
         Globals.swapMemoryInstance(tmpMem)
 
         Globals.REGISTER_FILE.resetRegisters()

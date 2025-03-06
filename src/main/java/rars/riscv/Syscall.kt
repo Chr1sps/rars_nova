@@ -1,22 +1,16 @@
 package rars.riscv
 
-import arrow.core.Either
-import arrow.core.flatMap
 import arrow.core.left
 import arrow.core.raise.either
 import arrow.core.right
 import org.jetbrains.annotations.Range
 import rars.Globals
-import rars.ProgramStatement
-import rars.exceptions.AddressErrorException
 import rars.exceptions.ExitingError
 import rars.exceptions.ExitingEvent
-import rars.exceptions.SimulationEvent
 import rars.riscv.syscalls.DisplayBitmapImpl
 import rars.riscv.syscalls.ToneGenerator
 import rars.riscv.syscalls.getRandomStream
 import rars.riscv.syscalls.setRandomStreamSeed
-import rars.simulator.SimulationContext
 import rars.util.*
 import java.lang.Double
 import java.lang.Float
@@ -55,8 +49,8 @@ enum class Syscall(
     @JvmField val inputs: String,
     /** A string documenting what registers are set to after the system call runs  */
     @JvmField val outputs: String,
-    private val callback: SimulationCallbackFunc
-) : SimulationCallback {
+    private val callback: SimulationCallback
+) : SimulationCallback by callback {
     Close(
         "Close", 57, "Close a file",
         "a0 = the file descriptor to close", "N/A",
@@ -134,17 +128,21 @@ enum class Syscall(
                     // syscalls are ready with compatable
                     // error codes, lets keep internal consitency.
                     registerFile.updateRegisterByName("a0", -1).bind()
-                } else try {
+                } else either {
                     for (index in utf8BytesList.indices) {
                         memory.setByte(
                             buf + index,
-                            utf8BytesList[index].toInt()
-                        )
+                            utf8BytesList[index]
+                        ).bind()
                     }
-                    memory.setByte(buf + utf8BytesList.size, 0)
-                } catch (e: AddressErrorException) {
-                    ExitingError(stmt, e).left()
+                    memory.setByte(buf + utf8BytesList.size, 0).bind()
+                }.onLeft { error ->
+
                 }
+                /* try {
+                                } catch (e: MemoryError) {
+                                    ExitingError(stmt, e).left()
+                                }*/
             }
         }
     ),
@@ -312,20 +310,20 @@ enum class Syscall(
                     // The buffer will contain characters, a '\n' character, and the null character
                     // Copy the input data to buffer as space permits
                     var stringLength = min((maxLength - 1).toDouble(), utf8BytesList.size.toDouble()).toInt()
-                    try {
+                    either {
                         for (index in 0..<stringLength) {
                             memory.setByte(
                                 byteAddress + index,
-                                utf8BytesList[index].toInt()
-                            )
+                                utf8BytesList[index]
+                            ).bind()
                         }
                         if (stringLength < maxLength - 1) {
-                            memory.setByte(byteAddress + stringLength, '\n'.code)
+                            memory.setByte(byteAddress + stringLength, '\n'.code.toByte()).bind()
                             stringLength++
                         }
-                        memory.setByte(byteAddress + stringLength, 0)
-                    } catch (e: AddressErrorException) {
-                        raise(ExitingError(stmt, e))
+                        memory.setByte(byteAddress + stringLength, 0).bind()
+                    }.onLeft { error ->
+                        raise(ExitingError(stmt, error))
                     }
                     if (utf8BytesList.size > maxLength - 1) -4 else 0
                 }
@@ -750,15 +748,15 @@ enum class Syscall(
                 ).bind()
 
                 // copy bytes from returned buffer into memory
-                try {
+                either {
                     for (index in 0..<retLength) {
                         memory.setByte(
                             destinationAddress + index,
-                            myBuffer[index].toInt()
-                        )
+                            myBuffer[index]
+                        ).bind()
                     }
-                } catch (e: AddressErrorException) {
-                    raise(ExitingError(stmt, e))
+                }.onLeft { error ->
+                    raise(ExitingError(stmt, error))
                 }
             }
         }
@@ -864,23 +862,23 @@ enum class Syscall(
             val utf8BytesList = inputString.toByteArray(StandardCharsets.UTF_8)
             // TODO: allow for utf-8 encoded strings
             var stringLength = min(maxLength.toDouble(), utf8BytesList.size.toDouble()).toInt()
-            try {
+            either {
                 for (index in 0..<stringLength) {
                     memory.setByte(
                         bufferAddress + index,
-                        utf8BytesList[index].toInt()
-                    )
+                        utf8BytesList[index]
+                    ).bind()
                 }
                 if (stringLength < maxLength) {
-                    memory.setByte(bufferAddress + stringLength, '\n'.code)
+                    memory.setByte(bufferAddress + stringLength, '\n'.code.toByte()).bind()
                     stringLength++
                 }
                 if (addNullByte) {
-                    memory.setByte(bufferAddress + stringLength, 0)
+                    memory.setByte(bufferAddress + stringLength, 0).bind()
                 }
-                Unit.right()
-            } catch (e: AddressErrorException) {
-                ExitingError(stmt, e).left()
+                Unit
+            }.mapLeft { error ->
+                ExitingError(stmt, error)
             }
         }
     ),
@@ -891,18 +889,18 @@ enum class Syscall(
         "a0 = amount of memory in bytes",
         "a0 = address to the allocated block",
         { stmt ->
-            val address = try {
-                memory.allocateBytesFromHeap(registerFile.getIntValue("a0")!!).toLong().right()
-            } catch (e: IllegalArgumentException) {
-                // TODO: Exiting event n' stuff
-                ExitingError(
-                    stmt,
-                    "${e.message} (syscall 9)"
-                ).left()
-            }
-            address.flatMap {
-                registerFile.updateRegisterByName("a0", it)
-            }.ignoreOk()
+            memory.allocateBytes(registerFile.getIntValue("a0")!!).fold(
+                { errorMessage ->
+                    ExitingError(
+                        stmt,
+                        "$errorMessage (syscall 9)"
+                    ).left()
+                },
+                { address ->
+                    registerFile.updateRegisterByName("a0", address.toLong())
+                    Unit.right()
+                }
+            )
         }
     ),
     Sleep(
@@ -947,17 +945,17 @@ enum class Syscall(
                     return@either
                 }
                 val myBuffer = ByteArray(reqLength)
-                try {
-                    var byteValue = memory.getByte(byteAddress)
+                either {
+                    var byteValue = memory.getByte(byteAddress).bind()
                     var index = 0
-                    while (index < reqLength)  // Stop at requested length. Null bytes are included.
-                    {
+                    // Stop at requested length. Null bytes are included.
+                    while (index < reqLength) {
                         myBuffer[index++] = byteValue
                         byteAddress++
-                        byteValue = memory.getByte(byteAddress)
+                        byteValue = memory.getByte(byteAddress).bind()
                     }
-                } catch (e: AddressErrorException) {
-                    raise(ExitingError(stmt, e))
+                }.onLeft { error ->
+                    raise(ExitingError(stmt, error))
                 }
                 val retValue: Int = io.writeToFile(
                     registerFile.getIntValue("a0")!!, // fd
@@ -968,9 +966,6 @@ enum class Syscall(
             }
         }
     );
-
-    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> =
-        callback(statement)
 
     /**
      *
@@ -986,7 +981,7 @@ enum class Syscall(
         name: String,
         number: Int,
         description: String,
-        callback: SimulationCallbackFunc
+        callback: SimulationCallback
     ) : this(name, number, description, "N/A", "N/A", callback)
 
     companion object {

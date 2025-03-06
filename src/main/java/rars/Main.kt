@@ -6,7 +6,6 @@ import rars.api.DisplayFormat
 import rars.api.Program
 import rars.api.ProgramOptions
 import rars.assembler.DataTypes
-import rars.exceptions.AddressErrorException
 import rars.riscv.InstructionsRegistry
 import rars.riscv.hardware.Memory
 import rars.riscv.hardware.wordAligned
@@ -331,18 +330,15 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
                         this.out.print("Mem[" + addr.toHexStringWithPrefix() + "]\t")
                     }
                 }
-                try {
-                    // Allow display of binary text segment (machine code) DPS 14-July-2008
-                    val value = if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(addr)) {
-                        val optValue = memory.getRawWordOrNull(addr)
-                        optValue ?: 0
-                    } else {
-                        memory.getWord(addr)
-                    }
-                    this.out.print(this.formatIntForDisplay(value) + "\t")
-                } catch (_: AddressErrorException) {
-                    this.out.print("Invalid address: $addr\t")
+                val eitherAddress = if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(addr)) {
+                    memory.getRawWordOrNull(addr).map { it ?: 0 }
+                } else {
+                    memory.getWord(addr)
                 }
+                eitherAddress.fold(
+                    { error -> out.print("Invalid address: $addr\t") },
+                    { value -> out.print(formatIntForDisplay(value) + "\t") }
+                )
                 valuesDisplayed++
                 addr += DataTypes.WORD_SIZE
             }

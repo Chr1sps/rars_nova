@@ -1,15 +1,15 @@
 package rars.simulator
 
+import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensureNotNull
 import rars.Globals
-import rars.ProgramStatement
 import rars.exceptions.*
 import rars.io.AbstractIO
 import rars.notices.SimulatorNotice
 import rars.riscv.BasicInstruction
 import rars.riscv.hardware.registerFiles.CSRegisterFile
-import rars.settings.OtherSettings.Companion.getBackSteppingEnabled
+import rars.settings.OtherSettings.Companion.isBacksteppingEnabled
 import rars.util.ListenerDispatcher
 import rars.util.toHexStringWithPrefix
 import rars.util.unwrap
@@ -94,14 +94,12 @@ open class SimThread(
         // Mode can be ignored because we are only handling traps
         val base = utvec!! and -0x4
 
-        var exceptionHandler: ProgramStatement? = null
-        if ((Globals.CS_REGISTER_FILE.getIntValue("ustatus")!! and 0x1) != 0) { // test user-interrupt enable (UIE)
-            try {
-                exceptionHandler = Globals.MEMORY_INSTANCE.getStatement(base)
-            } catch (_: AddressErrorException) {
-                // Handled below
-            }
-        }
+        val exceptionHandler =
+            if ((Globals.CS_REGISTER_FILE.getIntValue("ustatus")!! and 0x1) != 0) { // test user-interrupt enable (UIE)
+                Globals.MEMORY_INSTANCE.getProgramStatement(base).fold(
+                    { null }, { it }
+                )
+            } else null
 
         if (exceptionHandler != null) {
             // Set UPIE
@@ -150,12 +148,10 @@ open class SimThread(
             base += 4 * code
         }
 
-        var exceptionHandler: ProgramStatement? = null
-        try {
-            exceptionHandler = Globals.MEMORY_INSTANCE.getStatement(base)
-        } catch (_: AddressErrorException) {
-            // handled below
-        }
+
+        val exceptionHandler = Globals.MEMORY_INSTANCE
+            .getProgramStatement(base)
+            .fold({ null }, { it })
         if (exceptionHandler != null) {
             // Set UPIE
             Globals.CS_REGISTER_FILE.updateRegisterByName(
@@ -326,29 +322,30 @@ open class SimThread(
                 }
 
                 this.pc = Globals.REGISTER_FILE.programCounter
-                // Get instuction
-                val statement: ProgramStatement?
-                try {
-                    statement = Globals.MEMORY_INSTANCE.getStatement(this.pc)
-                } catch (e: AddressErrorException) {
-                    val tmp = if (e.reason == ExceptionReason.LOAD_ACCESS_FAULT) {
-                        SimulationError.create(
-                            "Instruction load access error",
-                            ExceptionReason.INSTRUCTION_ACCESS_FAULT
-                        )
-                    } else {
-                        SimulationError.create(
-                            "Instruction load alignment error",
-                            ExceptionReason.INSTRUCTION_ADDR_MISALIGNED
-                        )
-                    }
-                    if (!Globals.INTERRUPT_CONTROLLER.registerSynchronousTrap(tmp, this.pc)) {
-                        this.pe = tmp
-                        Globals.CS_REGISTER_FILE.updateRegisterByName("uepc", this.pc.toLong()).unwrap()
-                        this.stopExecution(true, Simulator.Reason.EXCEPTION)
-                        return
-                    } else {
-                        continue
+                val eitherStmt = Globals.MEMORY_INSTANCE.getProgramStatement(this.pc)
+                val statement = when (eitherStmt) {
+                    is Either.Right -> eitherStmt.value
+                    is Either.Left -> {
+                        val error = eitherStmt.value
+                        val tmp = if (error.reason == ExceptionReason.LOAD_ACCESS_FAULT) {
+                            SimulationError.create(
+                                "Instruction load access error",
+                                ExceptionReason.INSTRUCTION_ACCESS_FAULT
+                            )
+                        } else {
+                            SimulationError.create(
+                                "Instruction load alignment error",
+                                ExceptionReason.INSTRUCTION_ADDR_MISALIGNED
+                            )
+                        }
+                        if (!Globals.INTERRUPT_CONTROLLER.registerSynchronousTrap(tmp, this.pc)) {
+                            this.pe = tmp
+                            Globals.CS_REGISTER_FILE.updateRegisterByName("uepc", this.pc.toLong()).unwrap()
+                            this.stopExecution(true, Simulator.Reason.EXCEPTION)
+                            return
+                        } else {
+                            continue
+                        }
                     }
                 }
                 if (statement == null) {
@@ -369,14 +366,14 @@ open class SimThread(
                     instruction.run { context.simulate(statement) }.bind()
 
                     // IF statement added 7/26/06 (explanation above)
-                    if (getBackSteppingEnabled()) {
+                    if (isBacksteppingEnabled) {
                         Globals.PROGRAM!!.backStepper!!.addDoNothing(this@SimThread.pc)
                     }
                 }.fold({ event ->
                     when (event) {
                         is BreakpointEvent -> {
                             // EBREAK needs backstepping support too.
-                            if (getBackSteppingEnabled()) {
+                            if (isBacksteppingEnabled) {
                                 Globals.PROGRAM!!.backStepper!!.addDoNothing(this.pc)
                             }
                             ebreak = true
@@ -384,7 +381,7 @@ open class SimThread(
                         }
 
                         is WaitEvent -> {
-                            if (getBackSteppingEnabled()) {
+                            if (isBacksteppingEnabled) {
                                 Globals.PROGRAM!!.backStepper!!.addDoNothing(this.pc)
                             }
                             waiting = true

@@ -26,12 +26,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package rars.tools;
 
+import kotlin.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.ProgramStatement;
-import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.BasicInstruction;
@@ -269,29 +268,31 @@ public final class InstructionCounter extends AbstractTool {
         }
         this.lastAddress = a;
         this.counter++;
-        try {
-            final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatement(a);
+        Globals.MEMORY_INSTANCE.getProgramStatement(a).fold(
+            error -> {
+                InstructionCounter.LOGGER.error("Error in InstructionCounter: {}", error);
+                return Unit.INSTANCE;
+            },
+            stmt -> {
 
-            // If the program is finished, getStatement() will return null,
-            // a null statement will cause the simulator to stall.
-            if (stmt != null) {
-                final BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
-                final BasicInstructionFormat format = instr.instructionFormat;
-                switch (format) {
-                    case R_FORMAT -> this.counterR++;
-                    case R4_FORMAT -> this.counterR4++;
-                    case I_FORMAT -> this.counterI++;
-                    case S_FORMAT -> this.counterS++;
-                    case B_FORMAT -> this.counterB++;
-                    case U_FORMAT -> this.counterU++;
-                    case J_FORMAT -> this.counterJ++;
+                // If the program is finished, getStatement() will return null,
+                // a null statement will cause the simulator to stall.
+                if (stmt != null) {
+                    final BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
+                    final BasicInstructionFormat format = instr.instructionFormat;
+                    switch (format) {
+                        case R_FORMAT -> this.counterR++;
+                        case R4_FORMAT -> this.counterR4++;
+                        case I_FORMAT -> this.counterI++;
+                        case S_FORMAT -> this.counterS++;
+                        case B_FORMAT -> this.counterB++;
+                        case U_FORMAT -> this.counterU++;
+                        case J_FORMAT -> this.counterJ++;
+                    }
                 }
+                return Unit.INSTANCE;
             }
-        } catch (final AddressErrorException e) {
-            // TODO Auto-generated catch block
-
-            InstructionCounter.LOGGER.error("Error in InstructionCounter", e);
-        }
+        );
         this.updateDisplay();
     }
 

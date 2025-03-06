@@ -30,7 +30,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.exceptions.AddressErrorException;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
 import rars.venus.VenusUI;
@@ -203,12 +202,11 @@ public final class TimerTool extends AbstractTool {
     private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
         Globals.MEMORY_REGISTERS_LOCK.lock();
         try {
-            try {
-                Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue);
-            } catch (final AddressErrorException aee) {
-                TimerTool.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
+            Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue).onLeft(error -> {
+                TimerTool.LOGGER.fatal("Tool author specified incorrect MMIO address!", error);
                 System.exit(0);
-            }
+                return Unit.INSTANCE;
+            });
         } finally {
             Globals.MEMORY_REGISTERS_LOCK.unlock();
         }
@@ -270,42 +268,41 @@ public final class TimerTool extends AbstractTool {
         }
 
         public void addAsObserver() {
-            try {
-                Globals.MEMORY_INSTANCE.subscribe(
-                    notice -> {
-                        final var accessType = notice.accessType;
-                        // If is was a WRITE operation
-                        if (accessType == MemoryAccessNotice.AccessType.WRITE) {
-                            final int address = notice.address;
-                            final int value = notice.value;
+            Globals.MEMORY_INSTANCE.subscribe(
+                notice -> {
+                    final var accessType = notice.accessType;
+                    // If is was a WRITE operation
+                    if (accessType == MemoryAccessNotice.AccessType.WRITE) {
+                        final int address = notice.address;
+                        final int value = notice.value;
 
-                            // Check what word was changed, then update the corrisponding information
-                            if (address == TimerTool.getTimeCmpAddress()) {
-                                this.value = ((this.value >> 32) << 32) + value;
-                                this.postInterrupt = true; // timecmp was writen to
-                            } else if (address == TimerTool.getTimeCmpAddress() + 4) {
-                                this.value = (this.value) + (((long) value) << 32);
-                                this.postInterrupt = true; // timecmp was writen to
-                            }
+                        // Check what word was changed, then update the corrisponding information
+                        if (address == TimerTool.getTimeCmpAddress()) {
+                            this.value = ((this.value >> 32) << 32) + value;
+                            this.postInterrupt = true; // timecmp was writen to
+                        } else if (address == TimerTool.getTimeCmpAddress() + 4) {
+                            this.value = (this.value) + (((long) value) << 32);
+                            this.postInterrupt = true; // timecmp was writen to
                         }
-                        return Unit.INSTANCE;
-                    },
-                    TimerTool.getTimeCmpAddress(),
-                    TimerTool.getTimeCmpAddress() + 8
-                );
-            } catch (final AddressErrorException aee) {
+                    }
+                    return Unit.INSTANCE;
+                },
+                TimerTool.getTimeCmpAddress(),
+                TimerTool.getTimeCmpAddress() + 8
+            ).onLeft(aee -> {
                 TimerTool.LOGGER.fatal("Error while adding observer in Timer Tool");
                 System.exit(0);
-            }
+                return Unit.INSTANCE;
+            });
         }
 
     }
 
-    // Runs every millisecond to decide if a timer inturrupt should be raised
+    /** Runs every millisecond to decide if a timer interrupt should be raised */
     private class Tick extends TimerTask {
         public volatile boolean updateTimecmp = true;
 
-        // Checks the control bits to see if user-level timer inturrupts are enabled
+        /** Checks the control bits to see if user-level timer inturrupts are enabled */
         private static boolean bitsEnabled() {
             final boolean utip = (Globals.CS_REGISTER_FILE.getIntValue("uie") & 0x10) == 0x10;
             final boolean uie = (Globals.CS_REGISTER_FILE.getIntValue("ustatus") & 0x1) == 0x1;

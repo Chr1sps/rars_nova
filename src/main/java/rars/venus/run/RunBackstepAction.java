@@ -1,14 +1,16 @@
 package rars.venus.run;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+
+import static rars.util.KotlinUtilsKt.unwrap;
+
 import rars.Globals;
 import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
 import rars.venus.VenusUI;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -69,13 +71,13 @@ public final class RunBackstepAction extends GuiAction {
         this.mainUI.messagesPane.selectRunMessageTab();
         executePane.textSegment.setCodeHighlighting(true);
 
-        if (OtherSettings.getBackSteppingEnabled()) {
-            Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment.processMemoryAccessNotice);
+        if (OtherSettings.isBacksteppingEnabled()) {
+            final var memoryHandle = unwrap(Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment::processMemoryAccessNotice));
             Globals.REGISTER_FILE.addRegistersListener(executePane.registerValues.processRegisterNotice);
             Globals.CS_REGISTER_FILE.addRegistersListener(executePane.csrValues.processRegisterNotice);
             Globals.FP_REGISTER_FILE.addRegistersListener(executePane.fpRegValues.processRegisterNotice);
             Globals.PROGRAM.getBackStepper().backStep();
-            Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment.processMemoryAccessNotice);
+            Globals.MEMORY_INSTANCE.unsubscribe(memoryHandle);
             Globals.REGISTER_FILE.deleteRegistersListener(executePane.registerValues.processRegisterNotice);
             executePane.registerValues.updateRegisters();
             executePane.fpRegValues.updateRegisters();

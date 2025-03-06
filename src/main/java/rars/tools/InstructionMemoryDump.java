@@ -63,8 +63,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.ProgramStatement;
-import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.venus.VenusUI;
@@ -180,24 +178,30 @@ public final class InstructionMemoryDump extends AbstractTool {
                 return;
             }
             this.lastAddress = a;
-            try {
-                final ProgramStatement stmt = Globals.MEMORY_INSTANCE.getStatement(a);
-
-                // If the program is finished, getStatement() will return null,
-                // A null statement will cause the simulator to stall.
-                if (stmt != null) {
-                    // First dump the instruction address, prefixed by "I:"
-                    this.log.append("I: 0x").append(Integer.toUnsignedString(a, 16)).append("\n");
-                    // Then dump the instruction, prefixed by "i:"
-                    this.log.append("i: 0x").append(Integer.toUnsignedString(
-                        stmt.getBinaryStatement(),
-                        16
-                    )).append("\n");
+            Globals.MEMORY_INSTANCE.getProgramStatement(a).fold(
+                error -> {
+                    InstructionMemoryDump.LOGGER.error(
+                        "Error while trying to get statement at address {}: {}",
+                        a,
+                        error
+                    );
+                    return Unit.INSTANCE;
+                },
+                stmt -> {
+                    // If the program is finished, getStatement() will return null,
+                    // A null statement will cause the simulator to stall.
+                    if (stmt != null) {
+                        // First dump the instruction address, prefixed by "I:"
+                        this.log.append("I: 0x").append(Integer.toUnsignedString(a, 16)).append("\n");
+                        // Then dump the instruction, prefixed by "i:"
+                        this.log.append("i: 0x").append(Integer.toUnsignedString(
+                            stmt.getBinaryStatement(),
+                            16
+                        )).append("\n");
+                    }
+                    return Unit.INSTANCE;
                 }
-            } catch (final AddressErrorException e) {
-                // TODO Auto-generated catch block
-                InstructionMemoryDump.LOGGER.error("Error while trying to get statement at address {}", a, e);
-            }
+            );
         }
 
         // is a in the data segment?
