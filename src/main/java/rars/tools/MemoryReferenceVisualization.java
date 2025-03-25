@@ -155,9 +155,6 @@ public final class MemoryReferenceVisualization extends AbstractTool {
         return new JPanel(new BorderLayout(2, 2));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "Memory Reference Visualization";
@@ -214,9 +211,6 @@ public final class MemoryReferenceVisualization extends AbstractTool {
         return results;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void processRISCVUpdate(final AccessNotice accessNotice) {
         this.incrementReferenceCountForAddress(((MemoryAccessNotice) accessNotice).address);
@@ -264,9 +258,6 @@ public final class MemoryReferenceVisualization extends AbstractTool {
 
     // Private methods defined to support the above.
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void updateDisplay() {
         this.canvas.repaint();
@@ -556,11 +547,11 @@ public final class MemoryReferenceVisualization extends AbstractTool {
         this.theGrid.incrementElement(offset / this.theGrid.getColumns(), offset % this.theGrid.getColumns());
     }
 
-    // Specialized inner classes for modeling and animation.
-
-    // Object that represents mapping from counter value to color it is displayed
-
-    /// ///////////////////////////////////////////////////////////////////////////// as.
+    /**
+     * Specialized inner classes for modeling and animation.
+     * Object that represents mapping from counter value to color it is displayed
+     * as.
+     */
     private static class CounterColorScale {
         CounterColor[] counterColors;
 
@@ -617,16 +608,16 @@ public final class MemoryReferenceVisualization extends AbstractTool {
         }
     }
 
-    // Class that simply defines UI controls for use with slider to view and/or
-    // change the color associated with each memory reference count value.
-
-    // Each object represents beginning of a counter value range (non-negative
-    /////////////////////////////////////////////////////////////////////////////////////// integer)
-    /////////////////////////////////////////////////////////////////////////////////////// and
-    // color for rendering the range. High end of the range is defined as low end of
-
-    /// //////////////////////////////////////////////////////////////////////////////////// the
-    // next range minus 1. For last range, high end is Integer.MAX_VALUE.
+    /**
+     * Class that simply defines UI controls for use with slider to view and/or
+     * change the color associated with each memory reference count value.
+     * Each object represents beginning of a counter value range (non-negative
+     * integer)
+     * and
+     * color for rendering the range. High end of the range is defined as low end of
+     * the
+     * next range minus 1. For last range, high end is Integer.MAX_VALUE.
+     */
     private static class CounterColor implements Comparable<CounterColor> {
         private final int colorRangeStart;
         private final Color associatedColor;
@@ -638,8 +629,13 @@ public final class MemoryReferenceVisualization extends AbstractTool {
 
         // Necessary for sorting in ascending order of range low end.
         @Override
-        public int compareTo(final CounterColor other) {
-            return this.colorRangeStart - other.colorRangeStart;
+        public int compareTo(final @NotNull CounterColor other) {
+            return Integer.compare(this.colorRangeStart, other.colorRangeStart);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return obj instanceof CounterColor && this.compareTo((CounterColor) obj) == 0;
         }
     }
 
@@ -683,8 +679,12 @@ public final class MemoryReferenceVisualization extends AbstractTool {
         // Increment the given grid element and return incremented value.
         // Returns -1 if row or column is out of range.
         private int incrementElement(final int row, final int column) {
-            return (row >= 0 && row <= this.rows && column >= 0 && column <= this.columns) ?
-                ++this.grid[row][column] : -1;
+            if ((row >= 0 && row <= this.rows && column >= 0 && column <= this.columns)) {
+                ++this.grid[row][column];
+                return this.grid[row][column];
+            } else {
+                return -1;
+            }
         }
 
         // Just set all grid elements to 0.
@@ -697,10 +697,10 @@ public final class MemoryReferenceVisualization extends AbstractTool {
         }
     }
 
-    // Class that represents the panel for visualizing and animating memory
-
-    /// ////////////////////////////////////////////////////////////////////////// reference
-    // patterns.
+    /**
+     * Class that represents the panel for visualizing and animating memory
+     * reference patterns.
+     */
     private class GraphicsPanel extends JPanel {
         private static Color getContrastingColor(final Color color) {
             /*
@@ -803,7 +803,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
                         (
                             (counterValue == highEnd)
                                 ? "value " + counterValue
-                                : "range " + counterValue + "-" + highEnd
+                                : "range " + counterValue + '-' + highEnd
                         );
                     final Color newColor = JColorChooser.showDialog(
                         MemoryReferenceVisualization.this.theWindow,

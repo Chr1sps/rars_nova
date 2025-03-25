@@ -19,6 +19,7 @@ public final class RSTATokensProducer extends TokenMakerBase implements TokensPr
     private final Lexer<@NotNull Token, RSTATokensProducer> lexer;
 
     public RSTATokensProducer(final Lexer<@NotNull Token, RSTATokensProducer> lexer) {
+        super();
         this.lexer = lexer;
     }
 

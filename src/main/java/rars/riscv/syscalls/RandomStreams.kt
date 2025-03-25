@@ -19,10 +19,6 @@ fun SimulationContext.setRandomStreamSeed(index: Int, seed: Long) {
 
 fun SimulationContext.getRandomStream(reg: String): Random {
     val index: Int = registerFile.getIntValue(reg)!!
-    var stream = randomStreams[index]
-    if (stream == null) {
-        stream = Random() // create a non-seeded stream
-        randomStreams.put(index, stream)
-    }
+    val stream = randomStreams.getOrPut(index) { Random() }
     return stream
 }

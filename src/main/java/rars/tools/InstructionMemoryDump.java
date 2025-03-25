@@ -192,12 +192,12 @@ public final class InstructionMemoryDump extends AbstractTool {
                     // A null statement will cause the simulator to stall.
                     if (stmt != null) {
                         // First dump the instruction address, prefixed by "I:"
-                        this.log.append("I: 0x").append(Integer.toUnsignedString(a, 16)).append("\n");
+                        this.log.append("I: 0x").append(Integer.toUnsignedString(a, 16)).append('\n');
                         // Then dump the instruction, prefixed by "i:"
                         this.log.append("i: 0x").append(Integer.toUnsignedString(
                             stmt.getBinaryStatement(),
                             16
-                        )).append("\n");
+                        )).append('\n');
                     }
                     return Unit.INSTANCE;
                 }
@@ -212,7 +212,7 @@ public final class InstructionMemoryDump extends AbstractTool {
             if (notice.accessType == AccessNotice.AccessType.WRITE) {
                 this.log.append("S: 0x");
             }
-            this.log.append(Integer.toUnsignedString(a, 16)).append("\n");
+            this.log.append(Integer.toUnsignedString(a, 16)).append('\n');
         }
 
         this.updateDisplay();
@@ -242,9 +242,6 @@ public final class InstructionMemoryDump extends AbstractTool {
         this.theWindow.pack();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void reset() {
         this.lastAddress = -1;

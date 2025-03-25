@@ -1,5 +1,5 @@
 out
-.idea
+#.idea
 *.class
 
 # Build products
@@ -17,7 +17,7 @@ examples/riscv
 
 target/
 .vscode/
-.iml
+#.iml
 .gradle/
 
 dependency-reduced-pom.xml

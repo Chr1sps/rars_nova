@@ -108,9 +108,6 @@ public final class FloatRepresentation extends AbstractTool {
         super(FloatRepresentation.title + FloatRepresentation.version, FloatRepresentation.heading, mainUI);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "Floating Point Representation";
@@ -178,12 +175,7 @@ public final class FloatRepresentation extends AbstractTool {
         this.updateDisplaysAndRegister(new FlavorsOfFloat());
     }
 
-    /**
-     * <p>buildDisplayArea.</p>
-     *
-     * @return a {@link javax.swing.JComponent} object
-     */
-    protected JComponent buildDisplayArea() {
+    private @NotNull JComponent buildDisplayArea() {
         // Panel to hold all floating point dislay and editing components
         final Box mainPanel = Box.createVerticalBox();
         final JPanel leftPanel = new JPanel(new GridLayout(5, 1, 0, 0));
@@ -401,7 +393,7 @@ public final class FloatRepresentation extends AbstractTool {
         registerPanel.add(new JLabel(" "), BorderLayout.NORTH); // just for padding
         mainPanel.add(registerPanel);
         return mainPanel;
-    } // end of buildDisplayArea()
+    }
 
     /**
      * If display is attached to a register then update the register value.
@@ -705,6 +697,7 @@ public final class FloatRepresentation extends AbstractTool {
         private final int digitLength; // maximum number of digits long
 
         public HexDisplayKeystrokeListener(final int length) {
+            super();
             this.digitLength = length;
         }
 
@@ -730,7 +723,7 @@ public final class FloatRepresentation extends AbstractTool {
                 if (e.getKeyChar() != KeyEvent.VK_ENTER && e.getKeyChar() != KeyEvent.VK_TAB) {
                     Toolkit.getDefaultToolkit().beep();
                     if (source.getText().length() == this.digitLength && source.getSelectedText() == null) {
-                        FloatRepresentation.this.instructions.setText("Maximum length of this field is " + this.digitLength + ".");
+                        FloatRepresentation.this.instructions.setText("Maximum length of this field is " + this.digitLength + '.');
                     } else {
                         FloatRepresentation.this.instructions.setText("Only digits and A-F (or a-f) are accepted in " +
                             "hexadecimal field.");
@@ -759,6 +752,7 @@ public final class FloatRepresentation extends AbstractTool {
         private final int bitLength; // maximum number of bits permitted
 
         public BinaryDisplayKeystrokeListener(final int length) {
+            super();
             this.bitLength = length;
         }
 
@@ -784,7 +778,7 @@ public final class FloatRepresentation extends AbstractTool {
                 if (e.getKeyChar() != KeyEvent.VK_ENTER) {
                     Toolkit.getDefaultToolkit().beep();
                     if (source.getText().length() == this.bitLength && source.getSelectedText() == null) {
-                        FloatRepresentation.this.instructions.setText("Maximum length of this field is " + this.bitLength + ".");
+                        FloatRepresentation.this.instructions.setText("Maximum length of this field is " + this.bitLength + '.');
                     } else {
                         FloatRepresentation.this.instructions.setText("Only 0 and 1 are accepted in binary field.");
                     }
@@ -845,7 +839,7 @@ public final class FloatRepresentation extends AbstractTool {
                 if (fof == null) {
                     Toolkit.getDefaultToolkit().beep();
                     FloatRepresentation.this.instructions.setText(
-                        "'" + ((JTextField) e.getSource()).getText() + "' is not a valid floating point number.");
+                        '\'' + ((JTextField) e.getSource()).getText() + "' is not a valid floating point number.");
                 } else {
                     FloatRepresentation.this.updateDisplaysAndRegister(fof);
                     FloatRepresentation.this.instructions.setText(FloatRepresentation.this.defaultInstructions);

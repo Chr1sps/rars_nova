@@ -164,30 +164,30 @@ class ProgramOptions : Runnable {
 
     override fun toString(): String {
         return "ProgramOptions{" +
-                "programArgs=" + programArgs +
-                ", files=" + files +
-                ", printToStdErr=" + printToStdErr +
-                ", memoryRanges=" + memoryRanges +
-                ", isProjectMode=" + isProjectMode +
-                ", maxSteps=" + maxSteps +
-                ", registers=" + registers +
-                ", memoryConfiguration=" + memoryConfiguration +
-                ", startAtMain=" + startAtMain +
-                ", selfModifyingCode=" + selfModifyingCode +
-                ", isRV64=" + isRV64 +
-                ", displayInstructionCount=" + displayInstructionCount +
-                ", displayFormat=" + displayFormat +
-                ", warningsAreErrors=" + warningsAreErrors +
-                ", showHelp=" + showHelp +
-                ", acknowledgements=" + acknowledgements +
-                ", gui=" + gui +
-                ", simulationErrorCode=" + simulationErrorCode +
-                ", assemblyErrorCode=" + assemblyErrorCode +
-                ", debug=" + debug +
-                ", brief=" + brief +
-                ", assembleOnly=" + assembleOnly +
-                ", usePseudoInstructions=" + usePseudoInstructions +
-                '}'
+            "programArgs=" + programArgs +
+            ", files=" + files +
+            ", printToStdErr=" + printToStdErr +
+            ", memoryRanges=" + memoryRanges +
+            ", isProjectMode=" + isProjectMode +
+            ", maxSteps=" + maxSteps +
+            ", registers=" + registers +
+            ", memoryConfiguration=" + memoryConfiguration +
+            ", startAtMain=" + startAtMain +
+            ", selfModifyingCode=" + selfModifyingCode +
+            ", isRV64=" + isRV64 +
+            ", displayInstructionCount=" + displayInstructionCount +
+            ", displayFormat=" + displayFormat +
+            ", warningsAreErrors=" + warningsAreErrors +
+            ", showHelp=" + showHelp +
+            ", acknowledgements=" + acknowledgements +
+            ", gui=" + gui +
+            ", simulationErrorCode=" + simulationErrorCode +
+            ", assemblyErrorCode=" + assemblyErrorCode +
+            ", debug=" + debug +
+            ", brief=" + brief +
+            ", assembleOnly=" + assembleOnly +
+            ", usePseudoInstructions=" + usePseudoInstructions +
+            '}'
     }
 
     override fun run() {
@@ -204,7 +204,7 @@ class ProgramOptions : Runnable {
         override fun consumeParameters(
             args: Stack<String?>,
             argSpec: CommandLine.Model.ArgSpec,
-            commandSpec: CommandLine.Model.CommandSpec
+            commandSpec: CommandSpec
         ) {
             if (args.size != 2) {
                 throw CommandLine.ParameterException(

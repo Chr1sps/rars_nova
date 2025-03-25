@@ -1,5 +1,15 @@
 package rars.tools;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import rars.Globals;
+import rars.assembler.DataTypes;
+import rars.notices.AccessNotice;
+import rars.notices.MemoryAccessNotice;
+import rars.util.BinaryUtilsKt;
+import rars.venus.VenusUI;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -15,16 +25,6 @@ import java.util.Random;
 
 import static rars.Globals.FONT_SETTINGS;
 import static rars.util.KotlinUtilsKt.unwrap;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.assembler.DataTypes;
-import rars.notices.AccessNotice;
-import rars.notices.MemoryAccessNotice;
-import rars.util.BinaryUtilsKt;
-import rars.venus.VenusUI;
 
 /*
 Copyright (c) 2003-2014,  Pete Sanderson and Kenneth Vollmar
@@ -179,9 +179,6 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         return unwrap(Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE)) & 2;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return KeyboardAndDisplaySimulator.heading;
@@ -276,9 +273,6 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         return keyboardAndDisplay;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void processRISCVUpdate(final AccessNotice accessNotice) {
         final MemoryAccessNotice notice = (MemoryAccessNotice) accessNotice;
@@ -405,9 +399,6 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void initializePostGUI() {
         this.initializeTransmitDelaySimulator();
@@ -449,7 +440,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             final char[] charArray = new char[this.columns];
             Arrays.fill(charArray, KeyboardAndDisplaySimulator.VT_FILL);
             final String row = new String(charArray);
-            initialText = row + ("\n" + row).repeat(Math.max(0, this.rows - 1));
+            initialText = row + ('\n' + row).repeat(Math.max(0, this.rows - 1));
         }
         this.display.setText(initialText);
         this.display.setCaretPosition(0);
@@ -478,14 +469,14 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             // }
             if (((caretPosition + 1) % (this.columns + 1) != 0)) {
                 stringCaretPosition =
-                    "(" + (caretPosition % (this.columns + 1)) + "," + (caretPosition / (this.columns + 1))
-                        + ")";
+                    "(" + (caretPosition % (this.columns + 1)) + ',' + (caretPosition / (this.columns + 1))
+                        + ')';
             } else if (((caretPosition + 1) % (this.columns + 1) == 0) && ((caretPosition / (this.columns + 1)) + 1 == rows)) {
                 stringCaretPosition =
-                    "(" + (caretPosition % (this.columns + 1) - 1) + "," + (caretPosition / (this.columns + 1))
-                        + ")";
+                    "(" + (caretPosition % (this.columns + 1) - 1) + ',' + (caretPosition / (this.columns + 1))
+                        + ')';
             } else {
-                stringCaretPosition = "(0," + ((caretPosition / (this.columns + 1)) + 1) + ")";
+                stringCaretPosition = "(0," + ((caretPosition / (this.columns + 1)) + 1) + ')';
             }
         } else {
             stringCaretPosition = "" + caretPosition;
@@ -522,7 +513,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             ".KeyboardAndDisplaySimulator object "
             +
             "and invoke its go() method.\n" +
-            "\n" +
+            '\n' +
             "While the tool is connected to the program, each keystroke in the text area causes the corresponding" +
             " ASCII "
             +
@@ -532,7 +523,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             + BinaryUtilsKt.intToHexStringWithPrefix(KeyboardAndDisplaySimulator.RECEIVER_CONTROL) + ").  The Ready " +
             "bit is automatically reset to 0 when the program reads the Receiver Data using an 'lw' instruction.\n"
             +
-            "\n" +
+            '\n' +
             "A program may write to the display area by detecting the Ready bit set (1) in the Transmitter Control "
             +
             "register (low-order bit of memory word " + BinaryUtilsKt.intToHexStringWithPrefix(
@@ -540,13 +531,13 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             + "), then storing the ASCII code of the character to be " +
             "displayed in the Transmitter Data register (low-order byte of "
             + BinaryUtilsKt.intToHexStringWithPrefix(KeyboardAndDisplaySimulator.TRANSMITTER_DATA) + ") using a 'sw' instruction." +
-            " " +
+            ' ' +
             " This " +
             "triggers the simulated display to clear the Ready bit to 0, delay awhile to simulate processing the " +
             "data, "
             +
             "then set the Ready bit back to 1.  The delay is based on a count of executed instructions.\n" +
-            "\n" +
+            '\n' +
             "In a polled approach to I/O, a program idles in a loop, testing the device's Ready bit on each " +
             "iteration until it is set to 1 before proceeding.  This tool also supports an interrupt-driven " +
             "approach "
@@ -558,7 +549,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             +
             "transfer control to the interrupt handler. Interrupt-driven I/O is enabled " +
             "when the program sets the Interrupt-Enable bit in the device's control register.  Details below.\n" +
-            "\n" +
+            '\n' +
             "Upon setting the Receiver Controller's Ready bit to 1, its Interrupt-Enable bit (bit position 1) is " +
             "tested. "
             +
@@ -570,7 +561,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             "Ready bit!  "
             +
             "Very event-oriented.  The Ready bit is supposed to be read-only but in RARS it is not.\n" +
-            "\n" +
+            '\n' +
             "A similar test and potential response occurs when the Transmitter Controller's Ready bit is set to 1" +
             ".  This "
             +
@@ -583,7 +574,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             "Ready bit! "
             +
             "The Ready bit is supposed to be read-only but in RARS it is not.\n" +
-            "\n" +
+            '\n' +
             "IMPORTANT NOTE: The Transmitter Controller Ready bit is set to its initial value of 1 only when you" +
             " click the tool's "
             +
@@ -596,16 +587,16 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             "display the MMIO address range so you can directly observe values stored in the MMIO addresses given" +
             " above.\n"
             +
-            "\n" +
+            '\n' +
             "Clear the display window from the program:\n" +
-            "\n" +
+            '\n' +
             "When ASCII 12 (form feed) is stored in the Transmitter Data register, the tool's Display window will" +
             " be cleared "
             +
             "following the specified transmission delay.\n" +
-            "\n" +
+            '\n' +
             "Simulate a text-based virtual terminal with (x,y) positioning:\n" +
-            "\n" +
+            '\n' +
             "When ASCII 7 (bell) is stored in the Transmitter Data register, the cursor in the tool's Display " +
             "window will "
             +
@@ -620,7 +611,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             " at upper left. "
             +
             "Why did I select the ASCII Bell character?  Just for fun!\n" +
-            "\n" +
+            '\n' +
             "The dimensions (number of columns and rows) of the virtual text-based terminal are calculated based " +
             "on the display "
             +
@@ -648,7 +639,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             " each line ends. Each character "
             +
             "transmitted to the window thus replaces an existing character in the string.\n" +
-            "\n" +
+            '\n' +
             "Thanks to Eric Wang at Washington State University, who requested these features to enable use of " +
             "this display as the target "
             +
@@ -839,6 +830,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
     // Calculate transmitter delay (# instruction executions) based on
     // current combo box and slider settings.
 
+    @FunctionalInterface
     private interface TransmitterDelayTechnique {
         int generateDelay(double parameter);
     }

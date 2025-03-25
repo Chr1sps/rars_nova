@@ -74,7 +74,7 @@ public final class RunSpeedPanel extends JPanel {
         this.add(runSpeedSlider, BorderLayout.CENTER);
         this.setToolTipText("Simulation speed for \"Go\".  At " +
             ((int) this.speedTable[RunSpeedPanel.SPEED_INDEX_INTERACTION_LIMIT]) + " inst/sec or less, tables updated" +
-            " " +
+            ' ' +
             "after each instruction.");
     }
 

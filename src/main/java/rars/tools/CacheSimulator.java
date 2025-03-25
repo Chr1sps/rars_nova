@@ -146,9 +146,6 @@ public final class CacheSimulator extends AbstractTool {
         return new JPanel(new BorderLayout(2, 2));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "Data Cache Simulator";
@@ -534,12 +531,11 @@ public final class CacheSimulator extends AbstractTool {
         } catch (final
         NumberFormatException nfe) { // if this happens its my fault!
         }
-        final AbstractCache theNewCache = new AnyCache(
+        return new AnyCache(
             this.cacheBlockCountChoicesInt[this.cacheBlockCountSelector.getSelectedIndex()],
             this.cacheBlockSizeChoicesInt[this.cacheBlockSizeSelector.getSelectedIndex()],
             setSize
         );
-        return theNewCache;
     }
 
     private void resetCounts() {
@@ -612,7 +608,9 @@ public final class CacheSimulator extends AbstractTool {
         }
     }
 
-    // Abstract Cache class. Subclasses will implement specific policies.
+    /**
+     * Abstract Cache class. Subclasses will implement specific policies.
+     */
     private abstract static class AbstractCache {
         protected final CacheBlock[] blocks;
         private final int numberOfBlocks, blockSizeInWords, setSizeInBlocks, numberOfSets;
@@ -686,67 +684,70 @@ public final class CacheSimulator extends AbstractTool {
             System.gc(); // scoop 'em up now
         }
 
-        // Subclass must implement this according to its policies
+        /**
+         * Subclass must implement this according to its policies
+         */
         public abstract CacheAccessResult isItAHitThenReadOnMiss(int address);
     }
 
-    // Implements any of the well-known cache organizations. Physical memory
-    // address is partitioned depending on organization:
-    // Direct Mapping: [ tag | block | word | byte ]
-    // Fully Associative: [ tag | word | byte ]
-    // Set Associative: [ tag | set | word | byte ]
-    // Bit lengths of each part are determined as follows:
-    // Direct Mapping:
-    // byte = log2 of #bytes in a word (typically 4)
-    // word = log2 of #words in a block
-    // block = log2 of #blocks in the cache
-    // tag = #bytes in address - (byte+word+block)
-    // Fully Associative:
-    // byte = log2 of #bytes in a word (typically 4)
-    // word = log2 of #words in a block
-    // tag = #bytes in address - (byte+word)
-    // Set Associative:
-    // byte = log2 of #bytes in a word (typically 4)
-    // word = log2 of #words in a block
-    // set = log2 of #sets in the cache
-    // tag = #bytes in address - (byte+word+set)
-    // Direct Mapping (1 way set associative):
-    // The block value for a given address identifies its block index into the
-    ////////////////////////////////////////////////////////////////////////////// cache.
-    // That's why its called "direct mapped." This is the only cache block it can
-    // occupy. If that cache block is empty or if it is occupied by a different tag,
-    // this is a MISS. If that cache block is occupied by the same tag, this is a
-    ////////////////////////////////////////////////////////////////////////////// HIT.
-    // There is no replacement policy: upon a cache miss of an occupied block, the
-    ////////////////////////////////////////////////////////////////////////////// old
-    // block is written out (unless write-through) and the new one read in.
-    // Those actions are not simulated here.
-    // Fully Associative:
-    // There is one set, and very tag has to be searched before determining hit or
-    ////////////////////////////////////////////////////////////////////////////// miss.
-    // If tag is matched, it is a hit. If tag is not matched and there is at least
-    ////////////////////////////////////////////////////////////////////////////// one
-    // empty block, it is a miss and the new tag will occupy it. If tag is not
-    ////////////////////////////////////////////////////////////////////////////// matched
-    // and every block is occupied, it is a miss and one of the occupied blocks will
-    ////////////////////////////////////////////////////////////////////////////// be
-    // selected for removal and the new tag will replace it.
-    // n-way Set Associative:
-    // Each set consists of n blocks, and the number of sets in the cache is total
-    ////////////////////////////////////////////////////////////////////////////// number
-    // of blocks divided by n. The set bits in the address will identify which set
-    ////////////////////////////////////////////////////////////////////////////// to
-    // search, and every tag in that set has to be searched before determining hit
-    ////////////////////////////////////////////////////////////////////////////// or
-    ////////////////////////////////////////////////////////////////////////////// miss.
-    // If tag is matched, it is a hit. If tag is not matched and there is at least
-    ////////////////////////////////////////////////////////////////////////////// one
-    // empty block, it is a miss and the new tag will occupy it. If tag is not
-    ////////////////////////////////////////////////////////////////////////////// matched
-    // and every block is occupied, it is a miss and one of the occupied blocks will
-
-    /// /////////////////////////////////////////////////////////////////////////// be
-    // selected for removal and the new tag will replace it.
+    /**
+     * Implements any of the well-known cache organizations. Physical memory
+     * address is partitioned depending on organization:
+     * Direct Mapping: [ tag | block | word | byte ]
+     * Fully Associative: [ tag | word | byte ]
+     * Set Associative: [ tag | set | word | byte ]
+     * Bit lengths of each part are determined as follows:
+     * Direct Mapping:
+     * byte = log2 of #bytes in a word (typically 4)
+     * word = log2 of #words in a block
+     * block = log2 of #blocks in the cache
+     * tag = #bytes in address - (byte+word+block)
+     * Fully Associative:
+     * byte = log2 of #bytes in a word (typically 4)
+     * word = log2 of #words in a block
+     * tag = #bytes in address - (byte+word)
+     * Set Associative:
+     * byte = log2 of #bytes in a word (typically 4)
+     * word = log2 of #words in a block
+     * set = log2 of #sets in the cache
+     * tag = #bytes in address - (byte+word+set)
+     * Direct Mapping (1 way set associative):
+     * The block value for a given address identifies its block index into the
+     * cache.
+     * That's why its called "direct mapped." This is the only cache block it can
+     * occupy. If that cache block is empty or if it is occupied by a different tag,
+     * this is a MISS. If that cache block is occupied by the same tag, this is a
+     * HIT.
+     * There is no replacement policy: upon a cache miss of an occupied block, the
+     * old
+     * block is written out (unless write-through) and the new one read in.
+     * Those actions are not simulated here.
+     * Fully Associative:
+     * There is one set, and very tag has to be searched before determining hit or
+     * miss.
+     * If tag is matched, it is a hit. If tag is not matched and there is at least
+     * one
+     * empty block, it is a miss and the new tag will occupy it. If tag is not
+     * matched
+     * and every block is occupied, it is a miss and one of the occupied blocks will
+     * be
+     * selected for removal and the new tag will replace it.
+     * n-way Set Associative:
+     * Each set consists of n blocks, and the number of sets in the cache is total
+     * number
+     * of blocks divided by n. The set bits in the address will identify which set
+     * to
+     * search, and every tag in that set has to be searched before determining hit
+     * or
+     * miss.
+     * If tag is matched, it is a hit. If tag is not matched and there is at least
+     * one
+     * empty block, it is a miss and the new tag will occupy it. If tag is not
+     * matched
+     * and every block is occupied, it is a miss and one of the occupied blocks will
+     * be
+     * selected for removal and the new tag will replace it.
+     */
     private class AnyCache extends AbstractCache {
         public AnyCache(final int numberOfBlocks, final int blockSizeInWords, final int setSizeInBlocks) {
             super(numberOfBlocks, blockSizeInWords, setSizeInBlocks);
@@ -763,8 +764,8 @@ public final class CacheSimulator extends AbstractTool {
             {
                 CacheSimulator.this.writeLog("(" + CacheSimulator.this.memoryAccessCount + ") address: " + BinaryUtilsKt.intToHexStringWithPrefix(
                     address) + " (tag "
-                    + BinaryUtilsKt.intToHexStringWithPrefix(this.getTag(address)) + ") " + " block range: " + firstBlock + "-"
-                    + lastBlock + "\n");
+                    + BinaryUtilsKt.intToHexStringWithPrefix(this.getTag(address)) + ") " + " block range: " + firstBlock + '-'
+                    + lastBlock + '\n');
             }
             CacheBlock block;
             int blockNumber;
@@ -829,7 +830,7 @@ public final class CacheSimulator extends AbstractTool {
                         replaceBlock = first + CacheSimulator.this.randu.nextInt(last - first + 1);
                         if (CacheSimulator.debug) // System.out.print
                         {
-                            CacheSimulator.this.writeLog(" -- Random replace block " + replaceBlock + "\n");
+                            CacheSimulator.this.writeLog(" -- Random replace block " + replaceBlock + '\n');
                         }
                         break;
                     case CacheSimulator.LRU:
@@ -854,7 +855,9 @@ public final class CacheSimulator extends AbstractTool {
         }
     }
 
-    // Class to display animated cache
+    /**
+     * Class to display animated cache
+     */
     private class Animation {
 
         public final Color hitColor = Color.GREEN;

@@ -269,8 +269,7 @@ public final class EditTabbedPane extends JPanel {
                 }
             }
         }
-        final boolean result = true;
-        return result;
+        return true;
     }
 
     /**
@@ -349,7 +348,7 @@ public final class EditTabbedPane extends JPanel {
                 // edit pane had been previously saved, default to its directory.
                 // If a new file (mipsN.asm), default to current save directory.
                 // DPS 13-July-2011
-                JFileChooser saveDialog;
+                final JFileChooser saveDialog;
                 if (editPane.isNew()) {
                     saveDialog = new JFileChooser(this.editor.getCurrentSaveDirectory());
                 } else {
@@ -691,10 +690,12 @@ public final class EditTabbedPane extends JPanel {
                 // to the Edit pane as it was read, way slower due to dynamic string alloc.
                 final StringBuilder fileContents = new StringBuilder((int) theFile.length());
                 int lineNumber = 1;
-                String line = Globals.PROGRAM.getSourceLine(lineNumber++);
+                String line = Globals.PROGRAM.getSourceLine(lineNumber);
+                lineNumber++;
                 while (line != null) {
-                    fileContents.append(line).append("\n");
-                    line = Globals.PROGRAM.getSourceLine(lineNumber++);
+                    fileContents.append(line).append('\n');
+                    line = Globals.PROGRAM.getSourceLine(lineNumber);
+                    lineNumber++;
                 }
                 editPane.setSourceCode(fileContents.toString(), true);
                 // The above operation generates an undoable edit, setting the initial

@@ -9,7 +9,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.MutableTreeNode;
 import java.awt.*;
-import java.util.Arrays;
+
+import static kotlin.collections.CollectionsKt.map;
 
 public final class TreePanel extends JScrollPane {
     public final @NotNull TreeNode fontSettingsNode, generalSchemeSettingsNode, otherSettingsNode, presetsNode;
@@ -45,9 +46,10 @@ public final class TreePanel extends JScrollPane {
                 presetNode(presetsNode),
                 presetNode(generalSchemeSettingsNode),
                 normalNode("RISC-V Syntax").children(
-                    Arrays.stream(TokenSettingKey.values())
-                        .map(key -> syntaxNode(key, key.description))
-                        .toArray(NodeBuilder[]::new)
+                    map(
+                        TokenSettingKey.getEntries(),
+                        tokenSettingKey -> syntaxNode(tokenSettingKey, tokenSettingKey.description)
+                    ).toArray(NodeBuilder[]::new)
                 )
             ),
             presetNode(otherSettingsNode)

@@ -65,9 +65,6 @@ public final class SettingsAction extends GuiAction {
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void actionPerformed(final @NotNull ActionEvent e) {
         final boolean value = ((JCheckBoxMenuItem) e.getSource()).isSelected();
@@ -75,6 +72,7 @@ public final class SettingsAction extends GuiAction {
         this.handler.handler(value);
     }
 
+    @FunctionalInterface
     public interface Handler {
         void handler(boolean value);
     }

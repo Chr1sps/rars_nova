@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-/// //////////////////////////  CREDIT  /////////////////////////////////////
+// CREDIT  
 // http://forums.sun.com/thread.jspa?threadID=499183&messageID=2505646
 // bsampieri, 4 March 2004
 // Java Developer Forum, Useful Code of the Day: Button Fires Events While Held
@@ -20,7 +20,7 @@ import java.awt.event.MouseListener;
 // specified period of time and at a specified rate. 
 
 /**
- * {@code RepeatButton} is a <code>JButton</code> which contains a timer
+ * {@code RepeatButton} is a {@code JButton} which contains a timer
  * for firing events while the button is held down. There is a default
  * initial delay of 300ms before the key event is fired and a 60ms delay
  * between subsequent events. When the user holds the button down and moves

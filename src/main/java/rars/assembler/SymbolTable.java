@@ -2,7 +2,6 @@ package rars.assembler;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
@@ -265,7 +264,6 @@ public final class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      */
-    @Contract()
     public @NotNull List<Symbol> getAllSymbols() {
         return new ArrayList<>(this.table);
     }

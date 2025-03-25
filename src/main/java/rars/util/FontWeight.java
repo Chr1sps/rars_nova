@@ -2,7 +2,7 @@ package rars.util;
 
 import java.awt.font.TextAttribute;
 
-public enum FontWeight implements Comparable<FontWeight> {
+public enum FontWeight {
 
     EXTRA_LIGHT(TextAttribute.WEIGHT_EXTRA_LIGHT),
     LIGHT(TextAttribute.WEIGHT_LIGHT),

@@ -270,6 +270,7 @@ public final class LabelsWindow extends JInternalFrame {
         final Object[][] data;
 
         public LabelTableModel(final Object[][] d, final String[] n) {
+            super();
             this.data = d;
             this.columns = n;
         }

@@ -20,10 +20,10 @@ import rars.notices.MemoryAccessNotice
 import rars.riscv.BasicInstruction
 import rars.settings.BoolSetting
 import rars.settings.OtherSettings
-import rars.settings.OtherSettings.Companion.isBacksteppingEnabled
 import rars.util.Listener
 import rars.util.ListenerDispatcher
 import rars.util.toLongReinterpreted
+import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -286,9 +286,8 @@ class Memory(
      * @return true if that address is within RARS-defined memory map (MMIO) area,
      * false otherwise.
      */
-    fun isAddressInMemorySegment(address: Int): Boolean {
-        return address in memoryConfiguration.memoryMapBaseAddress..<memoryConfiguration.kernelHighAddress
-    }
+    fun isAddressInMemorySegment(address: Int): Boolean =
+        address in memoryConfiguration.memoryMapBaseAddress..<memoryConfiguration.kernelHighAddress
 
     // endregion Address checking utils
 
@@ -368,7 +367,7 @@ class Memory(
             isAddressInDataSegment(address) -> {
                 // in data segment. Will write one byte at a time, w/o regard to boundaries.
                 val relativeByteAddress = (address
-                - memoryConfiguration.dataSegmentBaseAddress) // relative to data segment start, in bytes
+                    - memoryConfiguration.dataSegmentBaseAddress) // relative to data segment start, in bytes
                 oldValue = storeBytesInTable(dataBlockTable, relativeByteAddress, length, value)
             }
             isAddressInStackRange(address) -> {
@@ -450,7 +449,7 @@ class Memory(
         if (isAddressInDataSegment(address)) {
             // in data segment
             relative = ((address - memoryConfiguration.dataSegmentBaseAddress)
-            shr 2) // convert byte address to words
+                shr 2) // convert byte address to words
             oldValue = storeWordInTable(dataBlockTable, relative, value)
         } else if (isAddressInStackRange(address)) {
             // in stack. Handle similarly to data segment write, except relative
@@ -480,7 +479,7 @@ class Memory(
             oldValue = storeWordInTable(memoryMapBlockTable, relative, value)
         } else raise(MemoryError("store address out of range ", ExceptionReason.STORE_ACCESS_FAULT, address))
         notifyAnyObservers(AccessNotice.AccessType.WRITE, address, DataTypes.WORD_SIZE, value)
-        if (isBacksteppingEnabled) {
+        if (OtherSettings.isBacksteppingEnabled) {
             Globals.PROGRAM!!.backStepper!!.addMemoryRestoreRawWord(address, oldValue)
         }
         oldValue
@@ -488,7 +487,7 @@ class Memory(
 
     override fun setWord(address: Int, value: Int): Either<MemoryError, Unit> = either {
         checkStoreWordAligned(address).bind()
-        if (isBacksteppingEnabled)
+        if (OtherSettings.isBacksteppingEnabled)
             Globals.PROGRAM!!.backStepper!!.addMemoryRestoreWord(
                 address,
                 set(address, value, DataTypes.WORD_SIZE).bind()
@@ -503,14 +502,14 @@ class Memory(
                 address
             )
         }
-        if (isBacksteppingEnabled) Globals.PROGRAM!!.backStepper!!.addMemoryRestoreHalf(
+        if (OtherSettings.isBacksteppingEnabled) Globals.PROGRAM!!.backStepper!!.addMemoryRestoreHalf(
             address,
             set(address, value.toInt(), 2).bind()
         ) else set(address, value.toInt(), 2).bind()
     }
 
     override fun setByte(address: Int, value: Byte): Either<MemoryError, Unit> = either {
-        if (isBacksteppingEnabled)
+        if (OtherSettings.isBacksteppingEnabled)
             Globals.PROGRAM!!.backStepper!!.addMemoryRestoreByte(
                 address,
                 set(address, value.toInt(), 1).bind()
@@ -925,7 +924,7 @@ class Memory(
         checkLoadWordAligned(address).bind()
         ensure(
             Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
-            || isAddressInTextSegment(address)
+                || isAddressInTextSegment(address)
         ) {
             MemoryError(
                 "fetch address for text segment out of range ",
@@ -1273,22 +1272,22 @@ class Memory(
         this.actualDataSegmentLimitAddress = min(
             this.memoryConfiguration.dataSegmentLimitAddress.toDouble(),
             (this.memoryConfiguration.dataSegmentBaseAddress
-            + BLOCK_LENGTH_WORDS * BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
+                + BLOCK_LENGTH_WORDS * BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
         ).toInt()
         this.actualTextLimitAddress = min(
             this.memoryConfiguration.textLimitAddress.toDouble(),
             (this.memoryConfiguration.textBaseAddress
-            + TEXT_BLOCK_LENGTH_WORDS * TEXT_BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
+                + TEXT_BLOCK_LENGTH_WORDS * TEXT_BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
         ).toInt()
         this.actualStackLimitAddress = max(
             this.memoryConfiguration.stackLimitAddress.toDouble(),
             (this.memoryConfiguration.stackBaseAddress
-            - BLOCK_LENGTH_WORDS * BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
+                - BLOCK_LENGTH_WORDS * BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
         ).toInt()
         this.actualMemoryMapLimitAddress = min(
             this.memoryConfiguration.memoryMapLimitAddress.toDouble(),
             (this.memoryConfiguration.memoryMapBaseAddress
-            + BLOCK_LENGTH_WORDS * MMIO_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
+                + BLOCK_LENGTH_WORDS * MMIO_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
         ).toInt()
         this.reset()
     }
@@ -1301,9 +1300,7 @@ private const val MMIO_TABLE_LENGTH = 16 // Each entry of table points to a 4K b
 private const val TEXT_BLOCK_LENGTH_WORDS = 1024 // allocated blocksize 1024 ints == 4K bytes
 private const val TEXT_BLOCK_TABLE_LENGTH = 1024 // Each entry of table points to a block.
 
-fun isDoubleWordAligned(address: Int): Boolean {
-    return (address % (DataTypes.WORD_SIZE + DataTypes.WORD_SIZE) == 0)
-}
+fun isDoubleWordAligned(address: Int): Boolean = (address % (DataTypes.WORD_SIZE + DataTypes.WORD_SIZE) == 0)
 
 /**
  * Returns result of substituting specified byte of source value into specified byte
@@ -1319,9 +1316,9 @@ private fun replaceByte(
     // Set source byte value into destination byte position; set other 24 bits to
     // zeros, and bitwise-OR it with. Set 8 bits in destination byte position to 0's,
     return ((sourceValue shr (24 - (bytePosInSource shl 3)) and 0xFF) shl (24 - (bytePosInDest shl 3))) or (destValue and (0xFF
-    shl (24 - (bytePosInDest shl 3))
-    ).inv()
-    )
+        shl (24 - (bytePosInDest shl 3))
+        ).inv()
+        )
 }
 
 // TODO: add some heap managment so programs can malloc and free
@@ -1362,13 +1359,14 @@ private class MemoryObservable(
         address.toUInt() in handle.startAddress.toUInt()..<(handle.endAddress.toUInt() + DataTypes.WORD_SIZE.toUInt())
 
     /**
-     * {@inheritDoc}
-     *
-     *
      * Useful to have for future refactoring, if it actually becomes worthwhile to sort
      * these or put 'em in a tree (rather than sequential search through list).
      */
     override fun compareTo(other: MemoryObservable): Int =
         compareValuesBy(this, other, { it.handle.startAddress.toUInt() }, { it.handle.endAddress.toUInt() })
-}
 
+    override fun equals(other: Any?): Boolean =
+        other is MemoryObservable && handle.startAddress == other.handle.startAddress && handle.endAddress == other.handle.endAddress
+
+    override fun hashCode(): Int = Objects.hash(handle.startAddress, handle.endAddress)
+}

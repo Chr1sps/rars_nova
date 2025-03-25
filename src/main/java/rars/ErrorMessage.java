@@ -124,7 +124,7 @@ public final class ErrorMessage {
         builder.append((this.isWarning ? "Warning" : "Error"))
             .append(" in ");
         if (this.file != null) {
-            builder.append(this.file.getPath()).append(" ");
+            builder.append(this.file.getPath()).append(' ');
         }
         builder.append("line ")
             .append(this.getMacroExpansionHistory())
@@ -133,7 +133,7 @@ public final class ErrorMessage {
             .append(this.position);
         builder.append(":\n")
             .append(this.message)
-            .append("\n");
+            .append('\n');
         return builder.toString();
     }
 

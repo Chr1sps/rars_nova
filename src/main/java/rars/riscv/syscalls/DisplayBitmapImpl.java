@@ -9,7 +9,7 @@ import rars.riscv.hardware.Memory;
 import rars.util.BitmapDisplay;
 
 public final class DisplayBitmapImpl {
-    public static @NotNull DisplayBitmapImpl INSTANCE = new DisplayBitmapImpl(Globals.MEMORY_INSTANCE);
+    public static final @NotNull DisplayBitmapImpl INSTANCE = new DisplayBitmapImpl(Globals.MEMORY_INSTANCE);
     private final @NotNull Memory memory;
     private @Nullable BitmapDisplay display;
 

@@ -15,7 +15,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -89,15 +88,16 @@ public abstract class AbstractTool extends JFrame {
      * Simple constructor
      *
      * @param title
-     * String containing title bar text
+     *     String containing title bar text
      * @param heading
-     * a {@link java.lang.String} object
+     *     a {@link java.lang.String} object
      */
     protected AbstractTool(
-    final @NotNull String title,
-    final @NotNull String heading,
-    final @NotNull VenusUI mainUI
+        final @NotNull String title,
+        final @NotNull String heading,
+        final @NotNull VenusUI mainUI
     ) {
+        super();
         this.title = title;
         this.heading = heading;
         this.mainUI = mainUI;
@@ -148,12 +148,12 @@ public abstract class AbstractTool extends JFrame {
         this.dialog = new JDialog(this.mainUI, this.title);
         // assure the dialog goes away if user clicks the X
         this.dialog.addWindowListener(
-        new WindowAdapter() {
-            @Override
-            public void windowClosing(final WindowEvent e) {
-                AbstractTool.this.performToolClosingDuties();
-            }
-        });
+            new WindowAdapter() {
+                @Override
+                public void windowClosing(final WindowEvent e) {
+                    AbstractTool.this.performToolClosingDuties();
+                }
+            });
         this.theWindow = this.dialog;
         this.initializePreGUI();
         final JPanel contentPane = new JPanel(new BorderLayout(5, 5));
@@ -237,25 +237,25 @@ public abstract class AbstractTool extends JFrame {
         this.connectButton = new ConnectButton();
         this.connectButton.setToolTipText("Control whether tool will respond to running program");
         this.connectButton.addActionListener(
-        e -> {
-            if (this.connectButton.isConnected()) {
-                this.connectButton.disconnect();
-            } else {
-                this.connectButton.connect();
-            }
-        });
+            e -> {
+                if (this.connectButton.isConnected()) {
+                    this.connectButton.disconnect();
+                } else {
+                    this.connectButton.connect();
+                }
+            });
         this.connectButton.addKeyListener(new EnterKeyListener(this.connectButton));
 
         final JButton resetButton = new JButton("Reset");
         resetButton.setToolTipText("Reset all counters and other structures");
         resetButton.addActionListener(
-        e -> this.reset());
+            e -> this.reset());
         resetButton.addKeyListener(new EnterKeyListener(resetButton));
 
         final JButton closeButton = new JButton("Close");
         closeButton.setToolTipText("Close (exit) this tool");
         closeButton.addActionListener(
-        e -> this.performToolClosingDuties());
+            e -> this.performToolClosingDuties());
         closeButton.addKeyListener(new EnterKeyListener(closeButton));
 
         // Add all the buttons...
@@ -314,20 +314,20 @@ public abstract class AbstractTool extends JFrame {
      * or number of subranges it is registered for.
      *
      * @param lowEnd
-     * low end of memory address range.
+     *     low end of memory address range.
      * @param highEnd
-     * high end of memory address range; must be >= lowEnd
+     *     high end of memory address range; must be >= lowEnd
      */
     protected void addAsObserver(final int lowEnd, final int highEnd) {
         Globals.MEMORY_INSTANCE.subscribe(this::processAccessNotice, lowEnd, highEnd).fold(
-        __ -> {
-            this.headingLabel.setText("Error connecting to memory");
-            return Unit.INSTANCE;
-        },
-        handle -> {
-            this.memoryHandle = handle;
-            return Unit.INSTANCE;
-        }
+            __ -> {
+                this.headingLabel.setText("Error connecting to memory");
+                return Unit.INSTANCE;
+            },
+            handle -> {
+                this.memoryHandle = handle;
+                return Unit.INSTANCE;
+            }
         );
     }
 
@@ -343,7 +343,7 @@ public abstract class AbstractTool extends JFrame {
      * Add this app/tool as an Observer of the specified register.
      *
      * @param reg
-     * a {@link Register} object
+     *     a {@link Register} object
      */
     protected void addAsObserver(final Register reg) {
         if (reg != null) {
@@ -372,7 +372,7 @@ public abstract class AbstractTool extends JFrame {
      * Delete this app/tool as an Observer of the specified register
      *
      * @param reg
-     * a {@link Register} object
+     *     a {@link Register} object
      */
     protected void deleteAsSubscriber(final Register reg) {
         if (reg != null) {
@@ -419,7 +419,7 @@ public abstract class AbstractTool extends JFrame {
      * invoked automatically.
      *
      * @param notice
-     * a {@link AccessNotice} object
+     *     a {@link AccessNotice} object
      */
     protected void processRISCVUpdate(final AccessNotice notice) {
     }
@@ -444,7 +444,9 @@ public abstract class AbstractTool extends JFrame {
     // Specialized inner classes. Either used by stand-alone (JFrame-based) only //
     // or used by Tool (JDialog-based) only. //
 
-    // Closing duties for Tool only.
+    /**
+     * Closing duties for Tool only.
+     */
     private void performToolClosingDuties() {
         this.performSpecialClosingDuties();
         if (this.connectButton.isConnected()) {
@@ -464,17 +466,18 @@ public abstract class AbstractTool extends JFrame {
         final AbstractButton myButton;
 
         public EnterKeyListener(final AbstractButton who) {
+            super();
             this.myButton = who;
         }
 
         @Override
         public void keyPressed(@NotNull final KeyEvent e) {
-            if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+            if ((int) e.getKeyChar() == KeyEvent.VK_ENTER) {
                 e.consume();
                 try {
                     this.myButton.getActionListeners()[0].actionPerformed(new ActionEvent(
-                    this.myButton, 0,
-                    this.myButton.getText()
+                        this.myButton, 0,
+                        this.myButton.getText()
                     ));
                 } catch (final ArrayIndexOutOfBoundsException oob) {
                     // do nothing, since there is no action listener.
@@ -483,12 +486,13 @@ public abstract class AbstractTool extends JFrame {
         }
     }
 
-    // Little class for this dual-purpose button. It is used only by the Tool
-    // (not by the stand-alone app).
-    protected class ConnectButton extends JButton {
+    /**
+     * Little class for this dual-purpose button. It is used only by the Tool
+     * (not by the stand-alone app).
+     */
+    protected final class ConnectButton extends JButton {
         private static final String connectText = "Connect to Program";
         private static final String disconnectText = "Disconnect from Program";
-        private final ArrayList<Callback> connectionListeners = new ArrayList<>();
 
         public ConnectButton() {
             super();
@@ -504,7 +508,6 @@ public abstract class AbstractTool extends JFrame {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
             this.setText(ConnectButton.disconnectText);
-            this.notifyConnectionListeners();
         }
 
         public void disconnect() {
@@ -516,25 +519,10 @@ public abstract class AbstractTool extends JFrame {
             }
             AbstractTool.this.observing = false;
             this.setText(ConnectButton.connectText);
-            this.notifyConnectionListeners();
-        }
-
-        private void notifyConnectionListeners() {
-            for (final var listener : this.connectionListeners) {
-                listener.run(AbstractTool.this.observing);
-            }
         }
 
         public boolean isConnected() {
             return AbstractTool.this.observing;
-        }
-
-        public void addConnectListener(final Callback callback) {
-            this.connectionListeners.add(callback);
-        }
-
-        public interface Callback {
-            void run(boolean isConnected);
         }
     }
 }

@@ -59,8 +59,10 @@ public final class Macro {
     public Macro() {
         this.name = "";
         this.program = null;
-        this.fromLine = this.toLine = 0;
-        this.origFromLine = this.origToLine = 0;
+        this.fromLine = 0;
+        this.toLine = 0;
+        this.origFromLine = 0;
+        this.origToLine = 0;
         this.args = new ArrayList<>();
         this.labels = new ArrayList<>();
     }
@@ -238,9 +240,6 @@ public final class Macro {
         return this.args;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof final Macro macro) {

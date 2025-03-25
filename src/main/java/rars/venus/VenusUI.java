@@ -4,6 +4,8 @@ package rars.venus;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import kotlin.Unit;
+import kotlin.collections.ArraysKt;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -29,11 +31,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static kotlin.collections.CollectionsKt.*;
 import static rars.Globals.BOOL_SETTINGS;
 
 
@@ -69,14 +69,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Top level container for Venus GUI.
  *
  * @author Sanderson and Team JSpim
- */
-
-/*
- * Heavily modified by Pete Sanderson, July 2004, to incorporate JSPIMMenu and
- * JSPIMToolbar
- * not as subclasses of JMenuBar and JToolBar, but as instances of them. They
- * are both
- * here primarily so both can share the Action objects.
  */
 public final class VenusUI extends JFrame {
     private static final Logger LOGGER = LogManager.getLogger(VenusUI.class);
@@ -584,7 +576,7 @@ public final class VenusUI extends JFrame {
         if (!this.editor.openFiles(files)) {
             VenusUI.LOGGER.fatal(
                 "Internal Error: could not open files {}",
-                files.stream().map(File::getName).collect(Collectors.joining(", "))
+                String.join(", ", map(files, File::getName))
             );
             System.exit(1);
         }
@@ -605,7 +597,12 @@ public final class VenusUI extends JFrame {
     /// @param actions
     ///     The actions to enable.
     private static void setEnabled(final @NotNull Action... actions) {
-        Arrays.stream(actions).forEach((action) -> action.setEnabled(true));
+        ArraysKt.forEach(
+            actions, action -> {
+                action.setEnabled(true);
+                return Unit.INSTANCE;
+            }
+        );
     }
 
     /// Sets each of the [Action] objects to be enabled.
@@ -613,7 +610,12 @@ public final class VenusUI extends JFrame {
     /// @param actions
     ///     The actions to enable.
     private static void setDisabled(final @NotNull Action... actions) {
-        Arrays.stream(actions).forEach((action) -> action.setEnabled(false));
+        ArraysKt.forEach(
+            actions, action -> {
+                action.setEnabled(false);
+                return Unit.INSTANCE;
+            }
+        );
     }
 
     private static @NotNull JButton createActionButton(final @NotNull Action action) {
@@ -819,25 +821,30 @@ public final class VenusUI extends JFrame {
             ),
             List.of(helpHelpAction)
         );
-        sections.stream()
-            // convert each action to a button
-            .map(list -> list.stream()
-                .map(VenusUI::createActionButton)
-                .toList())
+
+        flatMap(
+            map(
+                sections,
+                // convert each action to a button
+                list -> map(
+                    list,
+                    VenusUI::createActionButton
+                )
+            ),
             // insert separators and flatten the lists
-            .flatMap(list -> Stream.concat(list.stream(), Stream.of(new JToolBar.Separator())))
+            list -> plus(list, new JToolBar.Separator())
             // add everything to the toolbar
-            .forEach(toolBar::add);
+        ).forEach(toolBar::add);
 
         return toolBar;
     }
 
     // region Menu states
 
-    /*
+    /**
      * Determine from FileStatus what the menu state (enabled/disabled)should
      * be then call the appropriate method to set it. Current states are:
-     *
+     * <p>
      * setMenuStateInitial: set upon startup and after File->Close
      * setMenuStateEditingNew: set upon File->New
      * setMenuStateEditing: set upon File->Open or File->Save or erroneous
@@ -880,7 +887,7 @@ public final class VenusUI extends JFrame {
         this.updateUndoAndRedoState();
     }
 
-    /*
+    /**
      * Added DPS 9-Aug-2011, for newly-opened files. Retain
      * existing Run menu state (except Assemble, which is always true).
      * Thus if there was a valid assembly it is retained.
@@ -950,7 +957,7 @@ public final class VenusUI extends JFrame {
         this.updateUndoAndRedoState();
     }
 
-    /*
+    /**
      * Use this upon successful assemble or reset
      */
     private void setMenuStateRunnable() {
@@ -969,7 +976,7 @@ public final class VenusUI extends JFrame {
         this.updateUndoAndRedoState();
     }
 
-    /*
+    /**
      * Use this while program is running
      */
     private void setMenuStateRunning() {
@@ -986,7 +993,7 @@ public final class VenusUI extends JFrame {
         setDisabled(editUndoAction, editRedoAction);
     }
 
-    /*
+    /**
      * Use this upon completion of execution
      */
     private void setMenuStateTerminated() {

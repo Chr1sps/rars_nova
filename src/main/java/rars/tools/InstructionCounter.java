@@ -160,7 +160,8 @@ public final class InstructionCounter extends AbstractTool {
         // Fields
         final GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.LINE_START;
-        c.gridheight = c.gridwidth = 1;
+        c.gridwidth = 1;
+        c.gridheight = 1;
         c.gridx = 3;
         c.gridy = 1;
         c.insets = new Insets(0, 0, 17, 0);
@@ -298,14 +299,20 @@ public final class InstructionCounter extends AbstractTool {
 
     @Override
     protected void initializePreGUI() {
-        this.counter = this.counterR = this.counterR4 = this.counterI = this.counterS = this.counterB = this.counterU = this.counterJ = 0;
+        this.counter = 0;
+        this.counterR = 0;
+        this.counterR4 = 0;
+        this.counterI = 0;
+        this.counterS = 0;
+        this.counterB = 0;
+        this.counterU = 0;
+        this.counterJ = 0;
         this.lastAddress = -1;
     }
 
     @Override
     protected void reset() {
-        this.counter = this.counterR = this.counterR4 = this.counterI = this.counterS = this.counterB = this.counterU = this.counterJ = 0;
-        this.lastAddress = -1;
+        this.initializePreGUI();
         this.updateDisplay();
     }
 

@@ -338,7 +338,7 @@ public final class MessagesPane extends JTabbedPane {
         final JDialog dialog = pane.createDialog(this.mainUI, "Keyboard Input");
         dialog.setVisible(true);
         final String input = (String) pane.getInputValue();
-        this.postRunMessage(Globals.userInputAlert + input + "\n");
+        this.postRunMessage(Globals.userInputAlert + input + '\n');
         if (lock) {
             Globals.MEMORY_REGISTERS_LOCK.lock();
         }

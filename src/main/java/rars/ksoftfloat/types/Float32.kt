@@ -19,13 +19,12 @@ class Float32(val bits: Int) : Floating<Float32> {
     val exponent: Int get() = ((this.bits ushr 23) and 0xFF) - 127
 
     // Flip the sign bit
-    override fun negate(): Float32 = Float32(this.bits xor -0x80000000)
+    override fun negate(): Float32 = Float32(this.bits xor Int.MIN_VALUE)
 
     fun abs(): Float32 = Float32(this.bits and 0x7FFFFFFF)
 
-    fun copySign(signToTake: Float32): Float32 {
-        return Float32((this.bits and 0x7FFFFFFF) or (signToTake.bits and -0x80000000))
-    }
+    fun copySign(signToTake: Float32): Float32 =
+        Float32((this.bits and 0x7FFFFFFF) or (signToTake.bits and Int.MIN_VALUE))
 
     override val isSignMinus get() = (this.bits ushr 31) == 1
 

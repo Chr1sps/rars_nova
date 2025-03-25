@@ -267,9 +267,6 @@ class EndOfTrackListener implements javax.sound.midi.MetaEventListener {
 
     private boolean endedYet = false;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void meta(final javax.sound.midi.@NotNull MetaMessage m) {
         if (m.getType() == 47) {

@@ -340,9 +340,7 @@ object InstructionsRegistry {
     }
 
     @JvmStatic
-    fun getTokenList(instruction: Instruction): TokenList {
-        return tokenListMap[instruction]!!
-    }
+    fun getTokenList(instruction: Instruction): TokenList = tokenListMap[instruction]!!
 
     private class MatchMap(private val mask: Int, private val matchMap: MutableMap<Int, BasicInstruction>) :
         Comparable<MatchMap> {
@@ -358,9 +356,7 @@ object InstructionsRegistry {
             this.maskLength = k
         }
 
-        override fun equals(o: Any?): Boolean {
-            return o is MatchMap && this.mask == o.mask
-        }
+        override fun equals(o: Any?): Boolean = o is MatchMap && this.mask == o.mask
 
         override fun compareTo(other: MatchMap): Int {
             var d = other.maskLength - this.maskLength
@@ -375,9 +371,7 @@ object InstructionsRegistry {
             return this.matchMap[match]
         }
 
-        override fun hashCode(): Int {
-            return Objects.hash(mask, maskLength, matchMap)
-        }
+        override fun hashCode(): Int = Objects.hash(mask, maskLength, matchMap)
     }
 
     /**

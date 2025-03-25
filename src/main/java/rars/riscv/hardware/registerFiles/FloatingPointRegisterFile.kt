@@ -74,9 +74,7 @@ class FloatingPointRegisterFile : RegisterFileBase('f', createRegisters()) {
             java.lang.Float.intBitsToFloat(intValue)
     }
 
-    fun getFloatFromRegister(register: Register): Float {
-        return java.lang.Float.intBitsToFloat(this.getIntValue(register))
-    }
+    fun getFloatFromRegister(register: Register): Float = Float.fromBits(getIntValue(register))
 
     companion object {
         private fun createRegisters() = arrayOf(

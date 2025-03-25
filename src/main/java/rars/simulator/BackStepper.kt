@@ -41,36 +41,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 class BackStepper {
     private val backSteps: BackstepStack = BackstepStack(Globals.maximumBacksteps)
-    private var engaged = true
 
     /**
-     * Determine whether execution "undo" steps are currently being recorded.
-     *
-     * @return true if undo steps being recorded, false if not.
+     * Determines whether the undo actions are being recorded by this object.
      */
-    fun enabled(): Boolean {
-        return this.engaged
-    }
-
-    /**
-     * Set enable status.
-     *
-     * @param state
-     * If true, will begin (or continue) recoding "undo" steps. If
-     * false, will stop.
-     */
-    fun setEnabled(state: Boolean) {
-        this.engaged = state
-    }
+    var isEnabled = true
 
     /**
      * Test whether there are steps that can be undone.
      *
      * @return true if there are no steps to be undone, false otherwise.
      */
-    fun empty(): Boolean {
-        return this.backSteps.empty()
-    }
+    fun empty(): Boolean = backSteps.empty()
 
     /**
      * Carry out a "back step", which will undo the latest execution step.
@@ -85,18 +67,12 @@ class BackStepper {
      * Use a do-while loop based on the backstep's program statement reference.
      */
     fun backStep() {
-        if (this.engaged && !this.backSteps.empty()) {
+        if (isEnabled && !this.backSteps.empty()) {
             val statement = this.backSteps.peek().ps
             // GOTTA DO THIS SO METHOD CALL IN SWITCH WILL NOT RESULT IN NEW ACTION ON STACK!
-            this.engaged = false
+            this.isEnabled = false
             do {
                 val step = this.backSteps.pop()
-                /*
-                 * System.out.println("backstep POP: action "+step.action+" pc "+rars.util.
-                 * Binary.intToHexString(step.pc)+
-                 * " source "+((step.ps==null)? "none":step.ps.getSource())+
-                 * " parm1 "+step.param1+" parm2 "+step.param2);
-                 */
                 if (step.pc != NOT_PC_VALUE) {
                     Globals.REGISTER_FILE.setProgramCounter(step.pc)
                 }
@@ -152,7 +128,7 @@ class BackStepper {
                     DO_NOTHING -> {}
                 }
             } while (!this.backSteps.empty() && statement == this.backSteps.peek().ps)
-            this.engaged = true // RESET IT (was disabled at top of loop -- see comment)
+            this.isEnabled = true // RESET IT (was disabled at top of loop -- see comment)
         }
     }
 

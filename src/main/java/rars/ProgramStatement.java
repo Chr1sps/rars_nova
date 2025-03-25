@@ -131,9 +131,11 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     ) {
         this.binaryStatement = binaryStatement;
         this.textAddress = textAddress;
-        this.originalTokenList = this.strippedTokenList = null;
+        this.originalTokenList = null;
+        this.strippedTokenList = null;
         this.sourceLine = null;
-        this.machineStatement = this.basicAssemblyStatement = null;
+        this.basicAssemblyStatement = null;
+        this.machineStatement = null;
         this.operands = new ArrayList<>(5);
         final var foundInstruction = InstructionsRegistry.findBasicInstructionByBinaryCode(binaryStatement);
         assert foundInstruction != null : "ERROR: basic instruction not found for this opcode.";
@@ -268,7 +270,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         final @NotNull ArrayList<@NotNull Integer> operands
     ) {
         final var result = new BasicStatementList();
-        result.addString(instr.mnemonic + " ");
+        result.addString(instr.mnemonic + ' ');
         final var tokenList = InstructionsRegistry.getTokenList(instr);
         // index 0 is operator; operands start at index 1
         int tokenListCounter = 1;
@@ -337,9 +339,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
 
     @Override
     public int compareTo(final ProgramStatement obj1) {
-        final int addr1 = this.textAddress;
-        final int addr2 = obj1.textAddress;
-        return (addr1 < 0 && addr2 >= 0 || addr1 >= 0 && addr2 < 0) ? addr2 : addr1 - addr2;
+        return Integer.compareUnsigned(this.textAddress, obj1.textAddress);
     }
 
     /**
@@ -353,7 +353,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      */
     public void buildBasicStatementFromBasicInstruction(final ErrorList errors) {
         final var firstToken = Objects.requireNonNull(this.strippedTokenList).get(0);
-        final var firstElement = firstToken.getText() + " ";
+        final var firstElement = firstToken.getText() + ' ';
         this.basicStatementList.addString(firstElement); // the operator
         final var basicInstructionBuilder = new StringBuilder(firstElement);
         for (int i = 1; i < this.strippedTokenList.size(); i++) {
@@ -574,7 +574,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     && nextTokenType != TokenType.LEFT_PAREN
                     && nextTokenType != TokenType.RIGHT_PAREN
                 ) {
-                    basicInstructionBuilder.append(",");
+                    basicInstructionBuilder.append(',');
                     this.basicStatementList.addString(",");
                 }
             }
@@ -660,7 +660,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         final var textAddressString = "[%s]".formatted(BinaryUtilsKt.intToHexStringWithPrefix(this.textAddress));
         builder.append(textAddressString);
         if (this.basicAssemblyStatement != null) {
-            final var firstSpaceIndex = this.basicAssemblyStatement.indexOf(" ");
+            final var firstSpaceIndex = this.basicAssemblyStatement.indexOf(' ');
             final var instruction = this.basicAssemblyStatement.substring(0, firstSpaceIndex);
             final var operands = this.basicAssemblyStatement.substring(firstSpaceIndex + 1);
             builder.append(" %-7s %-21s".formatted(instruction, operands));

@@ -188,7 +188,7 @@ public enum TokenType {
         if (value.equals("Inf") || value.equals("NaN")) {
             return TokenType.REAL_NUMBER;
         }
-        if (('0' <= value.charAt(0) && value.charAt(0) <= '9') || value.charAt(0) == '.' || value.charAt(0) == '-') {
+        if ((value.charAt(0) >= '0' && value.charAt(0) <= '9') || value.charAt(0) == '.' || value.charAt(0) == '-') {
             try {
                 Double.parseDouble(value);
                 return TokenType.REAL_NUMBER;

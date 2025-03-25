@@ -220,8 +220,8 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
                             Simulator.Reason.MAX_STEPS -> {
                                 this.out.println(
                                     "\nProgram terminated when maximum step limit " + this.programOptions.maxSteps +
-                                            " " +
-                                            "reached."
+                                        " " +
+                                        "reached."
                                 )
                                 false
                             }

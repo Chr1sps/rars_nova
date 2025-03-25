@@ -50,7 +50,7 @@ public final class FileStatus {
     private @Nullable File file;
 
     /**
-     * Create a FileStatus object with FileStatis.NO_FILE for status and null for
+     * Create a FileStatus object with FileStatus.NO_FILE for status and null for
      * file getters.
      */
     public FileStatus() {

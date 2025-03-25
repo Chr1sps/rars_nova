@@ -24,6 +24,7 @@ public final class BaseStyleView extends JPanel {
         caretColorButton;
 
     public BaseStyleView() {
+        super();
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();

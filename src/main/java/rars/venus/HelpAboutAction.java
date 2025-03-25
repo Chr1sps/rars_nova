@@ -46,9 +46,6 @@ public final class HelpAboutAction extends GuiAction {
         super(name, icon, descrip, mnemonic, accel, gui);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void actionPerformed(final ActionEvent e) {
         final var message = """

@@ -31,7 +31,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.text.DecimalFormat;
-import java.util.Vector;
 
 /**
  * Represents the GUI of the BHT Simulator Tool.
@@ -110,6 +109,7 @@ public final class BHTSimGUI extends JPanel {
      * tool
      */
     public BHTSimGUI() {
+        super();
         final BorderLayout layout = new BorderLayout();
         layout.setVgap(10);
         layout.setHgap(10);
@@ -218,22 +218,15 @@ public final class BHTSimGUI extends JPanel {
     private JPanel buildConfigPanel() {
         final JPanel panel = new JPanel();
 
-        final Vector<Integer> sizes = new Vector<>();
-        sizes.add(8);
-        sizes.add(16);
-        sizes.add(32);
+        final var sizes = new Integer[]{8, 16, 32};
 
-        final Vector<Integer> bits = new Vector<>();
-        bits.add(1);
-        bits.add(2);
+        final var bits = new Integer[]{1, 2};
 
-        final Vector<String> initVals = new Vector<>();
-        initVals.add(BHTSimGUI.BHT_DO_NOT_TAKE_BRANCH);
-        initVals.add(BHTSimGUI.BHT_TAKE_BRANCH);
+        final var initialValues = new String[]{BHTSimGUI.BHT_DO_NOT_TAKE_BRANCH, BHTSimGUI.BHT_TAKE_BRANCH};
 
         m_cbBHTentries = new JComboBox<>(sizes);
         m_cbBHThistory = new JComboBox<>(bits);
-        m_cbBHTinitVal = new JComboBox<>(initVals);
+        m_cbBHTinitVal = new JComboBox<>(initialValues);
 
         panel.add(new JLabel("# of BHT entries"));
         panel.add(m_cbBHTentries);

@@ -48,7 +48,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class FilenameFinder {
 
-    public static @NotNull FileFilter RARS_FILE_FILTER = new FileFilter() {
+    public static final @NotNull FileFilter RARS_FILE_FILTER = new FileFilter() {
         @Override
         public boolean accept(final File f) {
             if (f.isDirectory()) return true;

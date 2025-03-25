@@ -1,10 +1,5 @@
 package rars.tools;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
 import kotlin.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +9,13 @@ import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.util.BinaryUtilsKt;
 import rars.venus.VenusUI;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import static rars.util.KotlinUtilsKt.unwrap;
 
 /*
  * Didier Teifreto LIFC Universit� de franche-Comt�
@@ -143,11 +145,7 @@ public final class DigitalLabSim extends AbstractTool {
         if (this.connectButton.isConnected()) {
             Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
-                Globals.MEMORY_INSTANCE.setByte(dataAddr, (byte) dataValue).onLeft(aee -> {
-                    DigitalLabSim.LOGGER.fatal("Tool author specified incorrect MMIO address!", aee);
-                    System.exit(0);
-                    return Unit.INSTANCE;
-                });
+                unwrap(Globals.MEMORY_INSTANCE.setByte(dataAddr, (byte) dataValue));
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
@@ -262,6 +260,7 @@ public final class DigitalLabSim extends AbstractTool {
         public char aff;
 
         public SevenSegmentDisplay(final char aff) {
+            super();
             this.aff = aff;
             this.setPreferredSize(new Dimension(60, 80));
         }
@@ -360,6 +359,7 @@ public final class DigitalLabSim extends AbstractTool {
         public final SevenSegmentDisplay[] display;
 
         public SevenSegmentPanel() {
+            super();
             final FlowLayout fl = new FlowLayout();
             this.setLayout(fl);
             this.display = new SevenSegmentDisplay[2];
@@ -385,6 +385,7 @@ public final class DigitalLabSim extends AbstractTool {
         public final JButton[] button;
 
         public HexaKeyboard() {
+            super();
             final GridLayout layout = new GridLayout(4, 4);
             this.setLayout(layout);
             this.button = new JButton[16];

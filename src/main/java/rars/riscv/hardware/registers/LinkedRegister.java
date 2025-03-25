@@ -38,7 +38,7 @@ public final class LinkedRegister extends Register {
     private final int shift;
 
     public LinkedRegister(final @NotNull String name, final int num, final @NotNull Register base, final long mask) {
-        super(name, num, 0); // reset value does not matter
+        super(name, num, 0L); // reset value does not matter
         this.base = base;
         this.mask = mask;
         this.shift = calculateShift(mask);
@@ -47,9 +47,9 @@ public final class LinkedRegister extends Register {
     private static int calculateShift(long mask) {
         // Find the lowest 1 bit
         int shift = 0;
-        while (mask != 0 && (mask & 1) == 0) {
+        while (mask != 0L && (mask & 1L) == 0L) {
             shift++;
-            mask >>>= 1;
+            mask >>>= 1L;
         }
         return shift;
     }
@@ -63,7 +63,7 @@ public final class LinkedRegister extends Register {
     public synchronized long setValue(final long val) {
         final long old = base.getValueNoNotify();
         base.setValue(((val << shift) & mask) | (old & ~mask));
-        super.setValue(0); // value doesn't matter just notify
+        super.setValue(0L); // value doesn't matter just notify
         return (old & mask) >>> shift;
     }
 

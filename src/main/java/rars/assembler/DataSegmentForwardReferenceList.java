@@ -6,6 +6,8 @@ import rars.Globals;
 
 import java.util.ArrayList;
 
+import static rars.util.KotlinUtilsKt.unwrap;
+
 /**
  * Handy class to handle forward label references appearing as data
  * segment operands. This is needed because the data segment is completely
@@ -72,7 +74,7 @@ final class DataSegmentForwardReferenceList {
             final var doRemove = labelAddress != SymbolTable.NOT_FOUND;
             if (doRemove) {
                 // patch address has to be valid b/c we already stored there...
-                Globals.MEMORY_INSTANCE.set(entry.patchAddress, labelAddress, entry.length);
+                unwrap(Globals.MEMORY_INSTANCE.set(entry.patchAddress, labelAddress, entry.length));
             }
             return doRemove;
         });

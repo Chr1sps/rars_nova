@@ -308,7 +308,7 @@ public final class EditFindReplaceAction extends GuiAction {
                     if (replaceCount == 0) {
                         this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {
-                        this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_REPLACED_ALL + " "
+                        this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_REPLACED_ALL + ' '
                             + replaceCount + " occurrence" + (replaceCount == 1 ? "" : "s"));
                     }
                 }

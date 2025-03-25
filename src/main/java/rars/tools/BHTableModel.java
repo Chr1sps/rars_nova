@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package rars.tools;//.bhtsim;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Simulates the actual functionality of a Branch History Table (BHT).
@@ -77,7 +77,7 @@ public final class BHTableModel extends AbstractTableModel {
     /**
      * vector holding the entries of the BHT
      */
-    private Vector<BHTEntry> m_entries;
+    private ArrayList<BHTEntry> m_entries;
     /**
      * number of entries in the BHT
      */
@@ -94,6 +94,7 @@ public final class BHTableModel extends AbstractTableModel {
      *     a boolean
      */
     public BHTableModel(final int numEntries, final int historySize, final boolean initVal) {
+        super();
         this.initBHT(numEntries, historySize, initVal);
     }
 
@@ -107,7 +108,7 @@ public final class BHTableModel extends AbstractTableModel {
     public String getColumnName(final int i) {
         if (i < 0 || i > this.m_columnNames.length) {
             throw new IllegalArgumentException(
-                "Illegal column index " + i + " (must be in range 0.." + (this.m_columnNames.length - 1) + ")");
+                "Illegal column index " + i + " (must be in range 0.." + (this.m_columnNames.length - 1) + ')');
         }
 
         return this.m_columnNames[i];
@@ -123,7 +124,7 @@ public final class BHTableModel extends AbstractTableModel {
     public Class<?> getColumnClass(final int i) {
         if (i < 0 || i > this.m_columnClasses.length) {
             throw new IllegalArgumentException(
-                "Illegal column index " + i + " (must be in range 0.." + (this.m_columnClasses.length - 1) + ")");
+                "Illegal column index " + i + " (must be in range 0.." + (this.m_columnClasses.length - 1) + ')');
         }
 
         return this.m_columnClasses[i];
@@ -160,31 +161,20 @@ public final class BHTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(final int row, final int col) {
 
-        final BHTEntry e = this.m_entries.elementAt(row);
+        final BHTEntry e = this.m_entries.get(row);
         if (e == null) {
             return "";
         }
 
-        if (col == 0) {
-            return row;
-        }
-        if (col == 1) {
-            return e.getHistoryAsStr();
-        }
-        if (col == 2) {
-            return e.getPredictionAsStr();
-        }
-        if (col == 3) {
-            return e.getStatsPredCorrect();
-        }
-        if (col == 4) {
-            return e.getStatsPredIncorrect();
-        }
-        if (col == 5) {
-            return e.getStatsPredPrecision();
-        }
-
-        return "";
+        return switch (col) {
+            case 0 -> row;
+            case 1 -> e.getHistoryAsStr();
+            case 2 -> e.getPredictionAsStr();
+            case 3 -> e.getStatsPredCorrect();
+            case 4 -> e.getStatsPredIncorrect();
+            case 5 -> e.getStatsPredPrecision();
+            default -> "";
+        };
     }
 
     /**
@@ -211,7 +201,7 @@ public final class BHTableModel extends AbstractTableModel {
 
         this.m_entryCnt = numEntries;
 
-        this.m_entries = new Vector<>();
+        this.m_entries = new ArrayList<>(this.m_entryCnt);
 
         for (int i = 0; i < this.m_entryCnt; i++) {
             this.m_entries.add(new BHTEntry(historySize, initVal));
@@ -249,7 +239,7 @@ public final class BHTableModel extends AbstractTableModel {
             throw new IllegalArgumentException("Only indexes in the range 0 to " + (this.m_entryCnt - 1) + " allowed");
         }
 
-        return this.m_entries.elementAt(index).getPrediction();
+        return this.m_entries.get(index).getPrediction();
     }
 
     /**
@@ -267,7 +257,7 @@ public final class BHTableModel extends AbstractTableModel {
             throw new IllegalArgumentException("Only indexes in the range 0 to " + (this.m_entryCnt - 1) + " allowed");
         }
 
-        this.m_entries.elementAt(index).updatePrediction(branchTaken);
+        this.m_entries.get(index).updatePrediction(branchTaken);
         this.fireTableRowsUpdated(index, index);
     }
 

@@ -169,7 +169,7 @@ class Tokenizer private constructor(
                                 tokenPos = 0
                             } else if (
                                 !((result.isEmpty() || result.last().type != TokenType.IDENTIFIER) &&
-                                        (line.size >= linePos + 2 && line[linePos + 1].isDigit()))
+                                    (line.size >= linePos + 2 && line[linePos + 1].isDigit()))
                             ) {
                                 // treat it as binary.....
                                 this.processCandidateToken(
@@ -388,8 +388,8 @@ class Tokenizer private constructor(
 
         var theLine = theLine
         if (tokens.size > 2 && (tokens.get(0).type == TokenType.DIRECTIVE
-                    || tokens.get(2).type == TokenType.DIRECTIVE
-                    )
+                || tokens.get(2).type == TokenType.DIRECTIVE
+                )
         ) {
             // There should not be a label but if there is, the directive is in token
             // position 2 (ident, colon, directive).
@@ -397,7 +397,7 @@ class Tokenizer private constructor(
             if (Directive.matchDirective(tokens.get(dirPos).text) == Directive.EQV) {
                 // Get position in token list of last non-comment token
                 val tokenPosLastOperand = (tokens.size
-                        - (if (tokens.get(tokens.size - 1).type == TokenType.COMMENT) 2 else 1))
+                    - (if (tokens.get(tokens.size - 1).type == TokenType.COMMENT) 2 else 1))
                 // There have to be at least two non-comment tokens beyond the directive
                 if (tokenPosLastOperand < dirPos + 2) {
                     this.errors.add(
@@ -428,7 +428,7 @@ class Tokenizer private constructor(
                             ErrorMessage.error(
                                 program, lineNum, tokens.get(dirPos).startPos,
                                 ("Cannot substitute " + symbol + " for itself in " + Directive.EQV.name
-                                        + " directive")
+                                    + " directive")
                             )
                         )
                         return tokens
@@ -441,7 +441,7 @@ class Tokenizer private constructor(
                 // COMMENT or to the end.
                 val startExpression = tokens.get(dirPos + 2).startPos
                 val endExpression = (tokens.get(tokenPosLastOperand).startPos
-                        + tokens.get(tokenPosLastOperand).text.length)
+                    + tokens.get(tokenPosLastOperand).text.length)
                 val expression = theLine.substring(startExpression - 1, endExpression - 1)
                 // Removed equivalents checking - this is a tokenizer, not a semantic checker
                 this.equivalents.put(symbol, expression)
@@ -459,7 +459,7 @@ class Tokenizer private constructor(
                 val sub = this.equivalents[token.text]
                 val startPos = token.startPos
                 theLine = (theLine.substring(0, startPos - 1) + sub
-                        + theLine.substring(startPos + token.text.length - 1))
+                    + theLine.substring(startPos + token.text.length - 1))
                 substitutionMade = true // one substitution per call. If there are multiple, will catch next one on the
                 // recursion
                 break
@@ -549,7 +549,7 @@ class Tokenizer private constructor(
         @JvmStatic
         fun tokenize(program: RISCVProgram): Either<AssemblyError, List<TokenList>> = either {
             val tokenizer = Tokenizer(program)
-            val source = tokenizer.processIncludes(program, mutableMapOf<String, String>()).bind()
+            val source = tokenizer.processIncludes(program, mutableMapOf()).bind()
             program.sourceLineList = source
 
             val tokenList = mutableListOf<TokenList>()

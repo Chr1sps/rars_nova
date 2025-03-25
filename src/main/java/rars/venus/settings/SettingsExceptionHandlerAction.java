@@ -66,9 +66,6 @@ public final class SettingsExceptionHandlerAction extends GuiAction {
         super(name, icon, descrip, mnemonic, accel, mainUI);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void actionPerformed(final ActionEvent e) {
         this.initialSelected =

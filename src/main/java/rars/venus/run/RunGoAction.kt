@@ -76,7 +76,7 @@ class RunGoAction(
                     this.name + ": running " + FileStatus.systemFile!!.getName() + "\n\n"
                 )
                 this.mainUI.messagesPane.selectRunMessageTab()
-                this.executePane!!.textSegment.setCodeHighlighting(false)
+                this.executePane!!.textSegment.codeHighlighting = false
                 this.executePane!!.textSegment.unhighlightAllSteps()
                 // FileStatus.set(FileStatus.RUNNING);
                 this.mainUI.setMenuState(FileStatus.State.RUNNING)
@@ -162,7 +162,7 @@ class RunGoAction(
             )
         }
         this.mainUI.messagesPane.selectMessageTab()
-        this.executePane!!.textSegment.setCodeHighlighting(true)
+        this.executePane!!.textSegment.codeHighlighting = true
         this.executePane!!.textSegment.highlightStepAtPC()
         this.executePane!!.registerValues.updateRegisters()
         this.executePane!!.fpRegValues.updateRegisters()
@@ -192,7 +192,7 @@ class RunGoAction(
         // Bring CSRs to the front if terminated due to exception.
         if (pe != null) {
             this.mainUI.registersPane.setSelectedComponent(this.executePane!!.csrValues)
-            this.executePane!!.textSegment.setCodeHighlighting(true)
+            this.executePane!!.textSegment.codeHighlighting = true
             this.executePane!!.textSegment.unhighlightAllSteps()
             this.executePane!!.textSegment.highlightStepAtAddress(Globals.REGISTER_FILE.programCounter - 4)
         }
@@ -253,7 +253,7 @@ class RunGoAction(
      * $a0 gets argument count (argc), $a1 gets stack address of first arg pointer (argv).
      */
     private fun processProgramArgumentsIfAny() {
-        val programArguments = this.executePane!!.textSegment.getProgramArguments()
+        val programArguments = this.executePane!!.textSegment.programArguments
         if (programArguments == null || programArguments.isEmpty() || !Globals.BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             return
         }
@@ -261,8 +261,8 @@ class RunGoAction(
     }
 
     companion object {
-        val defaultMaxSteps: Int = -1 // "forever", formerly 10000000; // 10 million
-        var maxSteps: Int = defaultMaxSteps
+        const val DEFAULT_MAX_STEPS: Int = -1
+        var maxSteps: Int = DEFAULT_MAX_STEPS
 
         /**
          * Reset max steps limit to default value at termination of a simulated
@@ -270,7 +270,7 @@ class RunGoAction(
          */
         @JvmStatic
         fun resetMaxSteps() {
-            maxSteps = defaultMaxSteps
+            maxSteps = DEFAULT_MAX_STEPS
         }
     }
 }

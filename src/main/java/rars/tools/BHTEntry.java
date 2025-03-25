@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
  */
 
-package rars.tools;//.bhtsim;
+package rars.tools;
 
 /**
  * Represents a single entry of the Branch History Table.
@@ -93,7 +93,8 @@ public final class BHTEntry {
         for (int i = 0; i < historySize; i++) {
             this.m_history[i] = initVal;
         }
-        this.m_correct = this.m_incorrect = 0;
+        this.m_correct = 0;
+        this.m_incorrect = 0;
     }
 
     /**

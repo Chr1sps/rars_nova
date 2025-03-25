@@ -175,7 +175,9 @@ public final class MacroPool {
      * @return counter value
      */
     public int getNextCounter() {
-        return this.counter++;
+        final int i = this.counter;
+        this.counter++;
+        return i;
     }
 
     /**

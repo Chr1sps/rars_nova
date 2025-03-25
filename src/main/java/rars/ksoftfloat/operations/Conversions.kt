@@ -58,9 +58,7 @@ private fun <T : Floating<T>> convertToIntegral(
     return rounded.min(max).max(min) // clamp rounded to between max and min
 }
 
-fun <T : Floating<T>> T.toInt(env: Environment): Int {
-    return this.toInt(env, false)
-}
+fun <T : Floating<T>> T.toInt(env: Environment) = toInt(env, false)
 
 fun <T : Floating<T>> T.toInt(
     env: Environment,
@@ -117,6 +115,4 @@ fun <T : Floating<T>> FloatingFactory<T>.fromBigInteger(
 } else fromExactFloat(env, ExactFloat(bigInt))
 
 
-private fun BigInteger.toULong(): ULong {
-    return this.toLong().toULong()
-}
+private fun BigInteger.toULong(): ULong = this.toLong().toULong()

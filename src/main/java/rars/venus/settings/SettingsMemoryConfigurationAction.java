@@ -140,7 +140,7 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
         private Component buildConfigChooser() {
             final JPanel chooserPanel = new JPanel(new GridLayout(4, 1));
             final ButtonGroup choices = new ButtonGroup();
-            for (final var configuration : MemoryConfiguration.values()) {
+            for (final var configuration : MemoryConfiguration.getEntries()) {
                 final var button = new ConfigurationButton(configuration);
                 button.addActionListener(this);
                 if (button.isSelected()) {
@@ -305,7 +305,7 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
             final int addressStringLength = BinaryUtilsKt.intToHexStringWithPrefix(configurationItemValues[0])
                 .length();
             for (int i = 0; i < configurationItemValues.length; i++) {
-                Map.Entry<String, String> pair = setSortedByAddress.next();
+                final Map.Entry<String, String> pair = setSortedByAddress.next();
                 this.nameDisplay[i].setText(pair.getValue());
                 this.addressDisplay[i].setText(pair.getKey().substring(0, addressStringLength));
             }

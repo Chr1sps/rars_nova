@@ -41,24 +41,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2003
  */
-public final class TokenList implements Cloneable, Collection<Token> {
+public final class TokenList implements Cloneable, Collection<@NotNull Token> {
 
-    private @NotNull ArrayList<Token> tokenList;
-    private @NotNull String processedLine;// DPS 03-Jan-2013
+    private @NotNull ArrayList<@NotNull Token> tokenList;
+    private @NotNull String processedLine;
 
     /**
      * Constructor for objects of class TokenList
      */
     public TokenList() {
         this.tokenList = new ArrayList<>();
-        this.processedLine = ""; // DPS 03-Jan-2013
+        this.processedLine = "";
     }
 
-    /**
-     * <p>iterator.</p>
-     *
-     * @return a {@link java.util.Iterator} object
-     */
     @Override
     public @NotNull Iterator<Token> iterator() {
         return this.tokenList.iterator();
@@ -74,8 +69,6 @@ public final class TokenList implements Cloneable, Collection<Token> {
         return this.tokenList.toArray(a);
     }
 
-    // DPS 03-Jan-2013/
-
     /**
      * Retrieve the source line String associated with this
      * token list. It may or may not have been modified during
@@ -86,8 +79,6 @@ public final class TokenList implements Cloneable, Collection<Token> {
     public @NotNull String getProcessedLine() {
         return this.processedLine;
     }
-
-    // DPS 03-Jan-2013
 
     /**
      * Use this to record the source line String for this token list
@@ -217,7 +208,7 @@ public final class TokenList implements Cloneable, Collection<Token> {
     public String toString() {
         final var builder = new StringBuilder();
         for (final var token : this.tokenList) {
-            builder.append(token.toString()).append(" ");
+            builder.append(token).append(' ');
         }
         return builder.toString();
     }

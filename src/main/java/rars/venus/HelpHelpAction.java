@@ -17,7 +17,6 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Vector;
@@ -172,7 +171,7 @@ public final class HelpHelpAction extends GuiAction {
      */
     @Contract(" -> new")
     private static @NotNull JScrollPane createSyscallsHelpPane() {
-        final var sortedList = Arrays.stream(Syscall.values()).sorted().toList();
+        final var sortedList = Syscall.getEntries().stream().sorted().toList();
         final String[][] data = new String[sortedList.size()][5];
 
         int i = 0;
@@ -204,20 +203,17 @@ public final class HelpHelpAction extends GuiAction {
     // Methods to construct MIPS help tabs from internal MARS objects
 
     private static @NotNull StringBuilder loadFiletoStringBuilder(final String path) {
-        final var stream = HelpHelpAction.class.getResourceAsStream(path);
-        final var reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));
-        final StringBuilder out = new StringBuilder();
-        try {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                out.append(line).append("\n");
+        try (final var stream = HelpHelpAction.class.getResourceAsStream(path)) {
+            final var result = new StringBuilder();
+            try (final var reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)))) {
+                for (var line = reader.readLine(); line != null; line = reader.readLine()) {
+                    result.append(line).append('\n');
+                }
             }
-            reader.close();
+            return result;
         } catch (final IOException io) {
             return new StringBuilder(path + " could not be loaded.");
         }
-        return out;
-
     }
 
     /// Create panel containing Help Info read from html document.

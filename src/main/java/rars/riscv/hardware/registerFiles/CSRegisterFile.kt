@@ -31,9 +31,7 @@ class CSRegisterFile : RegisterFileBase('_', createRegisters()) {
     val timeh: Register = this.registers[15]
     val instreth: Register = this.registers[16]
 
-    override fun convertFromLong(value: Long): Int {
-        return value.toInt()
-    }
+    override fun convertFromLong(value: Long): Int = value.toInt()
 
     override fun updateRegister(register: Register, newValue: Long): Either<SimulationError, Long> = either {
         ensure(!(register is ReadOnlyRegister || register === cycleh || register === timeh || register === instreth)) {

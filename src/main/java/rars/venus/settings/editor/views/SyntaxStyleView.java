@@ -6,9 +6,11 @@ import rars.venus.settings.editor.OptionSection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
+
+import static kotlin.collections.ArraysKt.flatMap;
+import static kotlin.collections.CollectionsKt.drop;
 
 public final class SyntaxStyleView extends JPanel {
 
@@ -16,6 +18,7 @@ public final class SyntaxStyleView extends JPanel {
     public final @NotNull ColorPickerButton foregroundColorButton, backgroundColorButton;
 
     public SyntaxStyleView() {
+        super();
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // foreground
@@ -56,10 +59,15 @@ public final class SyntaxStyleView extends JPanel {
         if (addMargins) {
             panel.add(Box.createHorizontalGlue());
         }
-        Arrays.stream(sections)
-            .flatMap(s -> Stream.of(Box.createHorizontalGlue(), s))
-            .skip(1)
-            .forEach(panel::add);
+
+        drop(
+            flatMap(
+                sections,
+                s -> List.of(Box.createHorizontalGlue(), s)
+            ),
+            1
+        ).forEach(panel::add);
+
         if (addMargins) {
             panel.add(Box.createHorizontalGlue());
         }

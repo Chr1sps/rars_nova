@@ -68,7 +68,6 @@ internal fun ULong.toBigInteger(): BigInteger {
     }
 }
 
-// TODO: Create some kind of a factory interface for the Floating types to use here
 internal fun <S : Floating<S>, D : Floating<D>> convert(
     valueToConvert: D,
     constructor: FloatingFactory<S>,

@@ -46,7 +46,7 @@ public final class FontUtilities {
      * An array of all available font family names. These are guaranteed to
      * be available at runtime, as they come from the local GraphicsEnvironment.
      */
-    public static String[] allFontFamilies = GraphicsEnvironment
+    public static final String[] allFontFamilies = GraphicsEnvironment
         .getLocalGraphicsEnvironment()
         .getAvailableFontFamilyNames();
 

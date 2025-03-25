@@ -39,6 +39,8 @@ import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static rars.util.KotlinUtilsKt.unwrap;
+
 /**
  * A RARS tool used to implement a timing module and timer inturrpts.
  */
@@ -113,9 +115,6 @@ public final class TimerTool extends AbstractTool {
 
     // Overwrites the empty parent method, called when the tool is closed
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() {
         return "Timer Tool";
@@ -202,11 +201,7 @@ public final class TimerTool extends AbstractTool {
     private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
         Globals.MEMORY_REGISTERS_LOCK.lock();
         try {
-            Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue).onLeft(error -> {
-                TimerTool.LOGGER.fatal("Tool author specified incorrect MMIO address!", error);
-                System.exit(0);
-                return Unit.INSTANCE;
-            });
+            unwrap(Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue));
         } finally {
             Globals.MEMORY_REGISTERS_LOCK.unlock();
         }
@@ -362,6 +357,7 @@ public final class TimerTool extends AbstractTool {
         final JLabel currentTime = new JLabel("Hello world");
 
         public TimePanel() {
+            super();
             final FlowLayout fl = new FlowLayout();
             this.setLayout(fl);
             this.add(this.currentTime);

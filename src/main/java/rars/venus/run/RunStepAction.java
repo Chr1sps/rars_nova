@@ -82,7 +82,7 @@ public final class RunStepAction extends GuiAction {
 
             final var stopListener = new Function1<SimulatorNotice, Unit>() {
                 @Override
-                public Unit invoke(SimulatorNotice item) {
+                public Unit invoke(final SimulatorNotice item) {
                     if (item.action != SimulatorNotice.Action.STOP) {
                         return Unit.INSTANCE;
                     }
@@ -130,7 +130,7 @@ public final class RunStepAction extends GuiAction {
         }
         if (done && pe == null) {
             this.mainUI.messagesPane.postMessage(
-                "\n" + this.name + ": execution " +
+                '\n' + this.name + ": execution " +
                     (
                         (reason == Simulator.Reason.CLIFF_TERMINATION) ? "terminated due to null instruction."
                             : "completed successfully."
@@ -140,7 +140,7 @@ public final class RunStepAction extends GuiAction {
                 "\n-- program is finished running" +
                     (
                         (reason == Simulator.Reason.CLIFF_TERMINATION) ? "(dropped off bottom)"
-                            : " (" + Globals.exitCode + ")"
+                            : " (" + Globals.exitCode + ')'
                     )
                     + " --\n\n");
             this.mainUI.messagesPane.selectRunMessageTab();
@@ -150,7 +150,7 @@ public final class RunStepAction extends GuiAction {
             this.mainUI.messagesPane.postMessage(
                 pe.getMessage().generateReport());
             this.mainUI.messagesPane.postMessage(
-                "\n" + this.name + ": execution terminated with errors.\n\n");
+                '\n' + this.name + ": execution terminated with errors.\n\n");
             this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues);
             FileStatus.setSystemState(FileStatus.State.TERMINATED); // should be redundant.
             this.executePane.textSegment.setCodeHighlighting(true);

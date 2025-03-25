@@ -75,6 +75,7 @@ public final class ExecutePane extends JDesktopPane {
         final @NotNull FloatingPointWindow fpRegs,
         final @NotNull ControlAndStatusWindow csrRegs
     ) {
+        super();
         this.mainUI = mainUI;
         // Although these are displayed in Data Segment, they apply to all three
         // internal

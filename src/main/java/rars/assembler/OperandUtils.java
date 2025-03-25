@@ -224,7 +224,7 @@ public final class OperandUtils {
             token.getSourceProgram(),
             token.getSourceLine(),
             token.getStartPos(),
-            "\"" + token.getText() + "\": " + mess
+            '"' + token.getText() + "\": " + mess
         ));
     }
 

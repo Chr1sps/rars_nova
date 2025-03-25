@@ -3,7 +3,6 @@ package rars.io
 import rars.settings.BoolSetting
 import rars.settings.BoolSettingsImpl
 import rars.venus.MessagesPane
-import java.nio.charset.StandardCharsets
 import kotlin.math.min
 
 class VenusIO(
@@ -43,7 +42,8 @@ class VenusIO(
 
     override fun writeToFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int = when (fd) {
         STDOUT, STDERR -> {
-            val string = String(myBuffer, StandardCharsets.UTF_8) // decode the bytes using UTF-8 
+            // decode the bytes using UTF-8 
+            val string = String(myBuffer, Charsets.UTF_8)
             this.printToGui(string)
             myBuffer.size
         }

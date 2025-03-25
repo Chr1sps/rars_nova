@@ -49,6 +49,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class RISCVProgram {
     var file: File? = null
         private set
+    var source: String? = null
     var sourceList: List<String>? = null
         private set
 
@@ -110,7 +111,7 @@ class RISCVProgram {
          */
         set(sourceLineList) {
             field = sourceLineList
-            this.sourceList = sourceLineList!!.stream().map<String?>(SourceLine::source).toList()
+            this.sourceList = sourceLineList!!.stream().map(SourceLine::source).toList()
         }
 
     /**
@@ -121,9 +122,7 @@ class RISCVProgram {
      * basic RISCV instruction.
      * @see ProgramStatement
      */
-    fun getMachineList(): List<ProgramStatement> {
-        return this.machineList!!
-    }
+    fun getMachineList(): List<ProgramStatement> = this.machineList!!
 
     /**
      * Produces specified line of RISCV source program.
@@ -133,12 +132,10 @@ class RISCVProgram {
      * @return Returns specified line of RISCV source. If outside the line range,
      * it returns null. Line 1 is first line.
      */
-    fun getSourceLine(i: Int): String? {
-        return if ((i >= 1) && (i <= this.sourceList!!.size)) {
-            this.sourceList!![i - 1]
-        } else {
-            null
-        }
+    fun getSourceLine(i: Int): String? = if ((i >= 1) && (i <= this.sourceList!!.size)) {
+        this.sourceList!![i - 1]
+    } else {
+        null
     }
 
     /**
@@ -149,6 +146,7 @@ class RISCVProgram {
      */
     fun fromString(source: String) {
         this.file = null
+        this.source = source
         this.sourceList =
             listOf(*source.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
     }
@@ -167,14 +165,14 @@ class RISCVProgram {
     fun readSource(file: File): Either<AssemblyError, Unit> = either {
         this@RISCVProgram.file = file
         try {
-            val inputFile = BufferedReader(FileReader(file))
-            var line = inputFile.readLine()
-            val sourceList = ArrayList<String>()
-            while (line != null) {
-                sourceList.add(line)
-                line = inputFile.readLine()
+            BufferedReader(FileReader(file)).use { inputFile ->
+                source = inputFile.readText()
+                sourceList = buildList {
+                    this@RISCVProgram.source!!.lines().forEach { line ->
+                        add(line)
+                    }
+                }
             }
-            this@RISCVProgram.sourceList = sourceList
         } catch (e: Exception) {
             val errors = ErrorList()
             errors.add(ErrorMessage.error(null, 0, 0, e.toString()))

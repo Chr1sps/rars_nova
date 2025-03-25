@@ -5,11 +5,11 @@ import rars.riscv.lang.lexing.RVTokenType;
 
 import java.awt.*;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 public final class EditorTheme {
-    public @NotNull HashMap<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles;
+    public @NotNull EnumMap<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles;
     public @NotNull Color backgroundColor;
     public @NotNull Color foregroundColor;
     public @NotNull Color lineHighlightColor;
@@ -24,7 +24,7 @@ public final class EditorTheme {
         final @NotNull Color caretColor,
         final @NotNull Color selectionColor
     ) {
-        this.tokenStyles = new HashMap<>(tokenStyles);
+        this.tokenStyles = new EnumMap<>(tokenStyles);
         Arrays.stream(RVTokenType.values())
             .forEach(tokenType ->
                 this.tokenStyles.putIfAbsent(tokenType, TokenStyle.DEFAULT));

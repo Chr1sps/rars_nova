@@ -16,19 +16,6 @@ import rars.util.toHexStringWithPrefix
 import rars.util.translateToInt
 import rars.util.translateToLong
 import rars.venus.NumberDisplayBaseChooser
-import java.lang.Float
-import java.nio.charset.StandardCharsets
-import kotlin.Boolean
-import kotlin.Double
-import kotlin.Int
-import kotlin.Long
-import kotlin.NumberFormatException
-import kotlin.Pair
-import kotlin.String
-import kotlin.Unit
-import kotlin.assert
-import kotlin.check
-import kotlin.repeat
 
 /*
  Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
@@ -365,7 +352,7 @@ class Assembler {
         // Yes, I would not have to sort here if I used SortedSet rather than ArrayList
         // but in case of duplicate I like having both statements handy for error
         // message.
-        val sortedMachineList = machineList.stream().sorted().toList()
+        val sortedMachineList = machineList.sorted()
         catchDuplicateAddresses(sortedMachineList, this@Assembler.errors!!)
         ensure(
             !(this@Assembler.errors!!.errorsOccurred()
@@ -1093,8 +1080,7 @@ class Assembler {
                     }
                 this.textAddress += lengthInBytes
             }
-        } // end of "if integer token type"
-        else if (token.type == TokenType.IDENTIFIER) {
+        } else if (token.type == TokenType.IDENTIFIER) {
             if (this.inDataSegment) {
                 val value = this.fileCurrentlyBeingAssembled!!.localSymbolTable!!
                     .getAddressLocalOrGlobal(token.text)
@@ -1111,11 +1097,10 @@ class Assembler {
                     token, "\"${token.text}\" label as directive operand not permitted in text segment"
                 )
             }
-        } // end of "if label"
-        else {
+        } else {
             errors.addTokenError(token, "\"${token.text}\" is not a valid integer constant or label")
         }
-    } // storeInteger
+    }
 
     /**
      * Store real (fixed or floating point) value given floating (float, double)
@@ -1129,14 +1114,11 @@ class Assembler {
     ) {
         val lengthInBytes = DataTypes.getLengthInBytes(directive)
         val value: Double
-
         if (token.text == "Inf") {
             value = Float.POSITIVE_INFINITY.toDouble()
         } else if (token.text == "-Inf") {
             value = Float.NEGATIVE_INFINITY.toDouble()
-        } else if (TokenType.isIntegerTokenType(token.type)
-            || TokenType.isFloatingTokenType(token.type)
-        ) {
+        } else if (TokenType.isIntegerTokenType(token.type) || TokenType.isFloatingTokenType(token.type)) {
             try {
                 value = token.text.toDouble()
             } catch (_: NumberFormatException) {
@@ -1158,7 +1140,7 @@ class Assembler {
 
         // Value has been validated; let's store it.
         if (directive == Directive.FLOAT) {
-            this.writeToDataSegment(Float.floatToIntBits(value.toFloat()), lengthInBytes, token, errors)
+            this.writeToDataSegment(value.toFloat().toRawBits(), lengthInBytes, token, errors)
         }
         if (directive == Directive.DOUBLE) {
             this.writeDoubleToDataSegment(value, token)
@@ -1176,11 +1158,11 @@ class Assembler {
         errors: ErrorList
     ) {
         // Correctly handles case where this is a "directive continuation" line.
-        val isFirstDirective = tokens.get(0).type == TokenType.DIRECTIVE
+        val isFirstDirective = tokens.first().type == TokenType.DIRECTIVE
         tokens.stream()
             .skip((if (isFirstDirective) 1 else 0).toLong())
-            .forEach { token: Token? ->
-                if (token!!.type != TokenType.QUOTED_STRING) {
+            .forEach { token ->
+                if (token.type != TokenType.QUOTED_STRING) {
                     errors.addTokenError(
                         token, "\"${token.text}\" is not a valid character string"
                     )
@@ -1226,7 +1208,7 @@ class Assembler {
                                 }
                             }
                         }
-                        val bytesOfChar = theChar.toString().toByteArray(StandardCharsets.UTF_8)
+                        val bytesOfChar = theChar.toString().toByteArray(Charsets.UTF_8)
                         either {
                             for (b in bytesOfChar) {
                                 Globals.MEMORY_INSTANCE.set(
@@ -1255,7 +1237,7 @@ class Assembler {
                     }
                 }
             }
-    } // storeStrings()
+    }
 
     /**
      * Simply check to see if we are in data segment. Generate error if not.
