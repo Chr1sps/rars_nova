@@ -1,6 +1,7 @@
 package rars.venus;
 
 import org.jetbrains.annotations.NotNull;
+import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
 import rars.venus.registers.ControlAndStatusWindow;
 import rars.venus.registers.FloatingPointWindow;
@@ -8,8 +9,6 @@ import rars.venus.registers.RegistersWindow;
 
 import javax.swing.*;
 import java.awt.*;
-
-import static rars.Globals.BOOL_SETTINGS;
 
 
 /*
@@ -71,26 +70,28 @@ public final class ExecutePane extends JDesktopPane {
      *     window containing the CSR set
      */
     public ExecutePane(
-        final @NotNull VenusUI mainUI, final @NotNull RegistersWindow regs,
+        final @NotNull VenusUI mainUI,
+        final @NotNull RegistersWindow regs,
         final @NotNull FloatingPointWindow fpRegs,
-        final @NotNull ControlAndStatusWindow csrRegs
+        final @NotNull ControlAndStatusWindow csrRegs,
+        final @NotNull AllSettings allSettings
     ) {
         super();
         this.mainUI = mainUI;
         // Although these are displayed in Data Segment, they apply to all three
         // internal
         // windows within the Execute pane. So they will be housed here.
+        final var boolSettings = allSettings.boolSettings;
         this.addressDisplayBase = new NumberDisplayBaseChooser(
             "Hexadecimal Addresses",
-            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX),
+            boolSettings.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX),
             this
         );
         this.valueDisplayBase = new NumberDisplayBaseChooser(
             "Hexadecimal Values",
-            BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX),
+            boolSettings.getSetting(BoolSetting.DISPLAY_VALUES_IN_HEX),
             this
-        );// VenusUI
-        // .DEFAULT_NUMBER_BASE);
+        );
         this.addressDisplayBase
             .setToolTipText("If checked, displays all memory addresses in hexadecimal.  Otherwise, decimal.");
         this.valueDisplayBase.setToolTipText(
@@ -99,14 +100,16 @@ public final class ExecutePane extends JDesktopPane {
         this.registerValues = regs;
         this.fpRegValues = fpRegs;
         this.csrValues = csrRegs;
-        this.textSegment = new TextSegmentWindow(this);
-        this.dataSegment = new DataSegmentWindow(choosers, this);
+        this.textSegment = new TextSegmentWindow(this, allSettings);
+        this.dataSegment = new DataSegmentWindow(
+            choosers, this, allSettings
+        );
         this.labelValues = new LabelsWindow(this);
-        this.labelWindowVisible = BOOL_SETTINGS.getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY);
-        this.add(this.textSegment); // these 3 LOC moved up. DPS 3-Sept-2014
+        this.labelWindowVisible = boolSettings.getSetting(BoolSetting.LABEL_WINDOW_VISIBILITY);
+        this.add(this.textSegment);
         this.add(this.dataSegment);
         this.add(this.labelValues);
-        this.textSegment.pack(); // these 3 LOC added. DPS 3-Sept-2014
+        this.textSegment.pack();
         this.dataSegment.pack();
         this.labelValues.pack();
         this.textSegment.setVisible(true);
@@ -139,7 +142,6 @@ public final class ExecutePane extends JDesktopPane {
         final Dimension textFullDim = new Dimension(fullWidth, halfHeight);
         this.dataSegment.setBounds(0, textDim.height + 1, dataDim.width, dataDim.height);
         if (this.labelWindowVisible) {
-//            System.out.println("YEA");
             this.textSegment.setBounds(0, 0, textDim.width, textDim.height);
             this.labelValues.setBounds(textDim.width + 1, 0, labelDimension.width, labelDimension.height);
         } else {

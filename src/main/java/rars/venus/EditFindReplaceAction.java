@@ -1,6 +1,7 @@
 package rars.venus;
 
 import org.jetbrains.annotations.NotNull;
+import rars.venus.actions.GuiAction;
 import rars.venus.editors.TextEditingArea;
 
 import javax.swing.*;
@@ -81,7 +82,7 @@ public final class EditFindReplaceAction extends GuiAction {
         private final JCheckBox caseSensitiveCheckBox;
         private final JLabel resultsLabel;
 
-        public FindReplaceDialog(final Frame owner, final String title, final boolean modality) {
+        private FindReplaceDialog(final Frame owner, final String title, final boolean modality) {
             super(owner, title, modality);
 
             final var dialogPanel = new JPanel(new BorderLayout());
@@ -223,7 +224,7 @@ public final class EditFindReplaceAction extends GuiAction {
             if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null because find/replace tool button disabled
                 // if no file open
-                final EditPane editPane = EditFindReplaceAction.this.mainUI.mainPane.getEditPane();
+                final EditPane editPane = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
                     final var posn = editPane.doFindText(
@@ -257,7 +258,7 @@ public final class EditFindReplaceAction extends GuiAction {
             if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null b/c find/replace tool button disabled if
                 // no file open
-                final EditPane editPane = EditFindReplaceAction.this.mainUI.mainPane.getEditPane();
+                final EditPane editPane = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
                     final var posn = editPane.doReplace(
@@ -297,7 +298,7 @@ public final class EditFindReplaceAction extends GuiAction {
             if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null b/c find/replace tool button disabled if
                 // no file open
-                final EditPane editPane = EditFindReplaceAction.this.mainUI.mainPane.getEditPane();
+                final EditPane editPane = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
                 if (editPane != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
                     final int replaceCount = editPane.doReplaceAll(

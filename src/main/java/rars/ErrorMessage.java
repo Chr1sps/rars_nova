@@ -152,4 +152,4 @@ public final class ErrorMessage {
         return this.macroExpansionHistory + "->";
     }
 
-} // ErrorMessage
+}

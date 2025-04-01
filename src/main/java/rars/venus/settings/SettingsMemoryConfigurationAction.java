@@ -6,7 +6,7 @@ import rars.Globals;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.util.BinaryUtilsKt;
 import rars.venus.FileStatus;
-import rars.venus.GuiAction;
+import rars.venus.actions.GuiAction;
 import rars.venus.VenusUI;
 
 import javax.swing.*;

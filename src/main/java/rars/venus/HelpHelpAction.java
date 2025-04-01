@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.assembler.Directive;
 import rars.riscv.*;
+import rars.venus.actions.GuiAction;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;

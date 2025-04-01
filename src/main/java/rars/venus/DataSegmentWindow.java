@@ -11,7 +11,7 @@ import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.MemoryConfiguration;
 import rars.riscv.hardware.MemoryListenerHandle;
-import rars.settings.BoolSetting;
+import rars.settings.*;
 import rars.util.BinaryUtilsKt;
 import rars.util.ConversionUtils;
 import rars.venus.run.RunSpeedPanel;
@@ -116,6 +116,11 @@ public final class DataSegmentWindow extends JInternalFrame {
     private final int[] displayBaseAddressArray;
     @NotNull
     private final ExecutePane executePane;
+    private final @NotNull BoolSettingsImpl boolSettings;
+    private final @NotNull FontSettingsImpl fontSettings;
+    private final @NotNull EditorThemeSettingsImpl editorThemeSettings;
+    private final @NotNull HighlightingSettingsImpl highlightingSettings;
+    
     private JScrollPane dataTableScroller;
     private JButton dataButton, nextButton, prevButton, stakButton, globButton, heapButton, extnButton, mmioButton,
         textButton;
@@ -142,10 +147,15 @@ public final class DataSegmentWindow extends JInternalFrame {
      */
     public DataSegmentWindow(
         final @NotNull NumberDisplayBaseChooser @NotNull [] choosers,
-        final @NotNull ExecutePane executePane
+        final @NotNull ExecutePane executePane,
+        final @NotNull AllSettings allSettings
     ) {
         super("Data Segment", true, false, true, true);
         this.executePane = executePane;
+        this.fontSettings = allSettings.fontSettings;
+        this.boolSettings = allSettings.boolSettings;
+        this.editorThemeSettings = allSettings.editorThemeSettings;
+        this.highlightingSettings = allSettings.highlightingSettings;
 
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.displayBaseAddressArray = new int[]{
@@ -176,7 +186,7 @@ public final class DataSegmentWindow extends JInternalFrame {
             return Unit.INSTANCE;
         });
 
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+        allSettings.fontSettings.onChangeListenerHook.subscribe(ignored -> {
             this.updateRowHeight();
             return Unit.INSTANCE;
         });
@@ -542,7 +552,10 @@ public final class DataSegmentWindow extends JInternalFrame {
         DataSegmentWindow.dataTable.getTableHeader().setReorderingAllowed(false);
         DataSegmentWindow.dataTable.setRowSelectionAllowed(false);
         // Addresses are column 0, render right-justified in mono font
-        final MonoRightCellRenderer monoRightCellRenderer = new MonoRightCellRenderer();
+        final var monoRightCellRenderer = new MonoRightCellRenderer(
+            fontSettings,
+            editorThemeSettings
+        );
         DataSegmentWindow.dataTable.getColumnModel().getColumn(DataSegmentWindow.ADDRESS_COLUMN).setPreferredWidth(60);
         DataSegmentWindow.dataTable.getColumnModel().getColumn(DataSegmentWindow.ADDRESS_COLUMN).setCellRenderer(
             monoRightCellRenderer);
@@ -645,11 +658,11 @@ public final class DataSegmentWindow extends JInternalFrame {
                         // through to the registry.
                         if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(finalAddress)) {
                             int displayValue = 0;
-                            if (!BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
-                                BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
+                            if (!boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+                                boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
                                 displayValue = unwrap(Globals.MEMORY_INSTANCE.getSilentMemoryView()
                                     .getWord(finalAddress));
-                                BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, false);
+                                boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, false);
                             }
                             ((DataTableModel) dataModel).setDisplayAndModelValueAt(
                                 NumberDisplayBaseChooser.formatNumber(displayValue, valueBase), finalRow, finalColumn);
@@ -794,7 +807,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.heapButton.setEnabled(true);
         this.extnButton.setEnabled(true);
         this.mmioButton.setEnabled(true);
-        this.textButton.setEnabled(BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
+        this.textButton.setEnabled(boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED));
         this.prevButton.setEnabled(true);
         this.nextButton.setEnabled(true);
         this.dataButton.setEnabled(true);
@@ -957,7 +970,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         if (DataSegmentWindow.dataTable == null) {
             return;
         }
-        final var font = FONT_SETTINGS.getCurrentFont();
+        final var font = fontSettings.getCurrentFont();
         final var height = this.getFontMetrics(font).getHeight();
         DataSegmentWindow.dataTable.setRowHeight(height);
     }
@@ -1110,14 +1123,14 @@ public final class DataSegmentWindow extends JInternalFrame {
                 row,
                 DataSegmentWindow.ADDRESS_COLUMN
             ).toString());
-            final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
-            final var defaultFont = FONT_SETTINGS.getCurrentFont();
+            final var theme = editorThemeSettings.getCurrentTheme();
+            final var defaultFont = fontSettings.getCurrentFont();
             if (/*DataSegmentWindow.this.settings.getBoolSettings().getSetting(BoolSetting.DATA_SEGMENT_HIGHLIGHTING)
              &&*/
                 DataSegmentWindow.this.addressHighlighting &&
                     rowFirstAddress == DataSegmentWindow.this.addressRowFirstAddress &&
                     column == DataSegmentWindow.this.addressColumn) {
-                final var style = HIGHLIGHTING_SETTINGS.getDataSegmentHighlightingStyle();
+                final var style = highlightingSettings.getDataSegmentHighlightingStyle();
                 if (style != null) {
                     cell.setBackground(style.background());
                     cell.setForeground(style.foreground());

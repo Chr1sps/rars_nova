@@ -10,7 +10,7 @@ import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
-import rars.venus.GuiAction;
+import rars.venus.actions.GuiAction;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -160,10 +160,12 @@ public final class RunStepAction extends GuiAction {
         this.mainUI.isMemoryReset = false;
     }
 
-    // Method to store any program arguments into MIPS memory and registers before
-    // execution begins. Arguments go into the gap between $sp and kernel memory.
-    // Argument pointers and count go into runtime stack and $sp is adjusted accordingly.
-    // $a0 gets argument count (argc), $a1 gets stack address of first arg pointer (argv).
+    /**
+     * Method to store any program arguments into MIPS memory and registers before
+     * execution begins. Arguments go into the gap between $sp and kernel memory.
+     * Argument pointers and count go into runtime stack and $sp is adjusted accordingly.
+     * $a0 gets argument count (argc), $a1 gets stack address of first arg pointer (argv).
+     */
     private void processProgramArgumentsIfAny() {
         final String programArguments = this.executePane.textSegment.getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||

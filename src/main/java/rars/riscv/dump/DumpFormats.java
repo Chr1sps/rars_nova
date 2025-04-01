@@ -42,8 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * This class provides a list of all dump formats available in RARS.
  */
 public final class DumpFormats {
-    public static final @NotNull
-    @Unmodifiable List<@NotNull DumpFormat> DUMP_FORMATS = List.of(
+    public static final @NotNull @Unmodifiable List<@NotNull DumpFormat> DUMP_FORMATS = List.of(
         ASCII_TEXT_DUMP_FORMAT,
         BINARY_DUMP_FORMAT,
         BINARY_TEXT_DUMP_FORMAT,

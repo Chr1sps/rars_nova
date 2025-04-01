@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
+import rars.settings.FontSettings;
+import rars.settings.FontSettingsImpl;
 import rars.simulator.Simulator;
 
 import javax.swing.*;
@@ -21,7 +23,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import static rars.Globals.FONT_SETTINGS;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -68,37 +69,40 @@ public final class MessagesPane extends JTabbedPane {
 
     private final @NotNull JTextArea assembleTextArea, runTextArea;
     private final @NotNull JPanel assembleTab, runTab;
-    @NotNull
-    private final VenusUI mainUI;
+
+    private final @NotNull VenusUI mainUI;
 
     /**
      * Constructor for the class, sets up two fresh tabbed text areas for program
      * feedback.
      */
-    public MessagesPane(final @NotNull VenusUI mainUI) {
+    public MessagesPane(
+        final @NotNull VenusUI mainUI,
+        final @NotNull FontSettingsImpl fontSettings
+    ) {
         super();
         this.mainUI = mainUI;
         this.setMinimumSize(new Dimension(0, 0));
+
         this.assembleTextArea = new JTextArea();
+        this.assembleTextArea.setEditable(false);
+        this.assembleTextArea.setFont(fontSettings.getCurrentFont());
+
         this.runTextArea = new JTextArea();
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
-            this.assembleTextArea.setFont(FONT_SETTINGS.getCurrentFont());
-            this.runTextArea.setFont(FONT_SETTINGS.getCurrentFont());
+        this.runTextArea.setEditable(false);
+        this.runTextArea.setFont(fontSettings.getCurrentFont());
+
+        fontSettings.onChangeListenerHook.subscribe(ignore -> {
+            this.assembleTextArea.setFont(fontSettings.getCurrentFont());
+            this.runTextArea.setFont(fontSettings.getCurrentFont());
             return Unit.INSTANCE;
         });
-        this.assembleTextArea.setEditable(false);
-        this.runTextArea.setEditable(false);
-        // Set both text areas to mono font. For assemble
-        // pane, will make messages more readable. For run
-        // pane, will allow properly aligned "text graphics"
-        // DPS 15 Dec 2008
-        this.assembleTextArea.setFont(FONT_SETTINGS.getCurrentFont());
-        this.runTextArea.setFont(FONT_SETTINGS.getCurrentFont());
 
         final JButton assembleTabClearButton = new JButton("Clear");
         assembleTabClearButton.setToolTipText("Clear the Messages area");
         assembleTabClearButton.addActionListener(
             e -> this.assembleTextArea.setText(""));
+        
         this.assembleTab = new JPanel(new BorderLayout());
         this.assembleTab.add(MessagesPane.createBoxForButton(assembleTabClearButton), BorderLayout.WEST);
         this.assembleTab.add(
@@ -191,14 +195,13 @@ public final class MessagesPane extends JTabbedPane {
             ), BorderLayout.CENTER
         );
 
-        this.addTab("Messages", this.assembleTab);
-        this.addTab("Run I/O", this.runTab);
-
-        this.setToolTipTextAt(
-            0,
+        this.addTab(
+            "Messages",
+            null,
+            this.assembleTab,
             "Messages produced by Run menu. Click on assemble error message to select erroneous line"
         );
-        this.setToolTipTextAt(1, "Simulated console input and output");
+        this.addTab("Run I/O", null, this.runTab, "Simulated console input and output");
     }
 
     // Center given button in a box, centered vertically and 6 pixels on left and
@@ -507,5 +510,5 @@ public final class MessagesPane extends JTabbedPane {
                 this.cleanup();
             }
         }
-    } // Asker class
+    }
 }

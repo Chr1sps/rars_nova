@@ -1,7 +1,7 @@
 package rars.venus.run;
 
 import org.jetbrains.annotations.NotNull;
-import rars.venus.GuiAction;
+import rars.venus.actions.GuiAction;
 import rars.venus.VenusUI;
 
 import javax.swing.*;

@@ -1,10 +1,11 @@
-package rars.venus.run;
+package rars.venus.run
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.awt.*;
+import org.jetbrains.annotations.Contract
+import java.awt.BorderLayout
+import java.awt.Dimension
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JSlider
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -33,96 +34,96 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
 */
-
 /**
  * Class for the Run speed slider control.
  *
  * @author Pete Sanderson
  * @version August 2005
  */
-public final class RunSpeedPanel extends JPanel {
-    /**
-     * Constant that represents unlimited run speed. Compare with return value of
-     * getRunSpeed() to determine if set to unlimited. At the unlimited setting, the
-     * GUI
-     * will not attempt to update register and memory contents as each instruction
-     * is executed. This is the only possible value for command-line use of Mars.
-     */
-    public final static double UNLIMITED_SPEED = 40;
+class RunSpeedPanel : JPanel(BorderLayout()) {
+    private val sliderLabel: JLabel
 
-    private final static int SPEED_INDEX_MIN = 0;
-    private final static int SPEED_INDEX_MAX = 40;
-    private final static int SPEED_INDEX_INIT = 40;
-    private static final int SPEED_INDEX_INTERACTION_LIMIT = 35;
-    private final double[] speedTable = {
-        0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3, 4, 5, // 0-10
-        6, 7, 8, 9, 10, 11, 12, 13, 14, 15, // 11-20
-        16, 17, 18, 19, 20, 21, 22, 23, 24, 25, // 21-30
-        26, 27, 28, 29, 30, RunSpeedPanel.UNLIMITED_SPEED, RunSpeedPanel.UNLIMITED_SPEED, // 31-37
-        RunSpeedPanel.UNLIMITED_SPEED, RunSpeedPanel.UNLIMITED_SPEED, RunSpeedPanel.UNLIMITED_SPEED // 38-40
-    };
-    private final @NotNull JLabel sliderLabel;
-    private volatile int runSpeedIndex = RunSpeedPanel.SPEED_INDEX_MAX;
+    @Volatile
+    private var runSpeedIndex: Int = SPEED_INDEX_MAX
 
-    public RunSpeedPanel() {
-        super(new BorderLayout());
-        final var runSpeedSlider = createSlider();
-        this.sliderLabel = new JLabel(this.setLabel(this.runSpeedIndex));
-        this.sliderLabel.setHorizontalAlignment(JLabel.CENTER);
-        this.sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        this.add(this.sliderLabel, BorderLayout.NORTH);
-        this.add(runSpeedSlider, BorderLayout.CENTER);
-        this.setToolTipText("Simulation speed for \"Go\".  At " +
-            ((int) this.speedTable[RunSpeedPanel.SPEED_INDEX_INTERACTION_LIMIT]) + " inst/sec or less, tables updated" +
-            ' ' +
-            "after each instruction.");
+    init {
+        val runSpeedSlider = createSlider()
+        sliderLabel = JLabel(this.createLabel(this.runSpeedIndex)).apply {
+            horizontalAlignment = JLabel.CENTER
+            alignmentX = CENTER_ALIGNMENT
+        }
+        add(sliderLabel, BorderLayout.NORTH)
+        add(runSpeedSlider, BorderLayout.CENTER)
+        val speed = SPEEDS[SPEED_INDEX_INTERACTION_LIMIT].toInt()
+        toolTipText = """Simulation speed for "Go".  At $speed inst/sec or less, tables updated after each instruction."""
     }
 
-    private @NotNull JSlider createSlider() {
-        final JSlider runSpeedSlider = new JSlider(
-            JSlider.HORIZONTAL, RunSpeedPanel.SPEED_INDEX_MIN,
-            RunSpeedPanel.SPEED_INDEX_MAX, RunSpeedPanel.SPEED_INDEX_INIT
-        );
-        runSpeedSlider.setSize(new Dimension(100, (int) runSpeedSlider.getSize().getHeight()));
-        runSpeedSlider.setMaximumSize(runSpeedSlider.getSize());
-        runSpeedSlider.setMajorTickSpacing(5);
-        runSpeedSlider.setPaintTicks(true); // Create the label table
-        runSpeedSlider.addChangeListener(e -> {
-            if (!runSpeedSlider.getValueIsAdjusting()) {
-                this.runSpeedIndex = runSpeedSlider.getValue();
+    private fun createSlider(): JSlider = JSlider(
+        JSlider.HORIZONTAL, SPEED_INDEX_MIN,
+        SPEED_INDEX_MAX, SPEED_INDEX_INIT
+    ).apply {
+        size = Dimension(100, size.height.toInt())
+        maximumSize = size
+        majorTickSpacing = 5
+        paintTicks = true // Create the label table
+        addChangeListener {
+            if (!valueIsAdjusting) {
+                runSpeedIndex = value
             } else {
-                this.sliderLabel.setText(this.setLabel(runSpeedSlider.getValue()));
+                sliderLabel.text = createLabel(value)
             }
-        });
-        return runSpeedSlider;
+        }
     }
 
     /**
-     * Returns current run speed setting, in instructions/second. Unlimited speed
+     * Current run speed setting, in instructions/second. Unlimited speed
      * setting is equal to RunSpeedPanel.UNLIMITED_SPEED
-     *
-     * @return run speed setting in instructions/second.
      */
-    public double getRunSpeed() {
-        return this.speedTable[this.runSpeedIndex];
-    }
+    val runSpeed: Double get() = SPEEDS[this.runSpeedIndex]
 
     /**
      * Set label wording depending on current speed setting.
      */
     @Contract(pure = true)
-    private @NotNull String setLabel(final int index) {
-        final var builder = new StringBuilder("Run speed ");
-        if (index <= RunSpeedPanel.SPEED_INDEX_INTERACTION_LIMIT) {
-            if (this.speedTable[index] < 1) {
-                builder.append(this.speedTable[index]);
+    private fun createLabel(index: Int): String = buildString {
+        append("Run speed ")
+        if (index <= SPEED_INDEX_INTERACTION_LIMIT) {
+            if (SPEEDS[index] < 1) {
+                append(SPEEDS[index])
             } else {
-                builder.append((int) this.speedTable[index]);
+                append(SPEEDS[index].toInt())
             }
-            builder.append(" inst/sec");
+            append(" inst/sec")
         } else {
-            builder.append("at max (no interaction)");
+            append("at max (no interaction)")
         }
-        return builder.toString();
     }
+
+    companion object {
+        /**
+         * Constant that represents unlimited run speed. Compare with return value of
+         * getRunSpeed() to determine if set to unlimited. At the unlimited setting, the GUI
+         * will not attempt to update register and memory contents as each instruction
+         * is executed. This is the only possible value for command-line use of Mars.
+         */
+        const val UNLIMITED_SPEED: Double = 40.0
+
+        private const val SPEED_INDEX_MIN = 0
+        private const val SPEED_INDEX_MAX = 40
+        private const val SPEED_INDEX_INIT = 40
+        private const val SPEED_INDEX_INTERACTION_LIMIT = 35
+        
+        private val SPEEDS = doubleArrayOf(
+            0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0,  // 0-10
+            6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0,  // 11-20
+            16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0,  // 21-30
+            26.0, 27.0, 28.0, 29.0, 30.0, UNLIMITED_SPEED, UNLIMITED_SPEED,  // 31-37
+            UNLIMITED_SPEED, UNLIMITED_SPEED, UNLIMITED_SPEED // 38-40
+        )
+    }
+}
+
+sealed interface RunSpeed {
+    data class Limited(val speed: Double): RunSpeed
+    data object Unlimited : RunSpeed
 }

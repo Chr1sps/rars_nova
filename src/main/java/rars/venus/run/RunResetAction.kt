@@ -2,7 +2,7 @@ package rars.venus.run
 
 import rars.Globals
 import rars.venus.FileStatus
-import rars.venus.GuiAction
+import rars.venus.actions.GuiAction
 import rars.venus.VenusUI
 import java.awt.event.ActionEvent
 import javax.swing.Icon
@@ -39,7 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Action for the Run -> Reset menu item
  */
 class RunResetAction(
-    name: String?, icon: Icon?, descrip: String?,
+    name: String, icon: Icon?, descrip: String,
     mnemonic: Int?, accel: KeyStroke?, gui: VenusUI
 ) : GuiAction(name, icon, descrip, mnemonic, accel, gui) {
     /**
@@ -50,7 +50,7 @@ class RunResetAction(
      */
     override fun actionPerformed(e: ActionEvent?) {
         RunGoAction.resetMaxSteps()
-        val name: String? = this.getValue(NAME).toString()
+        val name = this.getValue(NAME).toString()
         val executePane = mainUI.mainPane.executePane
 
         // The difficult part here is resetting the data segment. Two approaches are:

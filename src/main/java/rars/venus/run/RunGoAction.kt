@@ -9,7 +9,7 @@ import rars.simulator.storeProgramArguments
 import rars.util.Listener
 import rars.venus.ExecutePane
 import rars.venus.FileStatus
-import rars.venus.GuiAction
+import rars.venus.actions.GuiAction
 import rars.venus.VenusUI
 import java.awt.EventQueue
 import java.awt.event.ActionEvent
@@ -48,7 +48,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Action class for the Run -> Go menu item (and toolbar icon)
  */
 class RunGoAction(
-    name: String?, icon: Icon?, descrip: String?,
+    name: String, icon: Icon?, descrip: String,
     mnemonic: Int?, accel: KeyStroke?, gui: VenusUI
 ) : GuiAction(name, icon, descrip, mnemonic, accel, gui) {
     private var name: String? = null

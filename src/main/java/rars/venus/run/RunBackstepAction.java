@@ -9,7 +9,7 @@ import rars.Globals;
 import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
-import rars.venus.GuiAction;
+import rars.venus.actions.GuiAction;
 import rars.venus.VenusUI;
 
 /*

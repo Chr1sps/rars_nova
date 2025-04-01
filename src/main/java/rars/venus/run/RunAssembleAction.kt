@@ -8,7 +8,7 @@ import rars.exceptions.AssemblyError
 import rars.settings.BoolSetting
 import rars.util.FilenameFinder
 import rars.venus.FileStatus
-import rars.venus.GuiAction
+import rars.venus.actions.GuiAction
 import rars.venus.VenusUI
 import java.awt.event.ActionEvent
 import java.io.File
@@ -46,7 +46,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Action class for the Run -> Assemble menu item (and toolbar icon)
  */
 class RunAssembleAction(
-    name: String?, icon: Icon?, descrip: String?,
+    name: String, icon: Icon?, descrip: String,
     mnemonic: Int?, accel: KeyStroke?, gui: VenusUI
 ) : GuiAction(name, icon, descrip, mnemonic, accel, gui) {
     /**

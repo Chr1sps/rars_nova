@@ -7,11 +7,11 @@ import rars.riscv.dump.DumpFormats
 import rars.util.MemoryDump
 import rars.util.MemoryDump.SegmentInfo
 import rars.util.toHexStringWithPrefix
+import rars.venus.actions.GuiAction
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Label
 import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.io.IOException
@@ -72,21 +72,16 @@ class FileDumpMemoryAction(
     }
 
     /** The dump dialog that appears when menu item is selected. */
-    private fun createDumpDialog() = JDialog(mainUI, TITLE, true)
-        .apply {
-            contentPane = buildDialogPanel()
-            defaultCloseOperation = JDialog.DO_NOTHING_ON_CLOSE
-            addWindowListener(object : WindowAdapter() {
-                override fun windowClosing(we: WindowEvent?) = closeDialog()
-            })
-        }
+    private fun createDumpDialog() = JDialog(mainUI, TITLE, true).apply {
+        contentPane = buildDialogPanel()
+        defaultCloseOperation = JDialog.DO_NOTHING_ON_CLOSE
+        addWindowListener(object : WindowAdapter() {
+            override fun windowClosing(we: WindowEvent?) = closeDialog()
+        })
+    }
 
     /** Set contents of dump dialog. */
     private fun buildDialogPanel(): JPanel {
-        val contents = JPanel(BorderLayout(20, 20))
-        contents.setBorder(EmptyBorder(10, 10, 10, 10))
-
-        val segments = MemoryDump.SEGMENTS
 
         // Calculate the actual highest address to be dumped. For text segment, this depends on the
         // program length (number of machine code instructions). For data segment, this depends on
@@ -95,17 +90,18 @@ class FileDumpMemoryAction(
         // Initially not editable but maybe add this later.
         // If there is nothing to dump (e.g. address of first null == base address), then
         // the segment will not be listed.
-        val actualSegments: ArrayList<AugmentedSegmentInfo?> = ArrayList<AugmentedSegmentInfo?>()
-        for (segment in segments) {
-            val highAddress = Globals.MEMORY_INSTANCE.getAddressOfFirstNull(
-                segment.baseAddress,
-                segment.limitAddress
-            ).fold(
-                { segment.baseAddress - DataTypes.WORD_SIZE },
-                { it?.minus(DataTypes.WORD_SIZE) }
-            )
-            if (highAddress != null) {
-                actualSegments.add(AugmentedSegmentInfo(segment, highAddress))
+        val actualSegments = buildList {
+            for (segment in MemoryDump.SEGMENTS) {
+                val highAddress = Globals.MEMORY_INSTANCE.getAddressOfFirstNull(
+                    segment.baseAddress,
+                    segment.limitAddress
+                ).fold(
+                    { segment.baseAddress - DataTypes.WORD_SIZE },
+                    { it?.minus(DataTypes.WORD_SIZE) }
+                )
+                if (highAddress != null) {
+                    add(AugmentedSegmentInfo(segment, highAddress))
+                }
             }
         }
 
@@ -113,50 +109,58 @@ class FileDumpMemoryAction(
         // there will always be at least one instruction (.text segment has one
         // non-null).
         // But just in case...
-        if (segments.isEmpty()) {
-            contents.add(Label("There is nothing to dump!"), BorderLayout.NORTH)
-            val okButton = JButton("OK")
-            okButton.addActionListener(
-                ActionListener { e: ActionEvent? -> this.closeDialog() })
-            contents.add(okButton, BorderLayout.SOUTH)
-            return contents
+        if (actualSegments.isEmpty()) {
+            return JPanel().apply {
+                border = EmptyBorder(10, 10, 10, 10)
+                add(Label("There is nothing to dump!"), BorderLayout.NORTH)
+                val okButton = JButton("OK")
+                okButton.addActionListener { closeDialog() }
+                add(okButton, BorderLayout.SOUTH)
+            }
         }
 
         // Create segment selector. First element selected by default.
-        this.segmentListSelector = JComboBox(actualSegments.toTypedArray())
-        this.segmentListSelector!!.setSelectedIndex(0)
-        val segmentPanel = JPanel(BorderLayout())
-        segmentPanel.add(Label("Memory Segment"), BorderLayout.NORTH)
-        segmentPanel.add(this.segmentListSelector)
-        contents.add(segmentPanel, BorderLayout.WEST)
+        this.segmentListSelector = JComboBox(actualSegments.toTypedArray()).apply {
+            selectedIndex = 0
+        }
+        val segmentPanel = JPanel(BorderLayout()).apply {
+            add(Label("Memory Segment"), BorderLayout.NORTH)
+            add(segmentListSelector)
+        }
 
         // Next, create list of all available dump formats.
         val dumpFormats = DumpFormats.DUMP_FORMATS
-        this.formatListSelector = JComboBox(dumpFormats.toTypedArray())
-        this.formatListSelector!!.setRenderer(DumpFormatComboBoxRenderer(this.formatListSelector!!))
-        this.formatListSelector!!.setSelectedIndex(0)
-        val formatPanel = JPanel(BorderLayout())
-        formatPanel.add(Label("Dump Format"), BorderLayout.NORTH)
-        formatPanel.add(this.formatListSelector)
-        contents.add(formatPanel, BorderLayout.EAST)
+        this.formatListSelector = JComboBox(dumpFormats.toTypedArray()).apply {
+            renderer = DumpFormatComboBoxRenderer(this)
+            selectedIndex = 0
+        }
+        val formatPanel = JPanel(BorderLayout()).apply {
+            add(JLabel("Dump Format"), BorderLayout.NORTH)
+            add(formatListSelector)
+        }
 
         // Bottom row - the control buttons for Dump and Cancel
-        val controlPanel = Box.createHorizontalBox()
-        val dumpButton = createDumpButton()
-        val cancelButton = JButton("Cancel")
-        cancelButton.addActionListener(
-            ActionListener { e: ActionEvent? -> this.closeDialog() })
-        controlPanel.add(Box.createHorizontalGlue())
-        controlPanel.add(dumpButton)
-        controlPanel.add(Box.createHorizontalGlue())
-        controlPanel.add(cancelButton)
-        controlPanel.add(Box.createHorizontalGlue())
-        contents.add(controlPanel, BorderLayout.SOUTH)
+        val cancelButton = JButton("Cancel").apply {
+            addActionListener { closeDialog() }
+        }
+        val controlPanel = Box.createHorizontalBox().apply {
+            add(Box.createHorizontalGlue())
+            add(createDumpButton())
+            add(Box.createHorizontalGlue())
+            add(cancelButton)
+            add(Box.createHorizontalGlue())
+        }
+        val contents = JPanel(BorderLayout(20, 20)).apply {
+            border = EmptyBorder(10, 10, 10, 10)
+            add(segmentPanel, BorderLayout.WEST)
+            add(formatPanel, BorderLayout.EAST)
+            add(controlPanel, BorderLayout.SOUTH)
+        }
         return contents
     }
 
     private fun createDumpButton(): JButton = JButton("Dump").apply {
-        addActionListener { 
+        addActionListener {
             val selectedSegment = segmentListSelector!!.selectedItem as AugmentedSegmentInfo?
             if (selectedSegment == null) return@addActionListener
             val wasDumped = performDump(

@@ -1,5 +1,6 @@
 package rars.venus;
 
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
@@ -8,6 +9,7 @@ import rars.assembler.Symbol;
 import rars.assembler.SymbolTable;
 import rars.util.BinaryUtilsKt;
 import rars.venus.run.RunAssembleAction;
+import rars.venus.util.MouseListenerBuilder;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -409,7 +411,7 @@ public final class LabelsWindow extends JInternalFrame {
             }
             this.labelTable.getColumnModel()
                 .getColumn(LabelsWindow.ADDRESS_COLUMN)
-                .setCellRenderer(new MonoRightCellRenderer());
+                .setCellRenderer(new MonoRightCellRenderer(Globals.FONT_SETTINGS, Globals.EDITOR_THEME_SETTINGS));
             return this.labelTable;
         }
 
@@ -467,7 +469,20 @@ public final class LabelsWindow extends JInternalFrame {
 
             public SymbolTableHeader(final TableColumnModel cm) {
                 super(cm);
-                this.addMouseListener(new SymbolTableHeaderMouseListener());
+                final var headerMouseListener = MouseListenerBuilder.create().onMouseClicked(e -> {
+                    final var point = e.getPoint();
+                    final int index = columnModel.getColumnIndexAtX(point.x);
+                    final int realIndex = columnModel.getColumn(index).getModelIndex();
+                    LabelsWindow.this.sortState = LabelsWindow.sortStateTransitions[LabelsWindow.this.sortState][realIndex];
+                    LabelsWindow.this.tableSortComparator = LabelsWindow.this.tableSortingComparators.get(LabelsWindow.this.sortState);
+                    LabelsWindow.columnNames = LabelsWindow.sortColumnHeadings[LabelsWindow.this.sortState];
+                    OTHER_SETTINGS.setLabelSortStateAndSave(LabelsWindow.this.sortState);
+                    LabelsWindow.this.setupTable();
+                    LabelsWindow.this.executePane.setLabelWindowVisibility(false);
+                    LabelsWindow.this.executePane.setLabelWindowVisibility(true);
+                    return Unit.INSTANCE;
+                }).build();
+                this.addMouseListener(headerMouseListener);
             }
 
             @Override
@@ -478,43 +493,6 @@ public final class LabelsWindow extends JInternalFrame {
                 return LabelsWindow.columnToolTips[realIndex];
             }
 
-            /**
-             * When user clicks on table column header, system will sort the
-             * table based on that column then redraw it.
-             */
-            private class SymbolTableHeaderMouseListener implements MouseListener {
-                @Override
-                public void mouseClicked(final MouseEvent e) {
-                    final Point p = e.getPoint();
-                    final int index = SymbolTableHeader.this.columnModel.getColumnIndexAtX(p.x);
-                    final int realIndex = SymbolTableHeader.this.columnModel.getColumn(index).getModelIndex();
-                    LabelsWindow.this.sortState =
-                        LabelsWindow.sortStateTransitions[LabelsWindow.this.sortState][realIndex];
-                    LabelsWindow.this.tableSortComparator =
-                        LabelsWindow.this.tableSortingComparators.get(LabelsWindow.this.sortState);
-                    LabelsWindow.columnNames = LabelsWindow.sortColumnHeadings[LabelsWindow.this.sortState];
-                    OTHER_SETTINGS.setLabelSortStateAndSave(LabelsWindow.this.sortState);
-                    LabelsWindow.this.setupTable();
-                    LabelsWindow.this.executePane.setLabelWindowVisibility(false);
-                    LabelsWindow.this.executePane.setLabelWindowVisibility(true);
-                }
-
-                @Override
-                public void mouseEntered(final MouseEvent e) {
-                }
-
-                @Override
-                public void mouseExited(final MouseEvent e) {
-                }
-
-                @Override
-                public void mousePressed(final MouseEvent e) {
-                }
-
-                @Override
-                public void mouseReleased(final MouseEvent e) {
-                }
-            }
         }
     }
 

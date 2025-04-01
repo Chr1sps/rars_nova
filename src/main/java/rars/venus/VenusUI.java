@@ -12,8 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.io.VenusIO;
 import rars.riscv.InstructionsRegistry;
-import rars.settings.BoolSetting;
-import rars.settings.OtherSettings;
+import rars.settings.*;
+import rars.venus.actions.GuiAction;
+import rars.venus.actions.HelpAboutAction;
 import rars.venus.registers.ControlAndStatusWindow;
 import rars.venus.registers.FloatingPointWindow;
 import rars.venus.registers.RegistersPane;
@@ -34,7 +35,6 @@ import java.io.File;
 import java.util.List;
 
 import static kotlin.collections.CollectionsKt.*;
-import static rars.Globals.BOOL_SETTINGS;
 
 
 /*
@@ -105,6 +105,15 @@ public final class VenusUI extends JFrame {
     /// registers/memory reset for execution
     public boolean isMemoryReset = true;
     public boolean isExecutionStarted = false;
+    
+    // temporary place for migrating global settings and stuff
+    
+    private final @NotNull AllSettings allSettings = Globals.ALL_SETTINGS;
+    private final @NotNull FontSettingsImpl fontSettings = allSettings.fontSettings;
+    private final @NotNull BoolSettingsImpl boolSettings = allSettings.boolSettings;
+    private final @NotNull OtherSettingsImpl otherSettings = allSettings.otherSettings;
+    private final @NotNull EditorThemeSettingsImpl editorThemeSettings = allSettings.editorThemeSettings;
+    private final @NotNull HighlightingSettingsImpl highlightingSettings = allSettings.highlightingSettings;
 
     /**
      * Constructor for the Class. Sets up a window object for the UI
@@ -116,7 +125,7 @@ public final class VenusUI extends JFrame {
      */
     public VenusUI(final @NotNull String name, final @NotNull List<? extends @NotNull File> files) {
         super(name);
-        setDarkModeState(BOOL_SETTINGS.getSetting(BoolSetting.DARK_MODE));
+        setDarkModeState(boolSettings.getSetting(BoolSetting.DARK_MODE));
         this.editor = new Editor(this);
 
         final double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
@@ -171,10 +180,10 @@ public final class VenusUI extends JFrame {
         this.registersPane = new RegistersPane(this.registersTab, this.floatingPointTab, this.csrTab);
         this.registersPane.setPreferredSize(registersPanePreferredSize);
 
-        this.mainPane = new MainPane(this, this.editor, this.registersTab, this.floatingPointTab, this.csrTab);
+        this.mainPane = new MainPane(this, editor, registersTab, floatingPointTab, csrTab, allSettings);
 
         this.mainPane.setPreferredSize(mainPanePreferredSize);
-        this.messagesPane = new MessagesPane(this);
+        this.messagesPane = new MessagesPane(this, fontSettings);
         this.messagesPane.setPreferredSize(messagesPanePreferredSize);
         final JSplitPane splitter = new JSplitPane(JSplitPane.VERTICAL_SPLIT, this.mainPane, this.messagesPane);
         splitter.setOneTouchExpandable(true);
@@ -280,7 +289,7 @@ public final class VenusUI extends JFrame {
 
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final EditPane editPane = VenusUI.this.mainPane.getEditPane();
+                final EditPane editPane = VenusUI.this.mainPane.getCurrentEditTabPane();
                 if (editPane != null) {
                     editPane.undo();
                     VenusUI.this.updateUndoAndRedoState();
@@ -297,7 +306,7 @@ public final class VenusUI extends JFrame {
 
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final EditPane editPane = VenusUI.this.mainPane.getEditPane();
+                final EditPane editPane = VenusUI.this.mainPane.getCurrentEditTabPane();
                 if (editPane != null) {
                     editPane.redo();
                     VenusUI.this.updateUndoAndRedoState();
@@ -310,7 +319,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.mainPane.getEditPane().cutText();
+                VenusUI.this.mainPane.getCurrentEditTabPane().cutText();
             }
         };
         this.editCopyAction = new GuiAction(
@@ -319,7 +328,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.mainPane.getEditPane().copyText();
+                VenusUI.this.mainPane.getCurrentEditTabPane().copyText();
             }
         };
         this.editPasteAction = new GuiAction(
@@ -328,7 +337,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.mainPane.getEditPane().pasteText();
+                VenusUI.this.mainPane.getCurrentEditTabPane().pasteText();
             }
         };
         this.editFindReplaceAction = new EditFindReplaceAction(
@@ -412,8 +421,7 @@ public final class VenusUI extends JFrame {
         this.settingsPopupInputAction = new SettingsAction(
             "Popup dialog for input syscalls (5,6,7,8,12)",
             "If set, use popup dialog for input syscalls (5,6,7,8,12) instead of cursor in Run I/O window",
-            BoolSetting.POPUP_SYSCALL_INPUT, this, (v) -> {
-        }
+            BoolSetting.POPUP_SYSCALL_INPUT, this
         );
 
         this.settingsValueDisplayBaseAction = new SettingsAction(
@@ -456,10 +464,8 @@ public final class VenusUI extends JFrame {
             BoolSetting.WARNINGS_ARE_ERRORS, this
         );
         this.settingsStartAtMainAction = new SettingsAction(
-            "Initialize Program Counter to global 'main' if " +
-                "defined",
-            "If set, assembler will initialize Program Counter to text address globally labeled 'main', if " +
-                "defined.",
+            "Initialize Program Counter to global 'main' if defined",
+            "If set, assembler will initialize Program Counter to text address globally labeled 'main', if defined.",
             BoolSetting.START_AT_MAIN, this
         );
         this.settingsProgramArgumentsAction = new SettingsAction(
@@ -502,9 +508,11 @@ public final class VenusUI extends JFrame {
             "View and modify text editor settings.", null, null, this
         );
         this.settingsExceptionHandlerAction = new SettingsExceptionHandlerAction(
-            "Exception Handler...", null,
+            "Exception Handler...", 
             "If set, the specified exception handler file will be included in all Assemble operations.",
-            null, null, this
+             this,
+            boolSettings, 
+            otherSettings
         );
         this.settingsMemoryConfigurationAction = new SettingsMemoryConfigurationAction(
             "Memory Configuration...",
@@ -516,14 +524,11 @@ public final class VenusUI extends JFrame {
             "Help", VenusUI.loadIcon("Help22.png"),
             "Help", KeyEvent.VK_H, KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0), this
         );
-        this.helpAboutAction = new HelpAboutAction(
-            "About ...", null,
-            "Information about Rars", null, null, this
-        );
+        this.helpAboutAction = new HelpAboutAction(this);
 
         // endregion Action objects
 
-        this.venusIO = new VenusIO(this.messagesPane, BOOL_SETTINGS);
+        this.venusIO = new VenusIO(this.messagesPane, boolSettings);
 
         this.menu = this.setUpMenuBar();
         this.setJMenuBar(this.menu);
@@ -633,12 +638,12 @@ public final class VenusUI extends JFrame {
         return menuItem;
     }
 
-    private static @NotNull JCheckBoxMenuItem checkBoxItem(
+    private @NotNull JCheckBoxMenuItem checkBoxItem(
         final @NotNull Action action,
         final @NotNull BoolSetting setting
     ) {
         final var checkBoxMenuItem = new JCheckBoxMenuItem(action);
-        checkBoxMenuItem.setSelected(BOOL_SETTINGS.getSetting(setting));
+        checkBoxMenuItem.setSelected(boolSettings.getSetting(setting));
         return checkBoxMenuItem;
     }
 
@@ -857,7 +862,7 @@ public final class VenusUI extends JFrame {
         switch (status) {
             case NO_FILE -> this.setMenuStateInitial();
             case NEW_NOT_EDITED, NEW_EDITED -> this.setMenuStateEditingNew();
-            case NOT_EDITED -> this.setMenuStateNotEdited(); // was MenuStateEditing. DPS 9-Aug-2011
+            case NOT_EDITED -> this.setMenuStateNotEdited();
             case EDITED -> this.setMenuStateEditing();
             case RUNNABLE -> this.setMenuStateRunnable();
             case RUNNING -> this.setMenuStateRunning();
@@ -904,8 +909,8 @@ public final class VenusUI extends JFrame {
             editFindReplaceAction, settingsMemoryConfigurationAction, runAssembleAction
         );
         // If assemble-all, allow previous Run menu settings to remain.
-        // Otherwise, clear them out. DPS 9-Aug-2011
-        if (!BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {
+        // Otherwise, clear them out.
+        if (!boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {
             setDisabled(
                 this.runGoAction, this.runStepAction, this.runBackstepAction, this.runResetAction,
                 this.runStopAction, this.runPauseAction, this.runClearBreakpointsAction,
@@ -1028,14 +1033,14 @@ public final class VenusUI extends JFrame {
     }
 
     /**
-     * Have the menu request keyboard focus. DPS 5-4-10
+     * Have the menu request keyboard focus.
      */
     void haveMenuRequestFocus() {
         this.menu.requestFocus();
     }
 
     private void updateUndoAndRedoState() {
-        final EditPane editPane = this.mainPane.getEditPane();
+        final EditPane editPane = this.mainPane.getCurrentEditTabPane();
         this.editUndoAction.setEnabled(editPane != null && editPane.canUndo());
         this.editRedoAction.setEnabled(editPane != null && editPane.canRedo());
     }

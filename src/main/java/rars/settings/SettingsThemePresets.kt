@@ -4,10 +4,9 @@ package rars.settings
 
 import rars.venus.editors.TokenStyle
 import java.awt.Color
-import java.util.Map
 
 object SettingsThemePresets {
-    val LIGHT_THEME: SettingsTheme = buildTheme {
+    val LIGHT_THEME: SettingsTheme by lazyTheme {
         foregroundColor = Color.BLACK
         backgroundColor = Color.WHITE
         lineHighlightColor = Color(242, 242, 242)
@@ -38,7 +37,7 @@ object SettingsThemePresets {
 
         tokenStyles[TokenSettingKey.MACRO_PARAMETER] = TokenStyle.bold(macroParameterColor)
     }
-    val DARK_THEME: SettingsTheme = buildTheme {
+    val DARK_THEME: SettingsTheme by lazyTheme {
         foregroundColor = Color.WHITE
         backgroundColor = Color(31, 31, 31)
         lineHighlightColor = Color(47, 47, 47)
@@ -70,11 +69,17 @@ object SettingsThemePresets {
         tokenStyles[TokenSettingKey.MACRO_PARAMETER] = TokenStyle.bold(macroParameterColor)
     }
 
-    @JvmField
-    val THEMES: List<ThemeEntry> = listOf(
-        ThemeEntry("Default light", LIGHT_THEME),
-        ThemeEntry("Default dark", DARK_THEME)
-    )
+    @JvmStatic
+    val THEMES: List<ThemeEntry> by lazy {
+        listOf(
+            ThemeEntry("Default light", LIGHT_THEME),
+            ThemeEntry("Default dark", DARK_THEME)
+        )
+    }
+
+    private fun lazyTheme(builderFunction: SettingsTheme.() -> Unit): Lazy<SettingsTheme> = lazy {
+        buildTheme(builderFunction)
+    }
 
     private fun buildTheme(builderFunction: SettingsTheme.() -> Unit): SettingsTheme = SettingsTheme(
         Color.WHITE,
@@ -82,7 +87,7 @@ object SettingsThemePresets {
         Color.WHITE,
         Color.WHITE,
         Color.WHITE,
-        Map.of<TokenSettingKey, TokenStyle>()
+        mapOf<TokenSettingKey, TokenStyle>()
     ).apply(builderFunction)
 
     @JvmRecord

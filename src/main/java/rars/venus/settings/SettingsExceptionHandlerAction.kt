@@ -1,186 +1,187 @@
-package rars.venus.settings;
+package rars.venus.settings
 
-import org.jetbrains.annotations.NotNull;
-import rars.settings.BoolSetting;
-import rars.venus.GuiAction;
-import rars.venus.VenusUI;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-
-import static rars.Globals.BOOL_SETTINGS;
-import static rars.Globals.OTHER_SETTINGS;
-
-/*
-Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
-*/
+import rars.settings.BoolSetting
+import rars.settings.BoolSettingsImpl
+import rars.settings.OtherSettingsImpl
+import rars.venus.VenusUI
+import rars.venus.actions.GuiAction
+import java.awt.BorderLayout
+import java.awt.event.ActionEvent
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import java.io.File
+import javax.swing.*
+import javax.swing.border.EmptyBorder
 
 /**
  * Action class for the Settings menu item for optionally loading a MIPS
  * exception handler.
  */
-public final class SettingsExceptionHandlerAction extends GuiAction {
+class SettingsExceptionHandlerAction(
+    name: String,
+    descrip: String,
+    mainUI: VenusUI,
+    private val boolSettings: BoolSettingsImpl,
+    private val otherSettings: OtherSettingsImpl,
+) : GuiAction(name, null, descrip, null, null, mainUI) {
 
-    private JDialog exceptionHandlerDialog;
-    private JCheckBox exceptionHandlerSetting;
-    private JButton exceptionHandlerSelectionButton;
-    private JTextField exceptionHandlerDisplay;
-
-    private boolean initialSelected; // state of check box when dialog initiated.
-    private String initialPathname; // selected exception handler when dialog initiated.
-
-    public SettingsExceptionHandlerAction(
-        final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI mainUI
-    ) {
-        super(name, icon, descrip, mnemonic, accel, mainUI);
-    }
-
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        this.initialSelected =
-            BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED);
-        this.initialPathname = OTHER_SETTINGS.getExceptionHandler();
-        this.exceptionHandlerDialog = new JDialog(this.mainUI, "Exception Handler", true);
-        this.exceptionHandlerDialog.setContentPane(this.buildDialogPanel());
-        this.exceptionHandlerDialog.setDefaultCloseOperation(
-            JDialog.DO_NOTHING_ON_CLOSE);
-        this.exceptionHandlerDialog.addWindowListener(
-            new WindowAdapter() {
-                @Override
-                public void windowClosing(final WindowEvent we) {
-                    SettingsExceptionHandlerAction.this.closeDialog();
+    override fun actionPerformed(e: ActionEvent?) {
+        JDialog(mainUI, "Exception Handler", true).apply {
+            contentPane = buildDialogPanel(this, boolSettings, otherSettings)
+            addWindowListener(object : WindowAdapter() {
+                override fun windowClosing(we: WindowEvent?) {
+                    closeDialog()
                 }
-            });
-        this.exceptionHandlerDialog.pack();
-        this.exceptionHandlerDialog.setLocationRelativeTo(this.mainUI);
-        this.exceptionHandlerDialog.setVisible(true);
+            })
+            defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
+            pack()
+            setLocationRelativeTo(mainUI)
+            isVisible = true
+        }
     }
 
-    /**
-     * The dialog box that appears when menu item is selected.
-     */
-    private @NotNull JPanel buildDialogPanel() {
-        final JPanel contents = new JPanel(new BorderLayout(20, 20));
-        contents.setBorder(new EmptyBorder(10, 10, 10, 10));
-        // Top row - the check box for setting...
-        this.exceptionHandlerSetting = new JCheckBox("Include this exception handler file in all assemble operations");
-        this.exceptionHandlerSetting
-            .setSelected(BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED));
-        this.exceptionHandlerSetting.addActionListener(new ExceptionHandlerSettingAction());
-        contents.add(this.exceptionHandlerSetting, BorderLayout.NORTH);
-        // Middle row - the button and text field for exception handler file selection
-        final JPanel specifyHandlerFile = new JPanel();
-        this.exceptionHandlerSelectionButton = new JButton("Browse");
-        this.exceptionHandlerSelectionButton.setEnabled(this.exceptionHandlerSetting.isSelected());
-        this.exceptionHandlerSelectionButton.addActionListener(new ExceptionHandlerSelectionAction());
-        this.exceptionHandlerDisplay = new JTextField(OTHER_SETTINGS.getExceptionHandler(), 30);
-        this.exceptionHandlerDisplay.setEditable(false);
-        this.exceptionHandlerDisplay.setEnabled(this.exceptionHandlerSetting.isSelected());
-        specifyHandlerFile.add(this.exceptionHandlerSelectionButton);
-        specifyHandlerFile.add(this.exceptionHandlerDisplay);
-        contents.add(specifyHandlerFile, BorderLayout.CENTER);
+    private fun buildDialogPanel(
+        dialog: JDialog,
+        boolSettings: BoolSettingsImpl,
+        otherSettings: OtherSettingsImpl,
+    ): JPanel {
+        val initialSelected = boolSettings.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)
+        val initialPath = otherSettings.exceptionHandler
+        val exceptionHandlerDisplay = JTextField().apply {
+            text = otherSettings.exceptionHandler
+            columns = 30
+            isEditable = false
+            isEnabled = initialSelected
+        }
+        val exceptionHandlerSelectionButton = JButton().apply {
+            text = "Browse"
+            enabled = initialSelected
+            addActionListener {
+                val chooser = JFileChooser()
+                var pathname = otherSettings.exceptionHandler
+                val file = File(pathname)
+                if (file.exists()) {
+                    chooser.setSelectedFile(file)
+                }
+                val result = chooser.showOpenDialog(mainUI)
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    pathname = chooser.selectedFile.path // .replaceAll("\\\\","/");
+                    exceptionHandlerDisplay.text = pathname
+                }
+            }
+        }
+        val exceptionHandlerSetting = JCheckBox().apply {
+            text = "Include this exception handler file in all assemble operations"
+            isSelected = initialSelected
+            addActionListener {
+                val selected = (it.source as JCheckBox).isSelected
+                exceptionHandlerSelectionButton.isEnabled = selected
+                exceptionHandlerDisplay.isEnabled = selected
+            }
+        }
+        val specifyHandlerFile = JPanel().apply {
+            add(exceptionHandlerSelectionButton)
+            add(exceptionHandlerDisplay)
+        }
         // Bottom row - the control buttons for OK and Cancel
-        final Box controlPanel = Box.createHorizontalBox();
-        final JButton okButton = new JButton("OK");
-        okButton.addActionListener(
-            e -> {
-                this.performOK();
-                this.closeDialog();
-            });
-        final JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(
-            e -> this.closeDialog());
-        controlPanel.add(Box.createHorizontalGlue());
-        controlPanel.add(okButton);
-        controlPanel.add(Box.createHorizontalGlue());
-        controlPanel.add(cancelButton);
-        controlPanel.add(Box.createHorizontalGlue());
-        contents.add(controlPanel, BorderLayout.SOUTH);
-        return contents;
-    }
+        val okButton = JButton("OK").apply {
+            addActionListener {
+                performOK(
+                    boolSettings,
+                    otherSettings,
+                    initialSelected,
+                    initialPath,
+                    exceptionHandlerSetting.isSelected,
+                    exceptionHandlerDisplay.text
+                )
+                dialog.closeDialog()
+            }
+        }
+        val cancelButton = JButton("Cancel").apply {
+            addActionListener {
+                dialog.closeDialog()
+            }
+        }
+        val controlPanel = Box.createHorizontalBox().apply {
+            add(Box.createHorizontalGlue())
+            add(okButton)
+            add(Box.createHorizontalGlue())
+            add(cancelButton)
+            add(Box.createHorizontalGlue())
+        }
+//        return JPanel(BorderLayout(20, 20)).apply {
+//            border = EmptyBorder(10, 10, 10, 10)
+//            add(exceptionHandlerSetting, BorderLayout.NORTH)
+//            add(specifyHandlerFile, BorderLayout.CENTER)
+//            add(controlPanel, BorderLayout.SOUTH)
+//        }
 
-    /// User has clicked "OK" button, so record status of the checkbox and text field.
-    private void performOK() {
-        final boolean finalSelected = this.exceptionHandlerSetting.isSelected();
-        final String finalPathname = this.exceptionHandlerDisplay.getText();
-        // If nothing has changed then don't modify setting variables or properties
-        // file.
-        if (this.initialSelected != finalSelected
-            || this.initialPathname == null && finalPathname != null
-            || this.initialPathname != null && !this.initialPathname.equals(finalPathname)) {
-            BOOL_SETTINGS.setSettingAndSave(
-                BoolSetting.EXCEPTION_HANDLER_ENABLED,
-                finalSelected
-            );
-            if (finalSelected) {
-                OTHER_SETTINGS.setExceptionHandlerAndSave(finalPathname);
+        return JPanel().apply {
+            BorderLayout {
+                border = EmptyBorder(10, 10, 10, 10)
+                this[BorderLayout.NORTH] = exceptionHandlerSetting
+                this[BorderLayout.CENTER] = specifyHandlerFile
+                this[BorderLayout.SOUTH] = controlPanel
             }
         }
     }
 
-    // We're finished with this modal dialog.
-    private void closeDialog() {
-        this.exceptionHandlerDialog.setVisible(false);
-        this.exceptionHandlerDialog.dispose();
-    }
-
-    /// Associated action class: exception handler setting. Attached to check box.
-    private class ExceptionHandlerSettingAction implements ActionListener {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final boolean selected = ((JCheckBox) e.getSource()).isSelected();
-            SettingsExceptionHandlerAction.this.exceptionHandlerSelectionButton.setEnabled(selected);
-            SettingsExceptionHandlerAction.this.exceptionHandlerDisplay.setEnabled(selected);
-        }
-    }
-
-    /// Associated action class: selecting exception handler file. Attached to
-    private class ExceptionHandlerSelectionAction implements ActionListener {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final JFileChooser chooser = new JFileChooser();
-            String pathname = OTHER_SETTINGS.getExceptionHandler();
-            final File file = new File(pathname);
-            if (file.exists()) {
-                chooser.setSelectedFile(file);
-            }
-            final int result = chooser.showOpenDialog(SettingsExceptionHandlerAction.this.mainUI);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                pathname = chooser.getSelectedFile().getPath();// .replaceAll("\\\\","/");
-                SettingsExceptionHandlerAction.this.exceptionHandlerDisplay.setText(pathname);
+    companion object {
+        private fun performOK(
+            boolSettings: BoolSettingsImpl,
+            otherSettings: OtherSettingsImpl,
+            initialSelected: Boolean,
+            initialPath: String,
+            isSelected: Boolean,
+            path: String,
+        ) {
+            if (initialSelected != isSelected || path.isNotEmpty() || initialPath != path) {
+                boolSettings.setSettingAndSave(
+                    BoolSetting.EXCEPTION_HANDLER_ENABLED,
+                    isSelected
+                )
+                if (isSelected) {
+                    otherSettings.setExceptionHandlerAndSave(path)
+                }
             }
         }
     }
+}
 
+private fun JDialog.closeDialog() {
+    isVisible = false
+    dispose()
+}
+
+class BorderLayoutScope internal constructor(
+    private val panel: JPanel,
+) {
+    val layoutManager = BorderLayout().also {
+        panel.layout = it
+    }
+
+    var vgap by layoutManager::vgap
+    var hgap by layoutManager::hgap
+
+    operator fun set(index: String, component: JComponent) {
+        index.assertValid()
+        panel.add(component, index)
+    }
+
+    private fun String.assertValid() {
+        val isValidId = when (this) {
+            BorderLayout.NORTH,
+            BorderLayout.SOUTH,
+            BorderLayout.WEST,
+            BorderLayout.EAST,
+            BorderLayout.CENTER,
+                -> true
+            else -> false
+        }
+        assert(isValidId)
+    }
+}
+
+fun JPanel.BorderLayout(builder: BorderLayoutScope.() -> Unit) {
+    BorderLayoutScope(this).apply(builder)
 }

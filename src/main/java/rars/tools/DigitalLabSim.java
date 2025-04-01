@@ -9,11 +9,10 @@ import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.util.BinaryUtilsKt;
 import rars.venus.VenusUI;
+import rars.venus.util.MouseListenerBuilder;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import static rars.util.KotlinUtilsKt.unwrap;
 
@@ -59,7 +58,7 @@ public final class DigitalLabSim extends AbstractTool {
         this(DigitalLabSim.heading + ", " + DigitalLabSim.version, DigitalLabSim.heading, mainUI);
     }
 
-    public static void updateOneSecondCounter(final char value) {
+    public static void updateOneSecondCounter(final byte value) {
         if (value != 0) {
             DigitalLabSim.CounterInterruptOnOff = true;
             DigitalLabSim.CounterValue = DigitalLabSim.CounterValueMax;
@@ -89,7 +88,7 @@ public final class DigitalLabSim extends AbstractTool {
     public @NotNull Unit processAccessNotice(final @NotNull AccessNotice notice) {
         final var memNotice = (MemoryAccessNotice) notice;
         final int address = memNotice.address;
-        final char value = (char) memNotice.value;
+        final var value = (byte) memNotice.value;
         if (address == this.IN_ADRESS_DISPLAY_1) {
             this.updateSevenSegment(1, value);
         } else if (address == this.IN_ADRESS_DISPLAY_2) {
@@ -110,9 +109,6 @@ public final class DigitalLabSim extends AbstractTool {
         return Unit.INSTANCE;
     }
 
-    /**
-     * <p>reset.</p>
-     */
     @Override
     protected void reset() {
         this.sevenSegPanel.resetSevenSegment();
@@ -120,11 +116,6 @@ public final class DigitalLabSim extends AbstractTool {
         resetOneSecondCounter();
     }
 
-    /**
-     * <p>buildMainDisplayArea.</p>
-     *
-     * @return a {@link javax.swing.JComponent} object
-     */
     @Override
     protected JComponent buildMainDisplayArea() {
         DigitalLabSim.panelTools = new JPanel(new GridLayout(1, 2));
@@ -135,11 +126,6 @@ public final class DigitalLabSim extends AbstractTool {
         DigitalLabSim.CounterInterruptOnOff = false;
         return DigitalLabSim.panelTools;
     }
-
-    /*
-     * ...........................Seven segment display start here
-     * ..............................
-     */
 
     private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
         if (this.connectButton.isConnected()) {
@@ -155,47 +141,33 @@ public final class DigitalLabSim extends AbstractTool {
         }
     }
 
-    /**
-     * <p>getHelpComponent.</p>
-     *
-     * @return a {@link javax.swing.JComponent} object
-     */
     @Override
     protected JComponent getHelpComponent() {
-        final String helpContent = " This tool is composed of 3 parts : two seven-segment displays, an hexadecimal " +
-            "keyboard and counter \n"
-            +
-            "Seven segment display\n" +
-            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_DISPLAY_1)
-            + " : command right seven segment display \n " +
-            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_DISPLAY_2)
-            + " : command left seven segment display \n " +
-            " Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 " +
-            "for point \n \n"
-            +
-            "Hexadecimal keyboard\n" +
-            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_HEXA_KEYBOARD)
-            + " : command row number of hexadecimal keyboard (bit 0 to 3) and enable keyboard interrupt (bit 7) \n"
-            +
-            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.OUT_ADRESS_HEXA_KEYBOARD)
-            + " : receive row and column of the first pressed, 0 if not first pressed \n" +
-            " The program has to scan, one by one, each row (send 1,2,4,8...)" +
-            " and then observe if a first is pressed (that mean byte value at adresse 0xFFFF0014 is different " +
-            "from zero). "
-            +
-            " This byte value is composed of row number (4 left bits) and column number (4 right bits)" +
-            " Here you'll find the code for each first : 0x11,0x21,0x41,0x81,0x12,0x22,0x42,0x82,0x14,0x24,0x44," +
-            "0x84,0x18,0x28,0x48,0x88. \n"
-            +
-            " For exemple first number 2 return 0x41, that mean the first is on column 3 and row 1. \n" +
-            " If keyboard interruption is enable, an external interrupt is started with value 0x00000200\n \n" +
-            "Counter\n" +
-            " Byte value at address " + BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_COUNTER)
-            + " : If one bit of this byte is set, the counter interruption is enabled.\n" +
-            " If counter interruption is enable, every 30 instructions, a timer interrupt is started with value " +
-            "0x00000100.\n"
-            +
-            "   (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)";
+        final String helpContent = """
+            This tool is composed of 3 parts : two seven-segment displays, a hexadecimal keyboard and a counter.
+                Seven segment display
+                Byte value at address %s : command right seven segment display
+                Byte value at address %s : command left seven segment display
+                Each bit of these two bytes are connected to segments (bit 0 for a segment, 1 for b segment and 7 for point
+            
+            Hexadecimal keyboard
+                Byte value at address %s : command row number of hexadecimal keyboard (bit 0 to 3) and enable keyboard interrupt (bit 7)
+                Byte value at address %s : receive row and column of the first pressed, 0 if not first pressed
+                The program has to scan, one by one, each row (send 1,2,4,8...) and then observe if a first is pressed (that mean byte value at adresse 0xFFFF0014 is different from zero).  This byte value is composed of row number (4 left bits) and column number (4 right bits) Here you'll find the code for each first : 0x11,0x21,0x41,0x81,0x12,0x22,0x42,0x82,0x14,0x24,0x44,0x84,0x18,0x28,0x48,0x88.
+                For exemple first number 2 return 0x41, that mean the first is on column 3 and row 1.
+                If keyboard interruption is enable, an external interrupt is started with value 0x00000200
+            
+            Counter
+                Byte value at address %s : If one bit of this byte is set, the counter interruption is enabled.
+                If counter interruption is enable, every 30 instructions, a timer interrupt is started with value 0x00000100.
+            (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)
+            """.formatted(
+            BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_DISPLAY_1),
+            BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_DISPLAY_2),
+            BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_HEXA_KEYBOARD),
+            BinaryUtilsKt.intToHexStringWithPrefix(this.OUT_ADRESS_HEXA_KEYBOARD),
+            BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_COUNTER)
+        );
         final JButton help = new JButton("Help");
         help.addActionListener(
             e -> {
@@ -211,39 +183,13 @@ public final class DigitalLabSim extends AbstractTool {
                 );
             });
         return help;
-    }/*
-     * ....................Seven Segment display start
-     * here...................................
-     */
+    }
 
-    /**
-     * <p>updateSevenSegment.</p>
-     *
-     * @param number
-     *     a int
-     * @param value
-     *     a char
-     */
-    public void updateSevenSegment(final int number, final char value) {
+    public void updateSevenSegment(final int number, final byte value) {
         this.sevenSegPanel.display[number].modifyDisplay(value);
     }
 
-    /*
-     * ...........................Seven segment display end here
-     * ..............................
-     */
-    /*
-     * ....................Hexa Keyboard start
-     * here...................................
-     */
-
-    /**
-     * <p>updateHexaKeyboard.</p>
-     *
-     * @param row
-     *     a char
-     */
-    public void updateHexaKeyboard(final char row) {
+    public void updateHexaKeyboard(final byte row) {
         final int key = DigitalLabSim.KeyBoardValueButtonClick;
         if ((key != -1) && ((1 << (key / 4)) == (row & 0xF))) {
             this.updateMMIOControlAndData(
@@ -257,95 +203,90 @@ public final class DigitalLabSim extends AbstractTool {
     }
 
     public static class SevenSegmentDisplay extends JComponent {
-        public char aff;
+        public byte displaySegmentBits;
 
-        public SevenSegmentDisplay(final char aff) {
+        public SevenSegmentDisplay(final byte displaySegmentBits) {
             super();
-            this.aff = aff;
+            this.displaySegmentBits = displaySegmentBits;
             this.setPreferredSize(new Dimension(60, 80));
         }
 
-        public static void SwitchSegment(final Graphics g, final char segment) {
+        static void paintSegment(final Graphics g, final @NotNull DisplaySegment segment) {
             switch (segment) {
-                case 'a': // a segment
+                case A -> {
                     final int[] pxa1 = {12, 9, 12};
                     final int[] pya = {5, 8, 11};
                     g.fillPolygon(pxa1, pya, 3);
                     final int[] pxa2 = {36, 39, 36};
                     g.fillPolygon(pxa2, pya, 3);
                     g.fillRect(12, 5, 24, 6);
-                    break;
-                case 'b': // b segment
+                }
+                case B -> {
                     final int[] pxb = {37, 40, 43};
                     final int[] pyb1 = {12, 9, 12};
                     g.fillPolygon(pxb, pyb1, 3);
                     final int[] pyb2 = {36, 39, 36};
                     g.fillPolygon(pxb, pyb2, 3);
                     g.fillRect(37, 12, 6, 24);
-                    break;
-                case 'c': // c segment
+                }
+                case C -> {
                     final int[] pxc = {37, 40, 43};
                     final int[] pyc1 = {44, 41, 44};
                     g.fillPolygon(pxc, pyc1, 3);
                     final int[] pyc2 = {68, 71, 68};
                     g.fillPolygon(pxc, pyc2, 3);
                     g.fillRect(37, 44, 6, 24);
-                    break;
-                case 'd': // d segment
+                }
+                case D -> {
                     final int[] pxd1 = {12, 9, 12};
                     final int[] pyd = {69, 72, 75};
                     g.fillPolygon(pxd1, pyd, 3);
                     final int[] pxd2 = {36, 39, 36};
                     g.fillPolygon(pxd2, pyd, 3);
                     g.fillRect(12, 69, 24, 6);
-                    break;
-                case 'e': // e segment
+                }
+                case E -> {
                     final int[] pxe = {5, 8, 11};
                     final int[] pye1 = {44, 41, 44};
                     g.fillPolygon(pxe, pye1, 3);
                     final int[] pye2 = {68, 71, 68};
                     g.fillPolygon(pxe, pye2, 3);
                     g.fillRect(5, 44, 6, 24);
-                    break;
-                case 'f': // f segment
+                }
+                case F -> {
                     final int[] pxf = {5, 8, 11};
                     final int[] pyf1 = {12, 9, 12};
                     g.fillPolygon(pxf, pyf1, 3);
                     final int[] pyf2 = {36, 39, 36};
                     g.fillPolygon(pxf, pyf2, 3);
                     g.fillRect(5, 12, 6, 24);
-                    break;
-                case 'g': // g segment
+                }
+                case G -> {
                     final int[] pxg1 = {12, 9, 12};
                     final int[] pyg = {37, 40, 43};
                     g.fillPolygon(pxg1, pyg, 3);
                     final int[] pxg2 = {36, 39, 36};
                     g.fillPolygon(pxg2, pyg, 3);
                     g.fillRect(12, 37, 24, 6);
-                    break;
-                case 'h': // decimal point
-                    g.fillOval(49, 68, 8, 8);
-                    break;
+                }
+                case DOT -> g.fillOval(49, 68, 8, 8);
             }
         }
 
-        public void modifyDisplay(final char val) {
-            this.aff = val;
+        public void modifyDisplay(final byte val) {
+            this.displaySegmentBits = val;
             this.repaint();
         }
 
         @Override
         public void paint(final Graphics g) {
-            char c = 'a';
-            while (c <= 'h') {
-                if ((this.aff & 0x1) == 1) {
+            for (final var segment : DisplaySegment.values()) {
+                if ((this.displaySegmentBits & 0x1) == 1) {
                     g.setColor(Color.RED);
                 } else {
                     g.setColor(Color.LIGHT_GRAY);
                 }
-                SevenSegmentDisplay.SwitchSegment(g, c);
-                this.aff = (char) (this.aff >>> 1);
-                c++;
+                SevenSegmentDisplay.paintSegment(g, segment);
             }
         }
     }
@@ -364,19 +305,19 @@ public final class DigitalLabSim extends AbstractTool {
             this.setLayout(fl);
             this.display = new SevenSegmentDisplay[2];
             for (int i = 0; i < 2; i++) {
-                this.display[i] = new SevenSegmentDisplay((char) (0));
+                this.display[i] = new SevenSegmentDisplay((byte) (0));
                 this.add(this.display[i]);
             }
         }
 
-        public void modifyDisplay(final int num, final char val) {
+        public void modifyDisplay(final int num, final byte val) {
             this.display[num].modifyDisplay(val);
             this.display[num].repaint();
         }
 
         public void resetSevenSegment() {
             for (int i = 0; i < 2; i++) {
-                this.modifyDisplay(i, (char) 0);
+                this.modifyDisplay(i, (byte) 0);
             }
         }
     }
@@ -390,11 +331,31 @@ public final class DigitalLabSim extends AbstractTool {
             this.setLayout(layout);
             this.button = new JButton[16];
             for (int i = 0; i < 16; i++) {
-                this.button[i] = new JButton(Integer.toHexString(i));
-                this.button[i].setBackground(Color.WHITE);
-                this.button[i].setMargin(new Insets(10, 10, 10, 10));
-                this.button[i].addMouseListener(new EcouteurClick(i));
-                this.add(this.button[i]);
+                final var button = new JButton(Integer.toHexString(i));
+                button.setBackground(Color.WHITE);
+                button.setMargin(new Insets(10, 10, 10, 10));
+                final var keyboardClickValue = i;
+                button.addMouseListener(MouseListenerBuilder.create().onMouseClicked(e -> {
+                    if (DigitalLabSim.KeyBoardValueButtonClick != -1) {
+                        // Button already pressed -> now release
+                        DigitalLabSim.KeyBoardValueButtonClick = -1;
+                        DigitalLabSim.this.updateMMIOControlAndData(DigitalLabSim.this.OUT_ADRESS_HEXA_KEYBOARD, 0);
+                        for (final var btn : HexaKeyboard.this.button) {
+                            btn.setBackground(Color.WHITE);
+                        }
+                    } else {
+                        // new button pressed
+                        DigitalLabSim.KeyBoardValueButtonClick = keyboardClickValue;
+                        HexaKeyboard.this.button[DigitalLabSim.KeyBoardValueButtonClick].setBackground(Color.GREEN);
+                        if (DigitalLabSim.KeyboardInterruptOnOff) {
+                            Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
+                        }
+
+                    }
+                    return Unit.INSTANCE;
+                }).build());
+                this.button[i] = button;
+                this.add(button);
             }
         }
 
@@ -405,46 +366,22 @@ public final class DigitalLabSim extends AbstractTool {
             }
         }
 
-        public class EcouteurClick implements MouseListener {
-            private final int buttonValue;
+    }
+}
 
-            public EcouteurClick(final int val) {
-                this.buttonValue = val;
-            }
+enum DisplaySegment {
+    A((byte) 0b00000001),
+    B((byte) 0b00000010),
+    C((byte) 0b00000100),
+    D((byte) 0b00001000),
+    E((byte) 0b00010000),
+    F((byte) 0b00100000),
+    G((byte) 0b01000000),
+    DOT((byte) 0b10000000);
 
-            @Override
-            public void mouseEntered(final MouseEvent arg0) {
-            }
+    public final byte bitMask;
 
-            @Override
-            public void mouseExited(final MouseEvent arg0) {
-            }
-
-            @Override
-            public void mousePressed(final MouseEvent arg0) {
-            }
-
-            @Override
-            public void mouseReleased(final MouseEvent arg0) {
-            }
-
-            @Override
-            public void mouseClicked(final MouseEvent arg0) {
-                if (DigitalLabSim.KeyBoardValueButtonClick != -1) {// Button already pressed -> now realease
-                    DigitalLabSim.KeyBoardValueButtonClick = -1;
-                    DigitalLabSim.this.updateMMIOControlAndData(DigitalLabSim.this.OUT_ADRESS_HEXA_KEYBOARD, 0);
-                    for (int i = 0; i < 16; i++) {
-                        HexaKeyboard.this.button[i].setBackground(Color.WHITE);
-                    }
-                } else { // new button pressed
-                    DigitalLabSim.KeyBoardValueButtonClick = this.buttonValue;
-                    HexaKeyboard.this.button[DigitalLabSim.KeyBoardValueButtonClick].setBackground(Color.GREEN);
-                    if (DigitalLabSim.KeyboardInterruptOnOff) {
-                        Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
-                    }
-
-                }
-            }
-        }
+    DisplaySegment(final byte bitMask) {
+        this.bitMask = bitMask;
     }
 }

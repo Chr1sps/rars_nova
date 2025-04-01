@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.Settings;
 import rars.venus.ExecutePane;
-import rars.venus.GuiAction;
+import rars.venus.actions.GuiAction;
 import rars.venus.MonoRightCellRenderer;
 import rars.venus.util.AbstractFontSettingDialog;
 

@@ -208,7 +208,6 @@ public final class FileStatus {
         RUNNING,
         /// Execution terminated.
         TERMINATED,
-        // DPS 9-Aug-2011
         /// File is being opened.
         OPENING;
 

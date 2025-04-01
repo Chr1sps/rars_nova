@@ -4,6 +4,7 @@ import kotlin.Pair;
 import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
@@ -14,8 +15,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.File;
-
-import static rars.Globals.*;
 
 /*
 Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
@@ -69,7 +68,10 @@ public final class EditPane extends JPanel {
      * @param appFrame
      *     a {@link VenusUI} object
      */
-    public EditPane(final @NotNull VenusUI appFrame) {
+    public EditPane(
+        final @NotNull VenusUI appFrame,
+        final @NotNull AllSettings allSettings
+    ) {
         super(new BorderLayout());
         this.mainUI = appFrame;
         // user.dir, user's current working directory, is guaranteed to have a value
@@ -78,36 +80,41 @@ public final class EditPane extends JPanel {
 
         this.fileStatus = new FileStatus();
 
-        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(EDITOR_THEME_SETTINGS.getCurrentTheme()
-            .toEditorTheme());
+        final var editorThemeSettings = allSettings.editorThemeSettings;
+        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(
+            editorThemeSettings.getCurrentTheme() .toEditorTheme()
+        );
 
-        this.sourceCode.setTheme(EDITOR_THEME_SETTINGS.getCurrentTheme().toEditorTheme());
-        EDITOR_THEME_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+        this.sourceCode.setTheme(editorThemeSettings.getCurrentTheme().toEditorTheme());
+        editorThemeSettings.onChangeListenerHook.subscribe(ignored -> {
             this.sourceCode.setTheme(
-                EDITOR_THEME_SETTINGS.getCurrentTheme().toEditorTheme()
+                editorThemeSettings.getCurrentTheme().toEditorTheme()
             );
             return Unit.INSTANCE;
         });
 
-        this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
-        FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
-            this.sourceCode.setFont(FONT_SETTINGS.getCurrentFont());
+        final var fontSettings = allSettings.fontSettings;
+        this.sourceCode.setFont(fontSettings.getCurrentFont());
+        fontSettings.onChangeListenerHook.subscribe(ignored -> {
+            this.sourceCode.setFont(fontSettings.getCurrentFont());
             return Unit.INSTANCE;
         });
 
-        this.sourceCode.setLineHighlightEnabled(BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
-        BOOL_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
+        final var boolSettings = allSettings.boolSettings;
+        this.sourceCode.setLineHighlightEnabled(boolSettings.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
+        boolSettings.onChangeListenerHook.subscribe(ignored -> {
             this.sourceCode.setLineHighlightEnabled(
-                BOOL_SETTINGS.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
+                boolSettings.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
             );
             return Unit.INSTANCE;
         });
 
-        this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
-        this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
-        OTHER_SETTINGS.onChangeListenerHook.subscribe(ignore -> {
-            this.sourceCode.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
-            this.sourceCode.setTabSize(OTHER_SETTINGS.getEditorTabSize());
+        final var otherSettings = allSettings.otherSettings;
+        this.sourceCode.setCaretBlinkRate(otherSettings.getCaretBlinkRate());
+        this.sourceCode.setTabSize(otherSettings.getEditorTabSize());
+        otherSettings.onChangeListenerHook.subscribe(ignore -> {
+            this.sourceCode.setCaretBlinkRate(otherSettings.getCaretBlinkRate());
+            this.sourceCode.setTabSize(otherSettings.getEditorTabSize());
             return Unit.INSTANCE;
         });
 
@@ -119,7 +126,6 @@ public final class EditPane extends JPanel {
             new DocumentListener() {
                 @Override
                 public void insertUpdate(final DocumentEvent evt) {
-                    // IF statement added DPS 9-Aug-2011
                     // This method is triggered when file contents added to document
                     // upon opening, even though not edited by user. The IF
                     // statement will sense this situation and immediately return.
@@ -166,10 +172,6 @@ public final class EditPane extends JPanel {
                     this.insertUpdate(evt);
                 }
 
-                //                    @Override
-//                    public void changedUpdate(final DocumentEvent evt) {
-//                        this.insertUpdate(evt);
-//                    }
                 @Override
                 public void changedUpdate(final DocumentEvent e) {
 

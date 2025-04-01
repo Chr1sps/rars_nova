@@ -17,6 +17,18 @@ interface FontSettings {
     val fontSize: Int
 }
 
+interface PreferencesSettings {
+    fun saveSettingsToPreferences()
+}
+
+interface MutableFontSettings: FontSettings {
+    override var fontWeight: FontWeight
+    override var isLigaturized: Boolean
+    override var currentFont: Font
+    override var fontFamily: String
+    override var fontSize: Int
+}
+
 class FontSettingsImpl(private val preferences: Preferences) : FontSettings {
     private val onChangeDispatcher = ListenerDispatcher<Void?>()
 

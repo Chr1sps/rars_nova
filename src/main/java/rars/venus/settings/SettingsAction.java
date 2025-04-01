@@ -2,7 +2,7 @@ package rars.venus.settings;
 
 import org.jetbrains.annotations.NotNull;
 import rars.settings.BoolSetting;
-import rars.venus.GuiAction;
+import rars.venus.actions.GuiAction;
 import rars.venus.VenusUI;
 
 import javax.swing.*;

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.RISCVProgram;
+import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
 import rars.util.FilenameFinder;
 
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
-import static rars.Globals.BOOL_SETTINGS;
 
 /*
 Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
@@ -67,23 +67,16 @@ public final class EditTabbedPane extends JPanel {
     private final @NotNull Editor editor;
     private final @NotNull FileOpener fileOpener;
     private final @NotNull JTabbedPane tabbedPane;
+    private final @NotNull AllSettings allSettings;
 
-    /**
-     * Constructor for the EditTabbedPane class.
-     *
-     * @param mainUI
-     *     a {@link VenusUI} object
-     * @param editor
-     *     a {@link Editor} object
-     * @param mainPane
-     *     a {@link MainPane} object
-     */
     public EditTabbedPane(
         final @NotNull VenusUI mainUI,
         final @NotNull Editor editor,
-        final @NotNull MainPane mainPane
-    ) {
+        final @NotNull MainPane mainPane,
+        final @NotNull AllSettings allSettings
+        ) {
         super();
+        this.allSettings = allSettings;
         this.tabbedPane = new JTabbedPane();
         this.mainUI = mainUI;
         this.editor = editor;
@@ -95,8 +88,8 @@ public final class EditTabbedPane extends JPanel {
                 final EditPane editPane = (EditPane) tabbedPane.getSelectedComponent();
                 if (editPane != null) {
                     // New IF statement to permit free traversal of edit panes w/o invalidating
-                    // assembly if assemble-all is selected. DPS 9-Aug-2011
-                    if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {
+                    // assembly if assemble-all is selected.
+                    if (allSettings.boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {
                         EditTabbedPane.this.updateTitles(editPane);
                     } else {
                         EditTabbedPane.this.updateTitlesAndMenuState(editPane);
@@ -123,7 +116,7 @@ public final class EditTabbedPane extends JPanel {
      *
      * @return the current editor pane
      */
-    public EditPane getCurrentEditTab() {
+    public @Nullable EditPane getCurrentEditTab() {
         return (EditPane) tabbedPane.getSelectedComponent();
     }
 
@@ -142,7 +135,7 @@ public final class EditTabbedPane extends JPanel {
      * the New operation from the File menu.
      */
     public void newFile() {
-        final EditPane editPane = new EditPane(this.mainUI);
+        final var editPane = new EditPane(mainUI, allSettings);
         editPane.setSourceCode("", true);
         editPane.setFileStatus(FileStatus.State.NEW_NOT_EDITED);
         final var name = this.editor.getNextDefaultFilename();
@@ -347,7 +340,6 @@ public final class EditTabbedPane extends JPanel {
                 // Set Save As dialog directory in a logical way. If file in
                 // edit pane had been previously saved, default to its directory.
                 // If a new file (mipsN.asm), default to current save directory.
-                // DPS 13-July-2011
                 final JFileChooser saveDialog;
                 if (editPane.isNew()) {
                     saveDialog = new JFileChooser(this.editor.getCurrentSaveDirectory());
@@ -489,7 +481,6 @@ public final class EditTabbedPane extends JPanel {
     // Handy little utility to update the title on the current tab and the frame
     // title bar
     // and also to update the MARS menu state (controls which actions are enabled).
-    // DPS 9-Aug-2011
     private void updateTitles(final @NotNull EditPane editPane) {
         this.editor.setTitleFromFile(editPane.getFile(), editPane.getFileStatus());
         final boolean assembled = FileStatus.isAssembled();
@@ -581,7 +572,7 @@ public final class EditTabbedPane extends JPanel {
         }
         // If editPane == null, it means the desired file was not open. Line selection
         // does not properly with the JEditTextArea editor in this situation (it works
-        // fine for the original generic editor). So we just won't do it. DPS 9-Aug-2010
+        // fine for the original generic editor). So we just won't do it. 
         if (editPane != null) {
             currentPane.selectLine(line);
         }
@@ -627,7 +618,7 @@ public final class EditTabbedPane extends JPanel {
             // Set default to previous file opened, if any. This is useful in conjunction
             // with option to assemble file automatically upon opening. File likely to have
             // been edited externally (e.g. by Mipster).
-            if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ON_OPEN)
+            if (allSettings.boolSettings.getSetting(BoolSetting.ASSEMBLE_ON_OPEN)
                 && this.mostRecentlyOpenedFile != null) {
                 this.fileChooser.setSelectedFile(this.mostRecentlyOpenedFile);
             }
@@ -636,7 +627,6 @@ public final class EditTabbedPane extends JPanel {
                 final var startTime = Instant.now();
                 final File theFile = this.fileChooser.getSelectedFile();
                 this.theEditor.setCurrentOpenDirectory(theFile.getParent());
-                // theEditor.setCurrentSaveDirectory(theFile.getParent());// 13-July-2011 DPS.
                 if (!this.openFile(theFile)) {
                     return false;
                 }
@@ -645,7 +635,7 @@ public final class EditTabbedPane extends JPanel {
                 // Run->Assemble's
                 // actionPerformed() method.
                 if (theFile.canRead()) {
-                    if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ON_OPEN)) {
+                    if (allSettings.boolSettings.getSetting(BoolSetting.ASSEMBLE_ON_OPEN)) {
                         EditTabbedPane.this.mainUI.getRunAssembleAction().actionPerformed(null);
                     }
                 }
@@ -674,16 +664,16 @@ public final class EditTabbedPane extends JPanel {
                 EditTabbedPane.this.updateTitles(editPane);
                 return false;
             } else {
-                editPane = new EditPane(EditTabbedPane.this.mainUI);
+                editPane = new EditPane(mainUI, allSettings);
             }
             editPane.setFile(theFile);
             // FileStatus.reset();
             FileStatus.systemFile = theFile;
-            FileStatus.setSystemState(FileStatus.State.OPENING);// DPS 9-Aug-2011
+            FileStatus.setSystemState(FileStatus.State.OPENING);
             if (theFile.canRead()) {
                 Globals.PROGRAM = new RISCVProgram();
-                Globals.PROGRAM.readSource(theFile); // ignore the potential assembly error
-                // DPS 1 Nov 2006. Defined a StringBuffer to receive all file contents,
+                Globals.PROGRAM.readSource(theFile); 
+                // Defined a StringBuffer to receive all file contents,
                 // one line at a time, before adding to the Edit pane with one setText.
                 // StringBuffer is preallocated to full filelength to eliminate dynamic
                 // expansion as lines are added to it. Previously, each line was appended
@@ -710,8 +700,7 @@ public final class EditTabbedPane extends JPanel {
                 FileStatus.setSystemState(FileStatus.State.NOT_EDITED);
 
                 // If assemble-all, then allow opening of any file w/o invalidating assembly.
-                // DPS 9-Aug-2011
-                if (BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {
+                if (allSettings.boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {
                     EditTabbedPane.this.updateTitles(editPane);
                 } else {// this was the original code...
                     EditTabbedPane.this.updateTitlesAndMenuState(editPane);
@@ -747,7 +736,6 @@ public final class EditTabbedPane extends JPanel {
          * IS FIRED! I could obviously deal with this situation if I wanted to, but
          * enough
          * is enough. The limit will be one alternative filter at a time.
-         * DPS... 9 July 2008
          */
         private void setChoosableFileFilters() {
             // See if a new filter has been added to the master list. If so,
@@ -776,7 +764,7 @@ public final class EditTabbedPane extends JPanel {
             }
         }
 
-        // Private inner class for special property change listener. DPS 9 July 2008.
+        // Private inner class for special property change listener. 
         // If user adds a file filter, e.g. by typing *.txt into the file text field
         // Enter, then it is automatically added to the array of choosable file filters.
         // Cancel out of the Open dialog, it is then REMOVED from the list automatically
