@@ -15,7 +15,7 @@ import rars.ksoftfloat.types.Float64
 import rars.ksoftfloat.types.Floating
 import rars.riscv.*
 import rars.riscv.BasicInstruction.Companion.BASIC_INSTRUCTION_LENGTH
-import rars.riscv.hardware.registerFiles.RegisterFile
+import rars.riscv.hardware.registerfiles.RegisterFile
 import rars.simulator.SimulationContext
 import rars.util.ignoreOk
 
@@ -73,7 +73,7 @@ object BasicInstructions {
     val CSRRCI = basicInstruction(
         "csrrci t0, fcsr, 10",
         "Atomic Read/Clear CSR Immediate: read from the CSR into t0 and clear bits of the CSR according to a " +
-                "constant",
+            "constant",
         BasicInstructionFormat.I_FORMAT,
         "ssssssssssss ttttt 111 fffff 1110011"
     ) { statement ->
@@ -544,7 +544,7 @@ object BasicInstructions {
     val FENCE = basicInstruction(
         "fence 1, 1",
         "Ensure that IO and memory accesses before the fence happen before the following IO and memory accesses " +
-                "as viewed by a different thread",
+            "as viewed by a different thread",
         BasicInstructionFormat.I_FORMAT,
         "0000 ffff ssss 00000 000 00000 0001111"
     ) {
@@ -744,12 +744,12 @@ object BasicInstructions {
     val FSGNJD = basicInstruction(
         "fsgnj.d f1, f2, f3",
         "Floating point sign injection (64 bit): replace the sign bit of f2 with the sign bit of f3 and assign it" +
-                " to f1",
+            " to f1",
         BasicInstructionFormat.R_FORMAT,
         "0010001 ttttt sssss 000 fffff 1010011"
     ) { statement ->
         val result = ((fpRegisterFile.getLongValue(statement.getOperand(1))!! and Long.MAX_VALUE)
-                or (fpRegisterFile.getLongValue(statement.getOperand(2))!! and Long.MIN_VALUE))
+            or (fpRegisterFile.getLongValue(statement.getOperand(2))!! and Long.MIN_VALUE))
         fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result).ignoreOk()
     }
 
@@ -757,12 +757,12 @@ object BasicInstructions {
     val FSGNJND = basicInstruction(
         "fsgnjn.d f1, f2, f3",
         "Floating point sign injection (inverted 64 bit):  replace the sign bit of f2 with the opposite of sign " +
-                "bit of f3 and assign it to f1",
+            "bit of f3 and assign it to f1",
         BasicInstructionFormat.R_FORMAT,
         "0010001 ttttt sssss 001 fffff 1010011"
     ) { statement ->
         val result = ((fpRegisterFile.getLongValue(statement.getOperand(1))!! and Long.MAX_VALUE)
-                or ((fpRegisterFile.getLongValue(statement.getOperand(2))!!).inv() and Long.MIN_VALUE))
+            or ((fpRegisterFile.getLongValue(statement.getOperand(2))!!).inv() and Long.MIN_VALUE))
         fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result).ignoreOk()
     }
 
@@ -770,12 +770,12 @@ object BasicInstructions {
     val FSGNJNS = basicInstruction(
         "fsgnjn.s f1, f2, f3",
         "Floating point sign injection (inverted):  replace the sign bit of f2 with the opposite of sign bit of " +
-                "f3 and assign it to f1",
+            "f3 and assign it to f1",
         BasicInstructionFormat.R_FORMAT,
         "0010000 ttttt sssss 001 fffff 1010011"
     ) { statement ->
         val result = ((fpRegisterFile.getIntValue(statement.getOperand(1))!! and 0x7FFFFFFF)
-                or ((fpRegisterFile.getIntValue(statement.getOperand(2))!!).inv() and -0x80000000))
+            or ((fpRegisterFile.getIntValue(statement.getOperand(2))!!).inv() and -0x80000000))
         fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result)
     }
 
@@ -786,7 +786,7 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT, "0010000 ttttt sssss 000 fffff 1010011"
     ) { statement ->
         val result = ((fpRegisterFile.getIntValue(statement.getOperand(1))!! and 0x7FFFFFFF)
-                or (fpRegisterFile.getIntValue(statement.getOperand(2))!! and -0x80000000))
+            or (fpRegisterFile.getIntValue(statement.getOperand(2))!! and -0x80000000))
         fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result)
     }
 
@@ -794,7 +794,7 @@ object BasicInstructions {
     val FSGNJXD = basicInstruction(
         "fsgnjx.d f1, f2, f3",
         "Floating point sign injection (xor 64 bit):  xor the sign bit of f2 with the sign bit of f3 and assign " +
-                "it to f1",
+            "it to f1",
         BasicInstructionFormat.R_FORMAT,
         "0010001 ttttt sssss 010 fffff 1010011"
     ) { statement ->
@@ -887,7 +887,7 @@ object BasicInstructions {
     val JALR = basicInstruction(
         "jalr t1, t2, -100",
         "Jump and link register: Set t1 to Program Counter (return address) then jump to statement at t2 + " +
-                "immediate",
+            "immediate",
         BasicInstructionFormat.I_FORMAT,
         "tttttttttttt sssss 000 fffff 1100111"
     ) { stmt ->
@@ -921,7 +921,7 @@ object BasicInstructions {
     ) { stmt ->
         val newValue = Integer.toUnsignedLong(
             registerFile.getIntValue(stmt.getOperand(1))!!
-                    shl stmt.getOperand(2)
+                shl stmt.getOperand(2)
         )
         registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
     }
@@ -940,7 +940,7 @@ object BasicInstructions {
     val SLLIW = basicInstruction(
         "slliw t1,t2,10",
         "Shift left logical (32 bit): Set t1 to result of shifting t2 left by number of bits specified by " +
-                "immediate",
+            "immediate",
         BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 001 fffff 0011011"
     ) { stmt ->
         // Copy from SLLI
@@ -954,7 +954,7 @@ object BasicInstructions {
     val SRAI32 = basicInstruction(
         "srai t1,t2,10",
         "Shift right arithmetic : Set t1 to result of sign-extended shifting t2 right by number of bits specified" +
-                " by immediate",
+            " by immediate",
         BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0010011"
     ) { stmt ->
         // Uses >> because sign fill
@@ -967,7 +967,7 @@ object BasicInstructions {
     val SRAI64 = basicInstruction(
         "srai t1,t2,33",
         "Shift right arithmetic : Set t1 to result of sign-extended shifting t2 right by number of bits specified" +
-                " by immediate",
+            " by immediate",
         BasicInstructionFormat.R_FORMAT, "010000 tttttt sssss 101 fffff 0010011"
     ) { stmt ->
         // Uses >> because sign fill
@@ -979,7 +979,7 @@ object BasicInstructions {
     val SRAIW = basicInstruction(
         "sraiw t1,t2,10",
         "Shift right arithmetic (32 bit): Set t1 to result of sign-extended shifting t2 right by number of bits " +
-                "specified by immediate",
+            "specified by immediate",
         BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0011011"
     ) { stmt ->
         // Use the code directly from SRAI
@@ -1014,7 +1014,7 @@ object BasicInstructions {
     val SRLIW = basicInstruction(
         "srliw t1,t2,10",
         "Shift right logical (32 bit): Set t1 to result of shifting t2 right by number of bits specified by " +
-                "immediate",
+            "immediate",
         BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 101 fffff 0011011"
     ) { stmt ->
         val newValue = (registerFile.getIntValue(stmt.getOperand(1))!! ushr stmt.getOperand(2)).toLong()

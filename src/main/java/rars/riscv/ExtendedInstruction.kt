@@ -175,7 +175,7 @@ class ExtendedInstruction @JvmOverloads constructor(
                 if (sym != null) {
                     // should never be null, since there would not be an address if label were not
                     // in symtab!
-                    // DPS 9 Dec 2007: The "substitute()" method will substitute for ALL matches.
+                    // The "substitute()" method will substitute for ALL matches.
                     // Here
                     // we want to substitute only for the first match, for two reasons: (1) a
                     // statement

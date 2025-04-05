@@ -5,6 +5,7 @@ import rars.settings.BoolSettingsImpl
 import rars.settings.OtherSettingsImpl
 import rars.venus.VenusUI
 import rars.venus.actions.GuiAction
+import rars.venus.util.BorderLayout
 import java.awt.BorderLayout
 import java.awt.event.ActionEvent
 import java.awt.event.WindowAdapter
@@ -109,16 +110,10 @@ class SettingsExceptionHandlerAction(
             add(cancelButton)
             add(Box.createHorizontalGlue())
         }
-//        return JPanel(BorderLayout(20, 20)).apply {
-//            border = EmptyBorder(10, 10, 10, 10)
-//            add(exceptionHandlerSetting, BorderLayout.NORTH)
-//            add(specifyHandlerFile, BorderLayout.CENTER)
-//            add(controlPanel, BorderLayout.SOUTH)
-//        }
 
         return JPanel().apply {
+            border = EmptyBorder(10, 10, 10, 10)
             BorderLayout {
-                border = EmptyBorder(10, 10, 10, 10)
                 this[BorderLayout.NORTH] = exceptionHandlerSetting
                 this[BorderLayout.CENTER] = specifyHandlerFile
                 this[BorderLayout.SOUTH] = controlPanel
@@ -148,40 +143,7 @@ class SettingsExceptionHandlerAction(
     }
 }
 
-private fun JDialog.closeDialog() {
+fun JDialog.closeDialog() {
     isVisible = false
     dispose()
-}
-
-class BorderLayoutScope internal constructor(
-    private val panel: JPanel,
-) {
-    val layoutManager = BorderLayout().also {
-        panel.layout = it
-    }
-
-    var vgap by layoutManager::vgap
-    var hgap by layoutManager::hgap
-
-    operator fun set(index: String, component: JComponent) {
-        index.assertValid()
-        panel.add(component, index)
-    }
-
-    private fun String.assertValid() {
-        val isValidId = when (this) {
-            BorderLayout.NORTH,
-            BorderLayout.SOUTH,
-            BorderLayout.WEST,
-            BorderLayout.EAST,
-            BorderLayout.CENTER,
-                -> true
-            else -> false
-        }
-        assert(isValidId)
-    }
-}
-
-fun JPanel.BorderLayout(builder: BorderLayoutScope.() -> Unit) {
-    BorderLayoutScope(this).apply(builder)
 }

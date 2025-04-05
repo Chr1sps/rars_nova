@@ -1,76 +1,65 @@
-package rars.venus.settings.editor.views;
+package rars.venus.settings.editor.views
 
-import org.jetbrains.annotations.NotNull;
-import rars.venus.settings.editor.ColorPickerButton;
-import rars.venus.settings.editor.OptionSection;
+import rars.util.intersperseWith
+import rars.venus.settings.editor.ColorPickerButton
+import rars.venus.settings.editor.OptionSection
+import rars.venus.util.BoxLayout
+import java.awt.Color
+import javax.swing.*
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
-import java.util.Objects;
+class SyntaxStyleView : JPanel() {
+    val isBold: JCheckBox
+    val isItalic: JCheckBox
+    val isUnderline: JCheckBox
+    val useForeground: JCheckBox
+    val useBackground: JCheckBox
+    val foregroundColorButton: ColorPickerButton
+    val backgroundColorButton: ColorPickerButton
 
-import static kotlin.collections.ArraysKt.flatMap;
-import static kotlin.collections.CollectionsKt.drop;
-
-public final class SyntaxStyleView extends JPanel {
-
-    public final @NotNull JCheckBox isBold, isItalic, isUnderline, useForeground, useBackground;
-    public final @NotNull ColorPickerButton foregroundColorButton, backgroundColorButton;
-
-    public SyntaxStyleView() {
-        super();
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    init {
 
         // foreground
-        final var foregroundSection = new OptionSection("Foreground", false, Color.BLACK);
-        this.useForeground = Objects.requireNonNull(foregroundSection.checkBox);
-        this.foregroundColorButton = Objects.requireNonNull(foregroundSection.colorPickerButton);
+        val foregroundSection = OptionSection("Foreground", false, Color.BLACK)
+        useForeground = foregroundSection.checkBox!!
+        foregroundColorButton = foregroundSection.colorPickerButton!!
 
         // background
-        final var backgroundSection = new OptionSection("Background", false, Color.WHITE);
-        this.useBackground = Objects.requireNonNull(backgroundSection.checkBox);
-        this.backgroundColorButton = Objects.requireNonNull(backgroundSection.colorPickerButton);
-
-        // upper row
-        final var upperRow = buildRow(true, foregroundSection, backgroundSection);
-        this.add(upperRow);
-        this.add(Box.createVerticalStrut(10));
+        val backgroundSection = OptionSection("Background", false, Color.WHITE)
+        useBackground = backgroundSection.checkBox!!
+        backgroundColorButton = backgroundSection.colorPickerButton!!
 
         // bold
-        final var boldSection = new OptionSection("Bold", false, null);
-        this.isBold = Objects.requireNonNull(boldSection.checkBox);
+        val boldSection = OptionSection("Bold", false, null)
+        isBold = boldSection.checkBox!!
 
         // italic
-        final var italicSection = new OptionSection("Italic", false, null);
-        this.isItalic = Objects.requireNonNull(italicSection.checkBox);
+        val italicSection = OptionSection("Italic", false, null)
+        isItalic = italicSection.checkBox!!
 
         // underline
-        final var underlineSection = new OptionSection("Underline", false, null);
-        this.isUnderline = Objects.requireNonNull(underlineSection.checkBox);
+        val underlineSection = OptionSection("Underline", false, null)
+        isUnderline = underlineSection.checkBox!!
+
+        // upper row
+        val upperRow = buildRow(true, foregroundSection, backgroundSection)
 
         // bottom row
-        final var bottomRow = buildRow(true, boldSection, italicSection, underlineSection);
-        this.add(bottomRow, BorderLayout.SOUTH);
+        val bottomRow = buildRow(true, boldSection, italicSection, underlineSection)
+
+        BoxLayout(BoxLayout.Y_AXIS) {
+            +upperRow
+            verticalStrut(10)
+            +bottomRow
+        }
     }
+}
 
-    public static @NotNull JPanel buildRow(final boolean addMargins, final @NotNull JComponent... sections) {
-        final var panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        if (addMargins) {
-            panel.add(Box.createHorizontalGlue());
-        }
-
-        drop(
-            flatMap(
-                sections,
-                s -> List.of(Box.createHorizontalGlue(), s)
-            ),
-            1
-        ).forEach(panel::add);
-
-        if (addMargins) {
-            panel.add(Box.createHorizontalGlue());
-        }
-        return panel;
+fun buildRow(addMargins: Boolean, vararg sections: JComponent): JPanel = JPanel().apply {
+    BoxLayout(BoxLayout.X_AXIS) {
+        if (addMargins) horizontalGlue()
+        sections
+            .intersperseWith { Box.createHorizontalGlue() }
+            .forEach { +(it) }
+        if (addMargins) horizontalGlue()
     }
 }

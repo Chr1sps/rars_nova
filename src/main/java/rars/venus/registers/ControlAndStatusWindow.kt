@@ -1,6 +1,6 @@
 package rars.venus.registers
 
-import rars.riscv.hardware.registerFiles.CSRegisterFile
+import rars.riscv.hardware.registerfiles.CSRegisterFile
 import rars.settings.AllSettings
 import rars.settings.BoolSetting
 import rars.venus.NumberDisplayBaseChooser

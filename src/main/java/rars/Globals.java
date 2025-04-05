@@ -6,9 +6,9 @@ import rars.assembler.SymbolTable;
 import rars.riscv.hardware.InterruptController;
 import rars.riscv.hardware.Memory;
 import rars.riscv.hardware.MemoryConfiguration;
-import rars.riscv.hardware.registerFiles.CSRegisterFile;
-import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile;
-import rars.riscv.hardware.registerFiles.RegisterFile;
+import rars.riscv.hardware.registerfiles.CSRegisterFile;
+import rars.riscv.hardware.registerfiles.FloatingPointRegisterFile;
+import rars.riscv.hardware.registerfiles.RegisterFile;
 import rars.settings.*;
 import rars.simulator.Simulator;
 import rars.venus.VenusUI;
@@ -56,26 +56,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public final class Globals {
 
     /// String to GUI's RunI/O text area when echoing user input from pop-up dialog.
-    public static final @NotNull String userInputAlert = "**** user input : ";
+    public static final @NotNull String USER_INPUT_PROMPT = "**** user input : ";
     /// Path to folder that contains images.
-    public static final @NotNull String imagesPath = "/images/";
+    public static final @NotNull String IMAGES_PATH = "/images/";
 
     // The leading "/" in filepath prevents package name from being pre-pended.
     /// Path to folder that contains help text
-    public static final @NotNull String helpPath = "/help/";
+    public static final @NotNull String HELP_PATH = "/help/";
     /// The current version number.
-    public static final @NotNull String version = "1.6";
+    public static final @NotNull String VERSION = "1.6";
     /// Copyright years
-    public static final @NotNull String copyrightYears = "2003-2019";
+    public static final @NotNull String COPYRIGHT_YEARS = "2003-2019";
     /// Copyright holders
-    public static final @NotNull String copyrightHolders = "Pete Sanderson and Kenneth Vollmar";
+    public static final @NotNull String COPYRIGHT_HOLDERS = "Pete Sanderson and Kenneth Vollmar";
     /// List of accepted file extensions for RISCV assembly source files.
-    public static final @NotNull List<@NotNull String> fileExtensions = List.of("asm", "s", "S");
+    public static final @NotNull List<@NotNull String> FILE_EXTENSIONS = List.of("asm", "s", "S");
 
     /// Maximum length of scrolled message window (RARS Messages and Run I/O)
-    public static final int maximumMessageCharacters = 1_000_000;
+    public static final int MAXIMUM_MESSAGE_CHARACTERS = 1_000_000;
     /// Maximum number of back-step operations to buffer
-    public static final int maximumBacksteps = 2000;
+    public static final int MAXIMUM_BACKSTEPS = 2000;
 
     /// Lock variable used at head of synchronized block to guard memory and registers
     @Deprecated
@@ -108,7 +108,7 @@ public final class Globals {
     public static final @NotNull AllSettings ALL_SETTINGS;
     ///  Floating point register file for the RARS simulator.
     @Deprecated(forRemoval = true)
-    public static @NotNull FloatingPointRegisterFile FP_REGISTER_FILE;
+    public static final @NotNull FloatingPointRegisterFile FP_REGISTER_FILE;
     /// Flag to determine whether to produce internal debugging information.
     public static boolean debug = false;
     /// Exit code -- useful with SYSCALL 17 when running from command line (not GUI)

@@ -29,8 +29,8 @@ private fun createDirectiveMarkdown(): String = buildString {
         |------|------------|
         """.trimIndent()
     )
-    Directive.entries.sortedBy { it.name }.forEach {
-        append("\n|${it.name}|${it.description}|")
+    Directive.entries.sortedBy { it.directiveName }.forEach {
+        append("\n|${it.directiveName}|${it.description}|")
     }
 }
 

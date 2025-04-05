@@ -4,7 +4,7 @@ import rars.Globals
 import rars.notices.AccessNotice
 import rars.notices.RegisterAccessNotice
 import rars.notices.SimulatorNotice
-import rars.riscv.hardware.registerFiles.RegisterFileBase
+import rars.riscv.hardware.registerfiles.RegisterFileBase
 import rars.riscv.hardware.registers.Register
 import rars.settings.AllSettings
 import rars.settings.BoolSetting
@@ -13,6 +13,7 @@ import rars.util.translateToInt
 import rars.util.translateToLong
 import rars.venus.VenusUI
 import rars.venus.run.RunSpeedPanel
+import rars.venus.util.BorderLayout
 import java.awt.*
 import java.awt.event.MouseEvent
 import java.util.concurrent.locks.ReentrantLock
@@ -133,14 +134,13 @@ abstract class RegisterBlockWindowBase internal constructor(
             NAME_SIZE + NUMBER_SIZE + VALUE_SIZE,
             700
         )
-        this.setLayout(BorderLayout()) // table display will occupy entire width if widened
-        this.add(
-            JScrollPane(
-                this.table,
+        BorderLayout {
+            this[BorderLayout.CENTER] = JScrollPane(
+                table,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
             )
-        )
+        }
     }
 
     protected abstract fun formatRegisterValue(value: Long, base: Int): String

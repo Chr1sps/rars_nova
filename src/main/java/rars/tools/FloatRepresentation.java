@@ -53,38 +53,37 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * changing a few constants.
  */
 public final class FloatRepresentation extends AbstractTool {
-    private static final String version = "Version 1.1";
-    private static final String heading = "32-bit IEEE 754 Floating Point Representation";
-    private static final String title = "Floating Point Representation, ";
+    private static final String VERSION = "Version 1.1";
+    private static final String HEADING = "32-bit IEEE 754 Floating Point Representation";
+    private static final String TITLE = "Floating Point Representation, ";
 
-    private static final String defaultHex = "00000000";
-    private static final String defaultDecimal = "0.0";
-    private static final String defaultBinarySign = "0";
-    private static final String defaultBinaryExponent = "00000000";
-    private static final String defaultBinaryFraction = "00000000000000000000000";
-    private static final int maxLengthHex = 8;
-    private static final int maxLengthBinarySign = 1;
-    private static final int maxLengthBinaryExponent = 8;
-    private static final int maxLengthBinaryFraction = 23;
-    private static final int maxLengthBinaryTotal =
-        FloatRepresentation.maxLengthBinarySign + FloatRepresentation.maxLengthBinaryExponent
-            + FloatRepresentation.maxLengthBinaryFraction;
-    private static final int maxLengthDecimal = 20;
-    private static final String denormalizedLabel = "                 significand (denormalized - no 'hidden bit')";
-    private static final String normalizedLabel = "                 significand ('hidden bit' underlined)       ";
-    private static final Font instructionsFont = new Font("Arial", Font.PLAIN, 14);
-    private static final Font hexDisplayFont = new Font("Courier", Font.PLAIN, 32);
-    private static final Font binaryDisplayFont = new Font("Courier", Font.PLAIN, 18);
-    private static final Font decimalDisplayFont = new Font("Courier", Font.PLAIN, 18);
-    private static final Color hexDisplayColor = Color.red;
-    private static final Color binaryDisplayColor = Color.black;
-    private static final Color decimalDisplayColor = Color.blue;
-    private static final String expansionFontTag = "<font size=\"+1\" face=\"Courier\" color=\"#000000\">";
-    private static final int exponentBias = 127; // 32 bit floating point exponent bias
+    private static final String DEFAULT_HEX = "0".repeat(8);
+    private static final String DEFAULT_DECIMAL = "0.0";
+    private static final String DEFAULT_BINARY_SIGN = "0";
+    private static final String DEFAULT_BINARY_EXPONENT = "0".repeat(8);
+    private static final String DEFAULT_BINARY_FRACTION = "0".repeat(23);
+    private static final int MAX_LENGTH_HEX = 8;
+    private static final int MAX_LENGTH_BINARY_SIGN = 1;
+    private static final int MAX_LENGTH_BINARY_EXPONENT = 8;
+    private static final int MAX_LENGTH_BINARY_FRACTION = 23;
+    private static final int MAX_LENGTH_BINARY_TOTAL =
+        MAX_LENGTH_BINARY_SIGN + MAX_LENGTH_BINARY_EXPONENT + MAX_LENGTH_BINARY_FRACTION;
+    private static final int MAX_LENGTH_DECIMAL = 20;
+    private static final String DENORMALIZED_LABEL = "                 significand (denormalized - no 'hidden bit')";
+    private static final String NORMALIZED_LABEL = "                 significand ('hidden bit' underlined)       ";
+    private static final Font INSTRUCTIONS_FONT = new Font("Arial", Font.PLAIN, 14);
+    private static final Font HEX_DISPLAY_FONT = new Font("Courier", Font.PLAIN, 32);
+    private static final Font BINARY_DISPLAY_FONT = new Font("Courier", Font.PLAIN, 18);
+    private static final Font DECIMAL_DISPLAY_FONT = new Font("Courier", Font.PLAIN, 18);
+    private static final Color HEX_DISPLAY_COLOR = Color.RED;
+    private static final Color BINARY_DISPLAY_COLOR = Color.BLACK;
+    private static final Color DECIMAL_DISPLAY_COLOR = Color.BLUE;
+    private static final String EXPANSION_FONT_TAG = "<font size=\"+1\" face=\"Courier\" color=\"#000000\">";
+    private static final int EXPONENT_BIAS = 127; // 32 bit floating point exponent bias
     // Put here because inner class cannot have static members.
-    private static final String zeroes = "0000000000000000000000000000000000000000000000000000000000000000"; // 64
-    private static final String HTMLspaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-    private final JLabel significandLabel = new JLabel(FloatRepresentation.denormalizedLabel, JLabel.CENTER);
+    private static final String ZEROES = "0".repeat(64);
+    private static final String HTML_SPACES = "&nbsp;".repeat(8);
+    private final JLabel significandLabel = new JLabel(FloatRepresentation.DENORMALIZED_LABEL, JLabel.CENTER);
     private final String defaultInstructions = "Modify any value then press the Enter first to update all values.";
     private Register attachedRegister = null;
     private Register[] fpRegisters;
@@ -105,7 +104,7 @@ public final class FloatRepresentation extends AbstractTool {
      * Simple constructor, likely used by the RARS Tools menu mechanism
      */
     public FloatRepresentation(final @NotNull VenusUI mainUI) {
-        super(FloatRepresentation.title + FloatRepresentation.version, FloatRepresentation.heading, mainUI);
+        super(FloatRepresentation.TITLE + FloatRepresentation.VERSION, FloatRepresentation.HEADING, mainUI);
     }
 
     @Override
@@ -186,11 +185,11 @@ public final class FloatRepresentation extends AbstractTool {
         mainPanel.add(subMainPanel);
 
         // Editable display for hexadecimal version of the float value
-        this.hexDisplay = new JTextField(FloatRepresentation.defaultHex, FloatRepresentation.maxLengthHex + 1);
-        this.hexDisplay.setFont(FloatRepresentation.hexDisplayFont);
-        this.hexDisplay.setForeground(FloatRepresentation.hexDisplayColor);
+        this.hexDisplay = new JTextField(FloatRepresentation.DEFAULT_HEX, FloatRepresentation.MAX_LENGTH_HEX + 1);
+        this.hexDisplay.setFont(FloatRepresentation.HEX_DISPLAY_FONT);
+        this.hexDisplay.setForeground(FloatRepresentation.HEX_DISPLAY_COLOR);
         this.hexDisplay.setHorizontalAlignment(JTextField.RIGHT);
-        this.hexDisplay.setToolTipText(FloatRepresentation.maxLengthHex + "-digit hexadecimal (base 16) display");
+        this.hexDisplay.setToolTipText(FloatRepresentation.MAX_LENGTH_HEX + "-digit hexadecimal (base 16) display");
         this.hexDisplay.setEditable(true);
         this.hexDisplay.revalidate();
         this.hexDisplay.addKeyListener(new HexDisplayKeystrokeListener(8));
@@ -208,41 +207,41 @@ public final class FloatRepresentation extends AbstractTool {
         // It is split into 3 separately editable components (sign,exponent,fraction)
 
         this.binarySignDisplay = new JTextField(
-            FloatRepresentation.defaultBinarySign,
-            FloatRepresentation.maxLengthBinarySign + 1
+            FloatRepresentation.DEFAULT_BINARY_SIGN,
+            FloatRepresentation.MAX_LENGTH_BINARY_SIGN + 1
         );
-        this.binarySignDisplay.setFont(FloatRepresentation.binaryDisplayFont);
-        this.binarySignDisplay.setForeground(FloatRepresentation.binaryDisplayColor);
+        this.binarySignDisplay.setFont(FloatRepresentation.BINARY_DISPLAY_FONT);
+        this.binarySignDisplay.setForeground(FloatRepresentation.BINARY_DISPLAY_COLOR);
         this.binarySignDisplay.setHorizontalAlignment(JTextField.RIGHT);
         this.binarySignDisplay.setToolTipText("The sign bit");
         this.binarySignDisplay.setEditable(true);
         this.binarySignDisplay.revalidate();
 
         this.binaryExponentDisplay = new JTextField(
-            FloatRepresentation.defaultBinaryExponent,
-            FloatRepresentation.maxLengthBinaryExponent + 1
+            FloatRepresentation.DEFAULT_BINARY_EXPONENT,
+            FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT + 1
         );
-        this.binaryExponentDisplay.setFont(FloatRepresentation.binaryDisplayFont);
-        this.binaryExponentDisplay.setForeground(FloatRepresentation.binaryDisplayColor);
+        this.binaryExponentDisplay.setFont(FloatRepresentation.BINARY_DISPLAY_FONT);
+        this.binaryExponentDisplay.setForeground(FloatRepresentation.BINARY_DISPLAY_COLOR);
         this.binaryExponentDisplay.setHorizontalAlignment(JTextField.RIGHT);
-        this.binaryExponentDisplay.setToolTipText(FloatRepresentation.maxLengthBinaryExponent + "-bit exponent");
+        this.binaryExponentDisplay.setToolTipText(FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT + "-bit exponent");
         this.binaryExponentDisplay.setEditable(true);
         this.binaryExponentDisplay.revalidate();
 
         this.binaryFractionDisplay = new BinaryFractionDisplayTextField(
-            FloatRepresentation.defaultBinaryFraction,
-            FloatRepresentation.maxLengthBinaryFraction + 1
+            FloatRepresentation.DEFAULT_BINARY_FRACTION,
+            FloatRepresentation.MAX_LENGTH_BINARY_FRACTION + 1
         );
-        this.binaryFractionDisplay.setFont(FloatRepresentation.binaryDisplayFont);
-        this.binaryFractionDisplay.setForeground(FloatRepresentation.binaryDisplayColor);
+        this.binaryFractionDisplay.setFont(FloatRepresentation.BINARY_DISPLAY_FONT);
+        this.binaryFractionDisplay.setForeground(FloatRepresentation.BINARY_DISPLAY_COLOR);
         this.binaryFractionDisplay.setHorizontalAlignment(JTextField.RIGHT);
-        this.binaryFractionDisplay.setToolTipText(FloatRepresentation.maxLengthBinaryFraction + "-bit fraction");
+        this.binaryFractionDisplay.setToolTipText(FloatRepresentation.MAX_LENGTH_BINARY_FRACTION + "-bit fraction");
         this.binaryFractionDisplay.setEditable(true);
         this.binaryFractionDisplay.revalidate();
 
-        this.binarySignDisplay.addKeyListener(new BinaryDisplayKeystrokeListener(FloatRepresentation.maxLengthBinarySign));
-        this.binaryExponentDisplay.addKeyListener(new BinaryDisplayKeystrokeListener(FloatRepresentation.maxLengthBinaryExponent));
-        this.binaryFractionDisplay.addKeyListener(new BinaryDisplayKeystrokeListener(FloatRepresentation.maxLengthBinaryFraction));
+        this.binarySignDisplay.addKeyListener(new BinaryDisplayKeystrokeListener(FloatRepresentation.MAX_LENGTH_BINARY_SIGN));
+        this.binaryExponentDisplay.addKeyListener(new BinaryDisplayKeystrokeListener(FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT));
+        this.binaryFractionDisplay.addKeyListener(new BinaryDisplayKeystrokeListener(FloatRepresentation.MAX_LENGTH_BINARY_FRACTION));
         final JPanel binaryPanel = new JPanel();
 
         this.binarySignDecoratedDisplay = new JPanel(new BorderLayout());
@@ -281,11 +280,11 @@ public final class FloatRepresentation extends AbstractTool {
 
         // Editable display for decimal version of float value.
         this.decimalDisplay = new JTextField(
-            FloatRepresentation.defaultDecimal,
-            FloatRepresentation.maxLengthDecimal + 1
+            FloatRepresentation.DEFAULT_DECIMAL,
+            FloatRepresentation.MAX_LENGTH_DECIMAL + 1
         );
-        this.decimalDisplay.setFont(FloatRepresentation.decimalDisplayFont);
-        this.decimalDisplay.setForeground(FloatRepresentation.decimalDisplayColor);
+        this.decimalDisplay.setFont(FloatRepresentation.DECIMAL_DISPLAY_FONT);
+        this.decimalDisplay.setForeground(FloatRepresentation.DECIMAL_DISPLAY_COLOR);
         this.decimalDisplay.setHorizontalAlignment(JTextField.RIGHT);
         this.decimalDisplay.setToolTipText("Decimal floating point value");
         this.decimalDisplay.setMargin(new Insets(0, 0, 0, 0));
@@ -305,7 +304,7 @@ public final class FloatRepresentation extends AbstractTool {
 
         final JEditorPane hexExplain = new JEditorPane(
             "text/html",
-            FloatRepresentation.expansionFontTag + "&lt;&nbsp;&nbsp;Hexadecimal representation" + "</font>"
+            FloatRepresentation.EXPANSION_FONT_TAG + "&lt;&nbsp;&nbsp;Hexadecimal representation" + "</font>"
         );
         hexExplain.setEditable(false);
         hexExplain.setFocusable(false);
@@ -313,21 +312,21 @@ public final class FloatRepresentation extends AbstractTool {
         hexExplain.setBackground(place1.getBackground());
         final JEditorPane hexToBinExplain = new JEditorPane(
             "text/html",
-            FloatRepresentation.expansionFontTag + "&lt;&nbsp;&nbsp;Each hex digit represents 4 bits" + "</font>"
+            FloatRepresentation.EXPANSION_FONT_TAG + "&lt;&nbsp;&nbsp;Each hex digit represents 4 bits" + "</font>"
         );
         hexToBinExplain.setEditable(false);
         hexToBinExplain.setFocusable(false);
         hexToBinExplain.setBackground(place2.getBackground());
         final JEditorPane binExplain = new JEditorPane(
             "text/html",
-            FloatRepresentation.expansionFontTag + "&lt;&nbsp;&nbsp;Binary representation" + "</font>"
+            FloatRepresentation.EXPANSION_FONT_TAG + "&lt;&nbsp;&nbsp;Binary representation" + "</font>"
         );
         binExplain.setEditable(false);
         binExplain.setFocusable(false);
         binExplain.setBackground(place3.getBackground());
         final JEditorPane binToDecExplain = new JEditorPane(
             "text/html",
-            FloatRepresentation.expansionFontTag + "&lt;&nbsp;&nbsp;Binary-to-decimal conversion" + "</font>"
+            FloatRepresentation.EXPANSION_FONT_TAG + "&lt;&nbsp;&nbsp;Binary-to-decimal conversion" + "</font>"
         );
         binToDecExplain.setEditable(false);
         binToDecExplain.setFocusable(false);
@@ -423,23 +422,23 @@ public final class FloatRepresentation extends AbstractTool {
                 && (flavors.hexString.charAt(1) == 'x' || flavors.hexString.charAt(1) == 'X')
         ) ? 2 : 0;
         this.hexDisplay.setText(flavors.hexString.substring(hexIndex).toUpperCase()); // lop off leading "Ox" if present
-        this.binarySignDisplay.setText(flavors.binaryString.substring(0, FloatRepresentation.maxLengthBinarySign));
+        this.binarySignDisplay.setText(flavors.binaryString.substring(0, FloatRepresentation.MAX_LENGTH_BINARY_SIGN));
         this.binaryExponentDisplay.setText(
             flavors.binaryString.substring(
-                FloatRepresentation.maxLengthBinarySign,
-                FloatRepresentation.maxLengthBinarySign + FloatRepresentation.maxLengthBinaryExponent
+                FloatRepresentation.MAX_LENGTH_BINARY_SIGN,
+                FloatRepresentation.MAX_LENGTH_BINARY_SIGN + FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT
             ));
         this.binaryFractionDisplay.setText(
             flavors.binaryString.substring(
-                FloatRepresentation.maxLengthBinarySign + FloatRepresentation.maxLengthBinaryExponent,
-                FloatRepresentation.maxLengthBinaryTotal
+                FloatRepresentation.MAX_LENGTH_BINARY_SIGN + FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT,
+                FloatRepresentation.MAX_LENGTH_BINARY_TOTAL
             ));
         this.decimalDisplay.setText(flavors.decimalString);
         this.binaryToDecimalFormulaGraphic.drawSubtractLabel(BinaryUtilsOld.binaryStringToInt(
             (
                 flavors.binaryString.substring(
-                    FloatRepresentation.maxLengthBinarySign,
-                    FloatRepresentation.maxLengthBinarySign + FloatRepresentation.maxLengthBinaryExponent
+                    FloatRepresentation.MAX_LENGTH_BINARY_SIGN,
+                    FloatRepresentation.MAX_LENGTH_BINARY_SIGN + FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT
                 )
             )));
         this.expansionDisplay.setText(flavors.expansionString);
@@ -466,20 +465,20 @@ public final class FloatRepresentation extends AbstractTool {
     private void updateSignificandLabel(final FlavorsOfFloat flavors) {
         // Will change significandLabel text only if it needs to be changed...
         if (flavors.binaryString.substring(
-                FloatRepresentation.maxLengthBinarySign,
-                FloatRepresentation.maxLengthBinarySign + FloatRepresentation.maxLengthBinaryExponent
+                FloatRepresentation.MAX_LENGTH_BINARY_SIGN,
+                FloatRepresentation.MAX_LENGTH_BINARY_SIGN + FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT
             )
-            .equals(FloatRepresentation.zeroes.substring(
-                FloatRepresentation.maxLengthBinarySign,
-                FloatRepresentation.maxLengthBinarySign + FloatRepresentation.maxLengthBinaryExponent
+            .equals(FloatRepresentation.ZEROES.substring(
+                FloatRepresentation.MAX_LENGTH_BINARY_SIGN,
+                FloatRepresentation.MAX_LENGTH_BINARY_SIGN + FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT
             ))) {
             // Will change text only if it truly is changing....
             if (!this.significandLabel.getText().contains("deno")) {
-                this.significandLabel.setText(FloatRepresentation.denormalizedLabel);
+                this.significandLabel.setText(FloatRepresentation.DENORMALIZED_LABEL);
             }
         } else {
             if (!this.significandLabel.getText().contains("unde")) {
-                this.significandLabel.setText(FloatRepresentation.normalizedLabel);
+                this.significandLabel.setText(FloatRepresentation.NORMALIZED_LABEL);
             }
         }
     }
@@ -575,10 +574,10 @@ public final class FloatRepresentation extends AbstractTool {
 
         // Default object
         private FlavorsOfFloat() {
-            this.hexString = FloatRepresentation.defaultHex;
-            this.decimalString = FloatRepresentation.defaultDecimal;
+            this.hexString = FloatRepresentation.DEFAULT_HEX;
+            this.decimalString = FloatRepresentation.DEFAULT_DECIMAL;
             this.binaryString =
-                FloatRepresentation.defaultBinarySign + FloatRepresentation.defaultBinaryExponent + FloatRepresentation.defaultBinaryFraction;
+                FloatRepresentation.DEFAULT_BINARY_SIGN + FloatRepresentation.DEFAULT_BINARY_EXPONENT + FloatRepresentation.DEFAULT_BINARY_FRACTION;
             this.expansionString = FlavorsOfFloat.buildExpansionFromBinaryString(this.binaryString);
             this.intValue = Float.floatToIntBits(Float.parseFloat(this.decimalString));
         }
@@ -587,20 +586,20 @@ public final class FloatRepresentation extends AbstractTool {
         public static String buildExpansionFromBinaryString(final String binaryString) {
             final int biasedExponent = BinaryUtilsOld.binaryStringToInt(
                 binaryString.substring(
-                    FloatRepresentation.maxLengthBinarySign,
-                    FloatRepresentation.maxLengthBinarySign + FloatRepresentation.maxLengthBinaryExponent
+                    FloatRepresentation.MAX_LENGTH_BINARY_SIGN,
+                    FloatRepresentation.MAX_LENGTH_BINARY_SIGN + FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT
                 ));
-            final String stringExponent = Integer.toString(biasedExponent - FloatRepresentation.exponentBias);
+            final String stringExponent = Integer.toString(biasedExponent - FloatRepresentation.EXPONENT_BIAS);
             // stringExponent length will range from 1 to 4 (e.g. "0" to "-128") characters.
             // Right-pad with HTML spaces ("&nbsp;") to total length 5 displayed characters.
-            return "<html><head></head><body>" + FloatRepresentation.expansionFontTag
+            return "<html><head></head><body>" + FloatRepresentation.EXPANSION_FONT_TAG
                 + "-1<sup>" + binaryString.charAt(0) + "</sup> &nbsp;*&nbsp; 2<sup>"
-                + stringExponent + FloatRepresentation.HTMLspaces.substring(0, (5 - stringExponent.length()) * 6)
+                + stringExponent + FloatRepresentation.HTML_SPACES.substring(0, (5 - stringExponent.length()) * 6)
                 + "</sup> &nbsp;* &nbsp;"
                 + ((biasedExponent == 0) ? "&nbsp;." : "<u>1</u>.")
                 + binaryString.substring(
-                FloatRepresentation.maxLengthBinarySign + FloatRepresentation.maxLengthBinaryExponent,
-                FloatRepresentation.maxLengthBinaryTotal
+                FloatRepresentation.MAX_LENGTH_BINARY_SIGN + FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT,
+                FloatRepresentation.MAX_LENGTH_BINARY_TOTAL
             )
                 + " =</font></body></html>";
         }
@@ -609,9 +608,9 @@ public final class FloatRepresentation extends AbstractTool {
         // 'em.
         private static String addLeadingZeroes(final String str, final int length) {
             return (str.length() < length)
-                ? FloatRepresentation.zeroes.substring(
+                ? FloatRepresentation.ZEROES.substring(
                 0, Math.min(
-                    FloatRepresentation.zeroes.length(),
+                    FloatRepresentation.ZEROES.length(),
                     length - str.length()
                 )
             ) + str
@@ -626,7 +625,7 @@ public final class FloatRepresentation extends AbstractTool {
                         ? hexString.substring(2)
                         : hexString
                 ),
-                FloatRepresentation.maxLengthHex
+                FloatRepresentation.MAX_LENGTH_HEX
             );
             this.binaryString = BinaryUtilsOld.hexStringToBinaryString(this.hexString);
             this.decimalString = Float.toString(Float.intBitsToFloat(BinaryUtilsOld.binaryStringToInt(this.binaryString)));
@@ -677,15 +676,15 @@ public final class FloatRepresentation extends AbstractTool {
         private String getFullBinaryStringFromDisplays() {
             return FlavorsOfFloat.addLeadingZeroes(
                 FloatRepresentation.this.binarySignDisplay.getText(),
-                FloatRepresentation.maxLengthBinarySign
+                FloatRepresentation.MAX_LENGTH_BINARY_SIGN
             ) +
                 FlavorsOfFloat.addLeadingZeroes(
                     FloatRepresentation.this.binaryExponentDisplay.getText(),
-                    FloatRepresentation.maxLengthBinaryExponent
+                    FloatRepresentation.MAX_LENGTH_BINARY_EXPONENT
                 ) +
                 FlavorsOfFloat.addLeadingZeroes(
                     FloatRepresentation.this.binaryFractionDisplay.getText(),
-                    FloatRepresentation.maxLengthBinaryFraction
+                    FloatRepresentation.MAX_LENGTH_BINARY_FRACTION
                 );
         }
 
@@ -950,7 +949,7 @@ public final class FloatRepresentation extends AbstractTool {
         final int upperYArrowHead = this.upperY - this.arrowHeadOffset;
         int centerX, exponentCenterX;
         int subtractLabelWidth, subtractLabelHeight;
-        int currentExponent = BinaryUtilsOld.binaryStringToInt(FloatRepresentation.defaultBinaryExponent);
+        int currentExponent = BinaryUtilsOld.binaryStringToInt(FloatRepresentation.DEFAULT_BINARY_EXPONENT);
 
         @Override
         public void paintComponent(final Graphics g) {
@@ -989,7 +988,8 @@ public final class FloatRepresentation extends AbstractTool {
         // To be used only by "outsiders" to update the display of the exponent and
         // bias.
         public void drawSubtractLabel(final int exponent) {
-            if (exponent != this.currentExponent) { // no need to redraw if it hasn't changed...
+            if (exponent != this.currentExponent) {
+                // no need to redraw if it hasn't changed...
                 this.currentExponent = exponent;
                 this.drawSubtractLabel(this.getGraphics(), this.buildSubtractLabel(exponent));
             }
@@ -1032,7 +1032,7 @@ public final class FloatRepresentation extends AbstractTool {
 
         InstructionsPane(final Component parent) {
             super(FloatRepresentation.this.defaultInstructions);
-            this.setFont(FloatRepresentation.instructionsFont);
+            this.setFont(FloatRepresentation.INSTRUCTIONS_FONT);
             this.setBackground(parent.getBackground());
         }
 

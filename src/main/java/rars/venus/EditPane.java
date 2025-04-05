@@ -8,41 +8,13 @@ import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
-import rars.venus.editors.TextEditingAreaFactory;
+import rars.venus.editors.TextEditingAreaFactoryKt;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.File;
-
-/*
-Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject
-to the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Represents one file opened for editing. Maintains required internal
@@ -62,12 +34,6 @@ public final class EditPane extends JPanel {
     private final @NotNull JLabel caretPositionLabel;
     private final @NotNull FileStatus fileStatus;
 
-    /**
-     * Constructor for the EditPane class.
-     *
-     * @param appFrame
-     *     a {@link VenusUI} object
-     */
     public EditPane(
         final @NotNull VenusUI appFrame,
         final @NotNull AllSettings allSettings
@@ -81,8 +47,8 @@ public final class EditPane extends JPanel {
         this.fileStatus = new FileStatus();
 
         final var editorThemeSettings = allSettings.editorThemeSettings;
-        this.sourceCode = TextEditingAreaFactory.createTextEditingArea(
-            editorThemeSettings.getCurrentTheme() .toEditorTheme()
+        this.sourceCode = TextEditingAreaFactoryKt.createTextEditingArea(
+            allSettings
         );
 
         this.sourceCode.setTheme(editorThemeSettings.getCurrentTheme().toEditorTheme());
@@ -134,7 +100,6 @@ public final class EditPane extends JPanel {
                         FileStatus.setSystemState(FileStatus.State.NOT_EDITED);
                         return;
                     }
-                    // End of 9-Aug-2011 modification.
                     if (EditPane.this.getFileStatus() == FileStatus.State.NEW_NOT_EDITED) {
                         EditPane.this.setFileStatus(FileStatus.State.NEW_EDITED);
                     }
@@ -164,7 +129,7 @@ public final class EditPane extends JPanel {
                             FileStatus.setSystemState(FileStatus.State.EDITED);
                     }
 
-                    EditPane.this.mainUI.mainPane.executePane.clearPane(); // DPS 9-Aug-2011
+                    EditPane.this.mainUI.mainPane.executePane.clearPane();
                 }
 
                 @Override

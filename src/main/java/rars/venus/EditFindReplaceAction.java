@@ -65,7 +65,7 @@ public final class EditFindReplaceAction extends GuiAction {
 
     // Private class to do all the work!
 
-    private class FindReplaceDialog extends JDialog {
+    private final class FindReplaceDialog extends JDialog {
         private static final @NotNull String FIND_TOOL_TIP_TEXT = "Find next occurrence of given text; wraps around at end";
         private static final @NotNull String REPLACE_TOOL_TIP_TEXT = "Replace current occurrence of text then find next";
         private static final @NotNull String REPLACE_ALL_TOOL_TIP_TEXT = "Replace all occurrences of text";
@@ -99,17 +99,17 @@ public final class EditFindReplaceAction extends GuiAction {
             this.caseSensitiveCheckBox = new JCheckBox("Case Sensitive", EditFindReplaceAction.caseSensitivity);
             this.resultsLabel = new JLabel("");
             // this.resultsLabel.setForeground(Color.RED);
-            this.resultsLabel.setToolTipText(FindReplaceDialog.RESULTS_TOOL_TIP_TEXT);
+            this.resultsLabel.setToolTipText(RESULTS_TOOL_TIP_TEXT);
             dialogPanel.add(buildOptionsPanel(caseSensitiveCheckBox, resultsLabel));
 
             this.findButton = new JButton("Find");
-            this.findButton.setToolTipText(FindReplaceDialog.FIND_TOOL_TIP_TEXT);
+            this.findButton.setToolTipText(FIND_TOOL_TIP_TEXT);
             this.replaceButton = new JButton("Replace then Find");
-            this.replaceButton.setToolTipText(FindReplaceDialog.REPLACE_TOOL_TIP_TEXT);
+            this.replaceButton.setToolTipText(REPLACE_TOOL_TIP_TEXT);
             this.replaceAllButton = new JButton("Replace all");
-            this.replaceAllButton.setToolTipText(FindReplaceDialog.REPLACE_ALL_TOOL_TIP_TEXT);
+            this.replaceAllButton.setToolTipText(REPLACE_ALL_TOOL_TIP_TEXT);
             this.closeButton = new JButton("Close");
-            this.closeButton.setToolTipText(FindReplaceDialog.CLOSE_TOOL_TIP_TEXT);
+            this.closeButton.setToolTipText(CLOSE_TOOL_TIP_TEXT);
             dialogPanel.add(
                 buildControlPanel(
                     this.findButton,
@@ -206,11 +206,11 @@ public final class EditFindReplaceAction extends GuiAction {
         // Private methods to carry out the button actions
 
         private void initializeListeners() {
-            this.findInputField.addActionListener(e -> this.performFind());
-            this.findButton.addActionListener(e -> this.performFind());
-            this.replaceButton.addActionListener(e -> this.performReplace());
-            this.replaceAllButton.addActionListener(e -> this.performReplaceAll());
-            this.closeButton.addActionListener(e -> this.performClose());
+            this.findInputField.addActionListener(__ -> this.performFind());
+            this.findButton.addActionListener(__ -> this.performFind());
+            this.replaceButton.addActionListener(__ -> this.performReplace());
+            this.replaceAllButton.addActionListener(__ -> this.performReplaceAll());
+            this.closeButton.addActionListener(__ -> this.performClose());
         }
 
         /**

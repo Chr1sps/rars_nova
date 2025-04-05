@@ -73,35 +73,35 @@ public final class BHTSimGUI extends JPanel {
     /**
      * the table representing the BHT
      */
-    private final JTable m_tabBHT;
+    private final JTable bhtTable;
     /**
      * text field presenting the most recent branch instruction
      */
-    private JTextField m_tfInstruction;
+    private JTextField instructionTextField;
     /**
      * text field representing the address of the most recent branch instruction
      */
-    private JTextField m_tfAddress;
+    private JTextField addressTextField;
     /**
      * text field representing the resulting BHT index of the branch instruction
      */
-    private JTextField m_tfIndex;
+    private JTextField indexTextField;
     /**
      * combo box for selecting the number of BHT entries
      */
-    private JComboBox<Integer> m_cbBHTentries;
+    private JComboBox<Integer> bhtEntries;
     /**
      * combo box for selecting the history size
      */
-    private JComboBox<Integer> m_cbBHThistory;
+    private JComboBox<Integer> bhtHistory;
     /**
      * combo box for selecting the initial value
      */
-    private JComboBox<String> m_cbBHTinitVal;
+    private JComboBox<String> bhtInitialValues;
     /**
      * text field for log output
      */
-    private JTextArea m_taLog;
+    private JTextArea logsTextArea;
 
     /**
      * Creates the GUI components of the BHT Simulator
@@ -115,11 +115,11 @@ public final class BHTSimGUI extends JPanel {
         layout.setHgap(10);
         setLayout(layout);
 
-        m_tabBHT = createAndInitTable();
+        bhtTable = createAndInitTable();
 
         add(buildConfigPanel(), BorderLayout.NORTH);
         add(buildInfoPanel(), BorderLayout.WEST);
-        add(new JScrollPane(m_tabBHT), BorderLayout.CENTER);
+        add(new JScrollPane(bhtTable), BorderLayout.CENTER);
         add(buildLogPanel(), BorderLayout.SOUTH);
     }
 
@@ -165,19 +165,19 @@ public final class BHTSimGUI extends JPanel {
      * @return the info panel
      */
     private JPanel buildInfoPanel() {
-        m_tfInstruction = new JTextField();
-        m_tfAddress = new JTextField();
-        m_tfIndex = new JTextField();
+        instructionTextField = new JTextField();
+        addressTextField = new JTextField();
+        indexTextField = new JTextField();
 
-        m_tfInstruction.setColumns(10);
-        m_tfInstruction.setEditable(false);
-        m_tfInstruction.setHorizontalAlignment(JTextField.CENTER);
-        m_tfAddress.setColumns(10);
-        m_tfAddress.setEditable(false);
-        m_tfAddress.setHorizontalAlignment(JTextField.CENTER);
-        m_tfIndex.setColumns(10);
-        m_tfIndex.setEditable(false);
-        m_tfIndex.setHorizontalAlignment(JTextField.CENTER);
+        instructionTextField.setColumns(10);
+        instructionTextField.setEditable(false);
+        instructionTextField.setHorizontalAlignment(JTextField.CENTER);
+        addressTextField.setColumns(10);
+        addressTextField.setEditable(false);
+        addressTextField.setHorizontalAlignment(JTextField.CENTER);
+        indexTextField.setColumns(10);
+        indexTextField.setEditable(false);
+        indexTextField.setHorizontalAlignment(JTextField.CENTER);
 
         final JPanel panel = new JPanel();
         final JPanel outerPanel = new JPanel();
@@ -194,15 +194,15 @@ public final class BHTSimGUI extends JPanel {
 
         panel.add(new JLabel("Instruction"), c);
         c.gridy++;
-        panel.add(m_tfInstruction, c);
+        panel.add(instructionTextField, c);
         c.gridy++;
         panel.add(new JLabel("@ Address"), c);
         c.gridy++;
-        panel.add(m_tfAddress, c);
+        panel.add(addressTextField, c);
         c.gridy++;
         panel.add(new JLabel("-> Index"), c);
         c.gridy++;
-        panel.add(m_tfIndex, c);
+        panel.add(indexTextField, c);
 
         outerPanel.add(panel, BorderLayout.NORTH);
         return outerPanel;
@@ -224,16 +224,16 @@ public final class BHTSimGUI extends JPanel {
 
         final var initialValues = new String[]{BHTSimGUI.BHT_DO_NOT_TAKE_BRANCH, BHTSimGUI.BHT_TAKE_BRANCH};
 
-        m_cbBHTentries = new JComboBox<>(sizes);
-        m_cbBHThistory = new JComboBox<>(bits);
-        m_cbBHTinitVal = new JComboBox<>(initialValues);
+        bhtEntries = new JComboBox<>(sizes);
+        bhtHistory = new JComboBox<>(bits);
+        bhtInitialValues = new JComboBox<>(initialValues);
 
         panel.add(new JLabel("# of BHT entries"));
-        panel.add(m_cbBHTentries);
+        panel.add(bhtEntries);
         panel.add(new JLabel("BHT history size"));
-        panel.add(m_cbBHThistory);
+        panel.add(bhtHistory);
         panel.add(new JLabel("Initial value"));
-        panel.add(m_cbBHTinitVal);
+        panel.add(bhtInitialValues);
 
         return panel;
     }
@@ -246,12 +246,12 @@ public final class BHTSimGUI extends JPanel {
     private JPanel buildLogPanel() {
         final JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
-        m_taLog = new JTextArea();
-        m_taLog.setRows(6);
-        m_taLog.setEditable(false);
+        logsTextArea = new JTextArea();
+        logsTextArea.setRows(6);
+        logsTextArea.setEditable(false);
 
         panel.add(new JLabel("Log"), BorderLayout.NORTH);
-        panel.add(new JScrollPane(m_taLog), BorderLayout.CENTER);
+        panel.add(new JScrollPane(logsTextArea), BorderLayout.CENTER);
 
         return panel;
     }
@@ -262,7 +262,7 @@ public final class BHTSimGUI extends JPanel {
      * @return the reference to the combo box
      */
     public JComboBox<Integer> getCbBHTentries() {
-        return m_cbBHTentries;
+        return bhtEntries;
     }
 
     /**
@@ -271,7 +271,7 @@ public final class BHTSimGUI extends JPanel {
      * @return the reference to the combo box
      */
     public JComboBox<Integer> getCbBHThistory() {
-        return m_cbBHThistory;
+        return bhtHistory;
     }
 
     /**
@@ -280,7 +280,7 @@ public final class BHTSimGUI extends JPanel {
      * @return the reference to the combo box
      */
     public JComboBox<String> getCbBHTinitVal() {
-        return m_cbBHTinitVal;
+        return bhtInitialValues;
     }
 
     /**
@@ -289,7 +289,7 @@ public final class BHTSimGUI extends JPanel {
      * @return the reference to the table
      */
     public JTable getTabBHT() {
-        return m_tabBHT;
+        return bhtTable;
     }
 
     /**
@@ -298,7 +298,7 @@ public final class BHTSimGUI extends JPanel {
      * @return the reference to the text area
      */
     public JTextArea getTaLog() {
-        return m_taLog;
+        return logsTextArea;
     }
 
     /**
@@ -307,7 +307,7 @@ public final class BHTSimGUI extends JPanel {
      * @return the reference to the text field
      */
     public JTextField getTfInstruction() {
-        return m_tfInstruction;
+        return instructionTextField;
     }
 
     /**
@@ -317,7 +317,7 @@ public final class BHTSimGUI extends JPanel {
      * @return the reference to the text field
      */
     public JTextField getTfAddress() {
-        return m_tfAddress;
+        return addressTextField;
     }
 
     /**
@@ -326,7 +326,7 @@ public final class BHTSimGUI extends JPanel {
      * @return the reference to the text field
      */
     public JTextField getTfIndex() {
-        return m_tfIndex;
+        return indexTextField;
     }
 
 }

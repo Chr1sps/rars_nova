@@ -17,12 +17,8 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 /**
- *
- *
  * This is most of the public API for running RARS programs. It wraps internal
  * APIs to provide a base for making applications to simulate many programs.
- *
- *
  *
  * The order you are expected to run the methods is:
  *
@@ -34,22 +30,15 @@ import java.io.File
  *  6. repeat 3-5 if simulation hasn't terminated
  *  7. repeat 2-6 for multiple inputs as needed
  *
- *
- *
- *
  * Importantly, only one instance of Program can be setup at a time (this may
  * change in the future). Only the most recent program to be setup is valid to
  * call simulate on. Additionally, reading registers or memory is also only
  * valid
  * once setup has been called and before another setup is called.
  *
- *
- *
- *
  * Also, it is not thread safe, calling assemble in another thread could
  * invalidate
  * a concurrent simulation.
- *
  */
 class Program(private val programOptions: ProgramOptions) {
     private val code: RISCVProgram = RISCVProgram()

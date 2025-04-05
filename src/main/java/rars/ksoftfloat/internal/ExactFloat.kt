@@ -233,7 +233,8 @@ class ExactFloat(
             } else {
                 zeroRounded
             }
-        } else if (roundedBits > BigInteger.ONE.shiftLeft(bitsToRound - 1)) { // TODO: check sign
+        } else if (roundedBits > BigInteger.ONE.shiftLeft(bitsToRound - 1)) {
+            // TODO: check sign
             oneRounded
         } else {
             zeroRounded

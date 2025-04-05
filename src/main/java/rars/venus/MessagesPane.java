@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
-import rars.settings.FontSettings;
 import rars.settings.FontSettingsImpl;
 import rars.simulator.Simulator;
 
@@ -23,35 +22,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 
-
-/*
-Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 /**
  * Creates the message window at the bottom of the UI.
  *
@@ -64,8 +34,8 @@ public final class MessagesPane extends JTabbedPane {
     // reaches MAXIMUM_SCROLLED_CHARACTERS in length then cut off
     // the first NUMBER_OF_CHARACTERS_TO_CUT characters. The latter
     // must obviously be smaller than the former.
-    public static final int MAXIMUM_SCROLLED_CHARACTERS = Globals.maximumMessageCharacters;
-    public static final int NUMBER_OF_CHARACTERS_TO_CUT = Globals.maximumMessageCharacters / 10; // 10%
+    public static final int MAXIMUM_SCROLLED_CHARACTERS = Globals.MAXIMUM_MESSAGE_CHARACTERS;
+    public static final int NUMBER_OF_CHARACTERS_TO_CUT = Globals.MAXIMUM_MESSAGE_CHARACTERS / 10; // 10%
 
     private final @NotNull JTextArea assembleTextArea, runTextArea;
     private final @NotNull JPanel assembleTab, runTab;
@@ -102,7 +72,7 @@ public final class MessagesPane extends JTabbedPane {
         assembleTabClearButton.setToolTipText("Clear the Messages area");
         assembleTabClearButton.addActionListener(
             e -> this.assembleTextArea.setText(""));
-        
+
         this.assembleTab = new JPanel(new BorderLayout());
         this.assembleTab.add(MessagesPane.createBoxForButton(assembleTabClearButton), BorderLayout.WEST);
         this.assembleTab.add(
@@ -279,13 +249,12 @@ public final class MessagesPane extends JTabbedPane {
      * @param message
      *     String to append to runtime display text
      */
-    // The work of this method is done by "invokeLater" because
-    // its JTextArea is maintained by the main event thread
-    // but also used, via this method, by the execution thread for
-    // "print" syscalls. "invokeLater" schedules the code to be
-    // run under the event-processing thread no matter what.
-    // DPS, 23 Aug 2005.
     public void postRunMessage(final String message) {
+        // The work of this method is done by "invokeLater" because
+        // its JTextArea is maintained by the main event thread
+        // but also used, via this method, by the execution thread for
+        // "print" syscalls. "invokeLater" schedules the code to be
+        // run under the event-processing thread no matter what.
         SwingUtilities.invokeLater(
             () -> {
                 this.setSelectedComponent(this.runTab);
@@ -341,7 +310,7 @@ public final class MessagesPane extends JTabbedPane {
         final JDialog dialog = pane.createDialog(this.mainUI, "Keyboard Input");
         dialog.setVisible(true);
         final String input = (String) pane.getInputValue();
-        this.postRunMessage(Globals.userInputAlert + input + '\n');
+        this.postRunMessage(Globals.USER_INPUT_PROMPT + input + '\n');
         if (lock) {
             Globals.MEMORY_REGISTERS_LOCK.lock();
         }
@@ -461,7 +430,7 @@ public final class MessagesPane extends JTabbedPane {
             resultQueue = new ArrayBlockingQueue<>(1);
         }
 
-        private void run() { // must be invoked from the GUI thread
+        private void run() {
             MessagesPane.this.selectRunMessageTab();
             MessagesPane.this.runTextArea.setEditable(true);
             MessagesPane.this.runTextArea.requestFocusInWindow();
@@ -473,17 +442,16 @@ public final class MessagesPane extends JTabbedPane {
             self.stopEventHook.subscribe(this.stopListener);
         }
 
-        private void cleanup() { // not required to be called from the GUI thread
-            EventQueue.invokeLater(
-                () -> {
-                    MessagesPane.this.runTextArea.getDocument().removeDocumentListener(Asker.this.listener);
-                    MessagesPane.this.runTextArea.setEditable(false);
-                    MessagesPane.this.runTextArea.setNavigationFilter(null);
-                    MessagesPane.this.runTextArea.setCaretPosition(MessagesPane.this.runTextArea.getDocument()
-                        .getLength());
-                    final Simulator self = Globals.SIMULATOR;
-                    self.stopEventHook.unsubscribe(this.stopListener);
-                });
+        private void cleanup() {
+            // not required to be called from the GUI thread
+            EventQueue.invokeLater(() -> {
+                MessagesPane.this.runTextArea.getDocument().removeDocumentListener(Asker.this.listener);
+                MessagesPane.this.runTextArea.setEditable(false);
+                MessagesPane.this.runTextArea.setNavigationFilter(null);
+                MessagesPane.this.runTextArea.setCaretPosition(MessagesPane.this.runTextArea.getDocument()
+                    .getLength());
+                Globals.SIMULATOR.stopEventHook.unsubscribe(this.stopListener);
+            });
         }
 
         private void returnResponse() {

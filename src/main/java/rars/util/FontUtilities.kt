@@ -1,10 +1,6 @@
-package rars.util;
+package rars.util
 
-import org.jetbrains.annotations.NotNull;
-
-import java.awt.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.awt.GraphicsEnvironment
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
@@ -33,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (MIT license, http://www.opensource.org/licenses/mit-license.html)
 */
-
 /**
  * Specialized Font class designed to be used by both the
  * settings menu methods and the Settings class.
@@ -41,17 +36,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version July 2007
  */
-public final class FontUtilities {
+object FontUtilities {
     /**
      * An array of all available font family names. These are guaranteed to
      * be available at runtime, as they come from the local GraphicsEnvironment.
      */
-    public static final String[] allFontFamilies = GraphicsEnvironment
+    val allFontFamilies: Array<String> = GraphicsEnvironment
         .getLocalGraphicsEnvironment()
-        .getAvailableFontFamilyNames();
-
-    private FontUtilities() {
-    }
+        .availableFontFamilyNames
 
     /**
      * Handy utility to produce a string that has all the tabs replaced with spaces
@@ -60,19 +52,10 @@ public final class FontUtilities {
      * of
      * the tab character and the editor's current tab size setting.
      *
-     * @param string
-     *     The original string
+     * @param this@substituteSpacesForTabs
+     * The original string
      * @return New string in which spaces are substituted for tabs
      */
-    public static @NotNull String substituteSpacesForTabs(final @NotNull String string, final int tabSize) {
-        return IntStream.range(0, string.length())
-            .mapToObj(i -> {
-                if (string.charAt(i) == '\t') {
-                    return " ".repeat(tabSize - (i % tabSize));
-                } else {
-                    return String.valueOf(string.charAt(i));
-                }
-            })
-            .collect(Collectors.joining());
-    }
+    @JvmStatic
+    fun String.substituteSpacesForTabs(tabSize: Int): String = replace("\t", " ".repeat(tabSize))
 }

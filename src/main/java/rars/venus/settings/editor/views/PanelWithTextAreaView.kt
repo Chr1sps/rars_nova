@@ -1,61 +1,64 @@
-package rars.venus.settings.editor.views;
+package rars.venus.settings.editor.views
 
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.venus.editors.TextEditingArea;
-import rars.venus.editors.TextEditingAreaFactory;
+import rars.settings.AllSettings
+import rars.venus.editors.TextEditingArea
+import rars.venus.editors.createTextEditingArea
+import rars.venus.util.BoxLayout
+import java.awt.Dimension
+import javax.swing.BoxLayout
+import javax.swing.JPanel
 
-import javax.swing.*;
-import java.awt.*;
+class PanelWithTextAreaView(
+    val pickerCardView: PickerCardView,
+    allSettings: AllSettings,
+) : JPanel() {
+    val textArea: TextEditingArea = createTextArea(allSettings)
 
-import static rars.Globals.FONT_SETTINGS;
-import static rars.Globals.OTHER_SETTINGS;
-
-public final class PanelWithTextAreaView extends JPanel {
-    public final @NotNull PickerCardView pickerCardView;
-    public final @NotNull TextEditingArea textArea;
-
-    public PanelWithTextAreaView(final @NotNull PickerCardView pickerCardView) {
-        super();
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.pickerCardView = pickerCardView;
-        this.add(pickerCardView);
-        this.add(Box.createVerticalGlue());
-        this.textArea = createTextArea();
-        final var outerComponent = this.textArea.getOuterComponent();
-        final var textAreaSize = new Dimension(500, 300);
-        outerComponent.setMinimumSize(textAreaSize);
-        outerComponent.setPreferredSize(textAreaSize);
-        outerComponent.setMaximumSize(textAreaSize);
-        this.add(outerComponent);
+    init {
+        val outerComponent = this.textArea.outerComponent.apply {
+            val textAreaSize = Dimension(500, 300)
+            minimumSize = textAreaSize
+            preferredSize = textAreaSize
+            maximumSize = textAreaSize
+        }
+        this.BoxLayout(BoxLayout.Y_AXIS) {
+            +pickerCardView
+            verticalGlue()
+            +outerComponent
+        }
     }
 
-    private static @NotNull TextEditingArea createTextArea() {
-        final var currentTheme = Globals.EDITOR_THEME_SETTINGS.getCurrentTheme().toEditorTheme();
-        final var result = TextEditingAreaFactory.createTextEditingArea(currentTheme);
-        final var exampleText = """
+    companion object {
+        private fun createTextArea(
+            allSettings: AllSettings
+        ): TextEditingArea {
+            val (_, fontSettings, _, _, otherSettings) = allSettings
+            val exampleText = """
             # Some macro definitions to print strings
             string:
-            \t.asciz "Some string"
+            ${'\t'}.asciz "Some string"
             char:
-            \t.byte 'a'
+            ${'\t'}.byte 'a'
             .macro printStr (%str) # print a string
-            \t.data
+            ${'\t'}.data
             myLabel:
-            \t.asciz %str
-            \t.text
-            \tli a7, 4
-            \tla a0, myLabel
-            \tecall
-            .end_macro""";
-        result.setText(exampleText);
-        final var selectedText = "myLabel:";
-        final var selectionStart = exampleText.indexOf(selectedText);
-        result.setTabSize(OTHER_SETTINGS.getEditorTabSize());
-        result.setCaretBlinkRate(OTHER_SETTINGS.getCaretBlinkRate());
-        result.setFont(FONT_SETTINGS.getCurrentFont());
-        final var selectionEnd = selectionStart + selectedText.length();
-        result.select(selectionStart, selectionEnd);
-        return result;
+            ${'\t'}.asciz %str
+            ${'\t'}.text
+            ${'\t'}li a7, 4
+            ${'\t'}la a0, myLabel
+            ${'\t'}ecall
+            .end_macro
+            """.trimIndent()
+            val selectedText = "myLabel:"
+            val selectionStart = exampleText.indexOf(selectedText)
+            val selectionEnd = selectionStart + selectedText.length
+            return createTextEditingArea(allSettings).apply {
+                this.text = exampleText
+                this.tabSize = otherSettings.editorTabSize
+                this.caretBlinkRate = otherSettings.caretBlinkRate
+                this.font = fontSettings.currentFont
+                select(selectionStart, selectionEnd)
+            }
+        }
     }
 }

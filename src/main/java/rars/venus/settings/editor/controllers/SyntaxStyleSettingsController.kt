@@ -1,92 +1,86 @@
-package rars.venus.settings.editor.controllers;
+package rars.venus.settings.editor.controllers
 
-import org.jetbrains.annotations.NotNull;
-import rars.settings.TokenSettingKey;
-import rars.venus.editors.TextEditingArea;
-import rars.venus.editors.TokenStyle;
-import rars.venus.settings.editor.views.SyntaxStyleView;
+import rars.settings.TokenSettingKey
+import rars.settings.TokenSettingKey.Companion.getTokenTypesForSetting
+import rars.venus.editors.TextEditingArea
+import rars.venus.editors.TokenStyle
+import rars.venus.settings.editor.views.SyntaxStyleView
+import javax.swing.AbstractButton
+import javax.swing.event.ChangeListener
 
-import javax.swing.event.ChangeListener;
-import java.util.List;
+class SyntaxStyleSettingsController(
+    private val view: SyntaxStyleView,
+    private val parentController: EditorSettingsController,
+    private val textArea: TextEditingArea
+) {
+    private var currentKey: TokenSettingKey
 
-public final class SyntaxStyleSettingsController {
-    private final @NotNull SyntaxStyleView view;
-    private final @NotNull EditorSettingsController parentController;
-    private final @NotNull TextEditingArea textArea;
-    private @NotNull TokenSettingKey currentKey;
-
-    public SyntaxStyleSettingsController(
-        final @NotNull SyntaxStyleView view,
-        final @NotNull EditorSettingsController parentController,
-        final @NotNull TextEditingArea textArea
-    ) {
-        this.view = view;
-        this.parentController = parentController;
-        this.textArea = textArea;
-        this.currentKey = TokenSettingKey.COMMENT; // dummy value
-        initializeView();
+    init {
+        this.currentKey = TokenSettingKey.COMMENT // dummy value
+        view.initializeView()
     }
 
-    private void initializeView() {
-        final ChangeListener tokenStyleChangeListener = e -> {
-            final var tokenStyle = getTokenStyleFromView();
-            this.parentController.settingsTheme.tokenStyles.put(this.currentKey, tokenStyle);
-            TokenSettingKey
-                .getTokenTypesForSetting(this.currentKey)
-                .forEach(key -> this.textArea
-                    .setTokenStyle(key, tokenStyle)
-                );
-        };
-        List.of(
-            view.useForeground,
-            view.foregroundColorButton,
-            view.useBackground,
-            view.backgroundColorButton,
-            view.isBold,
-            view.isItalic,
-            view.isUnderline
-        ).forEach(component -> component.addChangeListener(tokenStyleChangeListener));
-    }
-
-    private @NotNull TokenStyle getTokenStyleFromView() {
-        final var foreground = this.view.useForeground.isSelected() ? this.view.foregroundColorButton.getColor() : null;
-        final var background = this.view.useBackground.isSelected() ? this.view.backgroundColorButton.getColor() : null;
-        final var isBold = this.view.isBold.isSelected();
-        final var isItalic = this.view.isItalic.isSelected();
-        final var isUnderline = this.view.isUnderline.isSelected();
-        return new TokenStyle(foreground, background, isBold, isItalic, isUnderline);
-    }
-
-    public void setCurrentKey(final @NotNull TokenSettingKey key) {
-        this.currentKey = key;
-        this.setView(key);
-    }
-
-    public void resetButtonValues() {
-        this.setView(this.currentKey);
-    }
-
-    private void setView(final @NotNull TokenSettingKey key) {
-        final var settingsTheme = this.parentController.settingsTheme;
-        final var tokenStyle = settingsTheme.tokenStyles.get(key);
-        final var foreground = tokenStyle.foreground();
-        if (foreground != null) {
-            this.view.useForeground.setSelected(true);
-            this.view.foregroundColorButton.setColor(foreground);
-        } else {
-            this.view.useForeground.setSelected(false);
-            this.view.foregroundColorButton.setColor(settingsTheme.foregroundColor);
+    private fun SyntaxStyleView.initializeView() {
+        val tokenStyleChangeListener = ChangeListener {
+            val tokenStyle = tokenStyleFromView
+            parentController.settingsTheme.tokenStyles.put(currentKey, tokenStyle)
+            getTokenTypesForSetting(currentKey).forEach { key ->
+                textArea.setTokenStyle(key, tokenStyle)
+            }
         }
-        final var background = tokenStyle.background();
+        arrayOf<AbstractButton>(
+            useForeground,
+            foregroundColorButton,
+            useBackground,
+            backgroundColorButton,
+            isBold,
+            isItalic,
+            isUnderline
+        ).forEach { component ->
+            component.addChangeListener(tokenStyleChangeListener)
+        }
+    }
+
+    private val tokenStyleFromView: TokenStyle
+        get() = view.run {
+            val foreground = if (useForeground.isSelected) foregroundColorButton.color else null
+            val background = if (useBackground.isSelected) backgroundColorButton.color else null
+            val isBold = isBold.isSelected
+            val isItalic = isItalic.isSelected
+            val isUnderline = isUnderline.isSelected
+            TokenStyle(foreground, background, isBold, isItalic, isUnderline)
+        }
+
+    fun setCurrentKey(key: TokenSettingKey) {
+        this.currentKey = key
+        view.setView(key)
+    }
+
+    fun resetButtonValues() {
+        view.setView(this.currentKey)
+    }
+
+    private fun SyntaxStyleView.setView(key: TokenSettingKey) {
+        val settingsTheme = parentController.settingsTheme
+        val tokenStyle = settingsTheme.tokenStyles[key]!!
+        val newForeground = tokenStyle.foreground
+        if (newForeground != null) {
+            useForeground.isSelected = true
+            foregroundColorButton.color = newForeground
+        } else {
+            useForeground.isSelected = false
+            foregroundColorButton.color = settingsTheme.foregroundColor
+        }
+        val background = tokenStyle.background
         if (background != null) {
-            this.view.useBackground.setSelected(true);
-            this.view.backgroundColorButton.setColor(background);
+            useBackground.isSelected = true
+            backgroundColorButton.color = background
         } else {
-            this.view.useBackground.setSelected(false);
-            this.view.backgroundColorButton.setColor(settingsTheme.backgroundColor);
+            useBackground.isSelected = false
+            backgroundColorButton.color = settingsTheme.backgroundColor
         }
-        this.view.isBold.setSelected(tokenStyle.isBold());
-        this.view.isItalic.setSelected(tokenStyle.isItalic());
-        this.view.isUnderline.setSelected(tokenStyle.isUnderline());
+        isBold.isSelected = tokenStyle.isBold
+        isItalic.isSelected = tokenStyle.isItalic
+        isUnderline.isSelected = tokenStyle.isUnderline
     }
 }

@@ -1,47 +1,26 @@
-package rars.assembler;
+package rars.assembler
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.util.*
 
-import java.util.Arrays;
-import java.util.List;
-
-/*
-Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * Enum representing RISCV assembler directives based on the original class by
  * Pete Sanderson. The directive name is indicative of the directive it
- * represents. For example, {@code DATA} represents the RISCV .data
+ * represents. For example, `DATA` represents the RISCV .data
  * directive.
  */
-public enum Directive {
-
+enum class Directive(
+    /**
+     * Name of this Directives object
+     */
+    @JvmField val directiveName: String,
+    /**
+     * Get description of this Directives object
+     *
+     * @return description of this directive (for help purposes)
+     */
+    @JvmField val description: String
+) {
     DATA(
         ".data",
         "Subsequent items stored in Data segment at next available address"
@@ -100,117 +79,78 @@ public enum Directive {
         ".global",
         "Declare the listed label(s) as global to enable referencing from other files"
     ),
-    /* EQV added by DPS 11 July 2012 */
     EQV(
         ".eqv",
         "Substitute second operand for first. First operand is symbol, second operand is expression (like #define)"
     ),
-    /* MACRO and END_MACRO added by Mohammad Sekhavat Oct 2012 */
     MACRO(".macro", "Begin macro definition.  See .end_macro"),
     END_MACRO(".end_macro", "End macro definition.  See .macro"),
-    /* INCLUDE added by DPS 11 Jan 2013 */
     INCLUDE(
         ".include",
-        "Insert the contents of the specified file.  Put file in quotes."
+        "Insert the contents of the specified file. Put file in quotes."
     ),
     SECTION(
         ".section",
         "Allows specifying sections without .text or .data directives. Included for gcc comparability"
     );
 
-    private final @NotNull String name;
-    private final @NotNull String description; // help text
-
-    Directive(@NotNull final String name, @NotNull final String description) {
-        this.name = name;
-        this.description = description;
-    }
-
-    /**
-     * Find Directive object, if any, which matches the given String.
-     *
-     * @param str
-     *     A String containing candidate directive name (e.g. ".ascii")
-     * @return If match is found, returns matching Directives object, else returns
-     * {@code null}.
-     */
-    public static @Nullable Directive matchDirective(final @NotNull String str) {
-        return Arrays.stream(Directive.values())
-            .filter(directive -> directive.name.equalsIgnoreCase(str))
-            .findAny()
-            .orElse(null);
-    }
-
-    /**
-     * Find Directive object, if any, which contains the given string as a prefix.
-     * For example,
-     * ".a" will match ".ascii", ".asciiz" and ".align"
-     *
-     * @param str
-     *     A String
-     * @return If match is found, returns ArrayList of matching Directives objects,
-     * else returns {@code null}.
-     */
-    public static @NotNull List<@NotNull Directive> prefixMatchDirectives(final @NotNull String str) {
-        return Arrays.stream(Directive.values())
-            .filter(directive ->
-                directive
-                    .name
-                    .toLowerCase()
-                    .startsWith(str.toLowerCase())
-            ).toList();
-    }
-
     /**
      * Produces String-ified version of Directive object
      *
      * @return String representing Directive: its MIPS name
      */
-    @Override
-    public @NotNull String toString() {
-        return this.name;
-    }
+    override fun toString(): String = this.directiveName
 
-    /**
-     * Get name of this Directives object
-     *
-     * @return name of this directive as a String
-     */
-    public @NotNull String getName() {
-        return this.name;
-    }
+    val isIntegerDirective: Boolean
+        /**
+         * Lets you know whether the directive is for integer (WORD,HALF,BYTE).
+         *
+         * @return true if the directive is WORD, HALF, or BYTE, false otherwise
+         */
+        get() = when (this) {
+            DWORD, WORD, HALF, BYTE -> true
+            else -> false
+        }
 
-    /**
-     * Get description of this Directives object
-     *
-     * @return description of this directive (for help purposes)
-     */
-    public @NotNull String getDescription() {
-        return this.description;
-    }
+    val isFloatingDirective: Boolean
+        /**
+         * Lets you know whether the directive is for floating number (FLOAT,DOUBLE).
+         *
+         * @return true if the directive is FLOAT or DOUBLE, false otherwise.
+         */
+        get() = when (this) {
+            FLOAT, DOUBLE -> true
+            else -> false
+        }
 
-    /**
-     * Lets you know whether the directive is for integer (WORD,HALF,BYTE).
-     *
-     * @return true if the directive is WORD, HALF, or BYTE, false otherwise
-     */
-    public boolean isIntegerDirective() {
-        return switch (this) {
-            case DWORD, WORD, HALF, BYTE -> true;
-            default -> false;
-        };
-    }
+    companion object {
+        /**
+         * Find Directive object, if any, which matches the given String.
+         *
+         * @param str
+         * A String containing candidate directive name (e.g. ".ascii")
+         * @return If match is found, returns matching Directives object, else returns
+         * `null`.
+         */
+        @JvmStatic
+        fun matchDirective(str: String): Directive? = entries.find {
+            it.directiveName.equals(str, ignoreCase = true)
+        }
 
-    /**
-     * Lets you know whether the directive is for floating number (FLOAT,DOUBLE).
-     *
-     * @return true if the directive is FLOAT or DOUBLE, false otherwise.
-     */
-    public boolean isFloatingDirective() {
-        return switch (this) {
-            case FLOAT, DOUBLE -> true;
-            default -> false;
-        };
+        /**
+         * Find Directive object, if any, which contains the given string as a prefix.
+         * For example,
+         * ".a" will match ".ascii", ".asciiz" and ".align"
+         *
+         * @param str
+         * A String
+         * @return If match is found, returns ArrayList of matching Directives objects,
+         * else returns `null`.
+         */
+        fun prefixMatchDirectives(str: String): List<Directive> = entries.filter {
+            it.directiveName
+                .lowercase(Locale.getDefault())
+                .startsWith(str.lowercase(Locale.getDefault()))
+        }
     }
-
 }

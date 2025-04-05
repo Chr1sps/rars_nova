@@ -54,24 +54,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class MemoryReferenceVisualization extends AbstractTool {
 
-    private static final String version = "Version 1.0";
-    private static final String heading = "Visualizing memory reference patterns";
+    private static final String VERSION = "Version 1.0";
+    private static final String HEADING = "Visualizing memory reference patterns";
     private static final String[] wordsPerUnitChoices = {
         "1", "2", "4", "8", "16", "32", "64", "128", "256", "512",
         "1024", "2048"
     };
-    private static final int defaultWordsPerUnitIndex = 0;
+    private static final int DEFAULT_WORDS_PER_UNIT_INDEX = 0;
     private static final String[] visualizationUnitPixelWidthChoices = {"1", "2", "4", "8", "16", "32"};
-    private static final int defaultVisualizationUnitPixelWidthIndex = 4;
+    private static final int DEFAULT_VISUALIZATION_UNIT_PIXEL_WIDTH_INDEX = 4;
     private static final String[] visualizationUnitPixelHeightChoices = {"1", "2", "4", "8", "16", "32"};
 
     // Values for Combo Boxes
-    private static final int defaultVisualizationUnitPixelHeightIndex = 4;
+    private static final int DEFAULT_VISUALIZATION_UNIT_PIXEL_HEIGHT_INDEX = 4;
     private static final String[] displayAreaPixelWidthChoices = {"64", "128", "256", "512", "1024"};
-    private static final int defaultDisplayWidthIndex = 2;
+    private static final int DEFAULT_DISPLAY_WIDTH_INDEX = 2;
     private static final String[] displayAreaPixelHeightChoices = {"64", "128", "256", "512", "1024"};
-    private static final int defaultDisplayHeightIndex = 2;
-    private static final boolean defaultDrawHashMarks = true;
+    private static final int DEFAULT_DISPLAY_HEIGHT_INDEX = 2;
+    private static final boolean DEFAULT_DRAW_HASH_MARKS = true;
     private static final int COUNT_INDEX_INIT = 10; // array element #10, arbitrary starting point
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
@@ -110,17 +110,17 @@ public final class MemoryReferenceVisualization extends AbstractTool {
     private JCheckBox drawHashMarksSelector;
     private JPanel canvas;
     private int unitPixelWidth = Integer
-        .parseInt(MemoryReferenceVisualization.visualizationUnitPixelWidthChoices[MemoryReferenceVisualization.defaultVisualizationUnitPixelWidthIndex]);
+        .parseInt(MemoryReferenceVisualization.visualizationUnitPixelWidthChoices[MemoryReferenceVisualization.DEFAULT_VISUALIZATION_UNIT_PIXEL_WIDTH_INDEX]);
     private int unitPixelHeight = Integer
-        .parseInt(MemoryReferenceVisualization.visualizationUnitPixelHeightChoices[MemoryReferenceVisualization.defaultVisualizationUnitPixelHeightIndex]);
+        .parseInt(MemoryReferenceVisualization.visualizationUnitPixelHeightChoices[MemoryReferenceVisualization.DEFAULT_VISUALIZATION_UNIT_PIXEL_HEIGHT_INDEX]);
 
     // `Values for mapping of reference counts to colors for display.
     private int wordsPerUnit =
-        Integer.parseInt(MemoryReferenceVisualization.wordsPerUnitChoices[MemoryReferenceVisualization.defaultWordsPerUnitIndex]);
+        Integer.parseInt(MemoryReferenceVisualization.wordsPerUnitChoices[MemoryReferenceVisualization.DEFAULT_WORDS_PER_UNIT_INDEX]);
     private int visualizationAreaWidthInPixels = Integer
-        .parseInt(MemoryReferenceVisualization.displayAreaPixelWidthChoices[MemoryReferenceVisualization.defaultDisplayWidthIndex]);
+        .parseInt(MemoryReferenceVisualization.displayAreaPixelWidthChoices[MemoryReferenceVisualization.DEFAULT_DISPLAY_WIDTH_INDEX]);
     private int visualizationAreaHeightInPixels = Integer
-        .parseInt(MemoryReferenceVisualization.displayAreaPixelHeightChoices[MemoryReferenceVisualization.defaultDisplayHeightIndex]);
+        .parseInt(MemoryReferenceVisualization.displayAreaPixelHeightChoices[MemoryReferenceVisualization.DEFAULT_DISPLAY_HEIGHT_INDEX]);
     // The next four are initialized dynamically in initializeDisplayBaseChoices()
     private String[] displayBaseAddressChoices;
     private int[] displayBaseAddresses;
@@ -132,8 +132,8 @@ public final class MemoryReferenceVisualization extends AbstractTool {
 
     public MemoryReferenceVisualization(final @NotNull VenusUI mainUI) {
         super(
-            "Memory Reference Visualization, " + MemoryReferenceVisualization.version,
-            MemoryReferenceVisualization.heading, mainUI
+            "Memory Reference Visualization, " + MemoryReferenceVisualization.VERSION,
+            MemoryReferenceVisualization.HEADING, mainUI
         );
     }
 
@@ -299,13 +299,13 @@ public final class MemoryReferenceVisualization extends AbstractTool {
         final JPanel organization = new JPanel(new GridLayout(9, 1));
 
         this.drawHashMarksSelector = new JCheckBox();
-        this.drawHashMarksSelector.setSelected(MemoryReferenceVisualization.defaultDrawHashMarks);
+        this.drawHashMarksSelector.setSelected(MemoryReferenceVisualization.DEFAULT_DRAW_HASH_MARKS);
         this.drawHashMarksSelector.addActionListener(
             e -> MemoryReferenceVisualization.this.updateDisplay());
         this.wordsPerUnitSelector = new JComboBox<>(MemoryReferenceVisualization.wordsPerUnitChoices);
         this.wordsPerUnitSelector.setEditable(false);
         this.wordsPerUnitSelector.setBackground(this.backgroundColor);
-        this.wordsPerUnitSelector.setSelectedIndex(MemoryReferenceVisualization.defaultWordsPerUnitIndex);
+        this.wordsPerUnitSelector.setSelectedIndex(MemoryReferenceVisualization.DEFAULT_WORDS_PER_UNIT_INDEX);
         this.wordsPerUnitSelector
             .setToolTipText("Number of memory words represented by one visualization element (rectangle)");
         this.wordsPerUnitSelector.addActionListener(
@@ -318,7 +318,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             new JComboBox<>(MemoryReferenceVisualization.visualizationUnitPixelWidthChoices);
         this.visualizationUnitPixelWidthSelector.setEditable(false);
         this.visualizationUnitPixelWidthSelector.setBackground(this.backgroundColor);
-        this.visualizationUnitPixelWidthSelector.setSelectedIndex(MemoryReferenceVisualization.defaultVisualizationUnitPixelWidthIndex);
+        this.visualizationUnitPixelWidthSelector.setSelectedIndex(MemoryReferenceVisualization.DEFAULT_VISUALIZATION_UNIT_PIXEL_WIDTH_INDEX);
         this.visualizationUnitPixelWidthSelector.setToolTipText("Width in pixels of rectangle representing memory " +
             "access");
         this.visualizationUnitPixelWidthSelector.addActionListener(
@@ -332,7 +332,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             new JComboBox<>(MemoryReferenceVisualization.visualizationUnitPixelHeightChoices);
         this.visualizationUnitPixelHeightSelector.setEditable(false);
         this.visualizationUnitPixelHeightSelector.setBackground(this.backgroundColor);
-        this.visualizationUnitPixelHeightSelector.setSelectedIndex(MemoryReferenceVisualization.defaultVisualizationUnitPixelHeightIndex);
+        this.visualizationUnitPixelHeightSelector.setSelectedIndex(MemoryReferenceVisualization.DEFAULT_VISUALIZATION_UNIT_PIXEL_HEIGHT_INDEX);
         this.visualizationUnitPixelHeightSelector.setToolTipText("Height in pixels of rectangle representing memory " +
             "access");
         this.visualizationUnitPixelHeightSelector.addActionListener(
@@ -346,7 +346,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             new JComboBox<>(MemoryReferenceVisualization.displayAreaPixelWidthChoices);
         this.visualizationPixelWidthSelector.setEditable(false);
         this.visualizationPixelWidthSelector.setBackground(this.backgroundColor);
-        this.visualizationPixelWidthSelector.setSelectedIndex(MemoryReferenceVisualization.defaultDisplayWidthIndex);
+        this.visualizationPixelWidthSelector.setSelectedIndex(MemoryReferenceVisualization.DEFAULT_DISPLAY_WIDTH_INDEX);
         this.visualizationPixelWidthSelector.setToolTipText("Total width in pixels of visualization area");
         this.visualizationPixelWidthSelector.addActionListener(
             e -> {
@@ -362,7 +362,7 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             new JComboBox<>(MemoryReferenceVisualization.displayAreaPixelHeightChoices);
         this.visualizationPixelHeightSelector.setEditable(false);
         this.visualizationPixelHeightSelector.setBackground(this.backgroundColor);
-        this.visualizationPixelHeightSelector.setSelectedIndex(MemoryReferenceVisualization.defaultDisplayHeightIndex);
+        this.visualizationPixelHeightSelector.setSelectedIndex(MemoryReferenceVisualization.DEFAULT_DISPLAY_HEIGHT_INDEX);
         this.visualizationPixelHeightSelector.setToolTipText("Total height in pixels of visualization area");
         this.visualizationPixelHeightSelector.addActionListener(
             e -> {
@@ -585,16 +585,20 @@ public final class MemoryReferenceVisualization extends AbstractTool {
             return highEnd;
         }
 
-        // The given entry should either be inserted into the the scale or replace an
-        // existing
-        // element. The latter occurs if the new CounterColor has same starting counter
-        // value
-        // as an existing one.
+        /**
+         * The given entry should either be inserted into the the scale or replace an
+         * existing
+         * element. The latter occurs if the new CounterColor has same starting counter
+         * value
+         * as an existing one.
+         */
         private void insertOrReplace(final CounterColor newColor) {
             final int index = Arrays.binarySearch(this.counterColors, newColor);
-            if (index >= 0) { // found, so replace
+            if (index >= 0) {
+                // found, so replace
                 this.counterColors[index] = newColor;
-            } else { // not found, so insert
+            } else {
+                // not found, so insert
                 final int insertIndex = -index - 1;
                 final CounterColor[] newSortedArray = new CounterColor[this.counterColors.length + 1];
                 System.arraycopy(this.counterColors, 0, newSortedArray, 0, insertIndex);

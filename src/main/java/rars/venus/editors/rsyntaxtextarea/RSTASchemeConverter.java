@@ -8,7 +8,7 @@ import rars.venus.editors.TokenStyle;
 import java.awt.*;
 import java.util.Map;
 
-import static rars.util.Utils.deriveFontFromStyle;
+import static rars.util.UtilsKt.applyStyle;
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
 public final class RSTASchemeConverter {
@@ -22,7 +22,7 @@ public final class RSTASchemeConverter {
         if (result.font == null) {
             result.font = baseFont;
         }
-        result.font = deriveFontFromStyle(result.font, style);
+        result.font = applyStyle(result.font, style);
         result.underline = style.isUnderline();
         return result;
     }

@@ -1,99 +1,72 @@
-package rars.venus.settings.editor;
+package rars.venus.settings.editor
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import rars.settings.TokenSettingKey;
+import rars.settings.TokenSettingKey
+import java.awt.Dimension
+import javax.swing.JScrollPane
+import javax.swing.JTree
+import javax.swing.tree.DefaultMutableTreeNode
+import javax.swing.tree.DefaultTreeCellRenderer
+import javax.swing.tree.TreeNode
 
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.MutableTreeNode;
-import java.awt.*;
+class TreePanel : JScrollPane() {
+    val fontSettingsNode: TreeNodeData = TreeNodeData("Font")
+    val generalSchemeSettingsNode: TreeNodeData = TreeNodeData("General")
+    val otherSettingsNode: TreeNodeData = TreeNodeData("Other settings")
+    val presetsNode: TreeNodeData = TreeNodeData("Presets")
 
-import static kotlin.collections.CollectionsKt.map;
+    val tree: JTree = buildTree(fontSettingsNode, presetsNode, generalSchemeSettingsNode, otherSettingsNode)
 
-public final class TreePanel extends JScrollPane {
-    public final @NotNull TreeNode fontSettingsNode, generalSchemeSettingsNode, otherSettingsNode, presetsNode;
+    init {
+        setViewportView(tree)
 
-    public final @NotNull JTree tree;
-
-    public TreePanel() {
-        super();
-        this.fontSettingsNode = new TreeNode("Font");
-        this.generalSchemeSettingsNode = new TreeNode("General");
-        this.otherSettingsNode = new TreeNode("Other settings");
-        this.presetsNode = new TreeNode("Presets");
-        this.tree = buildTree(fontSettingsNode, presetsNode, generalSchemeSettingsNode, otherSettingsNode);
-        this.setViewportView(this.tree);
-
-        final var renderer = (DefaultTreeCellRenderer) this.tree.getCellRenderer();
-        renderer.setLeafIcon(null); // Remove icons for leaf nodes
-        renderer.setClosedIcon(null);
-        renderer.setOpenIcon(null);
-
-        this.setPreferredSize(new Dimension(200, 400));
-    }
-
-    private static @NotNull JTree buildTree(
-        final @NotNull TreeNode fontSettingsNode,
-        final @NotNull TreeNode presetsNode,
-        final @NotNull TreeNode generalSchemeSettingsNode,
-        final @NotNull TreeNode otherSettingsNode
-    ) {
-        final var newRoot = root(
-            presetNode(fontSettingsNode),
-            normalNode("Color scheme").children(
-                presetNode(presetsNode),
-                presetNode(generalSchemeSettingsNode),
-                normalNode("RISC-V Syntax").children(
-                    map(
-                        TokenSettingKey.getEntries(),
-                        tokenSettingKey -> syntaxNode(tokenSettingKey, tokenSettingKey.description)
-                    ).toArray(NodeBuilder[]::new)
-                )
-            ),
-            presetNode(otherSettingsNode)
-        ).collect();
-        final var tree = new JTree(newRoot);
-        tree.setRootVisible(false); // Hide the root node
-        tree.setShowsRootHandles(true); // Show expand/collapse icons
-        return tree;
-    }
-
-    @Contract("_ -> new")
-    private static @NotNull NodeBuilder normalNode(final @NotNull String name) {
-        return new NodeBuilder(new TreeNode(name));
-    }
-
-    @Contract("_, _ -> new")
-    private static @NotNull NodeBuilder syntaxNode(final @NotNull TokenSettingKey type, final @NotNull String name) {
-        return new NodeBuilder(new TreeNode.Syntax(type, name));
-    }
-
-    private static @NotNull NodeBuilder presetNode(final @NotNull TreeNode node) {
-        return new NodeBuilder(node);
-    }
-
-    private static @NotNull NodeBuilder root(final @NotNull NodeBuilder... children) {
-        return new NodeBuilder(null).children(children);
-    }
-
-    private static final class NodeBuilder {
-        private final DefaultMutableTreeNode node;
-
-        public NodeBuilder(final Object data) {
-            this.node = new DefaultMutableTreeNode(data);
+        (tree.cellRenderer as DefaultTreeCellRenderer).apply {
+            leafIcon = null
+            closedIcon = null
+            openIcon = null
         }
 
-        public NodeBuilder children(final NodeBuilder @NotNull ... children) {
-            for (final var child : children) {
-                this.node.add(child.collect());
-            }
-            return this;
-        }
-
-        public MutableTreeNode collect() {
-            return node;
-        }
+        preferredSize = Dimension(200, 400)
     }
 }
+
+private fun buildTree(
+    fontSettingsNode: TreeNodeData,
+    presetsNode: TreeNodeData,
+    generalSchemeSettingsNode: TreeNodeData,
+    otherSettingsNode: TreeNodeData
+): JTree {
+    val newRoot = buildRoot {
+        presetNode(fontSettingsNode)
+        normalNode("Color scheme") {
+            presetNode(presetsNode)
+            presetNode(generalSchemeSettingsNode)
+            normalNode("RISC-V Syntax") {
+                TokenSettingKey.entries.forEach { key ->
+                    syntaxNode(key, key.description)
+                }
+            }
+        }
+        presetNode(otherSettingsNode)
+    }
+
+    return JTree(newRoot).apply {
+        isRootVisible = false
+        showsRootHandles = true
+    }
+}
+
+private fun buildRoot(builder: DefaultMutableTreeNode.() -> Unit): TreeNode =
+    DefaultMutableTreeNode(null).apply(builder)
+
+private fun DefaultMutableTreeNode.normalNode(name: String, builderFunc: DefaultMutableTreeNode.() -> Unit = {}) {
+    DefaultMutableTreeNode(TreeNodeData(name)).apply(builderFunc).also { add(it) }
+}
+
+private fun DefaultMutableTreeNode.presetNode(node: TreeNodeData) {
+    DefaultMutableTreeNode(node).also { add(it) }
+}
+
+private fun DefaultMutableTreeNode.syntaxNode(type: TokenSettingKey, name: String) {
+    DefaultMutableTreeNode(TreeNodeData.Syntax(type, name)).also { add(it) }
+}
+

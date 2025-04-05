@@ -87,9 +87,9 @@ import static rars.Globals.FONT_SETTINGS;
  */
 public final class InstructionMemoryDump extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger(InstructionMemoryDump.class);
-    private static final String name = "Instruction/Memory Dump";
-    private static final String version = "Version 1.0 (John Owens)";
-    private static final String heading = "Dumps every executed instruction and data memory access to a file";
+    private static final String NAME = "Instruction/Memory Dump";
+    private static final String VERSION = "Version 1.0 (John Owens)";
+    private static final String HEADING = "Dumps every executed instruction and data memory access to a file";
 
     /** Instructions and memory accesses get logged here */
     private final StringBuffer log = new StringBuffer();
@@ -111,7 +111,7 @@ public final class InstructionMemoryDump extends AbstractTool {
      * Simple construction, likely used by the RARS Tools menu mechanism.
      */
     public InstructionMemoryDump(final @NotNull VenusUI mainUI) {
-        super(InstructionMemoryDump.name + ", " + InstructionMemoryDump.version, InstructionMemoryDump.heading, mainUI);
+        super(InstructionMemoryDump.NAME + ", " + InstructionMemoryDump.VERSION, InstructionMemoryDump.HEADING, mainUI);
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.lowDataSegmentAddress = memoryConfiguration.dataSegmentBaseAddress;
         this.highDataSegmentAddress = memoryConfiguration.stackBaseAddress;
@@ -147,7 +147,7 @@ public final class InstructionMemoryDump extends AbstractTool {
 
     @Override
     public String getName() {
-        return InstructionMemoryDump.name;
+        return InstructionMemoryDump.NAME;
     }
 
     @Override

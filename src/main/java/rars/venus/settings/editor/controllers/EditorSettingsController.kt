@@ -1,124 +1,109 @@
-package rars.venus.settings.editor.controllers;
+package rars.venus.settings.editor.controllers
 
-import org.jetbrains.annotations.NotNull;
-import rars.settings.EditorThemeSettingsImpl;
-import rars.settings.FontSettingsImpl;
-import rars.settings.OtherSettingsImpl;
-import rars.settings.SettingsTheme;
-import rars.venus.settings.editor.EditorSettingsDialog;
-import rars.venus.settings.editor.EditorSettingsPanel;
-import rars.venus.settings.editor.TreeNode;
-import rars.venus.settings.editor.TreePanel;
+import rars.settings.EditorThemeSettingsImpl
+import rars.settings.FontSettingsImpl
+import rars.settings.OtherSettingsImpl
+import rars.settings.SettingsTheme
+import rars.venus.settings.editor.EditorSettingsDialog
+import rars.venus.settings.editor.EditorSettingsPanel
+import rars.venus.settings.editor.TreeNodeData
+import rars.venus.settings.editor.TreePanel
+import javax.swing.tree.DefaultMutableTreeNode
 
-import javax.swing.tree.DefaultMutableTreeNode;
+class EditorSettingsController(
+    editorSettingsView: EditorSettingsPanel,
+    dialog: EditorSettingsDialog,
+    treePanel: TreePanel,
+    fontSettings: FontSettingsImpl,
+    private val editorThemeSettings: EditorThemeSettingsImpl,
+    otherSettings: OtherSettingsImpl
+) {
+    private val fontSettingsController: FontSettingsController
+    private val baseStyleSettingsController: BaseStyleSettingsController
+    private val syntaxStyleSettingsController: SyntaxStyleSettingsController
+    private val otherSettingsController: OtherSettingsController
+    var settingsTheme: SettingsTheme
 
-public final class EditorSettingsController {
-    private final @NotNull FontSettingsController fontSettingsController;
-    private final @NotNull BaseStyleSettingsController baseStyleSettingsController;
-    private final @NotNull SyntaxStyleSettingsController syntaxStyleSettingsController;
-    private final @NotNull OtherSettingsController otherSettingsController;
-    private final @NotNull EditorThemeSettingsImpl editorThemeSettings;
-    public @NotNull SettingsTheme settingsTheme;
+    init {
+        this.settingsTheme = editorThemeSettings.currentTheme
+        val pickerCardView = editorSettingsView.panelWithTextAreaView.pickerCardView
+        val textArea = editorSettingsView.panelWithTextAreaView.textArea
 
-    public EditorSettingsController(
-        final @NotNull EditorSettingsPanel editorSettingsView,
-        final @NotNull EditorSettingsDialog dialog,
-        final @NotNull TreePanel treePanel,
-        final @NotNull FontSettingsImpl fontSettings,
-        final @NotNull EditorThemeSettingsImpl editorThemeSettings,
-        final @NotNull OtherSettingsImpl otherSettings
-    ) {
-        this.settingsTheme = editorThemeSettings.getCurrentTheme();
-        this.editorThemeSettings = editorThemeSettings;
-        final var pickerCardView = editorSettingsView.panelWithTextAreaView.pickerCardView;
-        final var textArea = editorSettingsView.panelWithTextAreaView.textArea;
-
-        this.fontSettingsController = new FontSettingsController(
+        this.fontSettingsController = FontSettingsController(
             pickerCardView.fontSettingsView,
             textArea,
             fontSettings
-        );
-        new PresetsController(
+        )
+        PresetsController(
             pickerCardView.presetsView,
             textArea,
             this
-        );
-        this.baseStyleSettingsController = new BaseStyleSettingsController(
+        )
+        this.baseStyleSettingsController = BaseStyleSettingsController(
             pickerCardView.baseStyleView,
             textArea,
             this
-        );
-        this.syntaxStyleSettingsController = new SyntaxStyleSettingsController(
+        )
+        this.syntaxStyleSettingsController = SyntaxStyleSettingsController(
             pickerCardView.syntaxStyleView,
             this,
             textArea
-        );
-        this.otherSettingsController = new OtherSettingsController(
+        )
+        this.otherSettingsController = OtherSettingsController(
             pickerCardView.otherSettingsView,
             textArea,
             otherSettings
-        );
-        final var bottomRow = editorSettingsView.bottomRowComponent;
-        bottomRow.applyButton.addActionListener(e -> applySettings());
-        bottomRow.applyAndCloseButton.addActionListener(e -> {
-            applySettings();
-            dialog.setVisible(false);
-            dialog.dispose();
-        });
-        bottomRow.cancelButton.addActionListener(e -> {
-            discardSettings();
-            dialog.setVisible(false);
-            dialog.dispose();
-        });
-        treePanel.tree.addTreeSelectionListener(
-            event -> {
-                final var selectedNode = (DefaultMutableTreeNode) treePanel.tree.getLastSelectedPathComponent();
-                if (selectedNode == null) {
-                    return;
-                }
-                switch (selectedNode.getUserObject()) {
-                    case final TreeNode.Syntax node -> {
-                        syntaxStyleSettingsController.setCurrentKey(node.type);
-                        pickerCardView.showSyntaxStyleView();
-                    }
-                    case final TreeNode node -> {
-                        if (node == treePanel.fontSettingsNode) {
-                            pickerCardView.showFontView();
-                        } else if (node == treePanel.generalSchemeSettingsNode) {
-                            pickerCardView.showBaseStyleView();
-                        } else if (node == treePanel.otherSettingsNode) {
-                            pickerCardView.showOtherSettings();
-                        } else if (node == treePanel.presetsNode) {
-                            pickerCardView.showPresets();
-                        } else {
-                            pickerCardView.showEmpty();
-                        }
-                    }
-                    default -> {
-                    }
-                }
+        )
+        editorSettingsView.bottomRowComponent.apply {
+            applyButton.addActionListener { applySettings() }
+            applyAndCloseButton.addActionListener {
+                applySettings()
+                dialog.isVisible = false
+                dialog.dispose()
             }
-        );
+            cancelButton.addActionListener {
+                discardSettings()
+                dialog.isVisible = false
+                dialog.dispose()
+            }
+        }
+        treePanel.tree.addTreeSelectionListener {
+            val selectedNode = treePanel.tree.lastSelectedPathComponent
+                as? DefaultMutableTreeNode
+                ?: return@addTreeSelectionListener
+            when (val node: Any? = selectedNode.getUserObject()) {
+                is TreeNodeData.Syntax -> {
+                    syntaxStyleSettingsController.setCurrentKey(node.type)
+                    pickerCardView.showSyntaxStyleView()
+                }
+
+                treePanel.fontSettingsNode -> pickerCardView.showFontView()
+                treePanel.generalSchemeSettingsNode -> pickerCardView.showBaseStyleView()
+                treePanel.otherSettingsNode -> pickerCardView.showOtherSettings()
+                treePanel.presetsNode -> pickerCardView.showPresets()
+                else -> pickerCardView.showEmpty()
+            }
+        }
     }
 
-    private void discardSettings() {
-        this.settingsTheme = this.editorThemeSettings.getCurrentTheme();
-        this.fontSettingsController.resetButtonValues();
-        this.baseStyleSettingsController.resetButtonValues();
-        this.syntaxStyleSettingsController.resetButtonValues();
+    private fun discardSettings() {
+        this.settingsTheme = this.editorThemeSettings.currentTheme
+        this.fontSettingsController.resetButtonValues()
+        this.baseStyleSettingsController.resetButtonValues()
+        this.syntaxStyleSettingsController.resetButtonValues()
     }
 
-    public void updateThemeControllers() {
-        this.fontSettingsController.resetButtonValues();
-        this.baseStyleSettingsController.resetButtonValues();
+    fun updateThemeControllers() {
+        this.fontSettingsController.resetButtonValues()
+        this.baseStyleSettingsController.resetButtonValues()
     }
 
-    private void applySettings() {
-        this.fontSettingsController.applySettings();
+    private fun applySettings() {
+        this.fontSettingsController.applySettings()
 
-        this.editorThemeSettings.setCurrentTheme(this.settingsTheme);
-        this.editorThemeSettings.saveSettingsToPreferences();
+        this.editorThemeSettings.currentTheme = this.settingsTheme
+        this.editorThemeSettings.saveSettingsToPreferences()
 
-        this.otherSettingsController.applySettings();
+        this.otherSettingsController.applySettings()
     }
 }

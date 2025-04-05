@@ -1,16 +1,16 @@
 package rars.venus.run;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-
-import static rars.util.KotlinUtilsKt.unwrap;
-
 import rars.Globals;
 import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
-import rars.venus.actions.GuiAction;
 import rars.venus.VenusUI;
+import rars.venus.actions.GuiAction;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+
+import static rars.util.UtilsKt.unwrap;
 
 /*
 Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar

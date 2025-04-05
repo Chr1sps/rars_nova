@@ -1,7 +1,7 @@
 package rars.settings
 
 import org.apache.logging.log4j.Logger
-import rars.util.Utils
+import rars.util.toHexString
 import rars.venus.editors.TokenStyle
 import java.awt.Color
 import java.util.prefs.Preferences
@@ -32,16 +32,12 @@ internal fun Preferences.putTokenStyle(
  * Otherwise, save the value to the preferences.
  */
 internal fun Preferences.putNullableColor(key: String, value: Color?) {
-    val valueString: String = if (value == null) {
-        "null"
-    } else {
-        Utils.getColorAsHexString(value)
-    }
+    val valueString: String = value?.toHexString() ?: "null"
     this.put(key, valueString)
 }
 
 internal fun Preferences.putColor(key: String, value: Color) {
-    this.put(key, Utils.getColorAsHexString(value))
+    this.put(key, value.toHexString())
 }
 
 // endregion Writing methods

@@ -8,40 +8,13 @@ import rars.exceptions.AssemblyError
 import rars.settings.BoolSetting
 import rars.util.FilenameFinder
 import rars.venus.FileStatus
-import rars.venus.actions.GuiAction
 import rars.venus.VenusUI
+import rars.venus.actions.GuiAction
 import java.awt.event.ActionEvent
 import java.io.File
 import javax.swing.Icon
 import javax.swing.KeyStroke
 
-/*
-Copyright (c) 2003-2010,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
-*/
 /**
  * Action class for the Run -> Assemble menu item (and toolbar icon)
  */
@@ -68,12 +41,13 @@ class RunAssembleAction(
             either<AssemblyError, Unit> {
                 Globals.PROGRAM = RISCVProgram()
                 val filesToAssembleNew = mutableListOf<File>()
-                if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) { // setting calls 
+                if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {
+                    // setting calls 
                     // for multiple
                     // file assembly
                     filesToAssembleNew.addAll(
                         FilenameFinder.getFilenameListForDirectory(
-                            FileStatus.systemFile!!.getParentFile(), Globals.fileExtensions
+                            FileStatus.systemFile!!.getParentFile(), Globals.FILE_EXTENSIONS
                         )
                     )
                 } else {
@@ -104,7 +78,6 @@ class RunAssembleAction(
                         programsToAssemble
                     )
                 )
-                // added logic to receive any warnings and output them.... DPS 11/28/06
                 val warnings: ErrorList = Globals.PROGRAM!!.assemble(
                     programsToAssemble,
                     extendedAssemblerEnabled,
@@ -159,7 +132,7 @@ class RunAssembleAction(
                 val errorMessages = assemblyError.errors.errorMessages
                 for (em in errorMessages) {
                     // No line or position may mean File Not Found (e.g. exception file). Don't try
-                    // to open. DPS 3-Oct-2010
+                    // to open.
                     if (em.lineNumber == 0 && em.position == 0) {
                         continue
                     }
@@ -175,7 +148,6 @@ class RunAssembleAction(
                         // Automatic assemble happens in EditTabbedPane's openFile() method, by invoking
                         // this method (actionPerformed) explicitly with null argument. Thus e!=null
                         // test.
-                        // DPS 9-Aug-2010
                         if (e != null) {
                             this.mainUI.mainPane.editTabbedPane.selectEditorTextLine(em.file, em.lineNumber)
                         }

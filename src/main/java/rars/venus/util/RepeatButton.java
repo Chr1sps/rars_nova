@@ -11,9 +11,7 @@ import java.awt.event.MouseListener;
 
 // CREDIT  
 // http://forums.sun.com/thread.jspa?threadID=499183&messageID=2505646
-// bsampieri, 4 March 2004
 // Java Developer Forum, Useful Code of the Day: Button Fires Events While Held
-// Adopted/adapted by DPS 20 July 2008
 //
 // This is NOT one of the MARS buttons!  It is a subclass of JButton that can
 // be used to create buttons that fire events after being held down for a 

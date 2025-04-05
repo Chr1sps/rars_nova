@@ -20,7 +20,6 @@ import java.awt.*;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -392,10 +391,11 @@ public final class LabelsWindow extends JInternalFrame {
             } else {
                 this.symbols = new ArrayList<>();
             }
-            this.symbols.sort(LabelsWindow.this.tableSortComparator); // DPS 25 Dec 2008
+            this.symbols.sort(tableSortComparator);
             this.labelData = new Object[this.symbols.size()][2];
 
-            for (int i = 0; i < this.symbols.size(); i++) {// sets up the label table
+            for (int i = 0; i < this.symbols.size(); i++) {
+                // sets up the label table
                 final Symbol s = this.symbols.get(i);
                 this.labelData[i][LabelsWindow.LABEL_COLUMN] = s.name();
                 this.labelData[i][LabelsWindow.ADDRESS_COLUMN] = NumberDisplayBaseChooser.formatNumber(

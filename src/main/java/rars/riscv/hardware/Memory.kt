@@ -377,9 +377,6 @@ class Memory(
                 oldValue = storeBytesInTable(stackBlockTable, relativeByteAddress, length, value)
             }
             isAddressInTextSegment(address) -> {
-                // Burch Mod (Jan 2013): replace throw with call to setStatement
-                // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
-
                 ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                     MemoryError(
                         "Cannot write directly to text segment!",
@@ -457,8 +454,6 @@ class Memory(
             relative = (memoryConfiguration.stackBaseAddress - address) shr 2 // convert byte address to words
             oldValue = storeWordInTable(stackBlockTable, relative, value)
         } else if (isAddressInTextSegment(address)) {
-            // Burch Mod (Jan 2013): replace throw with call to setStatement
-            // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
             ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 MemoryError(
                     "Cannot write directly to text segment!",
@@ -637,9 +632,6 @@ class Memory(
                 value = fetchBytesFromTable(memoryMapBlockTable, relativeByteAddress, length)
             }
             isAddressInTextSegment(address) -> {
-                // Burch Mod (Jan 2013): replace throw with calls to getStatementNoNotify &
-                // getBinaryStatement
-                // DPS adaptation 5-Jul-2013: either throw or call, depending on setting
                 ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                     MemoryError(
                         "Cannot read directly from text segment!",
@@ -1024,11 +1016,9 @@ class Memory(
         this.observables.removeIf { it.handle == handle }
     }
 
-    /** Method to notify any observers of memory operation that has just occurred.
-     * The `|| Globals.getGui()==null` is a hack added 19 July 2012 DPS. IF
-     * simulation
-     * is from command mode, Globals.program is null but still want ability to
-     * observe. */
+    /**
+     * Method to notify any observers of memory operation that has just occurred.
+     */
     private fun notifyAnyObservers(
         type: AccessNotice.AccessType,
         address: Int,
@@ -1057,8 +1047,6 @@ class Memory(
         length: Int,
         value: Int
     ): Int {
-        // IF added DPS 22-Dec-2008. NOTE: has NOT been tested with Big-Endian.
-        // Fix provided by Saul Spatz; comments that follow are his.
         // If address in stack segment is 4k + m, with 0 < m < 4, then the
         // relativeByteAddress we want is stackBaseAddress - 4k + m, but the
         // address actually passed in is stackBaseAddress - (4k + m), so we
@@ -1113,8 +1101,6 @@ class Memory(
         relativeByteAddress: Int,
         length: Int
     ): Int {
-        // IF added DPS 22-Dec-2008. NOTE: has NOT been tested with Big-Endian.
-        // Fix provided by Saul Spatz; comments that follow are his.
         // If address in stack segment is 4k + m, with 0 < m < 4, then the
         // relativeByteAddress we want is stackBaseAddress - 4k + m, but the
         // address actually passed in is stackBaseAddress - (4k + m), so we

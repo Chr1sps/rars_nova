@@ -6,31 +6,6 @@ import rars.RISCVProgram;
 
 import java.util.ArrayList;
 
-/*
-Copyright (c) 2013.
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 /**
  * Stores information of macros defined by now. <br>
  * Will be used in first pass of assembling RISCV source code. When reached
@@ -132,8 +107,6 @@ public final class MacroPool {
         for (final Macro macro : this.macroList) {
             if (macro.getName().equals(firstToken.getText())
                 && macro.getArgs().size() + 1 == tokens.size()
-                // && macro.getToLine() < callerLine // condition removed; doesn't work nicely
-                // in conjunction with .include, and does not seem necessary. DPS 8-MAR-2013
                 && (ret == null || ret.getFromLine() < macro.getFromLine())) {
                 ret = macro;
             }
@@ -181,13 +154,9 @@ public final class MacroPool {
     }
 
     /**
-     * <p>pushOnCallStack.</p>
-     *
-     * @param token
-     *     a {@link Token} object
-     * @return a boolean
+     * returns true if detected expansion loop
      */
-    public boolean pushOnCallStack(final @NotNull Token token) { // returns true if detected expansion loop
+    public boolean pushOnCallStack(final @NotNull Token token) {
         final int sourceLine = token.getSourceLine();
         final int origSourceLine = token.getOriginalSourceLine();
         if (this.callStack.contains(sourceLine)) {

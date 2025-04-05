@@ -74,7 +74,7 @@ public final class EditTabbedPane extends JPanel {
         final @NotNull Editor editor,
         final @NotNull MainPane mainPane,
         final @NotNull AllSettings allSettings
-        ) {
+    ) {
         super();
         this.allSettings = allSettings;
         this.tabbedPane = new JTabbedPane();
@@ -190,7 +190,7 @@ public final class EditTabbedPane extends JPanel {
         final EditPane editPane = this.getCurrentEditTab();
         if (editPane != null) {
             if (this.editsSavedOrAbandoned()) {
-                this.remove(editPane);
+                this.removePane(editPane);
                 this.mainPane.executePane.clearPane();
                 this.mainPane.setSelectedComponent(this);
             } else {
@@ -203,7 +203,7 @@ public final class EditTabbedPane extends JPanel {
     private void closeFile(final int index) {
         final EditPane editPane = (EditPane) tabbedPane.getComponentAt(index);
         if (this.editsSavedOrAbandoned()) {
-            this.remove(editPane);
+            this.removePane(editPane);
             this.mainPane.executePane.clearPane();
             this.mainPane.setSelectedComponent(this);
         }
@@ -237,18 +237,18 @@ public final class EditTabbedPane extends JPanel {
                                 tabbedPane.setSelectedComponent(tabs[i]);
                                 final boolean saved = this.saveCurrentFile();
                                 if (saved) {
-                                    this.remove(tabs[i]);
+                                    this.removePane(tabs[i]);
                                 } else {
                                     removedAll = false;
                                 }
                             } else {
-                                this.remove(tabs[i]);
+                                this.removePane(tabs[i]);
                             }
                         }
                         return removedAll;
                     case JOptionPane.NO_OPTION:
                         for (int i = 0; i < tabCount; i++) {
-                            this.remove(tabs[i]);
+                            this.removePane(tabs[i]);
                         }
                         return true;
                     case JOptionPane.CANCEL_OPTION:
@@ -258,7 +258,7 @@ public final class EditTabbedPane extends JPanel {
                 }
             } else {
                 for (int i = 0; i < tabCount; i++) {
-                    this.remove(tabs[i]);
+                    this.removePane(tabs[i]);
                 }
             }
         }
@@ -451,16 +451,16 @@ public final class EditTabbedPane extends JPanel {
      * @param editPane
      *     a {@link EditPane} object
      */
-    public void remove(EditPane editPane) {
+    public void removePane(final EditPane editPane) {
         tabbedPane.remove(editPane);
-        editPane = this.getCurrentEditTab(); // is now next tab or null
-        if (editPane == null) {
+        final var currentTab = getCurrentEditTab();
+        if (currentTab == null) {
             FileStatus.setSystemState(FileStatus.State.NO_FILE);
             this.editor.setTitle("", "", FileStatus.State.NO_FILE);
             this.mainUI.setMenuState(FileStatus.State.NO_FILE);
         } else {
-            FileStatus.setSystemState(editPane.getFileStatus());
-            this.updateTitlesAndMenuState(editPane);
+            FileStatus.setSystemState(currentTab.getFileStatus());
+            this.updateTitlesAndMenuState(currentTab);
         }
         // When last file is closed, menu is unable to respond to mnemonics
         // and accelerators. Let's have it request focus so it may do so.
@@ -565,7 +565,8 @@ public final class EditTabbedPane extends JPanel {
                 this.setCurrentEditTab(editPane);
             }
             currentPane = editPane;
-        } else { // file is not open. Try to open it.
+        } else {
+            // file is not open. Try to open it.
             if (this.openFile(file)) {
                 currentPane = this.getCurrentEditTab();
             }
@@ -672,7 +673,7 @@ public final class EditTabbedPane extends JPanel {
             FileStatus.setSystemState(FileStatus.State.OPENING);
             if (theFile.canRead()) {
                 Globals.PROGRAM = new RISCVProgram();
-                Globals.PROGRAM.readSource(theFile); 
+                Globals.PROGRAM.readSource(theFile);
                 // Defined a StringBuffer to receive all file contents,
                 // one line at a time, before adding to the Edit pane with one setText.
                 // StringBuffer is preallocated to full filelength to eliminate dynamic
@@ -702,7 +703,8 @@ public final class EditTabbedPane extends JPanel {
                 // If assemble-all, then allow opening of any file w/o invalidating assembly.
                 if (allSettings.boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {
                     EditTabbedPane.this.updateTitles(editPane);
-                } else {// this was the original code...
+                } else {
+                    // this was the original code...
                     EditTabbedPane.this.updateTitlesAndMenuState(editPane);
                     EditTabbedPane.this.mainPane.executePane.clearPane();
                 }

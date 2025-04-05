@@ -36,35 +36,6 @@ import java.util.List;
 
 import static kotlin.collections.CollectionsKt.*;
 
-
-/*
-Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 /**
  * Top level container for Venus GUI.
  *
@@ -102,18 +73,17 @@ public final class VenusUI extends JFrame {
         settingsExceptionHandlerAction, settingsEditorAction, settingsMemoryConfigurationAction,
         settingsSelfModifyingCodeAction, settingsRV64Action, settingsDeriveCurrentWorkingDirectoryAction;
     private final @NotNull Action helpHelpAction, helpAboutAction;
-    /// registers/memory reset for execution
-    public boolean isMemoryReset = true;
-    public boolean isExecutionStarted = false;
-    
-    // temporary place for migrating global settings and stuff
-    
     private final @NotNull AllSettings allSettings = Globals.ALL_SETTINGS;
     private final @NotNull FontSettingsImpl fontSettings = allSettings.fontSettings;
+
+    // temporary place for migrating global settings and stuff
     private final @NotNull BoolSettingsImpl boolSettings = allSettings.boolSettings;
     private final @NotNull OtherSettingsImpl otherSettings = allSettings.otherSettings;
     private final @NotNull EditorThemeSettingsImpl editorThemeSettings = allSettings.editorThemeSettings;
     private final @NotNull HighlightingSettingsImpl highlightingSettings = allSettings.highlightingSettings;
+    /// registers/memory reset for execution
+    public boolean isMemoryReset = true;
+    public boolean isExecutionStarted = false;
 
     /**
      * Constructor for the Class. Sets up a window object for the UI
@@ -151,7 +121,7 @@ public final class VenusUI extends JFrame {
             (int) (screenHeight * registersHeightPct)
         );
 
-        final var imageUrl = this.getClass().getResource(Globals.imagesPath + "RISC-V.png");
+        final var imageUrl = this.getClass().getResource(Globals.IMAGES_PATH + "RISC-V.png");
         if (imageUrl == null) {
             VenusUI.LOGGER.fatal("Internal Error: images folder or file not found.");
             System.exit(0);
@@ -408,6 +378,7 @@ public final class VenusUI extends JFrame {
         this.settingsLabelAction = new SettingsAction(
             "Show Labels Window (symbol table)",
             "Toggle visibility of Labels window (symbol table) in the Execute tab",
+            boolSettings,
             BoolSetting.LABEL_WINDOW_VISIBILITY, this, (value) -> {
             this.mainPane.executePane.setLabelWindowVisibility(value);
             VenusUI.LOGGER.info("ExecutePane reference 2");
@@ -415,62 +386,73 @@ public final class VenusUI extends JFrame {
         );
         this.settingsDarkModeAction = new SettingsAction(
             "Dark mode", "Toggle between light and dark mode",
+            boolSettings,
             BoolSetting.DARK_MODE, this, this::setDarkModeState
         );
 
         this.settingsPopupInputAction = new SettingsAction(
             "Popup dialog for input syscalls (5,6,7,8,12)",
             "If set, use popup dialog for input syscalls (5,6,7,8,12) instead of cursor in Run I/O window",
+            boolSettings,
             BoolSetting.POPUP_SYSCALL_INPUT, this
         );
 
         this.settingsValueDisplayBaseAction = new SettingsAction(
             "Values displayed in hexadecimal",
             "Toggle between hexadecimal and decimal display of memory/register values",
+            boolSettings,
             BoolSetting.DISPLAY_VALUES_IN_HEX, this,
             this.mainPane.executePane.valueDisplayBase::setSelected
         );
         this.settingsAddressDisplayBaseAction = new SettingsAction(
             "Addresses displayed in hexadecimal",
             "Toggle between hexadecimal and decimal display of memory addresses",
+            boolSettings,
             BoolSetting.DISPLAY_ADDRESSES_IN_HEX, this, this.mainPane.executePane.addressDisplayBase::setSelected
         );
         this.settingsExtendedAction = new SettingsAction(
             "Permit extended (usePseudoInstructions) instructions " +
                 "and formats",
             "If set, extended (usePseudoInstructions) instructions are formats are permitted.",
+            boolSettings,
             BoolSetting.EXTENDED_ASSEMBLER_ENABLED, this
         );
         this.settingsAssembleOnOpenAction = new SettingsAction(
             "Assemble file upon opening",
             "If set, a file will be automatically assembled as soon as it is opened.  File Open dialog will " +
                 "show most recently opened file.",
+            boolSettings,
             BoolSetting.ASSEMBLE_ON_OPEN, this
         );
         this.settingsAssembleAllAction = new SettingsAction(
             "Assemble all files in directory",
             "If set, all files in current directory will be assembled when Assemble operation is selected.",
+            boolSettings,
             BoolSetting.ASSEMBLE_ALL, this
         );
         this.settingsAssembleOpenAction = new SettingsAction(
             "Assemble all files currently open",
             "If set, all files currently open for editing will be assembled when Assemble operation is " +
                 "selected.",
+            boolSettings,
             BoolSetting.ASSEMBLE_OPEN, this
         );
         this.settingsWarningsAreErrorsAction = new SettingsAction(
             "Assembler warnings are considered errors",
             "If set, assembler warnings will be interpreted as errors and prevent successful assembly.",
+            boolSettings,
             BoolSetting.WARNINGS_ARE_ERRORS, this
         );
         this.settingsStartAtMainAction = new SettingsAction(
             "Initialize Program Counter to global 'main' if defined",
             "If set, assembler will initialize Program Counter to text address globally labeled 'main', if defined.",
+            boolSettings,
             BoolSetting.START_AT_MAIN, this
         );
         this.settingsProgramArgumentsAction = new SettingsAction(
             "Program arguments provided to program",
             "If set, program arguments for the program can be entered in border of Text Segment window.",
+            boolSettings,
             BoolSetting.PROGRAM_ARGUMENTS, this, (selected) -> {
             if (selected) {
                 this.mainPane.executePane.textSegment.addProgramArgumentsPanel();
@@ -478,17 +460,18 @@ public final class VenusUI extends JFrame {
                 this.mainPane.executePane.textSegment.removeProgramArgumentsPanel();
             }
         }
-        )
-        ;
+        );
         this.settingsSelfModifyingCodeAction = new SettingsAction(
             "Self-modifying code",
             "If set, the program can write and branch to both text and data segments.",
+            boolSettings,
             BoolSetting.SELF_MODIFYING_CODE_ENABLED, this
         );
 
         this.settingsRV64Action = new SettingsAction(
             "64 bit",
             "If set, registers are 64 bits wide and new instructions are available",
+            boolSettings,
             BoolSetting.RV64_ENABLED, this, (isRV64) -> {
             InstructionsRegistry.RV64_MODE_FLAG = isRV64;
             this.registersTab.updateRegisters();
@@ -500,18 +483,19 @@ public final class VenusUI extends JFrame {
             "Derive current working directory",
             "If set, the working directory is derived from the main file instead of the RARS executable " +
                 "directory.",
+            boolSettings,
             BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY, this
         );
 
         this.settingsEditorAction = new SettingsEditorAction(
-            "Editor...", null,
-            "View and modify text editor settings.", null, null, this
+            this,
+            allSettings
         );
         this.settingsExceptionHandlerAction = new SettingsExceptionHandlerAction(
-            "Exception Handler...", 
+            "Exception Handler...",
             "If set, the specified exception handler file will be included in all Assemble operations.",
-             this,
-            boolSettings, 
+            this,
+            boolSettings,
             otherSettings
         );
         this.settingsMemoryConfigurationAction = new SettingsMemoryConfigurationAction(
@@ -638,6 +622,11 @@ public final class VenusUI extends JFrame {
         return menuItem;
     }
 
+    private static @NotNull ImageIcon loadIcon(final @NotNull String name) {
+        final var resource = VenusUI.class.getResource(Globals.IMAGES_PATH + name);
+        return new ImageIcon(Toolkit.getDefaultToolkit().getImage(resource));
+    }
+
     private @NotNull JCheckBoxMenuItem checkBoxItem(
         final @NotNull Action action,
         final @NotNull BoolSetting setting
@@ -645,11 +634,6 @@ public final class VenusUI extends JFrame {
         final var checkBoxMenuItem = new JCheckBoxMenuItem(action);
         checkBoxMenuItem.setSelected(boolSettings.getSetting(setting));
         return checkBoxMenuItem;
-    }
-
-    private static @NotNull ImageIcon loadIcon(final @NotNull String name) {
-        final var resource = VenusUI.class.getResource(Globals.imagesPath + name);
-        return new ImageIcon(Toolkit.getDefaultToolkit().getImage(resource));
     }
 
     private void setDarkModeState(final boolean isDarkMode) {
@@ -893,8 +877,7 @@ public final class VenusUI extends JFrame {
     }
 
     /**
-     * Added DPS 9-Aug-2011, for newly-opened files. Retain
-     * existing Run menu state (except Assemble, which is always true).
+     * Retains existing Run menu state (except Assemble, which is always true).
      * Thus if there was a valid assembly it is retained.
      */
     private void setMenuStateNotEdited() {
@@ -905,7 +888,7 @@ public final class VenusUI extends JFrame {
         );
         this.fileDumpMemoryAction.setEnabled(false);
         setEnabled(
-            fileDumpMemoryAction, fileExitAction, editCutAction, editCopyAction, editPasteAction,
+            fileExitAction, editCutAction, editCopyAction, editPasteAction,
             editFindReplaceAction, settingsMemoryConfigurationAction, runAssembleAction
         );
         // If assemble-all, allow previous Run menu settings to remain.

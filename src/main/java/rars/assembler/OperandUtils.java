@@ -9,34 +9,6 @@ import rars.riscv.InstructionsRegistry;
 
 import java.util.List;
 
-/*
-Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
-
 /**
  * Provides utility method related to operand formats.
  *
@@ -134,7 +106,6 @@ public final class OperandUtils {
             // name, and
             // names are not permitted.
 
-            // added 2-July-2010 DPS
             // Not an error if spec calls for identifier and candidate is operator, since
             // operator names can be used as labels.
             // TODO: maybe add more cases in here
@@ -149,7 +120,6 @@ public final class OperandUtils {
                 cand.set(i, replacement);
                 continue;
             }
-            // end 2-July-2010 addition
 
             if ((specType == TokenType.REGISTER_NAME || specType == TokenType.REGISTER_NUMBER) &&
                 candType == TokenType.REGISTER_NAME) {
@@ -159,12 +129,13 @@ public final class OperandUtils {
                 candType == TokenType.REGISTER_NUMBER) {
                 continue;
             }
-            if (specType == TokenType.CSR_NAME &&
-                (
-                    candType == TokenType.INTEGER_5 || candType == TokenType.INTEGER_6
-                        || candType == TokenType.INTEGER_12
-                        || candType == TokenType.INTEGER_12U || candType == TokenType.CSR_NAME
-                )) {
+            if (specType == TokenType.CSR_NAME && (
+                candType == TokenType.INTEGER_5
+                    || candType == TokenType.INTEGER_6
+                    || candType == TokenType.INTEGER_12
+                    || candType == TokenType.INTEGER_12U
+                    || candType == TokenType.CSR_NAME
+            )) {
                 continue;
             }
             if ((specType == TokenType.INTEGER_6 && candType == TokenType.INTEGER_5) ||

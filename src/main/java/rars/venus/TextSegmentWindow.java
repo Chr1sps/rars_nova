@@ -34,9 +34,9 @@ import java.util.Objects;
 
 import static kotlin.collections.CollectionsKt.map;
 import static kotlin.collections.CollectionsKt.maxByOrNull;
-import static rars.Globals.*;
-import static rars.util.KotlinUtilsKt.unwrap;
-import static rars.util.Utils.deriveFontFromStyle;
+import static rars.Globals.SIMULATOR;
+import static rars.util.UtilsKt.applyStyle;
+import static rars.util.UtilsKt.unwrap;
 
 /*
 Copyright (c) 2003-2007,  Pete Sanderson and Kenneth Vollmar
@@ -76,13 +76,13 @@ public final class TextSegmentWindow extends JInternalFrame {
     private static final int PROGRAM_ARGUMENT_TEXTFIELD_COLUMNS = 40;
     // The following is displayed in the Basic and Source columns if existing code
     // is overwritten using self-modifying code feature
-    private static final String modifiedCodeMarker = " ------ ";
-    private static final @NotNull String breakpointToolTip = "If checked, will set an execution breakpoint. Click " +
+    private static final String MODIFIED_CODE_MARKER = " ------ ";
+    private static final @NotNull String BREAKPOINT_TOOL_TIP = "If checked, will set an execution breakpoint. Click " +
         "header to disable/enable breakpoints",
-        instructionAddressToolTip = "Text segment address of binary instruction code",
-        instructionCodeToolTip = "32-bit binary RISCV instruction",
-        basicInstructionsToolTip = "Basic assembler instruction",
-        sourceToolTip = "Source code line";
+        INSTRUCTION_ADDRESS_TOOL_TIP = "Text segment address of binary instruction code",
+        INSTRUCTION_CODE_TOOL_TIP = "32-bit binary RISCV instruction",
+        BASIC_INSTRUCTIONS_TOOL_TIP = "Basic assembler instruction",
+        SOURCE_TOOL_TIP = "Source code line";
     private final JPanel programArgumentsPanel;
     private final JTextField programArgumentsTextField;
     private final Container contentPane;
@@ -139,13 +139,7 @@ public final class TextSegmentWindow extends JInternalFrame {
         SIMULATOR.simulatorNoticeHook.subscribe(notice -> {
             if (notice.action == SimulatorNotice.Action.START) {
                 this.deleteAsTextSegmentObserver();
-                if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) { // &&
-                    // (notice.getRunSpeed()
-                    // !=
-                    // RunSpeedPanel.UNLIMITED_SPEED
-                    // ||
-                    // notice.getMaxSteps()==1))
-                    // {
+                if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                     this.addAsTextSegmentObserver();
                 }
             }
@@ -389,7 +383,8 @@ public final class TextSegmentWindow extends JInternalFrame {
             // modified at runtime, construct a ProgramStatement from the current address
             // and binary code
             // then display its basic code. 
-            if (this.executeMods.get(i) == null) { // not modified, so use original logic.
+            if (this.executeMods.get(i) == null) {
+                // not modified, so use original logic.
                 final ProgramStatement statement = sourceStatementList.get(i);
                 this.table.getModel().setValueAt(
                     statement.getPrintableBasicAssemblyStatement(), i,
@@ -683,9 +678,9 @@ public final class TextSegmentWindow extends JInternalFrame {
             return; // do nothing if address modified is outside the range of original program.
         }
         ModifiedCode mc = this.executeMods.get(row);
-        String strSource = TextSegmentWindow.modifiedCodeMarker;
+        String strSource = TextSegmentWindow.MODIFIED_CODE_MARKER;
         final String strBasic;
-        if (mc == null) { // if not already modified
+        if (mc == null) {
             // Not already modified and new code is same as original --> do nothing.
             if (this.tableModel.getValueAt(
                 row,
@@ -788,11 +783,11 @@ public final class TextSegmentWindow extends JInternalFrame {
     }
 
     private enum ColumnData {
-        BREAKPOINT_COLUMN(0, "Bkpt", breakpointToolTip),
-        SOURCE_COLUMN(1, "Source code", sourceToolTip),
-        BASIC_INSTRUCTIONS_COLUMN(2, "Basic instructions", basicInstructionsToolTip),
-        INSTRUCTION_ADDRESS_COLUMN(3, "Instruction address", instructionAddressToolTip),
-        INSTRUCTION_CODE_COLUMN(4, "Instruction opcode", instructionCodeToolTip),
+        BREAKPOINT_COLUMN(0, "Bkpt", BREAKPOINT_TOOL_TIP),
+        SOURCE_COLUMN(1, "Source code", SOURCE_TOOL_TIP),
+        BASIC_INSTRUCTIONS_COLUMN(2, "Basic instructions", BASIC_INSTRUCTIONS_TOOL_TIP),
+        INSTRUCTION_ADDRESS_COLUMN(3, "Instruction address", INSTRUCTION_ADDRESS_TOOL_TIP),
+        INSTRUCTION_CODE_COLUMN(4, "Instruction opcode", INSTRUCTION_CODE_TOOL_TIP),
         ;
 
         public final int number;
@@ -950,7 +945,7 @@ public final class TextSegmentWindow extends JInternalFrame {
                 final var style = highlightingSettings.getTextSegmentHighlightingStyle();
                 cell.setBackground(style.background());
                 cell.setForeground(style.foreground());
-                cell.setFont(deriveFontFromStyle(fontSettings.getCurrentFont(), style));
+                cell.setFont(applyStyle(fontSettings.getCurrentFont(), style));
             } else {
                 final var theme = editorThemeSettings.getCurrentTheme();
                 cell.setBackground(theme.backgroundColor);

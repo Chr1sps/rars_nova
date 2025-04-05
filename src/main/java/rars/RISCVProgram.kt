@@ -111,7 +111,7 @@ class RISCVProgram {
          */
         set(sourceLineList) {
             field = sourceLineList
-            this.sourceList = sourceLineList!!.stream().map(SourceLine::source).toList()
+            this.sourceList = sourceLineList!!.map(SourceLine::source)
         }
 
     /**
@@ -299,5 +299,5 @@ class RISCVProgram {
     }
 
     var localMacroPool: MacroPool? by this::macroPool
-} // RISCVprogram
+}
 

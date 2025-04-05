@@ -1,9 +1,9 @@
-package rars.util;
+package rars.util
 
-import java.awt.font.TextAttribute;
+import java.awt.font.TextAttribute
+import java.util.*
 
-public enum FontWeight {
-
+enum class FontWeight(val weight: Float) {
     EXTRA_LIGHT(TextAttribute.WEIGHT_EXTRA_LIGHT),
     LIGHT(TextAttribute.WEIGHT_LIGHT),
     DEMI_LIGHT(TextAttribute.WEIGHT_DEMILIGHT),
@@ -15,15 +15,9 @@ public enum FontWeight {
     HEAVY(TextAttribute.WEIGHT_HEAVY),
     EXTRA_BOLD(TextAttribute.WEIGHT_EXTRABOLD),
     ULTRA_BOLD(TextAttribute.WEIGHT_ULTRABOLD);
-    public final float weight;
 
-    FontWeight(final float weight) {
-        this.weight = weight;
-    }
-
-    @Override
-    public String toString() {
-        final var name = name().replace('_', ' ').toLowerCase();
-        return name.substring(0, 1).toUpperCase() + name.substring(1);
+    override fun toString(): String {
+        val name = name.replace('_', ' ').lowercase(Locale.getDefault())
+        return name.substring(0, 1).uppercase(Locale.getDefault()) + name.substring(1)
     }
 }

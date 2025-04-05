@@ -1,26 +1,24 @@
-package rars.venus.settings.editor.controllers;
+package rars.venus.settings.editor.controllers
 
-import org.jetbrains.annotations.NotNull;
-import rars.settings.SettingsThemePresets;
-import rars.venus.editors.TextEditingArea;
-import rars.venus.settings.editor.views.PresetsView;
+import rars.settings.SettingsThemePresets.THEMES
+import rars.venus.editors.TextEditingArea
+import rars.venus.settings.editor.views.PresetsView
+import rars.venus.settings.editor.views.PresetsView.PresetSection
 
-public final class PresetsController {
-    public PresetsController(
-        final @NotNull PresetsView view,
-        final @NotNull TextEditingArea textArea,
-        final @NotNull EditorSettingsController parentController
-    ) {
-        SettingsThemePresets.getTHEMES().forEach(themeEntry -> {
-            final var section = new PresetsView.PresetSection(themeEntry.name);
-            section.button.addActionListener(e -> {
-                parentController.settingsTheme = themeEntry.theme.clone();
-                textArea.setTheme(parentController.settingsTheme.toEditorTheme());
-                // We need to update the info regarding the theme in all the theme
-                // related controllers.
-                parentController.updateThemeControllers();
-            });
-            view.addSection(section);
-        });
+fun PresetsController(
+    view: PresetsView,
+    textArea: TextEditingArea,
+    parentController: EditorSettingsController
+) {
+    THEMES.forEach { themeEntry ->
+        val section = PresetSection(themeEntry.name)
+        section.button.addActionListener {
+            parentController.settingsTheme = themeEntry.theme.clone()
+            textArea.setTheme(parentController.settingsTheme.toEditorTheme())
+            // We need to update the info regarding the theme in all the theme
+            // related controllers.
+            parentController.updateThemeControllers()
+        }
+        view.addSection(section)
     }
 }

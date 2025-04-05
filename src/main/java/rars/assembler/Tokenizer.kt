@@ -63,7 +63,7 @@ class Tokenizer private constructor(
     private val program: RISCVProgram? = null,
     private val errors: ErrorList = ErrorList()
 ) {
-    private val equivalents = mutableMapOf<String, String>() // DPS 11-July-2012
+    private val equivalents = mutableMapOf<String, String>()
 
     // Modified for release 4.3, to preserve existing API.
     /**
@@ -106,14 +106,17 @@ class Tokenizer private constructor(
         var linePos = 0
         while (linePos < line.size) {
             var c = line[linePos]
-            if (insideQuotedString) { // everything goes into token
+            if (insideQuotedString) {
+                // everything goes into token
                 token[tokenPos++] = c
-                if (c == '"' && token[tokenPos - 2] != '\\') { // If quote not preceded by backslash, this is end
+                if (c == '"' && token[tokenPos - 2] != '\\') {
+                    // If quote not preceded by backslash, this is end
                     this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result)
                     tokenPos = 0
                     insideQuotedString = false
                 }
-            } else { // not inside a quoted string, so be sensitive to delimiters
+            } else {
+                // not inside a quoted string, so be sensitive to delimiters
                 when (c) {
                     '#' -> {
                         if (tokenPos > 0) {
@@ -141,7 +144,7 @@ class Tokenizer private constructor(
                     '+', '-' -> {
                         // Here's the REAL hack: recognizing signed exponent in E-notation floating
                         // point!
-                        // (e.g. 1.2e-5) Add the + or - to the token and keep going. DPS 17 Aug 2005
+                        // (e.g. 1.2e-5) Add the + or - to the token and keep going.
                         if (tokenPos > 0 &&
                             line.size >= linePos + 2 &&
                             Character.isDigit(line[linePos + 1]) &&
@@ -289,10 +292,10 @@ class Tokenizer private constructor(
                         token[tokenPos++] = c
                     }
                 }
-            } // if (insideQuotedString)
+            }
 
             linePos++
-        } // while
+        }
 
         if (tokenPos > 0) {
             if (insideQuotedString) {
@@ -306,7 +309,7 @@ class Tokenizer private constructor(
             this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result)
         }
         if (doEqvSubstitutes) {
-            result = this.processEqv(program, lineNum, theLine, result) // DPS 11-July-2012
+            result = this.processEqv(program, lineNum, theLine, result)
         }
         return result
     }
@@ -321,7 +324,6 @@ class Tokenizer private constructor(
      * included
      * files that themselves have .include. Plus it will detect and report recursive
      * includes both direct and indirect.
-     * DPS 11-Jan-2013
      */
     private fun processIncludes(
         program: RISCVProgram,
@@ -334,7 +336,7 @@ class Tokenizer private constructor(
             val tokenizedLine = tokenizeLineImpl(program, i + 1, line, false)
             var hasInclude = false
             for (ii in tokenizedLine.indices) {
-                if (tokenizedLine.get(ii).text.equals(Directive.INCLUDE.name, ignoreCase = true)
+                if (tokenizedLine.get(ii).text.equals(Directive.INCLUDE.directiveName, ignoreCase = true)
                     && (tokenizedLine.size > ii + 1)
                     && tokenizedLine.get(ii + 1).type == TokenType.QUOTED_STRING
                 ) {
@@ -403,7 +405,7 @@ class Tokenizer private constructor(
                     this.errors.add(
                         ErrorMessage.error(
                             program, lineNum, tokens.get(dirPos).startPos,
-                            "Too few operands for " + Directive.EQV.name + " directive"
+                            "Too few operands for " + Directive.EQV.directiveName + " directive"
                         )
                     )
                     return tokens
@@ -413,7 +415,7 @@ class Tokenizer private constructor(
                     this.errors.add(
                         ErrorMessage.error(
                             program, lineNum, tokens.get(dirPos).startPos,
-                            "Malformed " + Directive.EQV.name + " directive"
+                            "Malformed " + Directive.EQV.directiveName + " directive"
                         )
                     )
                     return tokens
@@ -427,7 +429,7 @@ class Tokenizer private constructor(
                         this.errors.add(
                             ErrorMessage.error(
                                 program, lineNum, tokens.get(dirPos).startPos,
-                                ("Cannot substitute " + symbol + " for itself in " + Directive.EQV.name
+                                ("Cannot substitute " + symbol + " for itself in " + Directive.EQV.directiveName
                                     + " directive")
                             )
                         )
@@ -465,7 +467,7 @@ class Tokenizer private constructor(
                 break
             }
         }
-        tokens.processedLine = theLine // DPS 03-Jan-2013. Related to changes of 11-July-2012.
+        tokens.processedLine = theLine
 
         return if (substitutionMade) this.tokenizeLineImpl(this.program, lineNum, theLine, true) else tokens
     }
@@ -557,7 +559,7 @@ class Tokenizer private constructor(
                 val sourceLine = source[i].source
                 val currentLineTokens = tokenizer.tokenizeLineImpl(tokenizer.program, i + 1, sourceLine, true)
                 tokenList.add(currentLineTokens)
-                // DPS 03-Jan-2013. Related to 11-July-2012. If source code substitution was
+                // If source code substitution was
                 // made
                 // based on .eqv directive during tokenizing, the processed line, a String, is
                 // not the same object as the original line. Thus I can use != instead of

@@ -1,4 +1,4 @@
-package rars.riscv.hardware.registerFiles
+package rars.riscv.hardware.registerfiles
 
 import arrow.core.Either
 import arrow.core.raise.either

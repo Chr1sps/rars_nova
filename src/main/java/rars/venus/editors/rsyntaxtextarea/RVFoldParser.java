@@ -310,14 +310,14 @@ final class RVFoldParser implements FoldParser {
     private static boolean isMacroStartLine(final Token tokens) {
         return lineContainsToken(
             tokens, (token) -> token.getType() == tokenValue(RVTokenType.DIRECTIVE) &&
-                token.getLexeme().equalsIgnoreCase(Directive.MACRO.getName())
+                token.getLexeme().equalsIgnoreCase(Directive.MACRO.directiveName)
         );
     }
 
     private static boolean isMacroEndLine(final Token tokens) {
         return lineContainsToken(
             tokens, (token) -> token.getType() == tokenValue(RVTokenType.DIRECTIVE) &&
-                token.getLexeme().equalsIgnoreCase(Directive.END_MACRO.getName())
+                token.getLexeme().equalsIgnoreCase(Directive.END_MACRO.directiveName)
         );
     }
 

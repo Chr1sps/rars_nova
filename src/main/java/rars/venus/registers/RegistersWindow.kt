@@ -1,6 +1,6 @@
 package rars.venus.registers
 
-import rars.riscv.hardware.registerFiles.RegisterFile
+import rars.riscv.hardware.registerfiles.RegisterFile
 import rars.settings.AllSettings
 import rars.settings.BoolSetting
 import rars.venus.NumberDisplayBaseChooser
@@ -27,7 +27,7 @@ class RegistersWindow(
     companion object {
         const val SAVED_TEMPORARY = "saved temporary (preserved across call)"
         const val TEMPORARY = "temporary (not preserved across call)"
-        
+
         /** The tips to show when hovering over the names of the registers */
         private val regToolTips = arrayOf(
             "constant 0", // zero 

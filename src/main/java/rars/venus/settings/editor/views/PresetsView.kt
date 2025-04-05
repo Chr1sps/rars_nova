@@ -1,37 +1,32 @@
-package rars.venus.settings.editor.views;
+package rars.venus.settings.editor.views
 
-import org.jetbrains.annotations.NotNull;
+import rars.venus.util.BoxLayout
+import javax.swing.*
 
-import javax.swing.*;
-import java.util.ArrayList;
-
-public final class PresetsView extends JScrollPane {
-    public final @NotNull ArrayList<@NotNull PresetSection> sections;
-    private final @NotNull JPanel mainPanel;
-
-    public PresetsView() {
-        super();
-        this.sections = new ArrayList<>();
-        this.mainPanel = new JPanel();
-        this.mainPanel.setLayout(new BoxLayout(this.mainPanel, BoxLayout.Y_AXIS));
-        this.setViewportView(this.mainPanel);
+class PresetsView : JScrollPane() {
+    val sections = mutableListOf<PresetSection>()
+    private val mainPanel = JPanel().apply {
+        layout = BoxLayout(this, BoxLayout.Y_AXIS)
     }
 
-    public void addSection(final @NotNull PresetSection section) {
-        this.sections.add(section);
-        this.mainPanel.add(section);
+    init {
+        setViewportView(mainPanel)
     }
 
-    public static class PresetSection extends JPanel {
-        public final @NotNull JButton button;
+    fun addSection(section: PresetSection) {
+        sections.add(section)
+        mainPanel.add(section)
+    }
 
-        public PresetSection(final @NotNull String themeName) {
-            super();
-            this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-            this.button = new JButton("Apply");
-            this.add(new JLabel(themeName));
-            this.add(Box.createHorizontalGlue());
-            this.add(this.button);
+    class PresetSection(themeName: String) : JPanel() {
+        val button: JButton = JButton("Apply")
+
+        init {
+            BoxLayout(BoxLayout.X_AXIS) {
+                +JLabel(themeName)
+                horizontalGlue()
+                +button
+            }
         }
     }
 }

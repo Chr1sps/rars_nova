@@ -233,9 +233,10 @@ public enum TokenType {
      * @return true if type is an integer type, false otherwise.
      */
     public static boolean isIntegerTokenType(final TokenType type) {
-        return type == TokenType.INTEGER_5 || type == TokenType.INTEGER_6 || type == TokenType.INTEGER_12 ||
-            type == TokenType.INTEGER_12U || type == TokenType.INTEGER_20 || type == TokenType.INTEGER_32 ||
-            type == TokenType.INTEGER_64;
+        return switch (type) {
+            case INTEGER_5, INTEGER_6, INTEGER_12, INTEGER_12U, INTEGER_20, INTEGER_32, INTEGER_64 -> true;
+            default -> false;
+        };
     }
 
     /**
@@ -249,13 +250,6 @@ public enum TokenType {
         return type == TokenType.REAL_NUMBER;
     }
 
-    /**
-     * <p>isValidIdentifier.</p>
-     *
-     * @param value
-     *     a {@link java.lang.String} object
-     * @return a boolean
-     */
     public static boolean isValidIdentifier(final String value) {
         boolean result = (
             Character.isLetter(value.charAt(0)) || value.charAt(0) == '_' || value.charAt(0) == '.'
@@ -273,17 +267,6 @@ public enum TokenType {
         }
         return result;
     }
-
-    // TODO: is $ still relevant?
-    // COD2, A-51: "Identifiers are a sequence of alphanumeric characters,
-    // underbars (_), and dots (.) that do not begin with a number."
-    // Ideally this would be in a separate Identifier class but I did not see an
-    // immediate
-    // need beyond this method (refactoring effort would probably identify other
-    // uses
-    // related to symbol table).
-    // DPS 14-Jul-2008: added '$' as valid symbol. Permits labels to include $.
-    // MIPS-target GCC will produce labels that start with $.
 
     /**
      * Produces String equivalent of this token type, which is its name.

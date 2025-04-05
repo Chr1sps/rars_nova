@@ -13,8 +13,8 @@ import rars.ksoftfloat.types.Float32
 import rars.ksoftfloat.types.Float64
 import rars.ksoftfloat.types.Floating
 import rars.ksoftfloat.types.FloatingFactory
-import rars.riscv.hardware.registerFiles.CSRegisterFile
-import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile
+import rars.riscv.hardware.registerfiles.CSRegisterFile
+import rars.riscv.hardware.registerfiles.FloatingPointRegisterFile
 import java.math.BigInteger
 
 internal fun CSRegisterFile.setfflags(environment: Environment): Either<SimulationError, Unit> =

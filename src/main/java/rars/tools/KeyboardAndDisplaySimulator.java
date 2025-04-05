@@ -24,35 +24,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static rars.Globals.FONT_SETTINGS;
-import static rars.util.KotlinUtilsKt.unwrap;
-
-/*
-Copyright (c) 2003-2014,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject
-to the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
+import static rars.util.UtilsKt.unwrap;
 
 // TODO: make an example that uses this. I'm not sure it wasn't broken in the porting process.
 
@@ -99,8 +71,8 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
     public static final int EXTERNAL_INTERRUPT_KEYBOARD = 0x00000040;
     public static final int EXTERNAL_INTERRUPT_DISPLAY = 0x00000080;
     private static final Logger LOGGER = LogManager.getLogger(KeyboardAndDisplaySimulator.class);
-    private static final String version = "Version 1.4";
-    private static final String heading = "Keyboard and Display MMIO Simulator";
+    private static final String VERSION = "Version 1.4";
+    private static final String HEADING = "Keyboard and Display MMIO Simulator";
     private static final char VT_FILL = ' '; // fill character for virtual terminal (random access mode)
     private static final Insets textAreaInsets = new Insets(4, 4, 4, 4);
     private static final char CLEAR_SCREEN = 12; // ASCII Form Feed
@@ -134,8 +106,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
     private boolean displayAfterDelay = true;
     /**
      * Whether or not display position is sequential (JTextArea append)
-     * or random access (row, column). Supports new random access feature. DPS
-     * 17-July-2014
+     * or random access (row, column). Supports new random access feature.
      */
     private boolean displayRandomAccessMode = false;
     private int rows, columns;
@@ -149,8 +120,8 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
 
     public KeyboardAndDisplaySimulator(final @NotNull VenusUI mainUI) {
         super(
-            KeyboardAndDisplaySimulator.heading + ", " + KeyboardAndDisplaySimulator.version,
-            KeyboardAndDisplaySimulator.heading, mainUI
+            KeyboardAndDisplaySimulator.HEADING + ", " + KeyboardAndDisplaySimulator.VERSION,
+            KeyboardAndDisplaySimulator.HEADING, mainUI
         );
         this.simulator = this;
     }
@@ -181,7 +152,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
 
     @Override
     public String getName() {
-        return KeyboardAndDisplaySimulator.heading;
+        return KeyboardAndDisplaySimulator.HEADING;
     }
 
     @Override
@@ -264,7 +235,6 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // display positioning feature. Previously, both the display and the keyboard
         // text areas were equal in size and there was no way for the user to change
         // that.
-        // DPS 17-July-2014
         // Major GUI components
         final JPanel keyboardAndDisplay = new JPanel(new BorderLayout());
         final JSplitPane both = new JSplitPane(JSplitPane.VERTICAL_SPLIT, this.buildDisplay(), this.buildKeyboard());
@@ -662,7 +632,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
                 // (2) create JOptionPane object, get JDialog from it, make the JDialog modeless
                 // Solution 2 is shorter but requires Java 1.6. Trying to keep MARS at 1.5. So
                 // we
-                // do it the hard way. DPS 16-July-2014
+                // do it the hard way.
                 final String title = "Simulating the Keyboard and Display";
                 // The following is necessary because there are different JDialog constructors
                 // for Dialog and
@@ -685,7 +655,6 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
                 d.setLocationRelativeTo(KeyboardAndDisplaySimulator.this.theWindow);
                 d.setVisible(true);
                 // This alternative technique is simpler than the above but requires java 1.6!
-                // DPS 16-July-2014
                 // JOptionPane theStuff = new JOptionPane(new
                 // JScrollPane(ja),JOptionPane.INFORMATION_MESSAGE,
                 // JOptionPane.DEFAULT_OPTION, null, new String[]{"Close"} );

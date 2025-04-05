@@ -30,10 +30,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.time.Instant;
 
-import static rars.Globals.*;
-import static rars.util.KotlinUtilsKt.rightOr;
-import static rars.util.KotlinUtilsKt.unwrap;
-import static rars.util.Utils.deriveFontFromStyle;
+import static rars.Globals.SIMULATOR;
+import static rars.util.UtilsKt.*;
 
 /*
 Copyright (c) 2003-2013,  Pete Sanderson and Kenneth Vollmar
@@ -83,7 +81,7 @@ public final class DataSegmentWindow extends JInternalFrame {
     // MEMORY_CHUNK_SIZE/2 means scroll half a table up or down. Easier to view
     // series that flows off the edge.
     // MEMORY_CHUNK_SIZE means scroll a full table's worth. Scrolls through memory
-    // faster. DPS 26-Jan-09
+    // faster. 
     private static final int PREV_NEXT_CHUNK_SIZE = DataSegmentWindow.MEMORY_CHUNK_SIZE / 2;
     private static final int ADDRESS_COLUMN = 0;
     private static final boolean USER_MODE = false;
@@ -110,7 +108,7 @@ public final class DataSegmentWindow extends JInternalFrame {
     // 7!
     // We'll keep the button objects however and manually invoke their action
     // listeners
-    // when the corresponding combo box item is selected. DPS 22-Nov-2006
+    // when the corresponding combo box item is selected. 
     private final JComboBox<String> baseAddressSelector;
     // Must agree with above in number and order...
     private final int[] displayBaseAddressArray;
@@ -120,7 +118,7 @@ public final class DataSegmentWindow extends JInternalFrame {
     private final @NotNull FontSettingsImpl fontSettings;
     private final @NotNull EditorThemeSettingsImpl editorThemeSettings;
     private final @NotNull HighlightingSettingsImpl highlightingSettings;
-    
+
     private JScrollPane dataTableScroller;
     private JButton dataButton, nextButton, prevButton, stakButton, globButton, heapButton, extnButton, mmioButton,
         textButton;
@@ -202,9 +200,9 @@ public final class DataSegmentWindow extends JInternalFrame {
         final Class<? extends DataSegmentWindow> cs = this.getClass();
         try {
             this.prevButton = new PrevButton(
-                new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Previous22.png"))));// "Back16
+                new ImageIcon(tk.getImage(cs.getResource(Globals.IMAGES_PATH + "Previous22.png"))));// "Back16
             // .gif"))));//"Down16.gif"))));
-            this.nextButton = new NextButton(new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Next22" +
+            this.nextButton = new NextButton(new ImageIcon(tk.getImage(cs.getResource(Globals.IMAGES_PATH + "Next22" +
                 ".png"))));// "Forward16
             // .gif"))));
             // //"Up16.gif"))));
@@ -257,7 +255,9 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.contentPane.add(features, BorderLayout.SOUTH);
     }
 
-    // Create and fill String array containing labels for base address combo box.
+    /**
+     * Create and fill String array containing labels for base address combo box.
+     */
     private static String[] createBaseAddressLabelsArray(final int[] baseAddressArray, final String[] descriptions) {
         final String[] baseAddressChoices = new String[baseAddressArray.length];
         for (int i = 0; i < baseAddressChoices.length; i++) {
@@ -265,8 +265,7 @@ public final class DataSegmentWindow extends JInternalFrame {
                 (baseAddressArray[i] != -1)
                     ? BinaryUtilsKt.intToHexStringWithPrefix(baseAddressArray[i])
                     : ""
-            )
-                + descriptions[i];
+            ) + descriptions[i];
         }
         return baseAddressChoices;
     }
@@ -283,7 +282,7 @@ public final class DataSegmentWindow extends JInternalFrame {
     private static int getBaseAddressIndexForAddress(final int address) {
         if (Globals.MEMORY_INSTANCE.isAddressInMemorySegment(address)) {
             return DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX;
-        } else if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(address)) { // DPS. 8-July-2013
+        } else if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(address)) {
             return DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX;
         }
         // Check distance from .extern base. Cannot be below it
@@ -608,7 +607,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         // after each successful assemble (or reset, which just re-assembles). The
         // assignment below assures the highlighting condition column==addressColumn
         // will be
-        // initially false since column>=0. DPS 23 jan 2009
+        // initially false since column>=0. 
         this.addressColumn = -1;
     }
 
@@ -675,8 +674,7 @@ public final class DataSegmentWindow extends JInternalFrame {
                         // line of code unconditionally.
                         // With 4.4, I added the above IF statement to work with the text segment but
                         // inadvertently removed this line!
-                        // Now it becomes the "else" part, executed when not in text segment. DPS
-                        // 8-July-2014.
+                        // Now it becomes the "else" part, executed when not in text segment. 
                         else {
                             ((DataTableModel) dataModel).setDisplayAndModelValueAt(
                                 NumberDisplayBaseChooser.formatNumber(0, valueBase), finalRow, finalColumn);
@@ -709,7 +707,8 @@ public final class DataSegmentWindow extends JInternalFrame {
      */
     public void updateCell(final int address, final int value) {
         final int offset = address - this.firstAddress;
-        if (offset < 0 || offset >= DataSegmentWindow.MEMORY_CHUNK_SIZE) { // out of range
+        if (offset < 0 || offset >= DataSegmentWindow.MEMORY_CHUNK_SIZE) {
+            // out of range
             return;
         }
         final int row = offset / DataSegmentWindow.BYTES_PER_ROW;
@@ -923,7 +922,7 @@ public final class DataSegmentWindow extends JInternalFrame {
             });
 
         // NOTE: action listeners for prevButton and nextButton are now in their
-        // specialized inner classes at the bottom of this listing. DPS 20 July 2008
+        // specialized inner classes at the bottom of this listing. 
 
     }
 
@@ -984,7 +983,7 @@ public final class DataSegmentWindow extends JInternalFrame {
      * this problem. One suggested solution, a JComboBox superclass overriding
      * setSelectedIndex to also call selectedItemChanged() did not help. Only this
      * solution to extend the model class to call the protected
-     * "fireContentsChanged()" method worked. DPS 25-Jan-2009
+     * "fireContentsChanged()" method worked.
      */
     private static class CustomComboBoxModel extends DefaultComboBoxModel<String> {
         public CustomComboBoxModel(final String[] list) {
@@ -1134,7 +1133,7 @@ public final class DataSegmentWindow extends JInternalFrame {
                 if (style != null) {
                     cell.setBackground(style.background());
                     cell.setForeground(style.foreground());
-                    cell.setFont(deriveFontFromStyle(defaultFont, style));
+                    cell.setFont(applyStyle(defaultFont, style));
                 } else {
                     cell.setBackground(theme.backgroundColor);
                     cell.setForeground(theme.foregroundColor);
@@ -1190,7 +1189,6 @@ public final class DataSegmentWindow extends JInternalFrame {
      * selected address range. It is a RepeatButton, which means
      * if the mouse is held down on the button, it will repeatedly
      * fire after an initial delay. Allows rapid scrolling.
-     * DPS 20 July 2008
      */
     private class PrevButton extends RepeatButton {
         public PrevButton(final Icon ico) {
@@ -1215,7 +1213,6 @@ public final class DataSegmentWindow extends JInternalFrame {
      * selected address range. It is a RepeatButton, which means
      * if the mouse is held down on the button, it will repeatedly
      * fire after an initial delay. Allows rapid scrolling.
-     * DPS 20 July 2008
      */
     private class NextButton extends RepeatButton {
         public NextButton(final Icon ico) {

@@ -1,74 +1,74 @@
-package rars.venus.settings.editor.views;
+package rars.venus.settings.editor.views
 
-import org.jetbrains.annotations.NotNull;
+import rars.settings.SettingsTheme
+import rars.venus.util.BorderLayout
+import java.awt.BorderLayout
+import java.awt.CardLayout
+import java.awt.Dimension
+import javax.swing.JPanel
 
-import javax.swing.*;
-import java.awt.*;
+class PickerCardView(
+    initialTheme: SettingsTheme,
+    initialCaretBlinkRate: Int,
+    initialEditorTabSize: Int
+) : JPanel() {
 
-import static rars.Globals.OTHER_SETTINGS;
+    val baseStyleView = BaseStyleView(initialTheme)
+    val presetsView = PresetsView()
+    val syntaxStyleView = SyntaxStyleView()
+    val fontSettingsView = FontSettingsView()
+    val otherSettingsView = OtherSettingsView(initialCaretBlinkRate, initialEditorTabSize)
 
-public final class PickerCardView extends JPanel {
-    private static final @NotNull String EMPTY = "empty",
-        FONT = "font",
-        PRESETS = "presets",
-        BASE = "base",
-        SYNTAX = "syntax",
-        OTHER = "other";
-    public final @NotNull BaseStyleView baseStyleView;
-    public final @NotNull PresetsView presetsView;
-    public final @NotNull SyntaxStyleView syntaxStyleView;
-    public final @NotNull FontSettingsView fontSettingsView;
-    public final @NotNull OtherSettingsView otherSettingsView;
-    private final @NotNull JPanel upperPanel;
-    private final @NotNull CardLayout upperLayout;
+    private val upperLayout = CardLayout()
 
-    public PickerCardView() {
-        super();
-        setLayout(new BorderLayout());
-        upperLayout = new CardLayout();
-        upperPanel = new JPanel(upperLayout);
-
-        setPreferredSize(new Dimension(450, 450));
-        setMinimumSize(new Dimension(50, 50));
-
-        final var emptyPanel = new JPanel();
-        baseStyleView = new BaseStyleView();
-        presetsView = new PresetsView();
-        syntaxStyleView = new SyntaxStyleView();
-        fontSettingsView = new FontSettingsView();
-        otherSettingsView = new OtherSettingsView(OTHER_SETTINGS);
-
-        upperPanel.add(emptyPanel, EMPTY);
-        upperPanel.add(fontSettingsView, FONT);
-        upperPanel.add(presetsView, PRESETS);
-        upperPanel.add(baseStyleView, BASE);
-        upperPanel.add(syntaxStyleView, SYNTAX);
-        upperPanel.add(otherSettingsView, OTHER);
-
-        this.add(upperPanel, BorderLayout.NORTH);
+    private val upperPanel = JPanel(upperLayout).apply {
+        add(JPanel(), EMPTY)
+        add(fontSettingsView, FONT)
+        add(presetsView, PRESETS)
+        add(baseStyleView, BASE)
+        add(syntaxStyleView, SYNTAX)
+        add(otherSettingsView, OTHER)
     }
 
-    public void showBaseStyleView() {
-        upperLayout.show(upperPanel, "base");
+    init {
+        preferredSize = Dimension(450, 450)
+        minimumSize = Dimension(50, 50)
+
+        BorderLayout {
+            this[BorderLayout.NORTH] = upperPanel
+        }
     }
 
-    public void showFontView() {
-        upperLayout.show(upperPanel, "font");
+    fun showBaseStyleView() {
+        upperLayout.show(upperPanel, BASE)
     }
 
-    public void showSyntaxStyleView() {
-        upperLayout.show(upperPanel, "syntax");
+    fun showFontView() {
+        upperLayout.show(upperPanel, FONT)
     }
 
-    public void showEmpty() {
-        upperLayout.show(upperPanel, "empty");
+    fun showSyntaxStyleView() {
+        upperLayout.show(upperPanel, SYNTAX)
     }
 
-    public void showOtherSettings() {
-        upperLayout.show(upperPanel, "other");
+    fun showEmpty() {
+        upperLayout.show(upperPanel, EMPTY)
     }
 
-    public void showPresets() {
-        upperLayout.show(upperPanel, "presets");
+    fun showOtherSettings() {
+        upperLayout.show(upperPanel, OTHER)
+    }
+
+    fun showPresets() {
+        upperLayout.show(upperPanel, PRESETS)
+    }
+
+    companion object {
+        private const val EMPTY = "empty"
+        private const val FONT = "font"
+        private const val PRESETS = "presets"
+        private const val BASE = "base"
+        private const val SYNTAX = "syntax"
+        private const val OTHER = "other"
     }
 }

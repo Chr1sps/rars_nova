@@ -10,8 +10,8 @@ import rars.settings.BoolSetting;
 import rars.simulator.Simulator;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
-import rars.venus.actions.GuiAction;
 import rars.venus.VenusUI;
+import rars.venus.actions.GuiAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -73,7 +73,7 @@ public final class RunStepAction extends GuiAction {
         this.name = this.getValue(Action.NAME).toString();
         this.executePane = this.mainUI.mainPane.executePane;
         if (FileStatus.isAssembled()) {
-            if (!this.mainUI.isExecutionStarted) { // DPS 17-July-2008
+            if (!this.mainUI.isExecutionStarted) {
                 this.processProgramArgumentsIfAny();
             }
             this.mainUI.isExecutionStarted = true;

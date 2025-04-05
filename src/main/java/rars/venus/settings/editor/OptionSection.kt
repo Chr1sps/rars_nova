@@ -1,50 +1,45 @@
-package rars.venus.settings.editor;
+package rars.venus.settings.editor
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import rars.venus.util.BoxLayout
+import java.awt.Color
+import javax.swing.BoxLayout
+import javax.swing.JCheckBox
+import javax.swing.JLabel
+import javax.swing.JPanel
 
-import javax.swing.*;
-import java.awt.*;
+class OptionSection(
+    label: String,
+    checkBoxState: Boolean?,
+    colorPickerButtonState: Color?
+) : JPanel() {
 
-public final class OptionSection extends JPanel {
-    public final @Nullable JCheckBox checkBox;
-    public final @Nullable ColorPickerButton colorPickerButton;
-
-    public OptionSection(
-        final @NotNull String label,
-        final @Nullable Boolean checkBoxState,
-        final @Nullable Color colorPickerButtonState
-    ) {
-        super();
-        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        this.add(new JLabel(label));
-        var isFirst = true;
-        if (checkBoxState != null) {
-            this.checkBox = new JCheckBox();
-            this.checkBox.setSelected(checkBoxState);
-            this.add(Box.createHorizontalStrut(10));
-            isFirst = false;
-            this.add(this.checkBox);
-        } else {
-            this.checkBox = null;
+    val colorPickerButton: ColorPickerButton? = colorPickerButtonState?.let { color ->
+        ColorPickerButton(color).apply {
+            isEnabled = (checkBoxState != false)
         }
-        if (colorPickerButtonState != null) {
-            this.colorPickerButton = new ColorPickerButton(colorPickerButtonState);
-            if (checkBoxState != null) {
-                this.colorPickerButton.setEnabled(checkBoxState);
-                this.checkBox.addChangeListener((event) -> {
-                    final var isSelected = this.checkBox.isSelected();
-                    this.colorPickerButton.setEnabled(isSelected);
-                });
+    }
+
+    val checkBox: JCheckBox? = checkBoxState?.let { state ->
+        JCheckBox().apply {
+            isSelected = state
+            if (colorPickerButton != null) addChangeListener {
+                colorPickerButton.isEnabled = isSelected
             }
-            if (isFirst) {
-                this.add(Box.createHorizontalStrut(10));
-            } else {
-                this.add(Box.createHorizontalStrut(5));
+        }
+    }
+
+    init {
+        BoxLayout(BoxLayout.X_AXIS) {
+            +JLabel(label)
+            if (checkBox != null) {
+                horizontalStrut(10)
+                +checkBox
             }
-            this.add(this.colorPickerButton);
-        } else {
-            this.colorPickerButton = null;
+            if (colorPickerButton != null) {
+                val width = if (checkBox != null) 5 else 10
+                horizontalStrut(width)
+                +colorPickerButton
+            }
         }
     }
 }

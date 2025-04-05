@@ -2,7 +2,6 @@ package rars.venus.registers
 
 import java.awt.Dimension
 import javax.swing.JTabbedPane
-import kotlin.math.max
 
 /*
 Copyright (c) 2003-2006,  Pete Sanderson and Kenneth Vollmar
@@ -49,11 +48,11 @@ class RegistersPane(
 
         addTab("Registers", null, registersWindow, "CPU registers")
         addTab("Floating Point", null, floatingPointWindow, "Floating point unit registers")
-        addTab("Control and Status", null, controlAndStatusWindow , "Control and Status registers")
+        addTab("Control and Status", null, controlAndStatusWindow, "Control and Status registers")
     }
 
     override fun getPreferredSize(): Dimension {
-        val preferredWidth = components.maxOf {it.preferredSize.width}
+        val preferredWidth = components.maxOf { it.preferredSize.width }
         return Dimension(preferredWidth + 1, super.preferredSize.height)
     }
 }

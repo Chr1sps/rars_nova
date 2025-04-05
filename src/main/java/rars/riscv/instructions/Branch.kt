@@ -6,7 +6,7 @@ import rars.ProgramStatement
 import rars.exceptions.SimulationEvent
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
-import rars.riscv.hardware.registerFiles.RegisterFile
+import rars.riscv.hardware.registerfiles.RegisterFile
 import rars.simulator.SimulationContext
 import java.lang.Long
 import kotlin.Boolean
@@ -77,21 +77,21 @@ class Branch private constructor(
             "000"
         ) { statement, registerFile ->
             registerFile.getLongValue(statement.getOperand(0)) ==
-                    registerFile.getLongValue(statement.getOperand(1))
+                registerFile.getLongValue(statement.getOperand(1))
         }
         val BGE: Branch = makeBranch(
             "bge",
             "Branch if greater than or equal: Branch to statement at label's address if t1 is greater than or equal " +
-                    "to t2",
+                "to t2",
             "101"
         ) { statement, registerFile ->
             registerFile.getLongValue(statement.getOperand(0))!! >=
-                    registerFile.getLongValue(statement.getOperand(1))!!
+                registerFile.getLongValue(statement.getOperand(1))!!
         }
         val BGEU: Branch = makeBranch(
             "bgeu",
             "Branch if greater than or equal to (unsigned): Branch to statement at label's address if t1 is greater " +
-                    "than or equal to t2 (with an unsigned interpretation)",
+                "than or equal to t2 (with an unsigned interpretation)",
             "111"
         ) { statement, registerFile ->
             Long.compareUnsigned(
@@ -112,7 +112,7 @@ class Branch private constructor(
         val BLTU: Branch = makeBranch(
             "bltu",
             "Branch if less than (unsigned): Branch to statement at label's address if t1 is less than t2 (with an " +
-                    "unsigned interpretation)",
+                "unsigned interpretation)",
             "110"
         ) { statement, registerFile ->
             Long.compareUnsigned(

@@ -3,7 +3,7 @@ package rars.riscv.hardware;
 import org.jetbrains.annotations.NotNull;
 import rars.exceptions.SimulationError;
 import rars.riscv.BasicInstruction;
-import rars.riscv.hardware.registerFiles.RegisterFile;
+import rars.riscv.hardware.registerfiles.RegisterFile;
 import rars.simulator.Simulator;
 
 // TODO: add backstepper support

@@ -2,9 +2,9 @@ package rars.simulator
 
 import rars.io.AbstractIO
 import rars.riscv.hardware.Memory
-import rars.riscv.hardware.registerFiles.CSRegisterFile
-import rars.riscv.hardware.registerFiles.FloatingPointRegisterFile
-import rars.riscv.hardware.registerFiles.RegisterFile
+import rars.riscv.hardware.registerfiles.CSRegisterFile
+import rars.riscv.hardware.registerfiles.FloatingPointRegisterFile
+import rars.riscv.hardware.registerfiles.RegisterFile
 
 @JvmRecord
 data class SimulationContext(

@@ -17,33 +17,6 @@ import rars.util.translateToInt
 import rars.util.translateToLong
 import rars.venus.NumberDisplayBaseChooser
 
-/*
- Copyright (c) 2003-2012,  Pete Sanderson and Kenneth Vollmar
-
- Developed by Pete Sanderson (psanderson@otterbein.edu)
- and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
- Permission is hereby granted, free of charge, to any person obtaining 
- a copy of this software and associated documentation files (the 
- "Software"), to deal in the Software without restriction, including 
- without limitation the rights to use, copy, modify, merge, publish, 
- distribute, sublicense, and/or sell copies of the Software, and to 
- permit persons to whom the Software is furnished to do so, subject 
- to the following conditions:
-
- The above copyright notice and this permission notice shall be 
- included in all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
- EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
- ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
- CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
- WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
- (MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 /**
  * An Assembler is capable of assembling a RISCV program. It has only one public
  * method, `assemble()`, which implements a two-pass assembler. It
@@ -208,7 +181,7 @@ class Assembler {
             )
             accumulatedDataSegmentForwardReferenceList.add(this@Assembler.currentFileDataSegmentForwardReferenceList!!)
             this@Assembler.currentFileDataSegmentForwardReferenceList!!.clear()
-        } // end of first-pass loop for each RISCVprogram
+        }
 
 
         // Have processed all source files. Attempt to resolve any remaining forward
@@ -237,7 +210,8 @@ class Assembler {
                 statement.buildBasicStatementFromBasicInstruction(this@Assembler.errors)
                 ensure(!this@Assembler.errors!!.errorsOccurred()) { AssemblyError(this@Assembler.errors!!) }
                 when (val instruction = statement.instruction) {
-                    is ExtendedInstruction -> { // It is a 
+                    is ExtendedInstruction -> {
+                        // It is a 
                         // pseudo-instruction:
                         // 1. Fetch its basic instruction template list
                         // 2. For each template in the list,
@@ -310,14 +284,14 @@ class Assembler {
                             this@Assembler.textAddress += (BasicInstruction.BASIC_INSTRUCTION_LENGTH)
                             ps.buildBasicStatementFromBasicInstruction(this@Assembler.errors)
                             machineList.add(ps)
-                        } // end of FOR loop, repeated for each template in list.
+                        }
                     }
 
                     else -> {
                         machineList.add(statement)
                     }
                 }
-            } // end of assembler second pass.
+            }
         }
         if (Globals.debug) {
             LOGGER.debug("Code generation begins")
@@ -362,7 +336,7 @@ class Assembler {
             AssemblyError(this@Assembler.errors!!)
         }
         sortedMachineList
-    } // assemble()
+    }
 
     private fun checkEqvDirectives(program: RISCVProgram) {
         val symbols = mutableListOf<String>()
@@ -578,7 +552,7 @@ class Assembler {
             }
         }
         return null
-    } // parseLine()
+    }
 
     /**
      * Pre-process the token list for a statement by stripping off any label, if
@@ -617,7 +591,7 @@ class Assembler {
                 return false
             }
         }
-    } // parseLabel()
+    }
 
     /** This source code line is a directive, not a instruction. Let's carry it out. */
     private fun executeDirective(tokens: TokenList) {
@@ -736,7 +710,6 @@ class Assembler {
                 direct == Directive.DWORD -> {
                 this.dataDirective = direct
                 if (this.passesDataSegmentCheck(token) && tokens.size > 1) {
-                    // added text segment prohibition
                     this.storeNumeric(tokens, direct, this.errors!!)
                 }
             }
@@ -764,7 +737,7 @@ class Assembler {
                     )
                     return
                 }
-                val value = tokens[1].text.translateToInt()!! // KENV 1/6/05
+                val value = tokens[1].text.translateToInt()!!
                 if (value < 2 && !this.inDataSegment) {
                     this.errors!!.add(
                         ErrorMessage.warning(
@@ -801,7 +774,7 @@ class Assembler {
                         )
                         return
                     }
-                    val value = tokens.get(1).text.translateToInt()!! // KENV 1/6/05
+                    val value = tokens.get(1).text.translateToInt()!!
                     this.dataAddress += value
                 }
             }
@@ -864,7 +837,7 @@ class Assembler {
                 "Directive \"${token.text}\" recognized but not yet implemented."
             )
         }
-    } // executeDirective()
+    }
 
     /** Process the list of .globl labels, if any, declared and defined in this file.
      * We'll just move their symbol table entries from local symbol table to global
@@ -912,7 +885,7 @@ class Assembler {
                 this.storeStrings(tokens, direct, this.errors!!)
             }
         }
-    } // executeDirectiveContinuation()
+    }
 
     // Given token, find the corresponding Instruction object. If token was not
     // recognized as OPERATOR, there is a problem.
@@ -931,7 +904,8 @@ class Assembler {
             return null
         }
         val instructions = InstructionsRegistry.matchOperator(token.text)
-        if (instructions.isEmpty()) { // This should NEVER happen...
+        if (instructions.isEmpty()) {
+            // This should NEVER happen...
             this.errors!!.addTokenError(
                 token,
                 "Internal Assembler error: \"${token.text}\" tokenized OPERATOR then not recognized"
@@ -939,7 +913,7 @@ class Assembler {
             return null
         }
         return instructions
-    } // matchInstruction()
+    }
 
     /**
      * Processes the .word/.half/.byte/.float/.double directive.
@@ -966,8 +940,6 @@ class Assembler {
         if (tokens.size == 4 && tokens.get(2).type == TokenType.COLON) {
             val valueToken = tokens.get(1)
             val repetitionsToken = tokens.get(3)
-            // DPS 15-jul-08, allow ":" for repetition for all numeric
-            // directives (originally just .word)
             // Conditions for correctly-formed replication:
             // (integer directive AND integer value OR floating directive AND
             // (integer value OR floating value))
@@ -981,7 +953,7 @@ class Assembler {
                 )
                 return
             }
-            val repetitions = repetitionsToken.text.translateToInt()!! // KENV 1/6/05
+            val repetitions = repetitionsToken.text.translateToInt()!!
             if (repetitions <= 0) {
                 errors.addTokenError(
                     repetitionsToken,
@@ -1014,7 +986,7 @@ class Assembler {
                 this.storeRealNumber(token, directive, errors)
             }
         }
-    } // storeNumeric()
+    }
 
     /**
      * Store integer value given integer (word, half, byte) directive.
@@ -1051,7 +1023,6 @@ class Assembler {
             }
 
             val fullValue = value
-            // DPS 4-Jan-2013. Overriding 6-Jan-2005 KENV changes.
             // If value is out of range for the directive, will simply truncate
             // the leading bits (includes sign bits). This is what SPIM does.
             // But will issue a warning (not error) which SPIM does not do.
@@ -1088,10 +1059,12 @@ class Assembler {
                     // Record value 0 for now, then set up backpatch entry
                     val dataAddress = this.writeToDataSegment(0, lengthInBytes, token, errors)
                     this.currentFileDataSegmentForwardReferenceList!!.add(dataAddress, lengthInBytes, token)
-                } else { // label already defined, so write its address
+                } else {
+                    // label already defined, so write its address
                     this.writeToDataSegment(value, lengthInBytes, token, errors)
                 }
-            } // Data segment check done previously, so this "else" will not be.
+            }
+            // Data segment check done previously, so this "else" will not be.
             else {
                 errors.addTokenError(
                     token, "\"${token.text}\" label as directive operand not permitted in text segment"
@@ -1145,7 +1118,7 @@ class Assembler {
         if (directive == Directive.DOUBLE) {
             this.writeDoubleToDataSegment(value, token)
         }
-    } // storeRealNumber
+    }
 
     /**
      * Use directive argument to distinguish between ASCII and ASCIZ. The
@@ -1159,8 +1132,8 @@ class Assembler {
     ) {
         // Correctly handles case where this is a "directive continuation" line.
         val isFirstDirective = tokens.first().type == TokenType.DIRECTIVE
-        tokens.stream()
-            .skip((if (isFirstDirective) 1 else 0).toLong())
+        tokens
+            .drop(if (isFirstDirective) 1 else 0)
             .forEach { token ->
                 if (token.type != TokenType.QUOTED_STRING) {
                     errors.addTokenError(
@@ -1375,7 +1348,7 @@ class Assembler {
                 tokens.remove(last)
             }
             return tokens
-        } // stripComment()
+        }
 
         private fun tokenListBeginsWithLabel(tokens: TokenList): Boolean = if (tokens.size < 2) false
         else (tokens[0].type == TokenType.IDENTIFIER ||

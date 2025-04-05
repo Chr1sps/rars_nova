@@ -84,14 +84,6 @@ public abstract class AbstractTool extends JFrame {
     // terminates.
     private volatile boolean observing = false;
 
-    /**
-     * Simple constructor
-     *
-     * @param title
-     *     String containing title bar text
-     * @param heading
-     *     a {@link java.lang.String} object
-     */
     protected AbstractTool(
         final @NotNull String title,
         final @NotNull String heading,
@@ -491,8 +483,6 @@ public abstract class AbstractTool extends JFrame {
      * (not by the stand-alone app).
      */
     protected final class ConnectButton extends JButton {
-        private static final String connectText = "Connect to Program";
-        private static final String disconnectText = "Disconnect from Program";
 
         public ConnectButton() {
             super();
@@ -507,7 +497,7 @@ public abstract class AbstractTool extends JFrame {
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
-            this.setText(ConnectButton.disconnectText);
+            this.setText("Disconnect from Program");
         }
 
         public void disconnect() {
@@ -518,7 +508,7 @@ public abstract class AbstractTool extends JFrame {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
             AbstractTool.this.observing = false;
-            this.setText(ConnectButton.connectText);
+            this.setText("Connect to Program");
         }
 
         public boolean isConnected() {

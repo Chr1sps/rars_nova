@@ -10,6 +10,7 @@ import java.util.prefs.Preferences
 
 interface OtherSettings {
     companion object {
+        // TODO: remove in favour of a Globals-less solution
         /**
          * Return whether backstepping is permitted at this time. Backstepping is
          * ability to undo execution

@@ -8,6 +8,8 @@ import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.Memory;
 import rars.util.BitmapDisplay;
 
+// TODO: move this to IO
+
 public final class DisplayBitmapImpl {
     public static final @NotNull DisplayBitmapImpl INSTANCE = new DisplayBitmapImpl(Globals.MEMORY_INSTANCE);
     private final @NotNull Memory memory;

@@ -24,7 +24,7 @@ abstract class BasicInstruction protected constructor(
      * of the I-format in that the computed value is address relative to the
      * Program Counter. All four formats are represented by static objects.
      */
-    @JvmField val instructionFormat: BasicInstructionFormat,
+    val instructionFormat: BasicInstructionFormat,
     operMask: String
 ) : Instruction(example, description), SimulationCallback {
     /**

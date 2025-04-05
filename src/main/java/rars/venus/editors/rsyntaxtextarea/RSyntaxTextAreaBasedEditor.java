@@ -13,6 +13,7 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.jetbrains.annotations.NotNull;
 import rars.riscv.lang.lexing.RVTokenType;
+import rars.settings.FontSettings;
 import rars.venus.editors.EditorTheme;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TokenStyle;
@@ -25,12 +26,10 @@ import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
-import static rars.Globals.FONT_SETTINGS;
-
 public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private static final @NotNull String SYNTAX_STYLE_RISCV = "text/riscv";
     private static final @NotNull Logger LOGGER = LogManager.getLogger(RSyntaxTextAreaBasedEditor.class);
-    private static final Map<TextAttribute, Object> textAttributes = Map.of(
+    private static final Map<TextAttribute, Object> TEXT_ATTRIBUTES = Map.of(
         TextAttribute.KERNING, TextAttribute.KERNING_ON
     );
 
@@ -46,11 +45,14 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private @NotNull EditorTheme theme;
     private @NotNull Font currentFont;
 
-    public RSyntaxTextAreaBasedEditor(final @NotNull EditorTheme theme) {
+    public RSyntaxTextAreaBasedEditor(
+        final @NotNull EditorTheme theme,
+        final @NotNull FontSettings fontSettings
+    ) {
         this.textArea = new RSyntaxTextArea();
         this.scrollPane = new RTextScrollPane(textArea);
         this.gutter = scrollPane.getGutter();
-        this.currentFont = FONT_SETTINGS.getCurrentFont();
+        this.currentFont = fontSettings.getCurrentFont();
         this.setFont(this.currentFont);
         this.setTheme(theme);
         this.textArea.setSyntaxEditingStyle(SYNTAX_STYLE_RISCV);
@@ -160,7 +162,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
 
     @Override
     public void setFont(final @NotNull Font f) {
-        final var derived = f.deriveFont(textAttributes);
+        final var derived = f.deriveFont(TEXT_ATTRIBUTES);
         this.currentFont = derived;
         textArea.setFont(derived);
         gutter.setLineNumberFont(derived);
@@ -245,8 +247,18 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
+    public int getCaretBlinkRate() {
+        return textArea.getCaret().getBlinkRate();
+    }
+
+    @Override
     public void setCaretBlinkRate(final int rate) {
         this.textArea.getCaret().setBlinkRate(rate);
+    }
+
+    @Override
+    public int getTabSize() {
+        return textArea.getTabSize();
     }
 
     @Override

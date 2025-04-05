@@ -1,45 +1,36 @@
-package rars.venus.settings.editor;
+package rars.venus.settings.editor
 
-import org.jetbrains.annotations.NotNull;
+import java.awt.Color
+import javax.swing.JButton
+import javax.swing.JColorChooser
 
-import javax.swing.*;
-import java.awt.*;
+class ColorPickerButton(color: Color) : JButton("Pick Color") {
+    var color: Color get() = background
+    set(newValue) {
+        val newForeground = newValue.getOppositeLuminanceColour()
+        background = newValue
+        foreground = newForeground
+        text = "#%02x%02x%02x".format(newValue.red, newValue.green, newValue.blue)
+    }
 
-public final class ColorPickerButton extends JButton {
-    private @NotNull Color color;
-
-    public ColorPickerButton(final Color color) {
-        super("Pick Color");
-        this.setColor(color);
-        this.addActionListener((event) -> {
-            final var result = JColorChooser.showDialog(null, "Choose color", this.color, false);
+    init {
+        this.color = color
+        addActionListener {
+            val result = JColorChooser.showDialog(null, "Choose color", this.color, false)
             if (result != null) {
-                this.setColor(result);
+                this.color = result
             }
-        });
+        }
     }
 
-    private static Color getBestForegroundForBackground(final @NotNull Color background) {
-        final var r = background.getRed();
-        final var g = background.getGreen();
-        final var b = background.getBlue();
 
-        // Calculate luminance
-        final var luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    companion object {
+        private fun Color.getOppositeLuminanceColour(): Color {
+            // Calculate luminance
+            val luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
 
-        // Return white or black based on luminance
-        return luminance > 127.5 ? Color.BLACK : Color.WHITE;
-    }
-
-    public @NotNull Color getColor() {
-        return this.color;
-    }
-
-    public void setColor(final @NotNull Color color) {
-        this.color = color;
-        final var foreground = getBestForegroundForBackground(color);
-        this.setBackground(color);
-        this.setForeground(foreground);
-        this.setText(String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue()));
+            // Return white or black based on luminance
+            return if (luminance > 127.5) Color.BLACK else Color.WHITE
+        }
     }
 }

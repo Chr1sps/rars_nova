@@ -40,7 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version February 2006
  */
 class BackStepper {
-    private val backSteps: BackstepStack = BackstepStack(Globals.maximumBacksteps)
+    private val backSteps: BackstepStack = BackstepStack(Globals.MAXIMUM_BACKSTEPS)
 
     /**
      * Determines whether the undo actions are being recorded by this object.
@@ -409,7 +409,8 @@ class BackStepper {
             } else if (this.size < this.capacity) {
                 this.top = (this.top + 1) % this.capacity
                 this.size++
-            } else { // size == capacity. The top moves up one, replacing oldest entry (goodbye!)
+            } else {
+                // size == capacity. The top moves up one, replacing oldest entry (goodbye!)
                 this.top = (this.top + 1) % this.capacity
             }
             // We'll re-use existing objects rather than create/discard each time.

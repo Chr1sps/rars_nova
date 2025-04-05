@@ -66,22 +66,22 @@ public final class BHTableModel extends AbstractTableModel {
     /**
      * name of the table columns
      */
-    private final String[] m_columnNames = {"Index", "History", "Prediction", "Correct", "Incorrect", "Precision"};
+    private final String[] myColumnNames = {"Index", "History", "Prediction", "Correct", "Incorrect", "Precision"};
     /**
      * type of the table columns
      */
-    private final Class<?>[] m_columnClasses = {
+    private final Class<?>[] myColumnClasses = {
         Integer.class, String.class, String.class, Integer.class, Integer.class,
         Double.class
     };
     /**
      * vector holding the entries of the BHT
      */
-    private ArrayList<BHTEntry> m_entries;
+    private ArrayList<BHTEntry> myEntries;
     /**
      * number of entries in the BHT
      */
-    private int m_entryCnt;
+    private int myEntryCount;
 
     /**
      * Constructs a new BHT with given number of entries and history size.
@@ -106,12 +106,12 @@ public final class BHTableModel extends AbstractTableModel {
      */
     @Override
     public String getColumnName(final int i) {
-        if (i < 0 || i > this.m_columnNames.length) {
+        if (i < 0 || i > this.myColumnNames.length) {
             throw new IllegalArgumentException(
-                "Illegal column index " + i + " (must be in range 0.." + (this.m_columnNames.length - 1) + ')');
+                "Illegal column index " + i + " (must be in range 0.." + (this.myColumnNames.length - 1) + ')');
         }
 
-        return this.m_columnNames[i];
+        return this.myColumnNames[i];
     }
 
     /**
@@ -122,12 +122,12 @@ public final class BHTableModel extends AbstractTableModel {
      */
     @Override
     public Class<?> getColumnClass(final int i) {
-        if (i < 0 || i > this.m_columnClasses.length) {
+        if (i < 0 || i > this.myColumnClasses.length) {
             throw new IllegalArgumentException(
-                "Illegal column index " + i + " (must be in range 0.." + (this.m_columnClasses.length - 1) + ')');
+                "Illegal column index " + i + " (must be in range 0.." + (this.myColumnClasses.length - 1) + ')');
         }
 
-        return this.m_columnClasses[i];
+        return this.myColumnClasses[i];
     }
 
     /**
@@ -149,7 +149,7 @@ public final class BHTableModel extends AbstractTableModel {
      */
     @Override
     public int getRowCount() {
-        return this.m_entryCnt;
+        return this.myEntryCount;
     }
 
     /**
@@ -161,7 +161,7 @@ public final class BHTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(final int row, final int col) {
 
-        final BHTEntry e = this.m_entries.get(row);
+        final BHTEntry e = this.myEntries.get(row);
         if (e == null) {
             return "";
         }
@@ -199,12 +199,12 @@ public final class BHTableModel extends AbstractTableModel {
             throw new IllegalArgumentException("Only history sizes of 1 or 2 supported.");
         }
 
-        this.m_entryCnt = numEntries;
+        this.myEntryCount = numEntries;
 
-        this.m_entries = new ArrayList<>(this.m_entryCnt);
+        this.myEntries = new ArrayList<>(this.myEntryCount);
 
-        for (int i = 0; i < this.m_entryCnt; i++) {
-            this.m_entries.add(new BHTEntry(historySize, initVal));
+        for (int i = 0; i < this.myEntryCount; i++) {
+            this.myEntries.add(new BHTEntry(historySize, initVal));
         }
 
         // refresh the table(s)
@@ -224,7 +224,7 @@ public final class BHTableModel extends AbstractTableModel {
             throw new IllegalArgumentException("No negative addresses supported");
         }
 
-        return (address >> 2) % this.m_entryCnt;
+        return (address >> 2) % this.myEntryCount;
     }
 
     /**
@@ -235,11 +235,11 @@ public final class BHTableModel extends AbstractTableModel {
      * @return the prediction to take (true) or do not take (false) the branch
      */
     public boolean getPredictionAtIdx(final int index) {
-        if (index < 0 || index > this.m_entryCnt) {
-            throw new IllegalArgumentException("Only indexes in the range 0 to " + (this.m_entryCnt - 1) + " allowed");
+        if (index < 0 || index > this.myEntryCount) {
+            throw new IllegalArgumentException("Only indexes in the range 0 to " + (this.myEntryCount - 1) + " allowed");
         }
 
-        return this.m_entries.get(index).getPrediction();
+        return this.myEntries.get(index).getPrediction();
     }
 
     /**
@@ -253,11 +253,11 @@ public final class BHTableModel extends AbstractTableModel {
      *     a boolean
      */
     public void updatePredictionAtIdx(final int index, final boolean branchTaken) {
-        if (index < 0 || index > this.m_entryCnt) {
-            throw new IllegalArgumentException("Only indexes in the range 0 to " + (this.m_entryCnt - 1) + " allowed");
+        if (index < 0 || index > this.myEntryCount) {
+            throw new IllegalArgumentException("Only indexes in the range 0 to " + (this.myEntryCount - 1) + " allowed");
         }
 
-        this.m_entries.get(index).updatePrediction(branchTaken);
+        this.myEntries.get(index).updatePrediction(branchTaken);
         this.fireTableRowsUpdated(index, index);
     }
 

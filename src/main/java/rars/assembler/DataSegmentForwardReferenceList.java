@@ -6,7 +6,7 @@ import rars.Globals;
 
 import java.util.ArrayList;
 
-import static rars.util.KotlinUtilsKt.unwrap;
+import static rars.util.UtilsKt.unwrap;
 
 /**
  * Handy class to handle forward label references appearing as data

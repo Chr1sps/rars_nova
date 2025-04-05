@@ -76,7 +76,7 @@ public final class HelpHelpAction extends GuiAction {
                     0,
                     Math.max(0, blanks.length() - directive.toString().length())
                 ),
-                directive.getDescription()
+                directive.description
             ));
         }
         Collections.sort(exampleList);
@@ -188,9 +188,9 @@ public final class HelpHelpAction extends GuiAction {
         final String[] columnNames = {"Name", "Number", "Description", "Inputs", "Ouputs"};
         final JEditorPane html = new JEditorPane(
             "text/html",
-            HelpHelpAction.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpPrelude.html") +
+            HelpHelpAction.loadFiletoStringBuilder(Globals.HELP_PATH + "SyscallHelpPrelude.html") +
                 HelpHelpAction.convertToHTMLTable(data, columnNames).toString()
-                + HelpHelpAction.loadFiletoStringBuilder(Globals.helpPath + "SyscallHelpConclusion.html")
+                + HelpHelpAction.loadFiletoStringBuilder(Globals.HELP_PATH + "SyscallHelpConclusion.html")
         );
 
         html.setCaretPosition(0); // this affects scroll position
@@ -222,7 +222,7 @@ public final class HelpHelpAction extends GuiAction {
         final JPanel helpPanel = new JPanel(new BorderLayout());
         JScrollPane helpScrollPane;
         try {
-            final StringBuilder text = HelpHelpAction.loadFiletoStringBuilder(Globals.helpPath + filename);
+            final StringBuilder text = HelpHelpAction.loadFiletoStringBuilder(Globals.HELP_PATH + filename);
             final JEditorPane helpDisplay = new JEditorPane("text/html", text.toString());
             helpDisplay.setEditable(false);
             helpDisplay.setCaretPosition(0); // assure top of document displayed
@@ -374,7 +374,7 @@ public final class HelpHelpAction extends GuiAction {
         tabbedPane.addTab("Acknowledgements", HelpHelpAction.createHTMLHelpPanel("Acknowledgements.html"));
         // Create non-modal dialog. Based on java.sun.com "How to Make Dialogs",
         // DialogDemo.java
-        final JDialog dialog = new JDialog(this.mainUI, "RARS " + Globals.version + " Help");
+        final JDialog dialog = new JDialog(this.mainUI, "RARS " + Globals.VERSION + " Help");
         // assure the dialog goes away if user clicks the X
         dialog.addWindowListener(
             new WindowAdapter() {
@@ -446,10 +446,6 @@ public final class HelpHelpAction extends GuiAction {
      * provide a Close button.
      */
     private record HelpHyperlinkListener(@NotNull JPanel parent) implements HyperlinkListener {
-        private static final @NotNull String cannotDisplayMessage = "<html><title></title><body><strong>Unable to " +
-            "display " +
-            "requested document.</strong></body></html>";
-
         @Override
         public void hyperlinkUpdate(final @NotNull HyperlinkEvent event) {
             if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {

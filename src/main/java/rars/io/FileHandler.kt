@@ -75,7 +75,7 @@ class FileHandler(
             // array of bytes.
             retValue = inputStream.read(buffer, 0, length)
             // This method will return -1 upon EOF, but our spec says that negative
-            // value represents an error, so we return 0 for EOF. DPS 10-July-2008.
+            // value represents an error, so we return 0 for EOF.
             if (retValue == -1) {
                 retValue = 0
             }
@@ -106,7 +106,6 @@ class FileHandler(
         // retrieve FileOutputStream from storage
         val outputStream = this.entries[fd]!!.stream as OutputStream
         try {
-            // Oct. 9 2005 Ken Vollmar
             // Observation: made a call to outputStream.write(myBuffer, 0, lengthRequested)
             // with myBuffer containing 6(ten) 32-bit-words <---> 24(ten) bytes, where the
             // words are MIPS integers with values such that many of the bytes are ZEROES.
@@ -116,17 +115,18 @@ class FileHandler(
             // by the return value.)
             // Writes up to lengthRequested bytes of data to this output stream from an
             // array of bytes.
-            // outputStream.write(myBuffer, 0, lengthRequested); // write is a void method
+            // outputStream.write(myBuffer, 0, lengthRequested);
+            // write is a void method
             // -- no verification value returned
 
-            // Oct. 9 2005 Ken Vollmar Force the write statement to write exactly
+            // Force the write statement to write exactly
             // the number of bytes requested, even though those bytes include many ZERO
             // values.
 
             for (i in 0..<length) {
                 outputStream.write(buffer[i].toInt())
             }
-            outputStream.flush() // DPS 7-Jan-2013
+            outputStream.flush()
         } catch (_: IOException) {
             return -1
         } catch (_: IndexOutOfBoundsException) {

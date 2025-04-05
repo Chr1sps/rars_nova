@@ -52,12 +52,12 @@ public final class FilenameFinder {
         @Override
         public boolean accept(final File f) {
             if (f.isDirectory()) return true;
-            return isFileExtensionMatch(f, Globals.fileExtensions);
+            return isFileExtensionMatch(f, Globals.FILE_EXTENSIONS);
         }
 
         @Override
         public String getDescription() {
-            return "Assembler files (%s)".formatted(String.join(", ", Globals.fileExtensions));
+            return "Assembler files (%s)".formatted(String.join(", ", Globals.FILE_EXTENSIONS));
         }
     };
 

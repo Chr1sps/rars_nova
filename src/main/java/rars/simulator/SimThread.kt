@@ -8,7 +8,7 @@ import rars.exceptions.*
 import rars.io.AbstractIO
 import rars.notices.SimulatorNotice
 import rars.riscv.BasicInstruction
-import rars.riscv.hardware.registerFiles.CSRegisterFile
+import rars.riscv.hardware.registerfiles.CSRegisterFile
 import rars.settings.OtherSettings.Companion.isBacksteppingEnabled
 import rars.util.ListenerDispatcher
 import rars.util.toHexStringWithPrefix
@@ -95,7 +95,8 @@ open class SimThread(
         val base = utvec!! and -0x4
 
         val exceptionHandler =
-            if ((Globals.CS_REGISTER_FILE.getIntValue("ustatus")!! and 0x1) != 0) { // test user-interrupt enable (UIE)
+            if ((Globals.CS_REGISTER_FILE.getIntValue("ustatus")!! and 0x1) != 0) {
+                // test user-interrupt enable (UIE)
                 Globals.MEMORY_INSTANCE.getProgramStatement(base).fold(
                     { null }, { it }
                 )
@@ -130,7 +131,7 @@ open class SimThread(
         // Don't handle cases where that interrupt isn't enabled
         assert(
             (Globals.CS_REGISTER_FILE.getLongValue("ustatus")!! and 0x1L) != 0L
-                    && (Globals.CS_REGISTER_FILE.getLongValue("uie")!! and (1 shl code).toLong()) != 0L
+                && (Globals.CS_REGISTER_FILE.getLongValue("uie")!! and (1 shl code).toLong()) != 0L
         ) { "The interrupt handler must be enabled" }
 
         // set the relevant CSRs
@@ -161,7 +162,7 @@ open class SimThread(
             Globals.CS_REGISTER_FILE.updateRegisterByName(
                 "ustatus",
                 Globals.CS_REGISTER_FILE.getLongValue("ustatus")!! and
-                        CSRegisterFile.INTERRUPT_ENABLE.toLong().inv()
+                    CSRegisterFile.INTERRUPT_ENABLE.toLong().inv()
             ).unwrap()
 
 
@@ -305,7 +306,7 @@ open class SimThread(
                     ) return
                 }
                 uip = uip or ((if (pendingExternal) CSRegisterFile.EXTERNAL_INTERRUPT else 0)
-                        or (if (pendingTimer) CSRegisterFile.TIMER_INTERRUPT else 0)).toLong()
+                    or (if (pendingTimer) CSRegisterFile.TIMER_INTERRUPT else 0)).toLong()
 
                 if (uip != Globals.CS_REGISTER_FILE.uip.valueNoNotify) {
                     Globals.CS_REGISTER_FILE.updateRegisterByName("uip", uip).unwrap()
@@ -358,7 +359,7 @@ open class SimThread(
                         SimulationError.create(
                             statement,
                             ("undefined instruction (" + statement.binaryStatement.toHexStringWithPrefix()
-                                    + ")"),
+                                + ")"),
                             ExceptionReason.ILLEGAL_INSTRUCTION
                         )
                     }

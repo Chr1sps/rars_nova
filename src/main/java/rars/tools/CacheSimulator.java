@@ -1,5 +1,6 @@
 package rars.tools;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import rars.assembler.DataTypes;
 import rars.notices.AccessNotice;
@@ -13,34 +14,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.util.Random;
-
-/*
-Copyright (c) 2003-2011,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 
 /**
  * A data cache simulator. It can be run either as a stand-alone Java
@@ -61,8 +34,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * </p>
  */
 public final class CacheSimulator extends AbstractTool {
-    private static final String version = "Version 1.2";
-    private static final String heading = "Simulate and illustrate data cache performance";
+    private static final String VERSION = "Version 1.2";
+    private static final String HEADING = "Simulate and illustrate data cache performance";
     private static final String[] cacheBlockSizeChoices = {
         "1", "2", "4", "8", "16", "32", "64", "128", "256", "512",
         "1024", "2048"
@@ -78,11 +51,11 @@ public final class CacheSimulator extends AbstractTool {
     private static final int DIRECT = 0, FULL = 1, SET = 2; // NOTE: these have to match placementPolicyChoices order!
     private static final String[] replacementPolicyChoices = {"LRU", "Random"};
     private static final int LRU = 0, RANDOM = 1; // NOTE: these have to match replacementPolicyChoices order!
-    private static final int defaultCacheBlockSizeIndex = 2;
-    private static final int defaultCacheBlockCountIndex = 3;
-    private static final int defaultPlacementPolicyIndex = CacheSimulator.DIRECT;
-    private static final int defaultReplacementPolicyIndex = CacheSimulator.LRU;
-    private static final int defaultCacheSetSizeIndex = 0;
+    private static final int DEFAULT_CACHE_BLOCK_SIZE_INDEX = 2;
+    private static final int DEFAULT_CACHE_BLOCK_COUNT_INDEX = 3;
+    private static final int DEFAULT_PLACEMENT_POLICY_INDEX = CacheSimulator.DIRECT;
+    private static final int DEFAULT_REPLACEMENT_POLICY_INDEX = CacheSimulator.LRU;
+    private static final int DEFAULT_CACHE_SET_SIZE_INDEX = 0;
     private static boolean debug = false; // controls display of debugging info
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
@@ -113,7 +86,7 @@ public final class CacheSimulator extends AbstractTool {
      * Simple constructor, likely used by the RARS Tools menu mechanism
      */
     public CacheSimulator(final @NotNull VenusUI mainUI) {
-        super("Data Cache Simulation Tool, " + CacheSimulator.version, CacheSimulator.heading, mainUI);
+        super("Data Cache Simulation Tool, " + CacheSimulator.VERSION, CacheSimulator.HEADING, mainUI);
     }
 
     // Will determine range of choices for "set size in blocks", which is determined
@@ -142,12 +115,14 @@ public final class CacheSimulator extends AbstractTool {
         return choices;
     }
 
-    private static JPanel getPanelWithBorderLayout() {
+    @Contract(" -> new")
+    private static @NotNull JPanel getPanelWithBorderLayout() {
         return new JPanel(new BorderLayout(2, 2));
     }
 
+    @Contract(pure = true)
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "Data Cache Simulator";
     }
 
@@ -162,7 +137,7 @@ public final class CacheSimulator extends AbstractTool {
      * @return the GUI component containing these three areas
      */
     @Override
-    protected JComponent buildMainDisplayArea() {
+    protected @NotNull JComponent buildMainDisplayArea() {
         // OVERALL STRUCTURE OF MAIN UI (CENTER)
         final Box results = Box.createVerticalBox();
         results.add(this.buildOrganizationArea());
@@ -171,7 +146,7 @@ public final class CacheSimulator extends AbstractTool {
         return results;
     }
 
-    private JComponent buildLogArea() {
+    private @NotNull JComponent buildLogArea() {
         this.logPanel = new JPanel();
         final TitledBorder ltb = new TitledBorder("Runtime Log");
         ltb.setTitleJustification(TitledBorder.CENTER);
@@ -198,11 +173,7 @@ public final class CacheSimulator extends AbstractTool {
         return this.logPanel;
     }
 
-    // Rest of the protected methods. These override do-nothing methods inherited
-
-    /// /////////////////////////////////////////////////////////////////////////////////// from
-    // the abstract superclass.
-    private JComponent buildOrganizationArea() {
+    private @NotNull JComponent buildOrganizationArea() {
         final JPanel organization = new JPanel(new GridLayout(3, 2));
         final TitledBorder otb = new TitledBorder("Cache Organization");
         otb.setTitleJustification(TitledBorder.CENTER);
@@ -210,45 +181,42 @@ public final class CacheSimulator extends AbstractTool {
         this.cachePlacementSelector = new JComboBox<>(CacheSimulator.placementPolicyChoices);
         this.cachePlacementSelector.setEditable(false);
         this.cachePlacementSelector.setBackground(this.backgroundColor);
-        this.cachePlacementSelector.setSelectedIndex(CacheSimulator.defaultPlacementPolicyIndex);
-        this.cachePlacementSelector.addActionListener(
-            e -> {
-                this.updateCacheSetSizeSelector();
-                this.reset();
-            });
+        this.cachePlacementSelector.setSelectedIndex(CacheSimulator.DEFAULT_PLACEMENT_POLICY_INDEX);
+        this.cachePlacementSelector.addActionListener(e -> {
+            this.updateCacheSetSizeSelector();
+            this.reset();
+        });
 
         this.cacheReplacementSelector = new JComboBox<>(CacheSimulator.replacementPolicyChoices);
         this.cacheReplacementSelector.setEditable(false);
         this.cacheReplacementSelector.setBackground(this.backgroundColor);
-        this.cacheReplacementSelector.setSelectedIndex(CacheSimulator.defaultReplacementPolicyIndex);
+        this.cacheReplacementSelector.setSelectedIndex(CacheSimulator.DEFAULT_REPLACEMENT_POLICY_INDEX);
 
         this.cacheBlockSizeSelector = new JComboBox<>(CacheSimulator.cacheBlockSizeChoices);
         this.cacheBlockSizeSelector.setEditable(false);
         this.cacheBlockSizeSelector.setBackground(this.backgroundColor);
-        this.cacheBlockSizeSelector.setSelectedIndex(CacheSimulator.defaultCacheBlockSizeIndex);
-        this.cacheBlockSizeSelector.addActionListener(
-            e -> {
-                this.updateCacheSizeDisplay();
-                this.reset();
-            });
+        this.cacheBlockSizeSelector.setSelectedIndex(CacheSimulator.DEFAULT_CACHE_BLOCK_SIZE_INDEX);
+        this.cacheBlockSizeSelector.addActionListener(e -> {
+            this.updateCacheSizeDisplay();
+            this.reset();
+        });
         this.cacheBlockCountSelector = new JComboBox<>(CacheSimulator.cacheBlockCountChoices);
         this.cacheBlockCountSelector.setEditable(false);
         this.cacheBlockCountSelector.setBackground(this.backgroundColor);
-        this.cacheBlockCountSelector.setSelectedIndex(CacheSimulator.defaultCacheBlockCountIndex);
-        this.cacheBlockCountSelector.addActionListener(
-            e -> {
-                this.updateCacheSetSizeSelector();
-                this.theCache = this.createNewCache();
-                this.resetCounts();
-                this.updateDisplay();
-                this.updateCacheSizeDisplay();
-                this.animations.fillAnimationBoxWithCacheBlocks();
-            });
+        this.cacheBlockCountSelector.setSelectedIndex(CacheSimulator.DEFAULT_CACHE_BLOCK_COUNT_INDEX);
+        this.cacheBlockCountSelector.addActionListener(e -> {
+            this.updateCacheSetSizeSelector();
+            this.theCache = this.createNewCache();
+            this.resetCounts();
+            this.updateDisplay();
+            this.updateCacheSizeDisplay();
+            this.animations.fillAnimationBoxWithCacheBlocks();
+        });
 
         this.cacheSetSizeSelector = new JComboBox<>(this.cacheSetSizeChoices);
         this.cacheSetSizeSelector.setEditable(false);
         this.cacheSetSizeSelector.setBackground(this.backgroundColor);
-        this.cacheSetSizeSelector.setSelectedIndex(CacheSimulator.defaultCacheSetSizeIndex);
+        this.cacheSetSizeSelector.setSelectedIndex(CacheSimulator.DEFAULT_CACHE_SET_SIZE_INDEX);
         this.cacheSetSizeSelector.addActionListener(
             e -> this.reset());
 
@@ -318,7 +286,7 @@ public final class CacheSimulator extends AbstractTool {
         return organization;
     }
 
-    private JComponent buildPerformanceArea() {
+    private @NotNull JComponent buildPerformanceArea() {
         final JPanel performance = new JPanel(new GridLayout(1, 2));
         final TitledBorder ptb = new TitledBorder("Cache Performance");
         ptb.setTitleJustification(TitledBorder.CENTER);
@@ -436,10 +404,10 @@ public final class CacheSimulator extends AbstractTool {
         final CacheAccessResult cacheAccessResult = this.theCache.isItAHitThenReadOnMiss(notice.address);
         if (cacheAccessResult.isHit()) {
             this.cacheHitCount++;
-            this.animations.showHit(cacheAccessResult.getBlock());
+            this.animations.showHit(cacheAccessResult.blockNumber());
         } else {
             this.cacheMissCount++;
-            this.animations.showMiss(cacheAccessResult.getBlock());
+            this.animations.showMiss(cacheAccessResult.blockNumber());
         }
         this.cacheHitRate = this.cacheHitCount / (double) this.memoryAccessCount;
     }
@@ -469,8 +437,8 @@ public final class CacheSimulator extends AbstractTool {
             }
         }
         this.cacheSetSizeChoices = CacheSimulator.determineSetSizeChoices(
-            CacheSimulator.defaultCacheBlockCountIndex,
-            CacheSimulator.defaultPlacementPolicyIndex
+            CacheSimulator.DEFAULT_CACHE_BLOCK_COUNT_INDEX,
+            CacheSimulator.DEFAULT_PLACEMENT_POLICY_INDEX
         );
     }
 
@@ -517,20 +485,16 @@ public final class CacheSimulator extends AbstractTool {
     // Update the Set Size combo box selection in response to other selections..
     private void updateCacheSetSizeSelector() {
         this.cacheSetSizeSelector.setModel(
-            new DefaultComboBoxModel<>(CacheSimulator.determineSetSizeChoices(
+            new DefaultComboBoxModel<>(determineSetSizeChoices(
                 this.cacheBlockCountSelector.getSelectedIndex(),
                 this.cachePlacementSelector.getSelectedIndex()
             )));
     }
 
     // create and return a new cache object based on current specs
-    private AbstractCache createNewCache() {
-        int setSize = 1;
-        try {
-            setSize = Integer.parseInt((String) this.cacheSetSizeSelector.getSelectedItem());
-        } catch (final
-        NumberFormatException nfe) { // if this happens its my fault!
-        }
+    @Contract(" -> new")
+    private @NotNull AbstractCache createNewCache() {
+        final var setSize = Integer.parseInt((String) this.cacheSetSizeSelector.getSelectedItem());
         return new AnyCache(
             this.cacheBlockCountChoicesInt[this.cacheBlockCountSelector.getSelectedIndex()],
             this.cacheBlockSizeChoicesInt[this.cacheBlockSizeSelector.getSelectedIndex()],
@@ -579,8 +543,10 @@ public final class CacheSimulator extends AbstractTool {
 
     // Specialized inner classes for cache modeling and animation.
 
-    // Represents a block in the cache. Since we are only simulating
-    // cache performance, there's no need to actually store memory contents.
+    /**
+     * Represents a block in the cache. Since we are only simulating
+     * cache performance, there's no need to actually store memory contents.
+     */
     private static class CacheBlock {
         private boolean valid;
         private int tag;
@@ -593,19 +559,13 @@ public final class CacheSimulator extends AbstractTool {
         }
     }
 
-    // Represents the outcome of a cache access. There are two parts:
-    // whether it was a hit or not, and in which block is the value stored.
-    // In the case of a hit, the block associated with address. In the case of
-    // a miss, the block where new association is made. DPS 23-Dec-2010
-    private record CacheAccessResult(boolean hitOrMiss, int blockNumber) {
-
-        public boolean isHit() {
-            return this.hitOrMiss;
-        }
-
-        public int getBlock() {
-            return this.blockNumber;
-        }
+    /**
+     * Represents the outcome of a cache access. There are two parts:
+     * whether it was a hit or not, and in which block is the value stored.
+     * In the case of a hit, the block associated with address. In the case of
+     * a miss, the block where new association is made.
+     */
+    private record CacheAccessResult(boolean isHit, int blockNumber) {
     }
 
     /**
@@ -656,22 +616,20 @@ public final class CacheSimulator extends AbstractTool {
             return address / DataTypes.WORD_SIZE / this.blockSizeInWords % this.numberOfSets;
         }
 
-        // This will work regardless of placement policy (direct map, n-way or full
-        // assoc)
         public int getTag(final int address) {
             return address / DataTypes.WORD_SIZE / this.blockSizeInWords / this.numberOfSets;
         }
 
-        // This will work regardless of placement policy (direct map, n-way or full
-        // assoc)
-        // Returns absolute block offset into the cache.
+        /**
+         * Returns absolute block offset into the cache.
+         */
         public int getFirstBlockToSearch(final int address) {
             return this.getSetNumber(address) * this.setSizeInBlocks;
         }
 
-        // This will work regardless of placement policy (direct map, n-way or full
-        // assoc)
-        // Returns absolute block offset into the cache.
+        /**
+         * Returns absolute block offset into the cache.
+         */
         public int getLastBlockToSearch(final int address) {
             return this.getFirstBlockToSearch(address) + this.setSizeInBlocks - 1;
         }
@@ -681,7 +639,6 @@ public final class CacheSimulator extends AbstractTool {
             for (int i = 0; i < this.numberOfBlocks; i++) {
                 this.blocks[i] = new CacheBlock(this.blockSizeInWords);
             }
-            System.gc(); // scoop 'em up now
         }
 
         /**
@@ -749,74 +706,77 @@ public final class CacheSimulator extends AbstractTool {
      * selected for removal and the new tag will replace it.
      */
     private class AnyCache extends AbstractCache {
-        public AnyCache(final int numberOfBlocks, final int blockSizeInWords, final int setSizeInBlocks) {
+        private AnyCache(final int numberOfBlocks, final int blockSizeInWords, final int setSizeInBlocks) {
             super(numberOfBlocks, blockSizeInWords, setSizeInBlocks);
         }
 
-        // This method works for any of the placement policies:
-        // direct mapped, full associative or n-way set associative.
+        /**
+         * This method works for any of the placement policies:
+         * direct mapped, full associative or n-way set associative.
+         */
         @Override
         public CacheAccessResult isItAHitThenReadOnMiss(final int address) {
-            final int SET_FULL = 0;
             final int firstBlock = this.getFirstBlockToSearch(address);
             final int lastBlock = this.getLastBlockToSearch(address);
-            if (CacheSimulator.debug) // System.out.print
-            {
-                CacheSimulator.this.writeLog("(" + CacheSimulator.this.memoryAccessCount + ") address: " + BinaryUtilsKt.intToHexStringWithPrefix(
-                    address) + " (tag "
-                    + BinaryUtilsKt.intToHexStringWithPrefix(this.getTag(address)) + ") " + " block range: " + firstBlock + '-'
-                    + lastBlock + '\n');
+            if (debug) {
+                writeLog("(%d) address: %s (tag %s)  block range: %d-%d\n".formatted(
+                    memoryAccessCount,
+                    BinaryUtilsKt.intToHexStringWithPrefix(address),
+                    BinaryUtilsKt.intToHexStringWithPrefix(getTag(address)),
+                    firstBlock,
+                    lastBlock
+                ));
             }
             CacheBlock block;
             int blockNumber;
             // Will do a sequential instead of associative search!
-            final int HIT = 1;
-            int result = SET_FULL;
+            CacheResult result = CacheResult.SET_FULL;
             for (blockNumber = firstBlock; blockNumber <= lastBlock; blockNumber++) {
                 block = this.blocks[blockNumber];
-                if (CacheSimulator.debug) // System.out.print
-                {
-                    CacheSimulator.this.writeLog("   trying block " + blockNumber
-                        + ((block.valid) ? " tag " + BinaryUtilsKt.intToHexStringWithPrefix(block.tag) : " empty"));
+                if (CacheSimulator.debug) {
+                    writeLog("   trying block %d%s".formatted(
+                        blockNumber,
+                        (block.valid)
+                            ? " tag %s".formatted(BinaryUtilsKt.intToHexStringWithPrefix(block.tag))
+                            : " empty"
+                    ));
                 }
-                if (block.valid && block.tag == this.getTag(address)) {// it's a hit!
-                    if (CacheSimulator.debug) // System.out.print
-                    {
-                        CacheSimulator.this.writeLog(" -- HIT\n");
+                if (block.valid && block.tag == this.getTag(address)) {
+                    // it's a hit!
+                    if (CacheSimulator.debug) {
+                        writeLog(" -- HIT\n");
                     }
-                    result = HIT;
+                    result = CacheResult.HIT;
                     block.mostRecentAccessTime = CacheSimulator.this.memoryAccessCount;
                     break;
                 }
-                if (!block.valid) {// it's a miss but I got it now because it is empty!
-                    if (CacheSimulator.debug) // System.out.print
-                    {
-                        CacheSimulator.this.writeLog(" -- MISS\n");
+                if (!block.valid) {
+                    // it's a miss but I got it now because it is empty!
+                    if (CacheSimulator.debug) {
+                        writeLog(" -- MISS\n");
                     }
-                    result = 2; // miss value
+                    result = CacheResult.MISS; // miss value
                     block.valid = true;
                     block.tag = this.getTag(address);
                     block.mostRecentAccessTime = CacheSimulator.this.memoryAccessCount;
                     break;
                 }
-                if (CacheSimulator.debug) // System.out.print
-                {
-                    CacheSimulator.this.writeLog(" -- OCCUPIED\n");
+                if (CacheSimulator.debug) {
+                    writeLog(" -- OCCUPIED\n");
                 }
             }
-            if (result == SET_FULL) {
+            if (result == CacheResult.SET_FULL) {
                 // select one to replace and replace it...
-                if (CacheSimulator.debug) // System.out.print
-                {
-                    CacheSimulator.this.writeLog("   MISS due to FULL SET");
+                if (CacheSimulator.debug) {
+                    writeLog("   MISS due to FULL SET");
                 }
                 final int blockToReplace = this.selectBlockToReplace(firstBlock, lastBlock);
-                block = this.blocks[blockToReplace];
-                block.tag = this.getTag(address);
-                block.mostRecentAccessTime = CacheSimulator.this.memoryAccessCount;
+                block = blocks[blockToReplace];
+                block.tag = getTag(address);
+                block.mostRecentAccessTime = memoryAccessCount;
                 blockNumber = blockToReplace;
             }
-            return new CacheAccessResult(result == HIT, blockNumber);
+            return new CacheAccessResult(result == CacheResult.HIT, blockNumber);
         }
 
         // call this if all blocks in the set are full. If the set contains more than
@@ -828,8 +788,7 @@ public final class CacheSimulator extends AbstractTool {
                 switch (CacheSimulator.this.cacheReplacementSelector.getSelectedIndex()) {
                     case CacheSimulator.RANDOM:
                         replaceBlock = first + CacheSimulator.this.randu.nextInt(last - first + 1);
-                        if (CacheSimulator.debug) // System.out.print
-                        {
+                        if (CacheSimulator.debug) {
                             CacheSimulator.this.writeLog(" -- Random replace block " + replaceBlock + '\n');
                         }
                         break;
@@ -843,8 +802,7 @@ public final class CacheSimulator extends AbstractTool {
                                 replaceBlock = block;
                             }
                         }
-                        if (CacheSimulator.debug) // System.out.print
-                        {
+                        if (CacheSimulator.debug) {
                             CacheSimulator.this.writeLog(" -- LRU replace block " + replaceBlock + "; unused since ("
                                 + leastRecentAccessTime + ")\n");
                         }
@@ -852,6 +810,12 @@ public final class CacheSimulator extends AbstractTool {
                 }
             }
             return replaceBlock;
+        }
+
+        private enum CacheResult {
+            SET_FULL,
+            HIT,
+            MISS
         }
     }
 

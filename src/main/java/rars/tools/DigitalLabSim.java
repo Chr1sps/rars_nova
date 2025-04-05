@@ -14,7 +14,24 @@ import rars.venus.util.MouseListenerBuilder;
 import javax.swing.*;
 import java.awt.*;
 
-import static rars.util.KotlinUtilsKt.unwrap;
+import static rars.util.UtilsKt.unwrap;
+
+enum DisplaySegment {
+    A((byte) 0b00000001),
+    B((byte) 0b00000010),
+    C((byte) 0b00000100),
+    D((byte) 0b00001000),
+    E((byte) 0b00010000),
+    F((byte) 0b00100000),
+    G((byte) 0b01000000),
+    DOT((byte) 0b10000000);
+
+    public final byte bitMask;
+
+    DisplaySegment(final byte bitMask) {
+        this.bitMask = bitMask;
+    }
+}
 
 /*
  * Didier Teifreto LIFC Universit� de franche-Comt�
@@ -25,20 +42,20 @@ public final class DigitalLabSim extends AbstractTool {
     public static final int EXTERNAL_INTERRUPT_TIMER = 0x00000100;
     public static final int EXTERNAL_INTERRUPT_HEXA_KEYBOARD = 0x00000200;
     private static final Logger LOGGER = LogManager.getLogger(DigitalLabSim.class);
-    private static final String heading = "Digital Lab Sim";
-    private static final String version = " Version 1.0 (Didier Teifreto)";
+    private static final String HEADING = "Digital Lab Sim";
+    private static final String VERSION = " Version 1.0 (Didier Teifreto)";
     // Counter
-    private static final int CounterValueMax = 30;
+    private static final int MAX_COUNTER_VALUE = 30;
     // GUI Interface.
     private static JPanel panelTools;
     // Keyboard
     private static int KeyBoardValueButtonClick = -1; // -1 no button click
     private static boolean KeyboardInterruptOnOff = false;
-    private static int CounterValue = DigitalLabSim.CounterValueMax;
+    private static int CounterValue = DigitalLabSim.MAX_COUNTER_VALUE;
     private static boolean CounterInterruptOnOff = false;
     // Used to be static final variables now they are regenerated per instance
-    private final int IN_ADRESS_DISPLAY_1, IN_ADRESS_DISPLAY_2, IN_ADRESS_HEXA_KEYBOARD, IN_ADRESS_COUNTER,
-        OUT_ADRESS_HEXA_KEYBOARD;
+    private final int rightDisplayAddress, leftDisplayAddress, keyboardInAddress, counterAddress,
+        keyboardOutAddress;
     // Seven Segment display
     private SevenSegmentPanel sevenSegPanel;
     private HexaKeyboard hexaKeyPanel;
@@ -47,21 +64,21 @@ public final class DigitalLabSim extends AbstractTool {
         super(title, heading, mainUI);
 
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.IN_ADRESS_DISPLAY_1 = memoryConfiguration.memoryMapBaseAddress + 0x10;
-        this.IN_ADRESS_DISPLAY_2 = memoryConfiguration.memoryMapBaseAddress + 0x11;
-        this.IN_ADRESS_HEXA_KEYBOARD = memoryConfiguration.memoryMapBaseAddress + 0x12;
-        this.IN_ADRESS_COUNTER = memoryConfiguration.memoryMapBaseAddress + 0x13;
-        this.OUT_ADRESS_HEXA_KEYBOARD = memoryConfiguration.memoryMapBaseAddress + 0x14;
+        this.rightDisplayAddress = memoryConfiguration.memoryMapBaseAddress + 0x10;
+        this.leftDisplayAddress = memoryConfiguration.memoryMapBaseAddress + 0x11;
+        this.keyboardInAddress = memoryConfiguration.memoryMapBaseAddress + 0x12;
+        this.counterAddress = memoryConfiguration.memoryMapBaseAddress + 0x13;
+        this.keyboardOutAddress = memoryConfiguration.memoryMapBaseAddress + 0x14;
     }
 
     public DigitalLabSim(final @NotNull VenusUI mainUI) {
-        this(DigitalLabSim.heading + ", " + DigitalLabSim.version, DigitalLabSim.heading, mainUI);
+        this(DigitalLabSim.HEADING + ", " + DigitalLabSim.VERSION, DigitalLabSim.HEADING, mainUI);
     }
 
     public static void updateOneSecondCounter(final byte value) {
         if (value != 0) {
             DigitalLabSim.CounterInterruptOnOff = true;
-            DigitalLabSim.CounterValue = DigitalLabSim.CounterValueMax;
+            DigitalLabSim.CounterValue = DigitalLabSim.MAX_COUNTER_VALUE;
         } else {
             DigitalLabSim.CounterInterruptOnOff = false;
         }
@@ -69,7 +86,7 @@ public final class DigitalLabSim extends AbstractTool {
 
     public static void resetOneSecondCounter() {
         DigitalLabSim.CounterInterruptOnOff = false;
-        DigitalLabSim.CounterValue = DigitalLabSim.CounterValueMax;
+        DigitalLabSim.CounterValue = DigitalLabSim.MAX_COUNTER_VALUE;
     }
 
     @Override
@@ -80,7 +97,7 @@ public final class DigitalLabSim extends AbstractTool {
     @Override
     protected void addAsObserver() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.addAsObserver(this.IN_ADRESS_DISPLAY_1, this.IN_ADRESS_DISPLAY_1);
+        this.addAsObserver(this.rightDisplayAddress, this.rightDisplayAddress);
         this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
     }
 
@@ -89,20 +106,20 @@ public final class DigitalLabSim extends AbstractTool {
         final var memNotice = (MemoryAccessNotice) notice;
         final int address = memNotice.address;
         final var value = (byte) memNotice.value;
-        if (address == this.IN_ADRESS_DISPLAY_1) {
+        if (address == this.rightDisplayAddress) {
             this.updateSevenSegment(1, value);
-        } else if (address == this.IN_ADRESS_DISPLAY_2) {
+        } else if (address == this.leftDisplayAddress) {
             this.updateSevenSegment(0, value);
-        } else if (address == this.IN_ADRESS_HEXA_KEYBOARD) {
+        } else if (address == this.keyboardInAddress) {
             this.updateHexaKeyboard(value);
-        } else if (address == this.IN_ADRESS_COUNTER) {
+        } else if (address == this.counterAddress) {
             DigitalLabSim.updateOneSecondCounter(value);
         }
         if (DigitalLabSim.CounterInterruptOnOff) {
             if (DigitalLabSim.CounterValue > 0) {
                 DigitalLabSim.CounterValue--;
             } else {
-                DigitalLabSim.CounterValue = DigitalLabSim.CounterValueMax;
+                DigitalLabSim.CounterValue = DigitalLabSim.MAX_COUNTER_VALUE;
                 Globals.INTERRUPT_CONTROLLER.registerTimerInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_TIMER);
             }
         }
@@ -162,27 +179,27 @@ public final class DigitalLabSim extends AbstractTool {
                 If counter interruption is enable, every 30 instructions, a timer interrupt is started with value 0x00000100.
             (contributed by Didier Teifreto, dteifreto@lifc.univ-fcomte.fr)
             """.formatted(
-            BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_DISPLAY_1),
-            BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_DISPLAY_2),
-            BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_HEXA_KEYBOARD),
-            BinaryUtilsKt.intToHexStringWithPrefix(this.OUT_ADRESS_HEXA_KEYBOARD),
-            BinaryUtilsKt.intToHexStringWithPrefix(this.IN_ADRESS_COUNTER)
+            BinaryUtilsKt.intToHexStringWithPrefix(rightDisplayAddress),
+            BinaryUtilsKt.intToHexStringWithPrefix(leftDisplayAddress),
+            BinaryUtilsKt.intToHexStringWithPrefix(keyboardInAddress),
+            BinaryUtilsKt.intToHexStringWithPrefix(keyboardOutAddress),
+            BinaryUtilsKt.intToHexStringWithPrefix(counterAddress)
         );
-        final JButton help = new JButton("Help");
-        help.addActionListener(
+        final var helpButton = new JButton("Help");
+        helpButton.addActionListener(
             e -> {
-                final JTextArea ja = new JTextArea(helpContent);
-                ja.setRows(20);
-                ja.setColumns(60);
-                ja.setLineWrap(true);
-                ja.setWrapStyleWord(true);
+                final var textArea = new JTextArea(helpContent);
+                textArea.setRows(20);
+                textArea.setColumns(60);
+                textArea.setLineWrap(true);
+                textArea.setWrapStyleWord(true);
                 JOptionPane.showMessageDialog(
-                    DigitalLabSim.this.theWindow, new JScrollPane(ja),
+                    DigitalLabSim.this.theWindow, new JScrollPane(textArea),
                     "Simulating the Hexa Keyboard and Seven segment display",
                     JOptionPane.INFORMATION_MESSAGE
                 );
             });
-        return help;
+        return helpButton;
     }
 
     public void updateSevenSegment(final int number, final byte value) {
@@ -193,11 +210,11 @@ public final class DigitalLabSim extends AbstractTool {
         final int key = DigitalLabSim.KeyBoardValueButtonClick;
         if ((key != -1) && ((1 << (key / 4)) == (row & 0xF))) {
             this.updateMMIOControlAndData(
-                this.OUT_ADRESS_HEXA_KEYBOARD,
+                this.keyboardOutAddress,
                 (char) (1 << (key / 4)) | (1 << (4 + (key % 4)))
             );
         } else {
-            this.updateMMIOControlAndData(this.OUT_ADRESS_HEXA_KEYBOARD, 0);
+            this.updateMMIOControlAndData(this.keyboardOutAddress, 0);
         }
         DigitalLabSim.KeyboardInterruptOnOff = (row & 0xF0) != 0;
     }
@@ -291,11 +308,6 @@ public final class DigitalLabSim extends AbstractTool {
         }
     }
 
-    /*
-     * ....................Hexa Keyboard end here...................................
-     */
-    /* ....................Timer start here................................... */
-
     public static class SevenSegmentPanel extends JPanel {
         public final SevenSegmentDisplay[] display;
 
@@ -339,7 +351,7 @@ public final class DigitalLabSim extends AbstractTool {
                     if (DigitalLabSim.KeyBoardValueButtonClick != -1) {
                         // Button already pressed -> now release
                         DigitalLabSim.KeyBoardValueButtonClick = -1;
-                        DigitalLabSim.this.updateMMIOControlAndData(DigitalLabSim.this.OUT_ADRESS_HEXA_KEYBOARD, 0);
+                        DigitalLabSim.this.updateMMIOControlAndData(DigitalLabSim.this.keyboardOutAddress, 0);
                         for (final var btn : HexaKeyboard.this.button) {
                             btn.setBackground(Color.WHITE);
                         }
@@ -366,22 +378,5 @@ public final class DigitalLabSim extends AbstractTool {
             }
         }
 
-    }
-}
-
-enum DisplaySegment {
-    A((byte) 0b00000001),
-    B((byte) 0b00000010),
-    C((byte) 0b00000100),
-    D((byte) 0b00001000),
-    E((byte) 0b00010000),
-    F((byte) 0b00100000),
-    G((byte) 0b01000000),
-    DOT((byte) 0b10000000);
-
-    public final byte bitMask;
-
-    DisplaySegment(final byte bitMask) {
-        this.bitMask = bitMask;
     }
 }

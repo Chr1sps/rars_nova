@@ -58,22 +58,11 @@ public final class BHTEntry {
      * taken or not. The value at index n-1 represents the most recent branch
      * outcome.
      */
-    private final boolean[] m_history;
+    private final boolean[] myHistory;
 
-    /**
-     * the current prediction
-     */
-    private boolean m_prediction;
-
-    /**
-     * absolute number of incorrect predictions
-     */
-    private int m_incorrect;
-
-    /**
-     * absolute number of correct predictions
-     */
-    private int m_correct;
+    private boolean currentPrediction;
+    private int incorrectPredictionsCount;
+    private int correctPredictionsCount;
 
     /**
      * Constructs a BHT entry with a given history size.
@@ -87,14 +76,14 @@ public final class BHTEntry {
      *     the initial value of the entry (take or do not take)
      */
     public BHTEntry(final int historySize, final boolean initVal) {
-        this.m_prediction = initVal;
-        this.m_history = new boolean[historySize];
+        this.currentPrediction = initVal;
+        this.myHistory = new boolean[historySize];
 
         for (int i = 0; i < historySize; i++) {
-            this.m_history[i] = initVal;
+            this.myHistory[i] = initVal;
         }
-        this.m_correct = 0;
-        this.m_incorrect = 0;
+        this.correctPredictionsCount = 0;
+        this.incorrectPredictionsCount = 0;
     }
 
     /**
@@ -103,7 +92,7 @@ public final class BHTEntry {
      * @return true if prediction is to take the branch, false otherwise
      */
     public boolean getPrediction() {
-        return this.m_prediction;
+        return this.currentPrediction;
     }
 
     /**
@@ -118,21 +107,21 @@ public final class BHTEntry {
     public void updatePrediction(final boolean branchTaken) {
 
         // update history
-        for (int i = 0; i < this.m_history.length - 1; i++) {
-            this.m_history[i] = this.m_history[i + 1];
+        for (int i = 0; i < this.myHistory.length - 1; i++) {
+            this.myHistory[i] = this.myHistory[i + 1];
         }
-        this.m_history[this.m_history.length - 1] = branchTaken;
+        this.myHistory[this.myHistory.length - 1] = branchTaken;
 
         // if the prediction was correct, update stats and keep prediction
-        if (branchTaken == this.m_prediction) {
-            this.m_correct++;
+        if (branchTaken == this.currentPrediction) {
+            this.correctPredictionsCount++;
         } else {
-            this.m_incorrect++;
+            this.incorrectPredictionsCount++;
 
             // check if the prediction should change
             boolean changePrediction = true;
 
-            for (final boolean taken : this.m_history) {
+            for (final boolean taken : this.myHistory) {
                 if (taken != branchTaken) {
                     changePrediction = false;
                     break;
@@ -140,7 +129,7 @@ public final class BHTEntry {
             }
 
             if (changePrediction) {
-                this.m_prediction = !this.m_prediction;
+                this.currentPrediction = !this.currentPrediction;
             }
 
         }
@@ -152,7 +141,7 @@ public final class BHTEntry {
      * @return number of incorrect predictions (mispredictions)
      */
     public int getStatsPredIncorrect() {
-        return this.m_incorrect;
+        return this.incorrectPredictionsCount;
     }
 
     /**
@@ -161,7 +150,7 @@ public final class BHTEntry {
      * @return number of correct predictions
      */
     public int getStatsPredCorrect() {
-        return this.m_correct;
+        return this.correctPredictionsCount;
     }
 
     /**
@@ -170,8 +159,8 @@ public final class BHTEntry {
      * @return the percentage of correct predictions
      */
     public double getStatsPredPrecision() {
-        final int sum = this.m_incorrect + this.m_correct;
-        return (sum == 0) ? 0 : this.m_correct * 100.0 / sum;
+        final int sum = this.incorrectPredictionsCount + this.correctPredictionsCount;
+        return (sum == 0) ? 0 : this.correctPredictionsCount * 100.0 / sum;
     }
 
     /**
@@ -184,11 +173,11 @@ public final class BHTEntry {
     public String getHistoryAsStr() {
         final StringBuilder result = new StringBuilder();
 
-        for (int i = 0; i < this.m_history.length; i++) {
+        for (int i = 0; i < this.myHistory.length; i++) {
             if (i > 0) {
                 result.append(", ");
             }
-            result.append(this.m_history[i] ? "T" : "NT");
+            result.append(this.myHistory[i] ? "T" : "NT");
         }
         return result.toString();
     }
@@ -200,6 +189,6 @@ public final class BHTEntry {
      * @return a string representation of the BHT entry's current prediction
      */
     public String getPredictionAsStr() {
-        return this.m_prediction ? "TAKE" : "NOT TAKE";
+        return this.currentPrediction ? "TAKE" : "NOT TAKE";
     }
 }

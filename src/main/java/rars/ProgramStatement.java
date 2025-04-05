@@ -58,7 +58,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version August 2003
  */
 public final class ProgramStatement implements Comparable<ProgramStatement> {
-    private static final @NotNull String invalidOperator = "<INVALID>";
+    private static final @NotNull String INVALID_OPERATOR = "<INVALID>";
     public final @Nullable SourceLine sourceLine;
     private final @Nullable TokenList originalTokenList, strippedTokenList;
     private final @NotNull BasicStatementList basicStatementList;
@@ -141,7 +141,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
         assert foundInstruction != null : "ERROR: basic instruction not found for this opcode.";
         this.instruction = foundInstruction;
         final var opCodeMask = foundInstruction.operationMask;
-        final var format = foundInstruction.instructionFormat;
+        final var format = foundInstruction.getInstructionFormat();
         switch (format) {
             case J_FORMAT -> {
                 this.operands.add(readBinaryCode(
@@ -263,7 +263,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * method is
      * used by the constructor that is given only the int address and binary code.
      * It is not
-     * intended to be used when source code is available. DPS 11-July-2013
+     * intended to be used when source code is available.
      */
     private static @NotNull BasicStatementList buildBasicStatementListFromBinaryCode(
         final @NotNull BasicInstruction instr,
@@ -333,7 +333,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             tokenListCounter++;
         }
         return result;
-    } // buildBasicStatementListFromBinaryCode()
+    }
 
     // endregion Statics
 
@@ -423,7 +423,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     this.operands.add(register.number);
                 }
                 case ROUNDING_MODE -> {
-                    final int rounding_mode = switch (tokenValue) {
+                    final int roundingMode = switch (tokenValue) {
                         case "rne" -> 0;
                         case "rtz" -> 1;
                         case "rdn" -> 2;
@@ -432,7 +432,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         case "dyn" -> 7;
                         default -> -1;
                     };
-                    if (rounding_mode == -1) {
+                    if (roundingMode == -1) {
                         errors.addTokenError(
                             token,
                             "invalid rounding mode"
@@ -441,7 +441,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     }
                     basicInstructionBuilder.append(tokenValue);
                     this.basicStatementList.addString(tokenValue);
-                    this.operands.add(rounding_mode);
+                    this.operands.add(roundingMode);
                 }
                 case IDENTIFIER -> {
                     int address =
@@ -449,7 +449,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                             .program()
                             .getLocalSymbolTable()
                             .getAddressLocalOrGlobal(tokenValue);
-                    if (address == SymbolTable.NOT_FOUND) { // symbol used without being defined
+                    if (address == SymbolTable.NOT_FOUND) {
+                        // symbol used without being defined
                         errors.addTokenError(
                             token,
                             "Symbol \"%s\" not found in symbol table.".formatted(tokenValue)
@@ -460,7 +461,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
 
                     if (this.instruction instanceof BasicInstruction) {
                         final BasicInstructionFormat format =
-                            ((BasicInstruction) this.instruction).instructionFormat;
+                            ((BasicInstruction) this.instruction).getInstructionFormat();
                         if (format == BasicInstructionFormat.B_FORMAT) {
                             address -= this.textAddress;
                             if (address >= (1 << 12) || address < -(1 << 12)) {
@@ -490,7 +491,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                         }
                     }
                     basicInstructionBuilder.append(address);
-                    if (absoluteAddress) { // record as address if absolute, value if relative
+                    if (absoluteAddress) {
+                        // record as address if absolute, value if relative
                         this.basicStatementList.addAddress(address);
                     } else {
                         this.basicStatementList.addValue(address);
@@ -500,56 +502,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                 case INTEGER_5, INTEGER_6, INTEGER_12, INTEGER_12U, INTEGER_20, INTEGER_32 -> {
 
                     final int tempNumeric = BinaryUtilsKt.stringToInt(tokenValue);
-
-                    /* **************************************************************************
-                     * MODIFICATION AND COMMENT, DPS 3-July-2008
-                     *
-                     * The modifications of January 2005 documented below are being rescinded.
-                     * All hexadecimal immediate values are considered 32 bits in length and
-                     * their classification as INTEGER_5, INTEGER_16, INTEGER_16U (new)
-                     * or INTEGER_32 depends on their 32 bit value. So 0xFFFF will be
-                     * equivalent to 0x0000FFFF instead of 0xFFFFFFFF. This change, along with
-                     * the introduction of INTEGER_16U (adopted from Greg Gibeling of Berkeley),
-                     * required extensive changes to instruction templates especially for
-                     * usePseudoInstructions-instructions.
-                     *
-                     * This modification also appears inbuildBasicStatementFromBasicInstruction()
-                     * in rars.ProgramStatement.
-                     *
-                     * ///// Begin modification 1/4/05 KENV
-                     * ///////////////////////////////////////////
-                     * // We have decided to interpret non-signed (no + or -) 16-bit hexadecimal
-                     * immediate
-                     * // operands as signed values in the range -32768 to 32767. So 0xffff will
-                     * represent
-                     * // -1, not 65535 (bit 15 as sign bit), 0x8000 will represent -32768 not
-                     * 32768.
-                     * // NOTE: 32-bit hexadecimal immediate operands whose values fall into this
-                     * range
-                     * // will be likewise affected, but they are used only in usePseudoInstructions-instructions.
-                     * The
-                     * // code in ExtendedInstruction.java to split this number into upper 16 bits
-                     * for "lui"
-                     * // and lower 16 bits for "ori" works with the original source code token, so
-                     * it is
-                     * // not affected by this tweak. 32-bit immediates in data segment directives
-                     * // are also processed elsewhere so are not affected either.
-                     * ////////////////////////////////////////////////////////////////////////////////
-                     *
-                     * if (tokenType != TokenTypes.INTEGER_16U) { // part of the Berkeley mod...
-                     * if ( Binary.isHex(tokenValue) &&
-                     * (tempNumeric >= 32768) &&
-                     * (tempNumeric <= 65535) ) // Range 0x8000 ... 0xffff
-                     * {
-                     * // Subtract the 0xffff bias, because strings in the
-                     * // range "0x8000" ... "0xffff" are used to represent
-                     * // 16-bit negative numbers, not positive numbers.
-                     * tempNumeric = tempNumeric - 65536;
-                     * // Note: no action needed for range 0xffff8000 ... 0xffffffff
-                     * }
-                     * }
-                     ************************** END DPS 3-July-2008 COMMENTS
-                     *******************************/
 
                     basicInstructionBuilder.append(tempNumeric);
                     if (tokenType == TokenType.INTEGER_5) {
@@ -580,7 +532,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             }
         }
         this.basicAssemblyStatement = basicInstructionBuilder.toString();
-    } // buildBasicStatementFromBasicInstruction()
+    }
 
     /**
      * Given the current statement in Basic Assembly format (see above), build the
@@ -592,7 +544,8 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      */
     public void buildMachineStatementFromBasicStatement(final @NotNull ErrorList errors) {
         switch (this.instruction) {
-            case final ExtendedInstruction ignored -> // This means the pseudo-instruction expansion generated another
+            case final ExtendedInstruction ignored ->
+                // This means the pseudo-instruction expansion generated another
                 // pseudo-instruction (expansion must be to all basic instructions).
                 // This is an error on the part of the pseudo-instruction author.
                 errors.add(ErrorMessage.error(
@@ -605,7 +558,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             case final BasicInstruction basic -> {
                 // mask indicates bit positions for 'f'irst, 's'econd, 't'hird operand
                 this.machineStatement = basic.operationMask;
-                final BasicInstructionFormat format = basic.instructionFormat;
+                final BasicInstructionFormat format = basic.getInstructionFormat();
 
                 if (format == BasicInstructionFormat.J_FORMAT) {
                     this.insertBinaryCode(
@@ -678,7 +631,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
             builder.append(machineStatementString);
         }
         return builder.toString();
-    } // toString()
+    }
 
     /**
      * Produces RISCVprogram object representing the source file containing this
@@ -836,7 +789,6 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      * NOTE: Address operands on Branch instructions are
      * considered values instead of addresses because they
      * are relative to the PC.
-     * DPS 29-July-2010
      */
     private static final class BasicStatementList {
 

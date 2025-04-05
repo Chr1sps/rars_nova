@@ -11,21 +11,16 @@ import rars.riscv.hardware.Memory
 import rars.riscv.hardware.wordAligned
 import rars.settings.BoolSetting
 import rars.simulator.Simulator
-import rars.util.*
+import rars.util.FilenameFinder
+import rars.util.toAscii
+import rars.util.toHexStringWithPrefix
+import rars.util.translateToInt
 import rars.venus.VenusUI
 import java.io.File
 import java.io.PrintStream
-import java.lang.Float
 import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
-import kotlin.Array
-import kotlin.Boolean
-import kotlin.Int
-import kotlin.NumberFormatException
-import kotlin.String
-import kotlin.arrayOfNulls
-import kotlin.assert
 import kotlin.system.exitProcess
 
 /**
@@ -65,7 +60,7 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
     //     for (final String[] triple : this.dumpTriples) {
     //         final File file = new File(triple[2]);
     //         var segmentBounds = MemoryDump.getSegmentBounds(triple[0]);
-    //         // If not segment name, see if it is address range instead. DPS 14-July-2008
+    //         // If not segment name, see if it is address range instead.
     //         if (segmentBounds == null) {
     //             try {
     //                 final String[] memoryRange = Main.checkMemoryAddressRange(triple[0]);
@@ -128,7 +123,7 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
         if (this.programOptions.isProjectMode) {
             val allFoundProjectFiles = FilenameFinder.getFilenameListForDirectory(
                 mainFile.getParentFile(),
-                Globals.fileExtensions
+                Globals.FILE_EXTENSIONS
             )
             // filesToAssemble = FilenameFinder.getFilenameList(mainFile.getParent(), Globals.fileExtensions);
             if (this.programOptions.files.size > 1) {
@@ -137,13 +132,13 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
                 val nonMainFiles = this.programOptions.files.drop(1)
                 val moreFilesToAssemble = FilenameFinder.filterFilesByExtensions(
                     nonMainFiles,
-                    Globals.fileExtensions
+                    Globals.FILE_EXTENSIONS
                 )
                 filesToAssemble = (allFoundProjectFiles + moreFilesToAssemble).distinct()
             } else {
                 filesToAssemble = FilenameFinder.filterFilesByExtensions(
                     allFoundProjectFiles,
-                    Globals.fileExtensions
+                    Globals.FILE_EXTENSIONS
                 )
             }
         } else {
@@ -230,7 +225,7 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
      */
     private fun displayMiscellaneousPostMortem() {
         if (this.programOptions.displayInstructionCount) {
-            this.out.println("\n" + RegisterUtils.getRegisterValue("cycle"))
+            this.out.println("\n" + getRegisterValue("cycle"))
         }
     }
 
@@ -238,39 +233,43 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
     private fun displayRegistersPostMortem() {
         // Display requested register contents
         for (registerName in this.programOptions.registers) {
-            if (Globals.FP_REGISTER_FILE.getRegisterByName(registerName) != null) {
-                // TODO: do something for double vs float
-                // It isn't clear to me what the best behaviour is
-                // floating point register
-                val ivalue = RegisterUtils.getRegisterValue(registerName)
-                if (!this.programOptions.brief) {
-                    this.out.print(registerName + "\t")
-                }
-                when (this.programOptions.displayFormat) {
-                    DisplayFormat.HEX -> this.out.println(ivalue.toHexStringWithPrefix())
-                    DisplayFormat.DECIMAL -> {
-                        val fvalue = Float.intBitsToFloat(ivalue)
-                        this.out.println(fvalue)
+            when {
+                Globals.FP_REGISTER_FILE.getRegisterByName(registerName) != null -> {
+                    // TODO: do something for double vs float
+                    // It isn't clear to me what the best behaviour is
+                    // floating point register
+                    val ivalue = getRegisterValue(registerName)!!
+                    if (!this.programOptions.brief) {
+                        this.out.print(registerName + "\t")
                     }
+                    when (this.programOptions.displayFormat) {
+                        DisplayFormat.HEX -> this.out.println(ivalue.toHexStringWithPrefix())
+                        DisplayFormat.DECIMAL -> {
+                            val fvalue = Float.fromBits(ivalue)
+                            this.out.println(fvalue)
+                        }
 
-                    else -> this.out.println(ivalue.toAscii())
+                        else -> this.out.println(ivalue.toAscii())
+                    }
                 }
-            } else if (Globals.CS_REGISTER_FILE.getRegisterByName(registerName) != null) {
-                this.out.print(registerName + "\t")
-                this.out.println(
-                    this.formatIntForDisplay(
-                        Globals.CS_REGISTER_FILE.getLongValue(registerName)!!
-                            .toInt()
+                Globals.CS_REGISTER_FILE.getRegisterByName(registerName) != null -> {
+                    this.out.print(registerName + "\t")
+                    this.out.println(
+                        this.formatIntForDisplay(
+                            Globals.CS_REGISTER_FILE.getLongValue(registerName)!!
+                                .toInt()
+                        )
                     )
-                )
-            } else if (this.programOptions.brief) {
-                this.out.print(registerName + "\t")
-                this.out.println(
-                    this.formatIntForDisplay(
-                        Globals.REGISTER_FILE.getRegisterByName(registerName)!!
-                            .getValue().toInt()
+                }
+                this.programOptions.brief -> {
+                    this.out.print(registerName + "\t")
+                    this.out.println(
+                        this.formatIntForDisplay(
+                            Globals.REGISTER_FILE.getRegisterByName(registerName)!!
+                                .getValue().toInt()
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -316,6 +315,22 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
             this.out.println()
         }
     }
+
+    // TODO: remove in favour of something that doesn't use Globals
+    /**
+     * Gets the value of a normal, floating-point or control and status register.
+     *
+     * @param name
+     * Either the common usage (t0, a0, ft0), explicit numbering (x2,
+     * x3, f0), or CSR name (ustatus)
+     * @return The value of the register as an int (floats are encoded as IEEE-754)
+     * @throws NullPointerException
+     * if name is invalid; only needs to be checked if
+     * code accesses arbitrary names
+     */
+    private fun getRegisterValue(name: String): Int? = Globals.REGISTER_FILE.getIntValue(name)
+        ?: Globals.FP_REGISTER_FILE.getIntValue(name)
+        ?: Globals.CS_REGISTER_FILE.getIntValue(name)
 }
 
 fun main(args: Array<String>) {
@@ -357,6 +372,7 @@ private fun checkMemoryAddressRange(arg: String): Array<String?>? {
         }
     }
     return memoryRange
+
 }
 
 /**
@@ -375,5 +391,5 @@ private fun launchIDE(options: ProgramOptions) {
         System.setProperty("apple.awt.application.name", "RARS Nova")
         System.setProperty("apple.awt.application.appearance", "system")
     }
-    SwingUtilities.invokeLater { Globals.GUI = VenusUI("RARS " + Globals.version, options.files) }
+    SwingUtilities.invokeLater { Globals.GUI = VenusUI("RARS " + Globals.VERSION, options.files) }
 }

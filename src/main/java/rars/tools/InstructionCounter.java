@@ -34,7 +34,6 @@ import rars.Globals;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.BasicInstruction;
-import rars.riscv.BasicInstructionFormat;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -50,9 +49,9 @@ import java.awt.*;
  */
 public final class InstructionCounter extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger(InstructionCounter.class);
-    private static final String name = "Instruction Counter";
-    private static final String version = "Version 1.0 (Felipe Lessa)";
-    private static final String heading = "Counting the number of instructions executed";
+    private static final String NAME = "Instruction Counter";
+    private static final String VERSION = "Version 1.0 (Felipe Lessa)";
+    private static final String HEADING = "Counting the number of instructions executed";
 
     /** Number of instructions executed until now. */
     private int counter = 0;
@@ -104,12 +103,12 @@ public final class InstructionCounter extends AbstractTool {
      * Simple construction, likely used by the RARS Tools menu mechanism.
      */
     public InstructionCounter(final @NotNull VenusUI mainUI) {
-        super(InstructionCounter.name + ", " + InstructionCounter.version, InstructionCounter.heading, mainUI);
+        super(InstructionCounter.NAME + ", " + InstructionCounter.VERSION, InstructionCounter.HEADING, mainUI);
     }
 
     @Override
     public String getName() {
-        return InstructionCounter.name;
+        return InstructionCounter.NAME;
     }
 
     @Override
@@ -279,8 +278,8 @@ public final class InstructionCounter extends AbstractTool {
                 // If the program is finished, getStatement() will return null,
                 // a null statement will cause the simulator to stall.
                 if (stmt != null) {
-                    final BasicInstruction instr = (BasicInstruction) stmt.getInstruction();
-                    final BasicInstructionFormat format = instr.instructionFormat;
+                    final var instruction = (BasicInstruction) stmt.getInstruction();
+                    final var format = instruction.getInstructionFormat();
                     switch (format) {
                         case R_FORMAT -> this.counterR++;
                         case R4_FORMAT -> this.counterR4++;

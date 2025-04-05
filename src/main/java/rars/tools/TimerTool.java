@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.notices.MemoryAccessNotice;
-import rars.riscv.hardware.registerFiles.CSRegisterFile;
+import rars.riscv.hardware.registerfiles.CSRegisterFile;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -39,7 +39,7 @@ import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static rars.util.KotlinUtilsKt.unwrap;
+import static rars.util.UtilsKt.unwrap;
 
 /**
  * A RARS tool used to implement a timing module and timer inturrpts.
@@ -47,8 +47,8 @@ import static rars.util.KotlinUtilsKt.unwrap;
 public final class TimerTool extends AbstractTool {
     private static final Logger LOGGER = LogManager.getLogger(TimerTool.class);
 
-    private static final String heading = "Timer Tool";
-    private static final String version = "Version 1.0 (Zachary Selk)";
+    private static final String HEADING = "Timer Tool";
+    private static final String VERSION = "Version 1.0 (Zachary Selk)";
     // Internal time values
 
     /** The current time of the program (starting from 0) */
@@ -68,7 +68,7 @@ public final class TimerTool extends AbstractTool {
     private TimePanel timePanel;
 
     public TimerTool(final @NotNull VenusUI mainUI) {
-        super(TimerTool.heading + ", " + TimerTool.version, TimerTool.heading, mainUI);
+        super(TimerTool.HEADING + ", " + TimerTool.VERSION, TimerTool.HEADING, mainUI);
         TimerTool.startTimeCmpDaemon();
     }
 

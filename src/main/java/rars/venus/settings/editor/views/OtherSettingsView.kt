@@ -1,43 +1,46 @@
-package rars.venus.settings.editor.views;
+package rars.venus.settings.editor.views
 
-import org.jetbrains.annotations.NotNull;
-import rars.settings.OtherSettingsImpl;
-import rars.venus.Editor;
-import rars.venus.settings.editor.GenericOptionSection;
+import rars.venus.Editor
+import rars.venus.settings.editor.GenericOptionSection
+import rars.venus.util.BoxLayout
+import javax.swing.BoxLayout
+import javax.swing.JPanel
+import javax.swing.JSpinner
+import javax.swing.SpinnerNumberModel
 
-import javax.swing.*;
+class OtherSettingsView(
+    initialCaretBlinkRate: Int,
+    initialEditorTabSize: Int,
+) : JPanel() {
+    val blinkRateSpinner: JSpinner
+    val tabSizeSpinner: JSpinner
 
-import static rars.venus.settings.editor.views.SyntaxStyleView.buildRow;
-
-public final class OtherSettingsView extends JPanel {
-    public final @NotNull JSpinner blinkRateSpinner, tabSizeSpinner;
-
-    public OtherSettingsView(final @NotNull OtherSettingsImpl otherSettings) {
-        super();
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        final var blinkRateModel = new SpinnerNumberModel(
-            otherSettings.getCaretBlinkRate(),
+    init {
+        val blinkRateModel = SpinnerNumberModel(
+            initialCaretBlinkRate,
             Editor.MIN_BLINK_RATE,
             Editor.MAX_BLINK_RATE,
             1
-        );
-        final var blinkRatePicker = new GenericOptionSection<>(
+        )
+        val blinkRatePicker = GenericOptionSection(
             "Caret blink rate (ms, 0 to disable)",
-            new JSpinner(blinkRateModel)
-        );
-        this.blinkRateSpinner = blinkRatePicker.component;
-        final var tabSizeModel = new SpinnerNumberModel(
-            otherSettings.getEditorTabSize(),
+            JSpinner(blinkRateModel)
+        )
+        val tabSizeModel = SpinnerNumberModel(
+            initialEditorTabSize,
             Editor.MIN_TAB_SIZE,
             Editor.MAX_TAB_SIZE,
             1
-        );
-        final var tabSizePicker = new GenericOptionSection<>(
+        )
+        val tabSizePicker = GenericOptionSection(
             "Tab size",
-            new JSpinner(tabSizeModel)
-        );
-        this.tabSizeSpinner = tabSizePicker.component;
-        this.add(buildRow(true, blinkRatePicker, tabSizePicker));
-        this.add(Box.createVerticalGlue());
+            JSpinner(tabSizeModel)
+        )
+        blinkRateSpinner = blinkRatePicker.component
+        tabSizeSpinner = tabSizePicker.component
+        BoxLayout(BoxLayout.Y_AXIS) {
+            +buildRow(addMargins = true, blinkRatePicker, tabSizePicker)
+            verticalGlue()
+        }
     }
 }

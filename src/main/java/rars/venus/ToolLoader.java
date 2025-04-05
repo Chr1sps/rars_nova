@@ -54,7 +54,7 @@ public final class ToolLoader {
     /**
      * List of functions that produce tools given the main UI.
      */
-    private static final @NotNull List<Function<@NotNull VenusUI, @NotNull AbstractTool>> toolProducers = List.of(
+    private static final @NotNull List<Function<@NotNull VenusUI, @NotNull AbstractTool>> TOOL_PRODUCERS = List.of(
         BHTSimulator::new,
         CacheSimulator::new,
         DigitalLabSim::new,
@@ -83,7 +83,7 @@ public final class ToolLoader {
         final var menu = new JMenu(ToolLoader.TOOLS_MENU_NAME);
         menu.setMnemonic(KeyEvent.VK_T);
         // traverse array list and build menu
-        for (final var toolProducer : ToolLoader.toolProducers) {
+        for (final var toolProducer : ToolLoader.TOOL_PRODUCERS) {
             menu.add(new ToolAction(toolProducer.apply(mainUI)));
         }
         return menu;

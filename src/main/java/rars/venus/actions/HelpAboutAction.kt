@@ -15,7 +15,7 @@ class HelpAboutAction(gui: VenusUI) : GuiAction(
 ) {
     override fun actionPerformed(e: ActionEvent?) {
         val message = """
-            RARS ${Globals.version}    Copyright ${Globals.copyrightYears}
+            RARS ${Globals.VERSION}    Copyright ${Globals.COPYRIGHT_YEARS}
             RARS is the RISC-V Assembler and Runtime Simulator.
             
             Toolbar and menu icons are from:

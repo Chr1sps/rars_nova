@@ -10,7 +10,7 @@ import static java.util.Map.entry;
 import static java.util.Map.ofEntries;
 
 public final class RSTAUtils {
-    private static final Map<RVTokenType, Integer> tokenValueMap = ofEntries(
+    private static final Map<RVTokenType, Integer> TOKEN_VALUE_MAP = ofEntries(
         entry(RVTokenType.NULL, Token.NULL),
         entry(RVTokenType.WHITESPACE, Token.WHITESPACE),
         entry(RVTokenType.COMMENT, Token.COMMENT_EOL),
@@ -36,8 +36,8 @@ public final class RSTAUtils {
     }
 
     public static int tokenValue(final @NotNull RVTokenType type) {
-        if (tokenValueMap.containsKey(type)) {
-            return tokenValueMap.get(type);
+        if (TOKEN_VALUE_MAP.containsKey(type)) {
+            return TOKEN_VALUE_MAP.get(type);
         }
         return extendedValue(type.ordinal());
     }

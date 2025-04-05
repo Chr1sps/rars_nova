@@ -1,23 +1,22 @@
-package rars.venus.settings.editor;
+package rars.venus.settings.editor
 
-import org.jetbrains.annotations.NotNull;
+import rars.venus.util.BoxLayout
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JPanel
 
-import javax.swing.*;
+class BottomRowComponent : JPanel() {
+    val applyButton: JButton = JButton("Apply")
+    val applyAndCloseButton: JButton = JButton("Apply and close")
+    val cancelButton: JButton = JButton("Cancel")
 
-public final class BottomRowComponent extends JPanel {
-    public final @NotNull JButton applyButton, applyAndCloseButton, cancelButton;
-
-    public BottomRowComponent() {
-        super();
-        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        this.applyButton = new JButton("Apply");
-        this.applyAndCloseButton = new JButton("Apply and close");
-        this.cancelButton = new JButton("Cancel");
-
-        this.add(Box.createHorizontalGlue());
-        this.add(this.cancelButton);
-        this.add(Box.createHorizontalStrut(10));
-        this.add(this.applyButton);
-        this.add(this.applyAndCloseButton);
+    init {
+        BoxLayout(BoxLayout.X_AXIS) {
+            horizontalGlue()
+            +cancelButton
+            horizontalStrut(10)
+            +applyButton
+            +applyAndCloseButton
+        }
     }
 }

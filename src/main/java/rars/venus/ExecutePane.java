@@ -225,7 +225,7 @@ public final class ExecutePane extends JDesktopPane {
             this.csrValues.updateRegisters();
             this.dataSegment.updateValues();
             this.textSegment.updateBasicStatements();
-        } else { // addressDisplayBase
+        } else {
             // Have all internal windows update their address columns
             this.dataSegment.updateDataAddresses();
             this.labelValues.updateLabelAddresses();

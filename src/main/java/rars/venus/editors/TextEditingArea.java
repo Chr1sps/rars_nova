@@ -95,8 +95,12 @@ public interface TextEditingArea {
 
     void setLineHighlightEnabled(boolean highlight);
 
+    int getCaretBlinkRate();
+    
     void setCaretBlinkRate(int rate);
 
+    int getTabSize();
+    
     void setTabSize(int chars);
 
     @NotNull Pair<@NotNull Integer, @NotNull Integer> getCaretPosition();

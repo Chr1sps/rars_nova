@@ -1,6 +1,7 @@
 package rars.venus.run
 
 import org.jetbrains.annotations.Contract
+import rars.venus.util.BorderLayout
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.JLabel
@@ -40,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @author Pete Sanderson
  * @version August 2005
  */
-class RunSpeedPanel : JPanel(BorderLayout()) {
+class RunSpeedPanel : JPanel() {
     private val sliderLabel: JLabel
 
     @Volatile
@@ -52,10 +53,13 @@ class RunSpeedPanel : JPanel(BorderLayout()) {
             horizontalAlignment = JLabel.CENTER
             alignmentX = CENTER_ALIGNMENT
         }
-        add(sliderLabel, BorderLayout.NORTH)
-        add(runSpeedSlider, BorderLayout.CENTER)
+        BorderLayout {
+            this[BorderLayout.NORTH] = sliderLabel
+            this[BorderLayout.CENTER] = runSpeedSlider
+        }
         val speed = SPEEDS[SPEED_INDEX_INTERACTION_LIMIT].toInt()
-        toolTipText = """Simulation speed for "Go".  At $speed inst/sec or less, tables updated after each instruction."""
+        toolTipText =
+            """Simulation speed for "Go".  At $speed inst/sec or less, tables updated after each instruction."""
     }
 
     private fun createSlider(): JSlider = JSlider(
@@ -112,7 +116,7 @@ class RunSpeedPanel : JPanel(BorderLayout()) {
         private const val SPEED_INDEX_MAX = 40
         private const val SPEED_INDEX_INIT = 40
         private const val SPEED_INDEX_INTERACTION_LIMIT = 35
-        
+
         private val SPEEDS = doubleArrayOf(
             0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0,  // 0-10
             6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0,  // 11-20
@@ -124,6 +128,6 @@ class RunSpeedPanel : JPanel(BorderLayout()) {
 }
 
 sealed interface RunSpeed {
-    data class Limited(val speed: Double): RunSpeed
+    data class Limited(val speed: Double) : RunSpeed
     data object Unlimited : RunSpeed
 }

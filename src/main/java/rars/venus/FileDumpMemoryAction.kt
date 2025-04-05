@@ -8,6 +8,8 @@ import rars.util.MemoryDump
 import rars.util.MemoryDump.SegmentInfo
 import rars.util.toHexStringWithPrefix
 import rars.venus.actions.GuiAction
+import rars.venus.settings.closeDialog
+import rars.venus.util.BorderLayout
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Label
@@ -18,35 +20,7 @@ import java.io.IOException
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 import javax.swing.plaf.basic.BasicComboBoxRenderer
-import kotlin.collections.toTypedArray
 
-/*
-Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
-*/
 /**
  * Action for the File -> Save For Dump Memory menu item
  */
@@ -54,26 +28,16 @@ class FileDumpMemoryAction(
     name: String, icon: Icon, description: String,
     mnemonic: Int, accel: KeyStroke, gui: VenusUI
 ) : GuiAction(name, icon, description, mnemonic, accel, gui) {
-    private var dumpDialog: JDialog? = null
-    private var segmentListSelector: JComboBox<AugmentedSegmentInfo>? = null
-    private var formatListSelector: JComboBox<DumpFormat>? = null
 
-    override fun actionPerformed(e: ActionEvent) = this.dumpMemory()
-
-    /**
-     * Save the memory segment in a supported format.
-     */
-    private fun dumpMemory() {
-        this.dumpDialog = this.createDumpDialog().apply {
-            pack()
-            setLocationRelativeTo(mainUI)
-            isVisible = true
-        }
+    override fun actionPerformed(e: ActionEvent): Unit = createDumpDialog().run {
+        pack()
+        setLocationRelativeTo(this@FileDumpMemoryAction.mainUI)
+        isVisible = true
     }
 
     /** The dump dialog that appears when menu item is selected. */
     private fun createDumpDialog() = JDialog(mainUI, TITLE, true).apply {
-        contentPane = buildDialogPanel()
+        contentPane = buildDialogPanel(this)
         defaultCloseOperation = JDialog.DO_NOTHING_ON_CLOSE
         addWindowListener(object : WindowAdapter() {
             override fun windowClosing(we: WindowEvent?) = closeDialog()
@@ -81,7 +45,7 @@ class FileDumpMemoryAction(
     }
 
     /** Set contents of dump dialog. */
-    private fun buildDialogPanel(): JPanel {
+    private fun buildDialogPanel(dialog: JDialog): JPanel {
 
         // Calculate the actual highest address to be dumped. For text segment, this depends on the
         // program length (number of machine code instructions). For data segment, this depends on
@@ -114,62 +78,71 @@ class FileDumpMemoryAction(
                 border = EmptyBorder(10, 10, 10, 10)
                 add(Label("There is nothing to dump!"), BorderLayout.NORTH)
                 val okButton = JButton("OK")
-                okButton.addActionListener { closeDialog() }
+                okButton.addActionListener { dialog.closeDialog() }
                 add(okButton, BorderLayout.SOUTH)
             }
         }
 
         // Create segment selector. First element selected by default.
-        this.segmentListSelector = JComboBox(actualSegments.toTypedArray()).apply {
+        val segmentListSelector = JComboBox(actualSegments.toTypedArray()).apply {
             selectedIndex = 0
         }
-        val segmentPanel = JPanel(BorderLayout()).apply {
-            add(Label("Memory Segment"), BorderLayout.NORTH)
-            add(segmentListSelector)
+        val segmentPanel = JPanel().apply {
+            BorderLayout {
+                this[BorderLayout.NORTH] = JLabel("Memory Segment")
+                this[BorderLayout.CENTER] = segmentListSelector
+            }
         }
 
         // Next, create list of all available dump formats.
         val dumpFormats = DumpFormats.DUMP_FORMATS
-        this.formatListSelector = JComboBox(dumpFormats.toTypedArray()).apply {
-            renderer = DumpFormatComboBoxRenderer(this)
+        val formatListSelector = JComboBox(dumpFormats.toTypedArray()).apply {
+            renderer = DumpFormatComboBoxRenderer()
             selectedIndex = 0
         }
-        val formatPanel = JPanel(BorderLayout()).apply {
-            add(JLabel("Dump Format"), BorderLayout.NORTH)
-            add(formatListSelector)
+        val formatPanel = JPanel().apply {
+            BorderLayout {
+                this[BorderLayout.NORTH] = JLabel("Dump Format")
+                this[BorderLayout.CENTER] = formatListSelector
+            }
         }
 
         // Bottom row - the control buttons for Dump and Cancel
         val cancelButton = JButton("Cancel").apply {
-            addActionListener { closeDialog() }
+            addActionListener { dialog.closeDialog() }
         }
         val controlPanel = Box.createHorizontalBox().apply {
             add(Box.createHorizontalGlue())
-            add(createDumpButton())
+            add(createDumpButton(dialog, formatListSelector, segmentListSelector))
             add(Box.createHorizontalGlue())
             add(cancelButton)
             add(Box.createHorizontalGlue())
         }
-        val contents = JPanel(BorderLayout(20, 20)).apply {
+        val contents = JPanel().apply {
             border = EmptyBorder(10, 10, 10, 10)
-            add(segmentPanel, BorderLayout.WEST)
-            add(formatPanel, BorderLayout.EAST)
-            add(controlPanel, BorderLayout.SOUTH)
+            BorderLayout(vgap = 20, hgap = 20) {
+                this[BorderLayout.WEST] = segmentPanel
+                this[BorderLayout.EAST] = formatPanel
+                this[BorderLayout.SOUTH] = controlPanel
+            }
         }
         return contents
     }
 
-    private fun createDumpButton(): JButton = JButton("Dump").apply {
+    private fun createDumpButton(
+        dialog: JDialog,
+        formatListSelector: JComboBox<DumpFormat>,
+        segmentListSelector: JComboBox<AugmentedSegmentInfo>
+    ): JButton = JButton("Dump").apply {
         addActionListener {
-            val selectedSegment = segmentListSelector!!.selectedItem as AugmentedSegmentInfo?
-            if (selectedSegment == null) return@addActionListener
+            val selectedSegment = segmentListSelector.selectedItem as AugmentedSegmentInfo
             val wasDumped = performDump(
                 selectedSegment.segmentInfo.baseAddress,
                 selectedSegment.actualHighAddress,
-                (formatListSelector!!.selectedItem as DumpFormat?)!!
+                formatListSelector.selectedItem as DumpFormat
             )
             if (wasDumped) {
-                closeDialog()
+                dialog.closeDialog()
             }
         }
     }
@@ -211,25 +184,17 @@ class FileDumpMemoryAction(
         return true
     }
 
-    // We're finished with this modal dialog.
-    private fun closeDialog() {
-        this.dumpDialog!!.isVisible = false
-        this.dumpDialog!!.dispose()
-    }
-
     // Display tool tip for dump format list items. Got the technique from
     // http://forum.java.sun.com/thread.jspa?threadID=488762&messageID=2292482
-    private class DumpFormatComboBoxRenderer<T>(private val myMaster: JComboBox<T>) : BasicComboBoxRenderer() {
+    private class DumpFormatComboBoxRenderer : BasicComboBoxRenderer() {
         override fun getListCellRendererComponent(
             list: JList<*>?, value: Any, index: Int,
             isSelected: Boolean, cellHasFocus: Boolean
         ): Component {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-            this.setToolTipText(value.toString())
-            if (index >= 0) {
-                ((this.myMaster.getItemAt(index)) as DumpFormat).description
-                this.setToolTipText(((this.myMaster.getItemAt(index)) as DumpFormat).description)
-            }
+            value as DumpFormat
+            toolTipText = value.description
+            text = value.name
             return this
         }
     }

@@ -1,62 +1,58 @@
-package rars.venus.settings.editor.views;
+package rars.venus.settings.editor.views
 
-import org.jetbrains.annotations.NotNull;
-import rars.venus.settings.editor.ColorPickerButton;
-import rars.venus.settings.editor.OptionSection;
+import rars.settings.SettingsTheme
+import rars.venus.settings.editor.ColorPickerButton
+import rars.venus.settings.editor.OptionSection
+import rars.venus.util.BoxLayout
+import javax.swing.BoxLayout
+import javax.swing.JPanel
 
-import javax.swing.*;
-import java.util.Objects;
+class BaseStyleView(initialTheme: SettingsTheme) : JPanel() {
+    val foregroundColorButton: ColorPickerButton
+    val backgroundColorButton: ColorPickerButton
+    val lineHighlightColorButton: ColorPickerButton
+    val textSelectionColorButton: ColorPickerButton
+    val caretColorButton: ColorPickerButton
 
-import static rars.Globals.EDITOR_THEME_SETTINGS;
-import static rars.venus.settings.editor.views.SyntaxStyleView.buildRow;
-
-public final class BaseStyleView extends JPanel {
-    private static final @NotNull String FOREGROUND = "Foreground",
-        BACKGROUND = "Background",
-        LINE_HIGHLIGHT = "Line highlight",
-        CARET = "Caret",
-        TEXT_SELECTION = "Text selection";
-    public final @NotNull ColorPickerButton
-        foregroundColorButton,
-        backgroundColorButton,
-        lineHighlightColorButton,
-        textSelectionColorButton,
-        caretColorButton;
-
-    public BaseStyleView() {
-        super();
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-        final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
+    init {
 
         // foreground
-        final var foregroundSection = new OptionSection(FOREGROUND, null, theme.foregroundColor);
-        this.foregroundColorButton = Objects.requireNonNull(foregroundSection.colorPickerButton);
+        val foregroundSection = OptionSection(FOREGROUND, null, initialTheme.foregroundColor)
+        this.foregroundColorButton = foregroundSection.colorPickerButton!!
 
         // background
-        final var backgroundSection = new OptionSection(BACKGROUND, null, theme.backgroundColor);
-        this.backgroundColorButton = Objects.requireNonNull(backgroundSection.colorPickerButton);
+        val backgroundSection = OptionSection(BACKGROUND, null, initialTheme.backgroundColor)
+        this.backgroundColorButton = backgroundSection.colorPickerButton!!
 
         // line highlight
-        final var lineHighlightSection = new OptionSection(LINE_HIGHLIGHT, null, theme.lineHighlightColor);
-        this.lineHighlightColorButton = Objects.requireNonNull(lineHighlightSection.colorPickerButton);
+        val lineHighlightSection = OptionSection(LINE_HIGHLIGHT, null, initialTheme.lineHighlightColor)
+        this.lineHighlightColorButton = lineHighlightSection.colorPickerButton!!
 
-        // top row
-        final var topRow = buildRow(false, foregroundSection, backgroundSection, lineHighlightSection);
-        this.add(topRow);
-        this.add(Box.createVerticalStrut(5));
 
         // text selection
-        final var textSelectionSection = new OptionSection(TEXT_SELECTION, null, theme.selectionColor);
-        this.textSelectionColorButton = Objects.requireNonNull(textSelectionSection.colorPickerButton);
+        val textSelectionSection = OptionSection(TEXT_SELECTION, null, initialTheme.selectionColor)
+        this.textSelectionColorButton = textSelectionSection.colorPickerButton!!
 
         // caret
-        final var caretSection = new OptionSection(CARET, null, theme.caretColor);
-        this.caretColorButton = Objects.requireNonNull(caretSection.colorPickerButton);
+        val caretSection = OptionSection(CARET, null, initialTheme.caretColor)
+        this.caretColorButton = caretSection.colorPickerButton!!
 
-        // bottom row
-        final var bottomRow = buildRow(true, textSelectionSection, caretSection);
-        this.add(bottomRow);
-        this.add(Box.createVerticalGlue());
+        val topRow = buildRow(addMargins = false, foregroundSection, backgroundSection, lineHighlightSection)
+        val bottomRow = buildRow(addMargins = true, textSelectionSection, caretSection)
+
+        BoxLayout(BoxLayout.Y_AXIS) {
+            +topRow
+            verticalStrut(5)
+            +bottomRow
+            verticalGlue()
+        }
+    }
+
+    companion object {
+        private const val FOREGROUND = "Foreground"
+        private const val BACKGROUND = "Background"
+        private const val LINE_HIGHLIGHT = "Line highlight"
+        private const val CARET = "Caret"
+        private const val TEXT_SELECTION = "Text selection"
     }
 }
