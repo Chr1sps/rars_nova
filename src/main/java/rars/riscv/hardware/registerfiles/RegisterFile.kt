@@ -4,7 +4,7 @@ import arrow.core.Either
 import arrow.core.raise.either
 import rars.Globals
 import rars.assembler.SymbolTable
-import rars.exceptions.SimulationError
+import rars.events.SimulationError
 import rars.riscv.hardware.MemoryConfiguration
 import rars.riscv.hardware.registers.Register
 import rars.settings.BoolSetting

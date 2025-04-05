@@ -1,7 +1,7 @@
 package rars.venus.run
 
 import rars.Globals
-import rars.exceptions.SimulationError
+import rars.events.SimulationError
 import rars.notices.SimulatorNotice
 import rars.settings.BoolSetting
 import rars.simulator.Simulator

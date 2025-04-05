@@ -4,7 +4,7 @@ import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensureNotNull
 import rars.Globals
-import rars.exceptions.*
+import rars.events.*
 import rars.io.AbstractIO
 import rars.notices.SimulatorNotice
 import rars.riscv.BasicInstruction
@@ -79,7 +79,7 @@ open class SimThread(
     }
 
     private fun handleTrap(se: SimulationError, pc: Int): Boolean {
-        assert(se.reason !== ExceptionReason.OTHER) { "Unhandlable exception not thrown through ExitingEception" }
+        assert(se.reason !== EventReason.OTHER) { "Unhandlable exception not thrown through ExitingEception" }
         assert(!se.reason.isInterrupt) { "Interrupts cannot be handled by the trap handler" }
 
         // set the relevant CSRs
@@ -174,7 +174,7 @@ open class SimThread(
             // process
             this.pe = SimulationError.create(
                 "Interrupt handler was not supplied, but interrupt enable was high",
-                ExceptionReason.OTHER
+                EventReason.OTHER
             )
             this.stopExecution(true, Simulator.Reason.EXCEPTION)
             return false
@@ -266,7 +266,7 @@ open class SimThread(
                 if (ie && pendingExternal && (uie and CSRegisterFile.EXTERNAL_INTERRUPT.toLong()) != 0L) {
                     if (this.handleInterrupt(
                             Globals.INTERRUPT_CONTROLLER.claimExternal(),
-                            ExceptionReason.EXTERNAL_INTERRUPT.value, this.pc
+                            EventReason.EXTERNAL_INTERRUPT.value, this.pc
                         )
                     ) {
                         pendingExternal = false
@@ -276,7 +276,7 @@ open class SimThread(
                         // thats an error
                     }
                 } else if (ie && (uip and 0x1L) != 0L && (uie and CSRegisterFile.SOFTWARE_INTERRUPT.toLong()) != 0L) {
-                    if (this.handleInterrupt(0, ExceptionReason.SOFTWARE_INTERRUPT.value, this.pc)) {
+                    if (this.handleInterrupt(0, EventReason.SOFTWARE_INTERRUPT.value, this.pc)) {
                         uip = uip and 0x1L.inv()
                     } else {
                         return  // if the interrupt can't be handled, but the interrupt enable bit is high,
@@ -285,7 +285,7 @@ open class SimThread(
                 } else if (ie && pendingTimer && (uie and CSRegisterFile.TIMER_INTERRUPT.toLong()) != 0L) {
                     if (this.handleInterrupt(
                             Globals.INTERRUPT_CONTROLLER.claimTimer(),
-                            ExceptionReason.TIMER_INTERRUPT.value,
+                            EventReason.TIMER_INTERRUPT.value,
                             this.pc
                         )
                     ) {
@@ -328,15 +328,15 @@ open class SimThread(
                     is Either.Right -> eitherStmt.value
                     is Either.Left -> {
                         val error = eitherStmt.value
-                        val tmp = if (error.reason == ExceptionReason.LOAD_ACCESS_FAULT) {
+                        val tmp = if (error.reason == EventReason.LOAD_ACCESS_FAULT) {
                             SimulationError.create(
                                 "Instruction load access error",
-                                ExceptionReason.INSTRUCTION_ACCESS_FAULT
+                                EventReason.INSTRUCTION_ACCESS_FAULT
                             )
                         } else {
                             SimulationError.create(
                                 "Instruction load alignment error",
-                                ExceptionReason.INSTRUCTION_ADDR_MISALIGNED
+                                EventReason.INSTRUCTION_ADDR_MISALIGNED
                             )
                         }
                         if (!Globals.INTERRUPT_CONTROLLER.registerSynchronousTrap(tmp, this.pc)) {
@@ -360,7 +360,7 @@ open class SimThread(
                             statement,
                             ("undefined instruction (" + statement.binaryStatement.toHexStringWithPrefix()
                                 + ")"),
-                            ExceptionReason.ILLEGAL_INSTRUCTION
+                            EventReason.ILLEGAL_INSTRUCTION
                         )
                     }
                     Globals.REGISTER_FILE.incrementPC(instruction.instructionLength)

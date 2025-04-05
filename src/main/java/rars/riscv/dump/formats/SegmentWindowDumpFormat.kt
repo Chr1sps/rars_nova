@@ -5,7 +5,7 @@ import arrow.core.left
 import arrow.core.right
 import rars.Globals
 import rars.assembler.DataTypes
-import rars.exceptions.MemoryError
+import rars.events.MemoryError
 import rars.riscv.hardware.Memory
 import rars.settings.BoolSetting
 import rars.util.BinaryUtilsOld

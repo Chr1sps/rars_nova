@@ -5,8 +5,8 @@ import arrow.core.left
 import arrow.core.raise.either
 import arrow.core.right
 import rars.ProgramStatement
-import rars.exceptions.ExceptionReason
-import rars.exceptions.SimulationError
+import rars.events.EventReason
+import rars.events.SimulationError
 import rars.ksoftfloat.Environment
 import rars.ksoftfloat.RoundingMode
 import rars.ksoftfloat.types.Float32
@@ -50,7 +50,7 @@ internal fun CSRegisterFile.getRoundingMode(
         else -> SimulationError.create(
             statement,
             "Invalid rounding mode. RM = $rmValue and frm = $frm",
-            ExceptionReason.OTHER
+            EventReason.OTHER
         ).left()
     }
 }

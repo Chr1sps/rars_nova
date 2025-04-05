@@ -3,7 +3,7 @@ package rars.riscv.instructions
 import arrow.core.Either
 import arrow.core.raise.either
 import rars.ProgramStatement
-import rars.exceptions.SimulationEvent
+import rars.events.SimulationEvent
 import rars.ksoftfloat.Environment
 import rars.ksoftfloat.operations.*
 import rars.ksoftfloat.types.Float64

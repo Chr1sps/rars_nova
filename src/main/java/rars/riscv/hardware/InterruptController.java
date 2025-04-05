@@ -1,7 +1,7 @@
 package rars.riscv.hardware;
 
 import org.jetbrains.annotations.NotNull;
-import rars.exceptions.SimulationError;
+import rars.events.SimulationError;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.registerfiles.RegisterFile;
 import rars.simulator.Simulator;

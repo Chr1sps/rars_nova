@@ -4,7 +4,7 @@ import arrow.core.raise.either
 import rars.ErrorList
 import rars.Globals
 import rars.RISCVProgram
-import rars.exceptions.AssemblyError
+import rars.events.AssemblyError
 import rars.settings.BoolSetting
 import rars.util.FilenameFinder
 import rars.venus.FileStatus

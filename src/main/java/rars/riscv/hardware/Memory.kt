@@ -13,8 +13,8 @@ import org.jetbrains.annotations.Contract
 import rars.Globals
 import rars.ProgramStatement
 import rars.assembler.DataTypes
-import rars.exceptions.ExceptionReason
-import rars.exceptions.MemoryError
+import rars.events.EventReason
+import rars.events.MemoryError
 import rars.notices.AccessNotice
 import rars.notices.MemoryAccessNotice
 import rars.riscv.BasicInstruction
@@ -27,33 +27,6 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-/*
-Copyright (c) 2003-2009,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
-*/
 /**
  * Represents memory. Different segments are represented by different data
  * structs.
@@ -93,7 +66,7 @@ class Memory(
         override fun getHalf(address: Int) = if (address % 2 != 0) {
             MemoryError(
                 "Load address not aligned on halfword boundary ",
-                ExceptionReason.LOAD_ADDRESS_MISALIGNED,
+                EventReason.LOAD_ADDRESS_MISALIGNED,
                 address
             ).left()
         } else get(address, 2, false).map {
@@ -380,7 +353,7 @@ class Memory(
                 ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                     MemoryError(
                         "Cannot write directly to text segment!",
-                        ExceptionReason.STORE_ACCESS_FAULT,
+                        EventReason.STORE_ACCESS_FAULT,
                         address
                     )
                 }
@@ -388,7 +361,7 @@ class Memory(
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     MemoryError(
                         "Load address crosses word boundary",
-                        ExceptionReason.LOAD_ADDRESS_MISALIGNED,
+                        EventReason.LOAD_ADDRESS_MISALIGNED,
                         address
                     )
                 }
@@ -410,7 +383,7 @@ class Memory(
                 ensure(address in memoryConfiguration.memoryMapBaseAddress..<actualMemoryMapLimitAddress) {
                     MemoryError(
                         "address out of range ",
-                        ExceptionReason.STORE_ACCESS_FAULT,
+                        EventReason.STORE_ACCESS_FAULT,
                         address
                     )
                 }
@@ -457,7 +430,7 @@ class Memory(
             ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 MemoryError(
                     "Cannot write directly to text segment!",
-                    ExceptionReason.STORE_ACCESS_FAULT,
+                    EventReason.STORE_ACCESS_FAULT,
                     address
                 )
             }
@@ -472,7 +445,7 @@ class Memory(
             // memory mapped I/O.
             relative = (address - memoryConfiguration.memoryMapBaseAddress) shr 2 // convert byte address to word
             oldValue = storeWordInTable(memoryMapBlockTable, relative, value)
-        } else raise(MemoryError("store address out of range ", ExceptionReason.STORE_ACCESS_FAULT, address))
+        } else raise(MemoryError("store address out of range ", EventReason.STORE_ACCESS_FAULT, address))
         notifyAnyObservers(AccessNotice.AccessType.WRITE, address, DataTypes.WORD_SIZE, value)
         if (OtherSettings.isBacksteppingEnabled) {
             Globals.PROGRAM!!.backStepper!!.addMemoryRestoreRawWord(address, oldValue)
@@ -493,7 +466,7 @@ class Memory(
         ensure(address % 2 == 0) {
             MemoryError(
                 "store address not aligned on halfword boundary ",
-                ExceptionReason.STORE_ADDRESS_MISALIGNED,
+                EventReason.STORE_ADDRESS_MISALIGNED,
                 address
             )
         }
@@ -577,7 +550,7 @@ class Memory(
         ensure(isAddressInTextSegment(address)) {
             MemoryError(
                 "Store address to text segment out of range",
-                ExceptionReason.STORE_ACCESS_FAULT,
+                EventReason.STORE_ACCESS_FAULT,
                 address
             )
         }
@@ -635,7 +608,7 @@ class Memory(
                 ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                     MemoryError(
                         "Cannot read directly from text segment!",
-                        ExceptionReason.LOAD_ACCESS_FAULT,
+                        EventReason.LOAD_ACCESS_FAULT,
                         address
                     )
                 }
@@ -643,7 +616,7 @@ class Memory(
                     // TODO: add checks for halfword load not aligned to halfword boundary
                     MemoryError(
                         "Load address not aligned to word boundary ",
-                        ExceptionReason.LOAD_ADDRESS_MISALIGNED,
+                        EventReason.LOAD_ADDRESS_MISALIGNED,
                         address
                     )
                 }
@@ -656,7 +629,7 @@ class Memory(
             }
             else -> {
                 // falls outside addressing range
-                raise(MemoryError("address out of range ", ExceptionReason.LOAD_ACCESS_FAULT, address))
+                raise(MemoryError("address out of range ", EventReason.LOAD_ACCESS_FAULT, address))
             }
         }
         if (notify) {
@@ -703,14 +676,14 @@ class Memory(
                 ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                     MemoryError(
                         "Cannot read directly from text segment!",
-                        ExceptionReason.LOAD_ACCESS_FAULT,
+                        EventReason.LOAD_ACCESS_FAULT,
                         address
                     )
                 }
                 val stmt = getStatementNoNotify(address).bind()
                 value = stmt?.binaryStatement ?: 0
             }
-            else -> raise(MemoryError("address out of range ", ExceptionReason.LOAD_ACCESS_FAULT, address))
+            else -> raise(MemoryError("address out of range ", EventReason.LOAD_ACCESS_FAULT, address))
         }
         notifyAnyObservers(AccessNotice.AccessType.READ, address, DataTypes.WORD_SIZE, value)
         value
@@ -761,7 +734,7 @@ class Memory(
             else -> raise(
                 MemoryError(
                     "address out of range ",
-                    ExceptionReason.LOAD_ACCESS_FAULT,
+                    EventReason.LOAD_ACCESS_FAULT,
                     address
                 )
             )
@@ -865,7 +838,7 @@ class Memory(
     override fun getHalf(address: Int): Either<MemoryError, Short> = if (address % 2 != 0) {
         MemoryError(
             "Load address not aligned on halfword boundary ",
-            ExceptionReason.LOAD_ADDRESS_MISALIGNED,
+            EventReason.LOAD_ADDRESS_MISALIGNED,
             address
         ).left()
     } else this.get(address, 2).map {
@@ -920,7 +893,7 @@ class Memory(
         ) {
             MemoryError(
                 "fetch address for text segment out of range ",
-                ExceptionReason.LOAD_ACCESS_FAULT,
+                EventReason.LOAD_ACCESS_FAULT,
                 address
             )
         }
@@ -996,14 +969,14 @@ class Memory(
         ensure(!(startAddress >= 0 && endAddress < 0)) {
             MemoryError(
                 "range cannot cross 0x8000000; please split it up",
-                ExceptionReason.LOAD_ACCESS_FAULT,
+                EventReason.LOAD_ACCESS_FAULT,
                 startAddress
             )
         }
         ensure(startAddress <= endAddress) {
             MemoryError(
                 "end address of range < start address of range ",
-                ExceptionReason.LOAD_ACCESS_FAULT,
+                EventReason.LOAD_ACCESS_FAULT,
                 startAddress
             )
         }

@@ -7,7 +7,7 @@ import arrow.core.raise.either
 import arrow.core.raise.ensureNotNull
 import arrow.core.right
 import rars.ProgramStatement
-import rars.exceptions.*
+import rars.events.*
 import rars.ksoftfloat.Environment
 import rars.ksoftfloat.operations.*
 import rars.ksoftfloat.types.Float32
@@ -55,7 +55,7 @@ object BasicInstructions {
                 SimulationError.create(
                     stmt,
                     "Attempt to access unavailable CSR",
-                    ExceptionReason.ILLEGAL_INSTRUCTION
+                    EventReason.ILLEGAL_INSTRUCTION
                 )
             }
             if (stmt.getOperand(2) != 0) {
@@ -82,7 +82,7 @@ object BasicInstructions {
                 SimulationError.create(
                     statement,
                     "Attempt to access unavailable CSR",
-                    ExceptionReason.ILLEGAL_INSTRUCTION
+                    EventReason.ILLEGAL_INSTRUCTION
                 )
             }
             if (statement.getOperand(2) != 0) {
@@ -106,7 +106,7 @@ object BasicInstructions {
                 SimulationError.create(
                     statement,
                     "Attempt to access unavailable CSR",
-                    ExceptionReason.ILLEGAL_INSTRUCTION
+                    EventReason.ILLEGAL_INSTRUCTION
                 )
             }
             if (statement.getOperand(2) != 0) {
@@ -131,7 +131,7 @@ object BasicInstructions {
                 SimulationError.create(
                     statement,
                     "Attempt to access unavailable CSR",
-                    ExceptionReason.ILLEGAL_INSTRUCTION
+                    EventReason.ILLEGAL_INSTRUCTION
                 )
             }
             if (statement.getOperand(2) != 0) {
@@ -157,7 +157,7 @@ object BasicInstructions {
                 SimulationError.create(
                     statement,
                     "Attempt to access unavailable CSR",
-                    ExceptionReason.ILLEGAL_INSTRUCTION
+                    EventReason.ILLEGAL_INSTRUCTION
                 )
             }
             val newValue = registerFile.getLongValue(statement.getOperand(2))!!
@@ -182,7 +182,7 @@ object BasicInstructions {
                 SimulationError.create(
                     statement,
                     "Attempt to access unavailable CSR",
-                    ExceptionReason.ILLEGAL_INSTRUCTION
+                    EventReason.ILLEGAL_INSTRUCTION
                 )
             }
             val newValue = statement.getOperand(2).toLong()
@@ -227,7 +227,7 @@ object BasicInstructions {
             SimulationError.create(
                 stmt,
                 "invalid or unimplemented syscall service: $number",
-                ExceptionReason.ENVIRONMENT_CALL
+                EventReason.ENVIRONMENT_CALL
             ).left()
         }
     }

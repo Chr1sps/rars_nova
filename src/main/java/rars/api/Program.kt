@@ -5,8 +5,8 @@ import arrow.core.raise.either
 import rars.ErrorList
 import rars.Globals
 import rars.RISCVProgram
-import rars.exceptions.AssemblyError
-import rars.exceptions.SimulationError
+import rars.events.AssemblyError
+import rars.events.SimulationError
 import rars.io.ConsoleIO
 import rars.riscv.hardware.Memory
 import rars.settings.BoolSetting

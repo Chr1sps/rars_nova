@@ -6,7 +6,7 @@ import arrow.core.raise.ensure
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import rars.*
-import rars.exceptions.AssemblyError
+import rars.events.AssemblyError
 import rars.riscv.BasicInstruction
 import rars.riscv.ExtendedInstruction
 import rars.riscv.Instruction

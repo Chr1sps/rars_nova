@@ -3,36 +3,10 @@ package rars.riscv.instructions
 import arrow.core.Either
 import arrow.core.raise.either
 import rars.ProgramStatement
-import rars.exceptions.SimulationEvent
+import rars.events.SimulationEvent
 import rars.riscv.*
 import rars.simulator.SimulationContext
 
-/*
-Copyright (c) 2017,  Benjamin Landers
-
-Developed by Benjamin Landers (benjaminrlanders@gmail.com)
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject
-to the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
- */
 /**
  * Base class for all integer instructions using immediates
  *
@@ -197,7 +171,7 @@ class Arithmetic private constructor(
         val SLL = arithmetic(
             "sll t1,t2,t3",
             "Shift left logical: Set t1 to result of shifting t2 left by number of bits specified by value in " +
-                    "low-order 5 bits of t3",
+                "low-order 5 bits of t3",
             "0000000",
             "001",
             { first, other -> first.shl(other.and(0b0001_1111)) } // use the bottom 5 bits
@@ -223,7 +197,7 @@ class Arithmetic private constructor(
         val SRA = arithmetic(
             "sra t1,t2,t3",
             "Shift right arithmetic: Set t1 to result of sign-extended shifting t2 right by number of bits specified " +
-                    "by value in low-order 5 bits of t3",
+                "by value in low-order 5 bits of t3",
             "0100000",
             "101",
             { first, other ->
@@ -237,7 +211,7 @@ class Arithmetic private constructor(
         val SRL = arithmetic(
             "srl t1,t2,t3",
             "Shift right logical: Set t1 to result of shifting t2 right by number of bits specified by value in " +
-                    "low-order 5 bits of t3",
+                "low-order 5 bits of t3",
             "0000000",
             "101", { first, other ->
                 first.ushr(other and 0b0001_1111) // use the bottom 5 bits

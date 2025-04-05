@@ -1,7 +1,7 @@
 package rars.notices
 
 import org.jetbrains.annotations.Contract
-import rars.exceptions.SimulationError
+import rars.events.SimulationError
 import rars.simulator.Simulator
 import rars.venus.run.RunSpeedPanel
 

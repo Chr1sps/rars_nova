@@ -5,8 +5,8 @@ import arrow.core.raise.either
 import arrow.core.right
 import org.jetbrains.annotations.Range
 import rars.Globals
-import rars.exceptions.ExitingError
-import rars.exceptions.ExitingEvent
+import rars.events.ExitingError
+import rars.events.ExitingEvent
 import rars.riscv.syscalls.DisplayBitmapImpl
 import rars.riscv.syscalls.ToneGenerator
 import rars.riscv.syscalls.getRandomStream
@@ -445,7 +445,7 @@ enum class Syscall(
                 JOptionPane.showMessageDialog(
                     null,
                     readNullString(stmt).bind() +
-                            readNullString(stmt, "a1").bind(),
+                        readNullString(stmt, "a1").bind(),
                     null,
                     JOptionPane.INFORMATION_MESSAGE
                 )

@@ -2,7 +2,7 @@ package rars.riscv.hardware
 
 import arrow.core.Either
 import rars.ProgramStatement
-import rars.exceptions.MemoryError
+import rars.events.MemoryError
 import rars.notices.MemoryAccessNotice
 import rars.util.Listener
 
@@ -80,9 +80,9 @@ fun <T> SubscribableMemory<T>.subscribe(
     listener: Listener<MemoryAccessNotice>,
     singleAddress: T
 ): Either<MemoryError, MemoryListenerHandle<T>>
-        where
-        T : Number,
-        T : Comparable<T> = subscribe(listener, singleAddress, singleAddress)
+    where
+    T : Number,
+    T : Comparable<T> = subscribe(listener, singleAddress, singleAddress)
 
 data class MemoryListenerHandle<T>(
     internal val listener: Listener<MemoryAccessNotice>,

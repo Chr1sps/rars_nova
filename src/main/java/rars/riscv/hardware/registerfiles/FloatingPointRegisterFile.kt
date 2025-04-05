@@ -3,7 +3,7 @@ package rars.riscv.hardware.registerfiles
 import arrow.core.Either
 import arrow.core.right
 import rars.Globals
-import rars.exceptions.SimulationError
+import rars.events.SimulationError
 import rars.riscv.hardware.registers.Register
 import rars.settings.OtherSettings
 import rars.util.ignoreOk

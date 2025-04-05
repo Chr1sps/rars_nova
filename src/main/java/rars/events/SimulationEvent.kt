@@ -1,4 +1,4 @@
-package rars.exceptions
+package rars.events
 
 import rars.ErrorMessage
 import rars.Globals
@@ -21,27 +21,27 @@ object ExitingEvent : SimulationEvent
 
 /** Represents an error that occurred during the simulation. */
 sealed interface SimulationError : SimulationEvent {
-    val reason: ExceptionReason
+    val reason: EventReason
     val message: ErrorMessage
     val value: Int
 
     companion object {
         @JvmStatic
         fun create(
-            reason: ExceptionReason,
+            reason: EventReason,
             message: ErrorMessage,
             value: Int,
         ): SimulationError = SimulationErrorImpl(reason, message, value)
 
         @JvmStatic
-        fun create(message: String, reason: ExceptionReason) = create(
+        fun create(message: String, reason: EventReason) = create(
             reason,
             ErrorMessage.error(null, 0, 0, message),
             0
         )
 
         @JvmStatic
-        fun create(statement: ProgramStatement, message: String, reason: ExceptionReason): SimulationError {
+        fun create(statement: ProgramStatement, message: String, reason: EventReason): SimulationError {
             val address = Globals.REGISTER_FILE.programCounter - BasicInstruction.BASIC_INSTRUCTION_LENGTH
             return create(
                 reason,
@@ -72,7 +72,7 @@ sealed interface SimulationError : SimulationEvent {
     }
 
     private class SimulationErrorImpl(
-        override val reason: ExceptionReason,
+        override val reason: EventReason,
         override val message: ErrorMessage,
         override val value: Int,
     ) : SimulationError
@@ -80,7 +80,7 @@ sealed interface SimulationError : SimulationEvent {
 
 /** Represents an exit from the program due to an error. */
 class ExitingError(
-    override val reason: ExceptionReason,
+    override val reason: EventReason,
     override val message: ErrorMessage,
     override val value: Int,
 ) : SimulationError {
@@ -107,7 +107,7 @@ class ExitingError(
             statement: ProgramStatement,
             message: String,
         ) = ExitingError(
-            ExceptionReason.OTHER,
+            EventReason.OTHER,
             ErrorMessage.error(
                 statement.sourceProgram,
                 statement.sourceLine!!.lineNumber,

@@ -8,34 +8,6 @@ import rars.assembler.DataTypes
 import java.util.*
 import kotlin.system.exitProcess
 
-/*
-Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
-
-Developed by Pete Sanderson (psanderson@otterbein.edu)
-and Kenneth Vollmar (kenvollmar@missouristate.edu)
-
-Permission is hereby granted, free of charge, to any person obtaining 
-a copy of this software and associated documentation files (the 
-"Software"), to deal in the Software without restriction, including 
-without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject 
-to the following conditions:
-
-The above copyright notice and this permission notice shall be 
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-(MIT license, http://www.opensource.org/licenses/mit-license.html)
-*/
-
 private fun buildArgsFromString(args: String): List<String> {
     val st = StringTokenizer(args)
     return buildList(st.countTokens()) {
@@ -52,25 +24,27 @@ fun storeProgramArguments(programArgumentList: List<String>) {
         return
     }
 
-    // Runtime stack initialization from stack top-down (each is 4 bytes) :
-    // programArgumentList.size()
-    // address of first character of first program argument
-    // address of first character of second program argument
-    // ....repeat for all program arguments
-    // 0x00000000 (null terminator for list of string pointers)
-    // $sp will be set to the address holding the arg list size
-    // $a0 will be set to the arg list size (argc)
-    // $a1 will be set to stack address just "below" arg list size (argv)
-    // Each of the arguments themselves will be stored starting at
-    // Memory.stackBaseAddress (0x7ffffffc) and working down from there:
-    // 0x7ffffffc will contain null terminator for first arg
-    // 0x7ffffffb will contain last character of first arg
-    // 0x7ffffffa will contain next-to-last character of first arg
-    // Etc down to first character of first arg.
-    // Previous address will contain null terminator for second arg
-    // Previous-to-that contains last character of second arg
-    // Etc down to first character of second arg.
-    // Follow this pattern for all remaining arguments.
+    /*
+    Runtime stack initialization from stack top-down (each is 4 bytes) :
+    programArgumentList.size()
+    address of first character of first program argument
+    address of first character of second program argument
+    ....repeat for all program arguments
+    0x00000000 (null terminator for list of string pointers)
+    $sp will be set to the address holding the arg list size
+    $a0 will be set to the arg list size (argc)
+    $a1 will be set to stack address just "below" arg list size (argv)
+    Each of the arguments themselves will be stored starting at
+    Memory.stackBaseAddress (0x7ffffffc) and working down from there:
+    0x7ffffffc will contain null terminator for first arg
+    0x7ffffffb will contain last character of first arg
+    0x7ffffffa will contain next-to-last character of first arg
+    Etc down to first character of first arg.
+    Previous address will contain null terminator for second arg
+    Previous-to-that contains last character of second arg
+    Etc down to first character of second arg.
+    Follow this pattern for all remaining arguments.
+    */
     val memoryConfiguration = Globals.MEMORY_INSTANCE.memoryConfiguration
     var highAddress = memoryConfiguration.stackBaseAddress // highest non-kernel address, sits "under" stack
     val argStartAddress = IntArray(programArgumentList.size)

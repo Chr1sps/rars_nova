@@ -2,7 +2,7 @@ package rars.riscv.hardware.registerfiles
 
 import arrow.core.Either
 import arrow.core.raise.either
-import rars.exceptions.SimulationError
+import rars.events.SimulationError
 import rars.notices.RegisterAccessNotice
 import rars.riscv.hardware.registers.Register
 import rars.util.Listener

@@ -1,7 +1,7 @@
 package rars.riscv.dump
 
 import arrow.core.Either
-import rars.exceptions.MemoryError
+import rars.events.MemoryError
 import rars.riscv.hardware.Memory
 import java.io.File
 import java.io.IOException

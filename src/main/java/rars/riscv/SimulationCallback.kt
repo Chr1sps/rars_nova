@@ -2,7 +2,7 @@ package rars.riscv
 
 import arrow.core.Either
 import rars.ProgramStatement
-import rars.exceptions.SimulationEvent
+import rars.events.SimulationEvent
 import rars.simulator.SimulationContext
 
 /**

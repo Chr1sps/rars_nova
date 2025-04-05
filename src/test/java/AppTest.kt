@@ -11,7 +11,7 @@ import rars.Globals
 import rars.ProgramStatement
 import rars.api.Program
 import rars.api.ProgramOptions
-import rars.exceptions.AssemblyError
+import rars.events.AssemblyError
 import rars.riscv.BasicInstructionFormat
 import rars.riscv.InstructionsRegistry
 import rars.riscv.hardware.MemoryConfiguration

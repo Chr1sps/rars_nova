@@ -1,6 +1,6 @@
-package rars.exceptions
+package rars.events
 
-enum class ExceptionReason(@JvmField val value: Int) {
+enum class EventReason(@JvmField val value: Int) {
     SOFTWARE_INTERRUPT(-0x80000000),
     TIMER_INTERRUPT(-0x7ffffffc),
     EXTERNAL_INTERRUPT(-0x7ffffff8),

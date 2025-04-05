@@ -4,8 +4,8 @@ import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensure
 import rars.Globals
-import rars.exceptions.ExceptionReason
-import rars.exceptions.SimulationError
+import rars.events.EventReason
+import rars.events.SimulationError
 import rars.riscv.hardware.registers.LinkedRegister
 import rars.riscv.hardware.registers.MaskedRegister
 import rars.riscv.hardware.registers.ReadOnlyRegister
@@ -37,7 +37,7 @@ class CSRegisterFile : RegisterFileBase('_', createRegisters()) {
         ensure(!(register is ReadOnlyRegister || register === cycleh || register === timeh || register === instreth)) {
             SimulationError.create(
                 "Attempt to write to read-only CSR",
-                ExceptionReason.ILLEGAL_INSTRUCTION
+                EventReason.ILLEGAL_INSTRUCTION
             )
         }
         val previousValue = register.setValue(newValue)
