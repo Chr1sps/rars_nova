@@ -6,7 +6,7 @@ import arrow.core.right
 import rars.Globals
 import rars.assembler.DataTypes
 import rars.events.MemoryError
-import rars.riscv.hardware.Memory
+import rars.riscv.hardware.memory.Memory
 import rars.settings.BoolSetting
 import rars.util.BinaryUtilsOld
 import rars.util.toHexStringWithPrefix

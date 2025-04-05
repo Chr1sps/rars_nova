@@ -3,7 +3,8 @@ package rars.settings
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import rars.Globals
-import rars.riscv.hardware.MemoryConfiguration
+import rars.riscv.hardware.memory.AbstractMemoryConfiguration
+import rars.riscv.hardware.memory.MemoryConfiguration
 import rars.util.ListenerDispatcher
 import java.util.prefs.BackingStoreException
 import java.util.prefs.Preferences
@@ -24,7 +25,7 @@ interface OtherSettings {
         val isBacksteppingEnabled: Boolean get() = Globals.PROGRAM?.backStepper?.isEnabled == true
     }
 
-    val memoryConfiguration: MemoryConfiguration
+    val memoryConfiguration: AbstractMemoryConfiguration<Int>
     val exceptionHandler: String
     val labelSortState: Int
     val editorTabSize: Int
@@ -39,7 +40,7 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
 
     override var exceptionHandler: String
         private set
-    override var memoryConfiguration: MemoryConfiguration
+    override var memoryConfiguration: AbstractMemoryConfiguration<Int>
         private set
     override var caretBlinkRate: Int
         private set
@@ -56,7 +57,7 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
         exceptionHandler = preferences.get(OTHER_PREFIX + EXCEPTION_HANDLER, "")
     }
 
-    fun setMemoryConfigurationAndSave(memoryConfiguration: MemoryConfiguration) {
+    fun setMemoryConfigurationAndSave(memoryConfiguration: AbstractMemoryConfiguration<Int>) {
         if (this.memoryConfiguration != memoryConfiguration) {
             this.memoryConfiguration = memoryConfiguration
             this.preferences.put(OTHER_PREFIX + MEMORY_CONFIGURATION, this.memoryConfiguration.identifier)
@@ -107,7 +108,7 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
         this.onChangeDispatcher.dispatch(null)
     }
 
-    private fun loadMemoryConfiguration(): MemoryConfiguration {
+    private fun loadMemoryConfiguration(): AbstractMemoryConfiguration<Int> {
         val memoryConfigurationName: String = preferences.get(
             OTHER_PREFIX + MEMORY_CONFIGURATION,
             MemoryConfiguration.DEFAULT.identifier

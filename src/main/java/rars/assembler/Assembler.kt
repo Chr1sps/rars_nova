@@ -11,6 +11,7 @@ import rars.riscv.BasicInstruction
 import rars.riscv.ExtendedInstruction
 import rars.riscv.Instruction
 import rars.riscv.InstructionsRegistry
+import rars.riscv.hardware.memory.textSegmentBaseAddress
 import rars.settings.BoolSetting
 import rars.util.toHexStringWithPrefix
 import rars.util.translateToInt
@@ -86,9 +87,9 @@ class Assembler {
     ): Either<AssemblyError, List<ProgramStatement>> = either {
         check(!tokenizedProgramFiles.isEmpty()) { "No source code to assemble." }
         val memoryConfiguration = Globals.MEMORY_INSTANCE.memoryConfiguration
-        this@Assembler.textAddress = memoryConfiguration.textBaseAddress
+        this@Assembler.textAddress = memoryConfiguration.textSegmentBaseAddress
         this@Assembler.dataAddress = memoryConfiguration.dataBaseAddress
-        this@Assembler.externAddress = memoryConfiguration.externBaseAddress
+        this@Assembler.externAddress = memoryConfiguration.externAddress
         this@Assembler.currentFileDataSegmentForwardReferenceList = DataSegmentForwardReferenceList()
         val accumulatedDataSegmentForwardReferenceList = DataSegmentForwardReferenceList()
         Globals.GLOBAL_SYMBOL_TABLE.clear()

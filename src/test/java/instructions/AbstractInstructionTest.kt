@@ -6,7 +6,7 @@ import rars.Globals
 import rars.api.Program
 import rars.api.ProgramOptions
 import rars.riscv.InstructionsRegistry
-import rars.riscv.hardware.MemoryConfiguration
+import rars.riscv.hardware.memory.MemoryConfiguration
 import rars.settings.BoolSetting
 import utils.RarsTestBase
 

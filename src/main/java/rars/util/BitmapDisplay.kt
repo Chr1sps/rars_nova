@@ -6,8 +6,8 @@ import org.apache.logging.log4j.Logger
 import rars.assembler.DataTypes
 import rars.notices.AccessNotice
 import rars.notices.MemoryAccessNotice
-import rars.riscv.hardware.Memory
-import rars.riscv.hardware.MemoryListenerHandle
+import rars.riscv.hardware.memory.Memory
+import rars.riscv.hardware.memory.MemoryListenerHandle
 import java.awt.Color
 import java.awt.Dimension
 import javax.swing.JFrame

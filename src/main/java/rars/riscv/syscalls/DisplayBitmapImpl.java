@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.notices.SimulatorNotice;
-import rars.riscv.hardware.Memory;
+import rars.riscv.hardware.memory.Memory;
 import rars.util.BitmapDisplay;
 
 // TODO: move this to IO

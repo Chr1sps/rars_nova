@@ -3,7 +3,8 @@ package rars.venus.settings;
 import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.riscv.hardware.MemoryConfiguration;
+import rars.riscv.hardware.memory.AbstractMemoryConfiguration;
+import rars.riscv.hardware.memory.MemoryConfiguration;
 import rars.util.BinaryUtilsKt;
 import rars.venus.FileStatus;
 import rars.venus.VenusUI;
@@ -70,7 +71,7 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
         public final @NotNull MemoryConfiguration configuration;
 
         public ConfigurationButton(final @NotNull MemoryConfiguration config) {
-            super(config.description, config == OTHER_SETTINGS.getMemoryConfiguration());
+            super(config.getDescription(), config == OTHER_SETTINGS.getMemoryConfiguration());
             this.configuration = config;
         }
     }
@@ -241,24 +242,24 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
         }
 
         // Set name values in JLabels and address values in the JTextFields
-        private void setConfigDisplay(final @NotNull MemoryConfiguration config) {
+        private void setConfigDisplay(final @NotNull AbstractMemoryConfiguration<Integer> config) {
             final int[] configurationItemValues = {
-                config.textBaseAddress,
-                config.dataSegmentBaseAddress,
-                config.externBaseAddress,
-                config.globalPointerAddress,
-                config.dataBaseAddress,
-                config.heapBaseAddress,
-                config.stackPointerAddress,
-                config.stackBaseAddress,
-                config.userHighAddress,
-                config.kernelBaseAddress,
-                config.memoryMapBaseAddress,
-                config.kernelHighAddress,
-                config.dataSegmentLimitAddress,
-                config.textLimitAddress,
-                config.stackLimitAddress,
-                config.memoryMapLimitAddress
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(config),
+                config.getExternAddress(),
+                config.getGlobalPointerAddress(),
+                config.getDataBaseAddress(),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(config),
+                config.getStackPointerAddress(),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getStackBaseAddress(config),
+                config.getUserHighAddress(),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelBaseAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelHighAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentLimitAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapLimitAddress(config)
             };
             // Will use TreeMap to extract list of address-name pairs sorted by
             // hex-stringified address. This will correctly handle kernel addresses,

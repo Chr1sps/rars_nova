@@ -55,8 +55,10 @@ public final class InstructionMemoryDump extends AbstractTool {
     public InstructionMemoryDump(final @NotNull VenusUI mainUI) {
         super(InstructionMemoryDump.NAME + ", " + InstructionMemoryDump.VERSION, InstructionMemoryDump.HEADING, mainUI);
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.lowDataSegmentAddress = memoryConfiguration.dataSegmentBaseAddress;
-        this.highDataSegmentAddress = memoryConfiguration.stackBaseAddress;
+        this.lowDataSegmentAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(
+            memoryConfiguration);
+        this.highDataSegmentAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getStackBaseAddress(
+            memoryConfiguration);
     }
 
     @Override
@@ -96,7 +98,10 @@ public final class InstructionMemoryDump extends AbstractTool {
     protected void addAsObserver() {
         // watch the text segment (the program)
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
+        this.addAsObserver(
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+        );
         // also watch the data segment
         this.addAsObserver(this.lowDataSegmentAddress, this.highDataSegmentAddress);
     }
@@ -112,7 +117,9 @@ public final class InstructionMemoryDump extends AbstractTool {
         final int a = m.address;
 
         // is a in the text segment (program)?
-        if ((a >= memoryConfiguration.textBaseAddress) && (a < memoryConfiguration.textLimitAddress)) {
+        if ((a >= rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration)) && (
+            a < rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+        )) {
             if (notice.accessType != AccessNotice.AccessType.READ) {
                 return;
             }

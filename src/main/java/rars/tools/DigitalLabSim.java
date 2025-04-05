@@ -64,11 +64,13 @@ public final class DigitalLabSim extends AbstractTool {
         super(title, heading, mainUI);
 
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.rightDisplayAddress = memoryConfiguration.memoryMapBaseAddress + 0x10;
-        this.leftDisplayAddress = memoryConfiguration.memoryMapBaseAddress + 0x11;
-        this.keyboardInAddress = memoryConfiguration.memoryMapBaseAddress + 0x12;
-        this.counterAddress = memoryConfiguration.memoryMapBaseAddress + 0x13;
-        this.keyboardOutAddress = memoryConfiguration.memoryMapBaseAddress + 0x14;
+        final var memoryMapBaseAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
+            memoryConfiguration);
+        this.rightDisplayAddress = memoryMapBaseAddress + 0x10;
+        this.leftDisplayAddress = memoryMapBaseAddress + 0x11;
+        this.keyboardInAddress = memoryMapBaseAddress + 0x12;
+        this.counterAddress = memoryMapBaseAddress + 0x13;
+        this.keyboardOutAddress = memoryMapBaseAddress + 0x14;
     }
 
     public DigitalLabSim(final @NotNull VenusUI mainUI) {
@@ -98,7 +100,10 @@ public final class DigitalLabSim extends AbstractTool {
     protected void addAsObserver() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.addAsObserver(this.rightDisplayAddress, this.rightDisplayAddress);
-        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
+        this.addAsObserver(
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+        );
     }
 
     @Override

@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.assembler.SymbolTable;
 import rars.riscv.hardware.InterruptController;
-import rars.riscv.hardware.Memory;
-import rars.riscv.hardware.MemoryConfiguration;
+import rars.riscv.hardware.memory.AbstractMemoryConfiguration;
+import rars.riscv.hardware.memory.Memory;
 import rars.riscv.hardware.registerfiles.CSRegisterFile;
 import rars.riscv.hardware.registerfiles.FloatingPointRegisterFile;
 import rars.riscv.hardware.registerfiles.RegisterFile;
@@ -16,7 +16,6 @@ import rars.venus.VenusUI;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.prefs.Preferences;
-
 
 // TODO: Remove all the mutable state from this class, leave only all the constants.
 
@@ -128,7 +127,7 @@ public final class Globals {
     private Globals() {
     }
 
-    public static void setupGlobalMemoryConfiguration(final @NotNull MemoryConfiguration newConfiguration) {
+    public static void setupGlobalMemoryConfiguration(final @NotNull AbstractMemoryConfiguration<Integer> newConfiguration) {
         MEMORY_INSTANCE.setMemoryConfigurationAndReset(newConfiguration);
         REGISTER_FILE.setValuesFromConfiguration(newConfiguration);
     }

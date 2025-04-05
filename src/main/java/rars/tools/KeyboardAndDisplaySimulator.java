@@ -159,13 +159,15 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
     protected void initializePreGUI() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
 
-        KeyboardAndDisplaySimulator.RECEIVER_CONTROL = memoryConfiguration.memoryMapBaseAddress; // 0xffff0000; // keyboard Ready 
+        final var memoryMapBaseAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
+            memoryConfiguration);
+        KeyboardAndDisplaySimulator.RECEIVER_CONTROL = memoryMapBaseAddress; // 0xffff0000; // keyboard Ready 
         // in low-order bit
-        KeyboardAndDisplaySimulator.RECEIVER_DATA = memoryConfiguration.memoryMapBaseAddress + 4; // 0xffff0004; // keyboard 
+        KeyboardAndDisplaySimulator.RECEIVER_DATA = memoryMapBaseAddress + 4; // 0xffff0004; // keyboard 
         // character in low-order byte
-        KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL = memoryConfiguration.memoryMapBaseAddress + 8; // 0xffff0008; // display 
+        KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL = memoryMapBaseAddress + 8; // 0xffff0008; // display 
         // Ready in low-order bit
-        KeyboardAndDisplaySimulator.TRANSMITTER_DATA = memoryConfiguration.memoryMapBaseAddress + 12; // 0xffff000c; // display 
+        KeyboardAndDisplaySimulator.TRANSMITTER_DATA = memoryMapBaseAddress + 12; // 0xffff000c; // display 
         // character in low-order byte
         KeyboardAndDisplaySimulator.displayPanelTitle =
             "DISPLAY: Store to Transmitter Data " + BinaryUtilsKt.intToHexStringWithPrefix(KeyboardAndDisplaySimulator.TRANSMITTER_DATA);
@@ -213,7 +215,10 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // the
         // TRANSMITTER_DATA.
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
+        this.addAsObserver(
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+        );
     }
 
     /**

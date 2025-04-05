@@ -2,7 +2,7 @@ package rars.api
 
 import picocli.CommandLine
 import picocli.CommandLine.Model.CommandSpec
-import rars.riscv.hardware.MemoryConfiguration
+import rars.riscv.hardware.memory.MemoryConfiguration
 import java.io.File
 import java.util.*
 

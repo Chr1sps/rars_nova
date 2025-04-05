@@ -7,8 +7,8 @@ import rars.api.Program
 import rars.api.ProgramOptions
 import rars.assembler.DataTypes
 import rars.riscv.InstructionsRegistry
-import rars.riscv.hardware.Memory
-import rars.riscv.hardware.wordAligned
+import rars.riscv.hardware.memory.Memory
+import rars.riscv.hardware.memory.wordAligned
 import rars.settings.BoolSetting
 import rars.simulator.Simulator
 import rars.util.FilenameFinder

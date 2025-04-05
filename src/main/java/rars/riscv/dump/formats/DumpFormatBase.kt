@@ -4,7 +4,7 @@ import arrow.core.left
 import arrow.core.right
 import rars.assembler.DataTypes.WORD_SIZE
 import rars.riscv.dump.DumpFormat
-import rars.riscv.hardware.Memory
+import rars.riscv.hardware.memory.Memory
 import rars.util.toAscii
 import rars.util.unwrap
 import java.io.File

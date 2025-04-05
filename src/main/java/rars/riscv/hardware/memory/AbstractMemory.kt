@@ -1,4 +1,4 @@
-package rars.riscv.hardware
+package rars.riscv.hardware.memory
 
 import arrow.core.Either
 import rars.ProgramStatement
@@ -6,14 +6,14 @@ import rars.events.MemoryError
 import rars.notices.MemoryAccessNotice
 import rars.util.Listener
 
-interface ReadableMemory<T : Comparable<T>> {
+interface ReadableMemory<T> {
     /**
      * The memory configuration for this memory.
      *
      * NOTE: the addresses used in this memory *may not* correspond to
      * actual boundaries of each of the segments.
      */
-    val memoryConfiguration: MemoryConfiguration
+    val memoryConfiguration: AbstractMemoryConfiguration<T>
 
     /**
      * Reads specified Memory byte as a byte value.
@@ -30,7 +30,7 @@ interface ReadableMemory<T : Comparable<T>> {
     fun getProgramStatement(address: T): Either<MemoryError, ProgramStatement?>
 }
 
-interface MutableMemory<T : Comparable<T>> : ReadableMemory<T> {
+interface MutableMemory<T> : ReadableMemory<T> {
 
     fun setByte(address: T, value: Byte): Either<MemoryError, Unit>
     fun setHalf(address: T, value: Short): Either<MemoryError, Unit>
@@ -49,7 +49,7 @@ interface MutableMemory<T : Comparable<T>> : ReadableMemory<T> {
     fun allocateBytes(amount: T): Either<String, T>
 }
 
-interface SubscribableMemory<T : Comparable<T>> : MutableMemory<T> {
+interface SubscribableMemory<T> : MutableMemory<T> {
     /**
      * A view into this memory, whose methods do not trigger the
      * memory access listeners.
@@ -79,10 +79,7 @@ interface SubscribableMemory<T : Comparable<T>> : MutableMemory<T> {
 fun <T> SubscribableMemory<T>.subscribe(
     listener: Listener<MemoryAccessNotice>,
     singleAddress: T
-): Either<MemoryError, MemoryListenerHandle<T>>
-    where
-    T : Number,
-    T : Comparable<T> = subscribe(listener, singleAddress, singleAddress)
+): Either<MemoryError, MemoryListenerHandle<T>> = subscribe(listener, singleAddress, singleAddress)
 
 data class MemoryListenerHandle<T>(
     internal val listener: Listener<MemoryAccessNotice>,
@@ -90,47 +87,3 @@ data class MemoryListenerHandle<T>(
     val endAddress: T,
 )
 
-data class MemoryConfigurationNew<T : Comparable<T>>(
-    val identifier: String,
-    val description: String,
-
-    val textSegmentRange: ClosedRange<T>,
-    val dataSegmentRange: ClosedRange<T>,
-    val mmioAddressRange: ClosedRange<T>,
-    val kernelAddressRange: ClosedRange<T>,
-    val heapStackAddressRange: ClosedRange<T>,
-
-    val externAddress: T,
-    val globalPointerAddress: T,
-    val stackPointerAddress: T,
-) {
-    init {
-        require(heapStackAddressRange in dataSegmentRange)
-        require(mmioAddressRange in kernelAddressRange)
-    }
-
-    val userHighAddress: T = maxOf(
-        textSegmentRange.endInclusive,
-        dataSegmentRange.endInclusive,
-    )
-
-    companion object {
-        val TEXT_BASED_COMPACT_32 = MemoryConfigurationNew<Int>(
-            "CompactTextAtZero",
-            "Compact, text at address 0",
-
-            textSegmentRange = 0x00000000..0x00000fff,
-            dataSegmentRange = 0x00001000..0x00003fff,
-            heapStackAddressRange = 0x00003000..0x00003fff,
-            kernelAddressRange = 0x00004000..0x00007fff,
-            mmioAddressRange = 0x00007f00..0x00007fff,
-
-            externAddress = 0x00001000,
-            globalPointerAddress = 0x00001800,
-            stackPointerAddress = 0x00003ffc,
-        )
-    }
-}
-
-operator fun <T : Comparable<T>> ClosedRange<T>.contains(otherRange: ClosedRange<T>) =
-    otherRange.start >= start && otherRange.endInclusive <= endInclusive

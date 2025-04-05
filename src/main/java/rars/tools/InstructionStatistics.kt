@@ -4,6 +4,8 @@ import rars.Globals
 import rars.notices.AccessNotice
 import rars.notices.MemoryAccessNotice
 import rars.riscv.Instruction
+import rars.riscv.hardware.memory.textSegmentBaseAddress
+import rars.riscv.hardware.memory.textSegmentLimitAddress
 import rars.riscv.instructions.*
 import rars.venus.VenusUI
 import java.awt.GridBagConstraints
@@ -119,7 +121,7 @@ class InstructionStatistics(mainUI: VenusUI) : AbstractTool("$NAME, Version 1.0 
      */
     override fun addAsObserver() {
         val memoryConfiguration = Globals.MEMORY_INSTANCE.memoryConfiguration
-        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress)
+        this.addAsObserver(memoryConfiguration.textSegmentBaseAddress, memoryConfiguration.textSegmentLimitAddress)
     }
 
     /**

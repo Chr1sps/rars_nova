@@ -13,6 +13,9 @@ import rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress;
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress;
+
 /**
  * Instruction counter tool. Can be used to know how many instructions
  * were executed to complete a given program.
@@ -224,7 +227,10 @@ public final class InstructionCounter extends AbstractTool {
     @Override
     protected void addAsObserver() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
+        this.addAsObserver(
+            getTextSegmentBaseAddress(memoryConfiguration),
+            getTextSegmentLimitAddress(memoryConfiguration)
+        );
     }
 
     @Override

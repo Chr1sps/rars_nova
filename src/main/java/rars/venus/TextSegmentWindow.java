@@ -12,7 +12,7 @@ import rars.assembler.DataTypes;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
-import rars.riscv.hardware.MemoryListenerHandle;
+import rars.riscv.hardware.memory.MemoryListenerHandle;
 import rars.settings.*;
 import rars.util.BinaryUtilsKt;
 import rars.util.FontUtilities;
@@ -35,6 +35,8 @@ import java.util.Objects;
 import static kotlin.collections.CollectionsKt.map;
 import static kotlin.collections.CollectionsKt.maxByOrNull;
 import static rars.Globals.SIMULATOR;
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress;
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress;
 import static rars.util.UtilsKt.applyStyle;
 import static rars.util.UtilsKt.unwrap;
 
@@ -634,8 +636,8 @@ public final class TextSegmentWindow extends JInternalFrame {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         handle = unwrap(Globals.MEMORY_INSTANCE.subscribe(
             this.processMemoryAccessNotice,
-            memoryConfiguration.textBaseAddress,
-            memoryConfiguration.dataSegmentBaseAddress
+            getTextSegmentBaseAddress(memoryConfiguration),
+            getDataSegmentBaseAddress(memoryConfiguration)
         ));
     }
 

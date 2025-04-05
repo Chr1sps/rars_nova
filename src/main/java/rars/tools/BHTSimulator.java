@@ -13,6 +13,9 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress;
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress;
+
 /**
  * A RARS tool for simulating branch prediction with a Branch History Table
  * (BHT)
@@ -114,7 +117,10 @@ public final class BHTSimulator extends AbstractTool implements ActionListener {
     @Override
     protected void addAsObserver() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.addAsObserver(memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress);
+        this.addAsObserver(
+            getTextSegmentBaseAddress(memoryConfiguration),
+            getTextSegmentLimitAddress(memoryConfiguration)
+        );
         this.addAsObserver(Globals.REGISTER_FILE.pc);
     }
 

@@ -9,8 +9,8 @@ import rars.Globals;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
-import rars.riscv.hardware.MemoryConfiguration;
-import rars.riscv.hardware.MemoryListenerHandle;
+import rars.riscv.hardware.memory.AbstractMemoryConfiguration;
+import rars.riscv.hardware.memory.MemoryListenerHandle;
 import rars.settings.*;
 import rars.util.BinaryUtilsKt;
 import rars.util.ConversionUtils;
@@ -129,13 +129,13 @@ public final class DataSegmentWindow extends JInternalFrame {
 
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.displayBaseAddressArray = new int[]{
-            memoryConfiguration.externBaseAddress,
-            memoryConfiguration.dataBaseAddress,
-            memoryConfiguration.heapBaseAddress,
+            memoryConfiguration.getExternAddress(),
+            memoryConfiguration.getDataBaseAddress(),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(memoryConfiguration),
             -1 /* memoryConfiguration.globalPointer */,
             -1 /* memoryConfiguration.stackPointer */,
-            memoryConfiguration.textBaseAddress,
-            memoryConfiguration.memoryMapBaseAddress,
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(memoryConfiguration),
         };
         SIMULATOR.simulatorNoticeHook.subscribe(s -> {
             if (s.action == SimulatorNotice.Action.START) {
@@ -161,7 +161,7 @@ public final class DataSegmentWindow extends JInternalFrame {
             return Unit.INSTANCE;
         });
 
-        this.homeAddress = memoryConfiguration.dataBaseAddress; // address for Home button
+        this.homeAddress = memoryConfiguration.getDataBaseAddress(); // address for Home button
         this.firstAddress = this.homeAddress; // first address to display at any given time
         this.userOrKernelMode = DataSegmentWindow.USER_MODE;
         this.addressHighlighting = false;
@@ -169,12 +169,12 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.tablePanel = new JPanel(new GridLayout(1, 2, 10, 0));
         final JPanel features = new JPanel();
         final Toolkit tk = Toolkit.getDefaultToolkit();
-        final Class<? extends DataSegmentWindow> cs = this.getClass();
+        final var cls = this.getClass();
         try {
             this.prevButton = new PrevButton(
-                new ImageIcon(tk.getImage(cs.getResource(Globals.IMAGES_PATH + "Previous22.png"))));// "Back16
+                new ImageIcon(tk.getImage(cls.getResource(Globals.IMAGES_PATH + "Previous22.png"))));// "Back16
             // .gif"))));//"Down16.gif"))));
-            this.nextButton = new NextButton(new ImageIcon(tk.getImage(cs.getResource(Globals.IMAGES_PATH + "Next22" +
+            this.nextButton = new NextButton(new ImageIcon(tk.getImage(cls.getResource(Globals.IMAGES_PATH + "Next22" +
                 ".png"))));// "Forward16
             // .gif"))));
             // //"Up16.gif"))));
@@ -259,7 +259,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         }
         // Check distance from .extern base. Cannot be below it
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        int thisDistance = address - memoryConfiguration.externBaseAddress;
+        int thisDistance = address - memoryConfiguration.getExternAddress();
         int shortDistance = 0x7fffffff;
         // assume not a data address.
         int desiredComboBoxIndex = -1;
@@ -278,13 +278,13 @@ public final class DataSegmentWindow extends JInternalFrame {
             desiredComboBoxIndex = DataSegmentWindow.GLOBAL_POINTER_ADDRESS_INDEX;
         }
         // Check distance from .data base. Cannot be below it
-        thisDistance = address - memoryConfiguration.dataBaseAddress;
+        thisDistance = address - memoryConfiguration.getDataBaseAddress();
         if (thisDistance >= 0 && thisDistance < shortDistance) {
             shortDistance = thisDistance;
             desiredComboBoxIndex = DataSegmentWindow.DATA_BASE_ADDRESS_INDEX;
         }
         // Check distance from heap base. Cannot be below it
-        thisDistance = address - memoryConfiguration.heapBaseAddress;
+        thisDistance = address - rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(memoryConfiguration);
         if (thisDistance >= 0 && thisDistance < shortDistance) {
             shortDistance = thisDistance;
             desiredComboBoxIndex = DataSegmentWindow.HEAP_BASE_ADDRESS_INDEX;
@@ -316,13 +316,16 @@ public final class DataSegmentWindow extends JInternalFrame {
 
     public void updateBaseAddressComboBox() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        this.displayBaseAddressArray[DataSegmentWindow.EXTERN_BASE_ADDRESS_INDEX] = memoryConfiguration.externBaseAddress;
+        this.displayBaseAddressArray[DataSegmentWindow.EXTERN_BASE_ADDRESS_INDEX] = memoryConfiguration.getExternAddress();
         this.displayBaseAddressArray[DataSegmentWindow.GLOBAL_POINTER_ADDRESS_INDEX] = -1; /* Memory.globalPointer */
-        this.displayBaseAddressArray[DataSegmentWindow.DATA_BASE_ADDRESS_INDEX] = memoryConfiguration.dataBaseAddress;
-        this.displayBaseAddressArray[DataSegmentWindow.HEAP_BASE_ADDRESS_INDEX] = memoryConfiguration.heapBaseAddress;
+        this.displayBaseAddressArray[DataSegmentWindow.DATA_BASE_ADDRESS_INDEX] = memoryConfiguration.getDataBaseAddress();
+        this.displayBaseAddressArray[DataSegmentWindow.HEAP_BASE_ADDRESS_INDEX] = rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
+            memoryConfiguration);
         this.displayBaseAddressArray[DataSegmentWindow.STACK_POINTER_BASE_ADDRESS_INDEX] = -1; /* Memory.stackPointer */
-        this.displayBaseAddressArray[DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX] = memoryConfiguration.memoryMapBaseAddress;
-        this.displayBaseAddressArray[DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX] = memoryConfiguration.textBaseAddress;
+        this.displayBaseAddressArray[DataSegmentWindow.MMIO_BASE_ADDRESS_INDEX] = rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
+            memoryConfiguration);
+        this.displayBaseAddressArray[DataSegmentWindow.TEXT_BASE_ADDRESS_INDEX] = rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+            memoryConfiguration);
         this.displayBaseAddressChoices = DataSegmentWindow.createBaseAddressLabelsArray(
             this.displayBaseAddressArray,
             this.descriptions
@@ -784,7 +787,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.dataButton.setEnabled(true);
     }
 
-    private void addButtonActionListenersAndInitialize(final @NotNull MemoryConfiguration memoryConfiguration) {
+    private void addButtonActionListenersAndInitialize(final @NotNull AbstractMemoryConfiguration<Integer> memoryConfiguration) {
         // set initial states
         this.disableAllButtons();
         // add tool tips
@@ -793,17 +796,20 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.globButton.setToolTipText("View range around global pointer");
         this.stakButton.setToolTipText("View range around stack pointer");
         this.heapButton.setToolTipText("View range around heap base address " +
-            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.heapBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
+                memoryConfiguration)));
         this.extnButton.setToolTipText("View range around static global base address " +
-            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.externBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.getExternAddress()));
         this.mmioButton.setToolTipText("View range around MMIO base address " +
-            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.memoryMapBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
+                memoryConfiguration)));
         this.textButton.setToolTipText("View range around program code " +
-            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.textBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+                memoryConfiguration)));
         this.prevButton.setToolTipText("View next lower address range; hold down for rapid fire");
         this.nextButton.setToolTipText("View next higher address range; hold down for rapid fire");
         this.dataButton.setToolTipText("View range around static data segment base address " +
-            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.dataBaseAddress));
+            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.getDataBaseAddress()));
 
         // add the action listeners to maintain button state and table contents
         // Currently there is no memory upper bound so next button always enabled.
@@ -813,7 +819,7 @@ public final class DataSegmentWindow extends JInternalFrame {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                 // get $gp global pointer, but guard against it having value below data segment
                 DataSegmentWindow.this.firstAddress = Math.max(
-                    memoryConfiguration.dataSegmentBaseAddress,
+                    rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(memoryConfiguration),
                     (int) Globals.REGISTER_FILE.gp.getValue()
                 );
                 // updateModelForMemoryRange requires argument to be multiple of 4
@@ -833,13 +839,14 @@ public final class DataSegmentWindow extends JInternalFrame {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                 // get $sp stack pointer, but guard against it having value below data segment
                 DataSegmentWindow.this.firstAddress = Math.max(
-                    memoryConfiguration.dataSegmentBaseAddress,
+                    rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(memoryConfiguration),
                     (int) Globals.REGISTER_FILE.sp.getValue()
                 );
                 // See comment above for gloButton...
                 DataSegmentWindow.this.firstAddress =
                     DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
-                DataSegmentWindow.this.homeAddress = memoryConfiguration.stackBaseAddress;
+                DataSegmentWindow.this.homeAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getStackBaseAddress(
+                    memoryConfiguration);
                 DataSegmentWindow.this.firstAddress =
                     DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
                 DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
@@ -848,7 +855,8 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.heapButton.addActionListener(
             ae -> {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                DataSegmentWindow.this.homeAddress = memoryConfiguration.heapBaseAddress;
+                DataSegmentWindow.this.homeAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
+                    memoryConfiguration);
                 DataSegmentWindow.this.firstAddress =
                     DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
                 DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
@@ -857,7 +865,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.extnButton.addActionListener(
             ae -> {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                DataSegmentWindow.this.homeAddress = memoryConfiguration.externBaseAddress;
+                DataSegmentWindow.this.homeAddress = memoryConfiguration.getExternAddress();
                 DataSegmentWindow.this.firstAddress =
                     DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
                 DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
@@ -866,7 +874,8 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.mmioButton.addActionListener(
             ae -> {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.KERNEL_MODE;
-                DataSegmentWindow.this.homeAddress = memoryConfiguration.memoryMapBaseAddress;
+                DataSegmentWindow.this.homeAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
+                    memoryConfiguration);
                 DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
                 DataSegmentWindow.this.firstAddress =
                     DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
@@ -876,7 +885,8 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.textButton.addActionListener(
             ae -> {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                DataSegmentWindow.this.homeAddress = memoryConfiguration.textBaseAddress;
+                DataSegmentWindow.this.homeAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+                    memoryConfiguration);
                 DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
                 DataSegmentWindow.this.firstAddress =
                     DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
@@ -886,7 +896,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.dataButton.addActionListener(
             ae -> {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
-                DataSegmentWindow.this.homeAddress = memoryConfiguration.dataBaseAddress;
+                DataSegmentWindow.this.homeAddress = memoryConfiguration.getDataBaseAddress();
                 DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
                 DataSegmentWindow.this.firstAddress =
                     DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
@@ -913,15 +923,15 @@ public final class DataSegmentWindow extends JInternalFrame {
         final int lowLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE) ?
             Math.min(
                 Math.min(
-                    memoryConfiguration.textBaseAddress,
-                    memoryConfiguration.dataSegmentBaseAddress
+                    rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
+                    rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(memoryConfiguration)
                 ),
-                memoryConfiguration.dataBaseAddress
+                memoryConfiguration.getDataBaseAddress()
             )
-            : memoryConfiguration.memoryMapBaseAddress;
+            : rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(memoryConfiguration);
         final int highLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE)
-            ? memoryConfiguration.userHighAddress
-            : memoryConfiguration.kernelHighAddress;
+            ? (memoryConfiguration).getUserHighAddress()
+            : rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelHighAddress(memoryConfiguration);
         if (lowAddress <= lowLimit) {
             lowAddress = lowLimit;
             this.prevButton.setEnabled(false);

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.notices.AccessNotice;
-import rars.riscv.hardware.MemoryListenerHandle;
+import rars.riscv.hardware.memory.MemoryListenerHandle;
 import rars.riscv.hardware.registers.Register;
 import rars.venus.VenusUI;
 
@@ -15,6 +15,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
+
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress;
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.getStackBaseAddress;
 
 /**
  * A base class used to define a tool that can interact with an executing program.
@@ -41,8 +44,8 @@ public abstract class AbstractTool extends JFrame {
     private final String heading; // Text to be displayed in the top portion of the main window.
     // Some GUI settings
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
-    private final int lowMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().dataSegmentBaseAddress;
-    private final int highMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().stackBaseAddress;
+    private final int lowMemoryAddress = getDataSegmentBaseAddress(Globals.MEMORY_INSTANCE.getMemoryConfiguration());
+    private final int highMemoryAddress = getStackBaseAddress(Globals.MEMORY_INSTANCE.getMemoryConfiguration());
     private final @NotNull Function1<@NotNull AccessNotice, @NotNull Unit> callback = this::processAccessNotice;
     protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
     protected ConnectButton connectButton;

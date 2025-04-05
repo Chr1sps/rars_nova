@@ -5,7 +5,8 @@ import arrow.core.raise.either
 import rars.Globals
 import rars.assembler.SymbolTable
 import rars.events.SimulationError
-import rars.riscv.hardware.MemoryConfiguration
+import rars.riscv.hardware.memory.AbstractMemoryConfiguration
+import rars.riscv.hardware.memory.textSegmentBaseAddress
 import rars.riscv.hardware.registers.Register
 import rars.settings.BoolSetting
 import rars.settings.OtherSettings
@@ -14,7 +15,7 @@ import rars.util.unwrap
 
 class RegisterFile(
     private val globalSymbolTable: SymbolTable,
-    initialMemoryConfiguration: MemoryConfiguration
+    initialMemoryConfiguration: AbstractMemoryConfiguration<Int>
 ) : RegisterFileBase('x', createRegisters(initialMemoryConfiguration)) {
     val zero: Register = this.myRegisters[0]
 
@@ -28,7 +29,7 @@ class RegisterFile(
     val pc: Register = Register(
         "pc",
         -1,
-        initialMemoryConfiguration.textBaseAddress.toLong()
+        initialMemoryConfiguration.textSegmentBaseAddress.toLong()
     )
 
     @JvmField
@@ -106,11 +107,11 @@ class RegisterFile(
         this.initializeProgramCounter(programCounterValue)
     }
 
-    fun setValuesFromConfiguration(configuration: MemoryConfiguration) {
+    fun setValuesFromConfiguration(configuration: AbstractMemoryConfiguration<Int>) {
         this.gp.changeResetValue(configuration.globalPointerAddress.toLong())
         this.sp.changeResetValue(configuration.stackPointerAddress.toLong())
-        this.pc.changeResetValue(configuration.textBaseAddress.toLong())
-        this.pc.setValue(configuration.textBaseAddress.toLong())
+        this.pc.changeResetValue(configuration.textSegmentBaseAddress.toLong())
+        this.pc.setValue(configuration.textSegmentBaseAddress.toLong())
         this.resetRegisters()
     }
 
@@ -126,7 +127,7 @@ class RegisterFile(
     companion object {
         const val GLOBAL_POINTER_REGISTER_INDEX: Int = 3
         const val STACK_POINTER_REGISTER_INDEX: Int = 2
-        private fun createRegisters(initialMemoryConfiguration: MemoryConfiguration): Array<Register> {
+        private fun createRegisters(initialMemoryConfiguration: AbstractMemoryConfiguration<Int>): Array<Register> {
             val sp = Register(
                 "sp",
                 STACK_POINTER_REGISTER_INDEX,

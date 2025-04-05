@@ -17,11 +17,15 @@ public final class MemoryDump {
     static {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         SEGMENTS = List.of(
-            new SegmentInfo(".text", memoryConfiguration.textBaseAddress, memoryConfiguration.textLimitAddress),
+            new SegmentInfo(
+                ".text",
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+            ),
             new SegmentInfo(
                 ".data",
-                memoryConfiguration.dataBaseAddress,
-                memoryConfiguration.dataSegmentLimitAddress
+                memoryConfiguration.getDataBaseAddress(),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentLimitAddress(memoryConfiguration)
             )
         );
     }

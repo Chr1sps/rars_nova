@@ -14,6 +14,7 @@ import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress;
 import static rars.util.UtilsKt.unwrap;
 
 /**
@@ -48,11 +49,11 @@ public final class TimerTool extends AbstractTool {
     }
 
     private static int getTimeAddress() {
-        return Globals.MEMORY_INSTANCE.getMemoryConfiguration().memoryMapBaseAddress + 0x18;
+        return getMemoryMapBaseAddress(Globals.MEMORY_INSTANCE.getMemoryConfiguration()) + 0x18;
     }
 
     private static int getTimeCmpAddress() {
-        return Globals.MEMORY_INSTANCE.getMemoryConfiguration().memoryMapBaseAddress + 0x20;
+        return getMemoryMapBaseAddress(Globals.MEMORY_INSTANCE.getMemoryConfiguration()) + 0x20;
     }
 
     // A daemon that watches the timecmp MMIO for any changes

@@ -8,7 +8,7 @@ import rars.RISCVProgram
 import rars.events.AssemblyError
 import rars.events.SimulationError
 import rars.io.ConsoleIO
-import rars.riscv.hardware.Memory
+import rars.riscv.hardware.memory.Memory
 import rars.settings.BoolSetting
 import rars.simulator.Simulator
 import rars.simulator.storeProgramArguments

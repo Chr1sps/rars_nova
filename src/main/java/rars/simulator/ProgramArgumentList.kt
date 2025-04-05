@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import rars.Globals
 import rars.assembler.DataTypes
+import rars.riscv.hardware.memory.stackBaseAddress
 import java.util.*
 import kotlin.system.exitProcess
 

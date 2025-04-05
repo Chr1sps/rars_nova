@@ -1,4 +1,4 @@
-package rars.riscv.hardware
+package rars.riscv.hardware.memory
 
 import arrow.core.Either
 import arrow.core.flatMap
@@ -21,9 +21,7 @@ import rars.riscv.BasicInstruction
 import rars.settings.BoolSetting
 import rars.settings.OtherSettings
 import rars.util.Listener
-import rars.util.ListenerDispatcher
 import rars.util.toLongReinterpreted
-import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -35,13 +33,10 @@ import kotlin.math.min
  * @version August 2003
  */
 class Memory(
-    /**
-     * Current memory configuration for simulation. Configuration is a
-     * collection of memory segment addresses. e.g. text segment starting at
-     * address 0x00400000. Configuration can be modified starting with MARS 3.7.
-     */
-    override var memoryConfiguration: MemoryConfiguration
+    private var _memoryConfiguration: AbstractMemoryConfiguration<Int>,
 ) : SubscribableMemory<Int> {
+    override val memoryConfiguration by ::_memoryConfiguration
+
     /**
      * Memory will maintain a collection of observables.  Each one is associated
      * with a specific memory address or address range, and each will have at least
@@ -95,13 +90,13 @@ class Memory(
         ).toDouble()
     ).toInt()
     private var actualTextLimitAddress: Int = min(
-        this.memoryConfiguration.textLimitAddress.toDouble(),
-        this.memoryConfiguration.textBaseAddress.plus(
+        this.memoryConfiguration.textSegmentLimitAddress.toDouble(),
+        this.memoryConfiguration.textSegmentBaseAddress.plus(
             TEXT_BLOCK_LENGTH_WORDS * TEXT_BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE
         ).toDouble()
     ).toInt()
     private var actualStackLimitAddress: Int = max(
-        this.memoryConfiguration.stackLimitAddress.toDouble(),
+        this.memoryConfiguration.heapBaseAddress.toDouble(),
         this.memoryConfiguration.stackBaseAddress.minus(
             BLOCK_LENGTH_WORDS * BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE
         ).toDouble()
@@ -210,7 +205,6 @@ class Memory(
         val result = currentHeapAddress
         ensure(numBytes != 0) { "request ($numBytes) is negative heap amount" }
         var newHeapAddress = currentHeapAddress + numBytes
-        UInt
         if (newHeapAddress % 4 != 0) {
             newHeapAddress = newHeapAddress + (4 - newHeapAddress % 4) // next higher multiple of 4
         }
@@ -225,7 +219,7 @@ class Memory(
 
     /**
      * Handy little utility to find out if given address is in the text
-     * segment (starts at Memory.currentConfiguration.textBaseAddress).
+     * segment (starts at Memory.currentConfiguration.textSegmentBaseAddress).
      * Note that RARS does not implement the entire text segment space,
      * but it does implement enough for hundreds of thousands of lines
      * of code.
@@ -236,7 +230,7 @@ class Memory(
      * false otherwise.
      */
     fun isAddressInTextSegment(address: Int): Boolean =
-        address in memoryConfiguration.textBaseAddress..<actualTextLimitAddress
+        address in memoryConfiguration.textSegmentBaseAddress..<actualTextLimitAddress
 
     /**
      * Handy little utility to find out if given address is in RARS data
@@ -560,7 +554,7 @@ class Memory(
         storeProgramStatement(
             address,
             statement,
-            memoryConfiguration.textBaseAddress,
+            memoryConfiguration.textSegmentBaseAddress,
             textBlockTable
         )
     }
@@ -900,7 +894,7 @@ class Memory(
         return if (isAddressInTextSegment(address)) {
             readProgramStatement(
                 address,
-                memoryConfiguration.textBaseAddress,
+                memoryConfiguration.textSegmentBaseAddress,
                 textBlockTable,
                 notify
             ).right()
@@ -1226,20 +1220,20 @@ class Memory(
         return null
     }
 
-    fun setMemoryConfigurationAndReset(newConfiguration: MemoryConfiguration) {
-        this.memoryConfiguration = newConfiguration
+    fun setMemoryConfigurationAndReset(newConfiguration: AbstractMemoryConfiguration<Int>) {
+        this._memoryConfiguration = newConfiguration
         this.actualDataSegmentLimitAddress = min(
             this.memoryConfiguration.dataSegmentLimitAddress.toDouble(),
             (this.memoryConfiguration.dataSegmentBaseAddress
                 + BLOCK_LENGTH_WORDS * BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
         ).toInt()
         this.actualTextLimitAddress = min(
-            this.memoryConfiguration.textLimitAddress.toDouble(),
-            (this.memoryConfiguration.textBaseAddress
+            this.memoryConfiguration.textSegmentLimitAddress.toDouble(),
+            (this.memoryConfiguration.textSegmentBaseAddress
                 + TEXT_BLOCK_LENGTH_WORDS * TEXT_BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
         ).toInt()
         this.actualStackLimitAddress = max(
-            this.memoryConfiguration.stackLimitAddress.toDouble(),
+            this.memoryConfiguration.heapBaseAddress.toDouble(),
             (this.memoryConfiguration.stackBaseAddress
                 - BLOCK_LENGTH_WORDS * BLOCK_TABLE_LENGTH * DataTypes.WORD_SIZE).toDouble()
         ).toInt()
@@ -1253,79 +1247,5 @@ class Memory(
 }
 
 private val LOGGER: Logger = LogManager.getLogger(Memory::class.java)
-private const val BLOCK_LENGTH_WORDS = 1024 // allocated blocksize 1024 ints == 4K bytes
-private const val BLOCK_TABLE_LENGTH = 1024 // Each entry of table points to a block.
-private const val MMIO_TABLE_LENGTH = 16 // Each entry of table points to a 4K block.
-private const val TEXT_BLOCK_LENGTH_WORDS = 1024 // allocated blocksize 1024 ints == 4K bytes
-private const val TEXT_BLOCK_TABLE_LENGTH = 1024 // Each entry of table points to a block.
-
-fun isDoubleWordAligned(address: Int): Boolean = (address % (DataTypes.WORD_SIZE + DataTypes.WORD_SIZE) == 0)
-
-/**
- * Returns result of substituting specified byte of source value into specified byte
- * of destination value. Byte positions are 0-1-2-3, listed from most to least
- * significant. No endian issues. This is a private helper method used by get() & set().
- */
-private fun replaceByte(
-    sourceValue: Int,
-    bytePosInSource: Int,
-    destValue: Int,
-    bytePosInDest: Int
-): Int {
-    // Set source byte value into destination byte position; set other 24 bits to
-    // zeros, and bitwise-OR it with. Set 8 bits in destination byte position to 0's,
-    return ((sourceValue shr (24 - (bytePosInSource shl 3)) and 0xFF) shl (24 - (bytePosInDest shl 3))) or (destValue and (0xFF
-        shl (24 - (bytePosInDest shl 3))
-        ).inv()
-        )
-}
 
 // TODO: add some heap managment so programs can malloc and free
-// Store a program statement at the given address. Address has already been verified as valid.
-private fun storeProgramStatement(
-    address: Int,
-    statement: ProgramStatement?,
-    baseAddress: Int,
-    blockTable: Array<Array<ProgramStatement?>?>
-) {
-    val relative = (address - baseAddress) shr 2 // convert byte address to words
-    val block: Int = relative / BLOCK_LENGTH_WORDS
-    if (block < TEXT_BLOCK_TABLE_LENGTH) {
-        if (blockTable[block] == null) {
-            // No instructions are stored in this block, so allocate the block.
-            blockTable[block] = arrayOfNulls(BLOCK_LENGTH_WORDS)
-        }
-        val offset: Int = relative % BLOCK_LENGTH_WORDS
-        blockTable[block]!![offset] = statement
-    }
-}
-
-/**
- * Private class whose objects will represent an observable-observer pair
- * for a given memory address or range.
- */
-private class MemoryObservable(
-    val handle: MemoryListenerHandle<Int>
-) : Comparable<MemoryObservable> {
-    val dispatcher = ListenerDispatcher<MemoryAccessNotice>()
-    val hook = this.dispatcher.hook
-
-    init {
-        this.hook.subscribe(handle.listener)
-    }
-
-    fun match(address: Int): Boolean =
-        address.toUInt() in handle.startAddress.toUInt()..<(handle.endAddress.toUInt() + DataTypes.WORD_SIZE.toUInt())
-
-    /**
-     * Useful to have for future refactoring, if it actually becomes worthwhile to sort
-     * these or put 'em in a tree (rather than sequential search through list).
-     */
-    override fun compareTo(other: MemoryObservable): Int =
-        compareValuesBy(this, other, { it.handle.startAddress.toUInt() }, { it.handle.endAddress.toUInt() })
-
-    override fun equals(other: Any?): Boolean =
-        other is MemoryObservable && handle.startAddress == other.handle.startAddress && handle.endAddress == other.handle.endAddress
-
-    override fun hashCode(): Int = Objects.hash(handle.startAddress, handle.endAddress)
-}

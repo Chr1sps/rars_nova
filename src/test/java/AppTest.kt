@@ -14,7 +14,8 @@ import rars.api.ProgramOptions
 import rars.events.AssemblyError
 import rars.riscv.BasicInstructionFormat
 import rars.riscv.InstructionsRegistry
-import rars.riscv.hardware.MemoryConfiguration
+import rars.riscv.hardware.memory.MemoryConfiguration
+import rars.riscv.hardware.memory.textSegmentBaseAddress
 import rars.settings.BoolSetting
 import rars.simulator.Simulator
 import rars.util.unwrap
@@ -109,17 +110,14 @@ internal class AppTest : RarsTestBase() {
             for (instruction in instructionsToTest) {
                 println("Testing: ${instruction.mnemonic}")
                 when (instruction.instructionFormat) {
-                    BasicInstructionFormat.B_FORMAT, BasicInstructionFormat.J_FORMAT -> {
-                        continue
-                    }
-
-                    else -> {}
+                    BasicInstructionFormat.B_FORMAT, BasicInstructionFormat.J_FORMAT -> continue
+                    else -> Unit
                 }
                 val format = instruction.exampleFormat
 
                 program.assembleString(format)
                 program.setup(emptyList(), "")
-                val instructionAddress = MemoryConfiguration.DEFAULT.textBaseAddress
+                val instructionAddress = MemoryConfiguration.DEFAULT.textSegmentBaseAddress
                 val word = program.memory.getWord(instructionAddress).unwrap()
 
                 val baseStatement = program.machineList.first()

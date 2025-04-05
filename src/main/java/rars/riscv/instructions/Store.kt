@@ -7,7 +7,7 @@ import rars.events.SimulationError
 import rars.events.SimulationEvent
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
-import rars.riscv.hardware.Memory
+import rars.riscv.hardware.memory.Memory
 import rars.simulator.SimulationContext
 import rars.util.ignoreOk
 

@@ -444,12 +444,12 @@ public final class MemoryReferenceVisualization extends AbstractTool {
     private void initializeDisplayBaseChoices() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         final int[] displayBaseAddressArray = {
-            memoryConfiguration.textBaseAddress,
-            memoryConfiguration.dataSegmentBaseAddress,
-            memoryConfiguration.globalPointerAddress,
-            memoryConfiguration.dataBaseAddress,
-            memoryConfiguration.heapBaseAddress,
-            memoryConfiguration.memoryMapBaseAddress
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(memoryConfiguration),
+            memoryConfiguration.getGlobalPointerAddress(),
+            memoryConfiguration.getDataBaseAddress(),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(memoryConfiguration)
         };
         // Must agree with above in number and order...
         this.displayBaseAddresses = displayBaseAddressArray;

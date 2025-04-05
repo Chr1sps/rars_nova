@@ -2,7 +2,7 @@ package rars.riscv.dump.formats
 
 import arrow.core.raise.either
 import rars.assembler.DataTypes.WORD_SIZE
-import rars.riscv.hardware.Memory
+import rars.riscv.hardware.memory.Memory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
