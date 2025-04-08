@@ -1,99 +1,95 @@
-package rars.venus.editors;
+package rars.venus.editors
 
-import kotlin.Pair;
-import org.jetbrains.annotations.NotNull;
-import rars.riscv.lang.lexing.RVTokenType;
-
-import javax.swing.text.Caret;
-import javax.swing.text.Document;
-import java.awt.*;
+import rars.riscv.lang.lexing.RVTokenType
+import rars.settings.AllSettings
+import rars.venus.editors.rsyntaxtextarea.RSyntaxTextAreaBasedEditor
+import java.awt.Color
+import java.awt.Component
+import java.awt.Font
+import javax.swing.text.Caret
+import javax.swing.text.Document
 
 /**
  * Specifies capabilities that any test editor used in MARS must have.
  */
-public interface TextEditingArea {
+interface TextEditingArea {
+    val document: Document
 
-    void copy();
+    var text: String
 
-    void cut();
+    var isEditable: Boolean
 
-    @NotNull FindReplaceResult doFindText(String find, boolean caseSensitive);
+    var font: Font
 
-    @NotNull FindReplaceResult doReplace(String find, String replace, boolean caseSensitive);
+    var theme: EditorTheme
 
-    int doReplaceAll(String find, String replace, boolean caseSensitive);
+    var foreground: Color
 
-    Document getDocument();
+    var background: Color
 
-    void select(int selectionStart, int selectionEnd);
+    var selectionColor: Color
 
-    void selectLine(int lineNumber);
+    var caretColor: Color
 
-    String getText();
+    var lineHighlightColor: Color
 
-    void setText(String text);
+    val caret: Caret
 
-    void paste();
+    var isEnabled: Boolean
 
-    void setEditable(boolean editable);
+    fun setSourceCode(code: String, editable: Boolean)
 
-    Font getFont();
+    var lineHighlightEnabled: Boolean
 
-    void setFont(Font f);
+    var caretBlinkRate: Int
 
-    void requestFocusInWindow();
+    var tabSize: Int
 
-    void setForeground(Color c);
+    val caretPosition: Pair<Int, Int>
 
-    void setBackground(Color c);
+    val outerComponent: Component
 
-    void setSelectionColor(Color c);
+    fun copy()
 
-    void setCaretColor(Color c);
+    fun cut()
 
-    void setLineHighlightColor(Color c);
+    fun paste()
 
-    @NotNull Caret getCaret();
+    fun undo()
 
-    void setEnabled(boolean enabled);
+    fun redo()
 
-    void redo();
+    fun canUndo(): Boolean
 
-    void setSourceCode(String code, boolean editable);
+    fun canRedo(): Boolean
 
-    void undo();
+    fun discardAllUndoableEdits()
 
-    void discardAllUndoableEdits();
+    fun doFindText(find: String, caseSensitive: Boolean): FindReplaceResult
 
-    void setLineHighlightEnabled(boolean highlight);
+    fun doReplace(find: String, replace: String, caseSensitive: Boolean): FindReplaceResult
 
-    int getCaretBlinkRate();
+    fun doReplaceAll(find: String, replace: String, caseSensitive: Boolean): Int
 
-    void setCaretBlinkRate(int rate);
+    fun select(selectionStart: Int, selectionEnd: Int)
 
-    int getTabSize();
+    fun selectLine(lineNumber: Int)
 
-    void setTabSize(int chars);
+    fun requestFocusInWindow()
 
-    @NotNull Pair<@NotNull Integer, @NotNull Integer> getCaretPosition();
 
-    Component getOuterComponent();
-
-    boolean canUndo();
-
-    boolean canRedo();
-
-    @NotNull EditorTheme getTheme();
-
-    void setTheme(final @NotNull EditorTheme theme);
-
-    void setTokenStyle(final @NotNull RVTokenType type, final @NotNull TokenStyle style);
+    fun setTokenStyle(type: RVTokenType, style: TokenStyle)
 
     // Used by Find/Replace
-    enum FindReplaceResult {
+    enum class FindReplaceResult {
         TEXT_NOT_FOUND,
         TEXT_FOUND,
         TEXT_REPLACED_FOUND_NEXT,
         TEXT_REPLACED_NOT_FOUND_NEXT
     }
 }
+
+fun createTextEditingArea(allSettings: AllSettings): TextEditingArea = RSyntaxTextAreaBasedEditor(
+    allSettings.editorThemeSettings.currentTheme.toEditorTheme(),
+    allSettings.fontSettings
+)

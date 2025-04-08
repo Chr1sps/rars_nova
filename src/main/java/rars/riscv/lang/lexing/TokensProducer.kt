@@ -1,24 +1,24 @@
-package rars.riscv.lang.lexing;
+package rars.riscv.lang.lexing
 
-import javax.swing.text.Segment;
+import javax.swing.text.Segment
 
-public interface TokensProducer<CollectionType> {
-    void addToken(
-        char[] array, int start, int end, RVTokenType tokenType,
-        int startOffset
-    );
+interface TokensProducer<CollectionType : Any?> {
+    fun addToken(
+        array: CharArray, start: Int, end: Int, tokenType: RVTokenType,
+        startOffset: Int
+    )
 
-    default void addNullToken(final char[] array, final int segmentPos, final int offset) {
-        this.addToken(array, segmentPos, segmentPos, RVTokenType.NULL, offset);
+    fun addNullToken(array: CharArray, segmentPos: Int, offset: Int) {
+        addToken(array, segmentPos, segmentPos, RVTokenType.NULL, offset)
     }
 
-    default void addErrorToken(final char[] array, final int segmentPos, final int offset, final String notice) {
-        this.addToken(array, segmentPos, segmentPos, RVTokenType.ERROR, offset);
+    fun addErrorToken(array: CharArray, segmentPos: Int, offset: Int, notice: String) {
+        addToken(array, segmentPos, segmentPos, RVTokenType.ERROR, offset)
     }
 
-    CollectionType getResult();
+    fun getResult(): CollectionType
 
-    CollectionType getEmptyResult();
+    fun getEmptyResult(): CollectionType
 
-    CollectionType getTokenList(Segment text, int initialTokenType, int lineOffset, int lineNum);
+    fun getTokenList(text: Segment, initialTokenType: Int, lineOffset: Int, lineNum: Int): CollectionType
 }

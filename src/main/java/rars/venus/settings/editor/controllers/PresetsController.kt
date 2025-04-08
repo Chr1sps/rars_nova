@@ -14,7 +14,7 @@ fun PresetsController(
         val section = PresetSection(themeEntry.name)
         section.button.addActionListener {
             parentController.settingsTheme = themeEntry.theme.clone()
-            textArea.setTheme(parentController.settingsTheme.toEditorTheme())
+            textArea.theme = parentController.settingsTheme.toEditorTheme()
             // We need to update the info regarding the theme in all the theme
             // related controllers.
             parentController.updateThemeControllers()

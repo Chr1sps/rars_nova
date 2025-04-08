@@ -72,7 +72,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public @NotNull FindReplaceResult doFindText(final String find, final boolean caseSensitive) {
+    public @NotNull FindReplaceResult doFindText(final @NotNull String find, final boolean caseSensitive) {
         final var context = new SearchContext();
         context.setSearchFor(find);
         context.setMatchCase(caseSensitive);
@@ -88,7 +88,11 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public @NotNull FindReplaceResult doReplace(final String find, final String replace, final boolean caseSensitive) {
+    public @NotNull FindReplaceResult doReplace(
+        final @NotNull String find,
+        final @NotNull String replace,
+        final boolean caseSensitive
+    ) {
         final var context = new SearchContext();
         context.setSearchFor(find);
         context.setMatchCase(caseSensitive);
@@ -103,7 +107,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public int doReplaceAll(final String find, final String replace, final boolean caseSensitive) {
+    public int doReplaceAll(final @NotNull String find, final @NotNull String replace, final boolean caseSensitive) {
         final var context = new SearchContext();
         context.setSearchFor(find);
         context.setReplaceWith(replace);
@@ -113,7 +117,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public Document getDocument() {
+    public @NotNull Document getDocument() {
         return textArea.getDocument();
     }
 
@@ -136,12 +140,12 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public String getText() {
+    public @NotNull String getText() {
         return textArea.getText();
     }
 
     @Override
-    public void setText(final String text) {
+    public void setText(final @NotNull String text) {
         textArea.setText(text);
     }
 
@@ -151,12 +155,17 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
+    public boolean isEditable() {
+        return textArea.isEditable();
+    }
+
+    @Override
     public void setEditable(final boolean editable) {
         textArea.setEditable(editable);
     }
 
     @Override
-    public Font getFont() {
+    public @NotNull Font getFont() {
         return textArea.getFont();
     }
 
@@ -174,7 +183,12 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public void setForeground(final Color c) {
+    public @NotNull Color getForeground() {
+        return textArea.getForeground();
+    }
+
+    @Override
+    public void setForeground(final @NotNull Color c) {
         this.textArea.setForeground(c);
         this.gutter.setForeground(c);
         this.gutter.setFoldIndicatorForeground(c);
@@ -183,31 +197,56 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public void setBackground(final Color color) {
+    public @NotNull Color getBackground() {
+        return textArea.getBackground();
+    }
+
+    @Override
+    public void setBackground(final @NotNull Color color) {
         this.textArea.setBackground(color);
         this.gutter.setBackground(color);
         UIManager.put("ToolTip.background", color);
     }
 
     @Override
-    public void setSelectionColor(final Color c) {
+    public @NotNull Color getSelectionColor() {
+        return textArea.getSelectionColor();
+    }
+
+    @Override
+    public void setSelectionColor(final @NotNull Color c) {
         this.textArea.setSelectionColor(c);
         this.textArea.setMarkOccurrencesColor(c);
     }
 
     @Override
-    public void setLineHighlightColor(final Color c) {
+    public @NotNull Color getLineHighlightColor() {
+        return textArea.getCurrentLineHighlightColor();
+    }
+
+    @Override
+    public void setLineHighlightColor(final @NotNull Color c) {
         textArea.setCurrentLineHighlightColor(c);
     }
 
     @Override
-    public void setCaretColor(final Color c) {
+    public @NotNull Color getCaretColor() {
+        return textArea.getCaretColor();
+    }
+
+    @Override
+    public void setCaretColor(final @NotNull Color c) {
         textArea.setCaretColor(c);
     }
 
     @Override
     public @NotNull Caret getCaret() {
         return textArea.getCaret();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return textArea.isEnabled();
     }
 
     @Override
@@ -221,7 +260,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public void setSourceCode(final String code, final boolean editable) {
+    public void setSourceCode(final @NotNull String code, final boolean editable) {
         textArea.setText(code);
         textArea.setEditable(editable);
         setEnabled(editable);
@@ -239,6 +278,11 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     @Override
     public void discardAllUndoableEdits() {
         textArea.discardAllEdits();
+    }
+
+    @Override
+    public boolean getLineHighlightEnabled() {
+        return textArea.getHighlightCurrentLine();
     }
 
     @Override
@@ -267,7 +311,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     }
 
     @Override
-    public Component getOuterComponent() {
+    public @NotNull Component getOuterComponent() {
         return scrollPane;
     }
 

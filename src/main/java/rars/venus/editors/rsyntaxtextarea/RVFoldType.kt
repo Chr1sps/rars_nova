@@ -1,13 +1,10 @@
-package rars.venus.editors.rsyntaxtextarea;
+package rars.venus.editors.rsyntaxtextarea
 
-import org.fife.ui.rsyntaxtextarea.folding.FoldType;
+import org.fife.ui.rsyntaxtextarea.folding.FoldType
 
-public final class RVFoldType implements FoldType {
-    public static final int REGION = FoldType.FOLD_TYPE_USER_DEFINED_MIN + 1;
-    public static final int LABEL = FoldType.FOLD_TYPE_USER_DEFINED_MIN + 2;
-    public static final int INSTRUCTION_BLOCK = FoldType.FOLD_TYPE_USER_DEFINED_MIN + 3;
-    public static final int MACRO = FoldType.FOLD_TYPE_USER_DEFINED_MIN + 4;
-
-    private RVFoldType() {
-    }
+object RVFoldType : FoldType {
+    const val REGION: Int = FoldType.FOLD_TYPE_USER_DEFINED_MIN + 1
+    const val LABEL: Int = FoldType.FOLD_TYPE_USER_DEFINED_MIN + 2
+    const val INSTRUCTION_BLOCK: Int = FoldType.FOLD_TYPE_USER_DEFINED_MIN + 3
+    const val MACRO: Int = FoldType.FOLD_TYPE_USER_DEFINED_MIN + 4
 }

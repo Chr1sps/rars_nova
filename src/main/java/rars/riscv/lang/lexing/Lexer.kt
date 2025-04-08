@@ -1,8 +1,7 @@
-package rars.riscv.lang.lexing;
+package rars.riscv.lang.lexing
 
-import javax.swing.text.Segment;
+import javax.swing.text.Segment
 
-@FunctionalInterface
-public interface Lexer<T, P extends TokensProducer<T>> {
-    T getTokensList(Segment text, int initialTokenType, int lineOffset, P producer);
+fun interface Lexer<T : Any?, P : TokensProducer<T>> {
+    fun getTokensList(text: Segment, initialTokenType: Int, lineOffset: Int, producer: P): T
 }

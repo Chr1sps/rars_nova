@@ -14,35 +14,35 @@ class BaseStyleSettingsController(
                 color = parentController.settingsTheme.backgroundColor
                 addChangeListener {
                     parentController.settingsTheme.backgroundColor = color
-                    textArea.setBackground(parentController.settingsTheme.backgroundColor)
+                    textArea.background = parentController.settingsTheme.backgroundColor
                 }
             }
             foregroundColorButton.apply {
                 color = parentController.settingsTheme.foregroundColor
                 addChangeListener {
                     parentController.settingsTheme.foregroundColor = color
-                    textArea.setForeground(parentController.settingsTheme.foregroundColor)
+                    textArea.foreground = parentController.settingsTheme.foregroundColor
                 }
             }
             textSelectionColorButton.apply {
                 color = parentController.settingsTheme.selectionColor
                 addChangeListener {
                     parentController.settingsTheme.selectionColor = color
-                    textArea.setSelectionColor(parentController.settingsTheme.selectionColor)
+                    textArea.selectionColor = parentController.settingsTheme.selectionColor
                 }
             }
             caretColorButton.apply {
                 color = parentController.settingsTheme.caretColor
                 addChangeListener {
                     parentController.settingsTheme.caretColor = color
-                    textArea.setCaretColor(parentController.settingsTheme.caretColor)
+                    textArea.caretColor = parentController.settingsTheme.caretColor
                 }
             }
             lineHighlightColorButton.apply {
                 color = parentController.settingsTheme.lineHighlightColor
                 addChangeListener {
                     parentController.settingsTheme.lineHighlightColor = color
-                    textArea.setLineHighlightColor(parentController.settingsTheme.lineHighlightColor)
+                    textArea.lineHighlightColor = parentController.settingsTheme.lineHighlightColor
                 }
             }
         }

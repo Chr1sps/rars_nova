@@ -1,42 +1,34 @@
-package rars.venus.editors.rsyntaxtextarea;
+package rars.venus.editors.rsyntaxtextarea
 
-import org.fife.ui.rsyntaxtextarea.Style;
-import org.jetbrains.annotations.NotNull;
-import rars.riscv.lang.lexing.RVTokenType;
-import rars.venus.editors.TokenStyle;
+import org.fife.ui.rsyntaxtextarea.Style
+import rars.riscv.lang.lexing.RVTokenType
+import rars.util.applyStyle
+import rars.venus.editors.TokenStyle
+import rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue
+import java.awt.Font
 
-import java.awt.*;
-import java.util.Map;
-
-import static rars.util.UtilsKt.applyStyle;
-import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
-
-public final class RSTASchemeConverter {
-    private RSTASchemeConverter() {
-    }
-
-    private static @NotNull Style convertStyle(final @NotNull TokenStyle style, final @NotNull Font baseFont) {
-        final var result = new Style();
-        result.foreground = style.foreground();
-        result.background = style.background();
-        if (result.font == null) {
-            result.font = baseFont;
+object RSTASchemeConverter {
+    private fun convertStyle(style: TokenStyle, baseFont: Font): Style {
+        return Style().apply {
+            foreground = style.foreground
+            background = style.background
+            if (font == null) {
+                font = baseFont
+            }
+            font = font.applyStyle(style)
+            underline = style.isUnderline
         }
-        result.font = applyStyle(result.font, style);
-        result.underline = style.isUnderline();
-        return result;
     }
 
-    public static @NotNull RVSyntaxScheme convert(
-        final @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles,
-        final @NotNull Font baseFont
-    ) {
-        final var result = new RVSyntaxScheme();
-        tokenStyles.forEach((key, value) -> {
-            final var newKey = tokenValue(key);
-            final var convertedStyle = convertStyle(value, baseFont);
-            result.setStyle(newKey, convertedStyle);
-        });
-        return result;
+    @JvmStatic
+    fun convert(
+        tokenStyles: MutableMap<RVTokenType, TokenStyle>,
+        baseFont: Font
+    ): RVSyntaxScheme = RVSyntaxScheme().apply {
+        tokenStyles.forEach { (key, value) ->
+            val newKey = key.tokenValue()
+            val convertedStyle = convertStyle(value, baseFont)
+            setStyle(newKey, convertedStyle)
+        }
     }
 }

@@ -8,7 +8,7 @@ import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
 import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TextEditingArea.FindReplaceResult;
-import rars.venus.editors.TextEditingAreaFactoryKt;
+import rars.venus.editors.TextEditingAreaKt;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -47,15 +47,13 @@ public final class EditPane extends JPanel {
         this.fileStatus = new FileStatus();
 
         final var editorThemeSettings = allSettings.editorThemeSettings;
-        this.sourceCode = TextEditingAreaFactoryKt.createTextEditingArea(
+        this.sourceCode = TextEditingAreaKt.createTextEditingArea(
             allSettings
         );
 
         this.sourceCode.setTheme(editorThemeSettings.getCurrentTheme().toEditorTheme());
         editorThemeSettings.onChangeListenerHook.subscribe(ignored -> {
-            this.sourceCode.setTheme(
-                editorThemeSettings.getCurrentTheme().toEditorTheme()
-            );
+            this.sourceCode.setTheme(editorThemeSettings.getCurrentTheme().toEditorTheme());
             return Unit.INSTANCE;
         });
 

@@ -63,8 +63,10 @@ public final class OperandUtils {
         return instrMatches.getFirst();
     }
 
-    // Simply check to see if numbers of operands are correct and generate error
-    // message if not.
+    /**
+     * Simply check to see if numbers of operands are correct and generate error
+     * message if not.
+     */
     private static boolean numOperandsCheck(
         final @NotNull TokenList cand, final @NotNull Instruction spec,
         final @NotNull ErrorList errors

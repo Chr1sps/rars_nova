@@ -20,11 +20,11 @@ internal fun Preferences.putTokenStyle(
     style: TokenStyle,
     commonPrefix: String
 ) {
-    this.putNullableColor("$commonPrefix$key$FOREGROUND", style.foreground)
-    this.putNullableColor("$commonPrefix$key$BACKGROUND", style.background)
-    this.putBoolean("$commonPrefix$key$BOLD", style.isBold)
-    this.putBoolean("$commonPrefix$key$ITALIC", style.isItalic)
-    this.putBoolean("$commonPrefix$key$UNDERLINE", style.isUnderline)
+    putNullableColor("$commonPrefix$key$FOREGROUND", style.foreground)
+    putNullableColor("$commonPrefix$key$BACKGROUND", style.background)
+    putBoolean("$commonPrefix$key$BOLD", style.isBold)
+    putBoolean("$commonPrefix$key$ITALIC", style.isItalic)
+    putBoolean("$commonPrefix$key$UNDERLINE", style.isUnderline)
 }
 
 /**
@@ -33,11 +33,11 @@ internal fun Preferences.putTokenStyle(
  */
 internal fun Preferences.putNullableColor(key: String, value: Color?) {
     val valueString: String = value?.toHexString() ?: "null"
-    this.put(key, valueString)
+    put(key, valueString)
 }
 
 internal fun Preferences.putColor(key: String, value: Color) {
-    this.put(key, value.toHexString())
+    put(key, value.toHexString())
 }
 
 // endregion Writing methods
@@ -50,18 +50,18 @@ internal fun Preferences.getTokenStyle(
     commonPrefix: String,
     logger: Logger
 ): TokenStyle {
-    val foreground = this.getNullableColor("$commonPrefix$key$FOREGROUND", defaultStyle.foreground, logger)
-    val background = this.getNullableColor("$commonPrefix$key$BACKGROUND", defaultStyle.background, logger)
-    val isBold = this.getBoolean("$commonPrefix$key$BOLD", defaultStyle.isBold)
-    val isItalic = this.getBoolean("$commonPrefix$key$ITALIC", defaultStyle.isItalic)
-    val isUnderline = this.getBoolean("$commonPrefix$key$UNDERLINE", defaultStyle.isUnderline)
+    val foreground = getNullableColor("$commonPrefix$key$FOREGROUND", defaultStyle.foreground, logger)
+    val background = getNullableColor("$commonPrefix$key$BACKGROUND", defaultStyle.background, logger)
+    val isBold = getBoolean("$commonPrefix$key$BOLD", defaultStyle.isBold)
+    val isItalic = getBoolean("$commonPrefix$key$ITALIC", defaultStyle.isItalic)
+    val isUnderline = getBoolean("$commonPrefix$key$UNDERLINE", defaultStyle.isUnderline)
     return TokenStyle(foreground, background, isBold, isItalic, isUnderline)
 }
 
 internal fun Preferences.getColor(
     key: String, defaultValue: Color, logger: Logger
 ): Color {
-    val value = this.get(key, null)
+    val value = get(key, null)
     return if (value == null) {
         defaultValue
     } else try {
@@ -77,7 +77,7 @@ internal fun Preferences.getNullableColor(
     defaultValue: Color?,
     logger: Logger
 ): Color? {
-    val value = this.get(key, null)
+    val value = get(key, null)
     if (value == null) {
         return defaultValue
     } else if (value == "null") {

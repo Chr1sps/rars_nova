@@ -1,74 +1,49 @@
-package rars.riscv.lang.lexing;
+package rars.riscv.lang.lexing
 
-import org.jetbrains.annotations.NotNull;
-import rars.ErrorList;
-import rars.ErrorMessage;
-import rars.RISCVProgram;
-import rars.riscv.lang.Position;
+import rars.ErrorList
+import rars.ErrorMessage
+import rars.RISCVProgram
+import rars.riscv.lang.Position
+import javax.swing.text.Segment
 
-import javax.swing.text.Segment;
-import java.util.ArrayList;
-import java.util.List;
+class RVTokensProducer @JvmOverloads constructor(
+    private val program: RISCVProgram,
+    private val errorList: ErrorList,
+    private val lexer: Lexer<TokenizedLine, RVTokensProducer> = RVLexer<TokenizedLine, RVTokensProducer>(),
+) : TokensProducer<TokenizedLine> {
+    private var lineNum = 0
+    private var result = mutableListOf<RVToken>()
 
-public class RVTokensProducer implements TokensProducer<TokenizedLine> {
-    private final Lexer<TokenizedLine, RVTokensProducer> lexer;
-    private final @NotNull RISCVProgram program;
-    private final @NotNull ErrorList errorList;
-    private @NotNull ArrayList<@NotNull RVToken> result;
-    private int lineNum;
+    override fun getEmptyResult(): TokenizedLine = TokenizedLine(emptyList(), lineNum)
 
-    public RVTokensProducer(
-        final @NotNull Lexer<TokenizedLine, RVTokensProducer> lexer,
-        final @NotNull RISCVProgram program,
-        final @NotNull ErrorList errorList
+    override fun getTokenList(
+        text: Segment, initialTokenType: Int, lineOffset: Int,
+        lineNum: Int
+    ): TokenizedLine {
+        this.result = ArrayList<RVToken>()
+        this.lineNum = lineNum
+        return lexer.getTokensList(text, initialTokenType, lineOffset, this)
+    }
+
+    override fun addToken(
+        array: CharArray, start: Int, end: Int, tokenType: RVTokenType,
+        startOffset: Int
     ) {
-        this.lexer = lexer;
-        this.program = program;
-        this.errorList = errorList;
-        this.result = new ArrayList<>();
+        val position = Position(lineNum, start, startOffset)
+        val substring = String(array, start, end - start)
+        val newToken = RVToken(position, tokenType, substring)
+        result.add(newToken)
     }
 
-    public RVTokensProducer(
-        final @NotNull RISCVProgram program,
-        final @NotNull ErrorList errorList
+    override fun addErrorToken(
+        array: CharArray,
+        segmentPos: Int,
+        offset: Int,
+        notice: String
     ) {
-        this(new RVLexer<>(), program, errorList);
+        this.errorList.add(ErrorMessage.error(program, lineNum, offset, notice))
+        super.addErrorToken(array, segmentPos, offset, notice)
     }
 
-    @Override
-    public @NotNull TokenizedLine getEmptyResult() {
-        return new TokenizedLine(List.of(), lineNum);
-    }
-
-    @Override
-    public TokenizedLine getTokenList(
-        final Segment text, final int initialTokenType, final int lineOffset,
-        final int lineNum
-    ) {
-        this.result = new ArrayList<>();
-        this.lineNum = lineNum;
-        return lexer.getTokensList(text, initialTokenType, lineOffset, this);
-    }
-
-    @Override
-    public void addToken(
-        final char @NotNull [] array, final int start, final int end, final RVTokenType tokenType,
-        final int startOffset
-    ) {
-        final var position = new Position(this.lineNum, start, startOffset);
-        final var substring = new String(array, start, end - start);
-        final var newToken = new RVToken(position, tokenType, substring);
-        result.add(newToken);
-    }
-
-    @Override
-    public void addErrorToken(final char[] array, final int segmentPos, final int offset, final String notice) {
-        this.errorList.add(ErrorMessage.error(this.program, this.lineNum, offset, notice));
-        TokensProducer.super.addErrorToken(array, segmentPos, offset, notice);
-    }
-
-    @Override
-    public @NotNull TokenizedLine getResult() {
-        return new TokenizedLine(result, lineNum);
-    }
+    override fun getResult(): TokenizedLine = TokenizedLine(result, lineNum)
 }

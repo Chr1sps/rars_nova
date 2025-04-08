@@ -1,7 +1,6 @@
-package rars.riscv.lang.lexing;
+package rars.riscv.lang.lexing
 
-import rars.riscv.lang.Position;
+import rars.riscv.lang.Position
 
-public record RVToken(Position position, RVTokenType type, String text) {
-
-}
+@JvmRecord
+data class RVToken(val position: Position, val type: RVTokenType, val text: String)

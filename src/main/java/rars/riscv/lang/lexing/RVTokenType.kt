@@ -1,6 +1,6 @@
-package rars.riscv.lang.lexing;
+package rars.riscv.lang.lexing
 
-public enum RVTokenType {
+enum class RVTokenType {
     NULL,
     WHITESPACE,
     ERROR,
@@ -20,16 +20,16 @@ public enum RVTokenType {
     UNFINISHED_STRING,
     UNFINISHED_CHAR,
 
-    LABEL, // .ident
+    LABEL,  // .ident
     INSTRUCTION,
 
-    PLUS, // '+'
-    MINUS, // '-'
-    LEFT_PAREN, // '('
-    RIGHT_PAREN, // ')'
-    COMMA, // ','
-    ROUNDING_MODE, // "rne", "rtz", "rdn", "rup", "rmm", "dyn"
-    MACRO_PARAMETER, // %ident, $ident
-    HI, // %hi
+    PLUS,  // '+'
+    MINUS,  // '-'
+    LEFT_PAREN,  // '('
+    RIGHT_PAREN,  // ')'
+    COMMA,  // ','
+    ROUNDING_MODE,  // "rne", "rtz", "rdn", "rup", "rmm", "dyn"
+    MACRO_PARAMETER,  // %ident, $ident
+    HI,  // %hi
     LO // %lo
 }

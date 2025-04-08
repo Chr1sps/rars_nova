@@ -1,44 +1,30 @@
-package rars.venus.editors.rsyntaxtextarea;
+package rars.venus.editors.rsyntaxtextarea
 
-import org.fife.ui.rsyntaxtextarea.Token;
-import org.jetbrains.annotations.NotNull;
-import rars.riscv.lang.lexing.RVTokenType;
+import org.fife.ui.rsyntaxtextarea.Token
+import rars.riscv.lang.lexing.RVTokenType
 
-import java.util.Map;
+object RSTAUtils {
+    private val TOKEN_VALUE_MAP = mapOf(
+        RVTokenType.NULL to Token.NULL,
+        RVTokenType.WHITESPACE to Token.WHITESPACE,
+        RVTokenType.COMMENT to Token.COMMENT_EOL,
+        RVTokenType.REGISTER_NAME to Token.VARIABLE,
+        RVTokenType.INTEGER to Token.LITERAL_NUMBER_DECIMAL_INT,
+        RVTokenType.FLOATING to Token.LITERAL_NUMBER_FLOAT,
+        RVTokenType.IDENTIFIER to Token.IDENTIFIER,
+        RVTokenType.STRING to Token.LITERAL_STRING_DOUBLE_QUOTE,
+        RVTokenType.CHAR to Token.LITERAL_CHAR,
+        RVTokenType.LABEL to Token.PREPROCESSOR,
+        RVTokenType.INSTRUCTION to Token.RESERVED_WORD,
+        RVTokenType.ERROR to Token.ERROR_IDENTIFIER,
+        RVTokenType.UNFINISHED_STRING to Token.ERROR_STRING_DOUBLE,
+        RVTokenType.UNFINISHED_CHAR to Token.ERROR_CHAR,
+        RVTokenType.OPERATOR to Token.OPERATOR
+    )
 
-import static java.util.Map.entry;
-import static java.util.Map.ofEntries;
+    private fun Int.extendedValue(): Int = this + Token.DEFAULT_NUM_TOKEN_TYPES
 
-public final class RSTAUtils {
-    private static final Map<RVTokenType, Integer> TOKEN_VALUE_MAP = ofEntries(
-        entry(RVTokenType.NULL, Token.NULL),
-        entry(RVTokenType.WHITESPACE, Token.WHITESPACE),
-        entry(RVTokenType.COMMENT, Token.COMMENT_EOL),
-        entry(RVTokenType.REGISTER_NAME, Token.VARIABLE),
-        entry(RVTokenType.INTEGER, Token.LITERAL_NUMBER_DECIMAL_INT),
-        entry(RVTokenType.FLOATING, Token.LITERAL_NUMBER_FLOAT),
-        entry(RVTokenType.IDENTIFIER, Token.IDENTIFIER),
-        entry(RVTokenType.STRING, Token.LITERAL_STRING_DOUBLE_QUOTE),
-        entry(RVTokenType.CHAR, Token.LITERAL_CHAR),
-        entry(RVTokenType.LABEL, Token.PREPROCESSOR),
-        entry(RVTokenType.INSTRUCTION, Token.RESERVED_WORD),
-        entry(RVTokenType.ERROR, Token.ERROR_IDENTIFIER),
-        entry(RVTokenType.UNFINISHED_STRING, Token.ERROR_STRING_DOUBLE),
-        entry(RVTokenType.UNFINISHED_CHAR, Token.ERROR_CHAR),
-        entry(RVTokenType.OPERATOR, Token.OPERATOR)
-    );
-
-    private RSTAUtils() {
-    }
-
-    private static int extendedValue(final int value) {
-        return value + Token.DEFAULT_NUM_TOKEN_TYPES;
-    }
-
-    public static int tokenValue(final @NotNull RVTokenType type) {
-        if (TOKEN_VALUE_MAP.containsKey(type)) {
-            return TOKEN_VALUE_MAP.get(type);
-        }
-        return extendedValue(type.ordinal());
-    }
+    @JvmStatic
+    fun RVTokenType.tokenValue(): Int = this@RSTAUtils.TOKEN_VALUE_MAP[this]
+        ?: ordinal.extendedValue()
 }

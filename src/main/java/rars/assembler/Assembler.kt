@@ -85,7 +85,7 @@ class Assembler {
         extendedAssemblerEnabled: Boolean,
         warningsAreErrors: Boolean
     ): Either<AssemblyError, List<ProgramStatement>> = either {
-        check(!tokenizedProgramFiles.isEmpty()) { "No source code to assemble." }
+        check(tokenizedProgramFiles.isNotEmpty()) { "No source code to assemble." }
         val memoryConfiguration = Globals.MEMORY_INSTANCE.memoryConfiguration
         this@Assembler.textAddress = memoryConfiguration.textSegmentBaseAddress
         this@Assembler.dataAddress = memoryConfiguration.dataBaseAddress
@@ -446,7 +446,7 @@ class Assembler {
                     // contains the modified source.
                     // Put it into the line to be parsed, so it will be displayed properly in text
                     // segment display. 
-                    if (!tokenList2.processedLine.isEmpty()) {
+                    if (tokenList2.processedLine.isNotEmpty()) {
                         substituted = tokenList2.processedLine
                     }
 
@@ -520,10 +520,7 @@ class Assembler {
         // is not
         // yet implemented.
         if (!this.inDataSegment) {
-            val instrMatches = this.matchInstruction(token)
-            if (instrMatches == null) {
-                return result
-            }
+            val instrMatches = this.matchInstruction(token) ?: return result
             // OK, we've got an operator match, let's check the operands.
             val instruction = OperandUtils.bestOperandMatch(tokens, instrMatches)
             // Here's the place to flag use of extended (pseudo) instructions
@@ -1156,12 +1153,9 @@ class Assembler {
                                 'f' -> theChar = '\u000c'
                                 '0' -> theChar = '\u0000'
                                 'u' -> {
-                                    val codePoint = ""
+                                    val codePoint = quote.substring(j + 1, j + 5)
                                     try {
-                                        val codePoint = quote.substring(
-                                            j + 1,
-                                            j + 5
-                                        ) // get the UTF-8 codepoint following the
+                                        // get the UTF-8 codepoint following the
                                         // unicode escape sequence
                                         theChar = Character.toChars(codePoint.toInt(16))[0] // converts the
                                         // codepoint to
@@ -1178,7 +1172,7 @@ class Assembler {
                                             "illegal unicode escape: \"\\u$codePoint\""
                                         )
                                     }
-                                    j = j + 4 // skip past the codepoint for next iteration
+                                    j += 4 // skip past the codepoint for next iteration
                                 }
                             }
                         }

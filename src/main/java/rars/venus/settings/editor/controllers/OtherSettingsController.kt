@@ -20,14 +20,14 @@ class OtherSettingsController(
                 value = caretBlinkRate
                 addChangeListener {
                     caretBlinkRate = value as Int
-                    textArea.setCaretBlinkRate(caretBlinkRate)
+                    textArea.caretBlinkRate = caretBlinkRate
                 }
             }
             tabSizeSpinner.apply {
                 value = editorTabSize
                 addChangeListener {
                     editorTabSize = value as Int
-                    textArea.setTabSize(editorTabSize)
+                    textArea.tabSize = editorTabSize
                 }
             }
         }

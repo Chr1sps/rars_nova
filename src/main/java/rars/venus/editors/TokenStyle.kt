@@ -1,43 +1,45 @@
-package rars.venus.editors;
+package rars.venus.editors
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.awt.Color
 
-import java.awt.*;
+@JvmRecord
+data class TokenStyle(
+    val foreground: Color?,
+    val background: Color?,
+    val isBold: Boolean,
+    val isItalic: Boolean,
+    val isUnderline: Boolean
+) : Cloneable {
+    override fun clone(): TokenStyle = super.clone() as TokenStyle
 
-public record TokenStyle(
-    @Nullable Color foreground,
-    @Nullable Color background,
-    boolean isBold,
-    boolean isItalic,
-    boolean isUnderline
-) implements Cloneable {
-    public static final Color DEFAULT_FOREGROUND = null;
-    public static final Color DEFAULT_BACKGROUND = null;
+    companion object {
+        val DEFAULT_FOREGROUND: Color? = null
+        val DEFAULT_BACKGROUND: Color? = null
 
-    public static final TokenStyle DEFAULT = new TokenStyle(
-        DEFAULT_FOREGROUND, DEFAULT_BACKGROUND, false, false,
-        false
-    );
+        @JvmField
+        val DEFAULT: TokenStyle = TokenStyle(
+            DEFAULT_FOREGROUND, DEFAULT_BACKGROUND,
+            isBold = false, isItalic = false, isUnderline = false
+        )
 
-    public static @NotNull TokenStyle plain(final @NotNull Color foreground) {
-        return new TokenStyle(foreground, DEFAULT_BACKGROUND, false, false, false);
-    }
+        fun plain(foreground: Color): TokenStyle = TokenStyle(
+            foreground, DEFAULT_BACKGROUND,
+            isBold = false, isItalic = false, isUnderline = false
+        )
 
-    public static @NotNull TokenStyle bold(final @NotNull Color foreground) {
-        return new TokenStyle(foreground, DEFAULT_BACKGROUND, true, false, false);
-    }
+        fun bold(foreground: Color): TokenStyle = TokenStyle(
+            foreground, DEFAULT_BACKGROUND,
+            isBold = true, isItalic = false, isUnderline = false
+        )
 
-    public static @NotNull TokenStyle italic(final @NotNull Color foreground) {
-        return new TokenStyle(foreground, DEFAULT_BACKGROUND, false, true, false);
-    }
+        fun italic(foreground: Color): TokenStyle = TokenStyle(
+            foreground, DEFAULT_BACKGROUND,
+            isBold = false, isItalic = true, isUnderline = false
+        )
 
-    public static @NotNull TokenStyle underline(final @NotNull Color foreground) {
-        return new TokenStyle(foreground, DEFAULT_BACKGROUND, false, false, true);
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
+        fun underline(foreground: Color): TokenStyle = TokenStyle(
+            foreground, DEFAULT_BACKGROUND,
+            isBold = false, isItalic = false, isUnderline = true
+        )
     }
 }
