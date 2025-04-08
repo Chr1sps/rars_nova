@@ -22,11 +22,11 @@ object RSTASchemeConverter {
 
     @JvmStatic
     fun convert(
-        tokenStyles: MutableMap<RVTokenType, TokenStyle>,
+        tokenStyles: Map<RVTokenType, TokenStyle>,
         baseFont: Font
     ): RVSyntaxScheme = RVSyntaxScheme().apply {
         tokenStyles.forEach { (key, value) ->
-            val newKey = key.tokenValue()
+            val newKey = key.tokenValue
             val convertedStyle = convertStyle(value, baseFont)
             setStyle(newKey, convertedStyle)
         }

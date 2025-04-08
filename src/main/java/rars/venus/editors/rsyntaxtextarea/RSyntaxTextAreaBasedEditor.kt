@@ -1,367 +1,261 @@
-package rars.venus.editors.rsyntaxtextarea;
+package rars.venus.editors.rsyntaxtextarea
 
-import kotlin.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
-import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
-import org.fife.ui.rtextarea.Gutter;
-import org.fife.ui.rtextarea.RTextScrollPane;
-import org.fife.ui.rtextarea.SearchContext;
-import org.fife.ui.rtextarea.SearchEngine;
-import org.jetbrains.annotations.NotNull;
-import rars.riscv.lang.lexing.RVTokenType;
-import rars.settings.FontSettings;
-import rars.venus.editors.EditorTheme;
-import rars.venus.editors.TextEditingArea;
-import rars.venus.editors.TokenStyle;
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
+import org.fife.ui.rsyntaxtextarea.TokenMakerFactory
+import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager
+import org.fife.ui.rtextarea.Gutter
+import org.fife.ui.rtextarea.RTextScrollPane
+import org.fife.ui.rtextarea.SearchContext
+import org.fife.ui.rtextarea.SearchEngine
+import rars.riscv.lang.lexing.RVTokenType
+import rars.settings.FontSettings
+import rars.venus.editors.EditorTheme
+import rars.venus.editors.TextEditingArea
+import rars.venus.editors.TextEditingArea.FindReplaceResult
+import rars.venus.editors.TokenStyle
+import rars.venus.editors.rsyntaxtextarea.RSTASchemeConverter.convert
+import java.awt.Color
+import java.awt.Component
+import java.awt.Font
+import java.awt.font.TextAttribute
+import javax.swing.UIManager
+import javax.swing.text.BadLocationException
+import javax.swing.text.Caret
+import javax.swing.text.Document
 
-import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Caret;
-import javax.swing.text.Document;
-import java.awt.*;
-import java.awt.font.TextAttribute;
-import java.util.Map;
+class RSyntaxTextAreaBasedEditor(
+    theme: EditorTheme,
+    fontSettings: FontSettings
+) : TextEditingArea {
+    private val textArea: RSyntaxTextArea = RSyntaxTextArea()
+    private val scrollPane: RTextScrollPane = RTextScrollPane(textArea)
+    private val gutter: Gutter = scrollPane.gutter
 
-public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
-    private static final @NotNull String SYNTAX_STYLE_RISCV = "text/riscv";
-    private static final @NotNull Logger LOGGER = LogManager.getLogger(RSyntaxTextAreaBasedEditor.class);
-    private static final Map<TextAttribute, Object> TEXT_ATTRIBUTES = Map.of(
-        TextAttribute.KERNING, TextAttribute.KERNING_ON
-    );
+    override var font: Font
+        get() = textArea.font
+        set(font) {
+            val derived: Font = font.deriveFont(TEXT_ATTRIBUTES)
+            textArea.font = derived
+            gutter.lineNumberFont = derived
+        }
 
-    static {
-        FoldParserManager.get().addFoldParserMapping(SYNTAX_STYLE_RISCV, new RVFoldParser());
-        final var factory = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
-        factory.putMapping(SYNTAX_STYLE_RISCV, RSTATokensProducer.class.getName());
+    override var theme: EditorTheme = theme
+        set(newTheme) {
+            field = newTheme
+            foreground = newTheme.foregroundColor
+            background = newTheme.backgroundColor
+            selectionColor = newTheme.selectionColor
+            caretColor = newTheme.caretColor
+            lineHighlightColor = newTheme.lineHighlightColor
+            applyColorScheme(newTheme.tokenStyles)
+        }
+
+    // Important: all delegated properties *must* be declared above the `init`
+    // block, otherwise NPEs will occur.
+
+    override var caretColor: Color by textArea::caretColor
+
+    override var lineHighlightColor: Color by textArea::currentLineHighlightColor
+
+    override val document: Document by textArea::document
+
+    override val caret: Caret by textArea::caret
+
+    override var lineHighlightEnabled: Boolean by textArea::highlightCurrentLine
+
+    override var caretBlinkRate: Int by textArea.caret::blinkRate
+
+    override var tabSize: Int by textArea::tabSize
+
+    override var text: String by textArea::text
+
+    init {
+        this.font = fontSettings.currentFont
+        this.theme = theme
+        this.textArea.syntaxEditingStyle = SYNTAX_STYLE_RISCV
+        this.textArea.isCodeFoldingEnabled = true
+        this.textArea.markOccurrences = true
+        this.textArea.markOccurrencesDelay = 1
     }
 
-    private final @NotNull RSyntaxTextArea textArea;
-    private final @NotNull RTextScrollPane scrollPane;
-    private final @NotNull Gutter gutter;
-    private @NotNull EditorTheme theme;
-    private @NotNull Font currentFont;
+    override fun copy() = textArea.copy()
 
-    public RSyntaxTextAreaBasedEditor(
-        final @NotNull EditorTheme theme,
-        final @NotNull FontSettings fontSettings
-    ) {
-        this.textArea = new RSyntaxTextArea();
-        this.scrollPane = new RTextScrollPane(textArea);
-        this.gutter = scrollPane.getGutter();
-        this.currentFont = fontSettings.getCurrentFont();
-        this.setFont(this.currentFont);
-        this.setTheme(theme);
-        this.textArea.setSyntaxEditingStyle(SYNTAX_STYLE_RISCV);
-        this.textArea.setCodeFoldingEnabled(true);
-        this.textArea.setMarkOccurrences(true);
-        this.textArea.setMarkOccurrencesDelay(1);
-    }
+    override fun cut() = textArea.cut()
 
-    @Override
-    public void copy() {
-        textArea.copy();
-    }
+    override fun doFindText(find: String, caseSensitive: Boolean): FindReplaceResult {
+        val context = SearchContext().apply {
+            markAll = true
+            searchFor = find
+            matchCase = caseSensitive
+            searchForward = true
+        }
 
-    @Override
-    public void cut() {
-        textArea.cut();
-    }
-
-    @Override
-    public @NotNull FindReplaceResult doFindText(final @NotNull String find, final boolean caseSensitive) {
-        final var context = new SearchContext();
-        context.setSearchFor(find);
-        context.setMatchCase(caseSensitive);
-        context.setSearchForward(true);
-        context.setMarkAll(false);
-
-        final var found = SearchEngine.find(textArea, context);
-        if (found.wasFound()) {
-            return FindReplaceResult.TEXT_FOUND;
+        val found = SearchEngine.find(textArea, context)
+        return if (found.wasFound()) {
+            FindReplaceResult.TEXT_FOUND
         } else {
-            return FindReplaceResult.TEXT_NOT_FOUND;
+            FindReplaceResult.TEXT_NOT_FOUND
         }
     }
 
-    @Override
-    public @NotNull FindReplaceResult doReplace(
-        final @NotNull String find,
-        final @NotNull String replace,
-        final boolean caseSensitive
-    ) {
-        final var context = new SearchContext();
-        context.setSearchFor(find);
-        context.setMatchCase(caseSensitive);
-        context.setSearchForward(true);
+    override fun doReplace(
+        find: String,
+        replace: String,
+        caseSensitive: Boolean
+    ): FindReplaceResult {
+        val context = SearchContext().apply {
+            searchFor = find
+            matchCase = caseSensitive
+            searchForward = true
+        }
 
-        final var found = SearchEngine.replace(textArea, context);
-        if (found.wasFound()) {
-            return FindReplaceResult.TEXT_REPLACED_FOUND_NEXT;
+        val found = SearchEngine.replace(textArea, context)
+        return if (found.wasFound()) {
+            FindReplaceResult.TEXT_REPLACED_FOUND_NEXT
         } else {
-            return FindReplaceResult.TEXT_REPLACED_NOT_FOUND_NEXT;
+            FindReplaceResult.TEXT_REPLACED_NOT_FOUND_NEXT
         }
     }
 
-    @Override
-    public int doReplaceAll(final @NotNull String find, final @NotNull String replace, final boolean caseSensitive) {
-        final var context = new SearchContext();
-        context.setSearchFor(find);
-        context.setReplaceWith(replace);
-        context.setMatchCase(caseSensitive);
-        final var result = SearchEngine.replaceAll(textArea, context);
-        return result.getCount();
+    override fun doReplaceAll(find: String, replace: String, caseSensitive: Boolean): Int {
+        val context = SearchContext().apply {
+            searchFor = find
+            replaceWith = replace
+            matchCase = caseSensitive
+        }
+        val result = SearchEngine.replaceAll(textArea, context)
+        return result.count
     }
 
-    @Override
-    public @NotNull Document getDocument() {
-        return textArea.getDocument();
+    override fun select(selectionStart: Int, selectionEnd: Int) {
+        textArea.select(selectionStart, selectionEnd)
+        textArea.grabFocus()
     }
 
-    @Override
-    public void select(final int selectionStart, final int selectionEnd) {
-        textArea.select(selectionStart, selectionEnd);
-        textArea.grabFocus();
-    }
-
-    @Override
-    public void selectLine(final int lineNumber) {
+    override fun selectLine(lineNumber: Int) {
         try {
-            final var start = textArea.getLineStartOffset(lineNumber);
-            final int end = textArea.getLineEndOffset(lineNumber);
-            textArea.select(start, end);
-            textArea.grabFocus();
-        } catch (final BadLocationException e) {
-            LOGGER.warn("Failed to select line", e);
+            val start = textArea.getLineStartOffset(lineNumber)
+            val end = textArea.getLineEndOffset(lineNumber)
+            textArea.select(start, end)
+            textArea.grabFocus()
+        } catch (e: BadLocationException) {
+            LOGGER.warn("Failed to select line", e)
         }
     }
 
-    @Override
-    public @NotNull String getText() {
-        return textArea.getText();
+
+    override fun paste() = textArea.paste()
+
+    override var isEditable: Boolean
+        get() = textArea.isEditable
+        set(editable) {
+            textArea.isEditable = editable
+        }
+
+    override fun requestFocusInWindow() {
+        textArea.requestFocusInWindow()
     }
 
-    @Override
-    public void setText(final @NotNull String text) {
-        textArea.setText(text);
+    override var foreground: Color
+        get() = textArea.foreground
+        set(color) {
+            this.textArea.foreground = color
+            this.gutter.foreground = color
+            this.gutter.foldIndicatorForeground = color
+            this.gutter.foldIndicatorArmedForeground = color
+            this.gutter.lineNumberColor = theme.foregroundColor
+        }
+
+    override var background: Color
+        get() = textArea.background
+        set(color) {
+            this.textArea.background = color
+            this.gutter.background = color
+            UIManager.put("ToolTip.background", color)
+        }
+
+    override var selectionColor: Color
+        get() = textArea.selectionColor
+        set(c) {
+            this.textArea.selectionColor = c
+            this.textArea.markOccurrencesColor = c
+        }
+
+
+    override var isEnabled: Boolean
+        get() = textArea.isEnabled
+        set(enabled) {
+            textArea.isEnabled = enabled
+        }
+
+    override fun redo() {
+        textArea.redoLastAction()
     }
 
-    @Override
-    public void paste() {
-        textArea.paste();
-    }
-
-    @Override
-    public boolean isEditable() {
-        return textArea.isEditable();
-    }
-
-    @Override
-    public void setEditable(final boolean editable) {
-        textArea.setEditable(editable);
-    }
-
-    @Override
-    public @NotNull Font getFont() {
-        return textArea.getFont();
-    }
-
-    @Override
-    public void setFont(final @NotNull Font f) {
-        final var derived = f.deriveFont(TEXT_ATTRIBUTES);
-        this.currentFont = derived;
-        textArea.setFont(derived);
-        gutter.setLineNumberFont(derived);
-    }
-
-    @Override
-    public void requestFocusInWindow() {
-        textArea.requestFocusInWindow();
-    }
-
-    @Override
-    public @NotNull Color getForeground() {
-        return textArea.getForeground();
-    }
-
-    @Override
-    public void setForeground(final @NotNull Color c) {
-        this.textArea.setForeground(c);
-        this.gutter.setForeground(c);
-        this.gutter.setFoldIndicatorForeground(c);
-        this.gutter.setFoldIndicatorArmedForeground(c);
-        this.gutter.setLineNumberColor(theme.foregroundColor);
-    }
-
-    @Override
-    public @NotNull Color getBackground() {
-        return textArea.getBackground();
-    }
-
-    @Override
-    public void setBackground(final @NotNull Color color) {
-        this.textArea.setBackground(color);
-        this.gutter.setBackground(color);
-        UIManager.put("ToolTip.background", color);
-    }
-
-    @Override
-    public @NotNull Color getSelectionColor() {
-        return textArea.getSelectionColor();
-    }
-
-    @Override
-    public void setSelectionColor(final @NotNull Color c) {
-        this.textArea.setSelectionColor(c);
-        this.textArea.setMarkOccurrencesColor(c);
-    }
-
-    @Override
-    public @NotNull Color getLineHighlightColor() {
-        return textArea.getCurrentLineHighlightColor();
-    }
-
-    @Override
-    public void setLineHighlightColor(final @NotNull Color c) {
-        textArea.setCurrentLineHighlightColor(c);
-    }
-
-    @Override
-    public @NotNull Color getCaretColor() {
-        return textArea.getCaretColor();
-    }
-
-    @Override
-    public void setCaretColor(final @NotNull Color c) {
-        textArea.setCaretColor(c);
-    }
-
-    @Override
-    public @NotNull Caret getCaret() {
-        return textArea.getCaret();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return textArea.isEnabled();
-    }
-
-    @Override
-    public void setEnabled(final boolean enabled) {
-        textArea.setEnabled(enabled);
-    }
-
-    @Override
-    public void redo() {
-        textArea.redoLastAction();
-    }
-
-    @Override
-    public void setSourceCode(final @NotNull String code, final boolean editable) {
-        textArea.setText(code);
-        textArea.setEditable(editable);
-        setEnabled(editable);
-        textArea.setCaretPosition(0);
-        if (editable) {
-            textArea.requestFocusInWindow();
+    override fun setSourceCode(code: String, editable: Boolean) {
+        isEnabled = editable
+        textArea.apply {
+            text = code
+            isEditable = editable
+            caretPosition = 0
+            if (editable) {
+                requestFocusInWindow()
+            }
         }
     }
 
-    @Override
-    public void undo() {
-        textArea.undoLastAction();
+    override fun undo() {
+        textArea.undoLastAction()
     }
 
-    @Override
-    public void discardAllUndoableEdits() {
-        textArea.discardAllEdits();
+    override fun discardAllUndoableEdits() {
+        textArea.discardAllEdits()
     }
 
-    @Override
-    public boolean getLineHighlightEnabled() {
-        return textArea.getHighlightCurrentLine();
+    override val outerComponent: Component
+        get() = scrollPane
+
+    override fun canUndo(): Boolean = textArea.canUndo()
+
+    override fun canRedo(): Boolean = textArea.canRedo()
+
+    override fun setTokenStyle(type: RVTokenType, style: TokenStyle) {
+        theme.tokenStyles[type] = style
+        applyColorScheme(theme.tokenStyles)
     }
 
-    @Override
-    public void setLineHighlightEnabled(final boolean highlight) {
-        textArea.setHighlightCurrentLine(highlight);
-    }
-
-    @Override
-    public int getCaretBlinkRate() {
-        return textArea.getCaret().getBlinkRate();
-    }
-
-    @Override
-    public void setCaretBlinkRate(final int rate) {
-        this.textArea.getCaret().setBlinkRate(rate);
-    }
-
-    @Override
-    public int getTabSize() {
-        return textArea.getTabSize();
-    }
-
-    @Override
-    public void setTabSize(final int chars) {
-        textArea.setTabSize(chars);
-    }
-
-    @Override
-    public @NotNull Component getOuterComponent() {
-        return scrollPane;
-    }
-
-    @Override
-    public boolean canUndo() {
-        return textArea.canUndo();
-    }
-
-    @Override
-    public boolean canRedo() {
-        return textArea.canRedo();
-    }
-
-    @Override
-    public @NotNull EditorTheme getTheme() {
-        return theme;
-    }
-
-    @Override
-    public void setTheme(final @NotNull EditorTheme theme) {
-        this.theme = theme;
-        this.setForeground(theme.foregroundColor);
-        this.setBackground(theme.backgroundColor);
-        this.setSelectionColor(theme.selectionColor);
-        this.setCaretColor(theme.caretColor);
-        this.setLineHighlightColor(theme.lineHighlightColor);
-        this.applyColorScheme(theme.tokenStyles);
-    }
-
-    @Override
-    public void setTokenStyle(@NotNull final RVTokenType type, @NotNull final TokenStyle style) {
-        this.theme.tokenStyles.put(type, style);
-        this.applyColorScheme(theme.tokenStyles);
-    }
-
-    @Override
-    public @NotNull Pair<@NotNull Integer, @NotNull Integer> getCaretPosition() {
-        final var offset = textArea.getCaretPosition();
-        try {
-            final var line = textArea.getLineOfOffset(offset);
-            final var column = offset - textArea.getLineStartOffset(line);
-            return new Pair<>(line, column);
-        } catch (final BadLocationException e) {
-            LOGGER.error("Failed to get caret position", e);
-            return new Pair<>(0, 0);
+    override val caretPosition: Pair<Int, Int>
+        get() {
+            val offset = textArea.caretPosition
+            try {
+                val line = textArea.getLineOfOffset(offset)
+                val column = offset - textArea.getLineStartOffset(line)
+                return Pair(line, column)
+            } catch (e: BadLocationException) {
+                LOGGER.error("Failed to get caret position", e)
+                return Pair(0, 0)
+            }
         }
+
+    private fun applyColorScheme(tokenStyles: Map<RVTokenType, TokenStyle>) {
+        val converted = convert(tokenStyles, textArea.font)
+        textArea.syntaxScheme = converted
     }
 
-    private void applyColorScheme(final @NotNull Map<@NotNull RVTokenType, @NotNull TokenStyle> tokenStyles) {
-        final var converted = RSTASchemeConverter.convert(tokenStyles, textArea.getFont());
-        this.textArea.setSyntaxScheme(converted);
+    companion object {
+        private const val SYNTAX_STYLE_RISCV = "text/riscv"
+        private val LOGGER: Logger = LogManager.getLogger(RSyntaxTextAreaBasedEditor::class.java)
+        private val TEXT_ATTRIBUTES = mapOf(
+            TextAttribute.KERNING to TextAttribute.KERNING_ON,
+        )
+
+        init {
+            FoldParserManager.get().addFoldParserMapping(SYNTAX_STYLE_RISCV, RVFoldParser)
+            val factory = TokenMakerFactory.getDefaultInstance() as AbstractTokenMakerFactory
+            factory.putMapping(SYNTAX_STYLE_RISCV, RSTATokensProducer::class.java.name)
+        }
     }
 }

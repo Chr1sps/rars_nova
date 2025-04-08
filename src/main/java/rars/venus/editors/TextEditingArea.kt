@@ -77,7 +77,6 @@ interface TextEditingArea {
 
     fun requestFocusInWindow()
 
-
     fun setTokenStyle(type: RVTokenType, style: TokenStyle)
 
     // Used by Find/Replace

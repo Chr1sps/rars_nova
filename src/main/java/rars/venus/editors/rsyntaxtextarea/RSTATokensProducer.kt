@@ -18,7 +18,7 @@ class RSTATokensProducer @JvmOverloads constructor(
         array: CharArray, start: Int, end: Int, tokenType: RVTokenType,
         startOffset: Int
     ) {
-        addToken(array, start, end, tokenType.tokenValue(), startOffset)
+        addToken(array, start, end, tokenType.tokenValue, startOffset)
     }
 
     override fun getResult(): Token = firstToken

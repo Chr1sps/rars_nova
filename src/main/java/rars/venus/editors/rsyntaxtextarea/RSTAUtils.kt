@@ -25,6 +25,7 @@ object RSTAUtils {
     private fun Int.extendedValue(): Int = this + Token.DEFAULT_NUM_TOKEN_TYPES
 
     @JvmStatic
-    fun RVTokenType.tokenValue(): Int = this@RSTAUtils.TOKEN_VALUE_MAP[this]
-        ?: ordinal.extendedValue()
+    val RVTokenType.tokenValue
+        get() = this@RSTAUtils.TOKEN_VALUE_MAP[this]
+            ?: ordinal.extendedValue()
 }
