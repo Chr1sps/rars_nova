@@ -1,37 +1,28 @@
-package rars.util;
+package rars.util
 
-import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension
+import java.awt.Graphics
+import javax.swing.JPanel
 
 /**
  * Class that represents the panel for visualizing and animating memory reference patterns.
  */
-public final class GraphicsPanel extends JPanel {
-    private final Grid grid;
-
-    public GraphicsPanel(final @NotNull Dimension size, final @NotNull Grid grid) {
-        super();
-        this.grid = grid;
-        this.setMinimumSize(size);
-        this.setPreferredSize(size);
-        this.setMaximumSize(size);
+class GraphicsPanel @JvmOverloads constructor(
+    size: Dimension,
+    private val grid: Grid = Grid(size.height, size.width)
+) : JPanel() {
+    init {
+        minimumSize = size
+        preferredSize = size
+        maximumSize = size
     }
 
-    public GraphicsPanel(final @NotNull Dimension size) {
-        this(size, new Grid(size.height, size.width));
-    }
-
-    @Override
-    public void paint(final @NotNull Graphics g) {
-        // override default paint method to assure display updated correctly every time
-        // the panel is repainted.
-        for (int row = 0; row < this.grid.rows; row++) {
-            for (int col = 0; col < this.grid.columns; col++) {
-                final var color = this.grid.grid[row][col];
-                g.setColor(color);
-                g.fillRect(col, grid.rows - row - 1, 1, 1);
+    override fun paint(g: Graphics) {
+        for (row in 0..<grid.rows) {
+            for (col in 0..<grid.columns) {
+                val color = this.grid.grid[row][col]
+                g.color = color
+                g.fillRect(col, grid.rows - row - 1, 1, 1)
             }
         }
     }

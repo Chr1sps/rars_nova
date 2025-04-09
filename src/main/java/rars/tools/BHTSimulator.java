@@ -311,7 +311,7 @@ public final class BHTSimulator extends AbstractTool implements ActionListener {
                         // if current instruction is branch instruction
                         if (stmt.getInstruction() instanceof Branch) {
                             this.handlePreBranchInst(stmt);
-                            this.myLastBranchTaken = ((Branch) stmt.getInstruction()).willBranch.invoke(
+                            this.myLastBranchTaken = ((Branch) stmt.getInstruction()).getWillBranch().invoke(
                                 stmt,
                                 Globals.REGISTER_FILE
                             );

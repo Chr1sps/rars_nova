@@ -5,8 +5,7 @@ import java.awt.Color
 /**
  * Represents grid of colors
  */
-class Grid(@JvmField val rows: Int, @JvmField val columns: Int) {
-    @JvmField
+class Grid(val rows: Int, val columns: Int) {
     val grid = Array<Array<Color>>(rows) {
         Array<Color>(columns) { Color.BLACK }
     }

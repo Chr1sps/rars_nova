@@ -12,7 +12,7 @@ import rars.riscv.hardware.registers.ReadOnlyRegister
 import rars.riscv.hardware.registers.Register
 import rars.settings.OtherSettings.Companion.isBacksteppingEnabled
 
-class CSRegisterFile : RegisterFileBase('_', createRegisters()) {
+class CSRegisterFile : AbstractRegisterFile('_', createRegisters()) {
     val ustatus: Register = this.registers[0]
     val fflags: Register = this.registers[1]
     val frm: Register = this.registers[2]

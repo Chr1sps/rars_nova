@@ -16,8 +16,8 @@ import rars.util.unwrap
 class RegisterFile(
     private val globalSymbolTable: SymbolTable,
     initialMemoryConfiguration: AbstractMemoryConfiguration<Int>
-) : RegisterFileBase('x', createRegisters(initialMemoryConfiguration)) {
-    val zero: Register = myRegisters[0]
+) : AbstractRegisterFile('x', createRegisters(initialMemoryConfiguration)) {
+    private val zero: Register = myRegisters[0]
 
     @JvmField
     val sp: Register = myRegisters[STACK_POINTER_REGISTER_INDEX]
@@ -32,13 +32,9 @@ class RegisterFile(
         initialMemoryConfiguration.textSegmentBaseAddress.toLong()
     )
 
-    @JvmField
     val a0: Register = myRegisters[10]
 
-    @JvmField
     val a1: Register = myRegisters[11]
-    val a2: Register = myRegisters[12]
-    val a7: Register = myRegisters[17]
 
     public override fun convertFromLong(value: Long): Int = ConversionUtils.longLowerHalfToInt(value)
 

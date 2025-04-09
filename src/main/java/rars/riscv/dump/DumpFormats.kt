@@ -1,37 +1,21 @@
-package rars.riscv.dump;
+package rars.riscv.dump
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
-import rars.riscv.dump.formats.IntelHexDumpFormat;
-import rars.riscv.dump.formats.SegmentWindowDumpFormat;
-
-import java.util.List;
-
-import static rars.riscv.dump.formats.DumpFormatBaseKt.*;
+import rars.riscv.dump.formats.*
 
 /**
  * This class provides a list of all dump formats available in RARS.
  */
-public final class DumpFormats {
-    public static final @NotNull
-    @Unmodifiable List<@NotNull DumpFormat> DUMP_FORMATS = List.of(
+object DumpFormats {
+    val DUMP_FORMATS = listOf(
         ASCII_TEXT_DUMP_FORMAT,
         BINARY_DUMP_FORMAT,
         BINARY_TEXT_DUMP_FORMAT,
         HEX_TEXT_DUMP_FORMAT,
-        IntelHexDumpFormat.INSTANCE,
-        SegmentWindowDumpFormat.INSTANCE
-    );
+        IntelHexDumpFormat,
+        SegmentWindowDumpFormat
+    )
 
-    private DumpFormats() {
+    fun findDumpFormatGivenCommandDescriptor(formatCommandDescriptor: String?): DumpFormat? = DUMP_FORMATS.find {
+        it.commandDescriptor == formatCommandDescriptor
     }
-
-    public static @Nullable DumpFormat findDumpFormatGivenCommandDescriptor(final String formatCommandDescriptor) {
-        return DUMP_FORMATS.stream()
-            .filter(format -> format.getCommandDescriptor().equals(formatCommandDescriptor))
-            .findAny()
-            .orElse(null);
-    }
-
 }

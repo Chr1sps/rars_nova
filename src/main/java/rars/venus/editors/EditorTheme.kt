@@ -5,13 +5,12 @@ import java.awt.Color
 
 class EditorTheme(
     tokenStyles: Map<RVTokenType, TokenStyle>,
-    @JvmField var backgroundColor: Color,
-    @JvmField var foregroundColor: Color,
-    @JvmField var lineHighlightColor: Color,
-    @JvmField var caretColor: Color,
-    @JvmField var selectionColor: Color
+    var backgroundColor: Color,
+    var foregroundColor: Color,
+    var lineHighlightColor: Color,
+    var caretColor: Color,
+    var selectionColor: Color
 ) {
-    @JvmField
     var tokenStyles: MutableMap<RVTokenType, TokenStyle> = buildMap {
         RVTokenType.entries.forEach {
             put(it, tokenStyles[it] ?: TokenStyle.DEFAULT)

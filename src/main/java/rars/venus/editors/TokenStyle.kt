@@ -16,7 +16,6 @@ data class TokenStyle(
         val DEFAULT_FOREGROUND: Color? = null
         val DEFAULT_BACKGROUND: Color? = null
 
-        @JvmField
         val DEFAULT: TokenStyle = TokenStyle(
             DEFAULT_FOREGROUND, DEFAULT_BACKGROUND,
             isBold = false, isItalic = false, isUnderline = false

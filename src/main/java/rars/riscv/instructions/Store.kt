@@ -47,28 +47,24 @@ class Store(
             store: (Int, Long, Memory) -> Either<MemoryError, Unit>
         ) = Store(usage, description, funct, store)
 
-        @JvmField
         val SB = store(
             "sb t1, -100(t2)",
             "Store byte : Store the low-order 8 bits of t1 into the effective memory byte address",
             "000"
         ) { address, value, memory -> memory.setByte(address, value.and(0xFFL).toByte()).ignoreOk() }
 
-        @JvmField
         val SH = store(
             "sh t1, -100(t2)",
             "Store halfword : Store the low-order 16 bits of t1 into the effective memory halfword address",
             "001"
         ) { address, value, memory -> memory.setHalf(address, value.and(0xFFFFL).toShort()).ignoreOk() }
 
-        @JvmField
         val SW = store(
             "sw t1, -100(t2)",
             "Store word : Store contents of t1 into effective memory word address",
             "010"
         ) { address, value, memory -> memory.setWord(address, value.toInt()).ignoreOk() }
 
-        @JvmField
         val SD = store(
             "sd t1, -100(t2)",
             "Store double word : Store contents of t1 into effective memory double word address",

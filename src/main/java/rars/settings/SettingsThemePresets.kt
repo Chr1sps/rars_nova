@@ -90,6 +90,5 @@ object SettingsThemePresets {
         mapOf<TokenSettingKey, TokenStyle>()
     ).apply(builderFunction)
 
-    @JvmRecord
-    data class ThemeEntry(@JvmField val name: String, @JvmField val theme: SettingsTheme)
+    data class ThemeEntry(val name: String, val theme: SettingsTheme)
 }

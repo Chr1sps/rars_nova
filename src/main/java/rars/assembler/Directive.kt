@@ -13,13 +13,13 @@ enum class Directive(
     /**
      * Name of this Directives object
      */
-    @JvmField val directiveName: String,
+    val directiveName: String,
     /**
      * Get description of this Directives object
      *
      * @return description of this directive (for help purposes)
      */
-    @JvmField val description: String
+    val description: String
 ) {
     DATA(
         ".data",

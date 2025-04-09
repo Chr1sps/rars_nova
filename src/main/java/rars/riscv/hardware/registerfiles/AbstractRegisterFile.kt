@@ -8,14 +8,14 @@ import rars.riscv.hardware.registers.Register
 import rars.util.Listener
 import rars.util.translateToIntFast
 
-abstract class RegisterFileBase protected constructor(
+abstract class AbstractRegisterFile protected constructor(
     private val registerNumberPrefix: Char,
     protected val myRegisters: Array<Register>
 ) {
     fun updateRegisterByName(registerName: String, newValue: Long): Either<SimulationError, Long?> = either {
-        val register = this@RegisterFileBase.getRegisterByName(registerName)
+        val register = this@AbstractRegisterFile.getRegisterByName(registerName)
         if (register == null) null
-        else this@RegisterFileBase.updateRegister(register, newValue).bind()
+        else this@AbstractRegisterFile.updateRegister(register, newValue).bind()
     }
 
     /**
@@ -64,9 +64,9 @@ abstract class RegisterFileBase protected constructor(
     }
 
     fun updateRegisterByNumber(registerNumber: Int, newValue: Long): Either<SimulationError, Long?> = either {
-        val register = this@RegisterFileBase.getRegisterByNumber(registerNumber)
+        val register = this@AbstractRegisterFile.getRegisterByNumber(registerNumber)
         if (register == null) null
-        else this@RegisterFileBase.updateRegister(register, newValue).bind()
+        else this@AbstractRegisterFile.updateRegister(register, newValue).bind()
     }
 
     abstract fun updateRegister(register: Register, newValue: Long): Either<SimulationError, Long>
@@ -100,20 +100,14 @@ abstract class RegisterFileBase protected constructor(
     }
 
     open fun resetRegisters() {
-        for (register in this.myRegisters) {
-            register.resetValue()
-        }
+        myRegisters.forEach { it.resetValue() }
     }
 
     fun addRegistersListener(listener: Listener<RegisterAccessNotice>) {
-        for (register in this.myRegisters) {
-            register.registerChangeHook.subscribe(listener)
-        }
+        myRegisters.forEach { it.registerChangeHook.subscribe(listener) }
     }
 
     fun deleteRegistersListener(listener: Listener<RegisterAccessNotice>) {
-        for (register in this.myRegisters) {
-            register.registerChangeHook.unsubscribe(listener)
-        }
+        myRegisters.forEach { it.registerChangeHook.unsubscribe(listener) }
     }
 }

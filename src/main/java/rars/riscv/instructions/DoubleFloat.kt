@@ -53,37 +53,31 @@ class DoubleFloat private constructor(
             compute: Environment.(Float64, Float64) -> Float64
         ): DoubleFloat = DoubleFloat("$name f1, f2, f3", description, funct, rm, compute)
 
-        @JvmField
         val FADDD = double(
             "fadd.d", "Floating ADD (64 bit): assigns f1 to f2 + f3", "0000001",
             Float64::add
         )
 
-        @JvmField
         val FDIVD = double(
             "fdiv.d", "Floating DIVide (64 bit): assigns f1 to f2 / f3", "0001101",
             Float64::divide
         )
 
-        @JvmField
         val FMAXD = double(
             "fmax.d", "Floating MAXimum (64 bit): assigns f1 to the larger of f1 and f3", "0010101", "001",
             Float64::max
         )
 
-        @JvmField
         val FMIND = double(
             "fmin.d", "Floating MINimum (64 bit): assigns f1 to the smaller of f1 and f3", "0010101", "000",
             Float64::min
         )
 
-        @JvmField
         val FMULD = double(
             "fmul.d", "Floating MULtiply (64 bit): assigns f1 to f2 * f3", "0001001",
             Float64::multiply
         )
 
-        @JvmField
         val FSUBD = double(
             "fsub.d", "Floating SUBtract (64 bit): assigns f1 to f2 - f3", "0000101",
             Float64::subtract

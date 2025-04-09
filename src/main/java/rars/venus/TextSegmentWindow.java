@@ -119,7 +119,7 @@ public final class TextSegmentWindow extends JInternalFrame {
             }
             return Unit.INSTANCE;
         });
-        boolSettings.onChangeListenerHook.subscribe(ignore -> {
+        boolSettings.getOnChangeListenerHook().subscribe(ignore -> {
             this.deleteAsTextSegmentObserver();
             if (boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
                 this.addAsTextSegmentObserver();

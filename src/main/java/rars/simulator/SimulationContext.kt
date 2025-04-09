@@ -6,11 +6,10 @@ import rars.riscv.hardware.registerfiles.CSRegisterFile
 import rars.riscv.hardware.registerfiles.FloatingPointRegisterFile
 import rars.riscv.hardware.registerfiles.RegisterFile
 
-@JvmRecord
 data class SimulationContext(
-    @JvmField val registerFile: RegisterFile,
-    @JvmField val fpRegisterFile: FloatingPointRegisterFile,
-    @JvmField val csrRegisterFile: CSRegisterFile,
-    @JvmField val memory: Memory,
-    @JvmField val io: AbstractIO
+    val registerFile: RegisterFile,
+    val fpRegisterFile: FloatingPointRegisterFile,
+    val csrRegisterFile: CSRegisterFile,
+    val memory: Memory,
+    val io: AbstractIO
 )

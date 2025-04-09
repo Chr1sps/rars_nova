@@ -14,27 +14,26 @@ class ConsoleIO(
     private val errorWriter by lazy { BufferedWriter(OutputStreamWriter(stderr)) }
     private val fileHandler = FileHandler(SYSCALL_MAXFILES - 3, boolSettings)
 
-    override fun readImpl(
+    override fun read(
         initialValue: String,
         prompt: String,
         maxLength: Int
     ): String = try {
-        val readLine = this.inputReader.readLine()
-        readLine ?: ""
+        inputReader.readLine() ?: ""
     } catch (_: IOException) {
         ""
     }
 
     override fun printString(message: String) {
         try {
-            this.outputWriter.write(message)
-            this.outputWriter.flush()
+            outputWriter.write(message)
+            outputWriter.flush()
         } catch (_: IOException) {
         }
     }
 
     override fun openFile(filename: String, flags: Int): Int {
-        val fd = this.fileHandler.openFile(filename, flags)
+        val fd = fileHandler.openFile(filename, flags)
         return if (fd == -1) {
             -1
         } else {
@@ -43,49 +42,39 @@ class ConsoleIO(
     }
 
     override fun closeFile(fd: Int) {
-        this.fileHandler.closeFile(fd - 3)
+        fileHandler.closeFile(fd - 3)
     }
 
-    override fun writeToFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int {
-        when (fd) {
-            STDOUT -> {
-                try {
-                    this.outputWriter.write(String(myBuffer))
-                    this.outputWriter.flush()
-                    return myBuffer.size
-                } catch (_: IOException) {
-                    return -1
-                }
-            }
-
-            STDERR -> {
-                try {
-                    this.errorWriter.write(String(myBuffer))
-                    this.errorWriter.flush()
-                    return myBuffer.size
-                } catch (_: IOException) {
-                    return -1
-                }
-            }
-
-            else -> {
-                return this.fileHandler.writeToFile(fd - 3, myBuffer, lengthRequested)
-            }
+    override fun writeToFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int = when (fd) {
+        STDOUT -> try {
+            outputWriter.write(String(myBuffer))
+            outputWriter.flush()
+            myBuffer.size
+        } catch (_: IOException) {
+            -1
         }
+
+        STDERR -> try {
+            errorWriter.write(String(myBuffer))
+            errorWriter.flush()
+            myBuffer.size
+        } catch (_: IOException) {
+            -1
+        }
+
+        else -> fileHandler.writeToFile(fd - 3, myBuffer, lengthRequested)
     }
 
-    override fun seek(fd: Int, offset: Int, base: Int): Int {
-        if (fd <= STDERR || fd >= SYSCALL_MAXFILES) {
-            return -1
-        }
-        return this.fileHandler.seek(fd - 3, offset, base)
-    }
+    override fun seek(fd: Int, offset: Int, base: Int): Int =
+        if (fd !in (STDERR + 1..<SYSCALL_MAXFILES)) {
+            -1
+        } else fileHandler.seek(fd - 3, offset, base)
 
     override fun readFromFile(fd: Int, myBuffer: ByteArray, lengthRequested: Int): Int = if (fd == STDIN) try {
-        this.stdin.read(myBuffer, 0, lengthRequested)
+        stdin.read(myBuffer, 0, lengthRequested)
     } catch (_: IOException) {
         -1
-    } else this.fileHandler.readFromFile(fd - 3, myBuffer, lengthRequested)
+    } else fileHandler.readFromFile(fd - 3, myBuffer, lengthRequested)
 
     override fun flush() {}
 }

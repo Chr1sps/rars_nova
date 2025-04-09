@@ -40,7 +40,6 @@ class FusedDouble(
     }
 
     companion object {
-        @JvmField
         val FMADD = FusedDouble(
             "fmadd.d f1, f2, f3, f4",
             "Fused Multiply Add (64 bit): Assigns f2*f3+f4 to f1",
@@ -48,14 +47,12 @@ class FusedDouble(
             Float64::fusedMultiplyAdd
         )
 
-        @JvmField
         val FMSUBD = FusedDouble(
             "fmsub.d f1, f2, f3, f4",
             "Fused Multiply Subtract (64 bit): Assigns f2*f3-f4 to f1",
             "01",
         ) { env, f1, f2, f3 -> Float64.fusedMultiplyAdd(env, f1, f2, f3.negate()) }
 
-        @JvmField
         val FNMADDD = FusedDouble(
             "fnmadd.d f1, f2, f3, f4",
             "Fused Negate Multiply Add (64 bit): Assigns -(f2*f3+f4) to f1",
@@ -66,7 +63,6 @@ class FusedDouble(
             Float64.fusedMultiplyAdd(env, f1, f2, f3).negate()
         }
 
-        @JvmField
         val FNMSUBD = FusedDouble(
             "fnmsub.d f1, f2, f3, f4",
             "Fused Negated Multiply Subatract: Assigns -(f2*f3-f4) to f1",

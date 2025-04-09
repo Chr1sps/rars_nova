@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Range
 import rars.Globals
 import rars.events.ExitingError
 import rars.events.ExitingEvent
+import rars.io.*
 import rars.riscv.syscalls.DisplayBitmapImpl
 import rars.riscv.syscalls.ToneGenerator
 import rars.riscv.syscalls.getRandomStream
@@ -37,18 +38,18 @@ enum class Syscall(
      * user to refer to the service when choosing to override its default service
      * number in the configuration file.
      */
-    @JvmField val serviceName: String,
+    val serviceName: String,
     /**
      * The assigned service number. This is the number the programmer
      * must store into a7 before issuing the ECALL instruction.
      */
-    @JvmField val serviceNumber: Int,
+    val serviceNumber: Int,
     /** A string describing what the system call does  */
-    @JvmField val description: String,
+    val description: String,
     /** A string documenting what registers should be set to before the system call runs.  */
-    @JvmField val inputs: String,
+    val inputs: String,
     /** A string documenting what registers are set to after the system call runs  */
-    @JvmField val outputs: String,
+    val outputs: String,
     private val callback: SimulationCallback
 ) : SimulationCallback by callback {
     Close(
@@ -119,8 +120,8 @@ enum class Syscall(
         { stmt ->
             either {
                 val path = System.getProperty("user.dir")
-                val buf = registerFile.getIntValue(registerFile.a0)
-                val length = registerFile.getIntValue(registerFile.a0)
+                val buf = registerFile.getIntValue("a0")!!
+                val length = registerFile.getIntValue("a1")!!
 
                 val utf8BytesList = path.toByteArray(StandardCharsets.UTF_8)
                 if (length < utf8BytesList.size + 1) {

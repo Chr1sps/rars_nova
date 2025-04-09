@@ -101,14 +101,11 @@ class HighlightingSettingsImpl(private val preferences: Preferences) : Highlight
     }
 }
 
-@JvmField
-val DEFAULT_TEXT_SEGMENT_STYLE: TokenStyle = fromBackground(Color(0xFFFF99))
+private val DEFAULT_TEXT_SEGMENT_STYLE: TokenStyle = fromBackground(Color(0xFFFF99))
 
-@JvmField
-val DEFAULT_DATA_SEGMENT_STYLE: TokenStyle = fromBackground(Color(0x99CCFF))
+private val DEFAULT_DATA_SEGMENT_STYLE: TokenStyle = fromBackground(Color(0x99CCFF))
 
-@JvmField
-val DEFAULT_REGISTER_STYLE: TokenStyle = fromBackground(Color(0x99CC55))
+private val DEFAULT_REGISTER_STYLE: TokenStyle = fromBackground(Color(0x99CC55))
 
 private fun fromBackground(color: Color): TokenStyle = TokenStyle(
     Color.BLACK,

@@ -38,18 +38,15 @@ class FusedFloat private constructor(
     }
 
     companion object {
-        @JvmField
         val FMADDS = FusedFloat(
             "fmadd.s f1, f2, f3, f4", "Fused Multiply Add: Assigns f2*f3+f4 to f1", "00",
             Float32::fusedMultiplyAdd
         )
 
-        @JvmField
         val FMSUBS = FusedFloat(
             "fmsub.s f1, f2, f3, f4", "Fused Multiply Subtract: Assigns f2*f3-f4 to f1", "01",
         ) { env, f1, f2, f3 -> Float32.fusedMultiplyAdd(env, f1, f2, f3.negate()) }
 
-        @JvmField
         val FNMADDS = FusedFloat(
             "fnmadd.s f1, f2, f3, f4", "Fused Negate Multiply Add: Assigns -(f2*f3+f4) to f1", "11",
         ) { env, f1, f2, f3 ->
@@ -58,15 +55,11 @@ class FusedFloat private constructor(
             Float32.fusedMultiplyAdd(env, f1, f2, f3).negate()
         }
 
-        @JvmField
         val FNMSUBS = FusedFloat(
             "fnmsub.s f1, f2, f3, f4", "Fused Negate Multiply Subtract: Assigns -(f2*f3-f4) to f1", "10",
         ) { env, f1, f2, f3 ->
             env.flipRounding()
             Float32.fusedMultiplyAdd(env, f1, f2, f3.negate()).negate()
         }
-
-//        @JvmField
-//        val INSTRUCTIONS = arrayOf(FMADDS, FMSUBS, FNMADDS, FNMSUBS)
     }
 }

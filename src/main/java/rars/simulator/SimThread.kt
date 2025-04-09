@@ -14,11 +14,10 @@ import rars.util.ListenerDispatcher
 import rars.util.toHexStringWithPrefix
 import rars.util.unwrap
 import rars.venus.run.RunSpeedPanel
-import java.util.*
 
 open class SimThread(
     private var pc: Int,
-    @JvmField protected val maxSteps: Int,
+    protected val maxSteps: Int,
     breakPoints: IntArray,
     private val io: AbstractIO,
     private val simulatorNoticeDispatcher: ListenerDispatcher<SimulatorNotice>
@@ -429,7 +428,7 @@ open class SimThread(
             Globals.CS_REGISTER_FILE.updateRegisterBackdoor(Globals.CS_REGISTER_FILE.time, time)
 
             // Return if we've reached a breakpoint.
-            if (ebreak || Arrays.binarySearch(this.breakPoints, Globals.REGISTER_FILE.programCounter) >= 0) {
+            if (ebreak || Globals.REGISTER_FILE.programCounter in breakPoints) {
                 this.stopExecution(false, Simulator.Reason.BREAKPOINT)
                 return
             }

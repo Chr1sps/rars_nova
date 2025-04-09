@@ -47,49 +47,42 @@ class Load private constructor(
             load: (Int, Memory) -> Either<MemoryError, Long>
         ): Load = Load(usage, description, funct, load)
 
-        @JvmField
         val LB = load(
             "lb t1, -100(t2)",
             "Set t1 to sign-extended 8-bit value from effective memory byte address",
             "000"
         ) { address, memory -> memory.getByte(address).map { it.toLong() } }
 
-        @JvmField
         val LBU = load(
             "lbu t1, -100(t2)",
             "Set t1 to zero-extended 8-bit value from effective memory byte address",
             "100"
         ) { address, memory -> memory.getByte(address).map { it.toLong() and 0xFFL } }
 
-        @JvmField
         val LH = load(
             "lh t1, -100(t2)",
             "Set t1 to sign-extended 16-bit value from effective memory halfword address",
             "001"
         ) { address, memory -> memory.getHalf(address).map { it.toLong() } }
 
-        @JvmField
         val LHU = load(
             "lhu t1, -100(t2)",
             "Set t1 to zero-extended 16-bit value from effective memory halfword address",
             "101"
         ) { address, memory -> memory.getHalf(address).map { it.toLong() and 0xFFFFL } }
 
-        @JvmField
         val LW = load(
             "lw t1, -100(t2)",
             "Set t1 to contents of effective memory word address",
             "010"
         ) { address, memory -> memory.getWord(address).map { it.toLong() } }
 
-        @JvmField
         val LD = load(
             "ld t1, -100(t2)",
             "Set t1 to contents of effective memory double word address",
             "011"
         ) { address, memory -> memory.getDoubleWord(address) }
 
-        @JvmField
         val LWU = load(
             "lwu t1, -100(t2)", "Set t1 to contents of effective memory word address without sign-extension", "110"
         ) { address, memory -> memory.getWord(address).map { it.toLong() and 0xFFFFFFFFL } }

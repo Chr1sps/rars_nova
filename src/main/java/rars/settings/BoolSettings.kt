@@ -13,7 +13,6 @@ interface BoolSettings {
 class BoolSettingsImpl(private val preferences: Preferences) : BoolSettings {
     private val onChangeDispatcher = ListenerDispatcher<Unit>()
 
-    @JvmField
     val onChangeListenerHook = this.onChangeDispatcher.hook
     private val currentSettings = mutableMapOf<BoolSetting, Boolean>()
 
@@ -71,7 +70,7 @@ class BoolSettingsImpl(private val preferences: Preferences) : BoolSettings {
     }
 }
 
-enum class BoolSetting(@JvmField val repr: String, @JvmField val defaultValue: Boolean) {
+enum class BoolSetting(val repr: String, val defaultValue: Boolean) {
     /**
      * Flag to determine whether program being assembled is limited to
      * basic instructions and formats.

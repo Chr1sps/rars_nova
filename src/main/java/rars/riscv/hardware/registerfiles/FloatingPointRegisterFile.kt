@@ -9,7 +9,7 @@ import rars.settings.OtherSettings
 import rars.util.ignoreOk
 import rars.util.unwrap
 
-class FloatingPointRegisterFile : RegisterFileBase('f', createRegisters()) {
+class FloatingPointRegisterFile : AbstractRegisterFile('f', createRegisters()) {
     val ft0: Register = this.registers[0]
 
     @JvmField

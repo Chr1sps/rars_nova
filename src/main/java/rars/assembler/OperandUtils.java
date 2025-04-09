@@ -33,7 +33,6 @@ public final class OperandUtils {
      * @return Returns {@code true} if the programmer's statement matches the MIPS
      * specification, else returns {@code false}.
      */
-
     static boolean checkIfTokensMatchOperand(
         final TokenList candidateList, final Instruction inst,
         final ErrorList errors

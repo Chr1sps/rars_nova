@@ -27,7 +27,7 @@ class Branch private constructor(
     operand: String,
     description: String,
     funct: String,
-    @JvmField val willBranch: (ProgramStatement, RegisterFile) -> Boolean
+    val willBranch: (ProgramStatement, RegisterFile) -> Boolean
 ) : BasicInstruction(
     "$operand t1,t2,label",
     description,

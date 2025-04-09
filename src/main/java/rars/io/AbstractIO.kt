@@ -2,71 +2,73 @@ package rars.io
 
 import rars.riscv.Syscall.*
 
+/**
+ * Implements syscall to read a double value.
+ * Client is responsible for catching NumberFormatException.
+ *
+ * @return double value corresponding to user input
+ */
+fun AbstractIO.readDouble() = read(
+    "0",
+    "Enter a Double value (syscall ${ReadDouble.serviceNumber})",
+    -1
+).trim { it <= ' ' }.toDouble()
+
+/**
+ * Implements syscall to read a float value.
+ * Client is responsible for catching NumberFormatException.
+ *
+ * @return float value corresponding to user input
+ * Feb 14 2005 Ken Vollmar
+ */
+fun AbstractIO.readFloat() = read(
+    "0",
+    "Enter a Float value (syscall ${ReadFloat.serviceNumber})",
+    -1
+).trim { it <= ' ' }.toFloat()
+
+/**
+ * Implements syscall to read an integer value.
+ * Client is responsible for catching NumberFormatException.
+ *
+ * @return int value corresponding to user input
+ */
+fun AbstractIO.readInt() = read(
+    "0",
+    "Enter an Integer value (syscall ${ReadInt.serviceNumber})",
+    -1
+).trim { it <= ' ' }.toInt()
+
+
+/**
+ * Implements syscall to read a string.
+ *
+ * @param maxLength
+ * the maximum string length
+ * @return the entered string, truncated to maximum length if necessary
+ */
+fun AbstractIO.readString(maxLength: Int): String {
+    val input = this.read(
+        "",
+        "Enter a string of maximum length $maxLength (syscall ${ReadString.serviceNumber})",
+        maxLength
+    ).removeSuffix("\n")
+    return if (maxLength <= 0) "" else input.take(maxLength)
+}
+
+
+/**
+ * Implements syscall to read a char value.
+ *
+ * @return char value corresponding to user input
+ */
+fun AbstractIO.readChar() = this.read(
+    "0",
+    "Enter a character value (syscall ${ReadChar.serviceNumber})", 1
+)[0]
+
 interface AbstractIO {
-    /**
-     * Implements syscall to read a double value.
-     * Client is responsible for catching NumberFormatException.
-     *
-     * @return double value corresponding to user input
-     */
-    fun readDouble() = readImpl(
-        "0",
-        "Enter a Double value (syscall ${ReadDouble.serviceNumber})",
-        -1
-    ).trim { it <= ' ' }.toDouble()
-
-    /**
-     * Implements syscall to read a float value.
-     * Client is responsible for catching NumberFormatException.
-     *
-     * @return float value corresponding to user input
-     * Feb 14 2005 Ken Vollmar
-     */
-    fun readFloat() = readImpl(
-        "0",
-        "Enter a Float value (syscall ${ReadFloat.serviceNumber})",
-        -1
-    ).trim { it <= ' ' }.toFloat()
-
-    /**
-     * Implements syscall to read an integer value.
-     * Client is responsible for catching NumberFormatException.
-     *
-     * @return int value corresponding to user input
-     */
-    fun readInt() = readImpl(
-        "0",
-        "Enter an Integer value (syscall ${ReadInt.serviceNumber})",
-        -1
-    ).trim { it <= ' ' }.toInt()
-
-    /**
-     * Implements syscall to read a string.
-     *
-     * @param maxLength
-     * the maximum string length
-     * @return the entered string, truncated to maximum length if necessary
-     */
-    fun readString(maxLength: Int): String {
-        val input = this.readImpl(
-            "",
-            "Enter a string of maximum length $maxLength (syscall ${ReadString.serviceNumber})",
-            maxLength
-        ).removeSuffix("\n")
-        return if (maxLength <= 0) "" else input.take(maxLength)
-    }
-
-    /**
-     * Implements syscall to read a char value.
-     *
-     * @return char value corresponding to user input
-     */
-    fun readChar() = this.readImpl(
-        "0",
-        "Enter a character value (syscall ${ReadChar.serviceNumber})", 1
-    )[0]
-
-    fun readImpl(
+    fun read(
         initialValue: String,
         prompt: String,
         maxLength: Int

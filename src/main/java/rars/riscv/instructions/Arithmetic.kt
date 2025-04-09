@@ -18,8 +18,8 @@ class Arithmetic private constructor(
     description: String,
     funct7: String,
     funct3: String,
-    @JvmField val compute: (Long, Long) -> Long,
-    @JvmField val computeW: (Int, Int) -> Int
+    val compute: (Long, Long) -> Long,
+    val computeW: (Int, Int) -> Int
 ) : BasicInstruction(
     usage, description, BasicInstructionFormat.R_FORMAT,
     "$funct7 ttttt sssss $funct3 fffff 0110011"
@@ -41,7 +41,6 @@ class Arithmetic private constructor(
     }
 
     companion object {
-        @JvmStatic
         private fun arithmetic(
             usage: String,
             description: String,
@@ -52,7 +51,6 @@ class Arithmetic private constructor(
             compute(first.toLong(), other.toLong()).toInt()
         }
 
-        @JvmStatic
         private fun arithmetic(
             usage: String,
             description: String,
@@ -62,19 +60,16 @@ class Arithmetic private constructor(
             compute: (Long, Long) -> Long,
         ): Arithmetic = Arithmetic(usage, description, funct7, funct3, compute, computeW)
 
-        @JvmField
         val ADD = arithmetic(
             "add t1,t2,t3", "Addition: set t1 to (t2 plus t3)",
             "0000000", "000", Long::plus
         )
 
-        @JvmField
         val AND = arithmetic(
             "and t1,t2,t3", "Bitwise AND : Set t1 to bitwise AND of t2 and t3",
             "0000000", "111", Long::and
         )
 
-        @JvmField
         val DIV = arithmetic(
             "div t1,t2,t3", "Division: set t1 to the result of t2/t3",
             "0000001", "100"
@@ -83,7 +78,6 @@ class Arithmetic private constructor(
             else first / other
         }
 
-        @JvmField
         val DIVU = arithmetic(
             "divu t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division",
             "0000001", "101", { first, other ->
@@ -95,22 +89,18 @@ class Arithmetic private constructor(
             else (first.toULong() / other.toULong()).toLong()
         }
 
-        @JvmField
         val MUL = arithmetic(
             "mul t1,t2,t3", "Multiplication: set t1 to the lower 32 bits of t2*t3",
             "0000001", "000", Long::times
         )
 
-        @JvmField
         val MULH = arithmetic(
             "mulh t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using signed multiplication",
             "0000001", "001", { first, other ->
                 (first.toULong() * other.toULong()).shr(32).toInt()
             }
         ) { first, other -> (first * other) shr 32 }
-        // return BigInteger.valueOf(value).multiply(BigInteger.valueOf(value2)).shiftRight(64).toLong()
 
-        @JvmField
         val MULHSU = arithmetic(
             "mulhsu t1,t2,t3",
             "Multiplication: set t1 to the upper 32 bits of t2*t3 where t2 is signed and t3 is unsigned",
@@ -126,7 +116,6 @@ class Arithmetic private constructor(
                 .toLong()
         }
 
-        @JvmField
         val MULHU = arithmetic(
             "mulhu t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using unsigned multiplication",
             "0000001", "011", { first, other ->
@@ -140,13 +129,11 @@ class Arithmetic private constructor(
                 .shr(64).toLong()
         }
 
-        @JvmField
         val OR = arithmetic(
             "or t1,t2,t3", "Bitwise OR : Set t1 to bitwise OR of t2 and t3",
             "0000000", "110", Long::or
         )
 
-        @JvmField
         val REM = arithmetic(
             "rem t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3",
             "0000001", "110"
@@ -155,7 +142,6 @@ class Arithmetic private constructor(
             else first.rem(other)
         }
 
-        @JvmField
         val REMU = arithmetic(
             "remu t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3 using unsigned division",
             "0000001", "111", { first, other ->
@@ -167,7 +153,6 @@ class Arithmetic private constructor(
             else first.toULong().rem(other.toULong()).toLong()
         }
 
-        @JvmField
         val SLL = arithmetic(
             "sll t1,t2,t3",
             "Shift left logical: Set t1 to result of shifting t2 left by number of bits specified by value in " +
@@ -179,13 +164,11 @@ class Arithmetic private constructor(
             first.shl(other.and(0b0011_1111L).toInt()) // use the bottom 6 bits
         }
 
-        @JvmField
         val SLT = arithmetic(
             "slt t1,t2,t3", "Set less than : If t2 is less than t3, then set t1 to 1 else set t1 to 0",
             "0000000", "010"
         ) { first, other -> if (first < other) 1 else 0 }
 
-        @JvmField
         val SLTU = arithmetic(
             "sltu t1,t2,t3",
             "Set less than : If t2 is less than t3 using unsigned comparision, then set t1 to 1 else set t1 to 0",
@@ -193,7 +176,6 @@ class Arithmetic private constructor(
             "011"
         ) { first, other -> if (first.toULong() < other.toULong()) 1 else 0 }
 
-        @JvmField
         val SRA = arithmetic(
             "sra t1,t2,t3",
             "Shift right arithmetic: Set t1 to result of sign-extended shifting t2 right by number of bits specified " +
@@ -207,7 +189,6 @@ class Arithmetic private constructor(
             first.shr(other.and(0b0011_1111L).toInt()) // use the bottom 6 bits
         }
 
-        @JvmField
         val SRL = arithmetic(
             "srl t1,t2,t3",
             "Shift right logical: Set t1 to result of shifting t2 right by number of bits specified by value in " +
@@ -220,13 +201,11 @@ class Arithmetic private constructor(
             first.ushr(other.and(0b0011_1111L).toInt()) // use the bottom 6 bits
         }
 
-        @JvmField
         val SUB = arithmetic(
             "sub t1,t2,t3", "Subtraction: set t1 to (t2 minus t3)",
             "0100000", "000", Long::minus
         )
 
-        @JvmField
         val XOR = arithmetic(
             "xor t1,t2,t3", "Bitwise XOR : Set t1 to bitwise XOR of t2 and t3",
             "0000000", "100", Long::xor

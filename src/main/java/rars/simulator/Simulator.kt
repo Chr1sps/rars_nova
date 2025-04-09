@@ -79,7 +79,7 @@ class Simulator {
     fun startSimulation(
         pc: Int,
         maxSteps: Int,
-        breakPoints: IntArray?,
+        breakPoints: IntArray,
         mainUI: VenusUI
     ) {
         this.simulatorThread = GuiSimThread(pc, maxSteps, breakPoints, this.simulatorNoticeDispatcher, mainUI)

@@ -4,7 +4,7 @@ import rars.Globals
 import rars.notices.AccessNotice
 import rars.notices.RegisterAccessNotice
 import rars.notices.SimulatorNotice
-import rars.riscv.hardware.registerfiles.RegisterFileBase
+import rars.riscv.hardware.registerfiles.AbstractRegisterFile
 import rars.riscv.hardware.registers.Register
 import rars.settings.AllSettings
 import rars.settings.BoolSetting
@@ -29,7 +29,7 @@ import javax.swing.table.JTableHeader
  * @author Sanderson, Bumgarner
  */
 abstract class RegisterBlockWindowBase internal constructor(
-    private val registerFile: RegisterFileBase,
+    private val registerFile: AbstractRegisterFile,
     registerDescriptions: Array<String>,
     valueTip: String,
     private val mainUI: VenusUI,
@@ -225,7 +225,7 @@ abstract class RegisterBlockWindowBase internal constructor(
     }
 
     private class RegisterTableModel(
-        private val registersFile: RegisterFileBase,
+        private val registersFile: AbstractRegisterFile,
         private val boolSettings: BoolSettings,
         private val memoryAndRegistersLock: ReentrantLock,
     ) : AbstractTableModel() {

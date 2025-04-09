@@ -36,19 +36,16 @@ class SimpleDumpFormat(
     }
 }
 
-@JvmField
 val ASCII_TEXT_DUMP_FORMAT = SimpleDumpFormat(
     "ASCII Text",
     "AsciiText",
     "Memory contents interpreted as ASCII characters"
 ) { append(it.toAscii()) }
 
-@JvmField
 val BINARY_DUMP_FORMAT = SimpleDumpFormat(
     "Binary", "Binary", "Written as byte stream to binary file"
 ) { for (i in 0..3) append((it ushr (i shl 3)) and 0xFF) }
 
-@JvmField
 val BINARY_TEXT_DUMP_FORMAT = SimpleDumpFormat(
     "Binary Text", "BinaryText", "Written as '0' and '1' characters to text file"
 ) {
@@ -57,7 +54,6 @@ val BINARY_TEXT_DUMP_FORMAT = SimpleDumpFormat(
     append(temp)
 }
 
-@JvmField
 val HEX_TEXT_DUMP_FORMAT = SimpleDumpFormat(
     "Hexadecimal Text", "HexText", "Written as hex characters to text file"
 ) {

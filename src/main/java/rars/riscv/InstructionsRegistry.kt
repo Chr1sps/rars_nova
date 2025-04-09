@@ -380,25 +380,19 @@ object InstructionsRegistry {
      */
     class SingleInstructionSet<out T : Instruction>(
         /** Instructions present in both 32-bit and 64-bit modes. */
-        @JvmField
         val shared: List<T>,
         /** Instructions only present in 32-bit mode. */
-        @JvmField
         val r32Only: List<T>,
         /** Instructions only present in 64-bit mode. */
-        @JvmField
         val r64Only: List<T>
     ) {
         /** 32-bit only + shared instructions. */
-        @JvmField
         val r32All = shared + r32Only
 
         /** 64-bit only + shared instructions. */
-        @JvmField
         val r64All = shared + r64Only
 
         /** All instructions (32-bit only + 64-bit only + shared). */
-        @JvmField
         val allInstructions = shared + r32Only + r64Only
 
         companion object {

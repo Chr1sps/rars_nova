@@ -31,7 +31,6 @@ object BasicInstructions {
             callback(statement)
     }
 
-    @JvmField
     val AUIPC = basicInstruction(
         "auipc t1,100000", "Add upper immediate to pc: set t1 to (pc plus an upper 20-bit immediate)",
         BasicInstructionFormat.U_FORMAT, "ssssssssssssssssssss fffff 0010111"
@@ -42,7 +41,6 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
     val CSRRC = basicInstruction(
         "csrrc t0, fcsr, t1",
         "Atomic Read/Clear CSR: read from the CSR into t0 and clear bits of the CSR according to t1",
@@ -69,7 +67,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val CSRRCI = basicInstruction(
         "csrrci t0, fcsr, 10",
         "Atomic Read/Clear CSR Immediate: read from the CSR into t0 and clear bits of the CSR according to a " +
@@ -96,7 +93,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val CSRRS = basicInstruction(
         "csrrs t0, fcsr, t1", "Atomic Read/Set CSR: read from the CSR into t0 and logical or t1 into the CSR",
         BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 1110011"
@@ -120,7 +116,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val CSRRSI = basicInstruction(
         "csrrsi t0, fcsr, 10",
         "Atomic Read/Set CSR Immediate: read from the CSR into t0 and logical or a constant into the CSR",
@@ -145,7 +140,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val CSRRW = basicInstruction(
         "csrrw t0, fcsr, t1", "Atomic Read/Write CSR: read from the CSR into t0 and write t1 into the CSR",
         BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 001 fffff 1110011"
@@ -169,7 +163,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val CSRRWI = basicInstruction(
         "csrrwi t0, fcsr, 10",
         "Atomic Read/Write CSR Immediate: read from the CSR into t0 and write a constant into the CSR",
@@ -194,13 +187,11 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val EBREAK = basicInstruction(
         "ebreak", "Pause execution",
         BasicInstructionFormat.I_FORMAT, "000000000001 00000 000 00000 1110011"
     ) { BreakpointEvent.left() }
 
-    @JvmField
     val ECALL = basicInstruction(
         "ecall", "Issue a system call : Execute the system call specified by value in a7",
         BasicInstructionFormat.I_FORMAT, "000000000000 00000 000 00000 1110011"
@@ -232,7 +223,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val FCLASSD = basicInstruction(
         "fclass.d t1, f1", "Classify a floating point number (64 bit)",
         BasicInstructionFormat.I_FORMAT, "1110001 00000 sssss 001 fffff 1010011"
@@ -241,7 +231,6 @@ object BasicInstructions {
         registerFile.fclass(input, statement.getOperand(0))
     }
 
-    @JvmField
     val FCLASSS = basicInstruction(
         "fclass.s t1, f1", "Classify a floating point number",
         BasicInstructionFormat.I_FORMAT, "1110000 00000 sssss 001 fffff 1010011"
@@ -250,7 +239,6 @@ object BasicInstructions {
         registerFile.fclass(input, statement.getOperand(0))
     }
 
-    @JvmField
     val FCVTDL = basicInstruction(
         "fcvt.d.l f1, t1, dyn", "Convert double from long: Assigns the value of t1 to f1",
         BasicInstructionFormat.I_FORMAT, "1101001 00010 sssss ttt fffff 1010011"
@@ -270,7 +258,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val FCVTDLU = basicInstruction(
         "fcvt.d.lu f1, t1, dyn", "Convert double from unsigned long: Assigns the value of t1 to f1",
         BasicInstructionFormat.I_FORMAT, "1101001 00011 sssss ttt fffff 1010011"
@@ -287,7 +274,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val FCVTDS = basicInstruction(
         "fcvt.d.s f1, f2, dyn", "Convert a float to a double: Assigned the value of f2 to f1",
         BasicInstructionFormat.R4_FORMAT, "0100001 00000 sssss ttt fffff 1010011"
@@ -302,7 +288,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val FCVTDW = basicInstruction(
         "fcvt.d.w f1, t1, dyn", "Convert double from integer: Assigns the value of t1 to f1",
         BasicInstructionFormat.I_FORMAT, "1101001 00000 sssss ttt fffff 1010011"
@@ -319,7 +304,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val FCVTDWU = basicInstruction(
         "fcvt.d.wu f1, t1, dyn", "Convert double from unsigned integer: Assigns the value of t1 to f1",
         BasicInstructionFormat.I_FORMAT, "1101001 00001 sssss ttt fffff 1010011"
@@ -336,7 +320,6 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
     val FCVTLD = basicInstruction(
         "fcvt.l.d t1, f1, dyn", "Convert 64 bit integer from double: Assigns the value of f1 (rounded) to t1",
         BasicInstructionFormat.I_FORMAT, "1100001 00010 sssss ttt fffff 1010011"
@@ -351,7 +334,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTLS = basicInstruction(
         "fcvt.l.s t1, f1, dyn", "Convert 64 bit integer from float: Assigns the value of f1 (rounded) to t1",
         BasicInstructionFormat.I_FORMAT, "1100000 00010 sssss ttt fffff 1010011"
@@ -366,7 +349,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTLUD = basicInstruction(
         "fcvt.lu.d t1, f1, dyn",
         "Convert unsigned 64 bit integer from double: Assigns the value of f1 (rounded) to t1",
@@ -382,7 +365,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTLUS = basicInstruction(
         "fcvt.lu.s t1, f1, dyn",
         "Convert unsigned 64 bit integer from float: Assigns the value of f1 (rounded) to t1",
@@ -398,7 +381,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTSD = basicInstruction(
         "fcvt.s.d f1, f2, dyn", "Convert a double to a float: Assigned the value of f2 to f1",
         BasicInstructionFormat.R4_FORMAT, "0100000 00001 sssss ttt fffff 1010011"
@@ -413,7 +396,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTSL = basicInstruction(
         "fcvt.s.l f1, t1, dyn", "Convert float from long: Assigns the value of t1 to f1",
         BasicInstructionFormat.I_FORMAT, "1101000 00010 sssss ttt fffff 1010011"
@@ -430,7 +413,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTSLU = basicInstruction(
         "fcvt.s.lu f1, t1, dyn", "Convert float from unsigned long: Assigns the value of t1 to f1",
         BasicInstructionFormat.I_FORMAT, "1101000 00011 sssss ttt fffff 1010011"
@@ -446,7 +429,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTSW = basicInstruction(
         "fcvt.s.w f1, t1, dyn", "Convert float from integer: Assigns the value of t1 to f1",
         BasicInstructionFormat.I_FORMAT, "1101000 00000 sssss ttt fffff 1010011"
@@ -463,7 +446,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTSWU = basicInstruction(
         "fcvt.s.wu f1, t1, dyn", "Convert float from unsigned integer: Assigns the value of t1 to f1",
         BasicInstructionFormat.I_FORMAT, "1101000 00001 sssss ttt fffff 1010011"
@@ -480,7 +463,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTWD = basicInstruction(
         "fcvt.w.d t1, f1, dyn", "Convert integer from double: Assigns the value of f1 (rounded) to t1",
         BasicInstructionFormat.I_FORMAT, "1100001 00000 sssss ttt fffff 1010011"
@@ -495,7 +478,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTWS = basicInstruction(
         "fcvt.w.s t1, f1, dyn", "Convert integer from float: Assigns the value of f1 (rounded) to t1",
         BasicInstructionFormat.I_FORMAT, "1100000 00000 sssss ttt fffff 1010011"
@@ -510,7 +493,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTWUD = basicInstruction(
         "fcvt.wu.d t1, f1, dyn", "Convert unsinged integer from double: Assigns the value of f1 (rounded) to t1",
         BasicInstructionFormat.I_FORMAT, "1100001 00001 sssss ttt fffff 1010011"
@@ -525,7 +508,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FCVTWUS = basicInstruction(
         "fcvt.wu.s t1, f1, dyn", "Convert unsinged integer from float: Assigns the value of f1 (rounded) to t1",
         BasicInstructionFormat.I_FORMAT, "1100000 00001 sssss ttt fffff 1010011"
@@ -540,7 +523,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FENCE = basicInstruction(
         "fence 1, 1",
         "Ensure that IO and memory accesses before the fence happen before the following IO and memory accesses " +
@@ -553,7 +536,7 @@ object BasicInstructions {
         Unit.right()
     }
 
-    @JvmField
+
     val FENCEI = basicInstruction(
         "fence.i", "Ensure that stores to instruction memory are visible to instruction fetches",
         BasicInstructionFormat.I_FORMAT, "0000 0000 0000 00000 001 00000 0001111"
@@ -563,7 +546,7 @@ object BasicInstructions {
         Unit.right()
     }
 
-    @JvmField
+
     val FEQD = basicInstruction(
         "feq.d t1, f1, f2", "Floating EQuals (64 bit): if f1 = f2, set t1 to 1, else set t1 to 0",
         BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 010 fffff 1010011"
@@ -578,7 +561,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FEQS = basicInstruction(
         "feq.s t1, f1, f2", "Floating EQuals: if f1 = f2, set t1 to 1, else set t1 to 0",
         BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 010 fffff 1010011"
@@ -593,7 +576,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FLD = basicInstruction(
         "fld f1, -100(t1)", "Load a double from memory",
         BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 011 fffff 0000111"
@@ -609,7 +592,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FLED = basicInstruction(
         "fle.d t1, f1, f2", "Floating Less than or Equals (64 bit): if f1 <= f2, set t1 to 1, else set t1 to 0",
         BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 000 fffff 1010011"
@@ -624,7 +607,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FLES = basicInstruction(
         "fle.s t1, f1, f2", "Floating Less than or Equals: if f1 <= f2, set t1 to 1, else set t1 to 0",
         BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 000 fffff 1010011"
@@ -642,7 +625,7 @@ object BasicInstructions {
 
     // TODO: Implement everything here
 
-    @JvmField
+
     val FLTD = basicInstruction(
         "flt.d t1, f1, f2", "Floating Less Than (64 bit): if f1 < f2, set t1 to 1, else set t1 to 0",
         BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 001 fffff 1010011"
@@ -658,7 +641,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FLTS = basicInstruction(
         "flt.s t1, f1, f2", "Floating Less Than: if f1 < f2, set t1 to 1, else set t1 to 0",
         BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 001 fffff 1010011"
@@ -674,7 +657,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FLW = basicInstruction(
         "flw f1, -100(t1)", "Load a float from memory",
         BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 0000111"
@@ -690,7 +673,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FMVDX = basicInstruction(
         "fmv.d.x f1, t1", "Move float: move bits representing a double from an 64 bit integer register",
         BasicInstructionFormat.I_FORMAT, "1111001 00000 sssss 000 fffff 1010011"
@@ -699,7 +682,7 @@ object BasicInstructions {
         fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
+
     val FMVSX = basicInstruction(
         "fmv.s.x f1, t1", "Move float: move bits representing a float from an integer register",
         BasicInstructionFormat.I_FORMAT, "1111000 00000 sssss 000 fffff 1010011"
@@ -708,7 +691,7 @@ object BasicInstructions {
         fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
+
     val FMVXD = basicInstruction(
         "fmv.x.d t1, f1", "Move double: move bits representing a double to an 64 bit integer register",
         BasicInstructionFormat.I_FORMAT, "1110001 00000 sssss 000 fffff 1010011"
@@ -717,7 +700,7 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
+
     val FMVXS = basicInstruction(
         "fmv.x.s t1, f1", "Move float: move bits representing a float to an integer register",
         BasicInstructionFormat.I_FORMAT, "1110000 00000 sssss 000 fffff 1010011"
@@ -726,7 +709,7 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
+
     val FSD = basicInstruction(
         "fsd f1, -100(t1)", "Store a double to memory",
         BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 011 sssss 0100111"
@@ -740,7 +723,7 @@ object BasicInstructions {
         }.ignoreOk()
     }
 
-    @JvmField
+
     val FSGNJD = basicInstruction(
         "fsgnj.d f1, f2, f3",
         "Floating point sign injection (64 bit): replace the sign bit of f2 with the sign bit of f3 and assign it" +
@@ -753,7 +736,7 @@ object BasicInstructions {
         fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result).ignoreOk()
     }
 
-    @JvmField
+
     val FSGNJND = basicInstruction(
         "fsgnjn.d f1, f2, f3",
         "Floating point sign injection (inverted 64 bit):  replace the sign bit of f2 with the opposite of sign " +
@@ -766,7 +749,7 @@ object BasicInstructions {
         fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result).ignoreOk()
     }
 
-    @JvmField
+
     val FSGNJNS = basicInstruction(
         "fsgnjn.s f1, f2, f3",
         "Floating point sign injection (inverted):  replace the sign bit of f2 with the opposite of sign bit of " +
@@ -779,7 +762,7 @@ object BasicInstructions {
         fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result)
     }
 
-    @JvmField
+
     val FSGNJS = basicInstruction(
         "fsgnj.s f1, f2, f3",
         "Floating point sign injection: replace the sign bit of f2 with the sign bit of f3 and assign it to f1",
@@ -790,7 +773,7 @@ object BasicInstructions {
         fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result)
     }
 
-    @JvmField
+
     val FSGNJXD = basicInstruction(
         "fsgnjx.d f1, f2, f3",
         "Floating point sign injection (xor 64 bit):  xor the sign bit of f2 with the sign bit of f3 and assign " +
@@ -804,7 +787,7 @@ object BasicInstructions {
         fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result).ignoreOk()
     }
 
-    @JvmField
+
     val FSGNJXS = basicInstruction(
         "fsgnjx.s f1, f2, f3",
         "Floating point sign injection (xor):  xor the sign bit of f2 with the sign bit of f3 and assign it to f1",
@@ -817,7 +800,7 @@ object BasicInstructions {
         fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result)
     }
 
-    @JvmField
+
     val FSQRTD = basicInstruction(
         "fsqrt.d f1, f2, dyn", "Floating SQuare RooT (64 bit): Assigns f1 to the square root of f2",
         BasicInstructionFormat.I_FORMAT, "0101101 00000 sssss ttt fffff 1010011"
@@ -835,7 +818,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FSQRTS = basicInstruction(
         "fsqrt.s f1, f2, dyn", "Floating SQuare RooT: Assigns f1 to the square root of f2",
         BasicInstructionFormat.I_FORMAT, "0101100 00000 sssss ttt fffff 1010011"
@@ -853,7 +836,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val FSW = basicInstruction(
         "fsw f1, -100(t1)", "Store a float to memory",
         BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 010 sssss 0100111"
@@ -866,7 +849,7 @@ object BasicInstructions {
         }.ignoreOk()
     }
 
-    @JvmField
+
     val JAL = basicInstruction(
         "jal t1, target",
         "Jump and link : Set t1 to Program Counter (return address) then jump to statement at target address",
@@ -883,7 +866,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val JALR = basicInstruction(
         "jalr t1, t2, -100",
         "Jump and link register: Set t1 to Program Counter (return address) then jump to statement at t2 + " +
@@ -902,7 +885,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val LUI = basicInstruction(
         "lui t1,100000",
         "Load upper immediate: set t1 to 20-bit followed by 12 0s",
@@ -913,7 +896,7 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), shiftedValue).ignoreOk()
     }
 
-    @JvmField
+
     val SLLI32 = basicInstruction(
         "slli t1,t2,10",
         "Shift left logical : Set t1 to result of shifting t2 left by number of bits specified by immediate",
@@ -926,7 +909,7 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
+
     val SLLI64 = basicInstruction(
         "slli t1,t2,33",
         "Shift left logical : Set t1 to result of shifting t2 left by number of bits specified by immediate",
@@ -936,7 +919,7 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
+
     val SLLIW = basicInstruction(
         "slliw t1,t2,10",
         "Shift left logical (32 bit): Set t1 to result of shifting t2 left by number of bits specified by " +
@@ -950,7 +933,6 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
     val SRAI32 = basicInstruction(
         "srai t1,t2,10",
         "Shift right arithmetic : Set t1 to result of sign-extended shifting t2 right by number of bits specified" +
@@ -963,7 +945,6 @@ object BasicInstructions {
 
     }
 
-    @JvmField
     val SRAI64 = basicInstruction(
         "srai t1,t2,33",
         "Shift right arithmetic : Set t1 to result of sign-extended shifting t2 right by number of bits specified" +
@@ -975,7 +956,6 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), shifted).ignoreOk()
     }
 
-    @JvmField
     val SRAIW = basicInstruction(
         "sraiw t1,t2,10",
         "Shift right arithmetic (32 bit): Set t1 to result of sign-extended shifting t2 right by number of bits " +
@@ -987,7 +967,7 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
+
     val SRLI32 = basicInstruction(
         "srli t1,t2,10",
         "Shift right logical : Set t1 to result of shifting t2 right by number of bits specified by immediate",
@@ -998,7 +978,6 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
     val SRLI64 = basicInstruction(
         "srli t1,t2,33",
         "Shift right logical : Set t1 to result of shifting t2 right by number of bits specified by immediate",
@@ -1010,7 +989,6 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), shifted).ignoreOk()
     }
 
-    @JvmField
     val SRLIW = basicInstruction(
         "srliw t1,t2,10",
         "Shift right logical (32 bit): Set t1 to result of shifting t2 right by number of bits specified by " +
@@ -1021,7 +999,7 @@ object BasicInstructions {
         registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
     }
 
-    @JvmField
+
     val URET = basicInstruction(
         "uret", "Return from handling an interrupt or exception (to uepc)",
         BasicInstructionFormat.I_FORMAT, "000000000010 00000 000 00000 1110011"
@@ -1041,7 +1019,7 @@ object BasicInstructions {
         }
     }
 
-    @JvmField
+
     val WFI = basicInstruction(
         "wfi", "Wait for Interrupt",
         BasicInstructionFormat.I_FORMAT, "000100000101 00000 000 00000 1110011"

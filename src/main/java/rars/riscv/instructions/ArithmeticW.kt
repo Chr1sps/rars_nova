@@ -28,45 +28,38 @@ class ArithmeticW private constructor(
     }
 
     companion object {
-        @JvmField
         val ADDW = ArithmeticW(
             "addw t1,t2,t3", "Addition: set t1 to (t2 plus t3) using only the lower 32 bits",
             "0000000", "000", Arithmetic.ADD
         )
 
-        @JvmField
         val DIVUW = ArithmeticW(
             "divuw t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division limited to 32 bits",
             "0000001", "101", Arithmetic.DIVU
         )
 
-        @JvmField
         val DIVW = ArithmeticW(
             "divw t1,t2,t3", "Division: set t1 to the result of t2/t3 using only the lower 32 bits",
             "0000001", "100", Arithmetic.DIV
         )
 
-        @JvmField
         val MULW = ArithmeticW(
             "mulw t1,t2,t3",
             "Multiplication: set t1 to the lower 32 bits of t2*t3 using only the lower 32 bits of the input",
             "0000001", "000", Arithmetic.MUL
         )
 
-        @JvmField
         val REMUW = ArithmeticW(
             "remuw t1,t2,t3",
             "Remainder: set t1 to the remainder of t2/t3 using unsigned division limited to 32 bits",
             "0000001", "111", Arithmetic.REMU
         )
 
-        @JvmField
         val REMW = ArithmeticW(
             "remw t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3 using only the lower 32 bits",
             "0000001", "110", Arithmetic.REM
         )
 
-        @JvmField
         val SLLW = ArithmeticW(
             "sllw t1,t2,t3",
             "Shift left logical (32 bit): Set t1 to result of shifting t2 left by number of bits specified by value in low-order 5 bits of t3",
@@ -75,7 +68,6 @@ class ArithmeticW private constructor(
             Arithmetic.SLL
         )
 
-        @JvmField
         val SRAW = ArithmeticW(
             "sraw t1,t2,t3",
             "Shift left logical (32 bit): Set t1 to result of shifting t2 left by number of bits specified by value in low-order 5 bits of t3",
@@ -84,7 +76,6 @@ class ArithmeticW private constructor(
             Arithmetic.SRA
         )
 
-        @JvmField
         val SRLW = ArithmeticW(
             "srlw t1,t2,t3",
             "Shift left logical (32 bit): Set t1 to result of shifting t2 left by number of bits specified by value in low-order 5 bits of t3",
@@ -93,7 +84,6 @@ class ArithmeticW private constructor(
             Arithmetic.SRL
         )
 
-        @JvmField
         val SUBW = ArithmeticW(
             "subw t1,t2,t3", "Subtraction: set t1 to (t2 minus t3) using only the lower 32 bits",
             "0100000", "000", Arithmetic.SUB

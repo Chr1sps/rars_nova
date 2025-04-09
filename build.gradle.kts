@@ -29,6 +29,8 @@ dependencies {
     jflexConfiguration("de.jflex:jflex:1.9.1")
     implementation("info.picocli:picocli:4.7.6")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-html:0.12.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.12.0")
 
     testCompileOnly("org.jetbrains:annotations:24.0.0")
     testImplementation("org.hamcrest:hamcrest:2.2")

@@ -77,38 +77,32 @@ class Floating(
             compute
         )
 
-        @JvmField
         val FADDS = floating(
             "fadd.s", "Floating ADD: assigns f1 to f2 + f3", "0000000",
             Float32::add
         )
 
-        @JvmField
         val FDIVS = floating(
             "fdiv.s", "Floating DIVide: assigns f1 to f2 / f3", "0001100",
             Float32::divide
         )
 
-        @JvmField
         val FMAXS = floating(
             "fmax.s", "Floating MAXimum: assigns f1 to the larger of f1 and f3",
             "0010100", "001",
             Float32::max
         )
 
-        @JvmField
         val FMINS = floating(
             "fmin.s", "Floating MINimum: assigns f1 to the smaller of f1 and f3", "0010100", "000",
             Float32::min
         )
 
-        @JvmField
         val FMULS = floating(
             "fmul.s", "Floating MULtiply: assigns f1 to f2 * f3", "0001000",
             Float32::multiply
         )
 
-        @JvmField
         val FSUBS = floating(
             "fsub.s", "Floating SUBtract: assigns f1 to f2 - f3", "0000100",
             Float32::subtract

@@ -6,7 +6,7 @@ import rars.riscv.lang.lexing.RVTokenType
  * Sometimes it's nice to group a couple of different token types together in a
  * single color setting. This enum helps with that.
  */
-enum class TokenSettingKey(@JvmField val description: String) {
+enum class TokenSettingKey(val description: String) {
     ERROR("Errors"),
 
     COMMENT("Comments"),

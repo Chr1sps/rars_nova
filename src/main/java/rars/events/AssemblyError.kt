@@ -10,4 +10,4 @@ import rars.ErrorList
  * @version July 2017
  */
 @JvmInline
-value class AssemblyError(@JvmField val errors: ErrorList)
+value class AssemblyError(val errors: ErrorList)

@@ -167,19 +167,11 @@ public final class MacroPool {
         return false;
     }
 
-    /**
-     * <p>popFromCallStack.</p>
-     */
     public void popFromCallStack() {
         this.callStack.removeLast();
         this.callStackOrigLines.removeLast();
     }
 
-    /**
-     * <p>getExpansionHistory.</p>
-     *
-     * @return a {@link java.lang.String} object
-     */
     public @NotNull String getExpansionHistory() {
         final StringBuilder ret = new StringBuilder();
         for (int i = 0; i < this.callStackOrigLines.size(); i++) {

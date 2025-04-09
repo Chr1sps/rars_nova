@@ -66,7 +66,7 @@ public final class EditPane extends JPanel {
 
         final var boolSettings = allSettings.boolSettings;
         this.sourceCode.setLineHighlightEnabled(boolSettings.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
-        boolSettings.onChangeListenerHook.subscribe(ignored -> {
+        boolSettings.getOnChangeListenerHook().subscribe(ignored -> {
             this.sourceCode.setLineHighlightEnabled(
                 boolSettings.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
             );
@@ -76,7 +76,7 @@ public final class EditPane extends JPanel {
         final var otherSettings = allSettings.otherSettings;
         this.sourceCode.setCaretBlinkRate(otherSettings.getCaretBlinkRate());
         this.sourceCode.setTabSize(otherSettings.getEditorTabSize());
-        otherSettings.onChangeListenerHook.subscribe(ignore -> {
+        otherSettings.getOnChangeListenerHook().subscribe(ignore -> {
             this.sourceCode.setCaretBlinkRate(otherSettings.getCaretBlinkRate());
             this.sourceCode.setTabSize(otherSettings.getEditorTabSize());
             return Unit.INSTANCE;

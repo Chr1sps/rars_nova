@@ -35,7 +35,6 @@ interface OtherSettings {
 class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
     private val onChangeDispatcher = ListenerDispatcher<Void?>()
 
-    @JvmField
     val onChangeListenerHook = this.onChangeDispatcher.hook
 
     override var exceptionHandler: String
