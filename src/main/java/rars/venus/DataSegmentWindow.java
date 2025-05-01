@@ -6,14 +6,14 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
-import rars.notices.AccessNotice;
+import rars.api.DisplayFormat;
+import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.memory.AbstractMemoryConfiguration;
 import rars.riscv.hardware.memory.MemoryListenerHandle;
 import rars.settings.*;
 import rars.util.BinaryUtilsKt;
-import rars.util.ConversionUtils;
 import rars.venus.run.RunSpeedPanel;
 import rars.venus.util.RepeatButton;
 
@@ -116,7 +116,7 @@ public final class DataSegmentWindow extends JInternalFrame {
      *     base (10 or 16)
      */
     public DataSegmentWindow(
-        final @NotNull NumberDisplayBaseChooser @NotNull [] choosers,
+        final @NotNull NumberDisplayBasePicker @NotNull [] choosers,
         final @NotNull ExecutePane executePane,
         final @NotNull AllSettings allSettings
     ) {
@@ -211,7 +211,7 @@ public final class DataSegmentWindow extends JInternalFrame {
         navButtons.add(this.nextButton);
         features.add(navButtons);
         features.add(this.baseAddressSelector);
-        for (final NumberDisplayBaseChooser chooser : choosers) {
+        for (final NumberDisplayBasePicker chooser : choosers) {
             features.add(chooser);
         }
         final JCheckBox asciiDisplayCheckBox = new JCheckBox("ASCII", this.asciiDisplay);
@@ -268,7 +268,7 @@ public final class DataSegmentWindow extends JInternalFrame {
             desiredComboBoxIndex = DataSegmentWindow.EXTERN_BASE_ADDRESS_INDEX;
         }
         // Check distance from global pointer; can be either side of it...
-        final var gpValue = ConversionUtils.longLowerHalfToInt(Globals.REGISTER_FILE.gp.getValue());
+        final var gpValue = (int) Globals.REGISTER_FILE.gp.getValue();
         thisDistance = Math.abs(address - gpValue); // 
         // distance from
         // global
@@ -299,13 +299,18 @@ public final class DataSegmentWindow extends JInternalFrame {
 
     // Little helper. Is called when headers set up and each time number base
     // changes.
-    private static String getHeaderStringForColumn(final int i, final int base) {
-        return (i == DataSegmentWindow.ADDRESS_COLUMN) ? "Address" :
-            "Value (+" + Integer.toString((i - 1) * DataSegmentWindow.BYTES_PER_VALUE, base) + ')';
+    private static @NotNull String getHeaderStringForColumn(final int i, final @NotNull DisplayFormat base) {
+        final var offset = (i - 1) * DataSegmentWindow.BYTES_PER_VALUE;
+        return (i == DataSegmentWindow.ADDRESS_COLUMN)
+            ? "Address"
+            : "Value (+%s)".formatted(BinaryUtilsKt.intFormatToString(
+                offset,
+                base
+            ));
     }
 
     public @NotNull Unit processMemoryAccessNotice(final @NotNull MemoryAccessNotice notice) {
-        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+        if (notice.accessType == AccessType.WRITE) {
             // Uses the same highlighting technique as for Text Segment -- see
             // AddressCellRenderer class in DataSegmentWindow.java.
             final var address = notice.address;
@@ -499,15 +504,15 @@ public final class DataSegmentWindow extends JInternalFrame {
     // Returns the JScrollPane for the Address/Data part of the Data Segment window.
     private JScrollPane generateDataPanel() {
         DataSegmentWindow.dataData = new Object[DataSegmentWindow.NUMBER_OF_ROWS][DataSegmentWindow.NUMBER_OF_COLUMNS];
-        final int valueBase = this.executePane.getValueDisplayBase();
-        final int addressBase = this.executePane.getAddressDisplayBase();
+        final var valueBase = this.executePane.getValueDisplayFormat();
+        final var addressBase = this.executePane.getAddressDisplayFormat();
         int address = this.homeAddress;
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             DataSegmentWindow.dataData[row][DataSegmentWindow.ADDRESS_COLUMN] =
-                NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase);
+                NumberDisplayBasePicker.formatUnsignedInteger(address, addressBase);
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 final var value = rightOr(Globals.MEMORY_INSTANCE.getRawWord(address), 0);
-                NumberDisplayBaseChooser.formatNumber(
+                NumberDisplayBasePicker.formatNumber(
                     value,
                     valueBase
                 );
@@ -586,11 +591,11 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.addressColumn = -1;
     }
 
-    private int getValueDisplayFormat() {
+    private @NotNull DisplayFormat getValueDisplayFormat() {
         if (this.asciiDisplay) {
-            return NumberDisplayBaseChooser.ASCII;
+            return DisplayFormat.ASCII;
         } else {
-            return this.executePane.getValueDisplayBase();
+            return this.executePane.getValueDisplayFormat();
         }
     }
 
@@ -607,13 +612,13 @@ public final class DataSegmentWindow extends JInternalFrame {
         if (this.tablePanel.getComponentCount() == 0) {
             return; // ignore if no content to change
         }
-        final int valueBase = this.getValueDisplayFormat();
-        final int addressBase = this.executePane.getAddressDisplayBase();
+        final var valueBase = this.getValueDisplayFormat();
+        final var addressBase = this.executePane.getAddressDisplayFormat();
         int address = firstAddr;
         final TableModel dataModel = DataSegmentWindow.dataTable.getModel();
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase), row,
+                NumberDisplayBasePicker.formatUnsignedInteger(address, addressBase), row,
                 DataSegmentWindow.ADDRESS_COLUMN
             );
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
@@ -639,7 +644,7 @@ public final class DataSegmentWindow extends JInternalFrame {
                                 boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, false);
                             }
                             ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                                NumberDisplayBaseChooser.formatNumber(displayValue, valueBase), finalRow, finalColumn);
+                                NumberDisplayBasePicker.formatNumber(displayValue, valueBase), finalRow, finalColumn);
                         }
                         // Bug Fix: the following line of code disappeared during the release 4.4 mods,
                         // but is essential to
@@ -652,13 +657,13 @@ public final class DataSegmentWindow extends JInternalFrame {
                         // Now it becomes the "else" part, executed when not in text segment. 
                         else {
                             ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                                NumberDisplayBaseChooser.formatNumber(0, valueBase), finalRow, finalColumn);
+                                NumberDisplayBasePicker.formatNumber(0, valueBase), finalRow, finalColumn);
                         }
                         return Unit.INSTANCE;
                     },
                     value -> {
                         ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                            NumberDisplayBaseChooser.formatNumber(
+                            NumberDisplayBasePicker.formatNumber(
                                 value,
                                 valueBase
                             ),
@@ -689,9 +694,9 @@ public final class DataSegmentWindow extends JInternalFrame {
         final int row = offset / DataSegmentWindow.BYTES_PER_ROW;
         final int column = (offset % DataSegmentWindow.BYTES_PER_ROW) / DataSegmentWindow.BYTES_PER_VALUE + 1; // 
         // column 0 reserved for address
-        final int valueBase = this.executePane.getValueDisplayBase();
+        final var valueBase = this.executePane.getValueDisplayFormat();
         ((DataTableModel) DataSegmentWindow.dataTable.getModel()).setDisplayAndModelValueAt(
-            NumberDisplayBaseChooser.formatNumber(value, valueBase),
+            NumberDisplayBasePicker.formatNumber(value, valueBase),
             row, column
         );
     }
@@ -705,10 +710,10 @@ public final class DataSegmentWindow extends JInternalFrame {
         if (this.tablePanel.getComponentCount() == 0) {
             return; // ignore if no content to change
         }
-        final int addressBase = this.executePane.getAddressDisplayBase();
+        final var addressBase = this.executePane.getAddressDisplayFormat();
         int address = this.firstAddress;
         for (int i = 0; i < DataSegmentWindow.NUMBER_OF_ROWS; i++) {
-            final String formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(address, addressBase);
+            final String formattedAddress = NumberDisplayBasePicker.formatUnsignedInteger(address, addressBase);
             ((DataTableModel) DataSegmentWindow.dataTable.getModel()).setDisplayAndModelValueAt(formattedAddress, i, 0);
             address += DataSegmentWindow.BYTES_PER_ROW;
         }
@@ -740,12 +745,12 @@ public final class DataSegmentWindow extends JInternalFrame {
      * Reset all data display values to 0
      */
     public void resetValues() {
-        final int valueBase = this.executePane.getValueDisplayBase();
+        final var valueBase = this.executePane.getValueDisplayFormat();
         final TableModel dataModel = DataSegmentWindow.dataTable.getModel();
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 ((DataTableModel) dataModel)
-                    .setDisplayAndModelValueAt(NumberDisplayBaseChooser.formatNumber(0, valueBase), row, column);
+                    .setDisplayAndModelValueAt(NumberDisplayBasePicker.formatNumber(0, valueBase), row, column);
             }
         }
         this.disableAllButtons();
@@ -1068,8 +1073,8 @@ public final class DataSegmentWindow extends JInternalFrame {
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
-            final int valueBase = DataSegmentWindow.this.executePane.getValueDisplayBase();
-            this.data[row][col] = NumberDisplayBaseChooser.formatNumber(parsed, valueBase);
+            final var valueBase = DataSegmentWindow.this.executePane.getValueDisplayFormat();
+            this.data[row][col] = NumberDisplayBasePicker.formatNumber(parsed, valueBase);
             this.fireTableCellUpdated(row, col);
         }
 
@@ -1113,8 +1118,8 @@ public final class DataSegmentWindow extends JInternalFrame {
                     column == DataSegmentWindow.this.addressColumn) {
                 final var style = highlightingSettings.getDataSegmentHighlightingStyle();
                 if (style != null) {
-                    cell.setBackground(style.background());
-                    cell.setForeground(style.foreground());
+                    cell.setBackground(style.getBackground());
+                    cell.setForeground(style.getForeground());
                     cell.setFont(applyStyle(defaultFont, style));
                 } else {
                     cell.setBackground(theme.backgroundColor);

@@ -24,7 +24,7 @@ class SettingsExceptionHandlerAction(
     mainUI: VenusUI,
     private val boolSettings: BoolSettingsImpl,
     private val otherSettings: OtherSettingsImpl,
-) : GuiAction(name, null, descrip, null, null, mainUI) {
+) : GuiAction(name, descrip, null, null, null, mainUI) {
 
     override fun actionPerformed(e: ActionEvent?) {
         JDialog(mainUI, "Exception Handler", true).apply {

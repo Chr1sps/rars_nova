@@ -6,6 +6,7 @@ import arrow.core.raise.ensure
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import rars.*
+import rars.api.DisplayFormat
 import rars.events.AssemblyError
 import rars.riscv.BasicInstruction
 import rars.riscv.ExtendedInstruction
@@ -16,7 +17,7 @@ import rars.settings.BoolSetting
 import rars.util.toHexStringWithPrefix
 import rars.util.translateToInt
 import rars.util.translateToLong
-import rars.venus.NumberDisplayBaseChooser
+import rars.venus.NumberDisplayBasePicker
 
 /**
  * An Assembler is capable of assembling a RISCV program. It has only one public
@@ -1153,24 +1154,21 @@ class Assembler {
                                 'f' -> theChar = '\u000c'
                                 '0' -> theChar = '\u0000'
                                 'u' -> {
-                                    val codePoint = quote.substring(j + 1, j + 5)
                                     try {
-                                        // get the UTF-8 codepoint following the
-                                        // unicode escape sequence
-                                        theChar = Character.toChars(codePoint.toInt(16))[0] // converts the
-                                        // codepoint to
-                                        // single character
+                                        val codePoint = quote.substring(j + 1, j + 5)
+                                        try {
+                                            theChar = Character.toChars(codePoint.toInt(16))[0]
+                                        } catch (_: NumberFormatException) {
+                                            errors.addTokenError(
+                                                token,
+                                                "illegal unicode escape: \"\\u$codePoint\""
+                                            )
+                                        }
                                     } catch (_: StringIndexOutOfBoundsException) {
                                         val invalidCodePoint = quote.substring(j + 1)
-                                        val message: String =
-                                            "unicode escape \"\\u$invalidCodePoint\" is incomplete. " +
-                                                "Only escapes with 4 digits are valid."
+                                        val message =
+                                            """Unicode escape "\u$invalidCodePoint" is incomplete. Only escapes with 4 digits are valid."""
                                         errors.addTokenError(token, message)
-                                    } catch (_: NumberFormatException) {
-                                        errors.addTokenError(
-                                            token,
-                                            "illegal unicode escape: \"\\u$codePoint\""
-                                        )
                                     }
                                     j += 4 // skip past the codepoint for next iteration
                                 }
@@ -1299,9 +1297,9 @@ class Assembler {
                 val ps1 = instructions[i]
                 val ps2 = instructions[i + 1]
                 if (ps1.address == ps2.address) {
-                    val formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(
+                    val formattedAddress = NumberDisplayBasePicker.formatUnsignedInteger(
                         ps2.address,
-                        if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)) 16 else 10
+                        if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)) DisplayFormat.HEX else DisplayFormat.DECIMAL
                     )
                     val directiveText = if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(ps2.address))
                         ".text"

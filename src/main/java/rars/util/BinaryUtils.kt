@@ -2,28 +2,15 @@
 
 package rars.util
 
+import rars.api.DisplayFormat
 import java.lang.Double.doubleToRawLongBits
 import java.lang.Double.longBitsToDouble
 import java.lang.Float.floatToIntBits
 import java.lang.Float.intBitsToFloat
 
-/**
- * Translate int value into a String consisting of '1's and '0's. Assumes all 32
- * bits are
- * to be translated.
- *
- * @return String consisting of '1' and '0' characters corresponding to the
- * requested binary sequence.
- */
 @JvmName("intToBinaryString")
-fun Int.toBinaryString(): String = toBinaryString(Int.SIZE_BITS)
-
-@JvmName("intToBinaryString")
-fun Int.toBinaryString(length: Int): String = buildString {
-    for (i in (length - 1) downTo 0) {
-        // Shift this Int right by i bits and mask out all but the lowest order bit.
-        append(if ((this@toBinaryString shr i) and 1 == 1) '1' else '0')
-    }
+fun Int.toBinaryString(length: Int): String = toUInt().toString(radix = 2).padStart(32, '0').let {
+    it.substring(it.length - length)
 }
 
 /**
@@ -204,27 +191,21 @@ fun String.withEscapes(printNonPrintableCodes: Boolean = true): String = buildSt
     }
 }
 
-fun Byte.toEscapedString(): String {
-    return when (this) {
-        '\u0000'.code.toByte() -> "\\0"
-        '\b'.code.toByte() -> "\\b"
-        '\t'.code.toByte() -> "\\t"
-        '\n'.code.toByte() -> "\\n"
-        '\u000b'.code.toByte() -> "\\v"
-        '\u000c'.code.toByte() -> "\\f"
-        '\r'.code.toByte() -> "\\r"
-        '\\'.code.toByte() -> "\\\\"
-        ' '.code.toByte() -> "␣"
-        else -> {
-            if (this in 32..126) {
-                this.toInt().toChar().toString()
-            } else {
-                if (true) {
-                    "\\x%02x".format(this)
-                } else {
-                    " "
-                }
-            }
+fun Byte.toEscapedString(): String = when (this) {
+    '\u0000'.code.toByte() -> "\\0"
+    '\b'.code.toByte() -> "\\b"
+    '\t'.code.toByte() -> "\\t"
+    '\n'.code.toByte() -> "\\n"
+    '\u000b'.code.toByte() -> "\\v"
+    '\u000c'.code.toByte() -> "\\f"
+    '\r'.code.toByte() -> "\\r"
+    '\\'.code.toByte() -> "\\\\"
+    ' '.code.toByte() -> "␣"
+    else -> {
+        if (this in 32..126) {
+            this.toInt().toChar().toString()
+        } else {
+            "\\x%02x".format(this)
         }
     }
 }
@@ -238,18 +219,171 @@ fun Byte.toEscapedString(): String {
  * @return String that represents ASCII equivalent
  */
 @JvmName("intToAscii")
-fun Int.toAscii(): String {
-    val result = StringBuilder(8)
-    this.bytes.forEach {
-        result.append(it.toEscapedString())
+fun Int.toAscii(): String = buildString(capacity = 4) {
+    bytes.forEach { byte ->
+        append(byte.toEscapedString())
     }
-    return result.toString()
 }
 
-val Int.bytes: ByteArray
-    get() = byteArrayOf(
-        (this shr 24).toByte(),
-        (this shr 16).toByte(),
-        (this shr 8).toByte(),
-        this.toByte()
-    )
+@JvmName("longToAscii")
+fun Long.toAscii(): String = buildString(capacity = 16) {
+    bytes.forEach { byte ->
+        append(byte.toEscapedString())
+    }
+}
+
+val Int.bytes
+    get() = ByteArray(4) {
+        (this@bytes shr (24 - it * 8)).toByte()
+    }
+
+val Long.bytes
+    get() = ByteArray(8) {
+        (this shr (56 - it * 8)).toByte()
+    }
+
+/**
+ * Translate String consisting of hexadecimal digits into String consisting of
+ * corresponding binary digits ('1's and '0's). No length limit.
+ * String position 0 will have most-significant bit, position length-1 has
+ * least-significant.
+ *
+ * @param value
+ *     String containing '0', '1', ...'f'
+ *     characters which form hexadecimal. Letters may be either upper
+ *     or lower case.
+ *     Works either with or without leading "Ox".
+ * @return String with equivalent value in binary.
+ */
+fun hexStringToBinaryString(value: String): String {
+    val trimmed = if (value.startsWith("0x", ignoreCase = true)) {
+        value.substring(2)
+    } else {
+        value
+    }
+    return buildString(capacity = trimmed.length * 4) {
+        for (chr in trimmed) {
+            val toAppend = when (chr) {
+                '0' -> "0000"
+                '1' -> "0001"
+                '2' -> "0010"
+                '3' -> "0011"
+                '4' -> "0100"
+                '5' -> "0101"
+                '6' -> "0110"
+                '7' -> "0111"
+                '8' -> "1000"
+                '9' -> "1001"
+                'a', 'A' -> "1010"
+                'b', 'B' -> "1011"
+                'c', 'C' -> "1100"
+                'd', 'D' -> "1101"
+                'e', 'E' -> "1110"
+                'f', 'F' -> "1111"
+                else -> error("Invalid hex character: $chr")
+            }
+            append(toAppend)
+        }
+    }
+}
+
+/**
+ * Translate String consisting of '1's and '0's into String equivalent of the
+ * corresponding
+ * hexadecimal value. No length limit.
+ * String position 0 has most-significant bit, position length-1 has
+ * least-significant.
+ *
+ * @param value
+ *     The String value to convert.
+ * @return String containing '0', '1', ..., 'F' characters which form hexadecimal
+ * equivalent of decoded String.
+ */
+fun binaryStringToHexString(value: String): String {
+    val digits = (value.length + 3) / 4
+    val hexChars = CharArray(digits + 2)
+    hexChars[0] = '0'
+    hexChars[1] = 'x'
+    var position = value.length - 1
+    for (digit in 0..<digits) {
+        var result = 0
+        var pow = 1
+        var rep = 0
+        while (rep < 4 && position >= 0) {
+            if (value[position] == '1') {
+                result += pow
+            }
+            pow *= 2
+            position--
+            rep++
+        }
+        hexChars[digits - digit + 1] = chars[result]
+    }
+    return String(hexChars)
+}
+
+fun Int.bitValue(bit: Int): Int {
+    require(bit in 0..<Int.SIZE_BITS) { "Bit index out of range: $bit" }
+    return (this shr bit) and 1
+}
+
+/**
+ * Returns int representing the bit values of the high order 32 bits of given
+ * 64 bit long value.
+ *
+ * @return int containing high order 32 bits of argument
+ */
+fun Long.upperToInt(): Int = (this ushr Int.SIZE_BITS).toInt()
+
+private val chars = charArrayOf(
+    '0', '1', '2', '3',
+    '4', '5', '6', '7',
+    '8', '9', 'a', 'b',
+    'c', 'd', 'e', 'f'
+)
+
+fun unsignedIntToIntString(value: Int): String = value.toUInt().toString()
+
+/**
+ * Produces a string form of a float given an integer containing
+ * the 32 bit pattern and the numerical base to use (10 or 16). If the
+ * base is 16, the string will be built from the 32 bits. If the
+ * base is 10, the int bits will be converted to float and the
+ * string constructed from that. Seems an odd distinction to make,
+ * except that contents of floating point registers are stored
+ * internally as int bits. If the int bits represent a NaN value
+ * (of which there are many!), converting them to float then calling
+ * formatNumber(float, int) above, causes the float value to become
+ * the canonical NaN value 0x7fc00000. It does not preserve the bit
+ * pattern! Then converting it to hex string yields the canonical NaN.
+ * Not an issue if display base is 10 since result string will be NaN
+ * no matter what the internal NaN value is.
+ *
+ * @param value
+ *     the int bits to be converted to string of corresponding float.
+ * @param format
+ *     the format to use
+ * @return a String equivalent of the value rendered appropriately.
+ */
+fun formatFloatNumber(value: Int, format: DisplayFormat): String {
+    return when (format) {
+        DisplayFormat.DECIMAL -> value.toFloatReinterpreted().toString()
+        DisplayFormat.HEX -> value.toHexStringWithPrefix()
+        DisplayFormat.ASCII -> value.toAscii()
+    }
+}
+
+fun Float.formatToString(format: DisplayFormat): String {
+    return when (format) {
+        DisplayFormat.DECIMAL -> toString()
+        DisplayFormat.HEX -> toInt().toHexStringWithPrefix()
+        DisplayFormat.ASCII -> toInt().toAscii()
+    }
+}
+
+@JvmName("intFormatToString")
+fun Int.formatToString(format: DisplayFormat): String = when (format) {
+    DisplayFormat.DECIMAL -> toString()
+    DisplayFormat.HEX -> toHexStringWithPrefix()
+    DisplayFormat.ASCII -> toAscii()
+}

@@ -28,16 +28,20 @@ class Load private constructor(
     BasicInstructionFormat.I_FORMAT,
     "ssssssssssss ttttt $funct fffff 0000011"
 ) {
-    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
-        val upperImmediate: Int = (statement.getOperand(1) shl 20) shr 20
-        val newValue = load(
-            registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate,
-            memory
-        ).mapLeft { error ->
-            SimulationError.create(statement, error)
-        }.bind()
-        registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).bind()
-    }
+    override suspend fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> =
+        either {
+            val upperImmediate: Int = (statement.getOperand(1) shl 20) shr 20
+            val newValue = load(
+                registerFile.getInt(statement.getOperand(2))!! + upperImmediate,
+                memory
+            ).mapLeft { error ->
+                SimulationError.create(statement, error)
+            }.bind()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                newValue
+            ).bind()
+        }
 
     companion object {
         private fun load(
@@ -57,7 +61,9 @@ class Load private constructor(
             "lbu t1, -100(t2)",
             "Set t1 to zero-extended 8-bit value from effective memory byte address",
             "100"
-        ) { address, memory -> memory.getByte(address).map { it.toLong() and 0xFFL } }
+        ) { address, memory ->
+            memory.getByte(address).map { it.toLong() and 0xFFL }
+        }
 
         val LH = load(
             "lh t1, -100(t2)",
@@ -69,7 +75,9 @@ class Load private constructor(
             "lhu t1, -100(t2)",
             "Set t1 to zero-extended 16-bit value from effective memory halfword address",
             "101"
-        ) { address, memory -> memory.getHalf(address).map { it.toLong() and 0xFFFFL } }
+        ) { address, memory ->
+            memory.getHalf(address).map { it.toLong() and 0xFFFFL }
+        }
 
         val LW = load(
             "lw t1, -100(t2)",
@@ -84,7 +92,11 @@ class Load private constructor(
         ) { address, memory -> memory.getDoubleWord(address) }
 
         val LWU = load(
-            "lwu t1, -100(t2)", "Set t1 to contents of effective memory word address without sign-extension", "110"
-        ) { address, memory -> memory.getWord(address).map { it.toLong() and 0xFFFFFFFFL } }
+            "lwu t1, -100(t2)",
+            "Set t1 to contents of effective memory word address without sign-extension",
+            "110"
+        ) { address, memory ->
+            memory.getWord(address).map { it.toLong() and 0xFFFFFFFFL }
+        }
     }
 }

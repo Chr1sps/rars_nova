@@ -1,8 +1,7 @@
 package rars.notices
 
 import org.jetbrains.annotations.Contract
-import rars.events.SimulationError
-import rars.simulator.Simulator
+import rars.simulator.StoppingEvent
 import rars.venus.run.RunSpeedPanel
 
 /**
@@ -14,18 +13,17 @@ import rars.venus.run.RunSpeedPanel
  * @version January 2009
  */
 class SimulatorNotice(
-    @JvmField val action: Action?,
+    @JvmField val action: Action,
     @JvmField val maxSteps: Int,
     @JvmField val runSpeed: Double,
     @JvmField val programCounter: Int,
-    @JvmField val reason: Simulator.Reason?,
-    @JvmField val error: SimulationError?,
-    @JvmField val done: Boolean
+    @JvmField val event: StoppingEvent,
 ) {
     @Contract(pure = true)
     override fun toString(): String {
         val prefix = if (this.action == Action.START) "START" else "STOP"
-        val speed = if (this.runSpeed == RunSpeedPanel.UNLIMITED_SPEED) "unlimited" else "${this.runSpeed} inst/sec"
+        val speed =
+            if (this.runSpeed == RunSpeedPanel.UNLIMITED_SPEED) "unlimited" else "${this.runSpeed} inst/sec"
         return ("$prefix Max Steps ${this.maxSteps} Speed $speed Prog Ctr ${this.programCounter}")
     }
 

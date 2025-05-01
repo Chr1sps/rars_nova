@@ -22,6 +22,7 @@ interface OtherSettings {
          * @return true if backstepping is permitted, false otherwise.
          */
         @get: JvmStatic
+        @Deprecated("To be replaced with something non-static.", level = DeprecationLevel.WARNING)
         val isBacksteppingEnabled: Boolean get() = Globals.PROGRAM?.backStepper?.isEnabled == true
     }
 

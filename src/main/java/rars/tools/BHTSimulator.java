@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.notices.AccessNotice;
+import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.instructions.Branch;
 import rars.venus.VenusUI;
@@ -286,7 +287,7 @@ public final class BHTSimulator extends AbstractTool implements ActionListener {
             return;
         }
 
-        if (notice.accessType == AccessNotice.AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
+        if (notice.accessType == AccessType.READ && notice instanceof final MemoryAccessNotice memAccNotice) {
 
             // now it is safe to make a cast of the notice
 

@@ -26,11 +26,16 @@ import javax.swing.text.BadLocationException
 import javax.swing.text.Caret
 import javax.swing.text.Document
 
-class RSyntaxTextAreaBasedEditor(
+class RSTABasedEditor(
     theme: EditorTheme,
     fontSettings: FontSettings
 ) : TextEditingArea {
-    private val textArea: RSyntaxTextArea = RSyntaxTextArea()
+    private val textArea: RSyntaxTextArea = RSyntaxTextArea().apply {
+        syntaxEditingStyle = SYNTAX_STYLE_RISCV
+        isCodeFoldingEnabled = true
+        markOccurrences = true
+        markOccurrencesDelay = 1
+    }
     private val scrollPane: RTextScrollPane = RTextScrollPane(textArea)
     private val gutter: Gutter = scrollPane.gutter
 
@@ -73,12 +78,8 @@ class RSyntaxTextAreaBasedEditor(
     override var text: String by textArea::text
 
     init {
-        this.font = fontSettings.currentFont
+        font = fontSettings.currentFont
         this.theme = theme
-        this.textArea.syntaxEditingStyle = SYNTAX_STYLE_RISCV
-        this.textArea.isCodeFoldingEnabled = true
-        this.textArea.markOccurrences = true
-        this.textArea.markOccurrencesDelay = 1
     }
 
     override fun copy() = textArea.copy()
@@ -162,26 +163,28 @@ class RSyntaxTextAreaBasedEditor(
     override var foreground: Color
         get() = textArea.foreground
         set(color) {
-            this.textArea.foreground = color
-            this.gutter.foreground = color
-            this.gutter.foldIndicatorForeground = color
-            this.gutter.foldIndicatorArmedForeground = color
-            this.gutter.lineNumberColor = theme.foregroundColor
+            textArea.foreground = color
+            gutter.apply {
+                foreground = color
+                foldIndicatorForeground = color
+                foldIndicatorArmedForeground = color
+                lineNumberColor = theme.foregroundColor
+            }
         }
 
     override var background: Color
         get() = textArea.background
         set(color) {
-            this.textArea.background = color
-            this.gutter.background = color
+            textArea.background = color
+            gutter.background = color
             UIManager.put("ToolTip.background", color)
         }
 
     override var selectionColor: Color
         get() = textArea.selectionColor
         set(c) {
-            this.textArea.selectionColor = c
-            this.textArea.markOccurrencesColor = c
+            textArea.selectionColor = c
+            textArea.markOccurrencesColor = c
         }
 
 
@@ -228,16 +231,14 @@ class RSyntaxTextAreaBasedEditor(
     }
 
     override val caretPosition: Pair<Int, Int>
-        get() {
+        get() = try {
             val offset = textArea.caretPosition
-            try {
-                val line = textArea.getLineOfOffset(offset)
-                val column = offset - textArea.getLineStartOffset(line)
-                return Pair(line, column)
-            } catch (e: BadLocationException) {
-                LOGGER.error("Failed to get caret position", e)
-                return Pair(0, 0)
-            }
+            val line = textArea.getLineOfOffset(offset)
+            val column = offset - textArea.getLineStartOffset(line)
+            Pair(line, column)
+        } catch (e: BadLocationException) {
+            LOGGER.error("Failed to get caret position", e)
+            Pair(0, 0)
         }
 
     private fun applyColorScheme(tokenStyles: Map<RVTokenType, TokenStyle>) {
@@ -247,7 +248,7 @@ class RSyntaxTextAreaBasedEditor(
 
     companion object {
         private const val SYNTAX_STYLE_RISCV = "text/riscv"
-        private val LOGGER: Logger = LogManager.getLogger(RSyntaxTextAreaBasedEditor::class.java)
+        private val LOGGER: Logger = LogManager.getLogger(RSTABasedEditor::class.java)
         private val TEXT_ATTRIBUTES = mapOf(
             TextAttribute.KERNING to TextAttribute.KERNING_ON,
         )

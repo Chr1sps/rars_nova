@@ -23,7 +23,7 @@ public final class EditFindReplaceAction extends GuiAction {
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel, gui);
+        super(name, descrip, icon, mnemonic, accel, gui);
     }
 
     @Override

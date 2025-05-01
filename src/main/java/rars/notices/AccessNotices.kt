@@ -18,10 +18,6 @@ sealed class AccessNotice protected constructor(
     @JvmField
     val isAccessFromRISCV: Boolean = Thread.currentThread().name.startsWith("RISCV")
 
-    enum class AccessType(@JvmField val repr: String) {
-        READ("Read"),
-        WRITE("Write")
-    }
 }
 
 /**

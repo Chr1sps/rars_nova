@@ -21,7 +21,7 @@ public final class RunBackstepAction extends GuiAction {
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel, gui);
+        super(name, descrip, icon, mnemonic, accel, gui);
     }
 
     /**
@@ -41,21 +41,21 @@ public final class RunBackstepAction extends GuiAction {
         }
         this.mainUI.isExecutionStarted = true;
         this.mainUI.messagesPane.selectRunMessageTab();
-        executePane.textSegment.setCodeHighlighting(true);
+        executePane.getTextSegment().setCodeHighlighting(true);
 
         if (OtherSettings.isBacksteppingEnabled()) {
-            final var memoryHandle = unwrap(Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment::processMemoryAccessNotice));
-            Globals.REGISTER_FILE.addRegistersListener(executePane.registerValues.processRegisterNotice);
-            Globals.CS_REGISTER_FILE.addRegistersListener(executePane.csrValues.processRegisterNotice);
-            Globals.FP_REGISTER_FILE.addRegistersListener(executePane.fpRegValues.processRegisterNotice);
+            final var memoryHandle = unwrap(Globals.MEMORY_INSTANCE.subscribe(executePane.getDataSegment()::processMemoryAccessNotice));
+            Globals.REGISTER_FILE.addRegistersListener(executePane.getRegisterValues().processRegisterNotice);
+            Globals.CS_REGISTER_FILE.addRegistersListener(executePane.getCsrValues().processRegisterNotice);
+            Globals.FP_REGISTER_FILE.addRegistersListener(executePane.getFpRegValues().processRegisterNotice);
             Globals.PROGRAM.getBackStepper().backStep();
             Globals.MEMORY_INSTANCE.unsubscribe(memoryHandle);
-            Globals.REGISTER_FILE.deleteRegistersListener(executePane.registerValues.processRegisterNotice);
-            executePane.registerValues.updateRegisters();
-            executePane.fpRegValues.updateRegisters();
-            executePane.csrValues.updateRegisters();
-            executePane.dataSegment.updateValues();
-            executePane.textSegment.highlightStepAtPC(); // Argument aded 25 June 2007
+            Globals.REGISTER_FILE.deleteRegistersListener(executePane.getRegisterValues().processRegisterNotice);
+            executePane.getRegisterValues().updateRegisters();
+            executePane.getFpRegValues().updateRegisters();
+            executePane.getCsrValues().updateRegisters();
+            executePane.getDataSegment().updateValues();
+            executePane.getTextSegment().highlightStepAtPC(); // Argument aded 25 June 2007
             FileStatus.setSystemState(FileStatus.State.RUNNABLE);
             // if we've backed all the way, disable the button
             // if (Globals.program.getBackStepper().empty()) {

@@ -1,7 +1,7 @@
 package rars.riscv.hardware.registerfiles
 
 import arrow.core.Either
-import arrow.core.raise.either
+import arrow.core.right
 import rars.events.SimulationError
 import rars.notices.RegisterAccessNotice
 import rars.riscv.hardware.registers.Register
@@ -12,10 +12,13 @@ abstract class AbstractRegisterFile protected constructor(
     private val registerNumberPrefix: Char,
     protected val myRegisters: Array<Register>
 ) {
-    fun updateRegisterByName(registerName: String, newValue: Long): Either<SimulationError, Long?> = either {
-        val register = this@AbstractRegisterFile.getRegisterByName(registerName)
-        if (register == null) null
-        else this@AbstractRegisterFile.updateRegister(register, newValue).bind()
+    fun updateRegisterByName(
+        registerName: String,
+        newValue: Long
+    ): Either<SimulationError, Long?> {
+        val register = getRegisterByName(registerName)
+        return if (register == null) null.right()
+        else updateRegister(register, newValue)
     }
 
     /**
@@ -27,11 +30,12 @@ abstract class AbstractRegisterFile protected constructor(
 
     protected abstract fun convertFromLong(value: Long): Int
 
-    fun getLongValue(register: Register): Long = register.getValue()
+    fun getLong(register: Register): Long = register.getValue()
 
-    fun getIntValue(register: Register): Int = this.convertFromLong(register.getValue())
+    fun getInt(register: Register): Int =
+        this.convertFromLong(register.getValue())
 
-    fun getIntValue(registerName: String): Int? {
+    fun getInt(registerName: String): Int? {
         val register = this.getRegisterByName(registerName)
         if (register == null) {
             return null
@@ -39,7 +43,7 @@ abstract class AbstractRegisterFile protected constructor(
         return this.convertFromLong(register.getValue())
     }
 
-    fun getIntValue(registerNumber: Int): Int? {
+    fun getInt(registerNumber: Int): Int? {
         val register = this.getRegisterByNumber(registerNumber)
         if (register == null) {
             return null
@@ -47,7 +51,7 @@ abstract class AbstractRegisterFile protected constructor(
         return this.convertFromLong(register.getValue())
     }
 
-    fun getLongValue(registerName: String): Long? {
+    fun getLong(registerName: String): Long? {
         val register = this.getRegisterByName(registerName)
         if (register == null) {
             return null
@@ -55,21 +59,27 @@ abstract class AbstractRegisterFile protected constructor(
         return register.getValue()
     }
 
-    fun getLongValue(registerNumber: Int): Long? {
+    fun getLong(registerNumber: Int): Long? {
         val register = this.getRegisterByNumber(registerNumber)
         if (register == null) {
             return null
         }
-        return this.getLongValue(register)
+        return this.getLong(register)
     }
 
-    fun updateRegisterByNumber(registerNumber: Int, newValue: Long): Either<SimulationError, Long?> = either {
-        val register = this@AbstractRegisterFile.getRegisterByNumber(registerNumber)
-        if (register == null) null
-        else this@AbstractRegisterFile.updateRegister(register, newValue).bind()
+    fun updateRegisterByNumber(
+        registerNumber: Int,
+        newValue: Long
+    ): Either<SimulationError, Long?> {
+        val register = getRegisterByNumber(registerNumber)
+        return if (register == null) null.right()
+        else updateRegister(register, newValue)
     }
 
-    abstract fun updateRegister(register: Register, newValue: Long): Either<SimulationError, Long>
+    abstract fun updateRegister(
+        register: Register,
+        newValue: Long
+    ): Either<SimulationError, Long>
 
     fun getRegisterByNumber(registerNumber: Int): Register? {
         for (register in this.myRegisters) {

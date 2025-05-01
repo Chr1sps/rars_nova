@@ -1,9 +1,10 @@
 package rars.venus.registers
 
+import rars.api.DisplayFormat
 import rars.riscv.hardware.registerfiles.RegisterFile
 import rars.settings.AllSettings
 import rars.settings.BoolSetting
-import rars.venus.NumberDisplayBaseChooser
+import rars.venus.NumberDisplayBasePicker
 import rars.venus.VenusUI
 
 class RegistersWindow(
@@ -17,11 +18,11 @@ class RegistersWindow(
     mainUI,
     settings
 ) {
-    override fun formatRegisterValue(value: Long, base: Int): String =
+    override fun formatRegisterValue(value: Long, format: DisplayFormat): String =
         if (settings.boolSettings.getSetting(BoolSetting.RV64_ENABLED)) {
-            NumberDisplayBaseChooser.formatNumber(value, base)
+            NumberDisplayBasePicker.formatNumber(value, format)
         } else {
-            NumberDisplayBaseChooser.formatNumber(value.toInt(), base)
+            NumberDisplayBasePicker.formatNumber(value.toInt(), format)
         }
 
     companion object {

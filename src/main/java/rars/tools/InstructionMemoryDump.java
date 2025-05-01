@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.notices.AccessNotice;
+import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
 import rars.venus.VenusUI;
 
@@ -120,7 +121,7 @@ public final class InstructionMemoryDump extends AbstractTool {
         if ((a >= rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration)) && (
             a < rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
         )) {
-            if (notice.accessType != AccessNotice.AccessType.READ) {
+            if (notice.accessType != AccessType.READ) {
                 return;
             }
             if (a == this.lastAddress) {
@@ -155,10 +156,10 @@ public final class InstructionMemoryDump extends AbstractTool {
 
         // is a in the data segment?
         if ((a >= this.lowDataSegmentAddress) && (a < this.highDataSegmentAddress)) {
-            if (notice.accessType == AccessNotice.AccessType.READ) {
+            if (notice.accessType == AccessType.READ) {
                 this.log.append("L: 0x");
             }
-            if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            if (notice.accessType == AccessType.WRITE) {
                 this.log.append("S: 0x");
             }
             this.log.append(Integer.toUnsignedString(a, 16)).append('\n');

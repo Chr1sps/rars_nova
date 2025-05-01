@@ -1,7 +1,8 @@
 package rars.venus.registers
 
 import rars.Globals
-import rars.notices.AccessNotice
+import rars.api.DisplayFormat
+import rars.notices.AccessType
 import rars.notices.RegisterAccessNotice
 import rars.notices.SimulatorNotice
 import rars.riscv.hardware.registerfiles.AbstractRegisterFile
@@ -37,7 +38,7 @@ abstract class RegisterBlockWindowBase internal constructor(
 ) : JPanel() {
     @JvmField
     val processRegisterNotice = { notice: RegisterAccessNotice ->
-        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+        if (notice.accessType == AccessType.WRITE) {
             // Uses the same highlighting technique as for Text Segment -- see
             // AddressCellRenderer class in DataSegmentWindow.java.
             this.highlightCellForRegister(notice.register)
@@ -116,7 +117,7 @@ abstract class RegisterBlockWindowBase internal constructor(
         }
     }
 
-    protected abstract fun formatRegisterValue(value: Long, base: Int): String
+    protected abstract fun formatRegisterValue(value: Long, format: DisplayFormat): String
 
     private fun beginObserving() {
         this.registerFile.addRegistersListener(this.processRegisterNotice)
@@ -201,8 +202,8 @@ abstract class RegisterBlockWindowBase internal constructor(
         ): Component {
             val formattedValue = if (column == VALUE_COLUMN) {
                 val value = value as Long
-                val displayBase = this@RegisterBlockWindowBase.mainUI.mainPane.executePane.getValueDisplayBase()
-                this@RegisterBlockWindowBase.formatRegisterValue(value, displayBase)
+                val displayBase = mainUI.mainPane.executePane.valueDisplayFormat
+                formatRegisterValue(value, displayBase)
             } else value
             val cell = super.getTableCellRendererComponent(
                 table, formattedValue,

@@ -45,7 +45,8 @@ abstract class BasicInstruction protected constructor(
      * and third operand, respectively.
      */
     @JvmField
-    val operationMask: String = operMask.replace(" ".toRegex(), "") // squeeze out any/all spaces
+    val operationMask: String =
+        operMask.replace(" ".toRegex(), "") // squeeze out any/all spaces
 
     /**
      * BasicInstruction constructor.
@@ -81,14 +82,18 @@ abstract class BasicInstruction protected constructor(
      */
     init {
         if (this.operationMask.length != BASIC_INSTRUCTION_LENGTH_BITS) {
-            LOGGER.warn("{} mask not $BASIC_INSTRUCTION_LENGTH_BITS bits!", example)
+            LOGGER.warn(
+                "{} mask not $BASIC_INSTRUCTION_LENGTH_BITS bits!",
+                example
+            )
         }
 
         this.opcodeMask = this.operationMask.replace("[01]".toRegex(), "1")
             .replace("[^01]".toRegex(), "0").toLong(
                 2
             ).toInt()
-        this.opcodeMatch = this.operationMask.replace("[^1]".toRegex(), "0").toLong(2).toInt()
+        this.opcodeMatch =
+            this.operationMask.replace("[^1]".toRegex(), "0").toLong(2).toInt()
     }
 
     override val instructionLength = BASIC_INSTRUCTION_LENGTH
@@ -101,6 +106,9 @@ abstract class BasicInstruction protected constructor(
         const val BASIC_INSTRUCTION_LENGTH: Int = DataTypes.WORD_SIZE
         private const val BASIC_INSTRUCTION_LENGTH_BITS = 32
 
-        private val LOGGER: Logger = LogManager.getLogger(BasicInstruction::class.java)
+        private val LOGGER: Logger =
+            LogManager.getLogger(BasicInstruction::class.java)
     }
+
+    override fun toString(): String = mnemonic.uppercase()
 }

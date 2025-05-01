@@ -32,7 +32,7 @@ class RunSpeedPanel : JPanel() {
         }
         val speed = SPEEDS[SPEED_INDEX_INTERACTION_LIMIT].toInt()
         toolTipText =
-            """Simulation speed for "Go".  At $speed inst/sec or less, tables updated after each instruction."""
+            """Simulation speed for "Go". At $speed inst/sec or less, tables updated after each instruction."""
     }
 
     private fun createSlider(): JSlider = JSlider(

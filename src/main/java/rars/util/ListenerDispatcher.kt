@@ -56,7 +56,7 @@ class ListenerDispatcher<Data> {
         fun subscribe(listener: Listener<Data>) {
             this@ListenerDispatcher.listenersLock.lock()
             try {
-                this@ListenerDispatcher.listeners.add(ListenerWrapper<Data>(listener))
+                this@ListenerDispatcher.listeners.add(ListenerWrapper(listener))
             } finally {
                 this@ListenerDispatcher.listenersLock.unlock()
             }
@@ -75,5 +75,83 @@ class ListenerDispatcher<Data> {
                 this@ListenerDispatcher.listenersLock.unlock()
             }
         }
+    }
+}
+
+
+data class SubscriptionHandle<Data>(internal val listener: Listener<Data>)
+
+interface Subscribable<Data> {
+    fun subscribe(listener: Listener<Data>): SubscriptionHandle<Data>
+    fun unsubscribe(handle: SubscriptionHandle<Data>)
+}
+
+interface SubscriptionManager<Data> {
+    fun addListener(listener: Listener<Data>): SubscriptionHandle<Data>
+    fun removeListener(handle: SubscriptionHandle<Data>)
+    fun dispatch(data: Data)
+    fun clearListeners()
+    fun hasHandle(handle: SubscriptionHandle<Data>): Boolean
+}
+
+class UnsafeSubscriptionManager<Data> : SubscriptionManager<Data> {
+    private val handles = mutableSetOf<SubscriptionHandle<Data>>()
+
+    override fun addListener(listener: Listener<Data>): SubscriptionHandle<Data> = SubscriptionHandle(listener).also {
+        handles.add(it)
+    }
+
+    override fun removeListener(handle: SubscriptionHandle<Data>) {
+        handles.remove(handle)
+    }
+
+    override fun dispatch(data: Data): Unit = handles.forEach { it.listener(data) }
+
+    override fun clearListeners(): Unit = handles.clear()
+
+    override fun hasHandle(handle: SubscriptionHandle<Data>): Boolean = handle in handles
+}
+
+class SynchronizedSubscriptionManager<Data> : SubscriptionManager<Data> {
+    private val handles = mutableSetOf<SubscriptionHandle<Data>>()
+    private val handlesReadLock: Lock
+    private val handlesWriteLock: Lock
+
+    init {
+        val readWriteLock = ReentrantReadWriteLock()
+        handlesReadLock = readWriteLock.readLock()
+        handlesWriteLock = readWriteLock.writeLock()
+    }
+
+    override fun addListener(listener: Listener<Data>): SubscriptionHandle<Data> = SubscriptionHandle(listener).also {
+        withLock(handlesWriteLock) { handles.add(it) }
+    }
+
+    override fun removeListener(handle: SubscriptionHandle<Data>): Unit = withLock(handlesWriteLock) {
+        handles.remove(handle)
+    }
+
+    override fun dispatch(data: Data): Unit = withLock(handlesReadLock) {
+        for (handle in handles) {
+            handle.listener(data)
+        }
+    }
+
+
+    override fun clearListeners() = withLock(handlesWriteLock) {
+        handles.clear()
+    }
+
+    override fun hasHandle(handle: SubscriptionHandle<Data>): Boolean = withLock(handlesReadLock) {
+        handle in handles
+    }
+}
+
+private fun <T> withLock(lock: Lock, block: () -> T): T {
+    lock.lock()
+    return try {
+        block()
+    } finally {
+        lock.unlock()
     }
 }

@@ -2,7 +2,7 @@ package rars.venus.editors
 
 import rars.riscv.lang.lexing.RVTokenType
 import rars.settings.AllSettings
-import rars.venus.editors.rsyntaxtextarea.RSyntaxTextAreaBasedEditor
+import rars.venus.editors.rsyntaxtextarea.RSTABasedEditor
 import java.awt.Color
 import java.awt.Component
 import java.awt.Font
@@ -10,7 +10,7 @@ import javax.swing.text.Caret
 import javax.swing.text.Document
 
 /**
- * Specifies capabilities that any test editor used in MARS must have.
+ * Specifies capabilities that any test editor used in RARS must have.
  */
 interface TextEditingArea {
     val document: Document
@@ -88,7 +88,7 @@ interface TextEditingArea {
     }
 }
 
-fun createTextEditingArea(allSettings: AllSettings): TextEditingArea = RSyntaxTextAreaBasedEditor(
+fun createTextEditingArea(allSettings: AllSettings): TextEditingArea = RSTABasedEditor(
     allSettings.editorThemeSettings.currentTheme.toEditorTheme(),
     allSettings.fontSettings
 )

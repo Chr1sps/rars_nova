@@ -1,10 +1,10 @@
 package rars.venus.run
 
 import rars.Globals
-import rars.events.SimulationError
 import rars.notices.SimulatorNotice
 import rars.settings.BoolSetting
-import rars.simulator.Simulator
+import rars.simulator.StoppingEvent
+import rars.simulator.isDone
 import rars.simulator.storeProgramArguments
 import rars.util.Listener
 import rars.venus.ExecutePane
@@ -23,7 +23,7 @@ import javax.swing.KeyStroke
 class RunGoAction(
     name: String, icon: Icon?, descrip: String,
     mnemonic: Int?, accel: KeyStroke?, gui: VenusUI
-) : GuiAction(name, icon, descrip, mnemonic, accel, gui) {
+) : GuiAction(name, descrip, icon, mnemonic, accel, gui) {
     private var name: String? = null
     private var executePane: ExecutePane? = null
 
@@ -54,26 +54,34 @@ class RunGoAction(
                 this.mainUI.setMenuState(FileStatus.State.RUNNING)
 
                 // Setup cleanup procedures for the simulation
-                val onSimulatorStopListener = object : Listener<SimulatorNotice> {
-                    override fun invoke(notice: SimulatorNotice) {
-                        if (notice.action != SimulatorNotice.Action.STOP) {
-                            return
-                        }
-                        val reason = notice.reason
-                        if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
-                            EventQueue.invokeLater {
-                                this@RunGoAction.paused(notice.done, reason, notice.error)
+                val onSimulatorStopListener =
+                    object : Listener<SimulatorNotice> {
+                        override fun invoke(notice: SimulatorNotice) {
+                            if (notice.action != SimulatorNotice.Action.STOP) {
+                                return
                             }
-                        } else {
-                            EventQueue.invokeLater { this@RunGoAction.stopped(notice.error, reason!!) }
+                            val event = notice.event
+                            when (event) {
+                                StoppingEvent.UserPaused,
+                                StoppingEvent.BreakpointHit -> EventQueue.invokeLater {
+                                    paused(event)
+                                }
+                                else -> EventQueue.invokeLater {
+                                    stopped(event)
+                                }
+                            }
+                            Globals.SIMULATOR
+                                .simulatorNoticeHook
+                                .unsubscribe(this)
                         }
-                        Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this)
+
                     }
+                Globals.SIMULATOR.simulatorNoticeHook.subscribe(
+                    onSimulatorStopListener
+                )
 
-                }
-                Globals.SIMULATOR.simulatorNoticeHook.subscribe(onSimulatorStopListener)
-
-                val breakPoints = this.executePane!!.textSegment.getSortedBreakPointsArray()
+                val breakPoints =
+                    this.executePane!!.textSegment.getSortedBreakPointsArray()
                 Globals.SIMULATOR.startSimulation(
                     Globals.REGISTER_FILE.programCounter,
                     maxSteps,
@@ -100,7 +108,10 @@ class RunGoAction(
         } else {
             // note: this should never occur since "Go" is only enabled after successful
             // assembly.
-            JOptionPane.showMessageDialog(this.mainUI, "The program must be assembled before it can be run.")
+            JOptionPane.showMessageDialog(
+                this.mainUI,
+                "The program must be assembled before it can be run."
+            )
         }
     }
 
@@ -113,24 +124,20 @@ class RunGoAction(
      * executing
      * step by step.
      */
-    fun paused(
-        done: Boolean,
-        pauseReason: Simulator.Reason,
-        pe: SimulationError?
-    ) {
+    fun paused(event: StoppingEvent) {
         // I doubt this can happen (pause when execution finished), but if so treat it
         // as stopped.
-        if (done) {
-            this.stopped(pe, Simulator.Reason.NORMAL_TERMINATION)
+        if (event.isDone) {
+            stopped(event)
             return
         }
-        if (pauseReason == Simulator.Reason.BREAKPOINT) {
+        if (event == StoppingEvent.BreakpointHit) {
             this.mainUI.messagesPane.postMessage(
-                this.name + ": execution paused at breakpoint: " + FileStatus.systemFile!!.getName() + "\n\n"
+                name + ": execution paused at breakpoint: " + FileStatus.systemFile!!.getName() + "\n\n"
             )
         } else {
             this.mainUI.messagesPane.postMessage(
-                this.name + ": execution paused by user: " + FileStatus.systemFile!!.getName() + "\n\n"
+                name + ": execution paused by user: " + FileStatus.systemFile!!.getName() + "\n\n"
             )
         }
         this.mainUI.messagesPane.selectMessageTab()
@@ -153,7 +160,7 @@ class RunGoAction(
      * execution
      * terminated due to completion or exception.
      */
-    fun stopped(pe: SimulationError?, reason: Simulator.Reason) {
+    fun stopped(stoppingEvent: StoppingEvent) {
         // show final register and data segment values.
         this.executePane!!.registerValues.updateRegisters()
         this.executePane!!.fpRegValues.updateRegisters()
@@ -162,14 +169,14 @@ class RunGoAction(
         FileStatus.setSystemState(FileStatus.State.TERMINATED)
         this.mainUI.venusIO.resetFiles() // close any files opened in MIPS program
         // Bring CSRs to the front if terminated due to exception.
-        if (pe != null) {
+        if (stoppingEvent is StoppingEvent.ErrorHit) {
             this.mainUI.registersPane.setSelectedComponent(this.executePane!!.csrValues)
             this.executePane!!.textSegment.codeHighlighting = true
             this.executePane!!.textSegment.unhighlightAllSteps()
             this.executePane!!.textSegment.highlightStepAtAddress(Globals.REGISTER_FILE.programCounter - 4)
         }
-        when (reason) {
-            Simulator.Reason.NORMAL_TERMINATION -> {
+        when (stoppingEvent) {
+            StoppingEvent.NormalTermination -> {
                 this.mainUI.messagesPane.postMessage(
                     "\n" + this.name + ": execution completed successfully.\n\n"
                 )
@@ -179,7 +186,7 @@ class RunGoAction(
                 this.mainUI.messagesPane.selectRunMessageTab()
             }
 
-            Simulator.Reason.CLIFF_TERMINATION -> {
+            StoppingEvent.CliffTermination -> {
                 this.mainUI.messagesPane.postMessage(
                     "\n" + this.name + ": execution terminated by null instruction.\n\n"
                 )
@@ -189,30 +196,30 @@ class RunGoAction(
                 this.mainUI.messagesPane.selectRunMessageTab()
             }
 
-            Simulator.Reason.EXCEPTION -> {
+            is StoppingEvent.ErrorHit -> {
                 this.mainUI.messagesPane.postMessage(
-                    pe!!.message.generateReport()
+                    stoppingEvent.error.message.generateReport()
                 )
                 this.mainUI.messagesPane.postMessage(
-                    "\n" + this.name + ": execution terminated with errors.\n\n"
+                    "\n${this.name}: execution terminated with errors.\n\n"
                 )
             }
 
-            Simulator.Reason.STOP -> {
+            StoppingEvent.UserStopped -> {
                 this.mainUI.messagesPane.postMessage(
                     "\n" + this.name + ": execution terminated by user.\n\n"
                 )
                 this.mainUI.messagesPane.selectMessageTab()
             }
 
-            Simulator.Reason.MAX_STEPS -> {
+            StoppingEvent.MaxStepsHit -> {
                 this.mainUI.messagesPane.postMessage(
                     "\n" + this.name + ": execution step limit of " + maxSteps + " exceeded.\n\n"
                 )
                 this.mainUI.messagesPane.selectMessageTab()
             }
 
-            else -> {}
+            else -> error("Should not be invoking this method for this event: $stoppingEvent")
         }
         resetMaxSteps()
         this.mainUI.isMemoryReset = false
@@ -226,7 +233,10 @@ class RunGoAction(
      */
     private fun processProgramArgumentsIfAny() {
         val programArguments = this.executePane!!.textSegment.programArguments
-        if (programArguments == null || programArguments.isEmpty() || !Globals.BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
+        if (programArguments == null || programArguments.isEmpty() || !Globals.BOOL_SETTINGS.getSetting(
+                BoolSetting.PROGRAM_ARGUMENTS
+            )
+        ) {
             return
         }
         storeProgramArguments(programArguments)

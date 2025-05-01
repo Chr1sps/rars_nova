@@ -8,7 +8,6 @@ import rars.assembler.Tokenizer.Companion.tokenizeExampleInstruction
 import rars.riscv.instructions.*
 import rars.settings.BoolSetting
 import java.io.BufferedReader
-import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.*
@@ -265,42 +264,34 @@ object InstructionsRegistry {
         }
     }
 
-    private fun loadPseudoInstructions(filename: String): MutableList<ExtendedInstruction> {
-        val instructionList = ArrayList<ExtendedInstruction>()
-        try {
-            javaClass.getResourceAsStream(PSEUDO_OPS_PATH + filename).use { stream ->
-                if (stream == null) {
-                    LOGGER.error("Error: Could not load pseudo instructions from file: {}", filename)
-                    exitProcess(1)
-                }
-                val reader = BufferedReader(InputStreamReader(Objects.requireNonNull<InputStream?>(stream)))
-                var line: String?
-                while ((reader.readLine().also { line = it }) != null) {
-                    // skip over: comment lines, empty lines, lines starting with blank.
-                    if (!line!!.startsWith("#") && !line.startsWith(" ") && !line.isEmpty()) {
-                        val tokenizer = StringTokenizer(line, ";")
-                        val pseudoOp = tokenizer.nextToken()
-                        val template = StringBuilder()
-                        while (tokenizer.hasMoreTokens()) {
-                            val token = tokenizer.nextToken()
-                            if (token.startsWith("#")) {
-                                // Optional description must be last token in the line.
-                                val description = token.substring(1)
-                                instructionList.add(ExtendedInstruction(pseudoOp, template.toString(), description))
-                                break
-                            }
-                            template.append(token)
-                            if (tokenizer.hasMoreTokens()) {
-                                template.append("\n")
-                            }
+    private fun loadPseudoInstructions(filename: String): List<ExtendedInstruction> = buildList {
+        javaClass.getResourceAsStream(PSEUDO_OPS_PATH + filename)?.use { stream ->
+            val reader = BufferedReader(InputStreamReader(Objects.requireNonNull<InputStream?>(stream)))
+            reader.readLines().forEach { line ->
+                // skip over: comment lines, empty lines, lines starting with blank.
+                if (!line.startsWith("#") && !line.startsWith(" ") && !line.isEmpty()) {
+                    val tokenizer = StringTokenizer(line, ";")
+                    val pseudoOp = tokenizer.nextToken()
+                    val template = StringBuilder()
+                    while (tokenizer.hasMoreTokens()) {
+                        val token = tokenizer.nextToken()
+                        if (token.startsWith("#")) {
+                            // Optional description must be last token in the line.
+                            val description = token.substring(1)
+                            add(ExtendedInstruction(pseudoOp, template.toString(), description))
+                            break
+                        }
+                        template.append(token)
+                        if (tokenizer.hasMoreTokens()) {
+                            template.append("\n")
                         }
                     }
                 }
             }
-        } catch (e: IOException) {
-            throw RuntimeException(e)
+        } ?: run {
+            LOGGER.error("Error: Could not load pseudo instructions from file: {}", filename)
+            exitProcess(1)
         }
-        return instructionList
     }
 
     private fun createMatchMaps(
@@ -406,3 +397,5 @@ object InstructionsRegistry {
         }
     }
 }
+
+private fun BufferedReader.readLines(): Sequence<String> = generateSequence { readLine() }

@@ -27,7 +27,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer
 class FileDumpMemoryAction(
     name: String, icon: Icon, description: String,
     mnemonic: Int, accel: KeyStroke, gui: VenusUI
-) : GuiAction(name, icon, description, mnemonic, accel, gui) {
+) : GuiAction(name, description, icon, mnemonic, accel, gui) {
 
     override fun actionPerformed(e: ActionEvent): Unit = createDumpDialog().run {
         pack()

@@ -8,6 +8,8 @@ import rars.Globals;
 
 import java.util.List;
 
+import static rars.riscv.hardware.memory.MemoryConfigurationKt.*;
+
 // TODO: refactor this out of existance
 
 public final class MemoryDump {
@@ -19,13 +21,13 @@ public final class MemoryDump {
         SEGMENTS = List.of(
             new SegmentInfo(
                 ".text",
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+                getTextSegmentBaseAddress(memoryConfiguration),
+                getTextSegmentLimitAddress(memoryConfiguration)
             ),
             new SegmentInfo(
                 ".data",
                 memoryConfiguration.getDataBaseAddress(),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentLimitAddress(memoryConfiguration)
+                getDataSegmentLimitAddress(memoryConfiguration)
             )
         );
     }

@@ -17,7 +17,7 @@ class SettingsAction @JvmOverloads constructor(
     private val setting: BoolSetting,
     mainUI: VenusUI,
     private val handler: Handler = Handler { }
-) : GuiAction(name, null, description, null, null, mainUI) {
+) : GuiAction(name, description, null, null, null, mainUI) {
     override fun actionPerformed(e: ActionEvent) {
         val value = (e.getSource() as JCheckBoxMenuItem).isSelected
         boolSettings.setSettingAndSave(setting, value)

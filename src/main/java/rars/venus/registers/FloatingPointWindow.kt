@@ -1,9 +1,11 @@
 package rars.venus.registers
 
+import rars.api.DisplayFormat
 import rars.riscv.hardware.registerfiles.FloatingPointRegisterFile
 import rars.settings.AllSettings
 import rars.settings.BoolSetting
-import rars.venus.NumberDisplayBaseChooser
+import rars.util.formatFloatNumber
+import rars.venus.NumberDisplayBasePicker
 import rars.venus.VenusUI
 
 class FloatingPointWindow(
@@ -17,11 +19,11 @@ class FloatingPointWindow(
     mainUI,
     settings
 ) {
-    override fun formatRegisterValue(value: Long, base: Int): String =
+    override fun formatRegisterValue(value: Long, format: DisplayFormat): String =
         if (settings.boolSettings.getSetting(BoolSetting.RV64_ENABLED)) {
-            NumberDisplayBaseChooser.formatDoubleNumber(value, base)
+            NumberDisplayBasePicker.formatDoubleNumber(value, format)
         } else {
-            NumberDisplayBaseChooser.formatFloatNumber(value.toInt(), base)
+            formatFloatNumber(value.toInt(), format)
         }
 
     companion object {

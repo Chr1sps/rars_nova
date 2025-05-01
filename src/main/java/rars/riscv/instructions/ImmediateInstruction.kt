@@ -7,7 +7,6 @@ import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
 import rars.riscv.InstructionsRegistry
 import rars.simulator.SimulationContext
-import rars.util.ConversionUtils
 import rars.util.ignoreOk
 
 /**
@@ -26,20 +25,23 @@ class ImmediateInstruction private constructor(
     usage, description, BasicInstructionFormat.I_FORMAT,
     "tttttttttttt sssss $funct fffff 001${if (isRV64) "1" else "0"}011"
 ) {
-    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> {
+    override suspend fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> {
         val upperImmediate = (statement.getOperand(2) shl 20) shr 20
         val newValue = if (InstructionsRegistry.RV64_MODE_FLAG) compute(
-            registerFile.getLongValue(statement.getOperand(1))!!,
+            registerFile.getLong(statement.getOperand(1))!!,
             upperImmediate.toLong()
         ) else computeW(
-            registerFile.getIntValue(statement.getOperand(1))!!,
+            registerFile.getInt(statement.getOperand(1))!!,
             upperImmediate
         ).toLong()
-        return registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+        return registerFile.updateRegisterByNumber(
+            statement.getOperand(0),
+            newValue
+        ).ignoreOk()
     }
 
     private fun computeW(value: Int, immediate: Int): Int =
-        ConversionUtils.longLowerHalfToInt(compute(value.toLong(), immediate.toLong()))
+        compute(value.toLong(), immediate.toLong()).toInt()
 
     companion object {
         private fun immediate32(
@@ -47,18 +49,22 @@ class ImmediateInstruction private constructor(
             description: String,
             funct: String,
             compute: (Long, Long) -> Long
-        ): ImmediateInstruction = ImmediateInstruction(usage, description, funct, false, compute)
+        ): ImmediateInstruction =
+            ImmediateInstruction(usage, description, funct, false, compute)
 
         private fun immediate64(
             usage: String,
             description: String,
             funct: String,
             compute: (Long, Long) -> Long
-        ): ImmediateInstruction = ImmediateInstruction(usage, description, funct, true, compute)
+        ): ImmediateInstruction =
+            ImmediateInstruction(usage, description, funct, true, compute)
 
         val ADDI = immediate32(
-            "addi t1,t2,-100", "Addition immediate: set t1 to (t2 plus signed 12-bit immediate)",
-            "000", Long::plus
+            "addi t1,t2,-100",
+            "Addition immediate: set t1 to (t2 plus signed 12-bit immediate)",
+            "000",
+            Long::plus
         )
 
         val ADDIW = immediate64(
@@ -68,13 +74,17 @@ class ImmediateInstruction private constructor(
         ) { first, other -> first.toInt().plus(other.toInt()).toLong() }
 
         val ANDI = immediate32(
-            "andi t1,t2,-100", "Bitwise AND immediate : Set t1 to bitwise AND of t2 and sign-extended 12-bit immediate",
-            "111", Long::and
+            "andi t1,t2,-100",
+            "Bitwise AND immediate : Set t1 to bitwise AND of t2 and sign-extended 12-bit immediate",
+            "111",
+            Long::and
         )
 
         val ORI = immediate32(
-            "ori t1,t2,-100", "Bitwise OR immediate : Set t1 to bitwise OR of t2 and sign-extended 12-bit immediate",
-            "110", Long::or
+            "ori t1,t2,-100",
+            "Bitwise OR immediate : Set t1 to bitwise OR of t2 and sign-extended 12-bit immediate",
+            "110",
+            Long::or
         )
 
         val SLTI = immediate32(
@@ -90,8 +100,10 @@ class ImmediateInstruction private constructor(
         ) { first, other -> if (first.toULong() < other.toULong()) 1 else 0 }
 
         val XORI = immediate32(
-            "xori t1,t2,-100", "Bitwise XOR immediate : Set t1 to bitwise XOR of t2 and sign-extended 12-bit immediate",
-            "100", Long::xor
+            "xori t1,t2,-100",
+            "Bitwise XOR immediate : Set t1 to bitwise XOR of t2 and sign-extended 12-bit immediate",
+            "100",
+            Long::xor
         )
     }
 }

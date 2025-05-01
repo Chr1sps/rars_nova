@@ -8,8 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.ProgramStatement;
+import rars.api.DisplayFormat;
 import rars.assembler.DataTypes;
-import rars.notices.AccessNotice;
+import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.memory.MemoryListenerHandle;
@@ -84,7 +85,7 @@ public final class TextSegmentWindow extends JInternalFrame {
     private HashMap<Integer, ModifiedCode> executeMods; // first is table model row, value is original code, basic,
     private TextTableModel tableModel;
     private final @NotNull Function1<@NotNull MemoryAccessNotice, @NotNull Unit> processMemoryAccessNotice = notice -> {
-        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+        if (notice.accessType == AccessType.WRITE) {
             this.updateTable(notice.address, notice.value);
         }
         return Unit.INSTANCE;
@@ -146,7 +147,7 @@ public final class TextSegmentWindow extends JInternalFrame {
      * Should convert the lines of code over to the table rows and columns.
      */
     public void setupTable() {
-        final int addressBase = this.executePane.getAddressDisplayBase();
+        final var addressFormat = this.executePane.getAddressDisplayFormat();
         this.codeHighlighting = true;
         this.breakpointsEnabled = true;
         final var sourceStatementList = Globals.PROGRAM.getMachineList();
@@ -178,12 +179,12 @@ public final class TextSegmentWindow extends JInternalFrame {
             this.addressRows.put(this.intAddresses[i], i);
             this.data[i][ColumnData.BREAKPOINT_COLUMN.number] = false;
             this.data[i][ColumnData.INSTRUCTION_ADDRESS_COLUMN.number] =
-                NumberDisplayBaseChooser.formatUnsignedInteger(
+                NumberDisplayBasePicker.formatUnsignedInteger(
                     statement.getAddress(),
-                    addressBase
+                    addressFormat
                 );
             this.data[i][ColumnData.INSTRUCTION_CODE_COLUMN.number] =
-                NumberDisplayBaseChooser.formatNumber(statement.getBinaryStatement(), 16);
+                NumberDisplayBasePicker.formatNumber(statement.getBinaryStatement(), DisplayFormat.HEX);
             this.data[i][ColumnData.BASIC_INSTRUCTIONS_COLUMN.number] = statement.getPrintableBasicAssemblyStatement();
             final var builder = new StringBuilder();
             if (statement.sourceLine != null) {
@@ -331,11 +332,11 @@ public final class TextSegmentWindow extends JInternalFrame {
         if (this.contentPane.getComponentCount() == 0) {
             return; // ignore if no content to change
         }
-        final int addressBase = this.executePane.getAddressDisplayBase();
+        final var addressFormat = this.executePane.getAddressDisplayFormat();
         for (int i = 0; i < this.intAddresses.length; i++) {
-            final var formattedAddress = NumberDisplayBaseChooser.formatUnsignedInteger(
+            final var formattedAddress = NumberDisplayBasePicker.formatUnsignedInteger(
                 this.intAddresses[i],
-                addressBase
+                addressFormat
             );
             this.table.getModel().setValueAt(formattedAddress, i, ColumnData.INSTRUCTION_ADDRESS_COLUMN.number);
         }
@@ -708,8 +709,8 @@ public final class TextSegmentWindow extends JInternalFrame {
         // for that. So we'll pretend to be Memory observable and send it a fake memory
         // write update.
         try {
-            this.executePane.dataSegment.processMemoryAccessNotice(new MemoryAccessNotice(
-                AccessNotice.AccessType.WRITE,
+            this.executePane.getDataSegment().processMemoryAccessNotice(new MemoryAccessNotice(
+                AccessType.WRITE,
                 address, DataTypes.WORD_SIZE,
                 value
             ));
@@ -912,13 +913,13 @@ public final class TextSegmentWindow extends JInternalFrame {
             );
             // cell.setFont(tableCellFont);
             final TextSegmentWindow textSegment =
-                TextSegmentWindow.this.executePane.textSegment;
+                TextSegmentWindow.this.executePane.getTextSegment();
             final boolean highlighting = textSegment.getCodeHighlighting();
 
             if (highlighting && textSegment.getIntCodeAddressAtRow(row) == TextSegmentWindow.this.highlightAddress) {
                 final var style = highlightingSettings.getTextSegmentHighlightingStyle();
-                cell.setBackground(style.background());
-                cell.setForeground(style.foreground());
+                cell.setBackground(style.getBackground());
+                cell.setForeground(style.getForeground());
                 cell.setFont(applyStyle(fontSettings.getCurrentFont(), style));
             } else {
                 final var theme = editorThemeSettings.getCurrentTheme();

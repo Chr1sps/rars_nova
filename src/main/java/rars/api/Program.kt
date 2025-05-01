@@ -10,7 +10,7 @@ import rars.events.SimulationError
 import rars.io.ConsoleIO
 import rars.riscv.hardware.memory.Memory
 import rars.settings.BoolSetting
-import rars.simulator.Simulator
+import rars.simulator.StoppingEvent
 import rars.simulator.storeProgramArguments
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -41,8 +41,9 @@ import java.io.File
  * a concurrent simulation.
  */
 class Program(private val programOptions: ProgramOptions) {
-    private val code: RISCVProgram = RISCVProgram()
-    private val assembled: Memory = Memory(this.programOptions.memoryConfiguration)
+    val code: RISCVProgram = RISCVProgram()
+    private val assembled: Memory =
+        Memory(this.programOptions.memoryConfiguration)
 
     /**
      * The instance of memory the program is using.
@@ -75,7 +76,8 @@ class Program(private val programOptions: ProgramOptions) {
         files: List<File>,
         mainFile: File
     ): Either<AssemblyError, ErrorList> = either {
-        val programs = code.prepareFilesForAssembly(files, mainFile, null).bind()
+        val programs =
+            code.prepareFilesForAssembly(files, mainFile, null).bind()
         assemble(programs).bind()
     }
 
@@ -90,7 +92,8 @@ class Program(private val programOptions: ProgramOptions) {
      * thrown if any errors are found in the code
      */
     fun assembleFile(file: File): Either<AssemblyError, ErrorList> = either {
-        val programs = code.prepareFilesForAssembly(listOf(file), file, null).bind()
+        val programs =
+            code.prepareFilesForAssembly(listOf(file), file, null).bind()
         assemble(programs).bind()
     }
 
@@ -104,31 +107,33 @@ class Program(private val programOptions: ProgramOptions) {
      * @throws AssemblyError
      * thrown if any errors are found in the code
      */
-    fun assembleString(source: String): Either<AssemblyError, ErrorList> = either {
-        code.fromString(source)
-        code.tokenize().bind()
-        assemble(listOf(code)).bind()
-    }
+    fun assembleString(source: String): Either<AssemblyError, ErrorList> =
+        either {
+            code.fromString(source)
+            code.tokenize().bind()
+            assemble(listOf(code)).bind()
+        }
 
-    private fun assemble(programs: List<RISCVProgram>): Either<AssemblyError, ErrorList> = either {
-        Globals.REGISTER_FILE.setValuesFromConfiguration(assembled.memoryConfiguration)
-        // Assembling changes memory so we need to swap to capture that.
-        val temp = Globals.swapMemoryInstance(assembled)
-        val errorList = code.assemble(
-            programs,
-            programOptions.usePseudoInstructions,
-            programOptions.warningsAreErrors
-        ).onLeft {
+    private fun assemble(programs: List<RISCVProgram>): Either<AssemblyError, ErrorList> =
+        either {
+            Globals.REGISTER_FILE.setValuesFromConfiguration(assembled.memoryConfiguration)
+            // Assembling changes memory so we need to swap to capture that.
+            val temp = Globals.swapMemoryInstance(assembled)
+            val errorList = code.assemble(
+                programs,
+                programOptions.usePseudoInstructions,
+                programOptions.warningsAreErrors
+            ).onLeft {
+                Globals.swapMemoryInstance(temp)
+                raise(it)
+            }.bind()
             Globals.swapMemoryInstance(temp)
-            raise(it)
-        }.bind()
-        Globals.swapMemoryInstance(temp)
 
-        Globals.REGISTER_FILE.initializeProgramCounter(programOptions.startAtMain)
-        startPC = Globals.REGISTER_FILE.programCounter
-        errorList
+            Globals.REGISTER_FILE.initializeProgramCounter(programOptions.startAtMain)
+            startPC = Globals.REGISTER_FILE.programCounter
+            errorList
 
-    }
+        }
 
     /**
      * Prepares the simulator for execution. Clears registers, loads arguments
@@ -192,27 +197,31 @@ class Program(private val programOptions: ProgramOptions) {
      * thrown if there is an uncaught interrupt. The
      * program cannot be simulated further.
      */
-    fun simulate(): Either<SimulationError, Simulator.Reason> {
+    fun simulate(): StoppingEvent {
         // Swap out global state for local state.
 
-        val selfMod = Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
+        val selfMod =
+            Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
         Globals.BOOL_SETTINGS.setSetting(
             BoolSetting.SELF_MODIFYING_CODE_ENABLED,
             this.programOptions.selfModifyingCode
         )
         val tmpMem = Globals.swapMemoryInstance(this.memory)
 
-        val result = Globals.SIMULATOR.simulateCli(
+        val stoppingEvent = Globals.SIMULATOR.simulateCli(
             Globals.REGISTER_FILE.programCounter,
             this.programOptions.maxSteps,
             this.consoleIO!!
         )
         this.exitCode = Globals.exitCode
 
-        Globals.BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, selfMod)
+        Globals.BOOL_SETTINGS.setSetting(
+            BoolSetting.SELF_MODIFYING_CODE_ENABLED,
+            selfMod
+        )
         Globals.swapMemoryInstance(tmpMem)
 
-        return result
+        return stoppingEvent
     }
 
     /** Bytes sent to stdout as a string. */

@@ -129,7 +129,7 @@ public final class LabelsWindow extends JInternalFrame {
         this.dataLabels = new JCheckBox("Data", true);
         this.textLabels = new JCheckBox("Text", true);
         final ItemListener listener = item -> {
-            for (final LabelsForSymbolTable symtab : LabelsWindow.this.listOfLabelsForSymbolTable) {
+            for (final LabelsForSymbolTable symtab : listOfLabelsForSymbolTable) {
                 symtab.generateLabelTable();
             }
         };
@@ -311,9 +311,9 @@ public final class LabelsWindow extends JInternalFrame {
             // Scroll to this address, either in Text Segment display or Data Segment
             // display
             if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(address)) {
-                LabelsWindow.this.executePane.textSegment.selectStepAtAddress(address);
+                executePane.getTextSegment().selectStepAtAddress(address);
             } else {
-                LabelsWindow.this.executePane.dataSegment.selectCellForAddress(address);
+                executePane.getDataSegment().selectCellForAddress(address);
             }
         }
     }
@@ -353,12 +353,12 @@ public final class LabelsWindow extends JInternalFrame {
             final SymbolTable symbolTable = (this.program == null)
                 ? Globals.GLOBAL_SYMBOL_TABLE
                 : this.program.getLocalSymbolTable();
-            final int addressBase = LabelsWindow.this.executePane.getAddressDisplayBase();
-            if (LabelsWindow.this.textLabels.isSelected() && LabelsWindow.this.dataLabels.isSelected()) {
+            final var addressFormat = executePane.getAddressDisplayFormat();
+            if (textLabels.isSelected() && dataLabels.isSelected()) {
                 this.symbols = symbolTable.getAllSymbols();
-            } else if (LabelsWindow.this.textLabels.isSelected()) {
+            } else if (textLabels.isSelected()) {
                 this.symbols = symbolTable.getTextSymbols();
-            } else if (LabelsWindow.this.dataLabels.isSelected()) {
+            } else if (dataLabels.isSelected()) {
                 this.symbols = symbolTable.getDataSymbols();
             } else {
                 this.symbols = new ArrayList<>();
@@ -370,9 +370,9 @@ public final class LabelsWindow extends JInternalFrame {
                 // sets up the label table
                 final Symbol s = this.symbols.get(i);
                 this.labelData[i][LabelsWindow.LABEL_COLUMN] = s.name();
-                this.labelData[i][LabelsWindow.ADDRESS_COLUMN] = NumberDisplayBaseChooser.formatNumber(
+                this.labelData[i][LabelsWindow.ADDRESS_COLUMN] = NumberDisplayBasePicker.formatNumber(
                     s.address(),
-                    addressBase
+                    addressFormat
                 );
             }
             final LabelTableModel m = new LabelTableModel(this.labelData, LabelsWindow.columnNames);
@@ -388,14 +388,14 @@ public final class LabelsWindow extends JInternalFrame {
         }
 
         public void updateLabelAddresses() {
-            if (LabelsWindow.this.labelPanel.getComponentCount() == 0) {
+            if (labelPanel.getComponentCount() == 0) {
                 return; // ignore if no content to change
             }
-            final int addressBase = LabelsWindow.this.executePane.getAddressDisplayBase();
+            final var addressFormat = executePane.getAddressDisplayFormat();
             final int numSymbols = (this.labelData == null) ? 0 : this.labelData.length;
             for (int i = 0; i < numSymbols; i++) {
                 final int address = this.symbols.get(i).address();
-                final String formattedAddress = NumberDisplayBaseChooser.formatNumber(address, addressBase);
+                final String formattedAddress = NumberDisplayBasePicker.formatNumber(address, addressFormat);
                 this.labelTable.getModel().setValueAt(formattedAddress, i, LabelsWindow.ADDRESS_COLUMN);
             }
         }
@@ -445,13 +445,13 @@ public final class LabelsWindow extends JInternalFrame {
                     final var point = e.getPoint();
                     final int index = columnModel.getColumnIndexAtX(point.x);
                     final int realIndex = columnModel.getColumn(index).getModelIndex();
-                    LabelsWindow.this.sortState = LabelsWindow.sortStateTransitions[LabelsWindow.this.sortState][realIndex];
-                    LabelsWindow.this.tableSortComparator = LabelsWindow.this.tableSortingComparators.get(LabelsWindow.this.sortState);
-                    LabelsWindow.columnNames = LabelsWindow.sortColumnHeadings[LabelsWindow.this.sortState];
-                    OTHER_SETTINGS.setLabelSortStateAndSave(LabelsWindow.this.sortState);
-                    LabelsWindow.this.setupTable();
-                    LabelsWindow.this.executePane.setLabelWindowVisibility(false);
-                    LabelsWindow.this.executePane.setLabelWindowVisibility(true);
+                    sortState = LabelsWindow.sortStateTransitions[sortState][realIndex];
+                    tableSortComparator = tableSortingComparators.get(sortState);
+                    LabelsWindow.columnNames = LabelsWindow.sortColumnHeadings[sortState];
+                    OTHER_SETTINGS.setLabelSortStateAndSave(sortState);
+                    setupTable();
+                    executePane.setLabelWindowVisibility(false);
+                    executePane.setLabelWindowVisibility(true);
                     return Unit.INSTANCE;
                 }).build();
                 this.addMouseListener(headerMouseListener);

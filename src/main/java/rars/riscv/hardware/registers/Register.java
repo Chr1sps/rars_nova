@@ -1,7 +1,7 @@
 package rars.riscv.hardware.registers;
 
 import org.jetbrains.annotations.NotNull;
-import rars.notices.AccessNotice;
+import rars.notices.AccessType;
 import rars.notices.RegisterAccessNotice;
 import rars.util.ListenerDispatcher;
 
@@ -50,7 +50,7 @@ public class Register {
      * @return value The value of the Register.
      */
     public final synchronized long getValue() {
-        this.registerChangeDispatcher.dispatch(new RegisterAccessNotice(AccessNotice.AccessType.READ, this));
+        this.registerChangeDispatcher.dispatch(new RegisterAccessNotice(AccessType.READ, this));
         return this.getValueNoNotify();
     }
 
@@ -84,7 +84,7 @@ public class Register {
     public synchronized long setValue(final long val) {
         final long old = this.value;
         this.value = val;
-        this.registerChangeDispatcher.dispatch(new RegisterAccessNotice(AccessNotice.AccessType.WRITE, this));
+        this.registerChangeDispatcher.dispatch(new RegisterAccessNotice(AccessType.WRITE, this));
         return old;
     }
 

@@ -10,8 +10,7 @@ import rars.riscv.InstructionsRegistry
 import rars.riscv.hardware.memory.Memory
 import rars.riscv.hardware.memory.wordAligned
 import rars.settings.BoolSetting
-import rars.simulator.Simulator
-import rars.util.FilenameFinder
+import rars.simulator.StoppingEvent
 import rars.util.toAscii
 import rars.util.toHexStringWithPrefix
 import rars.util.translateToInt
@@ -30,7 +29,8 @@ import kotlin.system.exitProcess
  * @version December 2009
  */
 class Main internal constructor(private val programOptions: ProgramOptions) {
-    private val out: PrintStream = if (programOptions.printToStdErr) System.err else System.out
+    private val out: PrintStream =
+        if (programOptions.printToStdErr) System.err else System.out
 
     init {
         Globals.setupGlobalMemoryConfiguration(this.programOptions.memoryConfiguration)
@@ -115,35 +115,32 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
             return null
         }
 
-        Globals.BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, this.programOptions.isRV64)
+        Globals.BOOL_SETTINGS.setSetting(
+            BoolSetting.RV64_ENABLED,
+            this.programOptions.isRV64
+        )
         InstructionsRegistry.RV64_MODE_FLAG = this.programOptions.isRV64
 
         val mainFile: File = this.programOptions.files.first().absoluteFile
-        val filesToAssemble: List<File>
-        if (this.programOptions.isProjectMode) {
-            val allFoundProjectFiles = FilenameFinder.getFilenameListForDirectory(
-                mainFile.getParentFile(),
-                Globals.FILE_EXTENSIONS
-            )
-            // filesToAssemble = FilenameFinder.getFilenameList(mainFile.getParent(), Globals.fileExtensions);
+        val filesToAssemble = if (this.programOptions.isProjectMode) {
+            val allFoundProjectFiles = mainFile.parentFile.listFiles { file ->
+                file.extension in Globals.FILE_EXTENSIONS
+            }
             if (this.programOptions.files.size > 1) {
                 // Using "p" project option PLUS listing more than one file on command line.
                 // Add the additional files, avoiding duplicates.
                 val nonMainFiles = this.programOptions.files.drop(1)
-                val moreFilesToAssemble = FilenameFinder.filterFilesByExtensions(
-                    nonMainFiles,
-                    Globals.FILE_EXTENSIONS
-                )
-                filesToAssemble = (allFoundProjectFiles + moreFilesToAssemble).distinct()
-            } else {
-                filesToAssemble = FilenameFinder.filterFilesByExtensions(
-                    allFoundProjectFiles,
-                    Globals.FILE_EXTENSIONS
-                )
+                val moreFilesToAssemble = nonMainFiles.filter { file ->
+                    file.extension in Globals.FILE_EXTENSIONS
+                }
+                (allFoundProjectFiles + moreFilesToAssemble).distinct()
+            } else allFoundProjectFiles.filter { file ->
+                file.extension in Globals.FILE_EXTENSIONS
             }
+
         } else {
             // filtering this list when we don't want to assemble everything in a file is nonsense
-            filesToAssemble = this.programOptions.files
+            this.programOptions.files
         }
         val program = Program(this.programOptions)
 
@@ -175,41 +172,38 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
                 this.out.println("--------  SIMULATION BEGINS  -----------")
             }
             while (true) {
-                val doLoop: Boolean = program.simulate().fold(
-                    { error ->
-                        Globals.exitCode = this.programOptions.simulationErrorCode
-                        this.out.println(error.message.generateReport())
-                        this.out.println("Simulation terminated due to errors.")
-                        false
-                    },
-                    { reason ->
-                        val result = when (reason) {
-                            Simulator.Reason.MAX_STEPS -> {
-                                this.out.println(
-                                    "\nProgram terminated when maximum step limit " + this.programOptions.maxSteps +
-                                        " " +
-                                        "reached."
-                                )
-                                false
-                            }
-
-                            Simulator.Reason.CLIFF_TERMINATION -> {
-                                this.out.println("\nProgram terminated by dropping off the bottom.")
-                                false
-                            }
-
-                            Simulator.Reason.NORMAL_TERMINATION -> {
-                                this.out.println("\nProgram terminated by calling exit")
-                                false
-                            }
-
-                            else -> true
+                val doLoop = program.simulate().let { stoppingEvent ->
+                    when (stoppingEvent) {
+                        is StoppingEvent.ErrorHit -> {
+                            Globals.exitCode =
+                                programOptions.simulationErrorCode
+                            out.println(stoppingEvent.error.message.generateReport())
+                            out.println("Simulation terminated due to errors.")
+                            false
                         }
-                        assert(reason == Simulator.Reason.BREAKPOINT) { "Internal error: All cases other than breakpoints should be handled already" }
-                        displayAllPostMortem(program) // print registers if we hit a breakpoint, then continue
-                        result
+                        StoppingEvent.MaxStepsHit -> {
+                            out.println(
+                                """
+                                Program terminated when maximum step limit ${programOptions.maxSteps} reached.
+                                """.trimIndent()
+                            )
+                            false
+                        }
+                        StoppingEvent.CliffTermination -> {
+                            this.out.println("\nProgram terminated by dropping off the bottom.")
+                            false
+                        }
+                        StoppingEvent.NormalTermination -> {
+                            this.out.println("\nProgram terminated by calling exit")
+                            false
+                        }
+                        StoppingEvent.BreakpointHit -> {
+                            displayAllPostMortem(program) // print registers if we hit a breakpoint, then continue
+                            true
+                        }
+                        else -> error("Invalid stopping event: $stoppingEvent")
                     }
-                )
+                }
                 if (!doLoop) break
             }
             this.displayAllPostMortem(program)
@@ -256,7 +250,7 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
                     this.out.print(registerName + "\t")
                     this.out.println(
                         this.formatIntForDisplay(
-                            Globals.CS_REGISTER_FILE.getLongValue(registerName)!!
+                            Globals.CS_REGISTER_FILE.getLong(registerName)!!
                                 .toInt()
                         )
                     )
@@ -300,11 +294,12 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
                         this.out.print("Mem[" + addr.toHexStringWithPrefix() + "]\t")
                     }
                 }
-                val eitherAddress = if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(addr)) {
-                    memory.getRawWordOrNull(addr).map { it ?: 0 }
-                } else {
-                    memory.getWord(addr)
-                }
+                val eitherAddress =
+                    if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(addr)) {
+                        memory.getRawWordOrNull(addr).map { it ?: 0 }
+                    } else {
+                        memory.getWord(addr)
+                    }
                 eitherAddress.fold(
                     { error -> out.print("Invalid address: $addr\t") },
                     { value -> out.print(formatIntForDisplay(value) + "\t") }
@@ -328,9 +323,10 @@ class Main internal constructor(private val programOptions: ProgramOptions) {
      * if name is invalid; only needs to be checked if
      * code accesses arbitrary names
      */
-    private fun getRegisterValue(name: String): Int? = Globals.REGISTER_FILE.getIntValue(name)
-        ?: Globals.FP_REGISTER_FILE.getIntValue(name)
-        ?: Globals.CS_REGISTER_FILE.getIntValue(name)
+    private fun getRegisterValue(name: String): Int? =
+        Globals.REGISTER_FILE.getInt(name)
+            ?: Globals.FP_REGISTER_FILE.getInt(name)
+            ?: Globals.CS_REGISTER_FILE.getInt(name)
 }
 
 fun main(args: Array<String>) {
@@ -344,7 +340,8 @@ fun main(args: Array<String>) {
 }
 
 private const val RANGE_SEPARATOR = "-"
-private const val MEMORY_WORDS_PER_LINE = 4 // display 4 memory words, tab separated, per line
+private const val MEMORY_WORDS_PER_LINE =
+    4 // display 4 memory words, tab separated, per line
 
 /**
  * Check for memory address subrange. Has to be two integers separated
@@ -391,5 +388,7 @@ private fun launchIDE(options: ProgramOptions) {
         System.setProperty("apple.awt.application.name", "RARS Nova")
         System.setProperty("apple.awt.application.appearance", "system")
     }
-    SwingUtilities.invokeLater { Globals.GUI = VenusUI("RARS " + Globals.VERSION, options.files) }
+    SwingUtilities.invokeLater {
+        Globals.GUI = VenusUI("RARS " + Globals.VERSION, options.files)
+    }
 }

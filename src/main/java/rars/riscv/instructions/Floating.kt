@@ -32,22 +32,26 @@ class Floating(
     "$funct ttttt sssss $rm fffff 1010011"
 ) {
 
-    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
-        val environment = Environment()
-        val hasRoundingMode: Boolean = statement.hasOperand(3)
-        if (hasRoundingMode) {
-            environment.mode = csrRegisterFile.getRoundingMode(
-                statement.getOperand(3),
-                statement
+    override suspend fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> =
+        either {
+            val environment = Environment()
+            val hasRoundingMode: Boolean = statement.hasOperand(3)
+            if (hasRoundingMode) {
+                environment.mode = csrRegisterFile.getRoundingMode(
+                    statement.getOperand(3),
+                    statement
+                ).bind()
+            }
+            val result: Float32 = environment.compute(
+                Float32(fpRegisterFile.getInt(statement.getOperand(1))!!),
+                Float32(fpRegisterFile.getInt(statement.getOperand(2))!!),
+            )
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumberInt(
+                statement.getOperand(0),
+                result.bits
             ).bind()
         }
-        val result: Float32 = environment.compute(
-            Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!),
-            Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!),
-        )
-        csrRegisterFile.setfflags(environment).bind()
-        fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result.bits).bind()
-    }
 
     companion object {
         private fun floating(
@@ -94,7 +98,10 @@ class Floating(
         )
 
         val FMINS = floating(
-            "fmin.s", "Floating MINimum: assigns f1 to the smaller of f1 and f3", "0010100", "000",
+            "fmin.s",
+            "Floating MINimum: assigns f1 to the smaller of f1 and f3",
+            "0010100",
+            "000",
             Float32::min
         )
 

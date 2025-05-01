@@ -8,16 +8,14 @@ import rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue
 import java.awt.Font
 
 object RSTASchemeConverter {
-    private fun convertStyle(style: TokenStyle, baseFont: Font): Style {
-        return Style().apply {
-            foreground = style.foreground
-            background = style.background
-            if (font == null) {
-                font = baseFont
-            }
-            font = font.applyStyle(style)
-            underline = style.isUnderline
+    private fun convertStyle(style: TokenStyle, baseFont: Font): Style = Style().apply {
+        foreground = style.foreground
+        background = style.background
+        if (font == null) {
+            font = baseFont
         }
+        font = font.applyStyle(style)
+        underline = style.isUnderline
     }
 
     @JvmStatic

@@ -17,13 +17,12 @@ import rars.riscv.InstructionsRegistry
 import rars.riscv.hardware.memory.MemoryConfiguration
 import rars.riscv.hardware.memory.textSegmentBaseAddress
 import rars.settings.BoolSetting
-import rars.simulator.Simulator
+import rars.simulator.StoppingEvent
 import rars.util.unwrap
 import utils.RarsTestBase
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
-import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
@@ -57,17 +56,22 @@ internal class AppTest : RarsTestBase() {
                 var line = br.readLine()
                 while (line.startsWith("#")) {
                     if (line.startsWith("#error on lines:")) {
-                        val linenumbers = line.replaceFirst("#error on lines:".toRegex(), "").split(",".toRegex())
-                            .dropLastWhile { it.isEmpty() }.toTypedArray()
+                        val linenumbers =
+                            line.replaceFirst("#error on lines:".toRegex(), "")
+                                .split(",".toRegex())
+                                .dropLastWhile { it.isEmpty() }.toTypedArray()
                         for (num in linenumbers) {
                             errorLines.add(num.trim { it <= ' ' }.toInt())
                         }
                     } else if (line.startsWith("#stdin:")) {
-                        stdin = line.replaceFirst("#stdin:".toRegex(), "").replace("\\\\n".toRegex(), "\n")
+                        stdin = line.replaceFirst("#stdin:".toRegex(), "")
+                            .replace("\\\\n".toRegex(), "\n")
                     } else if (line.startsWith("#stdout:")) {
-                        stdout = line.replaceFirst("#stdout:".toRegex(), "").replace("\\\\n".toRegex(), "\n")
+                        stdout = line.replaceFirst("#stdout:".toRegex(), "")
+                            .replace("\\\\n".toRegex(), "\n")
                     } else if (line.startsWith("#stderr:")) {
-                        stderr = line.replaceFirst("#stderr:".toRegex(), "").replace("\\\\n".toRegex(), "\n")
+                        stderr = line.replaceFirst("#stderr:".toRegex(), "")
+                            .replace("\\\\n".toRegex(), "\n")
                     }
                     line = br.readLine()
                 }
@@ -75,13 +79,18 @@ internal class AppTest : RarsTestBase() {
             return TestIO(stdin, stdout, stderr, errorLines)
         }
 
-        @Throws(IOException::class)
         private fun fileProvider(directory: String): Stream<Named<Path?>?>? {
             val path = testDataPath.resolve(directory)
             // noinspection resource
             return Files.walk(path).filter { p: Path? ->
-                Files.isRegularFile(p) && p!!.fileName.toString().lowercase(Locale.getDefault()).endsWith(".s")
-            }.map<Named<Path?>?> { p: Path? -> Named.of<Path?>(p!!.fileName.toString(), p) }
+                Files.isRegularFile(p) && p!!.fileName.toString()
+                    .lowercase(Locale.getDefault()).endsWith(".s")
+            }.map<Named<Path?>?> { p: Path? ->
+                Named.of<Path?>(
+                    p!!.fileName.toString(),
+                    p
+                )
+            }
         }
 
         @JvmStatic
@@ -101,12 +110,19 @@ internal class AppTest : RarsTestBase() {
             programArgs.memoryConfiguration = MemoryConfiguration.DEFAULT
             val program = Program(programArgs)
 
-            Globals.BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true)
-            Globals.BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64Enabled)
+            Globals.BOOL_SETTINGS.setSetting(
+                BoolSetting.SELF_MODIFYING_CODE_ENABLED,
+                true
+            )
+            Globals.BOOL_SETTINGS.setSetting(
+                BoolSetting.RV64_ENABLED,
+                isRV64Enabled
+            )
             InstructionsRegistry.RV64_MODE_FLAG = isRV64Enabled
 
-            val instructionsToTest = if (isRV64Enabled) InstructionsRegistry.BASIC_INSTRUCTIONS.r64All
-            else InstructionsRegistry.BASIC_INSTRUCTIONS.r32All
+            val instructionsToTest =
+                if (isRV64Enabled) InstructionsRegistry.BASIC_INSTRUCTIONS.r64All
+                else InstructionsRegistry.BASIC_INSTRUCTIONS.r32All
             for (instruction in instructionsToTest) {
                 println("Testing: ${instruction.mnemonic}")
                 when (instruction.instructionFormat) {
@@ -117,11 +133,13 @@ internal class AppTest : RarsTestBase() {
 
                 program.assembleString(format)
                 program.setup(emptyList(), "")
-                val instructionAddress = MemoryConfiguration.DEFAULT.textSegmentBaseAddress
+                val instructionAddress =
+                    MemoryConfiguration.DEFAULT.textSegmentBaseAddress
                 val word = program.memory.getWord(instructionAddress).unwrap()
 
                 val baseStatement = program.machineList.first()
-                val statementFromMemory = ProgramStatement(word, instructionAddress)
+                val statementFromMemory =
+                    ProgramStatement(word, instructionAddress)
 
                 val message = """
                     Expected:  $baseStatement
@@ -137,30 +155,42 @@ internal class AppTest : RarsTestBase() {
                 program.setup(emptyList(), "")
                 val word2 = program.memory.getWord(instructionAddress).unwrap()
                 assertEquals(word, word2, "Error 3 on: $format")
-                assertEquals(instruction, statementFromMemory.instruction, "Error 4 on: $format")
+                assertEquals(
+                    instruction,
+                    statementFromMemory.instruction,
+                    "Error 4 on: $format"
+                )
             }
         }
 
         private fun testPseudoInstructionsImpl(isRV64: Boolean) {
-            val programArgs = ProgramOptions()
-            programArgs.startAtMain = true
-            programArgs.maxSteps = 500
-            programArgs.selfModifyingCode = true
-            programArgs.memoryConfiguration = MemoryConfiguration.DEFAULT
+            val programArgs = ProgramOptions().apply {
+                startAtMain = true
+                maxSteps = 500
+                selfModifyingCode = true
+                memoryConfiguration = MemoryConfiguration.DEFAULT
+            }
             val program = Program(programArgs)
-            Globals.BOOL_SETTINGS.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true)
+            Globals.BOOL_SETTINGS.setSetting(
+                BoolSetting.SELF_MODIFYING_CODE_ENABLED,
+                true
+            )
             Globals.BOOL_SETTINGS.setSetting(BoolSetting.RV64_ENABLED, isRV64)
             InstructionsRegistry.RV64_MODE_FLAG = isRV64
 
-            val instructionsToTest = if (isRV64) InstructionsRegistry.EXTENDED_INSTRUCTIONS.r64All
-            else InstructionsRegistry.EXTENDED_INSTRUCTIONS.r32All
+            val instructionsToTest =
+                if (isRV64) InstructionsRegistry.EXTENDED_INSTRUCTIONS.r64All
+                else InstructionsRegistry.EXTENDED_INSTRUCTIONS.r32All
             for (instruction in instructionsToTest) {
                 val programString = "label:" + instruction.exampleFormat
                 program.assembleString(programString)
                 program.setup(emptyList(), "")
-                val first = program.memory.getWord(0x400000).unwrap()
-                val second = program.memory.getWord(0x400004).unwrap()
-                val ps = ProgramStatement(first, 0x400000)
+                val textSegmentAddress =
+                    MemoryConfiguration.DEFAULT.textSegmentBaseAddress
+                val first = program.memory.getWord(textSegmentAddress).unwrap()
+                val second =
+                    program.memory.getWord(textSegmentAddress + 4).unwrap()
+                val ps = ProgramStatement(first, textSegmentAddress)
                 assertNotNull(ps.instruction, "Error 11 on: $programString")
                 assertThat(
                     "Error 12 on: $programString",
@@ -173,29 +203,34 @@ internal class AppTest : RarsTestBase() {
                     // Currently this covers all instructions and is an alert if I made a trivial
                     // mistake.
                     val registerSubstitute =
-                        programString.replace("t0|t1|t2".toRegex(), "x0").replace("f1".toRegex(), "f0")
+                        programString.replace("t0|t1|t2".toRegex(), "x0")
+                            .replace("f1".toRegex(), "f0")
                     program.assembleString(registerSubstitute)
                     program.setup(emptyList(), "")
                     val word1 = program.memory.getWord(0x400000).unwrap()
                     val word2 = program.memory.getWord(0x400004).unwrap()
-                    Assertions.assertFalse(word1 == first && word2 == second, "Error 13 on: $programString")
+                    Assertions.assertFalse(
+                        word1 == first && word2 == second,
+                        "Error 13 on: $programString"
+                    )
                 }
             }
         }
     }
 
     @Test
-    @Throws(IOException::class)
     fun runSingle() {
-        val path = "riscv-tests/fclass.s"
+        val path = "riscv-tests/fcvt_w.s"
         runTest(testDataPath.resolve(path).toString(), false)
     }
 
     @Test
-    fun testBasicInstructionBinaryCodes32() = testBasicInstructionBinaryCodesImpl(false)
+    fun testBasicInstructionBinaryCodes32() =
+        testBasicInstructionBinaryCodesImpl(false)
 
     @Test
-    fun testBasicInstructionBinaryCodes64() = testBasicInstructionBinaryCodesImpl(true)
+    fun testBasicInstructionBinaryCodes64() =
+        testBasicInstructionBinaryCodesImpl(true)
 
     @Test
     fun testPseudoInstructions32() = testPseudoInstructionsImpl(false)
@@ -206,19 +241,16 @@ internal class AppTest : RarsTestBase() {
     @DisplayName("32 bit instructions")
     @ParameterizedTest
     @MethodSource("rv32TestFileProvider")
-    @Throws(IOException::class)
     fun test32(path: Path) = runTest(path.toString(), false)
 
     @DisplayName("64 bit instructions")
     @ParameterizedTest
     @MethodSource("rv64TestFileProvider")
-    @Throws(IOException::class)
     fun test64(path: Path) = runTest(path.toString(), true)
 
     @DisplayName("Examples")
     @ParameterizedTest
     @MethodSource("examplesTestFileProvider")
-    @Throws(IOException::class)
     fun testExamples(path: Path) = runTest(path.toString(), false)
 }
 
@@ -261,10 +293,10 @@ private fun RarsTestBase.doRunImpl(
                 buildString {
                     append(
                         """
-                                Expected and actual error lines are not equal for `$testName`.
-                                Expected lines: $errorLines
-                                Errors found:
-                                """.trimIndent()
+                        Expected and actual error lines are not equal for `$testName`.
+                        Expected lines: $errorLines
+                        Errors found:
+                        """.trimIndent()
                     )
                     for (error in errors) {
                         append("[${error.lineNumber},${error.position}] ${error.generateReport()}\n")
@@ -279,12 +311,18 @@ private fun RarsTestBase.doRunImpl(
     }
     program.setup(emptyList(), stdin)
     println("Machine list:")
-    program.machineList.forEach { x -> println(x) }
+    program.machineList.forEach { println(it) }
     println()
-    program.simulate().fold(
-        { error ->
-            fail {
-                """
+    Globals.PROGRAM = program.code
+    program.code.backStepper!!.isEnabled = true
+    program.simulate().let { stoppingEvent ->
+        println("Backstepper data:")
+        println(program.code.backStepper.toString())
+        when {
+            stoppingEvent is StoppingEvent.ErrorHit -> {
+                val error = stoppingEvent.error
+                fail {
+                    """
                     Crashed while executing `$testName`.
                     Reason: ${error.reason}.
                     Value: ${error.value}.
@@ -293,48 +331,50 @@ private fun RarsTestBase.doRunImpl(
                     ${error.message.generateReport()}
                     ```
                     """.trimIndent()
+                }
             }
-        },
-        { reason ->
-            when {
-                reason != Simulator.Reason.NORMAL_TERMINATION -> fail {
-                    """
-                    Ended abnormally while executing `$testName`.
-                    Reason: $reason.
-                    """.trimIndent()
-                }
-                program.exitCode != 42 -> fail {
-                    """
-                    Final exit code was wrong for `$testName`.
-                    Expected: 42, but got ${program.exitCode}.
-                    """.trimIndent()
-                }
-                program.stdout != stdout -> fail {
-                    """
+            stoppingEvent != StoppingEvent.NormalTermination -> fail {
+                """
+                Ended abnormally while executing `$testName`.
+                Event: $stoppingEvent.
+                """.trimIndent()
+            }
+            program.exitCode != 42 -> fail {
+                """
+                Final exit code was wrong for `$testName`.
+                Expected: 42, but got ${program.exitCode}.
+                """.trimIndent()
+            }
+            program.stdout != stdout -> fail {
+                """
                     STDOUT was wrong for `$testName`.
                     Expected:
                     \"$stdout\",
                     but got
                     \"${program.stdout}\".
                     """.trimIndent()
-                }
-                program.stderr != stderr -> fail {
-                    """
+            }
+
+            program.stderr != stderr -> fail {
+                """
                     STDERR was wrong for `$testName`.
                     Expected:
                     \"$stderr\",
                     but got
                     \"${program.stderr}\".
                     """.trimIndent()
-                }
-                else -> Unit
             }
         }
-    )
+    }
+
 }
 
 fun RarsTestBase.doRunFile(path: String, program: Program, testIO: TestIO) =
     doRunImpl(program, testIO) { assembleFile(File(path)) }
 
-fun RarsTestBase.doRunString(code: String, program: Program, testIO: TestIO = TestIO()) =
+fun RarsTestBase.doRunString(
+    code: String,
+    program: Program,
+    testIO: TestIO = TestIO()
+) =
     doRunImpl(program, testIO) { assembleString(code) }

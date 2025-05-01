@@ -15,7 +15,7 @@ import rars.ProgramStatement
 import rars.assembler.DataTypes
 import rars.events.EventReason
 import rars.events.MemoryError
-import rars.notices.AccessNotice
+import rars.notices.AccessType
 import rars.notices.MemoryAccessNotice
 import rars.riscv.BasicInstruction
 import rars.settings.BoolSetting
@@ -385,7 +385,7 @@ class Memory(
                 oldValue = storeBytesInTable(memoryMapBlockTable, relativeByteAddress, length, value)
             }
         }
-        notifyAnyObservers(AccessNotice.AccessType.WRITE, address, length, value)
+        notifyAnyObservers(AccessType.WRITE, address, length, value)
         oldValue
     }
 
@@ -440,7 +440,7 @@ class Memory(
             relative = (address - memoryConfiguration.memoryMapBaseAddress) shr 2 // convert byte address to word
             oldValue = storeWordInTable(memoryMapBlockTable, relative, value)
         } else raise(MemoryError("store address out of range ", EventReason.STORE_ACCESS_FAULT, address))
-        notifyAnyObservers(AccessNotice.AccessType.WRITE, address, DataTypes.WORD_SIZE, value)
+        notifyAnyObservers(AccessType.WRITE, address, DataTypes.WORD_SIZE, value)
         if (OtherSettings.isBacksteppingEnabled) {
             Globals.PROGRAM!!.backStepper!!.addMemoryRestoreRawWord(address, oldValue)
         }
@@ -627,7 +627,7 @@ class Memory(
             }
         }
         if (notify) {
-            notifyAnyObservers(AccessNotice.AccessType.READ, address, length, value)
+            notifyAnyObservers(AccessType.READ, address, length, value)
         }
         value
     }
@@ -679,7 +679,7 @@ class Memory(
             }
             else -> raise(MemoryError("address out of range ", EventReason.LOAD_ACCESS_FAULT, address))
         }
-        notifyAnyObservers(AccessNotice.AccessType.READ, address, DataTypes.WORD_SIZE, value)
+        notifyAnyObservers(AccessType.READ, address, DataTypes.WORD_SIZE, value)
         value
     }
 
@@ -910,7 +910,7 @@ class Memory(
      */
     fun subscribe(listener: Listener<MemoryAccessNotice>): Either<MemoryError, MemoryListenerHandle<Int>> =
         subscribe(listener, 0, -0x4).onLeft {
-            LOGGER.error("Internal error in Memory#subscribe: {}", it)
+            LOGGER.error("Internal error in Memory#subscribe: {}", it.toString())
         }
 
     /**
@@ -957,17 +957,7 @@ class Memory(
         endAddress: Int
     ): Either<MemoryError, MemoryListenerHandle<Int>> = either {
         checkLoadWordAligned(startAddress).bind()
-        checkLoadWordAligned(endAddress).bind()
-        // upper half of address space (above 0x7fffffff) has sign bit 1 thus is seen as
-        // negative.
-        ensure(!(startAddress >= 0 && endAddress < 0)) {
-            MemoryError(
-                "range cannot cross 0x8000000; please split it up",
-                EventReason.LOAD_ACCESS_FAULT,
-                startAddress
-            )
-        }
-        ensure(startAddress <= endAddress) {
+        ensure(startAddress.toUInt() <= endAddress.toUInt()) {
             MemoryError(
                 "end address of range < start address of range ",
                 EventReason.LOAD_ACCESS_FAULT,
@@ -987,7 +977,7 @@ class Memory(
      * Method to notify any observers of memory operation that has just occurred.
      */
     private fun notifyAnyObservers(
-        type: AccessNotice.AccessType,
+        type: AccessType,
         address: Int,
         length: Int,
         value: Int
@@ -1190,7 +1180,7 @@ class Memory(
                 // No instructions are stored in this block or offset.
                 if (notify) {
                     this.notifyAnyObservers(
-                        AccessNotice.AccessType.READ,
+                        AccessType.READ,
                         address,
                         BasicInstruction.BASIC_INSTRUCTION_LENGTH,
                         0
@@ -1200,7 +1190,7 @@ class Memory(
             } else {
                 if (notify) {
                     this.notifyAnyObservers(
-                        AccessNotice.AccessType.READ,
+                        AccessType.READ,
                         address,
                         BasicInstruction.BASIC_INSTRUCTION_LENGTH,
                         blockTable[block]!![offset]!!.binaryStatement
@@ -1211,7 +1201,7 @@ class Memory(
         }
         if (notify) {
             this.notifyAnyObservers(
-                AccessNotice.AccessType.READ,
+                AccessType.READ,
                 address,
                 BasicInstruction.BASIC_INSTRUCTION_LENGTH,
                 0

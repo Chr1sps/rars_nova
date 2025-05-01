@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.prefs.Preferences;
 
-// TODO: Remove all the mutable state from this class, leave only all the constants.
+// TODO: remove this class altogether. Replace with top-level constants in Kotlin.
 
 /**
  * Since the original RARS code contained *a lot* of globally accessible mutable state,
@@ -25,6 +25,7 @@ import java.util.prefs.Preferences;
  * and to potentially make it easier to refactor in the future. This class serves as a place
  * to put all the global mutable state that was previously scattered throughout the codebase.
  */
+@Deprecated(forRemoval = true)
 public final class Globals {
 
     /// String to GUI's RunI/O text area when echoing user input from pop-up dialog.
@@ -50,46 +51,31 @@ public final class Globals {
     public static final int MAXIMUM_BACKSTEPS = 2000;
 
     /// Lock variable used at head of synchronized block to guard memory and registers
-    @Deprecated
     public static final @NotNull ReentrantLock MEMORY_REGISTERS_LOCK = new ReentrantLock();
 
     /// Symbol table for file currently being assembled.
-    @Deprecated
     public static final @NotNull SymbolTable GLOBAL_SYMBOL_TABLE;
     ///  Register file for the RARS simulator.
-    @Deprecated(forRemoval = true)
     public static final @NotNull RegisterFile REGISTER_FILE;
     /// Control and status register file for the RARS simulator.
-    @Deprecated(forRemoval = true)
     public static final @NotNull CSRegisterFile CS_REGISTER_FILE;
-    @Deprecated
     public static final @NotNull Simulator SIMULATOR;
-    @Deprecated(forRemoval = true)
     public static final @NotNull InterruptController INTERRUPT_CONTROLLER;
-    @Deprecated(forRemoval = true)
     public static final @NotNull OtherSettingsImpl OTHER_SETTINGS;
-    @Deprecated(forRemoval = true)
     public static final @NotNull BoolSettingsImpl BOOL_SETTINGS;
-    @Deprecated(forRemoval = true)
     public static final @NotNull EditorThemeSettingsImpl EDITOR_THEME_SETTINGS;
-    @Deprecated(forRemoval = true)
     public static final @NotNull FontSettingsImpl FONT_SETTINGS;
-    @Deprecated(forRemoval = true)
     public static final @NotNull HighlightingSettingsImpl HIGHLIGHTING_SETTINGS;
-    @Deprecated(forRemoval = true)
     public static final @NotNull AllSettings ALL_SETTINGS;
     ///  Floating point register file for the RARS simulator.
-    @Deprecated(forRemoval = true)
     public static final @NotNull FloatingPointRegisterFile FP_REGISTER_FILE;
     /// Flag to determine whether to produce internal debugging information.
     public static boolean debug = false;
     /// Exit code -- useful with SYSCALL 17 when running from command line (not GUI)
     public static int exitCode = 0;
     /// The GUI being used (if any) with this simulator.
-    @Deprecated(forRemoval = true)
     public static @Nullable VenusUI GUI = null;
     /// The program currently being worked with. Used by GUI only, not command line.
-    @Deprecated(forRemoval = true)
     public static @Nullable RISCVProgram PROGRAM;
     public static @NotNull Memory MEMORY_INSTANCE;
 

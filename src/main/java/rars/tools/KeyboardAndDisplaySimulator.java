@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.assembler.DataTypes;
 import rars.notices.AccessNotice;
+import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
 import rars.util.BinaryUtilsKt;
 import rars.venus.VenusUI;
@@ -257,7 +258,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // If Ready bit was initially clear, they'll get the old keystroke -- serves 'em
         // right
         // for not checking!
-        if (notice.address == KeyboardAndDisplaySimulator.RECEIVER_DATA && notice.accessType == AccessNotice.AccessType.READ) {
+        if (notice.address == KeyboardAndDisplaySimulator.RECEIVER_DATA && notice.accessType == AccessType.READ) {
             this.updateMMIOControl(
                 KeyboardAndDisplaySimulator.RECEIVER_CONTROL,
                 KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.RECEIVER_CONTROL)
@@ -271,7 +272,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // is processing the character.
         // Also start an intruction counter that will simulate the delay of the slower
         // display device processing the character.
-        if (KeyboardAndDisplaySimulator.isReadyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL) && notice.address == KeyboardAndDisplaySimulator.TRANSMITTER_DATA && notice.accessType == AccessNotice.AccessType.WRITE) {
+        if (KeyboardAndDisplaySimulator.isReadyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL) && notice.address == KeyboardAndDisplaySimulator.TRANSMITTER_DATA && notice.accessType == AccessType.WRITE) {
             this.updateMMIOControl(
                 KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL,
                 KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL)
@@ -290,7 +291,7 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // can write another character to the transmitter data register. If the
         // Interrupt-Enabled
         // bit had been set by the program, generate an interrupt!
-        if (this.countingInstructions && notice.accessType == AccessNotice.AccessType.READ && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
+        if (this.countingInstructions && notice.accessType == AccessType.READ && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
             notice.address)) {
             this.instructionCount++;
             if (this.instructionCount >= this.transmitDelayInstructionCountLimit) {
@@ -780,8 +781,8 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             // it was written to poll the memory cells for their values. So we force it to
             // do so.
 
-            if (this.mainUI.mainPane.executePane.textSegment.getCodeHighlighting()) {
-                this.mainUI.mainPane.executePane.dataSegment.updateValues();
+            if (this.mainUI.mainPane.executePane.getTextSegment().getCodeHighlighting()) {
+                this.mainUI.mainPane.executePane.getDataSegment().updateValues();
             }
         }
     }

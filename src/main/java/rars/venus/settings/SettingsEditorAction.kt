@@ -12,7 +12,7 @@ import java.awt.event.ActionEvent
 class SettingsEditorAction(
     mainUI: VenusUI,
     private val allSettings: AllSettings
-) : GuiAction("Editor...", null, "View and modify text editor settings.", null, null, mainUI) {
+) : GuiAction("Editor...", "View and modify text editor settings.", null, null, null, mainUI) {
     override fun actionPerformed(e: ActionEvent?): Unit = EditorSettingsDialog(mainUI, allSettings).run {
         isVisible = true
     }

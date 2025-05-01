@@ -25,19 +25,26 @@ class FusedDouble(
     BasicInstructionFormat.R4_FORMAT,
     "qqqqq 01 ttttt sssss ppp fffff 100${op}11"
 ) {
-    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
-        val environment = Environment().apply {
-            mode = csrRegisterFile.getRoundingMode(statement.getOperand(4), statement).bind()
+    override suspend fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> =
+        either {
+            val environment = Environment().apply {
+                mode = csrRegisterFile.getRoundingMode(
+                    statement.getOperand(4),
+                    statement
+                ).bind()
+            }
+            val result = compute(
+                environment,
+                Float64(fpRegisterFile.getLong(statement.getOperand(1))!!),
+                Float64(fpRegisterFile.getLong(statement.getOperand(2))!!),
+                Float64(fpRegisterFile.getLong(statement.getOperand(3))!!),
+            )
+            csrRegisterFile.setfflags(environment).bind()
+            fpRegisterFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                result.bits
+            ).bind()
         }
-        val result = compute(
-            environment,
-            Float64(fpRegisterFile.getLongValue(statement.getOperand(1))!!),
-            Float64(fpRegisterFile.getLongValue(statement.getOperand(2))!!),
-            Float64(fpRegisterFile.getLongValue(statement.getOperand(3))!!),
-        )
-        csrRegisterFile.setfflags(environment).bind()
-        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result.bits).bind()
-    }
 
     companion object {
         val FMADD = FusedDouble(
@@ -51,7 +58,14 @@ class FusedDouble(
             "fmsub.d f1, f2, f3, f4",
             "Fused Multiply Subtract (64 bit): Assigns f2*f3-f4 to f1",
             "01",
-        ) { env, f1, f2, f3 -> Float64.fusedMultiplyAdd(env, f1, f2, f3.negate()) }
+        ) { env, f1, f2, f3 ->
+            Float64.fusedMultiplyAdd(
+                env,
+                f1,
+                f2,
+                f3.negate()
+            )
+        }
 
         val FNMADDD = FusedDouble(
             "fnmadd.d f1, f2, f3, f4",

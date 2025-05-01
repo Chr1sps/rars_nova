@@ -42,8 +42,7 @@ public final class HelpHelpAction extends GuiAction {
     ) {
         super(
             "Help",
-            IconLoading.loadIcon("Help22.png"),
-            "Help",
+            "Help", IconLoading.loadIcon("Help22.png"),
             KeyEvent.VK_H,
             KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0), gui
         );

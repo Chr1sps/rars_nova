@@ -8,7 +8,6 @@ import rars.assembler.DataTypes
 import rars.events.MemoryError
 import rars.riscv.hardware.memory.Memory
 import rars.settings.BoolSetting
-import rars.util.BinaryUtilsOld
 import rars.util.toHexStringWithPrefix
 import rars.util.unwrap
 import java.io.File
@@ -127,7 +126,7 @@ object SegmentWindowDumpFormat : AbstractDumpFormat(
                     val formattedAddress = if (doDisplayAddressesInHex)
                         address.toHexStringWithPrefix()
                     else
-                        BinaryUtilsOld.unsignedIntToIntString(address)
+                        address.toUInt().toString()
                     append(formattedAddress).append("    ")
                     append(word.toHexStringWithPrefix()).append("  ")
                     memory.getProgramStatement(address).onRight { ps ->

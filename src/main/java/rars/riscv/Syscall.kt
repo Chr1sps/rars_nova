@@ -57,7 +57,7 @@ enum class Syscall(
         "a0 = the file descriptor to close", "N/A",
         { stmt ->
             io.closeFile(
-                registerFile.getIntValue(
+                registerFile.getInt(
                     registerFile.a0
                 )
             ).right()
@@ -88,9 +88,9 @@ enum class Syscall(
         "N/A",
         { stmt ->
             DisplayBitmapImpl.INSTANCE.show(
-                registerFile.getIntValue("a0")!!,
-                registerFile.getIntValue("a1")!!,
-                registerFile.getIntValue("a2")!!
+                registerFile.getInt("a0")!!,
+                registerFile.getInt("a1")!!,
+                registerFile.getInt("a2")!!
             ).right()
         }
     ),
@@ -105,7 +105,7 @@ enum class Syscall(
         "Exit2", 93, "Exits the program with a code",
         "a0 = the number to exit with", "N/A",
         { stmt ->
-            Globals.exitCode = registerFile.getIntValue("a0")!!
+            Globals.exitCode = registerFile.getInt("a0")!!
             ExitingEvent.left()
         }
     ),
@@ -120,8 +120,8 @@ enum class Syscall(
         { stmt ->
             either {
                 val path = System.getProperty("user.dir")
-                val buf = registerFile.getIntValue("a0")!!
-                val length = registerFile.getIntValue("a1")!!
+                val buf = registerFile.getInt("a0")!!
+                val length = registerFile.getInt("a1")!!
 
                 val utf8BytesList = path.toByteArray(StandardCharsets.UTF_8)
                 if (length < utf8BytesList.size + 1) {
@@ -197,8 +197,12 @@ enum class Syscall(
                         exitCode = -1
                     }
                 }
-                fpRegisterFile.updateRegisterByName("ft0", Double.doubleToRawLongBits(result)).bind()
-                registerFile.updateRegisterByName("a1", exitCode.toLong()).bind()
+                fpRegisterFile.updateRegisterByName(
+                    "ft0",
+                    Double.doubleToRawLongBits(result)
+                ).bind()
+                registerFile.updateRegisterByName("a1", exitCode.toLong())
+                    .bind()
             }
         }
     ),
@@ -230,7 +234,10 @@ enum class Syscall(
                     exitCode = -1
                 }
 
-                fpRegisterFile.updateRegisterByNameInt("ft0", Float.floatToIntBits(result))
+                fpRegisterFile.updateRegisterByNameInt(
+                    "ft0",
+                    Float.floatToIntBits(result)
+                )
                 registerFile.updateRegisterByName("a1", exitCode.toLong())
             }
         }
@@ -268,7 +275,8 @@ enum class Syscall(
                     }
                 }
                 registerFile.updateRegisterByName("a0", result.toLong()).bind()
-                registerFile.updateRegisterByName("a1", exitCode.toLong()).bind()
+                registerFile.updateRegisterByName("a1", exitCode.toLong())
+                    .bind()
             }
         }
     ),
@@ -297,9 +305,9 @@ enum class Syscall(
                 // means that OK was chosen but no string was input.
                 val inputString = JOptionPane.showInputDialog(prompt)
                 // byteAddress of string is in a1
-                val byteAddress = registerFile.getIntValue("a1")!!
+                val byteAddress = registerFile.getInt("a1")!!
                 // input buffer size for input string is in a2
-                val maxLength = registerFile.getIntValue("a2")!!
+                val maxLength = registerFile.getInt("a2")!!
                 val status: Int = if (inputString == null) {
                     // Cancel was chosen
                     -2
@@ -307,10 +315,14 @@ enum class Syscall(
                     // OK was chosen but there was no input
                     -3
                 } else {
-                    val utf8BytesList = inputString.toByteArray(StandardCharsets.UTF_8)
+                    val utf8BytesList =
+                        inputString.toByteArray(StandardCharsets.UTF_8)
                     // The buffer will contain characters, a '\n' character, and the null character
                     // Copy the input data to buffer as space permits
-                    var stringLength = min((maxLength - 1).toDouble(), utf8BytesList.size.toDouble()).toInt()
+                    var stringLength = min(
+                        (maxLength - 1).toDouble(),
+                        utf8BytesList.size.toDouble()
+                    ).toInt()
                     either {
                         for (index in 0..<stringLength) {
                             memory.setByte(
@@ -319,7 +331,10 @@ enum class Syscall(
                             ).bind()
                         }
                         if (stringLength < maxLength - 1) {
-                            memory.setByte(byteAddress + stringLength, '\n'.code.toByte()).bind()
+                            memory.setByte(
+                                byteAddress + stringLength,
+                                '\n'.code.toByte()
+                            ).bind()
                             stringLength++
                         }
                         memory.setByte(byteAddress + stringLength, 0).bind()
@@ -344,9 +359,9 @@ enum class Syscall(
         "a0 = the selected position from the beginning of the file or -1 is an error occurred",
         { stmt ->
             val result: Int = io.seek(
-                registerFile.getIntValue("a0")!!,
-                registerFile.getIntValue("a1")!!,
-                registerFile.getIntValue("a2")!!
+                registerFile.getInt("a0")!!,
+                registerFile.getInt("a1")!!,
+                registerFile.getInt("a2")!!
             )
             registerFile.updateRegisterByName("a0", result.toLong()).ignoreOk()
         }
@@ -363,7 +378,7 @@ enum class Syscall(
             - other: plain message
             """.trimIndent(),
         "N/A", { stmt ->
-            var msgType: Int = registerFile.getIntValue("a1")!!
+            var msgType: Int = registerFile.getInt("a1")!!
             if (msgType < JOptionPane.ERROR_MESSAGE || msgType > JOptionPane.ERROR_MESSAGE) {
                 msgType = JOptionPane.PLAIN_MESSAGE
             }
@@ -398,12 +413,15 @@ enum class Syscall(
         }
     ),
     MessageDialogFloat(
-        "MessageDialogFloat", 60, "Service to display a message followed by a float to user",
+        "MessageDialogFloat",
+        60,
+        "Service to display a message followed by a float to user",
         """
             a0 = address of null-terminated string that is the message to user
             fa1 = the float to display
             """.trimIndent(),
-        "N/A", { stmt ->
+        "N/A",
+        { stmt ->
             either {
                 val message = readNullString(stmt).bind()
                 // Display the dialog.
@@ -417,18 +435,21 @@ enum class Syscall(
         }
     ),
     MessageDialogInt(
-        "MessageDialogInt", 56, "Service to display a message followed by a int to user",
+        "MessageDialogInt",
+        56,
+        "Service to display a message followed by a int to user",
         """
             a0 = address of null-terminated string that is the message to user
             a1 = the int to display
             """.trimIndent(),
-        "N/A", { stmt ->
+        "N/A",
+        { stmt ->
             either {
                 val message = readNullString(stmt).bind()
                 // Display the dialog.
                 JOptionPane.showMessageDialog(
                     null,
-                    message + registerFile.getIntValue("a1") as Int,
+                    message + registerFile.getInt("a1") as Int,
                     null,
                     JOptionPane.INFORMATION_MESSAGE
                 )
@@ -436,12 +457,15 @@ enum class Syscall(
         }
     ),
     MessageDialogString(
-        "MessageDialogString", 59, "Service to display a message followed by a string to user",
+        "MessageDialogString",
+        59,
+        "Service to display a message followed by a string to user",
         """
             a0 = address of null-terminated string that is the message to user
             a1 = address of the second string to display
             """.trimIndent(),
-        "N/A", { stmt ->
+        "N/A",
+        { stmt ->
             either {
                 JOptionPane.showMessageDialog(
                     null,
@@ -454,29 +478,42 @@ enum class Syscall(
         }
     ),
     MidiOut(
-        "MidiOut", 31, "Outputs simulated MIDI tone to sound card (does not wait for sound to end).",
-        "See MIDI note below", "N/A", { stmt ->
+        "MidiOut",
+        31,
+        "Outputs simulated MIDI tone to sound card (does not wait for sound to end).",
+        "See MIDI note below",
+        "N/A",
+        { stmt ->
             val rangeLowEnd = 0
             val rangeHighEnd = 127
-            val pitch: Int = registerFile.getIntValue("a0")!!
+            val pitch: Int = registerFile.getInt("a0")!!
                 .takeIf { it in rangeLowEnd..rangeHighEnd }
                 ?: ToneGenerator.DEFAULT_PITCH.toInt()
-            val duration: Int = registerFile.getIntValue("a1")!!
+            val duration: Int = registerFile.getInt("a1")!!
                 .takeIf { it > 0 }
                 ?: ToneGenerator.DEFAULT_DURATION
-            val instrument: Int = registerFile.getIntValue("a2")!!
+            val instrument: Int = registerFile.getInt("a2")!!
                 .takeIf { it in rangeLowEnd..rangeHighEnd }
                 ?: ToneGenerator.DEFAULT_INSTRUMENT.toInt()
-            val volume: Int = registerFile.getIntValue("a3")!!
+            val volume: Int = registerFile.getInt("a3")!!
                 .takeIf { it in rangeLowEnd..rangeHighEnd }
                 ?: ToneGenerator.DEFAULT_VOLUME.toInt()
-            ToneGenerator.generateTone(pitch.toByte(), duration, instrument.toByte(), volume.toByte())
+            ToneGenerator.generateTone(
+                pitch.toByte(),
+                duration,
+                instrument.toByte(),
+                volume.toByte()
+            )
             Unit.right()
         }
     ),
     MidiOutSync(
-        "MidiOutSync", 33, "Outputs simulated MIDI tone to sound card, then waits until the sound finishes playing.",
-        "See MIDI note below", "N/A", { stmt ->
+        "MidiOutSync",
+        33,
+        "Outputs simulated MIDI tone to sound card, then waits until the sound finishes playing.",
+        "See MIDI note below",
+        "N/A",
+        { stmt ->
             /*
          * Arguments:
          * a0 - pitch (note). Integer value from 0 to 127, with 60 being middle-C on a
@@ -498,19 +535,24 @@ enum class Syscall(
          */
             val rangeLowEnd = 0
             val rangeHighEnd = 127
-            val pitch: Int = registerFile.getIntValue("a0")!!
+            val pitch: Int = registerFile.getInt("a0")!!
                 .takeIf { it in rangeLowEnd..rangeHighEnd }
                 ?: ToneGenerator.DEFAULT_PITCH.toInt()
-            val duration: Int = registerFile.getIntValue("a1")!!
+            val duration: Int = registerFile.getInt("a1")!!
                 .takeIf { it > 0 }
                 ?: ToneGenerator.DEFAULT_DURATION
-            val instrument: Int = registerFile.getIntValue("a2")!!
+            val instrument: Int = registerFile.getInt("a2")!!
                 .takeIf { it in rangeLowEnd..rangeHighEnd }
                 ?: ToneGenerator.DEFAULT_INSTRUMENT.toInt()
-            val volume: Int = registerFile.getIntValue("a3")!!
+            val volume: Int = registerFile.getInt("a3")!!
                 .takeIf { it in rangeLowEnd..rangeHighEnd }
                 ?: ToneGenerator.DEFAULT_VOLUME.toInt()
-            ToneGenerator.generateToneSynchronously(pitch.toByte(), duration, instrument.toByte(), volume.toByte())
+            ToneGenerator.generateToneSynchronously(
+                pitch.toByte(),
+                duration,
+                instrument.toByte(),
+                volume.toByte()
+            )
             Unit.right()
         }
     ),
@@ -532,10 +574,11 @@ enum class Syscall(
             either {
                 val retValue: Int = io.openFile(
                     readNullString(stmt).bind(),
-                    registerFile.getIntValue("a1")!!
+                    registerFile.getInt("a1")!!
                 )
                 // set returned fd value in register
-                registerFile.updateRegisterByName("a0", retValue.toLong()).bind()
+                registerFile.updateRegisterByName("a0", retValue.toLong())
+                    .bind()
             }
         }
     ),
@@ -546,7 +589,7 @@ enum class Syscall(
         "a0 = character to print (only lowest byte is considered)",
         "N/A",
         { stmt ->
-            val t = (registerFile.getIntValue("a0")!! and 0x000000ff).toChar()
+            val t = (registerFile.getInt("a0")!! and 0x000000ff).toChar()
             io.printString(t.toString())
             Unit.right()
         }
@@ -571,7 +614,7 @@ enum class Syscall(
         "fa0 = float to print",
         "N/A",
         { stmt ->
-            val registerValue = fpRegisterFile.getIntValue("fa0")!!
+            val registerValue = fpRegisterFile.getInt("fa0")!!
             io.printString(Float.intBitsToFloat(registerValue).toString())
             Unit.right()
         }
@@ -584,7 +627,7 @@ enum class Syscall(
         "N/A",
         { stmt ->
             io.printString(
-                registerFile.getIntValue(
+                registerFile.getInt(
                     "a0"
                 )!!.toString()
             )
@@ -599,9 +642,9 @@ enum class Syscall(
         "N/A",
         { stmt ->
             io.printString(
-                registerFile.getIntValue(
+                registerFile.getInt(
                     "a0"
-                )!!.toBinaryString()
+                )!!.toString(radix = 2)
             )
             Unit.right()
         }
@@ -614,7 +657,7 @@ enum class Syscall(
         "N/A",
         { stmt ->
             io.printString(
-                registerFile.getIntValue(
+                registerFile.getInt(
                     "a0"
                 )!!.toHexStringWithPrefix()
             )
@@ -628,7 +671,7 @@ enum class Syscall(
         "a0 = integer to print",
         "N/A",
         { stmt ->
-            val value = registerFile.getIntValue("a0")!!.toUInt()
+            val value = registerFile.getInt("a0")!!.toUInt()
             io.printString(value.toString())
             Unit.right()
         }
@@ -701,9 +744,14 @@ enum class Syscall(
             either {
                 val stream = getRandomStream("a0")
                 val value = try {
-                    stream.nextInt(registerFile.getIntValue("a1")!!).toLong()
+                    stream.nextInt(registerFile.getInt("a1")!!).toLong()
                 } catch (_: IllegalArgumentException) {
-                    raise(ExitingError(stmt, "Upper bound of range cannot be negative (syscall 42)"))
+                    raise(
+                        ExitingError(
+                            stmt,
+                            "Upper bound of range cannot be negative (syscall 42)"
+                        )
+                    )
                 }
                 registerFile.updateRegisterByName(
                     "a0",
@@ -713,13 +761,17 @@ enum class Syscall(
         }
     ),
     RandSeed(
-        "RandSeed", 40, "Set seed for the underlying Java pseudorandom number generator",
+        "RandSeed",
+        40,
+        "Set seed for the underlying Java pseudorandom number generator",
         """
             a0 = index of pseudorandom number generator
             a1 = the seed
-            """.trimIndent(), "N/A", { stmt ->
-            val index = registerFile.getIntValue("a0")!!
-            val seed = registerFile.getIntValue("a1")!!.toLong()
+            """.trimIndent(),
+        "N/A",
+        { stmt ->
+            val index = registerFile.getInt("a0")!!
+            val seed = registerFile.getInt("a1")!!.toLong()
             setRandomStreamSeed(index, seed)
             Unit.right()
         }
@@ -732,12 +784,12 @@ enum class Syscall(
             a2 = maximum length to read
             """.trimIndent(),
         "a0 = the length read or -1 if error", { stmt ->
-            val destinationAddress = registerFile.getIntValue("a1")!!
-            val length = registerFile.getIntValue("a2")!!
+            val destinationAddress = registerFile.getInt("a1")!!
+            val length = registerFile.getInt("a2")!!
             val myBuffer = ByteArray(length)
             // Call to io().xxxx.read(xxx,xxx,xxx) returns actual length
             val retLength = io.readFromFile(
-                registerFile.getIntValue("a0")!!,
+                registerFile.getInt("a0")!!,
                 myBuffer,
                 length
             )
@@ -791,7 +843,10 @@ enum class Syscall(
                 ).left()
             }
             doubleValue.map {
-                fpRegisterFile.updateRegisterByNumber(10, it.toLongReinterpreted())
+                fpRegisterFile.updateRegisterByNumber(
+                    10,
+                    it.toLongReinterpreted()
+                )
             }
         }
     ),
@@ -811,7 +866,10 @@ enum class Syscall(
                 ).left()
             }
             floatValue.map {
-                fpRegisterFile.updateRegisterByNumberInt(10, it.toIntReinterpreted())
+                fpRegisterFile.updateRegisterByNumberInt(
+                    10,
+                    it.toIntReinterpreted()
+                )
             }
         }
     ),
@@ -853,8 +911,8 @@ enum class Syscall(
             a0 = address of input buffer
             a1 = maximum number of characters to read
             """.trimIndent(), "N/A", { stmt ->
-            val bufferAddress = registerFile.getIntValue("a0")!!
-            val (maxLength, addNullByte) = registerFile.getIntValue("a1")!!.let {
+            val bufferAddress = registerFile.getInt("a0")!!
+            val (maxLength, addNullByte) = registerFile.getInt("a1")!!.let {
                 if (it < 0) 0 to false
                 else it - 1 to true
             }
@@ -862,7 +920,8 @@ enum class Syscall(
 
             val utf8BytesList = inputString.toByteArray(StandardCharsets.UTF_8)
             // TODO: allow for utf-8 encoded strings
-            var stringLength = min(maxLength.toDouble(), utf8BytesList.size.toDouble()).toInt()
+            var stringLength =
+                min(maxLength.toDouble(), utf8BytesList.size.toDouble()).toInt()
             either {
                 for (index in 0..<stringLength) {
                     memory.setByte(
@@ -871,7 +930,10 @@ enum class Syscall(
                     ).bind()
                 }
                 if (stringLength < maxLength) {
-                    memory.setByte(bufferAddress + stringLength, '\n'.code.toByte()).bind()
+                    memory.setByte(
+                        bufferAddress + stringLength,
+                        '\n'.code.toByte()
+                    ).bind()
                     stringLength++
                 }
                 if (addNullByte) {
@@ -890,7 +952,7 @@ enum class Syscall(
         "a0 = amount of memory in bytes",
         "a0 = address to the allocated block",
         { stmt ->
-            memory.allocateBytes(registerFile.getIntValue("a0")!!).fold(
+            memory.allocateBytes(registerFile.getInt("a0")!!).fold(
                 { errorMessage ->
                     ExitingError(
                         stmt,
@@ -905,25 +967,37 @@ enum class Syscall(
         }
     ),
     Sleep(
-        "Sleep", 32, "Set the current thread to sleep for a time (not precise)", "a0 = time to sleep in milliseconds",
-        "N/A", { stmt ->
+        "Sleep",
+        32,
+        "Set the current thread to sleep for a time (not precise)",
+        "a0 = time to sleep in milliseconds",
+        "N/A",
+        { stmt ->
             try {
-                Thread.sleep(registerFile.getIntValue("a0")!!.toLong())
+                Thread.sleep(registerFile.getInt("a0")!!.toLong())
             } catch (_: InterruptedException) {
             }
             Unit.right()
         }
     ),
     Time(
-        "Time", 30, "Get the current time (milliseconds since 1 January 1970)", "N/A",
+        "Time",
+        30,
+        "Get the current time (milliseconds since 1 January 1970)",
+        "N/A",
         """
             a0 = low order 32 bits
             a1=high order 32 bits
-            """.trimIndent(), { stmt ->
+            """.trimIndent(),
+        { stmt ->
             either {
                 val time = System.currentTimeMillis()
-                registerFile.updateRegisterByName("a0", BinaryUtilsOld.lowOrderLongToInt(time).toLong()).bind()
-                registerFile.updateRegisterByName("a1", BinaryUtilsOld.highOrderLongToInt(time).toLong()).bind()
+                registerFile.updateRegisterByName("a0", time.toInt().toLong())
+                    .bind()
+                registerFile.updateRegisterByName(
+                    "a1",
+                    time.upperToInt().toLong()
+                ).bind()
             }
         }
     ),
@@ -939,8 +1013,10 @@ enum class Syscall(
         "a0 = the number of characters written",
         { stmt ->
             either {
-                var byteAddress = registerFile.getIntValue("a1")!! // source of characters to write to file
-                val reqLength = registerFile.getIntValue("a2")!! // user-requested length
+                var byteAddress =
+                    registerFile.getInt("a1")!! // source of characters to write to file
+                val reqLength =
+                    registerFile.getInt("a2")!! // user-requested length
                 if (reqLength < 0) {
                     registerFile.updateRegisterByName("a0", -1).bind()
                     return@either
@@ -959,11 +1035,12 @@ enum class Syscall(
                     raise(ExitingError(stmt, error))
                 }
                 val retValue: Int = io.writeToFile(
-                    registerFile.getIntValue("a0")!!, // fd
+                    registerFile.getInt("a0")!!, // fd
                     myBuffer, // buffer
-                    registerFile.getIntValue("a2")!! // length
+                    registerFile.getInt("a2")!! // length
                 )
-                registerFile.updateRegisterByName("a0", retValue.toLong()).bind()
+                registerFile.updateRegisterByName("a0", retValue.toLong())
+                    .bind()
             }
         }
     );
@@ -987,7 +1064,12 @@ enum class Syscall(
 
     companion object {
         @JvmStatic
-        fun findSyscall(number: @Range(from = 0, to = Int.MAX_VALUE.toLong()) Int) =
+        fun findSyscall(
+            number: @Range(
+                from = 0,
+                to = Int.MAX_VALUE.toLong()
+            ) Int
+        ) =
             entries.find { it.serviceNumber == number }
     }
 }

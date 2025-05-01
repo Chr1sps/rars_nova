@@ -40,7 +40,7 @@ public final class ErrorList {
      *
      * @return ArrayList of ErrorMessage objects
      */
-    public @NotNull List<ErrorMessage> getErrorMessages() {
+    public @NotNull List<@NotNull ErrorMessage> getErrorMessages() {
         return this.messages;
     }
 
@@ -66,8 +66,7 @@ public final class ErrorList {
     /**
      * Add new error message to end of list.
      *
-     * @param mess
-     *     ErrorMessage object to be added to end of error list.
+     * @param mess ErrorMessage object to be added to end of error list.
      */
     public void add(final @NotNull ErrorMessage mess) {
         if (this.errorCount > ERROR_LIMIT) {
@@ -75,11 +74,11 @@ public final class ErrorList {
         }
         if (this.errorCount == ERROR_LIMIT) {
             this.messages.add(ErrorMessage.error(
-                null,
-                mess.lineNumber,
-                mess.position,
-                "Error Limit of %d exceeded."
-                    .formatted(ERROR_LIMIT)
+                    null,
+                    mess.lineNumber,
+                    mess.position,
+                    "Error Limit of %d exceeded."
+                            .formatted(ERROR_LIMIT)
             ));
             this.errorCount++; // subsequent errors will not be added; see if statement above
             return;
@@ -94,20 +93,20 @@ public final class ErrorList {
 
     public void addTokenError(final @NotNull Token token, final @NotNull String message) {
         final var errorMessage = ErrorMessage.error(
-            token.getSourceProgram(),
-            token.getSourceLine(),
-            token.getStartPos(),
-            message
+                token.getSourceProgram(),
+                token.getSourceLine(),
+                token.getStartPos(),
+                message
         );
         this.add(errorMessage);
     }
 
     public void addWarning(final @NotNull Token token, final @NotNull String message) {
         final var errorMessage = ErrorMessage.warning(
-            token.getSourceProgram(),
-            token.getSourceLine(),
-            token.getStartPos(),
-            message
+                token.getSourceProgram(),
+                token.getSourceLine(),
+                token.getStartPos(),
+                message
         );
         this.add(errorMessage);
     }
@@ -148,7 +147,9 @@ public final class ErrorList {
         return this.generateWarningReport() + this.generateErrorReport();
     }
 
-    /** Produces either error or warning report. */
+    /**
+     * Produces either error or warning report.
+     */
     private @NotNull String generateReport(final boolean isWarning) {
         final StringBuilder report = new StringBuilder();
         for (final ErrorMessage m : this.messages) {
@@ -157,5 +158,12 @@ public final class ErrorList {
             }
         }
         return report.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "ErrorList{" +
+                "messages=" + messages +
+                '}';
     }
 }

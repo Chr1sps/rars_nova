@@ -22,5 +22,5 @@ fun interface SimulationCallback {
      * This is a run-time exception generated during
      * simulation.
      */
-    fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit>
+    suspend fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit>
 }

@@ -3,6 +3,7 @@ package rars.simulator
 import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensureNotNull
+import kotlinx.coroutines.runBlocking
 import rars.Globals
 import rars.events.*
 import rars.io.AbstractIO
@@ -23,13 +24,11 @@ open class SimThread(
     private val simulatorNoticeDispatcher: ListenerDispatcher<SimulatorNotice>
 ) : Runnable {
     private val breakPoints: IntArray = breakPoints.sortedArray()
-    private var done = false
-    var pe: SimulationError? = null
-        private set
 
     @Volatile
     private var stop = false
-    var constructReturnReason: Simulator.Reason? = null
+
+    lateinit var stoppingEvent: StoppingEvent
         private set
 
     /**
@@ -41,10 +40,14 @@ open class SimThread(
      * the Reason for stopping (PAUSE or STOP)
      */
     @Synchronized
-    fun setStop(reason: Simulator.Reason?) {
+    fun setStop(stoppingEvent: StoppingEvent) {
+        require(stoppingEvent is StoppingEvent.UserPaused || stoppingEvent is StoppingEvent.UserStopped)
+        this.stoppingEvent = stoppingEvent
         this.stop = true
-        this.constructReturnReason = reason
         (this as Object).notify()
+//        lock.withLock {
+//            condition.signal()
+//        }
     }
 
     protected open val runSpeed: Double
@@ -53,48 +56,85 @@ open class SimThread(
     private fun startExecution() {
         val notice = SimulatorNotice(
             SimulatorNotice.Action.START,
-            this.maxSteps,
-            this.runSpeed,
-            this.pc, null, this.pe, this.done
+            maxSteps,
+            runSpeed,
+            pc,
+            event = StoppingEvent.UserStopped, // TODO: this is semantically wrong, replace this
         )
         // TODO: this is not completely threadsafe, if anything using Swing is observing
         // This can be fixed by making a SwingObserver class that is thread-safe
         this.simulatorNoticeDispatcher.dispatch(notice)
     }
 
-    private fun stopExecution(done: Boolean, reason: Simulator.Reason?) {
-        this.done = done
-        this.constructReturnReason = reason
+    // region Stopping event functions
+
+    private fun stopWithError(error: SimulationError) {
+        stopExecution(StoppingEvent.ErrorHit(error))
+    }
+
+    private fun stopWithBreakpoint() {
+        stopExecution(StoppingEvent.BreakpointHit)
+    }
+
+    private fun stopWithMaxSteps() {
+        stopExecution(StoppingEvent.MaxStepsHit)
+    }
+
+    private fun stopWithNormalTermination() {
+        stopExecution(StoppingEvent.NormalTermination)
+    }
+
+    private fun stopWithCliffTermination() {
+        stopExecution(StoppingEvent.CliffTermination)
+    }
+
+    private fun stopExecution(
+        stoppingEvent: StoppingEvent
+//        done: Boolean, reason: Simulator.Reason
+    ) {
+//        this.done = done
+//        this.constructReturnReason = reason
+        this.stoppingEvent = stoppingEvent
         this.io.flush()
         val notice = SimulatorNotice(
             SimulatorNotice.Action.STOP,
             this.maxSteps,
             this.runSpeed,
-            this.pc, reason, this.pe, done
+            this.pc,
+            stoppingEvent
         )
         // TODO: this is not completely threadsafe, if anything using Swing is observing
         // This can be fixed by making a SwingObserver class that is thread-safe
         this.simulatorNoticeDispatcher.dispatch(notice)
     }
+
+    // endregion Stopping event functions
 
     private fun handleTrap(se: SimulationError, pc: Int): Boolean {
         assert(se.reason !== EventReason.OTHER) { "Unhandlable exception not thrown through ExitingEception" }
         assert(!se.reason.isInterrupt) { "Interrupts cannot be handled by the trap handler" }
 
         // set the relevant CSRs
-        Globals.CS_REGISTER_FILE.updateRegisterByName("ucause", se.reason.value.toLong()).unwrap()
-        Globals.CS_REGISTER_FILE.updateRegisterByName("uepc", pc.toLong()).unwrap()
-        Globals.CS_REGISTER_FILE.updateRegisterByName("utval", se.value.toLong()).unwrap()
+        Globals.CS_REGISTER_FILE.updateRegisterByName(
+            "ucause",
+            se.reason.value.toLong()
+        ).unwrap()
+        Globals.CS_REGISTER_FILE.updateRegisterByName("uepc", pc.toLong())
+            .unwrap()
+        Globals.CS_REGISTER_FILE.updateRegisterByName(
+            "utval",
+            se.value.toLong()
+        ).unwrap()
 
 
         // Get the interrupt handler if it exists
-        val utvec = Globals.CS_REGISTER_FILE.getIntValue("utvec")
+        val utvec = Globals.CS_REGISTER_FILE.getInt("utvec")
 
         // Mode can be ignored because we are only handling traps
         val base = utvec!! and -0x4
 
         val exceptionHandler =
-            if ((Globals.CS_REGISTER_FILE.getIntValue("ustatus")!! and 0x1) != 0) {
+            if ((Globals.CS_REGISTER_FILE.getInt("ustatus")!! and 0x1) != 0) {
                 // test user-interrupt enable (UIE)
                 Globals.MEMORY_INSTANCE.getProgramStatement(base).fold(
                     { null }, { it }
@@ -105,20 +145,19 @@ open class SimThread(
             // Set UPIE
             Globals.CS_REGISTER_FILE.updateRegisterByName(
                 "ustatus",
-                Globals.CS_REGISTER_FILE.getIntValue("ustatus")!!.toLong() or 0x10L
+                Globals.CS_REGISTER_FILE.getInt("ustatus")!!.toLong() or 0x10L
             ).unwrap()
             // Clear UIE
             Globals.CS_REGISTER_FILE.updateRegisterByName(
                 "ustatus",
-                Globals.CS_REGISTER_FILE.getLongValue("ustatus")!! and 0x1L.inv()
+                Globals.CS_REGISTER_FILE.getLong("ustatus")!! and 0x1L.inv()
             ).unwrap()
-            Globals.REGISTER_FILE.setProgramCounter(base)
+            Globals.REGISTER_FILE.programCounter = base
             return true
         } else {
             // If we don't have an error handler or exceptions are disabled terminate the
             // process
-            this.pe = se
-            this.stopExecution(true, Simulator.Reason.EXCEPTION)
+            stopWithError(se)
             return false
         }
     }
@@ -129,106 +168,71 @@ open class SimThread(
 
         // Don't handle cases where that interrupt isn't enabled
         assert(
-            (Globals.CS_REGISTER_FILE.getLongValue("ustatus")!! and 0x1L) != 0L
-                && (Globals.CS_REGISTER_FILE.getLongValue("uie")!! and (1 shl code).toLong()) != 0L
+            (Globals.CS_REGISTER_FILE.getLong("ustatus")!! and 0x1L) != 0L
+                && (Globals.CS_REGISTER_FILE.getLong("uie")!! and (1 shl code).toLong()) != 0L
         ) { "The interrupt handler must be enabled" }
 
         // set the relevant CSRs
-        Globals.CS_REGISTER_FILE.updateRegisterByName("ucause", cause.toLong()).unwrap()
-        Globals.CS_REGISTER_FILE.updateRegisterByName("uepc", pc.toLong()).unwrap()
-        Globals.CS_REGISTER_FILE.updateRegisterByName("utval", value.toLong()).unwrap()
+        Globals.CS_REGISTER_FILE
+            .updateRegisterByName("ucause", cause.toLong())
+            .unwrap()
+        Globals.CS_REGISTER_FILE
+            .updateRegisterByName("uepc", pc.toLong())
+            .unwrap()
+        Globals.CS_REGISTER_FILE
+            .updateRegisterByName("utval", value.toLong())
+            .unwrap()
 
         // Get the interrupt handler if it exists
-        val utvec = Globals.CS_REGISTER_FILE.getIntValue("utvec")!!
+        val utvec = Globals.CS_REGISTER_FILE.getInt("utvec")!!
 
         // Handle vectored mode
-        var base = utvec and -0x4
         val mode = utvec and 0x3
-        if (mode == 2) {
-            base += 4 * code
-        }
+        val base = (utvec and -0x4) + if (mode == 2) 4 * code else 0
 
 
-        val exceptionHandler = Globals.MEMORY_INSTANCE
+        val exceptionHandler = Globals
+            .MEMORY_INSTANCE
             .getProgramStatement(base)
             .fold({ null }, { it })
         if (exceptionHandler != null) {
             // Set UPIE
             Globals.CS_REGISTER_FILE.updateRegisterByName(
                 "ustatus",
-                Globals.CS_REGISTER_FILE.getLongValue("ustatus")!! or 0x10L
+                Globals.CS_REGISTER_FILE
+                    .getLong("ustatus")!! or 0x10L
             ).unwrap()
             Globals.CS_REGISTER_FILE.updateRegisterByName(
                 "ustatus",
-                Globals.CS_REGISTER_FILE.getLongValue("ustatus")!! and
+                Globals.CS_REGISTER_FILE
+                    .getLong("ustatus")!! and
                     CSRegisterFile.INTERRUPT_ENABLE.toLong().inv()
             ).unwrap()
 
 
-            // ControlAndStatusRegisterFile.clearRegister("ustatus", ControlAndStatusRegisterFile.INTERRUPT_ENABLE);
-            Globals.REGISTER_FILE.setProgramCounter(base)
+//             ControlAndStatusRegisterFile.clearRegister("ustatus", ControlAndStatusRegisterFile.INTERRUPT_ENABLE);
+            Globals.REGISTER_FILE.programCounter = base
             return true
         } else {
             // If we don't have an error handler or exceptions are disabled terminate the
             // process
-            this.pe = SimulationError.create(
-                "Interrupt handler was not supplied, but interrupt enable was high",
-                EventReason.OTHER
+            stopWithError(
+                SimulationError.create(
+                    "Interrupt handler was not supplied, but interrupt enable was high",
+                    EventReason.OTHER
+                )
             )
-            this.stopExecution(true, Simulator.Reason.EXCEPTION)
             return false
         }
     }
 
     override fun run() {
-        /*
-        The next two statements are necessary for GUI to be consistently updated
-        before the simulation gets underway. Without them, this happens only
-        intermittently,
-        with a consequence that some simulations are interruptable using PAUSE/STOP
-        and others
-        are not (because one or the other or both is not yet enabled).
-        */
         Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1)
         Thread.yield() // let the main thread run a bit to finish updating the GUI
 
-        this.startExecution()
+        startExecution()
 
-        /*
-        ******************* PS addition 26 July 2006 **********************
-        A couple statements below were added for the purpose of assuring that when
-        "back stepping" is enabled, every instruction will have at least one entry
-        on the back-stepping stack. Most instructions will because they write either
-        to a register or memory. But "nop" and branches not taken do not. When the
-        user is stepping backward through the program, the stack is popped and if
-        an instruction has no entry it will be skipped over in the process. This has
-        no effect on the correctness of the mechanism but the visual jerkiness when
-        instruction highlighting skips such instrutions is disruptive. Current
-        solution
-        is to add a "do nothing" stack entry for instructions that do no write
-        anything.
-        To keep this invisible to the "simulate()" method writer, we
-        will push such an entry onto the stack here if there is none for this
-        instruction
-        by the time it has completed simulating. This is done by the IF statement
-        just after the call to the simulate method itself. The BackStepper method
-        does
-        the aforementioned check and decides whether to push or not. The result
-        is a a smoother interaction experience. But it comes at the cost of slowing
-        simulation speed for flat-out runs, for every instruction executed even
-        though very few will require the "do nothing" stack entry. For stepped or
-        timed execution the slower execution speed is not noticeable.
-        To avoid this cost I tried a different technique: back-fill with "do
-        nothings"
-        during the backstepping itself when this situation is recognized. Problem
-        was in recognizing all possible situations in which the stack contained such
-        a "gap". It became a morass of special cases and it seemed every weird test
-        case revealed another one. In addition, when a program
-        begins with one or more such instructions ("nop" and branches not taken),
-        the backstep button is not enabled until a "real" instruction is executed.
-        This is noticeable in stepped mode.
-        *********************************************************************
-        */
+
         Globals.REGISTER_FILE.initializeProgramCounter(this.pc)
         var steps = 0
 
@@ -254,61 +258,76 @@ open class SimThread(
                 // Handle pending interupts and traps first
                 var uip = Globals.CS_REGISTER_FILE.uip.valueNoNotify
                 val uie = Globals.CS_REGISTER_FILE.uie.valueNoNotify
-                val ie =
-                    (Globals.CS_REGISTER_FILE.ustatus.valueNoNotify and CSRegisterFile.INTERRUPT_ENABLE.toLong()) != 0L
+                val ie = (
+                    Globals.CS_REGISTER_FILE.ustatus.valueNoNotify and
+                        CSRegisterFile.INTERRUPT_ENABLE.toLong()
+                    ) != 0L
                 // make sure no interrupts sneak in while we are processing them
                 this.pc = Globals.REGISTER_FILE.programCounter
-                var pendingExternal = Globals.INTERRUPT_CONTROLLER.externalPending()
-                var pendingTimer = Globals.INTERRUPT_CONTROLLER.timerPending()
-                val pendingTrap = Globals.INTERRUPT_CONTROLLER.trapPending()
+                var pendingExternal =
+                    Globals.INTERRUPT_CONTROLLER.isExternalPending
+                var pendingTimer = Globals.INTERRUPT_CONTROLLER.isTimerPending
+                val pendingTrap = Globals.INTERRUPT_CONTROLLER.isTrapPending
                 // This is the explicit (in the spec) order that interrupts should be serviced
-                if (ie && pendingExternal && (uie and CSRegisterFile.EXTERNAL_INTERRUPT.toLong()) != 0L) {
-                    if (this.handleInterrupt(
-                            Globals.INTERRUPT_CONTROLLER.claimExternal(),
-                            EventReason.EXTERNAL_INTERRUPT.value, this.pc
-                        )
-                    ) {
-                        pendingExternal = false
-                        uip = uip and 0x100L.inv()
-                    } else {
-                        return  // if the interrupt can't be handled, but the interrupt enable bit is high,
-                        // thats an error
+                when {
+                    ie && pendingExternal && (uie and CSRegisterFile.EXTERNAL_INTERRUPT.toLong()) != 0L -> {
+                        if (this.handleInterrupt(
+                                Globals.INTERRUPT_CONTROLLER.claimExternal(),
+                                EventReason.EXTERNAL_INTERRUPT.value, this.pc
+                            )
+                        ) {
+                            pendingExternal = false
+                            uip = uip and 0x100L.inv()
+                        } else {
+                            return  // if the interrupt can't be handled, but the interrupt enable bit is high,
+                            // thats an error
+                        }
                     }
-                } else if (ie && (uip and 0x1L) != 0L && (uie and CSRegisterFile.SOFTWARE_INTERRUPT.toLong()) != 0L) {
-                    if (this.handleInterrupt(0, EventReason.SOFTWARE_INTERRUPT.value, this.pc)) {
-                        uip = uip and 0x1L.inv()
-                    } else {
-                        return  // if the interrupt can't be handled, but the interrupt enable bit is high,
-                        // thats an error
+                    ie && (uip and 0x1L) != 0L && (uie and CSRegisterFile.SOFTWARE_INTERRUPT.toLong()) != 0L -> {
+                        if (this.handleInterrupt(
+                                0,
+                                EventReason.SOFTWARE_INTERRUPT.value,
+                                this.pc
+                            )
+                        ) {
+                            uip = uip and 0x1L.inv()
+                        } else {
+                            return  // if the interrupt can't be handled, but the interrupt enable bit is high,
+                            // thats an error
+                        }
                     }
-                } else if (ie && pendingTimer && (uie and CSRegisterFile.TIMER_INTERRUPT.toLong()) != 0L) {
-                    if (this.handleInterrupt(
-                            Globals.INTERRUPT_CONTROLLER.claimTimer(),
-                            EventReason.TIMER_INTERRUPT.value,
-                            this.pc
-                        )
-                    ) {
-                        pendingTimer = false
-                        uip = uip and 0x10L.inv()
-                    } else {
-                        // if the interrupt can't be handled, but the interrupt enable bit is high,
-                        // thats an error
-                        return
+                    ie && pendingTimer && (uie and CSRegisterFile.TIMER_INTERRUPT.toLong()) != 0L -> {
+                        if (this.handleInterrupt(
+                                Globals.INTERRUPT_CONTROLLER.claimTimer(),
+                                EventReason.TIMER_INTERRUPT.value,
+                                this.pc
+                            )
+                        ) {
+                            pendingTimer = false
+                            uip = uip and 0x10L.inv()
+                        } else {
+                            // if the interrupt can't be handled, but the interrupt enable bit is high,
+                            // thats an error
+                            return
+                        }
                     }
-                } else if (pendingTrap) {
-                    // if we have a pending trap and aren't handling an interrupt it must
-                    // be handled
-                    if (!this.handleTrap(
-                            Globals.INTERRUPT_CONTROLLER.claimTrap(),
-                            this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH
-                        )
-                    ) return
+                    pendingTrap -> {
+                        // if we have a pending trap and aren't handling an interrupt it must
+                        // be handled
+                        if (!this.handleTrap(
+                                Globals.INTERRUPT_CONTROLLER.claimTrap(),
+                                this.pc - BasicInstruction.BASIC_INSTRUCTION_LENGTH
+                            )
+                        ) return
+                    }
                 }
-                uip = uip or ((if (pendingExternal) CSRegisterFile.EXTERNAL_INTERRUPT else 0)
-                    or (if (pendingTimer) CSRegisterFile.TIMER_INTERRUPT else 0)).toLong()
+                uip =
+                    uip or ((if (pendingExternal) CSRegisterFile.EXTERNAL_INTERRUPT else 0)
+                        or (if (pendingTimer) CSRegisterFile.TIMER_INTERRUPT else 0)).toLong()
 
                 if (uip != Globals.CS_REGISTER_FILE.uip.valueNoNotify) {
-                    Globals.CS_REGISTER_FILE.updateRegisterByName("uip", uip).unwrap()
+                    Globals.CS_REGISTER_FILE.updateRegisterByName("uip", uip)
+                        .unwrap()
                 }
 
                 // always handle interrupts and traps before quiting
@@ -316,32 +335,40 @@ open class SimThread(
                 if (this.maxSteps > 0) {
                     steps++
                     if (steps > this.maxSteps) {
-                        this.stopExecution(false, Simulator.Reason.MAX_STEPS)
+                        stopWithMaxSteps()
                         return
                     }
                 }
 
                 this.pc = Globals.REGISTER_FILE.programCounter
-                val eitherStmt = Globals.MEMORY_INSTANCE.getProgramStatement(this.pc)
+                val eitherStmt =
+                    Globals.MEMORY_INSTANCE.getProgramStatement(this.pc)
                 val statement = when (eitherStmt) {
                     is Either.Right -> eitherStmt.value
                     is Either.Left -> {
                         val error = eitherStmt.value
-                        val tmp = if (error.reason == EventReason.LOAD_ACCESS_FAULT) {
-                            SimulationError.create(
-                                "Instruction load access error",
-                                EventReason.INSTRUCTION_ACCESS_FAULT
+                        val tmp =
+                            if (error.reason == EventReason.LOAD_ACCESS_FAULT) {
+                                SimulationError.create(
+                                    "Instruction load access error",
+                                    EventReason.INSTRUCTION_ACCESS_FAULT
+                                )
+                            } else {
+                                SimulationError.create(
+                                    "Instruction load alignment error",
+                                    EventReason.INSTRUCTION_ADDR_MISALIGNED
+                                )
+                            }
+                        if (!Globals.INTERRUPT_CONTROLLER.registerSynchronousTrap(
+                                tmp,
+                                this.pc
                             )
-                        } else {
-                            SimulationError.create(
-                                "Instruction load alignment error",
-                                EventReason.INSTRUCTION_ADDR_MISALIGNED
-                            )
-                        }
-                        if (!Globals.INTERRUPT_CONTROLLER.registerSynchronousTrap(tmp, this.pc)) {
-                            this.pe = tmp
-                            Globals.CS_REGISTER_FILE.updateRegisterByName("uepc", this.pc.toLong()).unwrap()
-                            this.stopExecution(true, Simulator.Reason.EXCEPTION)
+                        ) {
+                            Globals.CS_REGISTER_FILE.updateRegisterByName(
+                                "uepc",
+                                this.pc.toLong()
+                            ).unwrap()
+                            stopWithError(tmp)
                             return
                         } else {
                             continue
@@ -349,7 +376,7 @@ open class SimThread(
                     }
                 }
                 if (statement == null) {
-                    this.stopExecution(true, Simulator.Reason.CLIFF_TERMINATION)
+                    stopWithCliffTermination()
                     return
                 }
                 val doContinue = either {
@@ -363,55 +390,66 @@ open class SimThread(
                         )
                     }
                     Globals.REGISTER_FILE.incrementPC(instruction.instructionLength)
-                    instruction.run { context.simulate(statement) }.bind()
+                    instruction.run {
+                        runBlocking {
+                            context.simulate(statement)
+                        }
+                    }.bind()
 
                     // IF statement added 7/26/06 (explanation above)
                     if (isBacksteppingEnabled) {
                         Globals.PROGRAM!!.backStepper!!.addDoNothing(this@SimThread.pc)
                     }
-                }.fold({ event ->
-                    when (event) {
-                        is BreakpointEvent -> {
-                            // EBREAK needs backstepping support too.
-                            if (isBacksteppingEnabled) {
-                                Globals.PROGRAM!!.backStepper!!.addDoNothing(this.pc)
+                }.fold(
+                    { event ->
+                        when (event) {
+                            is BreakpointEvent -> {
+                                // EBREAK needs backstepping support too.
+                                if (isBacksteppingEnabled) {
+                                    Globals.PROGRAM!!.backStepper!!.addDoNothing(
+                                        this.pc
+                                    )
+                                }
+                                ebreak = true
+                                false
                             }
-                            ebreak = true
-                            false
-                        }
 
-                        is WaitEvent -> {
-                            if (isBacksteppingEnabled) {
-                                Globals.PROGRAM!!.backStepper!!.addDoNothing(this.pc)
+                            is WaitEvent -> {
+                                if (isBacksteppingEnabled) {
+                                    Globals.PROGRAM!!.backStepper!!.addDoNothing(
+                                        this.pc
+                                    )
+                                }
+                                waiting = true
+                                false
                             }
-                            waiting = true
-                            false
-                        }
 
-                        is ExitingEvent -> {
-                            this.constructReturnReason = Simulator.Reason.NORMAL_TERMINATION
-                            this.stopExecution(true, this.constructReturnReason)
-                            return
-                        }
-
-                        is ExitingError -> {
-                            this.constructReturnReason = Simulator.Reason.EXCEPTION
-                            this.pe = event
-                            this.stopExecution(true, this.constructReturnReason)
-                            return
-                        }
-
-                        is SimulationError -> {
-                            if (Globals.INTERRUPT_CONTROLLER.registerSynchronousTrap(event, this.pc)) {
-                                true
-                            } else {
-                                this.pe = event
-                                this.stopExecution(true, Simulator.Reason.EXCEPTION)
+                            is ExitingEvent -> {
+                                stopWithNormalTermination()
                                 return
                             }
+
+                            is ExitingError -> {
+                                stopWithError(event)
+                                return
+                            }
+
+                            is SimulationError -> {
+                                if (Globals.INTERRUPT_CONTROLLER.registerSynchronousTrap(
+                                        event,
+                                        this.pc
+                                    )
+                                ) {
+                                    true
+                                } else {
+                                    stopWithError(event)
+                                    return
+                                }
+                            }
                         }
-                    }
-                }, { false })
+                    },
+                    { false }
+                )
                 if (doContinue) {
                     continue
                 }
@@ -423,36 +461,60 @@ open class SimThread(
             val cycle = Globals.CS_REGISTER_FILE.cycle.valueNoNotify
             val instret = Globals.CS_REGISTER_FILE.instret.valueNoNotify
             val time = System.currentTimeMillis()
-            Globals.CS_REGISTER_FILE.updateRegisterBackdoor(Globals.CS_REGISTER_FILE.cycle, cycle + 1)
-            Globals.CS_REGISTER_FILE.updateRegisterBackdoor(Globals.CS_REGISTER_FILE.instret, instret + 1)
-            Globals.CS_REGISTER_FILE.updateRegisterBackdoor(Globals.CS_REGISTER_FILE.time, time)
+            Globals.CS_REGISTER_FILE.updateRegisterBackdoor(
+                Globals.CS_REGISTER_FILE.cycle,
+                cycle + 1
+            )
+            Globals.CS_REGISTER_FILE.updateRegisterBackdoor(
+                Globals.CS_REGISTER_FILE.instret,
+                instret + 1
+            )
+            Globals.CS_REGISTER_FILE.updateRegisterBackdoor(
+                Globals.CS_REGISTER_FILE.time,
+                time
+            )
 
             // Return if we've reached a breakpoint.
             if (ebreak || Globals.REGISTER_FILE.programCounter in breakPoints) {
-                this.stopExecution(false, Simulator.Reason.BREAKPOINT)
+                stopWithBreakpoint()
                 return
             }
 
             // Wait if WFI ran
             if (waiting) {
-                if (!(Globals.INTERRUPT_CONTROLLER.externalPending() || Globals.INTERRUPT_CONTROLLER.timerPending())) {
+                if (!(Globals.INTERRUPT_CONTROLLER.isExternalPending || Globals.INTERRUPT_CONTROLLER.isTimerPending)) {
                     synchronized(this) {
                         try {
                             (this as Object).wait()
                         } catch (_: InterruptedException) {
-                            // Don't bother catching an interruption
                         }
                     }
+//                    lock.withLock {
+//                        try {
+//                            condition.await()
+//                        } catch (_: InterruptedException) {
+//                            // Don't bother catching an interruption
+//                        }
+//                    }
                 }
                 waiting = false
             }
 
             this.onEndLoop()
         }
-        this.stopExecution(false, this.constructReturnReason)
+        this.stopExecution(stoppingEvent)
     }
 
     protected open fun onEndLoop() {
     }
-}
 
+//    /**
+//     * Signals the condition variable to wake up any waiting threads.
+//     * This method is used by external classes to interrupt the simulation.
+//     */
+//    fun signalCondition() {
+//        lock.withLock {
+//            condition.signal()
+//        }
+//    }
+}

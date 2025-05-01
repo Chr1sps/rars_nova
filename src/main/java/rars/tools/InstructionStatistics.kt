@@ -2,6 +2,7 @@ package rars.tools
 
 import rars.Globals
 import rars.notices.AccessNotice
+import rars.notices.AccessType
 import rars.notices.MemoryAccessNotice
 import rars.riscv.Instruction
 import rars.riscv.hardware.memory.textSegmentBaseAddress
@@ -142,7 +143,7 @@ class InstructionStatistics(mainUI: VenusUI) : AbstractTool("$NAME, Version 1.0 
         }
 
         // check for a read access in the text segment
-        if (notice.accessType == AccessNotice.AccessType.READ && notice is MemoryAccessNotice) {
+        if (notice.accessType == AccessType.READ && notice is MemoryAccessNotice) {
             // now it is safe to make a cast of the notice
 
             // The next three statments are from Felipe Lessa's instruction counter.

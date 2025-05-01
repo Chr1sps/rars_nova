@@ -10,7 +10,7 @@ import javax.swing.JOptionPane
  * Action for the Help -> About menu item
  */
 class HelpAboutAction(gui: VenusUI) : GuiAction(
-    "About RARS", null, "Information about RARS",
+    "About RARS", "Information about RARS", null,
     null, null, gui
 ) {
     override fun actionPerformed(e: ActionEvent?) {

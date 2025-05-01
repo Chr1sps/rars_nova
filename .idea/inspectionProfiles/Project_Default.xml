@@ -1,7 +1,6 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
-    <option name="myName" value="Project Default" />
     <inspection_tool class="ArrayEquality" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="AssertEqualsCalledOnArray" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="AssertMessageNotString" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -16,8 +15,8 @@
       <option name="ignoreTransformationOfOriginalParameter" value="true" />
     </inspection_tool>
     <inspection_tool class="BlockMarkerComments" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="WARNING_ATTRIBUTES" />
-    <inspection_tool class="BooleanMethodIsAlwaysInverted" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="BooleanLiteralArgument" enabled="true" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="BooleanMethodIsAlwaysInverted" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="BooleanParameter" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="BoundedWildcard" enabled="true" level="INFORMATION" enabled_by_default="true" editorAttributes="INFORMATION_ATTRIBUTES" />
     <inspection_tool class="CallToStringConcatCanBeReplacedByOperator" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
@@ -88,9 +87,6 @@
       <option name="ignoreConstantConversions" value="false" />
     </inspection_tool>
     <inspection_tool class="IncrementDecrementUsedAsExpression" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
-    <inspection_tool class="InnerClassOnInterface" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_ignoreInnerInterfaces" value="false" />
-    </inspection_tool>
     <inspection_tool class="InstanceVariableInitialization" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_ignorePrimitives" value="false" />
     </inspection_tool>
@@ -138,7 +134,7 @@
     </inspection_tool>
     <inspection_tool class="NoopMethodInAbstractClass" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="NullThrown" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ObjectAllocationInLoop" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
+    <inspection_tool class="ObjectAllocationInLoop" enabled="false" level="WEAK WARNING" enabled_by_default="false" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="ObjectInstantiationInEqualsHashCode" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="ObsoleteCollection" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES">
       <option name="ignoreRequiredObsoleteCollectionTypes" value="false" />

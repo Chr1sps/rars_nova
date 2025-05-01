@@ -9,15 +9,27 @@ import javax.swing.KeyStroke
  * Parent class for Action subclasses to be defined for every
  * menu/toolbar option.
  */
-abstract class GuiAction protected constructor(
-    name: String, icon: Icon?, description: String,
-    mnemonic: Int?, accel: KeyStroke?,
-    @JvmField protected val mainUI: VenusUI
+abstract class GuiAction @JvmOverloads protected constructor(
+    name: String,
+    description: String,
+    icon: Icon? = null,
+    /**
+     * When a dropdown menu is open, pressing this key will
+     * trigger this action, akin to clicking on it's correspoding
+     * menu item.
+     */
+    menuMnemonic: Int? = null,
+    /**
+     * A global shortcut that can be used to trigger this action
+     * at any place in the editor.
+     */
+    globalShortcut: KeyStroke? = null,
+    @JvmField protected val mainUI: VenusUI,
 ) : AbstractAction(name, icon) {
     init {
         putValue(SHORT_DESCRIPTION, description)
-        putValue(MNEMONIC_KEY, mnemonic)
-        putValue(ACCELERATOR_KEY, accel)
+        putValue(MNEMONIC_KEY, menuMnemonic)
+        putValue(ACCELERATOR_KEY, globalShortcut)
     }
 
     companion object {

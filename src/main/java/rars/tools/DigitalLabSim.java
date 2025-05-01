@@ -157,8 +157,8 @@ public final class DigitalLabSim extends AbstractTool {
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
-            if (this.mainUI.mainPane.executePane.textSegment.getCodeHighlighting()) {
-                this.mainUI.mainPane.executePane.dataSegment.updateValues();
+            if (this.mainUI.mainPane.executePane.getTextSegment().getCodeHighlighting()) {
+                this.mainUI.mainPane.executePane.getDataSegment().updateValues();
             }
         }
     }

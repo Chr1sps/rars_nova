@@ -17,7 +17,8 @@ import java.nio.charset.StandardCharsets
  * @throws ExitingError
  * if any.
  */
-fun SimulationContext.readNullString(statement: ProgramStatement) = readNullString(statement, "a0")
+fun SimulationContext.readNullString(statement: ProgramStatement) =
+    readNullString(statement, "a0")
 
 /**
  * Reads a NULL terminated string from memory starting at the address in reg
@@ -35,7 +36,7 @@ fun SimulationContext.readNullString(
     statement: ProgramStatement,
     registerName: String
 ): Either<ExitingError, String> = either {
-    var byteAddress = registerFile.getIntValue(registerName)!!
+    var byteAddress = registerFile.getInt(registerName)!!
     val utf8BytesList = mutableListOf<Byte>() // Need an array to hold bytes
     either {
         utf8BytesList.add(memory.getByte(byteAddress).bind())

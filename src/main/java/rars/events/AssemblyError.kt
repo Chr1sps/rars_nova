@@ -9,5 +9,4 @@ import rars.ErrorList
  * @author Benjamin Landers
  * @version July 2017
  */
-@JvmInline
-value class AssemblyError(val errors: ErrorList)
+data class AssemblyError(val errors: ErrorList)

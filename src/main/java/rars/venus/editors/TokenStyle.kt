@@ -2,7 +2,6 @@ package rars.venus.editors
 
 import java.awt.Color
 
-@JvmRecord
 data class TokenStyle(
     val foreground: Color?,
     val background: Color?,

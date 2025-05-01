@@ -18,11 +18,12 @@ class FloatingPointRegisterFile : AbstractRegisterFile('f', createRegisters()) {
     @JvmField
     val fa1: Register = this.registers[11]
 
-    public override fun convertFromLong(value: Long): Int = if ((value and -0x100000000L) == -0x100000000L) {
-        value.toInt()
-    } else {
-        0x7FC00000
-    }
+    public override fun convertFromLong(value: Long): Int =
+        if ((value and -0x100000000L) == -0x100000000L) {
+            value.toInt()
+        } else {
+            0x7FC00000
+        }
 
     override fun updateRegister(
         register: Register,
@@ -38,18 +39,27 @@ class FloatingPointRegisterFile : AbstractRegisterFile('f', createRegisters()) {
         return previousValue.right()
     }
 
-    fun updateRegisterByNumberInt(registerNumber: Int, value: Int): Either<SimulationError, Unit> {
-        val longValue = value.toLong() or -0x100000000L // NAN box if used as float
+    fun updateRegisterByNumberInt(
+        registerNumber: Int,
+        value: Int
+    ): Either<SimulationError, Unit> {
+        // NAN box if used as float
+        val longValue = value.toLong() or -0x100000000L
         return this.updateRegisterByNumber(registerNumber, longValue).ignoreOk()
     }
 
-    fun updateRegisterByNameInt(registerName: String, value: Int): Either<SimulationError, Unit> {
-        val longValue = value.toLong() or -0x100000000L // NAN box if used as float
+    fun updateRegisterByNameInt(
+        registerName: String,
+        value: Int
+    ): Either<SimulationError, Unit> {
+        // NAN box if used as float
+        val longValue = value.toLong() or -0x100000000L
         return this.updateRegisterByName(registerName, longValue).ignoreOk()
     }
 
     fun updateRegisterInt(register: Register, value: Int) {
-        val longValue = value.toLong() or -0x100000000L // NAN box if used as float
+        // NAN box if used as float
+        val longValue = value.toLong() or -0x100000000L
         this.updateRegister(register, longValue).unwrap()
     }
 
@@ -61,20 +71,25 @@ class FloatingPointRegisterFile : AbstractRegisterFile('f', createRegisters()) {
      * @param value
      * The desired float value for the register.
      */
-    fun setRegisterToFloat(registerNumber: Int, value: Float): Either<SimulationError, Unit> {
+    fun setRegisterToFloat(
+        registerNumber: Int,
+        value: Float
+    ): Either<SimulationError, Unit> {
         val intValue = java.lang.Float.floatToIntBits(value)
-        return this.updateRegisterByNumberInt(registerNumber, intValue).ignoreOk()
+        return this.updateRegisterByNumberInt(registerNumber, intValue)
+            .ignoreOk()
     }
 
     fun getFloatFromRegister(registerName: String): Float? {
-        val intValue = this.getIntValue(registerName)
+        val intValue = this.getInt(registerName)
         return if (intValue == null)
             null
         else
             java.lang.Float.intBitsToFloat(intValue)
     }
 
-    fun getFloatFromRegister(register: Register): Float = Float.fromBits(getIntValue(register))
+    fun getFloatFromRegister(register: Register): Float =
+        Float.fromBits(getInt(register))
 
     companion object {
         private fun createRegisters() = arrayOf(

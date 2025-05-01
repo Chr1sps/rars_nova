@@ -4,7 +4,7 @@ import arrow.core.Either
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import rars.assembler.DataTypes
-import rars.notices.AccessNotice
+import rars.notices.AccessType
 import rars.notices.MemoryAccessNotice
 import rars.riscv.hardware.memory.Memory
 import rars.riscv.hardware.memory.MemoryListenerHandle
@@ -25,52 +25,52 @@ class BitmapDisplay(
     private val grid: Grid = Grid(displayHeight, displayWidth)
     private val panel: GraphicsPanel = GraphicsPanel(Dimension(displayWidth, displayHeight), this.grid)
     private val accessNoticeCallback: (MemoryAccessNotice) -> Unit = { notice ->
-        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+        if (notice.accessType == AccessType.WRITE) {
             this.updateDisplay(notice.address, notice.length)
         }
     }
     private var handle: MemoryListenerHandle<Int>
 
     init {
-        this.setTitle("Syscall: DisplayBitmap")
-        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE)
-        this.add(this.panel)
-        this.setResizable(false)
+        title = "Syscall: DisplayBitmap"
+        defaultCloseOperation = DISPOSE_ON_CLOSE
+        add(panel)
+        isResizable = false
 
-        this.fillGrid()
-        this.pack()
+        fillGrid()
+        pack()
 
-        handle = this.memory
-            .subscribe(this.accessNoticeCallback, baseAddress, upperAddressBound)
+        handle = memory
+            .subscribe(accessNoticeCallback, baseAddress, upperAddressBound)
             .unwrap()
     }
 
     fun changeBaseAddress(newBaseAddress: Int) {
-        this.memory.unsubscribe(this.handle)
-        this.baseAddress = newBaseAddress
-        this.upperAddressBound = newBaseAddress + (this.displayWidth * this.displayHeight * DataTypes.WORD_SIZE)
-        handle = this.memory.subscribe(
-            this.accessNoticeCallback,
-            this.baseAddress,
-            this.upperAddressBound
+        memory.unsubscribe(handle)
+        baseAddress = newBaseAddress
+        upperAddressBound = newBaseAddress + (displayWidth * displayHeight * DataTypes.WORD_SIZE)
+        handle = memory.subscribe(
+            accessNoticeCallback,
+            baseAddress,
+            upperAddressBound
         ).unwrap()
     }
 
     fun unsubscribeFromMemory() {
-        this.memory.unsubscribe(handle)
+        memory.unsubscribe(handle)
     }
 
     private fun fillGrid() {
         var currentOffset = 0
-        for (row in 0..<this.displayHeight) {
-            for (col in 0..<this.displayWidth) {
-                val address = this.baseAddress + currentOffset
-                val word = this.memory.silentMemoryView.getWord(address).unwrap { e ->
+        for (row in 0..<displayHeight) {
+            for (col in 0..<displayWidth) {
+                val address = baseAddress + currentOffset
+                val word = memory.silentMemoryView.getWord(address).unwrap { e ->
                     LOGGER.error("Error updating color for address {} in bitmap display: {}", address, e)
                     return
                 }
                 val color = Color(word)
-                this.grid.setColor(row, col, color)
+                grid.setColor(row, col, color)
                 currentOffset += DataTypes.WORD_SIZE
             }
         }
@@ -81,27 +81,27 @@ class BitmapDisplay(
 
         val endAddress = memoryAddress + writeLength
         // clamp the range to the display bounds
-        if (endAddress >= this.baseAddress && memoryAddress <= this.upperAddressBound) {
+        if (endAddress >= baseAddress && memoryAddress <= upperAddressBound) {
             // the memory written may not be aligned by 4 bytes, so we round
             // the start and end to the nearest 4 byte boundary
-            val start = (max(memoryAddress, this.baseAddress) / 4) * 4
-            val end = ((min(endAddress, this.upperAddressBound) + 3) / 4) * 4
+            val start = (max(memoryAddress, baseAddress) / 4) * 4
+            val end = ((min(endAddress, upperAddressBound) + 3) / 4) * 4
             // these values are already nicely aligned, so all that's left to
             // do is to update the grid
-            var row = (start - this.baseAddress) / (this.displayWidth * 4)
-            var col = (start - this.baseAddress) % (this.displayWidth * 4) / 4
+            var row = (start - baseAddress) / (displayWidth * 4)
+            var col = (start - baseAddress) % (displayWidth * 4) / 4
             var i = start
             while (i < end) {
-                when (val word = this.memory.silentMemoryView.getWord(i)) {
+                when (val word = memory.silentMemoryView.getWord(i)) {
                     is Either.Left -> {
                         LOGGER.error("Error updating color for address {} in bitmap display: {}", i, word.value)
                         break
                     }
                     is Either.Right -> {
                         val color = Color(word.value)
-                        this.grid.setColor(row, col, color)
+                        grid.setColor(row, col, color)
                         col++
-                        if (col == this.displayWidth) {
+                        if (col == displayWidth) {
                             col = 0
                             row++
                         }
@@ -110,7 +110,7 @@ class BitmapDisplay(
                 }
             }
         }
-        this.panel.repaint()
+        panel.repaint()
     }
 
     companion object {

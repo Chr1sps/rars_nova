@@ -3,6 +3,7 @@ package rars.riscv.hardware.registerfiles
 import arrow.core.Either
 import arrow.core.raise.either
 import rars.Globals
+import rars.Globals.PROGRAM
 import rars.assembler.SymbolTable
 import rars.events.SimulationError
 import rars.riscv.hardware.memory.AbstractMemoryConfiguration
@@ -10,7 +11,6 @@ import rars.riscv.hardware.memory.textSegmentBaseAddress
 import rars.riscv.hardware.registers.Register
 import rars.settings.BoolSetting
 import rars.settings.OtherSettings
-import rars.util.ConversionUtils
 import rars.util.unwrap
 
 class RegisterFile(
@@ -36,7 +36,7 @@ class RegisterFile(
 
     val a1: Register = myRegisters[11]
 
-    public override fun convertFromLong(value: Long): Int = ConversionUtils.longLowerHalfToInt(value)
+    public override fun convertFromLong(value: Long): Int = value.toInt()
 
     override fun updateRegister(register: Register, newValue: Long): Either<SimulationError, Long> = either {
         if (register === this@RegisterFile.zero) {
@@ -66,16 +66,14 @@ class RegisterFile(
         pc.setValue(value.toLong())
     }
 
-    val programCounter: Int
+    var programCounter: Int
         get() = pc.getValue().toInt()
-
-    fun setProgramCounter(value: Int): Int {
-        val oldValue = updateRegister(pc, value.toLong()).unwrap().toInt()
-        if (OtherSettings.isBacksteppingEnabled) {
-            Globals.PROGRAM!!.backStepper!!.addPCRestore(oldValue)
+        set(value) {
+            val oldValue = updateRegister(pc, value.toLong()).unwrap().toInt()
+            if (OtherSettings.isBacksteppingEnabled) {
+                PROGRAM!!.backStepper!!.addPCRestore(oldValue)
+            }
         }
-        return oldValue
-    }
 
     fun initializeProgramCounter(startAtMain: Boolean) {
         val mainAddr = globalSymbolTable.getAddress(SymbolTable.getStartLabel())

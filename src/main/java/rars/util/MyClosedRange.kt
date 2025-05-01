@@ -15,7 +15,8 @@ interface MyClosedRange<T> {
         ): MyClosedRange<T> = KtClosedRangeDecorator(range)
     }
 
-    private class KtClosedRangeDecorator<T : Comparable<T>>(private val original: ClosedRange<T>) : MyClosedRange<T> {
+    private data class KtClosedRangeDecorator<T : Comparable<T>>(private val original: ClosedRange<T>) :
+        MyClosedRange<T> {
         override val start: T by original::start
         override val endInclusive: T by original::endInclusive
         override fun contains(value: T): Boolean = original.contains(value)

@@ -10,7 +10,12 @@ public final class LinkedRegister extends Register {
     private final long mask;
     private final int shift;
 
-    public LinkedRegister(final @NotNull String name, final int num, final @NotNull Register base, final long mask) {
+    public LinkedRegister(
+        final @NotNull String name,
+        final int num,
+        final @NotNull Register base,
+        final long mask
+    ) {
         super(name, num, 0L); // reset value does not matter
         this.base = base;
         this.mask = mask;

@@ -24,19 +24,31 @@ class Arithmetic private constructor(
     usage, description, BasicInstructionFormat.R_FORMAT,
     "$funct7 ttttt sssss $funct3 fffff 0110011"
 ) {
-    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
-        if (InstructionsRegistry.RV64_MODE_FLAG) {
-            val newValue = compute(
-                registerFile.getLongValue(statement.getOperand(1))!!,
-                registerFile.getLongValue(statement.getOperand(2))!!
-            )
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).bind()
-        } else {
-            val newValue = computeW(
-                registerFile.getIntValue(statement.getOperand(1))!!,
-                registerFile.getIntValue(statement.getOperand(2))!!
-            ).toLong()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).bind()
+    override suspend fun SimulationContext.simulate(
+        statement: ProgramStatement
+    ): Either<SimulationEvent, Unit> = either {
+        registerFile.run {
+            statement.run {
+                if (InstructionsRegistry.RV64_MODE_FLAG) {
+                    val newValue = compute(
+                        getLong(getOperand(1))!!,
+                        getLong(getOperand(2))!!
+                    )
+                    updateRegisterByNumber(
+                        getOperand(0),
+                        newValue
+                    ).bind()
+                } else {
+                    val newValue = computeW(
+                        getInt(getOperand(1))!!,
+                        getInt(getOperand(2))!!
+                    ).toLong()
+                    updateRegisterByNumber(
+                        getOperand(0),
+                        newValue
+                    ).bind()
+                }
+            }
         }
     }
 
@@ -47,7 +59,13 @@ class Arithmetic private constructor(
             funct7: String,
             funct3: String,
             compute: (Long, Long) -> Long
-        ): Arithmetic = Arithmetic(usage, description, funct7, funct3, compute) { first, other ->
+        ): Arithmetic = Arithmetic(
+            usage,
+            description,
+            funct7,
+            funct3,
+            compute
+        ) { first, other ->
             compute(first.toLong(), other.toLong()).toInt()
         }
 
@@ -58,7 +76,8 @@ class Arithmetic private constructor(
             funct3: String,
             computeW: (Int, Int) -> Int,
             compute: (Long, Long) -> Long,
-        ): Arithmetic = Arithmetic(usage, description, funct7, funct3, compute, computeW)
+        ): Arithmetic =
+            Arithmetic(usage, description, funct7, funct3, compute, computeW)
 
         val ADD = arithmetic(
             "add t1,t2,t3", "Addition: set t1 to (t2 plus t3)",
@@ -79,8 +98,11 @@ class Arithmetic private constructor(
         }
 
         val DIVU = arithmetic(
-            "divu t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division",
-            "0000001", "101", { first, other ->
+            "divu t1,t2,t3",
+            "Division: set t1 to the result of t2/t3 using unsigned division",
+            "0000001",
+            "101",
+            { first, other ->
                 if (other == 0) -1
                 else (first.toUInt() / other.toUInt()).toInt()
             }
@@ -90,13 +112,19 @@ class Arithmetic private constructor(
         }
 
         val MUL = arithmetic(
-            "mul t1,t2,t3", "Multiplication: set t1 to the lower 32 bits of t2*t3",
-            "0000001", "000", Long::times
+            "mul t1,t2,t3",
+            "Multiplication: set t1 to the lower 32 bits of t2*t3",
+            "0000001",
+            "000",
+            Long::times
         )
 
         val MULH = arithmetic(
-            "mulh t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using signed multiplication",
-            "0000001", "001", { first, other ->
+            "mulh t1,t2,t3",
+            "Multiplication: set t1 to the upper 32 bits of t2*t3 using signed multiplication",
+            "0000001",
+            "001",
+            { first, other ->
                 (first.toULong() * other.toULong()).shr(32).toInt()
             }
         ) { first, other -> (first * other) shr 32 }
@@ -117,8 +145,11 @@ class Arithmetic private constructor(
         }
 
         val MULHU = arithmetic(
-            "mulhu t1,t2,t3", "Multiplication: set t1 to the upper 32 bits of t2*t3 using unsigned multiplication",
-            "0000001", "011", { first, other ->
+            "mulhu t1,t2,t3",
+            "Multiplication: set t1 to the upper 32 bits of t2*t3 using unsigned multiplication",
+            "0000001",
+            "011",
+            { first, other ->
                 first.lowerToULong()
                     .times(other.lowerToULong())
                     .shr(32).toInt()
@@ -143,8 +174,11 @@ class Arithmetic private constructor(
         }
 
         val REMU = arithmetic(
-            "remu t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3 using unsigned division",
-            "0000001", "111", { first, other ->
+            "remu t1,t2,t3",
+            "Remainder: set t1 to the remainder of t2/t3 using unsigned division",
+            "0000001",
+            "111",
+            { first, other ->
                 if (other == 0) first
                 else first.toUInt().rem(other.toUInt()).toInt()
             }
@@ -165,8 +199,10 @@ class Arithmetic private constructor(
         }
 
         val SLT = arithmetic(
-            "slt t1,t2,t3", "Set less than : If t2 is less than t3, then set t1 to 1 else set t1 to 0",
-            "0000000", "010"
+            "slt t1,t2,t3",
+            "Set less than : If t2 is less than t3, then set t1 to 1 else set t1 to 0",
+            "0000000",
+            "010"
         ) { first, other -> if (first < other) 1 else 0 }
 
         val SLTU = arithmetic(

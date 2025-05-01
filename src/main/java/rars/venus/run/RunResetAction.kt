@@ -2,8 +2,8 @@ package rars.venus.run
 
 import rars.Globals
 import rars.venus.FileStatus
-import rars.venus.actions.GuiAction
 import rars.venus.VenusUI
+import rars.venus.actions.GuiAction
 import java.awt.event.ActionEvent
 import javax.swing.Icon
 import javax.swing.KeyStroke
@@ -14,7 +14,7 @@ import javax.swing.KeyStroke
 class RunResetAction(
     name: String, icon: Icon?, descrip: String,
     mnemonic: Int?, accel: KeyStroke?, gui: VenusUI
-) : GuiAction(name, icon, descrip, mnemonic, accel, gui) {
+) : GuiAction(name, descrip, icon, mnemonic, accel, gui) {
     /**
      * {@inheritDoc}
      *

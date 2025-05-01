@@ -6,7 +6,6 @@ import rars.Globals
 import rars.RISCVProgram
 import rars.events.AssemblyError
 import rars.settings.BoolSetting
-import rars.util.FilenameFinder
 import rars.venus.FileStatus
 import rars.venus.VenusUI
 import rars.venus.actions.GuiAction
@@ -21,7 +20,7 @@ import javax.swing.KeyStroke
 class RunAssembleAction(
     name: String, icon: Icon?, descrip: String,
     mnemonic: Int?, accel: KeyStroke?, gui: VenusUI
-) : GuiAction(name, icon, descrip, mnemonic, accel, gui) {
+) : GuiAction(name, descrip, icon, mnemonic, accel, gui) {
     /**
      * {@inheritDoc}
      */
@@ -46,9 +45,9 @@ class RunAssembleAction(
                     // for multiple
                     // file assembly
                     filesToAssembleNew.addAll(
-                        FilenameFinder.getFilenameListForDirectory(
-                            FileStatus.systemFile!!.getParentFile(), Globals.FILE_EXTENSIONS
-                        )
+                        FileStatus.systemFile!!.parentFile.listFiles { file ->
+                            file.extension in Globals.FILE_EXTENSIONS
+                        }
                     )
                 } else {
                     filesToAssembleNew.add(FileStatus.systemFile!!)

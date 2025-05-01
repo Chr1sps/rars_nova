@@ -11,13 +11,13 @@ import rars.util.toHexStringWithPrefix
 sealed interface SimulationEvent
 
 /** Represents and event that occurs when the simulation encounters a breakpoint. */
-object BreakpointEvent : SimulationEvent
+data object BreakpointEvent : SimulationEvent
 
 /** Represents an event that signals the simulation to wait for an interrupt. */
-object WaitEvent : SimulationEvent
+data object WaitEvent : SimulationEvent
 
 /** Represents a successful exit from the program. */
-object ExitingEvent : SimulationEvent
+data object ExitingEvent : SimulationEvent
 
 /** Represents an error that occurred during the simulation. */
 sealed interface SimulationError : SimulationEvent {
@@ -26,21 +26,18 @@ sealed interface SimulationError : SimulationEvent {
     val value: Int
 
     companion object {
-        @JvmStatic
         fun create(
             reason: EventReason,
             message: ErrorMessage,
             value: Int,
         ): SimulationError = SimulationErrorImpl(reason, message, value)
 
-        @JvmStatic
         fun create(message: String, reason: EventReason) = create(
             reason,
             ErrorMessage.error(null, 0, 0, message),
             0
         )
 
-        @JvmStatic
         fun create(statement: ProgramStatement, message: String, reason: EventReason): SimulationError {
             val address = Globals.REGISTER_FILE.programCounter - BasicInstruction.BASIC_INSTRUCTION_LENGTH
             return create(
@@ -55,7 +52,6 @@ sealed interface SimulationError : SimulationEvent {
             )
         }
 
-        @JvmStatic
         fun create(statement: ProgramStatement, memoryError: MemoryError): SimulationError {
             val address = Globals.REGISTER_FILE.programCounter - BasicInstruction.BASIC_INSTRUCTION_LENGTH
             return create(
@@ -70,16 +66,16 @@ sealed interface SimulationError : SimulationEvent {
             )
         }
     }
-
-    private class SimulationErrorImpl(
-        override val reason: EventReason,
-        override val message: ErrorMessage,
-        override val value: Int,
-    ) : SimulationError
 }
 
+private data class SimulationErrorImpl(
+    override val reason: EventReason,
+    override val message: ErrorMessage,
+    override val value: Int,
+) : SimulationError
+
 /** Represents an exit from the program due to an error. */
-class ExitingError(
+data class ExitingError(
     override val reason: EventReason,
     override val message: ErrorMessage,
     override val value: Int,

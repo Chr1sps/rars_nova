@@ -7,7 +7,6 @@ import rars.events.SimulationEvent
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
 import rars.simulator.SimulationContext
-import rars.util.ConversionUtils
 
 class ArithmeticW private constructor(
     usage: String,
@@ -19,28 +18,41 @@ class ArithmeticW private constructor(
     usage, description, BasicInstructionFormat.R_FORMAT,
     "$funct7 ttttt sssss $funct3 fffff 0111011"
 ) {
-    override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> = either {
-        val newValue = base.computeW(
-            ConversionUtils.longLowerHalfToInt(registerFile.getLongValue(statement.getOperand(1))!!),
-            ConversionUtils.longLowerHalfToInt(registerFile.getLongValue(statement.getOperand(2))!!)
-        ).toLong()
-        registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).bind()
-    }
+    override suspend fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> =
+        either {
+            val newValue = base.computeW(
+                registerFile.getLong(statement.getOperand(1))!!.toInt(),
+                registerFile.getLong(statement.getOperand(2))!!.toInt(),
+            ).toLong()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                newValue
+            ).bind()
+        }
 
     companion object {
         val ADDW = ArithmeticW(
-            "addw t1,t2,t3", "Addition: set t1 to (t2 plus t3) using only the lower 32 bits",
-            "0000000", "000", Arithmetic.ADD
+            "addw t1,t2,t3",
+            "Addition: set t1 to (t2 plus t3) using only the lower 32 bits",
+            "0000000",
+            "000",
+            Arithmetic.ADD
         )
 
         val DIVUW = ArithmeticW(
-            "divuw t1,t2,t3", "Division: set t1 to the result of t2/t3 using unsigned division limited to 32 bits",
-            "0000001", "101", Arithmetic.DIVU
+            "divuw t1,t2,t3",
+            "Division: set t1 to the result of t2/t3 using unsigned division limited to 32 bits",
+            "0000001",
+            "101",
+            Arithmetic.DIVU
         )
 
         val DIVW = ArithmeticW(
-            "divw t1,t2,t3", "Division: set t1 to the result of t2/t3 using only the lower 32 bits",
-            "0000001", "100", Arithmetic.DIV
+            "divw t1,t2,t3",
+            "Division: set t1 to the result of t2/t3 using only the lower 32 bits",
+            "0000001",
+            "100",
+            Arithmetic.DIV
         )
 
         val MULW = ArithmeticW(
@@ -56,8 +68,11 @@ class ArithmeticW private constructor(
         )
 
         val REMW = ArithmeticW(
-            "remw t1,t2,t3", "Remainder: set t1 to the remainder of t2/t3 using only the lower 32 bits",
-            "0000001", "110", Arithmetic.REM
+            "remw t1,t2,t3",
+            "Remainder: set t1 to the remainder of t2/t3 using only the lower 32 bits",
+            "0000001",
+            "110",
+            Arithmetic.REM
         )
 
         val SLLW = ArithmeticW(
@@ -85,8 +100,11 @@ class ArithmeticW private constructor(
         )
 
         val SUBW = ArithmeticW(
-            "subw t1,t2,t3", "Subtraction: set t1 to (t2 minus t3) using only the lower 32 bits",
-            "0100000", "000", Arithmetic.SUB
+            "subw t1,t2,t3",
+            "Subtraction: set t1 to (t2 minus t3) using only the lower 32 bits",
+            "0100000",
+            "000",
+            Arithmetic.SUB
         )
     }
 }

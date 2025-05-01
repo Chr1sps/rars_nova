@@ -12,17 +12,31 @@ class GuiSimThread(
     breakPoints: IntArray,
     simulatorNoticeDispatcher: ListenerDispatcher<SimulatorNotice>,
     private val mainUI: VenusUI
-) : SimThread(pc, maxSteps, breakPoints, mainUI.venusIO, simulatorNoticeDispatcher) {
+) : SimThread(
+    pc,
+    maxSteps,
+    breakPoints,
+    mainUI.venusIO,
+    simulatorNoticeDispatcher
+) {
     override val runSpeed: Double
-        get() = this.mainUI.runSpeedPanel.runSpeed
+        get() = mainUI.runSpeedPanel.runSpeed
 
     override fun onEndLoop() {
-        if (this.maxSteps != 1 && this.runSpeed < RunSpeedPanel.UNLIMITED_SPEED) {
+        if (maxSteps != 1 && runSpeed < RunSpeedPanel.UNLIMITED_SPEED) {
             SwingUtilities.invokeLater { updateUI() }
-            try {
-                (this as Object).wait((1000 / runSpeed).toLong())
-            } catch (_: InterruptedException) {
+            synchronized(this) {
+                try {
+                    (this as Object).wait((1000 / runSpeed).toLong())
+                } catch (_: InterruptedException) {
+                }
             }
+//            lock.withLock {
+//                try {
+//                    condition.await((1000 / runSpeed).toLong(), TimeUnit.MILLISECONDS)
+//                } catch (_: InterruptedException) {
+//                }
+//            }
         }
     }
 

@@ -58,8 +58,10 @@ inline fun <Err, Ok> Either<Err, Ok>.leftOrThrow(
     { Either.Left(it) }, guardFunc
 )
 
-inline fun <Ok> Either<*, Ok>.rightOr(defaultValue: Ok): Ok = this.fold({ defaultValue }, { it })
-inline fun <Err> Either<Err, *>.leftOr(defaultValue: Err): Err = this.fold({ it }, { defaultValue })
+inline fun <Ok> Either<*, Ok>.rightOr(defaultValue: Ok): Ok = fold({ defaultValue }, { it })
+inline fun <Err, Ok> Either<Err, Ok>.rightOr(fromLeftFunc: (Err) -> Ok): Ok = fold(fromLeftFunc) { it }
+inline fun <Err> Either<Err, *>.leftOr(defaultValue: Err): Err = fold({ it }, { defaultValue })
+inline fun <Err, Ok> Either<Err, Ok>.leftOr(fromRightFunc: (Ok) -> Err): Err = fold({ it }, fromRightFunc)
 
 fun Environment.flipRounding() {
     if (mode == RoundingMode.MAX) {
@@ -106,6 +108,7 @@ fun <T> Iterable<T>.intersperseWith(separatorFunc: () -> T): List<T> = when (thi
             add(separatorFunc())
         }
     }
+
     else -> {
         val iterator = this@intersperseWith.iterator()
         if (!iterator.hasNext()) emptyList()
@@ -151,4 +154,11 @@ fun Font.applyStyle(style: TokenStyle): Font {
     if (style.isItalic) fontStyle = fontStyle or Font.ITALIC
     // noinspection MagicConstant
     return deriveFont(fontStyle)
+}
+
+fun unreachable(): Nothing = error("Unreachable code.")
+
+object EmptyIterator : Iterator<Nothing> {
+    override fun next(): Nothing = throw NoSuchElementException("Empty iterator has no next element.")
+    override fun hasNext(): Boolean = false
 }

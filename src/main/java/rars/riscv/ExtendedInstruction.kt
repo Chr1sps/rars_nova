@@ -2,7 +2,7 @@ package rars.riscv
 
 import rars.RISCVProgram
 import rars.assembler.TokenList
-import rars.util.BinaryUtilsOld
+import rars.util.bitValue
 import rars.util.translateToInt
 import rars.util.translateToLong
 import java.util.*
@@ -92,7 +92,7 @@ class ExtendedInstruction @JvmOverloads constructor(
                     when {
                         "LIA$op" in instruction -> {
                             // add extra to compensate for sign extension
-                            val extra = BinaryUtilsOld.bitValue(shifted, 11)
+                            val extra = shifted.bitValue(11)
                             instruction = instruction.replace("LIA$op", ((shifted shr 12) + extra).toString())
                         }
                         "LIB$op" in instruction -> {
@@ -113,7 +113,8 @@ class ExtendedInstruction @JvmOverloads constructor(
 
                 val relative = value - pc
                 if (instruction.contains("PCH$op")) {
-                    val extra = BinaryUtilsOld.bitValue(relative, 11) // add extra to compesate for sign extension
+                    // add extra to compensate for sign extension
+                    val extra = relative.bitValue(11)
                     instruction = instruction.replace("PCH$op", ((relative shr 12) + extra).toString())
                 }
                 if (instruction.contains("PCL$op")) {
@@ -121,9 +122,8 @@ class ExtendedInstruction @JvmOverloads constructor(
                 }
 
                 if (instruction.contains("LH$op")) {
-                    val extra = BinaryUtilsOld.bitValue(value, 11) // add extra to compesate for sign extension
-                    //                instruction = ExtendedInstruction.substitute(instruction, "LH" + op, String.valueOf((val >> 12) + 
-//                extra));
+                    // add extra to compensate for sign extension
+                    val extra = value.bitValue(11)
                     instruction = instruction.replace("LH$op", ((value shr 12) + extra).toString())
                 }
                 if (instruction.contains("LL$op")) {
@@ -131,7 +131,8 @@ class ExtendedInstruction @JvmOverloads constructor(
                 }
 
                 if (instruction.contains("VH$op")) {
-                    val extra = BinaryUtilsOld.bitValue(value, 11) // add extra to compesate for sign extension
+                    // add extra to compensate for sign extension
+                    val extra = value.bitValue(11)
                     instruction = instruction.replace("VH$op", ((value shr 12) + extra).toString())
                 }
                 if (instruction.contains("VL$op")) {

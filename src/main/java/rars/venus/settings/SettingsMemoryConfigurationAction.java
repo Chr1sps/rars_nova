@@ -51,7 +51,7 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI mainUI
     ) {
-        super(name, icon, descrip, mnemonic, accel, mainUI);
+        super(name, descrip, icon, mnemonic, accel, mainUI);
     }
 
     /**
@@ -215,7 +215,8 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
                 Globals.setupGlobalMemoryConfiguration(newConfiguration);
                 SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow().clearHighlighting();
                 SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow().updateRegisters();
-                SettingsMemoryConfigurationAction.this.mainUI.mainPane.executePane.dataSegment.updateBaseAddressComboBox();
+                SettingsMemoryConfigurationAction.this.mainUI.mainPane.executePane.getDataSegment()
+                    .updateBaseAddressComboBox();
                 // 21 July 2009 Re-assemble if the situation demands it to maintain consistency.
                 if (FileStatus.getSystemState() == FileStatus.State.RUNNABLE ||
                     FileStatus.getSystemState() == FileStatus.State.RUNNING ||

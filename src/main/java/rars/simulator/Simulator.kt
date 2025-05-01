@@ -1,9 +1,5 @@
 package rars.simulator
 
-import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
-import org.jetbrains.annotations.NotNull
 import rars.events.SimulationError
 import rars.io.ConsoleIO
 import rars.notices.SimulatorNotice
@@ -17,8 +13,9 @@ import rars.venus.VenusUI
  * @version August 2005
  */
 class Simulator {
-    private val simulatorNoticeDispatcher = ListenerDispatcher<@NotNull SimulatorNotice>()
-    private val stopEventDispatcher = ListenerDispatcher<@NotNull Unit>()
+    private val simulatorNoticeDispatcher =
+        ListenerDispatcher<SimulatorNotice>()
+    private val stopEventDispatcher = ListenerDispatcher<Unit>()
 
     @JvmField
     val simulatorNoticeHook = this.simulatorNoticeDispatcher.hook
@@ -38,7 +35,7 @@ class Simulator {
      * @param maxSteps
      * maximum number of steps to perform before returning false
      * (0 or less means no max)
-     * @return a [Reason] object that indicates how the simulation ended/was stopped
+     * @return a [StoppingEvent] object that indicates how the simulation ended/was stopped
      * @throws SimulationError
      * Throws exception if run-time exception occurs.
      */
@@ -46,22 +43,19 @@ class Simulator {
         pc: Int,
         maxSteps: Int,
         consoleIO: ConsoleIO
-    ): Either<SimulationError, Reason> {
-        this.simulatorThread = SimThread(
-            pc,
-            maxSteps,
-            IntArray(0),
-            consoleIO,
-            this.simulatorNoticeDispatcher
-        )
-        this.simulatorThread!!.run() // Just call run, this is a blocking method
-        val pe = this.simulatorThread!!.pe
-        val out = this.simulatorThread!!.constructReturnReason!!
-        this.simulatorThread = null
-        return pe?.left() ?: out.right()
+    ): StoppingEvent = SimThread(
+        pc,
+        maxSteps,
+        IntArray(0),
+        consoleIO,
+        this.simulatorNoticeDispatcher
+    ).run {
+        run()
+        stoppingEvent
     }
 
     // region UI control methods
+
     /**
      * Start simulated execution of given source program (in a new thread). It must
      * have already been assembled.
@@ -82,38 +76,41 @@ class Simulator {
         breakPoints: IntArray,
         mainUI: VenusUI
     ) {
-        this.simulatorThread = GuiSimThread(pc, maxSteps, breakPoints, this.simulatorNoticeDispatcher, mainUI)
+        this.simulatorThread = GuiSimThread(
+            pc,
+            maxSteps,
+            breakPoints,
+            this.simulatorNoticeDispatcher,
+            mainUI
+        )
         Thread(this.simulatorThread, "RISCV").start()
     }
 
     /**
      * Set the volatile stop boolean variable checked by the execution
-     * thread at the end of each instruction execution. If variable
+     * thread at the end of each instruction execution. If the variable
      * is found to be true, the execution thread will depart
      * gracefully so the main thread handling the GUI can take over.
      * This is used by both STOP and PAUSE features.
      */
-    private fun interruptExecution(reason: Reason) {
-        if (this.simulatorThread != null) {
-            this.simulatorThread!!.setStop(reason)
-            this.stopEventDispatcher.dispatch(Unit)
-            this.simulatorThread = null
+    private fun interruptExecution(stoppingEvent: StoppingEvent) {
+        simulatorThread?.apply {
+            setStop(stoppingEvent)
+            stopEventDispatcher.dispatch(Unit)
         }
+        simulatorThread = null
     }
 
     fun stopExecution() {
-        this.interruptExecution(Reason.STOP)
+        this.interruptExecution(StoppingEvent.UserStopped)
     }
 
     fun pauseExecution() {
-        this.interruptExecution(Reason.PAUSE)
+        this.interruptExecution(StoppingEvent.UserPaused)
     }
 
     // endregion UI control methods
-    /**
-     *
-     * interrupt.
-     */
+
     fun interrupt() {
         if (this.simulatorThread == null) {
             return
@@ -121,18 +118,5 @@ class Simulator {
         synchronized(this.simulatorThread!!) {
             (this.simulatorThread as Object).notify()
         }
-    }
-
-    /**
-     * various reasons for simulate to end...
-     */
-    enum class Reason {
-        BREAKPOINT,
-        EXCEPTION,
-        MAX_STEPS,  // includes step mode (where maxSteps is 1)
-        NORMAL_TERMINATION,
-        CLIFF_TERMINATION,  // run off bottom of program
-        PAUSE,
-        STOP
     }
 }

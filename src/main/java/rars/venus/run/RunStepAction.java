@@ -2,12 +2,11 @@ package rars.venus.run;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.events.SimulationError;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
-import rars.simulator.Simulator;
+import rars.simulator.StoppingEvent;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
 import rars.venus.VenusUI;
@@ -19,6 +18,7 @@ import java.awt.event.ActionEvent;
 
 import static rars.Globals.BOOL_SETTINGS;
 import static rars.simulator.ProgramArgumentListKt.storeProgramArguments;
+import static rars.simulator.SimulationKt.isDone;
 
 /**
  * Action for the Run -> Step menu item
@@ -32,7 +32,7 @@ public final class RunStepAction extends GuiAction {
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
     ) {
-        super(name, icon, descrip, mnemonic, accel, gui);
+        super(name, descrip, icon, mnemonic, accel, gui);
     }
 
     /**
@@ -50,7 +50,7 @@ public final class RunStepAction extends GuiAction {
             }
             this.mainUI.isExecutionStarted = true;
             this.mainUI.messagesPane.selectRunMessageTab();
-            this.executePane.textSegment.setCodeHighlighting(true);
+            this.executePane.getTextSegment().setCodeHighlighting(true);
 
             final var stopListener = new Function1<SimulatorNotice, Unit>() {
                 @Override
@@ -59,8 +59,7 @@ public final class RunStepAction extends GuiAction {
                         return Unit.INSTANCE;
                     }
                     EventQueue.invokeLater(() -> RunStepAction.this.stepped(
-                        item.done, item.reason,
-                        item.error
+                        item.event
                     ));
 
                     Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this);
@@ -69,11 +68,19 @@ public final class RunStepAction extends GuiAction {
             };
             Globals.SIMULATOR.simulatorNoticeHook.subscribe(stopListener);
 
-            Globals.SIMULATOR.startSimulation(Globals.REGISTER_FILE.getProgramCounter(), 1, new int[0], this.mainUI);
+            Globals.SIMULATOR.startSimulation(
+                Globals.REGISTER_FILE.getProgramCounter(),
+                1,
+                new int[0],
+                this.mainUI
+            );
         } else {
             // note: this should never occur since "Step" is only enabled after successful
             // assembly.
-            JOptionPane.showMessageDialog(this.mainUI, "The program must be assembled before it can be run.");
+            JOptionPane.showMessageDialog(
+                this.mainUI,
+                "The program must be assembled before it can be run."
+            );
         }
     }
 
@@ -83,51 +90,46 @@ public final class RunStepAction extends GuiAction {
      * to update the GUI.
      */
     public void stepped(
-        final boolean done,
-        final @Nullable Simulator.Reason reason,
-        final @Nullable SimulationError pe
+        final @NotNull StoppingEvent event
     ) {
-        this.executePane.registerValues.updateRegisters();
-        this.executePane.fpRegValues.updateRegisters();
-        this.executePane.csrValues.updateRegisters();
-        this.executePane.dataSegment.updateValues();
-        if (!done) {
-            this.executePane.textSegment.highlightStepAtPC();
+        this.executePane.getRegisterValues().updateRegisters();
+        this.executePane.getFpRegValues().updateRegisters();
+        this.executePane.getCsrValues().updateRegisters();
+        this.executePane.getDataSegment().updateValues();
+        if (isDone(event)) {
+            RunGoAction.resetMaxSteps();
+            this.executePane.getTextSegment().unhighlightAllSteps();
+            FileStatus.setSystemState(FileStatus.State.TERMINATED);
+            if (!(event instanceof StoppingEvent.ErrorHit)) {
+                this.mainUI.messagesPane.postMessage('\n' + this.name + ": execution " + (
+                    (event instanceof StoppingEvent.CliffTermination)
+                        ? "terminated due to null instruction."
+                        : "completed successfully."
+                ) + "\n\n");
+                this.mainUI.messagesPane.postRunMessage(
+                    "\n-- program is finished running" + (
+                        (event instanceof StoppingEvent.CliffTermination)
+                            ? "(dropped off bottom)"
+                            : " (" + Globals.exitCode + ')'
+                    ) + " --\n\n");
+                this.mainUI.messagesPane.selectRunMessageTab();
+            }
+        } else {
+            this.executePane.getTextSegment().highlightStepAtPC();
             FileStatus.setSystemState(FileStatus.State.RUNNABLE);
         }
-        if (done) {
-            RunGoAction.resetMaxSteps();
-            this.executePane.textSegment.unhighlightAllSteps();
-            FileStatus.setSystemState(FileStatus.State.TERMINATED);
-        }
-        if (done && pe == null) {
-            this.mainUI.messagesPane.postMessage(
-                '\n' + this.name + ": execution " +
-                    (
-                        (reason == Simulator.Reason.CLIFF_TERMINATION) ? "terminated due to null instruction."
-                            : "completed successfully."
-                    )
-                    + "\n\n");
-            this.mainUI.messagesPane.postRunMessage(
-                "\n-- program is finished running" +
-                    (
-                        (reason == Simulator.Reason.CLIFF_TERMINATION) ? "(dropped off bottom)"
-                            : " (" + Globals.exitCode + ')'
-                    )
-                    + " --\n\n");
-            this.mainUI.messagesPane.selectRunMessageTab();
-        }
-        if (pe != null) {
+        if (event instanceof final StoppingEvent.ErrorHit errorHit) {
             RunGoAction.resetMaxSteps();
             this.mainUI.messagesPane.postMessage(
-                pe.getMessage().generateReport());
+                errorHit.getError().getMessage().generateReport());
             this.mainUI.messagesPane.postMessage(
                 '\n' + this.name + ": execution terminated with errors.\n\n");
-            this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues);
+            this.mainUI.registersPane.setSelectedComponent(this.executePane.getCsrValues());
             FileStatus.setSystemState(FileStatus.State.TERMINATED); // should be redundant.
-            this.executePane.textSegment.setCodeHighlighting(true);
-            this.executePane.textSegment.unhighlightAllSteps();
-            this.executePane.textSegment.highlightStepAtAddress(Globals.REGISTER_FILE.getProgramCounter() - 4);
+            this.executePane.getTextSegment().setCodeHighlighting(true);
+            this.executePane.getTextSegment().unhighlightAllSteps();
+            this.executePane.getTextSegment()
+                .highlightStepAtAddress(Globals.REGISTER_FILE.getProgramCounter() - 4);
         }
         this.mainUI.isMemoryReset = false;
     }
@@ -139,7 +141,8 @@ public final class RunStepAction extends GuiAction {
      * $a0 gets argument count (argc), $a1 gets stack address of first arg pointer (argv).
      */
     private void processProgramArgumentsIfAny() {
-        final String programArguments = this.executePane.textSegment.getProgramArguments();
+        final String programArguments = this.executePane.getTextSegment()
+            .getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||
             !BOOL_SETTINGS.getSetting(BoolSetting.PROGRAM_ARGUMENTS)) {
             return;

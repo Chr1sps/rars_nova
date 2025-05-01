@@ -74,7 +74,7 @@ public final class FileStatus {
     }
 
     /**
-     * Changes the value of assenbked to the parameter given.
+     * Changes the value of assembled to the parameter given.
      *
      * @param b
      *     boolean variable that tells what to set assembled to.

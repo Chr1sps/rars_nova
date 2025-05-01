@@ -9,7 +9,7 @@ import rars.Globals;
 import rars.RISCVProgram;
 import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
-import rars.util.FilenameFinder;
+import rars.util.AsmFileFilter;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -570,7 +570,7 @@ public final class EditTabbedPane extends JPanel {
             // Note: add sequence is significant - last one added becomes default.
             this.fileFilterList = new ArrayList<>();
             this.fileFilterList.add(this.fileChooser.getAcceptAllFileFilter());
-            this.fileFilterList.add(FilenameFinder.RARS_FILE_FILTER);
+            this.fileFilterList.add(AsmFileFilter.INSTANCE);
             this.fileFilterCount = 0; // this will trigger fileChooser file filter load in next line
             this.setChoosableFileFilters();
         }

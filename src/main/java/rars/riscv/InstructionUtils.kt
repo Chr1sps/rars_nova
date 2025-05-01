@@ -17,25 +17,29 @@ import rars.riscv.hardware.registerfiles.CSRegisterFile
 import rars.riscv.hardware.registerfiles.FloatingPointRegisterFile
 import java.math.BigInteger
 
-internal fun CSRegisterFile.setfflags(environment: Environment): Either<SimulationError, Unit> =
-    either {
-        val fflags = listOf(
-            environment.inexact to 1,
-            environment.underflow to 2,
-            environment.overflow to 4,
-            environment.divByZero to 8,
-            environment.invalid to 16
-        ).filter { it.first }.sumOf { it.second }
-        if (fflags != 0) {
-            updateRegisterByName("fflags", getLongValue("fflags")!! or fflags.toLong()).bind()
-        }
+internal fun CSRegisterFile.setfflags(
+    environment: Environment
+): Either<SimulationError, Unit> = either {
+    val fflags = listOf(
+        environment.inexact to 1,
+        environment.underflow to 2,
+        environment.overflow to 4,
+        environment.divByZero to 8,
+        environment.invalid to 16
+    ).filter { it.first }.sumOf { it.second }
+    if (fflags != 0) {
+        updateRegisterByName(
+            "fflags",
+            getLong("fflags")!! or fflags.toLong()
+        ).bind()
     }
+}
 
 internal fun CSRegisterFile.getRoundingMode(
     rmValue: Int,
     statement: ProgramStatement
 ): Either<SimulationError, RoundingMode> {
-    val frm = getIntValue("frm")!!
+    val frm = getInt("frm")!!
     val rm = if (rmValue == 7) {
         frm
     } else {
@@ -55,9 +59,12 @@ internal fun CSRegisterFile.getRoundingMode(
     }
 }
 
-internal fun FloatingPointRegisterFile.getFloat32(num: Int) = Float32(getIntValue(num)!!)
+internal fun FloatingPointRegisterFile.getFloat32(num: Int) =
+    Float32(getInt(num)!!)
 
-internal fun FloatingPointRegisterFile.getFloat64(num: Int) = Float64(getLongValue(num)!!)
+internal fun FloatingPointRegisterFile.getFloat64(num: Int) =
+    Float64(getLong(num)!!)
+
 internal fun Int.lowerToULong(): ULong = this.toULong() and 0xFFFFFFFFu
 internal fun Long.toBigInteger(): BigInteger = BigInteger.valueOf(this)
 internal fun ULong.toBigInteger(): BigInteger {
@@ -68,13 +75,12 @@ internal fun ULong.toBigInteger(): BigInteger {
     }
 }
 
-internal fun <S : Floating<S>, D : Floating<D>> convert(
+internal fun <S : Floating<S>, D : Floating<D>> FloatingFactory<S>.convert(
     valueToConvert: D,
-    constructor: FloatingFactory<S>,
     environment: Environment
 ): S = when {
-    valueToConvert.isInfinite -> if (valueToConvert.isSignMinus) constructor.negativeInfinity else constructor.infinity
-    valueToConvert.isZero -> if (valueToConvert.isSignMinus) constructor.negativeZero else constructor.zero
-    valueToConvert.isNaN -> constructor.NaN
-    else -> constructor.fromExactFloat(environment, valueToConvert.toExactFloat())
+    valueToConvert.isInfinite -> if (valueToConvert.isSignMinus) negativeInfinity else infinity
+    valueToConvert.isZero -> if (valueToConvert.isSignMinus) negativeZero else zero
+    valueToConvert.isNaN -> NaN
+    else -> fromExactFloat(environment, valueToConvert.toExactFloat())
 }

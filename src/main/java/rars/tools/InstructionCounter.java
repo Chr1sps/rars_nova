@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.notices.AccessNotice;
+import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.BasicInstruction;
 import rars.venus.VenusUI;
@@ -238,7 +239,7 @@ public final class InstructionCounter extends AbstractTool {
         if (!notice.isAccessFromRISCV) {
             return;
         }
-        if (notice.accessType != AccessNotice.AccessType.READ) {
+        if (notice.accessType != AccessType.READ) {
             return;
         }
         final MemoryAccessNotice m = (MemoryAccessNotice) notice;

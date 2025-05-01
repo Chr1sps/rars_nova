@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.notices.MemoryAccessNotice;
+import rars.notices.AccessType;
 import rars.riscv.hardware.registerfiles.CSRegisterFile;
 import rars.venus.VenusUI;
 
@@ -44,7 +44,11 @@ public final class TimerTool extends AbstractTool {
     private TimePanel timePanel;
 
     public TimerTool(final @NotNull VenusUI mainUI) {
-        super(TimerTool.HEADING + ", " + TimerTool.VERSION, TimerTool.HEADING, mainUI);
+        super(
+            TimerTool.HEADING + ", " + TimerTool.VERSION,
+            TimerTool.HEADING,
+            mainUI
+        );
         TimerTool.startTimeCmpDaemon();
     }
 
@@ -174,7 +178,10 @@ public final class TimerTool extends AbstractTool {
     }
 
     // Writes a word to a virtual memory address
-    private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
+    private synchronized void updateMMIOControlAndData(
+        final int dataAddr,
+        final int dataValue
+    ) {
         Globals.MEMORY_REGISTERS_LOCK.lock();
         try {
             unwrap(Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue));
@@ -220,8 +227,10 @@ public final class TimerTool extends AbstractTool {
                 ja.setLineWrap(true);
                 ja.setWrapStyleWord(true);
                 JOptionPane.showMessageDialog(
-                    this.theWindow, new JScrollPane(ja),
-                    "Simulating a timing device", JOptionPane.INFORMATION_MESSAGE
+                    this.theWindow,
+                    new JScrollPane(ja),
+                    "Simulating a timing device",
+                    JOptionPane.INFORMATION_MESSAGE
                 );
             });
         return help;
@@ -243,7 +252,7 @@ public final class TimerTool extends AbstractTool {
                 notice -> {
                     final var accessType = notice.accessType;
                     // If is was a WRITE operation
-                    if (accessType == MemoryAccessNotice.AccessType.WRITE) {
+                    if (accessType == AccessType.WRITE) {
                         final int address = notice.address;
                         final int value = notice.value;
 
@@ -261,7 +270,8 @@ public final class TimerTool extends AbstractTool {
                 TimerTool.getTimeCmpAddress(),
                 TimerTool.getTimeCmpAddress() + 8
             ).onLeft(aee -> {
-                TimerTool.LOGGER.fatal("Error while adding observer in Timer Tool");
+                TimerTool.LOGGER.fatal(
+                    "Error while adding observer in Timer Tool");
                 System.exit(0);
                 return Unit.INSTANCE;
             });
@@ -275,8 +285,8 @@ public final class TimerTool extends AbstractTool {
 
         /** Checks the control bits to see if user-level timer inturrupts are enabled */
         private static boolean bitsEnabled() {
-            final boolean utip = (Globals.CS_REGISTER_FILE.getIntValue("uie") & 0x10) == 0x10;
-            final boolean uie = (Globals.CS_REGISTER_FILE.getIntValue("ustatus") & 0x1) == 0x1;
+            final boolean utip = (Globals.CS_REGISTER_FILE.getInt("uie") & 0x10) == 0x10;
+            final boolean uie = (Globals.CS_REGISTER_FILE.getInt("ustatus") & 0x1) == 0x1;
 
             return (utip && uie);
         }
@@ -294,7 +304,10 @@ public final class TimerTool extends AbstractTool {
                     TimerTool.time = TimerTool.savedTime + System.currentTimeMillis() - TimerTool.startTime;
 
                     // Write the lower and upper words of the time MMIO respectivly
-                    TimerTool.this.updateMMIOControlAndData(TimerTool.getTimeAddress(), (int) (TimerTool.time));
+                    TimerTool.this.updateMMIOControlAndData(
+                        TimerTool.getTimeAddress(),
+                        (int) (TimerTool.time)
+                    );
                     TimerTool.this.updateMMIOControlAndData(
                         TimerTool.getTimeAddress() + 4,
                         (int) (TimerTool.time >> 32)
@@ -304,7 +317,8 @@ public final class TimerTool extends AbstractTool {
                     // Note: if either the UTIP bit in the uie CSR or the UIE bit in the ustatus CSR
                     // are zero then this interrupt will be stopped further on in the pipeline
                     if (TimerTool.time >= TimerTool.timeCmp.value && TimerTool.timeCmp.postInterrupt && Tick.bitsEnabled()) {
-                        Globals.INTERRUPT_CONTROLLER.registerTimerInterrupt(CSRegisterFile.TIMER_INTERRUPT);
+                        Globals.INTERRUPT_CONTROLLER.registerTimerInterrupt(
+                            CSRegisterFile.TIMER_INTERRUPT);
                         TimerTool.timeCmp.postInterrupt = false; // Wait for timecmp to be writen to again
                     }
                     TimerTool.this.timePanel.updateTime();
@@ -319,8 +333,14 @@ public final class TimerTool extends AbstractTool {
 
         // Set time MMIO to zero
         public void reset() {
-            TimerTool.this.updateMMIOControlAndData(TimerTool.getTimeAddress(), 0);
-            TimerTool.this.updateMMIOControlAndData(TimerTool.getTimeAddress() + 4, 0);
+            TimerTool.this.updateMMIOControlAndData(
+                TimerTool.getTimeAddress(),
+                0
+            );
+            TimerTool.this.updateMMIOControlAndData(
+                TimerTool.getTimeAddress() + 4,
+                0
+            );
         }
     }
 

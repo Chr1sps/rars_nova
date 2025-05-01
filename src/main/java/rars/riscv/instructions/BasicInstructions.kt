@@ -25,20 +25,25 @@ object BasicInstructions {
         description: String,
         format: BasicInstructionFormat,
         operandMask: String,
-        callback: SimulationContext.(ProgramStatement) -> Either<SimulationEvent, Unit>
-    ): BasicInstruction = object : BasicInstruction(example, description, format, operandMask) {
-        override fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> =
-            callback(statement)
-    }
+        callback: suspend SimulationContext.(ProgramStatement) -> Either<SimulationEvent, Unit>
+    ): BasicInstruction =
+        object : BasicInstruction(example, description, format, operandMask) {
+            override suspend fun SimulationContext.simulate(statement: ProgramStatement): Either<SimulationEvent, Unit> =
+                callback(statement)
+        }
 
     val AUIPC = basicInstruction(
-        "auipc t1,100000", "Add upper immediate to pc: set t1 to (pc plus an upper 20-bit immediate)",
-        BasicInstructionFormat.U_FORMAT, "ssssssssssssssssssss fffff 0010111"
+        "auipc t1,100000",
+        "Add upper immediate to pc: set t1 to (pc plus an upper 20-bit immediate)",
+        BasicInstructionFormat.U_FORMAT,
+        "ssssssssssssssssssss fffff 0010111"
     ) { stmt ->
         val shiftedValue = stmt.getOperand(1) shl 12
         val convertedValue = shiftedValue.toLong()
-        val newValue = registerFile.programCounter - BASIC_INSTRUCTION_LENGTH + convertedValue
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
+        val newValue =
+            registerFile.programCounter - BASIC_INSTRUCTION_LENGTH + convertedValue
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue)
+            .ignoreOk()
     }
 
     val CSRRC = basicInstruction(
@@ -48,7 +53,7 @@ object BasicInstructions {
         "ssssssssssss ttttt 011 fffff 1110011"
     ) { stmt ->
         either {
-            val csr = csrRegisterFile.getLongValue(stmt.getOperand(1))
+            val csr = csrRegisterFile.getLong(stmt.getOperand(1))
             ensureNotNull(csr) {
                 SimulationError.create(
                     stmt,
@@ -57,10 +62,11 @@ object BasicInstructions {
                 )
             }
             if (stmt.getOperand(2) != 0) {
-                val previousValue = csrRegisterFile.getLongValue(stmt.getOperand(1))
+                val previousValue = csrRegisterFile.getLong(stmt.getOperand(1))
                 csrRegisterFile.updateRegisterByNumber(
                     stmt.getOperand(1),
-                    previousValue!! and registerFile.getLongValue(stmt.getOperand(2))!!.inv()
+                    previousValue!! and registerFile.getLong(stmt.getOperand(2))!!
+                        .inv()
                 ).bind()
             }
             registerFile.updateRegisterByNumber(stmt.getOperand(0), csr).bind()
@@ -75,44 +81,57 @@ object BasicInstructions {
         "ssssssssssss ttttt 111 fffff 1110011"
     ) { statement ->
         either {
-            val csr = ensureNotNull(csrRegisterFile.getLongValue(statement.getOperand(1))) {
-                SimulationError.create(
-                    statement,
-                    "Attempt to access unavailable CSR",
-                    EventReason.ILLEGAL_INSTRUCTION
-                )
-            }
+            val csr =
+                ensureNotNull(csrRegisterFile.getLong(statement.getOperand(1))) {
+                    SimulationError.create(
+                        statement,
+                        "Attempt to access unavailable CSR",
+                        EventReason.ILLEGAL_INSTRUCTION
+                    )
+                }
             if (statement.getOperand(2) != 0) {
-                val previousValue = csrRegisterFile.getLongValue(statement.getOperand(1))
+                val previousValue =
+                    csrRegisterFile.getLong(statement.getOperand(1))
                 csrRegisterFile.updateRegisterByNumber(
                     statement.getOperand(1),
-                    previousValue!! and statement.getOperand(2).toLong().inv() // TODO: Validate the long conversion
+                    previousValue!! and statement.getOperand(2).toLong()
+                        .inv() // TODO: Validate the long conversion
                 ).bind()
             }
-            registerFile.updateRegisterByNumber(statement.getOperand(0), csr).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), csr)
+                .bind()
         }
     }
 
     val CSRRS = basicInstruction(
-        "csrrs t0, fcsr, t1", "Atomic Read/Set CSR: read from the CSR into t0 and logical or t1 into the CSR",
-        BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 1110011"
+        "csrrs t0, fcsr, t1",
+        "Atomic Read/Set CSR: read from the CSR into t0 and logical or t1 into the CSR",
+        BasicInstructionFormat.I_FORMAT,
+        "ssssssssssss ttttt 010 fffff 1110011"
     ) { statement ->
         either {
-            val csr = ensureNotNull(csrRegisterFile.getLongValue(statement.getOperand(1))) {
-                SimulationError.create(
-                    statement,
-                    "Attempt to access unavailable CSR",
-                    EventReason.ILLEGAL_INSTRUCTION
-                )
-            }
+            val csr =
+                ensureNotNull(csrRegisterFile.getLong(statement.getOperand(1))) {
+                    SimulationError.create(
+                        statement,
+                        "Attempt to access unavailable CSR",
+                        EventReason.ILLEGAL_INSTRUCTION
+                    )
+                }
             if (statement.getOperand(2) != 0) {
-                val previousValue = csrRegisterFile.getLongValue(statement.getOperand(1))
+                val previousValue =
+                    csrRegisterFile.getLong(statement.getOperand(1))
                 csrRegisterFile.updateRegisterByNumber(
                     statement.getOperand(1),
-                    previousValue!! or registerFile.getLongValue(statement.getOperand(2))!!
+                    previousValue!! or registerFile.getLong(
+                        statement.getOperand(
+                            2
+                        )
+                    )!!
                 ).bind()
             }
-            registerFile.updateRegisterByNumber(statement.getOperand(0), csr).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), csr)
+                .bind()
         }
     }
 
@@ -122,31 +141,36 @@ object BasicInstructions {
         BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 110 fffff 1110011"
     ) { statement ->
         either {
-            val csr = ensureNotNull(csrRegisterFile.getLongValue(statement.getOperand(1))) {
-                SimulationError.create(
-                    statement,
-                    "Attempt to access unavailable CSR",
-                    EventReason.ILLEGAL_INSTRUCTION
-                )
-            }
+            val csr =
+                ensureNotNull(csrRegisterFile.getLong(statement.getOperand(1))) {
+                    SimulationError.create(
+                        statement,
+                        "Attempt to access unavailable CSR",
+                        EventReason.ILLEGAL_INSTRUCTION
+                    )
+                }
             if (statement.getOperand(2) != 0) {
-                val previousValue = csrRegisterFile.getLongValue(statement.getOperand(1))
+                val previousValue =
+                    csrRegisterFile.getLong(statement.getOperand(1))
                 csrRegisterFile.updateRegisterByNumber(
                     statement.getOperand(1),
                     previousValue!! or statement.getOperand(2).toLong()
                 ).bind()
             }
-            registerFile.updateRegisterByNumber(statement.getOperand(0), csr).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), csr)
+                .bind()
         }
     }
 
     val CSRRW = basicInstruction(
-        "csrrw t0, fcsr, t1", "Atomic Read/Write CSR: read from the CSR into t0 and write t1 into the CSR",
-        BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 001 fffff 1110011"
+        "csrrw t0, fcsr, t1",
+        "Atomic Read/Write CSR: read from the CSR into t0 and write t1 into the CSR",
+        BasicInstructionFormat.I_FORMAT,
+        "ssssssssssss ttttt 001 fffff 1110011"
     ) { statement ->
         either {
             val csr = ensureNotNull(
-                csrRegisterFile.getLongValue(statement.getOperand(1))
+                csrRegisterFile.getLong(statement.getOperand(1))
             ) {
                 SimulationError.create(
                     statement,
@@ -154,12 +178,13 @@ object BasicInstructions {
                     EventReason.ILLEGAL_INSTRUCTION
                 )
             }
-            val newValue = registerFile.getLongValue(statement.getOperand(2))!!
+            val newValue = registerFile.getLong(statement.getOperand(2))!!
             csrRegisterFile.updateRegisterByNumber(
                 statement.getOperand(1),
                 newValue
             ).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), csr).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), csr)
+                .bind()
         }
     }
 
@@ -170,7 +195,7 @@ object BasicInstructions {
     ) { statement ->
         either {
             val csr = ensureNotNull(
-                csrRegisterFile.getLongValue(statement.getOperand(1))
+                csrRegisterFile.getLong(statement.getOperand(1))
             ) {
                 SimulationError.create(
                     statement,
@@ -183,7 +208,8 @@ object BasicInstructions {
                 statement.getOperand(1),
                 newValue
             ).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), csr).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), csr)
+                .bind()
         }
     }
 
@@ -193,10 +219,12 @@ object BasicInstructions {
     ) { BreakpointEvent.left() }
 
     val ECALL = basicInstruction(
-        "ecall", "Issue a system call : Execute the system call specified by value in a7",
-        BasicInstructionFormat.I_FORMAT, "000000000000 00000 000 00000 1110011"
+        "ecall",
+        "Issue a system call : Execute the system call specified by value in a7",
+        BasicInstructionFormat.I_FORMAT,
+        "000000000000 00000 000 00000 1110011"
     ) { stmt ->
-        val number = registerFile.getIntValue("a7")!!
+        val number = registerFile.getInt("a7")!!
         val syscall = Syscall.findSyscall(number)
         if (syscall != null) {
             val isWriting = when (syscall) {
@@ -213,14 +241,12 @@ object BasicInstructions {
                 else -> false
             }
             if (!isWriting) io.flush()
-            syscall.run { this@basicInstruction.simulate(stmt) }
-        } else {
-            SimulationError.create(
-                stmt,
-                "invalid or unimplemented syscall service: $number",
-                EventReason.ENVIRONMENT_CALL
-            ).left()
-        }
+            syscall.runSuspend { simulate(stmt) }
+        } else SimulationError.create(
+            stmt,
+            "invalid or unimplemented syscall service: $number",
+            EventReason.ENVIRONMENT_CALL
+        ).left()
     }
 
     val FCLASSD = basicInstruction(
@@ -240,14 +266,19 @@ object BasicInstructions {
     }
 
     val FCVTDL = basicInstruction(
-        "fcvt.d.l f1, t1, dyn", "Convert double from long: Assigns the value of t1 to f1",
-        BasicInstructionFormat.I_FORMAT, "1101001 00010 sssss ttt fffff 1010011"
+        "fcvt.d.l f1, t1, dyn",
+        "Convert double from long: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT,
+        "1101001 00010 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val converted = Float64.fromBigInteger(
-                registerFile.getLongValue(statement.getOperand(1))!!.toBigInteger(),
+                registerFile.getLong(statement.getOperand(1))!!.toBigInteger(),
                 environment,
             )
             csrRegisterFile.setfflags(environment).bind()
@@ -259,93 +290,138 @@ object BasicInstructions {
     }
 
     val FCVTDLU = basicInstruction(
-        "fcvt.d.lu f1, t1, dyn", "Convert double from unsigned long: Assigns the value of t1 to f1",
-        BasicInstructionFormat.I_FORMAT, "1101001 00011 sssss ttt fffff 1010011"
+        "fcvt.d.lu f1, t1, dyn",
+        "Convert double from unsigned long: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT,
+        "1101001 00011 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
-            val value = registerFile.getLongValue(statement.getOperand(1))!!
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
+            val value = registerFile.getLong(statement.getOperand(1))!!
             val unsigned = value.toULong().toBigInteger()
             val converted = Float64.fromBigInteger(unsigned, environment)
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits).bind()
+            fpRegisterFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                converted.bits
+            ).bind()
 
         }
     }
 
     val FCVTDS = basicInstruction(
-        "fcvt.d.s f1, f2, dyn", "Convert a float to a double: Assigned the value of f2 to f1",
-        BasicInstructionFormat.R4_FORMAT, "0100001 00000 sssss ttt fffff 1010011"
+        "fcvt.d.s f1, f2, dyn",
+        "Convert a float to a double: Assigned the value of f2 to f1",
+        BasicInstructionFormat.R4_FORMAT,
+        "0100001 00000 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
-            val output = convert(input, Float64, environment)
+            val output = Float64.convert(input, environment)
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), output.bits).bind()
+            fpRegisterFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                output.bits
+            ).bind()
         }
     }
 
     val FCVTDW = basicInstruction(
-        "fcvt.d.w f1, t1, dyn", "Convert double from integer: Assigns the value of t1 to f1",
-        BasicInstructionFormat.I_FORMAT, "1101001 00000 sssss ttt fffff 1010011"
+        "fcvt.d.w f1, t1, dyn",
+        "Convert double from integer: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT,
+        "1101001 00000 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val converted = Float64.fromBigInteger(
-                registerFile.getIntValue(statement.getOperand(1))!!.toBigInteger(),
+                registerFile.getInt(statement.getOperand(1))!!.toBigInteger(),
                 environment,
             )
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits).bind()
+            fpRegisterFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                converted.bits
+            ).bind()
         }
     }
 
     val FCVTDWU = basicInstruction(
-        "fcvt.d.wu f1, t1, dyn", "Convert double from unsigned integer: Assigns the value of t1 to f1",
-        BasicInstructionFormat.I_FORMAT, "1101001 00001 sssss ttt fffff 1010011"
+        "fcvt.d.wu f1, t1, dyn",
+        "Convert double from unsigned integer: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT,
+        "1101001 00001 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val converted = Float64.fromBigInteger(
-                registerFile.getIntValue(statement.getOperand(1))!!.lowerToULong().toBigInteger(),
+                registerFile.getInt(statement.getOperand(1))!!.lowerToULong()
+                    .toBigInteger(),
                 environment,
             )
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), converted.bits).bind()
+            fpRegisterFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                converted.bits
+            ).bind()
         }
     }
 
     val FCVTLD = basicInstruction(
-        "fcvt.l.d t1, f1, dyn", "Convert 64 bit integer from double: Assigns the value of f1 (rounded) to t1",
-        BasicInstructionFormat.I_FORMAT, "1100001 00010 sssss ttt fffff 1010011"
+        "fcvt.l.d t1, f1, dyn",
+        "Convert 64 bit integer from double: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT,
+        "1100001 00010 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
             val output = input.toLong(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output)
+                .bind()
         }
     }
 
 
     val FCVTLS = basicInstruction(
-        "fcvt.l.s t1, f1, dyn", "Convert 64 bit integer from float: Assigns the value of f1 (rounded) to t1",
-        BasicInstructionFormat.I_FORMAT, "1100000 00010 sssss ttt fffff 1010011"
+        "fcvt.l.s t1, f1, dyn",
+        "Convert 64 bit integer from float: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT,
+        "1100000 00010 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
             val output = input.toLong(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output).bind()
+            registerFile.updateRegisterByNumber(statement.getOperand(0), output)
+                .bind()
         }
     }
 
@@ -357,11 +433,17 @@ object BasicInstructions {
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
             val output = input.toULong(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                output.toLong()
+            ).bind()
         }
     }
 
@@ -373,153 +455,233 @@ object BasicInstructions {
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
             val output = input.toULong(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                output.toLong()
+            ).bind()
         }
     }
 
 
     val FCVTSD = basicInstruction(
-        "fcvt.s.d f1, f2, dyn", "Convert a double to a float: Assigned the value of f2 to f1",
-        BasicInstructionFormat.R4_FORMAT, "0100000 00001 sssss ttt fffff 1010011"
+        "fcvt.s.d f1, f2, dyn",
+        "Convert a double to a float: Assigned the value of f2 to f1",
+        BasicInstructionFormat.R4_FORMAT,
+        "0100000 00001 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
-            val output = convert(input, Float32, environment)
+            val output = Float32.convert(input, environment)
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), output.bits).bind()
+            fpRegisterFile.updateRegisterByNumberInt(
+                statement.getOperand(0),
+                output.bits
+            ).bind()
         }
     }
 
 
     val FCVTSL = basicInstruction(
-        "fcvt.s.l f1, t1, dyn", "Convert float from long: Assigns the value of t1 to f1",
-        BasicInstructionFormat.I_FORMAT, "1101000 00010 sssss ttt fffff 1010011"
+        "fcvt.s.l f1, t1, dyn",
+        "Convert float from long: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT,
+        "1101000 00010 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val converted = Float32.fromBigInteger(
-                registerFile.getLongValue(statement.getOperand(1))!!.toBigInteger(),
+                registerFile.getLong(statement.getOperand(1))!!.toBigInteger(),
                 environment
             )
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
+            fpRegisterFile.updateRegisterByNumberInt(
+                statement.getOperand(0),
+                converted.bits
+            ).bind()
         }
     }
 
 
     val FCVTSLU = basicInstruction(
-        "fcvt.s.lu f1, t1, dyn", "Convert float from unsigned long: Assigns the value of t1 to f1",
-        BasicInstructionFormat.I_FORMAT, "1101000 00011 sssss ttt fffff 1010011"
+        "fcvt.s.lu f1, t1, dyn",
+        "Convert float from unsigned long: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT,
+        "1101000 00011 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
-            val value = registerFile.getLongValue(statement.getOperand(1))!!
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
+            val value = registerFile.getLong(statement.getOperand(1))!!
             val unsigned = value.toULong().toBigInteger()
             val converted = Float32.fromBigInteger(unsigned, environment)
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
+            fpRegisterFile.updateRegisterByNumberInt(
+                statement.getOperand(0),
+                converted.bits
+            ).bind()
         }
     }
 
 
     val FCVTSW = basicInstruction(
-        "fcvt.s.w f1, t1, dyn", "Convert float from integer: Assigns the value of t1 to f1",
-        BasicInstructionFormat.I_FORMAT, "1101000 00000 sssss ttt fffff 1010011"
+        "fcvt.s.w f1, t1, dyn",
+        "Convert float from integer: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT,
+        "1101000 00000 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val converted = Float32.fromBigInteger(
-                registerFile.getIntValue(statement.getOperand(1))!!.toBigInteger(),
+                registerFile.getInt(statement.getOperand(1))!!.toBigInteger(),
                 environment,
             )
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
+            fpRegisterFile.updateRegisterByNumberInt(
+                statement.getOperand(0),
+                converted.bits
+            ).bind()
         }
     }
 
 
     val FCVTSWU = basicInstruction(
-        "fcvt.s.wu f1, t1, dyn", "Convert float from unsigned integer: Assigns the value of t1 to f1",
-        BasicInstructionFormat.I_FORMAT, "1101000 00001 sssss ttt fffff 1010011"
+        "fcvt.s.wu f1, t1, dyn",
+        "Convert float from unsigned integer: Assigns the value of t1 to f1",
+        BasicInstructionFormat.I_FORMAT,
+        "1101000 00001 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val converted = Float32.fromBigInteger(
-                registerFile.getIntValue(statement.getOperand(1))!!.lowerToULong().toBigInteger(),
+                registerFile.getInt(statement.getOperand(1))!!.lowerToULong()
+                    .toBigInteger(),
                 environment,
             )
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), converted.bits).bind()
+            fpRegisterFile.updateRegisterByNumberInt(
+                statement.getOperand(0),
+                converted.bits
+            ).bind()
         }
     }
 
 
     val FCVTWD = basicInstruction(
-        "fcvt.w.d t1, f1, dyn", "Convert integer from double: Assigns the value of f1 (rounded) to t1",
-        BasicInstructionFormat.I_FORMAT, "1100001 00000 sssss ttt fffff 1010011"
+        "fcvt.w.d t1, f1, dyn",
+        "Convert integer from double: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT,
+        "1100001 00000 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
             val output = input.toInt(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                output.toLong()
+            ).bind()
         }
     }
 
 
     val FCVTWS = basicInstruction(
-        "fcvt.w.s t1, f1, dyn", "Convert integer from float: Assigns the value of f1 (rounded) to t1",
-        BasicInstructionFormat.I_FORMAT, "1100000 00000 sssss ttt fffff 1010011"
+        "fcvt.w.s t1, f1, dyn",
+        "Convert integer from float: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT,
+        "1100000 00000 sssss ttt fffff 1010011"
     ) { statement ->
         either {
-            val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            val environment = Environment().apply {
+                mode = csrRegisterFile.getRoundingMode(
+                    statement.getOperand(2),
+                    statement
+                ).bind()
+            }
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
             val output = input.toInt(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                output.toLong()
+            ).bind()
         }
     }
 
 
     val FCVTWUD = basicInstruction(
-        "fcvt.wu.d t1, f1, dyn", "Convert unsinged integer from double: Assigns the value of f1 (rounded) to t1",
-        BasicInstructionFormat.I_FORMAT, "1100001 00001 sssss ttt fffff 1010011"
+        "fcvt.wu.d t1, f1, dyn",
+        "Convert unsinged integer from double: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT,
+        "1100001 00001 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val input = fpRegisterFile.getFloat64(statement.getOperand(1))
             val output = input.toUInt(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                output.toInt().toLong(),
+            ).bind()
         }
     }
 
 
     val FCVTWUS = basicInstruction(
-        "fcvt.wu.s t1, f1, dyn", "Convert unsinged integer from float: Assigns the value of f1 (rounded) to t1",
-        BasicInstructionFormat.I_FORMAT, "1100000 00001 sssss ttt fffff 1010011"
+        "fcvt.wu.s t1, f1, dyn",
+        "Convert unsinged integer from float: Assigns the value of f1 (rounded) to t1",
+        BasicInstructionFormat.I_FORMAT,
+        "1100000 00001 sssss ttt fffff 1010011"
     ) { statement ->
         either {
             val environment = Environment()
-            environment.mode = csrRegisterFile.getRoundingMode(statement.getOperand(2), statement).bind()
+            environment.mode = csrRegisterFile.getRoundingMode(
+                statement.getOperand(2),
+                statement
+            ).bind()
             val input = fpRegisterFile.getFloat32(statement.getOperand(1))
             val output = input.toUInt(environment, false)
             csrRegisterFile.setfflags(environment).bind()
-            registerFile.updateRegisterByNumber(statement.getOperand(0), output.toLong()).bind()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                output.toInt().toLong()
+            ).bind()
         }
     }
 
@@ -538,8 +700,10 @@ object BasicInstructions {
 
 
     val FENCEI = basicInstruction(
-        "fence.i", "Ensure that stores to instruction memory are visible to instruction fetches",
-        BasicInstructionFormat.I_FORMAT, "0000 0000 0000 00000 001 00000 0001111"
+        "fence.i",
+        "Ensure that stores to instruction memory are visible to instruction fetches",
+        BasicInstructionFormat.I_FORMAT,
+        "0000 0000 0000 00000 001 00000 0001111"
     ) {
         // Do nothing, currently all stores are immediately available to instruction
         // fetches
@@ -548,31 +712,41 @@ object BasicInstructions {
 
 
     val FEQD = basicInstruction(
-        "feq.d t1, f1, f2", "Floating EQuals (64 bit): if f1 = f2, set t1 to 1, else set t1 to 0",
-        BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 010 fffff 1010011"
+        "feq.d t1, f1, f2",
+        "Floating EQuals (64 bit): if f1 = f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT,
+        "1010001 ttttt sssss 010 fffff 1010011"
     ) { statement ->
-        val f1 = Float64(fpRegisterFile.getLongValue(statement.getOperand(1))!!)
-        val f2 = Float64(fpRegisterFile.getLongValue(statement.getOperand(2))!!)
+        val f1 = Float64(fpRegisterFile.getLong(statement.getOperand(1))!!)
+        val f2 = Float64(fpRegisterFile.getLong(statement.getOperand(2))!!)
         val environment = Environment()
         val result = environment.compareQuietEqual(f1, f2)
         val newValue = if (result) 1L else 0L
         csrRegisterFile.setfflags(environment).flatMap {
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                newValue
+            ).ignoreOk()
         }
     }
 
 
     val FEQS = basicInstruction(
-        "feq.s t1, f1, f2", "Floating EQuals: if f1 = f2, set t1 to 1, else set t1 to 0",
-        BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 010 fffff 1010011"
+        "feq.s t1, f1, f2",
+        "Floating EQuals: if f1 = f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT,
+        "1010000 ttttt sssss 010 fffff 1010011"
     ) { statement ->
-        val f1 = Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!)
-        val f2 = Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!)
+        val f1 = Float32(fpRegisterFile.getInt(statement.getOperand(1))!!)
+        val f2 = Float32(fpRegisterFile.getInt(statement.getOperand(2))!!)
         val environment = Environment()
         val result = environment.compareQuietEqual(f1, f2)
         val newValue = if (result) 1L else 0L
         csrRegisterFile.setfflags(environment).flatMap {
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                newValue
+            ).ignoreOk()
         }
     }
 
@@ -584,41 +758,54 @@ object BasicInstructions {
         val upperImmediate = (statement.getOperand(1) shl 20) shr 20
         either {
             val value = memory.getDoubleWord(
-                registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate
+                registerFile.getInt(statement.getOperand(2))!! + upperImmediate
             ).mapLeft { error ->
                 SimulationError.create(statement, error)
             }.bind()
-            fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), value).bind()
+            fpRegisterFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                value
+            ).bind()
         }
     }
 
 
     val FLED = basicInstruction(
-        "fle.d t1, f1, f2", "Floating Less than or Equals (64 bit): if f1 <= f2, set t1 to 1, else set t1 to 0",
-        BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 000 fffff 1010011"
+        "fle.d t1, f1, f2",
+        "Floating Less than or Equals (64 bit): if f1 <= f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT,
+        "1010001 ttttt sssss 000 fffff 1010011"
     ) { statement ->
-        val f1 = Float64(fpRegisterFile.getLongValue(statement.getOperand(1))!!)
-        val f2 = Float64(fpRegisterFile.getLongValue(statement.getOperand(2))!!)
+        val f1 = Float64(fpRegisterFile.getLong(statement.getOperand(1))!!)
+        val f2 = Float64(fpRegisterFile.getLong(statement.getOperand(2))!!)
         val environment = Environment()
         val result = environment.compareSignalingLessThanEqual(f1, f2)
         val newValue = if (result) 1L else 0L
         csrRegisterFile.setfflags(environment).flatMap {
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                newValue
+            ).ignoreOk()
         }
     }
 
 
     val FLES = basicInstruction(
-        "fle.s t1, f1, f2", "Floating Less than or Equals: if f1 <= f2, set t1 to 1, else set t1 to 0",
-        BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 000 fffff 1010011"
+        "fle.s t1, f1, f2",
+        "Floating Less than or Equals: if f1 <= f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT,
+        "1010000 ttttt sssss 000 fffff 1010011"
     ) { statement ->
-        val f1 = Float32(fpRegisterFile.getIntValue(statement.getOperand(1))!!)
-        val f2 = Float32(fpRegisterFile.getIntValue(statement.getOperand(2))!!)
+        val f1 = Float32(fpRegisterFile.getInt(statement.getOperand(1))!!)
+        val f2 = Float32(fpRegisterFile.getInt(statement.getOperand(2))!!)
         val environment = Environment()
         val result = environment.compareSignalingLessThanEqual(f1, f2)
         val newValue = if (result) 1L else 0L
         csrRegisterFile.setfflags(environment).flatMap {
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                newValue
+            ).ignoreOk()
         }
 
     }
@@ -627,8 +814,10 @@ object BasicInstructions {
 
 
     val FLTD = basicInstruction(
-        "flt.d t1, f1, f2", "Floating Less Than (64 bit): if f1 < f2, set t1 to 1, else set t1 to 0",
-        BasicInstructionFormat.R_FORMAT, "1010001 ttttt sssss 001 fffff 1010011"
+        "flt.d t1, f1, f2",
+        "Floating Less Than (64 bit): if f1 < f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT,
+        "1010001 ttttt sssss 001 fffff 1010011"
     ) { statement ->
         val f1 = fpRegisterFile.getFloat64(statement.getOperand(1))
         val f2 = fpRegisterFile.getFloat64(statement.getOperand(2))
@@ -637,14 +826,19 @@ object BasicInstructions {
         either {
             csrRegisterFile.setfflags(environment).bind()
             val newValue = if (result) 1L else 0L
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).bind()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                newValue
+            ).bind()
         }
     }
 
 
     val FLTS = basicInstruction(
-        "flt.s t1, f1, f2", "Floating Less Than: if f1 < f2, set t1 to 1, else set t1 to 0",
-        BasicInstructionFormat.R_FORMAT, "1010000 ttttt sssss 001 fffff 1010011"
+        "flt.s t1, f1, f2",
+        "Floating Less Than: if f1 < f2, set t1 to 1, else set t1 to 0",
+        BasicInstructionFormat.R_FORMAT,
+        "1010000 ttttt sssss 001 fffff 1010011"
     ) { statement ->
         val f1 = fpRegisterFile.getFloat32(statement.getOperand(1))
         val f2 = fpRegisterFile.getFloat32(statement.getOperand(2))
@@ -653,7 +847,10 @@ object BasicInstructions {
         either {
             csrRegisterFile.setfflags(environment).bind()
             val newValue = if (result) 1L else 0L
-            registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).bind()
+            registerFile.updateRegisterByNumber(
+                statement.getOperand(0),
+                newValue
+            ).bind()
         }
     }
 
@@ -663,50 +860,72 @@ object BasicInstructions {
         BasicInstructionFormat.I_FORMAT, "ssssssssssss ttttt 010 fffff 0000111"
     ) { statement ->
         val upperImmediate = (statement.getOperand(1) shl 20) shr 20
-        val valueAddress = registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate
+        val valueAddress =
+            registerFile.getInt(statement.getOperand(2))!! + upperImmediate
         either {
-            val memoryWord = memory
-                .getWord(valueAddress)
-                .mapLeft { SimulationError.create(statement, it) }
-                .bind()
-            fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), memoryWord).bind()
+            val memoryWord = memory.getWord(valueAddress).mapLeft {
+                SimulationError.create(statement, it)
+            }.bind()
+            fpRegisterFile.updateRegisterByNumberInt(
+                statement.getOperand(0),
+                memoryWord
+            ).bind()
         }
     }
 
 
     val FMVDX = basicInstruction(
-        "fmv.d.x f1, t1", "Move float: move bits representing a double from an 64 bit integer register",
-        BasicInstructionFormat.I_FORMAT, "1111001 00000 sssss 000 fffff 1010011"
+        "fmv.d.x f1, t1",
+        "Move float: move bits representing a double from an 64 bit integer register",
+        BasicInstructionFormat.I_FORMAT,
+        "1111001 00000 sssss 000 fffff 1010011"
     ) { statement ->
-        val newValue = registerFile.getLongValue(statement.getOperand(1))!!
-        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+        val newValue = registerFile.getLong(statement.getOperand(1))!!
+        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), newValue)
+            .ignoreOk()
     }
 
 
     val FMVSX = basicInstruction(
-        "fmv.s.x f1, t1", "Move float: move bits representing a float from an integer register",
-        BasicInstructionFormat.I_FORMAT, "1111000 00000 sssss 000 fffff 1010011"
+        "fmv.s.x f1, t1",
+        "Move float: move bits representing a float from an integer register",
+        BasicInstructionFormat.I_FORMAT,
+        "1111000 00000 sssss 000 fffff 1010011"
     ) { statement ->
-        val newValue = registerFile.getIntValue(statement.getOperand(1))!!
-        fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), newValue).ignoreOk()
+        val newValue = registerFile.getInt(statement.getOperand(1))!!
+        fpRegisterFile.updateRegisterByNumberInt(
+            statement.getOperand(0),
+            newValue
+        ).ignoreOk()
     }
 
 
     val FMVXD = basicInstruction(
-        "fmv.x.d t1, f1", "Move double: move bits representing a double to an 64 bit integer register",
-        BasicInstructionFormat.I_FORMAT, "1110001 00000 sssss 000 fffff 1010011"
+        "fmv.x.d t1, f1",
+        "Move double: move bits representing a double to an 64 bit integer register",
+        BasicInstructionFormat.I_FORMAT,
+        "1110001 00000 sssss 000 fffff 1010011"
     ) { statement ->
-        val newValue = fpRegisterFile.getLongValue(statement.getOperand(1))!!.toLong()
-        registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+        val newValue =
+            fpRegisterFile.getLong(statement.getOperand(1))!!.toLong()
+        registerFile.updateRegisterByNumber(statement.getOperand(0), newValue)
+            .ignoreOk()
     }
 
 
     val FMVXS = basicInstruction(
-        "fmv.x.s t1, f1", "Move float: move bits representing a float to an integer register",
-        BasicInstructionFormat.I_FORMAT, "1110000 00000 sssss 000 fffff 1010011"
+        "fmv.x.s t1, f1",
+        "Move float: move bits representing a float to an integer register",
+        BasicInstructionFormat.I_FORMAT,
+        "1110000 00000 sssss 000 fffff 1010011"
     ) { statement ->
-        val newValue = fpRegisterFile.getLongValue(statement.getOperand(1))!!.toLong()
-        registerFile.updateRegisterByNumber(statement.getOperand(0), newValue).ignoreOk()
+        val newValue =
+            fpRegisterFile.getLong(statement.getOperand(1))!!.toInt()
+        registerFile.updateRegisterByNumber(
+            statement.getOperand(0),
+            newValue.toLong()
+        )
+            .ignoreOk()
     }
 
 
@@ -715,8 +934,9 @@ object BasicInstructions {
         BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 011 sssss 0100111"
     ) { statement ->
         val upperImmediate = (statement.getOperand(1) shl 20) shr 20
-        val address = registerFile.getIntValue(statement.getOperand(2))!! + upperImmediate
-        val value = fpRegisterFile.getLongValue(statement.getOperand(0))!!
+        val address =
+            registerFile.getInt(statement.getOperand(2))!! + upperImmediate
+        val value = fpRegisterFile.getLong(statement.getOperand(0))!!
 
         memory.setDoubleWord(address, value).mapLeft { error ->
             SimulationError.create(statement, error)
@@ -731,9 +951,11 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT,
         "0010001 ttttt sssss 000 fffff 1010011"
     ) { statement ->
-        val result = ((fpRegisterFile.getLongValue(statement.getOperand(1))!! and Long.MAX_VALUE)
-            or (fpRegisterFile.getLongValue(statement.getOperand(2))!! and Long.MIN_VALUE))
-        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result).ignoreOk()
+        val result =
+            ((fpRegisterFile.getLong(statement.getOperand(1))!! and Long.MAX_VALUE)
+                or (fpRegisterFile.getLong(statement.getOperand(2))!! and Long.MIN_VALUE))
+        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result)
+            .ignoreOk()
     }
 
 
@@ -744,9 +966,11 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT,
         "0010001 ttttt sssss 001 fffff 1010011"
     ) { statement ->
-        val result = ((fpRegisterFile.getLongValue(statement.getOperand(1))!! and Long.MAX_VALUE)
-            or ((fpRegisterFile.getLongValue(statement.getOperand(2))!!).inv() and Long.MIN_VALUE))
-        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result).ignoreOk()
+        val result =
+            ((fpRegisterFile.getLong(statement.getOperand(1))!! and Long.MAX_VALUE)
+                or ((fpRegisterFile.getLong(statement.getOperand(2))!!).inv() and Long.MIN_VALUE))
+        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result)
+            .ignoreOk()
     }
 
 
@@ -757,9 +981,13 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT,
         "0010000 ttttt sssss 001 fffff 1010011"
     ) { statement ->
-        val result = ((fpRegisterFile.getIntValue(statement.getOperand(1))!! and 0x7FFFFFFF)
-            or ((fpRegisterFile.getIntValue(statement.getOperand(2))!!).inv() and -0x80000000))
-        fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result)
+        val result =
+            ((fpRegisterFile.getInt(statement.getOperand(1))!! and 0x7FFFFFFF)
+                or ((fpRegisterFile.getInt(statement.getOperand(2))!!).inv() and -0x80000000))
+        fpRegisterFile.updateRegisterByNumberInt(
+            statement.getOperand(0),
+            result
+        )
     }
 
 
@@ -768,9 +996,13 @@ object BasicInstructions {
         "Floating point sign injection: replace the sign bit of f2 with the sign bit of f3 and assign it to f1",
         BasicInstructionFormat.R_FORMAT, "0010000 ttttt sssss 000 fffff 1010011"
     ) { statement ->
-        val result = ((fpRegisterFile.getIntValue(statement.getOperand(1))!! and 0x7FFFFFFF)
-            or (fpRegisterFile.getIntValue(statement.getOperand(2))!! and -0x80000000))
-        fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result)
+        val result =
+            ((fpRegisterFile.getInt(statement.getOperand(1))!! and 0x7FFFFFFF)
+                or (fpRegisterFile.getInt(statement.getOperand(2))!! and -0x80000000))
+        fpRegisterFile.updateRegisterByNumberInt(
+            statement.getOperand(0),
+            result
+        )
     }
 
 
@@ -781,10 +1013,12 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT,
         "0010001 ttttt sssss 010 fffff 1010011"
     ) { statement ->
-        val f2 = fpRegisterFile.getLongValue(statement.getOperand(1))!!
-        val f3 = fpRegisterFile.getLongValue(statement.getOperand(2))!!
-        val result = (f2 and 0x7FFFFFFF_FFFFFFFFL) or ((f2 xor f3) and Long.MIN_VALUE)
-        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result).ignoreOk()
+        val f2 = fpRegisterFile.getLong(statement.getOperand(1))!!
+        val f3 = fpRegisterFile.getLong(statement.getOperand(2))!!
+        val result =
+            (f2 and 0x7FFFFFFF_FFFFFFFFL) or ((f2 xor f3) and Long.MIN_VALUE)
+        fpRegisterFile.updateRegisterByNumber(statement.getOperand(0), result)
+            .ignoreOk()
     }
 
 
@@ -794,16 +1028,21 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT,
         "0010000 ttttt sssss 010 fffff 1010011"
     ) { statement ->
-        val f2 = fpRegisterFile.getIntValue(statement.getOperand(1))!!
-        val f3 = fpRegisterFile.getIntValue(statement.getOperand(2))!!
+        val f2 = fpRegisterFile.getInt(statement.getOperand(1))!!
+        val f3 = fpRegisterFile.getInt(statement.getOperand(2))!!
         val result = (f2 and 0x7FFFFFFF) or ((f2 xor f3) and -0x80000000)
-        fpRegisterFile.updateRegisterByNumberInt(statement.getOperand(0), result)
+        fpRegisterFile.updateRegisterByNumberInt(
+            statement.getOperand(0),
+            result
+        )
     }
 
 
     val FSQRTD = basicInstruction(
-        "fsqrt.d f1, f2, dyn", "Floating SQuare RooT (64 bit): Assigns f1 to the square root of f2",
-        BasicInstructionFormat.I_FORMAT, "0101101 00000 sssss ttt fffff 1010011"
+        "fsqrt.d f1, f2, dyn",
+        "Floating SQuare RooT (64 bit): Assigns f1 to the square root of f2",
+        BasicInstructionFormat.I_FORMAT,
+        "0101101 00000 sssss ttt fffff 1010011"
     ) { stmt ->
         either {
             val environment = Environment()
@@ -811,17 +1050,22 @@ object BasicInstructions {
                 stmt.getOperand(2),
                 stmt
             ).bind()
-            val registerValue = fpRegisterFile.getLongValue(stmt.getOperand(1))!!
+            val registerValue = fpRegisterFile.getLong(stmt.getOperand(1))!!
             val result = Float64.squareRoot(environment, Float64(registerValue))
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumber(stmt.getOperand(0), result.bits)
+            fpRegisterFile.updateRegisterByNumber(
+                stmt.getOperand(0),
+                result.bits
+            )
         }
     }
 
 
     val FSQRTS = basicInstruction(
-        "fsqrt.s f1, f2, dyn", "Floating SQuare RooT: Assigns f1 to the square root of f2",
-        BasicInstructionFormat.I_FORMAT, "0101100 00000 sssss ttt fffff 1010011"
+        "fsqrt.s f1, f2, dyn",
+        "Floating SQuare RooT: Assigns f1 to the square root of f2",
+        BasicInstructionFormat.I_FORMAT,
+        "0101100 00000 sssss ttt fffff 1010011"
     ) { stmt ->
         either {
             val environment = Environment()
@@ -829,10 +1073,13 @@ object BasicInstructions {
                 stmt.getOperand(2),
                 stmt
             ).bind()
-            val registerValue = fpRegisterFile.getIntValue(stmt.getOperand(1))!!
+            val registerValue = fpRegisterFile.getInt(stmt.getOperand(1))!!
             val result = Float32.squareRoot(environment, Float32(registerValue))
             csrRegisterFile.setfflags(environment).bind()
-            fpRegisterFile.updateRegisterByNumberInt(stmt.getOperand(0), result.bits)
+            fpRegisterFile.updateRegisterByNumberInt(
+                stmt.getOperand(0),
+                result.bits
+            )
         }
     }
 
@@ -842,8 +1089,8 @@ object BasicInstructions {
         BasicInstructionFormat.S_FORMAT, "sssssss fffff ttttt 010 sssss 0100111"
     ) { stmt ->
         val upperImmediate = (stmt.getOperand(1) shl 20) shr 20
-        val address = registerFile.getIntValue(stmt.getOperand(2))!! + upperImmediate
-        val value = fpRegisterFile.getLongValue(stmt.getOperand(0))!!.toInt()
+        val address = registerFile.getInt(stmt.getOperand(2))!! + upperImmediate
+        val value = fpRegisterFile.getLong(stmt.getOperand(0))!!.toInt()
         memory.setWord(address, value).mapLeft { error ->
             SimulationError.create(stmt, error)
         }.ignoreOk()
@@ -860,9 +1107,7 @@ object BasicInstructions {
             statement.getOperand(0),
             registerFile.programCounter.toLong()
         ).map {
-            registerFile.setProgramCounter(
-                registerFile.programCounter - BASIC_INSTRUCTION_LENGTH + statement.getOperand(1)
-            )
+            registerFile.programCounter += statement.getOperand(1) - BASIC_INSTRUCTION_LENGTH
         }
     }
 
@@ -875,13 +1120,14 @@ object BasicInstructions {
         "tttttttttttt sssss 000 fffff 1100111"
     ) { stmt ->
 
-        val target = registerFile.getIntValue(stmt.getOperand(1))!!
+        val target = registerFile.getInt(stmt.getOperand(1))!!
         registerFile.updateRegisterByNumber(
             stmt.getOperand(0),
             registerFile.programCounter.toLong()
         ).map {
             // Set PC = $t2 + immediate with the last bit set to 0
-            registerFile.setProgramCounter((target + ((stmt.getOperand(2) shl 20) shr 20)) and -0x2)
+            registerFile.programCounter =
+                (target + ((stmt.getOperand(2) shl 20) shr 20)) and -0x2
         }
     }
 
@@ -893,7 +1139,8 @@ object BasicInstructions {
         "ssssssssssssssssssss fffff 0110111"
     ) { stmt ->
         val shiftedValue = (stmt.getOperand(1) shl 12).toLong()
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), shiftedValue).ignoreOk()
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), shiftedValue)
+            .ignoreOk()
     }
 
 
@@ -902,11 +1149,12 @@ object BasicInstructions {
         "Shift left logical : Set t1 to result of shifting t2 left by number of bits specified by immediate",
         BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 001 fffff 0010011"
     ) { stmt ->
-        val newValue = Integer.toUnsignedLong(
-            registerFile.getIntValue(stmt.getOperand(1))!!
-                shl stmt.getOperand(2)
-        )
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
+        val newValue =
+            registerFile.getInt(stmt.getOperand(1))!!.shl(
+                stmt.getOperand(2)
+            ).toULong().toLong()
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue)
+            .ignoreOk()
     }
 
 
@@ -915,8 +1163,10 @@ object BasicInstructions {
         "Shift left logical : Set t1 to result of shifting t2 left by number of bits specified by immediate",
         BasicInstructionFormat.R_FORMAT, "000000 tttttt sssss 001 fffff 0010011"
     ) { stmt ->
-        val newValue: Long = registerFile.getLongValue(stmt.getOperand(1))!! shl stmt.getOperand(2)
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
+        val newValue: Long =
+            registerFile.getLong(stmt.getOperand(1))!! shl stmt.getOperand(2)
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue)
+            .ignoreOk()
     }
 
 
@@ -927,10 +1177,12 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 001 fffff 0011011"
     ) { stmt ->
         // Copy from SLLI
-        val newValue = (registerFile.getIntValue(stmt.getOperand(1))!! shl stmt.getOperand(
-            2
-        )).toLong()
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
+        val newValue =
+            (registerFile.getInt(stmt.getOperand(1))!! shl stmt.getOperand(
+                2
+            )).toLong()
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue)
+            .ignoreOk()
     }
 
     val SRAI32 = basicInstruction(
@@ -940,8 +1192,10 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0010011"
     ) { stmt ->
         // Uses >> because sign fill
-        val newValue = (registerFile.getIntValue(stmt.getOperand(1))!! shr stmt.getOperand(2)).toLong()
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
+        val newValue =
+            (registerFile.getInt(stmt.getOperand(1))!! shr stmt.getOperand(2)).toLong()
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue)
+            .ignoreOk()
 
     }
 
@@ -952,8 +1206,10 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT, "010000 tttttt sssss 101 fffff 0010011"
     ) { stmt ->
         // Uses >> because sign fill
-        val shifted = registerFile.getLongValue(stmt.getOperand(1))!! shr stmt.getOperand(2)
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), shifted).ignoreOk()
+        val shifted =
+            registerFile.getLong(stmt.getOperand(1))!! shr stmt.getOperand(2)
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), shifted)
+            .ignoreOk()
     }
 
     val SRAIW = basicInstruction(
@@ -963,8 +1219,10 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT, "0100000 ttttt sssss 101 fffff 0011011"
     ) { stmt ->
         // Use the code directly from SRAI
-        val newValue = (registerFile.getIntValue(stmt.getOperand(1))!! shr stmt.getOperand(2)).toLong()
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
+        val newValue =
+            (registerFile.getInt(stmt.getOperand(1))!! shr stmt.getOperand(2)).toLong()
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue)
+            .ignoreOk()
     }
 
 
@@ -974,8 +1232,10 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 101 fffff 0010011"
     ) { stmt ->
         // Uses >>> because 0 fill
-        val newValue = (registerFile.getIntValue(stmt.getOperand(1))!! ushr stmt.getOperand(2)).toLong()
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
+        val newValue =
+            (registerFile.getInt(stmt.getOperand(1))!! ushr stmt.getOperand(2)).toLong()
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue)
+            .ignoreOk()
     }
 
     val SRLI64 = basicInstruction(
@@ -984,9 +1244,10 @@ object BasicInstructions {
         BasicInstructionFormat.R_FORMAT, "000000 tttttt sssss 101 fffff 0010011"
     ) { stmt ->
         // Uses >>> because 0 fill
-        val value: Long? = registerFile.getLongValue(stmt.getOperand(1))
+        val value: Long? = registerFile.getLong(stmt.getOperand(1))
         val shifted = value!! ushr stmt.getOperand(2)
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), shifted).ignoreOk()
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), shifted)
+            .ignoreOk()
     }
 
     val SRLIW = basicInstruction(
@@ -995,8 +1256,10 @@ object BasicInstructions {
             "immediate",
         BasicInstructionFormat.R_FORMAT, "0000000 ttttt sssss 101 fffff 0011011"
     ) { stmt ->
-        val newValue = (registerFile.getIntValue(stmt.getOperand(1))!! ushr stmt.getOperand(2)).toLong()
-        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue).ignoreOk()
+        val newValue =
+            (registerFile.getInt(stmt.getOperand(1))!! ushr stmt.getOperand(2)).toLong()
+        registerFile.updateRegisterByNumber(stmt.getOperand(0), newValue)
+            .ignoreOk()
     }
 
 
@@ -1005,17 +1268,18 @@ object BasicInstructions {
         BasicInstructionFormat.I_FORMAT, "000000000010 00000 000 00000 1110011"
     ) { stmt ->
         either {
-            val upie = (csrRegisterFile.getIntValue("ustatus")!! and 0x10) == 0x10
+            val upie = (csrRegisterFile.getInt("ustatus")!! and 0x10) == 0x10
             // Clear UPIE
             csrRegisterFile.updateRegisterByName(
                 "ustatus",
-                csrRegisterFile.getLongValue("ustatus")!! and 0x10L.inv()
+                csrRegisterFile.getLong("ustatus")!! and 0x10L.inv()
             ).bind()
-            val newUstatusValue = csrRegisterFile.getLongValue("ustatus")!!.let {
+            val newUstatusValue = csrRegisterFile.getLong("ustatus")!!.let {
                 if (upie) it or 0x1L else it and 0x1L.inv()
             }
-            csrRegisterFile.updateRegisterByName("ustatus", newUstatusValue).bind()
-            registerFile.setProgramCounter(csrRegisterFile.getIntValue("uepc")!!)
+            csrRegisterFile.updateRegisterByName("ustatus", newUstatusValue)
+                .bind()
+            registerFile.programCounter = csrRegisterFile.getInt("uepc")!!
         }
     }
 
@@ -1056,3 +1320,6 @@ private fun <T : Floating<T>> RegisterFile.fclass(
     }
     return updateRegisterByNumber(registerNumber, newValue.toLong()).ignoreOk()
 }
+
+private suspend inline fun <T, R> T.runSuspend(block: suspend T.() -> R): R =
+    block()

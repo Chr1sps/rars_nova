@@ -12,11 +12,13 @@ enum class EventReason(val value: Int) {
     STORE_ADDRESS_MISALIGNED(6),
     STORE_ACCESS_FAULT(7),
     ENVIRONMENT_CALL(8),
-    OTHER(-1);
-
-    val isInterrupt
-        get() = when (this) {
-            SOFTWARE_INTERRUPT, TIMER_INTERRUPT, EXTERNAL_INTERRUPT -> true
-            else -> false
-        }
+    OTHER(-1)
 }
+
+val EventReason.isInterrupt: Boolean
+    get() = when (this) {
+        EventReason.SOFTWARE_INTERRUPT,
+        EventReason.TIMER_INTERRUPT,
+        EventReason.EXTERNAL_INTERRUPT -> true
+        else -> false
+    }
