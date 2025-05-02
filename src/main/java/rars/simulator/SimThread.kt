@@ -382,12 +382,14 @@ open class SimThread(
                 val doContinue = either {
                     val instruction = statement.instruction as BasicInstruction?
                     ensureNotNull(instruction) {
-                        SimulationError.create(
-                            statement,
-                            ("undefined instruction (" + statement.binaryStatement.toHexStringWithPrefix()
-                                + ")"),
-                            EventReason.ILLEGAL_INSTRUCTION
-                        )
+                        with(context) {
+                            SimulationError.create(
+                                statement,
+                                ("undefined instruction (" + statement.binaryStatement.toHexStringWithPrefix()
+                                    + ")"),
+                                EventReason.ILLEGAL_INSTRUCTION
+                            )
+                        }
                     }
                     Globals.REGISTER_FILE.incrementPC(instruction.instructionLength)
                     instruction.run {

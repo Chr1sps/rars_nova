@@ -1,8 +1,8 @@
 package rars.settings
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import rars.Globals
+import rars.logging.RARSLogging
+import rars.logging.error
 import rars.riscv.hardware.memory.AbstractMemoryConfiguration
 import rars.riscv.hardware.memory.MemoryConfiguration
 import rars.util.ListenerDispatcher
@@ -22,7 +22,10 @@ interface OtherSettings {
          * @return true if backstepping is permitted, false otherwise.
          */
         @get: JvmStatic
-        @Deprecated("To be replaced with something non-static.", level = DeprecationLevel.WARNING)
+        @Deprecated(
+            "To be replaced with something non-static.",
+            level = DeprecationLevel.WARNING
+        )
         val isBacksteppingEnabled: Boolean get() = Globals.PROGRAM?.backStepper?.isEnabled == true
     }
 
@@ -52,7 +55,8 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
     init {
         labelSortState = preferences.getInt(OTHER_PREFIX + SORT_STATE, 0)
         memoryConfiguration = loadMemoryConfiguration()
-        caretBlinkRate = preferences.getInt(OTHER_PREFIX + CARET_BLINK_RATE, 500)
+        caretBlinkRate =
+            preferences.getInt(OTHER_PREFIX + CARET_BLINK_RATE, 500)
         editorTabSize = preferences.getInt(OTHER_PREFIX + EDITOR_TAB_SIZE, 4)
         exceptionHandler = preferences.get(OTHER_PREFIX + EXCEPTION_HANDLER, "")
     }
@@ -60,7 +64,10 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
     fun setMemoryConfigurationAndSave(memoryConfiguration: AbstractMemoryConfiguration<Int>) {
         if (this.memoryConfiguration != memoryConfiguration) {
             this.memoryConfiguration = memoryConfiguration
-            this.preferences.put(OTHER_PREFIX + MEMORY_CONFIGURATION, this.memoryConfiguration.identifier)
+            this.preferences.put(
+                OTHER_PREFIX + MEMORY_CONFIGURATION,
+                this.memoryConfiguration.identifier
+            )
             this.commitChanges()
         }
     }
@@ -68,7 +75,10 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
     fun setExceptionHandlerAndSave(exceptionHandler: String) {
         if (this.exceptionHandler != exceptionHandler) {
             this.exceptionHandler = exceptionHandler
-            this.preferences.put(OTHER_PREFIX + EXCEPTION_HANDLER, this.exceptionHandler)
+            this.preferences.put(
+                OTHER_PREFIX + EXCEPTION_HANDLER,
+                this.exceptionHandler
+            )
             this.commitChanges()
         }
     }
@@ -76,7 +86,10 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
     fun setLabelSortStateAndSave(labelSortState: Int) {
         if (this.labelSortState != labelSortState) {
             this.labelSortState = labelSortState
-            this.preferences.putInt(OTHER_PREFIX + SORT_STATE, this.labelSortState)
+            this.preferences.putInt(
+                OTHER_PREFIX + SORT_STATE,
+                this.labelSortState
+            )
             this.commitChanges()
         }
     }
@@ -84,7 +97,10 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
     fun setCaretBlinkRateAndSave(caretBlinkRate: Int) {
         if (this.caretBlinkRate != caretBlinkRate) {
             this.caretBlinkRate = caretBlinkRate
-            this.preferences.putInt(OTHER_PREFIX + CARET_BLINK_RATE, this.caretBlinkRate)
+            this.preferences.putInt(
+                OTHER_PREFIX + CARET_BLINK_RATE,
+                this.caretBlinkRate
+            )
             this.commitChanges()
         }
     }
@@ -92,7 +108,10 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
     fun setEditorTabSizeAndSave(editorTabSize: Int) {
         if (this.editorTabSize != editorTabSize) {
             this.editorTabSize = editorTabSize
-            this.preferences.putInt(OTHER_PREFIX + EDITOR_TAB_SIZE, this.editorTabSize)
+            this.preferences.putInt(
+                OTHER_PREFIX + EDITOR_TAB_SIZE,
+                this.editorTabSize
+            )
             this.commitChanges()
         }
     }
@@ -117,7 +136,7 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
     }
 
     companion object {
-        private val LOGGER: Logger = LogManager.getLogger(OtherSettingsImpl::class.java)
+        private val LOGGER = RARSLogging.forClass(OtherSettingsImpl::class)
 
         // region Preferences keys
         private const val OTHER_PREFIX = "Other"

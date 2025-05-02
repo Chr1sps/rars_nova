@@ -1,7 +1,5 @@
 package rars.tools;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.assembler.DataTypes;
@@ -68,10 +66,12 @@ import static rars.util.UtilsKt.unwrap;
  * row.
  */
 public final class KeyboardAndDisplaySimulator extends AbstractTool {
-    public static final Dimension preferredTextAreaDimension = new Dimension(400, 200);
+    public static final Dimension preferredTextAreaDimension = new Dimension(
+        400,
+        200
+    );
     public static final int EXTERNAL_INTERRUPT_KEYBOARD = 0x00000040;
     public static final int EXTERNAL_INTERRUPT_DISPLAY = 0x00000080;
-    private static final Logger LOGGER = LogManager.getLogger(KeyboardAndDisplaySimulator.class);
     private static final String VERSION = "Version 1.4";
     private static final String HEADING = "Keyboard and Display MMIO Simulator";
     private static final char VT_FILL = ' '; // fill character for virtual terminal (random access mode)
@@ -131,14 +131,22 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
 
     // Have to preserve the value of Interrupt Enable bit (bit 1)
     private static boolean isReadyBitSet(final int mmioControlRegister) {
-        return (unwrap(Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE)) & 1) == 1;
+        return (
+            unwrap(Globals.MEMORY_INSTANCE.get(
+                mmioControlRegister,
+                DataTypes.WORD_SIZE
+            )) & 1
+        ) == 1;
     }
 
     // Return value of the given MMIO control register after ready (low order) bit
 
     // Have to preserve the value of Interrupt Enable bit (bit 1)
     private static int readyBitSet(final int mmioControlRegister) {
-        return unwrap(Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE)) | 1;
+        return unwrap(Globals.MEMORY_INSTANCE.get(
+            mmioControlRegister,
+            DataTypes.WORD_SIZE
+        )) | 1;
     }
 
     // Rest of the protected methods. These all override do-nothing methods
@@ -148,7 +156,10 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
     // Have to preserve the value of Interrupt Enable bit (bit 1). Bits 2 and higher
 
     private static int readyBitCleared(final int mmioControlRegister) {
-        return unwrap(Globals.MEMORY_INSTANCE.get(mmioControlRegister, DataTypes.WORD_SIZE)) & 2;
+        return unwrap(Globals.MEMORY_INSTANCE.get(
+            mmioControlRegister,
+            DataTypes.WORD_SIZE
+        )) & 2;
     }
 
     @Override
@@ -171,7 +182,8 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         KeyboardAndDisplaySimulator.TRANSMITTER_DATA = memoryMapBaseAddress + 12; // 0xffff000c; // display 
         // character in low-order byte
         KeyboardAndDisplaySimulator.displayPanelTitle =
-            "DISPLAY: Store to Transmitter Data " + BinaryUtilsKt.intToHexStringWithPrefix(KeyboardAndDisplaySimulator.TRANSMITTER_DATA);
+            "DISPLAY: Store to Transmitter Data " + BinaryUtilsKt.intToHexStringWithPrefix(
+                KeyboardAndDisplaySimulator.TRANSMITTER_DATA);
         KeyboardAndDisplaySimulator.keyboardPanelTitle = "KEYBOARD: Characters typed here are stored to Receiver Data "
             + BinaryUtilsKt.intToHexStringWithPrefix(KeyboardAndDisplaySimulator.RECEIVER_DATA);
     }
@@ -206,8 +218,14 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // TRANSMITTER_DATA.
         // Use the Globals.memory.addObserver() methods instead of inherited method to
         // achieve this.
-        this.addAsObserver(KeyboardAndDisplaySimulator.RECEIVER_DATA, KeyboardAndDisplaySimulator.RECEIVER_DATA);
-        this.addAsObserver(KeyboardAndDisplaySimulator.TRANSMITTER_DATA, KeyboardAndDisplaySimulator.TRANSMITTER_DATA);
+        this.addAsObserver(
+            KeyboardAndDisplaySimulator.RECEIVER_DATA,
+            KeyboardAndDisplaySimulator.RECEIVER_DATA
+        );
+        this.addAsObserver(
+            KeyboardAndDisplaySimulator.TRANSMITTER_DATA,
+            KeyboardAndDisplaySimulator.TRANSMITTER_DATA
+        );
         // We want to be notified of each instruction execution, because instruction
         // count is the
         // basis for delay in re-setting (literally) the TRANSMITTER_CONTROL register.
@@ -217,8 +235,10 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // TRANSMITTER_DATA.
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.addAsObserver(
-            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
-            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+                memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(
+                memoryConfiguration)
         );
     }
 
@@ -243,7 +263,11 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // that.
         // Major GUI components
         final JPanel keyboardAndDisplay = new JPanel(new BorderLayout());
-        final JSplitPane both = new JSplitPane(JSplitPane.VERTICAL_SPLIT, this.buildDisplay(), this.buildKeyboard());
+        final JSplitPane both = new JSplitPane(
+            JSplitPane.VERTICAL_SPLIT,
+            this.buildDisplay(),
+            this.buildKeyboard()
+        );
         both.setResizeWeight(0.5);
         keyboardAndDisplay.add(both);
         return keyboardAndDisplay;
@@ -261,7 +285,8 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         if (notice.address == KeyboardAndDisplaySimulator.RECEIVER_DATA && notice.accessType == AccessType.READ) {
             this.updateMMIOControl(
                 KeyboardAndDisplaySimulator.RECEIVER_CONTROL,
-                KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.RECEIVER_CONTROL)
+                KeyboardAndDisplaySimulator.readyBitCleared(
+                    KeyboardAndDisplaySimulator.RECEIVER_CONTROL)
             );
         }
         // The program has just written (stored) the transmitter (display) data
@@ -272,10 +297,12 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // is processing the character.
         // Also start an intruction counter that will simulate the delay of the slower
         // display device processing the character.
-        if (KeyboardAndDisplaySimulator.isReadyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL) && notice.address == KeyboardAndDisplaySimulator.TRANSMITTER_DATA && notice.accessType == AccessType.WRITE) {
+        if (KeyboardAndDisplaySimulator.isReadyBitSet(
+            KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL) && notice.address == KeyboardAndDisplaySimulator.TRANSMITTER_DATA && notice.accessType == AccessType.WRITE) {
             this.updateMMIOControl(
                 KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL,
-                KeyboardAndDisplaySimulator.readyBitCleared(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL)
+                KeyboardAndDisplaySimulator.readyBitCleared(
+                    KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL)
             );
             this.intWithCharacterToDisplay = notice.value;
             if (!this.displayAfterDelay) {
@@ -300,10 +327,15 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
                 }
                 this.countingInstructions = false;
                 final int updatedTransmitterControl =
-                    KeyboardAndDisplaySimulator.readyBitSet(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL);
-                this.updateMMIOControl(KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL, updatedTransmitterControl);
+                    KeyboardAndDisplaySimulator.readyBitSet(
+                        KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL);
+                this.updateMMIOControl(
+                    KeyboardAndDisplaySimulator.TRANSMITTER_CONTROL,
+                    updatedTransmitterControl
+                );
                 if (updatedTransmitterControl != 1) {
-                    Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_DISPLAY);
+                    Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(
+                        KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_DISPLAY);
                 }
             }
         }
@@ -360,12 +392,17 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
                         caretPosition++;
                         this.display.setCaretPosition(caretPosition);
                     }
-                    this.display.replaceRange("" + characterToDisplay, caretPosition, caretPosition + 1);
+                    this.display.replaceRange(
+                        "" + characterToDisplay,
+                        caretPosition,
+                        caretPosition + 1
+                    );
                 } catch (final IllegalArgumentException e) {
                     // tried to write off the end of the defined grid.
                     this.display.setCaretPosition(this.display.getCaretPosition() - 1);
                     this.display.replaceRange(
-                        "" + characterToDisplay, this.display.getCaretPosition(),
+                        "" + characterToDisplay,
+                        this.display.getCaretPosition(),
                         this.display.getCaretPosition() + 1
                     );
                 }
@@ -391,7 +428,8 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         this.initializeTransmitDelaySimulator();
         this.initializeDisplay(this.displayRandomAccessMode);
         this.keyEventAccepter.setText("");
-        ((TitledBorder) this.displayPanel.getBorder()).setTitle(KeyboardAndDisplaySimulator.displayPanelTitle);
+        ((TitledBorder) this.displayPanel.getBorder()).setTitle(
+            KeyboardAndDisplaySimulator.displayPanelTitle);
         this.displayPanel.repaint();
         this.keyEventAccepter.requestFocusInWindow();
         this.updateMMIOControl(
@@ -477,7 +515,10 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         // Estimate number of columns/rows of text that will fit in current window with
         // current font.
         // I subtract 1 because initial tests showed slight scroll otherwise.
-        return new Dimension(widthInPixels / charWidth - 1, heightInPixels / rowHeight - 1);
+        return new Dimension(
+            widthInPixels / charWidth - 1,
+            heightInPixels / rowHeight - 1
+        );
     }
 
     @Override
@@ -643,12 +684,22 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
                 // The following is necessary because there are different JDialog constructors
                 // for Dialog and
                 // Frame and theWindow is declared a Window, superclass for both.
-                final JDialog d = (KeyboardAndDisplaySimulator.this.theWindow instanceof Dialog) ?
-                    new JDialog((Dialog) KeyboardAndDisplaySimulator.this.theWindow, title, false)
-                    : new JDialog((Frame) KeyboardAndDisplaySimulator.this.theWindow, title, false);
+                final JDialog d = (KeyboardAndDisplaySimulator.this.theWindow instanceof Dialog)
+                    ?
+                    new JDialog(
+                        (Dialog) KeyboardAndDisplaySimulator.this.theWindow,
+                        title,
+                        false
+                    )
+                    : new JDialog(
+                        (Frame) KeyboardAndDisplaySimulator.this.theWindow,
+                        title,
+                        false
+                    );
                 d.setSize(ja.getPreferredSize());
                 d.getContentPane().setLayout(new BorderLayout());
-                d.getContentPane().add(new JScrollPane(ja), BorderLayout.CENTER);
+                d.getContentPane()
+                    .add(new JScrollPane(ja), BorderLayout.CENTER);
                 final JButton b = new JButton("Close");
                 b.addActionListener(
                     ev -> {
@@ -707,15 +758,17 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         this.displayPanel.add(displayScrollPane);
         final JPanel displayOptions = new JPanel();
         this.delayTechniqueChooser = new JComboBox<>(this.delayTechniques);
-        this.delayTechniqueChooser.setToolTipText("Technique for determining simulated transmitter device processing " +
-            "delay");
+        this.delayTechniqueChooser.setToolTipText(
+            "Technique for determining simulated transmitter device processing " +
+                "delay");
         this.delayTechniqueChooser.addActionListener(
             e -> KeyboardAndDisplaySimulator.this.transmitDelayInstructionCountLimit =
                 KeyboardAndDisplaySimulator.this.generateDelay());
         this.delayLengthPanel = new DelayLengthPanel();
         this.displayAfterDelayCheckBox = new JCheckBox("DAD", true);
         this.displayAfterDelayCheckBox
-            .setToolTipText("Display After Delay: if checked, transmitter data not displayed until after delay");
+            .setToolTipText(
+                "Display After Delay: if checked, transmitter data not displayed until after delay");
         this.displayAfterDelayCheckBox.addActionListener(
             e -> KeyboardAndDisplaySimulator.this.displayAfterDelay =
                 KeyboardAndDisplaySimulator.this.displayAfterDelayCheckBox.isSelected());
@@ -755,7 +808,13 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         final int controlAddr, final int controlValue, final int dataAddr,
         final int dataValue
     ) {
-        this.updateMMIOControlAndData(controlAddr, controlValue, dataAddr, dataValue, false);
+        this.updateMMIOControlAndData(
+            controlAddr,
+            controlValue,
+            dataAddr,
+            dataValue,
+            false
+        );
     }
 
     // This one does the work: update the MMIO Control and optionally the Data
@@ -769,9 +828,15 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         if (this.connectButton.isConnected()) {
             Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
-                unwrap(Globals.MEMORY_INSTANCE.setRawWord(controlAddr, controlValue));
+                unwrap(Globals.MEMORY_INSTANCE.setRawWord(
+                    controlAddr,
+                    controlValue
+                ));
                 if (!controlOnly) {
-                    unwrap(Globals.MEMORY_INSTANCE.setRawWord(dataAddr, dataValue));
+                    unwrap(Globals.MEMORY_INSTANCE.setRawWord(
+                        dataAddr,
+                        dataValue
+                    ));
                 }
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
@@ -781,8 +846,10 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             // it was written to poll the memory cells for their values. So we force it to
             // do so.
 
-            if (this.mainUI.mainPane.executePane.getTextSegment().getCodeHighlighting()) {
-                this.mainUI.mainPane.executePane.getDataSegment().updateValues();
+            if (this.mainUI.mainPane.executePane.getTextSegment()
+                .getCodeHighlighting()) {
+                this.mainUI.mainPane.executePane.getDataSegment()
+                    .updateValues();
             }
         }
     }
@@ -829,7 +896,8 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
 
     // Randomly pick value from range 1 to slider setting, uniform distribution
     // (each value has equal probability of being chosen).
-    private static class UniformlyDistributedDelay implements TransmitterDelayTechnique {
+    private static class UniformlyDistributedDelay
+        implements TransmitterDelayTechnique {
         final Random randu;
 
         public UniformlyDistributedDelay() {
@@ -855,7 +923,8 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
      * value, take absolute value to make sure we don't get negative,
      * add 1 to make sure we don't get 0.
      */
-    private static class NormallyDistributedDelay implements TransmitterDelayTechnique {
+    private static class NormallyDistributedDelay
+        implements TransmitterDelayTechnique {
         final Random randn;
 
         public NormallyDistributedDelay() {
@@ -887,14 +956,17 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         @Override
         public void keyTyped(final KeyEvent e) {
             final int updatedReceiverControl =
-                KeyboardAndDisplaySimulator.readyBitSet(KeyboardAndDisplaySimulator.RECEIVER_CONTROL);
+                KeyboardAndDisplaySimulator.readyBitSet(
+                    KeyboardAndDisplaySimulator.RECEIVER_CONTROL);
             KeyboardAndDisplaySimulator.this.updateMMIOControlAndData(
                 KeyboardAndDisplaySimulator.RECEIVER_CONTROL,
-                updatedReceiverControl, KeyboardAndDisplaySimulator.RECEIVER_DATA,
+                updatedReceiverControl,
+                KeyboardAndDisplaySimulator.RECEIVER_DATA,
                 e.getKeyChar() & 0x00000ff
             );
             if (updatedReceiverControl != 1) {
-                Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_KEYBOARD);
+                Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(
+                    KeyboardAndDisplaySimulator.EXTERNAL_INTERRUPT_KEYBOARD);
             }
         }
 
@@ -914,10 +986,51 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
         private final static int DELAY_INDEX_MAX = 40;
         private final static int DELAY_INDEX_INIT = 4;
         private final double[] delayTable = {
-            1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, // 0-10
-            150, 200, 300, 400, 500, 600, 700, 800, 900, 1000, // 11-20
-            1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, // 21-30
-            20000, 40000, 60000, 80000, 100000, 200000, 400000, 600000, 800000, 1000000// 31-40
+            1,
+            2,
+            3,
+            4,
+            5,
+            10,
+            20,
+            30,
+            40,
+            50,
+            100,
+            // 0-10
+            150,
+            200,
+            300,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900,
+            1000,
+            // 11-20
+            1500,
+            2000,
+            3000,
+            4000,
+            5000,
+            6000,
+            7000,
+            8000,
+            9000,
+            10000,
+            // 21-30
+            20000,
+            40000,
+            60000,
+            80000,
+            100000,
+            200000,
+            400000,
+            600000,
+            800000,
+            1000000
+// 31-40
         };
         private JLabel sliderLabel = null;
         private volatile int delayLengthIndex = DelayLengthPanel.DELAY_INDEX_INIT;
@@ -926,21 +1039,29 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
             super(new BorderLayout());
             KeyboardAndDisplaySimulator.this.delayLengthSlider = new JSlider(
                 JSlider.HORIZONTAL,
-                DelayLengthPanel.DELAY_INDEX_MIN, DelayLengthPanel.DELAY_INDEX_MAX,
+                DelayLengthPanel.DELAY_INDEX_MIN,
+                DelayLengthPanel.DELAY_INDEX_MAX,
                 DelayLengthPanel.DELAY_INDEX_INIT
             );
             KeyboardAndDisplaySimulator.this.delayLengthSlider.setSize(new Dimension(
                 100,
-                (int) KeyboardAndDisplaySimulator.this.delayLengthSlider.getSize().getHeight()
+                (int) KeyboardAndDisplaySimulator.this.delayLengthSlider.getSize()
+                    .getHeight()
             ));
-            KeyboardAndDisplaySimulator.this.delayLengthSlider.setMaximumSize(KeyboardAndDisplaySimulator.this.delayLengthSlider.getSize());
-            KeyboardAndDisplaySimulator.this.delayLengthSlider.addChangeListener(new DelayLengthListener());
+            KeyboardAndDisplaySimulator.this.delayLengthSlider.setMaximumSize(
+                KeyboardAndDisplaySimulator.this.delayLengthSlider.getSize());
+            KeyboardAndDisplaySimulator.this.delayLengthSlider.addChangeListener(
+                new DelayLengthListener());
             this.sliderLabel = new JLabel(this.setLabel(this.delayLengthIndex));
             this.sliderLabel.setHorizontalAlignment(JLabel.CENTER);
             this.sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             this.add(this.sliderLabel, BorderLayout.NORTH);
-            this.add(KeyboardAndDisplaySimulator.this.delayLengthSlider, BorderLayout.CENTER);
-            this.setToolTipText("Parameter for simulated delay length (instruction execution count)");
+            this.add(
+                KeyboardAndDisplaySimulator.this.delayLengthSlider,
+                BorderLayout.CENTER
+            );
+            this.setToolTipText(
+                "Parameter for simulated delay length (instruction execution count)");
         }
 
         // returns current delay length setting, in instructions.
@@ -964,7 +1085,8 @@ public final class KeyboardAndDisplaySimulator extends AbstractTool {
                     KeyboardAndDisplaySimulator.this.transmitDelayInstructionCountLimit =
                         KeyboardAndDisplaySimulator.this.generateDelay();
                 } else {
-                    DelayLengthPanel.this.sliderLabel.setText(DelayLengthPanel.this.setLabel(source.getValue()));
+                    DelayLengthPanel.this.sliderLabel.setText(DelayLengthPanel.this.setLabel(
+                        source.getValue()));
                 }
             }
         }

@@ -1,10 +1,10 @@
 package rars.tools;
 
 import kotlin.Unit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 import rars.notices.AccessType;
 import rars.riscv.hardware.registerfiles.CSRegisterFile;
 import rars.venus.VenusUI;
@@ -14,6 +14,7 @@ import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static rars.logging.LoggingKt.fatal;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress;
 import static rars.util.UtilsKt.unwrap;
 
@@ -21,7 +22,7 @@ import static rars.util.UtilsKt.unwrap;
  * A RARS tool used to implement a timing module and timer inturrpts.
  */
 public final class TimerTool extends AbstractTool {
-    private static final Logger LOGGER = LogManager.getLogger(TimerTool.class);
+    private static final RARSLogger LOGGER = RARSLogging.forJavaClass(TimerTool.class);
 
     private static final String HEADING = "Timer Tool";
     private static final String VERSION = "Version 1.0 (Zachary Selk)";
@@ -270,9 +271,11 @@ public final class TimerTool extends AbstractTool {
                 TimerTool.getTimeCmpAddress(),
                 TimerTool.getTimeCmpAddress() + 8
             ).onLeft(aee -> {
-                TimerTool.LOGGER.fatal(
-                    "Error while adding observer in Timer Tool");
+                fatal(LOGGER, () ->
+                    "Error while adding observer in Timer Tool: " + aee
+                );
                 System.exit(0);
+                // noinspection UnreachableCode
                 return Unit.INSTANCE;
             });
         }

@@ -1,10 +1,10 @@
 package rars.riscv
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import rars.Globals
 import rars.assembler.TokenList
 import rars.assembler.Tokenizer.Companion.tokenizeExampleInstruction
+import rars.logging.RARSLogging
+import rars.logging.error
 import rars.riscv.instructions.*
 import rars.settings.BoolSetting
 import java.io.BufferedReader
@@ -24,215 +24,220 @@ object InstructionsRegistry {
     private var initialized = false
 
     @JvmField
-    val BASIC_INSTRUCTIONS: SingleInstructionSet<BasicInstruction> = SingleInstructionSet<BasicInstruction>(
-        listOf(
-            // region Arithmetic
-            Arithmetic.ADD,
-            Arithmetic.AND,
-            Arithmetic.DIV,
-            Arithmetic.DIVU,
-            Arithmetic.MUL,
-            Arithmetic.MULH,
-            Arithmetic.MULHSU,
-            Arithmetic.MULHU,
-            Arithmetic.OR,
-            Arithmetic.REM,
-            Arithmetic.REMU,
-            Arithmetic.SLL,
-            Arithmetic.SLT,
-            Arithmetic.SLTU,
-            Arithmetic.SRA,
-            Arithmetic.SRL,
-            Arithmetic.SUB,
-            Arithmetic.XOR,
-            // endregion Arithmetic           
+    val BASIC_INSTRUCTIONS: SingleInstructionSet<BasicInstruction> =
+        SingleInstructionSet<BasicInstruction>(
+            listOf(
+                // region Arithmetic
+                Arithmetic.ADD,
+                Arithmetic.AND,
+                Arithmetic.DIV,
+                Arithmetic.DIVU,
+                Arithmetic.MUL,
+                Arithmetic.MULH,
+                Arithmetic.MULHSU,
+                Arithmetic.MULHU,
+                Arithmetic.OR,
+                Arithmetic.REM,
+                Arithmetic.REMU,
+                Arithmetic.SLL,
+                Arithmetic.SLT,
+                Arithmetic.SLTU,
+                Arithmetic.SRA,
+                Arithmetic.SRL,
+                Arithmetic.SUB,
+                Arithmetic.XOR,
+                // endregion Arithmetic           
 
-            // region Branch
-            Branch.BEQ,
-            Branch.BGE,
-            Branch.BGEU,
-            Branch.BLT,
-            Branch.BLTU,
-            Branch.BNE,
-            // endregion Branch
+                // region Branch
+                Branch.BEQ,
+                Branch.BGE,
+                Branch.BGEU,
+                Branch.BLT,
+                Branch.BLTU,
+                Branch.BNE,
+                // endregion Branch
 
-            // region Double
-            DoubleFloat.FADDD,
-            DoubleFloat.FDIVD,
-            DoubleFloat.FMAXD,
-            DoubleFloat.FMIND,
-            DoubleFloat.FMULD,
-            DoubleFloat.FSUBD,
-            // endregion Double
+                // region Double
+                DoubleFloat.FADDD,
+                DoubleFloat.FDIVD,
+                DoubleFloat.FMAXD,
+                DoubleFloat.FMIND,
+                DoubleFloat.FMULD,
+                DoubleFloat.FSUBD,
+                // endregion Double
 
-            // region Floating
-            Floating.FADDS,
-            Floating.FDIVS,
-            Floating.FMAXS,
-            Floating.FMINS,
-            Floating.FMULS,
-            Floating.FSUBS,
-            // endregion Floating
+                // region Floating
+                Floating.FADDS,
+                Floating.FDIVS,
+                Floating.FMAXS,
+                Floating.FMINS,
+                Floating.FMULS,
+                Floating.FSUBS,
+                // endregion Floating
 
-            // region FusedDouble
-            FusedDouble.FMADD,
-            FusedDouble.FMSUBD,
-            FusedDouble.FNMADDD,
-            FusedDouble.FNMSUBD,
-            // endregion FusedDouble
+                // region FusedDouble
+                FusedDouble.FMADD,
+                FusedDouble.FMSUBD,
+                FusedDouble.FNMADDD,
+                FusedDouble.FNMSUBD,
+                // endregion FusedDouble
 
-            // region FusedFloat
-            FusedFloat.FMADDS,
-            FusedFloat.FMSUBS,
-            FusedFloat.FNMADDS,
-            FusedFloat.FNMSUBS,
-            // endregion FusedFloat
+                // region FusedFloat
+                FusedFloat.FMADDS,
+                FusedFloat.FMSUBS,
+                FusedFloat.FNMADDS,
+                FusedFloat.FNMSUBS,
+                // endregion FusedFloat
 
-            // region ImmediateInstruction
-            ImmediateInstruction.ADDI,
-            ImmediateInstruction.ANDI,
-            ImmediateInstruction.ORI,
-            ImmediateInstruction.SLTI,
-            ImmediateInstruction.SLTIU,
-            ImmediateInstruction.XORI,
-            // endregion ImmediateInstruction
+                // region ImmediateInstruction
+                ImmediateInstruction.ADDI,
+                ImmediateInstruction.ANDI,
+                ImmediateInstruction.ORI,
+                ImmediateInstruction.SLTI,
+                ImmediateInstruction.SLTIU,
+                ImmediateInstruction.XORI,
+                // endregion ImmediateInstruction
 
-            // region Load
-            Load.LB,
-            Load.LBU,
-            Load.LH,
-            Load.LHU,
-            Load.LW,
-            // endregion Load
+                // region Load
+                Load.LB,
+                Load.LBU,
+                Load.LH,
+                Load.LHU,
+                Load.LW,
+                // endregion Load
 
-            // region Store
-            Store.SB,
-            Store.SH,
-            Store.SW,
-            // endregion Store
+                // region Store
+                Store.SB,
+                Store.SH,
+                Store.SW,
+                // endregion Store
 
-            // region Other
-            BasicInstructions.AUIPC,
-            BasicInstructions.CSRRC,
-            BasicInstructions.CSRRCI,
-            BasicInstructions.CSRRS,
-            BasicInstructions.CSRRSI,
-            BasicInstructions.CSRRW,
-            BasicInstructions.CSRRWI,
-            BasicInstructions.EBREAK,
-            BasicInstructions.ECALL,
-            BasicInstructions.FCLASSD,
-            BasicInstructions.FCLASSS,
-            BasicInstructions.FCVTDS,
-            BasicInstructions.FCVTDW,
-            BasicInstructions.FCVTDWU,
-            BasicInstructions.FCVTSD,
-            BasicInstructions.FCVTSW,
-            BasicInstructions.FCVTSWU,
-            BasicInstructions.FCVTWD,
-            BasicInstructions.FCVTWS,
-            BasicInstructions.FCVTWUD,
-            BasicInstructions.FCVTWUS,
-            BasicInstructions.FENCE,
-            BasicInstructions.FENCEI,
-            BasicInstructions.FEQD,
-            BasicInstructions.FEQS,
-            BasicInstructions.FLD,
-            BasicInstructions.FLED,
-            BasicInstructions.FLES,
-            BasicInstructions.FLTD,
-            BasicInstructions.FLTS,
-            BasicInstructions.FLW,
-            BasicInstructions.FMVSX,
-            BasicInstructions.FMVXS,
-            BasicInstructions.FSD,
-            BasicInstructions.FSGNJD,
-            BasicInstructions.FSGNJND,
-            BasicInstructions.FSGNJNS,
-            BasicInstructions.FSGNJS,
-            BasicInstructions.FSGNJXD,
-            BasicInstructions.FSGNJXS,
-            BasicInstructions.FSQRTD,
-            BasicInstructions.FSQRTS,
-            BasicInstructions.FSW,
-            BasicInstructions.JAL,
-            BasicInstructions.JALR,
-            BasicInstructions.LUI,
-            BasicInstructions.URET,
-            BasicInstructions.WFI
-            // endregion Other
-        ),
-        listOf(
-            BasicInstructions.SLLI32,
-            BasicInstructions.SRAI32,
-            BasicInstructions.SRLI32
-        ),
-        listOf(
-            // region ArithmeticW
-            ArithmeticW.ADDW,
-            ArithmeticW.DIVUW,
-            ArithmeticW.DIVW,
-            ArithmeticW.MULW,
-            ArithmeticW.REMUW,
-            ArithmeticW.REMW,
-            ArithmeticW.SLLW,
-            ArithmeticW.SRAW,
-            ArithmeticW.SRLW,
-            ArithmeticW.SUBW,
-            // endregion ArithmeticW
+                // region Other
+                BasicInstructions.AUIPC,
+                BasicInstructions.CSRRC,
+                BasicInstructions.CSRRCI,
+                BasicInstructions.CSRRS,
+                BasicInstructions.CSRRSI,
+                BasicInstructions.CSRRW,
+                BasicInstructions.CSRRWI,
+                BasicInstructions.EBREAK,
+                BasicInstructions.ECALL,
+                BasicInstructions.FCLASSD,
+                BasicInstructions.FCLASSS,
+                BasicInstructions.FCVTDS,
+                BasicInstructions.FCVTDW,
+                BasicInstructions.FCVTDWU,
+                BasicInstructions.FCVTSD,
+                BasicInstructions.FCVTSW,
+                BasicInstructions.FCVTSWU,
+                BasicInstructions.FCVTWD,
+                BasicInstructions.FCVTWS,
+                BasicInstructions.FCVTWUD,
+                BasicInstructions.FCVTWUS,
+                BasicInstructions.FENCE,
+                BasicInstructions.FENCEI,
+                BasicInstructions.FEQD,
+                BasicInstructions.FEQS,
+                BasicInstructions.FLD,
+                BasicInstructions.FLED,
+                BasicInstructions.FLES,
+                BasicInstructions.FLTD,
+                BasicInstructions.FLTS,
+                BasicInstructions.FLW,
+                BasicInstructions.FMVSX,
+                BasicInstructions.FMVXS,
+                BasicInstructions.FSD,
+                BasicInstructions.FSGNJD,
+                BasicInstructions.FSGNJND,
+                BasicInstructions.FSGNJNS,
+                BasicInstructions.FSGNJS,
+                BasicInstructions.FSGNJXD,
+                BasicInstructions.FSGNJXS,
+                BasicInstructions.FSQRTD,
+                BasicInstructions.FSQRTS,
+                BasicInstructions.FSW,
+                BasicInstructions.JAL,
+                BasicInstructions.JALR,
+                BasicInstructions.LUI,
+                BasicInstructions.URET,
+                BasicInstructions.WFI
+                // endregion Other
+            ),
+            listOf(
+                BasicInstructions.SLLI32,
+                BasicInstructions.SRAI32,
+                BasicInstructions.SRLI32
+            ),
+            listOf(
+                // region ArithmeticW
+                ArithmeticW.ADDW,
+                ArithmeticW.DIVUW,
+                ArithmeticW.DIVW,
+                ArithmeticW.MULW,
+                ArithmeticW.REMUW,
+                ArithmeticW.REMW,
+                ArithmeticW.SLLW,
+                ArithmeticW.SRAW,
+                ArithmeticW.SRLW,
+                ArithmeticW.SUBW,
+                // endregion ArithmeticW
 
-            // ImmediateInstruction
-            ImmediateInstruction.ADDIW,
+                // ImmediateInstruction
+                ImmediateInstruction.ADDIW,
 
-            // Load
-            Load.LD,
-            Load.LWU,
+                // Load
+                Load.LD,
+                Load.LWU,
 
-            // Store
-            Store.SD,
+                // Store
+                Store.SD,
 
-            // region Other
-            BasicInstructions.FCVTDL,
-            BasicInstructions.FCVTDLU,
-            BasicInstructions.FCVTLD,
-            BasicInstructions.FCVTLS,
-            BasicInstructions.FCVTLUD,
-            BasicInstructions.FCVTLUS,
-            BasicInstructions.FCVTSL,
-            BasicInstructions.FCVTSLU,
-            BasicInstructions.FMVDX,
-            BasicInstructions.FMVXD,
-            BasicInstructions.SLLI64,
-            BasicInstructions.SLLIW,
-            BasicInstructions.SRAI64,
-            BasicInstructions.SRAIW,
-            BasicInstructions.SRLI64,
-            BasicInstructions.SRLIW
-            // endregion Other
+                // region Other
+                BasicInstructions.FCVTDL,
+                BasicInstructions.FCVTDLU,
+                BasicInstructions.FCVTLD,
+                BasicInstructions.FCVTLS,
+                BasicInstructions.FCVTLUD,
+                BasicInstructions.FCVTLUS,
+                BasicInstructions.FCVTSL,
+                BasicInstructions.FCVTSLU,
+                BasicInstructions.FMVDX,
+                BasicInstructions.FMVXD,
+                BasicInstructions.SLLI64,
+                BasicInstructions.SLLIW,
+                BasicInstructions.SRAI64,
+                BasicInstructions.SRAIW,
+                BasicInstructions.SRLI64,
+                BasicInstructions.SRLIW
+                // endregion Other
+            )
         )
-    )
 
     @JvmField
-    val EXTENDED_INSTRUCTIONS: SingleInstructionSet<ExtendedInstruction> = SingleInstructionSet<ExtendedInstruction>(
-        loadPseudoInstructions("shared.txt"),
-        loadPseudoInstructions("rv32_only.txt"),
-        loadPseudoInstructions("rv64_only.txt")
-    )
+    val EXTENDED_INSTRUCTIONS: SingleInstructionSet<ExtendedInstruction> =
+        SingleInstructionSet<ExtendedInstruction>(
+            loadPseudoInstructions("shared.txt"),
+            loadPseudoInstructions("rv32_only.txt"),
+            loadPseudoInstructions("rv64_only.txt")
+        )
 
     @JvmField
-    val ALL_INSTRUCTIONS: SingleInstructionSet<Instruction> = SingleInstructionSet.Companion.concat<Instruction>(
-        BASIC_INSTRUCTIONS,
-        EXTENDED_INSTRUCTIONS /*, COMPRESSED_INSTRUCTIONS*/
-    )
+    val ALL_INSTRUCTIONS: SingleInstructionSet<Instruction> =
+        SingleInstructionSet.Companion.concat<Instruction>(
+            BASIC_INSTRUCTIONS,
+            EXTENDED_INSTRUCTIONS /*, COMPRESSED_INSTRUCTIONS*/
+        )
 
     private const val PSEUDO_OPS_PATH = "/pseudoOps/"
-    private val LOGGER: Logger = LogManager.getLogger(InstructionsRegistry::class.java)
+    private val LOGGER = RARSLogging.forClass(InstructionsRegistry::class)
 
     @JvmField
-    var RV64_MODE_FLAG: Boolean = Globals.BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)
+    var RV64_MODE_FLAG: Boolean =
+        Globals.BOOL_SETTINGS.getSetting(BoolSetting.RV64_ENABLED)
 
     private val R32_MATCH_MAPS = createMatchMaps(BASIC_INSTRUCTIONS.r32All)
-    private val R64_MATCH_MAPS: List<MatchMap> = createMatchMaps(BASIC_INSTRUCTIONS.r64All)
+    private val R64_MATCH_MAPS: List<MatchMap> =
+        createMatchMaps(BASIC_INSTRUCTIONS.r64All)
     private val tokenListMap: Map<Instruction, TokenList> = createTokenListMap()
 
     init {
@@ -249,13 +254,21 @@ object InstructionsRegistry {
 
     @JvmStatic
     fun matchOperator(operator: String): List<Instruction> {
-        val instructionSet = if (initialized) ALL_INSTRUCTIONS else BASIC_INSTRUCTIONS
-        val instructionsToSearch = if (RV64_MODE_FLAG) instructionSet.r64All else instructionSet.r32All
-        return instructionsToSearch.filter { instruction -> instruction.mnemonic.equals(operator, ignoreCase = true) }
+        val instructionSet =
+            if (initialized) ALL_INSTRUCTIONS else BASIC_INSTRUCTIONS
+        val instructionsToSearch =
+            if (RV64_MODE_FLAG) instructionSet.r64All else instructionSet.r32All
+        return instructionsToSearch.filter { instruction ->
+            instruction.mnemonic.equals(
+                operator,
+                ignoreCase = true
+            )
+        }
     }
 
     fun matchOperatorByPrefix(operator: String): List<Instruction> {
-        val instructionsToSearch = if (RV64_MODE_FLAG) BASIC_INSTRUCTIONS.r64All else BASIC_INSTRUCTIONS.r32All
+        val instructionsToSearch =
+            if (RV64_MODE_FLAG) BASIC_INSTRUCTIONS.r64All else BASIC_INSTRUCTIONS.r32All
         return instructionsToSearch.filter { instruction ->
             instruction.mnemonic.startsWith(
                 operator,
@@ -264,35 +277,47 @@ object InstructionsRegistry {
         }
     }
 
-    private fun loadPseudoInstructions(filename: String): List<ExtendedInstruction> = buildList {
-        javaClass.getResourceAsStream(PSEUDO_OPS_PATH + filename)?.use { stream ->
-            val reader = BufferedReader(InputStreamReader(Objects.requireNonNull<InputStream?>(stream)))
-            reader.readLines().forEach { line ->
-                // skip over: comment lines, empty lines, lines starting with blank.
-                if (!line.startsWith("#") && !line.startsWith(" ") && !line.isEmpty()) {
-                    val tokenizer = StringTokenizer(line, ";")
-                    val pseudoOp = tokenizer.nextToken()
-                    val template = StringBuilder()
-                    while (tokenizer.hasMoreTokens()) {
-                        val token = tokenizer.nextToken()
-                        if (token.startsWith("#")) {
-                            // Optional description must be last token in the line.
-                            val description = token.substring(1)
-                            add(ExtendedInstruction(pseudoOp, template.toString(), description))
-                            break
-                        }
-                        template.append(token)
-                        if (tokenizer.hasMoreTokens()) {
-                            template.append("\n")
+    private fun loadPseudoInstructions(filename: String): List<ExtendedInstruction> =
+        buildList {
+            javaClass.getResourceAsStream(PSEUDO_OPS_PATH + filename)
+                ?.use { stream ->
+                    val reader = BufferedReader(
+                        InputStreamReader(
+                            Objects.requireNonNull<InputStream?>(stream)
+                        )
+                    )
+                    reader.readLines().forEach { line ->
+                        // skip over: comment lines, empty lines, lines starting with blank.
+                        if (!line.startsWith("#") && !line.startsWith(" ") && !line.isEmpty()) {
+                            val tokenizer = StringTokenizer(line, ";")
+                            val pseudoOp = tokenizer.nextToken()
+                            val template = StringBuilder()
+                            while (tokenizer.hasMoreTokens()) {
+                                val token = tokenizer.nextToken()
+                                if (token.startsWith("#")) {
+                                    // Optional description must be last token in the line.
+                                    val description = token.substring(1)
+                                    add(
+                                        ExtendedInstruction(
+                                            pseudoOp,
+                                            template.toString(),
+                                            description
+                                        )
+                                    )
+                                    break
+                                }
+                                template.append(token)
+                                if (tokenizer.hasMoreTokens()) {
+                                    template.append("\n")
+                                }
+                            }
                         }
                     }
-                }
+                } ?: run {
+                LOGGER.error("Error: Could not load pseudo instructions from file: $filename")
+                exitProcess(1)
             }
-        } ?: run {
-            LOGGER.error("Error: Could not load pseudo instructions from file: {}", filename)
-            exitProcess(1)
         }
-    }
 
     private fun createMatchMaps(
         instructionList: List<BasicInstruction>
@@ -319,10 +344,9 @@ object InstructionsRegistry {
             val exampleFormat = instruction.exampleFormat
             tokenizeExampleInstruction(exampleFormat).fold(
                 {
-                    LOGGER.error(
-                        "CONFIGURATION ERROR: Instruction example \"{}\" contains invalid token(s)",
-                        exampleFormat
-                    )
+                    LOGGER.error {
+                        """CONFIGURATION ERROR: Instruction example "$exampleFormat" contains invalid token(s)"""
+                    }
                 },
                 { result.put(instruction, it) }
             )
@@ -331,9 +355,13 @@ object InstructionsRegistry {
     }
 
     @JvmStatic
-    fun getTokenList(instruction: Instruction): TokenList = tokenListMap[instruction]!!
+    fun getTokenList(instruction: Instruction): TokenList =
+        tokenListMap[instruction]!!
 
-    private class MatchMap(private val mask: Int, private val matchMap: MutableMap<Int, BasicInstruction>) :
+    private class MatchMap(
+        private val mask: Int,
+        private val matchMap: MutableMap<Int, BasicInstruction>
+    ) :
         Comparable<MatchMap> {
         private val maskLength: Int // number of '1' bits in mask
 
@@ -347,7 +375,8 @@ object InstructionsRegistry {
             this.maskLength = k
         }
 
-        override fun equals(o: Any?): Boolean = o is MatchMap && this.mask == o.mask
+        override fun equals(o: Any?): Boolean =
+            o is MatchMap && this.mask == o.mask
 
         override fun compareTo(other: MatchMap): Int {
             var d = other.maskLength - this.maskLength
@@ -398,4 +427,5 @@ object InstructionsRegistry {
     }
 }
 
-private fun BufferedReader.readLines(): Sequence<String> = generateSequence { readLine() }
+private fun BufferedReader.readLines(): Sequence<String> =
+    generateSequence { readLine() }

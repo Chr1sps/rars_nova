@@ -1,10 +1,10 @@
 package rars.tools;
 
 import kotlin.Unit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.util.BinaryUtilsKt;
@@ -41,7 +41,9 @@ enum DisplaySegment {
 public final class DigitalLabSim extends AbstractTool {
     public static final int EXTERNAL_INTERRUPT_TIMER = 0x00000100;
     public static final int EXTERNAL_INTERRUPT_HEXA_KEYBOARD = 0x00000200;
-    private static final Logger LOGGER = LogManager.getLogger(DigitalLabSim.class);
+    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+        DigitalLabSim.class
+    );
     private static final String HEADING = "Digital Lab Sim";
     private static final String VERSION = " Version 1.0 (Didier Teifreto)";
     // Counter
@@ -60,7 +62,11 @@ public final class DigitalLabSim extends AbstractTool {
     private SevenSegmentPanel sevenSegPanel;
     private HexaKeyboard hexaKeyPanel;
 
-    public DigitalLabSim(final String title, final String heading, final VenusUI mainUI) {
+    public DigitalLabSim(
+        final String title,
+        final String heading,
+        final VenusUI mainUI
+    ) {
         super(title, heading, mainUI);
 
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
@@ -74,7 +80,11 @@ public final class DigitalLabSim extends AbstractTool {
     }
 
     public DigitalLabSim(final @NotNull VenusUI mainUI) {
-        this(DigitalLabSim.HEADING + ", " + DigitalLabSim.VERSION, DigitalLabSim.HEADING, mainUI);
+        this(
+            DigitalLabSim.HEADING + ", " + DigitalLabSim.VERSION,
+            DigitalLabSim.HEADING,
+            mainUI
+        );
     }
 
     public static void updateOneSecondCounter(final byte value) {
@@ -101,8 +111,10 @@ public final class DigitalLabSim extends AbstractTool {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.addAsObserver(this.rightDisplayAddress, this.rightDisplayAddress);
         this.addAsObserver(
-            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
-            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+                memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(
+                memoryConfiguration)
         );
     }
 
@@ -125,7 +137,8 @@ public final class DigitalLabSim extends AbstractTool {
                 DigitalLabSim.CounterValue--;
             } else {
                 DigitalLabSim.CounterValue = DigitalLabSim.MAX_COUNTER_VALUE;
-                Globals.INTERRUPT_CONTROLLER.registerTimerInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_TIMER);
+                Globals.INTERRUPT_CONTROLLER.registerTimerInterrupt(
+                    DigitalLabSim.EXTERNAL_INTERRUPT_TIMER);
             }
         }
         return Unit.INSTANCE;
@@ -149,16 +162,24 @@ public final class DigitalLabSim extends AbstractTool {
         return DigitalLabSim.panelTools;
     }
 
-    private synchronized void updateMMIOControlAndData(final int dataAddr, final int dataValue) {
+    private synchronized void updateMMIOControlAndData(
+        final int dataAddr,
+        final int dataValue
+    ) {
         if (this.connectButton.isConnected()) {
             Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
-                unwrap(Globals.MEMORY_INSTANCE.setByte(dataAddr, (byte) dataValue));
+                unwrap(Globals.MEMORY_INSTANCE.setByte(
+                    dataAddr,
+                    (byte) dataValue
+                ));
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
-            if (this.mainUI.mainPane.executePane.getTextSegment().getCodeHighlighting()) {
-                this.mainUI.mainPane.executePane.getDataSegment().updateValues();
+            if (this.mainUI.mainPane.executePane.getTextSegment()
+                .getCodeHighlighting()) {
+                this.mainUI.mainPane.executePane.getDataSegment()
+                    .updateValues();
             }
         }
     }
@@ -233,7 +254,10 @@ public final class DigitalLabSim extends AbstractTool {
             this.setPreferredSize(new Dimension(60, 80));
         }
 
-        static void paintSegment(final Graphics g, final @NotNull DisplaySegment segment) {
+        static void paintSegment(
+            final Graphics g,
+            final @NotNull DisplaySegment segment
+        ) {
             switch (segment) {
                 case A -> {
                     final int[] pxa1 = {12, 9, 12};
@@ -352,25 +376,32 @@ public final class DigitalLabSim extends AbstractTool {
                 button.setBackground(Color.WHITE);
                 button.setMargin(new Insets(10, 10, 10, 10));
                 final var keyboardClickValue = i;
-                button.addMouseListener(MouseListenerBuilder.create().onMouseClicked(e -> {
-                    if (DigitalLabSim.KeyBoardValueButtonClick != -1) {
-                        // Button already pressed -> now release
-                        DigitalLabSim.KeyBoardValueButtonClick = -1;
-                        DigitalLabSim.this.updateMMIOControlAndData(DigitalLabSim.this.keyboardOutAddress, 0);
-                        for (final var btn : HexaKeyboard.this.button) {
-                            btn.setBackground(Color.WHITE);
-                        }
-                    } else {
-                        // new button pressed
-                        DigitalLabSim.KeyBoardValueButtonClick = keyboardClickValue;
-                        HexaKeyboard.this.button[DigitalLabSim.KeyBoardValueButtonClick].setBackground(Color.GREEN);
-                        if (DigitalLabSim.KeyboardInterruptOnOff) {
-                            Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(DigitalLabSim.EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
-                        }
+                button.addMouseListener(MouseListenerBuilder.create()
+                    .onMouseClicked(e -> {
+                        if (DigitalLabSim.KeyBoardValueButtonClick != -1) {
+                            // Button already pressed -> now release
+                            DigitalLabSim.KeyBoardValueButtonClick = -1;
+                            DigitalLabSim.this.updateMMIOControlAndData(
+                                DigitalLabSim.this.keyboardOutAddress,
+                                0
+                            );
+                            for (final var btn : HexaKeyboard.this.button) {
+                                btn.setBackground(Color.WHITE);
+                            }
+                        } else {
+                            // new button pressed
+                            DigitalLabSim.KeyBoardValueButtonClick = keyboardClickValue;
+                            HexaKeyboard.this.button[DigitalLabSim.KeyBoardValueButtonClick].setBackground(
+                                Color.GREEN);
+                            if (DigitalLabSim.KeyboardInterruptOnOff) {
+                                Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(
+                                    DigitalLabSim.EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
+                            }
 
-                    }
-                    return Unit.INSTANCE;
-                }).build());
+                        }
+                        return Unit.INSTANCE;
+                    })
+                    .build());
                 this.button[i] = button;
                 this.add(button);
             }

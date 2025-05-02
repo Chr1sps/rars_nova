@@ -297,12 +297,15 @@ class SimulationImpl internal constructor(
                     // machine statement related API.
                     val instruction = statement.instruction as BasicInstruction
                     ensureNotNull(instruction) {
-                        SimulationError.create(
-                            statement,
-                            ("undefined instruction (" + statement.binaryStatement.toHexStringWithPrefix()
-                                + ")"),
-                            EventReason.ILLEGAL_INSTRUCTION
-                        )
+                        with(context) {
+                            val binaryStatement = statement.binaryStatement
+                                .toHexStringWithPrefix()
+                            SimulationError.create(
+                                statement,
+                                "undefined instruction ($binaryStatement)",
+                                EventReason.ILLEGAL_INSTRUCTION
+                            )
+                        }
                     }
                     registerFile.incrementPC(instruction.instructionLength)
                     instruction.run {

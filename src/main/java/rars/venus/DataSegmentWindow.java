@@ -1,12 +1,13 @@
 package rars.venus;
 
 import kotlin.Unit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.api.DisplayFormat;
+import rars.logging.LoggingKt;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
@@ -39,9 +40,15 @@ import static rars.util.UtilsKt.*;
  * @author Sanderson and Bumgarner
  */
 public final class DataSegmentWindow extends JInternalFrame {
-    private static final Logger LOGGER = LogManager.getLogger(DataSegmentWindow.class);
+    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+        DataSegmentWindow.class
+    );
 
-    private static final String[] dataSegmentNames = {"Data", "Stack", "Kernel"};
+    private static final String[] dataSegmentNames = {
+        "Data",
+        "Stack",
+        "Kernel"
+    };
     private static final int VALUES_PER_ROW = 8;
     private static final int NUMBER_OF_ROWS = 16; // with 8 value columns, this shows 512 bytes;
     private static final int NUMBER_OF_COLUMNS = DataSegmentWindow.VALUES_PER_ROW + 1;// 1 for address and 8 for values
@@ -131,11 +138,14 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.displayBaseAddressArray = new int[]{
             memoryConfiguration.getExternAddress(),
             memoryConfiguration.getDataBaseAddress(),
-            rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
+                memoryConfiguration),
             -1 /* memoryConfiguration.globalPointer */,
             -1 /* memoryConfiguration.stackPointer */,
-            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
-            rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+                memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
+                memoryConfiguration),
         };
         SIMULATOR.simulatorNoticeHook.subscribe(s -> {
             if (s.action == SimulatorNotice.Action.START) {
@@ -174,8 +184,9 @@ public final class DataSegmentWindow extends JInternalFrame {
             this.prevButton = new PrevButton(
                 new ImageIcon(tk.getImage(cls.getResource(Globals.IMAGES_PATH + "Previous22.png"))));// "Back16
             // .gif"))));//"Down16.gif"))));
-            this.nextButton = new NextButton(new ImageIcon(tk.getImage(cls.getResource(Globals.IMAGES_PATH + "Next22" +
-                ".png"))));// "Forward16
+            this.nextButton = new NextButton(new ImageIcon(tk.getImage(cls.getResource(
+                Globals.IMAGES_PATH + "Next22" +
+                    ".png"))));// "Forward16
             // .gif"))));
             // //"Up16.gif"))));
             // This group of buttons was replaced by a combo box. Keep the JButton objects
@@ -188,7 +199,10 @@ public final class DataSegmentWindow extends JInternalFrame {
             this.mmioButton = new JButton();// "MMIO");
             this.textButton = new JButton();// ".text");
         } catch (final NullPointerException e) {
-            DataSegmentWindow.LOGGER.fatal("Internal Error: images folder not found");
+            LoggingKt.fatal(
+                DataSegmentWindow.LOGGER, () ->
+                    "Internal Error: images folder not found"
+            );
             System.exit(0);
         }
 
@@ -197,7 +211,8 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.baseAddressSelector.setModel(new CustomComboBoxModel(this.displayBaseAddressChoices));
         this.baseAddressSelector.setEditable(false);
         this.baseAddressSelector.setSelectedIndex(this.defaultBaseAddressIndex);
-        this.baseAddressSelector.setToolTipText("Base address for data segment display");
+        this.baseAddressSelector.setToolTipText(
+            "Base address for data segment display");
         this.baseAddressSelector.addActionListener(
             e -> {
                 // trigger action listener for associated invisible button.
@@ -214,9 +229,13 @@ public final class DataSegmentWindow extends JInternalFrame {
         for (final NumberDisplayBasePicker chooser : choosers) {
             features.add(chooser);
         }
-        final JCheckBox asciiDisplayCheckBox = new JCheckBox("ASCII", this.asciiDisplay);
+        final JCheckBox asciiDisplayCheckBox = new JCheckBox(
+            "ASCII",
+            this.asciiDisplay
+        );
         asciiDisplayCheckBox
-            .setToolTipText("Display data segment values in ASCII (overrides Hexadecimal Values setting)");
+            .setToolTipText(
+                "Display data segment values in ASCII (overrides Hexadecimal Values setting)");
         asciiDisplayCheckBox.addItemListener(
             e -> {
                 DataSegmentWindow.this.asciiDisplay = (e.getStateChange() == ItemEvent.SELECTED);
@@ -230,7 +249,10 @@ public final class DataSegmentWindow extends JInternalFrame {
     /**
      * Create and fill String array containing labels for base address combo box.
      */
-    private static String[] createBaseAddressLabelsArray(final int[] baseAddressArray, final String[] descriptions) {
+    private static String[] createBaseAddressLabelsArray(
+        final int[] baseAddressArray,
+        final String[] descriptions
+    ) {
         final String[] baseAddressChoices = new String[baseAddressArray.length];
         for (int i = 0; i < baseAddressChoices.length; i++) {
             baseAddressChoices[i] = (
@@ -284,7 +306,8 @@ public final class DataSegmentWindow extends JInternalFrame {
             desiredComboBoxIndex = DataSegmentWindow.DATA_BASE_ADDRESS_INDEX;
         }
         // Check distance from heap base. Cannot be below it
-        thisDistance = address - rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(memoryConfiguration);
+        thisDistance = address - rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
+            memoryConfiguration);
         if (thisDistance >= 0 && thisDistance < shortDistance) {
             shortDistance = thisDistance;
             desiredComboBoxIndex = DataSegmentWindow.HEAP_BASE_ADDRESS_INDEX;
@@ -299,7 +322,10 @@ public final class DataSegmentWindow extends JInternalFrame {
 
     // Little helper. Is called when headers set up and each time number base
     // changes.
-    private static @NotNull String getHeaderStringForColumn(final int i, final @NotNull DisplayFormat base) {
+    private static @NotNull String getHeaderStringForColumn(
+        final int i,
+        final @NotNull DisplayFormat base
+    ) {
         final var offset = (i - 1) * DataSegmentWindow.BYTES_PER_VALUE;
         return (i == DataSegmentWindow.ADDRESS_COLUMN)
             ? "Address"
@@ -357,7 +383,11 @@ public final class DataSegmentWindow extends JInternalFrame {
         if (rowColumn == null) {
             return;
         }
-        final Rectangle addressCell = DataSegmentWindow.dataTable.getCellRect(rowColumn.x, rowColumn.y, true);
+        final Rectangle addressCell = DataSegmentWindow.dataTable.getCellRect(
+            rowColumn.x,
+            rowColumn.y,
+            true
+        );
         // Select the memory address cell by generating a fake Mouse Pressed event
         // within its
         // extent and explicitly invoking the table's mouse listener.
@@ -389,7 +419,10 @@ public final class DataSegmentWindow extends JInternalFrame {
         final int addressRow = rowColumn.x;
         this.addressColumn = rowColumn.y;
         this.addressRowFirstAddress = BinaryUtilsKt
-            .stringToInt(DataSegmentWindow.dataTable.getValueAt(addressRow, DataSegmentWindow.ADDRESS_COLUMN)
+            .stringToInt(DataSegmentWindow.dataTable.getValueAt(
+                    addressRow,
+                    DataSegmentWindow.ADDRESS_COLUMN
+                )
                 .toString());
         // System.out.println("Address "+Binary.intToHexString(address)+" becomes row "+
         // addressRow + " column "+addressColumn+
@@ -428,7 +461,8 @@ public final class DataSegmentWindow extends JInternalFrame {
         // just above the statements that implement it.
 
         // STEP 1: Determine which data segment contains this address.
-        final int desiredComboBoxIndex = DataSegmentWindow.getBaseAddressIndexForAddress(address);
+        final int desiredComboBoxIndex = DataSegmentWindow.getBaseAddressIndexForAddress(
+            address);
         if (desiredComboBoxIndex < 0) {
             // It is not a data segment address so good bye!
             return null;
@@ -436,8 +470,10 @@ public final class DataSegmentWindow extends JInternalFrame {
         // STEP 2: Set the combo box appropriately. This will also display the
         // first chunk of addresses from that segment.
         this.baseAddressSelector.setSelectedIndex(desiredComboBoxIndex);
-        ((CustomComboBoxModel) this.baseAddressSelector.getModel()).forceComboBoxUpdate(desiredComboBoxIndex);
-        this.baseAddressButtons[desiredComboBoxIndex].getActionListeners()[0].actionPerformed(null);
+        ((CustomComboBoxModel) this.baseAddressSelector.getModel()).forceComboBoxUpdate(
+            desiredComboBoxIndex);
+        this.baseAddressButtons[desiredComboBoxIndex].getActionListeners()[0].actionPerformed(
+            null);
         // STEP 3: Display memory chunk containing this address, which may be
         // different than the one just displayed.
         int baseAddress = this.displayBaseAddressArray[desiredComboBoxIndex];
@@ -467,16 +503,27 @@ public final class DataSegmentWindow extends JInternalFrame {
         // reordered, but I included it as a precautionary measure in case that changes.
         final int byteOffsetIntoChunk = byteOffset % DataSegmentWindow.MEMORY_CHUNK_SIZE;
         int addrColumn = byteOffsetIntoChunk % DataSegmentWindow.BYTES_PER_ROW / DataSegmentWindow.BYTES_PER_VALUE + 1;
-        addrColumn = DataSegmentWindow.dataTable.convertColumnIndexToView(addrColumn);
+        addrColumn = DataSegmentWindow.dataTable.convertColumnIndexToView(
+            addrColumn);
         final int addrRow = byteOffsetIntoChunk / DataSegmentWindow.BYTES_PER_ROW;
-        final Rectangle addressCell = DataSegmentWindow.dataTable.getCellRect(addrRow, addrColumn, true);
+        final Rectangle addressCell = DataSegmentWindow.dataTable.getCellRect(
+            addrRow,
+            addrColumn,
+            true
+        );
         // STEP 5: Center the row containing the cell of interest, to the extent
         // possible.
         final double cellHeight = addressCell.getHeight();
-        final double viewHeight = this.dataTableScroller.getViewport().getExtentSize().getHeight();
+        final double viewHeight = this.dataTableScroller.getViewport()
+            .getExtentSize()
+            .getHeight();
         final int numberOfVisibleRows = (int) (viewHeight / cellHeight);
-        final int newViewPositionY = Math.max((int) ((addrRow - ((double) numberOfVisibleRows / 2)) * cellHeight), 0);
-        this.dataTableScroller.getViewport().setViewPosition(new Point(0, newViewPositionY));
+        final int newViewPositionY = Math.max(
+            (int) ((addrRow - ((double) numberOfVisibleRows / 2)) * cellHeight),
+            0
+        );
+        this.dataTableScroller.getViewport()
+            .setViewPosition(new Point(0, newViewPositionY));
         return new Point(addrRow, addrColumn);
     }
 
@@ -509,9 +556,13 @@ public final class DataSegmentWindow extends JInternalFrame {
         int address = this.homeAddress;
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             DataSegmentWindow.dataData[row][DataSegmentWindow.ADDRESS_COLUMN] =
-                NumberDisplayBasePicker.formatUnsignedInteger(address, addressBase);
+                NumberDisplayBasePicker.formatUnsignedInteger(
+                    address,
+                    addressBase
+                );
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
-                final var value = rightOr(Globals.MEMORY_INSTANCE.getRawWord(address), 0);
+                final var value = rightOr(
+                    Globals.MEMORY_INSTANCE.getRawWord(address), 0);
                 NumberDisplayBasePicker.formatNumber(
                     value,
                     valueBase
@@ -521,29 +572,44 @@ public final class DataSegmentWindow extends JInternalFrame {
         }
         final String[] names = new String[DataSegmentWindow.NUMBER_OF_COLUMNS];
         for (int i = 0; i < DataSegmentWindow.NUMBER_OF_COLUMNS; i++) {
-            names[i] = DataSegmentWindow.getHeaderStringForColumn(i, addressBase);
+            names[i] = DataSegmentWindow.getHeaderStringForColumn(
+                i,
+                addressBase
+            );
         }
-        DataSegmentWindow.dataTable = new MyTippedJTable(new DataTableModel(DataSegmentWindow.dataData, names));
+        DataSegmentWindow.dataTable = new MyTippedJTable(new DataTableModel(
+            DataSegmentWindow.dataData,
+            names
+        ));
 
         this.updateRowHeight();
         // Do not allow user to re-order columns; column order corresponds to MIPS
         // memory order
-        DataSegmentWindow.dataTable.getTableHeader().setReorderingAllowed(false);
+        DataSegmentWindow.dataTable.getTableHeader()
+            .setReorderingAllowed(false);
         DataSegmentWindow.dataTable.setRowSelectionAllowed(false);
         // Addresses are column 0, render right-justified in mono font
         final var monoRightCellRenderer = new MonoRightCellRenderer(
             fontSettings,
             editorThemeSettings
         );
-        DataSegmentWindow.dataTable.getColumnModel().getColumn(DataSegmentWindow.ADDRESS_COLUMN).setPreferredWidth(60);
-        DataSegmentWindow.dataTable.getColumnModel().getColumn(DataSegmentWindow.ADDRESS_COLUMN).setCellRenderer(
-            monoRightCellRenderer);
+        DataSegmentWindow.dataTable.getColumnModel()
+            .getColumn(DataSegmentWindow.ADDRESS_COLUMN)
+            .setPreferredWidth(60);
+        DataSegmentWindow.dataTable.getColumnModel()
+            .getColumn(DataSegmentWindow.ADDRESS_COLUMN)
+            .setCellRenderer(
+                monoRightCellRenderer);
         // Data cells are columns 1 onward, render right-justitifed in mono font but
         // highlightable.
         final AddressCellRenderer addressCellRenderer = new AddressCellRenderer();
         for (int i = 1; i < DataSegmentWindow.NUMBER_OF_COLUMNS; i++) {
-            DataSegmentWindow.dataTable.getColumnModel().getColumn(i).setPreferredWidth(60);
-            DataSegmentWindow.dataTable.getColumnModel().getColumn(i).setCellRenderer(addressCellRenderer);
+            DataSegmentWindow.dataTable.getColumnModel()
+                .getColumn(i)
+                .setPreferredWidth(60);
+            DataSegmentWindow.dataTable.getColumnModel()
+                .getColumn(i)
+                .setCellRenderer(addressCellRenderer);
         }
         this.dataTableScroller = new JScrollPane(
             DataSegmentWindow.dataTable,
@@ -618,60 +684,80 @@ public final class DataSegmentWindow extends JInternalFrame {
         final TableModel dataModel = DataSegmentWindow.dataTable.getModel();
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                NumberDisplayBasePicker.formatUnsignedInteger(address, addressBase), row,
+                NumberDisplayBasePicker.formatUnsignedInteger(
+                    address,
+                    addressBase
+                ), row,
                 DataSegmentWindow.ADDRESS_COLUMN
             );
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 final var finalRow = row;
                 final var finalColumn = column;
                 final int finalAddress = address;
-                Globals.MEMORY_INSTANCE.getSilentMemoryView().getWord(address).fold(
-                    error -> {
-                        // Bit of a hack here. Memory will throw an exception if you try to read
-                        // directly from text segment when the
-                        // self-modifying code setting is disabled. This is a good thing if it is the
-                        // executing MIPS program trying to
-                        // read. But not a good thing if it is the DataSegmentDisplay trying to read.
-                        // I'll trick Memory by
-                        // temporarily enabling the setting as "non-persistent" so it won't write
-                        // through to the registry.
-                        if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(finalAddress)) {
-                            int displayValue = 0;
-                            if (!boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
-                                boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, true);
-                                displayValue = unwrap(Globals.MEMORY_INSTANCE.getSilentMemoryView()
-                                    .getWord(finalAddress));
-                                boolSettings.setSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED, false);
+                Globals.MEMORY_INSTANCE.getSilentMemoryView()
+                    .getWord(address)
+                    .fold(
+                        error -> {
+                            // Bit of a hack here. Memory will throw an exception if you try to read
+                            // directly from text segment when the
+                            // self-modifying code setting is disabled. This is a good thing if it is the
+                            // executing MIPS program trying to
+                            // read. But not a good thing if it is the DataSegmentDisplay trying to read.
+                            // I'll trick Memory by
+                            // temporarily enabling the setting as "non-persistent" so it won't write
+                            // through to the registry.
+                            if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(
+                                finalAddress)) {
+                                int displayValue = 0;
+                                if (!boolSettings.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+                                    boolSettings.setSetting(
+                                        BoolSetting.SELF_MODIFYING_CODE_ENABLED,
+                                        true
+                                    );
+                                    displayValue = unwrap(Globals.MEMORY_INSTANCE.getSilentMemoryView()
+                                        .getWord(finalAddress));
+                                    boolSettings.setSetting(
+                                        BoolSetting.SELF_MODIFYING_CODE_ENABLED,
+                                        false
+                                    );
+                                }
+                                ((DataTableModel) dataModel).setDisplayAndModelValueAt(
+                                    NumberDisplayBasePicker.formatNumber(
+                                        displayValue,
+                                        valueBase
+                                    ), finalRow, finalColumn
+                                );
                             }
+                            // Bug Fix: the following line of code disappeared during the release 4.4 mods,
+                            // but is essential to
+                            // display values of 0 for valid MIPS addresses that are outside the MARS
+                            // simulated address space. Such
+                            // addresses cause an AddressErrorException. Prior to 4.4, they performed this
+                            // line of code unconditionally.
+                            // With 4.4, I added the above IF statement to work with the text segment but
+                            // inadvertently removed this line!
+                            // Now it becomes the "else" part, executed when not in text segment. 
+                            else {
+                                ((DataTableModel) dataModel).setDisplayAndModelValueAt(
+                                    NumberDisplayBasePicker.formatNumber(
+                                        0,
+                                        valueBase
+                                    ), finalRow, finalColumn
+                                );
+                            }
+                            return Unit.INSTANCE;
+                        },
+                        value -> {
                             ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                                NumberDisplayBasePicker.formatNumber(displayValue, valueBase), finalRow, finalColumn);
+                                NumberDisplayBasePicker.formatNumber(
+                                    value,
+                                    valueBase
+                                ),
+                                finalRow, finalColumn
+                            );
+                            return Unit.INSTANCE;
                         }
-                        // Bug Fix: the following line of code disappeared during the release 4.4 mods,
-                        // but is essential to
-                        // display values of 0 for valid MIPS addresses that are outside the MARS
-                        // simulated address space. Such
-                        // addresses cause an AddressErrorException. Prior to 4.4, they performed this
-                        // line of code unconditionally.
-                        // With 4.4, I added the above IF statement to work with the text segment but
-                        // inadvertently removed this line!
-                        // Now it becomes the "else" part, executed when not in text segment. 
-                        else {
-                            ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                                NumberDisplayBasePicker.formatNumber(0, valueBase), finalRow, finalColumn);
-                        }
-                        return Unit.INSTANCE;
-                    },
-                    value -> {
-                        ((DataTableModel) dataModel).setDisplayAndModelValueAt(
-                            NumberDisplayBasePicker.formatNumber(
-                                value,
-                                valueBase
-                            ),
-                            finalRow, finalColumn
-                        );
-                        return Unit.INSTANCE;
-                    }
-                );
+                    );
                 address += DataSegmentWindow.BYTES_PER_VALUE;
             }
         }
@@ -713,15 +799,25 @@ public final class DataSegmentWindow extends JInternalFrame {
         final var addressBase = this.executePane.getAddressDisplayFormat();
         int address = this.firstAddress;
         for (int i = 0; i < DataSegmentWindow.NUMBER_OF_ROWS; i++) {
-            final String formattedAddress = NumberDisplayBasePicker.formatUnsignedInteger(address, addressBase);
-            ((DataTableModel) DataSegmentWindow.dataTable.getModel()).setDisplayAndModelValueAt(formattedAddress, i, 0);
+            final String formattedAddress = NumberDisplayBasePicker.formatUnsignedInteger(
+                address,
+                addressBase
+            );
+            ((DataTableModel) DataSegmentWindow.dataTable.getModel()).setDisplayAndModelValueAt(
+                formattedAddress,
+                i,
+                0
+            );
             address += DataSegmentWindow.BYTES_PER_ROW;
         }
         // column headers include address offsets, so translate them too
         for (int i = 1; i < DataSegmentWindow.NUMBER_OF_COLUMNS; i++) {
             DataSegmentWindow.dataTable.getColumnModel()
                 .getColumn(i)
-                .setHeaderValue(DataSegmentWindow.getHeaderStringForColumn(i, addressBase));
+                .setHeaderValue(DataSegmentWindow.getHeaderStringForColumn(
+                    i,
+                    addressBase
+                ));
         }
         DataSegmentWindow.dataTable.getTableHeader().repaint();
     }
@@ -750,7 +846,12 @@ public final class DataSegmentWindow extends JInternalFrame {
         for (int row = 0; row < DataSegmentWindow.NUMBER_OF_ROWS; row++) {
             for (int column = 1; column < DataSegmentWindow.NUMBER_OF_COLUMNS; column++) {
                 ((DataTableModel) dataModel)
-                    .setDisplayAndModelValueAt(NumberDisplayBasePicker.formatNumber(0, valueBase), row, column);
+                    .setDisplayAndModelValueAt(
+                        NumberDisplayBasePicker.formatNumber(
+                            0,
+                            valueBase
+                        ), row, column
+                    );
             }
         }
         this.disableAllButtons();
@@ -803,18 +904,22 @@ public final class DataSegmentWindow extends JInternalFrame {
         this.heapButton.setToolTipText("View range around heap base address " +
             BinaryUtilsKt.intToHexStringWithPrefix(rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
                 memoryConfiguration)));
-        this.extnButton.setToolTipText("View range around static global base address " +
-            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.getExternAddress()));
+        this.extnButton.setToolTipText(
+            "View range around static global base address " +
+                BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.getExternAddress()));
         this.mmioButton.setToolTipText("View range around MMIO base address " +
             BinaryUtilsKt.intToHexStringWithPrefix(rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
                 memoryConfiguration)));
         this.textButton.setToolTipText("View range around program code " +
             BinaryUtilsKt.intToHexStringWithPrefix(rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
                 memoryConfiguration)));
-        this.prevButton.setToolTipText("View next lower address range; hold down for rapid fire");
-        this.nextButton.setToolTipText("View next higher address range; hold down for rapid fire");
-        this.dataButton.setToolTipText("View range around static data segment base address " +
-            BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.getDataBaseAddress()));
+        this.prevButton.setToolTipText(
+            "View next lower address range; hold down for rapid fire");
+        this.nextButton.setToolTipText(
+            "View next higher address range; hold down for rapid fire");
+        this.dataButton.setToolTipText(
+            "View range around static data segment base address " +
+                BinaryUtilsKt.intToHexStringWithPrefix(memoryConfiguration.getDataBaseAddress()));
 
         // add the action listeners to maintain button state and table contents
         // Currently there is no memory upper bound so next button always enabled.
@@ -824,7 +929,8 @@ public final class DataSegmentWindow extends JInternalFrame {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                 // get $gp global pointer, but guard against it having value below data segment
                 DataSegmentWindow.this.firstAddress = Math.max(
-                    rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(memoryConfiguration),
+                    rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(
+                        memoryConfiguration),
                     (int) Globals.REGISTER_FILE.gp.getValue()
                 );
                 // updateModelForMemoryRange requires argument to be multiple of 4
@@ -835,8 +941,10 @@ public final class DataSegmentWindow extends JInternalFrame {
                     DataSegmentWindow.this.firstAddress - (DataSegmentWindow.this.firstAddress % DataSegmentWindow.BYTES_PER_ROW);
                 DataSegmentWindow.this.homeAddress = DataSegmentWindow.this.firstAddress;
                 DataSegmentWindow.this.firstAddress =
-                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(
+                        DataSegmentWindow.this.firstAddress);
+                DataSegmentWindow.this.updateModelForMemoryRange(
+                    DataSegmentWindow.this.firstAddress);
             });
 
         this.stakButton.addActionListener(
@@ -844,7 +952,8 @@ public final class DataSegmentWindow extends JInternalFrame {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                 // get $sp stack pointer, but guard against it having value below data segment
                 DataSegmentWindow.this.firstAddress = Math.max(
-                    rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(memoryConfiguration),
+                    rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(
+                        memoryConfiguration),
                     (int) Globals.REGISTER_FILE.sp.getValue()
                 );
                 // See comment above for gloButton...
@@ -853,8 +962,10 @@ public final class DataSegmentWindow extends JInternalFrame {
                 DataSegmentWindow.this.homeAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getStackBaseAddress(
                     memoryConfiguration);
                 DataSegmentWindow.this.firstAddress =
-                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(
+                        DataSegmentWindow.this.firstAddress);
+                DataSegmentWindow.this.updateModelForMemoryRange(
+                    DataSegmentWindow.this.firstAddress);
             });
 
         this.heapButton.addActionListener(
@@ -863,8 +974,10 @@ public final class DataSegmentWindow extends JInternalFrame {
                 DataSegmentWindow.this.homeAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
                     memoryConfiguration);
                 DataSegmentWindow.this.firstAddress =
-                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
-                DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(
+                        DataSegmentWindow.this.homeAddress);
+                DataSegmentWindow.this.updateModelForMemoryRange(
+                    DataSegmentWindow.this.firstAddress);
             });
 
         this.extnButton.addActionListener(
@@ -872,8 +985,10 @@ public final class DataSegmentWindow extends JInternalFrame {
                 DataSegmentWindow.this.userOrKernelMode = DataSegmentWindow.USER_MODE;
                 DataSegmentWindow.this.homeAddress = memoryConfiguration.getExternAddress();
                 DataSegmentWindow.this.firstAddress =
-                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.homeAddress);
-                DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(
+                        DataSegmentWindow.this.homeAddress);
+                DataSegmentWindow.this.updateModelForMemoryRange(
+                    DataSegmentWindow.this.firstAddress);
             });
 
         this.mmioButton.addActionListener(
@@ -883,8 +998,10 @@ public final class DataSegmentWindow extends JInternalFrame {
                     memoryConfiguration);
                 DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
                 DataSegmentWindow.this.firstAddress =
-                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(
+                        DataSegmentWindow.this.firstAddress);
+                DataSegmentWindow.this.updateModelForMemoryRange(
+                    DataSegmentWindow.this.firstAddress);
             });
 
         this.textButton.addActionListener(
@@ -894,8 +1011,10 @@ public final class DataSegmentWindow extends JInternalFrame {
                     memoryConfiguration);
                 DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
                 DataSegmentWindow.this.firstAddress =
-                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(
+                        DataSegmentWindow.this.firstAddress);
+                DataSegmentWindow.this.updateModelForMemoryRange(
+                    DataSegmentWindow.this.firstAddress);
             });
 
         this.dataButton.addActionListener(
@@ -904,8 +1023,10 @@ public final class DataSegmentWindow extends JInternalFrame {
                 DataSegmentWindow.this.homeAddress = memoryConfiguration.getDataBaseAddress();
                 DataSegmentWindow.this.firstAddress = DataSegmentWindow.this.homeAddress;
                 DataSegmentWindow.this.firstAddress =
-                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
-                DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
+                    DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(
+                        DataSegmentWindow.this.firstAddress);
+                DataSegmentWindow.this.updateModelForMemoryRange(
+                    DataSegmentWindow.this.firstAddress);
             });
 
         // NOTE: action listeners for prevButton and nextButton are now in their
@@ -925,18 +1046,23 @@ public final class DataSegmentWindow extends JInternalFrame {
      */
     private int setFirstAddressAndPrevNextButtonEnableStatus(int lowAddress) {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
-        final int lowLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE) ?
+        final int lowLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE)
+            ?
             Math.min(
                 Math.min(
-                    rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
-                    rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(memoryConfiguration)
+                    rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+                        memoryConfiguration),
+                    rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(
+                        memoryConfiguration)
                 ),
                 memoryConfiguration.getDataBaseAddress()
             )
-            : rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(memoryConfiguration);
+            : rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
+                memoryConfiguration);
         final int highLimit = (this.userOrKernelMode == DataSegmentWindow.USER_MODE)
             ? (memoryConfiguration).getUserHighAddress()
-            : rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelHighAddress(memoryConfiguration);
+            : rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelHighAddress(
+                memoryConfiguration);
         if (lowAddress <= lowLimit) {
             lowAddress = lowLimit;
             this.prevButton.setEnabled(false);
@@ -972,7 +1098,8 @@ public final class DataSegmentWindow extends JInternalFrame {
      * solution to extend the model class to call the protected
      * "fireContentsChanged()" method worked.
      */
-    private static class CustomComboBoxModel extends DefaultComboBoxModel<String> {
+    private static class CustomComboBoxModel
+        extends DefaultComboBoxModel<String> {
         public CustomComboBoxModel(final String[] list) {
             super(list);
         }
@@ -1045,7 +1172,11 @@ public final class DataSegmentWindow extends JInternalFrame {
          * value is valid, MIPS memory is updated.
          */
         @Override
-        public void setValueAt(final Object value, final int row, final int col) {
+        public void setValueAt(
+            final Object value,
+            final int row,
+            final int col
+        ) {
             final var parsed = BinaryUtilsKt.stringToInt((String) value);
             if (parsed == null) {
                 this.data[row][col] = "INVALID";
@@ -1062,7 +1193,10 @@ public final class DataSegmentWindow extends JInternalFrame {
             // occur only between instructions.
             Globals.MEMORY_REGISTERS_LOCK.lock();
             try {
-                final var isValid = Globals.MEMORY_INSTANCE.setRawWord(address, parsed).isRight();
+                final var isValid = Globals.MEMORY_INSTANCE.setRawWord(
+                    address,
+                    parsed
+                ).isRight();
                 if (!isValid) {
                     // somehow, user was able to display out-of-range address. Most likely to occur
                     // between
@@ -1074,14 +1208,21 @@ public final class DataSegmentWindow extends JInternalFrame {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
             final var valueBase = DataSegmentWindow.this.executePane.getValueDisplayFormat();
-            this.data[row][col] = NumberDisplayBasePicker.formatNumber(parsed, valueBase);
+            this.data[row][col] = NumberDisplayBasePicker.formatNumber(
+                parsed,
+                valueBase
+            );
             this.fireTableCellUpdated(row, col);
         }
 
         /**
          * Update cell contents in table model. Does not affect MIPS memory.
          */
-        private void setDisplayAndModelValueAt(final Object value, final int row, final int col) {
+        private void setDisplayAndModelValueAt(
+            final Object value,
+            final int row,
+            final int col
+        ) {
             this.data[row][col] = value;
             this.fireTableCellUpdated(row, col);
         }
@@ -1162,8 +1303,10 @@ public final class DataSegmentWindow extends JInternalFrame {
                     final String tip = null;
                     final Point p = e.getPoint();
                     final int index = this.columnModel.getColumnIndexAtX(p.x);
-                    final int realIndex = this.columnModel.getColumn(index).getModelIndex();
-                    return (realIndex < 2) ? MyTippedJTable.this.columnToolTips[realIndex]
+                    final int realIndex = this.columnModel.getColumn(index)
+                        .getModelIndex();
+                    return (realIndex < 2)
+                        ? MyTippedJTable.this.columnToolTips[realIndex]
                         :
                             MyTippedJTable.this.columnToolTips[2] + ((realIndex - 1) * 4) + MyTippedJTable.this.columnToolTips[3];
                 }
@@ -1190,7 +1333,8 @@ public final class DataSegmentWindow extends JInternalFrame {
         public void actionPerformed(final ActionEvent ae) {
             DataSegmentWindow.this.firstAddress -= DataSegmentWindow.PREV_NEXT_CHUNK_SIZE;
             DataSegmentWindow.this.firstAddress =
-                DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(
+                    DataSegmentWindow.this.firstAddress);
             DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
         }
     }
@@ -1214,7 +1358,8 @@ public final class DataSegmentWindow extends JInternalFrame {
         public void actionPerformed(final ActionEvent ae) {
             DataSegmentWindow.this.firstAddress += DataSegmentWindow.PREV_NEXT_CHUNK_SIZE;
             DataSegmentWindow.this.firstAddress =
-                DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(DataSegmentWindow.this.firstAddress);
+                DataSegmentWindow.this.setFirstAddressAndPrevNextButtonEnableStatus(
+                    DataSegmentWindow.this.firstAddress);
             DataSegmentWindow.this.updateModelForMemoryRange(DataSegmentWindow.this.firstAddress);
         }
     }

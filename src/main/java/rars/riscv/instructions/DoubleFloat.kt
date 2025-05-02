@@ -9,7 +9,6 @@ import rars.ksoftfloat.operations.*
 import rars.ksoftfloat.types.Float64
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
-import rars.riscv.getRoundingMode
 import rars.riscv.setfflags
 import rars.simulator.SimulationContext
 

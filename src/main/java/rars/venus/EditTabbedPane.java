@@ -1,12 +1,12 @@
 package rars.venus;
 
 import kotlin.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.RISCVProgram;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
 import rars.util.AsmFileFilter;
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
+import static rars.logging.LoggingKt.info;
 
 /**
  * Tabbed pane for the editor. Each of its tabs represents an open file.
@@ -71,7 +72,10 @@ public final class EditTabbedPane extends JPanel {
                 }
             });
         this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSABLE, true);
-        this.tabbedPane.putClientProperty(TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "Close current file");
+        this.tabbedPane.putClientProperty(
+            TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT,
+            "Close current file"
+        );
         this.tabbedPane.putClientProperty(
             TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (
                 pane,
@@ -266,13 +270,20 @@ public final class EditTabbedPane extends JPanel {
             }
             final var theFile = editPane.getFile();
             try {
-                final BufferedWriter outFileStream = new BufferedWriter(new FileWriter(theFile));
-                outFileStream.write(editPane.getSource(), 0, editPane.getSource().length());
+                final BufferedWriter outFileStream = new BufferedWriter(new FileWriter(
+                    theFile));
+                outFileStream.write(
+                    editPane.getSource(),
+                    0,
+                    editPane.getSource().length()
+                );
                 outFileStream.close();
             } catch (final java.io.IOException c) {
                 JOptionPane.showMessageDialog(
-                    null, "Save operation could not be completed due to an error:\n" + c,
-                    "Save Operation Failed", JOptionPane.ERROR_MESSAGE
+                    null,
+                    "Save operation could not be completed due to an error:\n" + c,
+                    "Save Operation Failed",
+                    JOptionPane.ERROR_MESSAGE
                 );
                 return false;
             }
@@ -337,7 +348,8 @@ public final class EditTabbedPane extends JPanel {
                         this.mainUI,
                         "File " + theFile.getName() + " already exists.  Do you wish to overwrite it?",
                         "Overwrite existing file?",
-                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE
+                        JOptionPane.YES_NO_CANCEL_OPTION,
+                        JOptionPane.WARNING_MESSAGE
                     );
                     switch (overwrite) {
                         case JOptionPane.YES_OPTION:
@@ -355,13 +367,20 @@ public final class EditTabbedPane extends JPanel {
             // Either file with selected name does not exist or user wants to
             // overwrite it, so go for it!
             try {
-                final BufferedWriter outFileStream = new BufferedWriter(new FileWriter(theFile));
-                outFileStream.write(editPane.getSource(), 0, editPane.getSource().length());
+                final BufferedWriter outFileStream = new BufferedWriter(new FileWriter(
+                    theFile));
+                outFileStream.write(
+                    editPane.getSource(),
+                    0,
+                    editPane.getSource().length()
+                );
                 outFileStream.close();
             } catch (final java.io.IOException c) {
                 JOptionPane.showMessageDialog(
-                    null, "Save As operation could not be completed due to an error:\n" + c,
-                    "Save As Operation Failed", JOptionPane.ERROR_MESSAGE
+                    null,
+                    "Save As operation could not be completed due to an error:\n" + c,
+                    "Save As Operation Failed",
+                    JOptionPane.ERROR_MESSAGE
                 );
                 return null;
             }
@@ -445,7 +464,10 @@ public final class EditTabbedPane extends JPanel {
     // title bar
     // and also to update the MARS menu state (controls which actions are enabled).
     private void updateTitlesAndMenuState(final @NotNull EditPane editPane) {
-        this.editor.setTitleFromFile(editPane.getFile(), editPane.getFileStatus());
+        this.editor.setTitleFromFile(
+            editPane.getFile(),
+            editPane.getFileStatus()
+        );
         editPane.updateStaticFileStatus(); // for legacy code that depends on the static FileStatus (pre 4.0)
         this.mainUI.setMenuState(editPane.getFileStatus());
     }
@@ -454,7 +476,10 @@ public final class EditTabbedPane extends JPanel {
     // title bar
     // and also to update the MARS menu state (controls which actions are enabled).
     private void updateTitles(final @NotNull EditPane editPane) {
-        this.editor.setTitleFromFile(editPane.getFile(), editPane.getFileStatus());
+        this.editor.setTitleFromFile(
+            editPane.getFile(),
+            editPane.getFileStatus()
+        );
         final boolean assembled = FileStatus.isAssembled();
         editPane.updateStaticFileStatus(); // for legacy code that depends on the static FileStatus (pre 4.0)
         FileStatus.setAssembled(assembled);
@@ -552,7 +577,9 @@ public final class EditTabbedPane extends JPanel {
     }
 
     private final class FileOpener {
-        private static final @NotNull Logger LOGGER = LogManager.getLogger(FileOpener.class);
+        private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+            FileOpener.class
+        );
         private final @NotNull JFileChooser fileChooser;
         private final @NotNull ArrayList<@NotNull FileFilter> fileFilterList;
         private final @NotNull PropertyChangeListener listenForUserAddedFileFilter;
@@ -609,12 +636,16 @@ public final class EditTabbedPane extends JPanel {
                 // actionPerformed() method.
                 if (theFile.canRead()) {
                     if (allSettings.boolSettings.getSetting(BoolSetting.ASSEMBLE_ON_OPEN)) {
-                        EditTabbedPane.this.mainUI.getRunAssembleAction().actionPerformed(null);
+                        EditTabbedPane.this.mainUI.getRunAssembleAction()
+                            .actionPerformed(null);
                     }
                 }
                 final var endTime = Instant.now();
                 final var duration = Duration.between(startTime, endTime);
-                LOGGER.info("Opened file in {}ms.", duration.toMillis());
+                info(
+                    LOGGER,
+                    () -> "Opened file in %dms.".formatted(duration.toMillis())
+                );
             }
             return true;
         }
@@ -668,7 +699,10 @@ public final class EditTabbedPane extends JPanel {
                 editPane.setFileStatus(FileStatus.State.NOT_EDITED);
 
                 tabbedPane.addTab(editPane.getFile().getName(), editPane);
-                tabbedPane.setToolTipTextAt(tabbedPane.indexOfComponent(editPane), editPane.getFile().getPath());
+                tabbedPane.setToolTipTextAt(
+                    tabbedPane.indexOfComponent(editPane),
+                    editPane.getFile().getPath()
+                );
                 tabbedPane.setSelectedComponent(editPane);
                 FileStatus.setSystemState(FileStatus.State.NOT_EDITED);
 
@@ -743,10 +777,12 @@ public final class EditTabbedPane extends JPanel {
         // Enter, then it is automatically added to the array of choosable file filters.
         // Cancel out of the Open dialog, it is then REMOVED from the list automatically
         // we will achieve a sort of persistence at least through the current activation
-        private final class ChoosableFileFilterChangeListener implements PropertyChangeListener {
+        private final class ChoosableFileFilterChangeListener
+            implements PropertyChangeListener {
             @Override
             public void propertyChange(final @NotNull PropertyChangeEvent e) {
-                if (e.getPropertyName().equals(JFileChooser.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY)) {
+                if (e.getPropertyName()
+                    .equals(JFileChooser.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY)) {
                     final FileFilter[] newFilters = (FileFilter[]) e.getNewValue();
                     if (newFilters.length > FileOpener.this.fileFilterList.size()) {
                         // new filter added, so add to end of master list.

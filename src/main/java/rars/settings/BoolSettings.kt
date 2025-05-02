@@ -1,7 +1,7 @@
 package rars.settings
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import rars.logging.RARSLogging
+import rars.logging.error
 import rars.util.ListenerDispatcher
 import java.util.prefs.BackingStoreException
 import java.util.prefs.Preferences
@@ -18,7 +18,8 @@ class BoolSettingsImpl(private val preferences: Preferences) : BoolSettings {
 
     init {
         for (setting in BoolSetting.entries) {
-            val value = preferences.getBoolean(setting.repr, setting.defaultValue)
+            val value =
+                preferences.getBoolean(setting.repr, setting.defaultValue)
             currentSettings.put(setting, value)
         }
     }
@@ -63,10 +64,11 @@ class BoolSettingsImpl(private val preferences: Preferences) : BoolSettings {
      * The setting to get
      * @return The value of the setting
      */
-    override fun getSetting(setting: BoolSetting): Boolean = currentSettings[setting]!!
+    override fun getSetting(setting: BoolSetting): Boolean =
+        currentSettings[setting]!!
 
     companion object {
-        private val LOGGER: Logger = LogManager.getLogger(BoolSettingsImpl::class.java)
+        private val LOGGER = RARSLogging.forClass(BoolSettingsImpl::class)
     }
 }
 
@@ -190,5 +192,8 @@ enum class BoolSetting(val repr: String, val defaultValue: Boolean) {
     /**
      * Flag to determine whether to use the FlatLaf dark or light look and feel.
      */
-    DARK_MODE("dark_mode", false) // TODO: add option for turning off user trap handling and interrupts
+    DARK_MODE(
+        "dark_mode",
+        false
+    ) // TODO: add option for turning off user trap handling and interrupts
 }

@@ -1,13 +1,16 @@
 package rars.venus.util;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
+import static rars.logging.LoggingKt.debug;
 
 // CREDIT  
 // http://forums.sun.com/thread.jspa?threadID=499183&messageID=2505646
@@ -37,7 +40,8 @@ import java.awt.event.MouseListener;
  */
 public class RepeatButton extends JButton
     implements ActionListener, MouseListener {
-    private static final Logger LOGGER = LogManager.getLogger(RepeatButton.class);
+    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+        RepeatButton.class);
     /**
      * Testing flag. Set in main method.
      */
@@ -229,7 +233,7 @@ public class RepeatButton extends JButton
         }
         // testing code...
         else if (RepeatButton.testing && ae.getSource() == this) {
-            RepeatButton.LOGGER.debug(ae.getActionCommand());
+            debug(LOGGER, ae::getActionCommand);
         }
     }
 

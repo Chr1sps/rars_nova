@@ -1,10 +1,10 @@
 package rars.tools;
 
 import kotlin.Unit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 import rars.notices.AccessNotice;
 import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
@@ -18,6 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import static rars.Globals.FONT_SETTINGS;
+import static rars.logging.LoggingKt.error;
 
 /**
  * Instruction/memory dump tool. Dumps every instruction run and every memory
@@ -29,7 +30,8 @@ import static rars.Globals.FONT_SETTINGS;
  * @author John Owens &lt;jowens@ece.ucdavis.edu&gt;
  */
 public final class InstructionMemoryDump extends AbstractTool {
-    private static final Logger LOGGER = LogManager.getLogger(InstructionMemoryDump.class);
+    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+        InstructionMemoryDump.class);
     private static final String NAME = "Instruction/Memory Dump";
     private static final String VERSION = "Version 1.0 (John Owens)";
     private static final String HEADING = "Dumps every executed instruction and data memory access to a file";
@@ -54,7 +56,11 @@ public final class InstructionMemoryDump extends AbstractTool {
      * Simple construction, likely used by the RARS Tools menu mechanism.
      */
     public InstructionMemoryDump(final @NotNull VenusUI mainUI) {
-        super(InstructionMemoryDump.NAME + ", " + InstructionMemoryDump.VERSION, InstructionMemoryDump.HEADING, mainUI);
+        super(
+            InstructionMemoryDump.NAME + ", " + InstructionMemoryDump.VERSION,
+            InstructionMemoryDump.HEADING,
+            mainUI
+        );
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.lowDataSegmentAddress = rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(
             memoryConfiguration);
@@ -100,11 +106,16 @@ public final class InstructionMemoryDump extends AbstractTool {
         // watch the text segment (the program)
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         this.addAsObserver(
-            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration),
-            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+                memoryConfiguration),
+            rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(
+                memoryConfiguration)
         );
         // also watch the data segment
-        this.addAsObserver(this.lowDataSegmentAddress, this.highDataSegmentAddress);
+        this.addAsObserver(
+            this.lowDataSegmentAddress,
+            this.highDataSegmentAddress
+        );
     }
 
     @Override
@@ -118,8 +129,12 @@ public final class InstructionMemoryDump extends AbstractTool {
         final int a = m.address;
 
         // is a in the text segment (program)?
-        if ((a >= rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(memoryConfiguration)) && (
-            a < rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(memoryConfiguration)
+        if ((
+            a >= rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+                memoryConfiguration)
+        ) && (
+            a < rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(
+                memoryConfiguration)
         )) {
             if (notice.accessType != AccessType.READ) {
                 return;
@@ -130,10 +145,12 @@ public final class InstructionMemoryDump extends AbstractTool {
             this.lastAddress = a;
             Globals.MEMORY_INSTANCE.getProgramStatement(a).fold(
                 error -> {
-                    InstructionMemoryDump.LOGGER.error(
-                        "Error while trying to get statement at address {}: {}",
-                        a,
-                        error
+                    error(
+                        LOGGER, () ->
+                            "Error while trying to get a statement at address %d: %s".formatted(
+                                a,
+                                error
+                            )
                     );
                     return Unit.INSTANCE;
                 },
@@ -142,12 +159,16 @@ public final class InstructionMemoryDump extends AbstractTool {
                     // A null statement will cause the simulator to stall.
                     if (stmt != null) {
                         // First dump the instruction address, prefixed by "I:"
-                        this.log.append("I: 0x").append(Integer.toUnsignedString(a, 16)).append('\n');
+                        this.log.append("I: 0x")
+                            .append(Integer.toUnsignedString(a, 16))
+                            .append('\n');
                         // Then dump the instruction, prefixed by "i:"
-                        this.log.append("i: 0x").append(Integer.toUnsignedString(
-                            stmt.getBinaryStatement(),
-                            16
-                        )).append('\n');
+                        this.log.append("i: 0x")
+                            .append(Integer.toUnsignedString(
+                                stmt.getBinaryStatement(),
+                                16
+                            ))
+                            .append('\n');
                     }
                     return Unit.INSTANCE;
                 }

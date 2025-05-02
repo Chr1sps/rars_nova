@@ -1,7 +1,5 @@
 package rars.venus.editors.rsyntaxtextarea
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory
@@ -10,6 +8,9 @@ import org.fife.ui.rtextarea.Gutter
 import org.fife.ui.rtextarea.RTextScrollPane
 import org.fife.ui.rtextarea.SearchContext
 import org.fife.ui.rtextarea.SearchEngine
+import rars.logging.RARSLogging
+import rars.logging.error
+import rars.logging.warning
 import rars.riscv.lang.lexing.RVTokenType
 import rars.settings.FontSettings
 import rars.venus.editors.EditorTheme
@@ -86,7 +87,10 @@ class RSTABasedEditor(
 
     override fun cut() = textArea.cut()
 
-    override fun doFindText(find: String, caseSensitive: Boolean): FindReplaceResult {
+    override fun doFindText(
+        find: String,
+        caseSensitive: Boolean
+    ): FindReplaceResult {
         val context = SearchContext().apply {
             markAll = true
             searchFor = find
@@ -121,7 +125,11 @@ class RSTABasedEditor(
         }
     }
 
-    override fun doReplaceAll(find: String, replace: String, caseSensitive: Boolean): Int {
+    override fun doReplaceAll(
+        find: String,
+        replace: String,
+        caseSensitive: Boolean
+    ): Int {
         val context = SearchContext().apply {
             searchFor = find
             replaceWith = replace
@@ -143,7 +151,7 @@ class RSTABasedEditor(
             textArea.select(start, end)
             textArea.grabFocus()
         } catch (e: BadLocationException) {
-            LOGGER.warn("Failed to select line", e)
+            LOGGER.warning(e, "Failed to select line nr $lineNumber.")
         }
     }
 
@@ -237,7 +245,7 @@ class RSTABasedEditor(
             val column = offset - textArea.getLineStartOffset(line)
             Pair(line, column)
         } catch (e: BadLocationException) {
-            LOGGER.error("Failed to get caret position", e)
+            LOGGER.error(e, "Failed to get caret position")
             Pair(0, 0)
         }
 
@@ -248,15 +256,20 @@ class RSTABasedEditor(
 
     companion object {
         private const val SYNTAX_STYLE_RISCV = "text/riscv"
-        private val LOGGER: Logger = LogManager.getLogger(RSTABasedEditor::class.java)
+        private val LOGGER = RARSLogging.forClass(RSTABasedEditor::class)
         private val TEXT_ATTRIBUTES = mapOf(
             TextAttribute.KERNING to TextAttribute.KERNING_ON,
         )
 
         init {
-            FoldParserManager.get().addFoldParserMapping(SYNTAX_STYLE_RISCV, RVFoldParser)
-            val factory = TokenMakerFactory.getDefaultInstance() as AbstractTokenMakerFactory
-            factory.putMapping(SYNTAX_STYLE_RISCV, RSTATokensProducer::class.java.name)
+            FoldParserManager.get()
+                .addFoldParserMapping(SYNTAX_STYLE_RISCV, RVFoldParser)
+            val factory =
+                TokenMakerFactory.getDefaultInstance() as AbstractTokenMakerFactory
+            factory.putMapping(
+                SYNTAX_STYLE_RISCV,
+                RSTATokensProducer::class.java.name
+            )
         }
     }
 }

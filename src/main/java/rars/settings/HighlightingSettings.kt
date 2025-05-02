@@ -1,7 +1,7 @@
 package rars.settings
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import rars.logging.RARSLogging
+import rars.logging.error
 import rars.util.ListenerDispatcher
 import rars.venus.editors.TokenStyle
 import java.awt.Color
@@ -14,28 +14,32 @@ interface HighlightingSettings {
     val dataSegmentHighlightingStyle: TokenStyle?
 }
 
-class HighlightingSettingsImpl(private val preferences: Preferences) : HighlightingSettings {
+class HighlightingSettingsImpl(private val preferences: Preferences) :
+    HighlightingSettings {
     private val onChangeDispatcher = ListenerDispatcher<Void?>()
     val onChangeListenerHook = this.onChangeDispatcher.hook
 
-    override var textSegmentHighlightingStyle: TokenStyle = this.preferences.getTokenStyle(
-        TEXT_SEGMENT,
-        DEFAULT_TEXT_SEGMENT_STYLE,
-        HIGHLIGHTING_PREFIX,
-        LOGGER
-    )
+    override var textSegmentHighlightingStyle: TokenStyle =
+        this.preferences.getTokenStyle(
+            TEXT_SEGMENT,
+            DEFAULT_TEXT_SEGMENT_STYLE,
+            HIGHLIGHTING_PREFIX,
+            LOGGER
+        )
         private set
 
-    override var dataSegmentHighlightingStyle: TokenStyle? = loadNullableTokenStyleFromPreferences(
-        DATA_SEGMENT,
-        DEFAULT_DATA_SEGMENT_STYLE
-    )
+    override var dataSegmentHighlightingStyle: TokenStyle? =
+        loadNullableTokenStyleFromPreferences(
+            DATA_SEGMENT,
+            DEFAULT_DATA_SEGMENT_STYLE
+        )
         private set
 
-    override var registerHighlightingStyle: TokenStyle? = loadNullableTokenStyleFromPreferences(
-        REGISTER,
-        DEFAULT_REGISTER_STYLE
-    )
+    override var registerHighlightingStyle: TokenStyle? =
+        loadNullableTokenStyleFromPreferences(
+            REGISTER,
+            DEFAULT_REGISTER_STYLE
+        )
         private set
 
     fun saveSettings() {
@@ -44,8 +48,14 @@ class HighlightingSettingsImpl(private val preferences: Preferences) : Highlight
             this.textSegmentHighlightingStyle,
             HIGHLIGHTING_PREFIX
         )
-        writeNullableTokenStyleToPreferences(DATA_SEGMENT, this.dataSegmentHighlightingStyle)
-        writeNullableTokenStyleToPreferences(REGISTER, this.registerHighlightingStyle)
+        writeNullableTokenStyleToPreferences(
+            DATA_SEGMENT,
+            this.dataSegmentHighlightingStyle
+        )
+        writeNullableTokenStyleToPreferences(
+            REGISTER,
+            this.registerHighlightingStyle
+        )
         try {
             this.preferences.flush()
         } catch (_: SecurityException) {
@@ -85,7 +95,8 @@ class HighlightingSettingsImpl(private val preferences: Preferences) : Highlight
     }
 
     companion object {
-        private val LOGGER: Logger = LogManager.getLogger(HighlightingSettingsImpl::class.java)
+        private val LOGGER =
+            RARSLogging.forClass(HighlightingSettingsImpl::class)
 
         // region Preferences keys
         private const val HIGHLIGHTING_PREFIX = "Highlighting"
@@ -97,13 +108,16 @@ class HighlightingSettingsImpl(private val preferences: Preferences) : Highlight
         private const val REGISTER = "Register"
         // endregion Preferences keys
 
-        private fun enabledPrefix(type: String) = "$HIGHLIGHTING_PREFIX$type$ENABLED"
+        private fun enabledPrefix(type: String) =
+            "$HIGHLIGHTING_PREFIX$type$ENABLED"
     }
 }
 
-private val DEFAULT_TEXT_SEGMENT_STYLE: TokenStyle = fromBackground(Color(0xFFFF99))
+private val DEFAULT_TEXT_SEGMENT_STYLE: TokenStyle =
+    fromBackground(Color(0xFFFF99))
 
-private val DEFAULT_DATA_SEGMENT_STYLE: TokenStyle = fromBackground(Color(0x99CCFF))
+private val DEFAULT_DATA_SEGMENT_STYLE: TokenStyle =
+    fromBackground(Color(0x99CCFF))
 
 private val DEFAULT_REGISTER_STYLE: TokenStyle = fromBackground(Color(0x99CC55))
 

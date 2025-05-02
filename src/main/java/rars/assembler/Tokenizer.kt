@@ -3,13 +3,13 @@ package rars.assembler
 import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensure
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import rars.ErrorList
 import rars.ErrorMessage
 import rars.Globals
 import rars.RISCVProgram
 import rars.events.AssemblyError
+import rars.logging.RARSLogging
+import rars.logging.debug
 import java.io.File
 
 /**
@@ -70,7 +70,7 @@ class Tokenizer private constructor(
         val line = theLine.toCharArray()
         val token = CharArray(line.size)
         if (Globals.debug) {
-            LOGGER.debug("source line --->{}<---", theLine)
+            LOGGER.debug("source line --->$theLine<---")
         }
         // Each iteration of this loop processes one character in the source line.
         var insideQuotedString = false
@@ -84,7 +84,15 @@ class Tokenizer private constructor(
                 token[tokenPos++] = c
                 if (c == '"' && token[tokenPos - 2] != '\\') {
                     // If quote not preceded by backslash, this is end
-                    this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result)
+                    this.processCandidateToken(
+                        token,
+                        program,
+                        lineNum,
+                        theLine,
+                        tokenPos,
+                        tokenStartPos,
+                        result
+                    )
                     tokenPos = 0
                     insideQuotedString = false
                 }
@@ -94,21 +102,39 @@ class Tokenizer private constructor(
                     '#' -> {
                         if (tokenPos > 0) {
                             this.processCandidateToken(
-                                token, program, lineNum, theLine, tokenPos, tokenStartPos,
+                                token,
+                                program,
+                                lineNum,
+                                theLine,
+                                tokenPos,
+                                tokenStartPos,
                                 result
                             )
                         }
                         tokenStartPos = linePos + 1
                         tokenPos = line.size - linePos
                         System.arraycopy(line, linePos, token, 0, tokenPos)
-                        this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result)
+                        this.processCandidateToken(
+                            token,
+                            program,
+                            lineNum,
+                            theLine,
+                            tokenPos,
+                            tokenStartPos,
+                            result
+                        )
                         linePos = line.size
                         tokenPos = 0
                     }
 
                     ' ', '\t', ',' -> if (tokenPos > 0) {
                         this.processCandidateToken(
-                            token, program, lineNum, theLine, tokenPos, tokenStartPos,
+                            token,
+                            program,
+                            lineNum,
+                            theLine,
+                            tokenPos,
+                            tokenStartPos,
                             result
                         )
                         tokenPos = 0
@@ -127,7 +153,12 @@ class Tokenizer private constructor(
                         } else {
                             if (tokenPos > 0) {
                                 this.processCandidateToken(
-                                    token, program, lineNum, theLine, tokenPos, tokenStartPos,
+                                    token,
+                                    program,
+                                    lineNum,
+                                    theLine,
+                                    tokenPos,
+                                    tokenStartPos,
                                     result
                                 )
                                 tokenPos = 0
@@ -140,7 +171,15 @@ class Tokenizer private constructor(
                                 line[linePos + 2] == 'n' &&
                                 line[linePos + 3] == 'f'
                             ) {
-                                result.add(Token(TokenType.REAL_NUMBER, "-Inf", program, lineNum, tokenStartPos))
+                                result.add(
+                                    Token(
+                                        TokenType.REAL_NUMBER,
+                                        "-Inf",
+                                        program,
+                                        lineNum,
+                                        tokenStartPos
+                                    )
+                                )
                                 linePos += 3
                                 tokenPos = 0
                             } else if (
@@ -149,7 +188,12 @@ class Tokenizer private constructor(
                             ) {
                                 // treat it as binary.....
                                 this.processCandidateToken(
-                                    token, program, lineNum, theLine, tokenPos, tokenStartPos,
+                                    token,
+                                    program,
+                                    lineNum,
+                                    theLine,
+                                    tokenPos,
+                                    tokenStartPos,
                                     result
                                 )
                                 tokenPos = 0
@@ -161,21 +205,39 @@ class Tokenizer private constructor(
                     ':', '(', ')' -> {
                         if (tokenPos > 0) {
                             this.processCandidateToken(
-                                token, program, lineNum, theLine, tokenPos, tokenStartPos,
+                                token,
+                                program,
+                                lineNum,
+                                theLine,
+                                tokenPos,
+                                tokenStartPos,
                                 result
                             )
                             tokenPos = 0
                         }
                         tokenStartPos = linePos + 1
                         token[tokenPos++] = c
-                        this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result)
+                        this.processCandidateToken(
+                            token,
+                            program,
+                            lineNum,
+                            theLine,
+                            tokenPos,
+                            tokenStartPos,
+                            result
+                        )
                         tokenPos = 0
                     }
 
                     '"' -> {
                         if (tokenPos > 0) {
                             this.processCandidateToken(
-                                token, program, lineNum, theLine, tokenPos, tokenStartPos,
+                                token,
+                                program,
+                                lineNum,
+                                theLine,
+                                tokenPos,
+                                tokenStartPos,
                                 result
                             )
                             tokenPos = 0
@@ -188,7 +250,12 @@ class Tokenizer private constructor(
                     '\'' -> {
                         if (tokenPos > 0) {
                             this.processCandidateToken(
-                                token, program, lineNum, theLine, tokenPos, tokenStartPos,
+                                token,
+                                program,
+                                lineNum,
+                                theLine,
+                                tokenPos,
+                                tokenStartPos,
                                 result
                             )
                             tokenPos = 0
@@ -200,14 +267,21 @@ class Tokenizer private constructor(
                         // need minimum 2 more characters, 1 for char and 1 for ending quote
                         if (lookaheadChars >= 2) {
                             c = line[++linePos]
-                            token[tokenPos++] = c // grab second character, put it in token[1]
+                            token[tokenPos++] =
+                                c // grab second character, put it in token[1]
                             if (c != '\'') {
                                 c = line[++linePos]
-                                token[tokenPos++] = c // grab third character, put it in token[2]
+                                token[tokenPos++] =
+                                    c // grab third character, put it in token[2]
                                 // Process if we've either reached second, non-escaped, quote or end of line.
                                 if (c == '\'' && token[1] != '\\' || lookaheadChars == 2) {
                                     this.processCandidateToken(
-                                        token, program, lineNum, theLine, tokenPos, tokenStartPos,
+                                        token,
+                                        program,
+                                        lineNum,
+                                        theLine,
+                                        tokenPos,
+                                        tokenStartPos,
                                         result
                                     )
                                     tokenPos = 0
@@ -217,11 +291,17 @@ class Tokenizer private constructor(
                                     // still here after seeing a second quote, it was escaped. Not done yet;
                                     // we either have an escape code, an octal code (also escaped) or invalid.
                                     c = line[++linePos]
-                                    token[tokenPos++] = c // grab fourth character, put it in token[3]
+                                    token[tokenPos++] =
+                                        c // grab fourth character, put it in token[3]
                                     // Process, if this is ending quote for escaped character or if at end of line
                                     if (c == '\'' || lookaheadChars == 3) {
                                         this.processCandidateToken(
-                                            token, program, lineNum, theLine, tokenPos, tokenStartPos,
+                                            token,
+                                            program,
+                                            lineNum,
+                                            theLine,
+                                            tokenPos,
+                                            tokenStartPos,
                                             result
                                         )
                                         tokenPos = 0
@@ -232,11 +312,13 @@ class Tokenizer private constructor(
                                         // Proceed, if enough characters remain to finish off octal.
                                         if (lookaheadChars >= 5) {
                                             c = line[++linePos]
-                                            token[tokenPos++] = c // grab fifth character, put it in token[4]
+                                            token[tokenPos++] =
+                                                c // grab fifth character, put it in token[4]
                                             if (c != '\'') {
                                                 // still haven't reached end, last chance for validity!
                                                 c = line[++linePos]
-                                                token[tokenPos++] = c // grab sixth character, put it in token[5]
+                                                token[tokenPos++] =
+                                                    c // grab sixth character, put it in token[5]
                                             }
                                         }
                                         // process no matter what...we either have a valid character by now or not
@@ -279,7 +361,15 @@ class Tokenizer private constructor(
                     )
                 )
             }
-            this.processCandidateToken(token, program, lineNum, theLine, tokenPos, tokenStartPos, result)
+            this.processCandidateToken(
+                token,
+                program,
+                lineNum,
+                theLine,
+                tokenPos,
+                tokenStartPos,
+                result
+            )
         }
         if (doEqvSubstitutes) {
             result = this.processEqv(program, lineNum, theLine, result)
@@ -309,7 +399,10 @@ class Tokenizer private constructor(
             val tokenizedLine = tokenizeLineImpl(program, i + 1, line, false)
             var hasInclude = false
             for (ii in tokenizedLine.indices) {
-                if (tokenizedLine.get(ii).text.equals(Directive.INCLUDE.directiveName, ignoreCase = true)
+                if (tokenizedLine.get(ii).text.equals(
+                        Directive.INCLUDE.directiveName,
+                        ignoreCase = true
+                    )
                     && (tokenizedLine.size > ii + 1)
                     && tokenizedLine.get(ii + 1).type == TokenType.QUOTED_STRING
                 ) {
@@ -318,7 +411,8 @@ class Tokenizer private constructor(
                         .text.let { it.substring(1, it.length - 1) }
                     // Handle either absolute or relative pathname for .include file
                     if (!File(filename).isAbsolute) {
-                        filename = program.file!!.getParent() + File.separator + filename
+                        filename =
+                            program.file!!.getParent() + File.separator + filename
                     }
                     if (inclFiles.containsKey(filename)) {
                         // This is a recursive include. Generate error message and return immediately.
@@ -335,10 +429,14 @@ class Tokenizer private constructor(
                     val incl = RISCVProgram()
                     incl.readSource(File(filename)).onLeft {
                         val token = tokenizedLine.get(ii + 1)
-                        this@Tokenizer.errors.addTokenError(token, "Error reading include file $filename")
+                        this@Tokenizer.errors.addTokenError(
+                            token,
+                            "Error reading include file $filename"
+                        )
                         raise(AssemblyError(this@Tokenizer.errors))
                     }
-                    val allLines = this@Tokenizer.processIncludes(incl, inclFiles).bind()
+                    val allLines =
+                        this@Tokenizer.processIncludes(incl, inclFiles).bind()
                     result.addAll(allLines)
                     hasInclude = true
                     break
@@ -417,7 +515,8 @@ class Tokenizer private constructor(
                 val startExpression = tokens.get(dirPos + 2).startPos
                 val endExpression = (tokens.get(tokenPosLastOperand).startPos
                     + tokens.get(tokenPosLastOperand).text.length)
-                val expression = theLine.substring(startExpression - 1, endExpression - 1)
+                val expression =
+                    theLine.substring(startExpression - 1, endExpression - 1)
                 // Removed equivalents checking - this is a tokenizer, not a semantic checker
                 this.equivalents.put(symbol, expression)
                 return tokens
@@ -435,14 +534,20 @@ class Tokenizer private constructor(
                 val startPos = token.startPos
                 theLine = (theLine.substring(0, startPos - 1) + sub
                     + theLine.substring(startPos + token.text.length - 1))
-                substitutionMade = true // one substitution per call. If there are multiple, will catch next one on the
+                substitutionMade =
+                    true // one substitution per call. If there are multiple, will catch next one on the
                 // recursion
                 break
             }
         }
         tokens.processedLine = theLine
 
-        return if (substitutionMade) this.tokenizeLineImpl(this.program, lineNum, theLine, true) else tokens
+        return if (substitutionMade) this.tokenizeLineImpl(
+            this.program,
+            lineNum,
+            theLine,
+            true
+        ) else tokens
     }
 
     /** Given candidate token and its position, will classify and record it. */
@@ -470,14 +575,15 @@ class Tokenizer private constructor(
     }
 
     companion object {
-        private val LOGGER: Logger = LogManager.getLogger(Tokenizer::class.java)
+        private val LOGGER = RARSLogging.forClass(Tokenizer::class)
 
         // The 8 escaped characters are: single quote, double quote, backslash, newline
         // (linefeed),
         // tab, backspace, return, form feed. The characters and their corresponding
         // decimal codes:
         private const val ESCAPED_CHARACTERS = "'\"\\ntbrf0"
-        private val escapedCharactersValues = arrayOf<String>("39", "34", "92", "10", "9", "8", "13", "12", "0")
+        private val escapedCharactersValues =
+            arrayOf<String>("39", "34", "92", "10", "9", "8", "13", "12", "0")
 
         /** If passed a candidate character literal, attempt to translate it into integer
          * constant.
@@ -496,7 +602,8 @@ class Tokenizer private constructor(
             // now we know it is escape sequence and have to decode which of the 8:
             // ',",\,n,t,b,r,f
             if (quotesRemoved.length == 2) {
-                val escapedCharacterIndex: Int = ESCAPED_CHARACTERS.indexOf(quotesRemoved[1])
+                val escapedCharacterIndex: Int =
+                    ESCAPED_CHARACTERS.indexOf(quotesRemoved[1])
                 return if (escapedCharacterIndex >= 0) escapedCharactersValues[escapedCharacterIndex] else value
             }
             // last valid possibility is 3 digit octal code 000 through 377
@@ -522,35 +629,46 @@ class Tokenizer private constructor(
          * if any.
          */
         @JvmStatic
-        fun tokenize(program: RISCVProgram): Either<AssemblyError, List<TokenList>> = either {
-            val tokenizer = Tokenizer(program)
-            val source = tokenizer.processIncludes(program, mutableMapOf()).bind()
-            program.sourceLineList = source
+        fun tokenize(program: RISCVProgram): Either<AssemblyError, List<TokenList>> =
+            either {
+                val tokenizer = Tokenizer(program)
+                val source =
+                    tokenizer.processIncludes(program, mutableMapOf()).bind()
+                program.sourceLineList = source
 
-            val tokenList = mutableListOf<TokenList>()
-            for (i in source.indices) {
-                val sourceLine = source[i].source
-                val currentLineTokens = tokenizer.tokenizeLineImpl(tokenizer.program, i + 1, sourceLine, true)
-                tokenList.add(currentLineTokens)
-                // If source code substitution was
-                // made
-                // based on .eqv directive during tokenizing, the processed line, a String, is
-                // not the same object as the original line. Thus I can use != instead of
-                // !equals()
-                // This IF statement will replace original source with source modified by .eqv
-                // substitution.
-                // Not needed by assembler, but looks better in the Text Segment Display.
-                if (sourceLine.isNotEmpty() && sourceLine != currentLineTokens.processedLine) {
-                    source[i] = SourceLine(
-                        currentLineTokens.processedLine,
-                        source[i].program,
-                        source[i].lineNumber
+                val tokenList = mutableListOf<TokenList>()
+                for (i in source.indices) {
+                    val sourceLine = source[i].source
+                    val currentLineTokens = tokenizer.tokenizeLineImpl(
+                        tokenizer.program,
+                        i + 1,
+                        sourceLine,
+                        true
+                    )
+                    tokenList.add(currentLineTokens)
+                    // If source code substitution was
+                    // made
+                    // based on .eqv directive during tokenizing, the processed line, a String, is
+                    // not the same object as the original line. Thus I can use != instead of
+                    // !equals()
+                    // This IF statement will replace original source with source modified by .eqv
+                    // substitution.
+                    // Not needed by assembler, but looks better in the Text Segment Display.
+                    if (sourceLine.isNotEmpty() && sourceLine != currentLineTokens.processedLine) {
+                        source[i] = SourceLine(
+                            currentLineTokens.processedLine,
+                            source[i].program,
+                            source[i].lineNumber
+                        )
+                    }
+                }
+                ensure(!tokenizer.errors.errorsOccurred()) {
+                    AssemblyError(
+                        tokenizer.errors
                     )
                 }
+                tokenList
             }
-            ensure(!tokenizer.errors.errorsOccurred()) { AssemblyError(tokenizer.errors) }
-            tokenList
-        }
 
         /** Used only to create a token list for the example provided with each
          * instruction specification.
@@ -564,12 +682,17 @@ class Tokenizer private constructor(
          * lexical (i.e. token) errors.
          */
         @JvmStatic
-        fun tokenizeExampleInstruction(example: String): Either<AssemblyError, TokenList> = either {
-            val tokenizer = Tokenizer()
-            val result = tokenizer.tokenizeLineImpl(null, 0, example, false)
-            ensure(!tokenizer.errors.errorsOccurred()) { AssemblyError(tokenizer.errors) }
-            result
-        }
+        fun tokenizeExampleInstruction(example: String): Either<AssemblyError, TokenList> =
+            either {
+                val tokenizer = Tokenizer()
+                val result = tokenizer.tokenizeLineImpl(null, 0, example, false)
+                ensure(!tokenizer.errors.errorsOccurred()) {
+                    AssemblyError(
+                        tokenizer.errors
+                    )
+                }
+                result
+            }
 
         /**
          * Will tokenize one line of source code. If lexical errors are discovered,
@@ -597,7 +720,12 @@ class Tokenizer private constructor(
             doEqvSubstitutes: Boolean
         ): TokenList {
             val tokenizer = Tokenizer(null, callerErrorList)
-            return tokenizer.tokenizeLineImpl(null, lineNum, theLine, doEqvSubstitutes)
+            return tokenizer.tokenizeLineImpl(
+                null,
+                lineNum,
+                theLine,
+                doEqvSubstitutes
+            )
         }
     }
 }

@@ -1,10 +1,10 @@
 package rars.tools;
 
 import kotlin.Unit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 import rars.notices.AccessNotice;
 import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
@@ -14,6 +14,7 @@ import rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 
+import static rars.logging.LoggingKt.error;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress;
 
@@ -26,7 +27,8 @@ import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLim
  * @author Felipe Lessa &lt;felipe.lessa@gmail.com&gt;
  */
 public final class InstructionCounter extends AbstractTool {
-    private static final Logger LOGGER = LogManager.getLogger(InstructionCounter.class);
+    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+        InstructionCounter.class);
     private static final String NAME = "Instruction Counter";
     private static final String VERSION = "Version 1.0 (Felipe Lessa)";
     private static final String HEADING = "Counting the number of instructions executed";
@@ -81,7 +83,11 @@ public final class InstructionCounter extends AbstractTool {
      * Simple construction, likely used by the RARS Tools menu mechanism.
      */
     public InstructionCounter(final @NotNull VenusUI mainUI) {
-        super(InstructionCounter.NAME + ", " + InstructionCounter.VERSION, InstructionCounter.HEADING, mainUI);
+        super(
+            InstructionCounter.NAME + ", " + InstructionCounter.VERSION,
+            InstructionCounter.HEADING,
+            mainUI
+        );
     }
 
     @Override
@@ -251,7 +257,10 @@ public final class InstructionCounter extends AbstractTool {
         this.counter++;
         Globals.MEMORY_INSTANCE.getProgramStatement(a).fold(
             error -> {
-                InstructionCounter.LOGGER.error("Error in InstructionCounter: {}", error);
+                error(
+                    LOGGER, () ->
+                        "Error in InstructionCounter: " + error
+                );
                 return Unit.INSTANCE;
             },
             stmt -> {

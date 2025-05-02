@@ -4,11 +4,11 @@ import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import kotlin.Unit;
 import kotlin.collections.ArraysKt;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.io.VenusIO;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 import rars.riscv.InstructionsRegistry;
 import rars.settings.*;
 import rars.venus.actions.ActionRegistry;
@@ -34,6 +34,8 @@ import java.io.File;
 import java.util.List;
 
 import static kotlin.collections.CollectionsKt.*;
+import static rars.logging.LoggingKt.error;
+import static rars.logging.LoggingKt.fatal;
 import static rars.venus.util.IconLoading.loadIcon;
 
 /**
@@ -42,7 +44,9 @@ import static rars.venus.util.IconLoading.loadIcon;
  * @author Sanderson and Team JSpim
  */
 public final class VenusUI extends JFrame {
-    private static final Logger LOGGER = LogManager.getLogger(VenusUI.class);
+    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+        VenusUI.class
+    );
     public final @NotNull JMenuBar menu;
     public final @NotNull MainPane mainPane;
     public final @NotNull RegistersPane registersPane;
@@ -93,13 +97,20 @@ public final class VenusUI extends JFrame {
      * @param files
      *     Files to open
      */
-    public VenusUI(final @NotNull String name, final @NotNull List<? extends @NotNull File> files) {
+    public VenusUI(
+        final @NotNull String name,
+        final @NotNull List<? extends @NotNull File> files
+    ) {
         super(name);
         setDarkModeState(boolSettings.getSetting(BoolSetting.DARK_MODE));
         this.editor = new Editor(this);
 
-        final double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-        final double screenHeight = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+        final double screenWidth = Toolkit.getDefaultToolkit()
+            .getScreenSize()
+            .getWidth();
+        final double screenHeight = Toolkit.getDefaultToolkit()
+            .getScreenSize()
+            .getHeight();
         // basically give up some screen space if running at 800 x 600
         final double messageWidthPct = (screenWidth < 1000.0) ? 0.67 : 0.73;
         final double messageHeightPct = (screenWidth < 1000.0) ? 0.12 : 0.15;
@@ -121,9 +132,10 @@ public final class VenusUI extends JFrame {
             (int) (screenHeight * registersHeightPct)
         );
 
-        final var imageUrl = this.getClass().getResource(Globals.IMAGES_PATH + "RISC-V.png");
+        final var imageUrl = this.getClass()
+            .getResource(Globals.IMAGES_PATH + "RISC-V.png");
         if (imageUrl == null) {
-            VenusUI.LOGGER.fatal("Internal Error: images folder or file not found.");
+            fatal(LOGGER, "Internal Error: images folder or file not found.");
             System.exit(0);
         }
         final var rvImage = Toolkit.getDefaultToolkit().getImage(imageUrl);
@@ -144,18 +156,33 @@ public final class VenusUI extends JFrame {
         // roughly in bottom-up order; some are created in component constructors and
         // thus are
         // not visible here.
-        this.registersTab = new RegistersWindow(Globals.REGISTER_FILE, this, Globals.ALL_SETTINGS);
-        this.floatingPointTab = new FloatingPointWindow(Globals.FP_REGISTER_FILE, this, Globals.ALL_SETTINGS);
-        this.csrTab = new ControlAndStatusWindow(Globals.CS_REGISTER_FILE, this, Globals.ALL_SETTINGS);
-        this.registersPane = new RegistersPane(this.registersTab, this.floatingPointTab, this.csrTab);
+        this.registersTab = new RegistersWindow(Globals.REGISTER_FILE,
+            this,
+            Globals.ALL_SETTINGS);
+        this.floatingPointTab = new FloatingPointWindow(Globals.FP_REGISTER_FILE,
+            this,
+            Globals.ALL_SETTINGS);
+        this.csrTab = new ControlAndStatusWindow(Globals.CS_REGISTER_FILE,
+            this,
+            Globals.ALL_SETTINGS);
+        this.registersPane = new RegistersPane(this.registersTab,
+            this.floatingPointTab,
+            this.csrTab);
         this.registersPane.setPreferredSize(registersPanePreferredSize);
 
-        this.mainPane = new MainPane(this, editor, registersTab, floatingPointTab, csrTab, allSettings);
+        this.mainPane = new MainPane(this,
+            editor,
+            registersTab,
+            floatingPointTab,
+            csrTab,
+            allSettings);
 
         this.mainPane.setPreferredSize(mainPanePreferredSize);
         this.messagesPane = new MessagesPane(this, fontSettings);
         this.messagesPane.setPreferredSize(messagesPanePreferredSize);
-        final JSplitPane splitter = new JSplitPane(JSplitPane.VERTICAL_SPLIT, this.mainPane, this.messagesPane);
+        final JSplitPane splitter = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+            this.mainPane,
+            this.messagesPane);
         splitter.setOneTouchExpandable(true);
         splitter.resetToPreferredSizes();
         final var horizontalLayout = new JPanel(new BorderLayout());
@@ -217,8 +244,12 @@ public final class VenusUI extends JFrame {
             }
         };
         this.fileSaveAsAction = new GuiAction(
-            "Save as ...", "Save current file with different name", loadIcon("SaveAs22.png"),
-            KeyEvent.VK_A, null, VenusUI.this
+            "Save as ...",
+            "Save current file with different name",
+            loadIcon("SaveAs22.png"),
+            KeyEvent.VK_A,
+            null,
+            VenusUI.this
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
@@ -240,7 +271,12 @@ public final class VenusUI extends JFrame {
             VenusUI.makeShortcut(KeyEvent.VK_D),
             this
         );
-        this.fileExitAction = new GuiAction("Exit", "Exit Rars", null, KeyEvent.VK_X, null, VenusUI.this) {
+        this.fileExitAction = new GuiAction("Exit",
+            "Exit Rars",
+            null,
+            KeyEvent.VK_X,
+            null,
+            VenusUI.this) {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 if (VenusUI.this.editor.closeAll()) {
@@ -311,8 +347,12 @@ public final class VenusUI extends JFrame {
             }
         };
         this.editFindReplaceAction = new EditFindReplaceAction(
-            "Find/Replace", loadIcon("Find22.png"),
-            "Find/Replace", KeyEvent.VK_F, VenusUI.makeShortcut(KeyEvent.VK_F), this
+            "Find/Replace",
+            loadIcon("Find22.png"),
+            "Find/Replace",
+            KeyEvent.VK_F,
+            VenusUI.makeShortcut(KeyEvent.VK_F),
+            this
         );
 
         this.runAssembleAction = new RunAssembleAction(
@@ -325,16 +365,27 @@ public final class VenusUI extends JFrame {
             KeyEvent.VK_G, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), this
         );
         this.runStepAction = new RunStepAction(
-            "Step", loadIcon("StepForward22.png"),
-            "Run one step at a time", KeyEvent.VK_T, KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), this
+            "Step",
+            loadIcon("StepForward22.png"),
+            "Run one step at a time",
+            KeyEvent.VK_T,
+            KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0),
+            this
         );
         this.runBackstepAction = new RunBackstepAction(
-            "Backstep", loadIcon("StepBack22.png"),
-            "Undo the last step", KeyEvent.VK_B, KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0), this
+            "Backstep",
+            loadIcon("StepBack22.png"),
+            "Undo the last step",
+            KeyEvent.VK_B,
+            KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0),
+            this
         );
         this.runPauseAction = new GuiAction(
-            "Pause", "Pause the currently running program", loadIcon("Pause22.png"),
-            KeyEvent.VK_P, KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0),
+            "Pause",
+            "Pause the currently running program",
+            loadIcon("Pause22.png"),
+            KeyEvent.VK_P,
+            KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0),
             VenusUI.this
         ) {
             @Override
@@ -344,8 +395,11 @@ public final class VenusUI extends JFrame {
             }
         };
         this.runStopAction = new GuiAction(
-            "Stop", "Stop the currently running program", loadIcon("Stop22.png"),
-            KeyEvent.VK_S, KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0),
+            "Stop",
+            "Stop the currently running program",
+            loadIcon("Stop22.png"),
+            KeyEvent.VK_S,
+            KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0),
             VenusUI.this
         ) {
             @Override
@@ -366,22 +420,24 @@ public final class VenusUI extends JFrame {
             "Toggle all breakpoints",
             "Disable/enable all breakpoints without clearing (can also click Bkpt column header)",
             null,
-            KeyEvent.VK_T, VenusUI.makeShortcut(KeyEvent.VK_T), VenusUI.this
+            KeyEvent.VK_T,
+            VenusUI.makeShortcut(KeyEvent.VK_T),
+            VenusUI.this
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 // settingsLabelAction.actionPerformed(e);
-                VenusUI.this.mainPane.executePane.getTextSegment().toggleBreakpoints();
+                VenusUI.this.mainPane.executePane.getTextSegment()
+                    .toggleBreakpoints();
             }
         };
         this.settingsLabelAction = new SettingsAction(
             "Show Labels Window (symbol table)",
             "Toggle visibility of Labels window (symbol table) in the Execute tab",
             boolSettings,
-            BoolSetting.LABEL_WINDOW_VISIBILITY, this, (value) -> {
-            this.mainPane.executePane.setLabelWindowVisibility(value);
-            VenusUI.LOGGER.info("ExecutePane reference 2");
-        }
+            BoolSetting.LABEL_WINDOW_VISIBILITY,
+            this,
+            mainPane.executePane::setLabelWindowVisibility
         );
         this.settingsDarkModeAction = new SettingsAction(
             "Dark mode", "Toggle between light and dark mode",
@@ -393,14 +449,16 @@ public final class VenusUI extends JFrame {
             "Popup dialog for input syscalls (5,6,7,8,12)",
             "If set, use popup dialog for input syscalls (5,6,7,8,12) instead of cursor in Run I/O window",
             boolSettings,
-            BoolSetting.POPUP_SYSCALL_INPUT, this
+            BoolSetting.POPUP_SYSCALL_INPUT,
+            this
         );
 
         this.settingsValueDisplayBaseAction = new SettingsAction(
             "Values displayed in hexadecimal",
             "Toggle between hexadecimal and decimal display of memory/register values",
             boolSettings,
-            BoolSetting.DISPLAY_VALUES_IN_HEX, this,
+            BoolSetting.DISPLAY_VALUES_IN_HEX,
+            this,
             this.mainPane.executePane.getValueDisplayBaseChooser()::setSelected
         );
         this.settingsAddressDisplayBaseAction = new SettingsAction(
@@ -416,76 +474,90 @@ public final class VenusUI extends JFrame {
                 "and formats",
             "If set, extended (usePseudoInstructions) instructions are formats are permitted.",
             boolSettings,
-            BoolSetting.EXTENDED_ASSEMBLER_ENABLED, this
+            BoolSetting.EXTENDED_ASSEMBLER_ENABLED,
+            this
         );
         this.settingsAssembleOnOpenAction = new SettingsAction(
             "Assemble file upon opening",
             "If set, a file will be automatically assembled as soon as it is opened.  File Open dialog will " +
                 "show most recently opened file.",
             boolSettings,
-            BoolSetting.ASSEMBLE_ON_OPEN, this
+            BoolSetting.ASSEMBLE_ON_OPEN,
+            this
         );
         this.settingsAssembleAllAction = new SettingsAction(
             "Assemble all files in directory",
             "If set, all files in current directory will be assembled when Assemble operation is selected.",
             boolSettings,
-            BoolSetting.ASSEMBLE_ALL, this
+            BoolSetting.ASSEMBLE_ALL,
+            this
         );
         this.settingsAssembleOpenAction = new SettingsAction(
             "Assemble all files currently open",
             "If set, all files currently open for editing will be assembled when Assemble operation is " +
                 "selected.",
             boolSettings,
-            BoolSetting.ASSEMBLE_OPEN, this
+            BoolSetting.ASSEMBLE_OPEN,
+            this
         );
         this.settingsWarningsAreErrorsAction = new SettingsAction(
             "Assembler warnings are considered errors",
             "If set, assembler warnings will be interpreted as errors and prevent successful assembly.",
             boolSettings,
-            BoolSetting.WARNINGS_ARE_ERRORS, this
+            BoolSetting.WARNINGS_ARE_ERRORS,
+            this
         );
         this.settingsStartAtMainAction = new SettingsAction(
             "Initialize Program Counter to global 'main' if defined",
             "If set, assembler will initialize Program Counter to text address globally labeled 'main', if defined.",
             boolSettings,
-            BoolSetting.START_AT_MAIN, this
+            BoolSetting.START_AT_MAIN,
+            this
         );
         this.settingsProgramArgumentsAction = new SettingsAction(
             "Program arguments provided to program",
             "If set, program arguments for the program can be entered in border of Text Segment window.",
             boolSettings,
-            BoolSetting.PROGRAM_ARGUMENTS, this, (selected) -> {
-            if (selected) {
-                this.mainPane.executePane.getTextSegment().addProgramArgumentsPanel();
-            } else {
-                this.mainPane.executePane.getTextSegment().removeProgramArgumentsPanel();
+            BoolSetting.PROGRAM_ARGUMENTS,
+            this,
+            (selected) -> {
+                if (selected) {
+                    this.mainPane.executePane.getTextSegment()
+                        .addProgramArgumentsPanel();
+                } else {
+                    this.mainPane.executePane.getTextSegment()
+                        .removeProgramArgumentsPanel();
+                }
             }
-        }
         );
         this.settingsSelfModifyingCodeAction = new SettingsAction(
             "Self-modifying code",
             "If set, the program can write and branch to both text and data segments.",
             boolSettings,
-            BoolSetting.SELF_MODIFYING_CODE_ENABLED, this
+            BoolSetting.SELF_MODIFYING_CODE_ENABLED,
+            this
         );
 
         this.settingsRV64Action = new SettingsAction(
             "64 bit",
             "If set, registers are 64 bits wide and new instructions are available",
             boolSettings,
-            BoolSetting.RV64_ENABLED, this, (isRV64) -> {
-            InstructionsRegistry.RV64_MODE_FLAG = isRV64;
-            this.registersTab.updateRegisters();
-            this.floatingPointTab.updateRegisters();
-            this.csrTab.updateRegisters();
-        }
+            BoolSetting.RV64_ENABLED,
+            this,
+            (isRV64) -> {
+                InstructionsRegistry.RV64_MODE_FLAG = isRV64;
+                this.registersTab.updateRegisters();
+                this.floatingPointTab.updateRegisters();
+                this.csrTab.updateRegisters();
+            }
         );
         this.settingsDeriveCurrentWorkingDirectoryAction = new SettingsAction(
             "Derive current working directory",
             "If set, the working directory is derived from the main file instead of the RARS executable " +
                 "directory.",
             boolSettings,
-            BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY, this
+            BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY,
+            this
         );
 
         this.settingsEditorAction = new SettingsEditorAction(
@@ -501,8 +573,11 @@ public final class VenusUI extends JFrame {
         );
         this.settingsMemoryConfigurationAction = new SettingsMemoryConfigurationAction(
             "Memory Configuration...",
-            null, "View and modify memory segment base addresses for the simulated processor",
-            null, null, this
+            null,
+            "View and modify memory segment base addresses for the simulated processor",
+            null,
+            null,
+            this
         );
 
         this.helpHelpAction = new HelpHelpAction(
@@ -567,10 +642,13 @@ public final class VenusUI extends JFrame {
 
         // Open files
         if (!this.editor.openFiles(files)) {
-            VenusUI.LOGGER.fatal(
-                "Internal Error: could not open files {}",
-                String.join(", ", map(files, File::getName))
-            );
+            fatal(LOGGER, () -> {
+                final var filesString = String.join(
+                    ", ",
+                    map(files, File::getName)
+                );
+                return "Internal Error: could not open files " + filesString;
+            });
             System.exit(1);
         }
     }
@@ -582,7 +660,8 @@ public final class VenusUI extends JFrame {
      */
 
     private static KeyStroke makeShortcut(final int key) {
-        return KeyStroke.getKeyStroke(key, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        return KeyStroke.getKeyStroke(key,
+            Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
     }
 
     /// Sets each of the [Action] objects to be enabled.
@@ -636,12 +715,14 @@ public final class VenusUI extends JFrame {
     }
 
     private void setDarkModeState(final boolean isDarkMode) {
-        final var lookAndFeel = isDarkMode ? new FlatMacDarkLaf() : new FlatMacLightLaf();
+        final var lookAndFeel = isDarkMode
+            ? new FlatMacDarkLaf()
+            : new FlatMacLightLaf();
         try {
             UIManager.setLookAndFeel(lookAndFeel);
             SwingUtilities.updateComponentTreeUI(this);
         } catch (final UnsupportedLookAndFeelException e) {
-            LOGGER.error("Error when loading look and feel.", e);
+            error(LOGGER, e, "Error when loading look and feel.");
         }
     }
 
@@ -721,30 +802,42 @@ public final class VenusUI extends JFrame {
             BoolSetting.DISPLAY_ADDRESSES_IN_HEX
         );
 
-        this.mainPane.executePane.getValueDisplayBaseChooser().setSettingsMenuItem(settingsValueDisplayBase);
-        this.mainPane.executePane.getAddressDisplayBaseChooser().setSettingsMenuItem(settingsAddressDisplayBase);
+        this.mainPane.executePane.getValueDisplayBaseChooser()
+            .setSettingsMenuItem(settingsValueDisplayBase);
+        this.mainPane.executePane.getAddressDisplayBaseChooser()
+            .setSettingsMenuItem(settingsAddressDisplayBase);
 
         List.of(
             checkBoxItem(this.settingsDarkModeAction, BoolSetting.DARK_MODE),
             new JPopupMenu.Separator(),
-            checkBoxItem(this.settingsLabelAction, BoolSetting.LABEL_WINDOW_VISIBILITY),
-            checkBoxItem(this.settingsProgramArgumentsAction, BoolSetting.PROGRAM_ARGUMENTS),
-            checkBoxItem(this.settingsPopupInputAction, BoolSetting.POPUP_SYSCALL_INPUT),
+            checkBoxItem(this.settingsLabelAction,
+                BoolSetting.LABEL_WINDOW_VISIBILITY),
+            checkBoxItem(this.settingsProgramArgumentsAction,
+                BoolSetting.PROGRAM_ARGUMENTS),
+            checkBoxItem(this.settingsPopupInputAction,
+                BoolSetting.POPUP_SYSCALL_INPUT),
             settingsAddressDisplayBase,
             settingsValueDisplayBase,
             new JPopupMenu.Separator(),
-            checkBoxItem(this.settingsAssembleOnOpenAction, BoolSetting.ASSEMBLE_ON_OPEN),
-            checkBoxItem(this.settingsAssembleAllAction, BoolSetting.ASSEMBLE_ALL),
-            checkBoxItem(this.settingsAssembleOpenAction, BoolSetting.ASSEMBLE_OPEN),
-            checkBoxItem(this.settingsWarningsAreErrorsAction, BoolSetting.WARNINGS_ARE_ERRORS),
-            checkBoxItem(this.settingsStartAtMainAction, BoolSetting.START_AT_MAIN),
+            checkBoxItem(this.settingsAssembleOnOpenAction,
+                BoolSetting.ASSEMBLE_ON_OPEN),
+            checkBoxItem(this.settingsAssembleAllAction,
+                BoolSetting.ASSEMBLE_ALL),
+            checkBoxItem(this.settingsAssembleOpenAction,
+                BoolSetting.ASSEMBLE_OPEN),
+            checkBoxItem(this.settingsWarningsAreErrorsAction,
+                BoolSetting.WARNINGS_ARE_ERRORS),
+            checkBoxItem(this.settingsStartAtMainAction,
+                BoolSetting.START_AT_MAIN),
             checkBoxItem(
                 this.settingsDeriveCurrentWorkingDirectoryAction,
                 BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY
             ),
             new JPopupMenu.Separator(),
-            checkBoxItem(this.settingsExtendedAction, BoolSetting.EXTENDED_ASSEMBLER_ENABLED),
-            checkBoxItem(this.settingsSelfModifyingCodeAction, BoolSetting.SELF_MODIFYING_CODE_ENABLED),
+            checkBoxItem(this.settingsExtendedAction,
+                BoolSetting.EXTENDED_ASSEMBLER_ENABLED),
+            checkBoxItem(this.settingsSelfModifyingCodeAction,
+                BoolSetting.SELF_MODIFYING_CODE_ENABLED),
             checkBoxItem(this.settingsRV64Action, BoolSetting.RV64_ENABLED),
             new JPopupMenu.Separator(),
             new JMenuItem(this.settingsEditorAction),
@@ -858,18 +951,33 @@ public final class VenusUI extends JFrame {
     private void setMenuStateInitial() {
         setEnabled(fileNewAction, fileOpenAction);
         setDisabled(
-            fileCloseAction, fileCloseAllAction, fileSaveAction, fileSaveAsAction, fileSaveAllAction,
+            fileCloseAction,
+            fileCloseAllAction,
+            fileSaveAction,
+            fileSaveAsAction,
+            fileSaveAllAction,
             fileDumpMemoryAction
         );
         this.fileExitAction.setEnabled(true);
         setDisabled(
-            editUndoAction, editRedoAction, editCutAction, editCopyAction, editPasteAction,
+            editUndoAction,
+            editRedoAction,
+            editCutAction,
+            editCopyAction,
+            editPasteAction,
             editFindReplaceAction
         );
         this.settingsMemoryConfigurationAction.setEnabled(true); // added 21 July 2009
         setDisabled(
-            runAssembleAction, runGoAction, runStepAction, runBackstepAction, runResetAction,
-            runStopAction, runPauseAction, runClearBreakpointsAction, runToggleBreakpointsAction
+            runAssembleAction,
+            runGoAction,
+            runStepAction,
+            runBackstepAction,
+            runResetAction,
+            runStopAction,
+            runPauseAction,
+            runClearBreakpointsAction,
+            runToggleBreakpointsAction
         );
         setEnabled(helpHelpAction, helpAboutAction);
         this.updateUndoAndRedoState();
@@ -882,20 +990,35 @@ public final class VenusUI extends JFrame {
     private void setMenuStateNotEdited() {
         /* Note: undo and redo are handled separately by the undo manager */
         setEnabled(
-            fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
-            fileSaveAsAction, fileSaveAllAction
+            fileNewAction,
+            fileOpenAction,
+            fileCloseAction,
+            fileCloseAllAction,
+            fileSaveAction,
+            fileSaveAsAction,
+            fileSaveAllAction
         );
         this.fileDumpMemoryAction.setEnabled(false);
         setEnabled(
-            fileExitAction, editCutAction, editCopyAction, editPasteAction,
-            editFindReplaceAction, settingsMemoryConfigurationAction, runAssembleAction
+            fileExitAction,
+            editCutAction,
+            editCopyAction,
+            editPasteAction,
+            editFindReplaceAction,
+            settingsMemoryConfigurationAction,
+            runAssembleAction
         );
         // If assemble-all, allow previous Run menu settings to remain.
         // Otherwise, clear them out.
         if (!boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {
             setDisabled(
-                this.runGoAction, this.runStepAction, this.runBackstepAction, this.runResetAction,
-                this.runStopAction, this.runPauseAction, this.runClearBreakpointsAction,
+                this.runGoAction,
+                this.runStepAction,
+                this.runBackstepAction,
+                this.runResetAction,
+                this.runStopAction,
+                this.runPauseAction,
+                this.runClearBreakpointsAction,
                 this.runToggleBreakpointsAction
             );
         }
@@ -906,17 +1029,33 @@ public final class VenusUI extends JFrame {
     private void setMenuStateEditing() {
         /* Note: undo and redo are handled separately by the undo manager */
         setEnabled(
-            fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
-            fileSaveAsAction, fileSaveAllAction
+            fileNewAction,
+            fileOpenAction,
+            fileCloseAction,
+            fileCloseAllAction,
+            fileSaveAction,
+            fileSaveAsAction,
+            fileSaveAllAction
         );
         setDisabled(fileDumpMemoryAction);
         setEnabled(
-            fileExitAction, editCutAction, editCopyAction, editPasteAction, editFindReplaceAction,
-            settingsMemoryConfigurationAction, runAssembleAction
+            fileExitAction,
+            editCutAction,
+            editCopyAction,
+            editPasteAction,
+            editFindReplaceAction,
+            settingsMemoryConfigurationAction,
+            runAssembleAction
         );
         setDisabled(
-            runGoAction, runStepAction, runBackstepAction, runResetAction,
-            runStopAction, runPauseAction, runClearBreakpointsAction, runToggleBreakpointsAction
+            runGoAction,
+            runStepAction,
+            runBackstepAction,
+            runResetAction,
+            runStopAction,
+            runPauseAction,
+            runClearBreakpointsAction,
+            runToggleBreakpointsAction
         );
         setEnabled(helpHelpAction, helpAboutAction);
         this.updateUndoAndRedoState();
@@ -928,17 +1067,33 @@ public final class VenusUI extends JFrame {
     private void setMenuStateEditingNew() {
         /* Note: undo and redo are handled separately by the undo manager */
         setEnabled(
-            fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
-            fileSaveAsAction, fileSaveAllAction
+            fileNewAction,
+            fileOpenAction,
+            fileCloseAction,
+            fileCloseAllAction,
+            fileSaveAction,
+            fileSaveAsAction,
+            fileSaveAllAction
         );
         setDisabled(fileDumpMemoryAction);
         setEnabled(
-            fileExitAction, editCutAction, editCopyAction, editPasteAction, editFindReplaceAction,
+            fileExitAction,
+            editCutAction,
+            editCopyAction,
+            editPasteAction,
+            editFindReplaceAction,
             settingsMemoryConfigurationAction
         );
         setDisabled(
-            runAssembleAction, runGoAction, runStepAction, runBackstepAction, runResetAction,
-            runStopAction, runPauseAction, runClearBreakpointsAction, runToggleBreakpointsAction
+            runAssembleAction,
+            runGoAction,
+            runStepAction,
+            runBackstepAction,
+            runResetAction,
+            runStopAction,
+            runPauseAction,
+            runClearBreakpointsAction,
+            runToggleBreakpointsAction
         );
         setEnabled(helpHelpAction, helpAboutAction);
         this.updateUndoAndRedoState();
@@ -950,10 +1105,23 @@ public final class VenusUI extends JFrame {
     private void setMenuStateRunnable() {
         /* Note: undo and redo are handled separately by the undo manager */
         setEnabled(
-            fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
-            fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction, editCutAction,
-            editCopyAction, editPasteAction, editFindReplaceAction,
-            settingsMemoryConfigurationAction, runAssembleAction, runGoAction, runStepAction
+            fileNewAction,
+            fileOpenAction,
+            fileCloseAction,
+            fileCloseAllAction,
+            fileSaveAction,
+            fileSaveAsAction,
+            fileSaveAllAction,
+            fileDumpMemoryAction,
+            fileExitAction,
+            editCutAction,
+            editCopyAction,
+            editPasteAction,
+            editFindReplaceAction,
+            settingsMemoryConfigurationAction,
+            runAssembleAction,
+            runGoAction,
+            runStepAction
         );
         runBackstepAction.setEnabled(OtherSettings.isBacksteppingEnabled() && !Globals.PROGRAM.getBackStepper()
             .isEmpty());
@@ -968,11 +1136,25 @@ public final class VenusUI extends JFrame {
      */
     private void setMenuStateRunning() {
         setDisabled(
-            fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
-            fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction, editCutAction,
-            editCopyAction, editPasteAction, editFindReplaceAction,
-            settingsMemoryConfigurationAction, runAssembleAction, runGoAction, runStepAction,
-            runBackstepAction, runResetAction
+            fileNewAction,
+            fileOpenAction,
+            fileCloseAction,
+            fileCloseAllAction,
+            fileSaveAction,
+            fileSaveAsAction,
+            fileSaveAllAction,
+            fileDumpMemoryAction,
+            fileExitAction,
+            editCutAction,
+            editCopyAction,
+            editPasteAction,
+            editFindReplaceAction,
+            settingsMemoryConfigurationAction,
+            runAssembleAction,
+            runGoAction,
+            runStepAction,
+            runBackstepAction,
+            runResetAction
         );
         setEnabled(runStopAction, runPauseAction);
         setDisabled(runToggleBreakpointsAction);
@@ -986,10 +1168,21 @@ public final class VenusUI extends JFrame {
     private void setMenuStateTerminated() {
         /* Note: undo and redo are handled separately by the undo manager */
         setEnabled(
-            fileNewAction, fileOpenAction, fileCloseAction, fileCloseAllAction, fileSaveAction,
-            fileSaveAsAction, fileSaveAllAction, fileDumpMemoryAction, fileExitAction, editCutAction,
-            editCopyAction, editPasteAction, editFindReplaceAction,
-            settingsMemoryConfigurationAction, runAssembleAction
+            fileNewAction,
+            fileOpenAction,
+            fileCloseAction,
+            fileCloseAllAction,
+            fileSaveAction,
+            fileSaveAsAction,
+            fileSaveAllAction,
+            fileDumpMemoryAction,
+            fileExitAction,
+            editCutAction,
+            editCopyAction,
+            editPasteAction,
+            editFindReplaceAction,
+            settingsMemoryConfigurationAction,
+            runAssembleAction
         );
         setDisabled(runGoAction, runStepAction);
         runBackstepAction.setEnabled(OtherSettings.isBacksteppingEnabled() && !Globals.PROGRAM.getBackStepper()

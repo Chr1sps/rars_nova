@@ -1,6 +1,7 @@
 package rars.settings
 
-import org.apache.logging.log4j.Logger
+import rars.logging.RARSLogger
+import rars.logging.error
 import rars.util.toHexString
 import rars.venus.editors.TokenStyle
 import java.awt.Color
@@ -48,18 +49,27 @@ internal fun Preferences.getTokenStyle(
     key: String,
     defaultStyle: TokenStyle,
     commonPrefix: String,
-    logger: Logger
+    logger: RARSLogger
 ): TokenStyle {
-    val foreground = getNullableColor("$commonPrefix$key$FOREGROUND", defaultStyle.foreground, logger)
-    val background = getNullableColor("$commonPrefix$key$BACKGROUND", defaultStyle.background, logger)
+    val foreground = getNullableColor(
+        "$commonPrefix$key$FOREGROUND",
+        defaultStyle.foreground,
+        logger
+    )
+    val background = getNullableColor(
+        "$commonPrefix$key$BACKGROUND",
+        defaultStyle.background,
+        logger
+    )
     val isBold = getBoolean("$commonPrefix$key$BOLD", defaultStyle.isBold)
     val isItalic = getBoolean("$commonPrefix$key$ITALIC", defaultStyle.isItalic)
-    val isUnderline = getBoolean("$commonPrefix$key$UNDERLINE", defaultStyle.isUnderline)
+    val isUnderline =
+        getBoolean("$commonPrefix$key$UNDERLINE", defaultStyle.isUnderline)
     return TokenStyle(foreground, background, isBold, isItalic, isUnderline)
 }
 
 internal fun Preferences.getColor(
-    key: String, defaultValue: Color, logger: Logger
+    key: String, defaultValue: Color, logger: RARSLogger
 ): Color {
     val value = get(key, null)
     return if (value == null) {
@@ -67,7 +77,7 @@ internal fun Preferences.getColor(
     } else try {
         Color.decode(value)
     } catch (nfe: NumberFormatException) {
-        logger.error("Unable to decode color from preferences", nfe)
+        logger.error(nfe, "Unable to decode color from preferences")
         defaultValue
     }
 }
@@ -75,7 +85,7 @@ internal fun Preferences.getColor(
 internal fun Preferences.getNullableColor(
     key: String,
     defaultValue: Color?,
-    logger: Logger
+    logger: RARSLogger
 ): Color? {
     val value = get(key, null)
     if (value == null) {
@@ -86,7 +96,7 @@ internal fun Preferences.getNullableColor(
     try {
         return Color.decode(value)
     } catch (nfe: NumberFormatException) {
-        logger.error("Unable to decode color from preferences", nfe)
+        logger.error(nfe, "Unable to decode color from preferences")
         return defaultValue
     }
 }

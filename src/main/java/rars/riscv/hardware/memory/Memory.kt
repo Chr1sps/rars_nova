@@ -6,8 +6,6 @@ import arrow.core.left
 import arrow.core.raise.either
 import arrow.core.raise.ensure
 import arrow.core.right
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import org.jetbrains.annotations.CheckReturnValue
 import org.jetbrains.annotations.Contract
 import rars.Globals
@@ -15,12 +13,16 @@ import rars.ProgramStatement
 import rars.assembler.DataTypes
 import rars.events.EventReason
 import rars.events.MemoryError
+import rars.logging.RARSLogging
+import rars.logging.debug
+import rars.logging.error
 import rars.notices.AccessType
 import rars.notices.MemoryAccessNotice
 import rars.riscv.BasicInstruction
 import rars.settings.BoolSetting
 import rars.settings.OtherSettings
 import rars.util.Listener
+import rars.util.toHexStringWithPrefix
 import rars.util.toLongReinterpreted
 import kotlin.math.max
 import kotlin.math.min
@@ -68,9 +70,10 @@ class Memory(
             (it and 0xFFFF).toShort()
         }
 
-        override fun getWord(address: Int) = checkLoadWordAligned(address).flatMap {
-            get(address, DataTypes.WORD_SIZE, false)
-        }
+        override fun getWord(address: Int) =
+            checkLoadWordAligned(address).flatMap {
+                get(address, DataTypes.WORD_SIZE, false)
+            }
 
         override fun getDoubleWord(address: Int) = either {
             checkLoadWordAligned(address).bind()
@@ -79,7 +82,8 @@ class Memory(
             (oldHighOrder.toLong() shl 32) or (oldLowOrder.toLong() and 0xFFFFFFFFL)
         }
 
-        override fun getProgramStatement(address: Int) = this@Memory.getStatementNoNotify(address)
+        override fun getProgramStatement(address: Int) =
+            this@Memory.getStatementNoNotify(address)
 
     }
 
@@ -133,7 +137,8 @@ class Memory(
      * the start of the 65'th block -- table entry 64.  That leaves (1024-64) * 4096 = 3,932,160
      * bytes of space available without going indirect.
      */
-    private var dataBlockTable: Array<IntArray?> = arrayOfNulls(BLOCK_TABLE_LENGTH)
+    private var dataBlockTable: Array<IntArray?> =
+        arrayOfNulls(BLOCK_TABLE_LENGTH)
 
     /**
      * The stack is modeled similarly to the data segment. It cannot share the same
@@ -159,7 +164,8 @@ class Memory(
      * Everything else works the same, so it shares some private helper methods with
      * data segment algorithms.
      */
-    private var stackBlockTable: Array<IntArray?> = arrayOfNulls(BLOCK_TABLE_LENGTH)
+    private var stackBlockTable: Array<IntArray?> =
+        arrayOfNulls(BLOCK_TABLE_LENGTH)
 
     /**
      * Memory mapped I/O is simulated with a separate table using the same structure
@@ -175,7 +181,8 @@ class Memory(
      * have unsigned types. As long as the absolute address is correctly translated
      * into a table offset, this is of no concern.
      */
-    private var memoryMapBlockTable: Array<IntArray?> = arrayOfNulls(MMIO_TABLE_LENGTH)
+    private var memoryMapBlockTable: Array<IntArray?> =
+        arrayOfNulls(MMIO_TABLE_LENGTH)
 
     /**
      * I use a similar scheme for storing instructions. MIPS text segment ranges
@@ -187,7 +194,8 @@ class Memory(
      * somewhat in that the block entries do not contain int's, but instead contain
      * references to ProgramStatement objects.
      */
-    private var textBlockTable: Array<Array<ProgramStatement?>?> = arrayOfNulls(TEXT_BLOCK_TABLE_LENGTH)
+    private var textBlockTable: Array<Array<ProgramStatement?>?> =
+        arrayOfNulls(TEXT_BLOCK_TABLE_LENGTH)
 
     /**
      * Returns the next available word-aligned heap address. There is no recycling
@@ -206,7 +214,8 @@ class Memory(
         ensure(numBytes != 0) { "request ($numBytes) is negative heap amount" }
         var newHeapAddress = currentHeapAddress + numBytes
         if (newHeapAddress % 4 != 0) {
-            newHeapAddress = newHeapAddress + (4 - newHeapAddress % 4) // next higher multiple of 4
+            newHeapAddress =
+                newHeapAddress + (4 - newHeapAddress % 4) // next higher multiple of 4
         }
         ensure(newHeapAddress < actualDataSegmentLimitAddress) { "request ($numBytes) exceeds available heap storage" }
         currentHeapAddress = newHeapAddress
@@ -266,7 +275,8 @@ class Memory(
 
         for (i in this.textBlockTable.indices) {
             if (other.textBlockTable[i] != null) {
-                this.textBlockTable[i] = other.textBlockTable[i]!!.clone() // TODO: potentially make ProgramStatement 
+                this.textBlockTable[i] =
+                    other.textBlockTable[i]!!.clone() // TODO: potentially make ProgramStatement 
                 // clonable
             } else {
                 this.textBlockTable[i] = null
@@ -288,7 +298,8 @@ class Memory(
         }
         for (i in this.memoryMapBlockTable.indices) {
             if (other.memoryMapBlockTable[i] != null) {
-                this.memoryMapBlockTable[i] = other.memoryMapBlockTable[i]!!.clone()
+                this.memoryMapBlockTable[i] =
+                    other.memoryMapBlockTable[i]!!.clone()
             } else {
                 this.memoryMapBlockTable[i] = null
             }
@@ -297,8 +308,10 @@ class Memory(
 
     fun reset() {
         this.currentHeapAddress = this.memoryConfiguration.heapBaseAddress
-        this.textBlockTable = arrayOfNulls<Array<ProgramStatement?>>(TEXT_BLOCK_TABLE_LENGTH)
-        this.dataBlockTable = arrayOfNulls<IntArray>(BLOCK_TABLE_LENGTH) // array of null int[] references
+        this.textBlockTable =
+            arrayOfNulls<Array<ProgramStatement?>>(TEXT_BLOCK_TABLE_LENGTH)
+        this.dataBlockTable =
+            arrayOfNulls<IntArray>(BLOCK_TABLE_LENGTH) // array of null int[] references
         this.stackBlockTable = arrayOfNulls<IntArray>(BLOCK_TABLE_LENGTH)
         this.memoryMapBlockTable = arrayOfNulls<IntArray>(MMIO_TABLE_LENGTH)
     }
@@ -324,70 +337,91 @@ class Memory(
      * if any.
      */
     @CheckReturnValue
-    fun set(address: Int, value: Int, length: Int): Either<MemoryError, Int> = either {
-        var value = value
-        if (Globals.debug) {
-            LOGGER.debug("memory[{}] set to {}({} bytes)", address, value, length)
+    fun set(address: Int, value: Int, length: Int): Either<MemoryError, Int> =
+        either {
+            var value = value
+            if (Globals.debug) LOGGER.debug {
+                "memory[${address.toHexStringWithPrefix()}] set to $value ($length bytes)"
+            }
+
+            var oldValue = 0
+            when {
+                isAddressInDataSegment(address) -> {
+                    // in data segment. Will write one byte at a time, w/o regard to boundaries.
+                    val relativeByteAddress = (address
+                        - memoryConfiguration.dataSegmentBaseAddress) // relative to data segment start, in bytes
+                    oldValue = storeBytesInTable(
+                        dataBlockTable,
+                        relativeByteAddress,
+                        length,
+                        value
+                    )
+                }
+                isAddressInStackRange(address) -> {
+                    // in stack. Handle similarly to data segment write, except relative byte
+                    // address calculated "backward" because stack addresses grow down from base.
+                    val relativeByteAddress =
+                        memoryConfiguration.stackBaseAddress - address
+                    oldValue = storeBytesInTable(
+                        stackBlockTable,
+                        relativeByteAddress,
+                        length,
+                        value
+                    )
+                }
+                isAddressInTextSegment(address) -> {
+                    ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+                        MemoryError(
+                            "Cannot write directly to text segment!",
+                            EventReason.STORE_ACCESS_FAULT,
+                            address
+                        )
+                    }
+                    ensure(address % 4 + length <= 4) {
+                        // TODO: add checks for halfword load not aligned to halfword boundary
+                        MemoryError(
+                            "Load address crosses word boundary",
+                            EventReason.LOAD_ADDRESS_MISALIGNED,
+                            address
+                        )
+                    }
+                    val oldStatement =
+                        getStatementImpl((address / 4) * 4, false).bind()
+                    if (oldStatement != null) {
+                        oldValue = oldStatement.binaryStatement
+                    }
+                    value = value shl (address % 4) * 8
+                    var mask =
+                        if (length == 4) -1 else ((1 shl (8 * length)) - 1)
+                    mask = mask shl (address % 4) * 8
+                    value = (value and mask) or (oldValue and mask.inv())
+                    oldValue = (oldValue and mask) shr (address % 4)
+                    setProgramStatement(
+                        (address / 4) * 4,
+                        ProgramStatement(value, (address / 4) * 4)
+                    ).bind()
+                }
+                else -> {
+                    ensure(address in memoryConfiguration.memoryMapBaseAddress..<actualMemoryMapLimitAddress) {
+                        MemoryError(
+                            "address out of range ",
+                            EventReason.STORE_ACCESS_FAULT,
+                            address
+                        )
+                    }
+                    val relativeByteAddress =
+                        address - memoryConfiguration.memoryMapBaseAddress
+                    oldValue = storeBytesInTable(
+                        memoryMapBlockTable,
+                        relativeByteAddress,
+                        length,
+                        value
+                    )
+                }
+            }
+            notifyAnyObservers(AccessType.WRITE, address, length, value)
+            oldValue
         }
-        var oldValue = 0
-        when {
-            isAddressInDataSegment(address) -> {
-                // in data segment. Will write one byte at a time, w/o regard to boundaries.
-                val relativeByteAddress = (address
-                    - memoryConfiguration.dataSegmentBaseAddress) // relative to data segment start, in bytes
-                oldValue = storeBytesInTable(dataBlockTable, relativeByteAddress, length, value)
-            }
-            isAddressInStackRange(address) -> {
-                // in stack. Handle similarly to data segment write, except relative byte
-                // address calculated "backward" because stack addresses grow down from base.
-                val relativeByteAddress = memoryConfiguration.stackBaseAddress - address
-                oldValue = storeBytesInTable(stackBlockTable, relativeByteAddress, length, value)
-            }
-            isAddressInTextSegment(address) -> {
-                ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
-                    MemoryError(
-                        "Cannot write directly to text segment!",
-                        EventReason.STORE_ACCESS_FAULT,
-                        address
-                    )
-                }
-                ensure(address % 4 + length <= 4) {
-                    // TODO: add checks for halfword load not aligned to halfword boundary
-                    MemoryError(
-                        "Load address crosses word boundary",
-                        EventReason.LOAD_ADDRESS_MISALIGNED,
-                        address
-                    )
-                }
-                val oldStatement = getStatementImpl((address / 4) * 4, false).bind()
-                if (oldStatement != null) {
-                    oldValue = oldStatement.binaryStatement
-                }
-                value = value shl (address % 4) * 8
-                var mask = if (length == 4) -1 else ((1 shl (8 * length)) - 1)
-                mask = mask shl (address % 4) * 8
-                value = (value and mask) or (oldValue and mask.inv())
-                oldValue = (oldValue and mask) shr (address % 4)
-                setProgramStatement(
-                    (address / 4) * 4,
-                    ProgramStatement(value, (address / 4) * 4)
-                ).bind()
-            }
-            else -> {
-                ensure(address in memoryConfiguration.memoryMapBaseAddress..<actualMemoryMapLimitAddress) {
-                    MemoryError(
-                        "address out of range ",
-                        EventReason.STORE_ACCESS_FAULT,
-                        address
-                    )
-                }
-                val relativeByteAddress = address - memoryConfiguration.memoryMapBaseAddress
-                oldValue = storeBytesInTable(memoryMapBlockTable, relativeByteAddress, length, value)
-            }
-        }
-        notifyAnyObservers(AccessType.WRITE, address, length, value)
-        oldValue
-    }
 
     /**
      * Starting at the given word address, write the given value over 4 bytes (a
@@ -405,58 +439,84 @@ class Memory(
      * If address is not on word boundary.
      */
     @CheckReturnValue
-    fun setRawWord(address: Int, value: Int): Either<MemoryError, Int> = either {
-        checkStoreWordAligned(address).bind()
-        var oldValue = 0
-        val relative: Int
-        @Suppress("Ensure")
-        if (isAddressInDataSegment(address)) {
-            // in data segment
-            relative = ((address - memoryConfiguration.dataSegmentBaseAddress)
-                shr 2) // convert byte address to words
-            oldValue = storeWordInTable(dataBlockTable, relative, value)
-        } else if (isAddressInStackRange(address)) {
-            // in stack. Handle similarly to data segment write, except relative
-            // address calculated "backward" because stack addresses grow down from base.
-            relative = (memoryConfiguration.stackBaseAddress - address) shr 2 // convert byte address to words
-            oldValue = storeWordInTable(stackBlockTable, relative, value)
-        } else if (isAddressInTextSegment(address)) {
-            ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+    fun setRawWord(address: Int, value: Int): Either<MemoryError, Int> =
+        either {
+            checkStoreWordAligned(address).bind()
+            var oldValue = 0
+            val relative: Int
+            @Suppress("Ensure")
+            if (isAddressInDataSegment(address)) {
+                // in data segment
+                relative =
+                    ((address - memoryConfiguration.dataSegmentBaseAddress)
+                        shr 2) // convert byte address to words
+                oldValue = storeWordInTable(dataBlockTable, relative, value)
+            } else if (isAddressInStackRange(address)) {
+                // in stack. Handle similarly to data segment write, except relative
+                // address calculated "backward" because stack addresses grow down from base.
+                relative =
+                    (memoryConfiguration.stackBaseAddress - address) shr 2 // convert byte address to words
+                oldValue = storeWordInTable(stackBlockTable, relative, value)
+            } else if (isAddressInTextSegment(address)) {
+                ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
+                    MemoryError(
+                        "Cannot write directly to text segment!",
+                        EventReason.STORE_ACCESS_FAULT,
+                        address
+                    )
+                }
+                val oldStatement = getStatementNoNotify(address).bind()
+                if (oldStatement != null) {
+                    oldValue = oldStatement.binaryStatement
+                }
+                setProgramStatement(
+                    address,
+                    ProgramStatement(value, address)
+                ).bind()
+            } else if (address >= memoryConfiguration.memoryMapBaseAddress
+                && address < actualMemoryMapLimitAddress
+            ) {
+                // memory mapped I/O.
+                relative =
+                    (address - memoryConfiguration.memoryMapBaseAddress) shr 2 // convert byte address to word
+                oldValue =
+                    storeWordInTable(memoryMapBlockTable, relative, value)
+            } else raise(
                 MemoryError(
-                    "Cannot write directly to text segment!",
+                    "store address out of range ",
                     EventReason.STORE_ACCESS_FAULT,
                     address
                 )
-            }
-            val oldStatement = getStatementNoNotify(address).bind()
-            if (oldStatement != null) {
-                oldValue = oldStatement.binaryStatement
-            }
-            setProgramStatement(address, ProgramStatement(value, address)).bind()
-        } else if (address >= memoryConfiguration.memoryMapBaseAddress
-            && address < actualMemoryMapLimitAddress
-        ) {
-            // memory mapped I/O.
-            relative = (address - memoryConfiguration.memoryMapBaseAddress) shr 2 // convert byte address to word
-            oldValue = storeWordInTable(memoryMapBlockTable, relative, value)
-        } else raise(MemoryError("store address out of range ", EventReason.STORE_ACCESS_FAULT, address))
-        notifyAnyObservers(AccessType.WRITE, address, DataTypes.WORD_SIZE, value)
-        if (OtherSettings.isBacksteppingEnabled) {
-            Globals.PROGRAM!!.backStepper!!.addMemoryRestoreRawWord(address, oldValue)
-        }
-        oldValue
-    }
-
-    override fun setWord(address: Int, value: Int): Either<MemoryError, Unit> = either {
-        checkStoreWordAligned(address).bind()
-        if (OtherSettings.isBacksteppingEnabled)
-            Globals.PROGRAM!!.backStepper!!.addMemoryRestoreWord(
+            )
+            notifyAnyObservers(
+                AccessType.WRITE,
                 address,
-                set(address, value, DataTypes.WORD_SIZE).bind()
-            ) else set(address, value, DataTypes.WORD_SIZE).bind()
-    }
+                DataTypes.WORD_SIZE,
+                value
+            )
+            if (OtherSettings.isBacksteppingEnabled) {
+                Globals.PROGRAM!!.backStepper!!.addMemoryRestoreRawWord(
+                    address,
+                    oldValue
+                )
+            }
+            oldValue
+        }
 
-    override fun setHalf(address: Int, value: Short): Either<MemoryError, Unit> = either {
+    override fun setWord(address: Int, value: Int): Either<MemoryError, Unit> =
+        either {
+            checkStoreWordAligned(address).bind()
+            if (OtherSettings.isBacksteppingEnabled)
+                Globals.PROGRAM!!.backStepper!!.addMemoryRestoreWord(
+                    address,
+                    set(address, value, DataTypes.WORD_SIZE).bind()
+                ) else set(address, value, DataTypes.WORD_SIZE).bind()
+        }
+
+    override fun setHalf(
+        address: Int,
+        value: Short
+    ): Either<MemoryError, Unit> = either {
         ensure(address % 2 == 0) {
             MemoryError(
                 "store address not aligned on halfword boundary ",
@@ -470,14 +530,15 @@ class Memory(
         ) else set(address, value.toInt(), 2).bind()
     }
 
-    override fun setByte(address: Int, value: Byte): Either<MemoryError, Unit> = either {
-        if (OtherSettings.isBacksteppingEnabled)
-            Globals.PROGRAM!!.backStepper!!.addMemoryRestoreByte(
-                address,
-                set(address, value.toInt(), 1).bind()
-            )
-        else set(address, value.toInt(), 1).bind()
-    }
+    override fun setByte(address: Int, value: Byte): Either<MemoryError, Unit> =
+        either {
+            if (OtherSettings.isBacksteppingEnabled)
+                Globals.PROGRAM!!.backStepper!!.addMemoryRestoreByte(
+                    address,
+                    set(address, value.toInt(), 1).bind()
+                )
+            else set(address, value.toInt(), 1).bind()
+        }
 
     /**
      * Writes 64 bit doubleword value starting at specified Memory address. Note
@@ -494,12 +555,19 @@ class Memory(
      * if any.
      */
     @CheckReturnValue
-    override fun setDoubleWord(address: Int, value: Long): Either<MemoryError, Unit> = either {
+    override fun setDoubleWord(
+        address: Int,
+        value: Long
+    ): Either<MemoryError, Unit> = either {
         val oldHighOrder = set(address + 4, (value shr 32).toInt(), 4).bind()
         val oldLowOrder = set(address, value.toInt(), 4).bind()
-        val old = (oldHighOrder.toLong() shl 32) or (oldLowOrder.toLong() and 0xFFFFFFFFL)
+        val old =
+            (oldHighOrder.toLong() shl 32) or (oldLowOrder.toLong() and 0xFFFFFFFFL)
         if (OtherSettings.isBacksteppingEnabled)
-            Globals.PROGRAM!!.backStepper!!.addMemoryRestoreDoubleWord(address, old)
+            Globals.PROGRAM!!.backStepper!!.addMemoryRestoreDoubleWord(
+                address,
+                old
+            )
         else old
     }
 
@@ -539,7 +607,10 @@ class Memory(
      * @see ProgramStatement
      */
     @CheckReturnValue
-    override fun setProgramStatement(address: Int, statement: ProgramStatement): Either<MemoryError, Unit> = either {
+    override fun setProgramStatement(
+        address: Int,
+        statement: ProgramStatement
+    ): Either<MemoryError, Unit> = either {
         checkStoreWordAligned(address).bind()
         ensure(isAddressInTextSegment(address)) {
             MemoryError(
@@ -548,9 +619,10 @@ class Memory(
                 address
             )
         }
-        if (Globals.debug) {
-            LOGGER.debug("memory[{}] set to {}", address, statement.binaryStatement)
+        if (Globals.debug) LOGGER.debug {
+            "memory[${address.toHexStringWithPrefix()}] set to ${statement.binaryStatement}"
         }
+
         storeProgramStatement(
             address,
             statement,
@@ -574,11 +646,16 @@ class Memory(
      * if any.
      */
     @CheckReturnValue
-    fun get(address: Int, length: Int): Either<MemoryError, Int> = get(address, length, true)
+    fun get(address: Int, length: Int): Either<MemoryError, Int> =
+        get(address, length, true)
 
     /** Does the real work, but includes option to NOT notify observers.  */
     @CheckReturnValue
-    private fun get(address: Int, length: Int, notify: Boolean): Either<MemoryError, Int> = either {
+    private fun get(
+        address: Int,
+        length: Int,
+        notify: Boolean
+    ): Either<MemoryError, Int> = either {
         val value: Int
         val relativeByteAddress: Int
         when {
@@ -586,17 +663,31 @@ class Memory(
                 // in data segment. Will read one byte at a time, w/o regard to boundaries.
                 relativeByteAddress =
                     (address - memoryConfiguration.dataSegmentBaseAddress) // relative to data segment start, in bytes
-                value = fetchBytesFromTable(dataBlockTable, relativeByteAddress, length)
+                value = fetchBytesFromTable(
+                    dataBlockTable,
+                    relativeByteAddress,
+                    length
+                )
             }
             isAddressInStackRange(address) -> {
                 // in stack. Similar to data, except relative address computed "backward"
-                relativeByteAddress = memoryConfiguration.stackBaseAddress - address
-                value = fetchBytesFromTable(stackBlockTable, relativeByteAddress, length)
+                relativeByteAddress =
+                    memoryConfiguration.stackBaseAddress - address
+                value = fetchBytesFromTable(
+                    stackBlockTable,
+                    relativeByteAddress,
+                    length
+                )
             }
             address in memoryConfiguration.memoryMapBaseAddress..<actualMemoryMapLimitAddress -> {
                 // memory mapped I/O.
-                relativeByteAddress = address - memoryConfiguration.memoryMapBaseAddress
-                value = fetchBytesFromTable(memoryMapBlockTable, relativeByteAddress, length)
+                relativeByteAddress =
+                    address - memoryConfiguration.memoryMapBaseAddress
+                value = fetchBytesFromTable(
+                    memoryMapBlockTable,
+                    relativeByteAddress,
+                    length
+                )
             }
             isAddressInTextSegment(address) -> {
                 ensure(Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)) {
@@ -623,7 +714,13 @@ class Memory(
             }
             else -> {
                 // falls outside addressing range
-                raise(MemoryError("address out of range ", EventReason.LOAD_ACCESS_FAULT, address))
+                raise(
+                    MemoryError(
+                        "address out of range ",
+                        EventReason.LOAD_ACCESS_FAULT,
+                        address
+                    )
+                )
             }
         }
         if (notify) {
@@ -655,15 +752,18 @@ class Memory(
         val value: Int
         when {
             isAddressInDataSegment(address) -> {
-                relative = ((address - memoryConfiguration.dataSegmentBaseAddress) shr 2)
+                relative =
+                    ((address - memoryConfiguration.dataSegmentBaseAddress) shr 2)
                 value = fetchWordFromTable(dataBlockTable, relative)
             }
             isAddressInStackRange(address) -> {
-                relative = (memoryConfiguration.stackBaseAddress - address) shr 2
+                relative =
+                    (memoryConfiguration.stackBaseAddress - address) shr 2
                 value = fetchWordFromTable(stackBlockTable, relative)
             }
             address in memoryConfiguration.memoryMapBaseAddress..<actualMemoryMapLimitAddress -> {
-                relative = (address - memoryConfiguration.memoryMapBaseAddress) shr 2
+                relative =
+                    (address - memoryConfiguration.memoryMapBaseAddress) shr 2
                 value = fetchWordFromTable(memoryMapBlockTable, relative)
             }
             isAddressInTextSegment(address) -> {
@@ -677,7 +777,13 @@ class Memory(
                 val stmt = getStatementNoNotify(address).bind()
                 value = stmt?.binaryStatement ?: 0
             }
-            else -> raise(MemoryError("address out of range ", EventReason.LOAD_ACCESS_FAULT, address))
+            else -> raise(
+                MemoryError(
+                    "address out of range ",
+                    EventReason.LOAD_ACCESS_FAULT,
+                    address
+                )
+            )
         }
         notifyAnyObservers(AccessType.READ, address, DataTypes.WORD_SIZE, value)
         value
@@ -714,11 +820,13 @@ class Memory(
         checkLoadWordAligned(address).bind()
         when {
             isAddressInDataSegment(address) -> {
-                val relativeAddress = ((address - memoryConfiguration.dataSegmentBaseAddress) shr 2)
+                val relativeAddress =
+                    ((address - memoryConfiguration.dataSegmentBaseAddress) shr 2)
                 fetchWordOrNullFromTable(dataBlockTable, relativeAddress)
             }
             isAddressInStackRange(address) -> {
-                val relativeAddress = ((memoryConfiguration.stackBaseAddress - address) shr 2)
+                val relativeAddress =
+                    ((memoryConfiguration.stackBaseAddress - address) shr 2)
                 fetchWordOrNullFromTable(stackBlockTable, relativeAddress)
             }
             isAddressInTextSegment(address) -> {
@@ -756,7 +864,10 @@ class Memory(
      * @throws MemoryError
      * if the base address is not on a word boundary
      */
-    fun getAddressOfFirstNull(baseAddress: Int, limitAddress: Int): Either<MemoryError, Int?> {
+    fun getAddressOfFirstNull(
+        baseAddress: Int,
+        limitAddress: Int
+    ): Either<MemoryError, Int?> {
         var address = baseAddress
         while (address < limitAddress) {
             val value = this.getRawWordOrNull(address)
@@ -779,12 +890,13 @@ class Memory(
      * If address is not on word boundary.
      */
     @CheckReturnValue
-    override fun getDoubleWord(address: Int): Either<MemoryError, Long> = either {
-        checkLoadWordAligned(address).bind()
-        val oldHighOrder = get(address + 4, 4).bind()
-        val oldLowOrder = get(address, 4).bind()
-        (oldHighOrder.toLong() shl 32) or (oldLowOrder.toLong() and 0xFFFFFFFFL)
-    }
+    override fun getDoubleWord(address: Int): Either<MemoryError, Long> =
+        either {
+            checkLoadWordAligned(address).bind()
+            val oldHighOrder = get(address + 4, 4).bind()
+            val oldLowOrder = get(address, 4).bind()
+            (oldHighOrder.toLong() shl 32) or (oldLowOrder.toLong() and 0xFFFFFFFFL)
+        }
 
     /**
      * Starting at the given word address, read a 4 byte word as an int.
@@ -798,9 +910,10 @@ class Memory(
      * If address is not on word boundary.
      */
     @CheckReturnValue
-    override fun getWord(address: Int): Either<MemoryError, Int> = checkLoadWordAligned(address).flatMap {
-        get(address, DataTypes.WORD_SIZE, true)
-    }
+    override fun getWord(address: Int): Either<MemoryError, Int> =
+        checkLoadWordAligned(address).flatMap {
+            get(address, DataTypes.WORD_SIZE, true)
+        }
 
     /**
      * Starting at the given word address, read a 4 byte word as an int.
@@ -814,9 +927,10 @@ class Memory(
      * If address is not on word boundary.
      */
     @CheckReturnValue
-    private fun getWordNoNotify(address: Int): Either<MemoryError, Int> = checkLoadWordAligned(address).flatMap {
-        get(address, DataTypes.WORD_SIZE, false)
-    }
+    private fun getWordNoNotify(address: Int): Either<MemoryError, Int> =
+        checkLoadWordAligned(address).flatMap {
+            get(address, DataTypes.WORD_SIZE, false)
+        }
 
     /**
      * Starting at the given word address, read a 2 byte word as a short value.
@@ -829,20 +943,22 @@ class Memory(
      * If address is not on halfword boundary.
      */
     @CheckReturnValue
-    override fun getHalf(address: Int): Either<MemoryError, Short> = if (address % 2 != 0) {
-        MemoryError(
-            "Load address not aligned on halfword boundary ",
-            EventReason.LOAD_ADDRESS_MISALIGNED,
-            address
-        ).left()
-    } else this.get(address, 2).map {
-        (it and 0xFFFF).toShort()
-    }
+    override fun getHalf(address: Int): Either<MemoryError, Short> =
+        if (address % 2 != 0) {
+            MemoryError(
+                "Load address not aligned on halfword boundary ",
+                EventReason.LOAD_ADDRESS_MISALIGNED,
+                address
+            ).left()
+        } else this.get(address, 2).map {
+            (it and 0xFFFF).toShort()
+        }
 
     @CheckReturnValue
-    override fun getByte(address: Int): Either<MemoryError, Byte> = this.get(address, 1).map {
-        (it and 0xFF).toByte()
-    }
+    override fun getByte(address: Int): Either<MemoryError, Byte> =
+        this.get(address, 1).map {
+            (it and 0xFF).toByte()
+        }
 
     /**
      * Gets ProgramStatement from Text Segment.
@@ -879,7 +995,10 @@ class Memory(
         this.getStatementImpl(address, false)
 
     @CheckReturnValue
-    private fun getStatementImpl(address: Int, notify: Boolean): Either<MemoryError, ProgramStatement?> = either {
+    private fun getStatementImpl(
+        address: Int,
+        notify: Boolean
+    ): Either<MemoryError, ProgramStatement?> = either {
         checkLoadWordAligned(address).bind()
         ensure(
             Globals.BOOL_SETTINGS.getSetting(BoolSetting.SELF_MODIFYING_CODE_ENABLED)
@@ -910,7 +1029,7 @@ class Memory(
      */
     fun subscribe(listener: Listener<MemoryAccessNotice>): Either<MemoryError, MemoryListenerHandle<Int>> =
         subscribe(listener, 0, -0x4).onLeft {
-            LOGGER.error("Internal error in Memory#subscribe: {}", it.toString())
+            LOGGER.error { "Internal error in Memory#subscribe: $it" }
         }
 
     /**
@@ -929,7 +1048,8 @@ class Memory(
     fun subscribe(
         obs: (MemoryAccessNotice) -> Unit,
         addr: Int
-    ): Either<MemoryError, MemoryListenerHandle<Int>> = this.subscribe(obs, addr, addr)
+    ): Either<MemoryError, MemoryListenerHandle<Int>> =
+        this.subscribe(obs, addr, addr)
 
     /**
      * Method to accept registration from observer for specific address range. The
@@ -1022,7 +1142,8 @@ class Memory(
             val value1 = value
             for (bytePositionInValue in 3 downTo 3 - length + 1) {
                 val relativeWordAddress = relativeByteAddress1 shr 2
-                val block: Int = relativeWordAddress / BLOCK_LENGTH_WORDS // Block number
+                val block: Int =
+                    relativeWordAddress / BLOCK_LENGTH_WORDS // Block number
                 if (blockTable[block] == null) {
                     blockTable[block] = IntArray(BLOCK_LENGTH_WORDS)
                 }
@@ -1076,7 +1197,8 @@ class Memory(
             for (bytePositionInValue in 3 downTo loopStopper + 1) {
                 val bytePositionInMemory = 3 - relativeByteAddress1 % 4
                 val relativeWordAddress = relativeByteAddress1 shr 2
-                val blockIndex: Int = relativeWordAddress / BLOCK_LENGTH_WORDS // Block number
+                val blockIndex: Int =
+                    relativeWordAddress / BLOCK_LENGTH_WORDS // Block number
                 if (blockTable[blockIndex] == null) {
                     return 0
                 }
@@ -1125,7 +1247,10 @@ class Memory(
      */
     @Contract(pure = true)
     @Synchronized
-    private fun fetchWordFromTable(blockTable: Array<IntArray?>, relative: Int): Int {
+    private fun fetchWordFromTable(
+        blockTable: Array<IntArray?>,
+        relative: Int
+    ): Int {
         val result = fetchWordOrNullFromTable(blockTable, relative)
         return result ?: 0
     }
@@ -1172,7 +1297,8 @@ class Memory(
         blockTable: Array<Array<ProgramStatement?>?>,
         notify: Boolean
     ): ProgramStatement? {
-        val relative = (address - baseAddress) shr 2 // convert byte address to words
+        val relative =
+            (address - baseAddress) shr 2 // convert byte address to words
         val block: Int = relative / TEXT_BLOCK_LENGTH_WORDS
         if (block < TEXT_BLOCK_TABLE_LENGTH) {
             val offset: Int = relative % TEXT_BLOCK_LENGTH_WORDS
@@ -1236,6 +1362,6 @@ class Memory(
     }
 }
 
-private val LOGGER: Logger = LogManager.getLogger(Memory::class.java)
+private val LOGGER = RARSLogging.forClass(Memory::class)
 
 // TODO: add some heap managment so programs can malloc and free

@@ -9,7 +9,6 @@ import rars.ksoftfloat.operations.fusedMultiplyAdd
 import rars.ksoftfloat.types.Float32
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
-import rars.riscv.getRoundingMode
 import rars.riscv.setfflags
 import rars.simulator.SimulationContext
 import rars.util.flipRounding

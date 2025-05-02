@@ -1,8 +1,8 @@
 package rars.riscv
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import rars.assembler.DataTypes
+import rars.logging.RARSLogging
+import rars.logging.warning
 
 /**
  * Class to represent a basic instruction in the MIPS instruction set.
@@ -81,11 +81,8 @@ abstract class BasicInstruction protected constructor(
      * a [String] object
      */
     init {
-        if (this.operationMask.length != BASIC_INSTRUCTION_LENGTH_BITS) {
-            LOGGER.warn(
-                "{} mask not $BASIC_INSTRUCTION_LENGTH_BITS bits!",
-                example
-            )
+        if (this.operationMask.length != BASIC_INSTRUCTION_LENGTH_BITS) LOGGER.warning {
+            "$example mask not $BASIC_INSTRUCTION_LENGTH_BITS bits!"
         }
 
         this.opcodeMask = this.operationMask.replace("[01]".toRegex(), "1")
@@ -106,8 +103,7 @@ abstract class BasicInstruction protected constructor(
         const val BASIC_INSTRUCTION_LENGTH: Int = DataTypes.WORD_SIZE
         private const val BASIC_INSTRUCTION_LENGTH_BITS = 32
 
-        private val LOGGER: Logger =
-            LogManager.getLogger(BasicInstruction::class.java)
+        private val LOGGER = RARSLogging.forClass(BasicInstruction::class)
     }
 
     override fun toString(): String = mnemonic.uppercase()

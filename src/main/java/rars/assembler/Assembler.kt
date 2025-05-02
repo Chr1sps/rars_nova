@@ -3,11 +3,11 @@ package rars.assembler
 import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensure
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import rars.*
 import rars.api.DisplayFormat
 import rars.events.AssemblyError
+import rars.logging.RARSLogging
+import rars.logging.debug
 import rars.riscv.BasicInstruction
 import rars.riscv.ExtendedInstruction
 import rars.riscv.Instruction
@@ -30,7 +30,8 @@ import rars.venus.NumberDisplayBasePicker
 class Assembler {
     private var errors: ErrorList? = null
     private var inDataSegment = false // status maintained by parser
-    private var inMacroSegment = false // status maintained by parser, true if in
+    private var inMacroSegment =
+        false // status maintained by parser, true if in
 
     // macro definition segment
     private var externAddress = 0
@@ -40,7 +41,8 @@ class Assembler {
     private var globalDeclarationList: TokenList? = null
     private var textAddress = 0
     private var dataAddress = 0
-    private var currentFileDataSegmentForwardReferenceList: DataSegmentForwardReferenceList? = null
+    private var currentFileDataSegmentForwardReferenceList: DataSegmentForwardReferenceList? =
+        null
 
     val errorList: ErrorList
         /**
@@ -91,13 +93,15 @@ class Assembler {
         this@Assembler.textAddress = memoryConfiguration.textSegmentBaseAddress
         this@Assembler.dataAddress = memoryConfiguration.dataBaseAddress
         this@Assembler.externAddress = memoryConfiguration.externAddress
-        this@Assembler.currentFileDataSegmentForwardReferenceList = DataSegmentForwardReferenceList()
-        val accumulatedDataSegmentForwardReferenceList = DataSegmentForwardReferenceList()
+        this@Assembler.currentFileDataSegmentForwardReferenceList =
+            DataSegmentForwardReferenceList()
+        val accumulatedDataSegmentForwardReferenceList =
+            DataSegmentForwardReferenceList()
         Globals.GLOBAL_SYMBOL_TABLE.clear()
         Globals.MEMORY_INSTANCE.reset()
         this@Assembler.errors = ErrorList()
         if (Globals.debug) {
-            LOGGER.debug("Assembler first pass begins:")
+            LOGGER.debug { "Assembler first pass begins:" }
         }
 
         for (program in tokenizedProgramFiles) {
@@ -131,8 +135,10 @@ class Assembler {
             // sourceList is an ArrayList of String objects, one per source line.
             // tokenList is an ArrayList of TokenList objects, one per source line;
             // each ArrayList in tokenList consists of Token objects.
-            val sourceLineList = this@Assembler.fileCurrentlyBeingAssembled!!.sourceLineList!!
-            val tokenList = this@Assembler.fileCurrentlyBeingAssembled!!.tokenList!!
+            val sourceLineList =
+                this@Assembler.fileCurrentlyBeingAssembled!!.sourceLineList!!
+            val tokenList =
+                this@Assembler.fileCurrentlyBeingAssembled!!.tokenList!!
             val parsedList = mutableListOf<ProgramStatement>()
             // each file keeps its own macro definitions
             this@Assembler.fileCurrentlyBeingAssembled!!.createMacroPool()
@@ -163,7 +169,8 @@ class Assembler {
                     ErrorMessage.error(
                         this@Assembler.fileCurrentlyBeingAssembled,
                         this@Assembler.fileCurrentlyBeingAssembled!!.localMacroPool!!.current!!.fromLine,
-                        0, "Macro started but not ended (no .end_macro directive)"
+                        0,
+                        "Macro started but not ended (no .end_macro directive)"
                     )
                 )
             }
@@ -207,10 +214,15 @@ class Assembler {
                 break
             }
             this@Assembler.fileCurrentlyBeingAssembled = program
-            val parsedList = this@Assembler.fileCurrentlyBeingAssembled!!.parsedList!!
+            val parsedList =
+                this@Assembler.fileCurrentlyBeingAssembled!!.parsedList!!
             for (statement in parsedList) {
                 statement.buildBasicStatementFromBasicInstruction(this@Assembler.errors)
-                ensure(!this@Assembler.errors!!.errorsOccurred()) { AssemblyError(this@Assembler.errors!!) }
+                ensure(!this@Assembler.errors!!.errorsOccurred()) {
+                    AssemblyError(
+                        this@Assembler.errors!!
+                    )
+                }
                 when (val instruction = statement.instruction) {
                     is ExtendedInstruction -> {
                         // It is a 
@@ -245,44 +257,51 @@ class Assembler {
 
                         // If we are using compact memory config and there is a compact expansion, use
                         // it
-                        val templateList = instruction.basicIntructionTemplateList
+                        val templateList =
+                            instruction.basicIntructionTemplateList
 
                         // subsequent ProgramStatement constructor needs the correct text segment address.
                         this@Assembler.textAddress = statement.address
                         // Will generate one basic instruction for each template in the list.
-                        val pc = this@Assembler.textAddress // Save the starting PC so that it can be used for PC 
+                        val pc =
+                            this@Assembler.textAddress // Save the starting PC so that it can be used for PC 
                         // relative stuff
                         for (s in templateList) {
-                            val instruction = ExtendedInstruction.makeTemplateSubstitutions(
-                                this@Assembler.fileCurrentlyBeingAssembled!!,
-                                s, tokenList, pc
-                            )
+                            val instruction =
+                                ExtendedInstruction.makeTemplateSubstitutions(
+                                    this@Assembler.fileCurrentlyBeingAssembled!!,
+                                    s, tokenList, pc
+                                )
 
                             // All substitutions have been made so we have generated
                             // a valid basic instruction!
-                            if (Globals.debug) {
-                                LOGGER.debug("PSEUDO generated: {}", instruction)
+                            if (Globals.debug) LOGGER.debug {
+                                "Pseudo instruction generated: $instruction"
                             }
+
                             // For generated instruction: tokenize, build program
                             // statement, add to list.
                             val newTokenList = Tokenizer.tokenizeLine(
                                 lineNumber,
                                 instruction, this@Assembler.errors!!, false
                             )
-                            val instrMatches = this@Assembler.matchInstruction(newTokenList.get(0))
+                            val instrMatches = this@Assembler.matchInstruction(
+                                newTokenList.get(0)
+                            )
                             val instr = OperandUtils.bestOperandMatch(
                                 newTokenList,
                                 instrMatches!!
                             )
                             // Only first generated instruction is linked to original source
-                            val ps = ProgramStatement( // this.fileCurrentlyBeingAssembled,
-                                // (instrNumber == 0) ? statement.source : "",
-                                newTokenList,
-                                newTokenList,
-                                instr!!,
-                                this@Assembler.textAddress,
-                                statement.sourceLine
-                            )
+                            val ps =
+                                ProgramStatement( // this.fileCurrentlyBeingAssembled,
+                                    // (instrNumber == 0) ? statement.source : "",
+                                    newTokenList,
+                                    newTokenList,
+                                    instr!!,
+                                    this@Assembler.textAddress,
+                                    statement.sourceLine
+                                )
                             this@Assembler.textAddress += (BasicInstruction.BASIC_INSTRUCTION_LENGTH)
                             ps.buildBasicStatementFromBasicInstruction(this@Assembler.errors)
                             machineList.add(ps)
@@ -308,14 +327,15 @@ class Assembler {
                 break
             }
             statement.buildMachineStatementFromBasicStatement(this@Assembler.errors!!)
-            if (Globals.debug) {
-                LOGGER.debug(statement)
-            }
+            if (Globals.debug) LOGGER.debug { statement }
             Globals.MEMORY_INSTANCE
                 .setProgramStatement(statement.address, statement)
                 .onLeft { error ->
                     val token = statement.originalTokenList!![0]
-                    errors!!.addTokenError(token, "Invalid address for text segment: ${error.address}")
+                    errors!!.addTokenError(
+                        token,
+                        "Invalid address for text segment: ${error.address}"
+                    )
                 }
         }
         // We will now sort the ArrayList of ProgramStatements by getAddress() value.
@@ -348,7 +368,8 @@ class Assembler {
                     line.get(2).type == TokenType.DIRECTIVE
                     )
             ) {
-                val dirPos = if (line.get(0).type == TokenType.DIRECTIVE) 0 else 2
+                val dirPos =
+                    if (line.get(0).type == TokenType.DIRECTIVE) 0 else 2
                 if (Directive.matchDirective(line.get(dirPos).text) == Directive.EQV) {
                     val symbol = line.get(dirPos + 1).text
                     // Symbol cannot be redefined - the only reason for this is to act like the Gnu
@@ -414,14 +435,17 @@ class Assembler {
 
         // SPIM-style macro calling:
         var parenFreeTokens = tokens
-        if (tokens.size > 2 && tokens.get(1).type == TokenType.LEFT_PAREN && tokens.get(tokens.size - 1)
+        if (tokens.size > 2 && tokens.get(1).type == TokenType.LEFT_PAREN && tokens.get(
+                tokens.size - 1
+            )
                 .type == TokenType.RIGHT_PAREN
         ) {
             parenFreeTokens = tokens.clone() as TokenList
             parenFreeTokens.remove(tokens.size - 1)
             parenFreeTokens.remove(1)
         }
-        val macro = macroPool.getMatchingMacro(parenFreeTokens) // parenFreeTokens.get(0).getSourceLine());
+        val macro =
+            macroPool.getMatchingMacro(parenFreeTokens) // parenFreeTokens.get(0).getSourceLine());
 
         // expand macro if this line is a macro expansion call
         val result = mutableListOf<ProgramStatement>()
@@ -432,13 +456,21 @@ class Assembler {
             if (macroPool.pushOnCallStack(token)) {
                 this.errors!!.add(
                     ErrorMessage.error(
-                        this.fileCurrentlyBeingAssembled, tokens.get(0)
-                            .sourceLine, 0, "Detected a macro expansion loop (recursive reference). "
+                        this.fileCurrentlyBeingAssembled,
+                        tokens.get(0)
+                            .sourceLine,
+                        0,
+                        "Detected a macro expansion loop (recursive reference). "
                     )
                 )
             } else {
                 for (i in macro.fromLine + 1..<macro.toLine) {
-                    var substituted = macro.getSubstitutedLine(i, tokens, counter.toLong(), this.errors)
+                    var substituted = macro.getSubstitutedLine(
+                        i,
+                        tokens,
+                        counter.toLong(),
+                        this.errors
+                    )
                     val tokenList2 = Tokenizer.tokenizeLine(
                         i, substituted, this.errors!!, true
                     )
@@ -523,7 +555,8 @@ class Assembler {
         if (!this.inDataSegment) {
             val instrMatches = this.matchInstruction(token) ?: return result
             // OK, we've got an operator match, let's check the operands.
-            val instruction = OperandUtils.bestOperandMatch(tokens, instrMatches)
+            val instruction =
+                OperandUtils.bestOperandMatch(tokens, instrMatches)
             // Here's the place to flag use of extended (pseudo) instructions
             // when setting disabled.
             if (instruction is ExtendedInstruction && !extendedAssemblerEnabled) {
@@ -533,8 +566,17 @@ class Assembler {
                         "."
                 )
             }
-            if (OperandUtils.checkIfTokensMatchOperand(tokens, instruction, this.errors)) {
-                val sourceLine = SourceLine(source, this.fileCurrentlyBeingAssembled!!, sourceLineNumber)
+            if (OperandUtils.checkIfTokensMatchOperand(
+                    tokens,
+                    instruction,
+                    this.errors
+                )
+            ) {
+                val sourceLine = SourceLine(
+                    source,
+                    this.fileCurrentlyBeingAssembled!!,
+                    sourceLineNumber
+                )
                 val programStatement = ProgramStatement(
                     tokenList,
                     tokens,
@@ -596,27 +638,38 @@ class Assembler {
     private fun executeDirective(tokens: TokenList) {
         val token = tokens.get(0)
         val direct = Directive.matchDirective(token.text)
-        if (Globals.debug) {
-            LOGGER.debug("line {} is directive {}", token.sourceLine, direct)
+        if (Globals.debug) LOGGER.debug {
+            "Line ${token.sourceLine} is directive $direct"
         }
+
         when {
-            direct == null -> this.errors!!.addTokenError(token, "Unrecognized directive: ${token.text}")
+            direct == null -> this.errors!!.addTokenError(
+                token,
+                "Unrecognized directive: ${token.text}"
+            )
 
             direct == Directive.EQV -> Unit // Do nothing. This was vetted and processed during tokenizing.
 
             direct == Directive.MACRO -> {
                 if (tokens.size < 2) {
-                    val message = "\"${token.text}\" directive requires at least one argument."
+                    val message =
+                        "\"${token.text}\" directive requires at least one argument."
                     this.errors!!.addTokenError(token, message)
                     return
                 }
                 val nextToken = tokens.get(1)
                 if (nextToken.type != TokenType.IDENTIFIER) {
-                    this.errors!!.addTokenError(nextToken, "Invalid Macro name \"${token.text}\"")
+                    this.errors!!.addTokenError(
+                        nextToken,
+                        "Invalid Macro name \"${token.text}\""
+                    )
                     return
                 }
                 if (this.inMacroSegment) {
-                    this.errors!!.addTokenError(token, "Nested macros are not allowed")
+                    this.errors!!.addTokenError(
+                        token,
+                        "Nested macros are not allowed"
+                    )
                     return
                 }
                 this.inMacroSegment = true
@@ -653,7 +706,9 @@ class Assembler {
                     return
                 }
                 this.inMacroSegment = false
-                this.fileCurrentlyBeingAssembled!!.localMacroPool!!.commitMacro(token)
+                this.fileCurrentlyBeingAssembled!!.localMacroPool!!.commitMacro(
+                    token
+                )
             }
 
             this.inMacroSegment -> Unit // should not parse lines even directives in macro segment
@@ -678,7 +733,10 @@ class Assembler {
                     val section = tokens.get(1)
                     if (section.type == TokenType.QUOTED_STRING || section.type == TokenType.IDENTIFIER) {
                         val str = section.text
-                        if (str.startsWith(".data") || str.startsWith(".rodata") || str.startsWith(".sdata")) {
+                        if (str.startsWith(".data") || str.startsWith(".rodata") || str.startsWith(
+                                ".sdata"
+                            )
+                        ) {
                             this.inDataSegment = true
                         } else if (str.startsWith(".text")) {
                             this.inDataSegment = false
@@ -724,7 +782,10 @@ class Assembler {
 
             direct == Directive.ALIGN -> {
                 if (tokens.size != 2) {
-                    this.errors!!.addTokenError(token, "\"${token.text}\" requires one operand")
+                    this.errors!!.addTokenError(
+                        token,
+                        "\"${token.text}\" requires one operand"
+                    )
                     return
                 }
                 if (!TokenType.isIntegerTokenType(tokens.get(1).type)
@@ -752,7 +813,10 @@ class Assembler {
                     this.autoAlign = false
                 } else {
                     this.dataAddress =
-                        this.alignToBoundary(this.dataAddress, StrictMath.pow(2.0, value.toDouble()).toInt())
+                        this.alignToBoundary(
+                            this.dataAddress,
+                            StrictMath.pow(2.0, value.toDouble()).toInt()
+                        )
                 }
             }
 
@@ -761,7 +825,10 @@ class Assembler {
                 // .space 90, 1 should fill memory with 90 bytes with the values 1
                 if (this.passesDataSegmentCheck(token)) {
                     if (tokens.size != 2) {
-                        this.errors!!.addTokenError(token, "\"${token.text}\" requires one operand")
+                        this.errors!!.addTokenError(
+                            token,
+                            "\"${token.text}\" requires one operand"
+                        )
                         return
                     }
                     if (!TokenType.isIntegerTokenType(tokens.get(1).type)
@@ -781,7 +848,8 @@ class Assembler {
             direct == Directive.EXTERN -> {
                 if (tokens.size != 3) {
                     this.errors!!.addTokenError(
-                        token, "\"${token.text}\" directive requires two operands (label and size)."
+                        token,
+                        "\"${token.text}\" directive requires two operands (label and size)."
                     )
                     return
                 }
@@ -844,9 +912,10 @@ class Assembler {
     private fun transferGlobals() {
         for (i in this.globalDeclarationList!!.indices) {
             val label = this.globalDeclarationList!!.get(i)
-            val symtabEntry = this.fileCurrentlyBeingAssembled!!.localSymbolTable!!.getSymbol(
-                label.text
-            )
+            val symtabEntry =
+                this.fileCurrentlyBeingAssembled!!.localSymbolTable!!.getSymbol(
+                    label.text
+                )
             if (symtabEntry == null) {
                 this.errors!!.addTokenError(
                     label,
@@ -858,10 +927,13 @@ class Assembler {
             } else {
                 if (Globals.GLOBAL_SYMBOL_TABLE.getAddress(label.text) != SymbolTable.NOT_FOUND) {
                     this.errors!!.addTokenError(
-                        label, "Label \"${label.text}\" already defined as global in a different file."
+                        label,
+                        "Label \"${label.text}\" already defined as global in a different file."
                     )
                 } else {
-                    this.fileCurrentlyBeingAssembled!!.localSymbolTable!!.removeSymbol(label)
+                    this.fileCurrentlyBeingAssembled!!.localSymbolTable!!.removeSymbol(
+                        label
+                    )
                     Globals.GLOBAL_SYMBOL_TABLE.addSymbol(
                         label, symtabEntry.address,
                         symtabEntry.isData, this.errors!!
@@ -921,7 +993,11 @@ class Assembler {
      * the
      * current directive as argument.
      */
-    private fun storeNumeric(tokens: TokenList, directive: Directive, errors: ErrorList) {
+    private fun storeNumeric(
+        tokens: TokenList,
+        directive: Directive,
+        errors: ErrorList
+    ) {
         var token = tokens.get(0)
         // A double-check; should have already been caught...removed ".word" exemption
         // 11/20/06
@@ -962,7 +1038,8 @@ class Assembler {
             }
             if (this.inDataSegment) {
                 if (this.autoAlign) {
-                    this.dataAddress = this.alignToBoundary(this.dataAddress, lengthInBytes)
+                    this.dataAddress =
+                        this.alignToBoundary(this.dataAddress, lengthInBytes)
                 }
                 repeat(repetitions) {
                     if (directive.isIntegerDirective) {
@@ -1006,8 +1083,9 @@ class Assembler {
                 longValue = token.text.translateToLong()!!
                 value = longValue.toInt()
                 if (directive != Directive.DWORD) {
-                    val message = "value ${longValue.toHexStringWithPrefix()} " +
-                        "is out-of-range and truncated to ${value.toHexStringWithPrefix()}"
+                    val message =
+                        "value ${longValue.toHexStringWithPrefix()} " +
+                            "is out-of-range and truncated to ${value.toHexStringWithPrefix()}"
                     errors.addWarning(token, message)
                 }
             } else {
@@ -1017,7 +1095,12 @@ class Assembler {
 
             if (directive == Directive.DWORD) {
                 this.writeToDataSegment(longValue.toInt(), 4, token, errors)
-                this.writeToDataSegment((longValue shr 32).toInt(), 4, token, errors)
+                this.writeToDataSegment(
+                    (longValue shr 32).toInt(),
+                    4,
+                    token,
+                    errors
+                )
                 return
             }
 
@@ -1044,7 +1127,8 @@ class Assembler {
                     .set(this.textAddress, value, lengthInBytes)
                     .onLeft {
                         errors.addTokenError(
-                            token, "\"${this.textAddress}\" is not a valid text segment address"
+                            token,
+                            "\"${this.textAddress}\" is not a valid text segment address"
                         )
                         return
                     }
@@ -1052,12 +1136,18 @@ class Assembler {
             }
         } else if (token.type == TokenType.IDENTIFIER) {
             if (this.inDataSegment) {
-                val value = this.fileCurrentlyBeingAssembled!!.localSymbolTable!!
-                    .getAddressLocalOrGlobal(token.text)
+                val value =
+                    this.fileCurrentlyBeingAssembled!!.localSymbolTable!!
+                        .getAddressLocalOrGlobal(token.text)
                 if (value == SymbolTable.NOT_FOUND) {
                     // Record value 0 for now, then set up backpatch entry
-                    val dataAddress = this.writeToDataSegment(0, lengthInBytes, token, errors)
-                    this.currentFileDataSegmentForwardReferenceList!!.add(dataAddress, lengthInBytes, token)
+                    val dataAddress =
+                        this.writeToDataSegment(0, lengthInBytes, token, errors)
+                    this.currentFileDataSegmentForwardReferenceList!!.add(
+                        dataAddress,
+                        lengthInBytes,
+                        token
+                    )
                 } else {
                     // label already defined, so write its address
                     this.writeToDataSegment(value, lengthInBytes, token, errors)
@@ -1066,11 +1156,15 @@ class Assembler {
             // Data segment check done previously, so this "else" will not be.
             else {
                 errors.addTokenError(
-                    token, "\"${token.text}\" label as directive operand not permitted in text segment"
+                    token,
+                    "\"${token.text}\" label as directive operand not permitted in text segment"
                 )
             }
         } else {
-            errors.addTokenError(token, "\"${token.text}\" is not a valid integer constant or label")
+            errors.addTokenError(
+                token,
+                "\"${token.text}\" is not a valid integer constant or label"
+            )
         }
     }
 
@@ -1090,7 +1184,10 @@ class Assembler {
             value = Float.POSITIVE_INFINITY.toDouble()
         } else if (token.text == "-Inf") {
             value = Float.NEGATIVE_INFINITY.toDouble()
-        } else if (TokenType.isIntegerTokenType(token.type) || TokenType.isFloatingTokenType(token.type)) {
+        } else if (TokenType.isIntegerTokenType(token.type) || TokenType.isFloatingTokenType(
+                token.type
+            )
+        ) {
             try {
                 value = token.text.toDouble()
             } catch (_: NumberFormatException) {
@@ -1101,18 +1198,27 @@ class Assembler {
                 return
             }
             if (DataTypes.outOfRange(directive, value)) {
-                errors.addTokenError(token, "\"${token.text}\" is an out-of-range value")
+                errors.addTokenError(
+                    token,
+                    "\"${token.text}\" is an out-of-range value"
+                )
                 return
             }
         } else {
-            val message = "\"${token.text}\" is not a valid floating point constant"
+            val message =
+                "\"${token.text}\" is not a valid floating point constant"
             errors.addTokenError(token, message)
             return
         }
 
         // Value has been validated; let's store it.
         if (directive == Directive.FLOAT) {
-            this.writeToDataSegment(value.toFloat().toRawBits(), lengthInBytes, token, errors)
+            this.writeToDataSegment(
+                value.toFloat().toRawBits(),
+                lengthInBytes,
+                token,
+                errors
+            )
         }
         if (directive == Directive.DOUBLE) {
             this.writeDoubleToDataSegment(value, token)
@@ -1136,7 +1242,8 @@ class Assembler {
             .forEach { token ->
                 if (token.type != TokenType.QUOTED_STRING) {
                     errors.addTokenError(
-                        token, "\"${token.text}\" is not a valid character string"
+                        token,
+                        "\"${token.text}\" is not a valid character string"
                     )
                 } else {
                     val quote = token.text
@@ -1155,9 +1262,12 @@ class Assembler {
                                 '0' -> theChar = '\u0000'
                                 'u' -> {
                                     try {
-                                        val codePoint = quote.substring(j + 1, j + 5)
+                                        val codePoint =
+                                            quote.substring(j + 1, j + 5)
                                         try {
-                                            theChar = Character.toChars(codePoint.toInt(16))[0]
+                                            theChar = Character.toChars(
+                                                codePoint.toInt(16)
+                                            )[0]
                                         } catch (_: NumberFormatException) {
                                             errors.addTokenError(
                                                 token,
@@ -1165,7 +1275,8 @@ class Assembler {
                                             )
                                         }
                                     } catch (_: StringIndexOutOfBoundsException) {
-                                        val invalidCodePoint = quote.substring(j + 1)
+                                        val invalidCodePoint =
+                                            quote.substring(j + 1)
                                         val message =
                                             """Unicode escape "\u$invalidCodePoint" is incomplete. Only escapes with 4 digits are valid."""
                                         errors.addTokenError(token, message)
@@ -1174,7 +1285,8 @@ class Assembler {
                                 }
                             }
                         }
-                        val bytesOfChar = theChar.toString().toByteArray(Charsets.UTF_8)
+                        val bytesOfChar =
+                            theChar.toString().toByteArray(Charsets.UTF_8)
                         either {
                             for (b in bytesOfChar) {
                                 Globals.MEMORY_INSTANCE.set(
@@ -1193,7 +1305,11 @@ class Assembler {
                         j++
                     }
                     if (direct == Directive.ASCIZ || direct == Directive.STRING) {
-                        Globals.MEMORY_INSTANCE.set(this.dataAddress, 0, DataTypes.CHAR_SIZE).onLeft {
+                        Globals.MEMORY_INSTANCE.set(
+                            this.dataAddress,
+                            0,
+                            DataTypes.CHAR_SIZE
+                        ).onLeft {
                             this.errors!!.addTokenError(
                                 token,
                                 "\"${this.dataAddress}\" is not a valid data segment address"
@@ -1208,13 +1324,15 @@ class Assembler {
     /**
      * Simply check to see if we are in data segment. Generate error if not.
      */
-    private fun passesDataSegmentCheck(token: Token): Boolean = if (!this.inDataSegment) {
-        val message = "\"${token.text}\" directive cannot appear in text segment"
-        this.errors!!.addTokenError(token, message)
-        false
-    } else {
-        true
-    }
+    private fun passesDataSegmentCheck(token: Token): Boolean =
+        if (!this.inDataSegment) {
+            val message =
+                "\"${token.text}\" directive cannot appear in text segment"
+            this.errors!!.addTokenError(token, message)
+            false
+        } else {
+            true
+        }
 
     /**
      * Writes the given int value into current data segment address. Works for
@@ -1227,13 +1345,16 @@ class Assembler {
         errors: ErrorList
     ): Int {
         if (this.autoAlign) {
-            this.dataAddress = this.alignToBoundary(this.dataAddress, lengthInBytes)
+            this.dataAddress =
+                this.alignToBoundary(this.dataAddress, lengthInBytes)
         }
-        Globals.MEMORY_INSTANCE.set(this.dataAddress, value, lengthInBytes).onLeft {
-            val message = "\"${this.dataAddress}\" is not a valid data segment address"
-            errors.addTokenError(token, message)
-            return this.dataAddress
-        }
+        Globals.MEMORY_INSTANCE.set(this.dataAddress, value, lengthInBytes)
+            .onLeft {
+                val message =
+                    "\"${this.dataAddress}\" is not a valid data segment address"
+                errors.addTokenError(token, message)
+                return this.dataAddress
+            }
         val address = this.dataAddress
         this.dataAddress += lengthInBytes
         return address
@@ -1248,10 +1369,14 @@ class Assembler {
     private fun writeDoubleToDataSegment(value: Double, token: Token) {
         val lengthInBytes = DataTypes.DOUBLE_SIZE
         if (this.autoAlign) {
-            this.dataAddress = (this.alignToBoundary(this.dataAddress, lengthInBytes))
+            this.dataAddress =
+                (this.alignToBoundary(this.dataAddress, lengthInBytes))
         }
         Globals.MEMORY_INSTANCE.setDouble(this.dataAddress, value).onLeft {
-            this.errors!!.addTokenError(token, "\"${this.dataAddress}\" is not a valid data segment address")
+            this.errors!!.addTokenError(
+                token,
+                "\"${this.dataAddress}\" is not a valid data segment address"
+            )
         }
         this.dataAddress += lengthInBytes
     }
@@ -1281,7 +1406,7 @@ class Assembler {
     }
 
     companion object {
-        private val LOGGER: Logger = LogManager.getLogger(Assembler::class.java)
+        private val LOGGER = RARSLogging.forClass(Assembler::class)
 
         /**
          * Will check for duplicate text addresses, which can happen inadvertently when
@@ -1297,18 +1422,21 @@ class Assembler {
                 val ps1 = instructions[i]
                 val ps2 = instructions[i + 1]
                 if (ps1.address == ps2.address) {
-                    val formattedAddress = NumberDisplayBasePicker.formatUnsignedInteger(
-                        ps2.address,
-                        if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)) DisplayFormat.HEX else DisplayFormat.DECIMAL
-                    )
-                    val directiveText = if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(ps2.address))
-                        ".text"
-                    else
-                        ".ktext"
-                    val message = "Duplicate text segment address: $formattedAddress " +
-                        "already occupied by ${ps1.sourceLine!!.program.file} " +
-                        "line ${ps1.sourceLine.lineNumber} " +
-                        "(caused by use of $directiveText operand)"
+                    val formattedAddress =
+                        NumberDisplayBasePicker.formatUnsignedInteger(
+                            ps2.address,
+                            if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.DISPLAY_ADDRESSES_IN_HEX)) DisplayFormat.HEX else DisplayFormat.DECIMAL
+                        )
+                    val directiveText =
+                        if (Globals.MEMORY_INSTANCE.isAddressInTextSegment(ps2.address))
+                            ".text"
+                        else
+                            ".ktext"
+                    val message =
+                        "Duplicate text segment address: $formattedAddress " +
+                            "already occupied by ${ps1.sourceLine!!.program.file} " +
+                            "line ${ps1.sourceLine.lineNumber} " +
+                            "(caused by use of $directiveText operand)"
                     errors.add(
                         ErrorMessage.error(
                             ps2.sourceProgram,
@@ -1343,23 +1471,25 @@ class Assembler {
             return tokens
         }
 
-        private fun tokenListBeginsWithLabel(tokens: TokenList): Boolean = if (tokens.size < 2) false
-        else (tokens[0].type == TokenType.IDENTIFIER ||
-            tokens[0].type == TokenType.OPERATOR)
-            && tokens[1].type == TokenType.COLON
+        private fun tokenListBeginsWithLabel(tokens: TokenList): Boolean =
+            if (tokens.size < 2) false
+            else (tokens[0].type == TokenType.IDENTIFIER ||
+                tokens[0].type == TokenType.OPERATOR)
+                && tokens[1].type == TokenType.COLON
 
         fun assemble(
             tokenizedProgramFiles: List<RISCVProgram>,
             extendedAssemblerEnabled: Boolean,
             warningsAreErrors: Boolean
-        ): Either<AssemblyError, Pair<List<ProgramStatement>, ErrorList>> = either {
-            val assembler = Assembler()
-            val machineList = assembler.assembleImpl(
-                tokenizedProgramFiles,
-                extendedAssemblerEnabled,
-                warningsAreErrors
-            ).bind()
-            Pair(machineList, assembler.errors!!)
-        }
+        ): Either<AssemblyError, Pair<List<ProgramStatement>, ErrorList>> =
+            either {
+                val assembler = Assembler()
+                val machineList = assembler.assembleImpl(
+                    tokenizedProgramFiles,
+                    extendedAssemblerEnabled,
+                    warningsAreErrors
+                ).bind()
+                Pair(machineList, assembler.errors!!)
+            }
     }
 }

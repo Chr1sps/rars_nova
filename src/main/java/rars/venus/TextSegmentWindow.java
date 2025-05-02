@@ -10,6 +10,8 @@ import rars.Globals;
 import rars.ProgramStatement;
 import rars.api.DisplayFormat;
 import rars.assembler.DataTypes;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
@@ -36,6 +38,7 @@ import java.util.Objects;
 import static kotlin.collections.CollectionsKt.map;
 import static kotlin.collections.CollectionsKt.maxByOrNull;
 import static rars.Globals.SIMULATOR;
+import static rars.logging.LoggingKt.error;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress;
 import static rars.util.UtilsKt.applyStyle;
@@ -47,7 +50,9 @@ import static rars.util.UtilsKt.unwrap;
  * @author Team JSpim
  */
 public final class TextSegmentWindow extends JInternalFrame {
-    private static final Logger LOGGER = LogManager.getLogger(TextSegmentWindow.class);
+    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+        TextSegmentWindow.class
+    );
     private static final int PROGRAM_ARGUMENT_TEXTFIELD_COLUMNS = 40;
     // The following is displayed in the Basic and Source columns if existing code
     // is overwritten using self-modifying code feature
@@ -138,7 +143,8 @@ public final class TextSegmentWindow extends JInternalFrame {
         this.programArgumentsPanel.add(new JLabel("Program Arguments: "));
         this.programArgumentsTextField = new JTextField(TextSegmentWindow.PROGRAM_ARGUMENT_TEXTFIELD_COLUMNS);
         this.programArgumentsTextField
-            .setToolTipText("Arguments provided to program at runtime via a0 (argc) and a1 (argv)");
+            .setToolTipText(
+                "Arguments provided to program at runtime via a0 (argc) and a1 (argv)");
         this.programArgumentsPanel.add(this.programArgumentsTextField);
     }
 
@@ -171,7 +177,8 @@ public final class TextSegmentWindow extends JInternalFrame {
             ), 0
         );
 
-        final var sourceLineDigitCount = Integer.toString(maxSourceLineNumber).length();
+        final var sourceLineDigitCount = Integer.toString(maxSourceLineNumber)
+            .length();
         int lastLine = -1;
         for (int i = 0; i < sourceStatementList.size(); i++) {
             final ProgramStatement statement = sourceStatementList.get(i);
@@ -184,11 +191,13 @@ public final class TextSegmentWindow extends JInternalFrame {
                     addressFormat
                 );
             this.data[i][ColumnData.INSTRUCTION_CODE_COLUMN.number] =
-                NumberDisplayBasePicker.formatNumber(statement.getBinaryStatement(), DisplayFormat.HEX);
+                NumberDisplayBasePicker.formatNumber(statement.getBinaryStatement(),
+                    DisplayFormat.HEX);
             this.data[i][ColumnData.BASIC_INSTRUCTIONS_COLUMN.number] = statement.getPrintableBasicAssemblyStatement();
             final var builder = new StringBuilder();
             if (statement.sourceLine != null) {
-                final int leadingSpacesCount = sourceLineDigitCount - Integer.toString(statement.sourceLine.lineNumber())
+                final int leadingSpacesCount = sourceLineDigitCount - Integer.toString(
+                        statement.sourceLine.lineNumber())
                     .length();
                 final String lineNumber;
                 if (statement.sourceLine.lineNumber() == lastLine) {
@@ -243,7 +252,8 @@ public final class TextSegmentWindow extends JInternalFrame {
         basicInstructionsColumn.setMaxWidth(320);
         basicInstructionsColumn.setCellRenderer(codeStepHighlighter);
 
-        final var monoRightCellRenderer = new MonoRightCellRenderer(fontSettings, editorThemeSettings);
+        final var monoRightCellRenderer = new MonoRightCellRenderer(fontSettings,
+            editorThemeSettings);
 
         final var instructionAddressColumn = columnModel.getColumn(ColumnData.INSTRUCTION_ADDRESS_COLUMN.number);
         instructionAddressColumn.setMinWidth(80);
@@ -287,7 +297,8 @@ public final class TextSegmentWindow extends JInternalFrame {
     public void addProgramArgumentsPanel() {
         // Don't add it if text segment window blank (file closed or no assemble yet)
         if (this.contentPane != null && this.contentPane.getComponentCount() > 0) {
-            this.contentPane.add(this.programArgumentsPanel, BorderLayout.NORTH);
+            this.contentPane.add(this.programArgumentsPanel,
+                BorderLayout.NORTH);
             this.contentPane.validate();
         }
     }
@@ -338,7 +349,10 @@ public final class TextSegmentWindow extends JInternalFrame {
                 this.intAddresses[i],
                 addressFormat
             );
-            this.table.getModel().setValueAt(formattedAddress, i, ColumnData.INSTRUCTION_ADDRESS_COLUMN.number);
+            this.table.getModel()
+                .setValueAt(formattedAddress,
+                    i,
+                    ColumnData.INSTRUCTION_ADDRESS_COLUMN.number);
         }
     }
 
@@ -401,7 +415,9 @@ public final class TextSegmentWindow extends JInternalFrame {
                     modifiedCode.basic(), modifiedCode.row(),
                     ColumnData.BASIC_INSTRUCTIONS_COLUMN.number
                 );
-                this.tableModel.setValueAt(modifiedCode.source(), modifiedCode.row(), ColumnData.SOURCE_COLUMN.number);
+                this.tableModel.setValueAt(modifiedCode.source(),
+                    modifiedCode.row(),
+                    ColumnData.SOURCE_COLUMN.number);
             }
             this.executeMods.clear();
         }
@@ -464,7 +480,9 @@ public final class TextSegmentWindow extends JInternalFrame {
         for (int i = 0; i < this.tableModel.getRowCount(); i++) {
             if ((Boolean) this.data[i][ColumnData.BREAKPOINT_COLUMN.number]) {
                 // must use this method to assure display updated and listener notified
-                this.tableModel.setValueAt(false, i, ColumnData.BREAKPOINT_COLUMN.number);
+                this.tableModel.setValueAt(false,
+                    i,
+                    ColumnData.BREAKPOINT_COLUMN.number);
             }
         }
         // Handles an obscure situation: if you click to set some breakpoints then
@@ -583,16 +601,22 @@ public final class TextSegmentWindow extends JInternalFrame {
             return;
         }
         // Scroll to assure desired row is centered in view port.
-        final int addressSourceColumn = this.table.convertColumnIndexToView(ColumnData.SOURCE_COLUMN.number);
-        final Rectangle sourceCell = this.table.getCellRect(addressRow, addressSourceColumn, true);
+        final int addressSourceColumn = this.table.convertColumnIndexToView(
+            ColumnData.SOURCE_COLUMN.number);
+        final Rectangle sourceCell = this.table.getCellRect(addressRow,
+            addressSourceColumn,
+            true);
         final double cellHeight = sourceCell.getHeight();
-        final double viewHeight = this.tableScroller.getViewport().getExtentSize().getHeight();
+        final double viewHeight = this.tableScroller.getViewport()
+            .getExtentSize()
+            .getHeight();
         final int numberOfVisibleRows = (int) (viewHeight / cellHeight);
         final int newViewPositionY = Math.max(
             (int) ((addressRow - ((double) numberOfVisibleRows / 2)) * cellHeight),
             0
         );
-        this.tableScroller.getViewport().setViewPosition(new Point(0, newViewPositionY));
+        this.tableScroller.getViewport()
+            .setViewPosition(new Point(0, newViewPositionY));
         // Select the source code cell for this row by generating a fake Mouse Pressed
         // event
         // and explicitly invoking the table's mouse listener.
@@ -617,7 +641,8 @@ public final class TextSegmentWindow extends JInternalFrame {
         // event on its mouse listener.
         // LocalTime.now()
 
-        final Rectangle rect = ((MyTippedJTable) this.table).getRectForColumnIndex(ColumnData.BREAKPOINT_COLUMN.number);
+        final Rectangle rect = ((MyTippedJTable) this.table).getRectForColumnIndex(
+            ColumnData.BREAKPOINT_COLUMN.number);
         final MouseEvent fakeMouseEvent = new MouseEvent(
             this.table, MouseEvent.MOUSE_CLICKED,
             Instant.now().toEpochMilli(), MouseEvent.BUTTON1_DOWN_MASK,
@@ -665,13 +690,16 @@ public final class TextSegmentWindow extends JInternalFrame {
             }
             mc = new ModifiedCode(
                 row,
-                this.tableModel.getValueAt(row, ColumnData.INSTRUCTION_CODE_COLUMN.number),
-                this.tableModel.getValueAt(row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number),
+                this.tableModel.getValueAt(row,
+                    ColumnData.INSTRUCTION_CODE_COLUMN.number),
+                this.tableModel.getValueAt(row,
+                    ColumnData.BASIC_INSTRUCTIONS_COLUMN.number),
                 this.tableModel.getValueAt(row, ColumnData.SOURCE_COLUMN.number)
             );
             this.executeMods.put(row, mc);
             // make a ProgramStatement and get basic code to display in BASIC_COLUMN
-            strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
+            strBasic = new ProgramStatement(value,
+                address).getPrintableBasicAssemblyStatement();
         } else {
             // If restored to original value, restore the basic and source
             // This will be the case upon backstepping.
@@ -682,7 +710,8 @@ public final class TextSegmentWindow extends JInternalFrame {
                 this.executeMods.remove(row);
             } else {
                 // make a ProgramStatement and get basic code to display in BASIC_COLUMN
-                strBasic = new ProgramStatement(value, address).getPrintableBasicAssemblyStatement();
+                strBasic = new ProgramStatement(value,
+                    address).getPrintableBasicAssemblyStatement();
             }
         }
         // For the code column, we don't want to do the following:
@@ -697,11 +726,16 @@ public final class TextSegmentWindow extends JInternalFrame {
         // is
         // update the table model then notify the controller/view to update its display.
         this.data[row][ColumnData.INSTRUCTION_CODE_COLUMN.number] = strValue;
-        this.tableModel.fireTableCellUpdated(row, ColumnData.INSTRUCTION_CODE_COLUMN.number);
+        this.tableModel.fireTableCellUpdated(row,
+            ColumnData.INSTRUCTION_CODE_COLUMN.number);
         // The other columns do not present a problem since they are not editable by
         // user.
-        this.tableModel.setValueAt(strBasic, row, ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
-        this.tableModel.setValueAt(strSource, row, ColumnData.SOURCE_COLUMN.number);
+        this.tableModel.setValueAt(strBasic,
+            row,
+            ColumnData.BASIC_INSTRUCTIONS_COLUMN.number);
+        this.tableModel.setValueAt(strSource,
+            row,
+            ColumnData.SOURCE_COLUMN.number);
         // Let's update the value displayed in the DataSegmentWindow too. But it only
         // observes memory while
         // the MIPS program is running, and even then only in timed or step mode. There
@@ -709,11 +743,12 @@ public final class TextSegmentWindow extends JInternalFrame {
         // for that. So we'll pretend to be Memory observable and send it a fake memory
         // write update.
         try {
-            this.executePane.getDataSegment().processMemoryAccessNotice(new MemoryAccessNotice(
-                AccessType.WRITE,
-                address, DataTypes.WORD_SIZE,
-                value
-            ));
+            this.executePane.getDataSegment()
+                .processMemoryAccessNotice(new MemoryAccessNotice(
+                    AccessType.WRITE,
+                    address, DataTypes.WORD_SIZE,
+                    value
+                ));
         } catch (final Exception e) {
             // Not sure if anything bad can happen in this sequence, but if anything does we
             // can let it go.
@@ -737,7 +772,8 @@ public final class TextSegmentWindow extends JInternalFrame {
      * a couple different public methods. Returns the table row
      * corresponding to this address.
      */
-    private int findRowForAddress(final int address) throws IllegalArgumentException {
+    private int findRowForAddress(final int address) throws
+        IllegalArgumentException {
         final int addressRow;
         try {
             addressRow = this.addressRows.get(address);
@@ -760,9 +796,15 @@ public final class TextSegmentWindow extends JInternalFrame {
     private enum ColumnData {
         BREAKPOINT_COLUMN(0, "Bkpt", BREAKPOINT_TOOL_TIP),
         SOURCE_COLUMN(1, "Source code", SOURCE_TOOL_TIP),
-        BASIC_INSTRUCTIONS_COLUMN(2, "Basic instructions", BASIC_INSTRUCTIONS_TOOL_TIP),
-        INSTRUCTION_ADDRESS_COLUMN(3, "Instruction address", INSTRUCTION_ADDRESS_TOOL_TIP),
-        INSTRUCTION_CODE_COLUMN(4, "Instruction opcode", INSTRUCTION_CODE_TOOL_TIP),
+        BASIC_INSTRUCTIONS_COLUMN(2,
+            "Basic instructions",
+            BASIC_INSTRUCTIONS_TOOL_TIP),
+        INSTRUCTION_ADDRESS_COLUMN(3,
+            "Instruction address",
+            INSTRUCTION_ADDRESS_TOOL_TIP),
+        INSTRUCTION_CODE_COLUMN(4,
+            "Instruction opcode",
+            INSTRUCTION_CODE_TOOL_TIP),
         ;
 
         public final int number;
@@ -854,7 +896,11 @@ public final class TextSegmentWindow extends JInternalFrame {
          * Straightforward process except for the Code column.
          */
         @Override
-        public void setValueAt(final Object value, final int row, final int col) {
+        public void setValueAt(
+            final Object value,
+            final int row,
+            final int col
+        ) {
             if (col != ColumnData.INSTRUCTION_CODE_COLUMN.number) {
                 this.data[row][col] = value;
                 this.fireTableCellUpdated(row, col);
@@ -878,13 +924,11 @@ public final class TextSegmentWindow extends JInternalFrame {
             try {
                 Globals.MEMORY_INSTANCE.setRawWord(address, val)
                     .onLeft(error -> {
-                            LOGGER.error(
-                                "Address error exception when setting memory word in TextSegmentWindow: {}",
-                                error
-                            );
-                            return Unit.INSTANCE;
-                        }
-                    );
+                        error(LOGGER, () ->
+                            "Address error exception when setting memory word in TextSegmentWindow: " + error
+                        );
+                        return Unit.INSTANCE;
+                    });
             } finally {
                 Globals.MEMORY_REGISTERS_LOCK.unlock();
             }
@@ -939,7 +983,8 @@ public final class TextSegmentWindow extends JInternalFrame {
      * <a href="http://www.javakb.com/Uwe/Forum.aspx/java-gui/1451/Java-TableCellRenderer-for-a-boolean-checkbox-field">here</a>
      * Slightly customized.
      */
-    class CheckBoxTableCellRenderer extends JCheckBox implements TableCellRenderer {
+    class CheckBoxTableCellRenderer extends JCheckBox
+        implements TableCellRenderer {
 
         Border noFocusBorder;
         Border focusBorder;
@@ -1009,13 +1054,15 @@ public final class TextSegmentWindow extends JInternalFrame {
 
             if (hasFocus) {
                 if (this.focusBorder == null) {
-                    this.focusBorder = UIManager.getBorder("Table.focusCellHighlightBorder");
+                    this.focusBorder = UIManager.getBorder(
+                        "Table.focusCellHighlightBorder");
                 }
                 this.setBorder(this.focusBorder);
             } else {
                 if (this.noFocusBorder == null) {
                     if (this.focusBorder == null) {
-                        this.focusBorder = UIManager.getBorder("Table.focusCellHighlightBorder");
+                        this.focusBorder = UIManager.getBorder(
+                            "Table.focusCellHighlightBorder");
                     }
                     if (this.focusBorder != null) {
                         final Insets n = this.focusBorder.getBorderInsets(this);
@@ -1050,7 +1097,8 @@ public final class TextSegmentWindow extends JInternalFrame {
          */
         public Rectangle getRectForColumnIndex(final int realIndex) {
             for (int i = 0; i < this.columnModel.getColumnCount(); i++) {
-                if (this.columnModel.getColumn(i).getModelIndex() == realIndex) {
+                if (this.columnModel.getColumn(i)
+                    .getModelIndex() == realIndex) {
                     return this.myTableHeader.getHeaderRect(i);
                 }
             }
@@ -1067,30 +1115,33 @@ public final class TextSegmentWindow extends JInternalFrame {
 
             public TextTableHeader(final TableColumnModel cm) {
                 super(cm);
-                final var headerMouseListener = MouseListenerBuilder.create().onMouseClicked(e -> {
-                    final var point = e.getPoint();
-                    final int index = columnModel.getColumnIndexAtX(point.x);
-                    final int realIndex = columnModel.getColumn(index).getModelIndex();
-                    if (realIndex == ColumnData.BREAKPOINT_COLUMN.number) {
-                        final JCheckBox check = (
-                            (JCheckBox) (
-                                (DefaultCellEditor) table.getCellEditor(
-                                    0,
-                                    index
-                                )
-                            ).getComponent()
-                        );
-                        TextSegmentWindow.this.breakpointsEnabled = !TextSegmentWindow.this.breakpointsEnabled;
-                        check.setEnabled(TextSegmentWindow.this.breakpointsEnabled);
-                        table.tableChanged(new TableModelEvent(
-                            TextSegmentWindow.this.tableModel,
-                            0,
-                            TextSegmentWindow.this.data.length - 1,
-                            ColumnData.BREAKPOINT_COLUMN.number
-                        ));
-                    }
-                    return Unit.INSTANCE;
-                }).build();
+                final var headerMouseListener = MouseListenerBuilder.create()
+                    .onMouseClicked(e -> {
+                        final var point = e.getPoint();
+                        final int index = columnModel.getColumnIndexAtX(point.x);
+                        final int realIndex = columnModel.getColumn(index)
+                            .getModelIndex();
+                        if (realIndex == ColumnData.BREAKPOINT_COLUMN.number) {
+                            final JCheckBox check = (
+                                (JCheckBox) (
+                                    (DefaultCellEditor) table.getCellEditor(
+                                        0,
+                                        index
+                                    )
+                                ).getComponent()
+                            );
+                            TextSegmentWindow.this.breakpointsEnabled = !TextSegmentWindow.this.breakpointsEnabled;
+                            check.setEnabled(TextSegmentWindow.this.breakpointsEnabled);
+                            table.tableChanged(new TableModelEvent(
+                                TextSegmentWindow.this.tableModel,
+                                0,
+                                TextSegmentWindow.this.data.length - 1,
+                                ColumnData.BREAKPOINT_COLUMN.number
+                            ));
+                        }
+                        return Unit.INSTANCE;
+                    })
+                    .build();
                 addMouseListener(headerMouseListener);
             }
 
@@ -1098,7 +1149,8 @@ public final class TextSegmentWindow extends JInternalFrame {
             public String getToolTipText(final MouseEvent e) {
                 final var point = e.getPoint();
                 final int index = columnModel.getColumnIndexAtX(point.x);
-                final int realIndex = columnModel.getColumn(index).getModelIndex();
+                final int realIndex = columnModel.getColumn(index)
+                    .getModelIndex();
                 return Objects.requireNonNull(ColumnData.fromInt(realIndex)).description;
             }
 

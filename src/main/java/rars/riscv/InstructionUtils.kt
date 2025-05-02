@@ -1,14 +1,9 @@
 package rars.riscv
 
 import arrow.core.Either
-import arrow.core.left
 import arrow.core.raise.either
-import arrow.core.right
-import rars.ProgramStatement
-import rars.events.EventReason
 import rars.events.SimulationError
 import rars.ksoftfloat.Environment
-import rars.ksoftfloat.RoundingMode
 import rars.ksoftfloat.types.Float32
 import rars.ksoftfloat.types.Float64
 import rars.ksoftfloat.types.Floating
@@ -35,29 +30,29 @@ internal fun CSRegisterFile.setfflags(
     }
 }
 
-internal fun CSRegisterFile.getRoundingMode(
-    rmValue: Int,
-    statement: ProgramStatement
-): Either<SimulationError, RoundingMode> {
-    val frm = getInt("frm")!!
-    val rm = if (rmValue == 7) {
-        frm
-    } else {
-        rmValue
-    }
-    return when (rm) {
-        0 -> RoundingMode.EVEN.right() // RNE
-        1 -> RoundingMode.ZERO.right() // RTZ
-        2 -> RoundingMode.MIN.right()  // RDN
-        3 -> RoundingMode.MAX.right()  // RUP
-        4 -> RoundingMode.AWAY.right() // RMM
-        else -> SimulationError.create(
-            statement,
-            "Invalid rounding mode. RM = $rmValue and frm = $frm",
-            EventReason.OTHER
-        ).left()
-    }
-}
+//internal fun CSRegisterFile.getRoundingMode(
+//    rmValue: Int,
+//    statement: ProgramStatement
+//): Either<SimulationError, RoundingMode> {
+//    val frm = getInt("frm")!!
+//    val rm = if (rmValue == 7) {
+//        frm
+//    } else {
+//        rmValue
+//    }
+//    return when (rm) {
+//        0 -> RoundingMode.EVEN.right() // RNE
+//        1 -> RoundingMode.ZERO.right() // RTZ
+//        2 -> RoundingMode.MIN.right()  // RDN
+//        3 -> RoundingMode.MAX.right()  // RUP
+//        4 -> RoundingMode.AWAY.right() // RMM
+//        else -> SimulationError.create(
+//            statement,
+//            "Invalid rounding mode. RM = $rmValue and frm = $frm",
+//            EventReason.OTHER
+//        ).left()
+//    }
+//}
 
 internal fun FloatingPointRegisterFile.getFloat32(num: Int) =
     Float32(getInt(num)!!)

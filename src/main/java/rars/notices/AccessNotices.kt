@@ -16,8 +16,8 @@ sealed class AccessNotice protected constructor(
 ) {
     /** Indicates whether the access is from the Simulator thread.  */
     @JvmField
-    val isAccessFromRISCV: Boolean = Thread.currentThread().name.startsWith("RISCV")
-
+    val isAccessFromRISCV: Boolean =
+        Thread.currentThread().name.startsWith("RISCV")
 }
 
 /**
@@ -36,7 +36,8 @@ class MemoryAccessNotice(
     /** The value of the access operation (the value read or written).  */
     @JvmField val value: Int
 ) : AccessNotice(type) {
-    override fun toString(): String = "Memory ${accessType.repr} @$address ${length}B = $value"
+    override fun toString(): String =
+        "Memory ${accessType.repr} @$address ${length}B = $value"
 }
 
 /**
@@ -50,5 +51,6 @@ class RegisterAccessNotice(
     type: AccessType,
     val register: Register
 ) : AccessNotice(type) {
-    override fun toString(): String = "Register ${accessType.repr}: $register.name"
+    override fun toString(): String =
+        "Register ${accessType.repr}: $register.name"
 }

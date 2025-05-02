@@ -1,7 +1,7 @@
 package rars.settings
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import rars.logging.RARSLogging
+import rars.logging.error
 import rars.util.FontWeight
 import rars.util.ListenerDispatcher
 import java.awt.Font
@@ -21,7 +21,7 @@ interface PreferencesSettings {
     fun saveSettingsToPreferences()
 }
 
-interface MutableFontSettings: FontSettings {
+interface MutableFontSettings : FontSettings {
     override var fontWeight: FontWeight
     override var isLigaturized: Boolean
     override var currentFont: Font
@@ -35,10 +35,11 @@ class FontSettingsImpl(private val preferences: Preferences) : FontSettings {
     @JvmField
     val onChangeListenerHook = this.onChangeDispatcher.hook
 
-    override var fontSize: Int = preferences.getInt(FONT_PREFIX + SIZE, DEFAULT_FONT_SIZE)
+    override var fontSize: Int =
+        preferences.getInt(FONT_PREFIX + SIZE, DEFAULT_FONT_SIZE)
         set(value) {
             if (value < MIN_FONT_SIZE || value > MAX_FONT_SIZE) {
-                LOGGER.error("Attempted to set invalid font size: {}", value)
+                LOGGER.error("Attempted to set invalid font size: $value")
                 error("Font size must be between$MIN_FONT_SIZE and $MAX_FONT_SIZE. Provided: $value")
             }
             field = value
@@ -86,7 +87,7 @@ class FontSettingsImpl(private val preferences: Preferences) : FontSettings {
     }
 
     companion object {
-        private val LOGGER: Logger = LogManager.getLogger(FontSettingsImpl::class.java)
+        private val LOGGER = RARSLogging.forClass(FontSettingsImpl::class)
 
         private const val MIN_FONT_SIZE = 6
         private const val MAX_FONT_SIZE = 72

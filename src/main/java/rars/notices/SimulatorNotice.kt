@@ -1,8 +1,6 @@
 package rars.notices
 
-import org.jetbrains.annotations.Contract
 import rars.simulator.StoppingEvent
-import rars.venus.run.RunSpeedPanel
 
 /**
  * Object provided to Observers of the Simulator.
@@ -12,21 +10,13 @@ import rars.venus.run.RunSpeedPanel
  * @author Pete Sanderson
  * @version January 2009
  */
-class SimulatorNotice(
+data class SimulatorNotice(
     @JvmField val action: Action,
     @JvmField val maxSteps: Int,
     @JvmField val runSpeed: Double,
     @JvmField val programCounter: Int,
     @JvmField val event: StoppingEvent,
 ) {
-    @Contract(pure = true)
-    override fun toString(): String {
-        val prefix = if (this.action == Action.START) "START" else "STOP"
-        val speed =
-            if (this.runSpeed == RunSpeedPanel.UNLIMITED_SPEED) "unlimited" else "${this.runSpeed} inst/sec"
-        return ("$prefix Max Steps ${this.maxSteps} Speed $speed Prog Ctr ${this.programCounter}")
-    }
-
     enum class Action {
         START,
         STOP

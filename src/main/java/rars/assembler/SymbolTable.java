@@ -1,17 +1,19 @@
 package rars.assembler;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
+import rars.logging.RARSLogger;
+import rars.logging.RARSLogging;
 import rars.util.BinaryUtilsKt;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import static rars.logging.LoggingKt.debug;
 
 /**
  * Represents a table of Symbol objects.
@@ -25,7 +27,9 @@ public final class SymbolTable {
     // its associated address!
 
     public static final int NOT_FOUND = -1;
-    private static final @NotNull Logger LOGGER = LogManager.getLogger(SymbolTable.class);
+    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+        SymbolTable.class
+    );
     private static final @NotNull String START_LABEL = "main";
     private final @Nullable File file;
     private final @Nullable SymbolTable globalSymbolTable;
@@ -39,7 +43,10 @@ public final class SymbolTable {
      *     used only for output/display so it can be any descriptive
      *     string.
      */
-    public SymbolTable(final @Nullable File file, final @NotNull SymbolTable globalSymbolTable) {
+    public SymbolTable(
+        final @Nullable File file,
+        final @NotNull SymbolTable globalSymbolTable
+    ) {
         this.file = file;
         this.table = new ArrayList<>();
         this.globalSymbolTable = globalSymbolTable;
@@ -85,13 +92,19 @@ public final class SymbolTable {
     ) {
         final var label = token.getText();
         if (this.getSymbol(label) != null) {
-            errors.addTokenError(token, "label \"%s\" already defined".formatted(label));
+            errors.addTokenError(
+                token,
+                "label \"%s\" already defined".formatted(label)
+            );
         } else {
             this.table.add(new Symbol(label, address, isData));
             if (Globals.debug) {
-                SymbolTable.LOGGER.debug(
-                    "The symbol {} with address {} has been added to the {} symbol table.",
-                    label, address, (this.file == null) ? "global" : this.file.getAbsolutePath()
+                debug(LOGGER,
+                    () -> "The symbol %s with address %d has been added to the %s symbol table.".formatted(
+                        label,
+                        address,
+                        file == null ? "global" : file.getAbsolutePath()
+                    )
                 );
             }
         }
@@ -111,10 +124,11 @@ public final class SymbolTable {
             symbol.name().equals(label)
         );
         if (removed && Globals.debug) {
-            SymbolTable.LOGGER.debug(
-                "The symbol {} has been removed from the {} symbol table.",
-                label,
-                (this.file == null) ? "global" : this.file.getAbsolutePath()
+            debug(LOGGER, () ->
+                "The symbol %s has been removed from the %s symbol table.".formatted(
+                    label,
+                    (this.file == null) ? "global" : this.file.getAbsolutePath()
+                )
             );
         }
     }
@@ -270,10 +284,17 @@ public final class SymbolTable {
      *     address updated to this value. Does nothing if none
      *     do.
      */
-    public void fixSymbolTableAddress(final int originalAddress, final int replacementAddress) {
+    public void fixSymbolTableAddress(
+        final int originalAddress,
+        final int replacementAddress
+    ) {
         this.table.replaceAll(symbol -> {
             if (symbol.address() == originalAddress) {
-                return new Symbol(symbol.name(), replacementAddress, symbol.isData());
+                return new Symbol(
+                    symbol.name(),
+                    replacementAddress,
+                    symbol.isData()
+                );
             }
             return symbol;
         });

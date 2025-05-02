@@ -1,10 +1,10 @@
 package rars.simulator
 
 import arrow.core.raise.either
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import rars.Globals
 import rars.assembler.DataTypes
+import rars.logging.RARSLogging
+import rars.logging.fatal
 import rars.riscv.hardware.memory.stackBaseAddress
 import java.util.*
 import kotlin.system.exitProcess
@@ -18,7 +18,7 @@ private fun buildArgsFromString(args: String): List<String> {
     }
 }
 
-private val LOGGER: Logger = LogManager.getLogger()
+private val LOGGER = RARSLogging.forClass(object {}::class)
 
 fun storeProgramArguments(programArgumentList: List<String>) {
     if (programArgumentList.isEmpty()) {
@@ -47,37 +47,54 @@ fun storeProgramArguments(programArgumentList: List<String>) {
     Follow this pattern for all remaining arguments.
     */
     val memoryConfiguration = Globals.MEMORY_INSTANCE.memoryConfiguration
-    var highAddress = memoryConfiguration.stackBaseAddress // highest non-kernel address, sits "under" stack
+    var highAddress =
+        memoryConfiguration.stackBaseAddress // highest non-kernel address, sits "under" stack
     val argStartAddress = IntArray(programArgumentList.size)
     either {
         // needed for all memory writes
         for (i in programArgumentList.indices) {
             val programArgument = programArgumentList[i]
-            Globals.MEMORY_INSTANCE.set(highAddress, 0, 1).bind() // trailing null byte for each argument
+            Globals.MEMORY_INSTANCE.set(highAddress, 0, 1)
+                .bind() // trailing null byte for each argument
             highAddress--
             for (j in programArgument.length - 1 downTo 0) {
-                Globals.MEMORY_INSTANCE.set(highAddress, programArgument[j].code, 1).bind()
+                Globals.MEMORY_INSTANCE.set(
+                    highAddress,
+                    programArgument[j].code,
+                    1
+                ).bind()
                 highAddress--
             }
             argStartAddress[i] = highAddress + 1
         }
         // now place a null word, the arg starting addresses, and arg count onto stack.
-        var stackAddress = memoryConfiguration.stackPointerAddress // base address for runtime stack.
+        var stackAddress =
+            memoryConfiguration.stackPointerAddress // base address for runtime stack.
         if (highAddress < memoryConfiguration.stackPointerAddress) {
             // Based on current values for stackBaseAddress and stackPointer, this will
             // only happen if the combined lengths of program arguments is greater than
             // 0x7ffffffc - 0x7fffeffc = 0x00001000 = 4096 bytes. In this case, set
             // stackAddress to next lower word boundary minus 4 for clearance (since every
             // byte from highAddress+1 is filled).
-            stackAddress = highAddress - (highAddress % DataTypes.WORD_SIZE) - DataTypes.WORD_SIZE
+            stackAddress =
+                highAddress - (highAddress % DataTypes.WORD_SIZE) - DataTypes.WORD_SIZE
         }
-        Globals.MEMORY_INSTANCE.set(stackAddress, 0, DataTypes.WORD_SIZE).bind() // null word for end of argv array
+        Globals.MEMORY_INSTANCE.set(stackAddress, 0, DataTypes.WORD_SIZE)
+            .bind() // null word for end of argv array
         stackAddress -= DataTypes.WORD_SIZE
         for (i in argStartAddress.indices.reversed()) {
-            Globals.MEMORY_INSTANCE.set(stackAddress, argStartAddress[i], DataTypes.WORD_SIZE).bind()
+            Globals.MEMORY_INSTANCE.set(
+                stackAddress,
+                argStartAddress[i],
+                DataTypes.WORD_SIZE
+            ).bind()
             stackAddress -= DataTypes.WORD_SIZE
         }
-        Globals.MEMORY_INSTANCE.set(stackAddress, argStartAddress.size, DataTypes.WORD_SIZE).bind() // argc
+        Globals.MEMORY_INSTANCE.set(
+            stackAddress,
+            argStartAddress.size,
+            DataTypes.WORD_SIZE
+        ).bind() // argc
         stackAddress -= DataTypes.WORD_SIZE
 
         // Need to set $sp register to stack address, $a0 to argc, $a1 to argv
@@ -87,7 +104,7 @@ fun storeProgramArguments(programArgumentList: List<String>) {
         Globals.REGISTER_FILE.a0.setValue(argStartAddress.size.toLong()) // argc
         Globals.REGISTER_FILE.a1.setValue((stackAddress + DataTypes.WORD_SIZE + DataTypes.WORD_SIZE).toLong()) // argv
     }.onLeft { error ->
-        LOGGER.fatal("Error while writing program arguments to memory: {}", error)
+        LOGGER.fatal("Error while writing program arguments to memory: $error")
         exitProcess(0)
     }
 }
