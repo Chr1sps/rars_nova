@@ -1,4 +1,4 @@
-package rars.ksoftfloat
+package rars.ieee754
 
 /** The different ways that rounding can be performed */
 enum class RoundingMode {

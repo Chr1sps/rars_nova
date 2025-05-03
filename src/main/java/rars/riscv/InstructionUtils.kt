@@ -3,11 +3,11 @@ package rars.riscv
 import arrow.core.Either
 import arrow.core.raise.either
 import rars.events.SimulationError
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.types.Float32
-import rars.ksoftfloat.types.Float64
-import rars.ksoftfloat.types.Floating
-import rars.ksoftfloat.types.FloatingFactory
+import rars.ieee754.Environment
+import rars.ieee754.types.Float32
+import rars.ieee754.types.Float64
+import rars.ieee754.types.Floating
+import rars.ieee754.types.FloatingFactory
 import rars.riscv.hardware.registerfiles.CSRegisterFile
 import rars.riscv.hardware.registerfiles.FloatingPointRegisterFile
 import java.math.BigInteger

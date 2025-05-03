@@ -81,7 +81,7 @@ abstract class BasicInstruction protected constructor(
      * a [String] object
      */
     init {
-        if (this.operationMask.length != BASIC_INSTRUCTION_LENGTH_BITS) LOGGER.warning {
+        if (this.operationMask.length != BASIC_INSTRUCTION_LENGTH_BITS) LOGGER.warning() {
             "$example mask not $BASIC_INSTRUCTION_LENGTH_BITS bits!"
         }
 

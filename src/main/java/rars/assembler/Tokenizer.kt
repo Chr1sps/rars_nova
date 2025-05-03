@@ -70,7 +70,7 @@ class Tokenizer private constructor(
         val line = theLine.toCharArray()
         val token = CharArray(line.size)
         if (Globals.debug) {
-            LOGGER.debug("source line --->$theLine<---")
+            LOGGER.debug { "source line --->$theLine<---" }
         }
         // Each iteration of this loop processes one character in the source line.
         var insideQuotedString = false

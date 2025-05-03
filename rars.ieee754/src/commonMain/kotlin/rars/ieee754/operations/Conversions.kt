@@ -1,9 +1,9 @@
-package rars.ksoftfloat.operations
+package rars.ieee754.operations
 
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.internal.ExactFloat
-import rars.ksoftfloat.types.Floating
-import rars.ksoftfloat.types.FloatingFactory
+import rars.ieee754.Environment
+import rars.ieee754.internal.ExactFloat
+import rars.ieee754.types.Floating
+import rars.ieee754.types.FloatingFactory
 import java.math.BigInteger
 
 fun <T : Floating<T>> T.roundToIntegral(

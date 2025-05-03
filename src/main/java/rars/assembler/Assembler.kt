@@ -204,7 +204,7 @@ class Assembler {
         // Throw collection of errors accumulated through the first pass.
         ensure(!this@Assembler.errors!!.errorsOccurred()) { AssemblyError(this@Assembler.errors!!) }
         if (Globals.debug) {
-            LOGGER.debug("Assembler second pass begins")
+            LOGGER.debug { "Assembler second pass begins" }
         }
         // SECOND PASS OF ASSEMBLER GENERATES BASIC ASSEMBLER THEN MACHINE CODE.
         // Generates basic assembler statements...
@@ -275,7 +275,7 @@ class Assembler {
 
                             // All substitutions have been made so we have generated
                             // a valid basic instruction!
-                            if (Globals.debug) LOGGER.debug {
+                            if (Globals.debug) LOGGER.debug() {
                                 "Pseudo instruction generated: $instruction"
                             }
 
@@ -315,7 +315,7 @@ class Assembler {
             }
         }
         if (Globals.debug) {
-            LOGGER.debug("Code generation begins")
+            LOGGER.debug { "Code generation begins" }
         }
 
         // THIRD MAJOR STEP IS PRODUCE MACHINE CODE FROM ASSEMBLY
@@ -327,7 +327,7 @@ class Assembler {
                 break
             }
             statement.buildMachineStatementFromBasicStatement(this@Assembler.errors!!)
-            if (Globals.debug) LOGGER.debug { statement }
+            if (Globals.debug) LOGGER.debug() { statement }
             Globals.MEMORY_INSTANCE
                 .setProgramStatement(statement.address, statement)
                 .onLeft { error ->
@@ -638,7 +638,7 @@ class Assembler {
     private fun executeDirective(tokens: TokenList) {
         val token = tokens.get(0)
         val direct = Directive.matchDirective(token.text)
-        if (Globals.debug) LOGGER.debug {
+        if (Globals.debug) LOGGER.debug() {
             "Line ${token.sourceLine} is directive $direct"
         }
 

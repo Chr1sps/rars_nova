@@ -2,15 +2,14 @@ package rars.venus;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.ProgramStatement;
 import rars.api.DisplayFormat;
 import rars.assembler.DataTypes;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
@@ -38,7 +37,6 @@ import java.util.Objects;
 import static kotlin.collections.CollectionsKt.map;
 import static kotlin.collections.CollectionsKt.maxByOrNull;
 import static rars.Globals.SIMULATOR;
-import static rars.logging.LoggingKt.error;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress;
 import static rars.util.UtilsKt.applyStyle;
@@ -50,7 +48,7 @@ import static rars.util.UtilsKt.unwrap;
  * @author Team JSpim
  */
 public final class TextSegmentWindow extends JInternalFrame {
-    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         TextSegmentWindow.class
     );
     private static final int PROGRAM_ARGUMENT_TEXTFIELD_COLUMNS = 40;
@@ -924,7 +922,7 @@ public final class TextSegmentWindow extends JInternalFrame {
             try {
                 Globals.MEMORY_INSTANCE.setRawWord(address, val)
                     .onLeft(error -> {
-                        error(LOGGER, () ->
+                        LoggingExtKt.logError(LOGGER, () ->
                             "Address error exception when setting memory word in TextSegmentWindow: " + error
                         );
                         return Unit.INSTANCE;

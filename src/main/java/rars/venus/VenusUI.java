@@ -7,7 +7,8 @@ import kotlin.collections.ArraysKt;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.io.VenusIO;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 import rars.riscv.InstructionsRegistry;
 import rars.settings.*;
@@ -34,8 +35,6 @@ import java.io.File;
 import java.util.List;
 
 import static kotlin.collections.CollectionsKt.*;
-import static rars.logging.LoggingKt.error;
-import static rars.logging.LoggingKt.fatal;
 import static rars.venus.util.IconLoading.loadIcon;
 
 /**
@@ -44,7 +43,7 @@ import static rars.venus.util.IconLoading.loadIcon;
  * @author Sanderson and Team JSpim
  */
 public final class VenusUI extends JFrame {
-    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         VenusUI.class
     );
     public final @NotNull JMenuBar menu;
@@ -135,7 +134,8 @@ public final class VenusUI extends JFrame {
         final var imageUrl = this.getClass()
             .getResource(Globals.IMAGES_PATH + "RISC-V.png");
         if (imageUrl == null) {
-            fatal(LOGGER, "Internal Error: images folder or file not found.");
+            LoggingExtKt.logFatal(LOGGER,
+                () -> "Internal Error: images folder or file not found.");
             System.exit(0);
         }
         final var rvImage = Toolkit.getDefaultToolkit().getImage(imageUrl);
@@ -642,7 +642,7 @@ public final class VenusUI extends JFrame {
 
         // Open files
         if (!this.editor.openFiles(files)) {
-            fatal(LOGGER, () -> {
+            LoggingExtKt.logFatal(LOGGER, () -> {
                 final var filesString = String.join(
                     ", ",
                     map(files, File::getName)
@@ -722,7 +722,9 @@ public final class VenusUI extends JFrame {
             UIManager.setLookAndFeel(lookAndFeel);
             SwingUtilities.updateComponentTreeUI(this);
         } catch (final UnsupportedLookAndFeelException e) {
-            error(LOGGER, e, "Error when loading look and feel.");
+            LoggingExtKt.logError(LOGGER, e, () ->
+                "Error when loading look and feel."
+            );
         }
     }
 

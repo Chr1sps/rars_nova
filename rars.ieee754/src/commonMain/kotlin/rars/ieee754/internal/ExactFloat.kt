@@ -1,7 +1,7 @@
-package rars.ksoftfloat.internal
+package rars.ieee754.internal
 
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.RoundingMode
+import rars.ieee754.Environment
+import rars.ieee754.RoundingMode
 import java.math.BigInteger
 import kotlin.math.min
 
@@ -23,11 +23,16 @@ class ExactFloat(
     val significand: BigInteger
 ) : Comparable<ExactFloat> {
 
-    constructor(bigInt: BigInteger) : this(bigInt < BigInteger.ZERO, 0, bigInt.abs())
+    constructor(bigInt: BigInteger) : this(
+        bigInt < BigInteger.ZERO,
+        0,
+        bigInt.abs()
+    )
 
     operator fun plus(other: ExactFloat): ExactFloat {
         val expoDiff = this.exponent - other.exponent
-        val finalExpo = min(this.exponent.toDouble(), other.exponent.toDouble()).toInt()
+        val finalExpo =
+            min(this.exponent.toDouble(), other.exponent.toDouble()).toInt()
 
         if (this.sign != other.sign) {
             val comp = this.abs().compareTo(other.abs())
@@ -41,12 +46,14 @@ class ExactFloat(
             return if (expoDiff < 0) {
                 ExactFloat(
                     finalSign, finalExpo,
-                    this.significand.subtract(other.significand.shiftLeft(-expoDiff)).abs()
+                    this.significand.subtract(other.significand.shiftLeft(-expoDiff))
+                        .abs()
                 )
             } else {
                 ExactFloat(
                     finalSign, finalExpo,
-                    this.significand.shiftLeft(expoDiff).subtract(other.significand).abs()
+                    this.significand.shiftLeft(expoDiff)
+                        .subtract(other.significand).abs()
                 )
             }
         } else {
@@ -54,13 +61,15 @@ class ExactFloat(
                 ExactFloat(
                     this.sign,
                     finalExpo,
-                    this.significand.add(other.significand.shiftLeft(-expoDiff)).abs()
+                    this.significand.add(other.significand.shiftLeft(-expoDiff))
+                        .abs()
                 )
             } else {
                 ExactFloat(
                     this.sign,
                     finalExpo,
-                    this.significand.shiftLeft(expoDiff).add(other.significand).abs()
+                    this.significand.shiftLeft(expoDiff).add(other.significand)
+                        .abs()
                 )
             }
         }
@@ -91,7 +100,7 @@ class ExactFloat(
      * guarantee with many other methods.
      *
      *
-     * Many implementation use Newton–Raphson division because it is much faster,
+     * Many implementations use Newton–Raphson division because it is much faster,
      * but the analysis to guarantee
      * correct rounding behavior is beyond me.
      *
@@ -113,9 +122,11 @@ class ExactFloat(
         val expChange = dividend.bitLength() - divisor.bitLength()
         // Line up the numbers
         if (divisor.bitLength() > dividend.bitLength()) {
-            dividend = dividend.shiftLeft(divisor.bitLength() - dividend.bitLength())
+            dividend =
+                dividend.shiftLeft(divisor.bitLength() - dividend.bitLength())
         } else {
-            divisor = divisor.shiftLeft(dividend.bitLength() - divisor.bitLength())
+            divisor =
+                divisor.shiftLeft(dividend.bitLength() - divisor.bitLength())
         }
 
         var count = 0
@@ -140,7 +151,11 @@ class ExactFloat(
             outbits = outbits.add(BigInteger.ONE)
             count++
         }
-        return ExactFloat(a.sign != b.sign, a.exponent - b.exponent - count - expChange + 1, outbits)
+        return ExactFloat(
+            a.sign != b.sign,
+            a.exponent - b.exponent - count - expChange + 1,
+            outbits
+        )
     }
 
 
@@ -187,7 +202,8 @@ class ExactFloat(
         }
     }
 
-    fun shiftRight(i: Int) = ExactFloat(this.sign, this.exponent - i, this.significand)
+    fun shiftRight(i: Int) =
+        ExactFloat(this.sign, this.exponent - i, this.significand)
 
     fun normalize(): ExactFloat = if (this.isZero) {
         ExactFloat(this.sign, 0, BigInteger.ZERO)
@@ -207,10 +223,12 @@ class ExactFloat(
         }
 
         val bitsToRound = -f.exponent
-        val mainBits = f.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound)
+        val mainBits =
+            f.significand.shiftRight(bitsToRound).shiftLeft(bitsToRound)
 
         val zeroRounded = ExactFloat(f.sign, f.exponent, mainBits).normalize()
-        val oneRounded = zeroRounded.plus(ExactFloat(f.sign, 0, BigInteger.valueOf(1)))
+        val oneRounded =
+            zeroRounded.plus(ExactFloat(f.sign, 0, BigInteger.valueOf(1)))
         if (env.mode == RoundingMode.ZERO) {
             return zeroRounded
         }
@@ -228,7 +246,10 @@ class ExactFloat(
         val roundedBits = f.significand.subtract(mainBits)
         return if (roundedBits == BigInteger.ONE.shiftLeft(bitsToRound - 1)) {
             // If there is a tie round according to the rounding mode
-            if (env.mode == RoundingMode.AWAY || zeroRounded.significand.testBit(0)) {
+            if (env.mode == RoundingMode.AWAY || zeroRounded.significand.testBit(
+                    0
+                )
+            ) {
                 oneRounded
             } else {
                 zeroRounded
@@ -249,7 +270,8 @@ class ExactFloat(
             env.inexact = true
         }
         assert(f.exponent >= 0) { "There can't be any fractions at this point" }
-        return f.significand.shiftLeft(f.exponent).multiply(BigInteger.valueOf((if (this.sign) -1 else 1).toLong()))
+        return f.significand.shiftLeft(f.exponent)
+            .multiply(BigInteger.valueOf((if (this.sign) -1 else 1).toLong()))
     }
 
     override fun compareTo(other: ExactFloat): Int {
@@ -262,7 +284,8 @@ class ExactFloat(
         if (this.sign != other.sign) {
             return if (this.sign) -1 else 1
         }
-        val tmp = this.exponent - other.exponent + this.significand.bitLength() - other.significand.bitLength()
+        val tmp =
+            this.exponent - other.exponent + this.significand.bitLength() - other.significand.bitLength()
         return if (tmp > 0) {
             if (this.sign) -1 else 1
         } else if (tmp < 0) {
@@ -278,6 +301,8 @@ class ExactFloat(
     }
 
     fun abs(): ExactFloat = ExactFloat(false, this.exponent, this.significand)
-    fun negate(): ExactFloat = ExactFloat(!this.sign, this.exponent, this.significand)
+    fun negate(): ExactFloat =
+        ExactFloat(!this.sign, this.exponent, this.significand)
+
     val isZero: Boolean get() = this.significand == BigInteger.ZERO
 }

@@ -1,7 +1,8 @@
 package rars.venus.util;
 
 import org.jetbrains.annotations.NotNull;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 
 import javax.swing.*;
@@ -9,8 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
-import static rars.logging.LoggingKt.debug;
 
 // CREDIT  
 // http://forums.sun.com/thread.jspa?threadID=499183&messageID=2505646
@@ -40,7 +39,7 @@ import static rars.logging.LoggingKt.debug;
  */
 public class RepeatButton extends JButton
     implements ActionListener, MouseListener {
-    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         RepeatButton.class);
     /**
      * Testing flag. Set in main method.
@@ -233,7 +232,7 @@ public class RepeatButton extends JButton
         }
         // testing code...
         else if (RepeatButton.testing && ae.getSource() == this) {
-            debug(LOGGER, ae::getActionCommand);
+            LoggingExtKt.logDebug(LOGGER, ae::getActionCommand);
         }
     }
 

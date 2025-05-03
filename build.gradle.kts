@@ -12,18 +12,23 @@ application {
 //    mainModule = "RARSNova"
 }
 
-repositories {
-    mavenCentral()
+allprojects {
+    repositories {
+        mavenCentral()
+    }
 }
 
 val graphDoclet: Configuration by configurations.creating
 val jflexConfiguration: Configuration by configurations.creating
 
 dependencies {
+    implementation(project(":rars.logging"))
+    implementation(project(":rars.runtime"))
+    implementation(project(":rars.ieee754"))
+    implementation(project(":rars.runtime"))
+
     compileOnly("org.jetbrains:annotations:24.0.0")
     implementation("com.formdev:flatlaf:3.4")
-    implementation("org.apache.logging.log4j:log4j-core:2.23.1")
-    implementation("org.apache.logging.log4j:log4j-api:2.23.1")
     implementation("com.fifesoft:rsyntaxtextarea:3.5.4")
     implementation("io.arrow-kt:arrow-core:2.0.1")
     jflexConfiguration("de.jflex:jflex:1.9.1")
@@ -99,7 +104,10 @@ sourceSets.test {
 // region JFlex
 
 // region Utils
-fun String.findMethod(header: String, vararg requiredContents: String): IntRange? {
+fun String.findMethod(
+    header: String,
+    vararg requiredContents: String
+): IntRange? {
     // First, find the method header index
     val headerIndex = indexOf(header).takeIf { it != -1 } ?: return null
 
@@ -137,10 +145,14 @@ fun String.findMethod(header: String, vararg requiredContents: String): IntRange
  * Finds the range of the zzRefill method in the lexer file.
  * The range encompasses the entire method, including the preceding docs.
  */
-fun String.findZZRefill(): IntRange? = findMethod("private boolean zzRefill() throws java.io.IOException ")
+fun String.findZZRefill(): IntRange? =
+    findMethod("private boolean zzRefill() throws java.io.IOException ")
 
 fun String.findYYReset(): IntRange? =
-    findMethod("public final void yyreset(java.io.Reader reader)", "zzBuffer = new char[initBufferSize];")
+    findMethod(
+        "public final void yyreset(java.io.Reader reader)",
+        "zzBuffer = new char[initBufferSize];"
+    )
 // endregion Utils
 
 // region Paths
@@ -176,63 +188,64 @@ val runJFlex = tasks.register<JavaExec>("runJFlex") {
     }
 }
 
-val removeDuplicateLexerMethods = tasks.register("removeDuplicateLexerMethods") {
-    group = "build"
-    description = "Modifies the generated lexer to remove specific methods."
+val removeDuplicateLexerMethods =
+    tasks.register("removeDuplicateLexerMethods") {
+        group = "build"
+        description = "Modifies the generated lexer to remove specific methods."
 
-    dependsOn(runJFlex)
-    withCache(cacheJFlexFile)
+        dependsOn(runJFlex)
+        withCache(cacheJFlexFile)
 
-    inputs.file(lexerOutputName)
-    outputs.file(lexerOutputName)
+        inputs.file(lexerOutputName)
+        outputs.file(lexerOutputName)
 
-    val lexerFile = file("$lexerOutputDir/$lexerClassName.java")
+        val lexerFile = file("$lexerOutputDir/$lexerClassName.java")
 
-    doLast {
-        if (lexerFile.exists()) {
-            val content = lexerFile.readText()
+        doLast {
+            if (lexerFile.exists()) {
+                val content = lexerFile.readText()
 
-            // Remove both methods from the content
-            fun String.doRemove(range: IntRange): String {
-                println("Found method:")
-                println(subSequence(range))
-                return removeRange(range)
-            }
-
-            var isModified = false
-            val modifiedContent = content
-                .run {
-                    val zzRefillRange = findZZRefill()
-                    if (zzRefillRange != null) {
-                        isModified = true
-                        doRemove(zzRefillRange)
-                    } else {
-                        println("zzRefill method not found, skipping removal.")
-                        this
-                    }
-                }
-                .run {
-                    val yyResetRange = findYYReset()
-                    if (yyResetRange != null) {
-                        isModified = true
-                        doRemove(yyResetRange)
-                    } else {
-                        println("yyreset method not found, skipping removal.")
-                        this
-                    }
+                // Remove both methods from the content
+                fun String.doRemove(range: IntRange): String {
+                    println("Found method:")
+                    println(subSequence(range))
+                    return removeRange(range)
                 }
 
-            if (isModified) {
-                lexerFile.writeText(modifiedContent)
-                println("Lexer modification completed.")
+                var isModified = false
+                val modifiedContent = content
+                    .run {
+                        val zzRefillRange = findZZRefill()
+                        if (zzRefillRange != null) {
+                            isModified = true
+                            doRemove(zzRefillRange)
+                        } else {
+                            println("zzRefill method not found, skipping removal.")
+                            this
+                        }
+                    }
+                    .run {
+                        val yyResetRange = findYYReset()
+                        if (yyResetRange != null) {
+                            isModified = true
+                            doRemove(yyResetRange)
+                        } else {
+                            println("yyreset method not found, skipping removal.")
+                            this
+                        }
+                    }
+
+                if (isModified) {
+                    lexerFile.writeText(modifiedContent)
+                    println("Lexer modification completed.")
+                } else {
+                    println("No methods found to remove.")
+                }
             } else {
-                println("No methods found to remove.")
+                println("Lexer file not found, skipping modification.")
             }
-        } else {
-            println("Lexer file not found, skipping modification.")
         }
     }
-}
 
 val createLexer = tasks.register("createLexer") {
     group = "build"
@@ -273,15 +286,16 @@ abstract class CacheFileTask : DefaultTask() {
         val inputContent = inputFile.get().asFile.readText()
         val cachedFile = outputFile.get().asFile
 
-        didUpdate = if (!cachedFile.exists() || cachedFile.readText() != inputContent) {
-            logger.lifecycle("Updating cached file: $cachedFile")
-            cachedFile.parentFile.mkdirs()
-            cachedFile.writeText(inputContent)
-            true
-        } else {
-            logger.lifecycle("Cached file is up-to-date: $cachedFile")
-            false
-        }
+        didUpdate =
+            if (!cachedFile.exists() || cachedFile.readText() != inputContent) {
+                logger.lifecycle("Updating cached file: $cachedFile")
+                cachedFile.parentFile.mkdirs()
+                cachedFile.writeText(inputContent)
+                true
+            } else {
+                logger.lifecycle("Cached file is up-to-date: $cachedFile")
+                false
+            }
     }
 }
 

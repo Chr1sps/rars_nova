@@ -1,11 +1,16 @@
-package rars.ksoftfloat.operations
+package rars.ieee754.operations
 
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.RoundingMode
-import rars.ksoftfloat.types.Floating
-import rars.ksoftfloat.types.FloatingFactory
+import rars.ieee754.Environment
+import rars.ieee754.RoundingMode
+import rars.ieee754.types.Floating
+import rars.ieee754.types.FloatingFactory
 
-fun <T : Floating<T>> FloatingFactory<T>.add(environment: Environment, a: T, b: T): T {
+
+fun <T : Floating<T>> FloatingFactory<T>.add(
+    environment: Environment,
+    a: T,
+    b: T
+): T {
 
     // TODO: handle signalling correctly
 
@@ -49,7 +54,11 @@ fun <T : Floating<T>> FloatingFactory<T>.add(environment: Environment, a: T, b: 
         fromExactFloat(environment, out)
 }
 
-fun <T : Floating<T>> FloatingFactory<T>.subtract(environment: Environment, a: T, b: T): T {
+fun <T : Floating<T>> FloatingFactory<T>.subtract(
+    environment: Environment,
+    a: T,
+    b: T
+): T {
     // TODO: handle signalling correctly
 
     // Section 6.2
@@ -65,7 +74,11 @@ fun <T : Floating<T>> FloatingFactory<T>.subtract(environment: Environment, a: T
     return add(environment, a, b.negate())
 }
 
-fun <T : Floating<T>> FloatingFactory<T>.multiply(environment: Environment, a: T, b: T): T {
+fun <T : Floating<T>> FloatingFactory<T>.multiply(
+    environment: Environment,
+    a: T,
+    b: T
+): T {
 
     // TODO: handle signalling correctly
 
@@ -95,7 +108,10 @@ fun <T : Floating<T>> FloatingFactory<T>.multiply(environment: Environment, a: T
     return fromExactFloat(environment, a.toExactFloat().times(b.toExactFloat()))
 }
 
-fun <T : Floating<T>> FloatingFactory<T>.squareRoot(environment: Environment, a: T): T {
+fun <T : Floating<T>> FloatingFactory<T>.squareRoot(
+    environment: Environment,
+    a: T
+): T {
     // TODO: handle signalling correctly
 
     // Section 6.2
@@ -119,10 +135,18 @@ fun <T : Floating<T>> FloatingFactory<T>.squareRoot(environment: Environment, a:
         return a
     }
 
-    return fromExactFloat(environment, a.toExactFloat().squareRoot(maxPrecision))
+    return fromExactFloat(
+        environment,
+        a.toExactFloat().squareRoot(maxPrecision)
+    )
 }
 
-fun <T : Floating<T>> FloatingFactory<T>.fusedMultiplyAdd(environment: Environment, a: T, b: T, c: T): T {
+fun <T : Floating<T>> FloatingFactory<T>.fusedMultiplyAdd(
+    environment: Environment,
+    a: T,
+    b: T,
+    c: T
+): T {
 
     // TODO: handle signalling correctly
 
@@ -167,7 +191,11 @@ fun <T : Floating<T>> FloatingFactory<T>.fusedMultiplyAdd(environment: Environme
     return fromExactFloat(environment, multiplied + c.toExactFloat())
 }
 
-fun <T : Floating<T>> FloatingFactory<T>.divide(environment: Environment, a: T, b: T): T {
+fun <T : Floating<T>> FloatingFactory<T>.divide(
+    environment: Environment,
+    a: T,
+    b: T
+): T {
     // TODO: handle signalling correctly
 
     // Section 6.2
@@ -199,7 +227,7 @@ fun <T : Floating<T>> FloatingFactory<T>.divide(environment: Environment, a: T, 
         return if (a.isSignMinus == b.isSignMinus) infinity else negativeInfinity
     }
 
-    assert(a.isFinite && b.isFinite) { "Both should definitely be finite by this point" }
+//    assert(a.isFinite && b.isFinite) { "Both should definitely be finite by this point" }
 
     // TODO: in tie cases round away from zero despite rounding mode unless actually
     // precise

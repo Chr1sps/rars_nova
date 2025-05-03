@@ -1,8 +1,8 @@
-package rars.ksoftfloat.operations
+package rars.ieee754.operations
 
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.types.Floating
-import rars.ksoftfloat.types.FloatingFactory
+import rars.ieee754.Environment
+import rars.ieee754.types.Floating
+import rars.ieee754.types.FloatingFactory
 
 
 private fun <T : Floating<T>> compareNoNAN(a: T, b: T): Int {

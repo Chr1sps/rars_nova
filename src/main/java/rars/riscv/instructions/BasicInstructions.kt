@@ -8,11 +8,11 @@ import arrow.core.raise.ensureNotNull
 import arrow.core.right
 import rars.ProgramStatement
 import rars.events.*
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.operations.*
-import rars.ksoftfloat.types.Float32
-import rars.ksoftfloat.types.Float64
-import rars.ksoftfloat.types.Floating
+import rars.ieee754.Environment
+import rars.ieee754.operations.*
+import rars.ieee754.types.Float32
+import rars.ieee754.types.Float64
+import rars.ieee754.types.Floating
 import rars.riscv.*
 import rars.riscv.BasicInstruction.Companion.BASIC_INSTRUCTION_LENGTH
 import rars.riscv.hardware.registerfiles.RegisterFile
@@ -907,7 +907,7 @@ object BasicInstructions {
         "1110001 00000 sssss 000 fffff 1010011"
     ) { statement ->
         val newValue =
-            fpRegisterFile.getLong(statement.getOperand(1))!!.toLong()
+            fpRegisterFile.getLong(statement.getOperand(1))!!
         registerFile.updateRegisterByNumber(statement.getOperand(0), newValue)
             .ignoreOk()
     }

@@ -340,7 +340,7 @@ class Memory(
     fun set(address: Int, value: Int, length: Int): Either<MemoryError, Int> =
         either {
             var value = value
-            if (Globals.debug) LOGGER.debug {
+            if (Globals.debug) LOGGER.debug() {
                 "memory[${address.toHexStringWithPrefix()}] set to $value ($length bytes)"
             }
 
@@ -619,7 +619,7 @@ class Memory(
                 address
             )
         }
-        if (Globals.debug) LOGGER.debug {
+        if (Globals.debug) LOGGER.debug() {
             "memory[${address.toHexStringWithPrefix()}] set to ${statement.binaryStatement}"
         }
 

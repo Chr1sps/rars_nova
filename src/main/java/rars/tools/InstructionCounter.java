@@ -3,7 +3,8 @@ package rars.tools;
 import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 import rars.notices.AccessNotice;
 import rars.notices.AccessType;
@@ -14,7 +15,6 @@ import rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 
-import static rars.logging.LoggingKt.error;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress;
 
@@ -27,7 +27,7 @@ import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLim
  * @author Felipe Lessa &lt;felipe.lessa@gmail.com&gt;
  */
 public final class InstructionCounter extends AbstractTool {
-    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         InstructionCounter.class);
     private static final String NAME = "Instruction Counter";
     private static final String VERSION = "Version 1.0 (Felipe Lessa)";
@@ -255,11 +255,11 @@ public final class InstructionCounter extends AbstractTool {
         }
         this.lastAddress = a;
         this.counter++;
+        // final var someFunc = kotlin.jvm.
         Globals.MEMORY_INSTANCE.getProgramStatement(a).fold(
             error -> {
-                error(
-                    LOGGER, () ->
-                        "Error in InstructionCounter: " + error
+                LoggingExtKt.logError(LOGGER, () ->
+                    "Error in InstructionCounter: " + error
                 );
                 return Unit.INSTANCE;
             },

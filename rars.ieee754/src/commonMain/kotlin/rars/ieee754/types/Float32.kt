@@ -1,8 +1,8 @@
-package rars.ksoftfloat.types
+package rars.ieee754.types
 
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.RoundingMode
-import rars.ksoftfloat.internal.ExactFloat
+import rars.ieee754.Environment
+import rars.ieee754.RoundingMode
+import rars.ieee754.internal.ExactFloat
 import java.math.BigInteger
 import kotlin.math.absoluteValue
 
@@ -43,9 +43,9 @@ class Float32(val bits: Int) : Floating<Float32> {
     override val isZero get() = bits == 0 || bits == -0x80000000
 
     override fun toExactFloat(): ExactFloat {
-        assert(!isInfinite) { "Infinity is not exact" }
-        assert(!isNaN) { "NaNs are not exact" }
-        assert(!isZero) { "Zeros should be handled explicitly" }
+        require(!isInfinite) { "Infinity is not exact" }
+        require(!isNaN) { "NaNs are not exact" }
+        require(!isZero) { "Zeros should be handled explicitly" }
 
         val exponent: Int
         val significand: BigInteger
@@ -97,7 +97,7 @@ class Float32(val bits: Int) : Floating<Float32> {
                 // Subnormal
 
                 if (ef.exponent > MINEXP - SIGBITS) {
-                    assert(ef.significand.bitLength() <= SIGBITS) { "Its actually normal" }
+                    require(ef.significand.bitLength() <= SIGBITS) { "Its actually normal" }
                     return Float32(
                         ef.sign, MINEXP,
                         ef.significand
@@ -122,7 +122,7 @@ class Float32(val bits: Int) : Floating<Float32> {
                 val upBits = ef.significand.shiftRight(bitsToRound)
                     .add(BigInteger.valueOf(1))
                 if (upBits.testBit(0) || upBits.bitLength() <= SIGBITS) {
-                    assert(upBits.bitLength() <= SIGBITS)
+                    require(upBits.bitLength() <= SIGBITS)
                     awayZero = Float32(ef.sign, MINEXP, upBits.intValueExact())
                 } else {
                     awayZero = Float32(
@@ -157,7 +157,7 @@ class Float32(val bits: Int) : Floating<Float32> {
                 if (ef.significand.bitLength() <= (SIGBITS + 1)) {
                     // No rounding needed
                     val bitCount = ef.exponent + ef.significand.bitLength() - 1
-                    assert(bitCount > MINEXP) { "Its actually subnormal" }
+                    require(bitCount > MINEXP) { "Its actually subnormal" }
 
                     return Float32(
                         ef.sign, bitCount,

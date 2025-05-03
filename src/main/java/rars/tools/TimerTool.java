@@ -3,7 +3,8 @@ package rars.tools;
 import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 import rars.notices.AccessType;
 import rars.riscv.hardware.registerfiles.CSRegisterFile;
@@ -14,7 +15,6 @@ import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static rars.logging.LoggingKt.fatal;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress;
 import static rars.util.UtilsKt.unwrap;
 
@@ -22,7 +22,7 @@ import static rars.util.UtilsKt.unwrap;
  * A RARS tool used to implement a timing module and timer inturrpts.
  */
 public final class TimerTool extends AbstractTool {
-    private static final RARSLogger LOGGER = RARSLogging.forJavaClass(TimerTool.class);
+    private static final Logger LOGGER = RARSLogging.forJavaClass(TimerTool.class);
 
     private static final String HEADING = "Timer Tool";
     private static final String VERSION = "Version 1.0 (Zachary Selk)";
@@ -271,7 +271,7 @@ public final class TimerTool extends AbstractTool {
                 TimerTool.getTimeCmpAddress(),
                 TimerTool.getTimeCmpAddress() + 8
             ).onLeft(aee -> {
-                fatal(LOGGER, () ->
+                LoggingExtKt.logFatal(LOGGER, () ->
                     "Error while adding observer in Timer Tool: " + aee
                 );
                 System.exit(0);

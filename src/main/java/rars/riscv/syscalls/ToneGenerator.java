@@ -1,7 +1,8 @@
 package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 
 import javax.sound.midi.*;
@@ -9,8 +10,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static rars.logging.LoggingKt.error;
 
 //  The ToneGenerator and Tone classes were developed by Otterbein College
 //  student Tony Brock in July 2007. They simulate MIDI output through the
@@ -130,7 +129,7 @@ final class Tone {
      * The default MIDI channel of the tone: 0 (channel 1).
      */
     public final static int DEFAULT_CHANNEL = 0;
-    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         Tone.class);
     /**
      * The following lock and the code which locks and unlocks it
@@ -245,7 +244,7 @@ final class Tone {
 
         } catch (final MidiUnavailableException |
             InvalidMidiDataException midiError) {
-            error(LOGGER, midiError, () ->
+            LoggingExtKt.logError(LOGGER, midiError, () ->
                 "Error playing tone."
             );
         }

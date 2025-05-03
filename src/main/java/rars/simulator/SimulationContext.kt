@@ -9,8 +9,8 @@ import rars.events.EventReason
 import rars.events.ExitingError
 import rars.events.MemoryError
 import rars.events.SimulationError
+import rars.ieee754.RoundingMode
 import rars.io.AbstractIO
-import rars.ksoftfloat.RoundingMode
 import rars.riscv.BasicInstruction
 import rars.riscv.hardware.memory.Memory
 import rars.riscv.hardware.registerfiles.CSRegisterFile

@@ -4,9 +4,9 @@ import arrow.core.Either
 import arrow.core.raise.either
 import rars.ProgramStatement
 import rars.events.SimulationEvent
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.operations.fusedMultiplyAdd
-import rars.ksoftfloat.types.Float64
+import rars.ieee754.Environment
+import rars.ieee754.operations.fusedMultiplyAdd
+import rars.ieee754.types.Float64
 import rars.riscv.BasicInstruction
 import rars.riscv.BasicInstructionFormat
 import rars.riscv.setfflags

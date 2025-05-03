@@ -1,7 +1,7 @@
-package rars.ksoftfloat.types
+package rars.ieee754.types
 
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.internal.ExactFloat
+import rars.ieee754.Environment
+import rars.ieee754.internal.ExactFloat
 
 interface Floating<T : Floating<T>> {
     val isSignMinus: Boolean

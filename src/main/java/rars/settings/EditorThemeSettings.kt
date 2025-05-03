@@ -42,14 +42,14 @@ class EditorThemeSettingsImpl(private val preferences: Preferences) :
             this.backupTheme = this._currentTheme
             this.onChangeDispatcher.dispatch(null)
         } catch (_: SecurityException) {
-            LOGGER.error("Unable to write to persistent storage for security reasons. Reverting to previous settings.")
+            LOGGER.error { "Unable to write to persistent storage for security reasons. Reverting to previous settings." }
             // The reason why we need to write the backup theme to the preferences
             // is because the Preferences API implementations are free to flush
             // the changes to disk at any time.
             writeThemeToPreferences(this.backupTheme)
             this._currentTheme = this.backupTheme
         } catch (_: BackingStoreException) {
-            LOGGER.error("Unable to communicate with persistent storage. Reverting to previous settings.")
+            LOGGER.error { "Unable to communicate with persistent storage. Reverting to previous settings." }
             writeThemeToPreferences(this.backupTheme)
             this._currentTheme = this.backupTheme
         }

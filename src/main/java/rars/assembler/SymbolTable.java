@@ -4,7 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 import rars.util.BinaryUtilsKt;
 
@@ -12,8 +13,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-
-import static rars.logging.LoggingKt.debug;
 
 /**
  * Represents a table of Symbol objects.
@@ -27,7 +26,7 @@ public final class SymbolTable {
     // its associated address!
 
     public static final int NOT_FOUND = -1;
-    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         SymbolTable.class
     );
     private static final @NotNull String START_LABEL = "main";
@@ -99,14 +98,15 @@ public final class SymbolTable {
         } else {
             this.table.add(new Symbol(label, address, isData));
             if (Globals.debug) {
-                debug(LOGGER,
-                    () -> "The symbol %s with address %d has been added to the %s symbol table.".formatted(
+                LoggingExtKt.logDebug(LOGGER, () ->
+                    "The symbol %s with address %d has been added to the %s symbol table.".formatted(
                         label,
                         address,
                         file == null ? "global" : file.getAbsolutePath()
                     )
                 );
             }
+
         }
     }
 
@@ -124,7 +124,7 @@ public final class SymbolTable {
             symbol.name().equals(label)
         );
         if (removed && Globals.debug) {
-            debug(LOGGER, () ->
+            LoggingExtKt.logDebug(LOGGER, () ->
                 "The symbol %s has been removed from the %s symbol table.".formatted(
                     label,
                     (this.file == null) ? "global" : this.file.getAbsolutePath()

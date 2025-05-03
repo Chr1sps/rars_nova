@@ -59,9 +59,9 @@ class HighlightingSettingsImpl(private val preferences: Preferences) :
         try {
             this.preferences.flush()
         } catch (_: SecurityException) {
-            LOGGER.error("Unable to write to persistent storage for security reasons.")
+            LOGGER.error { "Unable to write to persistent storage for security reasons." }
         } catch (_: BackingStoreException) {
-            LOGGER.error("Unable to communicate with persistent storage.")
+            LOGGER.error { "Unable to communicate with persistent storage." }
         }
         this.onChangeDispatcher.dispatch(null)
     }

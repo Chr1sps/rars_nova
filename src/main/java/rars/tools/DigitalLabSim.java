@@ -3,7 +3,7 @@ package rars.tools;
 import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
 import rars.logging.RARSLogging;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
@@ -41,7 +41,7 @@ enum DisplaySegment {
 public final class DigitalLabSim extends AbstractTool {
     public static final int EXTERNAL_INTERRUPT_TIMER = 0x00000100;
     public static final int EXTERNAL_INTERRUPT_HEXA_KEYBOARD = 0x00000200;
-    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         DigitalLabSim.class
     );
     private static final String HEADING = "Digital Lab Sim";

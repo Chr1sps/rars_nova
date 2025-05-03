@@ -104,7 +104,7 @@ fun storeProgramArguments(programArgumentList: List<String>) {
         Globals.REGISTER_FILE.a0.setValue(argStartAddress.size.toLong()) // argc
         Globals.REGISTER_FILE.a1.setValue((stackAddress + DataTypes.WORD_SIZE + DataTypes.WORD_SIZE).toLong()) // argv
     }.onLeft { error ->
-        LOGGER.fatal("Error while writing program arguments to memory: $error")
+        LOGGER.fatal { "Error while writing program arguments to memory: $error." }
         exitProcess(0)
     }
 }

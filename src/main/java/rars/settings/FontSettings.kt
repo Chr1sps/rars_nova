@@ -39,7 +39,7 @@ class FontSettingsImpl(private val preferences: Preferences) : FontSettings {
         preferences.getInt(FONT_PREFIX + SIZE, DEFAULT_FONT_SIZE)
         set(value) {
             if (value < MIN_FONT_SIZE || value > MAX_FONT_SIZE) {
-                LOGGER.error("Attempted to set invalid font size: $value")
+                LOGGER.error { "Attempted to set invalid font size: $value" }
                 error("Font size must be between$MIN_FONT_SIZE and $MAX_FONT_SIZE. Provided: $value")
             }
             field = value
@@ -79,9 +79,9 @@ class FontSettingsImpl(private val preferences: Preferences) : FontSettings {
         try {
             this.preferences.flush()
         } catch (_: SecurityException) {
-            LOGGER.error("Unable to write to persistent storage for security reasons.")
+            LOGGER.error { "Unable to write to persistent storage for security reasons." }
         } catch (_: BackingStoreException) {
-            LOGGER.error("Unable to communicate with persistent storage.")
+            LOGGER.error { "Unable to communicate with persistent storage." }
         }
         this.onChangeDispatcher.dispatch(null)
     }

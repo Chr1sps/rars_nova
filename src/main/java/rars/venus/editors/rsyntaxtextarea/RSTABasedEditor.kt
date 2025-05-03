@@ -151,7 +151,9 @@ class RSTABasedEditor(
             textArea.select(start, end)
             textArea.grabFocus()
         } catch (e: BadLocationException) {
-            LOGGER.warning(e, "Failed to select line nr $lineNumber.")
+            LOGGER.warning(exception = e) {
+                "Failed to select line nr $lineNumber."
+            }
         }
     }
 
@@ -245,7 +247,7 @@ class RSTABasedEditor(
             val column = offset - textArea.getLineStartOffset(line)
             Pair(line, column)
         } catch (e: BadLocationException) {
-            LOGGER.error(e, "Failed to get caret position")
+            LOGGER.error(exception = e) { "Failed to get caret position." }
             Pair(0, 0)
         }
 

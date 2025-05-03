@@ -314,7 +314,7 @@ object InstructionsRegistry {
                         }
                     }
                 } ?: run {
-                LOGGER.error("Error: Could not load pseudo instructions from file: $filename")
+                LOGGER.error { "Error: Could not load pseudo instructions from file `$filename`" }
                 exitProcess(1)
             }
         }

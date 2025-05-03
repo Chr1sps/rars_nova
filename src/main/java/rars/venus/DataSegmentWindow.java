@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.api.DisplayFormat;
-import rars.logging.LoggingKt;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
@@ -40,7 +40,7 @@ import static rars.util.UtilsKt.*;
  * @author Sanderson and Bumgarner
  */
 public final class DataSegmentWindow extends JInternalFrame {
-    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         DataSegmentWindow.class
     );
 
@@ -199,9 +199,8 @@ public final class DataSegmentWindow extends JInternalFrame {
             this.mmioButton = new JButton();// "MMIO");
             this.textButton = new JButton();// ".text");
         } catch (final NullPointerException e) {
-            LoggingKt.fatal(
-                DataSegmentWindow.LOGGER, () ->
-                    "Internal Error: images folder not found"
+            LoggingExtKt.logFatal(DataSegmentWindow.LOGGER, () ->
+                "Internal Error: images folder not found"
             );
             System.exit(0);
         }

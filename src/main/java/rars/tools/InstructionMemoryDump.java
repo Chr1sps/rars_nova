@@ -3,7 +3,8 @@ package rars.tools;
 import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 import rars.notices.AccessNotice;
 import rars.notices.AccessType;
@@ -18,7 +19,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import static rars.Globals.FONT_SETTINGS;
-import static rars.logging.LoggingKt.error;
 
 /**
  * Instruction/memory dump tool. Dumps every instruction run and every memory
@@ -30,7 +30,7 @@ import static rars.logging.LoggingKt.error;
  * @author John Owens &lt;jowens@ece.ucdavis.edu&gt;
  */
 public final class InstructionMemoryDump extends AbstractTool {
-    private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         InstructionMemoryDump.class);
     private static final String NAME = "Instruction/Memory Dump";
     private static final String VERSION = "Version 1.0 (John Owens)";
@@ -145,12 +145,11 @@ public final class InstructionMemoryDump extends AbstractTool {
             this.lastAddress = a;
             Globals.MEMORY_INSTANCE.getProgramStatement(a).fold(
                 error -> {
-                    error(
-                        LOGGER, () ->
-                            "Error while trying to get a statement at address %d: %s".formatted(
-                                a,
-                                error
-                            )
+                    LoggingExtKt.logError(LOGGER, () ->
+                        "Error while trying to get a statement at address %d: %s".formatted(
+                            a,
+                            error
+                        )
                     );
                     return Unit.INSTANCE;
                 },

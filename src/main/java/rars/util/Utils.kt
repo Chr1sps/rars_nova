@@ -1,8 +1,8 @@
 package rars.util
 
 import arrow.core.Either
-import rars.ksoftfloat.Environment
-import rars.ksoftfloat.RoundingMode
+import rars.ieee754.Environment
+import rars.ieee754.RoundingMode
 import rars.venus.editors.TokenStyle
 import java.awt.Color
 import java.awt.Font
@@ -58,10 +58,17 @@ inline fun <Err, Ok> Either<Err, Ok>.leftOrThrow(
     { Either.Left(it) }, guardFunc
 )
 
-inline fun <Ok> Either<*, Ok>.rightOr(defaultValue: Ok): Ok = fold({ defaultValue }, { it })
-inline fun <Err, Ok> Either<Err, Ok>.rightOr(fromLeftFunc: (Err) -> Ok): Ok = fold(fromLeftFunc) { it }
-inline fun <Err> Either<Err, *>.leftOr(defaultValue: Err): Err = fold({ it }, { defaultValue })
-inline fun <Err, Ok> Either<Err, Ok>.leftOr(fromRightFunc: (Ok) -> Err): Err = fold({ it }, fromRightFunc)
+inline fun <Ok> Either<*, Ok>.rightOr(defaultValue: Ok): Ok =
+    fold({ defaultValue }, { it })
+
+inline fun <Err, Ok> Either<Err, Ok>.rightOr(fromLeftFunc: (Err) -> Ok): Ok =
+    fold(fromLeftFunc) { it }
+
+inline fun <Err> Either<Err, *>.leftOr(defaultValue: Err): Err =
+    fold({ it }, { defaultValue })
+
+inline fun <Err, Ok> Either<Err, Ok>.leftOr(fromRightFunc: (Ok) -> Err): Err =
+    fold({ it }, fromRightFunc)
 
 fun Environment.flipRounding() {
     if (mode == RoundingMode.MAX) {
@@ -100,27 +107,28 @@ fun <T> Iterable<T>.intersperseWith(separator: T): List<T> = buildList {
 
 val Collection<*>.lastIndex get() = size - 1
 
-fun <T> Iterable<T>.intersperseWith(separatorFunc: () -> T): List<T> = when (this) {
-    is Collection<*> -> buildList {
-        for ((index, value) in this@intersperseWith.withIndex()) {
-            add(value)
-            if (index == this@intersperseWith.lastIndex) break
-            add(separatorFunc())
-        }
-    }
-
-    else -> {
-        val iterator = this@intersperseWith.iterator()
-        if (!iterator.hasNext()) emptyList()
-        else buildList {
-            while (true) {
-                add(iterator.next())
-                if (!iterator.hasNext()) break
+fun <T> Iterable<T>.intersperseWith(separatorFunc: () -> T): List<T> =
+    when (this) {
+        is Collection<*> -> buildList {
+            for ((index, value) in this@intersperseWith.withIndex()) {
+                add(value)
+                if (index == this@intersperseWith.lastIndex) break
                 add(separatorFunc())
             }
         }
+
+        else -> {
+            val iterator = this@intersperseWith.iterator()
+            if (!iterator.hasNext()) emptyList()
+            else buildList {
+                while (true) {
+                    add(iterator.next())
+                    if (!iterator.hasNext()) break
+                    add(separatorFunc())
+                }
+            }
+        }
     }
-}
 
 
 fun <T> Array<out T>.intersperseWith(separator: T): List<T> = buildList {
@@ -131,13 +139,14 @@ fun <T> Array<out T>.intersperseWith(separator: T): List<T> = buildList {
     }
 }
 
-fun <T> Array<out T>.intersperseWith(separatorFunc: () -> T): List<T> = buildList {
-    for ((index, value) in this@intersperseWith.withIndex()) {
-        add(value)
-        if (index == this@intersperseWith.lastIndex) break
-        add(separatorFunc())
+fun <T> Array<out T>.intersperseWith(separatorFunc: () -> T): List<T> =
+    buildList {
+        for ((index, value) in this@intersperseWith.withIndex()) {
+            add(value)
+            if (index == this@intersperseWith.lastIndex) break
+            add(separatorFunc())
+        }
     }
-}
 
 /**
  * Returns the color coded as Stringified 32-bit hex with
@@ -146,7 +155,8 @@ fun <T> Array<out T>.intersperseWith(separatorFunc: () -> T): List<T> = buildLis
  *
  * @return String containing hex-coded color second.
  */
-fun Color.toHexString(): String = (this.red shl 16 or (this.green shl 8) or this.blue).toHexStringWithPrefix()
+fun Color.toHexString(): String =
+    (this.red shl 16 or (this.green shl 8) or this.blue).toHexStringWithPrefix()
 
 fun Font.applyStyle(style: TokenStyle): Font {
     var fontStyle = 0
@@ -159,6 +169,8 @@ fun Font.applyStyle(style: TokenStyle): Font {
 fun unreachable(): Nothing = error("Unreachable code.")
 
 object EmptyIterator : Iterator<Nothing> {
-    override fun next(): Nothing = throw NoSuchElementException("Empty iterator has no next element.")
+    override fun next(): Nothing =
+        throw NoSuchElementException("Empty iterator has no next element.")
+
     override fun hasNext(): Boolean = false
 }

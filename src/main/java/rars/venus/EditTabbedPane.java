@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.RISCVProgram;
-import rars.logging.RARSLogger;
+import rars.logging.Logger;
+import rars.logging.LoggingExtKt;
 import rars.logging.RARSLogging;
 import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
-import static rars.logging.LoggingKt.info;
 
 /**
  * Tabbed pane for the editor. Each of its tabs represents an open file.
@@ -577,7 +577,7 @@ public final class EditTabbedPane extends JPanel {
     }
 
     private final class FileOpener {
-        private static final @NotNull RARSLogger LOGGER = RARSLogging.forJavaClass(
+        private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
             FileOpener.class
         );
         private final @NotNull JFileChooser fileChooser;
@@ -642,9 +642,10 @@ public final class EditTabbedPane extends JPanel {
                 }
                 final var endTime = Instant.now();
                 final var duration = Duration.between(startTime, endTime);
-                info(
-                    LOGGER,
-                    () -> "Opened file in %dms.".formatted(duration.toMillis())
+                LoggingExtKt.logInfo(LOGGER, () ->
+                    "Opened file in %dms.".formatted(
+                        duration.toMillis()
+                    )
                 );
             }
             return true;

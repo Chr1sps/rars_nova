@@ -1,6 +1,6 @@
 package rars.settings
 
-import rars.logging.RARSLogger
+import rars.logging.Logger
 import rars.logging.error
 import rars.util.toHexString
 import rars.venus.editors.TokenStyle
@@ -49,7 +49,7 @@ internal fun Preferences.getTokenStyle(
     key: String,
     defaultStyle: TokenStyle,
     commonPrefix: String,
-    logger: RARSLogger
+    logger: Logger
 ): TokenStyle {
     val foreground = getNullableColor(
         "$commonPrefix$key$FOREGROUND",
@@ -69,7 +69,7 @@ internal fun Preferences.getTokenStyle(
 }
 
 internal fun Preferences.getColor(
-    key: String, defaultValue: Color, logger: RARSLogger
+    key: String, defaultValue: Color, logger: Logger
 ): Color {
     val value = get(key, null)
     return if (value == null) {
@@ -77,7 +77,9 @@ internal fun Preferences.getColor(
     } else try {
         Color.decode(value)
     } catch (nfe: NumberFormatException) {
-        logger.error(nfe, "Unable to decode color from preferences")
+        logger.error(exception = nfe) {
+            "Unable to decode color from preferences"
+        }
         defaultValue
     }
 }
@@ -85,7 +87,7 @@ internal fun Preferences.getColor(
 internal fun Preferences.getNullableColor(
     key: String,
     defaultValue: Color?,
-    logger: RARSLogger
+    logger: Logger
 ): Color? {
     val value = get(key, null)
     if (value == null) {
@@ -96,7 +98,9 @@ internal fun Preferences.getNullableColor(
     try {
         return Color.decode(value)
     } catch (nfe: NumberFormatException) {
-        logger.error(nfe, "Unable to decode color from preferences")
+        logger.error(nfe) {
+            "Unable to decode color from preferences"
+        }
         return defaultValue
     }
 }
