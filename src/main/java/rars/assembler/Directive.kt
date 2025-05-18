@@ -21,6 +21,7 @@ enum class Directive(
      */
     val description: String
 ) {
+    // region Section definitions
     DATA(
         ".data",
         "Subsequent items stored in Data segment at next available address"
@@ -29,6 +30,18 @@ enum class Directive(
         ".text",
         "Subsequent items (instructions) stored in Text segment at next available address"
     ),
+    SECTION(
+        ".section",
+        "Allows specifying sections without .text or .data directives. Included for gcc comparability"
+    ),
+
+    // endregion Section definitions
+    // region Data/memory definitions
+    BYTE(".byte", "Store the listed value(s) as 8 bit bytes"),
+    HALF(
+        ".half",
+        "Store the listed value(s) as 16 bit halfwords on halfword boundary"
+    ),
     WORD(
         ".word",
         "Store the listed value(s) as 32 bit words on word boundary"
@@ -36,6 +49,14 @@ enum class Directive(
     DWORD(
         ".dword",
         "Store the listed value(s) as 64 bit double-word on word boundary"
+    ),
+    FLOAT(
+        ".float",
+        "Store the listed value(s) as single precision floating point"
+    ),
+    DOUBLE(
+        ".double",
+        "Store the listed value(s) as double precision floating point"
     ),
     ASCII(
         ".ascii",
@@ -46,26 +67,29 @@ enum class Directive(
         "Store the string in the Data segment and add null terminator"
     ),
     STRING(".string", "Alias for .asciz"),
-    BYTE(".byte", "Store the listed value(s) as 8 bit bytes"),
-    ALIGN(
-        ".align",
-        "Align next data item on specified byte boundary (0=byte, 1=half, 2=word, 3=double)"
-    ),
-    HALF(
-        ".half",
-        "Store the listed value(s) as 16 bit halfwords on halfword boundary"
-    ),
     SPACE(
         ".space",
         "Reserve the next specified number of bytes in Data segment"
     ),
-    DOUBLE(
-        ".double",
-        "Store the listed value(s) as double precision floating point"
+
+    // endregion Data/memory definitions
+    // region Preprocessing
+    EQV(
+        ".eqv",
+        "Substitute second operand for first. First operand is symbol, second operand is expression (like #define)"
     ),
-    FLOAT(
-        ".float",
-        "Store the listed value(s) as single precision floating point"
+    MACRO(".macro", "Begin macro definition.  See .end_macro"),
+    END_MACRO(".end_macro", "End macro definition.  See .macro"),
+    INCLUDE(
+        ".include",
+        "Insert the contents of the specified file. Put file in quotes."
+    ),
+
+    // endregion Preprocessing
+    // region Miscellaneous
+    ALIGN(
+        ".align",
+        "Align next data item on specified byte boundary (0=byte, 1=half, 2=word, 3=double)"
     ),
     EXTERN(
         ".extern",
@@ -79,20 +103,8 @@ enum class Directive(
         ".global",
         "Declare the listed label(s) as global to enable referencing from other files"
     ),
-    EQV(
-        ".eqv",
-        "Substitute second operand for first. First operand is symbol, second operand is expression (like #define)"
-    ),
-    MACRO(".macro", "Begin macro definition.  See .end_macro"),
-    END_MACRO(".end_macro", "End macro definition.  See .macro"),
-    INCLUDE(
-        ".include",
-        "Insert the contents of the specified file. Put file in quotes."
-    ),
-    SECTION(
-        ".section",
-        "Allows specifying sections without .text or .data directives. Included for gcc comparability"
-    );
+    // endregion Miscellaneous
+    ;
 
     /**
      * Produces String-ified version of Directive object
@@ -147,10 +159,11 @@ enum class Directive(
          * @return If match is found, returns ArrayList of matching Directives objects,
          * else returns `null`.
          */
-        fun prefixMatchDirectives(str: String): List<Directive> = entries.filter {
-            it.directiveName
-                .lowercase(Locale.getDefault())
-                .startsWith(str.lowercase(Locale.getDefault()))
-        }
+        fun prefixMatchDirectives(str: String): List<Directive> =
+            entries.filter {
+                it.directiveName
+                    .lowercase(Locale.getDefault())
+                    .startsWith(str.lowercase(Locale.getDefault()))
+            }
     }
 }

@@ -38,12 +38,16 @@ public final class Globals {
     public static final @NotNull String HELP_PATH = "/help/";
     /// The current version number.
     public static final @NotNull String VERSION = "1.6";
+    public static final @NotNull String RARS_TITLE = "RARS " + VERSION;
     /// Copyright years
     public static final @NotNull String COPYRIGHT_YEARS = "2003-2019";
     /// Copyright holders
     public static final @NotNull String COPYRIGHT_HOLDERS = "Pete Sanderson and Kenneth Vollmar";
     /// List of accepted file extensions for RISCV assembly source files.
-    public static final @NotNull List<@NotNull String> FILE_EXTENSIONS = List.of("asm", "s", "S");
+    public static final @NotNull List<@NotNull String> FILE_EXTENSIONS = List.of(
+        "asm",
+        "s",
+        "S");
 
     /// Maximum length of scrolled message window (RARS Messages and Run I/O)
     public static final int MAXIMUM_MESSAGE_CHARACTERS = 1_000_000;
@@ -82,7 +86,8 @@ public final class Globals {
     static {
         SIMULATOR = new Simulator();
 
-        final var settingsPreferences = Preferences.userRoot().node("/rars/settings");
+        final var settingsPreferences = Preferences.userRoot()
+            .node("/rars/settings");
 
         OTHER_SETTINGS = new OtherSettingsImpl(settingsPreferences);
         BOOL_SETTINGS = new BoolSettingsImpl(settingsPreferences);
@@ -103,11 +108,13 @@ public final class Globals {
         MEMORY_INSTANCE = new Memory(initialMemoryConfiguration);
 
         GLOBAL_SYMBOL_TABLE = new SymbolTable();
-        REGISTER_FILE = new RegisterFile(GLOBAL_SYMBOL_TABLE, initialMemoryConfiguration);
+        REGISTER_FILE = new RegisterFile(GLOBAL_SYMBOL_TABLE,
+            initialMemoryConfiguration);
         FP_REGISTER_FILE = new FloatingPointRegisterFile();
         CS_REGISTER_FILE = new CSRegisterFile();
 
-        INTERRUPT_CONTROLLER = new InterruptController(SIMULATOR, REGISTER_FILE);
+        INTERRUPT_CONTROLLER = new InterruptController(SIMULATOR,
+            REGISTER_FILE);
     }
 
     private Globals() {

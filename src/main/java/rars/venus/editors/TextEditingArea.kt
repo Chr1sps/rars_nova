@@ -4,8 +4,8 @@ import rars.riscv.lang.lexing.RVTokenType
 import rars.settings.AllSettings
 import rars.venus.editors.rsyntaxtextarea.RSTABasedEditor
 import java.awt.Color
-import java.awt.Component
 import java.awt.Font
+import javax.swing.JComponent
 import javax.swing.text.Caret
 import javax.swing.text.Document
 
@@ -37,7 +37,7 @@ interface TextEditingArea {
 
     var isEnabled: Boolean
 
-    fun setSourceCode(code: String, editable: Boolean)
+    fun setSourceCode(code: String)
 
     var lineHighlightEnabled: Boolean
 
@@ -47,7 +47,7 @@ interface TextEditingArea {
 
     val caretPosition: Pair<Int, Int>
 
-    val outerComponent: Component
+    val outerComponent: JComponent
 
     fun copy()
 
@@ -67,7 +67,11 @@ interface TextEditingArea {
 
     fun doFindText(find: String, caseSensitive: Boolean): FindReplaceResult
 
-    fun doReplace(find: String, replace: String, caseSensitive: Boolean): FindReplaceResult
+    fun doReplace(
+        find: String,
+        replace: String,
+        caseSensitive: Boolean
+    ): FindReplaceResult
 
     fun doReplaceAll(find: String, replace: String, caseSensitive: Boolean): Int
 
@@ -88,7 +92,8 @@ interface TextEditingArea {
     }
 }
 
-fun createTextEditingArea(allSettings: AllSettings): TextEditingArea = RSTABasedEditor(
-    allSettings.editorThemeSettings.currentTheme.toEditorTheme(),
-    allSettings.fontSettings
-)
+fun createTextEditingArea(allSettings: AllSettings): TextEditingArea =
+    RSTABasedEditor(
+        allSettings.editorThemeSettings.currentTheme.toEditorTheme(),
+        allSettings.fontSettings
+    )

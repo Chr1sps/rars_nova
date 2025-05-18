@@ -4,6 +4,7 @@ import rars.Globals;
 import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
+import rars.venus.GlobalFileStatus;
 import rars.venus.VenusUI;
 import rars.venus.actions.GuiAction;
 
@@ -11,6 +12,8 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 import static rars.util.UtilsKt.unwrap;
+import static rars.venus.FileStatusKt.isAssembled;
+import static rars.venus.FileStatusKt.toRunnable;
 
 /**
  * Action for the Run -> Backstep menu item
@@ -33,10 +36,12 @@ public final class RunBackstepAction extends GuiAction {
     public void actionPerformed(final ActionEvent e) {
         final String name = this.getValue(Action.NAME).toString();
         final ExecutePane executePane = this.mainUI.mainPane.executePane;
-        if (!FileStatus.isAssembled()) {
+        final var globalStatus = GlobalFileStatus.get();
+        if (!isAssembled(GlobalFileStatus.get())) {
             // note: this should never occur since backstepping is only enabled after
             // successful assembly.
-            JOptionPane.showMessageDialog(this.mainUI, "The program must be assembled before it can be run.");
+            JOptionPane.showMessageDialog(this.mainUI,
+                "The program must be assembled before it can be run.");
             return;
         }
         this.mainUI.isExecutionStarted = true;
@@ -44,7 +49,8 @@ public final class RunBackstepAction extends GuiAction {
         executePane.getTextSegment().setCodeHighlighting(true);
 
         if (OtherSettings.isBacksteppingEnabled()) {
-            final var memoryHandle = unwrap(Globals.MEMORY_INSTANCE.subscribe(executePane.getDataSegment()::processMemoryAccessNotice));
+            final var memoryHandle = unwrap(Globals.MEMORY_INSTANCE.subscribe(
+                executePane.getDataSegment()::processMemoryAccessNotice));
             Globals.REGISTER_FILE.addRegistersListener(executePane.getRegisterValues().processRegisterNotice);
             Globals.CS_REGISTER_FILE.addRegistersListener(executePane.getCsrValues().processRegisterNotice);
             Globals.FP_REGISTER_FILE.addRegistersListener(executePane.getFpRegValues().processRegisterNotice);
@@ -55,28 +61,8 @@ public final class RunBackstepAction extends GuiAction {
             executePane.getFpRegValues().updateRegisters();
             executePane.getCsrValues().updateRegisters();
             executePane.getDataSegment().updateValues();
-            executePane.getTextSegment().highlightStepAtPC(); // Argument aded 25 June 2007
-            FileStatus.setSystemState(FileStatus.State.RUNNABLE);
-            // if we've backed all the way, disable the button
-            // if (Globals.program.getBackStepper().empty()) {
-            // ((AbstractAction)((AbstractButton)e.getSource()).getAction()).setEnabled(false);
-            // }
-            /*
-             * if (pe !=null) {
-             * RunGoAction.resetMaxSteps();
-             * mainUI.getMessagesPane().postMessage(
-             * pe.errors().generateErrorReport());
-             * mainUI.getMessagesPane().postMessage(
-             * "\n"+name+": execution terminated with errors.\n\n");
-             * mainUI.getRegistersPane().setSelectedComponent(executePane.
-             * getControlAndStatusWindow());
-             * FileStatus.set(FileStatus.TERMINATED); // should be redundant.
-             * executePane.getTextSegmentWindow().setCodeHighlighting(true);
-             * executePane.getTextSegmentWindow().unhighlightAllSteps();
-             * executePane.getTextSegmentWindow().highlightStepAtAddress(RegisterFile.
-             * getProgramCounter()-4);
-             * }
-             */
+            executePane.getTextSegment().highlightStepAtPC();
+            GlobalFileStatus.set(toRunnable((FileStatus.Existing) globalStatus));
             this.mainUI.isMemoryReset = false;
         }
     }

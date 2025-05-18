@@ -349,28 +349,26 @@ private const val MEMORY_WORDS_PER_LINE =
  * If number is not multiple of 4, will be rounded up to next higher.
  */
 @Throws(NumberFormatException::class)
-private fun checkMemoryAddressRange(arg: String): Array<String?>? {
-    var memoryRange: Array<String?>? = null
-    if (arg.indexOf(RANGE_SEPARATOR) > 0 &&
-        arg.indexOf(RANGE_SEPARATOR) < arg.length - 1
-    ) {
-        // assume correct format, two numbers separated by -, no embedded spaces.
-        // If that doesn't work it is invalid.
-        memoryRange = arrayOfNulls<String>(2)
-        memoryRange[0] = arg.substring(0, arg.indexOf(RANGE_SEPARATOR))
-        memoryRange[1] = arg.substring(arg.indexOf(RANGE_SEPARATOR) + 1)
-        // NOTE: I will use homegrown decoder, because Integer.decode will throw
-        // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
-        if (memoryRange[0]!!.translateToInt()!! > memoryRange[1]!!.translateToInt()!! ||
-            !wordAligned(memoryRange[0]!!.translateToInt()!!) ||
-            !wordAligned(memoryRange[1]!!.translateToInt()!!)
-        ) {
-            throw NumberFormatException()
-        }
-    }
-    return memoryRange
-
-}
+private fun checkMemoryAddressRange(arg: String): Array<String>? = if (
+    arg.contains(RANGE_SEPARATOR)
+) {
+    // assume correct format, two numbers separated by -, no embedded spaces.
+    // If that doesn't work it is invalid.
+    val index = arg.indexOf(RANGE_SEPARATOR)
+    val memoryRange = arrayOf(
+        arg.substring(0, index),
+        arg.substring(index + 1)
+    )
+    // NOTE: I will use homegrown decoder, because Integer.decode will throw
+    // exception on address higher than 0x7FFFFFFF (e.g. sign bit is 1).
+    val first = memoryRange[0].translateToInt()!!
+    val second = memoryRange[1].translateToInt()!!
+    if (first > second ||
+        !wordAligned(first) ||
+        !wordAligned(second)
+    ) throw NumberFormatException()
+    memoryRange
+} else null
 
 /**
  * There are no command arguments, so run in interactive mode by

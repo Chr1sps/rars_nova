@@ -1,6 +1,5 @@
 package rars.riscv.lang.lexing
 
-import javax.swing.text.Segment
 
 interface TokensProducer<CollectionType : Any?> {
     fun addToken(
@@ -12,7 +11,12 @@ interface TokensProducer<CollectionType : Any?> {
         addToken(array, segmentPos, segmentPos, RVTokenType.NULL, offset)
     }
 
-    fun addErrorToken(array: CharArray, segmentPos: Int, offset: Int, notice: String) {
+    fun addErrorToken(
+        array: CharArray,
+        segmentPos: Int,
+        offset: Int,
+        notice: String
+    ) {
         addToken(array, segmentPos, segmentPos, RVTokenType.ERROR, offset)
     }
 
@@ -20,5 +24,10 @@ interface TokensProducer<CollectionType : Any?> {
 
     fun getEmptyResult(): CollectionType
 
-    fun getTokenList(text: Segment, initialTokenType: Int, lineOffset: Int, lineNum: Int): CollectionType
+    fun getTokenList(
+        text: CharSequence,
+        initialTokenType: Int,
+        lineOffset: Int,
+        lineNum: Int
+    ): CollectionType
 }

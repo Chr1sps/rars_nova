@@ -7,9 +7,7 @@ import rars.simulator.StoppingEvent
 import rars.simulator.isDone
 import rars.simulator.storeProgramArguments
 import rars.util.Listener
-import rars.venus.ExecutePane
-import rars.venus.FileStatus
-import rars.venus.VenusUI
+import rars.venus.*
 import rars.venus.actions.GuiAction
 import java.awt.EventQueue
 import java.awt.event.ActionEvent
@@ -24,8 +22,8 @@ class RunGoAction(
     name: String, icon: Icon?, descrip: String,
     mnemonic: Int?, accel: KeyStroke?, gui: VenusUI
 ) : GuiAction(name, descrip, icon, mnemonic, accel, gui) {
-    private var name: String? = null
-    private var executePane: ExecutePane? = null
+    private lateinit var name: String
+    private lateinit var executePane: ExecutePane
 
     /**
      * {@inheritDoc}
@@ -34,24 +32,26 @@ class RunGoAction(
      * Action to take when GO is selected -- run the MIPS program!
      */
     override fun actionPerformed(e: ActionEvent?) {
-        this.name = this.getValue(NAME).toString()
-        this.executePane = this.mainUI.mainPane.executePane
-        if (FileStatus.isAssembled()) {
+        name = getValue(NAME).toString()
+        executePane = mainUI.mainPane.executePane
+        val globalStatus = GlobalFileStatus.get()
+        if (globalStatus is FileStatus.Existing.Runnable) {
             if (!this.mainUI.isExecutionStarted) {
                 this.processProgramArgumentsIfAny()
             }
-            if (this.mainUI.isMemoryReset || this.mainUI.isExecutionStarted) {
+            if (mainUI.isMemoryReset || mainUI.isExecutionStarted) {
 
-                this.mainUI.isExecutionStarted = true
+                mainUI.isExecutionStarted = true
 
-                this.mainUI.messagesPane.postMessage(
-                    this.name + ": running " + FileStatus.systemFile!!.getName() + "\n\n"
+                mainUI.messagesPane.postMessage(
+                    "${name}: running ${globalStatus.file.name}\n\n"
                 )
-                this.mainUI.messagesPane.selectRunMessageTab()
-                this.executePane!!.textSegment.codeHighlighting = false
-                this.executePane!!.textSegment.unhighlightAllSteps()
-                // FileStatus.set(FileStatus.RUNNING);
-                this.mainUI.setMenuState(FileStatus.State.RUNNING)
+                mainUI.messagesPane.selectRunMessageTab()
+                executePane.textSegment.codeHighlighting = false
+                executePane.textSegment.unhighlightAllSteps()
+                val newStatus = globalStatus.toRunning()
+                GlobalFileStatus.set(newStatus)
+                mainUI.setMenuState(newStatus)
 
                 // Setup cleanup procedures for the simulation
                 val onSimulatorStopListener =
@@ -81,7 +81,7 @@ class RunGoAction(
                 )
 
                 val breakPoints =
-                    this.executePane!!.textSegment.getSortedBreakPointsArray()
+                    this.executePane.textSegment.getSortedBreakPointsArray()
                 Globals.SIMULATOR.startSimulation(
                     Globals.REGISTER_FILE.programCounter,
                     maxSteps,
@@ -131,23 +131,29 @@ class RunGoAction(
             stopped(event)
             return
         }
+        val globalStatus =
+            GlobalFileStatus.get()!! as FileStatus.Existing.Runnable
         if (event == StoppingEvent.BreakpointHit) {
             this.mainUI.messagesPane.postMessage(
-                name + ": execution paused at breakpoint: " + FileStatus.systemFile!!.getName() + "\n\n"
+                "$name: execution paused at breakpoint: ${globalStatus.file.name}\n\n"
             )
         } else {
             this.mainUI.messagesPane.postMessage(
-                name + ": execution paused by user: " + FileStatus.systemFile!!.getName() + "\n\n"
+                "$name: execution paused by user: ${globalStatus.file.name}\n\n"
             )
         }
         this.mainUI.messagesPane.selectMessageTab()
-        this.executePane!!.textSegment.codeHighlighting = true
-        this.executePane!!.textSegment.highlightStepAtPC()
-        this.executePane!!.registerValues.updateRegisters()
-        this.executePane!!.fpRegValues.updateRegisters()
-        this.executePane!!.csrValues.updateRegisters()
-        this.executePane!!.dataSegment.updateValues()
-        FileStatus.setSystemState(FileStatus.State.RUNNABLE)
+        this.executePane.textSegment.codeHighlighting = true
+        this.executePane.textSegment.highlightStepAtPC()
+        this.executePane.registerValues.updateRegisters()
+        this.executePane.fpRegValues.updateRegisters()
+        this.executePane.csrValues.updateRegisters()
+        this.executePane.dataSegment.updateValues()
+        GlobalFileStatus.set(
+            FileStatus.Existing.Runnable(
+                (GlobalFileStatus.get()!! as FileStatus.Existing).file
+            )
+        )
         this.mainUI.isMemoryReset = false
     }
 
@@ -162,18 +168,18 @@ class RunGoAction(
      */
     fun stopped(stoppingEvent: StoppingEvent) {
         // show final register and data segment values.
-        this.executePane!!.registerValues.updateRegisters()
-        this.executePane!!.fpRegValues.updateRegisters()
-        this.executePane!!.csrValues.updateRegisters()
-        this.executePane!!.dataSegment.updateValues()
-        FileStatus.setSystemState(FileStatus.State.TERMINATED)
+        this.executePane.registerValues.updateRegisters()
+        this.executePane.fpRegValues.updateRegisters()
+        this.executePane.csrValues.updateRegisters()
+        this.executePane.dataSegment.updateValues()
+        GlobalFileStatus.set((GlobalFileStatus.get()!! as FileStatus.Existing).toTerminated())
         this.mainUI.venusIO.resetFiles() // close any files opened in MIPS program
         // Bring CSRs to the front if terminated due to exception.
         if (stoppingEvent is StoppingEvent.ErrorHit) {
-            this.mainUI.registersPane.setSelectedComponent(this.executePane!!.csrValues)
-            this.executePane!!.textSegment.codeHighlighting = true
-            this.executePane!!.textSegment.unhighlightAllSteps()
-            this.executePane!!.textSegment.highlightStepAtAddress(Globals.REGISTER_FILE.programCounter - 4)
+            this.mainUI.registersPane.setSelectedComponent(this.executePane.csrValues)
+            this.executePane.textSegment.codeHighlighting = true
+            this.executePane.textSegment.unhighlightAllSteps()
+            this.executePane.textSegment.highlightStepAtAddress(Globals.REGISTER_FILE.programCounter - 4)
         }
         when (stoppingEvent) {
             StoppingEvent.NormalTermination -> {
@@ -232,7 +238,7 @@ class RunGoAction(
      * $a0 gets argument count (argc), $a1 gets stack address of first arg pointer (argv).
      */
     private fun processProgramArgumentsIfAny() {
-        val programArguments = this.executePane!!.textSegment.programArguments
+        val programArguments = this.executePane.textSegment.programArguments
         if (programArguments == null || programArguments.isEmpty() || !Globals.BOOL_SETTINGS.getSetting(
                 BoolSetting.PROGRAM_ARGUMENTS
             )

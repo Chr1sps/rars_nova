@@ -105,11 +105,12 @@ class RISCVProgram {
      * @return Returns specified line of RISCV source. If outside the line range,
      * it returns null. Line 1 is first line.
      */
-    fun getSourceLine(i: Int): String? = if ((i >= 1) && (i <= this.sourceList!!.size)) {
-        this.sourceList!![i - 1]
-    } else {
-        null
-    }
+    fun getSourceLine(i: Int): String? =
+        if ((i >= 1) && (i <= this.sourceList!!.size)) {
+            this.sourceList!![i - 1]
+        } else {
+            null
+        }
 
     /**
      * Reads RISCV source code from a string into structure.
@@ -120,8 +121,7 @@ class RISCVProgram {
     fun fromString(source: String) {
         this.file = null
         this.source = source
-        this.sourceList =
-            listOf(*source.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
+        this.sourceList = source.lines()
     }
 
     /**
@@ -139,18 +139,22 @@ class RISCVProgram {
         this@RISCVProgram.file = file
         try {
             BufferedReader(FileReader(file)).use { inputFile ->
-                source = inputFile.readText()
-                sourceList = buildList {
-                    this@RISCVProgram.source!!.lines().forEach { line ->
-                        add(line)
-                    }
-                }
+                val newSource = inputFile.readText()
+                source = newSource
+                sourceList = newSource.lines()
             }
         } catch (e: Exception) {
-            val errors = ErrorList()
-            errors.add(ErrorMessage.error(null, 0, 0, e.toString()))
+            val errors = ErrorList().apply {
+                add(ErrorMessage.error(null, 0, 0, e.toString()))
+            }
             raise(AssemblyError(errors))
         }
+    }
+
+    fun fromReadFile(file: File, source: String) {
+        this.file = file
+        this.source = source
+        this.sourceList = source.lines()
     }
 
     /**
@@ -164,7 +168,10 @@ class RISCVProgram {
     fun tokenize(): Either<AssemblyError, Unit> = either {
         tokenList = tokenize(this@RISCVProgram).bind()
         this@RISCVProgram.localSymbolTable =
-            SymbolTable(this@RISCVProgram.file, Globals.GLOBAL_SYMBOL_TABLE) // prepare for assembly
+            SymbolTable(
+                this@RISCVProgram.file,
+                Globals.GLOBAL_SYMBOL_TABLE
+            ) // prepare for assembly
     }
 
     /**
@@ -202,7 +209,8 @@ class RISCVProgram {
         val programsToAssemble = mutableListOf<RISCVProgram>()
         val leadFilePosition = if (exceptionHandler == null) 0 else 1
         for (file in files) {
-            val prepareeProgram = if (file == leadFile) this@RISCVProgram else RISCVProgram()
+            val prepareeProgram =
+                if (file == leadFile) this@RISCVProgram else RISCVProgram()
             prepareeProgram.readSource(file).bind()
             prepareeProgram.tokenize().bind()
             // I want "this" RISCVprogram to be the first in the list...except for exception

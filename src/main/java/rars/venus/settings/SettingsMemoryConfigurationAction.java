@@ -7,6 +7,7 @@ import rars.riscv.hardware.memory.AbstractMemoryConfiguration;
 import rars.riscv.hardware.memory.MemoryConfiguration;
 import rars.util.BinaryUtilsKt;
 import rars.venus.FileStatus;
+import rars.venus.GlobalFileStatus;
 import rars.venus.VenusUI;
 import rars.venus.actions.GuiAction;
 
@@ -21,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static java.util.Objects.requireNonNull;
 import static rars.Globals.FONT_SETTINGS;
 import static rars.Globals.OTHER_SETTINGS;
 
@@ -48,8 +50,12 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
     };
 
     public SettingsMemoryConfigurationAction(
-        final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI mainUI
+        final String name,
+        final Icon icon,
+        final String descrip,
+        final Integer mnemonic,
+        final KeyStroke accel,
+        final @NotNull VenusUI mainUI
     ) {
         super(name, descrip, icon, mnemonic, accel, mainUI);
     }
@@ -62,7 +68,9 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final JDialog configDialog = new MemoryConfigurationDialog(this.mainUI, "Memory Configuration", true);
+        final JDialog configDialog = new MemoryConfigurationDialog(this.mainUI,
+            "Memory Configuration",
+            true);
         configDialog.setVisible(true);
     }
 
@@ -71,18 +79,24 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
         public final @NotNull MemoryConfiguration configuration;
 
         public ConfigurationButton(final @NotNull MemoryConfiguration config) {
-            super(config.getDescription(), config == OTHER_SETTINGS.getMemoryConfiguration());
+            super(config.getDescription(),
+                config == OTHER_SETTINGS.getMemoryConfiguration());
             this.configuration = config;
         }
     }
 
     /// Private class to do all the work!
-    private final class MemoryConfigurationDialog extends JDialog implements ActionListener {
+    private final class MemoryConfigurationDialog extends JDialog
+        implements ActionListener {
         JTextField[] addressDisplay;
         JLabel[] nameDisplay;
         ConfigurationButton selectedConfigurationButton, initialConfigurationButton;
 
-        private MemoryConfigurationDialog(final Frame owner, final String title, final boolean modality) {
+        private MemoryConfigurationDialog(
+            final Frame owner,
+            final String title,
+            final boolean modality
+        ) {
             super(owner, title, modality);
             this.setContentPane(this.buildDialogPanel());
             this.setDefaultCloseOperation(
@@ -124,7 +138,8 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
                 chooserPanel.add(button);
             }
             chooserPanel.setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Configuration"));
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(
+                    Color.BLACK), "Configuration"));
             return chooserPanel;
         }
 
@@ -213,20 +228,21 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
             if (newConfiguration != currentConfiguration) {
                 OTHER_SETTINGS.setMemoryConfigurationAndSave(newConfiguration);
                 Globals.setupGlobalMemoryConfiguration(newConfiguration);
-                SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow().clearHighlighting();
-                SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow().updateRegisters();
+                SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow()
+                    .clearHighlighting();
+                SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow()
+                    .updateRegisters();
                 SettingsMemoryConfigurationAction.this.mainUI.mainPane.executePane.getDataSegment()
                     .updateBaseAddressComboBox();
                 // 21 July 2009 Re-assemble if the situation demands it to maintain consistency.
-                if (FileStatus.getSystemState() == FileStatus.State.RUNNABLE ||
-                    FileStatus.getSystemState() == FileStatus.State.RUNNING ||
-                    FileStatus.getSystemState() == FileStatus.State.TERMINATED) {
-                    // Stop execution if executing -- should NEVER happen because this
-                    // Action's widget is disabled during MIPS execution.
-                    if (FileStatus.getSystemState() == FileStatus.State.RUNNING) {
+                final var globalStatus = requireNonNull(GlobalFileStatus.get());
+                if (globalStatus instanceof FileStatus.Existing.Runnable ||
+                    globalStatus instanceof FileStatus.Existing.Running ||
+                    globalStatus instanceof FileStatus.Existing.Terminated) {
+                    if (globalStatus instanceof FileStatus.Existing.Running) {
                         Globals.SIMULATOR.stopExecution();
                     }
-                    SettingsMemoryConfigurationAction.this.mainUI.getRunAssembleAction().actionPerformed(null);
+                    mainUI.getRunAssembleAction().actionPerformed(null);
                 }
             }
         }
@@ -245,22 +261,33 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
         // Set name values in JLabels and address values in the JTextFields
         private void setConfigDisplay(final @NotNull AbstractMemoryConfiguration<Integer> config) {
             final int[] configurationItemValues = {
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
+                    config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(
+                    config),
                 config.getExternAddress(),
                 config.getGlobalPointerAddress(),
                 config.getDataBaseAddress(),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
+                    config),
                 config.getStackPointerAddress(),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getStackBaseAddress(config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getStackBaseAddress(
+                    config),
                 config.getUserHighAddress(),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelBaseAddress(config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelHighAddress(config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentLimitAddress(config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapLimitAddress(config)
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelBaseAddress(
+                    config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
+                    config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelHighAddress(
+                    config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentLimitAddress(
+                    config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(
+                    config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
+                    config),
+                rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapLimitAddress(
+                    config)
             };
             // Will use TreeMap to extract list of address-name pairs sorted by
             // hex-stringified address. This will correctly handle kernel addresses,
@@ -271,17 +298,21 @@ public final class SettingsMemoryConfigurationAction extends GuiAction {
             final TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
             for (int i = 0; i < configurationItemValues.length; i++) {
                 treeSortedByAddress.put(
-                    BinaryUtilsKt.intToHexStringWithPrefix(configurationItemValues[i]) + configurationItemNames[i],
+                    BinaryUtilsKt.intToHexStringWithPrefix(
+                        configurationItemValues[i]) + configurationItemNames[i],
                     configurationItemNames[i]
                 );
             }
-            final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet().iterator();
-            final int addressStringLength = BinaryUtilsKt.intToHexStringWithPrefix(configurationItemValues[0])
+            final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet()
+                .iterator();
+            final int addressStringLength = BinaryUtilsKt.intToHexStringWithPrefix(
+                    configurationItemValues[0])
                 .length();
             for (int i = 0; i < configurationItemValues.length; i++) {
                 final Map.Entry<String, String> pair = setSortedByAddress.next();
                 this.nameDisplay[i].setText(pair.getValue());
-                this.addressDisplay[i].setText(pair.getKey().substring(0, addressStringLength));
+                this.addressDisplay[i].setText(pair.getKey()
+                    .substring(0, addressStringLength));
             }
         }
 

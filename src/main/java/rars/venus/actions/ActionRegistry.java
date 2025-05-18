@@ -28,7 +28,8 @@ public class ActionRegistry {
     private final VenusUI mainUI;
     private final AllSettings allSettings;
     private final Map<String, Action> actions = new HashMap<>();
-    private final Map<ActionCategory, List<Action>> actionsByCategory = new EnumMap<>(ActionCategory.class);
+    private final Map<ActionCategory, List<Action>> actionsByCategory = new EnumMap<>(
+        ActionCategory.class);
 
     /**
      * Creates a new ActionRegistry for the given UI and settings.
@@ -52,7 +53,8 @@ public class ActionRegistry {
      * @return A KeyStroke for the key with the platform's menu shortcut modifier
      */
     private static KeyStroke makeShortcut(final int key) {
-        return KeyStroke.getKeyStroke(key, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        return KeyStroke.getKeyStroke(key,
+            java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
     }
 
     /**
@@ -74,7 +76,8 @@ public class ActionRegistry {
      * @return A list of actions in the category
      */
     public List<Action> getActions(final ActionCategory category) {
-        return actionsByCategory.getOrDefault(category, Collections.emptyList());
+        return actionsByCategory.getOrDefault(category,
+            Collections.emptyList());
     }
 
     /**
@@ -165,7 +168,10 @@ public class ActionRegistry {
                 mainUI.editor.newFile();
             }
         };
-        registerAction("fileNewAction", fileNewAction, ActionCategory.FILE, fileActions);
+        registerAction("fileNewAction",
+            fileNewAction,
+            ActionCategory.FILE,
+            fileActions);
 
         // File -> Open
         final Action fileOpenAction = new GuiAction(
@@ -178,7 +184,10 @@ public class ActionRegistry {
                 mainUI.editor.openFile();
             }
         };
-        registerAction("fileOpenAction", fileOpenAction, ActionCategory.FILE, fileActions);
+        registerAction("fileOpenAction",
+            fileOpenAction,
+            ActionCategory.FILE,
+            fileActions);
 
         // File -> Close
         final Action fileCloseAction = new GuiAction(
@@ -191,7 +200,10 @@ public class ActionRegistry {
                 mainUI.editor.close();
             }
         };
-        registerAction("fileCloseAction", fileCloseAction, ActionCategory.FILE, fileActions);
+        registerAction("fileCloseAction",
+            fileCloseAction,
+            ActionCategory.FILE,
+            fileActions);
 
         // File -> Close All
         final Action fileCloseAllAction = new GuiAction(
@@ -204,7 +216,10 @@ public class ActionRegistry {
                 mainUI.editor.closeAll();
             }
         };
-        registerAction("fileCloseAllAction", fileCloseAllAction, ActionCategory.FILE, fileActions);
+        registerAction("fileCloseAllAction",
+            fileCloseAllAction,
+            ActionCategory.FILE,
+            fileActions);
 
         // File -> Save
         final Action fileSaveAction = new GuiAction(
@@ -216,19 +231,29 @@ public class ActionRegistry {
                 mainUI.editor.save();
             }
         };
-        registerAction("fileSaveAction", fileSaveAction, ActionCategory.FILE, fileActions);
+        registerAction("fileSaveAction",
+            fileSaveAction,
+            ActionCategory.FILE,
+            fileActions);
 
         // File -> Save As
         final Action fileSaveAsAction = new GuiAction(
-            "Save as ...", "Save current file with different name", loadIcon("SaveAs22.png"),
-            KeyEvent.VK_A, null, mainUI
+            "Save as ...",
+            "Save current file with different name",
+            loadIcon("SaveAs22.png"),
+            KeyEvent.VK_A,
+            null,
+            mainUI
         ) {
             @Override
             public void actionPerformed(final java.awt.event.ActionEvent e) {
                 mainUI.editor.saveAs();
             }
         };
-        registerAction("fileSaveAsAction", fileSaveAsAction, ActionCategory.FILE, fileActions);
+        registerAction("fileSaveAsAction",
+            fileSaveAsAction,
+            ActionCategory.FILE,
+            fileActions);
 
         // File -> Save All
         final Action fileSaveAllAction = new GuiAction(
@@ -240,7 +265,10 @@ public class ActionRegistry {
                 mainUI.editor.saveAll();
             }
         };
-        registerAction("fileSaveAllAction", fileSaveAllAction, ActionCategory.FILE, fileActions);
+        registerAction("fileSaveAllAction",
+            fileSaveAllAction,
+            ActionCategory.FILE,
+            fileActions);
 
         // File -> Dump Memory
         final Action fileDumpMemoryAction = new FileDumpMemoryAction(
@@ -249,10 +277,18 @@ public class ActionRegistry {
             makeShortcut(KeyEvent.VK_D),
             mainUI
         );
-        registerAction("fileDumpMemoryAction", fileDumpMemoryAction, ActionCategory.FILE, fileActions);
+        registerAction("fileDumpMemoryAction",
+            fileDumpMemoryAction,
+            ActionCategory.FILE,
+            fileActions);
 
         // File -> Exit
-        final Action fileExitAction = new GuiAction("Exit", "Exit Rars", null, KeyEvent.VK_X, null, mainUI) {
+        final Action fileExitAction = new GuiAction("Exit",
+            "Exit Rars",
+            null,
+            KeyEvent.VK_X,
+            null,
+            mainUI) {
             @Override
             public void actionPerformed(final java.awt.event.ActionEvent e) {
                 if (mainUI.editor.closeAll()) {
@@ -260,7 +296,10 @@ public class ActionRegistry {
                 }
             }
         };
-        registerAction("fileExitAction", fileExitAction, ActionCategory.FILE, fileActions);
+        registerAction("fileExitAction",
+            fileExitAction,
+            ActionCategory.FILE,
+            fileActions);
 
         actionsByCategory.put(ActionCategory.FILE, fileActions);
     }
@@ -284,12 +323,15 @@ public class ActionRegistry {
             public void actionPerformed(final java.awt.event.ActionEvent e) {
                 final var editPane = mainUI.mainPane.getCurrentEditTabPane();
                 if (editPane != null) {
-                    editPane.undo();
+                    editPane.getTextArea().undo();
                     // Note: VenusUI will update undo/redo state when needed
                 }
             }
         };
-        registerAction("editUndoAction", editUndoAction, ActionCategory.EDIT, editActions);
+        registerAction("editUndoAction",
+            editUndoAction,
+            ActionCategory.EDIT,
+            editActions);
 
         // Edit -> Redo
         final Action editRedoAction = new GuiAction(
@@ -304,12 +346,15 @@ public class ActionRegistry {
             public void actionPerformed(final java.awt.event.ActionEvent e) {
                 final var editPane = mainUI.mainPane.getCurrentEditTabPane();
                 if (editPane != null) {
-                    editPane.redo();
+                    editPane.getTextArea().redo();
                     // Note: VenusUI will update undo/redo state when needed
                 }
             }
         };
-        registerAction("editRedoAction", editRedoAction, ActionCategory.EDIT, editActions);
+        registerAction("editRedoAction",
+            editRedoAction,
+            ActionCategory.EDIT,
+            editActions);
 
         // Edit -> Cut
         final Action editCutAction = new GuiAction(
@@ -318,10 +363,13 @@ public class ActionRegistry {
         ) {
             @Override
             public void actionPerformed(final java.awt.event.ActionEvent e) {
-                mainUI.mainPane.getCurrentEditTabPane().cutText();
+                mainUI.mainPane.getCurrentEditTabPane().getTextArea().cut();
             }
         };
-        registerAction("editCutAction", editCutAction, ActionCategory.EDIT, editActions);
+        registerAction("editCutAction",
+            editCutAction,
+            ActionCategory.EDIT,
+            editActions);
 
         // Edit -> Copy
         final Action editCopyAction = new GuiAction(
@@ -330,10 +378,13 @@ public class ActionRegistry {
         ) {
             @Override
             public void actionPerformed(final java.awt.event.ActionEvent e) {
-                mainUI.mainPane.getCurrentEditTabPane().copyText();
+                mainUI.mainPane.getCurrentEditTabPane().getTextArea().copy();
             }
         };
-        registerAction("editCopyAction", editCopyAction, ActionCategory.EDIT, editActions);
+        registerAction("editCopyAction",
+            editCopyAction,
+            ActionCategory.EDIT,
+            editActions);
 
         // Edit -> Paste
         final Action editPasteAction = new GuiAction(
@@ -342,17 +393,23 @@ public class ActionRegistry {
         ) {
             @Override
             public void actionPerformed(final java.awt.event.ActionEvent e) {
-                mainUI.mainPane.getCurrentEditTabPane().pasteText();
+                mainUI.mainPane.getCurrentEditTabPane().getTextArea().paste();
             }
         };
-        registerAction("editPasteAction", editPasteAction, ActionCategory.EDIT, editActions);
+        registerAction("editPasteAction",
+            editPasteAction,
+            ActionCategory.EDIT,
+            editActions);
 
         // Edit -> Find/Replace
         final Action editFindReplaceAction = new EditFindReplaceAction(
             "Find/Replace", loadIcon("Find22.png"),
             "Find/Replace", KeyEvent.VK_F, makeShortcut(KeyEvent.VK_F), mainUI
         );
-        registerAction("editFindReplaceAction", editFindReplaceAction, ActionCategory.EDIT, editActions);
+        registerAction("editFindReplaceAction",
+            editFindReplaceAction,
+            ActionCategory.EDIT,
+            editActions);
 
         actionsByCategory.put(ActionCategory.EDIT, editActions);
     }
@@ -369,33 +426,56 @@ public class ActionRegistry {
             "Assemble the current file and clear breakpoints", KeyEvent.VK_A,
             KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0), mainUI
         );
-        registerAction("runAssembleAction", runAssembleAction, ActionCategory.RUN, runActions);
+        registerAction("runAssembleAction",
+            runAssembleAction,
+            ActionCategory.RUN,
+            runActions);
 
         // Run -> Go
         final Action runGoAction = new RunGoAction(
             "Go", loadIcon("Play22.png"), "Run the current program",
             KeyEvent.VK_G, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), mainUI
         );
-        registerAction("runGoAction", runGoAction, ActionCategory.RUN, runActions);
+        registerAction("runGoAction",
+            runGoAction,
+            ActionCategory.RUN,
+            runActions);
 
         // Run -> Step
         final Action runStepAction = new RunStepAction(
-            "Step", loadIcon("StepForward22.png"),
-            "Run one step at a time", KeyEvent.VK_T, KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), mainUI
+            "Step",
+            loadIcon("StepForward22.png"),
+            "Run one step at a time",
+            KeyEvent.VK_T,
+            KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0),
+            mainUI
         );
-        registerAction("runStepAction", runStepAction, ActionCategory.RUN, runActions);
+        registerAction("runStepAction",
+            runStepAction,
+            ActionCategory.RUN,
+            runActions);
 
         // Run -> Backstep
         final Action runBackstepAction = new RunBackstepAction(
-            "Backstep", loadIcon("StepBack22.png"),
-            "Undo the last step", KeyEvent.VK_B, KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0), mainUI
+            "Backstep",
+            loadIcon("StepBack22.png"),
+            "Undo the last step",
+            KeyEvent.VK_B,
+            KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0),
+            mainUI
         );
-        registerAction("runBackstepAction", runBackstepAction, ActionCategory.RUN, runActions);
+        registerAction("runBackstepAction",
+            runBackstepAction,
+            ActionCategory.RUN,
+            runActions);
 
         // Run -> Pause
         final Action runPauseAction = new GuiAction(
-            "Pause", "Pause the currently running program", loadIcon("Pause22.png"),
-            KeyEvent.VK_P, KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0),
+            "Pause",
+            "Pause the currently running program",
+            loadIcon("Pause22.png"),
+            KeyEvent.VK_P,
+            KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0),
             mainUI
         ) {
             @Override
@@ -404,12 +484,18 @@ public class ActionRegistry {
                 // RunGoAction's "paused" method will do the cleanup.
             }
         };
-        registerAction("runPauseAction", runPauseAction, ActionCategory.RUN, runActions);
+        registerAction("runPauseAction",
+            runPauseAction,
+            ActionCategory.RUN,
+            runActions);
 
         // Run -> Stop
         final Action runStopAction = new GuiAction(
-            "Stop", "Stop the currently running program", loadIcon("Stop22.png"),
-            KeyEvent.VK_S, KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0),
+            "Stop",
+            "Stop the currently running program",
+            loadIcon("Stop22.png"),
+            KeyEvent.VK_S,
+            KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0),
             mainUI
         ) {
             @Override
@@ -418,35 +504,50 @@ public class ActionRegistry {
                 // RunGoAction's "stopped" method will take care of the cleanup.
             }
         };
-        registerAction("runStopAction", runStopAction, ActionCategory.RUN, runActions);
+        registerAction("runStopAction",
+            runStopAction,
+            ActionCategory.RUN,
+            runActions);
 
         // Run -> Reset
         final Action runResetAction = new RunResetAction(
             "Reset", loadIcon("Reset22.png"), "Reset memory and registers",
             KeyEvent.VK_R, KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0), mainUI
         );
-        registerAction("runResetAction", runResetAction, ActionCategory.RUN, runActions);
+        registerAction("runResetAction",
+            runResetAction,
+            ActionCategory.RUN,
+            runActions);
 
         // Run -> Clear Breakpoints
         final Action runClearBreakpointsAction = new RunClearBreakpointsAction(
             KeyEvent.VK_K,
             makeShortcut(KeyEvent.VK_K), mainUI
         );
-        registerAction("runClearBreakpointsAction", runClearBreakpointsAction, ActionCategory.RUN, runActions);
+        registerAction("runClearBreakpointsAction",
+            runClearBreakpointsAction,
+            ActionCategory.RUN,
+            runActions);
 
         // Run -> Toggle Breakpoints
         final Action runToggleBreakpointsAction = new GuiAction(
             "Toggle all breakpoints",
             "Disable/enable all breakpoints without clearing (can also click Bkpt column header)",
             null,
-            KeyEvent.VK_T, makeShortcut(KeyEvent.VK_T), mainUI
+            KeyEvent.VK_T,
+            makeShortcut(KeyEvent.VK_T),
+            mainUI
         ) {
             @Override
             public void actionPerformed(final java.awt.event.ActionEvent e) {
-                mainUI.mainPane.executePane.getTextSegment().toggleBreakpoints();
+                mainUI.mainPane.executePane.getTextSegment()
+                    .toggleBreakpoints();
             }
         };
-        registerAction("runToggleBreakpointsAction", runToggleBreakpointsAction, ActionCategory.RUN, runActions);
+        registerAction("runToggleBreakpointsAction",
+            runToggleBreakpointsAction,
+            ActionCategory.RUN,
+            runActions);
 
         actionsByCategory.put(ActionCategory.RUN, runActions);
     }
@@ -466,9 +567,13 @@ public class ActionRegistry {
             boolSettings,
             BoolSetting.LABEL_WINDOW_VISIBILITY,
             mainUI,
-            (value) -> mainUI.mainPane.executePane.setLabelWindowVisibility(value)
+            (value) -> mainUI.mainPane.executePane.setLabelWindowVisibility(
+                value)
         );
-        registerAction("settingsLabelAction", settingsLabelAction, ActionCategory.SETTINGS, settingsActions);
+        registerAction("settingsLabelAction",
+            settingsLabelAction,
+            ActionCategory.SETTINGS,
+            settingsActions);
 
         // Settings -> Dark Mode
         final Action settingsDarkModeAction = new SettingsAction(
@@ -479,23 +584,31 @@ public class ActionRegistry {
             // The UI will handle the dark mode change through other means
         }
         );
-        registerAction("settingsDarkModeAction", settingsDarkModeAction, ActionCategory.SETTINGS, settingsActions);
+        registerAction("settingsDarkModeAction",
+            settingsDarkModeAction,
+            ActionCategory.SETTINGS,
+            settingsActions);
 
         // Settings -> Popup Input
         final Action settingsPopupInputAction = new SettingsAction(
             "Popup dialog for input syscalls (5,6,7,8,12)",
             "If set, use popup dialog for input syscalls (5,6,7,8,12) instead of cursor in Run I/O window",
             boolSettings,
-            BoolSetting.POPUP_SYSCALL_INPUT, mainUI
+            BoolSetting.POPUP_SYSCALL_INPUT,
+            mainUI
         );
-        registerAction("settingsPopupInputAction", settingsPopupInputAction, ActionCategory.SETTINGS, settingsActions);
+        registerAction("settingsPopupInputAction",
+            settingsPopupInputAction,
+            ActionCategory.SETTINGS,
+            settingsActions);
 
         // Settings -> Value Display Base
         final Action settingsValueDisplayBaseAction = new SettingsAction(
             "Values displayed in hexadecimal",
             "Toggle between hexadecimal and decimal display of memory/register values",
             boolSettings,
-            BoolSetting.DISPLAY_VALUES_IN_HEX, mainUI,
+            BoolSetting.DISPLAY_VALUES_IN_HEX,
+            mainUI,
             mainUI.mainPane.executePane.getValueDisplayBaseChooser()::setSelected
         );
         registerAction(
@@ -526,9 +639,13 @@ public class ActionRegistry {
             "Permit extended (usePseudoInstructions) instructions and formats",
             "If set, extended (usePseudoInstructions) instructions are formats are permitted.",
             boolSettings,
-            BoolSetting.EXTENDED_ASSEMBLER_ENABLED, mainUI
+            BoolSetting.EXTENDED_ASSEMBLER_ENABLED,
+            mainUI
         );
-        registerAction("settingsExtendedAction", settingsExtendedAction, ActionCategory.SETTINGS, settingsActions);
+        registerAction("settingsExtendedAction",
+            settingsExtendedAction,
+            ActionCategory.SETTINGS,
+            settingsActions);
 
         // Settings -> Assemble On Open
         final Action settingsAssembleOnOpenAction = new SettingsAction(
@@ -550,7 +667,8 @@ public class ActionRegistry {
             "Assemble all files in directory",
             "If set, all files in current directory will be assembled when Assemble operation is selected.",
             boolSettings,
-            BoolSetting.ASSEMBLE_ALL, mainUI
+            BoolSetting.ASSEMBLE_ALL,
+            mainUI
         );
         registerAction(
             "settingsAssembleAllAction",
@@ -564,7 +682,8 @@ public class ActionRegistry {
             "Assemble all files currently open",
             "If set, all files currently open for editing will be assembled when Assemble operation is selected.",
             boolSettings,
-            BoolSetting.ASSEMBLE_OPEN, mainUI
+            BoolSetting.ASSEMBLE_OPEN,
+            mainUI
         );
         registerAction(
             "settingsAssembleOpenAction",
@@ -578,7 +697,8 @@ public class ActionRegistry {
             "Assembler warnings are considered errors",
             "If set, assembler warnings will be interpreted as errors and prevent successful assembly.",
             boolSettings,
-            BoolSetting.WARNINGS_ARE_ERRORS, mainUI
+            BoolSetting.WARNINGS_ARE_ERRORS,
+            mainUI
         );
         registerAction(
             "settingsWarningsAreErrorsAction",
@@ -592,7 +712,8 @@ public class ActionRegistry {
             "Initialize Program Counter to global 'main' if defined",
             "If set, assembler will initialize Program Counter to text address globally labeled 'main', if defined.",
             boolSettings,
-            BoolSetting.START_AT_MAIN, mainUI
+            BoolSetting.START_AT_MAIN,
+            mainUI
         );
         registerAction(
             "settingsStartAtMainAction",
@@ -606,13 +727,17 @@ public class ActionRegistry {
             "Program arguments provided to program",
             "If set, program arguments for the program can be entered in border of Text Segment window.",
             boolSettings,
-            BoolSetting.PROGRAM_ARGUMENTS, mainUI, (selected) -> {
-            if (selected) {
-                mainUI.mainPane.executePane.getTextSegment().addProgramArgumentsPanel();
-            } else {
-                mainUI.mainPane.executePane.getTextSegment().removeProgramArgumentsPanel();
+            BoolSetting.PROGRAM_ARGUMENTS,
+            mainUI,
+            (selected) -> {
+                if (selected) {
+                    mainUI.mainPane.executePane.getTextSegment()
+                        .addProgramArgumentsPanel();
+                } else {
+                    mainUI.mainPane.executePane.getTextSegment()
+                        .removeProgramArgumentsPanel();
+                }
             }
-        }
         );
         registerAction(
             "settingsProgramArgumentsAction",
@@ -626,7 +751,8 @@ public class ActionRegistry {
             "Self-modifying code",
             "If set, the program can write and branch to both text and data segments.",
             boolSettings,
-            BoolSetting.SELF_MODIFYING_CODE_ENABLED, mainUI
+            BoolSetting.SELF_MODIFYING_CODE_ENABLED,
+            mainUI
         );
         registerAction(
             "settingsSelfModifyingCodeAction",
@@ -640,21 +766,27 @@ public class ActionRegistry {
             "64 bit",
             "If set, registers are 64 bits wide and new instructions are available",
             boolSettings,
-            BoolSetting.RV64_ENABLED, mainUI, (isRV64) -> {
-            rars.riscv.InstructionsRegistry.RV64_MODE_FLAG = isRV64;
-            mainUI.registersTab.updateRegisters();
-            mainUI.floatingPointTab.updateRegisters();
-            mainUI.csrTab.updateRegisters();
-        }
+            BoolSetting.RV64_ENABLED,
+            mainUI,
+            (isRV64) -> {
+                rars.riscv.InstructionsRegistry.RV64_MODE_FLAG = isRV64;
+                mainUI.registersTab.updateRegisters();
+                mainUI.floatingPointTab.updateRegisters();
+                mainUI.csrTab.updateRegisters();
+            }
         );
-        registerAction("settingsRV64Action", settingsRV64Action, ActionCategory.SETTINGS, settingsActions);
+        registerAction("settingsRV64Action",
+            settingsRV64Action,
+            ActionCategory.SETTINGS,
+            settingsActions);
 
         // Settings -> Derive Current Working Directory
         final Action settingsDeriveCurrentWorkingDirectoryAction = new SettingsAction(
             "Derive current working directory",
             "If set, the working directory is derived from the main file instead of the RARS executable directory.",
             boolSettings,
-            BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY, mainUI
+            BoolSetting.DERIVE_CURRENT_WORKING_DIRECTORY,
+            mainUI
         );
         registerAction(
             "settingsDeriveCurrentWorkingDirectoryAction",
@@ -668,7 +800,10 @@ public class ActionRegistry {
             mainUI,
             allSettings
         );
-        registerAction("settingsEditorAction", settingsEditorAction, ActionCategory.SETTINGS, settingsActions);
+        registerAction("settingsEditorAction",
+            settingsEditorAction,
+            ActionCategory.SETTINGS,
+            settingsActions);
 
         // Settings -> Exception Handler
         final Action settingsExceptionHandlerAction = new SettingsExceptionHandlerAction(
@@ -688,8 +823,11 @@ public class ActionRegistry {
         // Settings -> Memory Configuration
         final Action settingsMemoryConfigurationAction = new SettingsMemoryConfigurationAction(
             "Memory Configuration...",
-            null, "View and modify memory segment base addresses for the simulated processor",
-            null, null, mainUI
+            null,
+            "View and modify memory segment base addresses for the simulated processor",
+            null,
+            null,
+            mainUI
         );
         registerAction(
             "settingsMemoryConfigurationAction",
@@ -712,11 +850,17 @@ public class ActionRegistry {
             mainUI,
             allSettings.fontSettings
         );
-        registerAction("helpHelpAction", helpHelpAction, ActionCategory.HELP, helpActions);
+        registerAction("helpHelpAction",
+            helpHelpAction,
+            ActionCategory.HELP,
+            helpActions);
 
         // Help -> About
         final Action helpAboutAction = new HelpAboutAction(mainUI);
-        registerAction("helpAboutAction", helpAboutAction, ActionCategory.HELP, helpActions);
+        registerAction("helpAboutAction",
+            helpAboutAction,
+            ActionCategory.HELP,
+            helpActions);
 
         actionsByCategory.put(ActionCategory.HELP, helpActions);
     }

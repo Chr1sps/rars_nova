@@ -41,7 +41,7 @@ public final class Editor {
      */
     public Editor(final @NotNull VenusUI ui) {
         this.mainUI = ui;
-        FileStatus.reset();
+        GlobalFileStatus.reset();
         this.mainUIbaseTitle = this.mainUI.getTitle();
         this.newUsageCount = 0;
         // Directory from which MARS was launched. Guaranteed to have a value.
@@ -141,7 +141,7 @@ public final class Editor {
         return "riscv" + this.newUsageCount + ".asm";
     }
 
-    /**
+    /*
      * Places name of file currently being edited into its edit tab and
      * the application's title bar. The edit tab will contain only
      * the file, the title bar will contain full pathname.
@@ -158,26 +158,28 @@ public final class Editor {
      * @param status
      *     Edit status of file. See FileStatus static constants.
      */
-    public void setTitle(final String path, final String name, final @NotNull FileStatus.State status) {
-        if (status == FileStatus.State.NO_FILE || name == null || name.isEmpty()) {
-            this.mainUI.setTitle(this.mainUIbaseTitle);
-        } else {
-            final var editIndicator = switch (status) {
-                case NEW_EDITED, EDITED -> "•";
-                default -> " ";
-            };
-            final var titleName = switch (status) {
-                case NEW_EDITED, NEW_NOT_EDITED -> name;
-                default -> path;
-            };
-            this.mainUI.setTitle(titleName + editIndicator + " - " + this.mainUIbaseTitle);
-            final var tabbedPane = this.editTabbedPane.getTabbedPane();
-            tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(), name + editIndicator);
-        }
-    }
-
-    public void setTitleFromFile(final @NotNull File file, final @NotNull FileStatus.State status) {
-        this.setTitle(file.getPath(), file.getName(), status);
+    public void setTitleFromFileStatus(
+        final @NotNull FileStatus fileStatus
+    ) {
+        final var editIndicator = FileStatusKt.isEdited(fileStatus)
+            ? "*"
+            : "";
+        final var titleName = switch (fileStatus) {
+            case final FileStatus.New statusNew -> statusNew.getTmpName();
+            case final FileStatus.Existing statusExisting ->
+                statusExisting.getFile().getAbsolutePath();
+            default -> throw new IllegalStateException("Unreachable case.");
+        };
+        final var tabName = switch (fileStatus) {
+            case final FileStatus.New statusNew -> statusNew.getTmpName();
+            case final FileStatus.Existing statusExisting ->
+                statusExisting.getFile().getName();
+            default -> throw new IllegalStateException("Unreachable case.");
+        };
+        mainUI.setTitle(titleName + editIndicator + " - " + this.mainUIbaseTitle);
+        final var tabbedPane = editTabbedPane.getTabbedPane();
+        tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(),
+            tabName + editIndicator);
     }
 
     /**

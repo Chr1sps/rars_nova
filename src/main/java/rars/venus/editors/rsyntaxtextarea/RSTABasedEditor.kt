@@ -19,9 +19,9 @@ import rars.venus.editors.TextEditingArea.FindReplaceResult
 import rars.venus.editors.TokenStyle
 import rars.venus.editors.rsyntaxtextarea.RSTASchemeConverter.convert
 import java.awt.Color
-import java.awt.Component
 import java.awt.Font
 import java.awt.font.TextAttribute
+import javax.swing.JComponent
 import javax.swing.UIManager
 import javax.swing.text.BadLocationException
 import javax.swing.text.Caret
@@ -208,15 +208,11 @@ class RSTABasedEditor(
         textArea.redoLastAction()
     }
 
-    override fun setSourceCode(code: String, editable: Boolean) {
-        isEnabled = editable
+    override fun setSourceCode(code: String) {
         textArea.apply {
             text = code
-            isEditable = editable
             caretPosition = 0
-            if (editable) {
-                requestFocusInWindow()
-            }
+            requestFocusInWindow()
         }
     }
 
@@ -228,7 +224,7 @@ class RSTABasedEditor(
         textArea.discardAllEdits()
     }
 
-    override val outerComponent: Component
+    override val outerComponent: JComponent
         get() = scrollPane
 
     override fun canUndo(): Boolean = textArea.canUndo()

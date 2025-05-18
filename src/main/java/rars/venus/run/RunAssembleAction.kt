@@ -1,14 +1,15 @@
 package rars.venus.run
 
 import arrow.core.raise.either
-import rars.ErrorList
 import rars.Globals
 import rars.RISCVProgram
 import rars.events.AssemblyError
 import rars.settings.BoolSetting
 import rars.venus.FileStatus
+import rars.venus.GlobalFileStatus
 import rars.venus.VenusUI
 import rars.venus.actions.GuiAction
+import rars.venus.isEdited
 import java.awt.event.ActionEvent
 import java.io.File
 import javax.swing.Icon
@@ -33,10 +34,12 @@ class RunAssembleAction(
             Globals.BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED)
         warningsAreErrors =
             Globals.BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS)
-        if (FileStatus.systemFile != null) {
-            if (FileStatus.getSystemState() == FileStatus.State.EDITED) {
+        val globalStatus = GlobalFileStatus.get()
+        if (globalStatus is FileStatus.Existing) {
+            if (globalStatus.isEdited()) {
                 this.mainUI.editor.save()
             }
+            val systemFile = globalStatus.file
             either<AssemblyError, Unit> {
                 Globals.PROGRAM = RISCVProgram()
                 val filesToAssembleNew = mutableListOf<File>()
@@ -45,31 +48,35 @@ class RunAssembleAction(
                     // for multiple
                     // file assembly
                     filesToAssembleNew.addAll(
-                        FileStatus.systemFile!!.parentFile.listFiles { file ->
+                        systemFile.parentFile.listFiles { file ->
                             file.extension in Globals.FILE_EXTENSIONS
                         }
                     )
                 } else {
-                    filesToAssembleNew.add(FileStatus.systemFile!!)
+                    filesToAssembleNew.add(systemFile)
                 }
                 if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
                     this@RunAssembleAction.mainUI.editor.saveAll()
-                    val paths: List<File> = this@RunAssembleAction.mainUI.editor.openFilePaths
+                    val paths: List<File> =
+                        this@RunAssembleAction.mainUI.editor.openFilePaths
                     for (path in paths) {
                         if (!filesToAssembleNew.contains(path)) {
                             filesToAssembleNew.add(path)
                         }
                     }
                 }
-                val useExceptionHandler = Globals.BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)
-                val isExceptionHandlerSet = !Globals.OTHER_SETTINGS.exceptionHandler.isEmpty()
-                val exceptionHandler = if (useExceptionHandler && isExceptionHandlerSet)
-                    File(Globals.OTHER_SETTINGS.exceptionHandler)
-                else
-                    null
+                val useExceptionHandler =
+                    Globals.BOOL_SETTINGS.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)
+                val isExceptionHandlerSet =
+                    !Globals.OTHER_SETTINGS.exceptionHandler.isEmpty()
+                val exceptionHandler =
+                    if (useExceptionHandler && isExceptionHandlerSet)
+                        File(Globals.OTHER_SETTINGS.exceptionHandler)
+                    else
+                        null
                 programsToAssemble = Globals.PROGRAM!!.prepareFilesForAssembly(
                     filesToAssembleNew,
-                    FileStatus.systemFile!!, exceptionHandler
+                    systemFile, exceptionHandler
                 ).bind()
                 messagesPane.postMessage(
                     buildFileNameList(
@@ -77,7 +84,7 @@ class RunAssembleAction(
                         programsToAssemble
                     )
                 )
-                val warnings: ErrorList = Globals.PROGRAM!!.assemble(
+                val warnings = Globals.PROGRAM!!.assemble(
                     programsToAssemble,
                     extendedAssemblerEnabled,
                     warningsAreErrors
@@ -88,8 +95,7 @@ class RunAssembleAction(
                 messagesPane.postMessage(
                     "$name: operation completed successfully.\n\n"
                 )
-                FileStatus.setAssembled(true)
-                FileStatus.setSystemState(FileStatus.State.RUNNABLE)
+                GlobalFileStatus.set(FileStatus.Existing.Runnable(systemFile))
 
                 Globals.REGISTER_FILE.resetRegisters()
                 Globals.FP_REGISTER_FILE.resetRegisters()
@@ -122,7 +128,8 @@ class RunAssembleAction(
                 }
 
             }.onLeft { assemblyError ->
-                val errorReport = assemblyError.errors.generateErrorAndWarningReport()
+                val errorReport =
+                    assemblyError.errors.generateErrorAndWarningReport()
                 messagesPane.postMessage(errorReport)
                 messagesPane.postMessage(
                     "$name: operation completed with errors.\n\n"
@@ -148,13 +155,15 @@ class RunAssembleAction(
                         // this method (actionPerformed) explicitly with null argument. Thus e!=null
                         // test.
                         if (e != null) {
-                            this.mainUI.mainPane.editTabbedPane.selectEditorTextLine(em.file, em.lineNumber)
+                            this.mainUI.mainPane.editTabbedPane.selectEditorTextLine(
+                                em.file,
+                                em.lineNumber
+                            )
                         }
                         break
                     }
                 }
-                FileStatus.setAssembled(false)
-                FileStatus.setSystemState(FileStatus.State.NOT_EDITED)
+                GlobalFileStatus.set(FileStatus.Existing.NotEdited(systemFile))
             }
         }
     }
@@ -190,7 +199,8 @@ class RunAssembleAction(
             for (i in programList.indices) {
                 val file = programList[i].file
                 val fileName = file!!.getName()
-                result.append(fileName).append(if (i < programList.size - 1) ", " else "")
+                result.append(fileName)
+                    .append(if (i < programList.size - 1) ", " else "")
                 lineLength += fileName.length
                 if (lineLength > LINE_LENGTH_LIMIT) {
                     result.append("\n")

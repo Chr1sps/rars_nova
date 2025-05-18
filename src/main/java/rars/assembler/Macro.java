@@ -17,6 +17,7 @@ import java.util.Objects;
  * @author M.H.Sekhavat sekhavat17@gmail.com
  */
 public final class Macro {
+    // TODO: do something here
     private final @NotNull ArrayList<@NotNull String> labels;
     /**
      * arguments like {@code %arg} will be substituted by macro expansion

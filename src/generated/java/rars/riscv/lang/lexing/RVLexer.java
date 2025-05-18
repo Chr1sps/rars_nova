@@ -22,7 +22,8 @@ import java.io.Reader;
     "unused"
 })
 
-public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P> {
+public final class RVLexer<T, P extends TokensProducer<T>>
+    implements LexerOld<T, P> {
 
     /** This character denotes the end of file. */
     public static final int YYEOF = -1;
@@ -140,7 +141,8 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
      * This buffer contains the current text to be matched and is the source of the {@link #yytext()}
      * string.
      */
-    private char zzBuffer[] = new char[Math.min(ZZ_BUFFERSIZE, zzMaxBufferLen())];
+    private char zzBuffer[] = new char[Math.min(ZZ_BUFFERSIZE,
+        zzMaxBufferLen())];
     /** Text position at the last accepting state. */
     private int zzMarkedPos;
     /** Current text position in the buffer. */
@@ -203,7 +205,11 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
         return result;
     }
 
-    private static int zzUnpackcmap_top(String packed, int offset, int[] result) {
+    private static int zzUnpackcmap_top(
+        String packed,
+        int offset,
+        int[] result
+    ) {
         int i = 0;       /* index in packed string  */
         int j = offset;  /* index in unpacked array */
         int l = packed.length();
@@ -224,7 +230,11 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
         return result;
     }
 
-    private static int zzUnpackcmap_blocks(String packed, int offset, int[] result) {
+    private static int zzUnpackcmap_blocks(
+        String packed,
+        int offset,
+        int[] result
+    ) {
         int i = 0;       /* index in packed string  */
         int j = offset;  /* index in unpacked array */
         int l = packed.length();
@@ -306,7 +316,11 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
         return result;
     }
 
-    private static int zzUnpackAttribute(String packed, int offset, int[] result) {
+    private static int zzUnpackAttribute(
+        String packed,
+        int offset,
+        int[] result
+    ) {
         int i = 0;       /* index in packed string  */
         int j = offset;  /* index in unpacked array */
         int l = packed.length();
@@ -325,7 +339,9 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
      */
     private static int zzCMap(int input) {
         int offset = input & 255;
-        return offset == input ? ZZ_CMAP_BLOCKS[offset] : ZZ_CMAP_BLOCKS[ZZ_CMAP_TOP[input >> 8] | offset];
+        return offset == input
+            ? ZZ_CMAP_BLOCKS[offset]
+            : ZZ_CMAP_BLOCKS[ZZ_CMAP_TOP[input >> 8] | offset];
     }
 
     /**
@@ -370,7 +386,11 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
      * @param tokenType
      *     The token's type.
      */
-    private void addToken(final int start, final int end, final RVTokenType tokenType) {
+    private void addToken(
+        final int start,
+        final int end,
+        final RVTokenType tokenType
+    ) {
         addToken(zzBuffer, start, end, tokenType, getOffset(start));
     }
 
@@ -401,11 +421,16 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
     }
 
     private void addNullToken() {
-        this.producer.addNullToken(zzBuffer, zzStartRead, getOffset(zzStartRead));
+        this.producer.addNullToken(zzBuffer,
+            zzStartRead,
+            getOffset(zzStartRead));
     }
 
     private void addErrorToken(String notice) {
-        this.producer.addErrorToken(zzBuffer, zzStartRead, getOffset(zzStartRead), notice);
+        this.producer.addErrorToken(zzBuffer,
+            zzStartRead,
+            getOffset(zzStartRead),
+            notice);
     }
 
     private int getOffset(int start) {
@@ -432,7 +457,12 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
      * the syntax highlighted text.
      */
     @Override
-    public T getTokensList(Segment text, int initialTokenType, int lineOffset, P producer) {
+    public T getTokensList(
+        Segment text,
+        int initialTokenType,
+        int lineOffset,
+        P producer
+    ) {
 
         this.producer = producer;
         //		resetTokenList();
@@ -650,7 +680,9 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
                 while (true) {
 
                     if (zzCurrentPosL < zzEndReadL) {
-                        zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL);
+                        zzInput = Character.codePointAt(zzBufferL,
+                            zzCurrentPosL,
+                            zzEndReadL);
                         zzCurrentPosL += Character.charCount(zzInput);
                     } else if (zzAtEOF) {
                         zzInput = YYEOF;
@@ -669,7 +701,9 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
                             zzInput = YYEOF;
                             break zzForAction;
                         } else {
-                            zzInput = Character.codePointAt(zzBufferL, zzCurrentPosL, zzEndReadL);
+                            zzInput = Character.codePointAt(zzBufferL,
+                                zzCurrentPosL,
+                                zzEndReadL);
                             zzCurrentPosL += Character.charCount(zzInput);
                         }
                     }
@@ -740,11 +774,15 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
                     case 25:
                         break;
                     case 6: {
-                        final var foundOps = InstructionsRegistry.matchOperator(yytext());
+                        final var foundOps = InstructionsRegistry.matchOperator(
+                            yytext());
                         if (foundOps.isEmpty()) {
-                            final var foundRegister = Globals.REGISTER_FILE.getRegisterByName(yytext());
-                            final var foundFPRegister = Globals.FP_REGISTER_FILE.getRegisterByName(yytext());
-                            final var foundCASRegister = Globals.CS_REGISTER_FILE.getRegisterByName(yytext());
+                            final var foundRegister = Globals.REGISTER_FILE.getRegisterByName(
+                                yytext());
+                            final var foundFPRegister = Globals.FP_REGISTER_FILE.getRegisterByName(
+                                yytext());
+                            final var foundCASRegister = Globals.CS_REGISTER_FILE.getRegisterByName(
+                                yytext());
                             if (foundRegister != null || foundFPRegister != null || foundCASRegister != null) {
                                 addToken(RVTokenType.REGISTER_NAME);
                             } else {

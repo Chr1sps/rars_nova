@@ -20,8 +20,12 @@ public final class EditFindReplaceAction extends GuiAction {
     private static boolean caseSensitivity = true;
 
     public EditFindReplaceAction(
-        final String name, final Icon icon, final String descrip,
-        final Integer mnemonic, final KeyStroke accel, final @NotNull VenusUI gui
+        final String name,
+        final Icon icon,
+        final String descrip,
+        final Integer mnemonic,
+        final KeyStroke accel,
+        final @NotNull VenusUI gui
     ) {
         super(name, descrip, icon, mnemonic, accel, gui);
     }
@@ -54,7 +58,11 @@ public final class EditFindReplaceAction extends GuiAction {
         private final JCheckBox caseSensitiveCheckBox;
         private final JLabel resultsLabel;
 
-        private FindReplaceDialog(final Frame owner, final String title, final boolean modality) {
+        private FindReplaceDialog(
+            final Frame owner,
+            final String title,
+            final boolean modality
+        ) {
             super(owner, title, modality);
 
             final var dialogPanel = new JPanel(new BorderLayout());
@@ -66,13 +74,16 @@ public final class EditFindReplaceAction extends GuiAction {
                 this.findInputField.selectAll();
             }
             this.replaceInputField = new JTextField(30);
-            dialogPanel.add(buildInputPanel(this.findInputField, this.replaceInputField), BorderLayout.NORTH);
+            dialogPanel.add(buildInputPanel(this.findInputField,
+                this.replaceInputField), BorderLayout.NORTH);
 
-            this.caseSensitiveCheckBox = new JCheckBox("Case Sensitive", EditFindReplaceAction.caseSensitivity);
+            this.caseSensitiveCheckBox = new JCheckBox("Case Sensitive",
+                EditFindReplaceAction.caseSensitivity);
             this.resultsLabel = new JLabel("");
             // this.resultsLabel.setForeground(Color.RED);
             this.resultsLabel.setToolTipText(RESULTS_TOOL_TIP_TEXT);
-            dialogPanel.add(buildOptionsPanel(caseSensitiveCheckBox, resultsLabel));
+            dialogPanel.add(buildOptionsPanel(caseSensitiveCheckBox,
+                resultsLabel));
 
             this.findButton = new JButton("Find");
             this.findButton.setToolTipText(FIND_TOOL_TIP_TEXT);
@@ -196,14 +207,14 @@ public final class EditFindReplaceAction extends GuiAction {
             if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null because find/replace tool button disabled
                 // if no file open
-                final EditPane editPane = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
-                if (editPane != null) {
+                final var editorTab = mainUI.mainPane.getCurrentEditTabPane();
+                if (editorTab != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final var posn = editPane.doFindText(
+                    final var result = editorTab.getTextArea().doFindText(
                         EditFindReplaceAction.searchString,
                         this.caseSensitiveCheckBox.isSelected()
                     );
-                    if (posn == TextEditingArea.FindReplaceResult.TEXT_NOT_FOUND) {
+                    if (result == TextEditingArea.FindReplaceResult.TEXT_NOT_FOUND) {
                         this.resultsLabel.setText(this.findButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {
                         this.resultsLabel.setText(this.findButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_FOUND);
@@ -230,10 +241,10 @@ public final class EditFindReplaceAction extends GuiAction {
             if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null b/c find/replace tool button disabled if
                 // no file open
-                final EditPane editPane = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
-                if (editPane != null) {
+                final var editorTab = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
+                if (editorTab != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final var posn = editPane.doReplace(
+                    final var posn = editorTab.getTextArea().doReplace(
                         EditFindReplaceAction.searchString,
                         this.replaceInputField.getText(),
                         this.caseSensitiveCheckBox.isSelected()
@@ -246,10 +257,12 @@ public final class EditFindReplaceAction extends GuiAction {
                         case TextEditingArea.FindReplaceResult.TEXT_FOUND:
                             result += FindReplaceDialog.RESULTS_TEXT_FOUND;
                             break;
-                        case TextEditingArea.FindReplaceResult.TEXT_REPLACED_NOT_FOUND_NEXT:
+                        case
+                            TextEditingArea.FindReplaceResult.TEXT_REPLACED_NOT_FOUND_NEXT:
                             result += FindReplaceDialog.RESULTS_TEXT_REPLACED_LAST;
                             break;
-                        case TextEditingArea.FindReplaceResult.TEXT_REPLACED_FOUND_NEXT:
+                        case
+                            TextEditingArea.FindReplaceResult.TEXT_REPLACED_FOUND_NEXT:
                             result += FindReplaceDialog.RESULTS_TEXT_REPLACED;
                             break;
                     }
@@ -270,19 +283,24 @@ public final class EditFindReplaceAction extends GuiAction {
             if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null b/c find/replace tool button disabled if
                 // no file open
-                final EditPane editPane = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
-                if (editPane != null) {
+                final var editorTab = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
+                if (editorTab != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
-                    final int replaceCount = editPane.doReplaceAll(
-                        EditFindReplaceAction.searchString,
-                        this.replaceInputField.getText(),
-                        this.caseSensitiveCheckBox.isSelected()
-                    );
+                    final int replaceCount = editorTab.getTextArea()
+                        .doReplaceAll(
+                            EditFindReplaceAction.searchString,
+                            this.replaceInputField.getText(),
+                            this.caseSensitiveCheckBox.isSelected()
+                        );
                     if (replaceCount == 0) {
                         this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_NOT_FOUND);
                     } else {
                         this.resultsLabel.setText(this.replaceAllButton.getText() + ": " + FindReplaceDialog.RESULTS_TEXT_REPLACED_ALL + ' '
-                            + replaceCount + " occurrence" + (replaceCount == 1 ? "" : "s"));
+                            + replaceCount + " occurrence" + (
+                            replaceCount == 1
+                                ? ""
+                                : "s"
+                        ));
                     }
                 }
             } else {

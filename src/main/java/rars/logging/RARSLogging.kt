@@ -13,7 +13,7 @@ private val RARSLoggerFactory = LoggerFactory.create {
         val time = dateTime.time.toString()
         val name = loggerName.coerceToSize(20)
         buildString {
-            appendLine("[$date $time $name] $level #> $message")
+            appendLine("[$date $time $name] $level > $message")
             exception?.let { appendLine(it.stackTraceToString()) }
         }
     }

@@ -16,5 +16,4 @@ package rars.riscv.lang
  *
  * @author Chr1sps
  */
-@JvmRecord
 data class Position(val line: Int, val column: Int, val offset: Int)

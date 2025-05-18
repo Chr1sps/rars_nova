@@ -13,7 +13,7 @@ import java.io.Reader;
 %public
 %final
 %class RVLexer<T, P extends TokensProducer<T>>
-%implements Lexer<T, P>
+%implements LexerOld<T, P>
 %no_suppress_warnings
 %unicode
 %ignorecase

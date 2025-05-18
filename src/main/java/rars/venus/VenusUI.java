@@ -5,6 +5,7 @@ import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import kotlin.Unit;
 import kotlin.collections.ArraysKt;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.io.VenusIO;
 import rars.logging.Logger;
@@ -201,7 +202,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.editor.newFile();
+                editor.newFile();
             }
         };
         this.fileOpenAction = new GuiAction(
@@ -211,7 +212,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.editor.openFile();
+                editor.openFile();
             }
         };
         this.fileCloseAction = new GuiAction(
@@ -221,7 +222,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.editor.close();
+                editor.close();
             }
         };
         this.fileCloseAllAction = new GuiAction(
@@ -231,7 +232,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.editor.closeAll();
+                editor.closeAll();
             }
         };
         this.fileSaveAction = new GuiAction(
@@ -240,7 +241,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.editor.save();
+                editor.save();
             }
         };
         this.fileSaveAsAction = new GuiAction(
@@ -253,7 +254,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.editor.saveAs();
+                editor.saveAs();
             }
         };
         this.fileSaveAllAction = new GuiAction(
@@ -262,7 +263,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.editor.saveAll();
+                editor.saveAll();
             }
         };
         this.fileDumpMemoryAction = new FileDumpMemoryAction(
@@ -279,7 +280,7 @@ public final class VenusUI extends JFrame {
             VenusUI.this) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                if (VenusUI.this.editor.closeAll()) {
+                if (editor.closeAll()) {
                     System.exit(0);
                 }
             }
@@ -295,10 +296,10 @@ public final class VenusUI extends JFrame {
 
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final EditPane editPane = VenusUI.this.mainPane.getCurrentEditTabPane();
-                if (editPane != null) {
-                    editPane.undo();
-                    VenusUI.this.updateUndoAndRedoState();
+                final var editorTab = mainPane.getCurrentEditTabPane();
+                if (editorTab != null) {
+                    editorTab.getTextArea().undo();
+                    updateUndoAndRedoState();
                 }
             }
         };
@@ -312,10 +313,10 @@ public final class VenusUI extends JFrame {
 
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final EditPane editPane = VenusUI.this.mainPane.getCurrentEditTabPane();
-                if (editPane != null) {
-                    editPane.redo();
-                    VenusUI.this.updateUndoAndRedoState();
+                final var editorTab = mainPane.getCurrentEditTabPane();
+                if (editorTab != null) {
+                    editorTab.getTextArea().redo();
+                    updateUndoAndRedoState();
                 }
             }
         };
@@ -325,7 +326,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.mainPane.getCurrentEditTabPane().cutText();
+                mainPane.getCurrentEditTabPane().getTextArea().cut();
             }
         };
         this.editCopyAction = new GuiAction(
@@ -334,7 +335,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.mainPane.getCurrentEditTabPane().copyText();
+                mainPane.getCurrentEditTabPane().getTextArea().copy();
             }
         };
         this.editPasteAction = new GuiAction(
@@ -343,7 +344,7 @@ public final class VenusUI extends JFrame {
         ) {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                VenusUI.this.mainPane.getCurrentEditTabPane().pasteText();
+                mainPane.getCurrentEditTabPane().getTextArea().paste();
             }
         };
         this.editFindReplaceAction = new EditFindReplaceAction(
@@ -427,7 +428,7 @@ public final class VenusUI extends JFrame {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 // settingsLabelAction.actionPerformed(e);
-                VenusUI.this.mainPane.executePane.getTextSegment()
+                mainPane.executePane.getTextSegment()
                     .toggleBreakpoints();
             }
         };
@@ -608,9 +609,7 @@ public final class VenusUI extends JFrame {
 
         this.getContentPane().add(center);
 
-        FileStatus.reset();
-        // The following has side effect of establishing menu state
-        FileStatus.setSystemState(FileStatus.State.NO_FILE);
+        GlobalFileStatus.reset();
         this.setMenuStateInitial();
 
         this.addWindowListener(
@@ -619,14 +618,14 @@ public final class VenusUI extends JFrame {
                 public void windowOpened(final WindowEvent e) {
                     // This is invoked when opening the app. It will set the app to
                     // appear at full screen size.
-                    VenusUI.this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                    setExtendedState(JFrame.MAXIMIZED_BOTH);
                 }
 
                 @Override
                 public void windowClosing(final WindowEvent e) {
                     // This is invoked when exiting the app through the X icon. It will in turn
                     // check for unsaved edits before exiting.
-                    if (VenusUI.this.editor.closeAll()) {
+                    if (editor.closeAll()) {
                         System.exit(0);
                     }
                 }
@@ -936,17 +935,22 @@ public final class VenusUI extends JFrame {
      * setMenuStateRunning: set upon Run->Go
      * setMenuStateTerminated: set upon completion of simulated execution
      */
-    public void setMenuState(final @NotNull FileStatus.State status) {
+    public void setMenuState(final @Nullable FileStatus status) {
         switch (status) {
-            case NO_FILE -> this.setMenuStateInitial();
-            case NEW_NOT_EDITED, NEW_EDITED -> this.setMenuStateEditingNew();
-            case NOT_EDITED -> this.setMenuStateNotEdited();
-            case EDITED -> this.setMenuStateEditing();
-            case RUNNABLE -> this.setMenuStateRunnable();
-            case RUNNING -> this.setMenuStateRunning();
-            case TERMINATED -> this.setMenuStateTerminated();
-            case OPENING -> {
-            }
+            case null -> setMenuStateInitial();
+            case final FileStatus.New ignored -> setMenuStateEditingNew();
+            case final FileStatus.Existing.NotEdited ignored ->
+                setMenuStateNotEdited();
+            case final FileStatus.Existing.Edited ignored ->
+                this.setMenuStateEditing();
+            case final FileStatus.Existing.Runnable ignored ->
+                this.setMenuStateRunnable();
+            case final FileStatus.Existing.Running ignored ->
+                this.setMenuStateRunning();
+            case final FileStatus.Existing.Terminated ignored ->
+                this.setMenuStateTerminated();
+            default ->
+                throw new IllegalStateException("Unreachable case: " + status);
         }
     }
 
@@ -1217,8 +1221,10 @@ public final class VenusUI extends JFrame {
     }
 
     private void updateUndoAndRedoState() {
-        final EditPane editPane = this.mainPane.getCurrentEditTabPane();
-        this.editUndoAction.setEnabled(editPane != null && editPane.canUndo());
-        this.editRedoAction.setEnabled(editPane != null && editPane.canRedo());
+        final var editorTab = this.mainPane.getCurrentEditTabPane();
+        this.editUndoAction.setEnabled(editorTab != null && editorTab.getTextArea()
+            .canUndo());
+        this.editRedoAction.setEnabled(editorTab != null && editorTab.getTextArea()
+            .canRedo());
     }
 }

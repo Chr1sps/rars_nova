@@ -31,6 +31,7 @@ class MainPane(
     val editTabbedPane: EditTabbedPane
 
     init {
+        @Suppress("RemoveRedundantQualifierName")
         tabPlacement = SwingConstants.TOP
         tabLayoutPolicy = SCROLL_TAB_LAYOUT
         putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, false)
@@ -57,7 +58,12 @@ class MainPane(
         )
 
         editTabbedPane = EditTabbedPane(mainUI, editor, this, allSettings)
-        addTab("Edit", null, editTabbedPane, "Text editor for composing RISCV programs.")
+        addTab(
+            "Edit",
+            null,
+            editTabbedPane,
+            "Text editor for composing RISCV programs."
+        )
 
         executePane = ExecutePane(mainUI, regs, cop1Regs, cop0Regs, allSettings)
         addTab(
@@ -69,8 +75,7 @@ class MainPane(
     }
 
     /**
-     * Current edit pane. Implementation changed for MARS 4.0 support
-     * for multiple panes, but specification is same.
+     * Current edit pane.
      */
-    val currentEditTabPane: EditPane? get() = this.editTabbedPane.currentEditTab
+    val currentEditTabPane: EditorTabNew? get() = this.editTabbedPane.currentEditTab
 }

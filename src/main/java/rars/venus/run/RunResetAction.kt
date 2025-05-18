@@ -2,6 +2,7 @@ package rars.venus.run
 
 import rars.Globals
 import rars.venus.FileStatus
+import rars.venus.GlobalFileStatus
 import rars.venus.VenusUI
 import rars.venus.actions.GuiAction
 import java.awt.event.ActionEvent
@@ -41,7 +42,7 @@ class RunResetAction(
         ).onLeft {
             // Should not be possible
             mainUI.messagesPane.postMessage( // pe.errors().generateErrorReport());
-                "Unable to reset.  Please close file then re-open and re-assemble.\n"
+                "Unable to reset. Please close file then re-open and re-assemble.\n"
             )
             return
         }
@@ -51,25 +52,45 @@ class RunResetAction(
         Globals.CS_REGISTER_FILE.resetRegisters()
         Globals.INTERRUPT_CONTROLLER.reset()
 
-        executePane.registerValues.clearHighlighting()
-        executePane.registerValues.updateRegisters()
-        executePane.fpRegValues.clearHighlighting()
-        executePane.fpRegValues.updateRegisters()
-        executePane.csrValues.clearHighlighting()
-        executePane.csrValues.updateRegisters()
-        executePane.dataSegment.highlightCellForAddress(Globals.MEMORY_INSTANCE.memoryConfiguration.dataBaseAddress)
-        executePane.dataSegment.clearHighlighting()
-        executePane.textSegment.resetModifiedSourceCode()
-        executePane.textSegment.codeHighlighting = true
-        executePane.textSegment.highlightStepAtPC()
-        mainUI.registersPane.setSelectedComponent(executePane.registerValues)
-        FileStatus.setSystemState(FileStatus.State.RUNNABLE)
-        mainUI.isMemoryReset = true
-        mainUI.isExecutionStarted = false
-
-        // Aug. 24, 2005 Ken Vollmar
-        this.mainUI.venusIO.resetFiles() // Ensure that I/O "file descriptors" are initialized for a new program run
-
-        mainUI.messagesPane.postRunMessage("\n$name: reset completed.\n\n")
+        executePane.apply {
+            registerValues.apply {
+                clearHighlighting()
+                updateRegisters()
+            }
+            fpRegValues.apply {
+                clearHighlighting()
+                updateRegisters()
+            }
+            csrValues.apply {
+                clearHighlighting()
+                updateRegisters()
+            }
+            dataSegment.apply {
+                highlightCellForAddress(Globals.MEMORY_INSTANCE.memoryConfiguration.dataBaseAddress)
+                clearHighlighting()
+            }
+            textSegment.apply {
+                resetModifiedSourceCode()
+                codeHighlighting = true
+                highlightStepAtPC()
+            }
+        }
+        GlobalFileStatus.set(
+            FileStatus.Existing.Runnable(
+                (GlobalFileStatus.get()!! as FileStatus.Existing).file
+            )
+        )
+        mainUI.run {
+            registersPane.setSelectedComponent(executePane.registerValues)
+            isMemoryReset = true
+            isExecutionStarted = false
+            venusIO.resetFiles() // Ensure that I/O "file descriptors" are initialized for a new program run
+            messagesPane.postRunMessage(
+                """
+                |$name: reset completed.
+                |
+                """.trimMargin()
+            )
+        }
     }
 }

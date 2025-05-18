@@ -3,7 +3,6 @@ package rars.venus;
 import kotlin.Pair;
 import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
 import rars.venus.editors.TextEditingArea;
@@ -14,7 +13,8 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.io.File;
+
+import static rars.venus.FileStatusKt.toEdited;
 
 /**
  * Represents one file opened for editing. Maintains required internal
@@ -27,16 +27,17 @@ import java.io.File;
  *
  * @author Sanderson and Bumgarner
  */
-public final class EditPane extends JPanel {
+public final class EditorTab extends JPanel {
 
     public final @NotNull TextEditingArea sourceCode;
     private final @NotNull VenusUI mainUI;
     private final @NotNull JLabel caretPositionLabel;
-    private final @NotNull FileStatus fileStatus;
+    private @NotNull FileStatus fileStatus;
 
-    public EditPane(
+    public EditorTab(
         final @NotNull VenusUI appFrame,
-        final @NotNull AllSettings allSettings
+        final @NotNull AllSettings allSettings,
+        final @NotNull FileStatus fileStatus
     ) {
         super(new BorderLayout());
         this.mainUI = appFrame;
@@ -44,16 +45,18 @@ public final class EditPane extends JPanel {
         // mainUI.editor = new Editor(mainUI);
         // We want to be notified of editor font changes! See update() below.
 
-        this.fileStatus = new FileStatus();
+        this.fileStatus = fileStatus;
 
         final var editorThemeSettings = allSettings.editorThemeSettings;
         this.sourceCode = TextEditingAreaKt.createTextEditingArea(
             allSettings
         );
 
-        this.sourceCode.setTheme(editorThemeSettings.getCurrentTheme().toEditorTheme());
+        this.sourceCode.setTheme(editorThemeSettings.getCurrentTheme()
+            .toEditorTheme());
         editorThemeSettings.onChangeListenerHook.subscribe(ignored -> {
-            this.sourceCode.setTheme(editorThemeSettings.getCurrentTheme().toEditorTheme());
+            this.sourceCode.setTheme(editorThemeSettings.getCurrentTheme()
+                .toEditorTheme());
             return Unit.INSTANCE;
         });
 
@@ -65,7 +68,8 @@ public final class EditPane extends JPanel {
         });
 
         final var boolSettings = allSettings.boolSettings;
-        this.sourceCode.setLineHighlightEnabled(boolSettings.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
+        this.sourceCode.setLineHighlightEnabled(boolSettings.getSetting(
+            BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING));
         boolSettings.getOnChangeListenerHook().subscribe(ignored -> {
             this.sourceCode.setLineHighlightEnabled(
                 boolSettings.getSetting(BoolSetting.EDITOR_CURRENT_LINE_HIGHLIGHTING)
@@ -93,41 +97,39 @@ public final class EditPane extends JPanel {
                     // This method is triggered when file contents added to document
                     // upon opening, even though not edited by user. The IF
                     // statement will sense this situation and immediately return.
-                    if (FileStatus.getSystemState() == FileStatus.State.OPENING) {
-                        EditPane.this.setFileStatus(FileStatus.State.NOT_EDITED);
-                        FileStatus.setSystemState(FileStatus.State.NOT_EDITED);
-                        return;
+                    switch (fileStatus) {
+                        case final FileStatus.New.NotEdited newNotEdited -> {
+                            final var newFileStatus = new FileStatus.New.Edited(
+                                newNotEdited.getTmpName()
+                            );
+                            EditorTab.this.fileStatus = newFileStatus;
+                            mainUI.editor.setTitleFromFileStatus(newFileStatus);
+                        }
+                        case
+                            final FileStatus.Existing.NotEdited existingNotEdited -> {
+                            final var newFileStatus = new FileStatus.Existing.Edited(
+                                existingNotEdited.getFile()
+                            );
+                            EditorTab.this.fileStatus = newFileStatus;
+                            mainUI.editor.setTitleFromFileStatus(newFileStatus);
+                        }
+                        default -> {
+                        }
                     }
-                    if (EditPane.this.getFileStatus() == FileStatus.State.NEW_NOT_EDITED) {
-                        EditPane.this.setFileStatus(FileStatus.State.NEW_EDITED);
-                    }
-                    if (EditPane.this.getFileStatus() == FileStatus.State.NOT_EDITED) {
-                        EditPane.this.setFileStatus(FileStatus.State.EDITED);
-                    }
-                    if (EditPane.this.getFileStatus() == FileStatus.State.NEW_EDITED) {
-                        EditPane.this.mainUI.editor.setTitle(
-                            "",
-                            EditPane.this.getFile().getName(),
-                            EditPane.this.getFileStatus()
-                        );
-                    } else {
-                        EditPane.this.mainUI.editor.setTitleFromFile(
-                            EditPane.this.getFile(),
-                            EditPane.this.getFileStatus()
-                        );
+                    switch (GlobalFileStatus.get()) {
+                        case final FileStatus.New.NotEdited newNotEdited ->
+                            GlobalFileStatus.set(toEdited(newNotEdited));
+                        case final FileStatus.New.Edited ignored -> {
+                        }
+                        case final FileStatus.Existing existing ->
+                            GlobalFileStatus.set(toEdited(existing));
+
+                        default ->
+                            throw new IllegalStateException("Unexpected value: " + GlobalFileStatus.get());
                     }
 
-                    switch (FileStatus.getSystemState()) {
-                        case FileStatus.State.NEW_NOT_EDITED:
-                            FileStatus.setSystemState(FileStatus.State.NEW_EDITED);
-                            break;
-                        case FileStatus.State.NEW_EDITED:
-                            break;
-                        default:
-                            FileStatus.setSystemState(FileStatus.State.EDITED);
-                    }
+                    mainUI.mainPane.executePane.clearPane();
 
-                    EditPane.this.mainUI.mainPane.executePane.clearPane();
                 }
 
                 @Override
@@ -146,14 +148,16 @@ public final class EditPane extends JPanel {
                 }
             });
 
-        this.setSourceCode("", false);
+        this.setSourceCode("");
         final JPanel editInfo = new JPanel(new BorderLayout());
         this.caretPositionLabel = new JLabel();
-        this.caretPositionLabel.setToolTipText("Tracks the current position of the text editing cursor.");
+        this.caretPositionLabel.setToolTipText(
+            "Tracks the current position of the text editing cursor.");
         this.displayCaretPosition(new Pair<>(0, 0));
         this.sourceCode.getCaret().addChangeListener(e -> {
             final var position = this.sourceCode.getCaretPosition();
-            this.displayCaretPosition(new Pair<>(position.getFirst() + 1, position.getSecond() + 1));
+            this.displayCaretPosition(new Pair<>(position.getFirst() + 1,
+                position.getSecond() + 1));
         });
         editInfo.add(this.caretPositionLabel, BorderLayout.WEST);
         this.add(editInfo, BorderLayout.SOUTH);
@@ -164,11 +168,9 @@ public final class EditPane extends JPanel {
      *
      * @param s
      *     String containing text
-     * @param editable
-     *     set true if code is editable else false
      */
-    public void setSourceCode(final String s, final boolean editable) {
-        this.sourceCode.setSourceCode(s, editable);
+    public void setSourceCode(final String s) {
+        this.sourceCode.setSourceCode(s);
     }
 
     /**
@@ -198,8 +200,8 @@ public final class EditPane extends JPanel {
      *
      * @return a int
      */
-    public @NotNull FileStatus.State getFileStatus() {
-        return this.fileStatus.getFileStatus();
+    public @NotNull FileStatus getFileStatus() {
+        return this.fileStatus;
     }
 
     /**
@@ -209,18 +211,8 @@ public final class EditPane extends JPanel {
      * @param fileStatus
      *     the status constant from class FileStatus
      */
-    public void setFileStatus(final @NotNull FileStatus.State fileStatus) {
-        this.fileStatus.setFileStatus(fileStatus);
-    }
-
-    /** Returns a file associated with this pane. */
-    public @Nullable File getFile() {
-        return this.fileStatus.getFile();
-    }
-
-    /** Sets the file associated with this pane. */
-    public void setFile(final @NotNull File file) {
-        this.fileStatus.setFile(file);
+    public void setFileStatus(final @NotNull FileStatus fileStatus) {
+        this.fileStatus = fileStatus;
     }
 
     /**
@@ -229,7 +221,7 @@ public final class EditPane extends JPanel {
      * @return a boolean
      */
     public boolean hasUnsavedEdits() {
-        return this.fileStatus.hasUnsavedEdits();
+        return FileStatusKt.isEdited(this.fileStatus);
     }
 
     /**
@@ -238,7 +230,7 @@ public final class EditPane extends JPanel {
      * @return a boolean
      */
     public boolean isNew() {
-        return this.fileStatus.isNew();
+        return FileStatusKt.isNew(this.fileStatus);
     }
 
     /**
@@ -262,8 +254,17 @@ public final class EditPane extends JPanel {
     /**
      * Delegates to corresponding FileStatus method
      */
+    @Deprecated(forRemoval = true)
     public void updateStaticFileStatus() {
-        this.fileStatus.updateStaticFileStatus();
+        /*
+    public void updateStaticFileStatus() {
+        systemState = this.status;
+        systemAssembled = false;
+        systemFile = this.file;
+    }
+         */
+        // FileStatusOld.setSystemState();
+        // this.fileStatusOld.updateStaticFileStatus();
     }
 
     /**
@@ -336,7 +337,10 @@ public final class EditPane extends JPanel {
      *     true if search is to be case-sensitive, false otherwise
      * @return TEXT_FOUND or TEXT_NOT_FOUND, depending on the result.
      */
-    public @NotNull FindReplaceResult doFindText(final String find, final boolean caseSensitive) {
+    public @NotNull FindReplaceResult doFindText(
+        final String find,
+        final boolean caseSensitive
+    ) {
         return this.sourceCode.doFindText(find, caseSensitive);
     }
 
@@ -364,7 +368,11 @@ public final class EditPane extends JPanel {
      * reaplacement is
      * successful and there is at least one additional match.
      */
-    public @NotNull FindReplaceResult doReplace(final String find, final String replace, final boolean caseSensitive) {
+    public @NotNull FindReplaceResult doReplace(
+        final String find,
+        final String replace,
+        final boolean caseSensitive
+    ) {
         return this.sourceCode.doReplace(find, replace, caseSensitive);
     }
 
@@ -392,7 +400,11 @@ public final class EditPane extends JPanel {
      *     true for case sensitive. false to ignore case
      * @return the number of occurrences that were matched and replaced.
      */
-    public int doReplaceAll(final String find, final String replace, final boolean caseSensitive) {
+    public int doReplaceAll(
+        final String find,
+        final String replace,
+        final boolean caseSensitive
+    ) {
         return this.sourceCode.doReplaceAll(find, replace, caseSensitive);
     }
 }

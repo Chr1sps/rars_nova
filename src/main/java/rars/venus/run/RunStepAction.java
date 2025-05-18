@@ -9,6 +9,7 @@ import rars.settings.BoolSetting;
 import rars.simulator.StoppingEvent;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
+import rars.venus.GlobalFileStatus;
 import rars.venus.VenusUI;
 import rars.venus.actions.GuiAction;
 
@@ -16,9 +17,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
+import static java.util.Objects.requireNonNull;
 import static rars.Globals.BOOL_SETTINGS;
 import static rars.simulator.ProgramArgumentListKt.storeProgramArguments;
 import static rars.simulator.SimulationKt.isDone;
+import static rars.venus.FileStatusKt.*;
 
 /**
  * Action for the Run -> Step menu item
@@ -44,7 +47,7 @@ public final class RunStepAction extends GuiAction {
     public void actionPerformed(final ActionEvent e) {
         this.name = this.getValue(Action.NAME).toString();
         this.executePane = this.mainUI.mainPane.executePane;
-        if (FileStatus.isAssembled()) {
+        if (isAssembled(requireNonNull(GlobalFileStatus.get()))) {
             if (!this.mainUI.isExecutionStarted) {
                 this.processProgramArgumentsIfAny();
             }
@@ -96,10 +99,13 @@ public final class RunStepAction extends GuiAction {
         this.executePane.getFpRegValues().updateRegisters();
         this.executePane.getCsrValues().updateRegisters();
         this.executePane.getDataSegment().updateValues();
+        final var globalStatus = requireNonNull(
+            (FileStatus.Existing) GlobalFileStatus.get()
+        );
         if (isDone(event)) {
             RunGoAction.resetMaxSteps();
             this.executePane.getTextSegment().unhighlightAllSteps();
-            FileStatus.setSystemState(FileStatus.State.TERMINATED);
+            GlobalFileStatus.set(toTerminated(globalStatus));
             if (!(event instanceof StoppingEvent.ErrorHit)) {
                 this.mainUI.messagesPane.postMessage('\n' + this.name + ": execution " + (
                     (event instanceof StoppingEvent.CliffTermination)
@@ -116,7 +122,7 @@ public final class RunStepAction extends GuiAction {
             }
         } else {
             this.executePane.getTextSegment().highlightStepAtPC();
-            FileStatus.setSystemState(FileStatus.State.RUNNABLE);
+            GlobalFileStatus.set(toRunnable(globalStatus));
         }
         if (event instanceof final StoppingEvent.ErrorHit errorHit) {
             RunGoAction.resetMaxSteps();
@@ -125,7 +131,7 @@ public final class RunStepAction extends GuiAction {
             this.mainUI.messagesPane.postMessage(
                 '\n' + this.name + ": execution terminated with errors.\n\n");
             this.mainUI.registersPane.setSelectedComponent(this.executePane.getCsrValues());
-            FileStatus.setSystemState(FileStatus.State.TERMINATED); // should be redundant.
+            GlobalFileStatus.set(toTerminated(globalStatus)); // should be redundant.
             this.executePane.getTextSegment().setCodeHighlighting(true);
             this.executePane.getTextSegment().unhighlightAllSteps();
             this.executePane.getTextSegment()

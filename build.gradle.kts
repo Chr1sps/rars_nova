@@ -26,6 +26,8 @@ dependencies {
     implementation(project(":rars.runtime"))
     implementation(project(":rars.ieee754"))
     implementation(project(":rars.runtime"))
+    implementation(project(":rars.instructions"))
+    implementation(project(":rars.parsing"))
 
     compileOnly("org.jetbrains:annotations:24.0.0")
     implementation("com.formdev:flatlaf:3.4")
@@ -263,6 +265,11 @@ val createLexer = tasks.register("createLexer") {
 tasks.compileJava {
     dependsOn(createLexer)
 }
+
+tasks.compileKotlin {
+    dependsOn(createLexer)
+}
+
 
 // endregion JFlex
 
