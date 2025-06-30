@@ -1,5 +1,6 @@
 package rars.riscv
 
+import rars.Globals
 import rars.RISCVProgram
 import rars.assembler.TokenList
 import rars.util.bitValue
@@ -80,7 +81,8 @@ class ExtendedInstruction @JvmOverloads constructor(
             // substitute first operand token for template's RG1 or OP1, second for RG2 or
             // OP2, etc
             for (op in 1..<tokenList.size) {
-                instruction = instruction.replace("RG$op", tokenList.get(op).text)
+                instruction =
+                    instruction.replace("RG$op", tokenList.get(op).text)
 
                 val strValue = tokenList.get(op).text
                 val value = strValue.translateToInt()
@@ -93,19 +95,34 @@ class ExtendedInstruction @JvmOverloads constructor(
                         "LIA$op" in instruction -> {
                             // add extra to compensate for sign extension
                             val extra = shifted.bitValue(11)
-                            instruction = instruction.replace("LIA$op", ((shifted shr 12) + extra).toString())
+                            instruction = instruction.replace(
+                                "LIA$op",
+                                ((shifted shr 12) + extra).toString()
+                            )
                         }
                         "LIB$op" in instruction -> {
-                            instruction = instruction.replace("LIB$op", (shifted shl 20 shr 20).toString())
+                            instruction = instruction.replace(
+                                "LIB$op",
+                                (shifted shl 20 shr 20).toString()
+                            )
                         }
                         "LIC$op" in instruction -> {
-                            instruction = instruction.replace("LIC$op", ((vall shr 21) and 0x7FF).toString())
+                            instruction = instruction.replace(
+                                "LIC$op",
+                                ((vall shr 21) and 0x7FF).toString()
+                            )
                         }
                         "LID$op" in instruction -> {
-                            instruction = instruction.replace("LID$op", ((vall shr 10) and 0x7FF).toString())
+                            instruction = instruction.replace(
+                                "LID$op",
+                                ((vall shr 10) and 0x7FF).toString()
+                            )
                         }
                         "LIE$op" in instruction -> {
-                            instruction = instruction.replace("LIE$op", (vall and 0x3FF).toString())
+                            instruction = instruction.replace(
+                                "LIE$op",
+                                (vall and 0x3FF).toString()
+                            )
                         }
                     }
                     continue
@@ -115,28 +132,46 @@ class ExtendedInstruction @JvmOverloads constructor(
                 if (instruction.contains("PCH$op")) {
                     // add extra to compensate for sign extension
                     val extra = relative.bitValue(11)
-                    instruction = instruction.replace("PCH$op", ((relative shr 12) + extra).toString())
+                    instruction = instruction.replace(
+                        "PCH$op",
+                        ((relative shr 12) + extra).toString()
+                    )
                 }
                 if (instruction.contains("PCL$op")) {
-                    instruction = instruction.replace("PCL$op", (relative shl 20 shr 20).toString())
+                    instruction = instruction.replace(
+                        "PCL$op",
+                        (relative shl 20 shr 20).toString()
+                    )
                 }
 
                 if (instruction.contains("LH$op")) {
                     // add extra to compensate for sign extension
                     val extra = value.bitValue(11)
-                    instruction = instruction.replace("LH$op", ((value shr 12) + extra).toString())
+                    instruction = instruction.replace(
+                        "LH$op",
+                        ((value shr 12) + extra).toString()
+                    )
                 }
                 if (instruction.contains("LL$op")) {
-                    instruction = instruction.replace("LL$op", (value shl 20 shr 20).toString())
+                    instruction = instruction.replace(
+                        "LL$op",
+                        (value shl 20 shr 20).toString()
+                    )
                 }
 
                 if (instruction.contains("VH$op")) {
                     // add extra to compensate for sign extension
                     val extra = value.bitValue(11)
-                    instruction = instruction.replace("VH$op", ((value shr 12) + extra).toString())
+                    instruction = instruction.replace(
+                        "VH$op",
+                        ((value shr 12) + extra).toString()
+                    )
                 }
                 if (instruction.contains("VL$op")) {
-                    instruction = instruction.replace("VL$op", (value shl 20 shr 20).toString())
+                    instruction = instruction.replace(
+                        "VL$op",
+                        (value shl 20 shr 20).toString()
+                    )
                 }
             }
             // substitute label if necessary
@@ -145,7 +180,10 @@ class ExtendedInstruction @JvmOverloads constructor(
                 // by symtab lookup, so I need to get the text label back so parseLine() won't
                 // puke.
                 val label = tokenList.get(tokenList.size - 1).text
-                val sym = program.localSymbolTable!!.getSymbolGivenAddressLocalOrGlobal(label)
+                val sym =
+                    program.localSymbolTable!!.getSymbolGivenAddress(label)
+                        ?: Globals.GLOBAL_SYMBOL_TABLE
+                            .getSymbolGivenAddress(label)
                 if (sym != null) {
                     // should never be null, since there would not be an address if label were not
                     // in symtab!

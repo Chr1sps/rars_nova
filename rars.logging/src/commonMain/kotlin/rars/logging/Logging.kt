@@ -1,8 +1,6 @@
 package rars.logging
 
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlin.reflect.KClass
 
 enum class LogLevel {
     NONE,
@@ -16,9 +14,29 @@ enum class LogLevel {
     override fun toString(): String = name.uppercase()
 }
 
+/**
+ * Interface defining the logging functionality.
+ *
+ * The Logger interface provides methods to log messages with different severity levels.
+ * It supports logging messages with optional exceptions and lazy message evaluation.
+ */
 interface Logger {
+
+    /**
+     * The logging level of this logger.
+     *
+     * This field is assumed to have a constant value for a given logger instance.
+     */
     val logLevel: LogLevel
 
+    /**
+     * Records a log message with specified severity level and optional exception.
+     * The message is evaluated lazily only if the message's severity level
+     * is enabled for this logger.
+     * @param level the severity level of the log message
+     * @param exception the exception to be logged (optional)
+     * @param lazyMessage function that produces the log message
+     */
     fun log(
         level: LogLevel,
         exception: Throwable? = null,
@@ -26,120 +44,10 @@ interface Logger {
     )
 }
 
-interface LoggerFactory {
-    fun forClass(cls: KClass<*>): Logger
-    fun forName(name: String): Logger
-    fun forObject(obj: Any): Logger = forClass(obj::class)
-
-    companion object {
-        fun create(builderFunc: LoggerFactoryBuilder.() -> Unit): LoggerFactory =
-            LoggerFactoryBuilderImpl().apply(builderFunc).build()
-
-        fun noopFactory(): LoggerFactory = NoopLoggerFactory
-        fun noopLogger(): Logger = NoopLogger
-    }
-}
-
-interface LoggerFactoryBuilder {
-    var logLevel: LogLevel
-    fun logFormat(format: LoggingFormat)
-    fun appender(appender: Appender)
-}
-
-private class LoggerFactoryBuilderImpl() : LoggerFactoryBuilder {
-    private var format: LoggingFormat? = null
-    private var _logLevel: LogLevel? = null
-    private val appenders = mutableSetOf<Appender>()
-
-    override var logLevel: LogLevel
-        get() = _logLevel ?: error {
-            "Log level not set before reading it's value."
-        }
-        set(value) {
-            _logLevel = value
-        }
-
-    override fun logFormat(format: LoggingFormat) {
-        this.format = format
-    }
-
-    override fun appender(appender: Appender) {
-        appenders.add(appender)
-    }
-
-    fun build(): LoggerFactory {
-        requireNotNull(format) {
-            """
-            Logging format must be set when creating a logger factory.
-            Make sure to call the logFormat() method in the builder.
-            """.trimIndent()
-        }
-        requireNotNull(_logLevel) {
-            """
-            Log level must be set before creating a logger factory.
-            Make sure to assign a LogLevel value to the logLevel variable.
-            """.trimIndent()
-        }
-        return if (_logLevel == LogLevel.NONE || appenders.isEmpty()) {
-            NoopLoggerFactory
-        } else {
-            LoggerFactoryImpl(format!!, _logLevel!!, appenders)
-        }
-    }
-}
-
-private class LoggerFactoryImpl(
-    private val format: LoggingFormat,
-    private val logLevel: LogLevel,
-    private val appenders: Set<Appender>,
-) : LoggerFactory {
-    override fun forClass(cls: KClass<*>): Logger = LoggerImpl(
-        LoggerName.ClassName(cls),
-        logLevel,
-        format,
-        appenders
-    )
-
-    override fun forName(name: String): Logger = LoggerImpl(
-        LoggerName.StringName(name),
-        logLevel,
-        format,
-        appenders
-    )
-}
-
-private class LoggerImpl(
-    private val name: LoggerName,
-    override val logLevel: LogLevel,
-    format: LoggingFormat,
-    appenders: Set<Appender>,
-) : LoggerBase(format, appenders) {
-    override fun collectContext(
-        level: LogLevel,
-        message: Any?,
-        throwable: Throwable?
-    ): LogContext = ContextImpl(
-        timestamp = Clock.System.now(),
-        loggerName = name,
-        message = message,
-        exception = throwable,
-        level = level,
-    )
-}
-
-private data class ContextImpl(
-    override val timestamp: Instant,
-    override val loggerName: LoggerName,
-    override val message: Any?,
-    override val exception: Throwable?,
-    override val level: LogLevel
-) : LogContext
-
-fun interface LoggingFormat {
-    fun LogContext.format(): String
-}
-
-interface LogContext {
+/**
+ * Stores all the information about a given logging event.
+ */
+expect interface LogContext {
     val timestamp: Instant
     val loggerName: LoggerName
     val message: Any?
@@ -148,13 +56,16 @@ interface LogContext {
 }
 
 /**
- * The [Appender] interface specifies the destination for log messages.
+ * The [Appender] interface specifies the destination for log messages
+ * (console, file, etc.).
  */
 fun interface Appender {
-    fun append(message: String, logLevel: LogLevel)
+    fun append(context: LogContext)
 }
 
-sealed interface LoggerName {
-    data class ClassName(val cls: KClass<*>) : LoggerName
-    data class StringName(val name: String) : LoggerName
-}
+/**
+ * Specifies the name of the logger either via a reference to its class or
+ * to its custom name. Platform implementations (i.e., JVM) may use
+ * platform-specific class types for the class references.
+ */
+expect sealed interface LoggerName 

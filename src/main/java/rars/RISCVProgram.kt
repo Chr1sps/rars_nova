@@ -167,11 +167,7 @@ class RISCVProgram {
      */
     fun tokenize(): Either<AssemblyError, Unit> = either {
         tokenList = tokenize(this@RISCVProgram).bind()
-        this@RISCVProgram.localSymbolTable =
-            SymbolTable(
-                this@RISCVProgram.file,
-                Globals.GLOBAL_SYMBOL_TABLE
-            ) // prepare for assembly
+        localSymbolTable = SymbolTable(file)
     }
 
     /**
@@ -262,8 +258,8 @@ class RISCVProgram {
             extendedAssemblerEnabled,
             warningsAreErrors
         ).bind()
-        this@RISCVProgram.machineList = assemblyResult.first
-        this@RISCVProgram.backStepper = Backstepper()
+        machineList = assemblyResult.first
+        backStepper = Backstepper()
         assemblyResult.second
     }
 

@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.logging.Logger;
 import rars.logging.LoggingExtKt;
-import rars.logging.RARSLogging;
 import rars.notices.AccessType;
 import rars.riscv.hardware.registerfiles.CSRegisterFile;
 import rars.venus.VenusUI;
@@ -15,6 +14,7 @@ import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static rars.logging.RARSLoggingKt.RARSLogging;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress;
 import static rars.util.UtilsKt.unwrap;
 

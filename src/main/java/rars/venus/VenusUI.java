@@ -10,10 +10,8 @@ import rars.Globals;
 import rars.io.VenusIO;
 import rars.logging.Logger;
 import rars.logging.LoggingExtKt;
-import rars.logging.RARSLogging;
 import rars.riscv.InstructionsRegistry;
 import rars.settings.*;
-import rars.venus.actions.ActionRegistry;
 import rars.venus.actions.GuiAction;
 import rars.venus.actions.HelpAboutAction;
 import rars.venus.registers.ControlAndStatusWindow;
@@ -30,13 +28,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 
 import static kotlin.collections.CollectionsKt.*;
-import static rars.venus.util.IconLoading.loadIcon;
+import static rars.logging.RARSLoggingKt.RARSLogging;
+import static rars.venus.util.IconLoadingKt.loadIcon;
+import static rars.venus.util.ListenerUtilsKt.onWindowClosing;
+import static rars.venus.util.ListenerUtilsKt.onWindowOpened;
 
 /**
  * Top level container for Venus GUI.
@@ -87,7 +86,7 @@ public final class VenusUI extends JFrame {
     /// registers/memory reset for execution
     public boolean isMemoryReset = true;
     public boolean isExecutionStarted = false;
-    private @NotNull ActionRegistry actionRegistry;
+    private @Nullable FileStatus myFileStatus = null;
 
     /**
      * Constructor for the Class. Sets up a window object for the UI
@@ -590,7 +589,6 @@ public final class VenusUI extends JFrame {
         // endregion Action objects
 
         // Initialize the action registry with all the actions
-        this.actionRegistry = new ActionRegistry(this, allSettings);
 
         this.venusIO = new VenusIO(this.messagesPane, boolSettings);
 
@@ -609,35 +607,31 @@ public final class VenusUI extends JFrame {
 
         this.getContentPane().add(center);
 
-        GlobalFileStatus.reset();
+        // GlobalFileStatus.reset();
         this.setMenuStateInitial();
 
-        this.addWindowListener(
-            new WindowAdapter() {
-                @Override
-                public void windowOpened(final WindowEvent e) {
-                    // This is invoked when opening the app. It will set the app to
-                    // appear at full screen size.
-                    setExtendedState(JFrame.MAXIMIZED_BOTH);
-                }
-
-                @Override
-                public void windowClosing(final WindowEvent e) {
-                    // This is invoked when exiting the app through the X icon. It will in turn
-                    // check for unsaved edits before exiting.
-                    if (editor.closeAll()) {
-                        System.exit(0);
-                    }
-                }
-            });
+        onWindowOpened(this, e -> {
+            // This is invoked when opening the app. It will set the app to
+            // appear at full screen size.
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
+            return Unit.INSTANCE;
+        });
+        onWindowClosing(this, e -> {
+            // This is invoked when exiting the app through the X icon. It will in turn
+            // check for unsaved edits before exiting.
+            if (editor.closeAll()) {
+                System.exit(0);
+            }
+            return Unit.INSTANCE;
+        });
 
         // The following will handle the windowClosing event properly in the
         // situation where user Cancels out of "save edits?" dialog. By default,
         // the GUI frame will be hidden but I want it to do nothing.
-        this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
-        this.pack();
-        this.setVisible(true);
+        pack();
+        setVisible(true);
 
         // Open files
         if (!this.editor.openFiles(files)) {
@@ -1226,5 +1220,18 @@ public final class VenusUI extends JFrame {
             .canUndo());
         this.editRedoAction.setEnabled(editorTab != null && editorTab.getTextArea()
             .canRedo());
+    }
+
+    public @Nullable FileStatus getFileStatus() {
+        return myFileStatus;
+    }
+
+    public void setFileStatus(final @Nullable FileStatus fileStatus) {
+        myFileStatus = fileStatus;
+        setMenuState(fileStatus);
+    }
+
+    public void resetFileStatus() {
+        setFileStatus(null);
     }
 }

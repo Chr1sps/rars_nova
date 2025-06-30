@@ -173,7 +173,7 @@
     <inspection_tool class="SimplifiableAnnotation" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="Singleton" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="StandardVariableNames" enabled="false" level="WEAK WARNING" enabled_by_default="false" editorAttributes="INFO_ATTRIBUTES" />
-    <inspection_tool class="StaticNonFinalField" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="StaticNonFinalField" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
     <inspection_tool class="StaticPseudoFunctionalStyleMethod" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="StaticVariableInitialization" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_ignorePrimitives" value="false" />

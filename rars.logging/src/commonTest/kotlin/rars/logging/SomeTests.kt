@@ -13,29 +13,8 @@ class LoggerTests {
 
     @Test
     fun `only log level in builder func body`() {
-        assertFails {
-            LoggerFactory.create {
-                logLevel = LogLevel.WARNING
-            }
-        }
-    }
-
-    @Test
-    fun `only appender in builder func body`() {
-        assertFails {
-            LoggerFactory.create {
-                appender { _, _ -> }
-            }
-        }
-    }
-
-    @Test
-    fun `noop logger factory - no appenders`() {
         val factory = LoggerFactory.create {
             logLevel = LogLevel.WARNING
-            logFormat {
-                "message"
-            }
         }
         assertIs<NoopLoggerFactory>(factory)
         val logger = factory.forClass(LoggerTests::class)
@@ -43,14 +22,20 @@ class LoggerTests {
     }
 
     @Test
+    fun `only appender in builder func body`() {
+        assertFails {
+            LoggerFactory.create {
+                appender { }
+            }
+        }
+    }
+
+    @Test
     fun `noop logger factory - log level is none`() {
         val stringBuilder = StringBuilder()
         val factory = LoggerFactory.create {
             logLevel = LogLevel.NONE
-            appender { message, _ ->
-                stringBuilder.append(message)
-            }
-            logFormat { message.toString() }
+            stringBuilderAppender(stringBuilder, TestLogFormat)
         }
         assertIs<NoopLoggerFactory>(factory)
         val logger = factory.forClass(LoggerTests::class)
@@ -64,12 +49,7 @@ class LoggerTests {
         val builder = StringBuilder()
         val factory = LoggerFactory.create {
             logLevel = LogLevel.INFO
-            appender { message, _ ->
-                builder.appendLine(message)
-            }
-            logFormat {
-                """[$level] $message"""
-            }
+            stringBuilderAppender(builder, TestLogFormat)
         }
         val logger = factory.forName("test")
         assertIsNot<NoopLogger>(logger)
@@ -78,3 +58,10 @@ class LoggerTests {
         assertEquals("[INFO] message\n", builder.toString())
     }
 }
+
+private val TestLogFormat = LoggingFormat { "[$level] $message\n" }
+
+private fun LoggerFactoryBuilder.stringBuilderAppender(
+    builder: StringBuilder,
+    format: LoggingFormat
+) = formattedAppender(format) { builder.append(it) }

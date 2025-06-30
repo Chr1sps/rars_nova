@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.logging.Logger;
 import rars.logging.LoggingExtKt;
-import rars.logging.RARSLogging;
 import rars.notices.AccessNotice;
 import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
@@ -19,6 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import static rars.Globals.FONT_SETTINGS;
+import static rars.logging.RARSLoggingKt.RARSLogging;
 
 /**
  * Instruction/memory dump tool. Dumps every instruction run and every memory

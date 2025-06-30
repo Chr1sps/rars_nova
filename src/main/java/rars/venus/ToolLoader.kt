@@ -1,13 +1,9 @@
-package rars.venus;
+package rars.venus
 
-import org.jetbrains.annotations.NotNull;
-import rars.tools.*;
-import rars.venus.actions.ToolAction;
-
-import javax.swing.*;
-import java.awt.event.KeyEvent;
-import java.util.List;
-import java.util.function.Function;
+import rars.tools.*
+import rars.venus.actions.ToolAction
+import java.awt.event.KeyEvent
+import javax.swing.JMenu
 
 /**
  * This class provides functionality to bring external Mars tools into the Mars
@@ -21,26 +17,24 @@ import java.util.function.Function;
  * @author Pete Sanderson with help from Bret Barker
  * @version August 2005
  */
-public final class ToolLoader {
-    private static final String TOOLS_MENU_NAME = "Tools";
+object ToolLoader {
+    private const val TOOLS_MENU_NAME = "Tools"
+
     /**
      * List of functions that produce tools given the main UI.
      */
-    private static final @NotNull List<Function<@NotNull VenusUI, @NotNull AbstractTool>> TOOL_PRODUCERS = List.of(
-        BHTSimulator::new,
-        CacheSimulator::new,
-        DigitalLabSim::new,
-        FloatRepresentation::new,
-        InstructionCounter::new,
-        InstructionMemoryDump::new,
-        InstructionStatistics::new,
-        KeyboardAndDisplaySimulator::new,
-        MemoryReferenceVisualization::new,
-        TimerTool::new
-    );
-
-    private ToolLoader() {
-    }
+    private val TOOL_PRODUCERS: List<(VenusUI) -> AbstractTool> = listOf(
+        ::BHTSimulator,
+        ::CacheSimulator,
+        ::DigitalLabSim,
+        ::FloatRepresentation,
+        ::InstructionCounter,
+        ::InstructionMemoryDump,
+        ::InstructionStatistics,
+        ::KeyboardAndDisplaySimulator,
+        ::MemoryReferenceVisualization,
+        ::TimerTool
+    )
 
     /**
      * Called in VenusUI to build its Tools menu. If there are no qualifying tools
@@ -51,13 +45,11 @@ public final class ToolLoader {
      *
      * @return a Tools JMenu if qualifying tool classes are found, otherwise null
      */
-    public static @NotNull JMenu buildToolsMenu(final @NotNull VenusUI mainUI) {
-        final var menu = new JMenu(ToolLoader.TOOLS_MENU_NAME);
-        menu.setMnemonic(KeyEvent.VK_T);
-        // traverse array list and build menu
-        for (final var toolProducer : ToolLoader.TOOL_PRODUCERS) {
-            menu.add(new ToolAction(toolProducer.apply(mainUI)));
+    @JvmStatic
+    fun buildToolsMenu(mainUI: VenusUI): JMenu = JMenu(TOOLS_MENU_NAME).apply {
+        setMnemonic(KeyEvent.VK_T)
+        for (toolProducer in TOOL_PRODUCERS) {
+            add(ToolAction(toolProducer(mainUI)))
         }
-        return menu;
     }
 }

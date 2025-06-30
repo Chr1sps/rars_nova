@@ -70,7 +70,7 @@ class Float32(val bits: Int) : Floating<Float32> {
         return ExactFloat(isSignMinus, exponent, significand)
     }
 
-    companion object : FloatingFactory<Float32> {
+    companion object Factory : FloatingFactory<Float32> {
         override val NaN: Float32 = Float32(0x7FC00000)
         override val zero = Float32(0)
         override val negativeZero = Float32(-0x80000000)

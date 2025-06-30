@@ -201,7 +201,7 @@ class Memory(
      * Returns the next available word-aligned heap address. There is no recycling
      * and no heap management! There is however nearly 4MB of heap space available in Rars.
      *
-     * @param numBytes
+     * @param amount
      * Number of bytes requested. Should be multiple of 4, otherwise
      * next higher multiple of 4 allocated.
      * @return address of allocated heap storage.
@@ -209,15 +209,15 @@ class Memory(
      * if number of requested bytes is negative or
      * exceeds available heap storage
      */
-    override fun allocateBytes(numBytes: Int): Either<String, Int> = either {
+    override fun allocateBytes(amount: Int): Either<String, Int> = either {
         val result = currentHeapAddress
-        ensure(numBytes != 0) { "request ($numBytes) is negative heap amount" }
-        var newHeapAddress = currentHeapAddress + numBytes
+        ensure(amount != 0) { "request ($amount) is negative heap amount" }
+        var newHeapAddress = currentHeapAddress + amount
         if (newHeapAddress % 4 != 0) {
             newHeapAddress =
                 newHeapAddress + (4 - newHeapAddress % 4) // next higher multiple of 4
         }
-        ensure(newHeapAddress < actualDataSegmentLimitAddress) { "request ($numBytes) exceeds available heap storage" }
+        ensure(newHeapAddress < actualDataSegmentLimitAddress) { "request ($amount) exceeds available heap storage" }
         currentHeapAddress = newHeapAddress
         result
     }
@@ -1131,7 +1131,7 @@ class Memory(
         // expression 4-delta below in place of m.
         synchronized(this) {
             var relativeByteAddress1 = relativeByteAddress
-            if (blockTable == this.stackBlockTable) {
+            if (blockTable === this.stackBlockTable) {
                 val delta = relativeByteAddress1 % 4
                 if (delta != 0) {
                     relativeByteAddress1 += (4 - delta) shl 1
@@ -1186,7 +1186,7 @@ class Memory(
         // expression 4-delta below in place of m.
         synchronized(this) {
             var relativeByteAddress1 = relativeByteAddress
-            if (blockTable == this.stackBlockTable) {
+            if (blockTable === this.stackBlockTable) {
                 val delta = relativeByteAddress1 % 4
                 if (delta != 0) {
                     relativeByteAddress1 += (4 - delta) shl 1

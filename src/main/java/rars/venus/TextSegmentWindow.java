@@ -10,7 +10,6 @@ import rars.api.DisplayFormat;
 import rars.assembler.DataTypes;
 import rars.logging.Logger;
 import rars.logging.LoggingExtKt;
-import rars.logging.RARSLogging;
 import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
 import rars.notices.SimulatorNotice;
@@ -18,7 +17,6 @@ import rars.riscv.hardware.memory.MemoryListenerHandle;
 import rars.settings.*;
 import rars.util.BinaryUtilsKt;
 import rars.util.FontUtilities;
-import rars.venus.util.MouseListenerBuilder;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -37,10 +35,12 @@ import java.util.Objects;
 import static kotlin.collections.CollectionsKt.map;
 import static kotlin.collections.CollectionsKt.maxByOrNull;
 import static rars.Globals.SIMULATOR;
+import static rars.logging.RARSLoggingKt.RARSLogging;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress;
 import static rars.util.UtilsKt.applyStyle;
 import static rars.util.UtilsKt.unwrap;
+import static rars.venus.util.ListenerUtilsKt.onMouseClicked;
 
 /**
  * Creates the Text Segment window in the Execute tab of the UI
@@ -1113,34 +1113,31 @@ public final class TextSegmentWindow extends JInternalFrame {
 
             public TextTableHeader(final TableColumnModel cm) {
                 super(cm);
-                final var headerMouseListener = MouseListenerBuilder.create()
-                    .onMouseClicked(e -> {
-                        final var point = e.getPoint();
-                        final int index = columnModel.getColumnIndexAtX(point.x);
-                        final int realIndex = columnModel.getColumn(index)
-                            .getModelIndex();
-                        if (realIndex == ColumnData.BREAKPOINT_COLUMN.number) {
-                            final JCheckBox check = (
-                                (JCheckBox) (
-                                    (DefaultCellEditor) table.getCellEditor(
-                                        0,
-                                        index
-                                    )
-                                ).getComponent()
-                            );
-                            TextSegmentWindow.this.breakpointsEnabled = !TextSegmentWindow.this.breakpointsEnabled;
-                            check.setEnabled(TextSegmentWindow.this.breakpointsEnabled);
-                            table.tableChanged(new TableModelEvent(
-                                TextSegmentWindow.this.tableModel,
-                                0,
-                                TextSegmentWindow.this.data.length - 1,
-                                ColumnData.BREAKPOINT_COLUMN.number
-                            ));
-                        }
-                        return Unit.INSTANCE;
-                    })
-                    .build();
-                addMouseListener(headerMouseListener);
+                onMouseClicked(this, e -> {
+                    final var point = e.getPoint();
+                    final int index = columnModel.getColumnIndexAtX(point.x);
+                    final int realIndex = columnModel.getColumn(index)
+                        .getModelIndex();
+                    if (realIndex == ColumnData.BREAKPOINT_COLUMN.number) {
+                        final JCheckBox check = (
+                            (JCheckBox) (
+                                (DefaultCellEditor) table.getCellEditor(
+                                    0,
+                                    index
+                                )
+                            ).getComponent()
+                        );
+                        TextSegmentWindow.this.breakpointsEnabled = !TextSegmentWindow.this.breakpointsEnabled;
+                        check.setEnabled(TextSegmentWindow.this.breakpointsEnabled);
+                        table.tableChanged(new TableModelEvent(
+                            TextSegmentWindow.this.tableModel,
+                            0,
+                            TextSegmentWindow.this.data.length - 1,
+                            ColumnData.BREAKPOINT_COLUMN.number
+                        ));
+                    }
+                    return Unit.INSTANCE;
+                });
             }
 
             @Override

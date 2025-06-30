@@ -10,19 +10,27 @@ import rars.riscv.hardware.registers.Register
 import rars.settings.AllSettings
 import rars.settings.BoolSetting
 import rars.settings.BoolSettings
+import rars.util.IntRefCell
 import rars.util.translateToInt
 import rars.util.translateToLong
 import rars.venus.VenusUI
 import rars.venus.run.RunSpeedPanel
 import rars.venus.util.BorderLayout
-import java.awt.*
+import rars.venus.util.SettingsBasedCellRenderer
+import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.Component
+import java.awt.Dimension
 import java.awt.event.MouseEvent
 import java.util.concurrent.locks.ReentrantLock
-import javax.swing.*
+import javax.swing.JPanel
+import javax.swing.JScrollPane
+import javax.swing.JTable
+import javax.swing.SwingConstants
 import javax.swing.event.TableModelEvent
 import javax.swing.table.AbstractTableModel
-import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.JTableHeader
+import kotlin.concurrent.withLock
 
 /**
  * Sets up a window to display registers in the UI.
@@ -41,8 +49,8 @@ abstract class RegisterBlockWindowBase internal constructor(
         if (notice.accessType == AccessType.WRITE) {
             // Uses the same highlighting technique as for Text Segment -- see
             // AddressCellRenderer class in DataSegmentWindow.java.
-            this.highlightCellForRegister(notice.register)
-            this.mainUI.registersPane.setSelectedComponent(this)
+            highlightCellForRegister(notice.register)
+            mainUI.registersPane.selectedComponent = this
         }
     }
     private val table: JTable = MyTippedJTable(
@@ -58,7 +66,7 @@ abstract class RegisterBlockWindowBase internal constructor(
             valueTip
         )
     )
-    private var highlightRow: Int = -1
+    private var highlightRow = IntRefCell(-1)
 
     /**
      * Constructor which sets up a fresh window with a table that contains the
@@ -76,7 +84,7 @@ abstract class RegisterBlockWindowBase internal constructor(
             if (notice.action == SimulatorNotice.Action.START) {
                 // Simulated MIPS execution starts.  Respond to memory changes if running in timed
                 // or stepped mode.
-                if (notice.runSpeed.compareTo(RunSpeedPanel.UNLIMITED_SPEED) != 0 || notice.maxSteps == 1) {
+                if (notice.runSpeed != RunSpeedPanel.UNLIMITED_SPEED || notice.maxSteps == 1) {
                     beginObserving()
                 }
             } else {
@@ -84,27 +92,33 @@ abstract class RegisterBlockWindowBase internal constructor(
                 endObserving()
             }
         }
-        this.updateRowHeight()
-        settings.fontSettings.onChangeListenerHook.subscribe { this.updateRowHeight() }
-        val columnModel = this.table.getColumnModel()
+        updateRowHeight()
+        settings.fontSettings.onChangeListenerHook.subscribe { updateRowHeight() }
+        table.columnModel.apply {
+            fun makeRenderer(alignment: Int) = RegisterCellRenderer(
+                settings,
+                alignment,
+                table,
+                mainUI,
+                ::formatRegisterValue,
+                highlightRow,
+            )
 
-        val nameColumn = columnModel.getColumn(NAME_COLUMN)
-        nameColumn.setMinWidth(NAME_SIZE)
-        nameColumn.setMaxWidth(NAME_SIZE)
-        nameColumn.setCellRenderer(RegisterCellRenderer(SwingConstants.LEFT, table))
+            fun setupColumn(
+                index: Int,
+                width: Int,
+                alignment: Int
+            ) = getColumn(index).apply {
+                minWidth = width
+                maxWidth = width
+                cellRenderer = makeRenderer(alignment)
+            }
+            setupColumn(NAME_COLUMN, NAME_SIZE, SwingConstants.LEFT)
+            setupColumn(NUMBER_COLUMN, NUMBER_SIZE, SwingConstants.RIGHT)
+            setupColumn(VALUE_COLUMN, VALUE_SIZE, SwingConstants.RIGHT)
+        }
 
-        val numberColumn = columnModel.getColumn(NUMBER_COLUMN)
-        numberColumn.setMinWidth(NUMBER_SIZE)
-        numberColumn.setMaxWidth(NUMBER_SIZE)
-        // Display register values (String-ified) right-justified in mono font
-        numberColumn.setCellRenderer(RegisterCellRenderer(SwingConstants.RIGHT, table))
-
-        val valueColumn = columnModel.getColumn(VALUE_COLUMN)
-        valueColumn.setMinWidth(VALUE_SIZE)
-        valueColumn.setMaxWidth(VALUE_SIZE)
-        valueColumn.setCellRenderer(RegisterCellRenderer(SwingConstants.RIGHT, table))
-
-        this.table.preferredScrollableViewportSize = Dimension(
+        table.preferredScrollableViewportSize = Dimension(
             NAME_SIZE + NUMBER_SIZE + VALUE_SIZE,
             700
         )
@@ -117,27 +131,30 @@ abstract class RegisterBlockWindowBase internal constructor(
         }
     }
 
-    protected abstract fun formatRegisterValue(value: Long, format: DisplayFormat): String
+    protected abstract fun formatRegisterValue(
+        value: Long,
+        format: DisplayFormat
+    ): String
 
     private fun beginObserving() {
-        this.registerFile.addRegistersListener(this.processRegisterNotice)
+        registerFile.addRegistersListener(processRegisterNotice)
     }
 
     private fun endObserving() {
-        this.registerFile.deleteRegistersListener(this.processRegisterNotice)
+        registerFile.deleteRegistersListener(processRegisterNotice)
     }
 
     private fun resetRegisters() {
-        this.registerFile.resetRegisters()
+        registerFile.resetRegisters()
     }
 
     /**
      * Reset and redisplay registers
      */
     fun clearWindow() {
-        this.clearHighlighting()
-        this.resetRegisters()
-        this.updateRegisters()
+        clearHighlighting()
+        resetRegisters()
+        updateRegisters()
     }
 
     /**
@@ -145,7 +162,7 @@ abstract class RegisterBlockWindowBase internal constructor(
      */
     fun clearHighlighting() {
         this.table.tableChanged(TableModelEvent(this.table.model))
-        this.highlightRow = -1
+        this.highlightRow.value = -1
     }
 
     fun updateRegisters() {
@@ -159,135 +176,23 @@ abstract class RegisterBlockWindowBase internal constructor(
      * Register object corresponding to row to be selected.
      */
     private fun highlightCellForRegister(register: Register) {
-        val registers = this.registerFile.registers
+        val registers = registerFile.registers
         for (i in registers.indices) {
             if (registers[i] === register) {
-                this.highlightRow = i
                 table.tableChanged(TableModelEvent(table.model))
+                this.highlightRow.value = i
                 return
             }
         }
-        this.highlightRow = -1
+        this.highlightRow.value = -1
     }
 
     private fun updateRowHeight() {
-        val font = this.settings.fontSettings.currentFont
-        val height = this.getFontMetrics(font).height
-        this.table.setRowHeight(height)
+        val font = settings.fontSettings.currentFont
+        val height = getFontMetrics(font).height
+        table.rowHeight = height
     }
 
-    /**
-     * Cell renderer for displaying register entries. This does highlighting, so if you
-     * don't want highlighting for a given column, don't use this. Currently we highlight
-     * all columns.
-     */
-    private inner class RegisterCellRenderer(
-        private val alignment: Int,
-        private val table: JTable,
-    ) : DefaultTableCellRenderer() {
-        private var font: Font?
-
-        init {
-            this.font = settings.fontSettings.currentFont
-            settings.fontSettings.onChangeListenerHook.subscribe {
-                this.font = settings.fontSettings.currentFont
-                this.table.repaint()
-            }
-        }
-
-        override fun getTableCellRendererComponent(
-            table: JTable?, value: Any?,
-            isSelected: Boolean, hasFocus: Boolean,
-            row: Int, column: Int
-        ): Component {
-            val formattedValue = if (column == VALUE_COLUMN) {
-                val value = value as Long
-                val displayBase = mainUI.mainPane.executePane.valueDisplayFormat
-                formatRegisterValue(value, displayBase)
-            } else value
-            val cell = super.getTableCellRendererComponent(
-                table, formattedValue,
-                isSelected, hasFocus, row, column
-            ) as JLabel
-            return cell.apply {
-                font = this@RegisterCellRenderer.font
-                horizontalAlignment = this@RegisterCellRenderer.alignment
-                if (settings.boolSettings.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && row == highlightRow) {
-                    val highlightingStyle = settings.highlightingSettings.registerHighlightingStyle
-                    foreground = highlightingStyle!!.foreground
-                    background = highlightingStyle.background
-                } else {
-                    val theme = settings.editorThemeSettings.currentTheme
-                    foreground = theme.foregroundColor
-                    background = theme.backgroundColor
-                }
-            }
-        }
-    }
-
-    private class RegisterTableModel(
-        private val registersFile: AbstractRegisterFile,
-        private val boolSettings: BoolSettings,
-        private val memoryAndRegistersLock: ReentrantLock,
-    ) : AbstractTableModel() {
-        private val registers = registersFile.registers
-
-        companion object {
-            private val columnNames = mapOf(
-                NUMBER_COLUMN to "No.",
-                NAME_COLUMN to "Name",
-                VALUE_COLUMN to "Value"
-            )
-        }
-
-        override fun getColumnName(col: Int): String = columnNames[col]!!
-
-        override fun getRowCount() = registers.size
-
-        override fun getColumnCount() = 3
-
-        override fun getValueAt(rowIndex: Int, columnIndex: Int) = registers[rowIndex].let {
-            when (columnIndex) {
-                NUMBER_COLUMN -> it.number
-                NAME_COLUMN -> it.name
-                VALUE_COLUMN -> it.value
-                else -> error("Invalid column index")
-            }
-        }
-
-        override fun getColumnClass(c: Int): Class<*> = this.getValueAt(0, c).javaClass
-
-        override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean = columnIndex == VALUE_COLUMN
-
-        /**
-         * Update cell contents in table model. This method should be called
-         * only when user edits cell, so input validation has to be done. If
-         * value is valid, the register is updated.
-         */
-        override fun setValueAt(value: Any?, row: Int, col: Int) {
-            if (value == null) return
-            val newValue: Long = try {
-                if (boolSettings.getSetting(BoolSetting.RV64_ENABLED)) {
-                    value.toString().translateToLong() ?: return
-                } else {
-                    value.toString().translateToInt()!!.toLong()
-                }
-            } catch (_: NumberFormatException) {
-                // If the user enters an invalid value, don't do anything.
-                return
-            }
-            // Assures that if changed during program execution, the update will
-            // occur only between instructions.
-            this.memoryAndRegistersLock.lock()
-            try {
-                registersFile.registers[row].value = newValue
-            } finally {
-                this.memoryAndRegistersLock.unlock()
-            }
-            this.registersFile.registers[row].value = newValue
-            this.fireTableCellUpdated(row, col)
-        }
-    }
 
     /**
      * JTable subclass to provide custom tool tips for each of the
@@ -295,25 +200,26 @@ abstract class RegisterBlockWindowBase internal constructor(
      * the first column. From
      * [Sun's JTable tutorial](http://java.sun.com/docs/books/tutorial/uiswing/components/table.html).
      */
-    private open inner class MyTippedJTable(
+    private inner class MyTippedJTable(
         model: RegisterTableModel,
         private val regToolTips: Array<String>,
         private val columnToolTips: Array<String>
     ) : JTable(model) {
         init {
-            this.setRowSelectionAllowed(true) // highlights background color of entire row
-            this.setSelectionBackground(Color.GREEN)
+            // highlights background color of entire row
+            rowSelectionAllowed = true
+            selectionBackground = Color.GREEN
         }
 
         override fun getToolTipText(event: MouseEvent): String? {
             // Implement table cell tool tips.
-            val point = event.getPoint()
-            val rowIndex = this.rowAtPoint(point)
-            val colIndex = this.columnAtPoint(point)
-            val realColumnIndex = this.convertColumnIndexToModel(colIndex)
+            val point = event.point
+            val rowIndex = rowAtPoint(point)
+            val colIndex = columnAtPoint(point)
+            val realColumnIndex = convertColumnIndexToModel(colIndex)
             return if (realColumnIndex == NAME_COLUMN) {
                 // Register name column
-                this.regToolTips[rowIndex]
+                regToolTips[rowIndex]
             } else {
                 // You can omit this part if you know you don't have any
                 // renderers that supply their own tool tips.
@@ -322,22 +228,127 @@ abstract class RegisterBlockWindowBase internal constructor(
         }
 
         // Implement table header tool tips.
-        override fun createDefaultTableHeader(): JTableHeader = object : JTableHeader(this.columnModel) {
-            override fun getToolTipText(event: MouseEvent): String? {
-                val point = event.getPoint()
-                val index = this.columnModel.getColumnIndexAtX(point.x)
-                val realIndex = this.columnModel.getColumn(index).getModelIndex()
-                return this@MyTippedJTable.columnToolTips[realIndex]
+        override fun createDefaultTableHeader(): JTableHeader =
+            object : JTableHeader(columnModel) {
+                override fun getToolTipText(event: MouseEvent): String? {
+                    val point = event.point
+                    val index = columnModel.getColumnIndexAtX(point.x)
+                    val realIndex = columnModel.getColumn(index).modelIndex
+                    return columnToolTips[realIndex]
+                }
             }
-        }
     }
+}
+
+private const val NUMBER_COLUMN = 0
+private const val NAME_COLUMN = 1
+private const val VALUE_COLUMN = 2
+private const val NUMBER_SIZE = 45
+private const val NAME_SIZE = 80
+private const val VALUE_SIZE = 160
+
+private class RegisterTableModel(
+    private val registersFile: AbstractRegisterFile,
+    private val boolSettings: BoolSettings,
+    private val memoryAndRegistersLock: ReentrantLock,
+) : AbstractTableModel() {
+    private val registers = registersFile.registers
 
     companion object {
-        private const val NUMBER_COLUMN = 0
-        private const val NAME_COLUMN = 1
-        private const val VALUE_COLUMN = 2
-        private const val NUMBER_SIZE = 45
-        private const val NAME_SIZE = 80
-        private const val VALUE_SIZE = 160
+        private val columnNames = mapOf(
+            NUMBER_COLUMN to "No.",
+            NAME_COLUMN to "Name",
+            VALUE_COLUMN to "Value"
+        )
+    }
+
+    override fun getColumnName(col: Int): String = columnNames[col]!!
+
+    override fun getRowCount() = registers.size
+
+    override fun getColumnCount() = 3
+
+    override fun getValueAt(rowIndex: Int, columnIndex: Int) =
+        registers[rowIndex].let {
+            when (columnIndex) {
+                NUMBER_COLUMN -> it.number
+                NAME_COLUMN -> it.name
+                VALUE_COLUMN -> it.value
+                else -> error("Invalid column index")
+            }
+        }
+
+    override fun getColumnClass(c: Int): Class<*> =
+        getValueAt(0, c).javaClass
+
+    override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean =
+        columnIndex == VALUE_COLUMN
+
+    /**
+     * Update cell contents in table model. This method should be called
+     * only when user edits cell, so input validation has to be done. If
+     * value is valid, the register is updated.
+     */
+    override fun setValueAt(value: Any?, row: Int, col: Int) {
+        if (value == null) return
+        val newValue: Long = try {
+            if (boolSettings.getSetting(BoolSetting.RV64_ENABLED)) {
+                value.toString().translateToLong() ?: return
+            } else {
+                value.toString().translateToInt()!!.toLong()
+            }
+        } catch (_: NumberFormatException) {
+            // If the user enters an invalid value, don't do anything.
+            return
+        }
+        // Assures that if changed during program execution, the update will
+        // occur only between instructions.
+        memoryAndRegistersLock.withLock {
+            registersFile.registers[row].value = newValue
+        }
+        registersFile.registers[row].value = newValue
+        fireTableCellUpdated(row, col)
+    }
+}
+
+/**
+ * Cell renderer for displaying register entries. This does highlighting, so if you
+ * don't want highlighting for a given column, don't use this. Currently we highlight
+ * all columns.
+ */
+private class RegisterCellRenderer(
+    settings: AllSettings,
+    alignment: Int,
+    table: JTable,
+    private val mainUI: VenusUI,
+    private val formatRegisterValue: (Long, DisplayFormat) -> String,
+    var highlightRow: IntRefCell,
+) : SettingsBasedCellRenderer(settings, alignment, table) {
+    init {
+        settings.boolSettings.onChangeListenerHook.subscribe { table.repaint() }
+    }
+
+    override fun getTableCellRendererComponent(
+        table: JTable, value: Any?,
+        isSelected: Boolean, hasFocus: Boolean,
+        row: Int, column: Int
+    ): Component {
+        val formattedValue = if (column == VALUE_COLUMN) {
+            val value = value as Long
+            val displayBase = mainUI.mainPane.executePane.valueDisplayFormat
+            formatRegisterValue(value, displayBase)
+        } else value
+        val cell = super.getTableCellRendererComponent(
+            table, formattedValue,
+            isSelected, hasFocus, row, column
+        )
+        return cell.apply {
+            if (settings.boolSettings.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && row == highlightRow.value) {
+                val highlightingStyle =
+                    settings.highlightingSettings.registerHighlightingStyle!!
+                foreground = highlightingStyle.foreground
+                background = highlightingStyle.background
+            }
+        }
     }
 }

@@ -6,13 +6,14 @@ import rars.ErrorList;
 import rars.Globals;
 import rars.logging.Logger;
 import rars.logging.LoggingExtKt;
-import rars.logging.RARSLogging;
 import rars.util.BinaryUtilsKt;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import static rars.logging.RARSLoggingKt.RARSLogging;
 
 /**
  * Represents a table of Symbol objects.
@@ -25,13 +26,11 @@ public final class SymbolTable {
     // kernel address space so highly unlikely that any symbol will have this as
     // its associated address!
 
-    public static final int NOT_FOUND = -1;
+    public static final @NotNull String START_LABEL = "main";
     private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
         SymbolTable.class
     );
-    private static final @NotNull String START_LABEL = "main";
     private final @Nullable File file;
-    private final @Nullable SymbolTable globalSymbolTable;
     private @NotNull ArrayList<@NotNull Symbol> table;
 
     /**
@@ -43,32 +42,10 @@ public final class SymbolTable {
      *     string.
      */
     public SymbolTable(
-        final @Nullable File file,
-        final @NotNull SymbolTable globalSymbolTable
+        final @Nullable File file
     ) {
         this.file = file;
         this.table = new ArrayList<>();
-        this.globalSymbolTable = globalSymbolTable;
-    }
-
-    /**
-     * Special constructor only for the global symbol table.
-     */
-    public SymbolTable() {
-        this.file = null;
-        this.table = new ArrayList<>();
-        this.globalSymbolTable = null;
-    }
-
-    /**
-     * Fetches the text segment label (symbol) which, if declared global, indicates
-     * the starting address for execution.
-     *
-     * @return String containing global label whose text segment address is starting
-     * address for program execution.
-     */
-    public static @NotNull String getStartLabel() {
-        return SymbolTable.START_LABEL;
     }
 
     /**
@@ -141,34 +118,13 @@ public final class SymbolTable {
      * @return The memory address of the label given, or NOT_FOUND if not found in
      * symbol table.
      */
-    public int getAddress(final @NotNull String label) {
+    public @Nullable Integer getAddress(final @NotNull String label) {
         return this.table
             .stream()
             .filter(symbol -> symbol.name().equals(label))
             .findAny()
             .map(Symbol::address)
-            .orElse(SymbolTable.NOT_FOUND);
-    }
-
-    /**
-     * Method to return the address associated with the given label. Look first
-     * in this (local) symbol table then in symbol table of labels declared
-     * global (.globl directive).
-     *
-     * @param label
-     *     The label.
-     * @return The memory address of the label given, or NOT_FOUND if not found in
-     * symbol table.
-     */
-    public int getAddressLocalOrGlobal(final @NotNull String label) {
-        final int address = this.getAddress(label);
-        if (address != SymbolTable.NOT_FOUND) {
-            return address;
-        } else if (this.globalSymbolTable != null) {
-            return this.globalSymbolTable.getAddress(label);
-        } else {
-            return SymbolTable.NOT_FOUND;
-        }
+            .orElse(null);
     }
 
     /**
@@ -194,7 +150,7 @@ public final class SymbolTable {
      * @return Symbol object having requested address, null if address not found in
      * symbol table.
      */
-    private @Nullable Symbol getSymbolGivenAddress(final @NotNull String addressString) {
+    public @Nullable Symbol getSymbolGivenAddress(final @NotNull String addressString) {
         final var address = BinaryUtilsKt.stringToInt(addressString);
         if (address == null) return null;
         for (final Symbol sym : this.table) {
@@ -203,28 +159,6 @@ public final class SymbolTable {
             }
         }
         return null;
-    }
-
-    /**
-     * Produce Symbol object from either local or global symbol table that has the
-     * given address.
-     *
-     * @param addressString
-     *     String representing address
-     * @return Symbol object having requested address, null if address not found in
-     * symbol table.
-     */
-    public @Nullable Symbol getSymbolGivenAddressLocalOrGlobal(
-        final @NotNull String addressString
-    ) {
-        final var foundSymbol = this.getSymbolGivenAddress(addressString);
-        if (foundSymbol != null) {
-            return foundSymbol;
-        } else if (this.globalSymbolTable != null) {
-            return this.globalSymbolTable.getSymbolGivenAddress(addressString);
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -250,7 +184,7 @@ public final class SymbolTable {
      *
      * @return An ArrayList of Symbol objects.
      */
-    public @NotNull List<Symbol> getAllSymbols() {
+    public @NotNull List<@NotNull Symbol> getAllSymbols() {
         return new ArrayList<>(this.table);
     }
 

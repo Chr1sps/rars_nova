@@ -14,10 +14,13 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getStackBaseAddress;
+import static rars.venus.util.ListenerUtilsKt.onWindowClosing;
 
 /**
  * A base class used to define a tool that can interact with an executing program.
@@ -114,13 +117,10 @@ public abstract class AbstractTool extends JFrame {
     public void action() {
         this.dialog = new JDialog(this.mainUI, this.title);
         // assure the dialog goes away if user clicks the X
-        this.dialog.addWindowListener(
-            new WindowAdapter() {
-                @Override
-                public void windowClosing(final WindowEvent e) {
-                    AbstractTool.this.performToolClosingDuties();
-                }
-            });
+        onWindowClosing(dialog, e -> {
+            performToolClosingDuties();
+            return Unit.INSTANCE;
+        });
         this.theWindow = this.dialog;
         this.initializePreGUI();
         final JPanel contentPane = new JPanel(new BorderLayout(5, 5));
@@ -184,7 +184,8 @@ public abstract class AbstractTool extends JFrame {
         // Details for heading area (top)
         this.headingLabel.setText(this.heading);
         this.headingLabel.setHorizontalTextPosition(JLabel.CENTER);
-        this.headingLabel.setFont(new Font(this.headingLabel.getFont().getFontName(), Font.PLAIN, 18));
+        this.headingLabel.setFont(new Font(this.headingLabel.getFont()
+            .getFontName(), Font.PLAIN, 18));
         return headingPanel;
     }
 
@@ -202,7 +203,8 @@ public abstract class AbstractTool extends JFrame {
         tc.setTitleJustification(TitledBorder.CENTER);
         buttonArea.setBorder(tc);
         this.connectButton = new ConnectButton();
-        this.connectButton.setToolTipText("Control whether tool will respond to running program");
+        this.connectButton.setToolTipText(
+            "Control whether tool will respond to running program");
         this.connectButton.addActionListener(
             e -> {
                 if (this.connectButton.isConnected()) {
@@ -286,7 +288,9 @@ public abstract class AbstractTool extends JFrame {
      *     high end of memory address range; must be >= lowEnd
      */
     protected void addAsObserver(final int lowEnd, final int highEnd) {
-        Globals.MEMORY_INSTANCE.subscribe(this::processAccessNotice, lowEnd, highEnd).fold(
+        Globals.MEMORY_INSTANCE.subscribe(this::processAccessNotice,
+            lowEnd,
+            highEnd).fold(
             __ -> {
                 this.headingLabel.setText("Error connecting to memory");
                 return Unit.INSTANCE;

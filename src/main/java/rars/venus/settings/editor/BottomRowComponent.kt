@@ -6,9 +6,9 @@ import javax.swing.JButton
 import javax.swing.JPanel
 
 class BottomRowComponent : JPanel() {
-    val applyButton: JButton = JButton("Apply")
-    val applyAndCloseButton: JButton = JButton("Apply and close")
-    val cancelButton: JButton = JButton("Cancel")
+    val applyButton = JButton("Apply")
+    val applyAndCloseButton = JButton("Apply and close")
+    val cancelButton = JButton("Cancel")
 
     init {
         BoxLayout(BoxLayout.X_AXIS) {

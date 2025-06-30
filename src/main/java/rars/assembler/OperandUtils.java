@@ -16,8 +16,7 @@ import java.util.List;
  * @version August 2003
  */
 public final class OperandUtils {
-    private OperandUtils() {
-    }
+    private OperandUtils() {}
 
     /**
      * Syntax test for correct match in both numbers and types of operands.

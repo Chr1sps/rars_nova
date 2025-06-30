@@ -13,7 +13,7 @@ interface EditorThemeSettings {
 
 class EditorThemeSettingsImpl(private val preferences: Preferences) :
     EditorThemeSettings {
-    private val onChangeDispatcher = ListenerDispatcher<Void?>()
+    private val onChangeDispatcher = ListenerDispatcher<Unit>()
 
     @JvmField
     val onChangeListenerHook = onChangeDispatcher.hook
@@ -40,7 +40,7 @@ class EditorThemeSettingsImpl(private val preferences: Preferences) :
         try {
             this.preferences.flush()
             this.backupTheme = this._currentTheme
-            this.onChangeDispatcher.dispatch(null)
+            this.onChangeDispatcher.dispatch(Unit)
         } catch (_: SecurityException) {
             LOGGER.error { "Unable to write to persistent storage for security reasons. Reverting to previous settings." }
             // The reason why we need to write the backup theme to the preferences

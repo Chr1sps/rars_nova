@@ -864,7 +864,7 @@ class Assembler {
                 }
                 val size = tokens.get(2).text.translateToInt()!!
                 // If label already in global symtab, do nothing. If not, add it right now.
-                if (Globals.GLOBAL_SYMBOL_TABLE.getAddress(tokens.get(1).text) == SymbolTable.NOT_FOUND) {
+                if (Globals.GLOBAL_SYMBOL_TABLE.getAddress(tokens.get(1).text) == null) {
                     Globals.GLOBAL_SYMBOL_TABLE.addSymbol(
                         tokens.get(1), this.externAddress,
                         true, this.errors!!
@@ -925,7 +925,7 @@ class Assembler {
                 // actually implemented in other files
                 // GCC outputs assembly that uses this
             } else {
-                if (Globals.GLOBAL_SYMBOL_TABLE.getAddress(label.text) != SymbolTable.NOT_FOUND) {
+                if (Globals.GLOBAL_SYMBOL_TABLE.getAddress(label.text) != null) {
                     this.errors!!.addTokenError(
                         label,
                         "Label \"${label.text}\" already defined as global in a different file."
@@ -1137,20 +1137,21 @@ class Assembler {
         } else if (token.type == TokenType.IDENTIFIER) {
             if (this.inDataSegment) {
                 val value =
-                    this.fileCurrentlyBeingAssembled!!.localSymbolTable!!
-                        .getAddressLocalOrGlobal(token.text)
-                if (value == SymbolTable.NOT_FOUND) {
+                    fileCurrentlyBeingAssembled!!.localSymbolTable!!
+                        .getAddress(token.text)
+                        ?: Globals.GLOBAL_SYMBOL_TABLE.getAddress(token.text)
+                if (value == null) {
                     // Record value 0 for now, then set up backpatch entry
                     val dataAddress =
-                        this.writeToDataSegment(0, lengthInBytes, token, errors)
-                    this.currentFileDataSegmentForwardReferenceList!!.add(
+                        writeToDataSegment(0, lengthInBytes, token, errors)
+                    currentFileDataSegmentForwardReferenceList!!.add(
                         dataAddress,
                         lengthInBytes,
                         token
                     )
                 } else {
                     // label already defined, so write its address
-                    this.writeToDataSegment(value, lengthInBytes, token, errors)
+                    writeToDataSegment(value, lengthInBytes, token, errors)
                 }
             }
             // Data segment check done previously, so this "else" will not be.

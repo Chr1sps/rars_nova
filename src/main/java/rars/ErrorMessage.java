@@ -14,8 +14,8 @@ import java.io.File;
  * @version August 2003
  */
 public final class ErrorMessage {
-    public final boolean isWarning; // allow for warnings too (added Nov 2006)
-    public final @Nullable File file; // name of source file (added Oct 2006)
+    public final boolean isWarning; // allow for warnings too 
+    public final @Nullable File file; // name of source file 
     public final int lineNumber; // line in source code where error detected
     public final int position; // position in source line where error detected
     public final @NotNull String message;
@@ -52,18 +52,23 @@ public final class ErrorMessage {
     ) {
         this.isWarning = isWarning;
         this.file = (sourceProgram == null) ? null : (
-            (sourceProgram.getSourceLineList() == null) ? sourceProgram.getFile() : (
-                sourceProgram.getSourceLineList().get(lineNumber - 1).file()
-            )
+            (sourceProgram.getSourceLineList() == null)
+                ? sourceProgram.getFile()
+                : (
+                    sourceProgram.getSourceLineList().get(lineNumber - 1).file()
+                )
         );
         this.lineNumber = (sourceProgram == null) ? -1 : (
             (sourceProgram.getSourceLineList() == null) ? lineNumber : (
-                sourceProgram.getSourceLineList().get(lineNumber - 1).lineNumber()
+                sourceProgram.getSourceLineList()
+                    .get(lineNumber - 1)
+                    .lineNumber()
             )
         );
         this.position = position;
         this.message = message;
-        this.macroExpansionHistory = ErrorMessage.getExpansionHistory(sourceProgram);
+        this.macroExpansionHistory = ErrorMessage.getExpansionHistory(
+            sourceProgram);
     }
 
     public static @NotNull ErrorMessage error(

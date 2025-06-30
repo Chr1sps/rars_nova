@@ -17,28 +17,37 @@ class BaseStyleView(initialTheme: SettingsTheme) : JPanel() {
     init {
 
         // foreground
-        val foregroundSection = OptionSection(FOREGROUND, null, initialTheme.foregroundColor)
-        this.foregroundColorButton = foregroundSection.colorPickerButton!!
+        val foregroundSection =
+            OptionSection(FOREGROUND, null, initialTheme.foregroundColor)
+        foregroundColorButton = foregroundSection.colorPickerButton!!
 
         // background
-        val backgroundSection = OptionSection(BACKGROUND, null, initialTheme.backgroundColor)
-        this.backgroundColorButton = backgroundSection.colorPickerButton!!
+        val backgroundSection =
+            OptionSection(BACKGROUND, null, initialTheme.backgroundColor)
+        backgroundColorButton = backgroundSection.colorPickerButton!!
 
         // line highlight
-        val lineHighlightSection = OptionSection(LINE_HIGHLIGHT, null, initialTheme.lineHighlightColor)
-        this.lineHighlightColorButton = lineHighlightSection.colorPickerButton!!
-
+        val lineHighlightSection =
+            OptionSection(LINE_HIGHLIGHT, null, initialTheme.lineHighlightColor)
+        lineHighlightColorButton = lineHighlightSection.colorPickerButton!!
 
         // text selection
-        val textSelectionSection = OptionSection(TEXT_SELECTION, null, initialTheme.selectionColor)
-        this.textSelectionColorButton = textSelectionSection.colorPickerButton!!
+        val textSelectionSection =
+            OptionSection(TEXT_SELECTION, null, initialTheme.selectionColor)
+        textSelectionColorButton = textSelectionSection.colorPickerButton!!
 
         // caret
         val caretSection = OptionSection(CARET, null, initialTheme.caretColor)
-        this.caretColorButton = caretSection.colorPickerButton!!
+        caretColorButton = caretSection.colorPickerButton!!
 
-        val topRow = buildRow(addMargins = false, foregroundSection, backgroundSection, lineHighlightSection)
-        val bottomRow = buildRow(addMargins = true, textSelectionSection, caretSection)
+        val topRow = buildRow(
+            addMargins = false,
+            foregroundSection,
+            backgroundSection,
+            lineHighlightSection
+        )
+        val bottomRow =
+            buildRow(addMargins = true, textSelectionSection, caretSection)
 
         BoxLayout(BoxLayout.Y_AXIS) {
             +topRow
@@ -47,12 +56,10 @@ class BaseStyleView(initialTheme: SettingsTheme) : JPanel() {
             verticalGlue()
         }
     }
-
-    companion object {
-        private const val FOREGROUND = "Foreground"
-        private const val BACKGROUND = "Background"
-        private const val LINE_HIGHLIGHT = "Line highlight"
-        private const val CARET = "Caret"
-        private const val TEXT_SELECTION = "Text selection"
-    }
 }
+
+private const val FOREGROUND = "Foreground"
+private const val BACKGROUND = "Background"
+private const val LINE_HIGHLIGHT = "Line highlight"
+private const val CARET = "Caret"
+private const val TEXT_SELECTION = "Text selection"

@@ -131,11 +131,6 @@ public final class MacroPool {
         return false;
     }
 
-    /**
-     * <p>Getter for the field {@code current}.</p>
-     *
-     * @return a {@link Macro} object
-     */
     public @Nullable Macro getCurrent() {
         return this.current;
     }

@@ -1,5 +1,6 @@
 package rars.venus;
 
+import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.venus.actions.GuiAction;
 import rars.venus.editors.TextEditingArea;
@@ -8,8 +9,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+
+import static rars.venus.util.ListenerUtilsKt.onWindowClosing;
 
 /**
  * Action for the Edit -> Find/Replace menu item
@@ -32,16 +33,12 @@ public final class EditFindReplaceAction extends GuiAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final JDialog findReplaceDialog = new FindReplaceDialog(
-            this.mainUI, EditFindReplaceAction.DIALOG_TITLE,
-            false
-        );
-        findReplaceDialog.setVisible(true);
+        new FindReplaceDialog(this.mainUI).setVisible(true);
     }
 
     // Private class to do all the work!
 
-    private final class FindReplaceDialog extends JDialog {
+    public static final class FindReplaceDialog extends JDialog {
         private static final @NotNull String FIND_TOOL_TIP_TEXT = "Find next occurrence of given text; wraps around at end";
         private static final @NotNull String REPLACE_TOOL_TIP_TEXT = "Replace current occurrence of text then find next";
         private static final @NotNull String REPLACE_ALL_TOOL_TIP_TEXT = "Replace all occurrences of text";
@@ -57,13 +54,14 @@ public final class EditFindReplaceAction extends GuiAction {
         private final JTextField findInputField, replaceInputField;
         private final JCheckBox caseSensitiveCheckBox;
         private final JLabel resultsLabel;
+        @NotNull
+        private final VenusUI mainUI;
 
-        private FindReplaceDialog(
-            final Frame owner,
-            final String title,
-            final boolean modality
+        public FindReplaceDialog(
+            final @NotNull VenusUI mainUI
         ) {
-            super(owner, title, modality);
+            super(mainUI, EditFindReplaceAction.DIALOG_TITLE, false);
+            this.mainUI = mainUI;
 
             final var dialogPanel = new JPanel(new BorderLayout());
             dialogPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -107,15 +105,12 @@ public final class EditFindReplaceAction extends GuiAction {
             this.setContentPane(dialogPanel);
             this.setDefaultCloseOperation(
                 JDialog.DO_NOTHING_ON_CLOSE);
-            this.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent we) {
-                        FindReplaceDialog.this.performClose();
-                    }
-                });
+            onWindowClosing(this, e -> {
+                performClose();
+                return Unit.INSTANCE;
+            });
             this.pack();
-            this.setLocationRelativeTo(owner);
+            this.setLocationRelativeTo(mainUI);
         }
 
         /**
@@ -241,7 +236,7 @@ public final class EditFindReplaceAction extends GuiAction {
             if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null b/c find/replace tool button disabled if
                 // no file open
-                final var editorTab = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
+                final var editorTab = mainUI.mainPane.getCurrentEditTabPane();
                 if (editorTab != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
                     final var posn = editorTab.getTextArea().doReplace(
@@ -283,7 +278,7 @@ public final class EditFindReplaceAction extends GuiAction {
             if (!this.findInputField.getText().isEmpty()) {
                 // Being cautious. Should not be null b/c find/replace tool button disabled if
                 // no file open
-                final var editorTab = EditFindReplaceAction.this.mainUI.mainPane.getCurrentEditTabPane();
+                final var editorTab = mainUI.mainPane.getCurrentEditTabPane();
                 if (editorTab != null) {
                     EditFindReplaceAction.searchString = this.findInputField.getText();
                     final int replaceCount = editorTab.getTextArea()

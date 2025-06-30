@@ -4,7 +4,6 @@ import rars.Globals;
 import rars.settings.OtherSettings;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
-import rars.venus.GlobalFileStatus;
 import rars.venus.VenusUI;
 import rars.venus.actions.GuiAction;
 
@@ -36,8 +35,8 @@ public final class RunBackstepAction extends GuiAction {
     public void actionPerformed(final ActionEvent e) {
         final String name = this.getValue(Action.NAME).toString();
         final ExecutePane executePane = this.mainUI.mainPane.executePane;
-        final var globalStatus = GlobalFileStatus.get();
-        if (!isAssembled(GlobalFileStatus.get())) {
+        final var globalStatus = mainUI.getFileStatus();
+        if (!isAssembled(mainUI.getFileStatus())) {
             // note: this should never occur since backstepping is only enabled after
             // successful assembly.
             JOptionPane.showMessageDialog(this.mainUI,
@@ -62,7 +61,7 @@ public final class RunBackstepAction extends GuiAction {
             executePane.getCsrValues().updateRegisters();
             executePane.getDataSegment().updateValues();
             executePane.getTextSegment().highlightStepAtPC();
-            GlobalFileStatus.set(toRunnable((FileStatus.Existing) globalStatus));
+            mainUI.setFileStatus(toRunnable((FileStatus.Existing) globalStatus));
             this.mainUI.isMemoryReset = false;
         }
     }

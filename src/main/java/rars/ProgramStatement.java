@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import rars.api.DisplayFormat;
 import rars.assembler.SourceLine;
-import rars.assembler.SymbolTable;
 import rars.assembler.TokenList;
 import rars.assembler.TokenType;
 import rars.riscv.*;
@@ -15,7 +14,8 @@ import rars.util.BinaryUtilsKt;
 import rars.venus.NumberDisplayBasePicker;
 
 import java.util.ArrayList;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 sealed interface ListElement {
     record String(@NotNull java.lang.String value) implements ListElement {
@@ -47,7 +47,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
     private final @Nullable TokenList originalTokenList, strippedTokenList;
     private final @NotNull BasicStatementList basicStatementList;
     private final @NotNull ArrayList<@NotNull Integer> operands;
-    private final @Nullable Instruction instruction;
+    private final @NotNull Instruction instruction;
     private final int textAddress;
     private String basicAssemblyStatement;
     private String machineStatement;
@@ -345,7 +345,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *     here.
      */
     public void buildBasicStatementFromBasicInstruction(final ErrorList errors) {
-        final var firstToken = Objects.requireNonNull(this.strippedTokenList)
+        final var firstToken = requireNonNull(this.strippedTokenList)
             .get(0);
         final var firstElement = firstToken.getText() + ' ';
         this.basicStatementList.addString(firstElement); // the operator
@@ -442,12 +442,14 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
                     this.operands.add(roundingMode);
                 }
                 case IDENTIFIER -> {
-                    int address =
-                        Objects.requireNonNull(this.sourceLine)
-                            .program()
-                            .getLocalSymbolTable()
-                            .getAddressLocalOrGlobal(tokenValue);
-                    if (address == SymbolTable.NOT_FOUND) {
+                    final var localAddress = requireNonNull(this.sourceLine)
+                        .program()
+                        .getLocalSymbolTable()
+                        .getAddress(tokenValue);
+                    var address = (localAddress != null)
+                        ? localAddress
+                        : Globals.GLOBAL_SYMBOL_TABLE.getAddress(tokenValue);
+                    if (address == null) {
                         // symbol used without being defined
                         errors.addTokenError(
                             token,
@@ -695,7 +697,7 @@ public final class ProgramStatement implements Comparable<ProgramStatement> {
      *
      * @return The Instruction that matches the operator used in this statement.
      */
-    public @Nullable Instruction getInstruction() {
+    public @NotNull Instruction getInstruction() {
         return this.instruction;
     }
 

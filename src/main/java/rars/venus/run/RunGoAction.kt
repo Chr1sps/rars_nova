@@ -34,7 +34,7 @@ class RunGoAction(
     override fun actionPerformed(e: ActionEvent?) {
         name = getValue(NAME).toString()
         executePane = mainUI.mainPane.executePane
-        val globalStatus = GlobalFileStatus.get()
+        val globalStatus = mainUI.fileStatus
         if (globalStatus is FileStatus.Existing.Runnable) {
             if (!this.mainUI.isExecutionStarted) {
                 this.processProgramArgumentsIfAny()
@@ -50,8 +50,7 @@ class RunGoAction(
                 executePane.textSegment.codeHighlighting = false
                 executePane.textSegment.unhighlightAllSteps()
                 val newStatus = globalStatus.toRunning()
-                GlobalFileStatus.set(newStatus)
-                mainUI.setMenuState(newStatus)
+                mainUI.fileStatus = newStatus
 
                 // Setup cleanup procedures for the simulation
                 val onSimulatorStopListener =
@@ -132,7 +131,7 @@ class RunGoAction(
             return
         }
         val globalStatus =
-            GlobalFileStatus.get()!! as FileStatus.Existing.Runnable
+            mainUI.fileStatus!! as FileStatus.Existing.Runnable
         if (event == StoppingEvent.BreakpointHit) {
             this.mainUI.messagesPane.postMessage(
                 "$name: execution paused at breakpoint: ${globalStatus.file.name}\n\n"
@@ -149,10 +148,8 @@ class RunGoAction(
         this.executePane.fpRegValues.updateRegisters()
         this.executePane.csrValues.updateRegisters()
         this.executePane.dataSegment.updateValues()
-        GlobalFileStatus.set(
-            FileStatus.Existing.Runnable(
-                (GlobalFileStatus.get()!! as FileStatus.Existing).file
-            )
+        mainUI.fileStatus = FileStatus.Existing.Runnable(
+            (mainUI.fileStatus!! as FileStatus.Existing).file
         )
         this.mainUI.isMemoryReset = false
     }
@@ -172,7 +169,8 @@ class RunGoAction(
         this.executePane.fpRegValues.updateRegisters()
         this.executePane.csrValues.updateRegisters()
         this.executePane.dataSegment.updateValues()
-        GlobalFileStatus.set((GlobalFileStatus.get()!! as FileStatus.Existing).toTerminated())
+        mainUI.fileStatus =
+            (mainUI.fileStatus!! as FileStatus.Existing).toTerminated()
         this.mainUI.venusIO.resetFiles() // close any files opened in MIPS program
         // Bring CSRs to the front if terminated due to exception.
         if (stoppingEvent is StoppingEvent.ErrorHit) {

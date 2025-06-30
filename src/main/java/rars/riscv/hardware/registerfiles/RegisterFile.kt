@@ -38,8 +38,11 @@ class RegisterFile(
 
     public override fun convertFromLong(value: Long): Int = value.toInt()
 
-    override fun updateRegister(register: Register, newValue: Long): Either<SimulationError, Long> = either {
-        if (register === this@RegisterFile.zero) {
+    override fun updateRegister(
+        register: Register,
+        newValue: Long
+    ): Either<SimulationError, Long> = either {
+        if (register === zero) {
             0
         } else {
             val prevValue = register.setValue(newValue)
@@ -76,37 +79,38 @@ class RegisterFile(
         }
 
     fun initializeProgramCounter(startAtMain: Boolean) {
-        val mainAddr = globalSymbolTable.getAddress(SymbolTable.getStartLabel())
-        val useMainAddr =
-            startAtMain && mainAddr != SymbolTable.NOT_FOUND && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
-                mainAddr
-            )
-        val programCounterValue = if (useMainAddr) mainAddr else pc.resetValue.toInt()
+        val mainAddr = globalSymbolTable.getAddress(SymbolTable.START_LABEL)
+        val useMainAddr = startAtMain
+            && mainAddr != null
+            && Globals.MEMORY_INSTANCE.isAddressInTextSegment(mainAddr)
+        val programCounterValue =
+            if (useMainAddr) mainAddr else pc.resetValue.toInt()
         initializeProgramCounter(programCounterValue)
     }
 
     override fun resetRegisters() {
-        val startAtMain: Boolean = Globals.BOOL_SETTINGS.getSetting(BoolSetting.START_AT_MAIN)
-        val mainAddr = globalSymbolTable.getAddress(SymbolTable.getStartLabel())
-        val useMainAddr =
-            startAtMain && mainAddr != SymbolTable.NOT_FOUND && Globals.MEMORY_INSTANCE.isAddressInTextSegment(
-                mainAddr
-            )
-        val programCounterValue = if (useMainAddr) mainAddr else pc.resetValue.toInt()
+        val startAtMain: Boolean =
+            Globals.BOOL_SETTINGS.getSetting(BoolSetting.START_AT_MAIN)
+        val mainAddr = globalSymbolTable.getAddress(SymbolTable.START_LABEL)
+        val useMainAddr = startAtMain
+            && mainAddr != null
+            && Globals.MEMORY_INSTANCE.isAddressInTextSegment(mainAddr)
+        val programCounterValue =
+            if (useMainAddr) mainAddr else pc.resetValue.toInt()
         resetRegisters(programCounterValue)
     }
 
     fun resetRegisters(programCounterValue: Int) {
         super.resetRegisters()
-        this.initializeProgramCounter(programCounterValue)
+        initializeProgramCounter(programCounterValue)
     }
 
     fun setValuesFromConfiguration(configuration: AbstractMemoryConfiguration<Int>) {
-        this.gp.changeResetValue(configuration.globalPointerAddress.toLong())
-        this.sp.changeResetValue(configuration.stackPointerAddress.toLong())
-        this.pc.changeResetValue(configuration.textSegmentBaseAddress.toLong())
-        this.pc.setValue(configuration.textSegmentBaseAddress.toLong())
-        this.resetRegisters()
+        gp.changeResetValue(configuration.globalPointerAddress.toLong())
+        sp.changeResetValue(configuration.stackPointerAddress.toLong())
+        pc.changeResetValue(configuration.textSegmentBaseAddress.toLong())
+        pc.setValue(configuration.textSegmentBaseAddress.toLong())
+        resetRegisters()
     }
 
     /**

@@ -14,7 +14,12 @@ class TreePanel : JScrollPane() {
     val otherSettingsNode: TreeNodeData = TreeNodeData("Other settings")
     val presetsNode: TreeNodeData = TreeNodeData("Presets")
 
-    val tree: JTree = buildTree(fontSettingsNode, presetsNode, generalSchemeSettingsNode, otherSettingsNode)
+    val tree = buildTree(
+        fontSettingsNode,
+        presetsNode,
+        generalSchemeSettingsNode,
+        otherSettingsNode
+    )
 
     init {
         setViewportView(tree)
@@ -58,15 +63,22 @@ private fun buildTree(
 private fun buildRoot(builder: DefaultMutableTreeNode.() -> Unit): TreeNode =
     DefaultMutableTreeNode(null).apply(builder)
 
-private fun DefaultMutableTreeNode.normalNode(name: String, builderFunc: DefaultMutableTreeNode.() -> Unit = {}) {
-    DefaultMutableTreeNode(TreeNodeData(name)).apply(builderFunc).also { add(it) }
+private fun DefaultMutableTreeNode.normalNode(
+    name: String,
+    builderFunc: DefaultMutableTreeNode.() -> Unit
+) {
+    DefaultMutableTreeNode(TreeNodeData(name)).apply(builderFunc)
+        .also { add(it) }
 }
 
 private fun DefaultMutableTreeNode.presetNode(node: TreeNodeData) {
     DefaultMutableTreeNode(node).also { add(it) }
 }
 
-private fun DefaultMutableTreeNode.syntaxNode(type: TokenSettingKey, name: String) {
+private fun DefaultMutableTreeNode.syntaxNode(
+    type: TokenSettingKey,
+    name: String
+) {
     DefaultMutableTreeNode(TreeNodeData.Syntax(type, name)).also { add(it) }
 }
 

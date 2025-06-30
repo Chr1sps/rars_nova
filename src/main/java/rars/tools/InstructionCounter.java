@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.logging.Logger;
 import rars.logging.LoggingExtKt;
-import rars.logging.RARSLogging;
 import rars.notices.AccessNotice;
 import rars.notices.AccessType;
 import rars.notices.MemoryAccessNotice;
@@ -15,6 +14,7 @@ import rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 
+import static rars.logging.RARSLoggingKt.RARSLogging;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress;
 import static rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress;
 

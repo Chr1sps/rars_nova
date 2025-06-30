@@ -1,145 +1,60 @@
-package rars.venus;
+package rars.venus
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.util.List;
+import java.io.File
 
 /**
  * Manage the file being edited.
  * Currently only manages one file at a time, but can be expanded.
  */
-public final class Editor {
+class Editor(private val mainUI: VenusUI) {
+    private val mainUIbaseTitle: String = mainUI.title
 
-    public static final int MIN_TAB_SIZE = 1;
-    public static final int MAX_TAB_SIZE = 32;
-    public static final int MIN_BLINK_RATE = 0; // no flashing
-    public static final int MAX_BLINK_RATE = 1000; // once per value
-
-    private final @NotNull VenusUI mainUI;
-    private final @NotNull String mainUIbaseTitle;
     // Current Directory for Open operation, same for Save operation
     // Values will mainly be set by the EditTabbedPane as Open/Save operations
     // occur.
-    private final @NotNull String defaultOpenDirectory;
-    private final @NotNull String defaultSaveDirectory;
-    private @Nullable EditTabbedPane editTabbedPane;
+    private val defaultOpenDirectory: String = System.getProperty("user.dir")
+    private val defaultSaveDirectory: String = System.getProperty("user.dir")
+
     /*
      * number of times File->New has been selected. Used to generate
      * default file until first Save or Save As.
      */
-    private int newUsageCount;
-    private String currentOpenDirectory;
-    private String currentSaveDirectory;
+    private var newUsageCount = 0
 
-    /**
-     * Create editor.
-     *
-     * @param ui
-     *     the GUI that owns this editor
-     */
-    public Editor(final @NotNull VenusUI ui) {
-        this.mainUI = ui;
-        GlobalFileStatus.reset();
-        this.mainUIbaseTitle = this.mainUI.getTitle();
-        this.newUsageCount = 0;
-        // Directory from which MARS was launched. Guaranteed to have a value.
-        this.defaultOpenDirectory = System.getProperty("user.dir");
-        this.defaultSaveDirectory = System.getProperty("user.dir");
-        this.currentOpenDirectory = this.defaultOpenDirectory;
-        this.currentSaveDirectory = this.defaultSaveDirectory;
-    }
 
-    public @NotNull List<@NotNull File> getOpenFilePaths() {
-        return this.editTabbedPane.getOpenFilePaths();
-    }
+    lateinit var editTabbedPane: EditTabbedPane
 
-    /**
-     * Set associated EditTabbedPane. This is container for any/all open files.
-     *
-     * @param editTabbedPane
-     *     an existing editTabbedPane object
-     */
-    public void setEditTabbedPane(final @Nullable EditTabbedPane editTabbedPane) {
-        this.editTabbedPane = editTabbedPane;
-    }
+    val openFilePaths: List<File>
+        get() = editTabbedPane.openFilePaths
 
-    /**
-     * Get name of current directory for Open operation.
-     *
-     * @return String containing directory pathname. Returns null if there is
-     * no EditTabbedPane. Returns default, directory MARS is launched from,
-     * if
-     * no Opens have been performed.
-     */
-    public String getCurrentOpenDirectory() {
-        return this.currentOpenDirectory;
-    }
-
-    /**
-     * Set name of current directory for Open operation. The contents of this
-     * directory will
-     * be displayed when Open dialog is launched.
-     *
-     * @param currentOpenDirectory
-     *     String containing pathname for current Open
-     *     directory. If
-     *     it does not exist or is not a directory, the
-     *     default (MARS launch directory) will be used.
-     */
-
-    void setCurrentOpenDirectory(final String currentOpenDirectory) {
-        final File file = new File(currentOpenDirectory);
-        if (!file.exists() || !file.isDirectory()) {
-            this.currentOpenDirectory = this.defaultOpenDirectory;
-        } else {
-            this.currentOpenDirectory = currentOpenDirectory;
+    /** Name of the current directory for the `Open` operation. */
+    var currentOpenDirectory: String = defaultOpenDirectory
+        set(newValue) {
+            field = newValue.let {
+                it.takeIfPathIsADirectory() ?: defaultOpenDirectory
+            }
         }
-    }
 
     /**
-     * Get name of current directory for Save or Save As operation.
-     *
-     * @return String containing directory pathname. Returns null if there is
-     * no EditTabbedPane. Returns default, directory MARS is launched from,
-     * if
-     * no Save or Save As operations have been performed.
+     * Name of the current directory for the `Save` and `Save As` operations.
      */
-    public String getCurrentSaveDirectory() {
-        return this.currentSaveDirectory;
-    }
-
-    /**
-     * Set name of current directory for Save operation. The contents of this
-     * directory will
-     * be displayed when Save dialog is launched.
-     *
-     * @param currentSaveDirectory
-     *     String containing pathname for current Save
-     *     directory. If
-     *     it does not exist or is not a directory, the
-     *     default (MARS launch directory) will be used.
-     */
-
-    void setCurrentSaveDirectory(final String currentSaveDirectory) {
-        final File file = new File(currentSaveDirectory);
-        if (!file.exists() || !file.isDirectory()) {
-            this.currentSaveDirectory = this.defaultSaveDirectory;
-        } else {
-            this.currentSaveDirectory = currentSaveDirectory;
+    var currentSaveDirectory: String = defaultSaveDirectory
+        set(newValue) {
+            field = newValue.let {
+                it.takeIfPathIsADirectory() ?: defaultSaveDirectory
+            }
         }
-    }
 
-    /**
-     * Generates a default file name
-     *
-     * @return returns string mipsN.asm, where N is 1,2,3,...
-     */
-    public String getNextDefaultFilename() {
-        this.newUsageCount++;
-        return "riscv" + this.newUsageCount + ".asm";
-    }
+    val nextDefaultFilename: String
+        /**
+         * Generates a default file name
+         *
+         * @return returns string mipsN.asm, where N is 1,2,3,...
+         */
+        get() {
+            this.newUsageCount++
+            return "riscv" + this.newUsageCount + ".asm"
+        }
 
     /*
      * Places name of file currently being edited into its edit tab and
@@ -158,123 +73,92 @@ public final class Editor {
      * @param status
      *     Edit status of file. See FileStatus static constants.
      */
-    public void setTitleFromFileStatus(
-        final @NotNull FileStatus fileStatus
+    fun setTitleFromFileStatus(
+        fileStatus: FileStatus
     ) {
-        final var editIndicator = FileStatusKt.isEdited(fileStatus)
-            ? "*"
-            : "";
-        final var titleName = switch (fileStatus) {
-            case final FileStatus.New statusNew -> statusNew.getTmpName();
-            case final FileStatus.Existing statusExisting ->
-                statusExisting.getFile().getAbsolutePath();
-            default -> throw new IllegalStateException("Unreachable case.");
-        };
-        final var tabName = switch (fileStatus) {
-            case final FileStatus.New statusNew -> statusNew.getTmpName();
-            case final FileStatus.Existing statusExisting ->
-                statusExisting.getFile().getName();
-            default -> throw new IllegalStateException("Unreachable case.");
-        };
-        mainUI.setTitle(titleName + editIndicator + " - " + this.mainUIbaseTitle);
-        final var tabbedPane = editTabbedPane.getTabbedPane();
-        tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(),
-            tabName + editIndicator);
+        val editIndicator = if (fileStatus.isEdited()) "*" else ""
+        val titleName: String = when (fileStatus) {
+            is FileStatus.New -> fileStatus.tmpName
+            is FileStatus.Existing -> fileStatus.file.absolutePath
+        }
+        val tabName: String = when (fileStatus) {
+            is FileStatus.New -> fileStatus.tmpName
+            is FileStatus.Existing -> fileStatus.file.getName()
+        }
+        mainUI.title = "$titleName$editIndicator - $mainUIbaseTitle"
+        val tabbedPane = editTabbedPane.tabbedPane
+        tabbedPane.setTitleAt(
+            tabbedPane.selectedIndex,
+            tabName + editIndicator
+        )
     }
 
     /**
      * Perform "new" operation to create an empty tab.
      */
-    public void newFile() {
-        this.editTabbedPane.newFile();
-    }
+    fun newFile(): Unit = editTabbedPane.newFile()
 
     /**
      * Perform "close" operation on current tab's file.
      *
      * @return true if succeeded, else false.
      */
-    public boolean close() {
-        return this.editTabbedPane.closeCurrentFile();
-    }
+    fun close(): Boolean = editTabbedPane.closeCurrentFile()
 
     /**
      * Close all currently open files.
      *
      * @return true if succeeded, else false.
      */
-    public boolean closeAll() {
-        return this.editTabbedPane.closeAllFiles();
-    }
+    fun closeAll(): Boolean = editTabbedPane.closeAllFiles()
 
     /**
      * Perform "save" operation on current tab's file.
      *
      * @return true if succeeded, else false.
      */
-    public boolean save() {
-        return this.editTabbedPane.saveCurrentFile();
-    }
+    fun save(): Boolean = editTabbedPane.saveCurrentFile()
 
     /**
      * Perform "save as" operation on current tab's file.
      *
      * @return true if succeeded, else false.
      */
-    public boolean saveAs() {
-        return this.editTabbedPane.saveAsCurrentFile();
-    }
+    fun saveAs(): Boolean = editTabbedPane.saveAsCurrentFile()
 
     /**
      * Perform save operation on all open files (tabs).
      *
      * @return true if succeeded, else false.
      */
-    public boolean saveAll() {
-        return this.editTabbedPane.saveAllFiles();
-    }
+    fun saveAll(): Boolean = editTabbedPane.saveAllFiles()
 
     /**
      * Open file in a new tab.
      *
      * @return true if succeeded, else false.
      */
-    public boolean openFile() {
-        return this.editTabbedPane.openFile();
-    }
+    fun openFile(): Boolean = editTabbedPane.openFile()
 
     /**
      * Open files in new tabs.
      *
      * @param paths
-     *     File paths to open
+     * File paths to open
      * @return true if succeeded, else false.
      */
-    public boolean openPaths(final @NotNull List<String> paths) {
-        for (final String path : paths) {
-            final File file = new File(path);
-            if (!this.editTabbedPane.openFile(file)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
+    fun openPaths(paths: List<String>): Boolean =
+        paths.map { File(it) }.let(::openFiles)
 
     /**
      * Open files in new tabs.
      *
      * @param files
-     *     Files to open
+     * Files to open
      * @return true if succeeded, else false.
      */
-    public boolean openFiles(final @NotNull List<? extends @NotNull File> files) {
-        for (final var file : files) {
-            if (!this.editTabbedPane.openFile(file)) {
-                return false;
-            }
-        }
-        return true;
+    fun openFiles(files: List<File>): Boolean = files.all {
+        editTabbedPane.openFile(it)
     }
 
     /**
@@ -289,8 +173,18 @@ public final class Editor {
      * Return of true means caller can proceed (edits were saved or
      * discarded).
      */
-    public boolean editsSavedOrAbandoned() {
-        return this.editTabbedPane.editsSavedOrAbandoned();
-    }
+    fun editsSavedOrAbandoned(): Boolean =
+        editTabbedPane.editsSavedOrAbandoned()
 
+    companion object {
+        const val MIN_TAB_SIZE: Int = 1
+        const val MAX_TAB_SIZE: Int = 32
+        const val MIN_BLINK_RATE: Int = 0 // no flashing
+        const val MAX_BLINK_RATE: Int = 1000 // once per value
+    }
+}
+
+private fun String.takeIfPathIsADirectory(): String? = takeIf {
+    val file = File(it)
+    file.exists() && file.isDirectory
 }

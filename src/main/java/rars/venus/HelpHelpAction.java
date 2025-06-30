@@ -10,7 +10,7 @@ import rars.riscv.InstructionsRegistry;
 import rars.riscv.Syscall;
 import rars.settings.FontSettingsImpl;
 import rars.venus.actions.GuiAction;
-import rars.venus.util.IconLoading;
+import rars.venus.util.IconLoadingKt;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -18,8 +18,6 @@ import javax.swing.event.HyperlinkListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,12 +25,14 @@ import java.util.List;
 import java.util.Objects;
 
 import static rars.venus.util.HelpRemarksKt.createHelpRemarks;
+import static rars.venus.util.ListenerUtilsKt.onWindowClosing;
 
 /**
  * Action for the Help -> Help menu item
  */
 public final class HelpHelpAction extends GuiAction {
-    private static final @NotNull Dimension WINDOW_SIZE = new Dimension(800, 600);
+    private static final @NotNull Dimension WINDOW_SIZE = new Dimension(800,
+        600);
     @NotNull
     private final FontSettingsImpl fontSettings;
 
@@ -42,7 +42,7 @@ public final class HelpHelpAction extends GuiAction {
     ) {
         super(
             "Help",
-            "Help", IconLoading.loadIcon("Help22.png"),
+            "Help", IconLoadingKt.loadIcon("Help22.png"),
             KeyEvent.VK_H,
             KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0), gui
         );
@@ -100,19 +100,32 @@ public final class HelpHelpAction extends GuiAction {
         return new JList<>(descriptions.toArray(String[]::new));
     }
 
-    private static @NotNull StringBuilder convertToHTMLTable(final String[][] data, final String @NotNull [] headers) {
-        final StringBuilder sb = new StringBuilder("<table border=1>");
+    private static @NotNull StringBuilder convertToHTMLTable(
+        final @NotNull List<@NotNull Syscall> data,
+        final @NotNull String @NotNull [] headers
+    ) {
+        final var sb = new StringBuilder("<table border=1>");
         sb.append("<tr>");
-        for (final String elem : headers) {
-            sb.append("<td>").append(elem).append("</td>");
+        for (final var elem : headers) {
+            sb.append("<td>%s</td>".formatted(elem));
         }
         sb.append("</tr>");
-        for (final String[] row : data) {
-            sb.append("<tr>");
-            for (final String elem : row) {
-                sb.append("<td>").append(elem).append("</td>");
-            }
-            sb.append("</tr>");
+        for (final var syscall : data) {
+            sb.append("""
+                <tr>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                </tr>
+                """.formatted(
+                syscall.getServiceName(),
+                syscall.getServiceNumber(),
+                syscall.getDescription(),
+                syscall.getInputs(),
+                syscall.getOutputs()
+            ));
         }
         sb.append("</table>");
         return sb;
@@ -123,8 +136,10 @@ public final class HelpHelpAction extends GuiAction {
         final JPanel copyrightInfo = new JPanel(new BorderLayout());
         JScrollPane copyrightScrollPane;
         try {
-            final StringBuilder text = loadFiletoStringBuilder("/License.txt").append("</pre>");
-            final JEditorPane copyrightDisplay = new JEditorPane("text/html", "<pre>" + text);
+            final StringBuilder text = loadFiletoStringBuilder("/License.txt").append(
+                "</pre>");
+            final JEditorPane copyrightDisplay = new JEditorPane("text/html",
+                "<pre>" + text);
             copyrightDisplay.setEditable(false);
             copyrightDisplay.setCaretPosition(0); // assure top of document displayed
             copyrightScrollPane = new JScrollPane(
@@ -146,23 +161,18 @@ public final class HelpHelpAction extends GuiAction {
     @Contract(" -> new")
     private static @NotNull JScrollPane createSyscallsHelpPane() {
         final var sortedList = Syscall.getEntries().stream().sorted().toList();
-        final String[][] data = new String[sortedList.size()][5];
 
-        int i = 0;
-        for (final var syscall : sortedList) {
-            data[i][0] = syscall.getServiceName();
-            data[i][1] = Integer.toString(syscall.getServiceNumber());
-            data[i][2] = syscall.getDescription();
-            data[i][3] = syscall.getInputs();
-            data[i][4] = syscall.getOutputs();
-            i++;
-        }
-
-        final String[] columnNames = {"Name", "Number", "Description", "Inputs", "Outputs"};
+        final String[] columnNames = {
+            "Name",
+            "Number",
+            "Description",
+            "Inputs",
+            "Outputs"
+        };
         final JEditorPane html = new JEditorPane(
             "text/html",
             loadFiletoStringBuilder(Globals.HELP_PATH + "SyscallHelpPrelude.html")
-                + convertToHTMLTable(data, columnNames).toString()
+                + convertToHTMLTable(sortedList, columnNames).toString()
                 + loadFiletoStringBuilder(Globals.HELP_PATH + "SyscallHelpConclusion.html")
         );
 
@@ -177,9 +187,14 @@ public final class HelpHelpAction extends GuiAction {
     // Methods to construct MIPS help tabs from internal MARS objects
 
     private static @NotNull StringBuilder loadFiletoStringBuilder(final String path) {
-        try (final var stream = HelpHelpAction.class.getResourceAsStream(path)) {
+        try (
+            final var stream = HelpHelpAction.class.getResourceAsStream(path)
+        ) {
             final var result = new StringBuilder();
-            try (final var reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)))) {
+            try (
+                final var reader = new BufferedReader(new InputStreamReader(
+                    Objects.requireNonNull(stream)))
+            ) {
                 for (var line = reader.readLine(); line != null; line = reader.readLine()) {
                     result.append(line).append('\n');
                 }
@@ -196,7 +211,8 @@ public final class HelpHelpAction extends GuiAction {
         JScrollPane helpScrollPane;
         try {
             final StringBuilder text = loadFiletoStringBuilder(Globals.HELP_PATH + filename);
-            final JEditorPane helpDisplay = new JEditorPane("text/html", text.toString());
+            final JEditorPane helpDisplay = new JEditorPane("text/html",
+                text.toString());
             helpDisplay.setEditable(false);
             helpDisplay.setCaretPosition(0); // assure top of document displayed
             helpScrollPane = new JScrollPane(
@@ -234,7 +250,8 @@ public final class HelpHelpAction extends GuiAction {
         final var helpInfo = new JPanel(new BorderLayout());
         // Introductory remarks go at the top as a label
         final var backgroundColor = new Color(0xCCFF99);
-        final var helpRemarksLabel = new JLabel(createHelpRemarks(backgroundColor), JLabel.CENTER);
+        final var helpRemarksLabel = new JLabel(createHelpRemarks(
+            backgroundColor), JLabel.CENTER);
         helpRemarksLabel.setOpaque(true);
         helpRemarksLabel.setBackground(backgroundColor);
         helpRemarksLabel.setForeground(Color.BLACK);
@@ -247,15 +264,18 @@ public final class HelpHelpAction extends GuiAction {
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab(
             "Basic Instructions",
-            createInstructionHelpPane(InstructionsRegistry.BASIC_INSTRUCTIONS.getAllInstructions(), fontSettings)
+            createInstructionHelpPane(InstructionsRegistry.BASIC_INSTRUCTIONS.getAllInstructions(),
+                fontSettings)
         );
         tabbedPane.addTab(
             "Extended (pseudo) Instructions",
-            createInstructionHelpPane(InstructionsRegistry.EXTENDED_INSTRUCTIONS.getAllInstructions(), fontSettings)
+            createInstructionHelpPane(InstructionsRegistry.EXTENDED_INSTRUCTIONS.getAllInstructions(),
+                fontSettings)
         );
         tabbedPane.addTab("Directives", createDirectivesHelpPane(fontSettings));
         tabbedPane.addTab("Syscalls", createSyscallsHelpPane());
-        tabbedPane.addTab("Exceptions", createHTMLHelpPanel("ExceptionsHelp.html"));
+        tabbedPane.addTab("Exceptions",
+            createHTMLHelpPanel("ExceptionsHelp.html"));
         tabbedPane.addTab("Macros", createHTMLHelpPanel("MacrosHelp.html"));
         operandsScrollPane.setPreferredSize(
             new Dimension(
@@ -268,7 +288,9 @@ public final class HelpHelpAction extends GuiAction {
                 (int) WINDOW_SIZE.getWidth(),
                 (int) (WINDOW_SIZE.getHeight() * 0.6)
             ));
-        final JSplitPane splitsville = new JSplitPane(JSplitPane.VERTICAL_SPLIT, operandsScrollPane, tabbedPane);
+        final JSplitPane splitsville = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+            operandsScrollPane,
+            tabbedPane);
         splitsville.setOneTouchExpandable(true);
         splitsville.resetToPreferredSizes();
         helpInfo.add(splitsville);
@@ -287,27 +309,25 @@ public final class HelpHelpAction extends GuiAction {
         tabbedPane.addTab("RISCV", createHelpInfoPanel(fontSettings));
         tabbedPane.addTab("RARS", createRarsHelpInfoPanel());
         tabbedPane.addTab("License", createCopyrightInfoPanel());
-        tabbedPane.addTab("Bugs/Comments", createHTMLHelpPanel("BugReportingHelp.html"));
-        tabbedPane.addTab("Acknowledgements", createHTMLHelpPanel("Acknowledgements.html"));
+        tabbedPane.addTab("Bugs/Comments",
+            createHTMLHelpPanel("BugReportingHelp.html"));
+        tabbedPane.addTab("Acknowledgements",
+            createHTMLHelpPanel("Acknowledgements.html"));
         // Create non-modal dialog. Based on java.sun.com "How to Make Dialogs",
         // DialogDemo.java
-        final JDialog dialog = new JDialog(this.mainUI, "RARS " + Globals.VERSION + " Help");
+        final JDialog dialog = new JDialog(this.mainUI,
+            "RARS " + Globals.VERSION + " Help");
         // assure the dialog goes away if user clicks the X
-        dialog.addWindowListener(
-            new WindowAdapter() {
-                @Override
-                public void windowClosing(final WindowEvent e) {
-                    dialog.setVisible(false);
-                    dialog.dispose();
-                }
-            });
-        // Add a "close" button to the non-modal help dialog.
+        onWindowClosing(dialog, it -> {
+            dialog.setVisible(false);
+            dialog.dispose();
+            return Unit.INSTANCE;
+        });
         final JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(
-            e1 -> {
-                dialog.setVisible(false);
-                dialog.dispose();
-            });
+        closeButton.addActionListener(_e -> {
+            dialog.setVisible(false);
+            dialog.dispose();
+        });
         final JPanel closePanel = new JPanel();
         closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
         closePanel.add(Box.createHorizontalGlue());
@@ -328,7 +348,8 @@ public final class HelpHelpAction extends GuiAction {
 
     }
 
-    private static class MyCellRenderer extends JLabel implements ListCellRenderer<String> {
+    private static class MyCellRenderer extends JLabel
+        implements ListCellRenderer<String> {
         @Override
         public Component getListCellRendererComponent(
             final JList<? extends String> list,
@@ -358,7 +379,8 @@ public final class HelpHelpAction extends GuiAction {
      * will not display URL, no navigation, nothing. Just display the page and
      * provide a Close button.
      */
-    private record HelpHyperlinkListener(@NotNull JPanel parent) implements HyperlinkListener {
+    private record HelpHyperlinkListener(@NotNull JPanel parent)
+        implements HyperlinkListener {
         @Override
         public void hyperlinkUpdate(final @NotNull HyperlinkEvent event) {
             if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {

@@ -107,7 +107,7 @@ public final class Globals {
 
         MEMORY_INSTANCE = new Memory(initialMemoryConfiguration);
 
-        GLOBAL_SYMBOL_TABLE = new SymbolTable();
+        GLOBAL_SYMBOL_TABLE = new SymbolTable(null);
         REGISTER_FILE = new RegisterFile(GLOBAL_SYMBOL_TABLE,
             initialMemoryConfiguration);
         FP_REGISTER_FILE = new FloatingPointRegisterFile();

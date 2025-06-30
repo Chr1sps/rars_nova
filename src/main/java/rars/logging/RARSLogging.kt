@@ -3,58 +3,65 @@ package rars.logging
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-private val RARSLoggerFactory = LoggerFactory.create {
-    logLevel = LogLevel.WARNING
-    stdErrAppender()
-    logFormat {
-        val dateTime =
-            timestamp.toLocalDateTime(TimeZone.currentSystemDefault())
-        val date = dateTime.date.toString()
-        val time = dateTime.time.toString()
-        val name = loggerName.coerceToSize(20)
-        buildString {
-            appendLine("[$date $time $name] $level > $message")
-            exception?.let { appendLine(it.stackTraceToString()) }
-        }
+private val RarsLoggingFormat = LoggingFormat {
+    val dateTime =
+        timestamp.toLocalDateTime(TimeZone.currentSystemDefault())
+    val date = dateTime.date.toString()
+    val time = dateTime.time.toString()
+    val name = loggerName.coerceToSize(30)
+    val method = source.methodName
+    val lineNumber = source.lineNumber
+    buildString {
+        appendLine("[$date $time $name:$lineNumber] [$level] $message")
+        exception?.let { appendLine(it.stackTraceToString()) }
     }
 }
 
-private fun LoggerName.coerceToSize(charCount: Int): String = when (this) {
-    is LoggerName.ClassName -> coerceToSize(charCount)
-    is LoggerName.StringName -> name
+@JvmField
+val RARSLogging = LoggerFactory.create {
+    logLevel = LogLevel.INFO
+    stdErrAppender(RarsLoggingFormat)
 }
 
-private fun LoggerName.ClassName.coerceToSize(charCount: Int): String {
-    val fqn = cls.qualifiedName!!
+internal fun LoggerName.coerceToSize(charCount: Int): String = when (this) {
+    is LoggerName.Class -> coerceToSize(charCount)
+    is LoggerName.String -> name
+}
+
+private fun LoggerName.Class.coerceToSize(charCount: Int): String {
+    val fqn = cls.name
     val initialLength = fqn.length
     if (initialLength <= charCount) return fqn
     val parts = fqn.split(".").toMutableList()
     val dotCount = parts.size - 1
     val targetSize = charCount - dotCount
+    var currentSize = initialLength - dotCount
     parts.subList(
-        0, parts.size - 2
+        0, parts.size - 1
     ).mutate { part ->
-        if (size > targetSize) {
-            if (part.length == 1) {
-                part
-            } else {
-                """${part.first()}${part.last()}"""
-            }
-        } else part
-    }.mutate { part ->
-        if (size > targetSize) part.first().toString() else part
+        val result =
+            if (currentSize > targetSize) part.first().toString() else part
+        currentSize = currentSize - (part.length - result.length)
+        result
     }
     return parts.joinToString(".")
 }
 
-private fun <T> MutableList<T>.mutate(block: List<T>.(T) -> T): MutableList<T> {
-    for (i in indices) {
-        this[i] = block(this[i])
+private fun <T> MutableList<T>.mutate(block: List<T>.(T) -> T): MutableList<T> =
+    apply {
+        for (i in indices) {
+            this[i] = block(this[i])
+        }
     }
-    return this
+
+fun Logger.requireOrError(condition: Boolean, message: () -> String) {
+    if (!condition) {
+        this.error(lazyMessage = message)
+    }
 }
 
-object RARSLogging : LoggerFactory by RARSLoggerFactory {
-    @JvmStatic
-    fun forJavaClass(cls: Class<*>) = RARSLoggerFactory.forJavaClass(cls)
+fun Logger.requireOrWarn(condition: Boolean, message: () -> String) {
+    if (!condition) {
+        this.warning(lazyMessage = message)
+    }
 }

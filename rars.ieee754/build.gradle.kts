@@ -12,7 +12,7 @@ kotlin {
 //    wasmJs()
 
     sourceSets {
-        val commonMain by getting { }
-        val jvmMain by getting { }
+        commonMain
+        jvmMain
     }
 }

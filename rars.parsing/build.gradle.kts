@@ -6,7 +6,17 @@ kotlin {
     jvmToolchain(21)
 
     jvm()
-    wasmJs()
+    wasmJs {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+            }
+        }
+        nodejs()
+    }
+
 
     sourceSets {
         commonMain {

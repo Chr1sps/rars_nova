@@ -30,7 +30,7 @@ interface MutableFontSettings : FontSettings {
 }
 
 class FontSettingsImpl(private val preferences: Preferences) : FontSettings {
-    private val onChangeDispatcher = ListenerDispatcher<Void?>()
+    private val onChangeDispatcher = ListenerDispatcher<Unit>()
 
     @JvmField
     val onChangeListenerHook = this.onChangeDispatcher.hook
@@ -83,7 +83,7 @@ class FontSettingsImpl(private val preferences: Preferences) : FontSettings {
         } catch (_: BackingStoreException) {
             LOGGER.error { "Unable to communicate with persistent storage." }
         }
-        this.onChangeDispatcher.dispatch(null)
+        this.onChangeDispatcher.dispatch(Unit)
     }
 
     companion object {

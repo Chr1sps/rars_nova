@@ -14,5 +14,4 @@ import org.jetbrains.annotations.NotNull;
  * @author Jason Bumgarner, Jason Shrewsbury
  * @version June 2003
  */
-public record Symbol(@NotNull String name, int address, boolean isData) {
-}
+public record Symbol(@NotNull String name, int address, boolean isData) {}

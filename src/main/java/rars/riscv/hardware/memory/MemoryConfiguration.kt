@@ -1,6 +1,6 @@
 package rars.riscv.hardware.memory
 
-import rars.util.MyClosedRange
+import rars.util.MemoryRange
 
 
 /**
@@ -26,11 +26,11 @@ interface AbstractMemoryConfiguration<T> {
     val identifier: String
     val description: String
 
-    val textSegmentRange: MyClosedRange<T>
-    val dataSegmentRange: MyClosedRange<T>
-    val mmioAddressRange: MyClosedRange<T>
-    val kernelAddressRange: MyClosedRange<T>
-    val heapStackAddressRange: MyClosedRange<T>
+    val textSegmentRange: MemoryRange<T>
+    val dataSegmentRange: MemoryRange<T>
+    val mmioAddressRange: MemoryRange<T>
+    val kernelAddressRange: MemoryRange<T>
+    val heapStackAddressRange: MemoryRange<T>
 
     val externAddress: T
     val globalPointerAddress: T
@@ -56,15 +56,17 @@ val <T> AbstractMemoryConfiguration<T>.memoryMapLimitAddress get() = this.mmioAd
 val <T> AbstractMemoryConfiguration<T>.kernelBaseAddress get() = this.kernelAddressRange.start
 val <T> AbstractMemoryConfiguration<T>.kernelHighAddress get() = this.kernelAddressRange.endInclusive
 
+const val MEMORY_CONFIGURATION_ADDRESSES_COUNT = 15
+
 enum class MemoryConfiguration(
     override val identifier: String,
     override val description: String,
 
-    override val textSegmentRange: MyClosedRange<Int>,
-    override val dataSegmentRange: MyClosedRange<Int>,
-    override val heapStackAddressRange: MyClosedRange<Int>,
-    override val kernelAddressRange: MyClosedRange<Int>,
-    override val mmioAddressRange: MyClosedRange<Int>,
+    override val textSegmentRange: MemoryRange<Int>,
+    override val dataSegmentRange: MemoryRange<Int>,
+    override val heapStackAddressRange: MemoryRange<Int>,
+    override val kernelAddressRange: MemoryRange<Int>,
+    override val mmioAddressRange: MemoryRange<Int>,
 
     override val dataBaseAddress: Int,
     override val externAddress: Int,
@@ -143,7 +145,9 @@ infix fun Byte.alignTo(alignment: Byte) = this / alignment * alignment
 data class IntMemoryRange(
     override val start: Int,
     override val endInclusive: Int,
-) : MyClosedRange<Int> {
-    override fun contains(value: Int): Boolean = value.toUInt() in start.toUInt()..endInclusive.toUInt()
+) : MemoryRange<Int> {
+    override fun contains(value: Int): Boolean =
+        value.toUInt() in start.toUInt()..endInclusive.toUInt()
+
     override fun isEmpty(): Boolean = start.toUInt() > endInclusive.toUInt()
 }

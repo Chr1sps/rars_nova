@@ -12,34 +12,33 @@ class OtherSettingsView(
     initialCaretBlinkRate: Int,
     initialEditorTabSize: Int,
 ) : JPanel() {
-    val blinkRateSpinner: JSpinner
-    val tabSizeSpinner: JSpinner
-
-    init {
-        val blinkRateModel = SpinnerNumberModel(
+    val blinkRateSpinner = JSpinner(
+        SpinnerNumberModel(
             initialCaretBlinkRate,
             Editor.MIN_BLINK_RATE,
             Editor.MAX_BLINK_RATE,
             1
         )
-        val blinkRatePicker = GenericOptionSection(
-            "Caret blink rate (ms, 0 to disable)",
-            JSpinner(blinkRateModel)
-        )
-        val tabSizeModel = SpinnerNumberModel(
+    )
+    val tabSizeSpinner: JSpinner = JSpinner(
+        SpinnerNumberModel(
             initialEditorTabSize,
             Editor.MIN_TAB_SIZE,
             Editor.MAX_TAB_SIZE,
             1
         )
-        val tabSizePicker = GenericOptionSection(
-            "Tab size",
-            JSpinner(tabSizeModel)
-        )
-        blinkRateSpinner = blinkRatePicker.component
-        tabSizeSpinner = tabSizePicker.component
+    )
+
+    init {
         BoxLayout(BoxLayout.Y_AXIS) {
-            +buildRow(addMargins = true, blinkRatePicker, tabSizePicker)
+            +buildRow(
+                addMargins = true,
+                GenericOptionSection(
+                    "Caret blink rate (ms, 0 to disable)",
+                    blinkRateSpinner
+                ),
+                GenericOptionSection("Tab size", tabSizeSpinner)
+            )
             verticalGlue()
         }
     }

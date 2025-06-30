@@ -6,6 +6,7 @@ import rars.logging.error
 import rars.riscv.hardware.memory.AbstractMemoryConfiguration
 import rars.riscv.hardware.memory.MemoryConfiguration
 import rars.util.ListenerDispatcher
+import rars.venus.util.LabelsSortState
 import java.util.prefs.BackingStoreException
 import java.util.prefs.Preferences
 
@@ -31,7 +32,7 @@ interface OtherSettings {
 
     val memoryConfiguration: AbstractMemoryConfiguration<Int>
     val exceptionHandler: String
-    val labelSortState: Int
+    val labelSortState: LabelsSortState
     val editorTabSize: Int
     val caretBlinkRate: Int
 }
@@ -49,11 +50,14 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
         private set
     override var editorTabSize: Int
         private set
-    override var labelSortState: Int
+    override var labelSortState: LabelsSortState
         private set
 
     init {
-        labelSortState = preferences.getInt(OTHER_PREFIX + SORT_STATE, 0)
+        labelSortState = preferences.getLabelsState(
+            OTHER_PREFIX + SORT_STATE,
+            LabelsSortState.LabelsDescending
+        )
         memoryConfiguration = loadMemoryConfiguration()
         caretBlinkRate =
             preferences.getInt(OTHER_PREFIX + CARET_BLINK_RATE, 500)
@@ -83,14 +87,14 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
         }
     }
 
-    fun setLabelSortStateAndSave(labelSortState: Int) {
-        if (this.labelSortState != labelSortState) {
-            this.labelSortState = labelSortState
-            this.preferences.putInt(
+    fun setLabelsStateAndSave(labelsState: LabelsSortState) {
+        if (labelSortState != labelsState) {
+            labelSortState = labelsState
+            preferences.putLabelsState(
                 OTHER_PREFIX + SORT_STATE,
-                this.labelSortState
+                labelSortState
             )
-            this.commitChanges()
+            commitChanges()
         }
     }
 
@@ -148,4 +152,14 @@ class OtherSettingsImpl(private val preferences: Preferences) : OtherSettings {
         private const val EDITOR_TAB_SIZE = "Editor_tab_size"
         // endregion Preferences keys
     }
+}
+
+private fun Preferences.getLabelsState(
+    key: String,
+    default: LabelsSortState
+): LabelsSortState =
+    LabelsSortState.fromInt(getInt(key, default.value.toInt()))!!
+
+private fun Preferences.putLabelsState(key: String, state: LabelsSortState) {
+    putInt(key, state.value.toInt())
 }

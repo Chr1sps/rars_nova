@@ -7,7 +7,6 @@ import rars.Globals;
 import rars.RISCVProgram;
 import rars.logging.Logger;
 import rars.logging.LoggingExtKt;
-import rars.logging.RARSLogging;
 import rars.settings.AllSettings;
 import rars.settings.BoolSetting;
 import rars.util.AsmFileFilter;
@@ -28,6 +27,7 @@ import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
 import static java.util.Objects.requireNonNull;
+import static rars.logging.RARSLoggingKt.RARSLogging;
 import static rars.util.UtilsKt.unwrap;
 import static rars.venus.FileStatusKt.getNameForEditorTab;
 import static rars.venus.FileStatusKt.isEdited;
@@ -63,7 +63,7 @@ public final class EditTabbedPane extends JPanel {
         this.editor.setEditTabbedPane(this);
         this.tabbedPane.addChangeListener(
             e -> {
-                final var editorTab = (EditorTabNew) tabbedPane.getSelectedComponent();
+                final var editorTab = (EditorTab) tabbedPane.getSelectedComponent();
                 if (editorTab != null) {
                     // New IF statement to permit free traversal of edit panes w/o invalidating
                     // assembly if assemble-all is selected.
@@ -97,8 +97,8 @@ public final class EditTabbedPane extends JPanel {
      *
      * @return the current editor pane
      */
-    public @Nullable EditorTabNew getCurrentEditTab() {
-        return (EditorTabNew) tabbedPane.getSelectedComponent();
+    public @Nullable EditorTab getCurrentEditTab() {
+        return (EditorTab) tabbedPane.getSelectedComponent();
     }
 
     /**
@@ -107,7 +107,7 @@ public final class EditTabbedPane extends JPanel {
      * @param editorTab
      *     The EditPane tab to become current.
      */
-    public void setCurrentEditTab(final @NotNull EditorTabNew editorTab) {
+    public void setCurrentEditTab(final @NotNull EditorTab editorTab) {
         tabbedPane.setSelectedComponent(editorTab);
     }
 
@@ -118,7 +118,7 @@ public final class EditTabbedPane extends JPanel {
     public void newFile() {
         final var name = this.editor.getNextDefaultFilename();
         final var status = new FileStatus.New.NotEdited(name);
-        final var editPane = new EditorTabNew(
+        final var editPane = new EditorTab(
             mainUI,
             allSettings,
             status
@@ -126,7 +126,7 @@ public final class EditTabbedPane extends JPanel {
         editPane.getTextArea().setSourceCode("");
         tabbedPane.addTab(name, editPane);
 
-        GlobalFileStatus.set(status);
+        mainUI.setFileStatus(status);
 
         Globals.REGISTER_FILE.resetRegisters();
         this.mainUI.isMemoryReset = true;
@@ -184,7 +184,7 @@ public final class EditTabbedPane extends JPanel {
     }
 
     private void closeFile(final int index) {
-        final var editorTab = (EditorTabNew) tabbedPane.getComponentAt(index);
+        final var editorTab = (EditorTab) tabbedPane.getComponentAt(index);
         if (this.editsSavedOrAbandoned()) {
             this.removePane(editorTab);
             this.mainPane.executePane.clearPane();
@@ -203,10 +203,10 @@ public final class EditTabbedPane extends JPanel {
         if (tabCount > 0) {
             this.mainPane.executePane.clearPane();
             this.mainPane.setSelectedComponent(this);
-            final var tabs = new EditorTabNew[tabCount];
+            final var tabs = new EditorTab[tabCount];
             boolean unsavedChanges = false;
             for (int i = 0; i < tabCount; i++) {
-                tabs[i] = (EditorTabNew) tabbedPane.getComponentAt(i);
+                tabs[i] = (EditorTab) tabbedPane.getComponentAt(i);
                 if (isEdited(tabs[i].getFileStatus())) {
                     unsavedChanges = true;
                 }
@@ -254,7 +254,7 @@ public final class EditTabbedPane extends JPanel {
     public boolean saveCurrentFile() {
         final var editPane = this.getCurrentEditTab();
         if (saveFile(editPane)) {
-            GlobalFileStatus.set(editPane.getFileStatus());
+            mainUI.setFileStatus(editPane.getFileStatus());
             this.updateTitlesAndMenuState(editPane);
             return true;
         } else {
@@ -264,7 +264,7 @@ public final class EditTabbedPane extends JPanel {
 
     // Save file associatd with specified edit pane.
     // Returns true if save operation worked, else false.
-    private boolean saveFile(final EditorTabNew editorTab) {
+    private boolean saveFile(final EditorTab editorTab) {
         if (editorTab != null) {
             final var fileStatus = editorTab.getFileStatus();
             if (fileStatus instanceof FileStatus.New) {
@@ -311,7 +311,7 @@ public final class EditTabbedPane extends JPanel {
         final var currentTab = requireNonNull(this.getCurrentEditTab());
         final var savedFile = this.saveAsFile(currentTab);
         if (savedFile != null) {
-            GlobalFileStatus.set(currentTab.getFileStatus());
+            mainUI.setFileStatus(currentTab.getFileStatus());
             this.editor.setCurrentSaveDirectory(savedFile.getParent());
             currentTab.setFileStatus(
                 new FileStatus.Existing.NotEdited(savedFile)
@@ -324,7 +324,7 @@ public final class EditTabbedPane extends JPanel {
 
     // perform Save As for selected edit pane. If the save is performed,
     // return its File object. Otherwise return null.
-    private @Nullable File saveAsFile(final @NotNull EditorTabNew editorTab) {
+    private @Nullable File saveAsFile(final @NotNull EditorTab editorTab) {
         File selectedFile;
         while (true) {
             // Set Save As dialog directory in a logical way. If file in
@@ -403,7 +403,7 @@ public final class EditTabbedPane extends JPanel {
 
             result = true;
             for (int i = 0; i < tabCount; i++) {
-                final var tab = (EditorTabNew) tabbedPane.getComponentAt(i);
+                final var tab = (EditorTab) tabbedPane.getComponentAt(i);
                 if (isEdited(tab.getFileStatus())) {
                     result &= saveFile(tab);
                     setTitleForTab(tab, tab.getFileStatus());
@@ -411,7 +411,7 @@ public final class EditTabbedPane extends JPanel {
             }
             if (result) {
                 final var editorTab = requireNonNull(getCurrentEditTab());
-                GlobalFileStatus.set(editorTab.getFileStatus());
+                mainUI.setFileStatus(editorTab.getFileStatus());
                 // editorTab.setFileStatus(FileStatusOld.State.NOT_EDITED);
                 this.updateTitlesAndMenuState(editorTab);
             }
@@ -424,7 +424,7 @@ public final class EditTabbedPane extends JPanel {
     }
 
     public void setTitleForTab(
-        final @NotNull EditorTabNew editorTab,
+        final @NotNull EditorTab editorTab,
         final @NotNull FileStatus fileStatus
     ) {
         final var editIndicator = isEdited(fileStatus)
@@ -450,7 +450,7 @@ public final class EditTabbedPane extends JPanel {
     public @NotNull List<@NotNull File> getOpenFilePaths() {
         final var result = new ArrayList<File>();
         for (final var component : tabbedPane.getComponents()) {
-            final var fileStatus = ((EditorTabNew) component).getFileStatus();
+            final var fileStatus = ((EditorTab) component).getFileStatus();
             if (fileStatus instanceof final FileStatus.Existing existing) {
                 result.add(existing.getFile());
             } else {
@@ -466,17 +466,16 @@ public final class EditTabbedPane extends JPanel {
      * Remove the pane and update menu status
      *
      * @param editorTab
-     *     a {@link EditorTabNew} object
+     *     a {@link EditorTab} object
      */
-    public void removePane(final EditorTabNew editorTab) {
+    public void removePane(final EditorTab editorTab) {
         tabbedPane.remove(editorTab);
         final var currentTab = getCurrentEditTab();
         if (currentTab == null) {
-            GlobalFileStatus.reset();
+            mainUI.resetFileStatus();
             setDefaultTitle();
-            this.mainUI.setMenuState(null);
         } else {
-            GlobalFileStatus.set(currentTab.getFileStatus());
+            mainUI.setFileStatus(currentTab.getFileStatus());
             this.updateTitlesAndMenuState(currentTab);
         }
         // When last file is closed, menu is unable to respond to mnemonics
@@ -489,22 +488,20 @@ public final class EditTabbedPane extends JPanel {
     // Handy little utility to update the title on the current tab and the frame
     // title bar
     // and also to update the MARS menu state (controls which actions are enabled).
-    private void updateTitlesAndMenuState(final @NotNull EditorTabNew editorTab) {
+    private void updateTitlesAndMenuState(final @NotNull EditorTab editorTab) {
         final var fileStatus = editorTab.getFileStatus();
         editor.setTitleFromFileStatus(fileStatus);
-        GlobalFileStatus.set(fileStatus);
-        // editorTab.updateStaticFileStatus(); // for legacy code that depends on the static FileStatus (pre 4.0)
-        this.mainUI.setMenuState(editorTab.getFileStatus());
+        mainUI.setFileStatus(fileStatus);
     }
 
     // Handy little utility to update the title on the current tab and the frame
     // title bar
     // and also to update the MARS menu state (controls which actions are enabled).
-    private void updateTitles(final @NotNull EditorTabNew editorTab) {
+    private void updateTitles(final @NotNull EditorTab editorTab) {
         this.editor.setTitleFromFileStatus(
             editorTab.getFileStatus()
         );
-        final var isAssembled = FileStatusKt.isAssembled(GlobalFileStatus.get());
+        final var isAssembled = FileStatusKt.isAssembled(mainUI.getFileStatus());
         // final boolean assembled = GlobalFileStatus.isAssembled();
         // editorTab.updateStaticFileStatus(); // for legacy code that depends on the static FileStatus (pre 4.0)
         // GlobalFileStatus.setAssembled(assembled);
@@ -519,9 +516,9 @@ public final class EditTabbedPane extends JPanel {
      * @return the EditPane for this file if it is open in the editor, or null if
      * not.
      */
-    public @Nullable EditorTabNew getEditPaneForFile(final @NotNull File file) {
+    public @Nullable EditorTab getEditPaneForFile(final @NotNull File file) {
         for (int i = 0; i < tabbedPane.getTabCount(); i++) {
-            final var pane = (EditorTabNew) tabbedPane.getComponentAt(i);
+            final var pane = (EditorTab) tabbedPane.getComponentAt(i);
             final var paneStatus = pane.getFileStatus();
             if (paneStatus instanceof final FileStatus.Existing statusExisting &&
                 statusExisting.getFile().equals(file)) {
@@ -584,7 +581,7 @@ public final class EditTabbedPane extends JPanel {
         final int line
     ) {
         final var editorTab = this.getEditPaneForFile(file);
-        final EditorTabNew tabForLine;
+        final EditorTab tabForLine;
         if (editorTab != null) {
             if (editorTab != this.getCurrentEditTab()) {
                 this.setCurrentEditTab(editorTab);
@@ -708,13 +705,13 @@ public final class EditTabbedPane extends JPanel {
                 updateTitles(editPane);
                 return false;
             } else {
-                editPane = new EditorTabNew(
+                editPane = new EditorTab(
                     mainUI,
                     allSettings,
                     new FileStatus.Existing.NotEdited(theFile));
             }
             // FileStatus.reset();
-            GlobalFileStatus.reset();
+            mainUI.resetFileStatus();
             // GlobalFileStatus.systemFile = theFile;
             // GlobalFileStatus.setSystemState(GlobalFileStatus.State.OPENING);
             if (theFile.canRead()) {
@@ -750,7 +747,7 @@ public final class EditTabbedPane extends JPanel {
                     new FileStatus.Existing.NotEdited(theFile)
                 );
 
-                GlobalFileStatus.set(new FileStatus.Existing.NotEdited(theFile));
+                mainUI.setFileStatus(new FileStatus.Existing.NotEdited(theFile));
 
                 // If assemble-all, then allow opening of any file w/o invalidating assembly.
                 if (allSettings.boolSettings.getSetting(BoolSetting.ASSEMBLE_ALL)) {

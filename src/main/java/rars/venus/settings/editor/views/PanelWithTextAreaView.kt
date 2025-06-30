@@ -15,50 +15,49 @@ class PanelWithTextAreaView(
     val textArea: TextEditingArea = createTextArea(allSettings)
 
     init {
-        val outerComponent = this.textArea.outerComponent.apply {
-            val textAreaSize = Dimension(500, 300)
-            minimumSize = textAreaSize
-            preferredSize = textAreaSize
-            maximumSize = textAreaSize
-        }
-        this.BoxLayout(BoxLayout.Y_AXIS) {
+        BoxLayout(BoxLayout.Y_AXIS) {
             +pickerCardView
             verticalGlue()
-            +outerComponent
-        }
-    }
-
-    companion object {
-        private fun createTextArea(
-            allSettings: AllSettings
-        ): TextEditingArea {
-            val (_, fontSettings, _, _, otherSettings) = allSettings
-            val exampleText = """
-            # Some macro definitions to print strings
-            string:
-            ${'\t'}.asciz "Some string"
-            char:
-            ${'\t'}.byte 'a'
-            .macro printStr (%str) # print a string
-            ${'\t'}.data
-            myLabel:
-            ${'\t'}.asciz %str
-            ${'\t'}.text
-            ${'\t'}li a7, 4
-            ${'\t'}la a0, myLabel
-            ${'\t'}ecall
-            .end_macro
-            """.trimIndent()
-            val selectedText = "myLabel:"
-            val selectionStart = exampleText.indexOf(selectedText)
-            val selectionEnd = selectionStart + selectedText.length
-            return createTextEditingArea(allSettings).apply {
-                this.text = exampleText
-                this.tabSize = otherSettings.editorTabSize
-                this.caretBlinkRate = otherSettings.caretBlinkRate
-                this.font = fontSettings.currentFont
-                select(selectionStart, selectionEnd)
+            +textArea.outerComponent.apply {
+                val textAreaSize = Dimension(500, 300)
+                minimumSize = textAreaSize
+                preferredSize = textAreaSize
+                maximumSize = textAreaSize
             }
         }
+    }
+}
+
+private fun createTextArea(
+    allSettings: AllSettings
+): TextEditingArea {
+    val tab = '\t'
+    val myLabel = "myLabel:"
+    val exampleText = """
+        # Some macro definitions to print strings
+        string:
+        $tab.asciz "Some string"
+        char:
+        $tab.byte 'a'
+        .macro printStr (%str) # print a string
+        $tab.data
+        $myLabel
+        $tab.asciz %str
+        $tab.text
+        ${tab}li a7, 4
+        ${tab}la a0, myLabel
+        ${tab}ecall
+        .end_macro
+    """.trimIndent()
+    val selectionStart = exampleText.indexOf(myLabel)
+    val selectionEnd = selectionStart + myLabel.length
+    val fontSettings = allSettings.fontSettings
+    val otherSettings = allSettings.otherSettings
+    return createTextEditingArea(allSettings).apply {
+        text = exampleText
+        tabSize = otherSettings.editorTabSize
+        caretBlinkRate = otherSettings.caretBlinkRate
+        font = fontSettings.currentFont
+        select(selectionStart, selectionEnd)
     }
 }

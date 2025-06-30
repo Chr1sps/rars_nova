@@ -39,8 +39,15 @@ final class DataSegmentForwardReferenceList {
      * - the label's token. All its information will be needed if error message
      * generated.
      */
-    public void add(final int patchAddress, final int length, final @NotNull Token token) {
-        this.forwardReferenceList.add(new DataSegmentForwardReference(patchAddress, length, token));
+    public void add(
+        final int patchAddress,
+        final int length,
+        final @NotNull Token token
+    ) {
+        this.forwardReferenceList.add(new DataSegmentForwardReference(
+            patchAddress,
+            length,
+            token));
     }
 
     /**
@@ -70,11 +77,18 @@ final class DataSegmentForwardReferenceList {
      */
     public void resolve(final @NotNull SymbolTable localSymbolTable) {
         this.forwardReferenceList.removeIf(entry -> {
-            final var labelAddress = localSymbolTable.getAddressLocalOrGlobal(entry.token.getText());
-            final var doRemove = labelAddress != SymbolTable.NOT_FOUND;
+            final var localAddress = localSymbolTable.getAddress(entry.token.getText());
+            final var labelAddress = (localAddress != null)
+                ? localAddress
+                : Globals.GLOBAL_SYMBOL_TABLE.getAddress(entry.token.getText());
+            final var doRemove = labelAddress != null;
             if (doRemove) {
                 // patch address has to be valid b/c we already stored there...
-                unwrap(Globals.MEMORY_INSTANCE.set(entry.patchAddress, labelAddress, entry.length));
+                unwrap(Globals.MEMORY_INSTANCE.set(
+                    entry.patchAddress,
+                    labelAddress,
+                    entry.length
+                ));
             }
             return doRemove;
         });

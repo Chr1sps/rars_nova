@@ -6,10 +6,10 @@ import rars.settings.OtherSettingsImpl
 import rars.venus.VenusUI
 import rars.venus.actions.GuiAction
 import rars.venus.util.BorderLayout
+import rars.venus.util.JPanel
+import rars.venus.util.onWindowClosing
 import java.awt.BorderLayout
 import java.awt.event.ActionEvent
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import java.io.File
 import javax.swing.*
 import javax.swing.border.EmptyBorder
@@ -29,11 +29,7 @@ class SettingsExceptionHandlerAction(
     override fun actionPerformed(e: ActionEvent?) {
         JDialog(mainUI, "Exception Handler", true).apply {
             contentPane = buildDialogPanel(this, boolSettings, otherSettings)
-            addWindowListener(object : WindowAdapter() {
-                override fun windowClosing(we: WindowEvent?) {
-                    closeDialog()
-                }
-            })
+            onWindowClosing { closeDialog() }
             defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
             pack()
             setLocationRelativeTo(mainUI)
@@ -46,7 +42,8 @@ class SettingsExceptionHandlerAction(
         boolSettings: BoolSettingsImpl,
         otherSettings: OtherSettingsImpl,
     ): JPanel {
-        val initialSelected = boolSettings.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)
+        val initialSelected =
+            boolSettings.getSetting(BoolSetting.EXCEPTION_HANDLER_ENABLED)
         val initialPath = otherSettings.exceptionHandler
         val exceptionHandlerDisplay = JTextField().apply {
             text = otherSettings.exceptionHandler
@@ -66,13 +63,15 @@ class SettingsExceptionHandlerAction(
                 }
                 val result = chooser.showOpenDialog(mainUI)
                 if (result == JFileChooser.APPROVE_OPTION) {
-                    pathname = chooser.selectedFile.path // .replaceAll("\\\\","/");
+                    pathname =
+                        chooser.selectedFile.path // .replaceAll("\\\\","/");
                     exceptionHandlerDisplay.text = pathname
                 }
             }
         }
         val exceptionHandlerSetting = JCheckBox().apply {
-            text = "Include this exception handler file in all assemble operations"
+            text =
+                "Include this exception handler file in all assemble operations"
             isSelected = initialSelected
             addActionListener {
                 val selected = (it.source as JCheckBox).isSelected
@@ -80,7 +79,7 @@ class SettingsExceptionHandlerAction(
                 exceptionHandlerDisplay.isEnabled = selected
             }
         }
-        val specifyHandlerFile = JPanel().apply {
+        val specifyHandlerFile = JPanel {
             add(exceptionHandlerSelectionButton)
             add(exceptionHandlerDisplay)
         }

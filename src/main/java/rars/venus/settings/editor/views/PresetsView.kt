@@ -1,11 +1,12 @@
 package rars.venus.settings.editor.views
 
 import rars.venus.util.BoxLayout
+import rars.venus.util.JPanel
 import javax.swing.*
 
 class PresetsView : JScrollPane() {
     val sections = mutableListOf<PresetSection>()
-    private val mainPanel = JPanel().apply {
+    private val mainPanel = JPanel {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
     }
 

@@ -68,7 +68,8 @@ public final class Macro {
         final String stringToBeReplaced = tokenToBeReplaced.getText();
         final int pos = source.indexOf(stringToBeReplaced);
         return (pos < 0) ? source
-            : source.substring(0, pos) + substitute + source.substring(pos + stringToBeReplaced.length());
+            : source.substring(0,
+                pos) + substitute + source.substring(pos + stringToBeReplaced.length());
     }
 
     /**
@@ -81,7 +82,10 @@ public final class Macro {
      *     with '$' if true
      * @return a boolean
      */
-    public static boolean tokenIsMacroParameter(final String tokenValue, final boolean acceptSpimStyleParameters) {
+    public static boolean tokenIsMacroParameter(
+        final String tokenValue,
+        final boolean acceptSpimStyleParameters
+    ) {
         if (acceptSpimStyleParameters) {
             // Bug fix: SPIM accepts parameter names that start with $ instead of %. This
             // can
@@ -99,116 +103,50 @@ public final class Macro {
         return tokenValue.length() > 1 && tokenValue.charAt(0) == '%';
     }
 
-    /**
-     * <p>Getter for the field {@code name}.</p>
-     *
-     * @return a {@link java.lang.String} object
-     */
     public @NotNull String getName() {
         return this.name;
     }
 
-    /**
-     * <p>Setter for the field {@code name}.</p>
-     *
-     * @param name
-     *     a {@link java.lang.String} object
-     */
     public void setName(final @NotNull String name) {
         this.name = name;
     }
 
-    /**
-     * <p>Getter for the field {@code program}.</p>
-     *
-     * @return a {@link RISCVProgram} object
-     */
     public @Nullable RISCVProgram getProgram() {
         return this.program;
     }
 
-    /**
-     * <p>Setter for the field {@code program}.</p>
-     *
-     * @param program
-     *     a {@link RISCVProgram} object
-     */
     public void setProgram(final @Nullable RISCVProgram program) {
         this.program = program;
     }
 
-    /**
-     * <p>Getter for the field {@code fromLine}.</p>
-     *
-     * @return a int
-     */
     public int getFromLine() {
         return this.fromLine;
     }
 
-    /**
-     * <p>Setter for the field {@code fromLine}.</p>
-     *
-     * @param fromLine
-     *     a int
-     */
     public void setFromLine(final int fromLine) {
         this.fromLine = fromLine;
     }
 
-    /**
-     * <p>getOriginalFromLine.</p>
-     *
-     * @return a int
-     */
     public int getOriginalFromLine() {
         return this.origFromLine;
     }
 
-    /**
-     * <p>setOriginalFromLine.</p>
-     *
-     * @param origFromLine
-     *     a int
-     */
     public void setOriginalFromLine(final int origFromLine) {
         this.origFromLine = origFromLine;
     }
 
-    /**
-     * <p>Getter for the field {@code toLine}.</p>
-     *
-     * @return a int
-     */
     public int getToLine() {
         return this.toLine;
     }
 
-    /**
-     * <p>Setter for the field {@code toLine}.</p>
-     *
-     * @param toLine
-     *     a int
-     */
     public void setToLine(final int toLine) {
         this.toLine = toLine;
     }
 
-    /**
-     * <p>setOriginalToLine.</p>
-     *
-     * @param origToLine
-     *     a int
-     */
     public void setOriginalToLine(final int origToLine) {
         this.origToLine = origToLine;
     }
 
-    /**
-     * <p>Getter for the field {@code args}.</p>
-     *
-     * @return a {@link java.util.ArrayList} object
-     */
     public List<String> getArgs() {
         return this.args;
     }
@@ -248,7 +186,12 @@ public final class Macro {
      * @return {@code line}-th line of source code, with substituted
      * arguments
      */
-    public String getSubstitutedLine(final int line, final TokenList args, final long counter, final ErrorList errors) {
+    public String getSubstitutedLine(
+        final int line,
+        final TokenList args,
+        final long counter,
+        final ErrorList errors
+    ) {
         final TokenList tokens = this.program.getTokenList().get(line - 1);
         var sourceLine = this.program.getSourceLine(line);
 
@@ -288,12 +231,6 @@ public final class Macro {
         return (Collections.binarySearch(this.labels, value) >= 0);
     }
 
-    /**
-     * <p>addLabel.</p>
-     *
-     * @param value
-     *     a {@link java.lang.String} object
-     */
     public void addLabel(final String value) {
         this.labels.add(value);
     }
@@ -309,8 +246,14 @@ public final class Macro {
     @Override
     public int hashCode() {
         return Objects.hash(
-            this.name, this.program, this.labels, this.fromLine, this.toLine, this.origFromLine,
-            this.origToLine, this.args
+            this.name,
+            this.program,
+            this.labels,
+            this.fromLine,
+            this.toLine,
+            this.origFromLine,
+            this.origToLine,
+            this.args
         );
     }
 }

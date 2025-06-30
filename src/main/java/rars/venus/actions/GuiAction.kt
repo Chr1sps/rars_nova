@@ -11,7 +11,7 @@ import javax.swing.KeyStroke
  */
 abstract class GuiAction @JvmOverloads protected constructor(
     name: String,
-    description: String,
+    description: String? = null,
     icon: Icon? = null,
     /**
      * When a dropdown menu is open, pressing this key will
@@ -33,9 +33,13 @@ abstract class GuiAction @JvmOverloads protected constructor(
     }
 
     companion object {
-        const val APPLY_TOOL_TIP_TEXT: String = "Apply current settings now and leave dialog open"
-        const val RESET_TOOL_TIP_TEXT: String = "Reset to initial settings without applying"
-        const val CANCEL_TOOL_TIP_TEXT: String = "Close dialog without applying current settings"
-        const val CLOSE_TOOL_TIP_TEXT: String = "Apply current settings and close dialog"
+        const val APPLY_TOOL_TIP_TEXT: String =
+            "Apply current settings now and leave dialog open"
+        const val RESET_TOOL_TIP_TEXT: String =
+            "Reset to initial settings without applying"
+        const val CANCEL_TOOL_TIP_TEXT: String =
+            "Close dialog without applying current settings"
+        const val CLOSE_TOOL_TIP_TEXT: String =
+            "Apply current settings and close dialog"
     }
 }

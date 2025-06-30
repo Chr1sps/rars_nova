@@ -3,13 +3,14 @@ package rars.riscv.syscalls;
 import org.jetbrains.annotations.NotNull;
 import rars.logging.Logger;
 import rars.logging.LoggingExtKt;
-import rars.logging.RARSLogging;
 
 import javax.sound.midi.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static rars.logging.RARSLoggingKt.RARSLogging;
 
 //  The ToneGenerator and Tone classes were developed by Otterbein College
 //  student Tony Brock in July 2007. They simulate MIDI output through the

@@ -10,12 +10,11 @@ import rars.util.toHexStringWithPrefix
 import rars.venus.actions.GuiAction
 import rars.venus.settings.closeDialog
 import rars.venus.util.BorderLayout
+import rars.venus.util.onWindowClosing
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Label
 import java.awt.event.ActionEvent
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import java.io.IOException
 import javax.swing.*
 import javax.swing.border.EmptyBorder
@@ -29,19 +28,18 @@ class FileDumpMemoryAction(
     mnemonic: Int, accel: KeyStroke, gui: VenusUI
 ) : GuiAction(name, description, icon, mnemonic, accel, gui) {
 
-    override fun actionPerformed(e: ActionEvent): Unit = createDumpDialog().run {
-        pack()
-        setLocationRelativeTo(this@FileDumpMemoryAction.mainUI)
-        isVisible = true
-    }
+    override fun actionPerformed(e: ActionEvent): Unit =
+        createDumpDialog().run {
+            pack()
+            setLocationRelativeTo(this@FileDumpMemoryAction.mainUI)
+            isVisible = true
+        }
 
     /** The dump dialog that appears when menu item is selected. */
     private fun createDumpDialog() = JDialog(mainUI, TITLE, true).apply {
         contentPane = buildDialogPanel(this)
         defaultCloseOperation = JDialog.DO_NOTHING_ON_CLOSE
-        addWindowListener(object : WindowAdapter() {
-            override fun windowClosing(we: WindowEvent?) = closeDialog()
-        })
+        onWindowClosing { closeDialog() }
     }
 
     /** Set contents of dump dialog. */
@@ -84,9 +82,10 @@ class FileDumpMemoryAction(
         }
 
         // Create segment selector. First element selected by default.
-        val segmentListSelector = JComboBox(actualSegments.toTypedArray()).apply {
-            selectedIndex = 0
-        }
+        val segmentListSelector =
+            JComboBox(actualSegments.toTypedArray()).apply {
+                selectedIndex = 0
+            }
         val segmentPanel = JPanel().apply {
             BorderLayout {
                 this[BorderLayout.NORTH] = JLabel("Memory Segment")
@@ -113,7 +112,13 @@ class FileDumpMemoryAction(
         }
         val controlPanel = Box.createHorizontalBox().apply {
             add(Box.createHorizontalGlue())
-            add(createDumpButton(dialog, formatListSelector, segmentListSelector))
+            add(
+                createDumpButton(
+                    dialog,
+                    formatListSelector,
+                    segmentListSelector
+                )
+            )
             add(Box.createHorizontalGlue())
             add(cancelButton)
             add(Box.createHorizontalGlue())
@@ -135,7 +140,8 @@ class FileDumpMemoryAction(
         segmentListSelector: JComboBox<AugmentedSegmentInfo>
     ): JButton = JButton("Dump").apply {
         addActionListener {
-            val selectedSegment = segmentListSelector.selectedItem as AugmentedSegmentInfo
+            val selectedSegment =
+                segmentListSelector.selectedItem as AugmentedSegmentInfo
             val wasDumped = performDump(
                 selectedSegment.segmentInfo.baseAddress,
                 selectedSegment.actualHighAddress,
@@ -149,7 +155,11 @@ class FileDumpMemoryAction(
 
     // User has clicked "Dump" button, so launch a file chooser then get
     // segment (memory range) and format selections and save to the file.
-    private fun performDump(firstAddress: Int, lastAddress: Int, format: DumpFormat): Boolean {
+    private fun performDump(
+        firstAddress: Int,
+        lastAddress: Int,
+        format: DumpFormat
+    ): Boolean {
         val saveDialog = JFileChooser(this.mainUI.editor.currentSaveDirectory)
         saveDialog.setDialogTitle(TITLE)
         var operationOK = false
@@ -165,7 +175,8 @@ class FileDumpMemoryAction(
                     this.mainUI,
                     "File " + theFile.getName() + " already exists.  Do you wish to overwrite it?",
                     "Overwrite existing file?",
-                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE
                 )
                 when (overwrite) {
                     JOptionPane.YES_OPTION -> {}
@@ -176,7 +187,12 @@ class FileDumpMemoryAction(
             }
             if (operationOK) {
                 try {
-                    format.dumpMemoryRange(theFile, firstAddress, lastAddress, Globals.MEMORY_INSTANCE)
+                    format.dumpMemoryRange(
+                        theFile,
+                        firstAddress,
+                        lastAddress,
+                        Globals.MEMORY_INSTANCE
+                    )
                 } catch (_: IOException) {
                 }
             }
@@ -191,7 +207,13 @@ class FileDumpMemoryAction(
             list: JList<*>?, value: Any, index: Int,
             isSelected: Boolean, cellHasFocus: Boolean
         ): Component {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+            super.getListCellRendererComponent(
+                list,
+                value,
+                index,
+                isSelected,
+                cellHasFocus
+            )
             value as DumpFormat
             toolTipText = value.description
             text = value.name
@@ -199,7 +221,10 @@ class FileDumpMemoryAction(
         }
     }
 
-    private data class AugmentedSegmentInfo(val segmentInfo: SegmentInfo, val actualHighAddress: Int) {
+    private data class AugmentedSegmentInfo(
+        val segmentInfo: SegmentInfo,
+        val actualHighAddress: Int
+    ) {
         override fun toString() = String.format(
             "%s (%s - %s)",
             segmentInfo.name,

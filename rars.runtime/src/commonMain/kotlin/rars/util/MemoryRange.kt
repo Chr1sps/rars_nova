@@ -3,7 +3,7 @@ package rars.util
 /**
  * A closed range implementation for types that do not implement [Comparable].
  */
-interface MyClosedRange<T> {
+interface MemoryRange<T> {
     val start: T
     val endInclusive: T
     operator fun contains(value: T): Boolean
@@ -12,11 +12,11 @@ interface MyClosedRange<T> {
     companion object {
         fun <T : Comparable<T>> fromClosedRange(
             range: ClosedRange<T>,
-        ): MyClosedRange<T> = KtClosedRangeDecorator(range)
+        ): MemoryRange<T> = KtClosedRangeDecorator(range)
     }
 
     private data class KtClosedRangeDecorator<T : Comparable<T>>(private val original: ClosedRange<T>) :
-        MyClosedRange<T> {
+        MemoryRange<T> {
         override val start: T by original::start
         override val endInclusive: T by original::endInclusive
         override fun contains(value: T): Boolean = original.contains(value)
@@ -24,5 +24,5 @@ interface MyClosedRange<T> {
     }
 }
 
-operator fun <T> MyClosedRange<T>.contains(otherRange: MyClosedRange<T>): Boolean =
+operator fun <T> MemoryRange<T>.contains(otherRange: MemoryRange<T>): Boolean =
     otherRange.start in this && otherRange.endInclusive in this

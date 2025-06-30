@@ -4,17 +4,17 @@ import kotlin.Unit;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.logging.Logger;
-import rars.logging.RARSLogging;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.util.BinaryUtilsKt;
 import rars.venus.VenusUI;
-import rars.venus.util.MouseListenerBuilder;
 
 import javax.swing.*;
 import java.awt.*;
 
+import static rars.logging.RARSLoggingKt.RARSLogging;
 import static rars.util.UtilsKt.unwrap;
+import static rars.venus.util.ListenerUtilsKt.onMouseClicked;
 
 enum DisplaySegment {
     A((byte) 0b00000001),
@@ -376,32 +376,29 @@ public final class DigitalLabSim extends AbstractTool {
                 button.setBackground(Color.WHITE);
                 button.setMargin(new Insets(10, 10, 10, 10));
                 final var keyboardClickValue = i;
-                button.addMouseListener(MouseListenerBuilder.create()
-                    .onMouseClicked(e -> {
-                        if (DigitalLabSim.KeyBoardValueButtonClick != -1) {
-                            // Button already pressed -> now release
-                            DigitalLabSim.KeyBoardValueButtonClick = -1;
-                            DigitalLabSim.this.updateMMIOControlAndData(
-                                DigitalLabSim.this.keyboardOutAddress,
-                                0
-                            );
-                            for (final var btn : HexaKeyboard.this.button) {
-                                btn.setBackground(Color.WHITE);
-                            }
-                        } else {
-                            // new button pressed
-                            DigitalLabSim.KeyBoardValueButtonClick = keyboardClickValue;
-                            HexaKeyboard.this.button[DigitalLabSim.KeyBoardValueButtonClick].setBackground(
-                                Color.GREEN);
-                            if (DigitalLabSim.KeyboardInterruptOnOff) {
-                                Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(
-                                    DigitalLabSim.EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
-                            }
-
+                onMouseClicked(button, e -> {
+                    if (DigitalLabSim.KeyBoardValueButtonClick != -1) {
+                        // Button already pressed -> now release
+                        DigitalLabSim.KeyBoardValueButtonClick = -1;
+                        DigitalLabSim.this.updateMMIOControlAndData(
+                            DigitalLabSim.this.keyboardOutAddress,
+                            0
+                        );
+                        for (final var btn : HexaKeyboard.this.button) {
+                            btn.setBackground(Color.WHITE);
                         }
-                        return Unit.INSTANCE;
-                    })
-                    .build());
+                    } else {
+                        // new button pressed
+                        DigitalLabSim.KeyBoardValueButtonClick = keyboardClickValue;
+                        HexaKeyboard.this.button[DigitalLabSim.KeyBoardValueButtonClick].setBackground(
+                            Color.GREEN);
+                        if (DigitalLabSim.KeyboardInterruptOnOff) {
+                            Globals.INTERRUPT_CONTROLLER.registerExternalInterrupt(
+                                DigitalLabSim.EXTERNAL_INTERRUPT_HEXA_KEYBOARD);
+                        }
+                    }
+                    return Unit.INSTANCE;
+                });
                 this.button[i] = button;
                 this.add(button);
             }

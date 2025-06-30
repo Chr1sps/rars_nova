@@ -2,6 +2,8 @@ package rars.venus.settings.editor.views
 
 import rars.settings.SettingsTheme
 import rars.venus.util.BorderLayout
+import rars.venus.util.CardLayout
+import rars.venus.util.JPanel
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Dimension
@@ -17,18 +19,21 @@ class PickerCardView(
     val presetsView = PresetsView()
     val syntaxStyleView = SyntaxStyleView()
     val fontSettingsView = FontSettingsView()
-    val otherSettingsView = OtherSettingsView(initialCaretBlinkRate, initialEditorTabSize)
+    val otherSettingsView =
+        OtherSettingsView(initialCaretBlinkRate, initialEditorTabSize)
 
-    private val upperLayout = CardLayout()
-
-    private val upperPanel = JPanel(upperLayout).apply {
-        add(JPanel(), EMPTY)
-        add(fontSettingsView, FONT)
-        add(presetsView, PRESETS)
-        add(baseStyleView, BASE)
-        add(syntaxStyleView, SYNTAX)
-        add(otherSettingsView, OTHER)
+    private val upperLayout: CardLayout
+    private val upperPanel = JPanel {
+        CardLayout {
+            this[EMPTY] = JPanel()
+            this[FONT] = fontSettingsView
+            this[PRESETS] = presetsView
+            this[BASE] = baseStyleView
+            this[SYNTAX] = syntaxStyleView
+            this[OTHER] = otherSettingsView
+        }.also { upperLayout = it }
     }
+
 
     init {
         preferredSize = Dimension(450, 450)

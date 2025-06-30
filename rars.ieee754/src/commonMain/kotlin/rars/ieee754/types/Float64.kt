@@ -61,7 +61,7 @@ class Float64(val bits: Long) : Floating<Float64> {
         return ExactFloat(sign, exponent, significand)
     }
 
-    companion object : FloatingFactory<Float64> {
+    companion object Factory : FloatingFactory<Float64> {
         override val NaN = Float64(0x7FF8000000000000L)
         override val zero = Float64(0)
         override val negativeZero = Float64(Long.MIN_VALUE)

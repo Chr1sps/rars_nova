@@ -2,68 +2,53 @@ package rars.venus.settings.editor.views
 
 import rars.util.FontUtilities
 import rars.util.FontWeight
+import rars.venus.util.GridBagLayout
 import java.awt.GridBagConstraints
-import java.awt.GridBagLayout
 import java.awt.Insets
 import javax.swing.*
 
 class FontSettingsView : JPanel() {
-    val fontSizeSpinner: JSpinner
-    val fontSelector: JComboBox<String>
-    val fontWeightSelector: JComboBox<FontWeight>
-    val ligaturesCheckbox: JCheckBox
+    val fontSizeSpinner = JSpinner().apply {
+        model = SpinnerNumberModel(
+            /* value = */ 12,
+            /* minimum = */ 1,
+            /* maximum = */ 100,
+            /* stepSize = */ 1
+        )
+        toolTipText = "Current font size in points."
+    }
+    val fontSelector: JComboBox<String> =
+        JComboBox(FontUtilities.allFontFamilies).apply {
+            isEditable = false
+            maximumRowCount = 20
+        }
+    val fontWeightSelector: JComboBox<FontWeight> =
+        JComboBox(FontWeight.entries.toTypedArray()).apply {
+            isEditable = false
+            maximumRowCount = FontWeight.entries.size
+        }
+    val ligaturesCheckbox = JCheckBox().apply {
+        toolTipText = "Enable or disable ligatures."
+    }
 
     init {
-        this.layout = GridBagLayout()
-        val gbc = GridBagConstraints()
+        val baseConstraints = GridBagConstraints().apply {
+            fill = GridBagConstraints.BOTH
+            insets = Insets(5, 5, 5, 5)
+        }
+        GridBagLayout(baseConstraints) {
+            add(FONT_LABEL, gridx = 0, gridy = 0)
+            add(fontSelector, gridx = 1, gridy = 0)
 
-        gbc.fill = GridBagConstraints.BOTH
-        gbc.insets = Insets(5, 5, 5, 5)
+            add(SIZE_LABEL, gridx = 0, gridy = 1)
+            add(fontSizeSpinner, gridx = 1, gridy = 1)
 
-        // font family
-        gbc.gridy = 0
-        gbc.gridx = 0
-        add(FONT_LABEL, gbc)
-        val fontFamilies = FontUtilities.allFontFamilies
-        this.fontSelector = JComboBox(fontFamilies)
-        this.fontSelector.setEditable(false)
-        this.fontSelector.setMaximumRowCount(20)
-        gbc.gridx = 1
-        this.add(fontSelector, gbc)
+            add(WEIGHT_LABEL, gridx = 0, gridy = 2)
+            add(fontWeightSelector, gridx = 1, gridy = 2)
 
-        // font size
-        gbc.gridy = 1
-        gbc.gridx = 0
-        this.add(SIZE_LABEL, gbc)
-        val fontSizeModel = SpinnerNumberModel(
-            12,
-            1,
-            100,
-            1
-        )
-        this.fontSizeSpinner = JSpinner(fontSizeModel)
-        this.fontSizeSpinner.setToolTipText("Current font size in points.")
-        gbc.gridx = 1
-        this.add(fontSizeSpinner, gbc)
-
-        // font weight
-        gbc.gridy = 2
-        gbc.gridx = 0
-        this.add(WEIGHT_LABEL, gbc)
-        this.fontWeightSelector = JComboBox<FontWeight>(FontWeight.entries.toTypedArray())
-        this.fontWeightSelector.setEditable(false)
-        this.fontWeightSelector.setMaximumRowCount(FontWeight.entries.size)
-        gbc.gridx = 1
-        this.add(fontWeightSelector, gbc)
-
-        // ligatures
-        gbc.gridy = 3
-        gbc.gridx = 0
-        this.add(LIGATURES_LABEL, gbc)
-        this.ligaturesCheckbox = JCheckBox()
-        this.ligaturesCheckbox.setToolTipText("Enable or disable ligatures.")
-        gbc.gridx = 1
-        this.add(ligaturesCheckbox, gbc)
+            add(LIGATURES_LABEL, gridx = 0, gridy = 3)
+            add(ligaturesCheckbox, gridx = 1, gridy = 3)
+        }
     }
 
     companion object {

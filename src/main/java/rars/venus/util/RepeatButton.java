@@ -1,13 +1,7 @@
 package rars.venus.util;
 
-import org.jetbrains.annotations.NotNull;
-import rars.logging.Logger;
-import rars.logging.LoggingExtKt;
-import rars.logging.RARSLogging;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -37,24 +31,9 @@ import java.awt.event.MouseListener;
  * firing anyway, except to process all ActionListeners internally. But
  * realistically, it probably doesn't matter.
  */
-public class RepeatButton extends JButton
-    implements ActionListener, MouseListener {
-    private static final @NotNull Logger LOGGER = RARSLogging.forJavaClass(
-        RepeatButton.class);
-    /**
-     * Testing flag. Set in main method.
-     */
-    private static boolean testing = false;
-    /**
-     * The pressed state for this button.
-     */
-    private boolean pressed = false;
-    /**
-     * Flag to indicate that the button should fire events when held.
-     * If false, the button is effectively a plain old JButton, but
-     * there may be times when this feature might wish to be disabled.
-     */
-    private boolean repeatEnabled = true;
+public class RepeatButton extends JButton {
+
+    private boolean isPressed = false;
     /**
      * The hold-down timer for this button.
      */
@@ -77,57 +56,73 @@ public class RepeatButton extends JButton
      */
     private int modifiers = 0;
 
-    /**
-     * Creates a button with an icon.
-     *
-     * @param icon
-     *     the button icon
-     */
-    public RepeatButton(final Icon icon) {
-        super(icon);
-        this.init();
-    }
-
-    /**
-     * Creates a button with text.
-     *
-     * @param text
-     *     the button text
-     */
-    public RepeatButton(final String text) {
-        super(text);
-        this.init();
-    }
-
-    /**
-     * Main method, for testing. Creates a frame with both styles of menu.
-     *
-     * @param args
-     *     the command-line arguments
-     */
-    public static void main(final String[] args) {
-        RepeatButton.testing = true;
-        final JFrame f = new JFrame("RepeatButton Test");
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        final JPanel p = new JPanel();
-        final RepeatButton b = new RepeatButton("hold me");
-        b.setActionCommand("test");
-        b.addActionListener(b);
-        p.add(b);
-        f.getContentPane().add(p);
-        f.pack();
-        f.setVisible(true);
-    }
-
-    /**
-     * Initializes the button.
-     */
-    private void init() {
-        this.addMouseListener(this);
+    public RepeatButton(final Icon icon, final String text) {
+        super(text, icon);
         // initialize timers for button holding...
-        this.timer = new Timer(this.delay, this);
-        this.timer.setRepeats(true);
+        timer = new Timer(this.delay, ae -> {
+            // process events only from this components
+            if (ae.getSource() == timer) {
+                final var event = new ActionEvent(
+                    this, ActionEvent.ACTION_PERFORMED,
+                    super.getActionCommand(), modifiers
+                );
+                super.fireActionPerformed(event);
+            }
+        });
+        timer.setRepeats(true);
+        addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(final MouseEvent e) {
+                if (e.getSource() == RepeatButton.this) {
+                    isPressed = false;
+                    if (timer.isRunning()) {
+                        timer.stop();
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(final MouseEvent e) {
+                if (e.getSource() == RepeatButton.this && isEnabled()) {
+                    isPressed = true;
+                    if (!timer.isRunning()) {
+                        modifiers = e.getModifiersEx();
+                        timer.setInitialDelay(initialDelay);
+                        timer.start();
+                    }
+                }
+            }
+
+            @Override
+            public void mouseReleased(final MouseEvent e) {
+                if (e.getSource() == RepeatButton.this) {
+                    isPressed = false;
+                    if (timer.isRunning()) {
+                        timer.stop();
+                    }
+                }
+            }
+
+            @Override
+            public void mouseEntered(final MouseEvent e) {
+                if (e.getSource() == RepeatButton.this && isEnabled()) {
+                    if (isPressed && !timer.isRunning()) {
+                        modifiers = e.getModifiersEx();
+                        timer.setInitialDelay(delay);
+                        timer.start();
+                    }
+                }
+            }
+
+            @Override
+            public void mouseExited(final MouseEvent me) {
+                if (me.getSource() == RepeatButton.this) {
+                    if (timer.isRunning()) {
+                        timer.stop();
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -136,7 +131,7 @@ public class RepeatButton extends JButton
      * @return the delay
      */
     public int getDelay() {
-        return this.delay;
+        return delay;
     }
 
     /**
@@ -146,7 +141,7 @@ public class RepeatButton extends JButton
      *     the delay
      */
     public void setDelay(final int d) {
-        this.delay = d;
+        delay = d;
     }
 
     /**
@@ -155,7 +150,7 @@ public class RepeatButton extends JButton
      * @return the initial delay
      */
     public int getInitialDelay() {
-        return this.initialDelay;
+        return initialDelay;
     }
 
     /**
@@ -165,37 +160,7 @@ public class RepeatButton extends JButton
      *     the initial delay
      */
     public void setInitialDelay(final int d) {
-        this.initialDelay = d;
-    }
-
-    /**
-     * Checks if the button should fire events when held. If false, the
-     * button is effectively a plain old JButton, but there may be times
-     * when this feature might wish to be disabled.
-     *
-     * @return if true, the button should fire events when held
-     */
-    public boolean isRepeatEnabled() {
-        return this.repeatEnabled;
-    }
-
-    /**
-     * Sets if the button should fire events when held. If false, the
-     * button is effectively a plain old JButton, but there may be times
-     * when this feature might wish to be disabled. If false, it will
-     * also stop the timer if it's running.
-     *
-     * @param en
-     *     if true, the button should fire events when held
-     */
-    public void setRepeatEnabled(final boolean en) {
-        if (!en) {
-            this.pressed = false;
-            if (this.timer.isRunning()) {
-                this.timer.stop();
-            }
-        }
-        this.repeatEnabled = en;
+        initialDelay = d;
     }
 
     /**
@@ -207,114 +172,11 @@ public class RepeatButton extends JButton
     @Override
     public void setEnabled(final boolean en) {
         if (en != super.isEnabled()) {
-            this.pressed = false;
-            if (this.timer.isRunning()) {
-                this.timer.stop();
+            isPressed = false;
+            if (timer.isRunning()) {
+                timer.stop();
             }
         }
         super.setEnabled(en);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Handle action events. OVERRIDE THIS IN SUBCLASS!
-     */
-    @Override
-    public void actionPerformed(final ActionEvent ae) {
-        // process events only from this components
-        if (ae.getSource() == this.timer) {
-            final ActionEvent event = new ActionEvent(
-                this, ActionEvent.ACTION_PERFORMED,
-                super.getActionCommand(), this.modifiers
-            );
-            super.fireActionPerformed(event);
-        }
-        // testing code...
-        else if (RepeatButton.testing && ae.getSource() == this) {
-            LoggingExtKt.logDebug(LOGGER, ae::getActionCommand);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Handle mouse clicked events.
-     */
-    @Override
-    public void mouseClicked(final MouseEvent me) {
-        // process events only from this components
-        if (me.getSource() == this) {
-            this.pressed = false;
-            if (this.timer.isRunning()) {
-                this.timer.stop();
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Handle mouse pressed events.
-     */
-    @Override
-    public void mousePressed(final MouseEvent me) {
-        // process events only from this components
-        if (me.getSource() == this && this.isEnabled() && this.repeatEnabled) {
-            this.pressed = true;
-            if (!this.timer.isRunning()) {
-                this.modifiers = me.getModifiersEx();
-                this.timer.setInitialDelay(this.initialDelay);
-                this.timer.start();
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Handle mouse released events.
-     */
-    @Override
-    public void mouseReleased(final MouseEvent me) {
-        // process events only from this components
-        if (me.getSource() == this) {
-            this.pressed = false;
-            if (this.timer.isRunning()) {
-                this.timer.stop();
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Handle mouse entered events.
-     */
-    @Override
-    public void mouseEntered(final MouseEvent me) {
-        // process events only from this components
-        if (me.getSource() == this && this.isEnabled() && this.repeatEnabled) {
-            if (this.pressed && !this.timer.isRunning()) {
-                this.modifiers = me.getModifiersEx();
-                this.timer.setInitialDelay(this.delay);
-                this.timer.start();
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Handle mouse exited events.
-     */
-    @Override
-    public void mouseExited(final MouseEvent me) {
-        // process events only from this components
-        if (me.getSource() == this) {
-            if (this.timer.isRunning()) {
-                this.timer.stop();
-            }
-        }
     }
 }

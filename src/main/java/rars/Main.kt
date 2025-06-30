@@ -6,6 +6,8 @@ import rars.api.DisplayFormat
 import rars.api.Program
 import rars.api.ProgramOptions
 import rars.assembler.DataTypes
+import rars.logging.RARSLogging
+import rars.logging.fatal
 import rars.riscv.InstructionsRegistry
 import rars.riscv.hardware.memory.Memory
 import rars.riscv.hardware.memory.wordAligned
@@ -15,6 +17,9 @@ import rars.util.toAscii
 import rars.util.toHexStringWithPrefix
 import rars.util.translateToInt
 import rars.venus.VenusUI
+import java.awt.AWTEvent
+import java.awt.EventQueue
+import java.awt.Toolkit
 import java.io.File
 import java.io.PrintStream
 import javax.swing.JDialog
@@ -386,7 +391,27 @@ private fun launchIDE(options: ProgramOptions) {
         System.setProperty("apple.awt.application.name", "RARS Nova")
         System.setProperty("apple.awt.application.appearance", "system")
     }
+    Toolkit.getDefaultToolkit()
+        .systemEventQueue
+        .push(MyEventQueue())
+    Thread.setDefaultUncaughtExceptionHandler { thread, e ->
+        RootLogger.fatal(exception = e) {
+            """Uncaught exception in thread "${thread.name}" """
+        }
+    }
     SwingUtilities.invokeLater {
         Globals.GUI = VenusUI("RARS " + Globals.VERSION, options.files)
+    }
+}
+
+val RootLogger = RARSLogging.forName("RARSRootLogger")
+
+private class MyEventQueue : EventQueue() {
+    override fun dispatchEvent(event: AWTEvent?) {
+        try {
+            super.dispatchEvent(event)
+        } catch (e: Exception) {
+            RootLogger.fatal(exception = e) { "Exception in Swing EventQueue while dispatching event $event" }
+        }
     }
 }

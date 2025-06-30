@@ -1,9 +1,12 @@
 package rars.logging
 
-object WasmJsConsoleAppender : Appender {
-    override fun append(message: String, logLevel: LogLevel) {
+private class WasmJsConsoleAppender(
+    private val format: LoggingFormat
+) : Appender {
+    override fun append(context: LogContext) {
+        val message = format.run { context.format() }
         val jsMessage = message.toJsString()
-        when (logLevel) {
+        when (context.level) {
             LogLevel.NONE -> Unit
             LogLevel.FATAL,
             LogLevel.ERROR -> JsConsole.error(jsMessage)
@@ -14,6 +17,9 @@ object WasmJsConsoleAppender : Appender {
         }
     }
 }
+
+fun LoggerFactoryBuilder.jsConsoleAppender(format: LoggingFormat): Unit =
+    appender(WasmJsConsoleAppender(format))
 
 @JsName("console")
 @Suppress("unused")

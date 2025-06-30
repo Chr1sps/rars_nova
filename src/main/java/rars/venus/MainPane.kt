@@ -77,5 +77,5 @@ class MainPane(
     /**
      * Current edit pane.
      */
-    val currentEditTabPane: EditorTabNew? get() = this.editTabbedPane.currentEditTab
+    val currentEditTabPane: EditorTab? get() = this.editTabbedPane.currentEditTab
 }

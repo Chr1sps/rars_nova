@@ -6,7 +6,6 @@ import rars.RISCVProgram
 import rars.events.AssemblyError
 import rars.settings.BoolSetting
 import rars.venus.FileStatus
-import rars.venus.GlobalFileStatus
 import rars.venus.VenusUI
 import rars.venus.actions.GuiAction
 import rars.venus.isEdited
@@ -34,7 +33,7 @@ class RunAssembleAction(
             Globals.BOOL_SETTINGS.getSetting(BoolSetting.EXTENDED_ASSEMBLER_ENABLED)
         warningsAreErrors =
             Globals.BOOL_SETTINGS.getSetting(BoolSetting.WARNINGS_ARE_ERRORS)
-        val globalStatus = GlobalFileStatus.get()
+        val globalStatus = mainUI.fileStatus
         if (globalStatus is FileStatus.Existing) {
             if (globalStatus.isEdited()) {
                 this.mainUI.editor.save()
@@ -42,26 +41,26 @@ class RunAssembleAction(
             val systemFile = globalStatus.file
             either<AssemblyError, Unit> {
                 Globals.PROGRAM = RISCVProgram()
-                val filesToAssembleNew = mutableListOf<File>()
+                val filesToAssemble = mutableListOf<File>()
                 if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_ALL)) {
                     // setting calls 
                     // for multiple
                     // file assembly
-                    filesToAssembleNew.addAll(
+                    filesToAssemble.addAll(
                         systemFile.parentFile.listFiles { file ->
                             file.extension in Globals.FILE_EXTENSIONS
                         }
                     )
                 } else {
-                    filesToAssembleNew.add(systemFile)
+                    filesToAssemble.add(systemFile)
                 }
                 if (Globals.BOOL_SETTINGS.getSetting(BoolSetting.ASSEMBLE_OPEN)) {
                     this@RunAssembleAction.mainUI.editor.saveAll()
                     val paths: List<File> =
                         this@RunAssembleAction.mainUI.editor.openFilePaths
                     for (path in paths) {
-                        if (!filesToAssembleNew.contains(path)) {
-                            filesToAssembleNew.add(path)
+                        if (!filesToAssemble.contains(path)) {
+                            filesToAssemble.add(path)
                         }
                     }
                 }
@@ -75,7 +74,7 @@ class RunAssembleAction(
                     else
                         null
                 programsToAssemble = Globals.PROGRAM!!.prepareFilesForAssembly(
-                    filesToAssembleNew,
+                    filesToAssemble,
                     systemFile, exceptionHandler
                 ).bind()
                 messagesPane.postMessage(
@@ -95,7 +94,7 @@ class RunAssembleAction(
                 messagesPane.postMessage(
                     "$name: operation completed successfully.\n\n"
                 )
-                GlobalFileStatus.set(FileStatus.Existing.Runnable(systemFile))
+                mainUI.setFileStatus(FileStatus.Existing.Runnable(systemFile))
 
                 Globals.REGISTER_FILE.resetRegisters()
                 Globals.FP_REGISTER_FILE.resetRegisters()
@@ -109,6 +108,7 @@ class RunAssembleAction(
                         highlightCellForAddress(Globals.MEMORY_INSTANCE.memoryConfiguration.dataBaseAddress)
                         clearHighlighting()
                     }
+                    labelsWindow.setupTable()
                     textSegment.apply {
                         codeHighlighting = true
                         highlightStepAtPC()
@@ -163,7 +163,7 @@ class RunAssembleAction(
                         break
                     }
                 }
-                GlobalFileStatus.set(FileStatus.Existing.NotEdited(systemFile))
+                mainUI.fileStatus = FileStatus.Existing.NotEdited(systemFile)
             }
         }
     }
@@ -171,22 +171,18 @@ class RunAssembleAction(
     companion object {
         // Threshold for adding file to printed message of files being assembled.
         private const val LINE_LENGTH_LIMIT = 60
-        private lateinit var programsToAssemble: List<RISCVProgram>
+
+        @get:JvmStatic
+        lateinit var programsToAssemble: List<RISCVProgram>
+            private set
+
+        // These are both used by RunResetAction to re-assemble under identical
+        // conditions.
         var extendedAssemblerEnabled: Boolean = false
             private set
         var warningsAreErrors: Boolean = false
             private set
 
-        // These are both used by RunResetAction to re-assemble under identical
-        // conditions.
-        /**
-         *
-         * Getter for the field `programsToAssemble`.
-         *
-         * @return a [ArrayList] object
-         */
-        @JvmStatic
-        fun getProgramsToAssemble(): List<RISCVProgram> = programsToAssemble
 
         // Handy little utility for building comma-separated list of filenames
         // while not letting line length get out of hand.

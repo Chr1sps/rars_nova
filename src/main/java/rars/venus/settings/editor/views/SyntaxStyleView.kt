@@ -4,6 +4,7 @@ import rars.util.intersperseWith
 import rars.venus.settings.editor.ColorPickerButton
 import rars.venus.settings.editor.OptionSection
 import rars.venus.util.BoxLayout
+import rars.venus.util.JPanel
 import java.awt.Color
 import javax.swing.*
 
@@ -44,7 +45,8 @@ class SyntaxStyleView : JPanel() {
         val upperRow = buildRow(true, foregroundSection, backgroundSection)
 
         // bottom row
-        val bottomRow = buildRow(true, boldSection, italicSection, underlineSection)
+        val bottomRow =
+            buildRow(true, boldSection, italicSection, underlineSection)
 
         BoxLayout(BoxLayout.Y_AXIS) {
             +upperRow
@@ -54,7 +56,7 @@ class SyntaxStyleView : JPanel() {
     }
 }
 
-fun buildRow(addMargins: Boolean, vararg sections: JComponent): JPanel = JPanel().apply {
+fun buildRow(addMargins: Boolean, vararg sections: JComponent) = JPanel {
     BoxLayout(BoxLayout.X_AXIS) {
         if (addMargins) horizontalGlue()
         sections

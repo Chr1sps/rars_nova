@@ -2,10 +2,9 @@ package rars.logging
 
 import kotlin.reflect.KClass
 
-internal data object NoopLoggerFactory : LoggerFactory {
-    override fun forClass(cls: KClass<*>): Logger = NoopLogger
-    override fun forName(name: String): Logger = NoopLogger
-    override fun forObject(obj: Any): Logger = NoopLogger
+internal expect object NoopLoggerFactory : LoggerFactory {
+    override fun forClass(cls: KClass<*>): Logger
+    override fun forName(name: String): Logger
 }
 
 internal data object NoopLogger : Logger {

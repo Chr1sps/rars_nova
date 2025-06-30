@@ -1,321 +1,279 @@
-package rars.venus.settings;
+package rars.venus.settings
 
-import kotlin.Unit;
-import org.jetbrains.annotations.NotNull;
-import rars.Globals;
-import rars.riscv.hardware.memory.AbstractMemoryConfiguration;
-import rars.riscv.hardware.memory.MemoryConfiguration;
-import rars.util.BinaryUtilsKt;
-import rars.venus.FileStatus;
-import rars.venus.GlobalFileStatus;
-import rars.venus.VenusUI;
-import rars.venus.actions.GuiAction;
+import rars.Globals
+import rars.riscv.hardware.memory.*
+import rars.settings.OtherSettings
+import rars.util.toHexStringWithPrefix
+import rars.venus.FileStatus
+import rars.venus.FileStatus.Existing.Running
+import rars.venus.FileStatus.Existing.Terminated
+import rars.venus.VenusUI
+import rars.venus.actions.GuiAction
+import rars.venus.util.*
+import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.Component
+import java.awt.Frame
+import java.awt.event.ActionEvent
+import javax.swing.*
+import javax.swing.border.EmptyBorder
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
-
-import static java.util.Objects.requireNonNull;
-import static rars.Globals.FONT_SETTINGS;
-import static rars.Globals.OTHER_SETTINGS;
+private class ConfigurationButton(
+    val configuration: MemoryConfiguration,
+    otherSettings: OtherSettings,
+) : JRadioButton(
+    configuration.description,
+    configuration == otherSettings.memoryConfiguration
+)
 
 /**
  * Action class for the Settings menu item for text editor settings.
  */
-public final class SettingsMemoryConfigurationAction extends GuiAction {
-    private static final String[] configurationItemNames = {
-        ".text base address",
-        "data segment base address",
-        ".extern base address",
-        "global pointer (gp)",
-        ".data base address",
-        "heap base address",
-        "stack pointer (sp)",
-        "stack base address",
-        "user space high address",
-        "kernel space base address",
-        "MMIO base address",
-        "kernel space high address",
-        "data segment limit address",
-        "text limit address",
-        "stack limit address",
-        "memory map limit address"
-    };
-
-    public SettingsMemoryConfigurationAction(
-        final String name,
-        final Icon icon,
-        final String descrip,
-        final Integer mnemonic,
-        final KeyStroke accel,
-        final @NotNull VenusUI mainUI
-    ) {
-        super(name, descrip, icon, mnemonic, accel, mainUI);
-    }
-
+class SettingsMemoryConfigurationAction(
+    name: String,
+    icon: Icon?,
+    descrip: String,
+    mnemonic: Int?,
+    accel: KeyStroke?,
+    mainUI: VenusUI
+) : GuiAction(name, descrip, icon, mnemonic, accel, mainUI) {
     /**
      * {@inheritDoc}
-     * <p>
+     *
+     *
      * When this action is triggered, launch a dialog to view and modify
      * editor settings.
      */
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        final JDialog configDialog = new MemoryConfigurationDialog(this.mainUI,
+    override fun actionPerformed(e: ActionEvent?) {
+        val configDialog: JDialog = MemoryConfigurationDialog(
+            this.mainUI,
             "Memory Configuration",
-            true);
-        configDialog.setVisible(true);
+            true
+        )
+        configDialog.isVisible = true
     }
 
-    // Handy class to connect button to its configuration...
-    private static class ConfigurationButton extends JRadioButton {
-        public final @NotNull MemoryConfiguration configuration;
+    private inner class MemoryConfigurationDialog(
+        owner: Frame?,
+        title: String?,
+        modality: Boolean
+    ) : JDialog(owner, title, modality) {
+        private var addressDisplay =
+            Array(MEMORY_CONFIGURATION_ADDRESSES_COUNT) {
+                JTextField().apply {
+                    isEditable = false
+                    font = Globals.FONT_SETTINGS.currentFont
+                    isFocusable = false
+                }
+            }
+        private var nameDisplay =
+            Array(MEMORY_CONFIGURATION_ADDRESSES_COUNT) { JLabel() }
+        lateinit var selectedConfigurationButton: ConfigurationButton
+        lateinit var initialConfigurationButton: ConfigurationButton
 
-        public ConfigurationButton(final @NotNull MemoryConfiguration config) {
-            super(config.getDescription(),
-                config == OTHER_SETTINGS.getMemoryConfiguration());
-            this.configuration = config;
+        init {
+            contentPane = buildDialogPanel()
+            defaultCloseOperation = DO_NOTHING_ON_CLOSE
+            onWindowClosing { performClose() }
+            pack()
+            setLocationRelativeTo(owner)
         }
-    }
 
-    /// Private class to do all the work!
-    private final class MemoryConfigurationDialog extends JDialog
-        implements ActionListener {
-        JTextField[] addressDisplay;
-        JLabel[] nameDisplay;
-        ConfigurationButton selectedConfigurationButton, initialConfigurationButton;
-
-        private MemoryConfigurationDialog(
-            final Frame owner,
-            final String title,
-            final boolean modality
-        ) {
-            super(owner, title, modality);
-            this.setContentPane(this.buildDialogPanel());
-            this.setDefaultCloseOperation(
-                JDialog.DO_NOTHING_ON_CLOSE);
-            this.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(final WindowEvent we) {
-                        MemoryConfigurationDialog.this.performClose();
+        private fun buildDialogPanel(): JPanel = JPanel {
+            border = EmptyBorder(10, 10, 10, 10)
+            this.BorderLayout {
+                this[BorderLayout.CENTER] = JPanel {
+                    FlowLayout {
+                        +buildConfigChooser()
+                        +buildConfigDisplay()
                     }
-                });
-            this.pack();
-            this.setLocationRelativeTo(owner);
-        }
-
-        private JPanel buildDialogPanel() {
-            final JPanel dialogPanel = new JPanel(new BorderLayout());
-            dialogPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-            final JPanel configInfo = new JPanel(new FlowLayout());
-            configInfo.add(this.buildConfigChooser());
-            configInfo.add(this.buildConfigDisplay());
-            dialogPanel.add(configInfo);
-            dialogPanel.add(this.buildControlPanel(), BorderLayout.SOUTH);
-            return dialogPanel;
-        }
-
-        private Component buildConfigChooser() {
-            final JPanel chooserPanel = new JPanel(new GridLayout(4, 1));
-            final ButtonGroup choices = new ButtonGroup();
-            for (final var configuration : MemoryConfiguration.getEntries()) {
-                final var button = new ConfigurationButton(configuration);
-                button.addActionListener(this);
-                if (button.isSelected()) {
-                    this.selectedConfigurationButton = button;
-                    this.initialConfigurationButton = button;
                 }
-                choices.add(button);
-                chooserPanel.add(button);
+                this[BorderLayout.SOUTH] = buildControlPanel()
             }
-            chooserPanel.setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(
-                    Color.BLACK), "Configuration"));
-            return chooserPanel;
         }
 
-        private Component buildConfigDisplay() {
-            final JPanel displayPanel = new JPanel();
-            final var config = OTHER_SETTINGS.getMemoryConfiguration();
-            final int numItems = configurationItemNames.length;
-            final JPanel namesPanel = new JPanel(new GridLayout(numItems, 1));
-            final JPanel valuesPanel = new JPanel(new GridLayout(numItems, 1));
-            this.nameDisplay = new JLabel[numItems];
-            this.addressDisplay = new JTextField[numItems];
-            for (int i = 0; i < numItems; i++) {
-                this.nameDisplay[i] = new JLabel();
-                final var textField = new JTextField();
-                textField.setEditable(false);
-                textField.setFont(FONT_SETTINGS.getCurrentFont());
-                textField.setFocusable(false);
-                this.addressDisplay[i] = textField;
+        private fun buildConfigChooser() = JPanel {
+            val choices = ButtonGroup()
+            GridLayout(4, 1) {
+                MemoryConfiguration.entries
+                    .withIndex()
+                    .forEach { (index, configuration) ->
+                        val button = ConfigurationButton(
+                            configuration,
+                            Globals.OTHER_SETTINGS
+                        ).apply {
+                            addActionListener { e ->
+                                val button = e.source as ConfigurationButton
+                                val config = button.configuration
+                                setConfigDisplay(config)
+                                selectedConfigurationButton = button
+                            }
+                        }
+                        if (button.isSelected) {
+                            selectedConfigurationButton = button
+                            initialConfigurationButton = button
+                        }
+                        choices.add(button)
+                        this[index, 0] = button
+                    }
             }
-            FONT_SETTINGS.onChangeListenerHook.subscribe(ignored -> {
-                for (final var textField : this.addressDisplay) {
-                    textField.setFont(FONT_SETTINGS.getCurrentFont());
+            border = BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(
+                    Color.BLACK
+                ), "Configuration"
+            )
+        }
+
+        private fun buildConfigDisplay(): Component {
+            val numItems = MEMORY_CONFIGURATION_ADDRESSES_COUNT
+            Globals.FONT_SETTINGS.onChangeListenerHook.subscribe {
+                for (textField in this.addressDisplay) {
+                    textField.font = Globals.FONT_SETTINGS.currentFont
                 }
-                return Unit.INSTANCE;
-            });
+            }
             // Display vertically from high to low memory addresses so
             // add the components in reverse order.
-            for (int i = this.addressDisplay.length - 1; i >= 0; i--) {
-                namesPanel.add(this.nameDisplay[i]);
-                valuesPanel.add(this.addressDisplay[i]);
+//            val namesPanel = JPanel(GridLayout(numItems, 1))
+            val namesPanel = JPanel {
+                GridLayout(numItems, 1) {
+                    nameDisplay.reversed()
+                        .withIndex()
+                        .forEach { (index, label) ->
+                            this[index, 0] = label
+                        }
+                }
+                border = BorderFactory.createTitledBorder(
+                    BorderFactory.createLineBorder(Color.BLACK),
+                    "Memory Addresses",
+                )
             }
-            this.setConfigDisplay(config);
-            final Box columns = Box.createHorizontalBox();
-            columns.add(valuesPanel);
-            columns.add(Box.createHorizontalStrut(6));
-            columns.add(namesPanel);
-            displayPanel.add(columns);
-            return displayPanel;
+            val valuesPanel = JPanel {
+                GridLayout(rows = numItems, cols = 1) {
+                    addressDisplay.reversed()
+                        .withIndex()
+                        .forEach { (index, textField) ->
+                            this[index, 0] = textField
+                        }
+                }
+            }
+            val config = Globals.OTHER_SETTINGS.memoryConfiguration
+            setConfigDisplay(config)
+            val columns = Box.createHorizontalBox().apply {
+                add(valuesPanel)
+                add(Box.createHorizontalStrut(6))
+                add(namesPanel)
+            }
+            return JPanel {
+                add(columns)
+            }
         }
 
-        // Carry out action for the radio buttons.
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final var config = ((ConfigurationButton) e.getSource()).configuration;
-            this.setConfigDisplay(config);
-            this.selectedConfigurationButton = (ConfigurationButton) e.getSource();
-        }
 
         // Row of control buttons to be placed along the button of the dialog
-        private Component buildControlPanel() {
-            final Box controlPanel = Box.createHorizontalBox();
-            final JButton okButton = new JButton("Apply and Close");
-            okButton.setToolTipText(CLOSE_TOOL_TIP_TEXT);
-            okButton.addActionListener(
-                e -> {
-                    this.performApply();
-                    this.performClose();
-                });
-            final JButton applyButton = new JButton("Apply");
-            applyButton.setToolTipText(APPLY_TOOL_TIP_TEXT);
-            applyButton.addActionListener(
-                e -> this.performApply());
-            final JButton cancelButton = new JButton("Cancel");
-            cancelButton.setToolTipText(CANCEL_TOOL_TIP_TEXT);
-            cancelButton.addActionListener(
-                e -> this.performClose());
-            final JButton resetButton = new JButton("Reset");
-            resetButton.setToolTipText(RESET_TOOL_TIP_TEXT);
-            resetButton.addActionListener(
-                e -> this.performReset());
-            controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(okButton);
-            controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(applyButton);
-            controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(cancelButton);
-            controlPanel.add(Box.createHorizontalGlue());
-            controlPanel.add(resetButton);
-            controlPanel.add(Box.createHorizontalGlue());
-            return controlPanel;
+        private fun buildControlPanel(): Component {
+            val okButton = JButton("Apply and Close").apply {
+                toolTipText = CLOSE_TOOL_TIP_TEXT
+                addActionListener {
+                    performApply()
+                    performClose()
+                }
+            }
+            val applyButton = JButton("Apply").apply {
+                toolTipText = APPLY_TOOL_TIP_TEXT
+                addActionListener { performApply() }
+            }
+            val cancelButton = JButton("Cancel").apply {
+                toolTipText = CANCEL_TOOL_TIP_TEXT
+                addActionListener { performClose() }
+            }
+            val resetButton = JButton("Reset").apply {
+                toolTipText = RESET_TOOL_TIP_TEXT
+                addActionListener { performReset() }
+            }
+            return Box.createHorizontalBox().apply {
+                add(Box.createHorizontalGlue())
+                add(okButton)
+                add(Box.createHorizontalGlue())
+                add(applyButton)
+                add(Box.createHorizontalGlue())
+                add(cancelButton)
+                add(Box.createHorizontalGlue())
+                add(resetButton)
+                add(Box.createHorizontalGlue())
+            }
         }
 
-        private void performApply() {
-            final var currentConfiguration = OTHER_SETTINGS.getMemoryConfiguration();
-            final var newConfiguration = this.selectedConfigurationButton.configuration;
+        private fun performApply() {
+            val currentConfiguration =
+                Globals.OTHER_SETTINGS.memoryConfiguration
+            val newConfiguration =
+                this.selectedConfigurationButton.configuration
             if (newConfiguration != currentConfiguration) {
-                OTHER_SETTINGS.setMemoryConfigurationAndSave(newConfiguration);
-                Globals.setupGlobalMemoryConfiguration(newConfiguration);
-                SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow()
-                    .clearHighlighting();
-                SettingsMemoryConfigurationAction.this.mainUI.registersPane.getRegistersWindow()
-                    .updateRegisters();
-                SettingsMemoryConfigurationAction.this.mainUI.mainPane.executePane.getDataSegment()
-                    .updateBaseAddressComboBox();
-                // 21 July 2009 Re-assemble if the situation demands it to maintain consistency.
-                final var globalStatus = requireNonNull(GlobalFileStatus.get());
-                if (globalStatus instanceof FileStatus.Existing.Runnable ||
-                    globalStatus instanceof FileStatus.Existing.Running ||
-                    globalStatus instanceof FileStatus.Existing.Terminated) {
-                    if (globalStatus instanceof FileStatus.Existing.Running) {
-                        Globals.SIMULATOR.stopExecution();
+                Globals.OTHER_SETTINGS.setMemoryConfigurationAndSave(
+                    newConfiguration
+                )
+                Globals.setupGlobalMemoryConfiguration(newConfiguration)
+                mainUI.apply {
+                    registersPane.registersWindow.apply {
+                        clearHighlighting()
+                        updateRegisters()
                     }
-                    mainUI.getRunAssembleAction().actionPerformed(null);
+                    mainPane.executePane.dataSegment.updateBaseAddressComboBox()
+                }
+                val globalStatus = mainUI.fileStatus!!
+                if (globalStatus is FileStatus.Existing.Runnable ||
+                    globalStatus is Running ||
+                    globalStatus is Terminated
+                ) {
+                    if (globalStatus is Running) {
+                        Globals.SIMULATOR.stopExecution()
+                    }
+                    mainUI.runAssembleAction.actionPerformed(null)
                 }
             }
         }
 
-        private void performClose() {
-            this.setVisible(false);
-            this.dispose();
+        private fun performClose() {
+            isVisible = false
+            dispose()
         }
 
-        private void performReset() {
-            this.selectedConfigurationButton = this.initialConfigurationButton;
-            this.selectedConfigurationButton.setSelected(true);
-            this.setConfigDisplay(this.selectedConfigurationButton.configuration);
+        private fun performReset() {
+            selectedConfigurationButton = initialConfigurationButton
+            selectedConfigurationButton.isSelected = true
+            setConfigDisplay(selectedConfigurationButton.configuration)
         }
 
         // Set name values in JLabels and address values in the JTextFields
-        private void setConfigDisplay(final @NotNull AbstractMemoryConfiguration<Integer> config) {
-            final int[] configurationItemValues = {
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentBaseAddress(
-                    config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentBaseAddress(
-                    config),
-                config.getExternAddress(),
-                config.getGlobalPointerAddress(),
-                config.getDataBaseAddress(),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
-                    config),
-                config.getStackPointerAddress(),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getStackBaseAddress(
-                    config),
-                config.getUserHighAddress(),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelBaseAddress(
-                    config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapBaseAddress(
-                    config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getKernelHighAddress(
-                    config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getDataSegmentLimitAddress(
-                    config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getTextSegmentLimitAddress(
-                    config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getHeapBaseAddress(
-                    config),
-                rars.riscv.hardware.memory.MemoryConfigurationKt.getMemoryMapLimitAddress(
-                    config)
-            };
-            // Will use TreeMap to extract list of address-name pairs sorted by
-            // hex-stringified address. This will correctly handle kernel addresses,
-            // whose int values are negative and thus normal sorting yields incorrect
-            // results. There can be duplicate addresses, so I concatenate the name
-            // onto the address to make each key unique. Then slice off the name upon
-            // extraction.
-            final TreeMap<String, String> treeSortedByAddress = new TreeMap<>();
-            for (int i = 0; i < configurationItemValues.length; i++) {
-                treeSortedByAddress.put(
-                    BinaryUtilsKt.intToHexStringWithPrefix(
-                        configurationItemValues[i]) + configurationItemNames[i],
-                    configurationItemNames[i]
-                );
+        private fun setConfigDisplay(config: AbstractMemoryConfiguration<Int>) {
+            val labelAddressMap = config.run {
+                listOf(
+                    textSegmentBaseAddress to ".text base address",
+                    dataSegmentBaseAddress to ".data base address",
+                    externAddress to ".extern base address",
+                    globalPointerAddress to "global pointer (gp)",
+                    dataBaseAddress to ".data base address",
+                    heapBaseAddress to "heap base address",
+                    stackPointerAddress to "stack pointer (sp)",
+                    stackBaseAddress to "stack base address",
+                    userHighAddress to "user space high address",
+                    kernelBaseAddress to "kernel space base address",
+                    memoryMapBaseAddress to "MMIO base address",
+                    kernelHighAddress to "kernel space high address",
+                    dataSegmentLimitAddress to "data segment limit address",
+                    textSegmentLimitAddress to "text limit address",
+                    heapBaseAddress to "stack limit address",
+                    memoryMapLimitAddress to "memory map limit address"
+                )
             }
-            final Iterator<Map.Entry<String, String>> setSortedByAddress = treeSortedByAddress.entrySet()
-                .iterator();
-            final int addressStringLength = BinaryUtilsKt.intToHexStringWithPrefix(
-                    configurationItemValues[0])
-                .length();
-            for (int i = 0; i < configurationItemValues.length; i++) {
-                final Map.Entry<String, String> pair = setSortedByAddress.next();
-                this.nameDisplay[i].setText(pair.getValue());
-                this.addressDisplay[i].setText(pair.getKey()
-                    .substring(0, addressStringLength));
+            val sorted = labelAddressMap.sortedWith(
+                compareBy({ it.first }, { it.second })
+            )
+            sorted.withIndex().forEach { (index, pair) ->
+                val (address, description) = pair
+                nameDisplay[index].text = description
+                addressDisplay[index].text = address.toHexStringWithPrefix()
             }
         }
-
     }
-
 }

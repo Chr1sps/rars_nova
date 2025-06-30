@@ -2,7 +2,6 @@ package rars.venus.run
 
 import rars.Globals
 import rars.venus.FileStatus
-import rars.venus.GlobalFileStatus
 import rars.venus.VenusUI
 import rars.venus.actions.GuiAction
 import java.awt.event.ActionEvent
@@ -36,7 +35,7 @@ class RunResetAction(
         // I am choosing the second approach although it will slow down the reset
         // operation. The first approach requires additional Memory class methods.
         Globals.PROGRAM!!.assemble(
-            RunAssembleAction.getProgramsToAssemble(),
+            RunAssembleAction.programsToAssemble,
             RunAssembleAction.extendedAssemblerEnabled,
             RunAssembleAction.warningsAreErrors
         ).onLeft {
@@ -75,11 +74,10 @@ class RunResetAction(
                 highlightStepAtPC()
             }
         }
-        GlobalFileStatus.set(
-            FileStatus.Existing.Runnable(
-                (GlobalFileStatus.get()!! as FileStatus.Existing).file
-            )
+        mainUI.fileStatus = FileStatus.Existing.Runnable(
+            (mainUI.fileStatus!! as FileStatus.Existing).file
         )
+
         mainUI.run {
             registersPane.setSelectedComponent(executePane.registerValues)
             isMemoryReset = true
