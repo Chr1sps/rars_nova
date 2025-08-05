@@ -43,6 +43,7 @@ tasks {
         options.encoding = "UTF-8"
     }
     shadowJar {
+        archiveBaseName.set("rars-nova")
         archiveClassifier.set("")
         mergeServiceFiles()
         manifest {
