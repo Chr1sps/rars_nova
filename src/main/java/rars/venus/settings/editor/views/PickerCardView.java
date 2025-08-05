@@ -27,7 +27,8 @@ public final class PickerCardView extends JPanel {
         upperLayout = new CardLayout();
         upperPanel = new JPanel(upperLayout);
 
-        setPreferredSize(new Dimension(450, 450));
+        // Keep the top controls panel compact so the text area can dominate
+        setPreferredSize(new Dimension(450, 200));
         setMinimumSize(new Dimension(50, 50));
 
         final var emptyPanel = new JPanel();
@@ -44,7 +45,7 @@ public final class PickerCardView extends JPanel {
         upperPanel.add(syntaxStyleView, SYNTAX);
         upperPanel.add(otherSettingsView, OTHER);
 
-        this.add(upperPanel, BorderLayout.NORTH);
+        this.add(upperPanel, BorderLayout.CENTER);
     }
 
     public void showBaseStyleView() {

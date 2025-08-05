@@ -23,8 +23,16 @@ public final class SyntaxStyleSettingsController {
         this.view = view;
         this.parentController = parentController;
         this.textArea = textArea;
-        this.currentKey = TokenSettingKey.COMMENT; // dummy value
+        this.currentKey = TokenSettingKey.COMMENT; // initial value
         initializeView();
+
+        // initialize selection based on the list
+        final var selected = this.view.tokenTypesList.getSelectedValue();
+        if (selected != null) {
+            setCurrentKey(selected);
+        } else {
+            setCurrentKey(this.currentKey);
+        }
     }
 
     private void initializeView() {
@@ -46,6 +54,16 @@ public final class SyntaxStyleSettingsController {
             view.isItalic,
             view.isUnderline
         ).forEach(component -> component.addChangeListener(tokenStyleChangeListener));
+
+        // selection listener for the token types list
+        view.tokenTypesList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                final var key = view.tokenTypesList.getSelectedValue();
+                if (key != null) {
+                    setCurrentKey(key);
+                }
+            }
+        });
     }
 
     private @NotNull TokenStyle getTokenStyleFromView() {

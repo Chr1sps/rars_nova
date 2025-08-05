@@ -69,6 +69,8 @@ public final class HighlightingSettings {
         return HIGHLIGHTING_PREFIX + type.name + ENABLED;
     }
 
+    // endregion Preferences prefix methods
+    
     public @NotNull TokenStyle getTextSegmentHighlightingStyle() {
         return textSegmentHighlightingStyle;
     }
@@ -80,8 +82,6 @@ public final class HighlightingSettings {
     public @Nullable TokenStyle getDataSegmentHighlightingStyle() {
         return dataSegmentHighlightingStyle;
     }
-
-    // endregion Preferences prefix methods
 
     public void saveSettings() {
         writeTokenStyleToPreferences(HighlightingType.TEXT_SEGMENT, this.textSegmentHighlightingStyle);
@@ -195,7 +195,7 @@ public final class HighlightingSettings {
 
     // endregion Preference loading methods
 
-    public enum HighlightingType {
+    private enum HighlightingType {
         TEXT_SEGMENT("Text"),
         DATA_SEGMENT("Data"),
         REGISTER("Register"),

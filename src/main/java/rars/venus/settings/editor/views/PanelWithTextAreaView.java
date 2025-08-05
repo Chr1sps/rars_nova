@@ -16,18 +16,19 @@ public final class PanelWithTextAreaView extends JPanel {
     public final @NotNull TextEditingArea textArea;
 
     public PanelWithTextAreaView(final @NotNull PickerCardView pickerCardView) {
-        super();
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        super(new BorderLayout());
         this.pickerCardView = pickerCardView;
-        this.add(pickerCardView);
-        this.add(Box.createVerticalGlue());
+        // Top: controls/card view
+        this.add(pickerCardView, BorderLayout.NORTH);
+
+        // Center: text area that should expand to fill available space
         this.textArea = createTextArea();
         final var outerComponent = this.textArea.getOuterComponent();
-        final var textAreaSize = new Dimension(500, 300);
-        outerComponent.setMinimumSize(textAreaSize);
-        outerComponent.setPreferredSize(textAreaSize);
-        outerComponent.setMaximumSize(textAreaSize);
-        this.add(outerComponent);
+        // Provide only a modest minimum/preferred size; do not cap maximum to allow expansion
+        final var minSize = new Dimension(300, 200);
+        outerComponent.setMinimumSize(minSize);
+        outerComponent.setPreferredSize(new Dimension(500, 300));
+        this.add(outerComponent, BorderLayout.CENTER);
     }
 
     private static @NotNull TextEditingArea createTextArea() {

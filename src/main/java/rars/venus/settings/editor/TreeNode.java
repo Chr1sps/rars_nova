@@ -3,24 +3,23 @@ package rars.venus.settings.editor;
 import org.jetbrains.annotations.NotNull;
 import rars.settings.TokenSettingKey;
 
-public class TreeNode {
-    private final @NotNull String display;
+public sealed interface TreeNode {
+    @NotNull String display();
 
-    public TreeNode(final @NotNull String display) {
-        this.display = display;
+    record Normal(@NotNull String display) implements TreeNode {
+        @Override
+        public @NotNull String toString() {
+            return display;
+        }
     }
 
-    @Override
-    public @NotNull String toString() {
-        return display;
-    }
-
-    public static final class Syntax extends TreeNode {
-        public final @NotNull TokenSettingKey type;
-
-        public Syntax(@NotNull final TokenSettingKey type, @NotNull final String display) {
-            super(display);
-            this.type = type;
+    record Syntax(
+        @NotNull TokenSettingKey type,
+        @NotNull String display
+    ) implements TreeNode {
+        @Override
+        public @NotNull String toString() {
+            return display;
         }
     }
 }

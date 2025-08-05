@@ -76,16 +76,15 @@ public final class EditorSettingsController {
                 if (selectedNode == null) {
                     return;
                 }
-                switch (selectedNode.getUserObject()) {
-                    case final TreeNode.Syntax node -> {
-                        syntaxStyleSettingsController.setCurrentKey(node.type);
-                        pickerCardView.showSyntaxStyleView();
-                    }
-                    case final TreeNode node -> {
+                switch ((TreeNode) (selectedNode.getUserObject())) {
+                    case null -> { /* ignore */ }
+                    case final TreeNode.Normal node -> {
                         if (node == treePanel.fontSettingsNode) {
                             pickerCardView.showFontView();
                         } else if (node == treePanel.generalSchemeSettingsNode) {
                             pickerCardView.showBaseStyleView();
+                        } else if (node == treePanel.syntaxSettingsNode) {
+                            pickerCardView.showSyntaxStyleView();
                         } else if (node == treePanel.otherSettingsNode) {
                             pickerCardView.showOtherSettings();
                         } else if (node == treePanel.presetsNode) {
@@ -94,8 +93,7 @@ public final class EditorSettingsController {
                             pickerCardView.showEmpty();
                         }
                     }
-                    default -> {
-                    }
+                    case final TreeNode.Syntax node -> { /* deprecated: no per-token nodes in tree */ }
                 }
             }
         );

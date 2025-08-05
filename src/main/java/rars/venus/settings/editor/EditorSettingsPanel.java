@@ -48,7 +48,9 @@ public final class EditorSettingsPanel extends JPanel {
         final @NotNull PanelWithTextAreaView panelWithTextAreaView
     ) {
         final var result = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, panelWithTextAreaView);
-        result.setDividerLocation(0.5);
+        // Make left (tree) narrower by default and let right (text area) dominate resizing
+        result.setDividerLocation(0.3);
+        result.setResizeWeight(0.0); // extra space goes to the right component on resize
         result.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         result.setDividerSize(2);
         result.setUI(plainSplitPaneDividerUI);

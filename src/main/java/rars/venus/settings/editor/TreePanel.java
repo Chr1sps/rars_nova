@@ -2,27 +2,26 @@ package rars.venus.settings.editor;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import rars.settings.TokenSettingKey;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.MutableTreeNode;
 import java.awt.*;
-import java.util.Arrays;
 
 public final class TreePanel extends JScrollPane {
-    public final @NotNull TreeNode fontSettingsNode, generalSchemeSettingsNode, otherSettingsNode, presetsNode;
+    public final @NotNull TreeNode fontSettingsNode, generalSchemeSettingsNode, syntaxSettingsNode, otherSettingsNode, presetsNode;
 
     public final @NotNull JTree tree;
 
     public TreePanel() {
         super();
-        this.fontSettingsNode = new TreeNode("Font");
-        this.generalSchemeSettingsNode = new TreeNode("General");
-        this.otherSettingsNode = new TreeNode("Other settings");
-        this.presetsNode = new TreeNode("Presets");
-        this.tree = buildTree(fontSettingsNode, presetsNode, generalSchemeSettingsNode, otherSettingsNode);
+        this.fontSettingsNode = new TreeNode.Normal("Font");
+        this.generalSchemeSettingsNode = new TreeNode.Normal("General");
+        this.syntaxSettingsNode = new TreeNode.Normal("RISC-V Syntax");
+        this.otherSettingsNode = new TreeNode.Normal("Other settings");
+        this.presetsNode = new TreeNode.Normal("Presets");
+        this.tree = buildTree(fontSettingsNode, presetsNode, generalSchemeSettingsNode, syntaxSettingsNode, otherSettingsNode);
         this.setViewportView(this.tree);
 
         final var renderer = (DefaultTreeCellRenderer) this.tree.getCellRenderer();
@@ -30,13 +29,15 @@ public final class TreePanel extends JScrollPane {
         renderer.setClosedIcon(null);
         renderer.setOpenIcon(null);
 
-        this.setPreferredSize(new Dimension(200, 400));
+        // Keep the navigation panel compact vertically
+        this.setPreferredSize(new Dimension(200, 300));
     }
 
     private static @NotNull JTree buildTree(
         final @NotNull TreeNode fontSettingsNode,
         final @NotNull TreeNode presetsNode,
         final @NotNull TreeNode generalSchemeSettingsNode,
+        final @NotNull TreeNode syntaxSettingsNode,
         final @NotNull TreeNode otherSettingsNode
     ) {
         final var newRoot = root(
@@ -44,11 +45,7 @@ public final class TreePanel extends JScrollPane {
             normalNode("Color scheme").children(
                 presetNode(presetsNode),
                 presetNode(generalSchemeSettingsNode),
-                normalNode("RISC-V Syntax").children(
-                    Arrays.stream(TokenSettingKey.values())
-                        .map(key -> syntaxNode(key, key.description))
-                        .toArray(NodeBuilder[]::new)
-                )
+                presetNode(syntaxSettingsNode)
             ),
             presetNode(otherSettingsNode)
         ).collect();
@@ -60,12 +57,7 @@ public final class TreePanel extends JScrollPane {
 
     @Contract("_ -> new")
     private static @NotNull NodeBuilder normalNode(final @NotNull String name) {
-        return new NodeBuilder(new TreeNode(name));
-    }
-
-    @Contract("_, _ -> new")
-    private static @NotNull NodeBuilder syntaxNode(final @NotNull TokenSettingKey type, final @NotNull String name) {
-        return new NodeBuilder(new TreeNode.Syntax(type, name));
+        return new NodeBuilder(new TreeNode.Normal(name));
     }
 
     private static @NotNull NodeBuilder presetNode(final @NotNull TreeNode node) {
